@@ -3386,5 +3386,115 @@
   "found": true,
   "sha256": "6972b21db31dc248",
   "context": "ion légale et administrative (premier ministre), ministère chargé de la justice après la tenue de l'assemblée annuelle d'approbation des comptes, le dirigeant doit déposer les comptes annuels au greffe du tribunal du commerce. le dépôt s'effectue en ligne sur le guichet des formalités des entreprises ou p"
+ },
+ {
+  "id": "de-gmbh",
+  "read": "https://service.berlin.de/dienstleistung/327425/",
+  "quote": "Wenn Sie eine Gesellschaft mit beschränkter Haftung (GmbH) errichten wollen, müssen Sie diese zur Eintragung in das Handelsregister anmelden.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "e8bed95ca4d9b531",
+  "context": "n vor ort aufgrund nur eingeschränkt arbeiten können. [stand: 21.10.2026 22:00] wenn sie eine gesellschaft mit beschränkter haftung (gmbh) errichten wollen, müssen sie diese zur eintragung in das handelsregister anmelden. die gmbh entsteht erst mit der eintragung. voraussetzungen gesellschaftsvertrag"
+ },
+ {
+  "id": "de-steuer",
+  "read": "https://www.elster.de/elsterweb/infoseite/unternehmensgruendung",
+  "quote": "Der Fragebogen muss innerhalb eines Monats nach Aufnahme Ihrer Tätigkeit unaufgefordert an Ihr zuständiges Finanzamt übermittelt werden.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "693602401d9a810e",
+  "context": " elektronisch mit einem fragebogen zur steuerlichen erfassung beantragt werden. der fragebogen muss innerhalb eines monats nach aufnahme ihrer tätigkeit unaufgefordert an ihr zuständiges finanzamt übermittelt werden. wo und wie bekomme ich jetzt die steuernummer für mein unternehmen? füllen sie "
+ },
+ {
+  "id": "de-bg",
+  "read": "https://service.berlin.de/dienstleistung/293946/",
+  "quote": "Wer ein neues Unternehmen eröffnet, muss dieses binnen einer Woche beim zuständigen Unfallversicherungsträger anmelden.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b7045e5ab4d557b9",
+  "context": "n vor ort aufgrund nur eingeschränkt arbeiten können. [stand: 21.10.2026 22:00] wer ein neues unternehmen eröffnet, muss dieses binnen einer woche beim zuständigen unfallversicherungsträger anmelden. der meldepflicht unterliegen z.b. auch freiberuflich tätige und unternehmen mit"
+ },
+ {
+  "id": "de-betriebsnummer",
+  "read": "https://www.arbeitsagentur.de/unternehmen/betriebsnummern-service/alles-wichtige/beantragung",
+  "quote": "Erst ab der Einstellung des ersten Beschäftigten unterliegen Arbeitgeberinnen und Arbeitgeber der Meldepflicht und benötigen eine Betriebsnummer.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "18080bc8ae2389da",
+  "context": "öffnen / alle schließen ab welchem zeitpunkt wird eine betriebsnummer benötigt? erst ab der einstellung des ersten beschäftigten unterliegen arbeitgeberinnen und arbeitgeber der meldepflicht und benötigen eine betriebsnummer. dies gilt für die beschäftigung von … arbeitskräften auf minijob -basis (gering"
+ },
+ {
+  "id": "de-gewerbe-ber",
+  "read": "https://service.berlin.de/dienstleistung/121921/",
+  "quote": "Die Gewerbeanmeldung ist gleichzeitig mit dem Beginn des Betriebs vorzunehmen.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "2f60d1437676ac3d",
+  "context": "emeinde und eine gewerbeanmeldung beim ordnungsamt in berlin erstattet werden). die gewerbeanmeldung ist gleichzeitig mit dem beginn des betriebs vorzunehmen. die anzeigepflicht besteht nur, wenn es sich um eine gewerbliche tätigkeit hand"
+ },
+ {
+  "id": "de-ber-food",
+  "read": "https://www.berlin.de/ba-spandau/politik-und-verwaltung/aemter/ordnungsamt/veterinaer-und-lebensmittelueberwachung/lebensmittelaufsicht-bezirksamt-spandau-1344989.php",
+  "quote": "Meldung eines Lebensmittelbetriebes nach Artikel 6 der Verordnung (EG) Nr. 852/2004 über Lebensmittelhygiene",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "eb96645e7d993641",
+  "context": "ansprechpartner / zuständigkeiten lebensmittelüberwachung verbraucherbeschwerde meldung eines lebensmittelbetriebes nach artikel 6 der verordnung (eg) nr. 852/2004 über lebensmittelhygiene antrag auf registrierung jäger als lebensmittelunternehmer zulassungen von betr"
+ },
+ {
+  "id": "de-ber-ifsg",
+  "read": "https://service.berlin.de/dienstleistung/324295/",
+  "quote": "Wenn Sie im Bereich der Lebensmittelzubereitung, des Lebensmittelverkaufs oder in der Gastronomie tätig werden wollen, benötigen Sie eine Bescheinigung.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "eebfdba910128883",
+  "context": "aher regelungen vor, die das risiko dieses übertragungsweges minimieren sollen. wenn sie im bereich der lebensmittelzubereitung, des lebensmittelverkaufs oder in der gastronomie tätig werden wollen, benötigen sie eine bescheinigung. auch personen, die sich regelmäßig in küchen von gaststätten oder sonstigen gem"
+ },
+ {
+  "id": "de-ber-gaststaette",
+  "read": "https://service.berlin.de/dienstleistung/327483/",
+  "quote": "Wenn Sie ein Gaststättengewerbe mit Alkoholausschank betreiben wollen, benötigen Sie grundsätzlich eine Erlaubnis für Ihr Gaststättengewerbe (Gaststättenerlaubnis).",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "6b28f38b2dd8de3a",
+  "context": "der betrieb muss jedermann oder einem bestimmten personenkreis zugänglich sein. wenn sie ein gaststättengewerbe mit alkoholausschank betreiben wollen, benötigen sie grundsätzlich eine erlaubnis für ihr gaststättengewerbe (gaststättenerlaubnis). ausnahmen: eine erlaubnis benötigen sie nicht, wenn sie: alkoholfreie getränke "
+ },
+ {
+  "id": "de-ber-bau",
+  "read": "https://service.berlin.de/dienstleistung/350893/",
+  "quote": "wenn Sie Anlagen errichten und/oder ändern und/oder deren Nutzung ändern möchten und diese Anlagen nicht verfahrensfrei sind.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "39aacf4eb3dbfc6b",
+  "context": "0.2026 22:00] der antrag für eine vereinfachte baugenehmigung ist erforderlich, wenn sie anlagen errichten und/oder ändern und/oder deren nutzung ändern möchten und diese anlagen nicht verfahrensfrei sind. dieses baugenehmigungsverfahren findet bei sonderbauten (§ 64 bauo bln) und wer"
+ },
+ {
+  "id": "de-ber-terrasse",
+  "read": "https://service.berlin.de/dienstleistung/326864/",
+  "quote": "wie das Herausstellen von Tischen und Stühlen (Schankvorgarten) vor eigenen Geschäftsräumen einschränkt, handelt es sich dabei um eine Sondernutzung.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "471eaae7c34875f5",
+  "context": "zu stehen. wenn jemand diesen gemeingebrauch durch eine andere art der nutzung, wie das herausstellen von tischen und stühlen (schankvorgarten) vor eigenen geschäftsräumen einschränkt, handelt es sich dabei um eine sondernutzung. online verfahren --> sie können diese dienstleistung auch online in anspruch ne"
+ },
+ {
+  "id": "de-ber-werbeanlage",
+  "read": "https://service.berlin.de/dienstleistung/350896/",
+  "quote": "Der Antrag für eine vereinfachte Baugenehmigung ist erforderlich, wenn Sie Werbeanlagen errichten und/oder ändern möchten und diese Werbeanlagen nicht verfahrensfrei sind.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7c85243255499e12",
+  "context": "n vor ort aufgrund nur eingeschränkt arbeiten können. [stand: 21.10.2026 22:00] der antrag für eine vereinfachte baugenehmigung ist erforderlich, wenn sie werbeanlagen errichten und/oder ändern möchten und diese werbeanlagen nicht verfahrensfrei sind. verfahrensablauf 1. es wird empfohlen, vor erstellung und einreichung der unter"
  }
 ]

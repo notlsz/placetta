@@ -243,4 +243,77 @@ export const FRANCE_FORMS: OfficialForm[] = [
     proof: [`${SPE}/F31214`, "Après la tenue de l'assemblée annuelle d'approbation des comptes, le dirigeant doit déposer les comptes annuels au greffe du tribunal du commerce.", "After the annual meeting approving the accounts, the manager must file the annual accounts with the commercial court registry."] }),
 ];
 
-export const EUROPE_FORMS: OfficialForm[] = [...UK_FORMS, ...EU_FORMS, ...FRANCE_FORMS];
+/* ------------------------------------------------------------------ Germany (Berlin; Hamburg, Munich and Frankfurt through their own offices) */
+const SB = "https://service.berlin.de/dienstleistung";
+const BER_FOOD = "https://www.berlin.de/ba-spandau/politik-und-verwaltung/aemter/ordnungsamt/veterinaer-und-lebensmittelueberwachung/lebensmittelaufsicht-bezirksamt-spandau-1344989.php";
+const BER_BEZIRK = (en: string, zh: string): T => [`Bezirksamt (district office) for the address, ${en}`, `地址所属区政府${zh}`];
+
+export const GERMANY_FORMS: OfficialForm[] = [
+  E({ id: "de-gmbh", where: "DE", level: "federal", needs: { newEntity: true }, method: "in_person", order: 10, cur: "EUR",
+    form: "Handelsregisteranmeldung (GmbH)", title: ["Commercial register entry for the GmbH", "有限责任公司（GmbH）商业登记"], agency: ["Local court (Registergericht), through a notary", "地方法院登记庭（经公证人提交）"],
+    how: ["The articles are notarised and every managing director's signature on the application is certified by a notary, who files it electronically with the register court. The GmbH exists only once registered.", "公司章程须经公证，所有总经理在申请上的签名须经公证人认证，由公证人以电子方式提交登记法院。GmbH 自登记之日起成立。"],
+    url: "https://www.handelsregister.de", feeNote: ["Notary and court fees depend on the share capital.", "公证费和法院费用视注册资本而定。"],
+    specialist: ["A German notary (Notar) notarises the articles and files the registration: Placetta prepares the documents and hands them to one.", "须由德国公证人（Notar）公证章程并提交登记：快哉准备文件并交给公证人。"],
+    foreign: ["A company formed abroad can register a German branch (Zweigniederlassung) instead, also through a notary.", "境外公司也可改为登记德国分支机构（Zweigniederlassung），同样须经公证人办理。"],
+    proof: [`${SB}/327425/`, "Wenn Sie eine Gesellschaft mit beschränkter Haftung (GmbH) errichten wollen, müssen Sie diese zur Eintragung in das Handelsregister anmelden.", "If you want to set up a limited liability company (GmbH), you must apply to have it entered in the commercial register."] }),
+  E({ id: "de-transparenz", where: "DE", level: "federal", needs: { newEntity: true }, method: "online", order: 15, cur: "EUR",
+    form: "Transparenzregister", title: ["Transparency register (beneficial owners)", "透明登记（受益所有人）"], agency: ["Transparency register (Bundesanzeiger Verlag)", "透明登记处（联邦公报出版社）"],
+    how: ["The company records its beneficial owners online.", "公司在线登记其受益所有人。"], url: "https://www.transparenzregister.de" }),
+  E({ id: "de-steuer", where: "DE", level: "federal", method: "online", order: 25, cur: "EUR",
+    form: "Fragebogen zur steuerlichen Erfassung", title: ["Tax registration questionnaire (tax number and VAT ID)", "税务登记问卷（税号与增值税号）"], agency: ["Finanzamt (tax office), through ELSTER", "税务局（通过 ELSTER）"],
+    how: ["Filed online through ELSTER within a month of starting; the tax office then sends the tax number by post, and the VAT ID follows.", "开始经营后一个月内通过 ELSTER 在线提交；税务局随后邮寄税号，增值税号随后发放。"], url: "https://www.elster.de",
+    takes: ["Due within a month of starting.", "开始经营后一个月内提交。"],
+    proof: ["https://www.elster.de/elsterweb/infoseite/unternehmensgruendung", "Der Fragebogen muss innerhalb eines Monats nach Aufnahme Ihrer Tätigkeit unaufgefordert an Ihr zuständiges Finanzamt übermittelt werden.", "The questionnaire must be sent to your tax office, unprompted, within a month of starting your activity."] }),
+  E({ id: "de-bg", where: "DE", level: "federal", method: "online", order: 27, cur: "EUR",
+    form: "Anmeldung bei der Berufsgenossenschaft", title: ["Statutory accident insurance registration", "法定工伤保险登记"], agency: ["The trade's Berufsgenossenschaft (statutory accident insurer)", "所属行业的同业公会（法定工伤保险机构）"],
+    how: ["Every new business registers within a week with its trade's statutory accident insurer, including companies based abroad with staff in Germany.", "所有新企业须在一周内向所属行业的法定工伤保险机构登记，包括在德国雇有员工的境外公司。"], url: "https://www.dguv.de/de/versicherung/unternehmensnummer/anmeldung/index.jsp",
+    takes: ["Due within a week of opening.", "开业后一周内登记。"],
+    proof: [`${SB}/293946/`, "Wer ein neues Unternehmen eröffnet, muss dieses binnen einer Woche beim zuständigen Unfallversicherungsträger anmelden.", "Anyone opening a new business must register it with the responsible accident insurer within a week."] }),
+  E({ id: "de-betriebsnummer", where: "DE", level: "federal", needs: { employees: true }, method: "online", order: 60, cur: "EUR",
+    form: "Betriebsnummer", title: ["Employer number for social insurance (Betriebsnummer)", "社会保险雇主编号（Betriebsnummer）"], agency: ["Bundesagentur für Arbeit, Betriebsnummern-Service", "德国联邦劳动局雇主编号服务"],
+    how: ["Applied for online before the first employee starts; payroll reports to social insurance carry it.", "首位员工入职前在线申请；向社会保险的工资申报须使用该编号。"], url: "https://www.arbeitsagentur.de/unternehmen/betriebsnummern-service",
+    proof: ["https://www.arbeitsagentur.de/unternehmen/betriebsnummern-service/alles-wichtige/beantragung", "Erst ab der Einstellung des ersten Beschäftigten unterliegen Arbeitgeberinnen und Arbeitgeber der Meldepflicht und benötigen eine Betriebsnummer.", "Employers are subject to the reporting duty, and need an employer number, from hiring their first employee."] }),
+  E({ id: "de-eori", where: "DE", level: "federal", segs: ["seller", "warehouse", "retail"], needs: { imports: true }, method: "online", order: 35, cur: "EUR",
+    form: "EORI-Nummer", title: ["EORI number for importing", "进口用 EORI 号码"], agency: ["German customs (Zoll)", "德国海关"], how: ["Requested from German customs before the first import.", "首次进口前向德国海关申请。"], url: "https://www.zoll.de" }),
+  /* Berlin: the district offices (Bezirksämter) */
+  E({ id: "de-gewerbe-ber", where: "DE-BER", level: "city", method: "online", order: 20, cur: "EUR",
+    form: "Gewerbeanmeldung", title: ["Trade registration (Gewerbeanmeldung)", "营业登记（Gewerbeanmeldung）"], agency: BER_BEZIRK("Ordnungsamt", "秩序局"),
+    how: ["Every shop, restaurant and trading business registers its trade with the district's Ordnungsamt when it starts, online or in person; the office passes it to the tax office and the inspectors.", "所有门店、餐厅和贸易企业须在开业时向所在区秩序局办理营业登记，可在线或现场办理；该局会转告税务局和监管部门。"],
+    url: `${SB}/121921/`, feeNote: ["A fee set by the district; lower when filed online.", "由区政府收取费用；在线办理费用较低。"],
+    proof: [`${SB}/121921/`, "Die Gewerbeanmeldung ist gleichzeitig mit dem Beginn des Betriebs vorzunehmen.", "The trade must be registered at the same time as the business starts."] }),
+  E({ id: "de-ber-food", where: "DE-BER", level: "city", segs: ["restaurant", "retail", "warehouse"], needs: { food: true }, method: "pdf_mail", order: 74, cur: "EUR",
+    form: "Meldung eines Lebensmittelbetriebes (Art. 6 VO (EG) 852/2004)", title: ["Food business registration", "食品企业登记"], agency: BER_BEZIRK("Veterinär- und Lebensmittelaufsicht", "兽医与食品监督部门"),
+    how: ["Each food business registers its premises with the district's veterinary and food inspection office on the registration form under Article 6 of Regulation (EC) 852/2004, before it opens.", "每家食品企业须在开业前，以依据第 852/2004 号法规第 6 条的登记表，向所在区兽医与食品监督部门登记其场所。"], url: BER_FOOD,
+    proof: [BER_FOOD, "Meldung eines Lebensmittelbetriebes nach Artikel 6 der Verordnung (EG) Nr. 852/2004 über Lebensmittelhygiene", "Registration of a food business under Article 6 of Regulation (EC) No 852/2004 on food hygiene"] }),
+  E({ id: "de-ber-ifsg", where: "DE-BER", level: "city", segs: ["restaurant", "retail"], needs: { food: true }, method: "in_person", order: 64, cur: "EUR",
+    form: "Belehrung nach § 43 Infektionsschutzgesetz", title: ["Infection protection instruction certificate for food staff", "食品从业人员传染病防护培训证明"], agency: BER_BEZIRK("Gesundheitsamt", "卫生局"),
+    how: ["Everyone who will prepare or sell food takes the health office's instruction and gets the certificate before starting work.", "所有将从事食品制作或销售的人员，须在上岗前参加卫生局的培训并取得证明。"], url: `${SB}/324295/`,
+    proof: [`${SB}/324295/`, "Wenn Sie im Bereich der Lebensmittelzubereitung, des Lebensmittelverkaufs oder in der Gastronomie tätig werden wollen, benötigen Sie eine Bescheinigung.", "If you want to work in food preparation, food sales or hospitality, you need a certificate."] }),
+  E({ id: "de-ber-gaststaette", where: "DE-BER", level: "city", segs: ["restaurant"], needs: { alcohol: true }, method: "online", order: 71, cur: "EUR",
+    form: "Gaststättenerlaubnis", title: ["Restaurant licence for serving alcohol (Gaststättenerlaubnis)", "餐饮售酒许可（Gaststättenerlaubnis）"], agency: BER_BEZIRK("Ordnungsamt", "秩序局"),
+    how: ["Serving alcohol on the premises needs the district's restaurant licence for that kind of business and those rooms; without alcohol, no licence is needed.", "在场所内供应酒类须取得区政府针对该经营类型及场所的餐饮许可；不供应酒类则无需此许可。"], url: `${SB}/327483/`,
+    feeNote: ["The district sends a fee notice with the licence.", "区政府随许可寄送收费通知。"],
+    proof: [`${SB}/327483/`, "Wenn Sie ein Gaststättengewerbe mit Alkoholausschank betreiben wollen, benötigen Sie grundsätzlich eine Erlaubnis für Ihr Gaststättengewerbe (Gaststättenerlaubnis).", "If you want to run a restaurant business serving alcohol, you generally need a permit for it (Gaststättenerlaubnis)."] }),
+  E({ id: "de-ber-bau", where: "DE-BER", level: "city", segs: PREMISES, needs: { buildout: true }, method: "online", order: 50, cur: "EUR",
+    form: "Baugenehmigung (vereinfachtes Verfahren)", title: ["Building permit for works or a change of use", "施工或变更用途的建筑许可"], agency: BER_BEZIRK("Stadtentwicklungsamt, Bau- und Wohnungsaufsicht", "城市发展局建筑与住房监督部门"),
+    how: ["Works that aren't exempt, or turning a shop into a restaurant, need the district building office's permit, which reviews fire safety too; it is filed online.", "非豁免工程，或将商店改为餐厅，须取得区建筑监督部门的许可，消防安全也在审查之列；在线提交。"], url: `${SB}/350893/`,
+    proof: [`${SB}/350893/`, "wenn Sie Anlagen errichten und/oder ändern und/oder deren Nutzung ändern möchten und diese Anlagen nicht verfahrensfrei sind.", "if you want to build or alter structures, or change their use, and the structures are not exempt from the procedure."] }),
+  E({ id: "de-ber-werbeanlage", where: "DE-BER", level: "city", segs: PREMISES, needs: { signage: true }, method: "online", order: 66, cur: "EUR",
+    form: "Baugenehmigung für Werbeanlagen", title: ["Permit for the shop sign (Werbeanlage)", "门店招牌许可（Werbeanlage）"], agency: BER_BEZIRK("Stadtentwicklungsamt, Bau- und Wohnungsaufsicht", "城市发展局建筑与住房监督部门"),
+    how: ["A sign that isn't exempt needs the district building office's simplified permit, filed online.", "非豁免招牌须向区建筑监督部门在线申请简化许可。"], url: `${SB}/350896/`,
+    proof: [`${SB}/350896/`, "Der Antrag für eine vereinfachte Baugenehmigung ist erforderlich, wenn Sie Werbeanlagen errichten und/oder ändern möchten und diese Werbeanlagen nicht verfahrensfrei sind.", "A simplified building permit is required if you want to put up or alter signs that are not exempt from the procedure."] }),
+  E({ id: "de-ber-terrasse", where: "DE-BER", level: "city", segs: STORES, needs: { terrace: true }, method: "online", order: 73, cur: "EUR",
+    form: "Sondernutzungserlaubnis (Tische und Stühle)", title: ["Street use permit for tables and chairs outside", "街道特别使用许可（户外桌椅）"], agency: BER_BEZIRK("Straßen- und Grünflächenamt", "道路与绿地局"),
+    how: ["Tables and chairs on the pavement in front of the shop are a special use of the street, applied for with the district's roads office, online.", "在店前人行道摆放桌椅属于街道特别使用，须向区道路部门在线申请。"], url: `${SB}/326864/`,
+    proof: [`${SB}/326864/`, "wie das Herausstellen von Tischen und Stühlen (Schankvorgarten) vor eigenen Geschäftsräumen einschränkt, handelt es sich dabei um eine Sondernutzung.", "such as putting tables and chairs (an outdoor seating area) in front of your own premises, is a special use."] }),
+  /* Munich, Hamburg and Frankfurt: the trade registration with the city's own office; the library has no quote of
+     their pages yet, so these rows name the office and its site */
+  ...([["DE-MUC", "Munich", "慕尼黑", "https://stadt.muenchen.de", "Landeshauptstadt München, Kreisverwaltungsreferat", "慕尼黑市行政管理局"],
+    ["DE-HAM", "Hamburg", "汉堡", "https://www.hamburg.de", "Freie und Hansestadt Hamburg, Bezirksamt", "汉堡市区政府"],
+    ["DE-FRA", "Frankfurt", "法兰克福", "https://frankfurt.de", "Stadt Frankfurt am Main, Ordnungsamt", "法兰克福市秩序局"]] as const)
+    .map(([where, en, zh, url, aen, azh]) => E({ id: "de-gewerbe-" + where.slice(3).toLowerCase(), where, level: "city", method: "online", order: 20, cur: "EUR",
+      form: "Gewerbeanmeldung", title: ["Trade registration (Gewerbeanmeldung)", "营业登记（Gewerbeanmeldung）"], agency: [aen, azh],
+      how: [`Every shop, restaurant and trading business registers its trade with ${en}'s trade office when it starts.`, `所有门店、餐厅和贸易企业开业时须在${zh}营业登记部门办理营业登记。`], url })),
+];
+
+export const EUROPE_FORMS: OfficialForm[] = [...UK_FORMS, ...EU_FORMS, ...FRANCE_FORMS, ...GERMANY_FORMS];

@@ -308,28 +308,6 @@ export const WORLD_FORMS: OfficialForm[] = [
   /* the UK, the EU's own rules and the European countries a brand enters first: src/forms/europe.ts */
   ...EUROPE_FORMS,
 
-  /* ------------------------------- Germany ------------------------------- */
-  W({ id: "de-handelsregister", where: "DE", level: "federal", needs: { newEntity: true }, method: "in_person", order: 10, cur: "EUR",
-    form: "Handelsregisteranmeldung", title: ["Commercial register entry (GmbH)", "商业登记（GmbH 有限责任公司）"], agency: ["Local court (Registergericht), through a notary", "地方法院登记庭（经公证人提交）"],
-    how: ["The articles are notarized and the notary files the registration electronically.", "公司章程须经公证，由公证人以电子方式提交登记。"], url: "https://www.handelsregister.de",
-    feeNote: ["Notary and court fees depend on the share capital.", "公证费和法院费用视注册资本而定。"] }),
-  W({ id: "de-transparenz", where: "DE", level: "federal", needs: { newEntity: true }, method: "online", order: 15, cur: "EUR",
-    form: "Transparenzregister", title: ["Transparency register (beneficial owners)", "透明登记（受益所有人）"], agency: ["Bundesanzeiger Verlag, Transparency Register", "联邦公报出版社透明登记处"],
-    how: ["Companies record their beneficial owners online.", "公司在线登记受益所有人。"], url: "https://www.transparenzregister.de" }),
-  W({ id: "de-elster", where: "DE", level: "federal", method: "online", order: 25, cur: "EUR", fee: 0,
-    form: "Fragebogen zur steuerlichen Erfassung", title: ["Tax registration questionnaire", "税务登记问卷"], agency: ["Finanzamt (through ELSTER)", "税务局（通过 ELSTER）"],
-    how: ["Filed online through ELSTER within a month of starting; the tax office then issues the tax number and VAT ID.", "开始经营后一个月内通过 ELSTER 在线提交，税务局随后发放税号和增值税号。"], url: "https://www.elster.de" }),
-  W({ id: "de-eori", where: "DE", level: "federal", segs: ["seller", "warehouse", "retail"], needs: { imports: true }, method: "online", order: 35, cur: "EUR", fee: 0,
-    form: "EORI-Nummer", title: ["EORI number for importing", "进口用 EORI 号码"], agency: ["German customs (Zoll)", "德国海关"], how: ["Requested from German customs before the first import.", "首次进口前向德国海关申请。"], url: "https://www.zoll.de" }),
-  ...([["DE-BER", "Berlin", "柏林", "https://service.berlin.de/dienstleistung/121921/", "Bezirksamt Berlin, Ordnungsamt", "柏林区政府秩序局"],
-    ["DE-MUC", "Munich", "慕尼黑", "https://stadt.muenchen.de", "Landeshauptstadt München, Kreisverwaltungsreferat", "慕尼黑市行政管理局"],
-    ["DE-HAM", "Hamburg", "汉堡", "https://www.hamburg.de", "Freie und Hansestadt Hamburg, Bezirksamt", "汉堡市区政府"],
-    ["DE-FRA", "Frankfurt", "法兰克福", "https://frankfurt.de", "Stadt Frankfurt am Main, Ordnungsamt", "法兰克福市秩序局"]] as const)
-    .map(([where, en, zh, url, aen, azh]) => W({ id: "de-gewerbe-" + where.slice(3).toLowerCase(), where, level: "city", method: "online", order: 20, cur: "EUR",
-      form: "Gewerbeanmeldung", title: ["Trade registration", "营业登记（Gewerbeanmeldung）"], agency: [aen, azh],
-      how: [`Every shop, restaurant and trading business registers its trade with ${en} before starting. The city passes it on to the tax office and the food inspectors.`, `所有门店、餐厅和贸易企业开业前须在${zh}办理营业登记，市政府会转告税务局和食品监管部门。`], url,
-      feeNote: ["A small fee set by the city.", "由市政府收取少量费用。"] })),
-
   /* ------------------------------- Spain, Italy, Netherlands ------------------------------- */
   W({ id: "es-circe", where: "ES", level: "federal", needs: { newEntity: true }, method: "online", order: 10, cur: "EUR",
     form: "Documento Único Electrónico (CIRCE)", title: ["Company creation (CIRCE)", "公司设立（CIRCE）"], agency: ["Ministerio de Economía, CIRCE / PAE", "西班牙经济部 CIRCE 企业服务点"],
