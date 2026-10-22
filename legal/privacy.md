@@ -13,6 +13,7 @@ This policy explains how Placetta Inc. ("Placetta", "we") handles information wh
 - Workspace information: details about your business, and about people in it such as owners and managers, that you give us so we can fill applications.
 - Documents you upload, and the applications and messages prepared in your workspace.
 - Your conversations with Odelia and your approvals, including your signature when you sign a form in the app.
+- Agent memory, only if an owner or admin turns it on (it is off by default): short notes about your business that Odelia suggests and your team approves, such as a store's landlord requirements or how owners like to be reached, each with where it came from and when. Memory never keeps ID numbers, card or bank numbers, passwords or sensitive details. You can see, edit and delete every note in Settings, and keep a conversation out of memory.
 - Texts and calls with Odelia, if you link a phone. See "Texts and calls" below.
 - The audit trail: a record of every action by Odelia, by you, by our team and by agencies.
 - Agency portal logins you choose to save, encrypted in a vault.
@@ -152,6 +153,7 @@ If you are in the People's Republic of China, or you give us personal informatio
 
 - Workspace information, documents and the audit trail are kept while the workspace exists. They are deleted when the workspace is deleted, including when its only owner deletes their account.
 - Account information, texts and call records are kept while your account exists, and are deleted when you delete it.
+- Agent memory is kept until your team deletes it, clears it with Forget all, or the workspace is deleted. Suggestions nobody approves expire after 30 days.
 - Records of your acceptance of our terms and policies are kept for 6 years after your account ends, and consent records for texts and calls for 5 years, even after you delete your account, as proof of the agreement and of your consent.
 - Plan requests from placetta.com are kept while we need them to follow up, or until you ask us to delete them.
 - We keep records the law requires us to keep, such as billing records, for as long as it requires.
@@ -233,6 +235,7 @@ Email: support@placetta.com
 - 工作区信息：为填写申请，您向我们提供的企业信息，以及企业所有人、经理等相关人员的信息。
 - 您上传的文件，以及在您工作区中准备的申请和消息。
 - 您与 Odelia 的对话和您的批准记录，包括您在应用中签署表格时的签名。
+- 助理记忆，仅在所有者或管理员开启后才会使用（默认关闭）：由 Odelia 提出、经您的团队批准的关于企业的简短记录，例如门店房东的要求或所有者偏好的联系方式，每条都注明来源和日期。记忆不会保存证件号、卡号、银行账号、密码或敏感信息。您可以在“设置”中查看、编辑和删除每一条记录，也可以让某次对话不被记住。
 - 如您关联了手机，您与 Odelia 之间的短信和通话，详见下文“短信与电话”。
 - 审计记录：Odelia、您、我们的团队和各机构的每一项操作。
 - 您选择保存的机构网站登录信息，加密存放在保险库中。
@@ -372,6 +375,7 @@ Email: support@placetta.com
 
 - 工作区信息、文件和审计记录在工作区存续期间保存，并在工作区被删除时删除，包括其唯一所有者删除账户的情形。
 - 账户信息、短信和通话记录在您的账户存续期间保存，并在您删除账户时删除。
+- 助理记忆会一直保存，直到您的团队删除、使用“全部忘记”清空，或工作区被删除。无人批准的建议在 30 天后失效。
 - 您接受我们的条款和政策的记录在您的账户终止后保存 6 年，短信和电话的同意记录保存 5 年，即使您删除账户也会保留，用于证明协议和您的同意。
 - 在 placetta.com 提交的方案申请，在我们跟进所需期间保存，或保存至您要求删除为止。
 - 法律要求我们保留的记录（例如账单记录），按法律要求的期限保存。

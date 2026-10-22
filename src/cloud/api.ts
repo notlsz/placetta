@@ -5,6 +5,7 @@ import type { HqLink, HqRow } from "../hq";
 import type { Quote } from "../overage.ts";
 import type { ModuleQuote } from "../modules.ts";
 import { readSSE } from "../../supabase/functions/_shared/stream.ts";
+import { tempChat } from "../odeliaMemory/tempChat";
 
 /* ------------------------------------------------------------------ *
  * Placetta's backend (Supabase): accounts, saved workspaces, private
@@ -451,7 +452,8 @@ export type RunRow = { id: string; kind: "task" | "watch"; prompt: string; statu
   parent_run?: string | null; job_id?: string | null; store_id?: string | null; children?: { id: string; status: RunRow["status"]; job_id: string | null; store_id: string | null; updated_at: string }[] };
 /** Start a task on the server. null when this server doesn't run the agent itself (an older deploy): the app runs it in the browser. */
 export async function startRun(ws: string, o: { prompt: string; history: { role: string; content: string }[]; lang: string; deep: boolean }): Promise<string | null> {
-  const { data, error } = await supabase().functions.invoke("agent-run", { body: { action: "start", workspace_id: ws, ...o } });
+  // "don't remember this chat" (src/odeliaMemory/tempChat.ts): the run reads and saves no memory
+  const { data, error } = await supabase().functions.invoke("agent-run", { body: { action: "start", workspace_id: ws, ...o, ...(tempChat() ? { no_memory: true } : {}) } });
   if (!error) return (data as { id: string }).id;
   const ctx = (error as { context?: Response }).context;
   if (ctx?.status === 404) return null;

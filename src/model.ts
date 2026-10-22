@@ -219,6 +219,9 @@ export type Workspace = {
      (src/autonomy.ts; only an owner changes them, the database holds that line), and Undo for her last runs (src/rewind.ts). */
   controls?: Controls;
   undo?: UndoPoint[];
+  /** Agent memory outside an account (the sample): its observations, briefs and settings (src/odeliaMemory/). An account
+   *  keeps it in its own tables with row-level security (migration 20261022171905_agent_memory), never here. */
+  agentMemory?: import("./odeliaMemory/types").AgentMemory;
 };
 /** The plan a new workspace starts with: what and where the person typed, when, and how many permits the registry listed.
  *  filled: the form lines filled from the signup answers (src/plan/prefill.ts); win: the application put up for approval

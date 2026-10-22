@@ -10,6 +10,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readiness } from "../src/stores.ts";
 import { B, SAMPLE, same, type Workspace } from "../src/model";
+import { memoryUiTests } from "./memory-ui-test";
 
 /** A believable answer for a form line, so the check before approval sees real-looking values (it refuses "test value" as a phone).
  *  An SSN line gets "By hand": Placetta never keeps the number, the signer writes it (src/guard.ts). */
@@ -314,4 +315,5 @@ ok(!html("<script>alert(1)</script>").includes("<script>"), "edge: a reply can't
   ok(!w.deadlines.some(d => d.app === dropApp) && !w.locations.some(l => l.name.en === "Plano") && w.locations.some(l => l.name.en === "Austin"), "edge: its deadlines and its city go too, other cities stay");
 }
 
+memoryUiTests(ok);
 if (fails) { console.error(`\n${fails} failed`); process.exit(1); } else console.log("\nall passed");

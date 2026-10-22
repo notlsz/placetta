@@ -36,6 +36,10 @@ import dingtalkLogo from "./assets/integrations/dingtalk.svg";
 import teamsLogo from "./assets/integrations/teams.svg";
 import wechatLogo from "./assets/integrations/wechat.svg";
 import { McpConnectors } from "./McpSettings";
+import { AgentMemoryGroup } from "./AgentMemory";
+import "./agent-memory.css";
+/** The database side of agent memory, loaded only when Settings needs it in an account. */
+const memoryDb = () => import("./cloud/memoryApi");
 import { SetSheet } from "./SetUI";
 import { ContractGroup, EntitiesGroup, FilingCapGroup, ModulesGroup } from "./Growth";
 import { cleanCode } from "./hqPlan.ts";
@@ -1283,7 +1287,7 @@ const SETTINGS_CATS: { id: string; label: Bi; items: string[] }[] = [
   { id: "general", label: B("General", "通用"), items: ["account", "appearance", "language"] },
   { id: "facts", label: B("Business facts", "企业资料"), items: ["facts", "house", "entities"] },
   { id: "team", label: B("Team", "团队"), items: ["team", "hq", "partner"] },
-  { id: "odelia", label: B("Odelia", "Odelia"), items: ["agent", "autonomy", "brules", "phone", "approvals", "memory", "skills"] },
+  { id: "odelia", label: B("Odelia", "Odelia"), items: ["agent", "autonomy", "brules", "phone", "approvals", "memory", "agentmemory", "skills"] },
   { id: "connections", label: B("Connections", "连接"), items: ["integrations", "logins"] },
   { id: "billing", label: B("Billing", "账单"), items: ["billing", "contract", "modules", "filingcap", "spending"] },
   { id: "security", label: B("Security", "安全"), items: ["security", "sso", "scim", "pin"] },
@@ -1439,6 +1443,8 @@ export function Settings() {
             rows={[B("Every filing with a government agency", "向政府机构提交的每一项申请"), B("Every payment", "每一笔付款"), B("Every message sent for you, unless an Always allow rule you set covers it", "代您发送的每一条消息（您设置的“始终允许”规则除外）")].map(l => ({ label: l, right: <em className="lock">{t("alwaysOn")}</em> }))} />
           {show("spending") && <SpendingGroup />}
           {show("memory") && <MemoryGroup />}
+          {/* Agent memory (src/AgentMemory.tsx): what Odelia keeps about the business, opt-in, with every control */}
+          {show("agentmemory") && <AgentMemoryGroup db={memoryDb} />}
           {show("skills") && <SkillsGroup />}
 
           <Group id="appearance" hidden={!show("appearance")} title={B("Appearance", "外观")} note={B("Dark mode for the agent and your workspace. Saved in this browser.", "为助理和工作区开启深色模式，保存在此浏览器中。")} rows={([

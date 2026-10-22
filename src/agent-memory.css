@@ -1,0 +1,18 @@
+/* Settings, Agent memory (src/AgentMemory.tsx). Reuses the Remembered rows (recall-metrics.css); these are the extras. */
+.am-meta { display: flex; flex-wrap: wrap; column-gap: 14px; row-gap: 2px; }
+.am-meta span { white-space: nowrap; }
+.am-meta .out { color: var(--warm); }
+.am-cap { font-size: 13px; color: var(--ink2); }
+.am-cap.warn { color: var(--warm); }
+.am-banner { margin: 8px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; line-height: 1.45; color: var(--ink2); }
+.am-banner.warn { border-color: color-mix(in srgb, var(--warm) 40%, var(--line)); color: var(--warm); }
+.am-edit { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.am-edit textarea, .am-brief textarea { width: 100%; min-height: 64px; font: inherit; font-size: 13.5px; line-height: 1.45; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg, transparent); color: var(--ink); resize: vertical; box-sizing: border-box; }
+.am-brief { margin-top: 12px; }
+.am-brief textarea { min-height: 96px; }
+.am-brief h4 { margin: 0 0 6px; font-size: 13px; font-weight: 600; color: var(--ink2); }
+.am-row-acts { display: flex; gap: 6px; justify-content: flex-start; margin-top: 6px; }
+.am-topic { margin: 16px 0 0; font-size: 13px; font-weight: 600; color: var(--ink2); }
+.am-topic small { display: block; font-weight: 400; color: var(--ink3); font-size: 12.5px; }
+.am-hist summary { cursor: pointer; font-size: 13px; color: var(--ink2); margin-top: 12px; }
+.am-off { opacity: .55; }
