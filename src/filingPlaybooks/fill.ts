@@ -40,6 +40,8 @@ const SUBJECTS: { line: RegExp; fact: RegExp }[] = [
   { line: /hours/i, fact: /hours/i },
 ];
 const STATE = /state of (formation|organization|incorporation)|formed in|jurisdiction of|home state/i;
+/** A line that asks for an identity or account number Placetta never collects in chat (src/live.ts rules). */
+export const SECRET_LINE = /\b(ssn|social security|itin|driver'?s? licen[cs]e( number| no\.?)?|passport (number|no)|bank account|routing (number|no)|account number|card number|credit card|debit card)\b/i;
 
 /** Values for lines the profile answers: [{label, value}] with the line's own label. The store's address fills the
  *  premises lines; a mailing line takes a mailing-address fact only. Nothing is guessed: no fact, no value. */
@@ -47,6 +49,8 @@ export function prefillFromProfile(lines: string[], facts: Fact[], storeAddress:
   const out: { label: string; value: string }[] = [];
   for (const line of lines) {
     const kind = kindOf(line), l = line.replace(/^line [\w.-]+:\s*/i, "");
+    // a line that only asks for an ID or account number is never asked in chat: the signer writes it on the signed copy
+    if (SECRET_LINE.test(l) && !/\b(name|title|address)\b.*,|,.*\b(name|title|address)\b/i.test(l)) { out.push({ label: line, value: "By hand" }); continue; }
     if (kind === "address" && !/mailing|agent|registered office|home|residen|books|records/i.test(l) && /(business|physical|street|premises|location|store|site|establishment|facility)/i.test(l) && storeAddress) { out.push({ label: line, value: storeAddress }); continue; }
     // the first subject the line is about that a fact of the right kind answers ("Owner E-Mail" is about the owner and
     // about email: the owner's name isn't an email, so the email fact answers it)

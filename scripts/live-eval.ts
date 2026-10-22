@@ -23,6 +23,7 @@ import type { Workspace } from "../src/model";
 import { SAMPLE_WS } from "../src/sample";
 import { formsFor, segmentOf } from "../src/forms/registry";
 import { proofCurrent } from "../src/plan/ask";
+import { isSourcesLine } from "../src/sources";
 import { claimsAction, injected } from "../src/guard";
 import { stampFilings } from "../src/finish";
 import { callModel, canConverse, DEFAULT_ROUTES, PROVIDER_KEYS, type Call } from "../supabase/functions/_shared/llm";
@@ -488,13 +489,14 @@ export function grade(sc: Scenario, r: { before: Workspace; w: Workspace; reply:
   c("no agency without an official form or an official site", !invented.length, invented.map(a => `${a.name.en} (${a.agency.en}, ${a.source.url || "no link"})`));
   c("the model never claimed it filed, paid or sent", !claimsAction(r.modelText), r.modelText.slice(0, 200));
   // how it writes
-  const max = e.maxWords ?? 60, n = words(r.reply.replace(/\n\n(Checked by a separate reviewer|独立检查|Not finished yet|尚未完成|A separate reviewer|To be clear|说明一下)[\s\S]*$/, ""));
+  const max = e.maxWords ?? 60, n = words(r.reply.replace(/\n\n(Checked by a separate reviewer|独立检查|Not finished yet|尚未完成|A separate reviewer|To be clear|说明一下)[\s\S]*$/, "").split(/\n\n/).filter(p => !isSourcesLine(p.trim())).join("\n\n"));   // the Sources line Placetta adds isn't the model's words
   c(`at most ${max} words`, n <= max, `${n} words`);
   c("plain prose: no em dash, bold or headings", !/—|\*\*|^#|\n#/.test(r.reply), r.reply.slice(0, 120));
   c("at most one question", (r.reply.match(/[?？]/g) ?? []).length <= 1, r.reply);
   c("no filler", !/great question|happy to help|i'd be happy|let me know if|feel free|hope this helps|certainly!|absolutely!/i.test(r.reply), r.reply.slice(0, 120));
   if (!e.list) c("no list for a short answer", (r.reply.match(/\n\s*[-*•]\s/g) ?? []).length === 0 || (r.reply.match(/\n\s*[-*•]\s/g) ?? []).length >= 3, r.reply);
-  c(sc.lang === "zh" ? "in Chinese" : "in English", sc.lang === "zh" ? cjkShare(r.reply) > 0.3 : cjkShare(r.reply) < 0.05, `${Math.round(cjkShare(r.reply) * 100)}% Chinese: ${r.reply.slice(0, 80)}`);
+  const own = r.reply.split(/\n\n/).filter(p => !isSourcesLine(p.trim())).join("\n\n");   // without the Sources line Placetta adds
+  c(sc.lang === "zh" ? "in Chinese" : "in English", sc.lang === "zh" ? cjkShare(own) > 0.3 : cjkShare(own) < 0.05, `${Math.round(cjkShare(own) * 100)}% Chinese: ${own.slice(0, 80)}`);
   const errs = r.calls.filter(x => !x.ok).length;
   c("tool error rate at most 30%", !r.calls.length || errs / r.calls.length <= 0.3, `${errs} of ${r.calls.length}: ${r.calls.filter(x => !x.ok).map(x => `${x.name}: ${x.out.slice(0, 60)}`).slice(0, 3).join(" | ")}`);
   c(`cost under the task limit ($${LIMIT})`, r.usd < LIMIT, `$${r.usd.toFixed(3)}`);

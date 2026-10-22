@@ -130,7 +130,7 @@ export const PLAYBOOKS: Playbook[] = [
   },
   {
     id: "entity_registration", name: B("Company formation or foreign registration", "公司设立或外州登记"), perStore: false,
-    match: f => /articles of organization|certificate of formation|llc formation|register a foreign llc|registration of a foreign llc/i.test(f.title.en),
+    match: f => /articles of organization|certificate of formation|llc formation|register a foreign llc|registration of a foreign llc|registration of an out-of-state|application for (authority|admission|registration)|foreign registration|authority to transact/i.test(`${f.title.en} ${f.form}`) || f.level === "state" && !!f.needs?.foreignEntity,
     inputs: [LEGAL, OWNER, { key: "agent", label: B("Registered agent in the state", "州内注册代理人"), from: { fact: /registered agent|agent for service/i }, validator: "premises" },
       { key: "mailing", label: B("Mailing address", "邮寄地址"), from: { fact: /mailing address|company address/i } }],
     documents: [{ key: "home_good_standing", label: B("Good standing certificate from the home state (foreign registration)", "注册州的良好存续证明（外州登记时）"), reuse: /good standing|existence|存续/i }],

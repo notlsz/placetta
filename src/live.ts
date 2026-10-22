@@ -231,7 +231,7 @@ Rules:
 - A question about a requirement ("Do I need a seller's permit?", "When does the business tax renew?") is answered from find_official_forms${research ? " or an official page you read" : ""}: say what the agency states, name the agency and give its official link. When neither confirms the answer, say you're not sure and who to ask: the agency that decides it and its official site. Never fill the gap with a guess.
 - Claim only what an official page says, in its words. find_official_forms marks each form and local step claim true (with the page's quote and the day it was read) or claim false (no current quote on record, or two official sources disagree): a claim-false step is never stated as required, only as something to confirm with the office it names, at the link it gives, until you read that page and can cite its words. Before saying a plan or an answer is done, check every requirement in it against its quote: drop or reword any you can't back.
 - You are not a lawyer, and Placetta is not a law firm. Say what an agency, statute or rule requires and cite it; don't give legal opinions or tell them what they legally should do. For questions of legal judgment (lease terms, choosing or structuring an entity, contracts, disputes, immigration, liability, what a law means for their situation), say it's a question for a licensed attorney, offer to prepare a short list of questions for one, and keep helping with the filings. Never say Placetta's lawyers will handle something.
-- Never ask for a Social Security number, ITIN, or bank or card numbers in chat. The team collects those on the agency's own site. A form line that asks for one (like line 7b of Form SS-4) is answered "By hand": fill_fields it with exactly that, and the signer writes the number on the signed copy (or "Foreign" when there is none).${research ? `
+- Never ask for a Social Security number, ITIN, driver's license or passport number, or bank account or card numbers in chat. The team collects those on the agency's own site. A form line that asks for one (like line 7b of Form SS-4) is answered "By hand": fill_fields it with exactly that, and the signer writes the number on the signed copy (or "Foreign" when there is none). A line that asks for one together with other details ("name, title, SSN, address") gets the other details and "SSN: By hand".${research ? `
 - Research requirements, fees and processing times on official government websites with web_search and web_fetch: the agency's own pages (.gov, state, county and city sites). Portals that point to agencies (usa.gov, sba.gov) are fine for finding the right agency, but read and cite the agency's own page. Use the agency's root domain as the application's agency_url. If you can't confirm something on an official page, call it an estimate.` : `
 - Beyond the forms library, requirements, fees and processing times come from your general knowledge: call them estimates to confirm with the agency, and never present a guess as a confirmed rule. Use only agencies' official root domains as links.
 - You cannot browse the web or reach agency portals from here.`}
@@ -548,7 +548,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         if (!name || !agency) throw new Error("name and agency are required (or an official_form_id)");
         // the store it's for: the one named, or the only one
         const stores = get().stores ?? [];
-        const target = str(i.store_id) ? findStore(i.store_id) : stores.length === 1 ? stores[0] : undefined;
+        // a store's own filing goes under it; a business-wide one (a state or federal filing) does only when asked
+        const target = str(i.store_id) ? findStore(i.store_id) : stores.length === 1 && (!off || off.level === "city" || off.level === "county") ? stores[0] : undefined;
         // the same filing for the same store is already here (a repeated call, or a run picked up again): don't add it twice
         const inStore = (id: string) => stores.some(s => (s.apps ?? []).includes(id));
         const level = off ? off.level : (LEVELS.includes(i.level as Level) ? i.level : "state") as Level;
@@ -680,7 +681,10 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         });
         made.apps.add(a.id); touch(a.id); mark();
         const now = get().apps.find(x => x.id === a.id)!;
-        return { status: now.status, still_empty: now.fields.filter(f => isBlank(f.value)).map(f => f.label.en), ...kept, ...(refused.length ? { address_not_filled: refused.map(x => addrOut(off!.id, x.id!, x.f.value, x.c!)), do_next: ADDR_NEXT } : {}), ...(added.length ? { added_as_new_fields: added, ...(off ? { note: "These matched no line on the official form. If you meant an existing line, fill it by its label or line number." } : {}) } : {}),
+        // a US agency's form prints English letters only: say so now, not first at approval
+        const cjk = off && (!off.currency || off.currency === "USD") ? given.filter(f => /[㐀-鿿豈-﫿]/.test(f.value)).map(f => f.label) : [];
+        return { status: now.status, still_empty: now.fields.filter(f => isBlank(f.value)).map(f => f.label.en), ...kept,
+          ...(cjk.length ? { not_in_english: cjk, fix_now: "A US agency's form takes English letters only: fill these lines again in English, with no Chinese characters (not even in parentheses), or approval refuses them." } : {}), ...(refused.length ? { address_not_filled: refused.map(x => addrOut(off!.id, x.id!, x.f.value, x.c!)), do_next: ADDR_NEXT } : {}), ...(added.length ? { added_as_new_fields: added, ...(off ? { note: "These matched no line on the official form. If you meant an existing line, fill it by its label or line number." } : {}) } : {}),
           ...(also ? { also_filled_on: `${also} other open application${also === 1 ? "" : "s"}${x.asked ? "" : ", and saved to Context"}` } : {}),
           ...(x.asked && wide.length ? { not_saved_to_context: `This came from outside the app, so Context (the business facts) didn't change. To keep ${wide.map(f => SHARED[f.id][0].en).join(", ")} there, use remember: it asks an owner to confirm in the app.` } : {}) };
       },
@@ -1629,10 +1633,12 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           let approval: Record<string, unknown> | null = null;
           if (!still.length && !missing.length) {
             approval = await run("request_filing_approval", { application_id: id });
-            if (!approval.approval_id) problems.push(`${s.name.en}: ${str(approval.why, 300)}${Array.isArray(approval.errors) ? " " + (approval.errors as unknown[]).map(e => typeof e === "string" ? e : JSON.stringify(e)).join("; ").slice(0, 400) : ""}`);
+            // the line and its fix, as request_filing_approval gives them, so the model fixes it without another call
+            const detail = [approval.errors, approval.fix, approval.empty_fields, approval.missing_documents].filter(Array.isArray).flatMap(x => x as unknown[]).map(e => typeof e === "string" ? e : JSON.stringify(e));
+            if (!approval.approval_id) problems.push(`${s.name.en}: ${str(approval.why, 300)}${detail.length ? " " + detail.join("; ").slice(0, 700) : ""}`);
           }
-          out.push({ store: s.name.en, form: form.id, application_id: id, agency_time: form.takes?.en ?? null, renews: form.renews?.en ?? null,
-            fee: form.fee, empty: still.length, missing_documents: missing.length, approval_requested: !!approval?.approval_id });
+          out.push({ store: s.name.en, form: form.id, application_id: id, agency_time: form.takes?.[lang] ?? form.takes?.en ?? null, renews: form.renews?.[lang] ?? form.renews?.en ?? null,
+            fee: form.fee, empty: still.length, missing_documents: missing.length, approval_requested: !!approval?.approval_id, ...(approval?.approval_id ? { approval_id: approval.approval_id } : {}) });
           }
         }
         const list = (m: Map<string, Set<string>>) => [...m].map(([k, v]) => (chosen.length > 1 && v.size < chosen.length ? `${k} (${[...v].join(", ")})` : k));

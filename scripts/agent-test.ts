@@ -2590,6 +2590,9 @@ console.log("\n# Filing playbooks: one call per kind, every store, one question"
   eq(got["Business location address"], "4250 Barranca Pkwy, Irvine, CA 92604", "the premises take the store's address");
   eq(got["Mailing address"], "100 N First St, San Jose, CA 95113", "the mailing line takes the mailing address");
   ok(!("Number of seats" in got), "nothing is guessed: no fact, no value");
+  const secret = Object.fromEntries(prefillFromProfile(["Driver's license number and state", "Line 22: Business bank account number", "SSN of responsible party", "K: Responsible persons (name, title, SSN or ITIN, address)"], facts, "").map(x => [x.label, x.value]));
+  ok(secret["Driver's license number and state"] === "By hand" && secret["Line 22: Business bank account number"] === "By hand" && secret["SSN of responsible party"] === "By hand", "an ID or account number line is answered 'By hand', never asked in chat", secret);
+  ok(!("K: Responsible persons (name, title, SSN or ITIN, address)" in secret), "a line that also asks for names and addresses is left for the person", secret);
   ok(answerFits("Business Owner", "Business Owner: name of the person who owns the business", "Irvine"), "an answer by the line's name fits the line with its description");
   ok(answerFits("Line 3: Owner name", "Owner name", "Irvine") && answerFits("Owner name", "Line 3: Owner name", "Irvine"), "with or without 'Line N:'");
   ok(answerFits("Tax ID (Houston, Bellaire Blvd)", "Tax ID", "Houston, Bellaire Blvd", ["Houston, Bellaire Blvd", "Chicago, China Pl"]), "a store's answer fits that store");
