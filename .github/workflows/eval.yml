@@ -37,6 +37,8 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       EVAL_OPENAI_MODEL: ${{ vars.EVAL_OPENAI_MODEL }}
       EVAL_BUDGET: ${{ vars.EVAL_BUDGET || '15' }}
+      # a regression is posted here (Slack incoming webhook or any URL taking {"text"}); unset, nothing is posted
+      EVAL_ALERT_WEBHOOK: ${{ secrets.EVAL_ALERT_WEBHOOK }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with: { fetch-depth: 0 }

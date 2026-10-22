@@ -561,13 +561,28 @@ const applyExtract = (appId: string, itemId: string | undefined, docId: string, 
 };
 
 /** An official form's own fields, in its order, with the values the agent gave matched by label, field id or line number. */
-function officialFields(off: OfficialForm, given: Field[]): Field[] {
+function officialFields(off: OfficialForm, given: Field[], facts: Workspace["facts"] = [], abroad = false): Field[] {
   return off.fields.map(o => {
     const g = given.find(x => { const k = x.label.en.toLowerCase().replace(/^line\s+/, ""); return k === o.label.en.toLowerCase() || x.label.en === o.label.zh || k === o.id || k === o.line.toLowerCase() || k === o.line.toLowerCase() + ": " + o.label.en.toLowerCase(); });
     // a line with no number of its own (an online form's question) is just its question
     const label = o.line ? B(`${/^\d/.test(o.line) ? "Line " : ""}${o.line}: ${o.label.en}`, `${/^\d/.test(o.line) ? "第 " + o.line + " 行" : o.line}：${o.label.zh}`) : o.label;
-    return { id: o.id, label, value: g?.value ?? "", from: g?.from };
+    const f = g && !isBlank(g.value) ? undefined : factFor(o.label.en, facts, abroad);
+    return f ? { id: o.id, label, value: f.value.en, from: f.source ?? B("From your business facts", "来自您的企业资料") } : { id: o.id, label, value: g?.value ?? "", from: g?.from };
   });
+}
+
+/** The business's own fact for a line of an agency's form, when the line plainly asks for it: the legal name, the EIN
+ *  (at home only), the business email or phone. Filled by Placetta itself so the model doesn't spend output tokens and a
+ *  round copying them; anything personal (an owner's, a home or cell number, an SSN) is left for the person. */
+export function factFor(label: string, facts: Workspace["facts"], abroad = false): Workspace["facts"][number] | undefined {
+  const l = label.toLowerCase();
+  if (/\b(ssn|social security|itin|owner|officer|member|partner|home|personal|cell|mobile|fax|dba|trade name|preparer|agent)\b/.test(l)) return undefined;
+  const fact = (re: RegExp) => facts.find(f => re.test(f.label.en) && !isBlank(f.value.en) && !secretNumber(f.label.en, f.value.en));
+  if (/legal (business |entity )?name|name of (the )?(entity|business|corporation|llc)|^business name$/.test(l)) return fact(/^legal (business )?name$|^company name$/i);
+  if (!abroad && /\b(fein|ein)\b|employer identification|federal tax id/.test(l)) return fact(/^ein$|federal tax id/i);
+  if (/e-?mail/.test(l)) return fact(/^(business |contact )?e-?mail/i);
+  if (/\b(phone|telephone)\b/.test(l)) return fact(/^(business |contact )?(phone|telephone)/i);
+  return undefined;
 }
 
 /** The lines every agency asks for, whatever the business or the form: used when the library doesn't list a form's
@@ -777,7 +792,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         if (stores.length > 1 && !target && (lvl === "city" || lvl === "county")) throw new Error(`This business has ${stores.length} stores and a ${lvl} permit is for one of them. Pass store_id (one of ${stores.map(x => `"${x.id}" (${x.name.en})`).join(", ")}).`);
         // a form skill fills the lines that don't depend on the store from the last filing of the same form
         const known = off ? prefill(get(), off.id) : new Map();
-        const fields = (listed ? officialFields(off!, given) : withCore(coreFields(get(), target, abroad), given)).map(f => (isBlank(f.value) && known.has(f.id) ? { ...f, value: known.get(f.id)!.value, from: known.get(f.id)!.from } : f));
+        const fields = (listed ? officialFields(off!, given, get().facts, abroad) : withCore(coreFields(get(), target, abroad), given)).map(f => (isBlank(f.value) && known.has(f.id) ? { ...f, value: known.get(f.id)!.value, from: known.get(f.id)!.from } : f));
         const blocked = off ? addressProblems(off.id, Object.fromEntries(fields.filter(f => !isBlank(f.value)).map(f => [f.id, f.value]))) : [];
         for (const p of blocked) { const k = fields.findIndex(f => f.id === p.field); if (k >= 0) fields[k] = { ...fields[k], value: "", from: undefined, quote: undefined }; }
         let checklist: CheckItem[] = [...(off?.attach ?? []).map(l => ({ item: l[lang], have: false })), ...arr(i.checklist)].map((c, k) => { const o = c as Record<string, unknown>; return { id: "c" + k, label: same(str(o.item, 120)), state: (o.have ? "done" : "missing") as "done" | "missing" }; }).filter((c, k, all) => c.label.en && all.findIndex(x => x.label.en.toLowerCase() === c.label.en.toLowerCase()) === k);

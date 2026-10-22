@@ -13,6 +13,9 @@ export type Span = {
   at: number; ms: number;
   model?: string; in?: number; out?: number; read?: number; write?: number; usd?: number;
   ok?: boolean;
+  /** The round of the run's loop it belongs to (0: before the first round, e.g. reading documents). The tree hangs
+   *  each round's tool calls under its model call, as the OpenAI Agents SDK nests function spans under the agent's. */
+  r?: number;
 };
 export const MAX_SPANS = 150;
 
@@ -41,4 +44,30 @@ export function totals(spans: Span[]) {
     usd: Math.round(sum(m, s => s.usd) * 1e6) / 1e6, hit: prompt ? Math.round((1000 * sum(m, s => s.read)) / prompt) / 10 : null,
     slowest: [...spans].sort((a, b) => b.ms - a.ms).slice(0, 3).map(s => s.n),
   };
+}
+
+/* ------------------------------ the tree and filters ------------------------------ */
+// A run's spans as a tree, run > round > model call > tool calls (the OpenAI Agents SDK's trace > agent span >
+// generation and function spans; Langfuse's agent observation with tool observations under it), and the filters a
+// trace view offers (LangSmith and Langfuse: by kind, errors only, slow ones).
+
+export type Round = { r: number; at: number; ms: number; usd: number; tokens: number; errors: number; spans: Span[] };
+
+/** Spans grouped by round, in time order. Spans recorded before rounds were (no r) form one group per span. */
+export function tree(spans: Span[]): Round[] {
+  const by = new Map<string, Span[]>();
+  spans.forEach((s, i) => { const k = s.r === undefined ? `x${i}` : `r${s.r}`; by.set(k, [...(by.get(k) ?? []), s]); });
+  return [...by.values()].map(list => {
+    const sorted = [...list].sort((a, b) => a.at - b.at || (a.k === "model" ? -1 : 1));
+    const at = Math.min(...sorted.map(s => s.at)), end = Math.max(...sorted.map(s => s.at + s.ms));
+    return { r: sorted[0].r ?? -1, at, ms: end - at, usd: Math.round(sorted.reduce((a, s) => a + (s.usd ?? 0), 0) * 1e6) / 1e6,
+      tokens: sorted.reduce((a, s) => a + (s.in ?? 0) + (s.read ?? 0) + (s.write ?? 0) + (s.out ?? 0), 0), errors: sorted.filter(s => s.ok === false).length, spans: sorted };
+  }).sort((a, b) => a.at - b.at);
+}
+
+export type TraceFilter = "all" | "model" | "tool" | "failed" | "slow";
+/** A slow span: two seconds or more. */
+export const SLOW_MS = 2000;
+export function keep(s: Span, f: TraceFilter): boolean {
+  return f === "all" || (f === "model" ? s.k === "model" : f === "tool" ? s.k === "tool" : f === "failed" ? s.ok === false : s.ms >= SLOW_MS);
 }

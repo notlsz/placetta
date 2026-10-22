@@ -5,7 +5,7 @@
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
 import { type Audit, type Deps, handle, PER_TOKEN, sha256, STATELESS, type Token } from "./logic.ts";
 // @ts-types="./tools.d.ts"
-import { checkArgs, runMcpTool, ToolError, TOOLS, type FilingRow } from "./tools.js";
+import { checkArgs, getPrompt, listResources, page, PROMPTS, readResource, RESOURCE_TEMPLATES, resourceScope, runMcpTool, ToolError, TOOLS, type FilingRow } from "./tools.js";
 import { McpClient, type Net } from "../_shared/mcp.ts";
 
 const A = "11111111-1111-1111-1111-111111111111", B = "22222222-2222-2222-2222-222222222222";
@@ -49,6 +49,7 @@ function server(o: { limited?: boolean } = {}) {
     audit: (a) => { audits.push(a); return Promise.resolve(); },
     tools: TOOLS, run: runMcpTool, isToolError: (e) => e instanceof ToolError, check: checkArgs,
     today: () => "2026-10-22", origins: ["https://claude.ai"],
+    x: { page, RESOURCE_TEMPLATES, listResources, resourceScope, readResource, PROMPTS, getPrompt },
   };
   const URL_ = "https://ref.fake.test/functions/v1/mcp";
   const net: Net = { resolve: () => Promise.resolve(["93.184.216.34"]), fetch: (input, init) => handle(new Request(String(input), init), deps) };
@@ -135,8 +136,8 @@ Deno.test("scopes, argument checks, rate limits, origins, and every call audited
   assertEquals(s.audits.map((a) => [a.tool, a.decision, a.actor_role]), [["mcp:tools/list", "allow", "owner"], ["mcp:filing_status", "deny", "owner"], ["mcp:upcoming_deadlines", "deny", "owner"], ["mcp:upcoming_deadlines", "deny", "owner"]]);
   assert(s.audits.every((a) => /^[0-9a-f]{64}$/.test(a.input_hash)), "inputs are logged as hashes, never as text");
 
-  const unknown = await json(await s.post({ jsonrpc: "2.0", id: 9, method: "resources/list" }, auth(KEY_A)));
-  assertEquals(unknown.error!.code, -32601);
+  const unknown = await json(await s.post({ jsonrpc: "2.0", id: 9, method: "sampling/createMessage" }, auth(KEY_A)));
+  assertEquals([unknown.error!.code, (unknown.error!.data as { code: string }).code], [-32601, "method_not_found"]);
   assertEquals((await s.post({ jsonrpc: "2.0", method: "notifications/initialized" }, auth(KEY_A))).status, 202);
   assertEquals((await s.post([{ jsonrpc: "2.0", id: 1, method: "ping" }], auth(KEY_A))).status, 400, "no batches");
   assertEquals((await s.post("{nope", auth(KEY_A))).status, 400);
@@ -149,5 +150,75 @@ Deno.test("scopes, argument checks, rate limits, origins, and every call audited
   const limited = server({ limited: true });
   const r = await limited.post({ jsonrpc: "2.0", id: 1, method: "tools/list" }, auth(KEY_A));
   assertEquals([r.status, r.headers.get("retry-after")], [429, "60"]);
+  assertEquals((await json(r)).error!.data, { code: "rate_limited", retry_after_s: 60 });
   assert(PER_TOKEN <= 120);
+});
+
+const rpc = (method: string, params: Record<string, unknown> = {}, id = 1) => ({ jsonrpc: "2.0", id, method, params });
+
+Deno.test("resources: each store's status as an address, templates, read, scopes, not found", async () => {
+  const s = server();
+  const init = await json(await s.post(rpc("initialize", { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "t", version: "1" } }), auth(KEY_A)));
+  const caps = init.result!.capabilities as Record<string, unknown>;
+  assert(caps.resources && caps.prompts && caps.tools, JSON.stringify(caps));
+  const list = await json(await s.post(rpc("resources/list"), auth(KEY_A)));
+  const uris = (list.result!.resources as { uri: string; mimeType: string }[]).map((r) => r.uri);
+  assertEquals(uris, ["placetta://status", "placetta://deadlines", "placetta://filings/open", "placetta://stores/flushing/status"]);
+  const tpl = await json(await s.post(rpc("resources/templates/list"), auth(KEY_A)));
+  assertEquals((tpl.result!.resourceTemplates as { uriTemplate: string }[]).map((t) => t.uriTemplate), ["placetta://stores/{store_id}/status", "placetta://stores/{store_id}/readiness"]);
+  const read = await json(await s.post(rpc("resources/read", { uri: "placetta://stores/flushing/status" }), auth(KEY_A)));
+  const c = (read.result!.contents as { uri: string; mimeType: string; text: string }[])[0];
+  assert(c.mimeType === "application/json" && /Upload the landlord's consent/.test(c.text), c.text.slice(0, 200));
+  const rd = await json(await s.post(rpc("resources/read", { uri: "placetta://stores/flushing/readiness" }), auth(KEY_A)));
+  assert(/Ready to open/.test((rd.result!.contents as { text: string }[])[0].text));
+  // another workspace's store, or an address that isn't Placetta's: not found, with a stable code
+  const other = await json(await s.post(rpc("resources/read", { uri: "placetta://stores/oakland/status" }), auth(KEY_A)));
+  assertEquals([other.error!.code, (other.error!.data as { code: string }).code], [-32002, "not_found"]);
+  const wild = await json(await s.post(rpc("resources/read", { uri: "file:///etc/passwd" }), auth(KEY_A)));
+  assertEquals(wild.error!.code, -32002);
+  // a plan-only token sees none of them and can't read them
+  const planList = await json(await s.post(rpc("resources/list"), auth(KEY_PLAN)));
+  assertEquals(planList.result!.resources, []);
+  const planRead = await json(await s.post(rpc("resources/read", { uri: "placetta://status" }), auth(KEY_PLAN)));
+  assertEquals((planRead.error!.data as { code: string }).code, "scope_missing");
+  assert(s.reads.every((r) => r.endsWith(A)), "only A's rows were read");
+});
+
+Deno.test("prompts: the renewal checklist comes with its data attached; scopes and arguments checked", async () => {
+  const s = server();
+  const list = await json(await s.post(rpc("prompts/list"), auth(KEY_A)));
+  assertEquals((list.result!.prompts as { name: string }[]).map((p) => p.name), ["renewal_checklist", "weekly_brief", "opening_readiness"]);
+  const got = await json(await s.post(rpc("prompts/get", { name: "renewal_checklist", arguments: { days: "90" } }), auth(KEY_A)));
+  const msgs = got.result!.messages as { role: string; content: { type: string; text?: string; resource?: { uri: string; text: string } } }[];
+  assert(msgs[0].content.type === "text" && /renewal checklist for the next 90 days/.test(msgs[0].content.text!), JSON.stringify(msgs[0]));
+  const dl = msgs.find((m) => m.content.resource?.uri === "placetta://deadlines")!;
+  assert(/File the sign permit/.test(dl.content.resource!.text) && !/Oakland|secret/i.test(JSON.stringify(msgs)), "A's deadlines, none of B's");
+  const zh = await json(await s.post(rpc("prompts/get", { name: "weekly_brief", arguments: { lang: "zh" } }), auth(KEY_A)));
+  assert(/这周/.test(JSON.stringify(zh.result!.messages)));
+  const noStore = await json(await s.post(rpc("prompts/get", { name: "opening_readiness", arguments: {} }), auth(KEY_A)));
+  assertEquals([noStore.error!.code, (noStore.error!.data as { code: string }).code], [-32602, "invalid_arguments"]);
+  const plan = await json(await s.post(rpc("prompts/list"), auth(KEY_PLAN)));
+  assertEquals(plan.result!.prompts, []);
+  const planGet = await json(await s.post(rpc("prompts/get", { name: "renewal_checklist" }), auth(KEY_PLAN)));
+  assertEquals((planGet.error!.data as { code: string }).code, "scope_missing");
+});
+
+Deno.test("pagination and error shapes: opaque cursors, an invalid cursor is -32602, tool errors carry a code", async () => {
+  const s = server();
+  const bad = await json(await s.post(rpc("tools/list", { cursor: "not-a-cursor" }), auth(KEY_A)));
+  assertEquals([bad.error!.code, (bad.error!.data as { code: string }).code], [-32602, "invalid_cursor"]);
+  const all = await json(await s.post(rpc("tools/list"), auth(KEY_A)));
+  assert(!("nextCursor" in all.result!), "five tools fit on one page");
+  assert((all.result!.tools as { outputSchema?: unknown; annotations: { readOnlyHint: boolean } }[]).every((t) => t.outputSchema && t.annotations.readOnlyHint));
+  // a long list pages: 120 items, 50 a page
+  const p1 = page(Array.from({ length: 120 }, (_, i) => i), undefined);
+  const p2 = page(Array.from({ length: 120 }, (_, i) => i), p1.next);
+  const p3 = page(Array.from({ length: 120 }, (_, i) => i), p2.next);
+  assertEquals([p1.items[0], p2.items[0], p3.items.length, p3.next], [0, 50, 20, undefined]);
+  const tcur = await structured(await s.post(call("filing_status", { cursor: "zzz" }), auth(KEY_A)));
+  assertEquals([tcur.isError, (tcur.structuredContent.error as { code: string }).code], [true, "invalid_cursor"]);
+  const nf = await structured(await s.post(call("store_readiness", { store_id: "nope" }), auth(KEY_A)));
+  assertEquals((nf.structuredContent.error as { code: string }).code, "not_found");
+  const scope = await json(await s.post(call("filing_status", {}), auth(KEY_PLAN)));
+  assertEquals((scope.error!.data as { code: string }).code, "scope_missing");
 });

@@ -24,5 +24,12 @@ export function taskLimit(env: (k: string) => string | undefined): number {
   const n = Number(env("AI_TASK_LIMIT_USD"));
   return Number.isFinite(n) && n > 0 ? n : TASK_LIMIT_DEFAULT;
 }
+/** One task's ceiling in tokens (prompt, cache and output), across every chunk: a runaway loop on a cheap model that
+ *  never reaches the dollar cap still stops cleanly. AI_TASK_TOKEN_LIMIT changes it; a bad value keeps the default. */
+export const TOKEN_LIMIT_DEFAULT = 500_000;
+export function tokenLimit(env: (k: string) => string | undefined): number {
+  const n = Number(env("AI_TASK_TOKEN_LIMIT"));
+  return Number.isInteger(n) && n >= 10_000 ? n : TOKEN_LIMIT_DEFAULT;
+}
 /** A task that has already cost its limit stops before the next model call, whichever instance holds it. */
 export const overTaskLimit = (spent: number, limit: number) => spent >= limit;

@@ -7,6 +7,7 @@ import { approveProposal, briefOf, rejectProposal, setBrief } from "./odeliaMemo
 import { settle } from "./odeliaMemory/pinned";
 import { emptyAgentMemory, isLive, scopeKey, TOPIC_INFO, TOPICS, type AgentMemory, type Observation, type Scope, type SourceKind } from "./odeliaMemory/types";
 import { onTempChat, setTempChat, tempChat } from "./odeliaMemory/tempChat";
+import { whyKept } from "./odeliaMemory/retrieve";
 
 /* Settings, Agent memory: what Odelia keeps about the business between conversations, and every control over it.
      the switch            off by default (opt-in, as the privacy policy discloses); owners and admins turn it on
@@ -74,8 +75,11 @@ export function AgentMemoryGroup({ db, preload }: { db: () => Promise<MemoryApi>
       <span>{scopeWords(o.scope)}</span>
       {o.pinned && <span>{zh ? "已置顶" : "Pinned"}</span>}
       {o.critical && <span>{zh ? "关键" : "Critical"}</span>}
+      <span title={b(whyKept(o).text)}>{zh ? `重要性 ${whyKept(o).score}/5` : `Importance ${whyKept(o).score} of 5`}</span>
     </small>
   );
+  /** Why Odelia keeps it and how much it weighs when she recalls (src/odeliaMemory/retrieve.ts importance). */
+  const why = (o: Observation) => <small className="am-why">{b(whyKept(o).text)}</small>;
   const btn = (label: string, onClick: () => void, kind = "quiet", aria?: string) => <button type="button" className={`sbtn ${kind}`} disabled={busy} onClick={onClick} aria-label={aria}>{label}</button>;
   const toggle = (on: boolean, set: (v: boolean) => void, label: string, disabled = false) => <label className="switch" onClick={e => e.stopPropagation()}><input type="checkbox" checked={on} disabled={disabled || busy} onChange={e => set(e.target.checked)} aria-label={label} /><i /></label>;
   const setSetting = (k: "enabled" | "suggest" | "allowLast4") => (v: boolean) => act(m => ({ ...m, settings: { ...m.settings, [k]: v } }), rpc(x => x.memorySettings(cloud!.wsId, { [k]: v })),
@@ -103,6 +107,7 @@ export function AgentMemoryGroup({ db, preload }: { db: () => Promise<MemoryApi>
         ) : <b>{b(o.text)}</b>}
         {o.source.quote && editing?.id !== o.id && <q>{o.source.quote}</q>}
         {meta(o)}
+        {isLive(o) && why(o)}
         {replaced(o) && <small>{zh ? `批准后将取代：${b(replaced(o)!.text)}` : `Approving it replaces: ${b(replaced(o)!.text)}`}</small>}
       </span>
       <span className="rmb-acts">{acts}</span>

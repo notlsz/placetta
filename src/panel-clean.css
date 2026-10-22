@@ -25,6 +25,9 @@
 .kept-t:hover, .kept-t[aria-expanded="true"] { color: var(--ink2); }
 .kept-b { display: flex; flex-direction: column; gap: 8px; padding-left: 20px; }
 .kept-b .rmb { margin: 0; }
+.kept-b .mem > span { display: flex; flex-direction: column; gap: 2px; }
+.mem-why { font-size: 12px; line-height: 1.45; color: var(--ink3); }
+.mem-foot { margin: 0; font-size: 12px; color: var(--ink3); }
 .kept-b .rmb-chip { padding: 0; background: none; }
 .kept-b .rmb-chip.sug, .kept-b .rmb-chip.off { background: none; }
 .kept-b .rmb-chip > svg { display: none; }

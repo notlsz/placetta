@@ -26,6 +26,7 @@ import { PlanGate } from "./PlanGate";
 import { FilledCard, WithdrawnRow } from "./FilledForm";
 import { planApprovalId } from "./autonomy";
 import { hasReplay } from "./replay";
+import { elapsed, reveal, stepTimes } from "./cloud/runFeed";
 import "./panel-clean.css";
 
 /* Less is more (the founder, on this screen): the owner says what they need, Odelia does the permit work, they approve.
@@ -123,6 +124,24 @@ function Memory({ text }: { text: Bi }) {
 
 const UndoMark = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></svg>;
 
+/** The agent memories this answer drew on, as one quiet line ("Used 2 memories") that opens to each one and why it came
+ *  up: what in the request it matched, why it matters, where it came from (ChatGPT's memory Sources under a reply). */
+function UsedLine({ items }: { items?: { id: string; text: Bi; why: Bi }[] }) {
+  const { b, lang } = useApp();
+  const [open, setOpen] = useState(false);
+  if (!items?.length) return null;
+  const zh = lang === "zh";
+  return (
+    <div className="kept">
+      <button type="button" className="kept-t" aria-expanded={open} onClick={() => setOpen(v => !v)}><I.spark /><span>{zh ? `用到了 ${items.length} 条记忆` : `Used ${items.length} ${items.length === 1 ? "memory" : "memories"}`}</span><i className={open ? "up" : ""} aria-hidden="true"><I.chev /></i></button>
+      {open && <div className="kept-b">
+        {items.map(x => <p key={x.id} className="mem"><I.spark /><span><b>{b(x.text)}</b><small className="mem-why">{zh ? "为什么想起这条：" : "Why Odelia remembered this: "}{b(x.why)}</small></span></p>)}
+        <p className="mem-foot">{zh ? "在设置的助理记忆中可修改或删除。" : "Change or delete any of them in Settings, Agent memory."}</p>
+      </div>}
+    </div>
+  );
+}
+
 /** What a run kept, as one quiet line ("Remembered 2 things") that opens to the details, each with its Forget. */
 function KeptLine({ memory, remembered, learned }: { memory?: Bi[]; remembered?: { id: string; text: Bi; suggested?: boolean }[]; learned?: Bi[] }) {
   const { b, t, lang, memory: book } = useApp();
@@ -150,6 +169,39 @@ function KeptLine({ memory, remembered, learned }: { memory?: Bi[]; remembered?:
   );
 }
 
+/** The clock, ticking each second while on (the live elapsed time, as Claude Code shows it while it works). */
+function useNow(on: boolean): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!on) return;
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [on]);
+  return now;
+}
+
+/** The words so far, revealed as an even flow between the server's 300 ms saves (src/cloud/runFeed.ts, reveal). */
+function useSmooth(text: string | undefined): string {
+  const [shown, setShown] = useState(text ?? "");
+  const cur = useRef(shown);
+  useEffect(() => {
+    const target = text ?? "";
+    const reduced = typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduced || !target || typeof requestAnimationFrame === "undefined") { cur.current = target; setShown(target); return; }
+    let last = performance.now(), raf = 0;
+    const tick = (t: number) => {
+      const next = reveal(cur.current, target, t - last);
+      last = t;
+      if (next !== cur.current) { cur.current = next; setShown(next); }
+      if (next.length < target.length) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [text]);
+  return shown;
+}
+
 /** One run: a quiet log of the steps, then the answer and whatever it produced. */
 function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }: {
   m: Turn; last: boolean; latest: boolean; speaking: string | null; onSay: (text: string) => void; asked: string; onAskPerson: () => void; poke?: Poke;
@@ -171,6 +223,12 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
   const covered = new Set([...pending, ...done].map(id => (ws.approvals.find(a => a.id === id) ?? ws.closed.find(a => a.id === id))?.app).filter(Boolean));
   const filed = r?.filed ?? [];
   const cur = live ? m.steps[m.active] : undefined;
+  // live: the time since she started, and how long each step took (the current one ticking)
+  const now = useNow(live);
+  const t0 = Date.parse(m.at);
+  const sinceStart = live && Number.isFinite(t0) && now >= t0 ? elapsed(now - t0, lang === "zh") : "";
+  const took = stepTimes(m.steps, now, live);
+  const draft = useSmooth(live ? m.draft : undefined);
   // the plan this run kept: the job it last updated
   const plan = !last ? undefined : (ws.jobs ?? []).filter(j => j.updated >= m.at).sort((x, y) => y.updated.localeCompare(x.updated))[0];
   const zh = lang === "zh";
@@ -202,6 +260,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
         {live && cur
           ? <span className="wh-now" aria-live="polite"><b>{b(taskVerb(cur.state))}…</b><small>{b(cur.label)}</small></span>
           : <span>{live ? t("working") : asking ? t("waitingYou") : m.ms ? t("workedFor", { s: Math.max(1, Math.round(m.ms / 1000)) }) : fmtAgo(m.at, lang)}</span>}
+        {sinceStart && <span className="wh-time" aria-label={lang === "zh" ? `已用时 ${sinceStart}` : `Working for ${sinceStart}`}>{sinceStart}</span>}
       </div>
       {(live || show) && m.steps.length > 0 && (
         <Working on={live} size="sm">
@@ -212,6 +271,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
               <li key={i} className={st}>
                 <i aria-hidden="true" />
                 <span>{b(s.label)}{st === "now" ? "…" : ""}{s.tool && <em>{s.tool}</em>}</span>
+                {took[i] != null && (st === "now" || took[i]! >= 1000) && <small className="st-t">{elapsed(took[i]!, lang === "zh")}</small>}
               </li>
             );
           })}
@@ -221,7 +281,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
       {live && last && <AllowanceNote asked={asked} />}
       {plan && <PlanCard job={plan} compact />}
       {plan && <PlanGate job={plan} />}
-      {live && m.draft && <p className="drafting" aria-live="polite">{m.draft}</p>}
+      {live && draft && <p className="drafting" aria-live="polite">{draft}</p>}
       {r && (
         <div className="answer">
           {r.text.map((p, i) => { const body = splitSources(b(p))[0]; return body ? <Prose key={i} text={body} /> : null; })}
@@ -247,6 +307,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
           {/* the agency's forms this run filled again: each opens the filled form on its application */}
           {r.forms?.map(n => <FilledCard key={n.app + n.version} n={n} />)}
           {done.map(id => { const a = ws.closed.find(x => x.id === id)!; return a.withdrawn ? <WithdrawnRow key={id} a={a} /> : <p key={id} className="resolved"><span className="ok-dot"><I.check /></span><span>{b(a.title)}</span><em>{t("approvedIt")}</em></p>; })}
+          <UsedLine items={r.recalled} />
           <KeptLine memory={r.memory} remembered={r.remembered} learned={r.skills} />
           {showSources && <SourcesRow said={said} links={r.sources} />}
           {last && r.matches && <button type="button" className="pill quiet" onClick={() => go("find")}>{b({ en: "Open the results", zh: "查看结果" })}</button>}

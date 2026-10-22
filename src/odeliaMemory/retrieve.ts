@@ -1,4 +1,5 @@
 import { isLive, norm, scopeKey, TOPIC_INFO, TOPICS, type AgentMemory, type Observation, type Scope, type Topic } from "./types";
+import { B, type Bi } from "../bi";
 
 /* Recall: the memories that matter for this request, within a token budget. Hybrid, the way dedicated memory layers do
    it, with no model in the loop so it costs nothing and gives the same answer twice:
@@ -59,8 +60,31 @@ export function topicsFor(query: string): Topic[] {
   return TOPICS.filter(t => TOPIC_INFO[t].words.test(query) || tokens(TOPIC_INFO[t].about.en).some(w => tokens(query).includes(w)));
 }
 
-export type Ranked = { item: Observation; score: number; parts: { keyword: number; vector: number; recency: number; boost: number } };
-export type RecallOpts = { scope?: { store?: string; market?: string }; me?: string; now: string; budget?: number; limit?: number; weights?: { keyword: number; vector: number; recency: number }; embed?: (texts: string[]) => number[][] };
+/* ------------------------------ importance ------------------------------ */
+// How much a memory matters on its own, 1 to 5, whatever the request: the "importance" of Generative Agents' memory
+// stream (recency + importance + relevance), scored here from what the memory is instead of by a model, so it is free,
+// the same every time and explainable. A license's expiry outranks a preference; the owner's word outranks a guess.
+
+export type Importance = { score: number; why: Bi[] };
+const CRITICAL_WHY: Record<NonNullable<Observation["critical"]>, Bi> = {
+  entity: B("it's about the legal entity", "关于法律实体"), license: B("it's about a license", "关于执照"), expiry: B("it's an expiry date", "是到期日"),
+  renewal: B("it's a renewal", "是续期事项"), approval: B("it's an approval", "是批准事项"), case: B("it's an open case", "是未结案件"), deadline: B("it's a deadline", "是截止日期"),
+};
+export function importance(o: Observation): Importance {
+  const why: Bi[] = [];
+  let s = o.topic === "rules" || o.topic === "decisions" ? 3 : o.topic === "preferences" || o.topic === "people" ? 2.5 : 2;
+  if (o.topic === "rules") why.push(B("it's a house rule", "是公司规定"));
+  if (o.topic === "decisions") why.push(B("it's a decision you made", "是您做出的决定"));
+  if (o.critical) { s = Math.max(s, o.critical === "entity" ? 4 : 5); why.push(CRITICAL_WHY[o.critical]); }
+  if (o.pinned) { s = 5; why.push(B("you pinned it", "您置顶了它")); }
+  if (o.trust === "owner" || o.trust === "record") { s += 0.5; why.push(o.trust === "owner" ? B("your team said it", "由您的团队提供") : B("it's in your records", "来自您的记录")); }
+  if (o.trust === "untrusted") s -= 0.5;
+  if ((o.seen ?? 1) >= 3) { s += 0.5; why.push(B(`it came up ${o.seen} times`, `出现过 ${o.seen} 次`)); }
+  return { score: Math.max(1, Math.min(5, Math.round(s))), why };
+}
+
+export type Ranked = { item: Observation; score: number; parts: { keyword: number; vector: number; recency: number; boost: number; importance?: number } };
+export type RecallOpts = { scope?: { store?: string; market?: string }; me?: string; now: string; budget?: number; limit?: number; weights?: { keyword: number; vector: number; recency: number; importance?: number }; embed?: (texts: string[]) => number[][] };
 
 /** Every live memory this run may see, scored. Another person's memories and another store's are never candidates for a
  *  store's run; a person's memories only for that person. */
@@ -68,7 +92,7 @@ export function rank(mem: AgentMemory, query: string, o: RecallOpts): Ranked[] {
   const may = (s: Scope) => s.kind !== "person" || s.id === o.me;
   const pool = mem.items.filter(x => isLive(x) && may(x.scope) && (!o.scope?.store || x.scope.kind !== "store" || x.scope.id === o.scope.store));
   if (!pool.length) return [];
-  const w = o.weights ?? { keyword: 0.5, vector: 0.3, recency: 0.2 };
+  const w = o.weights ?? { keyword: 0.45, vector: 0.25, recency: 0.15, importance: 0.15 };
   const docs = pool.map(docText);
   const kw = bm25(docs, query), top = Math.max(1e-9, ...kw);
   const vecs = o.embed ? o.embed([query, ...docs]) : [sketch(query), ...docs.map(d => sketch(d))];
@@ -82,8 +106,56 @@ export function rank(mem: AgentMemory, query: string, o: RecallOpts): Ranked[] {
     if (o.scope?.market && item.scope.kind === "market" && item.scope.id === o.scope.market) boost += 0.2;
     if (topics.includes(item.topic)) boost += 0.1;
     if (item.pinned || item.critical) boost += 1;
-    return { item, score: w.keyword * keyword + w.vector * vector + w.recency * recency + boost, parts: { keyword, vector, recency, boost } };
+    const imp = (importance(item).score - 1) / 4;
+    return { item, score: w.keyword * keyword + w.vector * vector + w.recency * recency + (w.importance ?? 0) * imp + boost, parts: { keyword, vector, recency, boost, importance: imp } };
   }).sort((a, b) => b.score - a.score || a.item.id.localeCompare(b.item.id));
+}
+
+/* ------------------------------ why ------------------------------ */
+// "Why Odelia remembered this", in plain words: ChatGPT shows the memories behind a reply as Sources under it; this
+// says, for each one, what in the request it matched, where it applies, why it matters and where it came from.
+
+/** The words of the request a memory shares (the BM25 tokens, at most three). */
+export function sharedWords(query: string, o: Observation): string[] {
+  const q = new Set(tokens(query)), d = new Set(tokens(docText(o)));
+  return [...q].filter(w => d.has(w)).slice(0, 3);
+}
+
+/** Why this memory came up for this request, as one line in each language. */
+export function explain(r: Ranked, query: string, o: { store?: string; names?: Record<string, string> } = {}): Bi {
+  const it = r.item, en: string[] = [], zh: string[] = [];
+  const words = sharedWords(query, it);
+  if (words.length) { en.push(`Matches "${words.join('", "')}" in what you asked`); zh.push(`与您问的“${words.join("”“")}”相符`); }
+  else if (r.parts.vector >= 0.35) { en.push("Close to what you asked"); zh.push("与您问的内容相近"); }
+  if (o.store && it.scope.kind === "store" && it.scope.id === o.store) { const n = o.names?.[scopeKey(it.scope)] ?? it.scope.id; en.push(`About ${n}`); zh.push(`关于${n}`); }
+  const imp = importance(it);
+  if (imp.why.length) { en.push(`Matters because ${imp.why.map(x => x.en).join(" and ")}`); zh.push(`重要：${imp.why.map(x => x.zh).join("，")}`); }
+  const src = SOURCE_WORDS[it.source.kind] ?? SOURCE_WORDS.chat;
+  en.push(`From ${src.en}, ${it.validFrom.slice(0, 10)}`);
+  zh.push(`${it.validFrom.slice(0, 10)}，来自${src.zh}`);
+  return { en: `${en.join(". ")}.`, zh: `${zh.join("。")}。` };
+}
+const SOURCE_WORDS: Record<string, Bi> = {
+  chat: B("a chat", "对话"), remote: B("a message outside the app", "应用外的消息"), filing: B("a filing", "申请"), document: B("a document", "文件"),
+  email: B("an email", "邮件"), portal: B("an agency page", "机构网页"), upload: B("an upload", "上传的文件"), owner: B("your team", "您的团队"), record: B("your records", "您的记录"),
+};
+
+/** Why a memory is kept at all, for Settings: its importance and the reasons, in each language. */
+export function whyKept(o: Observation): { score: number; text: Bi } {
+  const imp = importance(o);
+  const en = imp.why.length ? imp.why.map(x => x.en).join(", ") : "it came up in your work";
+  const zh = imp.why.length ? imp.why.map(x => x.zh).join("，") : "在工作中提到过";
+  return { score: imp.score, text: { en: `Kept because ${en}.`, zh: `保留原因：${zh}。` } };
+}
+
+/** The memories behind a reply, the ones that fit the request itself (not every always-loaded line), each with why:
+ *  what a reply shows under it as "Memory used". At most five. */
+export function usedFor(mem: AgentMemory, query: string, o: RecallOpts & { names?: Record<string, string> }): { id: string; text: Bi; why: Bi }[] {
+  if (!query.trim()) return [];
+  return recall(mem, query, { ...o, budget: 500 })
+    .filter(r => sharedWords(query, r.item).length > 0 || r.parts.vector >= 0.35)
+    .slice(0, 5)
+    .map(r => ({ id: r.item.id, text: r.item.text, why: explain(r, query, { store: o.scope?.store, names: o.names }) }));
 }
 
 /** The memories for this request, best first, until the token budget (default 800) is spent. Pinned and critical ones

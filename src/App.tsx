@@ -467,7 +467,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       if (m.gap) z.wake();
       return !!m.draft;
     };
-    const watch = api.watchRun(id, { progress: show, end: z.wake });
+    // after a dropped connection, a device back online or the tab shown again, read the row now (resume)
+    const watch = api.watchRun(id, { progress: show, end: z.wake, resume: z.wake });
     try {
       let r: api.RunRow;
       for (;;) {
@@ -705,7 +706,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       if (m.draft) upd(() => ({ draft: m.draft }));
       if (m.gap) z.wake();
     };
-    const watch = api.watchRun(id, { progress: show, end: z.wake });
+    const watch = api.watchRun(id, { progress: show, end: z.wake, resume: z.wake });
     try {
       let r: api.RunRow;
       for (;;) {

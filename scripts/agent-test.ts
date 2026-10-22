@@ -4,13 +4,14 @@
    audit trail, and that errors go back to the model instead of ending the run.
    npm run test:agent */
 import { DEFAULT_POLICY } from "../src/spend.ts";
-import { channelHint, channelNote, channelRefuses, guardPatch, runRounds, startState, type Channel, type ChildResult, type RunState, type Send } from "../src/serverRun";
+import { channelHint, channelNote, channelRefuses, guardPatch, runRounds, startState, TOKEN_CAP, tokensUsed, type Channel, type ChildResult, type RunState, type Send } from "../src/serverRun";
 import { fill, spawn, stillOpen, wake, type FamilyDb } from "../supabase/functions/agent-run/family";
 import { momentsFor, type RunLog } from "../src/replay";
 import { applyVerdict } from "../src/harness";
 import { family, proven } from "../src/jobs";
 import { applyChange, confirmChange, normalizeState, type Step } from "../src/core";
-import { apiModel, DOCS_PER_RUN, liveAgent, makeTools, messagesModel, pdfPages, READ_ONLY, rules, runAll, runTool, type Block, type Made, type Role, type Services } from "../src/live";
+import { apiModel, DOCS_PER_RUN, factFor, liveAgent, makeTools, messagesModel, pdfPages, READ_ONLY, rules, runAll, runTool, type Block, type Made, type Role, type Services } from "../src/live";
+import { tokenLimit, TOKEN_LIMIT_DEFAULT } from "../supabase/functions/agent-run/limits";
 import { confirmRecall, forgetRecall, keepRecall, RECALL_MARK, recallFrom, restoreRecall } from "../src/recall";
 import { mayEmail, wantsTexts } from "../supabase/functions/_shared/reach";
 import { callModel } from "../supabase/functions/_shared/llm";
@@ -35,8 +36,8 @@ import { ADDRESS_RULES } from "../src/forms/address-rules/index";
 import { checkAddress, placeOfAddress } from "../src/forms/addressCheck";
 import { groupOf, groupsFor, toolTokens } from "../src/toolIntent";
 import { checkArgs } from "../src/toolArgs";
-import { fromRow, merge, napper, pollDelay, startFeed } from "../src/cloud/runFeed";
-import { addSpan, MAX_SPANS, totals, type Span } from "../src/trace";
+import { elapsed, fromRow, merge, napper, pollDelay, reveal, startFeed, stepTimes } from "../src/cloud/runFeed";
+import { addSpan, keep, MAX_SPANS, totals, tree, type Span, type TraceFilter } from "../src/trace";
 import { readdirSync, readFileSync } from "node:fs";
 import { addRule, allowOptions, allowRule, autoOk, HOUSE_MAX, houseBrief, houseCheck, jobsDone, markSecond, planApprovalId, runMode, secondStep, workPrompt } from "../src/autonomy";
 import { addUndo, undoRun } from "../src/rewind";
@@ -2449,6 +2450,31 @@ console.log("\n# Audit trail export (CSV)");
   const many: Span[] = [];
   for (let i = 0; i < 200; i++) addSpan(many, { k: "tool", n: "x", at: i, ms: 1 });
   eq(many.length, MAX_SPANS, "a long run keeps at most 150 spans");
+  // the token cap: a run that has used its tokens stops before the next model call, cleanly, saying so
+  const capped = await agent({ ws: workspace({ apps: [app("a1", "draft")] }), svc, prompt: "Where are we?", script: [() => say("never asked")],
+    state: { ...startState([], "Where are we?"), cache: { calls: 9, hits: 0, input: TOKEN_CAP, read: 0, write: 0, output: 0 } } });
+  const said = JSON.stringify(capped.reply ?? {});
+  ok(capped.bodies.length === 0 && /reached its limit for one run/.test(said) && !/Done/.test(said), "a run over its token cap stops before another model call and says what to do", said);
+  eq([tokensUsed({ input: 10, read: 20, write: 3, output: 7 }), tokenLimit(() => "200000"), tokenLimit(() => "0"), tokenLimit(() => "abc")], [40, 200000, TOKEN_LIMIT_DEFAULT, TOKEN_LIMIT_DEFAULT], "token use is counted in full; a bad AI_TASK_TOKEN_LIMIT keeps the default");
+  // the business's own facts go on an agency's form by Placetta, not by the model
+  const facts = [{ id: "f1", group: "business", label: same("Legal name"), value: same("Acme Tea LLC") }, { id: "f2", group: "business", label: same("EIN"), value: same("12-3456789") },
+    { id: "f3", group: "business", label: same("Business phone"), value: same("(718) 555-0100") }, { id: "f4", group: "business", label: same("Contact email"), value: same("hi@acme.test") }] as Workspace["facts"];
+  eq(["Legal name of the business", "FEIN", "Business telephone", "E-mail address", "Owner's phone", "Owner SSN", "Name the store trades under (DBA)", "Mailing address"].map(l => factFor(l, facts)?.value.en ?? null),
+    ["Acme Tea LLC", "12-3456789", "(718) 555-0100", "hi@acme.test", null, null, null, null], "fills the legal name, EIN, business phone and email; never an owner's, an SSN, the DBA or anything else");
+  eq(factFor("FEIN", facts, true), undefined, "abroad, the US EIN isn't offered");
+
+  // the tree: each round's tool calls under its model call
+  ok(spans.every(x => typeof x.r === "number" && x.r >= 1), "every span knows its round", spans);
+  const g = tree([
+    { k: "tool", n: "fill_fields", at: 1550, ms: 15, ok: false, r: 2 },
+    { k: "model", n: "plan", at: 0, ms: 900, in: 200, out: 120, usd: 0.0012, r: 1 },
+    { k: "tool", n: "check_progress", at: 900, ms: 40, r: 1 },
+    { k: "model", n: "plan", at: 950, ms: 600, in: 100, out: 60, usd: 0.0008, r: 2 },
+    { k: "model", n: "extract", at: 5, ms: 3000 },
+  ]);
+  eq(g.map(x => [x.r, x.spans.map(s => s.n), x.errors]), [[1, ["plan", "check_progress"], 0], [-1, ["extract"], 0], [2, ["plan", "fill_fields"], 1]], "rounds in time order, the model call first, then its tools");
+  eq([g[0].ms, g[0].tokens, g[2].usd], [940, 320, 0.0008], "each round's time, tokens and cost");
+  eq(["all", "model", "tool", "failed", "slow"].map(f => g.flatMap(x => x.spans).filter(s => keep(s, f as TraceFilter)).length), [5, 3, 2, 1, 1], "filters: all, model, tool, failed, slow (2 s or more)");
 }
 
 /* ------------------------------------------------------------------ live run updates: pushed and polled, merged */
@@ -2469,6 +2495,16 @@ console.log("\n# Audit trail export (CSV)");
   eq([pollDelay(true, true), pollDelay(false, true), pollDelay(false, false)], [4000, 300, 700], "polling slows to every 4 s while pushes arrive");
   const z = napper(); const t0 = Date.now(); const p = z.nap(5000); z.wake(); await p;
   ok(Date.now() - t0 < 1000, "a push wakes the poll at once");
+  // the words flow evenly between saves, and the clock
+  const r1 = reveal("", "Hello there, your permit is filed.", 16);
+  ok(r1.length >= 1 && r1.length < 34 && "Hello there, your permit is filed.".startsWith(r1), "a burst of words is revealed a little at a time");
+  eq(reveal("Hello", "Hello there", 1000), "Hello there", "a backlog is cleared within about 600 ms");
+  eq(reveal("Old answer", "New", 16).length <= 3 && "New".startsWith(reveal("Old answer", "New", 16)), true, "a new answer starts over");
+  eq(reveal("", "all at once", 1, { reduced: true }), "all at once", "reduced motion shows the words at once");
+  ok(!/[\uD800-\uDBFF]$/.test(reveal("", "a😀b", 17)), "never cuts an emoji in half");
+  eq([elapsed(8_400), elapsed(65_000), elapsed(3_720_000), elapsed(65_000, true)], ["8s", "1m 05s", "1h 02m", "1分05秒"], "elapsed time as people say it");
+  eq(stepTimes([{ at: "2026-10-22T10:00:00Z" }, { at: "2026-10-22T10:00:03Z" }, { at: "2026-10-22T10:00:04Z" }], Date.parse("2026-10-22T10:00:09Z"), true), [3000, 1000, 5000], "each step's time, the running one to now");
+  eq(stepTimes([{}, { at: "2026-10-22T10:00:03Z" }], 0, false), [null, null], "no time without both ends");
 }
 
 growthTests(ok, eq);

@@ -28,7 +28,8 @@ import { scrubCredentials } from "./security/secrets";
 import { keepOwnerControls } from "./security/controls";
 import { scanServerResults } from "./security/web";
 // Agent memory (src/odeliaMemory/): the cache-ordered prompt, the memory tools, and the processors every call goes through
-import { commandNote, emptyOut, memoryTools, systemFor, type RunMemory, type RunMemoryOut } from "./odeliaMemory/context";
+import { commandNote, emptyOut, memoryTools, scopeNames, systemFor, using, type RunMemory, type RunMemoryOut } from "./odeliaMemory/context";
+import { usedFor } from "./odeliaMemory/retrieve";
 import { addCall, cacheUse, emptyStats, type CacheStats } from "./odeliaMemory/cache";
 import { shape } from "./odeliaMemory/processors";
 
@@ -103,6 +104,11 @@ export type RunState = {
 };
 
 const MAX_ROUNDS = 16;
+/** A run's token ceiling: about five times the longest run on the eval fixtures (scripts/eval/speed.ts measures them). */
+export const TOKEN_CAP = 500_000;
+/** Tokens a run has used so far (prompt, cache reads and writes, output), from its own counts. */
+export const tokensUsed = (c: { input: number; read: number; write: number; output: number } | undefined) => (c ? c.input + c.read + c.write + c.output : 0);
+export const overTokens = (lang?: string) => (lang === "zh" ? "这项任务已用到单次运行的上限，我先停在这里，已完成的部分都已保存。说“继续”，我会接着做下一部分。" : "This task reached its limit for one run, so I stopped here. What's done is saved. Say \"continue\" and I'll do the next part.");
 
 /** Where the person asked: the app, a text message, a phone call, an email, or the business's Slack, Lark or WeChat
  *  Official Account. */
@@ -262,6 +268,9 @@ export async function runRounds(o: {
   research?: boolean;
   /** Most model calls in one run (default 16). */
   maxRounds?: number;
+  /** Most tokens one run may send and receive across all its chunks (default TOKEN_CAP): a runaway run stops cleanly,
+   *  saying what's done, instead of burning credit (agent-run also caps dollars per task: limits.ts). */
+  maxTokens?: number;
   /** The main loop's role: plan (default), short for a text, call or chat bot, watch for the monitor's background checks. */
   role?: Role;
   /** Whose memory the run reads: the person who asked (agent-run passes the run's created_by). Their saved details
@@ -306,9 +315,9 @@ export async function runRounds(o: {
     const t0 = Date.now(), at = since();
     try {
       const data = await send0(body, deep, role, onText);
-      addSpan(st.trace ??= [], modelSpan(role ?? "plan", at, Date.now() - t0, data as { usage?: unknown; model?: unknown; usd?: unknown }));
+      addSpan(st.trace ??= [], { ...modelSpan(role ?? "plan", at, Date.now() - t0, data as { usage?: unknown; model?: unknown; usd?: unknown }), r: st.rounds });
       return data;
-    } catch (e) { addSpan(st.trace ??= [], modelSpan(role ?? "plan", at, Date.now() - t0, {}, false)); throw e; }
+    } catch (e) { addSpan(st.trace ??= [], { ...modelSpan(role ?? "plan", at, Date.now() - t0, {}, false), r: st.rounds }); throw e; }
   } };
   // each application's answers as the run found them: the ones it changes get their form filled again at the end
   st.forms ??= Object.fromEntries(o.ws().apps.map(a => [a.id, answersHash(a)]));
@@ -464,7 +473,7 @@ export async function runRounds(o: {
   const counted = (data: { usage?: unknown; model?: unknown }) => { st.cache = addCall(st.cache ?? emptyStats(), cacheUse(data.usage as Record<string, unknown> | undefined), shaped.prefix); };
   const sources = new Map(st.sources.map(s => [s.url, s]));
   const max = o.maxRounds ?? MAX_ROUNDS;
-  let finished = false;
+  let finished = false, capped = false;
   // The jobs that are this run's own: a store's bot has its store's part; any other run, every job but the stores'
   // parts (their own bots work, check and hand those off, side by side with this one).
   const own = (j: Job) => (o.child ? j.id === o.child.job : !j.parent);
@@ -481,6 +490,8 @@ export async function runRounds(o: {
     while (st.rounds < (onJob() ? max * MAX_SEATS : max)) {
       // leave room for one more model call and the save
       if (Date.now() > o.until) { link(); return { paused: save() }; }
+      // the token cap: stop before the next model call, cleanly, never mid-tool
+      if (tokensUsed(st.cache) >= (o.maxTokens ?? TOKEN_CAP)) { capped = true; break; }
       if (st.rounds === 0) step({ state: "searching", label: { en: "Reading your workspace", zh: "读取您的工作区" } });
       st.rounds++; st.seatRounds = (st.seatRounds ?? 0) + 1;
       // streamed into the draft: the app shows the words as the model writes them, not when the round ends
@@ -521,7 +532,7 @@ export async function runRounds(o: {
           content = r.content; error = !!r.is_error;
         }
         if (error) st.toolErrors = (st.toolErrors ?? 0) + 1;
-        addSpan(st.trace ??= [], { k: "tool", n: name.slice(0, 80), at, ms: Date.now() - t0, ...(error ? { ok: false } : {}) });
+        addSpan(st.trace ??= [], { k: "tool", n: name.slice(0, 80), at, ms: Date.now() - t0, ...(error ? { ok: false } : {}), r: st.rounds });
         // the replay: what she used, what she gave it, what came back and what it changed, and any approval it put up
         if ((st.moments ?? 0) < MAX_MOMENTS) {
           st.moments = (st.moments ?? 0) + 1;
@@ -554,7 +565,7 @@ export async function runRounds(o: {
       await o.round?.(save());
     }
     // out of rounds with tool results the model never saw: say the work isn't finished, never "Done."
-    if (!finished) { const more = outOfSteps(o.lang); st.text += (st.text ? "\n\n" : "") + more; made.lastToolAt = Math.min(made.lastToolAt, st.text.length - more.length); break; }
+    if (!finished) { const more = capped ? overTokens(o.lang) : outOfSteps(o.lang); st.text += (st.text ? "\n\n" : "") + more; made.lastToolAt = Math.min(made.lastToolAt, st.text.length - more.length); break; }
 
     // Split across stores and the stores' bots are still at it: this run waits for them. Its answer so far (who's on
     // what) goes to the person now; when the last store's bot finishes, the run wakes with their results and writes
@@ -665,7 +676,12 @@ export async function runRounds(o: {
   /* ---- end Sources ---- */
 
   step(replyMoment(line ? `${final}\n\n${line}` : final));
+  // the agent memories that fit this request, each with why, shown under the answer (ChatGPT's memory Sources); none for
+  // a store's bot, a temporary chat or with memory off
+  const recalled = !o.child && o.memory && using(o.memory) && st.request
+    ? usedFor(o.memory.memory, st.request, { me: o.memory.me, now: new Date().toISOString(), names: { ...scopeNames(o.ws()), ...(o.memory.names ?? {}) } }) : [];
   return { reply: { text: [same(line ? `${final}\n\n${line}` : final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
+    ...(recalled.length ? { recalled } : {}),
     files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: line ? (links.length ? links : undefined) : cited.length ? cited : undefined, ...(undoId ? { undo: undoId } : {}),
     // the filled forms go back with the answer: a card in the app, an attachment by email, a short link by text or chat
     ...(st.filled?.length ? { forms: st.filled } : {}) } };
