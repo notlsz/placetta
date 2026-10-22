@@ -27,8 +27,14 @@ export const dailyLimit = (env: (k: string) => string | undefined) => { const v 
 /** One workspace's ceiling per day before it's put in saver mode for the rest of the day, from AI_WS_DAILY_LIMIT_USD (default $10). */
 export const wsDailyLimit = (env: (k: string) => string | undefined) => { const v = Number(env("AI_WS_DAILY_LIMIT_USD") ?? "10"); return Number.isFinite(v) && v > 0 ? v : 10; };
 
-export async function gate(admin: SupabaseClient, env: (k: string) => string | undefined, ws: string, uid: string | null, kind: "task" | "call"): Promise<Gate> {
-  const { data, error } = await admin.rpc("ai_gate", { ws, uid, p_kind: kind, p_daily_limit: dailyLimit(env) });
+/** midTask: a call inside a task that already passed the gate. The allowance never stops it part way (a filing being
+ *  prepared isn't left half done); it runs on in saver mode, bounded by the task's own dollar and token caps
+ *  (ai_gate_in_task, migration 20261025090000_margin_guard). The company ceiling and rate limits still apply. A
+ *  database without that function answers with the ordinary gate. */
+export async function gate(admin: SupabaseClient, env: (k: string) => string | undefined, ws: string, uid: string | null, kind: "task" | "call", o: { midTask?: boolean } = {}): Promise<Gate> {
+  let { data, error } = await admin.rpc(o.midTask && kind === "call" ? "ai_gate_in_task" : "ai_gate", o.midTask && kind === "call"
+    ? { ws, uid, p_daily_limit: dailyLimit(env) } : { ws, uid, p_kind: kind, p_daily_limit: dailyLimit(env) });
+  if (error && o.midTask && kind === "call") ({ data, error } = await admin.rpc("ai_gate", { ws, uid, p_kind: kind, p_daily_limit: dailyLimit(env) }));
   if (error || !data) { console.error("ai_gate", error?.message); return { ok: false, code: "unavailable", ...refusal("unavailable") }; }
   const g = data as { ok: boolean; event?: number; tier?: "full" | "reduced"; reason?: "allowance" | "throttle"; code?: string; retry_after?: number; budget?: { period_end?: string | null; used_usd?: number; limit_usd?: number } };
   if (g.ok) {

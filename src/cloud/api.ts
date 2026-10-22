@@ -923,6 +923,12 @@ export async function updateFiling(id: string, patch: Partial<Pick<Filing, "stat
   const { error } = await supabase().from("filings").update(patch).eq("id", id);
   if (error) throw fromPg(error);
 }
+/** Staff add the minutes they spent on a filing (migration 20261025090000_margin_guard); past its budget, a staff alert. */
+export async function addTeamMinutes(id: string, minutes: number): Promise<{ minutes: number; budget: number; tier: string; over: boolean }> {
+  const { data, error } = await supabase().rpc("filing_add_team_minutes", { p_id: id, p_minutes: minutes });
+  if (error) throw fromPg(error);
+  return data as { minutes: number; budget: number; tier: string; over: boolean };
+}
 export async function uploadReceipt(f: QueueRow, file: File): Promise<string> {
   const path = `${f.workspace_id}/receipts/${f.id}/${safeName(file.name)}`;
   const up = await supabase().storage.from("documents").upload(path, file, { upsert: true, contentType: file.type || undefined });

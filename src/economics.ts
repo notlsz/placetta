@@ -78,20 +78,42 @@ export const ASSUME = {
   thinkingTokensPerCall: 0,
 } as const;
 
+/* ------------------------------------------------------------------ the store ceiling (founder, 2026-10-22) */
+
+/** The most AI and running cost one store on the $149 store plan may cost Placetta in a month, so the plan leaves about
+ *  $100. Set by the founder; the soft line is where Odelia moves to saver mode. */
+export const MAX_COST_PER_STORE_MONTH_USD = 50;
+export const SOFT_COST_PER_STORE_MONTH_USD = 35;
+
+/** A store's running cost a month that isn't AI: Stripe on its yearly plan invoice (by card, the dearer way), its
+ *  alert texts, and the delivery of the renewals Odelia sends on her own (about 2 a year: fax pages, the filer's
+ *  browser and model, scripts/econ/measure.ts). Team minutes are not in it: they are funded by the $299, $999 and $99
+ *  fees (docs/UNIT-ECONOMICS.md, "The $50 ceiling"). */
+export function runningCostPerStoreMonth(): number {
+  const stripe = stripeFee(149 * 12, "subscription_card") / 12;
+  const sms = ASSUME.smsPerStoreMonth * (VENDOR.smsMessage.usd + VENDOR.smsCarrier.usd);
+  const ownRenewals = (2 / 12) * (ASSUME.portalSteps * 0.0041 + (ASSUME.portalBrowserMinutes / 60) * VENDOR.browserHour.usd + ASSUME.pagesPerFiling * VENDOR.faxPage.usd);
+  return Math.round((stripe + sms + ownRenewals) * 100) / 100;
+}
+/** What's left of the ceiling for AI: the store plan's hard AI allowance a store, and where saver mode starts. These
+ *  are the numbers in ai_rules() (store_plan_month, store_plan_soft); agent-test checks they agree. */
+export const storeAiBudget = () => ({
+  hard: Math.floor(MAX_COST_PER_STORE_MONTH_USD - runningCostPerStoreMonth()),
+  soft: Math.floor(SOFT_COST_PER_STORE_MONTH_USD - runningCostPerStoreMonth()),
+});
+
 /** Limits that protect margin. FOUNDER TO CONFIRM, every one. None stops a filing already approved or in motion: the
  *  gate refuses new Odelia work only, and filings, deadlines and reminders carry on (ai_gate.ts refusal text). */
 export const GUARDRAIL = {
   /** FOUNDER TO CONFIRM. A workspace whose AI cost this month is more than this share of its plan revenue this month
-   *  opens a staff alert (the margin watch). The plan includes $25 of AI a store, 16.8% of $149: 10% is well under it. */
+   *  opens a staff alert (the margin watch): about $15 a store, well before the $44 hard AI allowance, so staff see a
+   *  pattern while it is still cheap. */
   aiShareOfRevenueAlert: 0.10,
   /** FOUNDER TO CONFIRM. A workspace with no revenue this month (the free plan preview) alerts past this many dollars. */
   aiNoRevenueAlertUsd: 5,
   /** FOUNDER TO CONFIRM. Team minutes on one filing past its budget (ASSUME.teamMinutes for its kind) by this factor
    *  open a staff alert. */
   teamOverBudgetFactor: 1.5,
-  /** FOUNDER TO CONFIRM. Chat fair use: turns a store's people send in a day before replies move to saver mode for the
-   *  rest of the day (cheaper models, no web research). Answers keep coming; nothing is refused. */
-  chatTurnsPerStoreDay: 60,
   /** FOUNDER TO CONFIRM. The share of finished runs the online grader checks (no model: plain checks, so it costs nothing). */
   graderSampleRate: 0.2,
   /** FOUNDER TO CONFIRM. A source page whose proof was read longer ago than this is re-checked first by the sweeper. */

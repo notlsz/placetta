@@ -40,6 +40,7 @@ import { defaultShield, secureTools } from "../src/security/secure";
 import { elapsed, fromRow, merge, napper, pollDelay, reveal, startFeed, stepTimes } from "../src/cloud/runFeed";
 import { addSpan, keep, MAX_SPANS, totals, tree, type Span, type TraceFilter } from "../src/trace";
 import { readdirSync, readFileSync } from "node:fs";
+import { econTests } from "./econ-test";
 import { addRule, allowOptions, allowRule, autoOk, HOUSE_MAX, houseBrief, houseCheck, jobsDone, markSecond, planApprovalId, runMode, secondStep, workPrompt } from "../src/autonomy";
 import { addUndo, undoRun } from "../src/rewind";
 import { deadlineEvents, fire, validRule, type Notice } from "../src/businessRules";
@@ -2527,6 +2528,7 @@ console.log("\n# Audit trail export (CSV)");
 growthTests(ok, eq);
 await memoryTests(ok, eq);
 await journeyTests(ok, eq);
+econTests(ok, eq);
 
 console.log("\n# Every declared tool is exercised");
 const missed = declared.filter(n => !covered.has(n));

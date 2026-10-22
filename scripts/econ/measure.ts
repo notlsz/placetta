@@ -29,7 +29,7 @@ import { tokenCount } from "../../src/odeliaMemory/retrieve";
 import { costOf } from "../../supabase/functions/_shared/ai_cost";
 import { DEST } from "../../supabase/functions/file/destinations";
 import { pick, type Env, type Filing, type Route } from "../../supabase/functions/file/logic";
-import { ASSUME, VENDOR, fixedMonthUsd, stripeFee, teamUsd, GUARDRAIL } from "../../src/economics";
+import { ASSUME, VENDOR, fixedMonthUsd, stripeFee, teamUsd, GUARDRAIL, MAX_COST_PER_STORE_MONTH_USD, SOFT_COST_PER_STORE_MONTH_USD, runningCostPerStoreMonth, storeAiBudget } from "../../src/economics";
 import { requestText, MIN_CACHE_TOKENS } from "../eval/speed";
 import { prompt as filerPrompt, TOOLS as FILER_TOOLS } from "../../worker/filer/src/model";
 
@@ -300,19 +300,20 @@ async function main() {
   const chat = aiOf(by.chat_turn), chatWorst = aiOf(by.chat_turn, true);
   const storeMonthAi = ASSUME.chatTurnsPerStoreMonth * chat + ASSUME.watchRunsPerStoreMonth * ASSUME.watchRunUsd;
   const heavyMonthAi = ASSUME.heavyChatTurnsPerStoreMonth * chat + ASSUME.watchRunsPerStoreMonth * ASSUME.watchRunUsd;
-  const allowanceMonth = 25;   // ai_rules().per_location_month: the store plan's AI allowance, the most a month can cost
+  const allowanceMonth = storeAiBudget().hard;   // ai_rules().store_plan_month: the most AI a store-month can cost
   const sms = ASSUME.smsPerStoreMonth * (VENDOR.smsMessage.usd + VENDOR.smsCarrier.usd);
   // the renewals Odelia files on her own are included in the plan: AI plus delivery, a month's share
   const ownRenewalsMonth = (renewalsPerStoreYear * (1 - renewalTeamShare)) / 12;
   const renewalAi = aiOf(by.renewal);
-  const ownRenewalCost = ownRenewalsMonth * (renewalAi + deliveryAuto / Math.max(automatedShare, 0.01) + teamUsd(ASSUME.teamMinutes.renewalAutomated));
+  const ownRenewalCost = ownRenewalsMonth * (renewalAi + deliveryAuto / Math.max(automatedShare, 0.01));
+  const ownRenewalTeamMin = ownRenewalsMonth * ASSUME.teamMinutes.renewalAutomated;
 
   const planMonth = SIMPLE.planStoreMonthUsd;
   const planStripe = stripeFee(PLAN_STORE_YEAR_USD, "subscription_card") / 12;
   const items: Line[] = [
-    line("Store plan, a store a month (typical)", planMonth, storeMonthAi, sms + ownRenewalCost - ownRenewalsMonth * renewalAi, 0, r2(planStripe), `${ASSUME.chatTurnsPerStoreMonth} chat turns, ${ASSUME.watchRunsPerStoreMonth} weekly checks, ${r2(ownRenewalsMonth)} included renewals`),
-    line("Store plan, a store a month (heavy chat)", planMonth, heavyMonthAi, sms + ownRenewalCost - ownRenewalsMonth * renewalAi, 0, r2(planStripe), `${ASSUME.heavyChatTurnsPerStoreMonth} chat turns`),
-    line("Store plan, a store a month (abusive: at the allowance)", planMonth, allowanceMonth, sms + ownRenewalCost - ownRenewalsMonth * renewalAi, 0, r2(planStripe), "the gate holds AI at the plan's $25 allowance"),
+    line("Store plan, a store a month (typical)", planMonth, storeMonthAi, sms + ownRenewalCost - ownRenewalsMonth * renewalAi, ownRenewalTeamMin, r2(planStripe), `${ASSUME.chatTurnsPerStoreMonth} chat turns, ${ASSUME.watchRunsPerStoreMonth} weekly checks, ${r2(ownRenewalsMonth)} included renewals`),
+    line("Store plan, a store a month (heavy chat)", planMonth, heavyMonthAi, sms + ownRenewalCost - ownRenewalsMonth * renewalAi, ownRenewalTeamMin, r2(planStripe), `${ASSUME.heavyChatTurnsPerStoreMonth} chat turns`),
+    line("Store plan, a store a month (abusive: at the allowance)", planMonth, allowanceMonth, sms + ownRenewalCost - ownRenewalsMonth * renewalAi, ownRenewalTeamMin, r2(planStripe), `the gate holds AI at the store plan's $${storeAiBudget().hard} allowance (the $50 ceiling less running cost)`),
     line("New license", SIMPLE.licenseUsd, aiOf(by.new_license), deliveryAuto, teamMinLicense, stripeFee(SIMPLE.licenseUsd), `route mix measured over ${mix.n} licenses`),
     line("New license, pessimistic AI and all by the team", SIMPLE.licenseUsd, aiOf(by.new_license, true), 0, ASSUME.teamMinutes.team, stripeFee(SIMPLE.licenseUsd), "worst route, the team files it"),
     line("Complex license (liquor)", SIMPLE.complexUsd, aiOf(by.complex_license), 0, ASSUME.teamMinutes.complex, stripeFee(SIMPLE.complexUsd), "team-led: hearings, notices, corrections"),
@@ -347,8 +348,27 @@ async function main() {
     const rnRevAll = rnCount * SIMPLE.renewalUsd;
     const rnCost = rnCount * rn.cost;
     const revenue = r2(planRev + licRev + rnRevAll), cost = r2(planCost + licCost + rnCost);
-    return { who: c.who, stores: c.stores, opens: c.opens, revenue, cost, margin: revenue ? (revenue - cost) / revenue : 0, licensesIncluded: c.chain ? lic + cmp : 0 };
+    // the $50 ceiling counts AI and running cost a store-month; team minutes are shown apart, against the fees that pay them
+    const machine = (i: Line) => i.ai + i.delivery + (c.chain && i !== rn ? 0 : i.stripe);
+    const aiRunStoreMonth = r2((storeMonths * (typical.cost - typical.team) + lic * machine(newLic) + cmp * machine(cx) + rnCount * machine(rn)) / storeMonths);
+    const teamStoreMonth = r2((storeMonths * typical.team + lic * newLic.team + cmp * cx.team + rnCount * rn.team) / storeMonths);
+    const feesStoreMonth = r2((licRev + rnRevAll) / storeMonths);
+    return { who: c.who, stores: c.stores, opens: c.opens, revenue, cost, margin: revenue ? (revenue - cost) / revenue : 0, licensesIncluded: c.chain ? lic + cmp : 0,
+      aiRunStoreMonth, teamStoreMonth, feesStoreMonth, fits: aiRunStoreMonth <= MAX_COST_PER_STORE_MONTH_USD, profitStoreMonth: r2((revenue - cost) / storeMonths) };
   });
+
+  // a heavy month for one store: 200 chat turns, five new licenses, one complex, two renewals the team sends, four
+  // weekly checks, all on the dearest of the four routes, plus the store's running cost
+  const heavy = {
+    chats: 200, licenses: 5, complex: 1, teamRenewals: 2,
+    ai: r2(200 * aiOf(by.chat_turn, true) + 5 * aiOf(by.new_license, true) + aiOf(by.complex_license, true) + 2 * aiOf(by.renewal, true) + ASSUME.watchRunsPerStoreMonth * ASSUME.watchRunUsd),
+    running: runningCostPerStoreMonth(),
+    licenseAi: r2(5 * aiOf(by.new_license, true) + aiOf(by.complex_license, true) + 2 * aiOf(by.renewal, true)),
+    fees: 5 * SIMPLE.licenseUsd + SIMPLE.complexUsd + 2 * SIMPLE.renewalUsd,
+    team: r2(5 * newLic.team + cx.team + 2 * rn.team),
+    feeStripe: r2(5 * newLic.stripe + cx.stripe + 2 * rn.stripe),
+  };
+  const ceiling = storeAiBudget();
 
   const result = {
     measured: TODAY, prices: "supabase/functions/_shared/ai_cost.ts (Anthropic and Gemini read 2026-10-22)", assumptions: "src/economics.ts ASSUME (FOUNDER TO CONFIRM)",
@@ -356,7 +376,7 @@ async function main() {
     filer: { tokensPerStep: step.tokens, usdPerStep: r4(step.usd), steps: ASSUME.portalSteps, maxSteps: 80, usdAtMax: r4(step.usd * 80) },
     routeMix: { licenses: mix.n, stores: mix.stores, byRoute: mix.byRoute, byTier: mix.byTier, automatedShare: r4(automatedShare), renewalsPerStoreYear: r2(renewalsPerStoreYear), renewalTeamShare: r4(renewalTeamShare) },
     teamMinutesPerLicense: r2(teamMinLicense), fixedMonthUsd: fixedMonthUsd(), fixedYearUsd: fixedYear,
-    items, customers, guardrail: GUARDRAIL,
+    items, customers, guardrail: GUARDRAIL, ceiling: { max: MAX_COST_PER_STORE_MONTH_USD, soft: SOFT_COST_PER_STORE_MONTH_USD, running: runningCostPerStoreMonth(), aiHard: ceiling.hard, aiSoft: ceiling.soft }, heavyMonth: heavy,
     perChatTurn: { typical: r4(chat), worst: r4(chatWorst) },
   };
   writeFileSync("docs/unit-economics.json", JSON.stringify(result, null, 2) + "\n");
@@ -373,6 +393,15 @@ async function main() {
   for (const i of items) t.push(`| ${i.item} | ${usd(i.price)} | ${usd(i.ai)} | ${usd(i.delivery)} | ${usd(i.team)} | ${usd(i.stripe)} | ${usd(i.cost)} | ${i.price ? pct(i.margin) : "free"} | ${i.note} |`);
   t.push("", "### Contribution margin per customer, a year (est.)", "", "| Customer | Stores | Opens | Revenue | Cost | Margin | Licenses included free |", "|---|---:|---:|---:|---:|---:|---:|");
   for (const c of customers) t.push(`| ${c.who} | ${c.stores} | ${c.opens} | ${usd(c.revenue, 0)} | ${usd(c.cost, 0)} | ${pct(c.margin)} | ${c.licensesIncluded} |`);
+  t.push("", `### The $${MAX_COST_PER_STORE_MONTH_USD} ceiling a store a month`, "",
+    `AI and running cost a store may cost in a month: $${MAX_COST_PER_STORE_MONTH_USD}, saver mode from $${SOFT_COST_PER_STORE_MONTH_USD}. Running cost that isn't AI is ${usd(runningCostPerStoreMonth())} a store-month (Stripe on the yearly invoice by card, alert texts, the renewals Odelia sends), so the gate allows $${ceiling.hard} of AI a store (saver from $${ceiling.soft}).`, "",
+    "Each journey on the dearest of the four routes (with 1,000 thinking tokens a call at 2027's price), and how many fit in the AI allowance:", "",
+    "| Journey | AI, dearest route | Fits in $" + ceiling.hard + " |", "|---|---:|---:|");
+  for (const j of js) { const w = worst(j.priced) + j.priced.thinkingPer1k2027; t.push(`| ${j.what} | ${usd(w, 4)} | ${Math.floor(ceiling.hard / w).toLocaleString("en-US")} |`); }
+  t.push("", "Each customer type, a store-month: AI and running cost against the ceiling, and team time apart, against the fees that pay it:", "",
+    "| Customer | AI and running a store-month | Under $50 | Team a store-month | License and renewal fees a store-month | Profit a store-month |", "|---|---:|---|---:|---:|---:|");
+  for (const c of customers) t.push(`| ${c.who} | ${usd(c.aiRunStoreMonth)} | ${c.fits ? "yes" : "no"} | ${usd(c.teamStoreMonth)} | ${usd(c.feesStoreMonth)} | ${usd(c.profitStoreMonth)} |`);
+  t.push("", `A heavy month for one store, everything on the dearest route: ${heavy.chats} chat turns, ${heavy.licenses} new licenses, ${heavy.complex} complex, ${heavy.teamRenewals} renewals the team sends and the weekly checks cost ${usd(heavy.ai)} of AI, ${usd(heavy.ai + heavy.running)} with running cost: ${heavy.ai + heavy.running <= MAX_COST_PER_STORE_MONTH_USD ? "under" : "over"} $${MAX_COST_PER_STORE_MONTH_USD}. The licenses' and renewals' own AI is ${usd(heavy.licenseAi)}; their fees (${usd(heavy.fees, 0)}) pay it many times over, and pay their team time (${usd(heavy.team)}) and Stripe (${usd(heavy.feeStripe)}) too, so none of it has to come out of the $${MAX_COST_PER_STORE_MONTH_USD}. Their AI still counts against the store's allowance in the gate; at about ${usd(heavy.licenseAi / (heavy.licenses + heavy.complex + heavy.teamRenewals), 3)} a filing it never decides whether one fits.`);
   t.push("", `Fixed platform cost before the first customer: ${usd(fixedMonthUsd(), 0)} a month (${usd(fixedYear, 0)} a year): Supabase Pro, Vercel Pro, the Render worker, Resend Pro, a Telnyx number and Browserbase Startup. It is left out of the per-customer margin above.`);
   const table = t.join("\n");
   const doc = "docs/UNIT-ECONOMICS.md";

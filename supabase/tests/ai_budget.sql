@@ -27,7 +27,8 @@ begin
   res := res || jsonb_build_object('credit alone does not buy AI without a plan', public.ai_gate(w1, a, 'call', null)->>'code' = 'plan_required');
 
   -- Per location: $25 a location a month
-  insert into public.billing (workspace_id, subscription_status, paid_locations) values (wm, 'active', 2);
+  -- Essentials and Pro are legacy plans (the store plan has its own numbers: margin_guard.sql)
+  insert into public.billing (workspace_id, subscription_status, paid_locations, price_model) values (wm, 'active', 2, 'legacy');
   g := public.ai_gate(wm, x, 'call', null);
   res := res || jsonb_build_object('two locations, $50', (g->'budget'->>'limit_usd')::numeric = 50 and g->>'tier' = 'full');
   perform public.ai_record((g->>'event')::bigint, 49.99, 'anthropic:claude-opus-5-5', 1, 1);
@@ -52,7 +53,7 @@ begin
   update public.billing set subscription_plan = 'locations' where workspace_id = wm;
 
   -- Opening: $50 a month more for each paid store still opening
-  insert into public.billing (workspace_id, subscription_status, paid_locations, charged_store_ids) values (wo, 'active', 3, '{s1,s2}');
+  insert into public.billing (workspace_id, subscription_status, paid_locations, charged_store_ids, price_model) values (wo, 'active', 3, '{s1,s2}', 'legacy');
   res := res || jsonb_build_object('opening stores add budget only when paid and opening', (public.ai_budget(wo)->>'budget_usd')::numeric = 125);
 
   -- Entry: $15 a market for 30 days, then it ends

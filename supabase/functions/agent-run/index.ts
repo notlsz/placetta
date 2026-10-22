@@ -154,7 +154,8 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
     throw err("not_configured", "Add a model key (for example ANTHROPIC_API_KEY) in the Edge Function secrets.");
   if (overTaskLimit(who.spent, TASK_LIMIT_USD)) throw err("task_limit", "This task grew too large for one go, so I stopped here. Ask for the next part on its own.");
   // budget, rate limits and the company's ceiling
-  const g = await gate(admin, (k) => Deno.env.get(k), ws, who.uid, "call");
+  // a call after this task's first one is mid-task: never stopped part way for the allowance (saver mode instead)
+  const g = await gate(admin, (k) => Deno.env.get(k), ws, who.uid, "call", { midTask: (who.events?.length ?? 0) > 0 });
   if (!g.ok) throw err(g.code, g.message);
   // kept with the run, so a run that fails on our side or the vendor's gives these calls back (refundFailed)
   if (who.events && who.events.length < 500) who.events.push(g.event);
