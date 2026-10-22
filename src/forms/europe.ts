@@ -316,4 +316,62 @@ export const GERMANY_FORMS: OfficialForm[] = [
       how: [`Every shop, restaurant and trading business registers its trade with ${en}'s trade office when it starts.`, `所有门店、餐厅和贸易企业开业时须在${zh}营业登记部门办理营业登记。`], url })),
 ];
 
-export const EUROPE_FORMS: OfficialForm[] = [...UK_FORMS, ...EU_FORMS, ...FRANCE_FORMS, ...GERMANY_FORMS];
+/* ------------------------------------------------------------------ Italy (Milan; Rome and elsewhere through the comune's SUAP) */
+const IIG = "https://www.impresainungiorno.gov.it/web/l-impresa-e-l-europa";
+const IT_SETUP = `${IIG}/setting-up-a-business`;
+const FIM = "https://fareimpresa.comune.milano.it";
+const MIL_SUAP: T = ["Comune di Milano, SUAP (Sportello Unico Attività Produttive)", "米兰市政府企业服务窗口（SUAP）"];
+
+export const ITALY_FORMS: OfficialForm[] = [
+  E({ id: "it-registro", where: "IT", level: "federal", method: "online", order: 10, cur: "EUR",
+    form: "Comunicazione Unica d'Impresa (ComUnica)", title: ["Business register entry through ComUnica", "通过 ComUnica 办理企业登记"], agency: ["Registro delle imprese, Camera di commercio", "商会企业登记处"],
+    how: ["Filed online as one Comunicazione Unica, which registers the company with the Chamber of Commerce and, in the same filing, with the tax agency, INAIL and INPS. A company's deed of incorporation is drawn up by a notary.", "以一份 Comunicazione Unica 在线提交，即在商会登记公司，并同时向税务局、INAIL 和 INPS 登记。公司设立文书须由公证人起草。"],
+    url: "https://www.registroimprese.it", takes: ["Registration is completed within five days of the application.", "自收到申请起五天内完成登记。"],
+    feeNote: ["Registration carries a yearly fee (diritto annuale) to the Chamber of Commerce.", "登记后须每年向商会缴纳年费（diritto annuale）。"],
+    specialist: ["An Italian notary (notaio) draws up the company's deed of incorporation: Placetta prepares the details and hands them to one.", "公司设立文书须由意大利公证人（notaio）起草：快哉准备资料并交给公证人。"],
+    foreign: ["A company established abroad that operates in Italy registers a local unit (unità locale) with the Chamber of Commerce.", "在意大利经营的境外公司须在商会登记本地分支（unità locale）。"],
+    proof: [IT_SETUP, "Tutte le imprese di qualsiasi natura giuridica si debbono iscrivere al Registro delle imprese.", "Every business, whatever its legal form, must enter the business register."] }),
+  E({ id: "it-iva", where: "IT", level: "federal", method: "online", order: 25, cur: "EUR",
+    form: "Partita IVA", title: ["VAT number (partita IVA)", "增值税号（Partita IVA）"], agency: ["Agenzia delle Entrate", "意大利税务局"],
+    how: ["Opened through the same Comunicazione Unica, for tax purposes, before trading.", "经营前通过同一份 Comunicazione Unica 为税务目的开立。"], url: "https://www.agenziaentrate.gov.it",
+    proof: [IT_SETUP, "Agenzia delle Entrate (per i fini fiscali)", "Revenue Agency (for tax purposes)"] }),
+  E({ id: "it-inps", where: "IT", level: "federal", needs: { employees: true }, method: "online", order: 60, cur: "EUR",
+    form: "Iscrizione INPS e INAIL", title: ["Employer registration with INPS and INAIL", "向 INPS 与 INAIL 办理雇主登记"], agency: ["INPS and INAIL", "国家社会保障局（INPS）与国家工伤保险局（INAIL）"],
+    how: ["Registered through the Comunicazione Unica, for pensions and social security (INPS) and workplace accident insurance (INAIL).", "通过 Comunicazione Unica 办理养老与社会保障（INPS）及工伤保险（INAIL）登记。"], url: "https://www.inps.it",
+    proof: [IT_SETUP, "Istituto Nazionale della Previdenza Sociale (per i fini previdenziali)", "National Social Security Institute (for social security purposes)"] }),
+  E({ id: "it-scia", where: "IT", level: "city", segs: STORES, except: ["IT-MIL"], method: "online", order: 55, cur: "EUR",
+    form: "Segnalazione Certificata di Inizio Attività (SCIA)", title: ["Notice to start the activity (SCIA) at the comune's SUAP", "向市政府企业窗口（SUAP）提交开业申报（SCIA）"], agency: ["The comune's SUAP (Sportello Unico Attività Produttive)", "市政府企业服务窗口（SUAP）"],
+    how: ["Shops and restaurants file the SCIA online with the comune's SUAP before opening; more complex activities need an authorisation instead.", "门店和餐厅开业前向市政府 SUAP 在线提交 SCIA；较复杂的经营活动须改为申请许可。"], url: "https://www.impresainungiorno.gov.it",
+    proof: [IT_SETUP, "è sufficiente l’autocertificazione con la presentazione in modalità digitale della Segnalazione Certificata di Inizio attività (SCIA)", "a self-certification is enough, by filing the Certified Notice of Start of Activity (SCIA) online"] }),
+  E({ id: "it-vvf", where: "IT", level: "city", segs: PREMISES, needs: { buildout: true }, method: "online", order: 67, cur: "EUR",
+    form: "SCIA antincendio (DPR 151/2011)", title: ["Fire prevention notice, for premises on the fire brigade's list", "消防预防申报（适用于消防部门名录内的场所）"], agency: ["Vigili del Fuoco (the provincial fire brigade command)", "意大利消防队（省级指挥部）"],
+    how: ["Premises whose size or use puts them on the fire prevention list file a fire safety SCIA with the fire brigade, through the SUAP.", "按面积或用途列入消防预防名录的场所，须经 SUAP 向消防部门提交消防 SCIA。"], url: "https://www.vigilfuoco.it" }),
+  /* Milan */
+  E({ id: "it-mil-vicinato", where: "IT-MIL", level: "city", segs: ["retail"], method: "online", order: 55, cur: "EUR",
+    form: "SCIA esercizio di vicinato", title: ["Shop opening notice (SCIA), for a shop of up to 250 m² of sales area", "门店开业申报（SCIA），适用于营业面积不超过 250 平方米的门店"], agency: MIL_SUAP,
+    how: ["Filed online with Milan's SUAP through impresainungiorno.gov.it; the receipt lets the shop open at once. A larger shop needs an authorisation instead.", "通过 impresainungiorno.gov.it 向米兰 SUAP 在线提交；回执即可让门店立即开业。面积更大的门店须改为申请许可。"], url: "https://www.impresainungiorno.gov.it",
+    proof: [`${FIM}/it/vendita/esercizi-vicinato`, "Per aprire o modificare un esercizio di vicinato occorre presentare, esclusivamente per via telematica al SUAP (Sportello Unico Attività Produttive) del Comune di Milano", "To open or change a neighbourhood shop you must file, online only, with the City of Milan's SUAP"] }),
+  E({ id: "it-mil-somministrazione", where: "IT-MIL", level: "city", segs: ["restaurant"], method: "online", order: 55, cur: "EUR",
+    form: "SCIA somministrazione di alimenti e bevande", title: ["Food and drink service notice (SCIA), or an authorisation in protected zones", "餐饮服务开业申报（SCIA），保护区内须申请许可"], agency: MIL_SUAP,
+    how: ["Outside Milan's protected zones a bar or restaurant files the SCIA online with the SUAP, with the ATS health fee receipt; inside them it needs an authorisation.", "在米兰保护区以外，酒吧或餐厅须向 SUAP 在线提交 SCIA，并附 ATS 卫生费用收据；保护区内须申请许可。"], url: "https://www.impresainungiorno.gov.it",
+    proof: [`${FIM}/it/somministrazione/somministrazione-pubblici-esercizi-bar-ristorante`, "Per avviare/modificare/ un’attività di somministrazione di alimenti e bevande (pubblico esercizio) nelle Zone non tutelate è necessario inviare, esclusivamente per via telematica al SUAP", "To start or change a food and drink service business outside the protected zones, you must send, online only, to the SUAP"] }),
+  E({ id: "it-mil-notifica", where: "IT-MIL", level: "city", segs: ["restaurant", "retail", "warehouse"], needs: { food: true }, method: "online", order: 56, cur: "EUR",
+    form: "Notifica ai fini della registrazione (art. 6, Reg. CE 852/2004)", title: ["Food business health notice for registration", "食品企业卫生登记通知"], agency: ["ATS Città Metropolitana di Milano, through the SUAP", "米兰大都市区卫生保护局（ATS），经 SUAP 提交"],
+    how: ["Filed with the SCIA through Milan's SUAP, which sends it to the health authority (ATS) to register the food business.", "随 SCIA 经米兰 SUAP 提交，由其转交卫生保护局（ATS）为食品企业登记。"], url: "https://www.impresainungiorno.gov.it",
+    proof: [`${FIM}/documents/87339536/190972146/MG+modulo_notifica-sanitaria_luglio2017.pdf/195a13f6-40b1-e695-cd6e-ece97de6f72e?t=1594025662959`, "NOTIFICA AI FINI DELLA REGISTRAZIONE (ART. 6, REG. CE N. 852/2004)", "Notice for registration (Art. 6, Regulation (EC) No 852/2004)"] }),
+  E({ id: "it-mil-insegna", where: "IT-MIL", level: "city", segs: PREMISES, needs: { signage: true }, method: "pdf_mail", order: 66, cur: "EUR",
+    form: "SCIA per insegne di esercizio", title: ["Shop sign notice (SCIA)", "门店招牌申报（SCIA）"], agency: ["Comune di Milano, Area Pubblicità e Occupazione Suolo", "米兰市政府广告与公共用地管理部门"],
+    how: ["A shop sign is notified to the city's advertising and public land office with its SCIA form, in three signed copies.", "门店招牌须以 SCIA 表格向市政府广告与公共用地部门申报，一式三份并签名。"], url: `${FIM}/documents/20126/526414/Modulo+SCIA+per+insegne+e+targhe+professionali.pdf/20cf0075-f30e-02af-0f4d-9886b19587b9?t=1637749345425`,
+    proof: [`${FIM}/documents/20126/526414/Modulo+SCIA+per+insegne+e+targhe+professionali.pdf/20cf0075-f30e-02af-0f4d-9886b19587b9?t=1637749345425`, "SEGNALAZIONE CERTIFICATA INIZIO ATTIVITA’ finalizzata alla installazione di insegne di esercizio e/o targhe professionali", "Certified notice of start of activity for putting up business signs or professional plates"] }),
+  E({ id: "it-mil-dehors", where: "IT-MIL", level: "city", segs: STORES, needs: { terrace: true }, method: "online", order: 73, cur: "EUR",
+    form: "Occupazione di suolo pubblico (dehors)", title: ["Outdoor seating on public land (dehors)", "公共用地户外座位（dehors）"], agency: ["Comune di Milano", "米兰市政府"],
+    how: ["Applied for with the city's forms and documents, sent to its certified email address.", "以市政府规定的表格和材料申请，发送至其认证电子邮箱。"], url: "https://www.comune.milano.it/en/servizi/impresa/occupazione-suolo-con-strutture-leggere-semirigide-amovibili",
+    proof: ["https://www.comune.milano.it/en/servizi/impresa/occupazione-suolo-con-strutture-leggere-semirigide-amovibili", "Applications for occupation of public land with outdoor seating must be submitted using the specific forms"] }),
+  /* running it */
+  E({ id: "it-diritto-annuale", where: "IT", level: "federal", method: "online", order: 92, cur: "EUR",
+    form: "Diritto annuale", title: ["Yearly Chamber of Commerce fee", "商会年费"], agency: ["Camera di commercio", "商会"],
+    how: ["Paid every year by every business entered in the register.", "所有已登记企业每年缴纳。"], url: "https://www.registroimprese.it", renews: ["Every year.", "每年一次。"],
+    proof: [IT_SETUP, "L'iscrizione prevede il pagamento di un diritto annuale", "Registration requires paying a yearly fee"] }),
+];
+
+export const EUROPE_FORMS: OfficialForm[] = [...UK_FORMS, ...EU_FORMS, ...FRANCE_FORMS, ...GERMANY_FORMS, ...ITALY_FORMS];
