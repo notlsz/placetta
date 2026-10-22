@@ -3086,6 +3086,10 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 @keyframes ivmq{to{transform:translateX(-50%)}}
 @media (max-width:767px){#invR .ivt{gap:36px;padding-right:36px;animation-duration:36s}#invR+.more95{display:none!important}}
 @media (prefers-reduced-motion:reduce){#invR .ivt{animation:none;flex-wrap:wrap;justify-content:center;width:auto;gap:24px 36px}#invR .ivt img[aria-hidden]{display:none}}
+
+/* the menu never runs off a short screen, and nothing sits on top of it (Oct 22) */
+@media (max-width:1023px){.msheet:not([hidden]){max-height:calc(100dvh - 104px - env(safe-area-inset-top,0px));overflow-y:auto;overscroll-behavior:contain}}
+.menu-open .mbar,.menu-open .resume{display:none!important}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -6224,7 +6228,7 @@ applyAll(); fitTable(); bindCounters(); setPlay(vPlaying); onScroll(); requestAn
    keeps one height, a visible "more" on the stories tab bar, and the security list folded to four */
 (function phone95(){
   const root = document.documentElement, hdr = document.getElementById("hdr"), sheet = document.getElementById("mSheet"), mb = document.getElementById("mnBtn");
-  const setMenu = open => { if (!sheet || !mb) return; sheet.hidden = !open; mb.setAttribute("aria-expanded", open); mb.setAttribute("aria-label", t(open ? "menu.close" : "menu.open")); if (open) root.classList.remove("p95hide"); };
+  const setMenu = open => { if (!sheet || !mb) return; sheet.hidden = !open; mb.setAttribute("aria-expanded", open); mb.setAttribute("aria-label", t(open ? "menu.close" : "menu.open")); if (open) root.classList.remove("p95hide"); root.classList.toggle("menu-open", open); };
   if (mb) mb.addEventListener("click", () => { setMenu(sheet.hidden); track("menu_toggle", {open: !sheet.hidden}); });
   if (mb) { const orig = applyAll; applyAll = function(){ orig.apply(this, arguments); mb.setAttribute("aria-label", t(sheet.hidden ? "menu.open" : "menu.close")); }; }
   if (sheet) sheet.addEventListener("click", e => { if (e.target.closest("a,[data-open]")) setMenu(false); });
