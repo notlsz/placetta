@@ -17,7 +17,11 @@
  * src/forms/fill.ts).
  * ------------------------------------------------------------------ */
 
-export type PdfScan = { hidden: { why: string; text: string }[]; active: string[] };
+/** text: every string the content streams draw, hidden or not, as far as it's plain single-byte text (a model reads
+ *  the PDF itself; this is so the detector and the recipient check read what it reads). */
+export type PdfScan = { hidden: { why: string; text: string }[]; active: string[]; text: string };
+
+const TEXT_OPS = /\((?:\\.|[^\\)])*\)\s*(?:Tj|'|")|<[0-9A-Fa-f\s]+>\s*Tj|\[(?:\((?:\\.|[^\\)])*\)|<[0-9A-Fa-f\s]*>|[^\]])*\]\s*TJ/g;
 
 const latin1 = (b: Uint8Array) => { let s = ""; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode(...b.subarray(i, i + 0x8000)); return s; };
 
@@ -70,6 +74,7 @@ export async function scanPdf(bytes: Uint8Array): Promise<PdfScan> {
   let inflate: ((b: Uint8Array) => Uint8Array) | null = null;
   try { inflate = (await import("fflate")).unzlibSync; } catch { inflate = null; }
   let streams = 0;
+  const text: string[] = [];
   for (const m of raw.matchAll(/<<((?:(?!>>)[\s\S]){0,800})>>\s*stream\r?\n/g)) {
     if (++streams > 400) break;
     const start = m.index! + m[0].length, end = raw.indexOf("endstream", start);
@@ -83,7 +88,8 @@ export async function scanPdf(bytes: Uint8Array): Promise<PdfScan> {
     } else if (/\/Filter/.test(dict)) continue;
     if (!/\bBT\b/.test(content)) continue;
     hidden.push(...hiddenIn(content));
+    if (text.length < 4000) for (const op of content.matchAll(TEXT_OPS)) text.push(drawn(op[0]));
     if (hidden.length > 40) break;
   }
-  return { hidden, active };
+  return { hidden, active, text: text.join("\n").slice(0, 60000) };
 }

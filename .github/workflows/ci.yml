@@ -31,6 +31,9 @@ jobs:
       # the agent loop against a scripted model that misbehaves on purpose: approvals, made-up ids, planted
       # instructions, SSNs, remote channels, limits, racing runs, Chinese, every tool, model failover
       - run: npm run test:extreme
+      # the prompt-injection red team: hostile emails, PDFs, pages, chats, lessons and form fields, each against a
+      # model that obeys them; every one must be stopped by Placetta's own code
+      - run: npm run test:redteam
       # the live evaluation's harness, on its scripted model (no key in CI): scenarios, tools, graders and report
       - run: npm run eval:live -- --dry --out /tmp/eval.md --json /tmp/eval.json
       - run: npm run test:plan

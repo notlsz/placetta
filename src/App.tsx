@@ -562,7 +562,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       }
     };
     const m = modelRef.current;
-    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services, fallback: demoAgent, me, comments: item => collabRef.current.forAgent(item) }) : withDemoPlan(demoAgent);
+    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services, fallback: demoAgent, me, comments: item => collabRef.current.forAgent(item), role: cloud ? cloud.role : "owner" }) : withDemoPlan(demoAgent);
     // each application's answers before the run: the ones it changes get their form filled again when it ends
     const answersBefore = new Map(wsRef.current.apps.map(a => [a.id, answersHash(a)]));
     try {

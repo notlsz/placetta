@@ -16,7 +16,9 @@ export const hostOf = (url: string): string => {
 
 /** A government's own host: .gov, .mil, .us, a country's gov or gob or gouv second level, a city or county domain
  *  Placetta knows is the agency's own. */
-export const governmentHost = (h: string) => /\.(gov|mil|us)$/i.test(h) || /\.(gov|gob|gouv|govt|go|gc)\.[a-z]{2}$/i.test(h) || /(^|\.)(gov\.uk|gov\.cn|gc\.ca|canada\.ca|europa\.eu)$/i.test(h)
+/** .us alone isn't a government's: anyone can register one. Only the locality names under a state's code are
+ *  (ci.sanjose.ca.us, co.santa-clara.ca.us, state.ca.us). */
+export const governmentHost = (h: string) => /\.(gov|mil)$/i.test(h) || /\.[a-z]{2}\.us$/i.test(h) || /\.(gov|gob|gouv|govt|go|gc)\.[a-z]{2}$/i.test(h) || /(^|\.)(gov\.uk|gov\.cn|gc\.ca|canada\.ca|europa\.eu)$/i.test(h)
   || /(^|\.)(sccgov\.org|acgov\.org|sfgov\.org|nyc\.gov|lacounty\.gov|houstontx\.gov|sanjoseca\.gov)$/i.test(h);
 
 let HOSTS: Set<string> | null = null;

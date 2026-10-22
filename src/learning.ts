@@ -1,6 +1,7 @@
 import { type Bi } from "./bi";
 import type { Workspace } from "./model";
 import { detectInjection } from "./security/detect";
+import { agencyHostOk, agencyUrlOk } from "./security/registry";
 import { neutralize, wrapUntrusted } from "./security/untrusted";
 
 /* ------------------------------------------------------------------ *
@@ -71,7 +72,7 @@ export const lessonUsable = (l: Lesson) => l.businesses >= 2 && l.confirms >= 2 
 export function lessonsBrief(ls: Lesson[], lang: "en" | "zh"): string {
   const usable = ls.filter(lessonUsable);
   if (!usable.length) return "";
-  const lines = rank(usable).slice(0, 14).map(l => `- [${l.id}] ${where(l.key)}: ${neutralize((lang === "zh" ? l.text.zh : "") || l.text.en, { html: false }).text}${l.source_url ? ` (source: ${l.source_url})` : ""} (${l.businesses} ${l.businesses === 1 ? "business" : "businesses"})`);
+  const lines = rank(usable).slice(0, 14).map(l => `- [${l.id}] ${where(l.key)}: ${neutralize((lang === "zh" ? l.text.zh : "") || l.text.en, { html: false }).text}${l.source_url && agencyUrlOk(l.source_url) ? ` (source: ${l.source_url})` : ""} (${l.businesses} ${l.businesses === 1 ? "business" : "businesses"})`);
   return `
 
 What Placetta has learned from other businesses doing the same jobs (anonymized; each one confirmed by at least two businesses):
@@ -97,6 +98,8 @@ export function scrubLesson(text: string, w?: Workspace): string | null {
   // the injection detector too (src/security/detect.ts): instructions to an AI, disguised or not, never become a lesson
   if (detectInjection(t).verdict !== "clean" || neutralize(t, { html: false }).hidden.length) return null;
   if (/https?:\/\//i.test(t)) return null;   // links travel in source_url, checked separately
+  // a bare web address only when it's an agency's own: a poisoned lesson can't send the next business to a look-alike
+  for (const m of t.matchAll(/\b(?:[a-z0-9-]+\.)+(?:[a-z]{2,24})\b/gi)) if (/[a-z]/i.test(m[0].split(".").pop()!) && /\.(com|net|org|io|co|app|xyz|info|biz|site|online|us|cn|me|ly|link|pay|top|shop)$/i.test(m[0]) && !agencyHostOk(m[0].toLowerCase())) return null;
   if (w) {
     const lower = t.toLowerCase();
     const cities = new Set([w.meta?.city, ...(w.stores ?? []).map(s => STATE.exec(s.address ?? "")?.[1])].filter(Boolean).map(s => String(s).toLowerCase().trim()));
@@ -107,7 +110,8 @@ export function scrubLesson(text: string, w?: Workspace): string | null {
   }
   return t;
 }
-const officialUrl = (u: string) => { try { const h = new URL(u).hostname.toLowerCase(); return /\.(gov|mil|us)$/.test(h) || /\.gov\.[a-z]{2}$/.test(h) || /^(www\.)?(sccgov\.org|acgov\.org|sfgov\.org|lacounty\.gov)$/.test(h); } catch { return false; } };
+/** A lesson's source: an official agency page (src/security/registry.ts), or none. */
+const officialUrl = (u: string) => agencyUrlOk(u);
 
 /* ------------------------------------------------------------------ the distiller */
 
@@ -137,7 +141,8 @@ export function parseDistill(text: string, o: { keys: string[]; existing: string
     const en = scrubLesson(String(n.en ?? ""), o.w);
     if (!en) continue;
     const zh = scrubLesson(String(n.zh ?? ""), o.w) ?? en;
-    const url = typeof n.source_url === "string" && /^https:\/\/[^\s]+$/.test(n.source_url) && n.source_url.length < 400 ? n.source_url : undefined;
+    // a source travels with a lesson only when it's an agency's own page; any other link is dropped, never shared
+    const url = typeof n.source_url === "string" && /^https:\/\/[^\s]+$/.test(n.source_url) && n.source_url.length < 400 && officialUrl(n.source_url) ? n.source_url : undefined;
     if (fresh.some(f => f.key === key && f.text.en.toLowerCase() === en.toLowerCase())) continue;
     fresh.push({ kind, key, text: { en, zh }, source_url: url, official: !!url && officialUrl(url) });
   }

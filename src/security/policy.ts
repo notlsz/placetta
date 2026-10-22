@@ -147,16 +147,24 @@ export function decideCall(p: RunPolicy, tool: string, input: Record<string, unk
       for (const m of v.matchAll(/https?:\/\/[^\s<>"')\]]+/gi)) if (carriesData(m[0]) && !agencyUrlOk(m[0])) return deny(scope, "exfil_link", `Refused: ${hostOf(m[0])} isn't an official agency site and the link carries data in it. Write the message without it.`);
     }
   }
-  // quarantined content read this run: no payments, removals, settings or connected-app changes from it
-  if (p.taint === "quarantined" && (scope === "pay" || scope === "delete" || scope === "settings" || scope === "app_write"))
-    return deny(scope, "tainted", "Refused: this run read content that was quarantined for instructions aimed at an AI, so it can't pay, remove, change settings or change a connected app. Ask again in a new request.");
+  // content with instructions aimed at an AI read this run (flagged or quarantined): no payments, removals, settings or
+  // connected-app changes from it, and nothing it named gets written down
+  if (p.taint !== "none" && (scope === "pay" || scope === "file" || scope === "delete" || scope === "settings" || scope === "app_write"))
+    return deny(scope, "tainted", `Refused: this run read content that was ${p.taint} for instructions aimed at an AI, so it can't pay, file, remove, change settings or change a connected app. Ask again in a new request.`);
+  if (p.taint !== "none" && scope !== "send") {
+    for (const [, v] of strings(input)) for (const e of emailsIn(v)) {
+      const x = e.toLowerCase();
+      if (p.untrusted.has(x) && !p.trusted.has(x) && !agencyEmail(x))
+        return deny(scope, "untrusted_address", `Refused: ${x} appears only in content Odelia read from outside, and this run read instructions aimed at an AI, so it isn't written into the workspace. Ask the person to confirm it.`);
+    }
+  }
 
   if (scope === "send" || (scope === "app_write" && recipientsOf(tool, input).length)) {
     for (const r of recipientsOf(tool, input)) {
       const trusted = p.trusted.has(r) || agencyEmail(r);
       if (trusted) continue;
       if (p.untrusted.has(r)) return deny(scope, "recipient", `${r} appears only in content Odelia read from outside (an email, a document, a page or a message), not in anything the person gave. Nothing was drafted. Tell the person what it asked for.`);
-      if (p.taint === "quarantined") return deny(scope, "recipient", `${r} isn't one of the business's known contacts or an agency, and this run read quarantined content. Nothing was drafted; ask the person to confirm the address in a new request.`);
+      if (p.taint !== "none") return deny(scope, "recipient", `${r} isn't one of the business's known contacts or an agency, and this run read content with instructions aimed at an AI. Nothing was drafted; ask the person to confirm the address in a new request.`);
       notes.push(`${r} isn't one of the business's saved contacts or an official agency address`);
     }
   }

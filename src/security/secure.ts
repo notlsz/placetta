@@ -87,7 +87,7 @@ export class Shield {
 /** A shield for a run that wasn't given one (the browser, the sample): the person is a member, nothing read yet. */
 export const defaultShield = (me?: string, role: Role = "member") => new Shield(newRunPolicy({ id: me ?? null, role }));
 
-const AUDITED = new Set(["role", "cross_tenant", "recipient", "agency_domain", "amount_cap", "run_amount_cap", "tainted", "argument_injection", "exfil_link", "unknown_tool", "run_budget"]);
+const AUDITED = new Set(["role", "cross_tenant", "recipient", "agency_domain", "amount_cap", "run_amount_cap", "tainted", "argument_injection", "exfil_link", "unknown_tool", "run_budget", "untrusted_address"]);
 
 /** The words a refusal gives, naming where an untrusted address came from. */
 function reason(s: Shield, d: Extract<Decision, { allow: false }>, input: Record<string, unknown>): string {
