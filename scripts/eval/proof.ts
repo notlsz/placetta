@@ -14,7 +14,7 @@ type Entry = { id: string; read: string; quote: string; checked: string; method:
 const log = LOG as Entry[];
 /** Rows whose agency pages couldn't be read at all on 2026-10-18: named, so they fail loudly if more appear. */
 export const UNREAD: Record<string, string> = {
-  "il-sos": "ilsos.gov timed out for every request (curl over HTTP/1.1 and 2) and WebFetch wasn't permitted for it",
+  // il-sos was here until 2026-10-22: its proof is now read from the Illinois Department of Commerce's handbook
 };
 const words = (s: string) => s.trim().split(/\s+/).length;
 

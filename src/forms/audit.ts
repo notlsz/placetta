@@ -27,7 +27,7 @@ export type Fix = {
   /** the agency that actually takes the filing, when the old entry named a portal's owner instead */
   agency?: { en: string; zh: string };
   /** a fee an official page states (with its note), for an entry that had none */
-  fee?: number; feeNote?: { en: string; zh: string };
+  fee?: number | null; feeNote?: { en: string; zh: string };
   why: string;
 };
 

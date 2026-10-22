@@ -578,7 +578,50 @@ const TURKIYE: OfficialForm[] = [
     proof: [IST_SIHHI, "İstanbul Büyük Şehir İtfaiye Müdürlüğüne (Yangın, patlama v.b yönünden), Belediye İmar ve Şehircilik Müdürlüğüne (imar yönünden)", "to the Istanbul Metropolitan Fire Department (for fire, explosion and the like), to the municipality's zoning department (for zoning)"] }),
 ];
 
-export const FINISH_FORMS: OfficialForm[] = [...AUSTRIA, ...SWITZERLAND, ...SWEDEN, ...DENMARK, ...FINLAND, ...POLAND, ...BELGIUM, ...PORTUGAL, ...IRELAND, ...GERMANY_SPAIN_ITALY, ...UAE, ...TURKIYE];
+/* ------------------------------------------------------------------ Mexico (Guadalajara, Cancún, and the IMSS) */
+const MX_IMSS = "https://ventanillamipymes.economia.gob.mx/inscripcion-al-imss-persona-moral/";
+const GDL_USO = "https://apitramites.guadalajara.gob.mx/pdf/375";
+const GDL_LIC = "https://apitramites.guadalajara.gob.mx/pdf/380";
+const CUN_LIC = "https://cancun.gob.mx/cancun/noticias/leer/3383";
+
+const MEXICO_MORE: OfficialForm[] = [
+  N({ id: "mx-gdl-uso-suelo", where: "MX-GDL", level: "city", segs: PREMISES, method: "online", order: 50, cur: "MXN", fee: 2045,
+    form: "Dictamen de Trazo, Usos y Destinos Específicos", title: ["Land use and zoning certificate (Dictamen de Trazo, Usos y Destinos)", "土地用途与分区证明（Dictamen de Trazo, Usos y Destinos）"],
+    agency: ["Gobierno de Guadalajara, Dirección de Ordenamiento del Territorio", "瓜达拉哈拉市政府国土规划局"],
+    how: ["The certificate states the land uses allowed at the address and the building rules that apply; a business licence needs a favourable or conditioned land use for the activity.", "该证明载明该地址允许的土地用途和适用的建筑规则；经营许可要求该经营活动的土地用途为允许或有条件允许。"],
+    url: GDL_USO, takes: ["10 business days.", "10 个工作日。"],
+    proof: [GDL_USO, "El Dictamen de Trazo, Usos y Destinos Específicos te permite certificar los usos de suelo permitidos en el predio", "The Dictamen de Trazo, Usos y Destinos Específicos certifies the land uses allowed on the property"] }),
+  N({ id: "mx-cun-uso-suelo", where: "MX-CUN", level: "city", segs: PREMISES, method: "online", order: 50, cur: "MXN",
+    form: "Permiso de utilización de uso de suelo; dictamen de Protección Civil", title: ["Land use permit and civil protection opinion (uso de suelo)", "土地用途许可与民防意见（uso de suelo）"],
+    agency: ["Municipio de Benito Juárez (Cancún), Desarrollo Urbano and Protección Civil", "贝尼托华雷斯市政府（坎昆）城市发展与民防部门"],
+    how: ["The operating licence requires a current land use permit for the premises and a current civil protection opinion, both from the municipality.", "经营许可要求具备场所的有效土地用途许可和有效民防意见，均由市政府出具。"],
+    url: "https://imdai.cancun.gob.mx/ventanilla",
+    proof: [CUN_LIC, "permiso de utilización de uso de suelo y dictamen de Protección Civil vigente.", "a land use permit and a current civil protection opinion."] }),
+];
+
+/* ------------------------------------------------------------------ United States: the five guide cities short of covered */
+const AZ_WH = "https://azdor.gov/business/withholding-tax/employer-withholding-filing-obligations";
+const IL_DCEO = "https://dceo.illinois.gov/content/dam/soi/en/web/dceo/smallbizassistance/beginhere/documents/starting-your-business-handbook-2026.pdf";
+const TPA_BTR = "https://www.tampa.gov/service/new-business-tax-receipt-application";
+const SACC_PR = "https://emd.saccounty.gov/us/en/environmental-health/eh-plan-review.html";
+const CMH_FOOD = "https://www.columbus.gov/Services/Food-Protection-Program";
+const ORC_LLC = "https://codes.ohio.gov/ohio-revised-code/section-1706.16";
+const ORC_UI = "https://codes.ohio.gov/ohio-revised-code/section-4141.20";
+const FCA_VENDOR = "https://auditor.franklincountyohio.gov/Consumer/Licensing-Types";
+const DAL_FIRE_FEES = "https://dallascityhall.com/departments/fire-rescue/FPEI%20Docs/Schedule%20of%20Permit%20Fees%202024.pdf";
+const DAL_DSD_FEES = "https://dallascityhall.com/departments/sustainabledevelopment/DCH%20documents/DSD%20Fees.pdf";
+const CA_FEES = "https://bpd.cdn.sos.ca.gov/pdf/be-fee-schedule-062018.pdf";
+
+const US_FINISH: OfficialForm[] = [
+  N({ id: "az-jt1", where: "AZ", level: "state", needs: { employees: true }, method: "online", order: 60, cur: "USD", fee: 0,
+    form: "Arizona Joint Tax Application (Form JT-1), on AZTaxes.gov", title: ["Employer registration for withholding and unemployment insurance (JT-1)", "雇主预扣税与失业保险登记（JT-1）"],
+    agency: ["Arizona Department of Revenue, with the Arizona Department of Economic Security", "亚利桑那州税务局与经济保障局"],
+    how: ["An employer that withholds Arizona income tax registers its EIN with ADOR on the Joint Tax Application in AZTaxes.gov; the same form starts the unemployment insurance registration with DES.", "预扣亚利桑那州所得税的雇主须在 AZTaxes.gov 以联合税务申请表向州税务局登记其 EIN；同一表格也启动在经济保障局的失业保险登记。"],
+    url: "https://www.aztaxes.gov", feeNote: ["No fee for the employer registration.", "雇主登记不收费。"],
+    proof: [AZ_WH, "Completing and submitting Arizona Form JT-1 also begins the process of registering the employer for unemployment compensation insurance"] }),
+];
+
+export const FINISH_FORMS: OfficialForm[] = [...AUSTRIA, ...SWITZERLAND, ...SWEDEN, ...DENMARK, ...FINLAND, ...POLAND, ...BELGIUM, ...PORTUGAL, ...IRELAND, ...GERMANY_SPAIN_ITALY, ...UAE, ...TURKIYE, ...MEXICO_MORE, ...US_FINISH];
 
 export const FINISH_FIXES: Fix[] = [
   P("at-fb", AT_FB, "In der Regel erlangt die Gesellschaft mit der Eintragung in das Firmenbuch Rechtspersönlichkeit.", "As a rule the company becomes a legal person on its entry in the company register.",
@@ -667,6 +710,36 @@ export const FINISH_FIXES: Fix[] = [
     "Proof added from the Revenue Administration's corporate tax guide (gib.gov.tr)."),
   { ...P("tr-ist-ruhsat", IST_RUHSAT, "İşyeri Açma ve Çalışma Ruhsatı Müracaatları Gerekli evraklar hazırlandıktan sonra Belediyemiz Ruhsat ve Denetim Müdürlüğüne Şahsen veya şirkette imzaya yetkili kişilerce yapılır.", "Applications for the business opening and operating licence are made to the municipality's licensing department, in person or by the company's signatories.",
     "Proof added from Beyoğlu Municipality's own page (one of Istanbul's district municipalities, each of which issues the licence for its district)."), url: IST_RUHSAT },
+  /* Mexico */
+  P("mx-imss", MX_IMSS, "Este trámite te permite registrarte ante el Instituto Mexicano del Seguro Social (IMSS) para cumplir con tus obligaciones patronales.", "This procedure registers you with the Mexican Social Security Institute (IMSS) to meet your obligations as an employer.",
+    "Proof added from the Ministry of Economy's SME window (economia.gob.mx): imss.gob.mx builds its pages in script and its PDFs answer empty."),
+  { ...P("mx-gdl-licencia", GDL_LIC, "Te permite obtener tu licencia de funcionamiento para giros de riesgo medio", "It gets you the operating licence for medium-risk businesses",
+    "Proof added from the City of Guadalajara's own procedure sheet (Licencia de Giro Comercial Tipo B; type A covers small low-risk shops)."),
+    url: GDL_LIC, feeNote: { en: "618 pesos to print the licence plus 57 pesos for the form; decided within 30 business days.", zh: "执照打印费 618 比索，另加表格费 57 比索；30 个工作日内决定。" } },
+  { ...P("mx-cun-licencia", CUN_LIC, "La dependencia invita a la ciudadanía en general a que obtenga su licencia de funcionamiento en línea,", "The department invites everyone to get their operating licence online,",
+    "Proof added from the Municipality of Benito Juárez's own notice (cancun.gob.mx), which lists the licence's requirements."), url: "https://cancun.gob.mx" },
+  /* United States: the guide cities short of covered, and the five fees the audit couldn't confirm */
+  { ...P("il-sos", IL_DCEO, "The following entities must file formation documents with the SOS:", undefined,
+    "Proof added from the Illinois Department of Commerce's 2026 starting-a-business handbook (illinois.gov): ilsos.gov refused every connection. The $150 fee stays unconfirmed: no current official page that states it could be read, so it is no longer claimed."),
+    fee: null, feeNote: { en: "Fee not confirmed: the Secretary of State's fee page couldn't be read.", zh: "费用未经确认：无法读取州务卿的收费页面。" } },
+  P("tpa-business-tax", TPA_BTR, "the first step in applying for a business tax receipt for a new business operating in the City of Tampa.", undefined,
+    "Proof added from the City of Tampa's own application page."),
+  P("sacc-plan-review", SACC_PR, "that is built or remodeled in Sacramento County must submit plans and have them approved by the EMD Plan Review staff.", undefined,
+    "Proof added from Sacramento County EMD's plan review page."),
+  P("cmh-food-license", CMH_FOOD, "Before opening, you’ll need to complete an application for a license and pass a final inspection.", undefined,
+    "Proof added from Columbus Public Health's Food Protection Program page."),
+  P("oh-sos-llc", ORC_LLC, "A limited liability company is formed when the articles of organization are filed by the secretary of state", undefined,
+    "Proof added from the Ohio Revised Code, section 1706.16 (codes.ohio.gov): ohiosos.gov refuses automated reads (403)."),
+  P("oh-ui", ORC_UI, "Every contributory employer shall file a quarterly contribution and wage report.", undefined,
+    "Proof added from the Ohio Revised Code, section 4141.20 (codes.ohio.gov): jfs.ohio.gov answered 404 for its employer pages."),
+  { ...P("oh-vendor", FCA_VENDOR, "Upon completion, this application can be submitted along with the $50 filing fee to Franklin County Auditor,", undefined,
+    "Fee confirmed: the Franklin County Auditor's licensing page states the $50 filing fee."), fee: 50 },
+  { ...P("dal-fire-hood", DAL_FIRE_FEES, "Commercial Cooking Fire-Extinguishing System $250", undefined,
+    "Fee confirmed: Dallas Fire-Rescue's Schedule of Permit Fees (2024) lists the permit at $250."), fee: 250 },
+  { id: "dal-sign", fee: 281, feeNote: { en: "$281 for a premise sign in the city's permit fee schedule (effective May 1, 2024), which also lists a $281 sign plan review fee.", zh: "市政府收费表（2024 年 5 月 1 日起生效）列明场所招牌许可费 281 美元，另有招牌图纸审查费 281 美元。" },
+    why: `Fee corrected: the $296 the registry stated isn't on any city page; the city's permit fee schedule (${DAL_DSD_FEES}) lists "Signs - Premise $281".` },
+  { ...P("ca-llc-5", CA_FEES, "Application to Register a Foreign Limited Liability Company (Form LLC-5)", undefined,
+    "Fee confirmed: the Secretary of State's Business Entities Fee Schedule lists Form LLC-5 at $70.00."), fee: 70 },
   P("ch-ahv", CH_AHV, "Als Arbeitgeber melden Sie sich bei der Ausgleichskasse an.", "As an employer you register with the compensation fund.",
     "Proof added from the Federal Social Insurance Office's FAQ (bsv.admin.ch)."),
 ];
