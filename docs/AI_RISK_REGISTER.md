@@ -179,8 +179,11 @@ Likelihood 1, impact 3. Residual: low.
 The files a portal run uploads are written to that run's own temporary folder and deleted when the run ends
 (`worker/filer/src/run.ts`); before 2026-10-22 each file went to its own temporary folder that was never removed.
 
-Gap: the filer reads the password (`vault_get`) before it writes the audit row (`worker/filer/src/store.ts` `login`).
-If the insert fails the password was still opened. Write the audit row first, as `logins` `reveal` does.
+Gap, fixed in code on 2026-10-22 and not yet live: the filer read the password (`vault_get`) before it wrote the audit
+row, and ignored a failed insert. Now `filer_open_login` (`20261022120000_filer_least_privilege.sql`) writes the audit
+row, then the opening time, then reads the password, in one transaction, and the worker calls only that
+(`worker/filer/src/store.ts` `login`); `supabase/tests/filer_role.sql` checks that a failing audit insert returns no
+password. Live once the migration is applied and the filer redeployed (docs/soc2/runbooks/filer-least-privilege.md).
 
 ### R7. Runaway cost or abuse of the model
 

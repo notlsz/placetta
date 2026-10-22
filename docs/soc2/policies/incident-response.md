@@ -61,7 +61,7 @@ The log is the `public.incidents` table (`supabase/migrations/20261017210300_age
 Two gaps, both to close:
 
 1. **The table isn't in the live database yet.** The migration is in the repo and tested (`supabase/tests/health.sql`) but not applied (checked 2026-10-18). Until it is, keep entries in the evidence folder using the template in [RECORDS.md](../RECORDS.md#incident).
-2. **It has no columns for severity, detection, containment, resolution or customer notice times.** Until a migration adds `severity`, `detected_at`, `contained_at`, `resolved_at` and `customers_notified_at` (code), write them at the start of the impact and fix text: `SEV2. Detected 2026-11-03 14:05 UTC. Contained 15:20 UTC.`
+2. **It has no columns for severity, detection, containment, resolution or customer notice times** in production. The migration that adds them (`20261022130000_incident_timeline.sql`, with `incident_timeline` for staff and `incident_timings` for reviews) is written and tested but not applied, and needs `20261017210300_agent_health.sql` first. Until both are live, write them at the start of the impact and fix text: `SEV2. Detected 2026-11-03 14:05 UTC. Contained 15:20 UTC.`
 
 ## Testing this plan
 

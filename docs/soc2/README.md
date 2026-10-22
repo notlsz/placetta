@@ -2,7 +2,7 @@
 
 Placetta has no SOC 2 report today, and the trust page says so. A SOC 2 report needs an independent CPA firm to audit us; that's the founder's step. Everything before it is here: the policies, the control matrix that maps every 2017 Trust Services Criterion to the code and the evidence, a script that collects the evidence, and the CI checks an auditor will look for.
 
-On 2026-10-22 the matrix has **84 controls: 17 in place, 43 partial, 24 gaps** (78 on 2026-10-18, plus six enterprise access controls added built but not live: roles, single sign-on, SCIM, role administration, security events in the audit trail, filing isolation). Most partials are things that are built but not live: migrations written and tested but not applied to the database, functions not redeployed, policies not yet approved. Most gaps are the founder's: backups, branch protection, account settings, an auditor.
+After the readiness fixes of 2026-10-22 the matrix has **85 controls: 17 in place, 48 partial, 20 gaps** (the filer's own role added; CI on Postgres 17.11, the log export, the off-site backup and the restore drill moved from gap to partial because their code exists, not yet live). Earlier the same day it had **84 controls: 17 in place, 43 partial, 24 gaps** (78 on 2026-10-18, plus six enterprise access controls added built but not live: roles, single sign-on, SCIM, role administration, security events in the audit trail, filing isolation). Most partials are things that are built but not live: migrations written and tested but not applied to the database, functions not redeployed, policies not yet approved. Most gaps are the founder's: backups, branch protection, account settings, an auditor.
 
 ## What's in this folder
 
@@ -12,6 +12,9 @@ On 2026-10-22 the matrix has **84 controls: 17 in place, 43 partial, 24 gaps** (
 | [policies/](policies/) | 15 policies, each with an owner, a review cadence and "How we prove it" |
 | [RECORDS.md](RECORDS.md) | Templates for the records the policies call for: access reviews, restore tests, incidents, vendor reviews |
 | [BRANCH_PROTECTION.md](BRANCH_PROTECTION.md) | The rules for `main` as code (`.github/branch-protection.json`) and how to apply them |
+| [runbooks/](runbooks/) | Founder runbooks for every step that changes a live system: [branch protection](runbooks/branch-protection.md), [backups and restore drills](runbooks/backup-restore.md), [log retention](runbooks/log-retention.md), [two-step sign-in and identity](runbooks/mfa-and-identity.md), [the filer's own role](runbooks/filer-least-privilege.md), [legal-text claims](runbooks/legal-text-corrections.md) |
+| [records/](records/) | The quarterly [restore drill](records/restore-drill-template.md) and [access review](records/access-review-template.md) templates |
+| [vendors/](vendors/README.md) | The vendor evidence tracker and [request templates](vendors/request-templates.md) |
 | `scripts/soc2-evidence.mjs` | Collects the evidence into a dated bundle ([Evidence](#evidence) below) |
 | `.github/workflows/ci.yml`, `security` job | Secret scan (gitleaks v8.30.1), `npm audit` gate, Dependabot coverage check |
 | `.github/CODEOWNERS`, `.github/pull_request_template.md` | Who reviews what, and the security checklist on every pull request |
@@ -62,13 +65,16 @@ Code left for later pull requests (each is in the matrix with its ID):
 
 | Change | ID |
 | --- | --- |
-| Severity and timestamp columns on `public.incidents` | CC7.4a |
-| `postgres:17` in the CI database job, matching production (17.11), once the migrations are checked on it | CC8.1g |
-| An import map and `deno.lock` for the server functions; Actions pinned to commit SHAs | CC8.1h |
+| The filer's own database role, audit before password, non-root container: done 2026-10-22 (not applied) | CC6.3e |
+| One year of platform logs (hourly export): done 2026-10-22, runs once set up | CC7.2c |
+| A restore drill script that runs the database tests on the restored copy: done 2026-10-22 | A1.3a |
+| Severity and timestamp columns on `public.incidents`: done 2026-10-22 (`20261022130000_incident_timeline.sql`, not applied) | CC7.4a |
+| `postgres:17.11` in the CI database job: done 2026-10-22; every migration and all 871 database checks pass on 17.11 | CC8.1g |
+| Actions pinned to commit SHAs and supabase-js pinned exactly in the functions: done 2026-10-22. Still open: a `deno.lock` | CC8.1h |
 | A `supabase db push` job after CI on `main` | CC8.1d |
 | Gemini through Vertex AI instead of the Gemini Developer API | CC9.2b |
-| Toast, Square, WeChat and MCP connectors on the trust page's subprocessor list; self-hosted fonts instead of Google Fonts | CC2.3a, CC9.2c |
-| A weekly copy of the `documents` bucket and a database dump to a second provider | A1.2b |
+| Toast, Square, WeChat and MCP connectors on the trust page's subprocessor list: done 2026-10-22. Still open: self-hosted fonts instead of Google Fonts | CC2.3a, CC9.2c |
+| A copy of the database (daily) and the `documents` bucket (weekly) at a second provider: done 2026-10-22 (the Off-site backup workflow), runs once the founder sets it up | A1.2b |
 | The audit-trail retention rule, once decided, in `purge_expired()` and the Privacy Policy; purges for consent records after 5 years and terms acceptances after 6 | C1.2b |
 
 ## Evidence
