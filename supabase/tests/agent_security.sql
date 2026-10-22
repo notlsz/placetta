@@ -1,4 +1,4 @@
--- Odelia's protections in the database (20261022150000_agent_security.sql): the append-only tool-call log and who may
+-- Odelia's protections in the database (20261022190000_agent_security.sql): the append-only tool-call log and who may
 -- read it, the role a run acts with, lessons that need two businesses and never carry instructions, and the filer's
 -- run tokens, which reach one filing and nothing else. Run with scripts/test-db.sh (ends by raising TEST_RESULTS).
 do $test$

@@ -23,7 +23,7 @@ export interface Store {
   teamTask(f: Filing | null, kind: string, title: string, detail?: unknown): Promise<void>;
   notify(f: Filing, title: { en: string; zh: string }, body: { en: string; zh: string }): Promise<void>;
   /** A run starts on this filing: the database gives it a token for this filing alone, for at most an hour, which every
-   *  call of the run then carries (20261022150000_agent_security.sql). */
+   *  call of the run then carries (20261022190000_agent_security.sql). */
   begin?(f: Filing): Promise<void>;
   /** The run is over: its token stops working. */
   end?(): Promise<void>;
@@ -48,7 +48,7 @@ export class SupabaseStore implements Store {
     const { data, error } = await this.base.rpc("filer_begin_run", { p_filing: f.id, p_minutes: 45 });
     if (error) {
       // a database without the run tokens yet keeps working on the filer's role alone, and says so
-      if (error.code === "PGRST202") { console.warn("filer_begin_run is missing: apply 20261022150000_agent_security.sql so each run gets its own token"); return; }
+      if (error.code === "PGRST202") { console.warn("filer_begin_run is missing: apply 20261022190000_agent_security.sql so each run gets its own token"); return; }
       throw new Error(`run token failed: ${error.message}`);
     }
     if (typeof data !== "string" || data.length < 32) throw new Error("run token failed: no token");

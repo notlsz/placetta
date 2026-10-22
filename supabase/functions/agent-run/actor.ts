@@ -19,7 +19,7 @@ export async function actorOf(db: Db, run: { workspace_id: string; created_by: s
   const r = await db.rpc("agent_actor_role", { p_ws: run.workspace_id, p_uid: run.created_by });
   if (!r.error) role = typeof r.data === "string" ? r.data : null;
   else if (r.error.code === "PGRST202" || r.error.code === "42883") {
-    // a database without 20261022150000_agent_security.sql yet: the membership row alone
+    // a database without 20261022190000_agent_security.sql yet: the membership row alone
     const { data } = await db.from("workspace_members").select("role").eq("workspace_id", run.workspace_id).eq("user_id", run.created_by).maybeSingle();
     role = (data as { role?: string } | null)?.role ?? "none";
   } else return { refused: "Couldn't check who asked. Try again." };

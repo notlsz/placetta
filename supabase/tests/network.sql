@@ -1,5 +1,5 @@
 -- The network (20261016110000_network_learning.sql): lessons go live on a second business (since
--- 20261022150000_agent_security.sql an official source alone no longer makes one live),
+-- 20261022190000_agent_security.sql an official source alone no longer makes one live),
 -- retire on contradictions, count each business once, and agency decisions are queued. Run with scripts/test-db.sh.
 do $test$
 declare
@@ -24,7 +24,7 @@ begin
   perform public.lesson_add(w2, 'agency', 'agency:santa-clara-county-environmental-health', 'Plan check goes back when the equipment list has no spec sheets.', 'x', null, false);
   res := res || jsonb_build_object('a second business makes it live', (select status = 'live' and businesses = 2 and confirms = 2 from public.odelia_lessons where id = l1));
 
-  -- an official source alone isn't enough: a second business has to confirm it (20261022150000_agent_security.sql)
+  -- an official source alone isn't enough: a second business has to confirm it (20261022190000_agent_security.sql)
   l2 := public.lesson_add(w1, 'place', 'place:san-jose-ca', 'File the Business Tax Certificate first; other city permits ask for its number.', 'x', 'https://www.sanjoseca.gov/btc', true);
   res := res || jsonb_build_object('one business with the agency''s own page is still a candidate', (select status = 'candidate' and official from public.odelia_lessons where id = l2));
 

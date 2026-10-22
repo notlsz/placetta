@@ -1,6 +1,6 @@
 -- The portal filer's own role (20261022120000_filer_least_privilege.sql): no table access, only its functions, only
 -- for filings handed to it; a saved password leaves the database only after its audit entry is written. Since
--- 20261022150000_agent_security.sql each call also carries the run's token for that filing (the x-filer-run header);
+-- 20261022190000_agent_security.sql each call also carries the run's token for that filing (the x-filer-run header);
 -- supabase/tests/agent_security.sql checks what happens without one.
 -- Run with scripts/test-db.sh (ends by raising TEST_RESULTS, so nothing is kept).
 do $test$
