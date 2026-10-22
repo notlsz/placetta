@@ -732,12 +732,15 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         // library has no form for come with who to ask (src/plan/ask.ts, the same rows the instant plan lists)
         const known = !str(i.search) && info.country === "US" ? libraryAnswer(str(i.business) || get().business.en, place, needs) : undefined;
         const claimed = (f: OfficialForm) => known ? known.claim(f) : !!(f.proof && proofCurrent(f.proof, daysFromNow(0)));
+        // a whole plan lists each form's line count, not its lines: prepare_application returns the lines still empty, so the
+        // listing doesn't carry every label of every form into every later step (a search for one or a few forms keeps them)
+        const lines = list.length <= 3;
         return {
           segment, place, country: info.country ?? "unknown", city: info.city?.en, currency: info.currency,
           forms: list.slice(0, 30).map(f => ({ official_form_id: f.id, form: f.form, title: f.title[lang], agency: f.agency[lang], level: f.level, how_filed: `${METHOD[f.method][lang]}. ${f.how[lang]}`, official_link: f.url, info: f.info,
             ...(claimed(f) ? { claim: true, ...(f.proof ? { info_quote: f.proof.quote, ...(f.proof.en ? { info_quote_in_english: f.proof.en } : {}), info_read_on: proofCurrent(f.proof, daysFromNow(0)) ?? f.proof.checked } : {}) }
               : { claim: false, not_claimed: `No current quote from the agency's own page says this applies here${known?.conflicts.length ? ", or two official sources disagree on who issues it" : ""}. Don't tell the person it's required: say you're not sure, and that ${f.agency[lang]} (${f.info || f.url}) decides. Read that page; if it says so, cite its words.` }),
-            fee: f.fee, currency: f.currency ?? "USD", fee_note: f.feeNote?.[lang], takes: f.takes?.[lang], renews: f.renews?.[lang], fields: f.fields.length ? f.fields.map(x => `Line ${x.line}: ${x.label[lang]}${x.options ? ` (${x.options.join(" / ")})` : ""}`) : "Not listed yet: prepare_application adds the lines every agency asks; read the official link for the rest",
+            fee: f.fee, currency: f.currency ?? "USD", fee_note: f.feeNote?.[lang], takes: f.takes?.[lang], renews: f.renews?.[lang], fields: f.fields.length && !lines ? `${f.fields.length} lines: prepare_application returns the ones still empty` : f.fields.length ? f.fields.map(x => `Line ${x.line}: ${x.label[lang]}${x.options ? ` (${x.options.join(" / ")})` : ""}`) : "Not listed yet: prepare_application adds the lines every agency asks; read the official link for the rest",
             attachments: f.attach?.map(a => a[lang]), for_foreign_owners: f.foreign?.[lang], ...(f.specialist ? { needs_local_professional: f.specialist[lang] } : {}), placetta_fills_official_pdf: canFill(f), reread_agency_page_first: f.checked === "known" })),
           ...(known?.steps.length ? { local_steps: known.steps.map(a => ({ step: a.name[lang], agency: a.agency[lang], level: a.level, link: a.source.url,
             ...(a.abstain ? { claim: false, who_to_ask: a.source.url } : { claim: true, quote: a.source.quote, read_on: a.source.checked }) })) } : {}),

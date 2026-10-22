@@ -219,6 +219,9 @@ export async function journeyTests(ok: Ok, eq: Eq) {
     const [plan, pn] = r.calls.filter(c => c.name === "find_official_forms").map(c => ((c.parsed?.forms ?? []) as { official_form_id: string }[]).map(f => f.official_form_id));
     ok(plan.includes("cbp-5106") && plan.includes("cbp-301") && plan.includes("fda-ffr") && !plan.includes("cpsc-cert"), "a tea importer: CBP's importer form and bond and FDA registration, never CPSC's certificate", plan);
     ok(pn.includes("fda-prior-notice"), "Prior Notice is in the library for each shipment", pn);
+    // cost: a whole plan lists each form's line count, a search for a few forms keeps the lines
+    const [planOut, pnOut] = r.calls.filter(c => c.name === "find_official_forms").map(c => (c.parsed?.forms ?? []) as { fields: unknown }[]);
+    ok(planOut.every(f => typeof f.fields === "string") && pnOut.length <= 3 && pnOut.some(f => Array.isArray(f.fields) || /Not listed/.test(String(f.fields))), "a plan lists line counts, not every label; a search for one form keeps its lines", [planOut[0]?.fields, pnOut[0]?.fields]);
     ok(licenseTierOf("USDA import permit") === "complex" && licenseTierOf("Customs Bond") === "license", "an import permit is complex ($999); a customs bond is a standard filing");
   }
 
