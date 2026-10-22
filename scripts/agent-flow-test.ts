@@ -296,6 +296,18 @@ ok(!html("<script>alert(1)</script>").includes("<script>"), "edge: a reply can't
   ok(!!sent && !w.approvals.some(a => a.id === "a-staff"), "edge: a message approval (not a filing) still goes through");
 }
 
+// the composer's starter chip "What's due this week" (found by the Playwright walk: it got the new-business intake
+// question "Which city, and will it serve food...?"): the sample's own deadlines, soonest first, in both languages
+{
+  const ask = async (text: string, lang: "en" | "zh") => { let reply: Extract<AgentEvent, { type: "reply" }> | undefined; await demoAgent.run({ text }, { lang, current: SAMPLE }, e => { if (e.type === "reply") reply = e; }, new AbortController().signal).catch(() => undefined); return reply; };
+  const en = await ask("What's due this week", "en"), zh = await ask("本周有什么到期", "zh");
+  const lines = en?.reply.text.map(t => t.en) ?? [];
+  ok(!/Which city/.test(lines.join(" ")) && /(due in the next 7 days|Nothing is due|The next ones)/.test(lines[0] ?? ""), "edge: \"What's due this week\" answers with the deadlines, not the intake question", lines);
+  const dated = lines.slice(1).map(l => l.slice(0, 10));
+  ok(dated.length > 0 && dated.every(d => SAMPLE.deadlines.some(x => x.date === d)) && dated.join() === [...dated].sort().join(), "edge: each line is one of the workspace's own deadlines, soonest first", dated);
+  ok(!!zh && /到期|没有/.test(zh.reply.text[0].zh) && !/哪个城市/.test(zh.reply.text.map(t => t.zh).join("")), "edge: and in Chinese", zh?.reply.text.map(t => t.zh));
+}
+
 // removing a store takes its unfiled applications with it, keeps filed ones
 {
   const k = kit(base());

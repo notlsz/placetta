@@ -137,6 +137,22 @@ function blocking(ctx: Context): Plan {
   };
 }
 
+/** "What's due this week" (a starter chip in the composer): the deadlines in the next 7 days, soonest first, each with
+ *  what to do; with none that close, the next three. Read from the workspace, nothing made up. */
+function due(ctx: Context): Plan {
+  const today = inDays(0), week = inDays(7);
+  const open = [...ctx.current.deadlines].filter(d => d.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+  const soon = open.filter(d => d.date <= week), list = (soon.length ? soon : open).slice(0, soon.length ? 6 : 3);
+  const line = (d: (typeof list)[number]) => B(`${d.date}: ${d.title.en}${d.agency ? ` (${d.agency.en})` : ""}`, `${d.date}：${d.title.zh}${d.agency ? `（${d.agency.zh}）` : ""}`);
+  const lead = !open.length ? B("Nothing is due. Every deadline on your calendar has passed or been done.", "没有到期事项。日历上的截止日期都已过去或已完成。")
+    : soon.length ? B(`${soon.length} thing${soon.length === 1 ? "" : "s"} due in the next 7 days:`, `未来 7 天有 ${soon.length} 项到期：`)
+    : B("Nothing is due in the next 7 days. The next ones:", "未来 7 天没有到期事项。接下来的是：");
+  return {
+    steps: [S("searching", "Reading your deadlines", "读取您的截止日期"), S("composing", "Putting the soonest first", "按时间先后排列")],
+    reply: { text: [lead, ...list.map(line)] },
+  };
+}
+
 function fremont(): Plan {
   return {
     steps: [
@@ -348,6 +364,7 @@ const SCRIPTS: { match: RegExp; plan: (ctx: Context, text: string) => Plan }[] =
   { match: /^carry on with the job|^继续这项工作/i, plan: carryOn },
   { match: /^interview me|teach (odelia|you) a job|就一项我想交给你|教 ?odelia/i, plan: interview },
   { match: /^run the playbook|^按手册/i, plan: runPlaybook },
+  { match: /\b(what'?s|what is|anything|what'?s coming) due\b|\bdue (this|next) (week|month)\b|\bupcoming deadlines?\b|(本周|这周|下周|最近)[^。？?]{0,6}到期|有什么到期/i, plan: due },
   { match: /statement|biennial|llc-12|信息声明|申报/i, plan: prepareSoi },
   { match: /changed|county plan check|rule|notice|变化|规定|通知/i, plan: ruleChange },
   { match: /staff|handler|remind|员工|提醒|从业/i, plan: staff },
