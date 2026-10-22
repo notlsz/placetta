@@ -3074,6 +3074,9 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 
 /* cleaner hero (Oct 22): the plan box speaks for itself */
 .hero .hnote{display:none}
+
+/* phone top bar like devin.ai and alven.ai (Oct 22): logo left, menu right; language and log in live in the menu */
+@media (max-width:767px){.hdr .right .lgt,.hdr .right .login{display:none!important}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -3158,6 +3161,7 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
       <a href="/pricing" data-sec="pricing" data-i18n="foot.pricing">Pricing</a>
       <a href="/faq" data-sec="faq" data-i18n="nav.faq">FAQ</a>
       <a href="/guides/" data-i18n="foot.guides">License guides</a>
+      <a href="/app/" data-track="menu_login" data-i18n="nav.login">Log in</a>
     </nav>
     <div class="lgt mslang" role="group" aria-label="Language" data-i18n-aria="aria.lang"><button type="button" data-lang="en" aria-pressed="true">English</button><button type="button" data-lang="zh" aria-pressed="false">中文</button></div>
     <button type="button" class="btn b-ink" data-open="menu" data-i18n="cta.plan">Get my plan</button>
