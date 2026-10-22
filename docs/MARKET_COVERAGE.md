@@ -11,39 +11,39 @@ Each market is read at a sample storefront address for a new milk tea shop with 
 | 1. New York City: Queens | 11 | 11 | 2 | 7 | 0 |
 | 1. New York City: Manhattan | 11 | 11 | 2 | 7 | 0 |
 | 1. New York City: Brooklyn | 11 | 11 | 2 | 7 | 0 |
-| 2. Los Angeles | 11 | 11 | 6 | 9 | 0 |
-| 3. Boston | 13 | 13 | 6 | 10 | 0 |
+| 2. Los Angeles | 12 | 12 | 6 | 9 | 0 |
+| 3. Boston | 14 | 14 | 6 | 10 | 0 |
 | 4. Seattle | 8 | 8 | 4 | 8 | 0 |
-| 5. San Diego | 12 | 11 | 3 | 8 | 1 |
-| 6. Philadelphia | 9 | 9 | 2 | 7 | 0 |
-| 7. San Francisco | 14 | 14 | 6 | 10 | 0 |
-| 8. Chicago | 8 | 8 | 3 | 5 | 0 |
-| 9. San Mateo | 12 | 10 | 4 | 9 | 2 |
-| 10. Cupertino | 11 | 11 | 3 | 10 | 0 |
-| 11. Irvine | 11 | 11 | 5 | 8 | 0 |
-| 12. Houston | 12 | 12 | 6 | 9 | 0 |
-| 13. Glendale | 12 | 10 | 5 | 7 | 2 |
-| 14. San Gabriel | 12 | 10 | 5 | 8 | 2 |
-| 15. Rockville | 8 | 8 | 3 | 4 | 0 |
-| San José | 14 | 14 | 3 | 12 | 0 |
-| Paradise (unincorporated Clark County: the Las Vegas Strip) | 12 | 10 | 4 | 6 | 2 |
-| Spring Valley (unincorporated Clark County) | 12 | 10 | 4 | 6 | 2 |
-| Rowland Heights (unincorporated Los Angeles County) | 12 | 11 | 5 | 8 | 1 |
-| Tysons (Fairfax County) | 10 | 9 | 2 | 8 | 1 |
-| California | 7 | 7 | 3 | 7 | 0 |
+| 5. San Diego | 13 | 12 | 3 | 8 | 1 |
+| 6. Philadelphia | 10 | 10 | 2 | 7 | 0 |
+| 7. San Francisco | 15 | 15 | 6 | 10 | 0 |
+| 8. Chicago | 9 | 9 | 3 | 5 | 0 |
+| 9. San Mateo | 13 | 11 | 4 | 9 | 2 |
+| 10. Cupertino | 12 | 12 | 3 | 10 | 0 |
+| 11. Irvine | 12 | 12 | 5 | 8 | 0 |
+| 12. Houston | 13 | 13 | 6 | 9 | 0 |
+| 13. Glendale | 13 | 11 | 5 | 7 | 2 |
+| 14. San Gabriel | 13 | 11 | 5 | 8 | 2 |
+| 15. Rockville | 9 | 9 | 3 | 4 | 0 |
+| San José | 15 | 15 | 3 | 12 | 0 |
+| Paradise (unincorporated Clark County: the Las Vegas Strip) | 13 | 11 | 4 | 6 | 2 |
+| Spring Valley (unincorporated Clark County) | 13 | 11 | 4 | 6 | 2 |
+| Rowland Heights (unincorporated Los Angeles County) | 13 | 12 | 5 | 8 | 1 |
+| Tysons (Fairfax County) | 11 | 10 | 2 | 8 | 1 |
+| California | 8 | 8 | 3 | 7 | 0 |
 | New York | 6 | 6 | 2 | 5 | 0 |
-| Massachusetts | 6 | 6 | 1 | 6 | 0 |
-| Texas | 7 | 7 | 3 | 7 | 0 |
+| Massachusetts | 7 | 7 | 1 | 6 | 0 |
+| Texas | 8 | 8 | 3 | 7 | 0 |
 | Washington | 4 | 4 | 2 | 4 | 0 |
-| Illinois | 4 | 4 | 3 | 3 | 0 |
-| Pennsylvania | 3 | 3 | 1 | 3 | 0 |
-| New Jersey | 3 | 3 | 2 | 3 | 0 |
-| Maryland | 3 | 3 | 2 | 3 | 0 |
-| Nevada | 5 | 5 | 2 | 2 | 0 |
-| Virginia | 5 | 5 | 2 | 5 | 0 |
+| Illinois | 5 | 5 | 3 | 3 | 0 |
+| Pennsylvania | 4 | 4 | 1 | 3 | 0 |
+| New Jersey | 4 | 4 | 2 | 3 | 0 |
+| Maryland | 4 | 4 | 2 | 3 | 0 |
+| Nevada | 6 | 6 | 2 | 2 | 0 |
+| Virginia | 6 | 6 | 2 | 5 | 0 |
 | Arizona | 3 | 3 | 2 | 3 | 0 |
 | Hawaii | 6 | 6 | 1 | 4 | 0 |
-| Florida | 7 | 7 | 5 | 7 | 0 |
+| Florida | 8 | 8 | 5 | 7 | 0 |
 | Utah | 4 | 4 | 0 | 4 | 0 |
 
 ## 1. New York City: Queens
@@ -116,6 +116,7 @@ Read at 727 N Broadway, Los Angeles, CA 90012. Jurisdictions: US, CA, LA, LAC.
 | Food facility plan check | `lac-plan-check` Retail Food Facility Plan Review Service Request (Rev 11/2025) · [PDF](http://publichealth.lacounty.gov/eh/docs/inspection/retail-food-facility-plan-review-service-request.pdf) | yes | Placetta team: Two steps: an email asking for a SharePoint upload link, then the plans go to that link, and review waits for the invoiced fee. |  |
 | Building permit and Certificate of Occupancy | `la-ladbs` Application for Building Permit and Certificate of Occupancy · portal eplanla.lacity.org | no | portal (eplanla.lacity.org) | Online only (eplanla.lacity.org): Placetta prepares the answers summary for the agency's site. |
 | Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
+| Workers' compensation insurance | `ca-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Public health permit (food facility) | `lac-health-permit` Public Health Permit/License Application · [PDF](http://publichealth.lacounty.gov/eh/docs/permit/Public-Health-Permit-License-Application.pdf) | yes | Placetta team: The plan checker hands over the application at the final inspection and takes it back there. |  |
 
 ## 3. Boston
@@ -132,6 +133,7 @@ Read at 60 Beach St, Boston, MA 02111. Jurisdictions: US, MA, BOS.
 | Boston business certificate (DBA) | `bos-cert` Business Certificate (City Clerk) · [PDF](https://www.boston.gov/sites/default/files/file/2025/03/2025-New-Business-Certificate-Form_0.pdf) | yes | Owner packet: The form must be notarized ("everyone who's signing must be there in person"), and "There is no online filing option." |  |
 | Employer registration for unemployment insurance | `ma-dua` Employer registration (Unemployment Services for Employers) · portal unemployment.mass.gov | no | portal (unemployment.mass.gov) | Online only (unemployment.mass.gov): Placetta prepares the answers summary for the agency's site. |
 | Food establishment plan review | `bos-plan-review` Food Establishment Plan Review worksheet · [PDF](https://www.boston.gov/sites/default/files/file/2021/05/FSPLAN%20REVIEW%20fillable%205%2013%20FINAL.pdf) | yes | Placetta team: "The Plan Review appointment is in-person only." |  |
+| Workers' compensation insurance | `ma-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Building permit for the build-out | `bos-building` Long Form or Short Form building permit (online) | no | Placetta team: "The permit applicant must be the contractor performing the work"; "Only the licensed contractor can apply." | Online only (www.boston.gov): Placetta prepares the answers summary for the agency's site. |
 | Common Victualler License | `bos-cv` Application for Common Victualler (Without Alcohol) License · [PDF](https://www.boston.gov/sites/default/files/file/2023/10/Common%20Victualler%20(CV)%20No%20Alcohol%20Application%2011.2023.pdf) · portal docs.google.com | yes | portal (docs.google.com) |  |
 | Site cleanliness license | `bos-site` Site Cleanliness License · [PDF](https://www.boston.gov/sites/default/files/file/2026/04/ISD%20site%20cleanliness%20Application%20Fillable%20%204%202%2026_4.pdf) | yes | mail |  |
@@ -168,6 +170,7 @@ Read at 4646 Convoy St, San Diego, CA 92111. Jurisdictions: US, CA, SDG, SDC. Sa
 | City of San Diego Business Tax Certificate | `sdg-business-tax` Business Tax Certificate application · portal pay.sandiego.gov | no | portal (pay.sandiego.gov), mail | Online only (pay.sandiego.gov): Placetta prepares the answers summary for the agency's site. |
 | Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
 | Food facility plan check | `sdc-plan-check` Food facility plan check | no | Placetta team: Online through the county's Accela Citizen Access, reached through dehpay.com; the portal's own host isn't printed, so the worker can't be pointed at it. | Filed in person; Online through the county's Accela Citizen Access, reached through dehpay.com; the portal's own host isn't printed, so the worker can't be pointed at it. |
+| Workers' compensation insurance | `ca-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Certificate of Occupancy | `sdg-co` Certificate of Occupancy (Information Bulletin 585) | no | Placetta team: Not an application: issued after the final inspection of the building permit work. | Online only (www.sandiego.gov): Placetta prepares the answers summary for the agency's site. |
 | Building permit for the build-out: We'll confirm with the City of San Diego building department | none | no | Placetta team: no official form to route yet | The planner lists "Building permit for the build-out: We'll confirm with the City of San Diego building department" with no official form in the registry for this place yet. |
 | Public health permit (food facility) | `sdc-health-permit` Public Health Permit (retail food facility) | no | Placetta team: The county issues it in person with the plan check; no remote route is published. | Filed in person; The county issues it in person with the plan check; no remote route is published. |
@@ -185,6 +188,7 @@ Read at 1001 Race St, Philadelphia, PA 19107. Jurisdictions: US, PA, PHL.
 | Philadelphia tax account (BIRT and Wage Tax) | `phl-tax-account` Philadelphia Tax Center new taxpayer registration · portal tax-services.phila.gov | no | portal (tax-services.phila.gov) | Online only (tax-services.phila.gov): Placetta prepares the answers summary for the agency's site. |
 | Commercial activity license | `phl-cal` Commercial Activity License (eCLIPSE) · portal eclipse.phila.gov | no | portal (eclipse.phila.gov) | Online only (eclipse.phila.gov): Placetta prepares the answers summary for the agency's site. |
 | Food business plan review | `phl-plan-review` Plan Review for Stationary Food Businesses (2025) · [PDF](https://phila.gov/media/20250423122123/Plan-Review-for-Stationary-Food-Businesses-2025-fillable.pdf) | yes | Placetta team: Submitted by phone appointment or walk-in at 7801 Essington Ave. |  |
+| Workers' compensation insurance | `pa-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Building permit for the build-out | `phl-building` Building permit (eCLIPSE) | no | Placetta team: The city's page names no application route for the building permit: "Call 311 and ask to speak to an L&I Building Unit representative." | Online only (eclipse.phila.gov): Placetta prepares the answers summary for the agency's site. |
 | Food preparation and serving license | `phl-food-license` Food Preparation and Serving License (eCLIPSE) · portal eclipse.phila.gov | no | portal (eclipse.phila.gov) | Online only (eclipse.phila.gov): Placetta prepares the answers summary for the agency's site. |
 
@@ -204,6 +208,7 @@ Read at 845 Clay St, San Francisco, CA 94108. Jurisdictions: US, CA, SF.
 | Formula retail (chain store) affidavit | `sf-formula-retail` Affidavit for Formula Retail Establishments · [PDF](https://sfplanning.org/sites/default/files/forms/Formula_Retail_Affidavit.pdf) | yes | Placetta team: Not a filing of its own: the affidavit goes with the building permit application. |  |
 | Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
 | Food facility plan check | `sf-dph-plan-check` DPH Plan Review Application · [PDF](https://sf.gov/sites/default/files/2023-07/PlanCheckApplication.pdf) | yes | Placetta team: Submitted in person with the building permit at the Permit Center, DPH counters 82 and 83. |  |
+| Workers' compensation insurance | `ca-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Building permit for a tenant improvement | `sf-dbi-building` Form 3/8 Building Permit Application | no | Placetta team: Plans and the application go in at the Permit Center, which routes them to Planning, Fire and Health. | Filed in person; Plans and the application go in at the Permit Center, which routes them to Planning, Fire and Health. |
 | Health permit to operate a food facility | `sf-dph-health-permit` Health Permit to Operate · portal myhealthdepartment.com | no | portal (myhealthdepartment.com) (an agency fee keeps email, fax and mail with the team) | Online only (myhealthdepartment.com): Placetta prepares the answers summary for the agency's site. |
 | Sign and awning permit | `sf-sign` Sign and awning permit (PermitSF) · portal sanfranciscoca.portal.opengov.com | no | portal (sanfranciscoca.portal.opengov.com) | Online only (sanfranciscoca.portal.opengov.com): Placetta prepares the answers summary for the agency's site. |
@@ -222,6 +227,7 @@ Read at 2172 S Archer Ave, Chicago, IL 60616. Jurisdictions: US, IL, CHI.
 | Building permit for the interior alteration | `chi-building` Building permit (Express Permit Program or standard plan review) | no | Placetta team: not researched | Online only (chicago.gov): Placetta prepares the answers summary for the agency's site. |
 | Unemployment insurance employer registration | `il-ides` Report to Determine Liability (REG-UI-1) or MyTax Illinois · [PDF](https://ides.illinois.gov/content/dam/soi/en/web/ides/ides_forms_and_publications/REG-UI-1.pdf) · portal mytax.illinois.gov | yes | portal (mytax.illinois.gov) |  |
 | Food establishment plan review | `chi-plan-review` Food establishment plan review (with the building permit) | no | Placetta team: Reviewed as part of the building permit by a city sanitarian; Public Health isn't on E-Plan. | Filed in person; Reviewed as part of the building permit by a city sanitarian; Public Health isn't on E-Plan. |
+| Workers' compensation insurance | `il-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Chicago retail food establishment license | `chi-license` Retail Food Establishment License · portal chicagobusinessdirect.org | no | portal (chicagobusinessdirect.org) | Online only (chicagobusinessdirect.org): Placetta prepares the answers summary for the agency's site. |
 
 ## 9. San Mateo
@@ -239,6 +245,7 @@ Read at 40 E 4th Ave, San Mateo, CA 94401. Jurisdictions: US, CA, SMO, SMC. San 
 | Food facility plan check | `smc-plan-check` Food facility plan check | no | Placetta team: San Mateo County's plan check page didn't load past its navigation for us, so the plan submission route (MyEHS or paper) wasn't confirmed. | Online only (smcehs.my.site.com): Placetta prepares the answers summary for the agency's site. |
 | City of San Mateo business tax certificate | `smo-license` Application for Business Tax Certificate · [PDF](https://www.cityofsanmateo.org/DocumentCenter/View/232/Gross-Receipts-Form?bidId=) | yes | mail |  |
 | Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
+| Workers' compensation insurance | `ca-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Building permit for the build-out: We'll confirm with the City of San Mateo building department | none | no | Placetta team: no official form to route yet | The planner lists "Building permit for the build-out: We'll confirm with the City of San Mateo building department" with no official form in the registry for this place yet. |
 | Certificate of occupancy (or final sign-off) once the work passes inspection: We'll confirm with the City of San Mateo building department | none | no | Placetta team: no official form to route yet | The planner lists "Certificate of occupancy (or final sign-off) once the work passes inspection: We'll confirm with the City of San Mateo building department" with no official form in the registry for this place yet. |
 | Health permit to operate a food facility | `smc-health-permit` Health permit application (MyEHS) · portal smcehs.my.site.com | no | portal (smcehs.my.site.com) | Online only (smcehs.my.site.com): Placetta prepares the answers summary for the agency's site. |
@@ -258,6 +265,7 @@ Read at 10123 N Wolfe Rd, Cupertino, CA 95014. Jurisdictions: US, CA, CUP, SCC. 
 | City of Cupertino business license | `cup-license` Business License application (HdL) · portal cupertino.hdlgov.com | no | portal (cupertino.hdlgov.com) (an agency fee keeps email, fax and mail with the team) | Online only (cupertino.hdlgov.com): Placetta prepares the answers summary for the agency's site. |
 | Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
 | Food facility plan check | `scc-plan-check` Food Facility Plan Check Application Form | no | email | Santa Clara County's application PDFs didn't download (blocked); filed by email to the county. |
+| Workers' compensation insurance | `ca-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Building permit for the tenant improvement | `cup-building` Building permit (tenant improvement) | no | Placetta team: not researched | Online only (www.cupertino.gov): Placetta prepares the answers summary for the agency's site. |
 | Health permit to operate a food facility | `scc-health-permit` Permit Application & Certification Statement | no | email | Santa Clara County's application PDFs didn't download (blocked); filed by email to the county. |
 
@@ -276,6 +284,7 @@ Read at 4250 Barranca Pkwy, Irvine, CA 92604. Jurisdictions: US, CA, IRV, ORC. O
 | Building permit for the tenant improvement | `irv-building` Commercial tenant improvement permit (IrvineReady!) | no | Placetta team: not researched | Online only (cityofirvine.gov): Placetta prepares the answers summary for the agency's site. |
 | Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
 | Food facility plan check | `oc-plan-check` Food facility plan check · [PDF](https://www.ochealthinfo.com/sites/healthcare/files/2026-07/EH_Cover_Sheet_7_22_2026.pdf) · portal myhealthdepartment.com | yes | portal (myhealthdepartment.com) |  |
+| Workers' compensation insurance | `ca-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Food facility health permit | `oc-health-permit` Food Facility Health Permit application · [PDF](https://ochealthinfo.com/sites/healthcare/files/2023-04/Food%20Health%20Permit%20Application%20W.pdf) | yes | Placetta team: The plan checker directs the owner or contractor to the application at the final inspection; no address or inbox is published for it. |  |
 | City of Irvine business license | `irv-license` Business License application | no | Placetta team: Irvine is moving business licensing to its new PRISM portal and hasn't published the portal's address yet ("check back closer to launch"). | Online only (cityofirvine.gov): Placetta prepares the answers summary for the agency's site. |
 
@@ -295,6 +304,7 @@ Read at 9889 Bellaire Blvd, Houston, TX 77036. Jurisdictions: US, TX, HOU.
 | Buildout permit (building permit for the space) | `hou-buildout` Buildout Permit (HPW Code 1148) | no | Placetta team: Filed in iPermits, whose address the page doesn't print, with plans uploaded on the city's emailed invitation; trade inspections are "scheduled by the appropriate registered licensed contractor". | Online only (www.houstonpermittingcenter.org): Placetta prepares the answers summary for the agency's site. |
 | Certificate of Occupancy | `hou-co` Certificate of Occupancy (HPW Code 1106) · [PDF](https://www.houstonpermittingcenter.org/media/941/download) | yes | email, mail |  |
 | Unemployment tax account | `tx-twc` Employer registration (unemployment tax) · portal apps.twc.texas.gov | no | portal (apps.twc.texas.gov) | Online only (apps.twc.texas.gov): Placetta prepares the answers summary for the agency's site. |
+| Workers' compensation, or the yearly non-subscriber notice | `tx-workers-comp` DWC Form-005 (Non-subscriber notice), if you don't buy coverage | no | Placetta team: not researched | Nothing to fill: Texas doesn't require private employers to carry workers' compensation. An employer with one or more employees who doesn't carry it is a non-subscriber: it files DWC Form-005 every year between February 1 and April 30, and tells its employees. |
 | Food dealer permit | `hou-food-dealer` Food Dealer permit (HHD1003) · [PDF](https://www.houstonhealth.org/media/14901/download) | yes | email |  |
 | Sign permit | `hou-sign` On-premises sign permit (HPW Code 1112) · [PDF](https://www.houstonpermittingcenter.org/media/6006/download) | yes | Placetta team: "Contractors only; no individuals": a licensed sign contractor files it, with notarized affidavits. |  |
 
@@ -313,6 +323,7 @@ Read at 100 W Broadway, Glendale, CA 91210. Jurisdictions: US, CA, GLN, LAC. Los
 | Food facility plan check | `lac-plan-check` Retail Food Facility Plan Review Service Request (Rev 11/2025) · [PDF](http://publichealth.lacounty.gov/eh/docs/inspection/retail-food-facility-plan-review-service-request.pdf) | yes | Placetta team: Two steps: an email asking for a SharePoint upload link, then the plans go to that link, and review waits for the invoiced fee. |  |
 | Glendale business registration certificate | `gln-brc` Business Registration Certificate (GlendalePermits) | no | Placetta team: Applied for in the city's GlendalePermits portal, whose address the city's page doesn't print. | Online only (www.glendaleca.gov): Placetta prepares the answers summary for the agency's site. |
 | Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
+| Workers' compensation insurance | `ca-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Building permit for the build-out | none | no | Placetta team: no official form to route yet | The planner lists "Building permit for the build-out" with no official form in the registry for this place yet. |
 | Certificate of occupancy (or final sign-off) once the work passes inspection: We'll confirm with the City of Glendale building department | none | no | Placetta team: no official form to route yet | The planner lists "Certificate of occupancy (or final sign-off) once the work passes inspection: We'll confirm with the City of Glendale building department" with no official form in the registry for this place yet. |
 | Public health permit (food facility) | `lac-health-permit` Public Health Permit/License Application · [PDF](http://publichealth.lacounty.gov/eh/docs/permit/Public-Health-Permit-License-Application.pdf) | yes | Placetta team: The plan checker hands over the application at the final inspection and takes it back there. |  |
@@ -332,6 +343,7 @@ Read at 140 W Valley Blvd, San Gabriel, CA 91776. Jurisdictions: US, CA, SGB, LA
 | Food facility plan check | `lac-plan-check` Retail Food Facility Plan Review Service Request (Rev 11/2025) · [PDF](http://publichealth.lacounty.gov/eh/docs/inspection/retail-food-facility-plan-review-service-request.pdf) | yes | Placetta team: Two steps: an email asking for a SharePoint upload link, then the plans go to that link, and review waits for the invoiced fee. |  |
 | City of San Gabriel business license | `sgb-license` Business License and Occupancy Application · [PDF](https://www.sangabrielcity.com/DocumentCenter/View/6352) | no | email | San Gabriel's business license application is a scanned image with no text to place answers by; the city takes it by email after the zoning and occupancy checks. |
 | Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
+| Workers' compensation insurance | `ca-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Building permit for the build-out | none | no | Placetta team: no official form to route yet | The planner lists "Building permit for the build-out" with no official form in the registry for this place yet. |
 | Certificate of occupancy (or final sign-off) once the work passes inspection: We'll confirm with the City of San Gabriel building department | none | no | Placetta team: no official form to route yet | The planner lists "Certificate of occupancy (or final sign-off) once the work passes inspection: We'll confirm with the City of San Gabriel building department" with no official form in the registry for this place yet. |
 | Public health permit (food facility) | `lac-health-permit` Public Health Permit/License Application · [PDF](http://publichealth.lacounty.gov/eh/docs/permit/Public-Health-Permit-License-Application.pdf) | yes | Placetta team: The plan checker hands over the application at the final inspection and takes it back there. |  |
@@ -347,6 +359,7 @@ Read at 1066 Rockville Pike, Rockville, MD 20852. Jurisdictions: US, MD, ROC, MO
 | Maryland sales and use tax, withholding and unemployment insurance registration | `md-cra` Form CRA, Combined Registration Application · [PDF](https://www.marylandtaxes.gov/forms/current_forms/cra.pdf) · portal interactive.marylandtaxes.gov | yes | portal (interactive.marylandtaxes.gov), fax, mail |  |
 | Certified food service manager | `moco-cfsm` Certified Food Service Manager (Montgomery County Code 15-8) | no | Placetta team: not researched | Online only (www.montgomerycountymd.gov): Placetta prepares the answers summary for the agency's site. |
 | Food service plan review | `moco-plan-review` HHS food service plan review (submitted with the building permit) | no | Placetta team: Health and Human Services reviews the plans before any building permit issues; they go in with the building permit to the permitting office for the address (the county's Department of Permitting Services, or the City of Rockville's or Gaithersburg's), filed by the design professional. | Online only (montgomerycountymd.gov): Placetta prepares the answers summary for the agency's site. |
+| Workers' compensation insurance | `md-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Commercial occupancy permit | `rock-occupancy` Commercial Occupancy Permit Application | no | Placetta team: not researched | Online only (www.rockvillemd.gov): Placetta prepares the answers summary for the agency's site. |
 | Building permit for the build-out | `rock-building` Building and trade permits (MGO Connect) | no | Placetta team: not researched | Online only (www.rockvillemd.gov): Placetta prepares the answers summary for the agency's site. |
 | Montgomery County food service facility license | `moco-food-license` Food Service Facility License Application (April 2026) · [PDF](https://assets.montgomerycountymd.gov/files/2026-04/Food%20Service%20Facility%20License%20App_April2026.pdf) · portal www.civicgov4.com | yes | portal (www.civicgov4.com), fax, mail |  |
@@ -366,6 +379,7 @@ Read at 1688 Hostetter Rd, San Jose, CA 95131. Jurisdictions: US, CA, SJ, SCC.
 | City of San José Business Tax Certificate | `sj-business-tax` Register for a Business Tax Certificate | no | Placetta team: The registration page names no email, fax or mailing route, and its online link isn't in the page's text, so there's no host to point the worker at. | Online only (www.sanjoseca.gov): Placetta prepares the answers summary for the agency's site. |
 | Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
 | Food facility plan check | `scc-plan-check` Food Facility Plan Check Application Form | no | email | Santa Clara County's application PDFs didn't download (blocked); filed by email to the county. |
+| Workers' compensation insurance | `ca-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Building permit for a tenant improvement | `sj-building-ti` 310 Building Permit Application · portal sjpermits.org | no | portal (sjpermits.org) | Online only (sjpermits.org): Placetta prepares the answers summary for the agency's site. |
 | Fire protection system permit | `sj-fire-systems` Fire Protection Systems permit | no | Placetta team: Only a licensed contractor can apply: "Your Contractor's License type will determine which permits you can apply for." | Online only (www.sjpermits.org): Placetta prepares the answers summary for the agency's site. |
 | Building final inspection | `sj-building-final` Building final inspection · portal sjpermits.org | no | portal (sjpermits.org) | Online only (sjpermits.org): Placetta prepares the answers summary for the agency's site. |
@@ -387,6 +401,7 @@ Read at 3570 S Las Vegas Blvd, Las Vegas, NV 89109. Jurisdictions: US, NV, LV, S
 | Clark County business license | `cc-business-license` Clark County Business License Application · [PDF](https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:0746bb4a-633d-43f6-85c8-875896f099a7/original/as/application-checklist-08-13-2026.pdf) | no | Placetta team: The county's apply page loads its options in buttons the page text doesn't carry, so the online route wasn't confirmed. | Clark County's application is filed online; its apply page builds its options in script the page text doesn't carry. |
 | Unemployment insurance employer account | `nv-esd` Unemployment insurance employer registration · [PDF](https://tax.nv.gov/wp-content/uploads/2024/03/TAX-F006-Nevada-Business-Registration-2.pdf) | yes | Placetta team: The registration page says DETR shares details with the Department of Taxation but doesn't name the employer portal's address. |  |
 | Food establishment plan review | `snhd-plan-review` Health Permit Application with plans (05/2022) · [PDF](https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf) | yes | email |  |
+| Workers' compensation insurance: We'll confirm with the Nevada Division of Industrial Relations, Workers' Compensation Section | `nv-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Building permit for the build-out: We'll confirm with the City of Las Vegas building department | none | no | Placetta team: no official form to route yet | The planner lists "Building permit for the build-out: We'll confirm with the City of Las Vegas building department" with no official form in the registry for this place yet. |
 | Certificate of occupancy (or final sign-off) once the work passes inspection: We'll confirm with the City of Las Vegas building department | none | no | Placetta team: no official form to route yet | The planner lists "Certificate of occupancy (or final sign-off) once the work passes inspection: We'll confirm with the City of Las Vegas building department" with no official form in the registry for this place yet. |
 | Food establishment health permit | `lv-food` Health Permit Application (food establishment) · [PDF](https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf) | yes | email |  |
@@ -406,6 +421,7 @@ Read at 4255 Spring Mountain Rd, Spring Valley, NV 89102. Jurisdictions: US, NV,
 | Clark County business license | `cc-business-license` Clark County Business License Application · [PDF](https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:0746bb4a-633d-43f6-85c8-875896f099a7/original/as/application-checklist-08-13-2026.pdf) | no | Placetta team: The county's apply page loads its options in buttons the page text doesn't carry, so the online route wasn't confirmed. | Clark County's application is filed online; its apply page builds its options in script the page text doesn't carry. |
 | Unemployment insurance employer account | `nv-esd` Unemployment insurance employer registration · [PDF](https://tax.nv.gov/wp-content/uploads/2024/03/TAX-F006-Nevada-Business-Registration-2.pdf) | yes | Placetta team: The registration page says DETR shares details with the Department of Taxation but doesn't name the employer portal's address. |  |
 | Food establishment plan review | `snhd-plan-review` Health Permit Application with plans (05/2022) · [PDF](https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf) | yes | email |  |
+| Workers' compensation insurance: We'll confirm with the Nevada Division of Industrial Relations, Workers' Compensation Section | `nv-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Building permit for the build-out: We'll confirm with Clark County building department | none | no | Placetta team: no official form to route yet | The planner lists "Building permit for the build-out: We'll confirm with Clark County building department" with no official form in the registry for this place yet. |
 | Certificate of occupancy (or final sign-off) once the work passes inspection: We'll confirm with Clark County building department | none | no | Placetta team: no official form to route yet | The planner lists "Certificate of occupancy (or final sign-off) once the work passes inspection: We'll confirm with Clark County building department" with no official form in the registry for this place yet. |
 | Food establishment health permit | `lv-food` Health Permit Application (food establishment) · [PDF](https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf) | yes | email |  |
@@ -425,6 +441,7 @@ Read at 18414 Colima Rd, Rowland Heights, CA 91748. Jurisdictions: US, CA, LAC, 
 | Food facility plan check | `lac-plan-check` Retail Food Facility Plan Review Service Request (Rev 11/2025) · [PDF](http://publichealth.lacounty.gov/eh/docs/inspection/retail-food-facility-plan-review-service-request.pdf) | yes | Placetta team: Two steps: an email asking for a SharePoint upload link, then the plans go to that link, and review waits for the invoiced fee. |  |
 | Los Angeles County business license (unincorporated areas) | `lac-business-license` County of Los Angeles Business License (EnerGov) · portal losangelescountyca-energovweb.tylerhost.net | no | portal (losangelescountyca-energovweb.tylerhost.net) | Online only (losangelescountyca-energovweb.tylerhost.net): Placetta prepares the answers summary for the agency's site. |
 | Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
+| Workers' compensation insurance | `ca-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Building permit for the build-out (unincorporated Los Angeles County) | `lacpw-building` Building permit (EPIC-LA) | no | Placetta team: not researched | Online only (epicla.lacounty.gov): Placetta prepares the answers summary for the agency's site. |
 | Certificate of occupancy (or final sign-off) once the work passes inspection: We'll confirm with Los Angeles County building department | none | no | Placetta team: no official form to route yet | The planner lists "Certificate of occupancy (or final sign-off) once the work passes inspection: We'll confirm with Los Angeles County building department" with no official form in the registry for this place yet. |
 | Public health permit (food facility) | `lac-health-permit` Public Health Permit/License Application · [PDF](http://publichealth.lacounty.gov/eh/docs/permit/Public-Health-Permit-License-Application.pdf) | yes | Placetta team: The plan checker hands over the application at the final inspection and takes it back there. |  |
@@ -439,9 +456,10 @@ Read at 8065 Leesburg Pike, Tysons, VA 22182. Jurisdictions: US, VA, FFX.
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Virginia business tax registration | `va-tax` Business registration (Virginia Tax online, or Form R-1) · [PDF](https://www.tax.virginia.gov/sites/default/files/taxforms/business-registration/any/r-1-any.pdf) · portal account.tax.virginia.gov | yes | portal (account.tax.virginia.gov) |  |
 | Certified food protection manager | `va-food-manager` Certified Food Protection Manager (12VAC5-421) | no | Owner packet: An employee with authority over food holds a certificate from a CFP-accredited program, earned by passing its exam. | The owner (or the person certified) does it: An employee with authority over food holds a certificate from a CFP-accredited program, earned by passing its exam. |
-| Fairfax County business license (BPOL) | `ffx-bpol` Business, Professional and Occupational License (BPOL) · [PDF](https://Www.Fairfaxcounty.Gov/taxes/sites/taxes/files/Assets/Documents/PDF/business/2024-BPOL-application-instruction-fillable.pdf) | no | Placetta team: The county's BPOL application PDF now returns "not found" and the license page names no route to send it. | Fairfax County's BPOL application PDF now returns "not found". |
+| Fairfax County business license (BPOL) | `ffx-bpol` Business, Professional and Occupational License (BPOL) | no | Placetta team: The county's BPOL application PDF now returns "not found" and the license page names no route to send it. | Fairfax County's BPOL application PDF now returns "not found". |
 | Unemployment insurance employer registration | `va-vec` VEC FC-27 Report to Determine Liability · [PDF](https://vec.virginia.gov/sites/default/files/documents/fc_27new.pdf) · portal www.business.tax.virginia.gov | yes | portal (www.business.tax.virginia.gov), mail |  |
 | Food establishment plan review | `ffx-plan-review` Food establishment plan review (PLUS) · portal plus.fairfaxcounty.gov | no | portal (plus.fairfaxcounty.gov) | Online only (plus.fairfaxcounty.gov): Placetta prepares the answers summary for the agency's site. |
+| Workers' compensation insurance | `va-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Non-Residential Use Permit | `ffx-nonrup` Non-Residential Use Permit (Non-RUP) · portal plus.fairfaxcounty.gov | no | portal (plus.fairfaxcounty.gov) | Online only (plus.fairfaxcounty.gov): Placetta prepares the answers summary for the agency's site. |
 | Building permit for the build-out: We'll confirm with Fairfax County building department | none | no | Placetta team: no official form to route yet | The planner lists "Building permit for the build-out: We'll confirm with Fairfax County building department" with no official form in the registry for this place yet. |
 | Food establishment permit to operate | `ffx-food-permit` Food establishment permit application (PLUS) · portal plus.fairfaxcounty.gov | no | portal (plus.fairfaxcounty.gov) | Online only (plus.fairfaxcounty.gov): Placetta prepares the answers summary for the agency's site. |
@@ -459,6 +477,7 @@ Read at 727 N Broadway, Los Angeles, CA 90012. Jurisdictions: US, CA.
 | Certified food protection manager | `ca-food-manager` Food Safety Certificate (Health and Safety Code 113947.1) | no | Owner packet: An owner or employee passes a food protection manager exam from an accredited organization; the person keeps the certificate for the inspector. | The owner (or the person certified) does it: An owner or employee passes a food protection manager exam from an accredited organization; the person keeps the certificate for the inspector. |
 | Food handler cards for staff | `ca-food-handler` California Food Handler Card (Health and Safety Code 113948) | no | Owner packet: Each employee who handles food earns their own California Food Handler Card from an accredited course and exam within 30 days of hire; the card is the employee's. | The owner (or the person certified) does it: Each employee who handles food earns their own California Food Handler Card from an accredited course and exam within 30 days of hire; the card is the employee's. |
 | Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
+| Workers' compensation insurance | `ca-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 
 ## New York (state filings)
 
@@ -485,6 +504,7 @@ Read at 60 Beach St, Boston, MA 02111. Jurisdictions: US, MA.
 | Certified food protection manager | `ma-food-manager` Certified Food Protection Manager certificate (accredited exam) | no | Owner packet: A manager passes a food protection manager exam from a nationally accredited provider that Massachusetts accepts. | The owner (or the person certified) does it: A manager passes a food protection manager exam from a nationally accredited provider that Massachusetts accepts. |
 | Allergen awareness certificate | `ma-allergen` Allergen awareness training certificate (105 CMR 590.011(C)) | no | Owner packet: The person in charge and their backup take an allergen awareness course themselves. | The owner (or the person certified) does it: The person in charge and their backup take an allergen awareness course themselves. |
 | Employer registration for unemployment insurance | `ma-dua` Employer registration (Unemployment Services for Employers) · portal unemployment.mass.gov | no | portal (unemployment.mass.gov) | Online only (unemployment.mass.gov): Placetta prepares the answers summary for the agency's site. |
+| Workers' compensation insurance | `ma-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 
 ## Texas (state filings)
 
@@ -499,6 +519,7 @@ Read at 9889 Bellaire Blvd, Houston, TX 77036. Jurisdictions: US, TX.
 | Certified food manager | `tx-food-manager` Certified Food Manager certificate (DSHS-licensed exam) | no | Owner packet: Certification comes from passing an exam at a DSHS-licensed program or test site: "Do not apply or send money to DSHS". | The owner (or the person certified) does it: Certification comes from passing an exam at a DSHS-licensed program or test site: "Do not apply or send money to DSHS". |
 | Food handler certificates for staff | `tx-food-handler` Accredited food handler course (each food employee) | no | Owner packet: Each employee completes an accredited food handler course "within 30 days of getting a job"; nothing is filed with the state. | The owner (or the person certified) does it: Each employee completes an accredited food handler course "within 30 days of getting a job"; nothing is filed with the state. |
 | Unemployment tax account | `tx-twc` Employer registration (unemployment tax) · portal apps.twc.texas.gov | no | portal (apps.twc.texas.gov) | Online only (apps.twc.texas.gov): Placetta prepares the answers summary for the agency's site. |
+| Workers' compensation, or the yearly non-subscriber notice | `tx-workers-comp` DWC Form-005 (Non-subscriber notice), if you don't buy coverage | no | Placetta team: not researched | Nothing to fill: Texas doesn't require private employers to carry workers' compensation. An employer with one or more employees who doesn't carry it is a non-subscriber: it files DWC Form-005 every year between February 1 and April 30, and tells its employees. |
 
 ## Washington (state filings)
 
@@ -521,6 +542,7 @@ Read at 2172 S Archer Ave, Chicago, IL 60616. Jurisdictions: US, IL.
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Illinois business registration (sales tax) | `il-tax` Form REG-1 (MyTax Illinois) · [PDF](https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/reg/documents/reg-1.pdf) · portal mytax.illinois.gov | yes | portal (mytax.illinois.gov) |  |
 | Unemployment insurance employer registration | `il-ides` Report to Determine Liability (REG-UI-1) or MyTax Illinois · [PDF](https://ides.illinois.gov/content/dam/soi/en/web/ides/ides_forms_and_publications/REG-UI-1.pdf) · portal mytax.illinois.gov | yes | portal (mytax.illinois.gov) |  |
+| Workers' compensation insurance | `il-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 
 ## Pennsylvania (state filings)
 
@@ -531,6 +553,7 @@ Read at 1001 Race St, Philadelphia, PA 19107. Jurisdictions: US, PA.
 | LLC formation | `pa-dos` Certificate of Organization · [PDF](https://www.pa.gov/content/dam/copapwp-pagov/en/dos/programs/business/forms/offsite-forms/15-8821-Cert-of-Org-Dom-LLC.pdf) · portal file.dos.pa.gov | yes | portal (file.dos.pa.gov) (an agency fee keeps email, fax and mail with the team) |  |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Pennsylvania tax registration (sales tax license and employer accounts) | `pa-tax` Pennsylvania Online Business Tax Registration (myPATH) · portal mypath.pa.gov | no | portal (mypath.pa.gov) | Online only (mypath.pa.gov): Placetta prepares the answers summary for the agency's site. |
+| Workers' compensation insurance | `pa-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 
 ## New Jersey (state filings)
 
@@ -541,6 +564,7 @@ Read at 1655 Oak Tree Rd, Edison, NJ 08820. Jurisdictions: US, NJ.
 | Business formation and tax registration | `nj-formation` Public Records Filing for New Business Entity · [PDF](https://www.nj.gov/treasury/revenue/pdf/Legacy-Reg-Form.pdf) · portal www.njportal.com | yes | portal (www.njportal.com) |  |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | New Jersey tax and employer registration (NJ-REG) | `nj-reg` Form NJ-REG (Business Registration) · [PDF](https://www.nj.gov/treasury/revenue/pdf/Legacy-Reg-Form.pdf) · portal www.njportal.com | yes | portal (www.njportal.com) |  |
+| Workers' compensation insurance | `nj-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 
 ## Maryland (state filings)
 
@@ -551,6 +575,7 @@ Read at 1066 Rockville Pike, Rockville, MD 20852. Jurisdictions: US, MD.
 | LLC formation (Articles of Organization) | `md-llc` Articles of Organization (Revised August 2024) · [PDF](https://dat.maryland.gov/sdat%20forms/artorgan.pdf) · portal egov.maryland.gov | yes | portal (egov.maryland.gov) (an agency fee keeps email, fax and mail with the team) |  |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Maryland sales and use tax, withholding and unemployment insurance registration | `md-cra` Form CRA, Combined Registration Application · [PDF](https://www.marylandtaxes.gov/forms/current_forms/cra.pdf) · portal interactive.marylandtaxes.gov | yes | portal (interactive.marylandtaxes.gov), fax, mail |  |
+| Workers' compensation insurance | `md-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 
 ## Nevada (state filings)
 
@@ -563,6 +588,7 @@ Read at 3570 S Las Vegas Blvd, Las Vegas, NV 89109. Jurisdictions: US, NV.
 | Nevada state business license | `nv-sbl` State Business License (SilverFlume) | no | Placetta team: not researched | Online only (www.nvsilverflume.gov): Placetta prepares the answers summary for the agency's site. |
 | Nevada sales tax permit | `nv-tax` Nevada Business Registration (sales tax permit) · [PDF](https://tax.nv.gov/wp-content/uploads/2024/03/TAX-F006-Nevada-Business-Registration-2.pdf) · portal mynvtax.nv.gov | yes | portal (mynvtax.nv.gov), mail (an agency fee keeps email, fax and mail with the team) |  |
 | Unemployment insurance employer account | `nv-esd` Unemployment insurance employer registration · [PDF](https://tax.nv.gov/wp-content/uploads/2024/03/TAX-F006-Nevada-Business-Registration-2.pdf) | yes | Placetta team: The registration page says DETR shares details with the Department of Taxation but doesn't name the employer portal's address. |  |
+| Workers' compensation insurance: We'll confirm with the Nevada Division of Industrial Relations, Workers' Compensation Section | `nv-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 
 ## Virginia (state filings)
 
@@ -575,6 +601,7 @@ Read at 8065 Leesburg Pike, Tysons, VA 22182. Jurisdictions: US, VA.
 | Virginia business tax registration | `va-tax` Business registration (Virginia Tax online, or Form R-1) · [PDF](https://www.tax.virginia.gov/sites/default/files/taxforms/business-registration/any/r-1-any.pdf) · portal account.tax.virginia.gov | yes | portal (account.tax.virginia.gov) |  |
 | Certified food protection manager | `va-food-manager` Certified Food Protection Manager (12VAC5-421) | no | Owner packet: An employee with authority over food holds a certificate from a CFP-accredited program, earned by passing its exam. | The owner (or the person certified) does it: An employee with authority over food holds a certificate from a CFP-accredited program, earned by passing its exam. |
 | Unemployment insurance employer registration | `va-vec` VEC FC-27 Report to Determine Liability · [PDF](https://vec.virginia.gov/sites/default/files/documents/fc_27new.pdf) · portal www.business.tax.virginia.gov | yes | portal (www.business.tax.virginia.gov), mail |  |
+| Workers' compensation insurance | `va-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 
 ## Arizona (state filings)
 
@@ -611,6 +638,7 @@ Read at 1101 Brickell Ave, Miami, FL 33131. Jurisdictions: US, FL.
 | Registration of a fictitious name (DBA): We'll confirm with the Florida Department of State, Division of Corporations | `fl-fictitious` CR4E001 (10/20) · [PDF](https://form.sunbiz.org/pdf/cr4e001.pdf) · portal efile.sunbiz.org | yes | portal (efile.sunbiz.org) (an agency fee keeps email, fax and mail with the team) |  |
 | Certified food protection manager | `fl-food-manager` Certified food protection manager (section 509.039, Florida Statutes) | no | Owner packet: "Florida law requires food managers to complete training and pass a certification exam within 30 days of employment. Private entities provide the training and testing." | The owner (or the person certified) does it: "Florida law requires food managers to complete training and pass a certification exam within 30 days of employment. Private entities provide the training and testing." |
 | Food service plan review | `fl-dbpr-plan` Food service plan review (with the license application) · [PDF](https://www2.myfloridalicense.com/hr/forms/documents/dbpr_hr_7005_application_for_plan_review.pdf) · portal www.myfloridalicense.com | yes | portal (www.myfloridalicense.com) |  |
+| Workers' compensation insurance | `fl-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
 | Florida public food service license | `fl-dbpr` Permanent food service license (seating or non-seating) · [PDF](https://www2.myfloridalicense.com/hr/forms/documents/dbpr_hr_7035_application_for_fixed_food_service_license.pdf) · portal www.myfloridalicense.com | yes | portal (www.myfloridalicense.com) |  |
 
 ## Utah (state filings)

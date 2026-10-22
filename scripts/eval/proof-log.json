@@ -12,11 +12,12 @@
  {
   "id": "fincen-boir",
   "read": "https://www.fincen.gov/boi",
-  "quote": "U.S. companies are exempt from BOI reporting requirements.",
+  "quote": "U.S. companies are exempt from the Beneficial Ownership Information (BOI) reporting requirements",
   "checked": "2026-10-22",
   "method": "curl",
-  "found": false,
-  "note": "sentence not on the fetched page"
+  "found": true,
+  "sha256": "156cefacacef2a51",
+  "context": "ust 11, 2026]: fincen has finalized its boi reporting rule. under the new rule: u.s. companies are exempt from the beneficial ownership information (boi) reporting requirements and therefore, are no longer required to file boi reports. reporting companies "
  },
  {
   "id": "cbp-5106",
@@ -800,7 +801,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "85b39af87114fcb2",
+  "sha256": "b47ddbe418a681bb",
   "context": " elektronisch mit einem fragebogen zur steuerlichen erfassung beantragt werden. der fragebogen muss innerhalb eines monats nach aufnahme ihrer tätigkeit unaufgefordert an ihr zuständiges finanzamt übermittelt werden. wo und wie bekomme ich jetzt die steuernummer für mein unternehmen? füllen sie "
  },
  {
@@ -950,7 +951,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "355a8f95807d56d2",
+  "sha256": "f53c2c9fade4e43d",
   "context": "istrazione di alimenti e bevande (pubblico esercizio) nelle \"zone non tutelate\" per avviare/modificare/ un'attività di somministrazione di alimenti e bevande (pubblico esercizio) nelle zone non tutelate è necessario inviare, esclusivamente per via telematica al suap (sportello unico attività produttive) del comune di milano, tramite la piattafo"
  },
  {
@@ -1202,15 +1203,6 @@
   "found": true,
   "sha256": "b1f000444eaf6a3e",
   "context": "prise auprès de la tva ? oui mais il s'agit d'un service complémentaire payant. vous pouvez également activer vous-même gratuitement votre numéro d'entreprise auprès de la tva sur le site du spf finances. puis-je utiliser un guichet d'entreprises en ligne ? oui. tous les guichets d'"
- },
- {
-  "id": "pt-empresa",
-  "read": "https://www2.gov.pt/servicos/criar-uma-empresa-na-hora",
-  "quote": "Num balcão da Empresa na Hora é possível criar sociedades por quotas, sociedades unipessoais por quotas e sociedades anónimas de forma rápida e simples.",
-  "checked": "2026-10-22",
-  "method": "curl",
-  "found": false,
-  "note": "sentence not on the fetched page"
  },
  {
   "id": "ch-mwst",
@@ -1702,7 +1694,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "9b7bfe56a1963f37",
+  "sha256": "239d04aa1adb8fa3",
   "context": "ps will serve as a guide throughout the process subsequent to plan approval. 1. plan approval: congratulations on the approval of your submitted plans, which allows you to initiate construction. it is the responsibility of the submitter to provide evidence of this approval "
  },
  {
@@ -1712,7 +1704,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "522d88eb985392dd",
+  "sha256": "28ddbfe436639b57",
   "context": "respectively. inspection requests shall be requested 5 working days in advance. a health permit will be issued upon completion of a final inspection. you may not start construction until plans from all agencies have been reviewed"
  },
  {
@@ -1832,7 +1824,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "6922cbd726906c45",
+  "sha256": "501e785e2c13cd17",
   "context": "c record that registers your business name and address with the city of boston. massachusetts law requires most businesses operating under a trade name to file with the city clerk's office. you must renew every four years. contact city clerk 617-635-4601 cityclerk@bost"
  },
  {
@@ -1842,7 +1834,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "8232ab9f232003f4",
+  "sha256": "7f8117e8aefbb28e",
   "context": "twice each year. we add businesses to our online database as we do inspections. depending on your situation, you may also need a plan review before we can issue your permit. the food service permit is issued by the inspectional services department. cont"
  },
  {
@@ -1882,7 +1874,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "8368bdcb8a0b7d07",
+  "sha256": "0b3a533d131693e4",
   "context": "usiness in boston. if you plan to serve alcohol you'll need a separate license. you must have this license before you can apply for a food service health permit from the inspectional services department health division (isd). if you also plan to serve alcohol, or let guests bring their own, you'll need a"
  },
  {
@@ -1892,7 +1884,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "8232ab9f232003f4",
+  "sha256": "7f8117e8aefbb28e",
   "context": " or sell food to the public in boston. some businesses also need a plan review. before you can serve food to the public, you need to apply for a food service permit and pass a health inspection. we inspect food service businesses at least once a year, but usually twice each"
  },
  {
@@ -2733,16 +2725,6 @@
   "context": "rations, limited liability companies and limited partnerships available online. failure to file the required statement of information with the secretary of state as outlined in statute may result in penalties being assessed by the franchise tax board and suspension or forfeiture. in addi"
  },
  {
-  "id": "fl-fictitious",
-  "read": "https://dos.fl.gov/sunbiz/start-business/efile/fl-fictitious-name-registration/",
-  "quote": "Registration of Fictitious Name $50.00",
-  "checked": "2026-10-22",
-  "method": "curl",
-  "found": true,
-  "sha256": "5a4425600d32f3ac",
-  "context": " search fictitious name records fictitious name registration fees service price registration of fictitious name $50.00 certified copy of fictitious name registration $30.00 certificate of status for"
- },
- {
   "id": "md-llc",
   "read": "https://dat.maryland.gov/sdat%20forms/artorgan.pdf",
   "quote": "FEES: (1) Certificate of Organization $100.00",
@@ -2871,6 +2853,16 @@
   "found": true,
   "sha256": "4d1dcd0c8121b663",
   "context": "support public health and safety, and comply with local and state health codes. plans must be received and approved before any construction or remodeling takes place. plan review is required for: new construction remodels replacement or installat"
+ },
+ {
+  "id": "smc-health-permit",
+  "read": "https://smchealth.org/division/divisions/environmental-health-services/permits-business-services/food-program/",
+  "quote": "You can apply for a food permit, pay invoices, and manage your permits online using MyEHS.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "ed92beca05a9c2b9",
+  "context": "vices to ensure food safety and support for food-related businesses and events. you can apply for a food permit, pay invoices, and manage your permits online using myehs. unpermitted food vendors unpermitted food vendors are not regulated or inspecte"
  },
  {
   "id": "cup-license",
@@ -3057,7 +3049,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "3de93297528806d5",
+  "sha256": "8778d3e986fc726a",
   "context": "4.1-302. illegal sale of alcoholic beverages in general; penalty. if any person who is not licensed sells any alcoholic beverages except as permitted by this subtitle, he shall be guilty of a class 1 misdemeanor. in the event of a second or subsequent conviction under this section, a jail se"
  },
  {
