@@ -4,6 +4,7 @@ import type { Reply, Step } from "../core";
 import type { HqLink, HqRow } from "../hq";
 import type { Quote } from "../overage.ts";
 import type { ModuleQuote } from "../modules.ts";
+import type { LicenseQuote, SIMPLE, SimpleItem } from "../pricing.ts";
 import { readSSE } from "../../supabase/functions/_shared/stream.ts";
 import { tempChat } from "../odeliaMemory/tempChat";
 import type { Pushed } from "./runFeed";
@@ -74,10 +75,13 @@ export type Billing = {
   subscription_plan: string | null; current_period_end: string | null; comped: boolean; stripe_customer_id: string | null;
   /** Payments aren't switched on yet (no Stripe): everything is open, as the database's plan_of() says. */
   free?: boolean;
+  /** legacy: a customer from before the simple model, on its old plan; simple: per license (src/pricing.ts SIMPLE) */
+  price_model?: "legacy" | "simple";
 };
-export type Plan = "none" | "entry" | "monthly";
+/** simple: the simple model with no chain plan, so each filing is paid for on its own when it's approved. */
+export type Plan = "none" | "entry" | "monthly" | "simple";
 export const planOf = (b: Billing | null): Plan =>
-  !b ? "none" : b.free || b.comped || b.subscription_status === "active" || b.subscription_status === "trialing" ? "monthly" : b.entry_markets > 0 ? "entry" : "none";
+  !b ? "none" : b.free || b.comped || b.subscription_status === "active" || b.subscription_status === "trialing" ? "monthly" : b.price_model === "simple" ? "simple" : b.entry_markets > 0 ? "entry" : "none";
 export type DocRow = { id: string; workspace_id: string; app_id: string | null; filing_id: string | null; name: string; path: string; size: number; mime: string | null; source: string; created_at: string };
 export type Integration = { id: string; kind: IntegrationKind; account: string | null; status: "connected" | "error"; error: string | null; meta: Record<string, unknown>; connected_at: string; last_used_at: string | null };
 export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "slack_bot" | "lark_bot" | "wechat_bot" | "square" | "toast";
@@ -553,12 +557,20 @@ export const readUpdates = (ws: string) => supabase().rpc("read_updates", { ws }
 /* ------------------------------ billing ------------------------------ */
 
 export async function getBilling(ws: string): Promise<Billing | null> {
+  const cols = "workspace_id, entry_markets, entry_paid_at, subscription_status, subscription_plan, current_period_end, comped, stripe_customer_id";
+  const row = async (): Promise<{ data: unknown; error: { code?: string; message: string } | null }> => {
+    // price_model (migration 20261023120000): before it runs, every workspace is on the plans it had ('legacy')
+    const r = await supabase().from("billing").select(`${cols}, price_model`).eq("workspace_id", ws).maybeSingle();
+    if (r.error?.code !== "42703") return r;
+    const x = await supabase().from("billing").select(cols).eq("workspace_id", ws).maybeSingle();
+    return { data: x.data ? { ...(x.data as object), price_model: "legacy" } : x.data, error: x.error };
+  };
   const [{ data, error }, settings] = await Promise.all([
-    supabase().from("billing").select("workspace_id, entry_markets, entry_paid_at, subscription_status, subscription_plan, current_period_end, comped, stripe_customer_id").eq("workspace_id", ws).maybeSingle(),
+    row(),
     // No settings row (an older database, or the preview) means plans apply as before.
     supabase().from("app_settings").select("payments_on").maybeSingle().then(r => r, () => ({ data: null })),
   ]);
-  if (error) throw fromPg(error);
+  if (error) throw fromPg(error as Parameters<typeof fromPg>[0]);
   return data ? { ...(data as Billing), free: (settings.data as { payments_on?: boolean } | null)?.payments_on === false } : null;
 }
 
@@ -703,8 +715,21 @@ export const hqUnshare = (id: string) => rpcVoid("hq_unshare", { p_id: id });
 export type LocationPrice ={ amount: number; currency: string; interval: string | null; interval_count: number | null };
 export type PlanPrices = { location: LocationPrice | null; pro?: LocationPrice | null; opening: LocationPrice | null; opening_food?: LocationPrice | null; guarantee?: LocationPrice | null; pack?: LocationPrice | null;
   /** which two and three year terms can be bought online (their approved Stripe price is set); else the team quotes */
-  terms?: Record<"essentials" | "pro", Record<string, boolean>> };
+  terms?: Record<"essentials" | "pro", Record<string, boolean>>;
+  /** which model this workspace is on; on the simple model only `simple` is sent: the list, and which items can be bought online */
+  model?: "legacy" | "simple";
+  simple?: { prices: typeof SIMPLE; online: Record<SimpleItem, boolean> } };
 export const locationPrices = (ws: string) => fn<PlanPrices>("billing", { action: "prices", workspace_id: ws, return_url: appHome() });
+
+/* ------------------------------ the simple model: per license ------------------------------ */
+/** What a filing costs, from the billing function, shown to an owner before approving it (src/pricing.ts LicenseQuote). */
+export const licenseQuote = (ws: string, ref: string) => fn<{ ok: true; quote: LicenseQuote }>("billing", { action: "license_quote", workspace_id: ws, ref, return_url: appHome() });
+/** The filing approved at the price shown: paid now (a renewal on the saved card, free, or included), or a Stripe
+ *  Checkout to pay by card; the filing goes in once it's paid. */
+export const licensePay = (ws: string, ref: string, shown: { tier: string; cents: number }) =>
+  fn<{ ok: true; paid: boolean; included?: boolean; url?: string; cents?: number }>("billing", { action: "license_pay", workspace_id: ws, ref, shown_tier: shown.tier, shown_cents: shown.cents, return_url: appHome() });
+/** The store plan for every store, billed yearly, after the renewal terms were agreed to next to the button. */
+export const planCheckout = (ws: string, stores: number) => fn<{ url: string; stores: number }>("billing", { action: "plan_checkout", workspace_id: ws, shown_stores: stores, renewal_consent: true, return_url: appHome() });
 export const syncLocations = (ws: string) => fn<{ synced: boolean }>("billing", { action: "sync_locations", workspace_id: ws, return_url: appHome() });
 export const checkout = (ws: string, plan: "entry" | "starter" | "growth" | "locations", o: { markets?: number; extra_locations?: number; tier?: "essentials" | "pro"; guarantee?: boolean; term_years?: number; renewal_consent?: boolean } = {}) =>
   fn<{ url: string }>("billing", { action: "checkout", workspace_id: ws, plan, ...o, return_url: appHome() });
@@ -761,7 +786,7 @@ export const hqSync = () => fn<{ covered: number }>("billing", { action: "hq_syn
 /** An Odelia pack: more AI allowance, carried over until it's used. */
 export const buyPack = (ws: string, packs = 1) => fn<{ url: string }>("billing", { action: "pack", workspace_id: ws, packs, return_url: appHome() });
 /** How much of this period's Odelia allowance is used. */
-export type AiStatus = { plan: "none" | "entry" | "entry_ended" | "monthly" | "comped"; used_pct: number; resets_at: string | null; has_credit: boolean; /** saver mode is on (past 60% of the allowance, or throttled for the day) */ saver?: boolean; saver_at_pct?: number };
+export type AiStatus = { plan: "none" | "entry" | "entry_ended" | "monthly" | "comped" | "simple"; used_pct: number; resets_at: string | null; has_credit: boolean; /** saver mode is on (past 60% of the allowance, or throttled for the day) */ saver?: boolean; saver_at_pct?: number };
 export async function aiStatus(ws: string): Promise<AiStatus | null> {
   if (PREVIEW) return null;
   const { data, error } = await supabase().rpc("ai_status", { ws });

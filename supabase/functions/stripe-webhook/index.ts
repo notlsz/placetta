@@ -1,10 +1,12 @@
 // Stripe tells us when someone pays. Signature checked by hand (HMAC-SHA256), each event applied once.
 //   checkout.session.completed (payment, plan=entry)  -> billing.entry_markets += markets (added in SQL, atomically)
+//   checkout.session.completed (payment, kind=license) -> that filing's license charge is paid (license_charge_settle)
+//   a store plan subscription (plan=store)             -> billing.subscription_*, plan 'store', its stores paid for
 //   customer.subscription.created / updated / deleted  -> billing.subscription_*, unless an event created later was
 //                                                        already applied (Stripe doesn't deliver in order)
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { itemOf, webhookSecret } from "../_shared/stripe_catalog.ts";
-import { TERM_PRICE_ENV } from "../../../src/pricing.ts";
+import { SIMPLE_PRICE_ENV, TERM_PRICE_ENV } from "../../../src/pricing.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -60,6 +62,12 @@ Deno.serve(async (req) => {
         if (o.mode === "payment" && o.metadata?.plan === "entry" && o.payment_status === "paid") {
           markets = Math.max(1, Math.min(20, Number(o.metadata?.markets) || 1));
         }
+        // a license or renewal on the simple model, paid at the price the owner approved: its filing may now go in
+        if (o.mode === "payment" && o.metadata?.kind === "license" && o.payment_status === "paid" && typeof o.metadata?.charge_id === "string") {
+          const { error } = await admin.rpc("license_charge_settle", { p_id: o.metadata.charge_id, p_ok: true, p_stripe: String(o.id ?? "") || null });
+          if (error) throw new Error(error.message);
+          await admin.from("audit_log").insert({ workspace_id: ws, actor: "you", actor_id: null, action: { en: "Paid for a filing", zh: "已支付申报费用" }, object: { en: String(o.metadata.ref ?? ""), zh: String(o.metadata.ref ?? "") } });
+        }
         if (o.mode === "payment" && o.metadata?.kind === "pack" && o.payment_status === "paid") {
           // the credit was set by the billing function when it made this checkout
           const usd = Math.max(0, Math.min(1000, Number(o.metadata?.credit_usd) || 0));
@@ -106,6 +114,8 @@ Deno.serve(async (req) => {
         const tierOf = (p: { id?: string; lookup_key?: string | null } | undefined) => {
           const it = itemOf(p, env);
           if (it === "essentials" || it === "pro") return it;
+          // the simple model's store plan: a store a month, billed yearly (src/pricing.ts SIMPLE_PRICE_ENV)
+          if (p?.id && env(SIMPLE_PRICE_ENV.plan.env) === p.id) return "store" as const;
           return (["essentials", "pro"] as const).find((t) => Object.values(TERM_PRICE_ENV[t]).some((k) => !!p?.id && env(k) === p.id));
         };
         const located = items.filter((i) => !!tierOf(i.price));

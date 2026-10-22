@@ -23,6 +23,7 @@ import {
   verifyCallToken, verifyTelnyx, voiceReady, workspaceBrief,
 } from "../_shared/odelia.ts";
 import { currentWorkspace, type Link, linkByNumber, linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
+import { priceFacts } from "../../../src/pricing.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
@@ -90,6 +91,7 @@ function instructions(o: { lang: Lang; name: string | null; business: string; ve
       : "First verify the caller. Ask for the 4-digit code just texted to the phone number on file, and call verify_code with the digits they say. Until verify_code returns ok, say nothing about the business, its stores, licenses, filings or account, and call no other tool. If verify_code says no tries are left, apologize, suggest the Placetta app or texting this number, say goodbye and call hangup. Once verified, answer from the workspace verify_code returns.",
     "For real work (mapping a new store, drafting a letter, preparing or renewing an application, researching a rule), call start_task with what they want in their own words and every detail they gave, then tell them you're on it and will text them when it's done.",
     "On a call you never file, pay, send an email, delete or approve anything, and you never take Social Security, ITIN, bank or card numbers. Those happen in the Placetta app with their approval: offer to text them the link with send_text.",
+    `If asked what Placetta costs: ${priceFacts("simple")} ${priceFacts("legacy")} Say the numbers plainly, one or two at a time.`,
     "If they want something in writing (an address, a date, a confirmation number, a link to the app), use send_text.",
     "If you hear nothing for a while, ask once whether they're still there. When they're done, say a short goodbye and call hangup. If a tool fails, apologize in one sentence and offer to text instead.",
     o.outbound ? `You called them about this: ${o.outbound} Tell them in one or two sentences, answer their questions, and offer to start on it with start_task.` : "",

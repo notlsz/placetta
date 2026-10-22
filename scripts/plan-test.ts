@@ -55,6 +55,7 @@ import { costToOpen } from "../src/cost";
 import { formById } from "../src/forms/registry";
 import { normalizeState } from "../src/core";
 import { CATALOG } from "../supabase/functions/_shared/stripe_catalog.ts";
+import { licenseTierOf, SIMPLE } from "../src/pricing";
 const opened = (where: string, opening: string) => {
   const p = previewPlan("Milk tea shop", where, opening, { today: "2026-10-17", storeId: "st1" });
   const store = { id: "st1", name: B(where, where), address: where, stage: "opening" as const, plannedOpen: opening, rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: p.apps.map(a => a.id) };
@@ -78,18 +79,27 @@ for (const [where, x] of Object.entries(want)) {
   eq(c.fees.filter(f => f.fee == null).length, forms.filter(f => !f || f.fee == null).length, `${where}: every fee the registry leaves open stays open`);
   eq(x.closed.every(id => c.fees.find(f => f.app === "pv-" + id)?.fee === null), true, `${where}: ${x.closed.join(", ")} say "not published", with no amount`);
   eq(x.open.every(id => c.fees.find(f => f.app === "pv-" + id)?.fee === formById(id)!.fee && c.fees.find(f => f.app === "pv-" + id)?.source === formById(id)!.info), true, `${where}: published fees carry the agency's page`);
-  eq(c.placetta.map(r => r.amount), [CATALOG.food.cents / 100, CATALOG.essentials.cents / 100], `${where}: Placetta is the food opening fee and a year of Essentials, from the Stripe catalog`);
-  eq(c.totalUSD, cents(x.usd + 6500 + 1788), `${where}: the total is what's known, nothing more`);
+  // the simple model (every new workspace, and the sample): each permit at its list price, complex ones at $999,
+  // what staff complete themselves free (src/pricing.ts)
+  const tiers = w.apps.filter(a => a.status !== "approved").map(a => licenseTierOf(a.name.en));
+  const simple = tiers.reduce((s, t) => s + (t === "complex" ? SIMPLE.complexUsd : t === "license" ? SIMPLE.licenseUsd : 0), 0) + SIMPLE.planStoreMonthUsd * 12 * Math.max(1, (w.stores ?? []).length);
+  eq(c.placettaUSD, simple, `${where}: Placetta is each new license at its list price plus the store plan's first year ($${simple})`);
+  eq(tiers.includes("complex") && tiers.includes("license"), true, `${where}: a restaurant opening has both standard and complex licenses`);
+  eq(c.totalUSD, cents(x.usd + simple), `${where}: the total is what's known, nothing more`);
+  const legacy = costToOpen(w, { today: "2026-10-17", billing: { plan: "none", model: "legacy" } });
+  eq(legacy.placetta.map(r => r.amount), [CATALOG.food.cents / 100, CATALOG.essentials.cents / 100], `${where}: a legacy customer still sees the food opening fee and a year of Essentials, from the Stripe catalog`);
   eq(!!c.landing && c.landing === p.projectedOpen, true, `${where}: the time to open is the opening path's date`);
 }
 {
   // the plan in billing: Pro, a comped account, and an entry plan already paid; a complex store is quoted, never priced
   const { w } = opened("Flushing, NY", "2027-03-01");
-  eq(costToOpen(w, { today: "2026-10-17", billing: { plan: "monthly", tier: "pro" } }).placetta.map(r => r.amount), [6500, 3588], "Pro: a year of Pro instead");
+  eq(costToOpen(w, { today: "2026-10-17", billing: { plan: "monthly", tier: "pro", model: "legacy" } }).placetta.map(r => r.amount), [6500, 3588], "Pro: a year of Pro instead");
   eq(costToOpen(w, { today: "2026-10-17", billing: { plan: "monthly", comped: true } }).placettaUSD, 0, "comped: nothing to pay");
-  const entry = costToOpen(w, { today: "2026-10-17", billing: { plan: "entry", entryMarkets: 1 } });
+  const entry = costToOpen(w, { today: "2026-10-17", billing: { plan: "entry", entryMarkets: 1, model: "legacy" } });
   eq([entry.placetta.at(-1)?.paid, entry.placettaUSD], [true, 8288], "an entry plan already paid is shown, not charged again");
-  const complex = costToOpen({ ...w, stores: w.stores!.map(s => ({ ...s, kind: "complex" }) as typeof s) }, { today: "2026-10-17" });
+  eq(costToOpen(w, { today: "2026-10-17", billing: { plan: "monthly", paidLocations: 12 } }).placettaUSD, 0, "10 or more stores on the plan: every new license included");
+  eq(costToOpen(w, { today: "2026-10-17", billing: { plan: "monthly", paidLocations: 1 } }).placetta.some(r => r.paid && r.amount === 0), true, "on the store plan: the plan is shown as theirs, new licenses still priced");
+  const complex = costToOpen({ ...w, stores: w.stores!.map(s => ({ ...s, kind: "complex" }) as typeof s) }, { today: "2026-10-17", billing: { plan: "none", model: "legacy" } });
   eq([complex.placetta[0].amount, complex.quoted, complex.placettaUSD], [null, 1, 1788], "a liquor or build-out store is quoted by the team, not guessed");
   // a permit that isn't in the registry is never counted, whatever amount sits on it
   const odd = costToOpen({ ...w, apps: [...w.apps, { ...w.apps[0], id: "x", official: undefined, fees: [{ label: B("Fee", "费用"), amount: 999 }] }] }, { today: "2026-10-17" });

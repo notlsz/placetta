@@ -1,5 +1,6 @@
 import { CATALOG } from "../supabase/functions/_shared/stripe_catalog.ts";
 import { B, type Bi } from "./bi";
+import { COMPLEX_LIST, licenseTierOf, PLAN_STORE_YEAR_USD, SIMPLE } from "./pricing";
 import { formById } from "./forms/registry";
 import type { Store, Workspace } from "./model";
 import { basisLine, openingPath } from "./smart";
@@ -13,9 +14,11 @@ import { basisLine, openingPath } from "./smart";
  *     (src/forms/registry.ts). A fee the agency sets case by case, or a
  *     permit the registry doesn't have yet, is "not published", never a
  *     guess and never counted;
- *   - Placetta's own price for this business, from the price list Stripe
- *     charges (supabase/functions/_shared/stripe_catalog.ts) and the plan
- *     in billing;
+ *   - Placetta's own price for this business: on the simple model (every
+ *     new workspace, and the sample) each permit at its list price
+ *     (src/pricing.ts SIMPLE), or the chain plan; for a customer from before
+ *     (legacy), the price list Stripe charges
+ *     (supabase/functions/_shared/stripe_catalog.ts) and the plan in billing;
  *   - the time to open, from the opening path (src/smart.ts).
  * ------------------------------------------------------------------ */
 
@@ -23,7 +26,11 @@ export type FeeRow = { app: string; name: Bi; agency: Bi; fee: number | null; cu
 /** amount null: quoted by the team. paid: already paid, shown for the record and not added again. */
 export type PriceRow = { label: Bi; amount: number | null; note: Bi; paid?: boolean };
 /** The plan in billing, as the app has it (src/cloud/api.ts); nothing for the sample, which shows list prices. */
-export type Billed = { plan: "none" | "entry" | "monthly"; tier?: "essentials" | "pro"; comped?: boolean; free?: boolean; entryMarkets?: number };
+export type Billed = { plan: "none" | "entry" | "monthly" | "simple"; tier?: "essentials" | "pro"; comped?: boolean; free?: boolean; entryMarkets?: number;
+  /** legacy: a customer from before the simple model, priced on its old plan; anything else is the simple model */
+  model?: "legacy" | "simple";
+  /** stores paid for on the store plan: 10 or more includes every new license (the chain plan) */
+  paidLocations?: number };
 export type Cost = {
   fees: FeeRow[];
   agencyUSD: number;          // published agency fees in US dollars, added up
@@ -74,6 +81,25 @@ export function costToOpen(w: Workspace, o: { today: string; billing?: Billed })
   const placetta: PriceRow[] = [];
   if (b?.comped) placetta.push({ label: B("Placetta", "快哉"), amount: 0, note: B("Your account is comped: nothing to pay.", "您的账户已免费开通，无需付费。") });
   else if (b?.free) placetta.push({ label: B("Placetta", "快哉"), amount: 0, note: B("Payments aren't switched on yet: nothing to pay for now.", "目前尚未开通付费，暂时无需付费。") });
+  else if (b?.model !== "legacy") {
+    // the simple model: each new license still to file at its list price (every one included with 10 or more stores on
+    // the plan), and the store plan's first year when it isn't on yet
+    const todo = w.apps.filter(a => a.status !== "approved");
+    const onPlan = b?.plan === "monthly", stores = Math.max(1, (w.stores ?? []).length);
+    if (onPlan && (b?.paidLocations ?? 0) >= SIMPLE.chainMinStores) placetta.push({ label: B("Every new license", "每一项新执照"), amount: 0, note: B(`Included: ${SIMPLE.chainMinStores} or more stores are on your store plan.`, `已包含：您的门店方案内有 ${SIMPLE.chainMinStores} 家及以上门店。`) });
+    else {
+      const tiers = todo.map(a => licenseTierOf(a.name.en));
+      const n = (t: string) => tiers.filter(x => x === t).length;
+      if (n("license")) placetta.push({ label: B(`${n("license")} license${n("license") === 1 ? "" : "s"} at $${SIMPLE.licenseUsd}`, `${n("license")} 项执照，每项 $${SIMPLE.licenseUsd}`), amount: n("license") * SIMPLE.licenseUsd,
+        note: B("Each one filed and tracked to approval, charged only when you approve it.", "每项提交并跟踪至获批，经您批准才收费。") });
+      if (n("complex")) placetta.push({ label: B(`${n("complex")} complex license${n("complex") === 1 ? "" : "s"} at $${SIMPLE.complexUsd}`, `${n("complex")} 项复杂执照，每项 $${SIMPLE.complexUsd}`), amount: n("complex") * SIMPLE.complexUsd,
+        note: B(`${COMPLEX_LIST.map(c => c.name.en).join(", ")}. Charged only when you approve each one.`, `${COMPLEX_LIST.map(c => c.name.zh).join("、")}。每项经您批准才收费。`) });
+      if (n("free")) placetta.push({ label: B(`${n("free")} tracked free`, `${n("free")} 项免费跟踪`), amount: 0, note: B("Certificates your staff earn and inspections inside a permit: Placetta tracks them at no charge.", "员工自行取得的证书和许可内的检查：快哉免费跟踪。") });
+    }
+    if (onPlan) placetta.push({ label: B("Store plan", "门店方案"), amount: 0, paid: true, note: B("Your plan: tracking, renewal monitoring, alerts, the document vault, Odelia, and the renewals she files on her own.", "您的方案：跟踪、续期监控、提醒、文件库、Odelia，以及她自行提交的续期。") });
+    else placetta.push({ label: B(`Store plan, first year${stores > 1 ? ` for ${stores} stores` : ""}`, `门店方案首年${stores > 1 ? `（${stores} 家门店）` : ""}`), amount: PLAN_STORE_YEAR_USD * stores,
+      note: B(`$${SIMPLE.planStoreMonthUsd} a store a month, billed yearly: tracking, renewal monitoring, alerts, the document vault, Odelia, and the renewals she files on her own.`, `每家门店每月 $${SIMPLE.planStoreMonthUsd}，按年计费：跟踪、续期监控、提醒、文件库、Odelia，以及她自行提交的续期。`) });
+  }
   else {
     for (const s of opening) {
       const k = storeKind(s, w);

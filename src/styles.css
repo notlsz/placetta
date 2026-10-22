@@ -826,6 +826,9 @@ a.sbtn { color: var(--ink); }
 .plans .plan ul { margin: 4px 0 8px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; }
 .plans .plan li { display: flex; gap: 8px; align-items: flex-start; } .plans .plan li svg { margin-top: 3px; color: var(--blue-ink); flex: none; }
 .plans .plan .pill { margin-top: auto; align-self: flex-start; }
+/* the simple model's per-item prices: the price in its own column, then what it buys */
+.plans .plan ul.simple-rows li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; }
+.plans .plan ul.simple-rows b { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
 .tiers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
 .plan-act { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; }
 .mk { display: inline-flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 500; color: var(--ink2); }

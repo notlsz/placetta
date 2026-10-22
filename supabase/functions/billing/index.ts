@@ -9,15 +9,29 @@
 // Liquor and complex build-outs are quoted by the team (a team task), never charged at checkout.
 //   STRIPE_PRICE_STARTER / _GROWTH / _EXTRA_LOCATION  older plans, kept only for anyone already on them
 //   STRIPE_PRICE_PACK     one time, an Odelia pack: PACK_CREDIT_USD (default $25) more AI allowance per pack
+// Everything in this block is for customers from before the simple model (billing.price_model = 'legacy') only.
 // Credits: entry plans bought in the last 60 days come off the first invoice. Opening fees are not credited.
 // Scale is quoted by the team, so it has no checkout. Actions: prices (any member), checkout, portal, sync_locations (owners).
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { accessRpc, WORKS } from "../_shared/access.ts";
 import { ensureWebhook, priceId, type Item } from "../_shared/stripe_catalog.ts";
-import { chargeStep, filingFactsOf, filingQuote, hqCheckout, moduleApproval, moduleOf, QUOTE_TTL_S, modulePriceOk, moduleQuote, moduleUnits, openingCounts, ownerPriceOk, prorationCents,
-  returnOrigins, safeReturn, type Store, storesFrom, STRIPE_FAILED, termOf, termPriceEnv, termPriceOk } from "./logic.ts";
+import { chargeStep, isChain, planQuantity, filingFactsOf, filingQuote, hqCheckout, licenseFactsOf, moduleApproval, moduleOf, QUOTE_TTL_S, modulePriceOk, moduleQuote, moduleUnits, openingCounts, ownerPriceOk, prorationCents,
+  returnOrigins, safeReturn, simpleApproval, simplePriceOk, simpleQuote, type Store, storesFrom, STRIPE_FAILED, termOf, termPriceEnv, termPriceOk } from "./logic.ts";
 import { moduleById } from "../../../src/modules.ts";
-import { MODULE_PRICES, OWNER_PRICE_ENV } from "../../../src/pricing.ts";
+import { MODULE_PRICES, OWNER_PRICE_ENV, priceModelOf, SIMPLE, SIMPLE_PRICE_ENV, type SimpleItem } from "../../../src/pricing.ts";
+// The simple model (src/pricing.ts SIMPLE, docs/PRICING.md), for every workspace that wasn't a customer before it shipped
+// (billing.price_model = 'simple'). Customers from before ('legacy') keep the plans above, and the old checkouts stay
+// theirs only. Each simple price is charged only from its own Stripe price (never made by this code), and only when
+// Stripe's amount is exactly the approved one; otherwise the team sends a quote and nothing is charged.
+//   STRIPE_PRICE_LICENSE           $299 one time, a license filed
+//   STRIPE_PRICE_LICENSE_COMPLEX   $999 one time, a license on the complex list (liquor, building plan review, import permits)
+//   STRIPE_PRICE_RENEWAL           $99 one time, a renewal the plan doesn't include, after the owner's one-tap approval
+//   STRIPE_PRICE_STORE_PLAN        $1,788 a year: the store plan, $149 a store a month, billed yearly
+//   license_quote   what this filing costs, shown before approval: $299, $999, a $99 renewal, free, or included (a
+//                   renewal Odelia files on her own, on the store plan; everything, with 10 or more stores on it)
+//   license_pay     that filing, approved at the price shown: charged to the saved card for a renewal (one tap), else
+//                   Stripe Checkout; once paid, the filing may go in (the database checks, can_file_app)
+//   plan_checkout   the store plan for every store in the workspace, billed yearly
 import type { BillTo } from "../../../src/hqPlan.ts";
 // Growth actions, at the owner prices the founder approved on 2026-10-22 (src/pricing.ts, docs/PRICING.md). Each is
 // charged only from its own Stripe price (an env var), and only when Stripe's amount is exactly the approved one; when
@@ -164,6 +178,48 @@ async function verifiedPrice(envName: string, ok: (p: Record<string, unknown>) =
   return null;
 }
 
+/** The workspace's price model. Before migration 20261023120000 has run there is no column: every workspace is then
+ *  treated as before ('legacy'), so nothing changes until the database knows who is grandfathered. */
+async function modelOf(ws: string) {
+  const { data, error } = await admin.from("billing").select("price_model").eq("workspace_id", ws).maybeSingle();
+  return error ? "legacy" as const : priceModelOf(data as { price_model?: string } | null);
+}
+
+/** The simple model's Stripe price for an item, only when it's exactly the approved one; else null (a team quote). */
+const simplePrice = (item: SimpleItem) => verifiedPrice(SIMPLE_PRICE_ENV[item].env, (p) => simplePriceOk(item, p));
+/** Which simple prices can be bought online now, for the plans sheet. */
+async function simplePrices(): Promise<Record<SimpleItem, boolean>> {
+  const items = Object.keys(SIMPLE_PRICE_ENV) as SimpleItem[];
+  const ids = await Promise.all(items.map((i) => simplePrice(i).catch(() => null)));
+  return Object.fromEntries(items.map((i, k) => [i, !!ids[k]])) as Record<SimpleItem, boolean>;
+}
+
+/** A filing's simple-model quote, worked out on the server from the saved workspace, its history and Stripe. */
+async function licenseQuoteFor(ws: string, ref: unknown, bill: { subscription_status?: string | null; comped?: boolean | null; paid_locations?: number | null } | null) {
+  const facts = licenseFactsOf((await wsState(ws))?.apps, ref);
+  if (!facts) return null;
+  const { data: st, error } = await admin.rpc("license_state", { p_ws: ws, p_ref: String(ref) });
+  if (error) throw new Error(`license_state: ${error.code ?? ""}`);
+  const s = st as { renewal: boolean; paid: { tier: string; cents: number } | null };
+  const onPlan = bill?.subscription_status === "active" || bill?.subscription_status === "trialing";
+  const chain = !!bill?.comped || (onPlan && isChain(Number(bill?.paid_locations) || 0));
+  // a renewal is included on the plan when Odelia can file it on her own (its verified destination, src/overage.ts)
+  const automated = filingFactsOf((await wsState(ws))?.apps, ref)?.mode === "automated";
+  const ids: Partial<Record<SimpleItem, string | null>> = {};
+  for (const i of ["license", "complex", "renewal"] as SimpleItem[]) ids[i] = chain || s.paid ? null : await simplePrice(i);
+  const q = simpleQuote(facts, { renewal: !!s.renewal, paid: s.paid, chain, onPlan, automated, priceOk: (i) => !!ids[i] });
+  return { q, facts, priceId: q.tier === "license" || q.tier === "complex" || q.tier === "renewal" ? ids[q.tier] ?? null : null };
+}
+
+/** A card the customer saved at an earlier Checkout (setup_future_usage), for a one-tap renewal; else null. */
+async function savedCard(customer: string): Promise<string | null> {
+  const c = await stripeGet(`customers/${encodeURIComponent(customer)}`);
+  const d = c?.invoice_settings?.default_payment_method;
+  if (typeof d === "string" && d) return d;
+  const list = await stripeGet(`payment_methods?customer=${encodeURIComponent(customer)}&type=card&limit=1`);
+  return (list?.data?.[0]?.id as string | undefined) ?? null;
+}
+
 /** The parts of the workspace billing prices from: its filings, stores and entities, as saved on the server. */
 async function wsState(ws: string): Promise<{ apps?: unknown; stores?: unknown; entities?: unknown } | null> {
   const { data, error } = await admin.from("workspaces").select("apps:state->apps, stores:state->stores, entities:state->entities").eq("id", ws).maybeSingle();
@@ -299,7 +355,12 @@ Deno.serve(async (req) => {
   if (access === "sso_required") return fail(401, "sso_required", "Your company requires single sign-on. Sign in with SSO to continue.");
   if (body.action === "prices") {
     if (!WORKS.has(access) && access !== "viewer") return fail(403, "forbidden", "This isn't your workspace.");
-    try { return json(200, { ok: true, ...(await locationPrices()) }); } catch (e) {
+    try {
+      const model = await modelOf(ws);
+      // a new workspace sees only the simple model; a customer from before sees its own plans
+      if (model === "simple") return json(200, { ok: true, model, simple: { prices: SIMPLE, online: await simplePrices() } });
+      return json(200, { ok: true, model, ...(await locationPrices()) });
+    } catch (e) {
       console.error("prices:", (e as Error).message.slice(0, 200));
       return fail(502, "upstream_error", STRIPE_FAILED.en, STRIPE_FAILED.zh);
     }
@@ -311,8 +372,109 @@ Deno.serve(async (req) => {
 
   const { data: bill } = await admin.from("billing").select("stripe_customer_id, subscription_id, subscription_status, current_period_end, abroad_countries, charged_store_ids, entry_markets, entry_paid_at, entry_credited_at").eq("workspace_id", ws).maybeSingle();
   const customer = bill?.stripe_customer_id as string | null | undefined;
+  const model = await modelOf(ws);
 
   try {
+    // ---------------------------------------------------------------- the simple model
+    if (body.action === "license_quote" || body.action === "license_pay") {
+      if (model !== "simple") return fail(409, "legacy_plan", "This workspace keeps its plan: its licenses are part of it.", "此工作区沿用原方案，执照已包含在内。");
+      const { data: cb } = await admin.from("billing").select("comped, paid_locations").eq("workspace_id", ws).maybeSingle();
+      const c2 = cb as { comped?: boolean; paid_locations?: number } | null;
+      const lq = await licenseQuoteFor(ws, body.ref, { subscription_status: bill?.subscription_status as string | null, comped: c2?.comped ?? false, paid_locations: c2?.paid_locations ?? 0 });
+      if (!lq) return fail(404, "not_found", "That filing isn't in this workspace. Nothing was charged.", "此工作区中没有这份申报，未收取任何费用。");
+      const { q, facts, priceId: pid } = lq;
+      if (body.action === "license_quote") return json(200, { ok: true, quote: q });
+      const ok = simpleApproval(q, { tier: body.shown_tier, cents: body.shown_cents });
+      if (!ok.ok) return fail(409, ok.code, ok.message, ok.message_zh);
+      const ref = String(body.ref);
+      // with 10 or more stores on the plan (or comped) it's included: the database already lets it go in
+      if (q.tier === "chain") return json(200, { ok: true, paid: true, included: true });
+      // a renewal Odelia files on her own, on the store plan: recorded as included ($0), so the database lets it go in
+      if (q.tier === "plan") {
+        const { data: inc, error: ie } = await admin.rpc("license_charge_open", { p_ws: ws, p_ref: String(body.ref), p_tier: "included", p_cents: 0, p_user: user.id });
+        if (ie || !(inc as { ok?: boolean })?.ok) throw new Error(`license_charge_open included: ${ie?.code ?? ""}`);
+        return json(200, { ok: true, paid: true, included: true });
+      }
+      if (q.paid) return json(200, { ok: true, paid: true });
+      if (!q.priceOk) {
+        await teamQuote(ws, `Quote the ${q.tier} filing ${facts.name}`, { ref, tier: q.tier, by: user.id }, `quote:${ws}:license:${ref}`);
+        return fail(409, "quoted", "The team sends you a quote for this filing. Nothing was charged.", "团队会就这份申报向您报价。未收取任何费用。");
+      }
+      const { data: opened, error: oe } = await admin.rpc("license_charge_open", { p_ws: ws, p_ref: ref, p_tier: q.tier, p_cents: q.cents, p_user: user.id });
+      if (oe) throw new Error(`license_charge_open: ${oe.code}`);
+      const o = opened as { ok: boolean; id?: string; paid?: boolean; code?: string };
+      if (!o.ok) return fail(409, o.code ?? "refused", "Nothing was charged.", "未收取任何费用。");
+      const audit = (en: string, zh: string) => admin.from("audit_log").insert({ workspace_id: ws, actor: "you", actor_id: user.id, action: { en, zh }, object: { en: facts.name, zh: facts.name }, detail: q.line });
+      if (o.paid) { if (q.tier === "free") await audit("Approved a free filing", "批准了免费申报"); return json(200, { ok: true, paid: true }); }
+      const meta = { "metadata[workspace_id]": ws, "metadata[kind]": "license", "metadata[charge_id]": o.id!, "metadata[ref]": ref, "metadata[tier]": q.tier, "metadata[approved_by]": user.id };
+      // A renewal with a card saved at an earlier checkout: one tap, charged now, nothing else to do.
+      if (q.tier === "renewal" && customer) {
+        const pm = await savedCard(customer).catch(() => null);
+        if (pm) {
+          let inv: { id?: string; status?: string } | null = null;
+          try {
+            await stripe("invoiceitems", { customer, "pricing[price]": pid!, quantity: "1", ...meta }, `license-item-${o.id}`);
+            inv = await stripe("invoices", { customer, collection_method: "charge_automatically", auto_advance: "false", pending_invoice_items_behavior: "include", default_payment_method: pm, description: `Renewal: ${facts.name}`, ...meta }, `license-inv-${o.id}`);
+            await stripe(`invoices/${inv!.id}/finalize`, {}, `license-fin-${o.id}`);
+            const paid = await stripe(`invoices/${inv!.id}/pay`, { off_session: "true" }, `license-pay-${o.id}`);
+            if (paid?.status !== "paid") throw new Error("not paid");
+            await admin.rpc("license_charge_settle", { p_id: o.id, p_ok: true, p_stripe: inv!.id });
+            await audit("Approved and paid a renewal", "批准并支付了续期");
+            return json(200, { ok: true, paid: true, cents: q.cents });
+          } catch (e) {
+            // the card was refused: let the charge go and fall through to Checkout, where the owner pays by hand
+            console.error("billing renewal off-session:", (e as Error).message.slice(0, 200));
+            if (inv?.id) await stripe(`invoices/${inv.id}/void`, {}).catch(() => undefined);
+            await admin.rpc("license_charge_settle", { p_id: o.id, p_ok: false, p_stripe: inv?.id ?? null });
+            const { data: again } = await admin.rpc("license_charge_open", { p_ws: ws, p_ref: ref, p_tier: q.tier, p_cents: q.cents, p_user: user.id });
+            meta["metadata[charge_id]"] = (again as { id: string }).id;
+          }
+        }
+      }
+      const notReady = await webhookReady();
+      if (notReady) return notReady;
+      const p: Record<string, string> = {
+        mode: "payment", "line_items[0][price]": pid!, "line_items[0][quantity]": "1",
+        success_url: `${back}?billing=success`, cancel_url: `${back}?billing=cancel`, client_reference_id: ws,
+        "payment_intent_data[setup_future_usage]": "off_session", "payment_intent_data[description]": `${q.tier === "renewal" ? "Renewal" : "License"}: ${facts.name}`.slice(0, 200),
+        ...meta,
+      };
+      if (customer) p.customer = customer; else { if (user.email) p.customer_email = user.email; p.customer_creation = "always"; }
+      const s = await stripe("checkout/sessions", p, `license-cs-${meta["metadata[charge_id]"]}`);
+      await audit("Approved a filing charge", "批准了申报费用");
+      return json(200, { ok: true, paid: false, url: s.url, cents: q.cents });
+    }
+
+    if (body.action === "plan_checkout") {
+      if (model !== "simple") return fail(409, "legacy_plan", "This workspace keeps its plan.", "此工作区沿用原方案。");
+      if (body.renewal_consent !== true) return fail(400, "consent_required", "Agree to the renewal terms first.", "请先同意续费条款。");
+      const all = await stores(ws);
+      const qty = planQuantity(all.length);
+      if (Number(body.shown_stores) !== qty) return fail(409, "price_changed", "The number of stores changed since it was shown. Look at the price again. Nothing was charged.", "门店数量已与显示时不同，请重新查看价格。未收取任何费用。");
+      const chain = await simplePrice("plan");
+      if (!chain) {
+        await teamQuote(ws, `Quote the store plan for ${qty} store${qty === 1 ? "" : "s"}`, { stores: qty, by: user.id }, `quote:${ws}:plan:${qty}`);
+        return fail(409, "quoted", "The team sends you a quote for the store plan. Nothing was charged.", "团队会就门店方案向您报价。未收取任何费用。");
+      }
+      const notReady = await webhookReady();
+      if (notReady) return notReady;
+      const p: Record<string, string> = {
+        mode: "subscription", success_url: `${back}?billing=success`, cancel_url: `${back}?billing=canceled`, client_reference_id: ws,
+        "metadata[workspace_id]": ws, "metadata[plan]": "store", "metadata[renewal_consent]": new Date().toISOString(), "metadata[term_years]": "1",
+        "subscription_data[metadata][workspace_id]": ws, "subscription_data[metadata][plan]": "store",
+        "line_items[0][price]": chain, "line_items[0][quantity]": String(qty),
+      };
+      if (customer) p.customer = customer; else if (user.email) p.customer_email = user.email;
+      const s = await stripe("checkout/sessions", p);
+      await admin.from("billing").update({ checkout_store_ids: all.map((x) => x.id) }).eq("workspace_id", ws);
+      return json(200, { ok: true, url: s.url, stores: qty });
+    }
+
+    // The old plans are for customers from before the simple model only.
+    if (model === "simple" && (body.action === "checkout" || body.action === "pack" || body.action === "module_quote" || body.action === "add_module" || body.action === "filing_charge")) {
+      return fail(409, "new_pricing", "Placetta now prices per license: each one shows its price before you approve it.", "快哉现按执照计价：每一项在您批准前都会显示价格。");
+    }
+
     if (body.action === "portal") {
       if (!customer) return fail(409, "no_customer", "There's no billing account yet.");
       const s = await stripe("billing_portal/sessions", { customer, return_url: back });
@@ -368,7 +530,16 @@ Deno.serve(async (req) => {
       const subId = bill?.subscription_id as string | null | undefined;
       if (!subId) return json(200, { ok: true, synced: false });
       const sub = await stripeGet(`subscriptions/${encodeURIComponent(subId)}`);
-      if (sub?.metadata?.plan !== "locations" || !["active", "trialing", "past_due"].includes(sub.status)) return json(200, { ok: true, synced: false });
+      if (!["active", "trialing", "past_due"].includes(sub.status)) return json(200, { ok: true, synced: false });
+      // the store plan: every store, prorated; no opening fees (new licenses are priced one by one, or included at 10+)
+      if (sub?.metadata?.plan === "store") {
+        const planId = env(SIMPLE_PRICE_ENV.plan.env);
+        const item = (sub.items?.data ?? []).find((i: { price?: { id?: string } }) => !!planId && i.price?.id === planId);
+        const n = planQuantity((await stores(ws)).length);
+        if (item && item.quantity !== n) await stripe(`subscription_items/${item.id}`, { quantity: String(n), proration_behavior: "create_prorations" });
+        return json(200, { ok: true, synced: true, stores: n, new_openings: 0 });
+      }
+      if (sub?.metadata?.plan !== "locations") return json(200, { ok: true, synced: false });
       const terms = (["essentials", "pro"] as const).flatMap((t) => [2, 3].map((y) => env(termPriceEnv(t, y)!)));
       const locs = [...(await Promise.all([price("essentials"), price("pro")])), ...terms].filter(Boolean);
       const item = (sub.items?.data ?? []).find((i: { price?: { id?: string } }) => locs.includes(i.price?.id));

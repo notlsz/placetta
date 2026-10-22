@@ -10,6 +10,7 @@
 
 import { UPDATED } from "../legal";
 import { moreRest, moreRpc, type PreviewKit } from "./previewMore";
+import { licenseQuoteLine, licenseTierOf, SIMPLE, tierUsd } from "../pricing";
 
 export const PREVIEW_CODE = "123456";
 
@@ -210,7 +211,7 @@ async function rpc(fn: string, body: Record<string, unknown>, c: { sub: string; 
       t("workspaces").push({ id, name, state: body.p_state ?? {}, authorized_at: now(), created_at: now() });
       t("workspace_members").push({ workspace_id: id, user_id: c.sub, role: "owner", created_at: now() });
       t("terms_acceptances").push({ id: t("terms_acceptances").length + 1, user_id: c.sub, workspace_id: id, doc: "authorization", version: UPDATED, accepted_at: now(), ip: null, user_agent: navigator.userAgent });
-      t("billing").push({ workspace_id: id, entry_markets: 0, entry_paid_at: null, subscription_status: null, subscription_plan: null, current_period_end: null, comped: false, stripe_customer_id: null });
+      t("billing").push({ workspace_id: id, price_model: "simple", entry_markets: 0, entry_paid_at: null, subscription_status: null, subscription_plan: null, current_period_end: null, comped: false, stripe_customer_id: null });
       audit(id, c.sub, "you", "Created the workspace and authorized Placetta to prepare and submit the filings you approve", "创建工作区，并授权快哉准备和提交您批准的申请", { en: name, zh: name });
       save(); return json(id);
     }
@@ -360,7 +361,11 @@ async function rest(req: Request, url: URL, c: { sub: string; aal: string } | nu
       const row: Row = { ...it, id: table === "audit_log" ? rows.length + 1 : uuid(), created_at: now() };
       if (table === "filings") {
         const b = t("billing").find(x => x.workspace_id === it.workspace_id);
-        if (!isOwner(String(it.workspace_id), c) || !(b?.comped || b?.subscription_status === "active")) return pgErr("new row violates row-level security policy", "42501", 403);
+        // the database's can_file_app: a paid plan, or on the simple model this filing's own charge paid
+        const paidCharge = t("license_charges").find(x => x.workspace_id === it.workspace_id && x.ref === it.app_id && x.status === "paid");
+        const allowed = b?.price_model === "simple" ? !!(b.comped || (b.subscription_status === "active" && Number(b.paid_locations) >= SIMPLE.chainMinStores) || paidCharge) : !!(b?.comped || b?.subscription_status === "active");
+        if (!isOwner(String(it.workspace_id), c) || !allowed) return pgErr("new row violates row-level security policy", "42501", 403);
+        if (paidCharge) Object.assign(paidCharge, { status: "used" });
         if (rows.some(r => r.workspace_id === it.workspace_id && r.app_id === it.app_id && ["requested", "in_progress", "needs_info", "submitted"].includes(String(r.status)))) return pgErr("This application is already with the team.", "23505", 409);
         Object.assign(row, { status: "requested", approved_by: c.sub, approved_at: now(), assigned_to: null, requirements_checked: false, confirmation_number: null, fee_paid: null, receipt_path: null, note: null, payment_url: null, customer_paid_at: null, submitted_at: null, decided_at: null, updated_at: now() });
         audit(String(row.workspace_id), c.sub, "you", "Approved for filing by the Placetta team", "批准由快哉团队提交", row.title as { en: string; zh: string });
@@ -409,7 +414,35 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
   const needOwner = () => (owner ? null : fnErr("forbidden", member ? "Only an owner of this workspace can do that." : "You are not a member of this workspace.", 403));
   switch (name) {
     case "billing": {
-      if (body.action === "prices") return json({ ok: true, location: { amount: 1788, currency: "USD", interval: "year", interval_count: 1 }, pro: { amount: 3588, currency: "USD", interval: "year", interval_count: 1 }, opening: { amount: 3500, currency: "USD", interval: null, interval_count: null }, opening_food: { amount: 6500, currency: "USD", interval: null, interval_count: null }, guarantee: { amount: 2500, currency: "USD", interval: null, interval_count: null }, pack: { amount: 49, currency: "USD", interval: null, interval_count: null } });   // the prices the launcher creates in Stripe
+      const bl = t("billing").find(x => x.workspace_id === ws);
+      // the simple model, as the billing function prices it; the preview never charges, so a paid filing is marked paid
+      if (bl?.price_model === "simple") {
+        if (body.action === "prices") return json({ ok: true, model: "simple", simple: { prices: SIMPLE, online: { license: true, complex: true, renewal: true, plan: true } } });
+        if (body.action === "license_quote" || body.action === "license_pay") {
+          const app = ((t("workspaces").find(x => x.id === ws)?.state as { apps?: { id: string; name: { en: string } }[] } | undefined)?.apps ?? []).find(a => a.id === body.ref);
+          if (!app) return fnErr("not_found", "That filing isn't in this workspace. Nothing was charged.", 404);
+          const onPlan = bl.subscription_status === "active", covered = bl.comped || (onPlan && Number(bl.paid_locations) >= SIMPLE.chainMinStores);
+          const paid = t("license_charges").find(x => x.workspace_id === ws && x.ref === body.ref && x.status === "paid");
+          const renewal = t("license_charges").some(x => x.workspace_id === ws && x.ref === body.ref && x.status === "used");
+          const base = licenseTierOf(app.name.en, renewal);
+          // the preview treats every renewal as one Odelia files on her own
+          const tier = covered ? "chain" as const : onPlan && base === "renewal" ? "plan" as const : base;
+          const cents = tier === "chain" || tier === "plan" ? 0 : tierUsd(tier) * 100;
+          const quote = { tier, cents, priceOk: true, ...(paid ? { paid: true } : {}), line: licenseQuoteLine(tier, true, !!paid) };
+          if (body.action === "license_quote") return json({ ok: true, quote });
+          const no = needOwner(); if (no) return no;
+          if (body.shown_tier !== tier || body.shown_cents !== cents) return fnErr("price_changed", "The price changed since it was shown. Nothing was charged.", 409);
+          if (tier !== "chain" && !paid) t("license_charges").push({ id: uuid(), workspace_id: ws, ref: body.ref, tier, cents, status: "paid", created_at: now() });
+          audit(ws, c.sub, "you", "Approved a filing charge", "批准了申报费用", quote.line);
+          save(); return json({ ok: true, paid: true, ...(tier === "chain" ? { included: true } : {}) });
+        }
+        if (body.action === "plan_checkout") {
+          const no = needOwner(); if (no) return no;
+          Object.assign(bl, { subscription_status: "active", subscription_plan: "store", paid_locations: Number(body.shown_stores) || 1, stripe_customer_id: "cus_preview" });
+          save(); return json({ ok: true, url: "preview:billing" });
+        }
+      }
+      if (body.action === "prices") return json({ ok: true, model: "legacy", location: { amount: 1788, currency: "USD", interval: "year", interval_count: 1 }, pro: { amount: 3588, currency: "USD", interval: "year", interval_count: 1 }, opening: { amount: 3500, currency: "USD", interval: null, interval_count: null }, opening_food: { amount: 6500, currency: "USD", interval: null, interval_count: null }, guarantee: { amount: 2500, currency: "USD", interval: null, interval_count: null }, pack: { amount: 49, currency: "USD", interval: null, interval_count: null } });   // the prices the launcher creates in Stripe
       if (body.action === "sync_locations") return json({ ok: true, synced: false });
       const no = needOwner(); if (no) return no;
       if (body.action === "portal") return fnErr("not_configured", "Billing management opens Stripe on the live app.", 409);

@@ -178,7 +178,7 @@ begin
 
   -- the revenue share, from billing
   update public.billing set subscription_status = 'active', subscription_plan = 'locations', paid_locations = 2 where workspace_id = w1;
-  update public.billing set entry_markets = 1, entry_paid_at = now() where workspace_id = w2;
+  update public.billing set price_model = 'legacy', entry_markets = 1, entry_paid_at = now() where workspace_id = w2;
   perform public.partner_revenue_sweep();
   res := res || jsonb_build_object('two locations on Essentials: $298 this month', (select revenue_usd = 298 and share_usd = 37.25 from public.partner_revenue where workspace_id = w1 and month = mo),
     'an entry plan paid this month counts', (select revenue_usd = 299 from public.partner_revenue where workspace_id = w2 and month = mo),

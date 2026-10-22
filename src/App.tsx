@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { filingKindOf, IN_PLAN } from "./overage.ts";
-import { shownCharges } from "./FilingCharge";
+import { shownCharges, shownLicense } from "./FilingCharge";
 import { speakTag } from "./langs";
 import { audit, demoAgent, dropApproval, setApp, setFact, setField, type AgentBackend, type AgentEvent, type Reply, type Request, type Step } from "./agent";
 import { blockersSay, confirmChange, readyToFile } from "./core";
@@ -980,6 +980,21 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (!ownerOk()) return;
     if (a.kind === "pay") { if (a.url) window.open(a.url, "_blank", "noopener,noreferrer"); return; }
     if (a.kind === "file") {
+      // The simple model (every new workspace): each filing is paid for on its own, at the price its card showed, before
+      // it goes in. A renewal with a saved card, a free item or one the plan includes is paid at once; otherwise Stripe
+      // Checkout opens and the filing waits, approval saved, until it's paid (src/pricing.ts, the billing function).
+      if (billing?.price_model === "simple" && a.app) {
+        const shownQ = shownLicense.get(a.id);
+        if (!shownQ) { say(lang === "zh" ? "请先打开这份申报，查看快哉对它的收费，然后再批准。未收取任何费用。" : "Open this filing first to see Placetta's price for it, then approve. Nothing was charged."); return; }
+        let r: Awaited<ReturnType<typeof api.licensePay>>;
+        try { r = await api.licensePay(cloud.wsId, a.app, shownQ); }
+        catch (e) { shownLicense.delete(a.id); const er = e as api.ApiError; say((lang === "zh" && er.message_zh) || er.message); return; }
+        if (!r.paid && r.url) { hold(id); say(lang === "zh" ? "正在打开付款页面。付款后回到这里，再点一次批准即可提交。" : "Opening the payment page. Once it's paid, come back and approve once more to file it."); window.location.href = r.url; return; }
+        shownLicense.delete(a.id);
+        const line = await fileOne(a, sig);
+        if (line) { setPanelOpen(true); pushTurn(shown, { text: [line], filed: [a.app] }); }
+        return;
+      }
       if (plan !== "monthly") { hold(id); setPlans("file"); return; }
       // a filing past the plan's own licenses: approved at the price its card showed (0 within the allowance), under
       // the owner's monthly cap, before it goes (src/overage.ts); without a price shown, nothing is filed or charged
@@ -1018,7 +1033,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       return;
     }
     run({ approve: id }, shown);
-  }, [run, lang, cloud, plan, refresh, pushTurn, say, integrations, ownerOk, held, services]);
+  }, [run, lang, cloud, plan, billing, refresh, pushTurn, say, integrations, ownerOk, held, services]);
   approveRef.current = approve;
   /* Everything ready, from one tap: the same checks as one at a time (complete, nothing the second look says is wrong),
      filed in turn, and one answer that shows each filing live. */
@@ -1042,12 +1057,14 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       run({ approveAll: ids }, shown); return;
     }
     if (!ownerOk()) return;
+    // on the simple model each filing is approved on its own, at its own price
+    if (billing?.price_model === "simple") { say(lang === "zh" ? "每份申报单独批准，并显示各自的价格。先从这一份开始。" : "Each filing is approved on its own, with its own price. Starting with this one."); return approve(ok[0].id); }
     if (plan !== "monthly") { hold(ok[0].id); setPlans("file"); return; }
     setPanelOpen(true);
     const filed: string[] = [];
     for (const a of ok) { if (await fileOne(a) && a.app) filed.push(a.app); }
     if (filed.length) pushTurn(shown, { text: [B(`Approved ${filed.length === 2 ? "both" : `all ${filed.length}`}. I'm filing each one now; every step and what the agency sends back shows below, live.`, `已批准 ${filed.length} 项。我正在逐一提交，每一步和机构的回执都会实时显示在下方。`)], filed });
-  }, [held, cloud, say, lang, approve, run, ownerOk, plan, fileOne, pushTurn]);   // eslint-disable-line react-hooks/exhaustive-deps
+  }, [held, cloud, say, lang, approve, run, ownerOk, plan, billing, fileOne, pushTurn]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ---- Owner controls (src/autonomy.ts, src/commands.ts) ---- */
   // After a plan is approved in this browser: its work starts once the workspace shows the approval.
@@ -1139,6 +1156,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       openPlans: r => { if (!ownerOk()) return; setPlans(r ?? "start"); },
       checkout: async (p, o) => { if (!ownerOk()) return; try { goTo((await api.checkout(cloud.wsId, p, o)).url); } catch (e) { fail(e); } },
       portal: async () => { if (!ownerOk()) return; try { goTo((await api.billingPortal(cloud.wsId)).url); } catch (e) { fail(e); } },
+      startPlan: async (stores: number) => { if (!ownerOk()) return; try { goTo((await api.planCheckout(cloud.wsId, stores)).url); } catch (e) { fail(e); } },
       buyPack: async () => { if (!ownerOk()) return; try { goTo((await api.buyPack(cloud.wsId)).url); } catch (e) { if ((e as api.ApiError).code === "plan_required") setPlans("start"); else fail(e); } },
       connect: async kind => { if (!ownerOk()) return; try { goTo((await api.connectUrl(cloud.wsId, kind)).url); } catch (e) { if ((e as api.ApiError).code === "not_configured") say(lang === "zh" ? "这个连接即将开放。在此之前，可把机构来信转发到 support@placetta.com，团队会帮您添加。" : "This connection opens soon. Until then, forward agency emails to support@placetta.com and the team adds them for you."); else fail(e); } },
       connectHook: async (kind, url, secret) => { if (!ownerOk()) return false; try { await api.integration(cloud.wsId, "hook_connect", { kind, url, secret: secret || undefined, lang }); setIntegrations(await api.listIntegrations(cloud.wsId)); say(lang === "zh" ? "已连接，测试消息已发到群里。" : "Connected. A test message is in the group."); return true; } catch (e) { fail(e); return false; } },

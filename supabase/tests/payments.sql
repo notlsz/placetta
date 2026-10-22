@@ -9,7 +9,7 @@ begin
   insert into auth.identities (user_id, provider) values (a, 'email');
   insert into public.workspaces (id, name, authorized_at, authorized_by, created_by) values (w, 'P', now(), a, a), (w2, 'Q', now(), a, a);
   insert into public.workspace_members (workspace_id, user_id, role) values (w, a, 'owner'), (w2, a, 'owner');
-  insert into public.billing (workspace_id) values (w);
+  insert into public.billing (workspace_id, price_model) values (w, 'legacy');   -- a customer from before the simple model
   insert into public.billing (workspace_id, comped) values (w2, true);
 
   res := res || jsonb_build_object(
