@@ -25,7 +25,8 @@ export type Where = string;
 export type Method = "online" | "pdf_mail" | "pdf_fax" | "portal" | "in_person" | "insurer" | "none";
 export type FormField = { id: string; line: string; label: Bi; hint?: Bi; options?: string[] };
 export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; alcohol?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean; reference?: boolean;
-  wood?: boolean; upholstered?: boolean; clothingStorage?: boolean };   // furniture: wood goods, upholstered furniture, clothing storage units (src/forms/furniture.ts)   // reference: listed in the library and answers, never added to a plan
+  wood?: boolean; upholstered?: boolean; clothingStorage?: boolean;
+  terrace?: boolean };   // terrace: tables and chairs outside on the street (a pavement licence, a terrasse, a Sondernutzung)   // furniture: wood goods, upholstered furniture, clothing storage units (src/forms/furniture.ts)   // reference: listed in the library and answers, never added to a plan
 
 export type SignSpot = { page: number; x: number; y: number; w: number; h: number; date?: { x: number; y: number; size: number } };
 
@@ -69,7 +70,9 @@ export type OfficialForm = {
   except?: Where[];
   /** The proof behind the source link: a sentence (under 25 words) from the official page that states the requirement,
       the day it was read, and the URL that was fetched to read it (src/forms/proof.ts, scripts/eval/proof.ts). */
-  proof?: { quote: string; checked: string; read: string };
+  proof?: { quote: string; checked: string; read: string; en?: string };   // en: the quote in English, when the page isn't
+  /** A filing only a local professional may make (a notary, a lawyer, a gestor): Placetta prepares it and hands it to one. */
+  specialist?: Bi;
 };
 
 const F = (id: string, line: string, en: string, zh: string, options?: string[], hint?: Bi): FormField => ({ id, line, label: B(en, zh), ...(options ? { options } : {}), ...(hint ? { hint } : {}) });

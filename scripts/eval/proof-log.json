@@ -3037,5 +3037,184 @@
   "found": true,
   "sha256": "cf3455450afbeeb5",
   "context": "scribed by regulation. if the principal defaults with regard to any obligation, the principal and surety (jointly and severally) agree to pay liquidated damages of $5,000 for each violation. (k) agreement to comply with electronic entry and/or advance cargo information "
+ },
+ {
+  "id": "cbp-301",
+  "read": "https://cbp.gov/sites/default/files/assets/documents/2021-Jun/IE%20%E2%80%93%20Bond%20Recommendations.pdf",
+  "quote": "Customs Bonds are the backbone to the importation process guaranteeing the payment of duties, taxes, and fees to CBP",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "gb-incorporate",
+  "read": "https://www.gov.uk/limited-company-formation/register-your-company",
+  "quote": "It costs £100 and can be paid by debit or credit card.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "54ef23c60e07c78a",
+  "context": " the company legally exists and shows the company number and date of formation. it costs £100 and can be paid by debit or credit card. your company is usually registered within 24 hours. you can also use this servi"
+ },
+ {
+  "id": "gb-corp-tax",
+  "read": "https://www.gov.uk/limited-company-formation/register-your-company",
+  "quote": "You will usually be set up for Corporation Tax at the same time,",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "54ef23c60e07c78a",
+  "context": "er your company use this service to register your company with companies house. you will usually be set up for corporation tax at the same time, unless your company or association is 'dormant'. you may need the companies hou"
+ },
+ {
+  "id": "gb-vat",
+  "read": "https://www.gov.uk/register-for-vat",
+  "quote": "You must register if your total taxable turnover for the last 12 months goes over £90,000.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b0ed0638712b34fe",
+  "context": "our business did for itself if you exceeded the threshold in the last 12 months you must register if your total taxable turnover for the last 12 months goes over £90,000. you have to register within 30 days of the end of the month when you went over "
+ },
+ {
+  "id": "gb-paye",
+  "read": "https://www.gov.uk/register-employer",
+  "quote": "You must register before the first payday to get your employer PAYE reference number.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7122bb4af766ae7d",
+  "context": "only employing yourself, for example as the only director of a limited company. you must register before the first payday to get your employer paye reference number. this will be sent to you in a letter. you cannot register more than 2 months be"
+ },
+ {
+  "id": "gb-pension",
+  "read": "https://www.gov.uk/workplace-pensions-employers",
+  "quote": "You must enrol and make an employer’s contribution for all staff who:",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "de9d17bd98ddce8d",
+  "context": "d national insurance contributions from an employee's wages. who you must enrol you must enrol and make an employer's contribution for all staff who: are aged between 22 and the state pension age earn at least £10,000 a year norm"
+ },
+ {
+  "id": "gb-el-insurance",
+  "read": "https://www.gov.uk/employers-liability-insurance",
+  "quote": "as soon as you become an employer to cover you for at least £5 million from an authorised insurer",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "64a9593a63ee695e",
+  "context": "ployers' liability insurance you must get employers' liability ( el) insurance: as soon as you become an employer to cover you for at least £5 million from an authorised insurer el insurance will help you pay compensation if an employee is injured or become"
+ },
+ {
+  "id": "gb-planning",
+  "read": "https://www.gov.uk/planning-permission-england-wales",
+  "quote": "change the use of your building",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f9e7a6a95a4f7a71",
+  "context": "mething new make a major change to your building, such as building an extension change the use of your building to find out if your project will need planning permission, contact your local p"
+ },
+ {
+  "id": "gb-signage",
+  "read": "https://www.gov.uk/guidance/advertisements",
+  "quote": "Those which require the express consent of the local planning authority.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f785b9b1fbea6a80",
+  "context": "ess consent from the local planning authority; those which have deemed consent; those which require the express consent of the local planning authority. in detail: advertisements which do not require deemed consent or express consen"
+ },
+ {
+  "id": "gb-business-rates",
+  "read": "https://www.gov.uk/introduction-to-business-rates",
+  "quote": "Business rates are charged on most non-domestic properties, like:",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b99abd585882d2bf",
+  "context": "me pubs and licensed trade self-catering and holiday let accommodation overview business rates are charged on most non-domestic properties, like: shops offices pubs warehouses factories holiday rental homes or guest houses yo"
+ },
+ {
+  "id": "gb-fire",
+  "read": "https://www.gov.uk/workplace-fire-safety-your-responsibilities",
+  "quote": "carry out a fire risk assessment of the premises and review it regularly",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f6c25343c5871e28",
+  "context": "safety in northern ireland responsibilities as the responsible person you must: carry out a fire risk assessment of the premises and review it regularly tell staff or their representatives about the risks you've identified put in pl"
+ },
+ {
+  "id": "gb-food",
+  "read": "https://www.gov.uk/food-business-registration",
+  "quote": "You are required to register at least 28 days before trading.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "75e06114f921d6cd",
+  "context": "iene guidance for food banks and charities. england, wales and northern ireland you are required to register at least 28 days before trading. we recommend that you do not register too early, but that you wait until 28 day"
+ },
+ {
+  "id": "gb-premises",
+  "read": "https://www.gov.uk/premises-licence",
+  "quote": "You'll need a premises licence if you want to sell alcohol or offer entertainment from a particular venue",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f014c96981d4fd5d",
+  "context": " gov.uk search home find a licence licence premises licence (england and wales) you'll need a premises licence if you want to sell alcohol or offer entertainment from a particular venue apply for this licence enter a postcode for example sw1a 2aa find your local co"
+ },
+ {
+  "id": "gb-personal-licence",
+  "read": "https://www.gov.uk/personal-licence-to-sell-alcohol",
+  "quote": "You need a licence to sell alcohol from a licensed premises",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "fbd83fdf191febe7",
+  "context": "ome find a licence licence personal licence to sell alcohol (england and wales) you need a licence to sell alcohol from a licensed premises apply for this licence enter a postcode for example sw1a 2aa find your local co"
+ },
+ {
+  "id": "gb-pavement",
+  "read": "https://www.gov.uk/government/publications/pavement-licences-guidance",
+  "quote": "obtain a licence to place removable furniture, such as tables and chairs outside of cafes, bars, and restaurants quickly.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a8b94beff3643cdf",
+  "context": "vement licences process retains the streamlined consent route for businesses to obtain a licence to place removable furniture, such as tables and chairs outside of cafes, bars, and restaurants quickly. local authorities may charge up to £500 for first-time applications and £350 fo"
+ },
+ {
+  "id": "gb-eori",
+  "read": "https://www.gov.uk/eori",
+  "quote": "You may need an Economic Operators Registration and Identification number",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "e7f0b8b4ae6e27ae",
+  "context": "eori number report a change or cancel an eori number get help who needs an eori you may need an economic operators registration and identification number ( eori number) if you move goods: between great britain (england, scotland and "
+ },
+ {
+  "id": "gb-confirmation",
+  "read": "https://www.gov.uk/guidance/confirmation-statement-guidance",
+  "quote": "You must review your records and file at least one confirmation statement every 12 months.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "dcea5c845f460fdf",
+  "context": "mation register sign up to get an email reminder when it's time for you to file you must review your records and file at least one confirmation statement every 12 months. the review period ends 12 months after either: the date your company incorporat"
+ },
+ {
+  "id": "gb-accounts",
+  "read": "https://www.gov.uk/prepare-file-annual-accounts-for-limited-company",
+  "quote": "After the end of its financial year, your private limited company must prepare:",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "9eb421ade35d4fa9",
+  "context": "accounts and tax returns apply to extend your accounts filing deadline overview after the end of its financial year, your private limited company must prepare: full ('statutory') annual accounts a company tax return you need your accounts "
  }
 ]

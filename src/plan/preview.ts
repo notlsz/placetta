@@ -23,6 +23,7 @@ export type PreviewOptions = {
   buildout?: boolean;       // builds out the space (default yes)
   imports?: boolean;        // imports the goods it sells (default: read from what it is, "importer", "进口")
   alcohol?: boolean;        // sells beer, wine or spirits (default: read from what it is)
+  terrace?: boolean;        // puts tables outside (default: read from what it is)
   today?: string;           // YYYY-MM-DD, for tests
   storeId?: string;         // the store the rows belong to, for the projected opening
 };
@@ -190,6 +191,8 @@ const NO_ALCOHOL = /\b(no|without|non-?)\s*(alcohol|beer|wine|liquor)|alcohol-fr
 export const sellsAlcohol = (what: string) => ALCOHOL.test(what) && !NO_ALCOHOL.test(what);
 /** What it is says it imports what it sells. */
 export const imports = (what: string) => /\bimport(s|er|ers|ing)?\b|进口|跨境/i.test(what);
+/** What it is says it puts tables outside: "café with a terrace", "outdoor seating", "露台". */
+export const terrace = (what: string) => /\bterrace\b|\bterrasse\b|outdoor (seating|tables)|sidewalk (cafe|café|seating|tables)|pavement (cafe|café|tables)|patio|露台|外摆/i.test(what);
 
 type Role = "entity" | "ein" | "tax" | "employer" | "plan" | "food" | "license" | "building" | "publication" | "other";
 /** What a form does in an opening, so the rows can be chained in order. */
@@ -230,7 +233,7 @@ const NO_QUOTE = B("Placetta has no current quote from the agency's own page say
 function abstain(a: Application, ask: Bi, feeNote: Bi = NO_QUOTE): Application {
   const said = confirm(ask.en, ask.zh);
   const name = /We'll confirm with/.test(a.name.en) ? a.name : B(`${a.name.en}: ${said.en}`, `${a.name.zh}：${said.zh}`);
-  const { quote: _q, checked: _c, ...source } = a.source;
+  const { quote: _q, checked: _c, quoteEn: _e, ...source } = a.source;
   return { ...a, name, abstain: true, fees: [{ label: B("Government fee", "政府规费"), amount: 0, tbd: true }], feeNote, est: CONFIRMS, source };
 }
 
@@ -249,7 +252,8 @@ function fromForm(f: OfficialForm, today: string): Application {
     ...(f.currency && f.currency !== "USD" ? { currency: f.currency } : {}),
     feeNote: f.feeNote ?? (f.fee == null ? FEE_SET : FEE_PUB),
     est: f.takes ?? NO_TIME, renews: f.renews,
-    source: { label: host(f.info || f.url), url: f.info || f.url, ...(f.proof && seen ? { quote: f.proof.quote, checked: seen } : {}) }, form: same(f.form), fields, checklist,
+    source: { label: host(f.info || f.url), url: f.info || f.url, ...(f.proof && seen ? { quote: f.proof.quote, checked: seen, ...(f.proof.en ? { quoteEn: f.proof.en } : {}) } : {}) }, form: same(f.form), fields, checklist,
+    ...(f.specialist ? { specialist: f.specialist } : {}),
   };
   return seen ? a : abstain(a, theAgency(f.agency));
 }
@@ -279,7 +283,7 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
   const employees = o.employees ?? true, buildout = o.buildout ?? true;
   const alcohol = o.alcohol ?? sellsAlcohol(what);
   // a furniture brand: wood goods, upholstered furniture and clothing storage units, read from what it is (src/forms/furniture.ts)
-  const needs = { food, employees, signage: o.signage ?? true, buildout, newEntity: !(o.entity ?? "").trim(), imports: o.imports ?? imports(what), alcohol, ...furnitureNeeds(what) };
+  const needs = { food, employees, signage: o.signage ?? true, buildout, newEntity: !(o.entity ?? "").trim(), imports: o.imports ?? imports(what), alcohol, terrace: o.terrace ?? terrace(what), ...furnitureNeeds(what) };
   const info = placeInfo(where), places = placesOf(where);
   const country = info.country ?? "US";
   const us = country === "US";

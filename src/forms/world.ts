@@ -2,6 +2,7 @@ import { B, type Bi } from "../bi";
 import type { Level } from "../model";
 import type { FormField, Method, Needs, OfficialForm, Segment } from "./registry";
 import { usLocality } from "./usplace";
+import { UK_FORMS } from "./europe";
 
 /* Beyond the US forms library: the major cities in China, Europe, the Middle East and the US tier 1, with each
    country's core registrations and each city's own portal. Links are the agencies' official sites. These entries are
@@ -43,11 +44,23 @@ export const COUNTRIES: Country[] = [
   { code: "EG", en: "Egypt", zh: "埃及", currency: "EGP", names: /egypt|埃及/i },
   { code: "JO", en: "Jordan", zh: "约旦", currency: "JOD", names: /jordan|约旦/i },
   { code: "IL", en: "Israel", zh: "以色列", currency: "ILS", names: /israel|以色列/i },
+  // "New Mexico" (新墨西哥州) is a US state, not Mexico
+  { code: "MX", en: "Mexico", zh: "墨西哥", currency: "MXN", names: /(?<!new )\bmexico\b|(?<!新)墨西哥|\bcdmx\b|quintana roo|nuevo leon|\bjalisco\b/i },
 ];
+
+/** The EU's member states among the registry's countries: the EU-wide rules (src/forms/europe.ts, where "EU") apply in each. */
+export const EU_MEMBERS = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"];
 
 const c = (code: string, country: string, en: string, zh: string, aliases: string[], guide = true, state?: string): City => ({ code, country, en, zh, aliases, guide, ...(state ? { state } : {}) });
 
 export const CITIES: City[] = [
+  /* Mexico (first: Mexico City's Roma and Juárez neighborhoods aren't Rome or Ciudad Juárez). Each city's state is its
+     code ("NLE" Nuevo León, "JAL" Jalisco, "ROO" Quintana Roo), for the state's own steps (src/forms/mexico.ts). */
+  c("MX-CMX", "MX", "Mexico City", "墨西哥城", ["mexico city", "ciudad de mexico", "cdmx", "墨西哥城", "polanco", "roma norte", "colonia roma", "condesa", "coyoacan", "cuauhtemoc, cdmx", "miguel hidalgo, cdmx"]),
+  c("MX-MTY", "MX", "Monterrey", "蒙特雷", ["monterrey", "蒙特雷"], true, "NLE"),
+  c("MX-GDL", "MX", "Guadalajara", "瓜达拉哈拉", ["guadalajara", "瓜达拉哈拉"], true, "JAL"),
+  c("MX-CUN", "MX", "Cancún", "坎昆", ["cancun", "坎昆", "benito juarez, quintana roo"], true, "ROO"),
+
   /* China: the guide cities, then the cities where the national steps apply and the agent researches the local ones */
   c("CN-BJ", "CN", "Beijing", "北京", ["beijing", "北京", "chaoyang", "朝阳区", "haidian", "海淀", "dongcheng", "东城", "xicheng", "西城", "sanlitun", "三里屯", "wangfujing", "王府井"]),
   c("CN-SH", "CN", "Shanghai", "上海", ["shanghai", "上海", "pudong", "浦东", "jing'an", "jingan", "静安", "huangpu", "黄浦", "xuhui", "徐汇", "minhang", "闵行", "changning", "长宁"]),
@@ -91,6 +104,13 @@ export const CITIES: City[] = [
   c("PL-WAW", "PL", "Warsaw", "华沙", ["warsaw", "warszawa", "华沙"]),
   c("NO-OSL", "NO", "Oslo", "奥斯陆", ["oslo", "奥斯陆"]),
   c("FI-HEL", "FI", "Helsinki", "赫尔辛基", ["helsinki", "赫尔辛基"]),
+  // the largest commercial city beside each capital, added 2026-10-21 with the national steps (src/forms/europe.ts)
+  c("IE-ORK", "IE", "Cork", "科克", ["cork, ireland", "cork city", "科克"]),
+  c("CH-BRN", "CH", "Bern", "伯尔尼", ["bern", "berne", "伯尔尼"]),
+  c("AT-GRZ", "AT", "Graz", "格拉茨", ["graz", "格拉茨"]),
+  c("SE-GOT", "SE", "Gothenburg", "哥德堡", ["gothenburg", "goteborg", "哥德堡"]),
+  c("DK-AAR", "DK", "Aarhus", "奥胡斯", ["aarhus", "århus", "奥胡斯"]),
+  c("NO-BGO", "NO", "Bergen", "卑尔根", ["bergen, norway", "bergen", "卑尔根"]),
   ...([["GB", "Birmingham", "伯明翰"], ["GB", "Edinburgh", "爱丁堡"], ["GB", "Glasgow", "格拉斯哥"], ["GB", "Liverpool", "利物浦"], ["FR", "Lyon", "里昂"], ["FR", "Marseille", "马赛"],
     ["FR", "Nice, France", "尼斯"], ["DE", "Cologne", "科隆"], ["DE", "Stuttgart", "斯图加特"], ["DE", "Düsseldorf", "杜塞尔多夫"], ["ES", "Valencia", "瓦伦西亚"], ["ES", "Seville", "塞维利亚"],
     ["IT", "Naples", "那不勒斯"], ["IT", "Turin", "都灵"], ["IT", "Florence", "佛罗伦萨"], ["IT", "Venice, Italy", "威尼斯"], ["NL", "The Hague", "海牙"], ["NL", "Utrecht", "乌得勒支"],
@@ -285,33 +305,8 @@ export const WORLD_FORMS: OfficialForm[] = [
     form: `${zh}企业开办一网通办`, title: [`Open the business on ${en}'s one-stop portal`, `在${zh}企业开办平台一网通办`], agency: [aen, azh],
     how: [`${en}'s portal takes the company registration, seal, tax, social insurance and invoices in one online application, and is where the food business license is applied for.`, `${zh}的平台一次在线申请即可办理企业登记、刻章、税务、社保和发票，食品经营许可证也在此申请。`], url })),
 
-  /* ------------------------------- United Kingdom ------------------------------- */
-  W({ id: "gb-incorporate", where: "GB", level: "federal", needs: { newEntity: true }, method: "online", order: 10, cur: "GBP",
-    form: "Register a private limited company (IN01)", title: ["Company incorporation", "公司注册"], agency: ["Companies House", "英国公司注册处（Companies House）"],
-    how: ["Filed online with Companies House. Every director and person with significant control must verify their identity first.", "在 Companies House 在线注册。所有董事和重要控制人须先完成身份验证。"],
-    url: "https://www.gov.uk/limited-company-formation/register-your-company", info: "https://www.gov.uk/government/organisations/companies-house",
-    feeNote: ["Set by Companies House; the filing team confirms the current fee.", "以 Companies House 公布为准，团队会确认当前费用。"], takes: ["Online applications are usually done within 24 hours.", "在线申请通常 24 小时内完成。"],
-    fields: [F("name", "Name", "Company name", "公司名称"), F("office", "Registered office", "Registered office address in the UK", "英国注册办公地址"), F("sic", "SIC", "SIC code for the business activity", "业务 SIC 代码"),
-      F("directors", "Officers", "Directors", "董事"), F("psc", "PSC", "People with significant control", "重要控制人"), F("shares", "Capital", "Share capital and shareholders", "股本与股东")],
-    foreign: ["A company formed abroad can instead register a UK establishment (overseas company registration).", "境外公司也可改为注册英国分支机构（海外公司登记）。"] }),
-  W({ id: "gb-vat", where: "GB", level: "federal", method: "online", order: 25, cur: "GBP", fee: 0,
-    form: "VAT registration", title: ["VAT registration", "增值税（VAT）登记"], agency: ["HM Revenue & Customs", "英国税务海关总署（HMRC）"],
-    how: ["Required once taxable turnover passes £90,000 in 12 months. A business not established in the UK registers from its first UK sale.", "12 个月应税营业额超过 9 万英镑时必须登记。未在英国设立的企业自首笔英国销售起即须登记。"],
-    url: "https://www.gov.uk/register-for-vat" }),
-  W({ id: "gb-paye", where: "GB", level: "federal", needs: { employees: true }, method: "online", order: 28, cur: "GBP", fee: 0,
-    form: "Register as an employer (PAYE)", title: ["Employer registration (PAYE)", "雇主登记（PAYE）"], agency: ["HM Revenue & Customs", "英国税务海关总署（HMRC）"],
-    how: ["Register before the first payday; it can take up to 5 working days to get the employer reference.", "须在首次发薪前登记，获得雇主编号最多需要 5 个工作日。"], url: "https://www.gov.uk/register-employer" }),
-  W({ id: "gb-eori", where: "GB", level: "federal", segs: ["seller", "warehouse", "retail"], needs: { imports: true }, method: "online", order: 35, cur: "GBP", fee: 0,
-    form: "EORI number", title: ["EORI number for importing", "进口用 EORI 号码"], agency: ["HM Revenue & Customs", "英国税务海关总署（HMRC）"],
-    how: ["Needed before moving goods into the UK.", "向英国运入货物前必须取得。"], url: "https://www.gov.uk/eori" }),
-  W({ id: "gb-food", where: "GB", level: "city", segs: ["restaurant", "retail", "warehouse", "seller"], needs: { food: true }, method: "online", order: 60, cur: "GBP", fee: 0,
-    form: "Register a food business", title: ["Food business registration", "食品企业登记"], agency: ["Local council environmental health", "所在地市政厅环境卫生部门"],
-    how: ["Register with the local council at least 28 days before opening. It's free, and the council inspects and gives a food hygiene rating.", "开业前至少 28 天向当地市政厅登记，免费，市政厅会检查并给出食品卫生评级。"],
-    url: "https://www.gov.uk/food-business-registration" }),
-  W({ id: "gb-premises", where: "GB", level: "city", segs: ["restaurant"], method: "online", order: 70, cur: "GBP",
-    form: "Premises licence", title: ["Premises licence (alcohol or late-night hot food)", "场所许可证（售酒或深夜热食）"], agency: ["Local council licensing", "所在地市政厅许可部门"],
-    how: ["Needed only to sell alcohol, or hot food and drink between 11pm and 5am.", "仅在售酒，或在晚 11 点至早 5 点供应热食热饮时需要。"], url: "https://www.gov.uk/premises-licence",
-    feeNote: ["Set by the premises' rateable value.", "按场所应税估值确定。"] }),
+  /* United Kingdom: src/forms/europe.ts */
+  ...UK_FORMS,
 
   /* ------------------------------- France ------------------------------- */
   W({ id: "fr-guichet", where: "FR", level: "federal", method: "online", order: 10, cur: "EUR",
@@ -513,11 +508,14 @@ export function worldPlaces(place: string): Place {
   // a full US address names its city second to last ("…, Arcadia, CA 91007"): that city first, then any alias
   const parts = w.split(",").map(s => s.trim()), named = parts.length >= 2 ? parts[parts.length - 2] : "";
   const lastSt = /^([a-z]{2})(\s+\d{5}(-\d{4})?)?$/.exec(parts[parts.length - 1] ?? "")?.[1]?.toUpperCase();
+  // where two cities share a name (Guadalajara in Mexico and in Spain), the one whose country the place names wins
+  const hits = CITIES.filter(x => (!usState || x.country === "US") && x.aliases.some(a => has(w, a.toLowerCase())));
   const city = (named ? CITIES.find(x => x.country === "US" && x.en.toLowerCase() === named && (!lastSt || x.state === lastSt)) : undefined)
-    ?? CITIES.find(x => (!usState || x.country === "US") && x.aliases.some(a => has(w, a.toLowerCase())));
+    ?? hits.find(x => x.country !== "US" && COUNTRIES.find(k => k.code === x.country)!.names.test(w)) ?? hits[0];
   const country = COUNTRIES.find(x => x.code === city?.country) ?? (usState ? undefined : COUNTRIES.find(x => x.code !== "US" && x.names.test(w)));
   const codes: string[] = [];
   if (country) codes.push(country.code);
+  if (country && EU_MEMBERS.includes(country.code)) codes.push("EU");
   if (city?.state) codes.push(city.state);
   for (const s of STATES) if (s.names.test(where) && !codes.includes(s.code)) codes.push(s.code);
   if (city) codes.push(city.code);

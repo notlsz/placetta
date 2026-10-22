@@ -318,6 +318,8 @@ function Fees({ a }: { a: Application }) {
         {a.renews && <div><dt>{t("k_renewal")}</dt><dd>{b(a.renews)}</dd></div>}
         <div><dt>{t("source")}</dt><dd><a href={a.source.url} target="_blank" rel="noopener noreferrer">{a.source.label}<I.ext /></a></dd></div>
         {a.source.quote && <div><dt>{t("src_quote")}</dt><dd className="src-q">“{a.source.quote}”</dd></div>}
+        {a.source.quoteEn && <div><dt>{t("src_quote_en")}</dt><dd className="src-q">“{a.source.quoteEn}”</dd></div>}
+        {a.specialist && <div><dt>{t("specialist")}</dt><dd>{b(a.specialist)}</dd></div>}
         {a.source.checked && <div><dt>{t("src_checked")}</dt><dd>{a.source.checked}</dd></div>}
       </dl>
     </div>
@@ -330,8 +332,9 @@ export function SourceQuote({ a }: { a: Pick<Application, "source"> }) {
   const { t } = useApp();
   if (!a.source.quote) return null;
   return (
-    <blockquote className="src-q" lang="en">
+    <blockquote className="src-q" lang={a.source.quoteEn ? undefined : "en"}>
       <span className="src-q-l">{t("src_quote")}</span> “{a.source.quote}”
+      {a.source.quoteEn && <span className="src-q-t" lang="en"> ({a.source.quoteEn})</span>}
       {a.source.checked && <span className="src-q-d"> {t("src_checked")} {a.source.checked}</span>}
     </blockquote>
   );

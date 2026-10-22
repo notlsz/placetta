@@ -48,7 +48,9 @@ export type Application = {
   est: Bi;                   // how long the agency usually takes
   // quote: the sentence on that page that states the requirement (under 25 words, in English as the agency wrote it),
   // checked: the day it was read (YYYY-MM-DD)
-  source: { label: string; url: string; quote?: string; checked?: string };
+  // quoteEn: the quote in English, when the agency wrote it in another language (the quote stays as written)
+  source: { label: string; url: string; quote?: string; checked?: string; quoteEn?: string };
+  specialist?: Bi;           // only a local notary, lawyer or gestor may file it: Placetta prepares it and hands it over
   form?: Bi;                 // the form Placetta fills
   fields: Field[];
   checklist: CheckItem[];
