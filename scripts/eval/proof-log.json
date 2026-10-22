@@ -3656,5 +3656,115 @@
   "found": true,
   "sha256": "227dc4876bfe88e4",
   "context": "tirada y gestión de residuos procedentes de obras de construcción y demolición. la ocupación de la vía pública, cuando resulte necesario. asimismo, deberá comunicarse el cambio de titularidad cuando se produzca una mo"
+ },
+ {
+  "id": "nl-bv",
+  "read": "https://business.gov.nl/starting-your-business/preparations/step-by-step-plan-how-to-start-a-business-in-the-netherlands/",
+  "quote": "Private limited companies and public limited companies have to register via a civil-law notary.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "e1638a59d5d3ca3d",
+  "context": "ou do not need to register your company separately with the tax administration. private limited companies and public limited companies have to register via a civil-law notary. the notary will take care of the registration at the tax administration on your"
+ },
+ {
+  "id": "nl-kvk",
+  "read": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+  "quote": "New businesses must register with the Netherlands Chamber of Commerce KVK.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "653b79cd5e44588f",
+  "context": ". read how it works. register your hospitality business with kvk open mandatory new businesses must register with the netherlands chamber of commerce kvk. kvk will pass on your details to the netherlands tax administration ( belasting"
+ },
+ {
+  "id": "nl-btw",
+  "read": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+  "quote": "If the Tax Administration sees you as an entrepreneur, you will receive a VAT identification number and a VAT number.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "653b79cd5e44588f",
+  "context": " pass on your details to the netherlands tax administration ( belastingdienst). if the tax administration sees you as an entrepreneur, you will receive a vat identification number and a vat number. read more about: filing a vat return vat numbers bring your rental or purchase "
+ },
+ {
+  "id": "nl-loonheffing",
+  "read": "https://business.gov.nl/starting-your-business/registering-your-business/registering-with-the-netherlands-tax-administration/",
+  "quote": "Before you can hire staff, you will first need to register as an employer for social security purposes with the Tax Administration.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "44bed4cc038f9842",
+  "context": "tax return form. you do not need to submit a separate request for a vat number. before you can hire staff, you will first need to register as an employer for social security purposes with the tax administration. you will then receive a payroll tax number and several forms to fill in. the pa"
+ },
+ {
+  "id": "nl-nvwa",
+  "read": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+  "quote": "If your company manufactures, processes, or sells food products, you must register your business with the Netherlands Food and Consumer Product Safety Authority (NVWA).",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "653b79cd5e44588f",
+  "context": " on some outdoor terraces. register your food business with nvwa open mandatory if your company manufactures, processes, or sells food products, you must register your business with the netherlands food and consumer product safety authority (nvwa). the nvwa checks that food is produced, processed, and sold according to the rul"
+ },
+ {
+  "id": "nl-exploitatie",
+  "read": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+  "quote": "If customers eat and drink in your restaurant or café you need a catering establishment operating permit",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "653b79cd5e44588f",
+  "context": "e the main hospitality licences: + catering establishment operating permit open if customers eat and drink in your restaurant or café you need a catering establishment operating permit ( horecavergunning). sometimes this permit is not required. for example, for a "
+ },
+ {
+  "id": "nl-alcohol",
+  "read": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+  "quote": "If alcoholic beverages are sold and consumed in your catering business, you must have an alcohol licence",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "653b79cd5e44588f",
+  "context": "quirements open an operating licence alone does not allow you to serve alcohol. if alcoholic beverages are sold and consumed in your catering business, you must have an alcohol licence. you can apply to your local municipality for this if you meet the following co"
+ },
+ {
+  "id": "nl-terras",
+  "read": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+  "quote": "You must have a permit if you want to set up a terrace",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "653b79cd5e44588f",
+  "context": "uction of hospitality establishments. view all the rules. + terrace permit open you must have a permit if you want to set up a terrace read how to apply for a terrace permit. + permit for gaming machine open do you"
+ },
+ {
+  "id": "nl-omgeving",
+  "read": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+  "quote": "If your plans do not fit within the environment plan, you will need to apply for an environment and planning permit",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "653b79cd5e44588f",
+  "context": "on the map, in dutch) at the environment and planning portal ( omgevingsloket). if your plans do not fit within the environment plan, you will need to apply for an environment and planning permit. are you planning to carry out building works? check whether you need an enviro"
+ },
+ {
+  "id": "nl-reclame",
+  "read": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+  "quote": "In that case, you will often need an environment and planning permit as well.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "653b79cd5e44588f",
+  "context": "fferent rules apply. do you want to display advertising on or on your premises? in that case, you will often need an environment and planning permit as well. use the permit check (in dutch) to find out what other permits you need for you"
+ },
+ {
+  "id": "nl-brand",
+  "read": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+  "quote": "You must also take fire safety measures.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "653b79cd5e44588f",
+  "context": "k make sure your business complies with fire safety requirements open mandatory you must also take fire safety measures. for example, use non-flammable or flame-retardant materials. read more about fi"
  }
 ]

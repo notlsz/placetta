@@ -413,4 +413,59 @@ export const SPAIN_FORMS: OfficialForm[] = [
     how: ["Shops and restaurants notify the city of their activity online before opening; some need a licence.", "门店和餐厅开业前须在线向市政府申报经营活动，部分需申请许可。"], url: "https://ajuntament.barcelona.cat" }),
 ];
 
-export const EUROPE_FORMS: OfficialForm[] = [...UK_FORMS, ...EU_FORMS, ...FRANCE_FORMS, ...GERMANY_FORMS, ...ITALY_FORMS, ...SPAIN_FORMS];
+/* ------------------------------------------------------------------ the Netherlands (Amsterdam and Rotterdam through the gemeente) */
+const BGN = "https://business.gov.nl/starting-your-business";
+const NL_HORECA = `${BGN}/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/`;
+const NL_START = `${BGN}/preparations/step-by-step-plan-how-to-start-a-business-in-the-netherlands/`;
+const NL_TAX = `${BGN}/registering-your-business/registering-with-the-netherlands-tax-administration/`;
+const NL_GEMEENTE: T = ["The gemeente (municipality): Gemeente Amsterdam, Gemeente Rotterdam", "所在市政府（gemeente）：阿姆斯特丹市、鹿特丹市"];
+
+export const NETHERLANDS_FORMS: OfficialForm[] = [
+  E({ id: "nl-bv", where: "NL", level: "federal", needs: { newEntity: true }, method: "in_person", order: 8, cur: "EUR",
+    form: "Oprichting BV (notariële akte)", title: ["Private limited company (BV) through a civil-law notary", "经民法公证人设立私人有限公司（BV）"], agency: ["Civil-law notary (notaris)", "民法公证人（notaris）"],
+    how: ["A BV is incorporated by a civil-law notary's deed, which includes the articles; the notary registers it with KVK and the tax office.", "BV 以民法公证人出具的设立文书（含公司章程）设立，由公证人向 KVK 和税务局办理登记。"], url: "https://www.kvk.nl",
+    specialist: ["A Dutch civil-law notary (notaris) incorporates the BV: Placetta prepares the details and hands them to one.", "BV 须由荷兰民法公证人（notaris）设立：快哉准备资料并交给公证人。"],
+    proof: [NL_START, "Private limited companies and public limited companies have to register via a civil-law notary."] }),
+  E({ id: "nl-kvk", where: "NL", level: "federal", method: "in_person", order: 10, cur: "EUR",
+    form: "Inschrijving Handelsregister", title: ["Business register entry (KVK)", "商业登记（KVK）"], agency: ["Kamer van Koophandel (KVK)", "荷兰商会（KVK）"],
+    how: ["Every new business registers with KVK, with its lease or purchase contract; KVK passes the details to the tax office. A foreign company opening a branch registers it too.", "所有新企业须携租赁或购买合同在 KVK 登记；KVK 会将信息转给税务局。外国公司开设分支机构也须登记。"], url: "https://www.kvk.nl",
+    proof: [NL_HORECA, "New businesses must register with the Netherlands Chamber of Commerce KVK."] }),
+  E({ id: "nl-btw", where: "NL", level: "federal", method: "none", order: 25, cur: "EUR",
+    form: "Btw-identificatienummer", title: ["VAT numbers from the tax office (Belastingdienst)", "税务局（Belastingdienst）发放的增值税号"], agency: ["Belastingdienst", "荷兰税务局"],
+    how: ["No separate request: after the KVK registration the tax office sends the VAT identification number and the VAT number.", "无需另行申请：KVK 登记后，税务局会寄送增值税识别号和增值税号。"], url: "https://www.belastingdienst.nl",
+    proof: [NL_HORECA, "If the Tax Administration sees you as an entrepreneur, you will receive a VAT identification number and a VAT number."] }),
+  E({ id: "nl-loonheffing", where: "NL", level: "federal", needs: { employees: true }, method: "online", order: 60, cur: "EUR",
+    form: "Registratie als werkgever (loonheffingen)", title: ["Employer registration for payroll tax", "工资税雇主登记"], agency: ["Belastingdienst", "荷兰税务局"],
+    how: ["Before hiring, the company registers as an employer with the tax office and gets its payroll tax number.", "雇用员工前，公司须向税务局登记为雇主并取得工资税号。"], url: "https://www.belastingdienst.nl",
+    proof: [NL_TAX, "Before you can hire staff, you will first need to register as an employer for social security purposes with the Tax Administration."] }),
+  E({ id: "nl-nvwa", where: "NL", level: "federal", segs: ["restaurant", "retail", "warehouse", "seller"], needs: { food: true }, method: "online", order: 74, cur: "EUR",
+    form: "Registratie levensmiddelenbedrijf (NVWA)", title: ["Food business registration with the NVWA", "向荷兰食品与消费品安全局（NVWA）登记食品企业"], agency: ["Nederlandse Voedsel- en Warenautoriteit (NVWA)", "荷兰食品与消费品安全局（NVWA）"],
+    how: ["A business that makes, processes or sells food registers with the NVWA, and works to a HACCP food safety plan or an approved hygiene code, which the NVWA inspects.", "制作、加工或销售食品的企业须向 NVWA 登记，并执行 HACCP 食品安全计划或经批准的卫生规范，由 NVWA 检查。"], url: "https://www.nvwa.nl",
+    proof: [NL_HORECA, "If your company manufactures, processes, or sells food products, you must register your business with the Netherlands Food and Consumer Product Safety Authority (NVWA)."] }),
+  E({ id: "nl-exploitatie", where: "NL", level: "city", segs: ["restaurant"], method: "online", order: 55, cur: "EUR",
+    form: "Exploitatievergunning (horecavergunning)", title: ["Catering operating permit for the premises (exploitatievergunning)", "场所餐饮经营许可（exploitatievergunning）"], agency: NL_GEMEENTE,
+    how: ["Where customers eat and drink on the premises, the municipality's operating permit is needed; the municipality may run an integrity (Bibob) check.", "顾客在店内用餐饮料的场所须取得市政府经营许可；市政府可能进行诚信（Bibob）审查。"], url: "https://www.amsterdam.nl",
+    proof: [NL_HORECA, "If customers eat and drink in your restaurant or café you need a catering establishment operating permit"] }),
+  E({ id: "nl-alcohol", where: "NL", level: "city", segs: STORES, needs: { alcohol: true }, method: "online", order: 71, cur: "EUR",
+    form: "Alcoholwetvergunning", title: ["Alcohol licence", "酒类许可（Alcoholwetvergunning）"], agency: NL_GEMEENTE,
+    how: ["Applied for with the municipality by owners aged 21 or over who hold the Social Hygiene certificate; the premises must meet the Alcohol Act's layout rules.", "由年满 21 岁并持有社会卫生证书的经营者向市政府申请；场所须符合《酒类法》的布局要求。"], url: "https://www.amsterdam.nl",
+    proof: [NL_HORECA, "If alcoholic beverages are sold and consumed in your catering business, you must have an alcohol licence"] }),
+  E({ id: "nl-terras", where: "NL", level: "city", segs: STORES, needs: { terrace: true }, method: "online", order: 73, cur: "EUR",
+    form: "Terrasvergunning", title: ["Terrace permit", "露台许可"], agency: NL_GEMEENTE,
+    how: ["Applied for with the municipality before setting up tables outside; precario tax may be billed for the land.", "在户外摆放桌椅前向市政府申请；可能须为占用土地缴纳占用税（precario）。"], url: "https://www.amsterdam.nl",
+    proof: [NL_HORECA, "You must have a permit if you want to set up a terrace"] }),
+  E({ id: "nl-omgeving", where: "NL", level: "city", segs: PREMISES, needs: { buildout: true }, method: "online", order: 50, cur: "EUR",
+    form: "Omgevingsvergunning", title: ["Environment and planning permit, where the plans don't fit the environment plan", "环境与规划许可（方案不符合环境规划时）"], agency: NL_GEMEENTE,
+    how: ["Checked first against the municipality's environment plan on the Omgevingsloket; building works or a use the plan doesn't allow need the permit.", "先在 Omgevingsloket 上对照市政府的环境规划核查；建筑工程或规划不允许的用途须申请该许可。"], url: "https://omgevingswet.overheid.nl",
+    proof: [NL_HORECA, "If your plans do not fit within the environment plan, you will need to apply for an environment and planning permit"] }),
+  E({ id: "nl-reclame", where: "NL", level: "city", segs: PREMISES, needs: { signage: true }, method: "online", order: 66, cur: "EUR",
+    form: "Omgevingsvergunning (reclame)", title: ["Permit for the shop sign", "门店招牌许可"], agency: NL_GEMEENTE,
+    how: ["Advertising on or at the premises often needs an environment and planning permit; the permit check shows which.", "在场所上或场所处设置广告通常须申请环境与规划许可；可通过许可检查工具确认。"], url: "https://omgevingswet.overheid.nl",
+    proof: [NL_HORECA, "In that case, you will often need an environment and planning permit as well."] }),
+  E({ id: "nl-brand", where: "NL", level: "city", segs: PREMISES, method: "none", order: 72, cur: "EUR",
+    form: "Brandveiligheid", title: ["Fire safety measures (checked by the municipality and the fire service)", "消防安全措施（由市政府和消防部门检查）"], agency: NL_GEMEENTE,
+    how: ["The premises take fire safety measures, such as non-flammable or flame-retardant materials; larger premises notify the municipality of their fire-safe use.", "场所须采取消防安全措施，例如使用不燃或阻燃材料；较大场所须向市政府申报其消防安全使用。"], url: NL_HORECA,
+    proof: [NL_HORECA, "You must also take fire safety measures."] }),
+];
+
+export const EUROPE_FORMS: OfficialForm[] = [...UK_FORMS, ...EU_FORMS, ...FRANCE_FORMS, ...GERMANY_FORMS, ...ITALY_FORMS, ...SPAIN_FORMS, ...NETHERLANDS_FORMS];

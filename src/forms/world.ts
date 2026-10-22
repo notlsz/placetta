@@ -308,17 +308,6 @@ export const WORLD_FORMS: OfficialForm[] = [
   /* the UK, the EU's own rules and the European countries a brand enters first: src/forms/europe.ts */
   ...EUROPE_FORMS,
 
-  /* ------------------------------- Spain, Italy, Netherlands ------------------------------- */
-  W({ id: "nl-kvk", where: "NL", level: "federal", method: "in_person", order: 10, cur: "EUR",
-    form: "Inschrijving Handelsregister", title: ["Business register (KVK)", "商业登记（KVK）"], agency: ["Kamer van Koophandel (KVK)", "荷兰商会（KVK）"],
-    how: ["Register with KVK before starting; a BV is registered by a notary. Sole traders get their VAT number from the tax office automatically.", "开业前在 KVK 登记；BV 公司由公证人办理。个体经营者会自动获得税务局发放的增值税号。"], url: "https://www.kvk.nl" }),
-  W({ id: "nl-tax", where: "NL", level: "federal", method: "online", order: 25, cur: "EUR", fee: 0,
-    form: "Belastingdienst registratie", title: ["Tax and VAT registration", "税务与增值税登记"], agency: ["Belastingdienst", "荷兰税务局"],
-    how: ["Companies and foreign businesses register with the tax office for VAT and payroll tax.", "公司和境外企业须向税务局登记增值税和工资税。"], url: "https://www.belastingdienst.nl" }),
-  W({ id: "nl-ams-horeca", where: "NL-AMS", level: "city", segs: ["restaurant"], method: "online", order: 60, cur: "EUR",
-    form: "Exploitatievergunning", title: ["Hospitality operating permit", "餐饮经营许可"], agency: ["Gemeente Amsterdam", "阿姆斯特丹市政府"],
-    how: ["Restaurants and cafes need the city's operating permit; with alcohol, an alcohol licence too.", "餐厅和咖啡馆须取得市政府经营许可，售酒还需酒类许可证。"], url: "https://www.amsterdam.nl" }),
-
   /* ------------------------------- the rest of Europe: the core national steps ------------------------------- */
   ...([
     ["ie-cro", "IE", "Company registration (CORE)", "公司注册（CORE）", "Companies Registration Office", "爱尔兰公司注册处", "https://core.cro.ie", "Register the company online, then register for tax with Revenue.", "在线注册公司，之后向税务局登记税务。"],
