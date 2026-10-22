@@ -69,3 +69,34 @@ export const MEXICO_FORMS: OfficialForm[] = [
     form: "Licencia de funcionamiento", title: ["Municipal operating licence (Benito Juárez, Cancún)", "市级经营许可（贝尼托华雷斯市，坎昆）"], agency: ["Municipio de Benito Juárez (Cancún)", "贝尼托华雷斯市政府（坎昆）"],
     how: ["Shops and restaurants get the municipality's operating licence.", "门店和餐厅须取得市政府的经营许可。"], url: "https://cancun.gob.mx" }),
 ];
+
+/* Added in the coverage audit of 2026-10-22 (docs/COVERAGE.md): the employer's housing fund, each state's payroll tax,
+   Mexico City's civil protection program and Monterrey's alcohol consent. None of their official pages could be read
+   for a sentence (INFONAVIT's and Mexico City's civil protection portals don't answer; the state finance sites are
+   built in script), so all are UNVERIFIED: the rows abstain, name the office and state no fee or rate. */
+const ISN_HOW: T = ["Employers with staff in the state register for the state's payroll tax (impuesto sobre nóminas) with its finance office and pay it monthly on the wages paid there.", "在该州有员工的雇主须向州财政部门登记州工资税（impuesto sobre nóminas），并按在该州支付的工资每月缴纳。"];
+const isn = (where: string, state: string, stateZh: string, agency: T, url: string) => E({ id: `mx-${where.toLowerCase()}-isn`, where, level: "state", needs: { employees: true }, method: "online", order: 62, cur: "MXN",
+  form: "Inscripción al padrón del Impuesto sobre Nóminas", title: [`State payroll tax registration (${state})`, `州工资税登记（${stateZh}）`], agency, how: ISN_HOW, url });
+
+export const MEXICO_GAPS: OfficialForm[] = [
+  E({ id: "mx-infonavit", where: "MX", level: "federal", needs: { employees: true }, method: "online", order: 61, cur: "MXN",
+    form: "Registro patronal ante el INFONAVIT", title: ["Employer registration with the workers' housing fund (INFONAVIT)", "向工人住房基金（INFONAVIT）办理雇主登记"],
+    agency: ["Instituto del Fondo Nacional de la Vivienda para los Trabajadores (INFONAVIT)", "墨西哥全国工人住房基金管理局（INFONAVIT）"],
+    how: ["An employer pays housing contributions for each worker to INFONAVIT, alongside its IMSS contributions; the IMSS employer registration is the starting point.", "雇主须为每位员工向 INFONAVIT 缴纳住房供款，与 IMSS 社保缴费一并办理；以 IMSS 雇主登记为起点。"],
+    url: "https://www.gob.mx/infonavit" }),
+  isn("MX-CMX", "Mexico City", "墨西哥城", ["Secretaría de Administración y Finanzas de la Ciudad de México", "墨西哥城行政与财政局"], "https://www.finanzas.cdmx.gob.mx/"),
+  isn("NLE", "Nuevo León", "新莱昂州", ["Secretaría de Finanzas y Tesorería General del Estado de Nuevo León", "新莱昂州财政与总库局"], "https://www.nl.gob.mx/es"),
+  isn("JAL", "Jalisco", "哈利斯科州", ["Secretaría de la Hacienda Pública del Estado de Jalisco", "哈利斯科州公共财政局"], "https://hacienda.jalisco.gob.mx/"),
+  isn("ROO", "Quintana Roo", "金塔纳罗奥州", ["Secretaría de Finanzas y Planeación de Quintana Roo (SEFIPLAN)", "金塔纳罗奥州财政与规划局"], "https://qroo.gob.mx/"),
+  E({ id: "mx-cdmx-pc", where: "MX-CMX", level: "city", segs: PREMISES, method: "online", order: 67, cur: "MXN",
+    form: "Programa Interno de Protección Civil", title: ["Internal civil protection program", "内部民防计划"],
+    agency: ["Secretaría de Gestión Integral de Riesgos y Protección Civil de la Ciudad de México", "墨西哥城综合风险管理与民防局"],
+    how: ["Depending on its size and risk, an establishment registers an internal civil protection program prepared by an authorised third party.", "视规模和风险而定，场所须登记由授权第三方编制的内部民防计划。"],
+    url: "https://www.proteccioncivil.cdmx.gob.mx/" }),
+  E({ id: "mx-mty-alcohol", where: "MX-MTY", level: "city", segs: ["restaurant", "retail"], needs: { alcohol: true }, method: "online", order: 71, cur: "MXN",
+    form: "Anuencia municipal para la venta de bebidas alcohólicas", title: ["City consent to sell alcohol (anuencia)", "市政府酒类销售许可（anuencia）"],
+    agency: ["Municipio de Monterrey", "蒙特雷市政府"],
+    how: ["A restaurant or shop selling alcohol gets the city's consent (anuencia), listed among Monterrey's online services, before the state's alcohol licence.", "销售酒类的餐厅或商店须先取得市政府许可（anuencia，列于蒙特雷市在线服务中），再申请州酒类许可。"],
+    url: "https://www.monterrey.gob.mx/" }),
+];
+MEXICO_FORMS.push(...MEXICO_GAPS);
