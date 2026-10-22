@@ -4,13 +4,14 @@
    audit trail, and that errors go back to the model instead of ending the run.
    npm run test:agent */
 import { DEFAULT_POLICY } from "../src/spend.ts";
-import { channelHint, channelNote, channelRefuses, guardPatch, runRounds, startState, type Channel, type ChildResult, type RunState, type Send } from "../src/serverRun";
+import { channelHint, channelNote, channelRefuses, guardPatch, runRounds, startState, TOKEN_CAP, tokensUsed, type Channel, type ChildResult, type RunState, type Send } from "../src/serverRun";
 import { fill, spawn, stillOpen, wake, type FamilyDb } from "../supabase/functions/agent-run/family";
 import { momentsFor, type RunLog } from "../src/replay";
 import { applyVerdict } from "../src/harness";
 import { family, proven } from "../src/jobs";
 import { applyChange, confirmChange, normalizeState, type Step } from "../src/core";
-import { apiModel, DOCS_PER_RUN, liveAgent, makeTools, messagesModel, pdfPages, READ_ONLY, rules, runAll, runTool, type Block, type Made, type Role, type Services } from "../src/live";
+import { apiModel, DOCS_PER_RUN, factFor, liveAgent, makeTools, messagesModel, pdfPages, READ_ONLY, rules, runAll, runTool, type Block, type Made, type Role, type Services } from "../src/live";
+import { tokenLimit, TOKEN_LIMIT_DEFAULT } from "../supabase/functions/agent-run/limits";
 import { confirmRecall, forgetRecall, keepRecall, RECALL_MARK, recallFrom, restoreRecall } from "../src/recall";
 import { mayEmail, wantsTexts } from "../supabase/functions/_shared/reach";
 import { callModel } from "../supabase/functions/_shared/llm";
@@ -2449,6 +2450,19 @@ console.log("\n# Audit trail export (CSV)");
   const many: Span[] = [];
   for (let i = 0; i < 200; i++) addSpan(many, { k: "tool", n: "x", at: i, ms: 1 });
   eq(many.length, MAX_SPANS, "a long run keeps at most 150 spans");
+  // the token cap: a run that has used its tokens stops before the next model call, cleanly, saying so
+  const capped = await agent({ ws: workspace({ apps: [app("a1", "draft")] }), svc, prompt: "Where are we?", script: [() => say("never asked")],
+    state: { ...startState([], "Where are we?"), cache: { calls: 9, hits: 0, input: TOKEN_CAP, read: 0, write: 0, output: 0 } } });
+  const said = JSON.stringify(capped.reply ?? {});
+  ok(capped.bodies.length === 0 && /reached its limit for one run/.test(said) && !/Done/.test(said), "a run over its token cap stops before another model call and says what to do", said);
+  eq([tokensUsed({ input: 10, read: 20, write: 3, output: 7 }), tokenLimit(() => "200000"), tokenLimit(() => "0"), tokenLimit(() => "abc")], [40, 200000, TOKEN_LIMIT_DEFAULT, TOKEN_LIMIT_DEFAULT], "token use is counted in full; a bad AI_TASK_TOKEN_LIMIT keeps the default");
+  // the business's own facts go on an agency's form by Placetta, not by the model
+  const facts = [{ id: "f1", group: "business", label: same("Legal name"), value: same("Acme Tea LLC") }, { id: "f2", group: "business", label: same("EIN"), value: same("12-3456789") },
+    { id: "f3", group: "business", label: same("Business phone"), value: same("(718) 555-0100") }, { id: "f4", group: "business", label: same("Contact email"), value: same("hi@acme.test") }] as Workspace["facts"];
+  eq(["Legal name of the business", "FEIN", "Business telephone", "E-mail address", "Owner's phone", "Owner SSN", "Name the store trades under (DBA)", "Mailing address"].map(l => factFor(l, facts)?.value.en ?? null),
+    ["Acme Tea LLC", "12-3456789", "(718) 555-0100", "hi@acme.test", null, null, null, null], "fills the legal name, EIN, business phone and email; never an owner's, an SSN, the DBA or anything else");
+  eq(factFor("FEIN", facts, true), undefined, "abroad, the US EIN isn't offered");
+
   // the tree: each round's tool calls under its model call
   ok(spans.every(x => typeof x.r === "number" && x.r >= 1), "every span knows its round", spans);
   const g = tree([

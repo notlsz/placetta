@@ -104,6 +104,11 @@ export type RunState = {
 };
 
 const MAX_ROUNDS = 16;
+/** A run's token ceiling: about five times the longest run on the eval fixtures (scripts/eval/speed.ts measures them). */
+export const TOKEN_CAP = 500_000;
+/** Tokens a run has used so far (prompt, cache reads and writes, output), from its own counts. */
+export const tokensUsed = (c: { input: number; read: number; write: number; output: number } | undefined) => (c ? c.input + c.read + c.write + c.output : 0);
+export const overTokens = (lang?: string) => (lang === "zh" ? "这项任务已用到单次运行的上限，我先停在这里，已完成的部分都已保存。说“继续”，我会接着做下一部分。" : "This task reached its limit for one run, so I stopped here. What's done is saved. Say \"continue\" and I'll do the next part.");
 
 /** Where the person asked: the app, a text message, a phone call, an email, or the business's Slack, Lark or WeChat
  *  Official Account. */
@@ -263,6 +268,9 @@ export async function runRounds(o: {
   research?: boolean;
   /** Most model calls in one run (default 16). */
   maxRounds?: number;
+  /** Most tokens one run may send and receive across all its chunks (default TOKEN_CAP): a runaway run stops cleanly,
+   *  saying what's done, instead of burning credit (agent-run also caps dollars per task: limits.ts). */
+  maxTokens?: number;
   /** The main loop's role: plan (default), short for a text, call or chat bot, watch for the monitor's background checks. */
   role?: Role;
   /** Whose memory the run reads: the person who asked (agent-run passes the run's created_by). Their saved details
@@ -465,7 +473,7 @@ export async function runRounds(o: {
   const counted = (data: { usage?: unknown; model?: unknown }) => { st.cache = addCall(st.cache ?? emptyStats(), cacheUse(data.usage as Record<string, unknown> | undefined), shaped.prefix); };
   const sources = new Map(st.sources.map(s => [s.url, s]));
   const max = o.maxRounds ?? MAX_ROUNDS;
-  let finished = false;
+  let finished = false, capped = false;
   // The jobs that are this run's own: a store's bot has its store's part; any other run, every job but the stores'
   // parts (their own bots work, check and hand those off, side by side with this one).
   const own = (j: Job) => (o.child ? j.id === o.child.job : !j.parent);
@@ -482,6 +490,8 @@ export async function runRounds(o: {
     while (st.rounds < (onJob() ? max * MAX_SEATS : max)) {
       // leave room for one more model call and the save
       if (Date.now() > o.until) { link(); return { paused: save() }; }
+      // the token cap: stop before the next model call, cleanly, never mid-tool
+      if (tokensUsed(st.cache) >= (o.maxTokens ?? TOKEN_CAP)) { capped = true; break; }
       if (st.rounds === 0) step({ state: "searching", label: { en: "Reading your workspace", zh: "读取您的工作区" } });
       st.rounds++; st.seatRounds = (st.seatRounds ?? 0) + 1;
       // streamed into the draft: the app shows the words as the model writes them, not when the round ends
@@ -555,7 +565,7 @@ export async function runRounds(o: {
       await o.round?.(save());
     }
     // out of rounds with tool results the model never saw: say the work isn't finished, never "Done."
-    if (!finished) { const more = outOfSteps(o.lang); st.text += (st.text ? "\n\n" : "") + more; made.lastToolAt = Math.min(made.lastToolAt, st.text.length - more.length); break; }
+    if (!finished) { const more = capped ? overTokens(o.lang) : outOfSteps(o.lang); st.text += (st.text ? "\n\n" : "") + more; made.lastToolAt = Math.min(made.lastToolAt, st.text.length - more.length); break; }
 
     // Split across stores and the stores' bots are still at it: this run waits for them. Its answer so far (who's on
     // what) goes to the person now; when the last store's bot finishes, the run wakes with their results and writes

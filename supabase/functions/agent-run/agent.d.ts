@@ -47,7 +47,7 @@ export declare function runRounds(o: {
   state: RunState; ws: () => Workspace; apply: (p: (w: Workspace) => Workspace) => void; step: (s: Step) => void; draft?: (text: string) => void;
   send: Send; lang: "en" | "zh"; deep: boolean; account: boolean; svc?: Services; files?: Map<string, File>; signal: AbortSignal; until: number;
   round?: (state: RunState) => Promise<void>;
-  research?: boolean; maxRounds?: number;
+  research?: boolean; maxRounds?: number; maxTokens?: number;
   channel?: Channel;
   /** Who asked from outside the app (their number or address), shown on a change card for a business fact. */
   sender?: string;

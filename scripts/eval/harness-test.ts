@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { abReport, alert, applyPrompt, consistency, datasetOf, diffReport, diffRuns, entryOf, gate, kindOf, load, parseVariant, rates, record, scoreboard, toolChecks, variantEnv, versionOf, withOpenAI, type Entry, type Outcome } from "./harness";
 import { argError, checkArgs, type Schema } from "../../src/toolArgs";
+import { requestText, SimClock, speedSummary } from "./speed";
 
 let n = 0;
 const t = (name: string, f: () => void) => { f(); n++; console.log(`ok  ${name}`); };
@@ -125,6 +126,32 @@ t("the A/B table lists where variants disagree", () => {
   const md = abReport([ent([true, true], { variant: "gemini" }), ent([true, false], { variant: "sonnet" })]);
   assert.match(md, /## A\/B: gemini vs sonnet/); assert.match(md, /\| s1 \| pass \| fail \|/);
   assert.equal(abReport([ent([true])]), "");
+});
+
+/* ---------------- cost and speed on the fixtures */
+t("speed: cache reads only past 1,024 shared tokens, breaks located, time to first token from the first words", () => {
+  const sys = "R".repeat(8000);   // about 2,000 tokens of rules
+  const b1 = { tools: [{ name: "a" }], system: sys, messages: [{ role: "user", content: "hi" }] };
+  const b2 = { ...b1, messages: [...b1.messages, { role: "assistant", content: "x" }] };
+  let now = 1000;
+  const clock = new SimClock(null, 1000, () => now);
+  const c1 = clock.call(requestText(b1), { content: [{ type: "tool_use" }] }, "gemini-2.5-flash");
+  const c2 = clock.call(requestText(b2), { content: [{ type: "text", text: "Done." }] }, "gemini-2.5-flash");
+  assert.equal(c1.read, 0); assert.ok(c2.read >= 2000 && c2.input < 50, JSON.stringify(c2));
+  assert.ok(c2.usd < c1.usd, "a cached call costs less");
+  now = 1100;
+  const d = clock.done();
+  assert.equal(d.breaks.none, 1);
+  assert.ok(d.ttft_ms > c1.ms && d.ttft_ms < c1.ms + c2.ms, "first words come with the second call");
+  const other = new SimClock(null);
+  other.call(requestText(b1), { content: [{ type: "text", text: "a" }] }, "x");
+  other.call(requestText({ ...b1, tools: [{ name: "b" }] }), { content: [{ type: "text", text: "a" }] }, "x");
+  assert.equal(other.done().breaks.tools, 1, "a changed tool list is found as the break");
+  const short = new SimClock(null);
+  short.call(requestText({ system: "s" }), { content: [] }, "x");
+  assert.equal(short.call(requestText({ system: "s" }), { content: [] }, "x").read, 0, "under 1,024 tokens nothing is cached");
+  const s = speedSummary([d, d, { ...d, usd: 1, done_ms: 99_000 }]);
+  assert.equal(s.runs, 3); assert.equal(s.done_p95_ms, 99_000); assert.equal(s.usd_p50, d.usd);
 });
 
 /* ---------------- dataset versions, the per-scenario diff, consistency, the alert */

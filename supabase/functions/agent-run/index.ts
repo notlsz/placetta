@@ -35,7 +35,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { callModel, canConverse, type Role } from "../_shared/llm.ts";
 import { accessRpc, WORKS } from "../_shared/access.ts";
-import { overTaskLimit, repeatKey, repeatStatuses, REPEAT_MS, taskLimit, tooLarge } from "./limits.ts";
+import { overTaskLimit, repeatKey, repeatStatuses, REPEAT_MS, taskLimit, tokenLimit, tooLarge } from "./limits.ts";
 import { gate, record, saverLine, saverNoticeDue } from "../_shared/ai_gate.ts";
 import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/odelia.ts";
 import { linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
@@ -76,6 +76,8 @@ const env = (k: string, d = "") => Deno.env.get(k) ?? d;
 /** One task's ceiling: a task that costs more than this stops and says so, so a loop can't eat a month's budget.
  *  (limits.ts: a broken AI_TASK_LIMIT_USD used to make it NaN, which switched the cap off.) */
 const TASK_LIMIT_USD = taskLimit((k) => Deno.env.get(k));
+// and its tokens, across every chunk (src/serverRun.ts TOKEN_CAP; AI_TASK_TOKEN_LIMIT changes it)
+const TASK_TOKENS = tokenLimit((k) => Deno.env.get(k));
 const MODEL = env("AGENT_MODEL", "claude-sonnet-5-5"), MODEL_DEEP = env("AGENT_MODEL_DEEP", "claude-opus-5-5");
 /** In saver mode (past 60% of the allowance, or throttled for the day) answers are capped at this many tokens. */
 const SAVER_MAX_TOKENS = 2000;
@@ -692,7 +694,7 @@ export async function work(runId: string, token: string | null, ticket: string |
     const recalling = !state.rounds && !state.recalled ? recallFor(run, cur, who) : null;
     const memory = await memoryFor(run);
     const out = await runRounds({
-      state, ws: () => cur, lang: run.lang, deep: run.deep, account: true, svc, signal: ctl.signal, until,
+      state, ws: () => cur, lang: run.lang, deep: run.deep, account: true, svc, signal: ctl.signal, until, maxTokens: TASK_TOKENS,
       apply: (p) => { cur = p(cur); pending.push(p); },
       step: (s) => { steps.push(s); flush(); },
       // after each round: save the work and where the conversation is (with what it has cost), so a fresh instance can carry on
