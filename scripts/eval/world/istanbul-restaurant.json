@@ -1,0 +1,116 @@
+{
+  "id": "istanbul-restaurant",
+  "title": "A restaurant in Istanbul",
+  "read": "2026-10-22",
+  "input": {
+    "what": "Restaurant",
+    "where": "İstiklal Caddesi 100, Beyoğlu, İstanbul, Türkiye",
+    "lang": "en"
+  },
+  "assumptions": "A new limited company opening a restaurant in Beyoğlu with staff and a fit-out, no alcohol. Each item quotes the ministry or municipality page the registry entry was verified on (read 2026-10-22).",
+  "order": [],
+  "mustNotInclude": [
+    {
+      "name": "US filings",
+      "why": "Not in the US.",
+      "match": "irs-|cbp-|fincen|\\\\bEIN\\\\b|secretary of state"
+    },
+    {
+      "name": "EU rules",
+      "why": "Türkiye is not in the EU.",
+      "match": "\\\\beu-"
+    }
+  ],
+  "items": [
+    {
+      "key": "tr-mersis",
+      "name": "Company registration (MERSİS)",
+      "agency": "Ministry of Trade, Central Registry",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://ticaret.gov.tr/ic-ticaret/ticaret-sicili/merkezi-sicil-kayit-sistemi-mersis",
+      "quote": "Bu sayede, ticaret sicili müdürlükleri şirket kuruluşlarında tek temas noktası haline getirilmiştir.",
+      "en": "This makes the trade registry offices the single point of contact for forming a company.",
+      "read": "2026-10-22",
+      "match": "\\btr-mersis\\b",
+      "agencyMatch": "Ministry of Trade|Central Registry"
+    },
+    {
+      "key": "tr-gib",
+      "name": "Tax registration",
+      "agency": "Revenue Administration (GİB)",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://cdn.gib.gov.tr/api/gibportal-file/file/getFileResources?objectKey=arsiv%2Fonceki-dokumanlar%2Fuser_upload%2Fyayinlar%2Fkurumlar_vergisi.pdf",
+      "quote": "İşe başlama bildirimi, şirketlerin kuruluş aşamasında işe başlama tarihinden itibaren 10 gün içinde ticaret sicili memurluğunca ilgili vergi dairesine yapılır.",
+      "en": "For a company, the trade registry notifies the tax office of the start of business within 10 days, at formation.",
+      "read": "2026-10-22",
+      "match": "\\btr-gib\\b",
+      "agencyMatch": "Revenue Administration|GİB"
+    },
+    {
+      "key": "tr-sgk",
+      "name": "Employer workplace registration",
+      "agency": "Sosyal Güvenlik Kurumu (SGK)",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "source": "https://www.sgk.gov.tr/Content/Post/3affeaef-df73-4c5b-926f-86376b4e07bf/Isyeri-Isveren-ve-Isyerinin-Bildirimi-2022-05-15-06-04-21",
+      "quote": "işverenler, örneği Kurumca hazırlanacak işyeri bildirgesini en geç sigortalı çalıştırmaya başladığı tarihte, Kuruma vermekle yükümlü tutulmuşlardır.",
+      "en": "employers must file the workplace registration form, as prepared by the Institution, at the latest on the day they start employing insured workers.",
+      "read": "2026-10-22",
+      "match": "\\btr-sgk\\b",
+      "agencyMatch": "SGK"
+    },
+    {
+      "key": "tr-ist-gida",
+      "name": "Food business registration",
+      "agency": "Istanbul Provincial Directorate of Agriculture and Forestry (the district directorate for the address)",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://istanbul.tarimorman.gov.tr/Belgeler/DepoPerakende%20ve%20Toplu%20T%C3%BCketim%20Yerleri%20Kay%C4%B1t%20%C4%B0%C5%9Flemleri%20(04.01.2023).pdf",
+      "quote": "gıda işletmelerinin kayıt belgesi alma zorunluluğu bulunmaktadır.",
+      "en": "food businesses are obliged to obtain a registration certificate.",
+      "read": "2026-10-22",
+      "match": "\\btr-ist-gida\\b",
+      "agencyMatch": "Agriculture"
+    },
+    {
+      "key": "tr-ist-imar-itfaiye",
+      "name": "Zoning and fire opinions",
+      "agency": "The district municipality's zoning department and the Istanbul Metropolitan Fire Department",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://beyoglu.bel.tr/hizmetlerimiz/basvuru-kaynaklari/isyeri-acma-ve-calisma-ruhsatlari/sihhi-muesseseler-ve-aranacak-sartlar/",
+      "quote": "İstanbul Büyük Şehir İtfaiye Müdürlüğüne (Yangın, patlama v.b yönünden), Belediye İmar ve Şehircilik Müdürlüğüne (imar yönünden)",
+      "en": "to the Istanbul Metropolitan Fire Department (for fire, explosion and the like), to the municipality's zoning department (for zoning)",
+      "read": "2026-10-22",
+      "match": "\\btr-ist-imar-itfaiye\\b",
+      "agencyMatch": "zoning|Fire"
+    },
+    {
+      "key": "tr-ist-ruhsat",
+      "name": "Business opening and operating licence",
+      "agency": "Istanbul district municipality",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://beyoglu.bel.tr/hizmetlerimiz/basvuru-kaynaklari/isyeri-acma-ve-calisma-ruhsatlari/",
+      "quote": "İşyeri Açma ve Çalışma Ruhsatı Müracaatları Gerekli evraklar hazırlandıktan sonra Belediyemiz Ruhsat ve Denetim Müdürlüğüne Şahsen veya şirkette imzaya yetkili kişilerce yapılır.",
+      "en": "Applications for the business opening and operating licence are made to the municipality's licensing department, in person or by the company's signatories.",
+      "read": "2026-10-22",
+      "match": "\\btr-ist-ruhsat\\b",
+      "agencyMatch": "municipality"
+    }
+  ]
+}

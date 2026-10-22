@@ -113,6 +113,23 @@
    "match": "\\bit-mil-insegna\\b",
    "agencyMatch": "Comune di Milano",
    "condition": "Only when it applies to this opening (see the assumptions)."
+  },
+  {
+   "key": "it-vvf",
+   "name": "Fire prevention notice (premises on the fire brigade's list)",
+   "agency": "Vigili del Fuoco",
+   "level": "federal",
+   "levels": ["federal", "state", "county", "city"],
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.vigilfuoco.it/comando-vvf-potenza/prevenzione-incendi",
+   "quote": "considerate a maggior rischio d'incendio, che sono sottoposte a controllo dei Vigili del Fuoco.",
+   "quoteEn": "considered at higher fire risk, which are subject to the fire brigade's control.",
+   "read": "2026-10-22",
+   "match": "\\bit-vvf\\b|fire prevention",
+   "agencyMatch": "Vigili del Fuoco",
+   "condition": "Only for premises among the activities listed in annex I of DPR 151/2011 (added 2026-10-22, when the fire brigade's page was read)."
   }
  ],
  "order": [],
