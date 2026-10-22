@@ -3766,5 +3766,85 @@
   "found": true,
   "sha256": "653b79cd5e44588f",
   "context": "k make sure your business complies with fire safety requirements open mandatory you must also take fire safety measures. for example, use non-flammable or flame-retardant materials. read more about fi"
+ },
+ {
+  "id": "mx-sociedad",
+  "read": "https://www.sat.gob.mx/gobmx/Paginas/Ficha_43_cff.html",
+  "quote": "Documento constitutivo protocolizado (copia certificada).",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "95c7322aee3280d8",
+  "context": " en el rfc, en caso de haber iniciado la solicitud a través del portal del sat. documento constitutivo protocolizado (copia certificada). comprobante de domicilio fiscal, cualquiera de los señalados en el inciso b) de"
+ },
+ {
+  "id": "mx-rfc",
+  "read": "https://www.sat.gob.mx/gobmx/Paginas/Ficha_43_cff.html",
+  "quote": "Personas morales de nueva creación a través de sus representantes legales",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "95c7322aee3280d8",
+  "context": "d de inscripción en el rfc de personas morales en la adsc. quiénes lo presentan personas morales de nueva creación a través de sus representantes legales, como son entre otras: asociaciones civiles, sociedades civiles, sociedades anó"
+ },
+ {
+  "id": "mx-cofepris",
+  "read": "https://www.gob.mx/cms/uploads/attachment/file/348567/Instructivo_Aviso_Funcionamiento.pdf",
+  "quote": "Cuando se trate de la notificación de un establecimiento nuevo o de una nueva sucursal.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "c829a59b6e3b0d4e",
+  "context": "odalidad del trámite según se describen a continuación: aviso de funcionamiento cuando se trate de la notificación de un establecimiento nuevo o de una nueva sucursal. aviso de responsable sanitario cuando presente el aviso de funcionamiento inici"
+ },
+ {
+  "id": "mx-cdmx-vecinal",
+  "read": "https://www.congresocdmx.gob.mx/media/documentos/674707c7d7b1fd7d269dc81619514990e9551158.pdf",
+  "quote": "presenten por medio del Sistema un Aviso de Funcionamiento para Establecimiento Mercantil de Impacto Vecinal",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "746dccc1ff5a9dd1",
+  "context": "e 2023 artículo 31.- las personas titulares de establecimientos mercantiles que presenten por medio del sistema un aviso de funcionamiento para establecimiento mercantil de impacto vecinal, proporcionarán la siguiente información: reforma publicada en la gocdmx el 19 "
+ },
+ {
+  "id": "mx-cdmx-bajo",
+  "read": "https://www.congresocdmx.gob.mx/media/documentos/674707c7d7b1fd7d269dc81619514990e9551158.pdf",
+  "quote": "Para el funcionamiento de los establecimientos a que se refiere este Título, los titulares deberán ingresar el Aviso correspondiente al Sistema",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "746dccc1ff5a9dd1",
+  "context": "a, lavado de vehículos, venta y distribución de agua embotellada. artículo 38.- para el funcionamiento de los establecimientos a que se refiere este título, los titulares deberán ingresar el aviso correspondiente al sistema, proporcionando la siguiente información: i. nombre o razón social del solicita"
+ },
+ {
+  "id": "mx-cdmx-zonificacion",
+  "read": "https://www.congresocdmx.gob.mx/media/documentos/674707c7d7b1fd7d269dc81619514990e9551158.pdf",
+  "quote": "Certificado de Zonificación de uso del suelo para el giro que se pretende operar",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "746dccc1ff5a9dd1",
+  "context": "a gocdmx el 19 de enero de 2023 vi. giro mercantil que se pretende operar; vii. certificado de zonificación de uso del suelo para el giro que se pretende operar; reforma publicada en la gocdmx el 19 de enero de 2023 viii. número de cajones "
+ },
+ {
+  "id": "mx-cdmx-enseres",
+  "read": "https://www.congresocdmx.gob.mx/media/documentos/674707c7d7b1fd7d269dc81619514990e9551158.pdf",
+  "quote": "podrán colocar en la vía pública enseres e instalaciones que sean necesarios para la prestación de sus servicios, previo aviso que ingresen al Sistema",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "746dccc1ff5a9dd1",
+  "context": "ntiles cuyo giro preponderante sea la venta de alimentos preparados y/o bebidas podrán colocar en la vía pública enseres e instalaciones que sean necesarios para la prestación de sus servicios, previo aviso que ingresen al sistema y el pago de los derechos que estable el código fiscal de la ciudad de méxico. "
+ },
+ {
+  "id": "mx-mty-edificacion",
+  "read": "https://www.monterrey.gob.mx/pdf/new/Procedimientos/Sedue/P_SDU_DEC_16_Licencia_del_Uso_de_Edificacion.pdf",
+  "quote": "solicitar la autorización del municipio para hacer construcciones en diferentes zonas habitacionales y determinar el funcionamiento específico del predio",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "339cba632f348347",
+  "context": "a ciudadanía para el trámite de licencia de uso de edificación, que consiste en solicitar la autorización del municipio para hacer construcciones en diferentes zonas habitacionales y determinar el funcionamiento específico del predio. ii. alcance este procedimiento es aplicable a la dirección general para un des"
  }
 ]

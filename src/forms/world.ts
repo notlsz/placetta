@@ -3,6 +3,7 @@ import type { Level } from "../model";
 import type { FormField, Method, Needs, OfficialForm, Segment } from "./registry";
 import { usLocality } from "./usplace";
 import { EUROPE_FORMS } from "./europe";
+import { MEXICO_FORMS } from "./mexico";
 
 /* Beyond the US forms library: the major cities in China, Europe, the Middle East and the US tier 1, with each
    country's core registrations and each city's own portal. Links are the agencies' official sites. These entries are
@@ -307,6 +308,8 @@ export const WORLD_FORMS: OfficialForm[] = [
 
   /* the UK, the EU's own rules and the European countries a brand enters first: src/forms/europe.ts */
   ...EUROPE_FORMS,
+  /* Mexico: src/forms/mexico.ts */
+  ...MEXICO_FORMS,
 
   /* ------------------------------- the rest of Europe: the core national steps ------------------------------- */
   ...([
