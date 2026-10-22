@@ -21,7 +21,7 @@
 <meta name="twitter:title" content="Trust and security | Placetta">
 <meta name="twitter:description" content="How Placetta protects your business's data, which companies process it, and what isn't finished yet.">
 <meta name="twitter:image" content="https://www.placetta.com/media/og-home.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://www.placetta.com/trust#page","url":"https://www.placetta.com/trust","name":"Trust and security | Placetta","description":"How Placetta protects your business's data, which companies process it, and what isn't finished yet.","inLanguage":"en","isPartOf":{"@id":"https://www.placetta.com/#website"},"publisher":{"@type":"Organization","@id":"https://www.placetta.com/#organization","name":"Placetta","url":"https://www.placetta.com/"},"about":{"@id":"https://www.placetta.com/#organization"},"datePublished":"2026-10-21","dateModified":"2026-10-21"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://www.placetta.com/trust#page","url":"https://www.placetta.com/trust","name":"Trust and security | Placetta","description":"How Placetta protects your business's data, which companies process it, and what isn't finished yet.","inLanguage":"en","isPartOf":{"@id":"https://www.placetta.com/#website"},"publisher":{"@type":"Organization","@id":"https://www.placetta.com/#organization","name":"Placetta","url":"https://www.placetta.com/"},"about":{"@id":"https://www.placetta.com/#organization"},"datePublished":"2026-10-21","dateModified":"2026-10-22"}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Placetta","item":"https://www.placetta.com/"},{"@type":"ListItem","position":2,"name":"Trust and security","item":"https://www.placetta.com/trust"}]}</script>
 <!-- /seo:head -->
 <meta name="description" content="How Placetta protects your business's data, which companies process it, and what isn't finished yet.">
@@ -41,7 +41,7 @@
 <main class="lw">
 <article data-block="en" lang="en" data-title="Trust and security | Placetta" class="trust">
 <h1>Trust and security</h1>
-<p class="upd">Last updated: October 17, 2026</p>
+<p class="upd">Last updated: October 22, 2026</p>
 <p class="lead">How Placetta protects your business's information, which companies process it, and what isn't finished yet. Placetta doesn't hold a security certification today. The roadmap below says where we are.</p>
 <div class="legend">
 <p><span class="tag t-on">In place</span>Works in production today.</p>
@@ -63,7 +63,8 @@
 <p><span class="tag t-roll">Rolling out</span>A message from outside the app could be a forwarded letter or a forgery, so it can't change your business's facts or name either. Odelia puts the change on a card that shows the old value, the new one, and who asked from where, and nothing changes until an owner confirms it in the app. From outside the app she also can't save to her memory, set up or stop routines, change or remove stores, or remove deadlines. A plain SMS, the easiest message to forge, can only look things up and draft.</p>
 
 <h2 id="audit" data-anchor="audit">Audit trail</h2>
-<p><span class="tag t-on">In place</span>Every action by Odelia, by you and your team, by our team and by agencies is recorded in your workspace's audit trail: what happened, to what, who did it and when. Everyone on your team can read it, and you can export it in Settings. Nobody using the app can edit or delete an entry.</p>
+<p><span class="tag t-on">In place</span>Every action by Odelia, by you and your team, by our team and by agencies is recorded in your workspace's audit trail: what happened, to what, who did it and when. Everyone on your team can read it in the app. Nobody using the app can edit or delete an entry.</p>
+<p><span class="tag t-roll">Rolling out</span>Owners will be able to export the whole trail as a spreadsheet file in Settings, and each export will be recorded in the trail too.</p>
 <p><span class="tag t-on">In place</span>Each time a saved agency login is opened, by our filing software or by someone on our team, the opening goes into the audit trail.</p>
 <p><span class="tag t-roll">Rolling out</span>The database itself will refuse to edit or delete any entry, from anyone, our own servers included, and will stamp each entry with its own clock instead of trusting the writer's.</p>
 
@@ -103,7 +104,7 @@
 <p>If a message can't be verified, nothing starts, and you get a short note saying why. Email from an address that isn't a Placetta account gets no reply at all. Nothing is filed, paid, sent or deleted by email. Odelia answers with a link to the approval in the app.</p>
 
 <h2 id="subprocessors" data-anchor="subprocessors">Subprocessors</h2>
-<p>These companies process customer information on our behalf. The list is taken from our code: a service that isn't wired in there isn't here. "When used" and "If you connect it" mean the company receives nothing until that feature is on or you connect it.</p>
+<p>These companies process customer information on our behalf. The list is taken from our code: a service that isn't wired in there isn't here. "When used" and "If you connect it" mean the company receives nothing until that feature is on or you connect it. "Rolling out" means the connection is built but not switched on yet, so that company receives nothing today.</p>
 <h3>Running the service</h3>
 <div class="sp">
 <div class="sp-row"><div class="sp-h"><b>Supabase</b><span class="tag t-on">Always on</span></div><p>Database, file storage, sign-in and server functions, in its US East region. Stores your workspace, documents, texts and audit trail.</p></div>
@@ -143,6 +144,10 @@
 <div class="sp-row"><div class="sp-h"><b>Lark (Feishu)</b><span class="tag t-prog">If you connect it</span></div><p>Status updates, and asking Odelia in Lark.</p></div>
 <div class="sp-row"><div class="sp-h"><b>WeCom</b><span class="tag t-prog">If you connect it</span></div><p>Status updates to a group you choose.</p></div>
 <div class="sp-row"><div class="sp-h"><b>DingTalk</b><span class="tag t-prog">If you connect it</span></div><p>Status updates to a group you choose.</p></div>
+<div class="sp-row"><div class="sp-h"><b>Toast</b><span class="tag t-roll">Rolling out</span></div><p>If you connect it, we read your sales by location and your team's schedules and hours worked, read only, for sales tax returns, permits whose fee depends on sales, and work-hour rules. Toast receives only our requests for that data.</p></div>
+<div class="sp-row"><div class="sp-h"><b>Square</b><span class="tag t-roll">Rolling out</span></div><p>If you connect it, we read your sales by location and your team's schedules and hours worked, read only, for the same filings. Square receives only our requests for that data.</p></div>
+<div class="sp-row"><div class="sp-h"><b>Tencent (WeChat)</b><span class="tag t-roll">Rolling out</span></div><p>If you point your business's own WeChat Official Account at Placetta, Tencent carries your teammates' messages to Odelia and her replies.</p></div>
+<div class="sp-row"><div class="sp-h"><b>Apps connected through MCP</b><span class="tag t-roll">Rolling out</span></div><p>Notion, Airtable, Google Drive, Gmail, Dropbox, Box, Slack, HubSpot, Linear, Asana, Zapier, Square, Stripe, and any other app an owner adds by its address. If you connect one, it receives the requests Odelia sends it, which can include details from your workspace. Looking things up runs on its own. Anything that would change data in that app waits for an owner's approval.</p></div>
 </div>
 
 <h2 id="roadmap" data-anchor="roadmap">Compliance roadmap</h2>
@@ -177,7 +182,7 @@
 </article>
 <article data-block="zh" lang="zh-CN" data-title="信任与安全 | 快哉" class="trust" hidden>
 <h1>信任与安全</h1>
-<p class="upd">最后更新：2026年10月17日</p>
+<p class="upd">最后更新：2026年10月22日</p>
 <p class="lead">快哉如何保护您企业的信息、哪些公司会处理这些信息，以及哪些工作尚未完成。快哉目前没有任何安全认证，进展见下文的合规路线图。</p>
 <div class="legend">
 <p><span class="tag t-on">已上线</span>已在生产环境中运行。</p>
@@ -199,7 +204,8 @@
 <p><span class="tag t-roll">上线中</span>来自应用之外的消息可能是转发的信件，也可能是伪造的，因此也不能更改您企业的资料或名称。Odelia 会把更改做成一张卡片，显示原值、新值，以及由谁从何处提出；所有者在应用中确认之前，不会有任何更改。在应用之外，她也不能保存记忆、设置或停止例行任务、更改或移除门店，或删除截止日期。普通短信最容易伪造，只能用来查询和起草。</p>
 
 <h2 data-anchor="audit">审计记录</h2>
-<p><span class="tag t-on">已上线</span>Odelia、您和您的团队、我们的团队以及各机构的每一项操作，都会记入您工作区的审计记录：发生了什么、涉及什么、由谁操作、何时操作。团队中的每个人都可以查看，您也可以在“设置”中导出。任何人都无法在应用中编辑或删除记录。</p>
+<p><span class="tag t-on">已上线</span>Odelia、您和您的团队、我们的团队以及各机构的每一项操作，都会记入您工作区的审计记录：发生了什么、涉及什么、由谁操作、何时操作。团队中的每个人都可以在应用中查看。任何人都无法在应用中编辑或删除记录。</p>
+<p><span class="tag t-roll">上线中</span>所有者将可以在“设置”中把完整的审计记录导出为表格文件，每次导出本身也会记入审计记录。</p>
 <p><span class="tag t-on">已上线</span>我们的申报软件或我们团队中的人每次打开已保存的机构网站登录信息，都会记入审计记录。</p>
 <p><span class="tag t-roll">上线中</span>数据库本身将拒绝任何人编辑或删除任何记录，包括我们自己的服务器；并用数据库自己的时钟为每条记录标注时间，而不采用写入方提供的时间。</p>
 
@@ -239,7 +245,7 @@
 <p>无法验证的邮件不会触发任何操作，您会收到一条简短说明。来自非快哉账户邮箱的邮件不会得到任何回复。通过邮件不会提交、付款、发送或删除任何内容，Odelia 会回复一个指向应用中审批页面的链接。</p>
 
 <h2 data-anchor="subprocessors">数据处理方</h2>
-<p>以下公司代表我们处理客户信息。这份名单取自我们的代码：代码中没有接入的服务，不会出现在这里。“按需使用”和“您连接后”表示在该功能开启或您连接之前，该公司不会收到任何内容。</p>
+<p>以下公司代表我们处理客户信息。这份名单取自我们的代码：代码中没有接入的服务，不会出现在这里。“按需使用”和“您连接后”表示在该功能开启或您连接之前，该公司不会收到任何内容。“上线中”表示该连接已开发完成但尚未开启，因此该公司目前不会收到任何内容。</p>
 <h3>运行服务</h3>
 <div class="sp">
 <div class="sp-row"><div class="sp-h"><b>Supabase</b><span class="tag t-on">始终启用</span></div><p>数据库、文件存储、登录和服务器功能，位于其美国东部区域。存储您的工作区、文件、短信和审计记录。</p></div>
@@ -279,6 +285,10 @@
 <div class="sp-row"><div class="sp-h"><b>飞书（Lark）</b><span class="tag t-prog">您连接后</span></div><p>进度更新，以及在飞书中向 Odelia 提问。</p></div>
 <div class="sp-row"><div class="sp-h"><b>企业微信</b><span class="tag t-prog">您连接后</span></div><p>向您选择的群发送进度更新。</p></div>
 <div class="sp-row"><div class="sp-h"><b>钉钉</b><span class="tag t-prog">您连接后</span></div><p>向您选择的群发送进度更新。</p></div>
+<div class="sp-row"><div class="sp-h"><b>Toast</b><span class="tag t-roll">上线中</span></div><p>您连接后，我们以只读方式读取各门店的销售额，以及团队的排班和实际工时，用于销售税申报、按销售额计费的许可证和工时规定。Toast 只会收到我们读取这些数据的请求。</p></div>
+<div class="sp-row"><div class="sp-h"><b>Square</b><span class="tag t-roll">上线中</span></div><p>您连接后，我们以只读方式读取各门店的销售额，以及团队的排班和实际工时，用途同上。Square 只会收到我们读取这些数据的请求。</p></div>
+<div class="sp-row"><div class="sp-h"><b>腾讯（微信）</b><span class="tag t-roll">上线中</span></div><p>如您把企业自己的微信服务号接入快哉，腾讯会传递团队成员发给 Odelia 的消息和她的回复。</p></div>
+<div class="sp-row"><div class="sp-h"><b>通过 MCP 连接的应用</b><span class="tag t-roll">上线中</span></div><p>Notion、Airtable、Google Drive、Gmail、Dropbox、Box、Slack、HubSpot、Linear、Asana、Zapier、Square、Stripe，以及所有者按地址添加的其他应用。您连接后，该应用会收到 Odelia 发给它的请求，其中可能包含您工作区中的信息。查询会自动进行；任何会更改该应用中数据的操作，都须等所有者批准。</p></div>
 </div>
 
 <h2 data-anchor="roadmap">合规路线图</h2>
