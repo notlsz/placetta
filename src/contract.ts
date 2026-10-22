@@ -15,7 +15,7 @@
 
    Expansion prompts: when a customer adds a market or a module, say what it adds before anything is bought. Nothing in
    this file charges anything. No imports but the price list, so the monitor (Deno) sends the same notice. */
-import { PROPOSED, PUBLISHED } from "./pricing.ts";
+import { APPROVED, termYearCents } from "./pricing.ts";
 
 type Bi = { en: string; zh: string };
 const B = (en: string, zh: string): Bi => ({ en, zh });
@@ -27,14 +27,19 @@ export const NOTICE_MIN = 15, NOTICE_MAX = 45;
 export const NOTICE_AT = 30;
 
 export type Term = { years: number; tier: "essentials" | "pro"; locations: number };
-export const validTerm = (y: unknown): number | null => (typeof y === "number" && (PROPOSED.terms as readonly number[]).includes(y) ? y : null);
+export const validTerm = (y: unknown): number | null => (typeof y === "number" && (APPROVED.terms as readonly number[]).includes(y) ? y : null);
 
-const money = (n: number) => "$" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+const money = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: Math.round(n * 100) % 100 ? 2 : 0, maximumFractionDigits: 2 });
 
-/** What a year costs at the published per-location price. */
+/** What a year costs at the published per-location price, less the term's discount (5% for two years, 10% for three,
+ *  approved 2026-10-22), to the cent. */
 export function yearUsd(t: Term): number {
-  const month = t.tier === "pro" ? PUBLISHED.proMonth : PUBLISHED.essentialsMonth;
-  return month * 12 * Math.max(1, Math.floor(t.locations)) * (1 - PROPOSED.multiYearDiscountPct / 100);
+  return (termYearCents(t.tier, t.years) * Math.max(1, Math.floor(t.locations))) / 100;
+}
+/** The term's discount, said: "5% off for a 2-year term". Empty for one year. */
+export function termDiscountLine(years: number): { en: string; zh: string } {
+  const pct = APPROVED.termDiscountPct[years] ?? 0;
+  return pct ? B(`${pct}% off the location price for a ${years}-year term, billed yearly`, `${years} 年期门店价格优惠 ${pct}%，按年计费`) : B("", "");
 }
 
 /** The terms, said before checkout, next to the button that agrees to them (§ 17602(a)(1)). With no tier chosen yet,
@@ -44,7 +49,8 @@ export function disclosure(t: Omit<Term, "tier"> & { tier?: Term["tier"] }): Bi 
   const ess = money(yearUsd({ ...t, tier: "essentials" })), pro = money(yearUsd({ ...t, tier: "pro" }));
   const price = t.tier ? B(`${money(yearUsd({ ...t, tier: t.tier }))} a year`, `每年 ${money(yearUsd({ ...t, tier: t.tier }))}`)
     : B(`${ess} a year for Essentials or ${pro} for Pro`, `基础版每年 ${ess}，专业版每年 ${pro}`);
-  const term = t.years === 1 ? B("one year", "一年") : B(`${t.years} years, billed once a year`, `${t.years} 年，每年计费一次`);
+  const off = APPROVED.termDiscountPct[t.years] ?? 0;
+  const term = t.years === 1 ? B("one year", "一年") : B(`${t.years} years, billed once a year, ${off}% off the location price`, `${t.years} 年，每年计费一次，门店价格优惠 ${off}%`);
   return B(
     `Renews automatically. Your plan is for ${term.en} at ${price.en} (${n} location${n === 1 ? "" : "s"}), then renews every year at the same price until you cancel. We email you ${NOTICE_MIN} to ${NOTICE_MAX} days before each renewal with what it will charge. Cancel online any time in Settings, Billing: one click, no call. Government fees are separate and paid to each agency.`,
     `自动续费。您的方案期限为${term.zh}，${price.zh}（${n} 家门店），到期后按相同价格每年自动续费，直到您取消。每次续费前 ${NOTICE_MIN} 至 ${NOTICE_MAX} 天，我们会发邮件告知续费金额。可随时在“设置 > 账单”中在线取消：点一下即可，无需致电。政府规费另计，直接支付给各机构。`);

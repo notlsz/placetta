@@ -5,11 +5,11 @@
 import { approvalLine, headline, hoursEstimate, valueReport, valueReportHtml, type ValueInput } from "../src/value.ts";
 import { valueInputOf } from "../src/valueInput";
 import { ENTITY_RULES, entityDeadlines, filePrompt, MAX_RULE_AGE, nextDue, obligations, REGISTERED_AGENT, ruleCurrent, ruleFor } from "../src/entity.ts";
-import { allowanceOf, filingKindOf, quoteFiling, validCap } from "../src/overage.ts";
+import { allowanceOf, filingKindOf, filingModeOf, quoteFiling, validCap } from "../src/overage.ts";
 import { commitmentEnd, consentLine, disclosure, expansions, noticeDue, renewalNotice, yearUsd } from "../src/contract.ts";
-import { addLine, MODULES, moduleStates, modulePrice } from "../src/modules.ts";
+import { MODULES, moduleFactsOf, moduleQuantity, moduleQuote, modulesYearCents, moduleStates, placeOf, priceLabel } from "../src/modules.ts";
 import { cleanCode, hqQuote, inviteLink } from "../src/hqPlan.ts";
-import { MODULE_PRICES, PROPOSED, PUBLISHED } from "../src/pricing.ts";
+import { APPROVED, MODULE_PRICES, moduleStripeCents, PROPOSED, PUBLISHED, stripePriceMatches, termYearCents } from "../src/pricing.ts";
 import { readFileSync } from "node:fs";
 import type { Workspace } from "../src/model";
 
@@ -103,12 +103,19 @@ export function growthTests(ok: Ok, eq: Eq) {
     eq([filingKindOf({ id: "ent-e1-ca", name: bi("x") }), filingKindOf({ id: "a", name: bi("LLC Statement of Information") }), filingKindOf({ id: "a", name: bi("Sales and use tax return, Q3") }),
       filingKindOf({ id: "a", name: bi("Amended seller's permit") }), filingKindOf({ id: "a", name: bi("Health permit") })], ["entity", "entity", "sales_tax", "amendment", "license"], "what kind of filing each is");
     eq(quoteFiling("renewal", { locations: 0, used: 99, chargedCents: 0, capCents: 0 }).kind, "plan", "a plan's own renewal is never charged");
-    eq(allowanceOf(3), 3 * PROPOSED.extraFilingsPerLocationMonth, "the allowance grows with paid locations");
-    const q = quoteFiling("sales_tax", { locations: 1, used: PROPOSED.extraFilingsPerLocationMonth, chargedCents: 0, capCents: 0 });
+    eq(allowanceOf(3), 3 * APPROVED.includedAutomatedPerLocationMonth, "the allowance grows with paid locations");
+    eq(APPROVED.includedAutomatedPerLocationMonth, 2, "2 automated filings a location a month are included");
+    const q = quoteFiling("sales_tax", { locations: 1, used: APPROVED.includedAutomatedPerLocationMonth, chargedCents: 0, capCents: 0 });
     ok(q.kind === "blocked" && q.reason === "no_cap" && /nothing is charged/.test(q.line.en), "a new workspace's $0 cap charges nothing");
     eq(PROPOSED.defaultFilingCapUsd, 0, "and that is the default");
     const c = quoteFiling("sales_tax", { locations: 1, used: 5, chargedCents: 4900, capCents: 10000, packCents: 4900 });
-    ok(c.kind === "charge" && c.cents === 4900 * PROPOSED.packsPerExtraFiling && /\$2 would be left under your \$100 monthly cap/.test(c.line.en), "the price, said before approval, with what's left under the cap");
+    ok(c.kind === "charge" && c.cents === 4900 * APPROVED.packsPerAutomatedFiling && c.mode === "automated" && /\$2 would be left under your \$100 monthly cap/.test(c.line.en), "the price, said before approval, with what's left under the cap");
+    // assisted: Placetta's team, $199, never inside the allowance, and a team quote when Stripe has no approved price
+    const a1 = quoteFiling("sales_tax", { locations: 2, used: 0, chargedCents: 0, capCents: 50000, assistedCents: 19900 }, "assisted");
+    ok(a1.kind === "charge" && a1.cents === 19900 && a1.mode === "assisted" && /Placetta's team/.test(a1.line.en) && /\$199/.test(a1.line.en) && a1.line.zh.includes("$199"), "an assisted filing is $199, even with the allowance unused");
+    eq(quoteFiling("sales_tax", { locations: 2, used: 0, chargedCents: 0, capCents: 50000 }, "assisted").kind, "quoted", "without its Stripe price, the team quotes it");
+    eq([filingModeOf({ signature: "typed", portal: "x.gov" }), filingModeOf({ signature: "none", email: "a@b.gov" }), filingModeOf({ signature: "wet", portal: "x.gov" }), filingModeOf({ signature: "typed" }), filingModeOf(undefined)],
+      ["automated", "automated", "assisted", "assisted", "assisted"], "who does the work, from the verified destination");
     eq(quoteFiling("sales_tax", { locations: 1, used: 5, chargedCents: 9800, capCents: 10000 }).kind, "blocked", "never past the cap");
     eq([validCap(0), validCap("150"), validCap(10.5), validCap(-1), validCap(PROPOSED.maxFilingCapUsd + 1)], [0, 150, null, null, null], "a cap is whole dollars within the app's range");
   }
@@ -116,9 +123,10 @@ export function growthTests(ok: Ok, eq: Eq) {
   console.log("\n# Contract: terms, the renewal notice, expansion prompts (src/contract.ts)");
   {
     const d = disclosure({ years: 2, locations: 3 });
-    ok(/Renews automatically/.test(d.en) && /2 years, billed once a year/.test(d.en) && /\$5,364 a year for Essentials or \$10,764 for Pro/.test(d.en) && /Cancel online any time/.test(d.en) && /15 to 45 days/.test(d.en), "the terms, price, cadence, notice and online cancel, before checkout");
+    ok(/Renews automatically/.test(d.en) && /2 years, billed once a year/.test(d.en) && /\$5,095\.80 a year for Essentials or \$10,225\.80 for Pro/.test(d.en) && /5% off/.test(d.en) && /Cancel online any time/.test(d.en) && /15 to 45 days/.test(d.en), "the terms, price, cadence, notice and online cancel, before checkout");
     ok(d.zh.includes("自动续费") && consentLine.zh.length > 0, "and in Chinese");
     eq(yearUsd({ years: 1, tier: "essentials", locations: 2 }), PUBLISHED.essentialsMonth * 24, "the year at the published price");
+    eq([termYearCents("essentials", 1), termYearCents("essentials", 2), termYearCents("essentials", 3), termYearCents("pro", 2), termYearCents("pro", 3)], [178800, 169860, 160920, 340860, 322920], "5% off for two years, 10% for three, to the cent");
     eq([noticeDue("2026-11-21", "2026-10-22", null), noticeDue("2026-11-21", "2026-10-21", null), noticeDue("2026-11-21", "2026-11-07", null), noticeDue("2026-11-21", "2026-10-22", "2026-11-21"), noticeDue("2026-11-21", "2026-10-22", null, false)],
       [true, false, false, false, false], "the notice: 15 to 30 days out, once, only while auto-renew is on");
     eq(commitmentEnd("2026-10-22", 3), "2029-10-21", "a three-year term's last day");
@@ -134,21 +142,42 @@ export function growthTests(ok: Ok, eq: Eq) {
   console.log("\n# Modules and the brand plan (src/modules.ts, src/hqPlan.ts)");
   {
     eq(MODULES.map(m => m.id), ["entity", "sales_tax", "alcohol", "imports", "abroad", "security"], "the six modules");
-    ok(Object.values(MODULE_PRICES).every(p => p === null) && MODULES.every(m => modulePrice(m.id) === null), "no module has a price until the founder confirms one");
-    ok(MODULES.every(m => m.name.zh && m.does.zh && m.ready.zh), "each in Chinese too");
+    eq(MODULES.map(m => moduleStripeCents(MODULE_PRICES[m.id])), [29900, 58800, 94800, 598800, 150000, 600000], "each module's Stripe amount: a year of a monthly price, else the price");
+    ok(MODULES.every(m => m.name.zh && m.does.zh && priceLabel(m.id).zh && priceLabel(m.id).en), "each in Chinese too, with its price and unit");
+    ok(MODULES.every(m => !/[·•]|\$0\d/.test(priceLabel(m.id).en + priceLabel(m.id).zh)), "no dot separators, no leading zeros");
+    eq([priceLabel("sales_tax").en, priceLabel("entity").en], ["$49 a state a month, billed yearly", "$299 a legal entity in each state it's registered in, a year"], "the price says its unit");
+    eq([placeOf("1 Main St, San Jose, CA 95112"), placeOf("2 Elm, Austin, Texas 78701"), placeOf("Calle Mayor 1, 28013 Madrid, ES"), placeOf("Main St, Flushing, NY (sample)")], [{ state: "CA" }, { state: "TX" }, { country: "ES" }, {}], "where a store is, from its address");
+    const wsFacts = moduleFactsOf({
+      stores: [{ id: "a", address: "1 Main St, San Jose, CA 95112", liquor: true }, { id: "b", address: "9 Rd, Austin, TX 78701" }, { id: "c", address: "5 Av, Ciudad de Mexico, MX" }, { id: "d", address: "2 Mkt St, San Francisco, CA 94103", liquor: true }],
+      entities: [{ id: "e1", registrations: [{ state: "DE" }, { state: "CA" }] }, { id: "e2", registrations: [{ state: "CA" }, { state: "ca" }] }],
+    });
+    eq([moduleQuantity("entity", wsFacts), moduleQuantity("sales_tax", wsFacts), moduleQuantity("alcohol", wsFacts), moduleQuantity("imports", wsFacts), moduleQuantity("security", wsFacts), moduleQuantity("abroad", wsFacts), moduleQuantity("abroad", wsFacts, ["MX"])],
+      [3, 2, 2, 1, 1, 1, 0], "units from the workspace's own facts: entity-states, sales tax states, licensed locations, the company, new countries");
+    const st = moduleQuote("sales_tax", { qty: 2, priceOk: true, subscribed: true, dueNowCents: 58800, renews: "2027-03-01" });
+    ok(st.billed && st.periodCents === 117600 && st.dueNowCents === 58800 && /2 states × \$588 a year = \$1,176 a year/.test(st.line.en) && /\$588 is charged now/.test(st.line.en) && st.line.zh.includes("$1,176"), "a quote says the units, the year, and what's charged now");
+    const ab = moduleQuote("abroad", { qty: 2, priceOk: true, subscribed: true });
+    ok(ab.billed && ab.dueNowCents === 300000 && /one time/.test(ab.line.en) && /at cost/.test(ab.line.en), "abroad: one time per new country, fees at cost");
+    eq([moduleQuote("alcohol", { qty: 2, priceOk: false, subscribed: true }).reason, moduleQuote("alcohol", { qty: 2, priceOk: true, subscribed: false }).reason, moduleQuote("alcohol", { qty: 0, priceOk: true, subscribed: true }).reason, moduleQuote("alcohol", { qty: 2, had: 2, priceOk: true, subscribed: true }).reason],
+      ["no_price", "no_plan", "nothing_to_count", "no_change"], "without the approved Stripe price the team quotes; never a guessed amount");
+    ok(/quote/.test(moduleQuote("imports", { qty: 1, priceOk: false, subscribed: true }).line.en), "and says so");
+    eq(modulesYearCents({ sales_tax: 2, entity: 3, abroad: 4, security: 1 }), 2 * 58800 + 3 * 29900 + 600000, "a year of the modules on the plan (one-time fees aside)");
+    ok(stripePriceMatches({ unit_amount: 58800, currency: "usd", recurring: { interval: "year", interval_count: 1 } }, { cents: 58800, interval: "year" })
+      && !stripePriceMatches({ unit_amount: 58799, currency: "usd", recurring: { interval: "year" } }, { cents: 58800, interval: "year" })
+      && !stripePriceMatches({ unit_amount: 58800, currency: "usd", recurring: { interval: "month" } }, { cents: 58800, interval: "year" })
+      && stripePriceMatches({ unit_amount: 150000, currency: "usd", recurring: null }, { cents: 150000, interval: null }), "a Stripe price is charged only when it is exactly the approved one");
     eq(moduleStates(["alcohol"], ["imports"]).alcohol + "/" + moduleStates(["alcohol"], ["imports"]).imports + "/" + moduleStates([], []).entity, "on/requested/off", "where each stands");
-    ok(/quote/.test(addLine(MODULES[2], false).en) && /prorated/.test(addLine(MODULES[2], true).en), "what adding one does, said first");
     const f = hqQuote({ billTo: "franchisee", tier: "essentials", locations: 8, people: 40 });
     ok(f.yearUsd === 0 && /Headquarters pays nothing to see them all/.test(f.lines[0].en), "franchisees pay: headquarters pays nothing, as the landing page says");
     const h = hqQuote({ billTo: "hq", tier: "essentials", locations: 15, people: 60 });
-    const extra = 60 - 15 * PROPOSED.includedPeoplePerLocation;
-    eq([h.locationsUsd, h.extraPeople, h.peopleUsd, h.topUpUsd, h.yearUsd], [15 * 1788, extra, extra * PROPOSED.personYearUsd, 0, 15 * 1788 + extra * PROPOSED.personYearUsd], "locations and people drive the price");
+    const extra = 60 - 15 * APPROVED.includedPeoplePerLocation;
+    eq([h.locationsUsd, h.extraPeople, h.peopleUsd, h.topUpUsd, h.yearUsd], [15 * 1788, extra, extra * APPROVED.personYearUsd, 0, 15 * 1788 + extra * APPROVED.personYearUsd], "locations and people drive the price");
     eq(hqQuote({ billTo: "hq", tier: "essentials", locations: 2, people: 2 }).yearUsd, PUBLISHED.hqFromYear, "the published $25,000 floor");
     eq([cleanCode("https://placetta.com/app/settings/team?hq=" + "a".repeat(64)), cleanCode("short"), cleanCode(" ab-cd ".repeat(4) + "x".repeat(10))], ["a".repeat(64), null, "abcd".repeat(4) + "x".repeat(10)], "an invite code from a link or pasted");
     eq(inviteLink("https://placetta.com/", "abc"), "https://placetta.com/app/settings/team?hq=abc", "the invite link opens where an owner joins");
     // no public price changed: the landing page still says what it said
     const site = readFileSync("site/index.html", "utf8");
     ok(site.includes("$149") && site.includes("25,000"), "the landing page's prices are untouched");
-    ok(!new RegExp(`\\$${PROPOSED.personYearUsd} (a|per) (year|person)`).test(site) && !/FOUNDER TO CONFIRM|people past those included/i.test(site), "no proposed price is published");
+    ok(!new RegExp(`\\$${APPROVED.personYearUsd} (a|per) (year|person)`).test(site) && !/FOUNDER TO CONFIRM|people past those included/i.test(site), "no proposed price is published");
+    ok(!/\$199|\$1,500 (one time|a country|for each)|\$240 (a|per) |\$588|\$79 a|\$500 a month|legal entity in each state|a licensed location|% off/i.test(site), "no owner price is on the landing page");
   }
 }

@@ -168,6 +168,7 @@ export type Store = {
   name: Bi;
   address: string;
   stage: "open" | "opening";
+  liquor?: boolean;              // holds (or is getting) a liquor license: what the Alcohol module counts (src/modules.ts)
   plannedOpen?: string;          // the date the brand planned to open
   opened?: string;               // the date it opened
   projectedOpen?: string;        // for stores still opening: where the critical path lands now

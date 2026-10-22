@@ -4,9 +4,9 @@ import { useApp } from "../ctx";
 import { B } from "../model";
 import { filledName } from "../plan/prefill";
 import { I, Modal, Pill, Select } from "../ui";
-import { consentLine, disclosure, NOTICE_MAX } from "../contract.ts";
-import { MODULES } from "../modules.ts";
-import { PROPOSED } from "../pricing.ts";
+import { consentLine, disclosure, NOTICE_MAX, termDiscountLine } from "../contract.ts";
+import { MODULES, priceLabel } from "../modules.ts";
+import { APPROVED } from "../pricing.ts";
 import { daysUntil } from "../time";
 import { RenewalValue } from "../ValueReport";
 
@@ -91,9 +91,10 @@ export function Plans({ reason, filing, onClose }: { reason: "start" | "file"; f
         <section className="plan terms">
           <div className="plan-h"><b>{b(B("Term and renewal", "期限与续费"))}</b>
             <label className="mk">{b(B("Term", "期限"))}
-              <Select aria-label={b(B("Term", "期限"))} value={years} onChange={e => setYears(Number(e.target.value))}>{PROPOSED.terms.map(y => <option key={y} value={y}>{zh ? `${y} 年` : `${y} year${y === 1 ? "" : "s"}`}</option>)}</Select>
+              <Select aria-label={b(B("Term", "期限"))} value={years} onChange={e => setYears(Number(e.target.value))}>{APPROVED.terms.map(y => <option key={y} value={y}>{zh ? `${y} 年${APPROVED.termDiscountPct[y] ? `，优惠 ${APPROVED.termDiscountPct[y]}%` : ""}` : `${y} year${y === 1 ? "" : "s"}${APPROVED.termDiscountPct[y] ? `, ${APPROVED.termDiscountPct[y]}% off` : ""}`}</option>)}</Select>
             </label></div>
           <p>{b(disclosure({ years, locations: n }))}</p>
+          {years > 1 && <p className="note">{b(termDiscountLine(years))}{prices && !(prices.terms?.essentials?.[years] && prices.terms?.pro?.[years]) ? b(B(". If a plan below can't be bought online for this term, our team sends you a quote and nothing is charged.", "。如以下方案无法在线购买此期限，团队会向您报价，期间不会收费。")) : "."}</p>}
           <label className="guar"><input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} /><span>{b(consentLine)}</span></label>
         </section>
         {cloud.billing?.current_period_end && daysUntil(cloud.billing.current_period_end.slice(0, 10)) >= 0 && daysUntil(cloud.billing.current_period_end.slice(0, 10)) <= NOTICE_MAX && <RenewalValue />}
@@ -121,7 +122,13 @@ export function Plans({ reason, filing, onClose }: { reason: "start" | "file"; f
             </div>
           </section>
         )}
-        <p className="note">{b(B("Grow the same contract with modules, priced by our team: ", "可在同一合同上添加模块，由团队报价："))}{MODULES.map(m => b(m.name)).join(zh ? "、" : ", ")}{b(B(". Add them in Settings, Billing.", "。可在“设置 > 账单”中添加。"))}</p>
+        {cloud.owner ? (
+          <section className="plan modules">
+            <div className="plan-h"><b>{b(B("Grow the same contract with modules", "在同一合同上添加模块"))}</b></div>
+            <ul>{MODULES.map(m => <li key={m.id}><I.check /><span><b>{b(m.name)}</b> {b(priceLabel(m.id))}</span></li>)}</ul>
+            <p className="note">{b(B("Each one counts its own unit from your workspace and shows the exact charge before you approve it. Add them in Settings, Billing.", "每项按您工作区中的实际数量计价，批准前显示确切金额。可在“设置 > 账单”中添加。"))}</p>
+          </section>
+        ) : <p className="note">{b(B("Grow the same contract with modules: ", "可在同一合同上添加模块："))}{MODULES.map(m => b(m.name)).join(zh ? "、" : ", ")}{b(B(". An owner adds them in Settings, Billing.", "。由所有者在“设置 > 账单”中添加。"))}</p>}
         <p className="note">{b(B("Ten or more locations: headquarters plans from $25,000 a year, with every store on one dashboard. Overseas brands entering the US: company setup through the first store, quoted. Government fees are paid by you directly to each agency, at cost. Payments are handled by Stripe.", "10 家及以上门店：总部方案每年 25,000 美元起，所有门店一屏掌握。海外品牌进入美国：从公司设立到首店开业，单独报价。政府规费由您按实际金额直接支付给各机构。付款由 Stripe 处理。"))} <a href="mailto:support@placetta.com?subject=Headquarters%20plan">{b(B("Talk to us", "联系我们"))}</a></p>
       </div>
     </Modal>

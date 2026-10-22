@@ -2,6 +2,8 @@ import { createClient, type Session, type SupabaseClient } from "@supabase/supab
 import type { Audit, Bi, Workspace } from "../model";
 import type { Reply, Step } from "../core";
 import type { HqLink, HqRow } from "../hq";
+import type { Quote } from "../overage.ts";
+import type { ModuleQuote } from "../modules.ts";
 import { readSSE } from "../../supabase/functions/_shared/stream.ts";
 
 /* ------------------------------------------------------------------ *
@@ -645,7 +647,9 @@ export async function hqShare(ws: string, email: string, brand?: string): Promis
 export const hqUnshare = (id: string) => rpcVoid("hq_unshare", { p_id: id });
 
 export type LocationPrice ={ amount: number; currency: string; interval: string | null; interval_count: number | null };
-export type PlanPrices = { location: LocationPrice | null; pro?: LocationPrice | null; opening: LocationPrice | null; opening_food?: LocationPrice | null; guarantee?: LocationPrice | null; pack?: LocationPrice | null };
+export type PlanPrices = { location: LocationPrice | null; pro?: LocationPrice | null; opening: LocationPrice | null; opening_food?: LocationPrice | null; guarantee?: LocationPrice | null; pack?: LocationPrice | null;
+  /** which two and three year terms can be bought online (their approved Stripe price is set); else the team quotes */
+  terms?: Record<"essentials" | "pro", Record<string, boolean>> };
 export const locationPrices = (ws: string) => fn<PlanPrices>("billing", { action: "prices", workspace_id: ws, return_url: appHome() });
 export const syncLocations = (ws: string) => fn<{ synced: boolean }>("billing", { action: "sync_locations", workspace_id: ws, return_url: appHome() });
 export const checkout = (ws: string, plan: "entry" | "starter" | "growth" | "locations", o: { markets?: number; extra_locations?: number; tier?: "essentials" | "pro"; guarantee?: boolean; term_years?: number; renewal_consent?: boolean } = {}) =>
@@ -655,25 +659,31 @@ export const billingPortal = (ws: string) => fn<{ url: string }>("billing", { ac
 /* ------------------------------ growth: the cap, modules, the term, the brand plan ------------------------------ */
 
 /** The growth columns of billing (migration 20261022140000_growth_mechanics). Null before it's applied. */
-export type Growth = { modules: string[]; modules_requested: string[]; filing_cap_cents: number; term_years: number; term_started: string | null; auto_renew: boolean; renewal_notice_for: string | null; hq_paid_by: string | null; current_period_end: string | null; paid_locations: number };
+export type Growth = { modules: string[]; modules_requested: string[]; module_qty?: Record<string, number>; abroad_countries?: string[]; filing_cap_cents: number; term_years: number; term_started: string | null; auto_renew: boolean; renewal_notice_for: string | null; hq_paid_by: string | null; current_period_end: string | null; paid_locations: number };
 export async function growth(ws: string): Promise<Growth | null> {
   if (PREVIEW) return null;
-  const { data, error } = await supabase().from("billing").select("modules, modules_requested, filing_cap_cents, term_years, term_started, auto_renew, renewal_notice_for, hq_paid_by, current_period_end, paid_locations").eq("workspace_id", ws).maybeSingle();
+  const { data, error } = await supabase().from("billing").select("modules, modules_requested, module_qty, abroad_countries, filing_cap_cents, term_years, term_started, auto_renew, renewal_notice_for, hq_paid_by, current_period_end, paid_locations").eq("workspace_id", ws).maybeSingle();
   if (error) return null;
   return (data as Growth | null) ?? null;
 }
 /** This month's filings past the plan: how many, what was charged, the cap. */
-export type FilingMonth = { month: string; locations: number; used: number; charged_cents: number; cap_cents: number; paid: boolean };
+export type FilingMonth = { month: string; locations: number; used: number; assisted?: number; charged_cents: number; cap_cents: number; paid: boolean };
 export async function filingMonth(ws: string): Promise<FilingMonth | null> {
   if (PREVIEW) return null;
   const { data, error } = await supabase().rpc("filing_month", { ws });
   return error ? null : (data as FilingMonth);
 }
 export const setFilingCap = (ws: string, usd: number) => rpcData<number>("filing_cap_set", { ws, p_cents: Math.round(usd) * 100 });
-/** A filing past the plan, approved at the price shown (0 within the allowance). */
-export const filingCharge = (ws: string, o: { ref: string; kind: string; shown_cents: number }) =>
+/** What a filing past the plan costs, from the server (owners only): automated or assisted, and the price. */
+export const filingQuote = (ws: string, ref: string) => fn<{ ok: true; quote: Quote }>("billing", { action: "filing_quote", workspace_id: ws, ref, return_url: appHome() });
+/** A filing past the plan, approved at the price and kind of work shown (0 within the allowance). */
+export const filingCharge = (ws: string, o: { ref: string; mode: string; shown_cents: number }) =>
   fn<{ ok: true; kind: "plan" | "allowance" | "charge"; cents: number; again?: boolean }>("billing", { action: "filing_charge", workspace_id: ws, ...o, return_url: appHome() });
-export const addModule = (ws: string, module: string) => fn<{ ok: true; module: string; state: "on" | "requested" }>("billing", { action: "add_module", workspace_id: ws, module, return_url: appHome() });
+/** A module's units from the workspace's facts and what adding it charges now (owners only). */
+export const moduleQuote = (ws: string, module: string) => fn<{ ok: true; quote: ModuleQuote; quote_at: number }>("billing", { action: "module_quote", workspace_id: ws, module, return_url: appHome() });
+/** Add a module (or change its units) at the quote shown: the same units and cents, or the server refuses. */
+export const addModule = (ws: string, module: string, shown: { qty: number; cents: number; at: number }) =>
+  fn<{ ok: true; module: string; state: "on" | "requested" }>("billing", { action: "add_module", workspace_id: ws, module, shown_qty: shown.qty, shown_cents: shown.cents, quote_at: shown.at, return_url: appHome() });
 /** Off is the online cancel of auto-renew; on turns it back on. */
 export const setAutoRenew = (ws: string, on: boolean) => fn<{ ok: true; auto_renew: boolean }>("billing", { action: "auto_renew", workspace_id: ws, on, return_url: appHome() });
 

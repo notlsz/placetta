@@ -957,7 +957,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       if (filingApp && !IN_PLAN.includes(filingKindOf(filingApp))) {
         const priced = shownCharges.get(a.id);
         if (!priced) { say(lang === "zh" ? "请先打开这份申报，查看快哉对它的收费，然后再批准。未收取任何费用。" : "Open this filing first to see Placetta's price for it, then approve. Nothing was charged."); return; }
-        try { await api.filingCharge(cloud.wsId, { ref: a.app!, kind: priced.kind, shown_cents: priced.cents }); }
+        try { await api.filingCharge(cloud.wsId, { ref: a.app!, mode: priced.mode, shown_cents: priced.cents }); }
         catch (e) { shownCharges.delete(a.id); const er = e as api.ApiError; say((lang === "zh" && er.message_zh) || er.message); return; }
         shownCharges.delete(a.id);
       }

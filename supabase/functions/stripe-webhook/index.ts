@@ -4,6 +4,7 @@
 //                                                        already applied (Stripe doesn't deliver in order)
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { itemOf, webhookSecret } from "../_shared/stripe_catalog.ts";
+import { TERM_PRICE_ENV } from "../../../src/pricing.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -101,11 +102,17 @@ Deno.serve(async (req) => {
         // the locations paid for, which size Odelia's monthly allowance
         const env = (k: string) => Deno.env.get(k);
         const items = (o.items?.data ?? []) as { price?: { id?: string; lookup_key?: string | null }; quantity?: number }[];
-        const located = items.filter((i) => ["essentials", "pro"].includes(itemOf(i.price, env) ?? ""));
+        // a location price: the plan's own, or a two or three year term's (src/pricing.ts TERM_PRICE_ENV)
+        const tierOf = (p: { id?: string; lookup_key?: string | null } | undefined) => {
+          const it = itemOf(p, env);
+          if (it === "essentials" || it === "pro") return it;
+          return (["essentials", "pro"] as const).find((t) => Object.values(TERM_PRICE_ENV[t]).some((k) => !!p?.id && env(k) === p.id));
+        };
+        const located = items.filter((i) => !!tierOf(i.price));
         const paid = status === "active" || status === "trialing" ? located.reduce((n, i) => n + (Number(i.quantity) || 0), 0) : 0;
         // Pro sizes a larger Odelia allowance. The price decides (a move in the portal changes it); the tier set at
         // checkout counts only when no location price is recognized.
-        const pro = located.length ? located.some((i) => itemOf(i.price, env) === "pro") : o.metadata?.tier === "pro";
+        const pro = located.length ? located.some((i) => tierOf(i.price) === "pro") : o.metadata?.tier === "pro";
         // Applied only if no event created later has been applied already: a late "updated" can't undo a "deleted".
         const createdAt = new Date((Number(event.created) || Math.floor(Date.now() / 1000)) * 1000).toISOString();
         const { data: applied, error } = await admin.rpc("billing_subscription_apply", {

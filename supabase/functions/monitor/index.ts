@@ -670,7 +670,7 @@ Deno.serve(async (req) => {
   let renewalNotices = 0;
   if (RESEND && FROM) {
     const { data: rows, error: re } = await admin.from("billing")
-      .select("workspace_id, current_period_end, subscription_status, subscription_plan, paid_locations, auto_renew, renewal_notice_for, hq_paid_by, subscription_id")
+      .select("workspace_id, current_period_end, subscription_status, subscription_plan, paid_locations, auto_renew, renewal_notice_for, hq_paid_by, subscription_id, term_years, module_qty")
       .not("current_period_end", "is", null);
     if (re) console.error("renewal notices", re.code);
     for (const r of dueNotices((rows ?? []) as RenewalRow[], today)) {
