@@ -6,6 +6,7 @@ import { AnthropicModel } from "./model.ts";
 import { playbookFor } from "./playbooks.ts";
 import { type Route, Worker, type Session } from "./run.ts";
 import { dbKey, SupabaseStore } from "./store.ts";
+import { assertNotRoot } from "./sandbox.ts";
 
 /** The destination's tenant path, other hosts and start page, from destinations.ts like its host. */
 export const routeOf = (id: string): Route | null => {
@@ -29,7 +30,8 @@ export async function openBrowser(): Promise<Session> {
       close: async () => { await browser.close(); await fetch(`https://api.browserbase.com/v1/sessions/${s.id}`, { method: "POST", headers: { "X-BB-API-Key": key, "Content-Type": "application/json" }, body: JSON.stringify({ projectId: project, status: "REQUEST_RELEASE" }) }).catch(() => undefined); } };
   }
   const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH || undefined, args: process.env.CHROMIUM_PATH ? ["--no-sandbox"] : [] });
-  const page = await (await browser.newContext()).newPage();
+  // no downloads, no service workers: the run's own throwaway context (sandbox.ts locks the rest down)
+  const page = await (await browser.newContext({ acceptDownloads: false, serviceWorkers: "block" })).newPage();
   return { browser, page, liveUrl: null, close: () => browser.close() };
 }
 
@@ -42,6 +44,7 @@ export const settings = () => ({
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   if (process.env.FILER_ENABLED !== "1") { console.log("FILER_ENABLED is not 1; the portal worker is off."); process.exit(0); }
+  assertNotRoot();
   const store = new SupabaseStore(process.env.SUPABASE_URL!, dbKey(process.env));
   const w = new Worker({ store, model: new AnthropicModel(process.env.ANTHROPIC_API_KEY!), open: openBrowser, portalOf: (id) => DEST[id]?.portal ?? null,
     routeOf, playbookOf: playbookFor, ...settings() });

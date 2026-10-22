@@ -5,7 +5,20 @@
 import type { Locator, Page } from "playwright-core";
 import type { PageState } from "./guards.ts";
 
+/** The page as the model sees it. A page that starts a navigation while it's read (a refused jump to another site
+ *  included) is read again once it settles. */
 export async function pageState(page: Page): Promise<PageState> {
+  for (let i = 0; ; i++) {
+    try { return await readState(page); }
+    catch (e) {
+      if (i >= 3 || !/context was destroyed|navigat/i.test(String((e as Error)?.message ?? e))) throw e;
+      await page.waitForLoadState("domcontentloaded").catch(() => undefined);
+      await page.waitForTimeout(150);
+    }
+  }
+}
+
+async function readState(page: Page): Promise<PageState> {
   const s = await page.evaluate(() => {
     const visible = (el: Element) => {
       const r = (el as HTMLElement).getBoundingClientRect();
@@ -48,8 +61,24 @@ export async function pageState(page: Page): Promise<PageState> {
       url: location.href, title: document.title,
       headings: (Array.from(document.querySelectorAll("h1, h2, h3")) as HTMLElement[]).filter(visible).map((h) => clean(h.textContent)).slice(0, 12),
       controls, labels: Array.from(labels.entries()), buttons, links, frames, markers,
-      text: (document.body?.innerText ?? "").slice(0, 6000),
+      ...readable(),
     };
+    /** The text a person sees, and what's hidden from them: tiny, transparent, the colour of its background, off-screen. */
+    function readable() {
+      const shown: string[] = [], hidden: string[] = [];
+      const bgOf = (el: Element | null): string => { for (let e = el; e; e = e.parentElement) { const b = getComputedStyle(e).backgroundColor; if (b && !/rgba\(0, 0, 0, 0\)|transparent/.test(b)) return b; } return "rgb(255, 255, 255)"; };
+      const walker = document.createTreeWalker(document.body ?? document.documentElement, NodeFilter.SHOW_TEXT);
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        const t = clean(n.textContent); const el = n.parentElement;
+        if (!t || !el || /^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE)$/.test(el.tagName)) continue;
+        const st = getComputedStyle(el), r = el.getBoundingClientRect();
+        if (st.display === "none" || st.visibility === "hidden" || !el.getClientRects().length) continue;   // innerText leaves these out too
+        const tiny = parseFloat(st.fontSize) < 4, faint = parseFloat(st.opacity) < 0.05 || /rgba\([^)]*, 0\)$/.test(st.color);
+        const same = st.color === bgOf(el), off = r.right < 0 || r.bottom < 0 || r.width < 2 || r.height < 2;
+        (tiny || faint || same || off ? hidden : shown).push(t);
+      }
+      return { text: shown.join("\n").slice(0, 6000), hidden: hidden.join(" ").slice(0, 2000) ? [hidden.join(" ").slice(0, 2000)] : [] };
+    }
   });
   const dup = new Map(s.labels as [string, number][]);
   const controls = (s.controls as Omit<PageState["controls"][number], "selector">[]).map((c) => ({
@@ -60,7 +89,7 @@ export async function pageState(page: Page): Promise<PageState> {
     url: s.url, title: s.title, headings: s.headings, controls,
     buttons: s.buttons.map((t: string) => ({ selector: `button:${t}`, text: t })),
     links: s.links.map((l: { text: string; href: string }) => ({ selector: `link:${l.text}`, text: l.text, href: l.href })),
-    text: s.text, frames: s.frames, markers: s.markers,
+    text: s.text, frames: s.frames, markers: s.markers, hidden: s.hidden,
   };
 }
 

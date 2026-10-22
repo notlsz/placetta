@@ -11,6 +11,7 @@ import { accessRpc, WORKS } from "../_shared/access.ts";
 import { callModel, canConverse, ROLES, type Role } from "../_shared/llm.ts";
 import { sse } from "../_shared/stream.ts";
 import { gate, record } from "../_shared/ai_gate.ts";
+import { secretValues, withoutEnv } from "../_shared/secrets.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -145,6 +146,9 @@ Deno.serve(async (req) => {
   const tools = [...pageTools, ...(research ? [search, fetchTool] : [])];
   if (tools.length) payload.tools = tools;
 
+  // none of the server's own secrets ever goes to a model vendor, whatever put it in the conversation (_shared/secrets.ts)
+  const cut = withoutEnv(payload, (() => { try { return secretValues(Deno.env.toObject()); } catch { return []; } })());
+  if (cut.cut) { console.error("model call: cut", cut.cut, "server secret value(s) from the request"); Object.assign(payload, cut.body); }
   const call = { payload, role, research, beta: research ? FETCH_BETA : null };
   const tools_ = research ? { search, fetch: fetchTool, pageTools } : null;
   const failed = (out: { model: string; status: number; text: string }) => {

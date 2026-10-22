@@ -16,6 +16,8 @@ import type { Model } from "./model.ts";
 import { headingOf, locate, pageState } from "./page.ts";
 import { finalOn, type FormSteps, guideLines, payOn, type Playbook } from "./playbooks.ts";
 import type { Store } from "./store.ts";
+import { harden, linkAllowed, safeConfirm, wipe, withTimeout, type Blocked } from "./sandbox.ts";
+import { scoreText } from "../../../supabase/functions/_shared/injection.ts";
 import type { Act, Filing, Login, Result, Skill, TraceStep } from "./types.ts";
 
 export type Session = { browser: Browser; page: Page; liveUrl: string | null; close(): Promise<void> };
@@ -32,6 +34,7 @@ export type Config = {
   dryRun: boolean; twoKey: number; maxSteps: number; maxMs: number; holdMs: number; pollMs: number;
   beforeSubmitClick?(f: Filing): Promise<void>;        // tests: kill the run right after submit_clicked_at
   tmpRoot?: string;                                    // where each run's own folder is made (the system's temp folder)
+  runMs?: number;                                      // the whole run's hard limit (default maxMs + holdMs + 5 minutes)
 };
 
 const PAY = {
@@ -61,6 +64,15 @@ export async function assertFresh(session: Session): Promise<void> {
     throw new Error(`browser session isn't fresh (${cookies.length} cookies, ${pages.length} other pages${onSite ? ", already on a website" : ""})`);
   }
 }
+/** Why a page reads like instructions to an AI, or null: its visible text, labels and buttons, and what it hides. */
+export function pageInjection(st: PageState): string | null {
+  const seen = [st.title, ...st.headings, st.text, ...st.controls.map((c) => c.label), ...st.buttons.map((b) => b.text)].join("\n");
+  const v = scoreText(seen);
+  if (v.verdict !== "clean") return v.hits[0];
+  const hidden = (st.hidden ?? []).join("\n");
+  const h = hidden ? scoreText(hidden) : null;
+  return h && h.score > 0 ? `hidden text: ${h.hits[0]}` : null;
+}
 const urlKey = (u: string) => { try { const x = new URL(u); return x.origin + x.pathname; } catch { return u; } };
 export const portalKey = (host: string, official: string) => `portal:${host}:${official}`;
 
@@ -85,7 +97,27 @@ export class Worker {
     return true;
   }
 
+  /** One filing, under the run's hard time limit: past it the browser is closed, whatever it was waiting on. */
   async run(f0: Filing): Promise<Result | null> {
+    const track: { session?: Session; dir?: string } = {};
+    const alive = { on: true };
+    const limit = this.c.runMs ?? this.c.maxMs + this.c.holdMs + 5 * 60_000;
+    try {
+      // past the limit: storage wiped, browser closed, the run's folder gone and its token ended now, not when the
+      // model or the page finally answers
+      return await withTimeout(this.runInner(f0, track, alive), limit, async () => {
+        alive.on = false;
+        if (track.session) { await wipe(track.session.page).catch(() => undefined); await track.session.close().catch(() => undefined); }
+        if (track.dir) await rm(track.dir, { recursive: true, force: true }).catch(() => undefined);
+        await this.c.store.end?.().catch(() => undefined);
+      });
+    } catch (e) {
+      await this.fail(f0, e);
+      return null;
+    }
+  }
+
+  private async runInner(f0: Filing, track: { session?: Session; dir?: string }, alive: { on: boolean } = { on: true }): Promise<Result | null> {
     const { store } = this.c;
     let f = f0;
     const official = f.payload.official ?? "";
@@ -108,11 +140,18 @@ export class Worker {
     let session: Session | null = null;
     // this run's own folder for what it uploads; nothing else writes there and it goes when the run ends
     const dir = await mkdtemp(join(this.c.tmpRoot ?? tmpdir(), `filer-${f.id.replace(/[^\w-]+/g, "").slice(0, 36)}-`));
+    track.dir = dir;
     try {
+      // the run's own token for this one filing (store.ts): every database call it makes carries it
+      await store.begin?.(f);
       session = await this.c.open();
+      track.session = session;
       await assertFresh(session);
       const page = session.page;
-      await page.context().route("**/*", (r) => (r.request().isNavigationRequest() && r.request().frame() === page.mainFrame() && !onAny(r.request().url(), hosts) ? r.abort() : r.continue()));
+      // the sandbox (sandbox.ts): navigation only to the run's hosts, no file: or other schemes, no downloads, dialogs
+      // dismissed, popups closed; each refusal goes in the filing's log
+      const blocked: Blocked[] = [];
+      await harden(page, hosts, (b) => { blocked.push(b); });
       const login = await store.login(f, host, route?.tenant);
       f = await store.step(f, log(`Opening ${host}`, `打开 ${host}`, "visit"), { provider_ref: null });
       if (pb) f = await store.step(f, log(`Following the published guide for ${pb.playbook.name}${pb.playbook.verified ? "" : " (first run, watched by the Placetta team)"}`, `按${pb.playbook.name}公布的指南操作${pb.playbook.verified ? "" : "（首次运行，由快哉团队监督）"}`, "playbook"));
@@ -132,15 +171,19 @@ export class Worker {
         }
       }
       res ??= await this.drive(ctx, skill?.enabled ? "The recorded steps stopped matching this page; carry on from here." : undefined);
+      for (const b of blocked.slice(0, 10)) ctx.f = await store.step(ctx.f, log(`Refused ${b.kind === "navigation" ? "to leave the agency's site" : b.kind === "scheme" ? "a local or script address" : b.kind === "download" ? "a download" : b.kind === "dialog" ? "a pop-up dialog" : "a new window"}`, `已拒绝${b.kind === "download" ? "下载" : b.kind === "dialog" ? "弹出对话框" : b.kind === "popup" ? "新窗口" : "离开机构网站或打开本地地址"}`, "refused", b.detail));
       await this.finish(ctx.f, res, ctx);
       if (res.kind === "submitted") await this.learn(key, ctx.f, res, skill);
       return res;
     } catch (e) {
-      await this.fail(f, e);
+      if (alive.on) await this.fail(f, e);   // a run past its limit was already failed by run()
       return null;
     } finally {
+      // storage wiped, then the browser closed, then the run's folder gone; the token stops working
+      if (session) await wipe(session.page).catch(() => undefined);
       await session?.close().catch(() => undefined);
       await rm(dir, { recursive: true, force: true }).catch((e) => console.error("filer: couldn't delete the run's folder", e instanceof Error ? e.message : e));
+      await store.end?.().catch(() => undefined);
     }
   }
 
@@ -200,6 +243,12 @@ export class Worker {
       rec(a);
       ctx.f = await this.c.store.step(ctx.f, log(`Attached ${a.attachment}`, `已上传 ${a.attachment}`, "upload"));
       return { ok: true };
+    }
+    // a link to somewhere off the run's hosts, or to a file: or script address, is never clicked
+    const href = await loc.evaluate((el) => (el as HTMLAnchorElement).getAttribute?.("href") ?? "").catch(() => "");
+    if (href && !/^(#|\/(?!\/)|\?)/.test(href) && !linkAllowed(new URL(href, page.url()).href, ctx.hosts)) {
+      ctx.f = await this.c.store.step(ctx.f, log("Refused a link off the agency's site", "拒绝打开机构网站以外的链接", "refused", href.slice(0, 120)));
+      return { ok: false, error: "Refused: that link leaves the agency's site." };
     }
     // click. The words on what's clicked decide whether it sends the application, whatever kind of selector picked it:
     // a "Submit" link or an element chosen by its id gets the same final-submit guard as a "Submit" button.
@@ -307,7 +356,7 @@ export class Worker {
       if (!r.ok) return r;
     }
     const st = await pageState(ctx.page);
-    const m = skill.body.confirm ? new RegExp(skill.body.confirm.pattern).exec(st.text) : null;
+    const m = skill.body.confirm ? safeConfirm(skill.body.confirm.pattern)?.exec(st.text) ?? null : null;
     if (!m) return { ok: false, error: "no confirmation" };
     return { end: await this.done(ctx, m[1], "Submitted by replaying the recorded steps", true) };
   }
@@ -325,6 +374,11 @@ export class Worker {
         if (r.kind === "needs_you" && r.reason === "resumed") continue;
         return r;
       }
+      // A page with instructions aimed at an AI (in sight, or in text hidden from a person) isn't the agency talking to
+      // the customer: the run stops before the model reads it, and the team takes the filing.
+      const inj = pageInjection(st);
+      if (inj) return { kind: "handoff", reason: "page_injection", trace: ctx.trace,
+        message: { en: `The agency's page had text aimed at an AI (${inj}), so Placetta stopped before reading it. The team takes this filing from here.`, zh: "机构页面中含有针对 AI 的文字，快哉在读取前已停止，由团队接手这份申请。" } };
       // After the submit, the guide's confirmation pattern finds the agency's number without asking the model.
       const pattern = ctx.f.submit_clicked_at && ctx.pb?.playbook.confirm ? new RegExp(ctx.pb.playbook.confirm, "i").exec(st.text) : null;
       if (pattern?.[1]) return await this.done(ctx, pattern[1], `Submitted following the published guide for ${ctx.pb!.playbook.name}`, false);
