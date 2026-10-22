@@ -1,3 +1,7 @@
+## How the US checklist was built
+
+From SBA's federal license table (https://www.sba.gov/business-guide/launch-your-business/apply-licenses-permits, which now lands on https://www.sba.gov/counseling/launch-your-business/#licenses-permits: agriculture imports with USDA, alcohol with TTB, fish and wildlife with FWS, radio with the FCC, transportation with DOT) and USAGov's small business pages (https://www.usa.gov/small-business, including its import license guide; the "america.gov" the founder named is retired). Then each state's own .gov page for formation, out-of-state registration, sales tax, employer accounts and workers' compensation, and each county's and city's own .gov pages. Secondary sources (law firms, blogs, aggregators) were used only to find leads; none is cited, and an entry whose official page couldn't be read is UNVERIFIED (an internal `lead` field may keep the secondary link for staff; it is never shown).
+
 ## Still missing
 
 What the audit looked for and the registry still doesn't hold, by country and level. Each is a gap to research, not a claim.

@@ -27,6 +27,7 @@ function topicOf(f: OfficialForm): Topic {
   const t = `${f.id} ${f.form} ${f.title.en}`.toLowerCase();
   if (f.needs?.alcohol || /alcohol|liquor|wine|beer|abc\b|sla\b/.test(t)) return "alcohol";
   if (f.needs?.newEntity || f.needs?.foreignEntity || /formation|articles of|incorporat|company registration|registro p|handelsregister|kbis|sociedad|notar|extra-provincial|foreign (llc|registration)|certificate of (organization|formation)/.test(t)) return "company";
+  if (/irs-ss4|business number/.test(t)) return "tax";
   if (f.needs?.employees || /employer|payroll|unemployment|workers'? comp|wsib|imss|social (security|insurance)|urssaf|sozialversicherung|seguridad social|inps/.test(t)) return "employer";
   if (/plan (review|check)|building|occupancy|zoning|use permit|uso de|edificaci|alteration|buildout|finish-out|tenant improvement|construction|planning|bauantrag|permis de construire|fire|sign\b|sign permit|hood/.test(t)) return "building";
   if (/food|health|hygiene|haccp|cofepris|victual|restaurant|sanitation|eating|lebensmittel|alimentaire|sanitari|horeca|handler|manager/.test(t)) return "food";
@@ -79,7 +80,8 @@ function rowFor(city: string, country: string): Row {
   const gaps: string[] = [];
   let ok = 0, some = 0;
   for (const [label, lv, t] of need) {
-    if (has(lv, t) || (t === "tax" && noSalesTax)) { ok++; continue; }
+    // a city's or county's business tax registration is its local licence (Los Angeles, San José, Sacramento)
+    if (has(lv, t) || (t === "tax" && noSalesTax) || (t === "licence" && has(["county", "city"], "tax"))) { ok++; continue; }
     if (has(lv, t, false)) { some++; gaps.push(`${label} (unverified)`); } else gaps.push(`${label} (missing)`);
   }
   // a "licence" topic is often folded into the food permit or the business tax registration abroad: count it present then

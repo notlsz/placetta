@@ -1,0 +1,31 @@
+{
+  "id": "toronto-restaurant",
+  "title": "A restaurant in Toronto",
+  "read": "2026-10-22",
+  "input": { "what": "Restaurant", "where": "100 Queen St W, Toronto, ON M5H 2N2, Canada", "lang": "en" },
+  "assumptions": "A new federal corporation opening a restaurant in Toronto with staff and a fit-out, no alcohol. GST/HST registration applies once taxable sales pass the small supplier limit, so it is conditional. Ontario's food handler rule (O. Reg. 493/17) couldn't be read on ontario.ca (e-Laws is built in script), so it is set aside.",
+  "order": [],
+  "mustNotInclude": [
+    { "name": "US and California filings", "why": "Canada's code is CA, like California's; no US filing applies in Toronto.", "match": "california|irs-|cbp-|fincen|\\bEIN\\b" },
+    { "name": "EU-wide rules", "why": "Not in the EU.", "match": "\\beu-" },
+    { "name": "British Columbia's steps", "why": "Toronto is in Ontario.", "match": "ca-bc-|ca-van-" }
+  ],
+  "items": [
+    { "key": "ca-ised-incorporate", "name": "Federal incorporation with Corporations Canada", "agency": "Corporations Canada", "level": "federal", "required": true, "verified": true, "fee": null,
+      "source": "https://ised-isde.canada.ca/cc/lgcy/index.html", "quote": "Incorporate ($200)", "read": "2026-10-22", "match": "\\bca-ised-incorporate\\b", "agencyMatch": "Corporations Canada" },
+    { "key": "ca-cra-bn", "name": "Business number and CRA program accounts", "agency": "Canada Revenue Agency", "level": "federal", "required": true, "verified": true, "fee": null,
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/business-registration/business-number-program-account/how-register.html",
+      "quote": "Find out how to register for a business number (BN) and Canada Revenue Agency (CRA) program accounts for your business.", "read": "2026-10-22", "match": "\\bca-cra-bn\\b", "agencyMatch": "Canada Revenue Agency" },
+    { "key": "ca-cra-gst", "name": "GST/HST registration (above the small supplier limit)", "agency": "Canada Revenue Agency", "level": "federal", "required": false, "verified": true, "fee": null,
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/when-register-charge.html",
+      "quote": "You are no longer a small supplier and have to charge GST/HST on the supply that made you exceed $30,000 within the calendar quarter.", "read": "2026-10-22", "match": "\\bca-cra-gst\\b", "agencyMatch": "Canada Revenue Agency" },
+    { "key": "ca-on-wsib", "name": "WSIB registration within 10 days of the first hire", "agency": "Workplace Safety and Insurance Board", "level": "state", "required": true, "verified": true, "fee": null,
+      "source": "https://www.wsib.ca/en/businesses/registration-and-coverage/questions-and-answers-registration",
+      "quote": "By law, most businesses need to register with the WSIB within 10 calendar days of hiring their first employee.", "read": "2026-10-22", "match": "\\bca-on-wsib\\b|WSIB", "agencyMatch": "Workplace Safety and Insurance Board" },
+    { "key": "ca-tor-eating", "name": "Eating or Drinking Establishment licence", "agency": "City of Toronto, Municipal Licensing and Standards", "level": "city", "required": true, "verified": true, "fee": null,
+      "source": "https://www.toronto.ca/services-payments/permits-licences-bylaws/restaurants-cafes-grocery-variety-and-retail-stores-selling-food/eating-or-drinking-establishment/",
+      "quote": "Application fee: $268.32", "read": "2026-10-22", "match": "\\bca-tor-eating\\b|eating or drinking establishment", "agencyMatch": "Toronto" },
+    { "key": "ca-on-food-handler", "name": "Certified food handler on site (O. Reg. 493/17)", "agency": "Ontario Ministry of Health (local public health unit)", "level": "state", "required": true, "verified": false, "fee": null,
+      "source": "https://www.ontario.ca/laws/regulation/170493", "read": "2026-10-22", "match": "\\bca-on-food-handler\\b|food handler", "agencyMatch": "Ontario" }
+  ]
+}

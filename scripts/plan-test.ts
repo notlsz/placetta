@@ -67,8 +67,10 @@ const want: Record<string, { usd: number; published: number; unpublished: number
   "Flushing, NY": { usd: 554.6, published: 7, unpublished: 4, open: ["nyc-fse"], closed: ["nyc-co", "ny-wcb", "nyc-sign", "nyc-dob-alt"] },
   // Irvine's build-out permit (irv-building, src/forms/topcities.ts) joined the plan with the strict accuracy set on
   // 2026-10-21; the city publishes no flat fee for it, so it is the sixth fee left open
-  "Irvine, CA": { usd: 90, published: 5, unpublished: 6, open: ["ca-llc-1", "ca-llc-12"], closed: ["irv-license", "irv-building", "oc-plan-check", "oc-health-permit", "ca-food-handler"] },
-  "Houston, TX": { usd: 325, published: 5, unpublished: 7, open: ["tx-205", "tx-503"], closed: ["hou-food-dealer", "hou-plan-review", "hou-co", "hou-buildout"] },
+  // the coverage audit (2026-10-22) added each state's workers' compensation (src/forms/us-gaps.ts): bought from an
+  // insurer, so no agency fee, and one more fee left open in California and Texas (Texas's is the non-subscriber notice)
+  "Irvine, CA": { usd: 90, published: 5, unpublished: 7, open: ["ca-llc-1", "ca-llc-12"], closed: ["irv-license", "irv-building", "oc-plan-check", "oc-health-permit", "ca-food-handler", "ca-workers-comp"] },
+  "Houston, TX": { usd: 325, published: 5, unpublished: 8, open: ["tx-205", "tx-503"], closed: ["hou-food-dealer", "hou-plan-review", "hou-co", "hou-buildout", "tx-workers-comp"] },
 };
 const cents = (n: number) => Math.round(n * 100) / 100;
 for (const [where, x] of Object.entries(want)) {

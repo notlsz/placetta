@@ -93,6 +93,19 @@ expect(!places("240 S Water St, Henderson, NV 89015").includes("LVC"), "Henderso
 expect(places("100 W Broadway, Glendale, CA 91210").includes("LAC") && !places("5850 W Glendale Ave, Glendale, AZ 85301").includes("LAC"), "Glendale, CA (not AZ) is in Los Angeles County");
 expect(places("1066 Rockville Pike, Rockville, MD 20852").includes("MOCO") && !places("1066 Rockville Pike, Rockville, MD 20852").includes("CA"), "Rockville is Montgomery County, Maryland");
 expect(!places("727 N Broadway, Los Angeles, CA 90012").includes("LACU"), "the City of Los Angeles isn't unincorporated county");
+// The countries added in the coverage audit (src/forms/intl.ts) whose codes are also US states': Canada and California
+// ("CA"), Colombia and Colorado ("CO"), Morocco and Massachusetts ("MA"). Each plan keeps to its own country's forms.
+{
+  const own = (what: string, where: string, cur: string) => previewPlan(what, where, "2027-03-01", { today: TODAY }).apps
+    .map(a => a.official ? formById(a.official) : undefined).filter((f): f is OfficialForm => !!f).every(f => (f.currency ?? "USD") === cur);
+  expect(places("100 Queen St W, Toronto, ON M5H 2N2, Canada").includes("CA-TOR") && !places("100 Queen St W, Toronto, ON M5H 2N2, Canada").includes("US"), "Toronto is Canada's, not a US place");
+  expect(own("Milk tea shop", "100 Queen St W, Toronto, ON M5H 2N2, Canada", "CAD"), "a Toronto plan has only Canadian forms (none of California's)");
+  expect(own("Milk tea shop", "727 N Broadway, Los Angeles, CA 90012", "USD"), "a Los Angeles plan has no Canadian form");
+  expect(own("Milk tea shop", "1600 Champa St, Denver, CO 80202", "USD"), "a Denver plan has no Colombian form");
+  expect(own("Milk tea shop", "60 Beach St, Boston, MA 02111", "USD"), "a Boston plan has no Moroccan form");
+  expect(places("Carrera 7, Bogotá, Colombia")[0] === "CO" && own("Milk tea shop", "Carrera 7, Bogotá, Colombia", "COP"), "a Bogotá plan has only Colombian forms");
+  expect(places("Kuala Lumpur, Malaysia").includes("MY-KUL") && own("Milk tea shop", "Bukit Bintang, Kuala Lumpur, Malaysia", "MYR"), "a Kuala Lumpur plan has only Malaysian forms");
+}
 // And the check itself: a downtown Las Vegas plan read as if it were the Strip must be caught pointing at the City of
 // Las Vegas's license.
 {
