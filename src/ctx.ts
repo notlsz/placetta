@@ -92,6 +92,8 @@ export type Ctx = {
   live: Step | null;
   mode: "claude" | "api" | "server" | "demo";
   apiName: string;
+  /** The API models a developer may pick with their own key: only in a local development build (src/localAgent.ts). */
+  apiModels: { id: string; label: string }[];
   deep: boolean;
   setDeep(v: boolean): void;
   voiceOn: boolean;

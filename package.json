@@ -32,6 +32,8 @@
     "test:markets": "esbuild scripts/market-coverage.ts --bundle --platform=node --format=esm --outfile=.market-test.mjs '--external:*.pdf?inline' --log-level=error && node .market-test.mjs; s=$?; rm -f .market-test.mjs; exit $s",
     "markets:write": "esbuild scripts/market-coverage.ts --bundle --platform=node --format=esm --outfile=.market-test.mjs '--external:*.pdf?inline' --log-level=error && node .market-test.mjs --write; s=$?; rm -f .market-test.mjs; exit $s",
     "test:words": "node scripts/plain-words.mjs",
+    "test:leak": "node scripts/leak-test.mjs",
+    "test:demo": "esbuild scripts/demo-quality.ts --bundle --platform=node --format=esm --outfile=.demo-quality.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .demo-quality.mjs; s=$?; rm -f .demo-quality.mjs; exit $s",
     "test:stores": "esbuild scripts/stores-check-test.ts --bundle --platform=node --format=esm --outfile=.stores-check-test.mjs '--external:*.pdf?inline' --log-level=error && node .stores-check-test.mjs; s=$?; rm -f .stores-check-test.mjs; exit $s",
     "site:check": "esbuild src/site/stores-check.ts --bundle --minify --format=iife --target=es2020 --outfile=site/stores-check.js --log-level=warning",
     "leads:fda": "node scripts/fda-leads.mjs",

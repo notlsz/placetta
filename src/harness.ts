@@ -1,5 +1,5 @@
 import { B, same, type Bi } from "./bi";
-import { family, met, proven, stageOf, type DoneItem, type Job } from "./jobs";
+import { family, met, proven, stageOf, toolbox, type DoneItem, type Job } from "./jobs";
 import type { Application, Store, Workspace } from "./model";
 import { isBlank } from "./core";
 import { answersHash, formName, formOf, latestVersion } from "./forms/versions";
@@ -82,12 +82,8 @@ ${storeBrief(w, job, lang)}`;
 /** Names the store a store job is for, in a line: "Flushing, Main St". */
 export const storeName = (w: Pick<Workspace, "stores">, id: string | undefined): Bi | undefined => (w.stores ?? []).find((s: Store) => s.id === id)?.name;
 
-/** The files a job made or uses: its own, and its playbook's. */
-export function toolbox(w: Workspace, job: Job): { id: string; name: string }[] {
-  const pb = job.playbook ? (w.skills ?? []).find(s => s.id === job.playbook) : undefined;
-  const ids = [...new Set([...(job.files ?? []), ...(pb?.files ?? [])])];
-  return ids.map(id => w.docs.find(d => d.id === id || d.name === id)).filter((d): d is NonNullable<typeof d> => !!d).map(d => ({ id: d.id, name: d.name }));
-}
+/** The files a job made or uses (src/jobs.ts, where the app reads it too). */
+export { toolbox };
 
 /** What the checker sees: the job, the parts of the workspace it touches, and the answer about to go back. Facts, not
  *  the agent's conversation, so the check can't be talked into a pass. */

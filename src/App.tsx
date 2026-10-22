@@ -20,7 +20,13 @@ import { readBack } from "./forms/readback";
 import { answersHash, fieldsOf, fileable, formName, latestVersion, needsForm, problemLine, problemsOf, refreshForms, TYPING_MS, type FilledCopy } from "./forms/versions";
 import { ApproveModal, AppDrawer } from "./Drawer";
 import { INITIAL_FEED, type FeedItem, type Turn } from "./feed";
-import { API_MODELS, PERMANENT, apiModel, claudeModel, liveAgent, serverModel, type Model, type Services, type Turn as Msg } from "./live";
+import { PERMANENT, accountAgent, serverModel, type Model, type Turn as Msg } from "./agentCore";
+import type { Services } from "./live";
+/* Odelia's instructions, tools and playbooks run on the server (agent-run). The whole agent in this browser (the viewer's
+   Claude, an API key, held changes made here) is for local development only: __LOCAL_AGENT__ is false in every production
+   build, so the bundler drops src/localAgent.ts and none of it ships (npm run test:leak, docs/SECURITY-AUDIT.md). */
+type LocalAgent = typeof import("./localAgent");
+const loadLocal: (() => Promise<LocalAgent>) | null = __LOCAL_AGENT__ ? () => import("./localAgent") : null;
 import { applicationPdf, auditCsv, auditExportCsv, docBlob, downloads, saveFile } from "./files";
 import { applyAccent, saveTheme, unlockAudio, useNarrow, useSpeak } from "./hooks";
 import { S, fmt, type Key, type Lang } from "./i18n";
@@ -53,14 +59,13 @@ import { PartnerPage, usePartnerMe } from "./Partner";
 /* Owner controls: Plan first, Ask me first, Always allow, business rules and Undo (src/autonomy.ts, src/rewind.ts) */
 import { approvePlan, autoOk, markSecond, secondStep, workPrompt } from "./autonomy";
 import { addUndo, recorder, undoTitle } from "./rewind";
-import { applyHeldHere } from "./held";
 import { withDemoPlan } from "./demoPlan";
 import { ownerApprove } from "./cloud/owners";
 /* Team review: comments, @mentions, Assigned to and the Mine filter (src/Comments.tsx, src/collab.ts) */
 import { CollabCtx, useCollab } from "./Comments";
 
 const KEY = "placetta-api-key", KEY_MODEL = "placetta-api-model";
-const readKey = () => { try { return { key: localStorage.getItem(KEY) ?? "", model: localStorage.getItem(KEY_MODEL) ?? API_MODELS[0].id }; } catch { return { key: "", model: API_MODELS[0].id }; } };
+const readKey = () => { try { return { key: localStorage.getItem(KEY) ?? "", model: localStorage.getItem(KEY_MODEL) ?? "" }; } catch { return { key: "", model: "" }; } };
 const readFlag = (k: string) => { try { return localStorage.getItem(k) === "1"; } catch { return false; } };
 const writeFlag = (k: string, v: boolean) => { try { localStorage.setItem(k, v ? "1" : "0"); } catch { /* storage blocked */ } };
 
@@ -368,6 +373,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   /* the model behind the agent: Placetta's server for an account; Claude in a viewer; the API with a key; or the demo script */
   const [model, setModel] = useState<Model | null>(null);
   const [apiName, setApiName] = useState("");
+  /* the agent in this browser and the API models it offers: a local development build only (loadLocal above) */
+  const localRef = useRef<LocalAgent | null>(null);
+  const [localModels, setLocalModels] = useState<{ id: string; label: string }[]>([]);
   const [deep, setDeep] = useState(false);
   const history = useRef<Msg[]>([]);
   /* Whose memory (src/recall.ts): the signed-in person, or the sample's one person, so the demo remembers too. */
@@ -379,12 +387,15 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       setModel(serverModel((body, d, role, onText) => api.agentCall(cloud.wsId, body, { deep: d, location: loc, role, onText }) as never));
       return;
     }
+    if (!loadLocal) return;
     let on = true;
-    void claudeModel().then(m => {
+    void loadLocal().then(async L => {
+      const m = await L.claudeModel();
       if (!on) return;
+      localRef.current = L; setLocalModels(L.API_MODELS);
       if (m) { setModel(m); return; }
-      const saved = readKey();
-      if (saved.key) { setModel(apiModel(saved.key, saved.model)); setApiName(API_MODELS.find(x => x.id === saved.model)?.label ?? saved.model); }
+      const saved = readKey(), id = saved.model || L.API_MODELS[0].id;
+      if (saved.key) { setModel(L.apiModel(saved.key, id)); setApiName(L.API_MODELS.find(x => x.id === id)?.label ?? id); }
     });
     return () => { on = false; };
   }, [cloud]);
@@ -582,7 +593,11 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       }
     };
     const m = modelRef.current;
-    const agent: AgentBackend = m ? liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services, fallback: demoAgent, me, comments: item => collabRef.current.forAgent(item), role: cloud ? cloud.role : "owner" }) : withDemoPlan(demoAgent);
+    // an account's conversations run on the server; here only a license search and reading an upload (src/agentCore.ts)
+    const L = localRef.current;
+    const agent: AgentBackend = !m ? withDemoPlan(demoAgent)
+      : L ? L.liveAgent(m, history.current, kept.current, deep, { account: !!cloud, paths: paths.current, services, fallback: demoAgent, me, comments: item => collabRef.current.forAgent(item), role: cloud ? cloud.role : "owner" })
+      : accountAgent(m, kept.current, { paths: paths.current, fallback: demoAgent, me });
     // each application's answers before the run: the ones it changes get their form filled again when it ends
     const answersBefore = new Map(wsRef.current.apps.map(a => [a.id, answersHash(a)]));
     try {
@@ -927,7 +942,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         return;
       }
       if (viaServer) { setPanelOpen(true); void run({ text: "/apply " + a.id }, shown); return; }
-      const r = await applyHeldHere(a.id, { get: () => wsRef.current, apply: setWs, lang, model: modelRef.current, svc: services, files: kept.current, account: !!cloud });
+      const r = localRef.current && await localRef.current.applyHeldHere(a.id, { get: () => wsRef.current, apply: setWs, lang, model: modelRef.current, svc: services, files: kept.current, account: !!cloud });
       if (r) { setPanelOpen(true); pushTurn(shown, { text: [r.text], undo: r.undo }); }
       return;
     }
@@ -1216,10 +1231,11 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
 
   const ctx: Ctx = useMemo(() => ({
     lang, t, b, setLang, ws: view_, busy, live: step, uploading,
-    mode: model ? model.kind : "demo", apiName, deep, setDeep, voiceOn, setVoiceOn,
+    mode: model ? model.kind : "demo", apiName, apiModels: localModels, deep, setDeep, voiceOn, setVoiceOn,
     stop: () => abort.current?.abort(),
     applyKey: (key, id, remember) => {
-      setModel(apiModel(key, id)); setApiName(API_MODELS.find(x => x.id === id)?.label ?? id);
+      const L = localRef.current; if (!L) return;
+      setModel(L.apiModel(key, id)); setApiName(L.API_MODELS.find(x => x.id === id)?.label ?? id);
       try { if (remember) { localStorage.setItem(KEY, key); localStorage.setItem(KEY_MODEL, id); } else { localStorage.removeItem(KEY); localStorage.removeItem(KEY_MODEL); } } catch { /* storage blocked */ }
     },
     dropKey: () => { setModel(null); setApiName(""); try { localStorage.removeItem(KEY); localStorage.removeItem(KEY_MODEL); } catch { /* storage blocked */ } },

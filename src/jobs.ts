@@ -385,3 +385,10 @@ export function reconcile<W extends Evidence>(w: W, now = new Date().toISOString
 export const continuePrompt = (j: Job, lang: "en" | "zh") => lang === "zh"
   ? `继续这项工作，直到完成：“${j.title.zh}”（job ${j.id}）。按计划做下一步，做完后对照完成标准逐项核对。`
   : `Carry on with the job "${j.title.en}" (job ${j.id}) until it's done. Do the next step in its plan, then check the work against its done list.`;
+
+/** The files a job made or uses: its own, and its playbook's. */
+export function toolbox(w: import("./model").Workspace, job: Job): { id: string; name: string }[] {
+  const pb = job.playbook ? (w.skills ?? []).find(s => s.id === job.playbook) : undefined;
+  const ids = [...new Set([...(job.files ?? []), ...(pb?.files ?? [])])];
+  return ids.map(id => w.docs.find(d => d.id === id || d.name === id)).filter((d): d is NonNullable<typeof d> => !!d).map(d => ({ id: d.id, name: d.name }));
+}

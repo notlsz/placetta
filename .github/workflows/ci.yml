@@ -58,6 +58,10 @@ jobs:
         run: npm run test:seo
       - name: Production build
         run: npx vite build
+      # what anyone can read with F12: none of Odelia's instructions, tool definitions or playbooks, no model id, no
+      # source map and no secret in dist/ (scripts/leak-test.mjs; the build itself refuses server-only imports)
+      - name: Nothing server-only ships
+        run: npm run test:leak
       # the portal filer: types, and its tests (its database access goes only through the filer functions; its image
       # runs as a non-root user; its rerouting; and replay.test.ts, which drives each agency playbook in Chromium, so the
       # filer's own Playwright browser is installed first)

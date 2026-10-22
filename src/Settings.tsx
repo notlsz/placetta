@@ -2,7 +2,6 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { hrefOf, plainClick, readRoute, setRoute } from "./route";
 import { useApp } from "./ctx";
 import { B, type Bi } from "./model";
-import { API_MODELS } from "./live";
 import { fmtAgo, fmtDay } from "./time";
 import { Footer, I, Modal, Select } from "./ui";
 import { ACCENTS, applyAccent, readAccent, useTheme, type Theme } from "./hooks";
@@ -1388,9 +1387,9 @@ export function openSettings(go: (v: "settings") => void, section: string) {
 }
 
 export function Settings() {
-  const { t, b, lang, cloud, mode, apiName, deep, setDeep, voiceOn, setVoiceOn, applyKey, dropKey, exportAudit, openLegal, ws } = useApp();
+  const { t, b, lang, cloud, mode, apiName, apiModels, deep, setDeep, voiceOn, setVoiceOn, applyKey, dropKey, exportAudit, openLegal, ws } = useApp();
   const [key, setKey] = useState("");
-  const [id, setId] = useState(API_MODELS[0].id);
+  const [id, setId] = useState("");
   const [remember, setRemember] = useState(false);
   const [theme, setTheme] = useTheme();
   const [accent, setAccent] = useState(readAccent);
@@ -1505,10 +1504,11 @@ export function Settings() {
             { label: B("Read every reply aloud", "朗读每一条回复"), sub: b(B("Voice messages are always answered aloud.", "语音消息始终会语音回复。")), right: <label className="switch"><input type="checkbox" checked={voiceOn} onChange={e => setVoiceOn(e.target.checked)} /><i /></label> },
             ...(mode === "api" ? [{ label: B("Anthropic API key", "Anthropic API 密钥"), right: <Btn onClick={dropKey}>{t("key_drop")}</Btn> }] : []),
           ]}>
-            {mode === "demo" && !cloud && (
-              <form className="sg-form keyform" onSubmit={e => { e.preventDefault(); if (key.trim()) { applyKey(key.trim(), id, remember); setKey(""); } }}>
+            {/* a developer's own key: a local development build only (src/localAgent.ts); production never offers it */}
+            {mode === "demo" && !cloud && apiModels.length > 0 && (
+              <form className="sg-form keyform" onSubmit={e => { e.preventDefault(); if (key.trim()) { applyKey(key.trim(), id || apiModels[0].id, remember); setKey(""); } }}>
                 <input type="password" autoComplete="off" value={key} onChange={e => setKey(e.target.value)} placeholder={`${t("key_label")}: sk-ant-...`} aria-label={t("key_label")} />
-                <Select value={id} onChange={e => setId(e.target.value)} aria-label={t("key_model")}>{API_MODELS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}</Select>
+                <Select value={id || apiModels[0].id} onChange={e => setId(e.target.value)} aria-label={t("key_model")}>{apiModels.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}</Select>
                 <label className="check"><input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} /><span>{t("key_remember")}</span></label>
                 <div className="sg-form-act"><button type="submit" className="sbtn ink" disabled={!key.trim()}>{t("key_use")}</button></div>
                 <p className="sg-note">{t("key_note")}</p>
