@@ -4611,7 +4611,7 @@ const valid = {
 };
 function contactOk(){
   if (Q.contact === "wechat") return /^[A-Za-z0-9_+\-]{5,30}$/.test(Q.wechat.trim());
-  return /^[^\s@]+@[^\s@]+\.[^\s@]{2}$/.test(Q.email.trim());
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(Q.email.trim());
 }
 function chips(key, arr){ return `<div class="qchips" role="group">${arr.map(a => { const v = Array.isArray(a) ? a[0] : a; const lab = Array.isArray(a) ? (a.length === 2 ? a[L()] : a[1 + L()]) : a; return `<button type="button" data-k="${key}" data-v="${esc(v)}" aria-pressed="${Q[key] === v}">${lab}</button>`; }).join("")}</div>`; }
 
@@ -6221,7 +6221,7 @@ applyAll(); fitTable(); bindCounters(); setPlay(vPlaying); onScroll(); requestAn
   /* stories tab bar: an arrow at the end while more names sit past the edge */
   const tabs = document.getElementById("tsTabs"), bar = document.getElementById("tsBar");
   if (tabs && bar) {
-    const arr = document.createElement("button"); arr.type = "button"; arr.className = "p95arr"; arr.tabIndex = -1; arr.setAttribute("aria-hidden", "true");
+    const arr = document.createElement("button"); arr.type = "button"; arr.className = "p95arr"; arr.tabIndex = -1; arr.setAttribute("aria-hidden", "true"); arr.setAttribute("aria-label", lang === "zh" ? "更多" : "More");
     arr.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>';
     bar.appendChild(arr);
     const upd = () => { const end = tabs.scrollLeft + tabs.clientWidth >= tabs.scrollWidth - 4; tabs.classList.toggle("p95end", end); arr.hidden = end || !phone.matches; };

@@ -228,6 +228,19 @@ group("guides: answer first, quotable, tables, FAQ, hreflang, no thin duplicates
   check("editorial policy page", pages.has("site/editorial.html") && strip(pages.get("site/editorial.html")).includes("official"));
 });
 
+// The lead sheet's email check (found by the Playwright walk: since 2026-10-21 it read "\.[^\s@]{2}$" and refused every
+// .com address, so no plan request went out): the landing pages' own rule, run on real addresses
+group("the lead sheet takes ordinary email addresses", () => {
+  for (const f of ["site/index.html", "site/zh.html"]) {
+    const m = /function contactOk\(\)\{[\s\S]*?return (\/\^[^\n]*?\$\/)\.test\(Q\.email\.trim\(\)\);/.exec(read(f));
+    check(`${f}: the lead sheet's email rule is found`, !!m);
+    if (!m) continue;
+    const re = new RegExp(m[1].slice(1, -1));
+    check(`${f}: .com, .co.uk and .io addresses pass`, ["mei@moonleaf.com", "jun@brand.co.uk", "hq@tea.io", "李@品牌.中国"].every(e => re.test(e)), m[1]);
+    check(`${f}: an address without a domain doesn't`, !["not-an-email", "a@b", "a@b.c"].some(e => re.test(e)), m[1]);
+  }
+});
+
 for (const r of results) console.log("  " + r);
 console.log(`\ntest:seo: ${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);
