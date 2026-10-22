@@ -1,6 +1,6 @@
 // calendar-feed: a workspace's deadlines as an iCalendar (RFC 5545) subscription.
 // GET ?t=<token>&lang=en|zh. Deployed with verify_jwt off: the unguessable token is the credential.
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },

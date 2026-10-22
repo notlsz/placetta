@@ -1,6 +1,6 @@
 // Reads an agent reply aloud with an Azure neural voice (free tier: 500,000 characters a month).
 // Members only, short texts only, and a daily per-workspace character cap so the free tier lasts.
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { accessRpc, WORKS } from "../_shared/access.ts";
 import { zdrAllows } from "../_shared/zdr.ts";
 

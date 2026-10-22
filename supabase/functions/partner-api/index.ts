@@ -2,7 +2,7 @@
 // plan box partners put on their own sites (site/embed.js). The rules are in logic.ts; this file wires in the
 // database (service role: every call is checked there first), the rate limit and the registry. Documented in
 // docs/PARTNER_API.md. Deployed with verify_jwt = false (supabase/config.toml): it checks its own keys.
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { handle, type Deps, type PlanRow, type ReferralRow } from "./logic.ts";
 // @ts-types="./plan.d.ts"
 import { previewPlan, stateOf } from "./plan.js";

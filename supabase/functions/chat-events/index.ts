@@ -15,7 +15,7 @@
 // waits for an approval in the app. The one exception is Placetta's own public account (the workspace named by
 // ODELIA_PUBLIC_WECHAT_WS): a follower who isn't on the team can text to start ("奶茶店，纽约法拉盛") and gets the plan
 // and its claim link as the reply (_shared/text_start.ts), with no run and no model.
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { type Bot, type ChatSender, type ChatTo, chatReply, type LarkBot, larkOpen, larkSender, larkText, larkWorks, NEEDS_EMAIL_SCOPE, NOT_TEAMMATE, type SlackBot, slackSender, slackSigned, slackText, slackWho } from "../_shared/bots.ts";
 import { HOOK_KINDS, postHook } from "../_shared/channels.ts";
 import { type WechatBot, WX_SAY, wxCredsWork, wxHandle, wxUrlCheck } from "../_shared/wechat.ts";

@@ -7,7 +7,7 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Download
         run: |
           mkdir -p out
@@ -16,7 +16,7 @@ jobs:
             code=$(curl -sSL --max-time 60 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36" -o "out/$id.pdf" -w "%{http_code}" "$url" || echo ERR)
             echo "$id $code $(head -c 5 "out/$id.pdf" 2>/dev/null | tr -dc '[:print:]') $(stat -c %s "out/$id.pdf" 2>/dev/null) $url" | tee -a out/index.txt
           done < scripts/official-pdfs.txt
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with: { name: official-pdfs, path: out }
       - name: Keep them on the official-pdfs branch
         run: |

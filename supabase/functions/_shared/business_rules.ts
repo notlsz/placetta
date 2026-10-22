@@ -4,7 +4,7 @@
 //
 // A rule's message says what happened, never what a filing holds, and a rule never files, pays or sends a filing: the
 // only thing that leaves here is that message.
-import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
 import { deadlineEvents, fire, type BrEvent, type Notice, type RuleShape } from "../../../src/businessRules.ts";
 import { appLink, appOrigin, type Env } from "./odelia.ts";
 import { postHook, type HookKind } from "./channels.ts";

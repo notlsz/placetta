@@ -1,6 +1,6 @@
 // Odelia by text and phone: the database side shared by odelia-sms, odelia-voice and agent-run. Every function here
 // runs with the service role, so callers have already decided who the person is.
-import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
 import { BLOCKED_BY_STOP, type Channel, type Env, type Lang, sendSms, smsReady } from "./odelia.ts";
 import { WA_WINDOW_CLOSED, waTemplate, waTemplateReady, waText, waWindowOpen, whatsappReady } from "./whatsapp.ts";
 import { LINQ_LINE_RESTRICTED, LINQ_OPTED_OUT, LINQ_TEXT_FIRST, linqLines, linqReady, linqSend, pickLine } from "./linq.ts";

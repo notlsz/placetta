@@ -11,7 +11,7 @@
 //                                                           and assignments just made, by each person's channel (_shared/notices.ts)
 // The invite is accepted when that email signs in (accept_invites in the database), so the email only has to get them to sign in:
 // new people get Supabase's invite email, people with an account get a sign-in link.
-import { createClient, type User } from "npm:@supabase/supabase-js@2";
+import { createClient, type User } from "npm:@supabase/supabase-js@2.117.2";
 import {
   aalOf,
   admin,

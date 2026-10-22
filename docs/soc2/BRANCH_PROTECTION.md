@@ -1,5 +1,7 @@
 # Branch protection, as code
 
+The step-by-step founder runbook, including the bot identity for AI sessions and what a solo founder does about a second approver, is [runbooks/branch-protection.md](runbooks/branch-protection.md). This page explains the rules.
+
 The rules for `main` live in [.github/branch-protection.json](../../.github/branch-protection.json), in the exact shape GitHub's API takes. The evidence script compares the live settings with that file every time it runs (`github.branch_protection`). Change the rules by changing the file in a pull request, then apply it.
 
 ## What the file requires

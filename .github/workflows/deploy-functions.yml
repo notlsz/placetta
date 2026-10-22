@@ -11,6 +11,7 @@ on:
     branches: [main]
   workflow_dispatch:
 concurrency: { group: deploy-functions, cancel-in-progress: false }
+permissions: { contents: read }
 jobs:
   deploy:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
@@ -21,11 +22,11 @@ jobs:
       - name: Check the token
         id: tok
         run: if [ -n "$SUPABASE_ACCESS_TOKEN" ]; then echo "ok=1" >> "$GITHUB_OUTPUT"; else echo "::warning::Add SUPABASE_ACCESS_TOKEN to the repository secrets to deploy functions."; fi
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         if: steps.tok.outputs.ok
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         if: steps.tok.outputs.ok
         with: { node-version: 22, cache: npm }
       - run: npm ci
@@ -38,4 +39,5 @@ jobs:
         run: npm run build:agent
       - name: Deploy
         if: steps.tok.outputs.ok
-        run: npx --yes supabase functions deploy --project-ref esquxzcfsylffuijvzec --use-api
+        # The CLI at an exact version, so a new release can't change a deploy without a pull request
+        run: npx --yes supabase@2.120.0 functions deploy --project-ref esquxzcfsylffuijvzec --use-api

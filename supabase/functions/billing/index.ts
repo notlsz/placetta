@@ -11,7 +11,7 @@
 //   STRIPE_PRICE_PACK     one time, an Odelia pack: PACK_CREDIT_USD (default $25) more AI allowance per pack
 // Credits: entry plans bought in the last 60 days come off the first invoice. Opening fees are not credited.
 // Scale is quoted by the team, so it has no checkout. Actions: prices (any member), checkout, portal, sync_locations (owners).
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { accessRpc, WORKS } from "../_shared/access.ts";
 import { ensureWebhook, priceId, type Item } from "../_shared/stripe_catalog.ts";
 import { openingCounts, returnOrigins, safeReturn, type Store, storesFrom, STRIPE_FAILED } from "./logic.ts";

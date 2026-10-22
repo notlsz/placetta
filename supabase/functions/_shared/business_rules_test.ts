@@ -2,7 +2,7 @@
 // Business rules on the server: a rule's message goes out once per event through the business's own channels, says
 // what happened and nothing a filing holds, and the morning check fires each deadline once.
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
-import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
 import { deadlineRules, deliverNotice } from "./business_rules.ts";
 import { fire, validRule, type Notice } from "../../../src/businessRules.ts";
 

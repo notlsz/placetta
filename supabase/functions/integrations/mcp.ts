@@ -12,7 +12,7 @@
 //   mcp_decline    owner: turn a proposed call down
 // Tokens live in the vault (mcp_servers.secret_id); the server row keeps the address, the tools and the switches.
 // The rules themselves are in mcp_rules.ts; the protocol and the address guard in ../_shared/mcp.ts.
-import type { User } from "npm:@supabase/supabase-js@2";
+import type { User } from "npm:@supabase/supabase-js@2.117.2";
 import { admin, allowedReturn, appOrigins, audit, HttpError, ok, optText, same, signState, SUPABASE_URL, text, uuidParam } from "./shared.ts";
 import { REDIRECT_URI } from "./providers.ts";
 import {

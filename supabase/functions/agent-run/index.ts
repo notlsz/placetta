@@ -32,7 +32,7 @@
 // Every run keeps its moments on steps (src/replay.ts): the job's replay in the app.
 // The app polls a run with the poll_agent_run RPC and stops one with stop_agent_run. When nobody is watching as it
 // finishes, the result becomes an Update and the owners get an email (with RESEND_API_KEY and MAIL_FROM set).
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { callModel, canConverse, type Role } from "../_shared/llm.ts";
 import { accessRpc, WORKS } from "../_shared/access.ts";
 import { overTaskLimit, repeatKey, repeatStatuses, REPEAT_MS, taskLimit, tooLarge } from "./limits.ts";

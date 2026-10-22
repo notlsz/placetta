@@ -1,7 +1,7 @@
 // Shared helpers for the Placetta edge functions.
 // The MCP deploy only uploads files inside a function's own folder, so this file is copied into
 // integrations/, oauth-callback/, logins/, team/, spend/, file/, forms/ and sso/. Keep the copies identical.
-import { createClient, type SupabaseClient, type User } from "npm:@supabase/supabase-js@2";
+import { createClient, type SupabaseClient, type User } from "npm:@supabase/supabase-js@2.117.2";
 
 export const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";

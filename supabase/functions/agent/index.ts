@@ -6,7 +6,7 @@
 // chatbot. A workspace past 60% of its allowance runs in saver mode (cheaper models, no research, shorter answers);
 // past 100% it stops. With stream: true the answer comes back as server-sent events while the model writes it (the app
 // shows the words arriving), ending with the same complete message.
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { accessRpc, WORKS } from "../_shared/access.ts";
 import { callModel, canConverse, ROLES, type Role } from "../_shared/llm.ts";
 import { sse } from "../_shared/stream.ts";

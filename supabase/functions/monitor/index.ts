@@ -15,7 +15,7 @@
 // Odelia's bill: owners get an Update at 50% and 80% of the month's allowance (ai_allowance_alerts), and a workspace
 // that spends more than AI_WS_DAILY_LIMIT_USD in a day (default $10), or more than 5x the median workspace that day,
 // goes into saver mode until midnight UTC with a task for the team (ai_throttle_sweep).
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { appLink, noticeText, urgency } from "../_shared/odelia.ts";
 import { HOOK_KINDS, hookDigest, postHook, type HookKind } from "../_shared/channels.ts";
 import { deadlineRules } from "../_shared/business_rules.ts";

@@ -2,7 +2,7 @@
 //   checkout.session.completed (payment, plan=entry)  -> billing.entry_markets += markets (added in SQL, atomically)
 //   customer.subscription.created / updated / deleted  -> billing.subscription_*, unless an event created later was
 //                                                        already applied (Stripe doesn't deliver in order)
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { itemOf, webhookSecret } from "../_shared/stripe_catalog.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {

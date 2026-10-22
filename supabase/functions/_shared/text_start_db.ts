@@ -2,7 +2,7 @@
 // Official Account) call startForStranger for a message from someone who isn't on Placetta, and odelia-sms's sweep
 // calls sendStartReminders for the one reminder people ask for. The rules themselves are in text_start.ts. Every
 // function here runs with the service role. No model is called anywhere.
-import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
 import { appOrigin, type Env, smsCountries, smsReady } from "./odelia.ts";
 import { logMessage, sendText, textingReady } from "./odelia_db.ts";
 // @ts-types="./start.d.ts"

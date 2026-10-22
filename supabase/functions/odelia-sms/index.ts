@@ -22,7 +22,7 @@
 // iMessage lines are kept healthy the way Lindy learned to after Apple banned its own line: people spread across lines,
 // replies always on the line they wrote to, at most LIMITS.newChatsPerLine new conversations a line a day (only the
 // verification code starts one), outbound paused on a line Linq scores CRITICAL, and the team told when a line slips.
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import {
   appLink, appOrigin, BLOCKED_BY_STOP, inboundFlood, inQuietHours, KEYWORD_REPLY, keyword, type Lang, localMinutes, LIMITS, normalizePhone, odeliaNumber,
   pickWorkspace, prettyPhone, randomCode, SAY, smsCountries, smsCountryAllowed, smsReady, splitSms, strangerMayGetReply, switchTarget, underDailyLimit,

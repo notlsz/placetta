@@ -17,7 +17,7 @@
 // background run (agent-run, channel "voice") whose answer is texted. Nothing is filed, paid, sent or deleted by voice.
 // English or Mandarin, by the language they use in the app. Silence, hangups and errors end with a short apology and,
 // when it helps, a text.
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import {
   appLink, appOrigin, callerAttested, clientState, type Lang, normalizePhone, odeliaNumber, randomCode, readClientState, SAY, signCallToken, splitSms, spokenDigits, telnyx,
   verifyCallToken, verifyTelnyx, voiceReady, workspaceBrief,

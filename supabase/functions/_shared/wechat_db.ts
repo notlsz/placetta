@@ -1,6 +1,6 @@
 // Odelia in WeChat: the database side shared by chat-events (messages coming in) and agent-run (answers going out).
 // Every function here runs with the service role, so callers have already decided who is asking.
-import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
 import type { WechatBot } from "./wechat.ts";
 
 /** What the vault holds for a WeChat account: the integrations bundle shape (access_token and expires_at are WeChat's

@@ -1,8 +1,10 @@
 # Every change is checked before it ships: types, the agent and planning tests, the team-chat checks, every server
 # function type-checked, every migration applied to a fresh Postgres with the database tests run against it, and the
-# security checks (no secrets in the commits, no high or critical advisory in production dependencies, Dependabot
-# watching every manifest). Server functions deploy only after this passes on main (deploy-functions.yml).
-# Branch protection requires all four jobs before a merge: .github/branch-protection.json, docs/soc2/BRANCH_PROTECTION.md.
+# security checks (no secrets in the commits, no high or critical advisory in any dependency, Dependabot watching
+# every manifest). Server functions deploy only after this passes on main (deploy-functions.yml).
+# Branch protection requires all four jobs before a merge: .github/branch-protection.json, docs/soc2/runbooks/branch-protection.md.
+# Every action is pinned to a full commit SHA (the tag it was taken from is in the comment), so a moved or hijacked tag
+# can't change what runs here; Dependabot's github-actions entry proposes new SHAs as pull requests.
 name: CI
 on:
   pull_request:
@@ -17,8 +19,8 @@ jobs:
   app:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - name: Types
@@ -54,12 +56,12 @@ jobs:
   functions:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - run: npm run build:agent
-      - uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with: { deno-version: v2.x }
       - name: Type-check every server function
         run: for f in supabase/functions/*/index.ts; do deno check "$f" || exit 1; done
@@ -70,33 +72,39 @@ jobs:
   database:
     runs-on: ubuntu-latest
     services:
+      # The same major and minor version as production (Supabase reports Postgres 17.11)
       postgres:
-        image: postgres:15
+        image: postgres:17.11
         env: { POSTGRES_PASSWORD: postgres }
         ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     env: { PGHOST: localhost, PGPORT: "5432", PGUSER: postgres, PGPASSWORD: postgres }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Migrations and database tests
         run: bash scripts/test-db.sh
   # docs/soc2/policies/secure-development.md and vulnerability-management.md
   security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with: { fetch-depth: 0 }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with: { node-version: 22 }
       - name: No high or critical advisory in production dependencies
         run: |
           npm audit --omit=dev --audit-level=high --package-lock-only
           npm audit --omit=dev --audit-level=high --package-lock-only --prefix worker/filer
+      # The build tools (Vite, esbuild, TypeScript) make what ships, so they're held to the same bar
+      - name: No high or critical advisory in build and test dependencies
+        run: |
+          npm audit --audit-level=high --package-lock-only
+          npm audit --audit-level=high --package-lock-only --prefix worker/filer
       - name: Dependabot watches every manifest
         run: node scripts/check-dependabot.mjs
       - name: Evidence collector tests
         run: node --test scripts/soc2-evidence.test.mjs
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with: { go-version: stable, cache: false }
       # Built from the Go module proxy at an exact version, so the download is checked against sum.golang.org.
       # (gitleaks v8.30.1 needs Go 1.24.11 or newer; the latest stable Go always is.)

@@ -2,7 +2,7 @@
 // The IdP's SCIM base URL is https://<project>.supabase.co/functions/v1/scim/v2 and its token is the one an owner or
 // admin makes in Settings, Security (shown once; only its SHA-256 is kept). The protocol is in logic.ts; the rules in
 // the database. Deployed with verify_jwt = false (supabase/config.toml): it checks its own token.
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { type Filter, type GroupRow, handle, type Store, type UserRow } from "./logic.ts";
 
 const URL_ = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");

@@ -10,7 +10,7 @@
 // see mail.ts): a From line, and any header the sender writes, can be forged. Unknown senders get nothing back (no backscatter);
 // unverified mail from a real account gets one note a day saying why. Auto-replies, bounces and lists are dropped.
 // Nothing is filed, paid, sent or deleted by email: the answer links to the approval in the app.
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { appLink, appOrigin, type Lang, SAY } from "../_shared/odelia.ts";
 import { currentWorkspace, DOC_TYPES, type Link, logMessage, storeDocs } from "../_shared/odelia_db.ts";
 import { fetchResend, type InMail, isForward, mailBody, mailReady, odeliaEmail, parsePostmark, postmarkAuthOk, replySubject, sendMail, senderVerified, verifyStandardWebhook } from "../_shared/mail.ts";

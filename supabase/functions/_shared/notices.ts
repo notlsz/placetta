@@ -7,7 +7,7 @@
 //   - a headquarters email gets an email.
 // The team function sends what a person just wrote (action notify); the monitor sends the rest each morning, reminders
 // on their day. Anything a week old that never went out is marked and left alone.
-import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
 import { mayEmail, wantsTexts } from "./reach.ts";
 
 export type Bi = { en: string; zh: string };

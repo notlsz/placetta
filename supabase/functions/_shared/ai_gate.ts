@@ -1,7 +1,7 @@
 // The one door every AI call goes through (public.ai_gate in the database): the company's daily ceiling, rate limits
 // per person and per workspace, and each workspace's budget for its plan. Then each call is priced (ai_record), with
 // the role it served and the vendor that served it, so the margin and the subprocessor list can both be proven.
-import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
 import { costOf, type Usage } from "./ai_cost.ts";
 import { providerOf, type Role } from "./llm.ts";
 

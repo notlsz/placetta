@@ -3,7 +3,7 @@
 // POST {workspace_id, action, ...}. Members of the workspace; owners only to connect, disconnect, send mail or read sales
 // and staff. Reading a connected mailbox, drive or books: owners, or the member who connected that account. Each member
 // links their own WeChat (wechat_link).
-import type { User } from "npm:@supabase/supabase-js@2";
+import type { User } from "npm:@supabase/supabase-js@2.117.2";
 import {
   admin,
   allowedReturn,
