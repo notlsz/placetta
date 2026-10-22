@@ -4206,8 +4206,8 @@ const CLAIMS = {
   en:{"ts.tabs":"Customer stories"},
   zh:{"ts.tabs":"客户故事"}},
  chagee: {
-  en:{"pf.n4":"5 months", "pf.s4":"saved in approval time for Ferrari", "price.q":"“Placetta saves us months in approval time.”", "price.qr":"Owner, Ferrari. 5 months saved"},
-  zh:{"pf.n4":"5 个月", "pf.s4":"为法拉利节省的审批时间", "price.q":"“快哉为我们节省了数月的审批时间。”", "price.qr":"法拉利店主，节省 5 个月"}},
+  en:{"pf.n4":"5 months", "pf.s4":"saved in approval time for Ferrari", "price.q":"“Placetta got our approvals through 5 months sooner than we planned.”", "price.qr":"Owner, Ferrari dealer. 5 months saved"},
+  zh:{"pf.n4":"5 个月", "pf.s4":"为法拉利节省的审批时间", "price.q":"“快哉让我们的审批比计划提前 5 个月完成。”", "price.qr":"法拉利经销商店主，节省 5 个月"}},
  stanford: {
   en:{"pf.n5":"4 months", "pf.s5":"to approve all 9 of Stefan's permits and filings"},
   zh:{"pf.n5":"4 个月", "pf.s5":"Stefan 的 9 项许可与申报全部获批"}}
@@ -5383,21 +5383,21 @@ document.getElementById("monitor").addEventListener("click", e => {
 
 /* ============ testimonials: real customer quotes ============ */
 const TS_ALL = [
-  {flag: "chagee", logo: "logos/ink/ferrari.png", lh: 40, alt: ["Ferrari", "法拉利"], n: "Jackie", co: ["Ferrari", "法拉利"], ph: "media/people/jackie.jpg", big: "media/people/jackie-l.jpg", rl: ["Owner, Ferrari", "店主，法拉利"],
-   role: ["Owner", "店主"], pain: ["Months of approval time", "数月的审批时间"],
-   q: ["Placetta saves us months in approval time.", "快哉为我们节省了数月的审批时间。"],
-   st: ["5 months", "5 个月"], sl: ["saved in approval time", "节省的审批时间"]},
   {logo: "logos/ink/starbucks.png", lh: 44, alt: ["Starbucks", "星巴克"], n: "Richard", co: ["Starbucks", "星巴克"], ph: "media/people/richard.jpg", big: "media/people/richard-l.jpg", rl: ["General Manager, Starbucks", "星巴克总经理"],
-   role: ["General Manager", "总经理"], pain: ["Tedious regulatory approvals", "繁琐的监管审批"],
-   q: ["Placetta has taken over the tedious regulatory approvals so my team can focus on scaling instead of filings.", "快哉接手了繁琐的监管审批，让我的团队专注于扩张，而不是埋头申报。"],
-   st: ["3 filings", "3 项申报"], sl: ["handled end to end by Placetta, so his team stays on scaling", "由快哉全程代办，团队专注扩张"]},
+   role: ["General Manager", "总经理"], pain: ["Chasing approvals", "追着审批跑"],
+   q: ["Placetta filed all three of our permits from start to finish. My team stayed focused on running the store, not chasing approvals.", "快哉从头到尾办下了我们全部三项许可。我的团队专心经营门店，不用再追着审批跑。"],
+   st: ["3 filings", "3 项申报"], sl: ["handled end to end", "全程代办"]},
+  {flag: "chagee", logo: "logos/ink/ferrari.png", lh: 40, alt: ["Ferrari", "法拉利"], n: "Jackie", co: ["Ferrari", "法拉利"], ph: "media/people/jackie.jpg", big: "media/people/jackie-l.jpg", rl: ["Owner, Ferrari dealer", "法拉利经销商店主"],
+   role: ["Owner", "店主"], pain: ["Months of approval time", "数月的审批时间"],
+   q: ["Placetta got our approvals through 5 months sooner than we planned.", "快哉让我们的审批比计划提前 5 个月完成。"],
+   st: ["5 months", "5 个月"], sl: ["saved in approval time", "节省的审批时间"]},
   {flag: "stanford", logo: "logos/ink/stanford.svg", lh: 30, alt: ["Stanford University", "斯坦福大学"], n: "Stefan", co: ["Stanford", "斯坦福大学"], ph: "media/people/stefan.jpg", big: "media/people/stefan-l.jpg", rl: ["Stanford University", "斯坦福大学"],
    pain: ["Permits and filings", "许可与申报"],
-   q: ["Experts are fantastic! I was connected with an ex-Partner from Goldman Sachs, who assisted with our GTM and business model.", "专家团队太棒了！我被对接到一位前高盛合伙人，他帮我们梳理了市场进入策略和商业模式。"],
-   st: ["9 filings", "9 项申报"], sl: ["permits and filings handled, approved in 4 months", "许可与申报全部代办，4 个月获批"]},
-  {logo: "logos/ink/yale.svg", lh: 34, alt: ["Yale University", "耶鲁大学"], n: "Jean", co: ["Yale", "耶鲁大学"], ph: "media/people/jean.jpg", big: "media/people/jean-l.jpg", rl: ["Yale University, $1.5M NSF research grant", "耶鲁大学，获美国国家科学基金会 150 万美元研究资助"],
-   q: ["They were the fastest company I've worked with.", "他们是我合作过的速度最快的公司。"],
-   st: ["Fastest", "最快"], sl: ["company Jean has worked with", "Jean 合作过的公司中最快的一家"]},
+   q: ["We had 9 permits and filings to get through. Placetta mapped the order, filed each one, and we were approved in 4 months.", "我们有 9 项许可和申报要办。快哉理清了先后顺序，逐项提交，4 个月就全部获批。"],
+   st: ["9 filings", "9 项申报"], sl: ["approved in 4 months", "4 个月获批"]},
+  {logo: "logos/ink/yale.svg", lh: 34, alt: ["Yale University", "耶鲁大学"], n: "Jean", co: ["Yale", "耶鲁大学"], ph: "media/people/jean.jpg", big: "media/people/jean-l.jpg", rl: ["Yale University", "耶鲁大学"],
+   q: ["I expected 3 months. Placetta had it approved in 4 weeks. They were the fastest company I\u2019ve worked with.", "我原以为要 3 个月，快哉 4 周就办下来了。他们是我合作过的速度最快的公司。"],
+   st: ["4 weeks", "4 周"], sl: ["against the 3 months she expected", "她原本预计需要 3 个月"]},
 ];
 // PROOF: a quote shows only with PROOF.testimonials on, its own flag on where it has one, and, where the person has a
 // connection to Placetta or its founder (needsMc), that connection written in mc: ["...", "..."] and shown under the name
@@ -5407,9 +5407,7 @@ document.addEventListener("click", e => { const b = e.target.closest(".tsx"); if
 function renderTsStrip(){
   const el = document.getElementById("tsStrip"); if (!el) return; const i = L();
   // Vanta-style: each customer's logo with the result they reported, nothing added
-  // Yale shows what Jean said about us; the grant was his own win, not ours
-  const res = {5: [["“Fastest”", "“最快”"], ["company Jean has worked with, Yale researcher", "耶鲁研究员 Jean 合作过速度最快的公司"]]};
-  el.innerHTML = [0, 4, 5].map(k => { const v = TS[k], r = res[k]; return `<button type="button" class="tsx" data-ts="${k}"><img src="${v.logo}" alt="${v.alt[i]}" style="height:${Math.round(v.lh * .7)}px" draggable="false"><b>${r ? r[0][i] : v.st[i]}</b><span>${r ? r[1][i] : v.sl[i]}</span></button>`; }).join("");
+  el.innerHTML = TS.map((v, k) => { const r = null; return `<button type="button" class="tsx" data-ts="${k}"><img src="${v.logo}" alt="${v.alt[i]}" style="height:${Math.round(v.lh * .7)}px" draggable="false"><b>${r ? r[0][i] : v.st[i]}</b><span>${r ? r[1][i] : v.sl[i]}</span></button>`; }).join("");
 }
 function tsWho(v, i){ return v.role ? v.rl[i] : v.co[i]; }
 function tsOff(){ if (TS.length) return false; ["tsBar", "tsGrid"].forEach(id => { const e = document.getElementById(id); if (e) e.hidden = true; }); return true; }
