@@ -3098,6 +3098,21 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 .hdr.light{background:rgba(244,245,247,.86);-webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2);box-shadow:0 1px 2px rgba(15,27,51,.04)}
 .menu-open .hdr.light{background:rgba(255,255,255,.98)}
 .menu-open .hdr:not(.light){background:rgba(15,27,51,.92)}
+
+/* menu96 (Oct 22): the phone menu fills the screen like devin.ai's. The page behind is dimmed and blurred, links
+   sit on hairlines, and language and the plan button stay pinned at the bottom. */
+@media (max-width:1023px){
+  .menu-open body{overflow:hidden}
+  .menu-open .hwrap{bottom:0;pointer-events:auto}
+  .menu-open .hwrap::before{content:"";position:fixed;inset:0;z-index:-1;background:rgba(10,20,40,.55);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);animation:fadeIn96 .2s ease}
+  .msheet:not([hidden]){flex:1;min-height:0;max-height:none;margin-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding:8px 20px 20px;gap:12px;background:#fff}
+  .msheet nav a{min-height:56px;border-bottom:1px solid var(--line);font-size:19px}
+  .msheet nav a:last-child{border-bottom:0}
+  .msheet .mslang{margin-top:auto}
+}
+/* tablets keep EN/中文 and the plan button in the bar, so the sheet holds just the links */
+@media (min-width:600px) and (max-width:1023px){.menu-open .hwrap{bottom:auto}.msheet:not([hidden]){flex:none}.msheet .mslang,.msheet>.btn{display:none}}
+@keyframes fadeIn96{from{opacity:0}to{opacity:1}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
