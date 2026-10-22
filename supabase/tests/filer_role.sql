@@ -103,7 +103,7 @@ begin
   execute 'reset role';
   insert into storage.objects (bucket_id, name) values ('documents', w::text || '/uploads/lease.pdf'), ('documents', gen_random_uuid()::text || '/uploads/x.pdf');
   execute 'set local role placetta_filer';
-  select count(*) into n from storage.objects where bucket_id = 'documents';
+  begin select count(*) into n from storage.objects where bucket_id = 'documents'; exception when insufficient_privilege then n := -1; end;
   execute 'reset role';
   res := res || jsonb_build_object('reads only files of workspaces with a running filing',
     n = (select count(*) from storage.objects where bucket_id = 'documents' and (storage.foldername(name))[1] in (w::text, w2::text)));
