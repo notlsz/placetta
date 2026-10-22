@@ -644,6 +644,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
             attachments: f.attach?.map(a => a[lang]), for_foreign_owners: f.foreign?.[lang], placetta_fills_official_pdf: canFill(f), reread_agency_page_first: f.checked === "known" })),
           ...(known?.steps.length ? { local_steps: known.steps.map(a => ({ step: a.name[lang], agency: a.agency[lang], level: a.level, link: a.source.url,
             ...(a.abstain ? { claim: false, who_to_ask: a.source.url } : { claim: true, quote: a.source.quote, read_on: a.source.checked }) })) } : {}),
+          // what an official page says differs for this kind of business here (a milk tea shop, a coffee shop, a bakery):
+          // only facts whose quote is current; tell the person in these words, citing the page
+          ...(known?.facts.length ? { store_type_facts: known.facts.map(k => ({ fact: k.text[lang], agency: k.agency[lang], link: k.source.url, quote: k.source.quote, read_on: k.source.checked })) } : {}),
           not_in_library: !info.country ? "This place isn't in the library yet. Research its national and local requirements on the government's own sites, prepare each one, then skill_save what you learned so the next business there goes faster."
             : !info.local ? `The national${info.country === "US" ? ", state" : ""} steps are here; ${info.city ? info.city.en + "'s" : "the city's"} own local permits aren't. Research the city's official pages for them, then skill_save the local steps you found.`
             : list.length ? "Check the agency pages for anything local not listed (signage, alcohol, outdoor seating)." : "Nothing in the library for this. Research the agency's official page.",

@@ -7,6 +7,7 @@
 import { B, same, type Bi } from "../bi";
 import { formsEntity as formsEntityFor, formsFor, placeInfo, placesOf, segmentOf, type OfficialForm, type Segment, type Where } from "../forms/registry";
 import { usPlace } from "../forms/usplace";
+import { kindFactsAt, kindsOf, type KindFact, type StoreKind } from "../forms/kinds";
 import { FOOD_PERMITTER, MUNICIPAL_BUILDING, proofCurrent, whoToAsk, type Src } from "./ask";
 import type { Application, CheckItem, Deadline, Field, Level, Store, Workspace } from "../model";
 import { publishedDays } from "../plan";
@@ -39,7 +40,12 @@ export type PreviewPlan = {
   layers: Record<Level, number>;
   fees: number;                          // the fees the registry publishes, added up
   varies: number;                        // rows whose fee the agency sets
+  kinds: StoreKind[];                    // the kinds of food business the words name (src/forms/kinds.ts)
+  facts: PlanFact[];                     // what an official page says differs for those kinds here, each quoted and current
+  withheld: string[];                    // facts for this place and kind whose quote isn't current: not stated (fail closed)
 };
+/** A fact about this kind of business here, as the plan states it: only with a current quote from its official page. */
+export type PlanFact = { id: string; kinds: StoreKind[]; title: Bi; text: Bi; agency: Bi; level: Level; app?: string; source: { label: string; url: string; quote: string; checked: string } };
 
 /* --------------------------------------------------------------- the US states */
 
@@ -455,6 +461,20 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
     if (role === (food ? "food" : "license") || role === "plan") r.a.critical = true;
   }
 
+  // what differs for this kind of food business here (a milk tea shop, a coffee shop, a bakery), each fact stated only
+  // while its official quote is current; it goes on the row it bears on (the permit to open, the plan review, the build-out)
+  const kinds = segment === "restaurant" ? kindsOf(what) : [];
+  const withheld: string[] = [];
+  const near: Record<NonNullable<KindFact["about"]>, Role[]> = { food: ["food", "plan", "license"], plan: ["plan", "building", "food"], building: ["building", "plan", "food"], license: ["license", "food"] };
+  const facts: PlanFact[] = kindFactsAt(kinds, places).flatMap(k => {
+    const seen = proofCurrent(k.proof, today);
+    if (!seen) { withheld.push(k.id); return []; }
+    const app = k.about ? near[k.about].map(x => byRole.get(x)).find(Boolean) : undefined;
+    const source = { label: host(k.proof.read), url: k.proof.read, quote: k.proof.quote, checked: seen };
+    if (app) app.notes = [...(app.notes ?? []), { id: k.id, title: k.title, text: k.text, source }];
+    return [{ id: k.id, kinds: k.kinds.filter(x => kinds.includes(x)), title: k.title, text: k.text, agency: k.agency, level: k.level, ...(app ? { app: app.id } : {}), source }];
+  });
+
   // deadlines: the opening, and the day each permit has to be filed by to be in hand for it
   const deadlines: Deadline[] = [];
   if (opening) {
@@ -479,6 +499,7 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
     apps, deadlines, projectedOpen, segment, food, country, places, local: info.local,
     fromRegistry: rows.filter(r => r.f).length, generic: rows.filter(r => !r.f).length, layers, abstained: apps.filter(a => a.abstain).length, conflicts,
     fees: apps.reduce((s, a) => s + a.fees.reduce((t, f) => t + f.amount, 0), 0), varies: apps.filter(a => a.fees.some(f => f.tbd)).length,
+    kinds, facts, withheld,
   };
 }
 
@@ -493,6 +514,8 @@ export function libraryAnswer(what: string, where: string, needs: { employees?: 
     claim: (f: OfficialForm) => { const a = byForm.get(f.id); return a ? !a.abstain : !!(f.proof && proofCurrent(f.proof, today)); },
     row: (f: OfficialForm) => byForm.get(f.id),
     steps: p.apps.filter(a => !a.official), conflicts: p.conflicts,
+    // what differs for this kind of business here, each with its official quote (only current ones)
+    facts: p.facts,
   };
 }
 

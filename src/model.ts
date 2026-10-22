@@ -60,6 +60,9 @@ export type Application = {
   // Odelia doesn't claim this step: no current quote from an official page says it's required here (none on record, the
   // last re-read is too old, the page no longer says it, or two sources disagree), so the row names who to ask instead
   abstain?: boolean;
+  // what an official page says differs for this kind of business here (a milk tea shop, a coffee shop, a bakery), each
+  // with the page's own words and the day they were last seen there (src/forms/kinds.ts)
+  notes?: { id: string; title: Bi; text: Bi; source: { label: string; url: string; quote: string; checked: string } }[];
   versions?: FormVersion[];  // the agency's own form, filled, each time its answers changed (src/forms/versions.ts); newest last
   filed?: Filed;             // its latest filing as the filings table has it (src/finish.ts stampFilings): the proof a job waits on
 };

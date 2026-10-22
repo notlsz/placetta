@@ -1,0 +1,215 @@
+{
+ "id": "sangabriel-bakery",
+ "title": "Bakery on Valley Boulevard, San Gabriel",
+ "read": "2026-10-21",
+ "input": {
+  "what": "Bakery",
+  "where": "140 W Valley Blvd, San Gabriel, CA 91776",
+  "lang": "en",
+  "signage": false
+ },
+ "assumptions": "The filings are those of heldout/sangabriel-restaurant.json (the same place; the kind of food business doesn't change them). What differs from the Cantonese restaurant at the same address: CDPH's Processed Food Registration for wholesale bakery products, and the customer restroom rule that turns on seating.",
+ "items": [
+  {
+   "key": "ca-llc",
+   "name": "Articles of Organization (California LLC)",
+   "agency": "California Secretary of State",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "feeNote": "Fee not read on an official page in this pass (registry says $70).",
+   "note": "SF guide: LLCs \"must register their structure with the CA Secretary of State before registering locally.\"",
+   "source": "https://www.sf.gov/guide-opening-restaurant",
+   "match": "articles of organization.*california|ca-llc-1|california llc",
+   "agencyMatch": "california secretary of state"
+  },
+  {
+   "key": "ein",
+   "name": "Employer Identification Number (EIN)",
+   "agency": "Internal Revenue Service",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "note": "IRS: \"You never have to pay a fee for an EIN.\"",
+   "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+   "match": "employer identification number|\\bEIN\\b|irs-ss4",
+   "agencyMatch": "internal revenue service|\\bIRS\\b"
+  },
+  {
+   "key": "ca-seller",
+   "name": "Seller's permit",
+   "agency": "California Department of Tax and Fee Administration",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "note": "\"Every location must have this permit to sell taxable goods.\" Also on the LA restaurant checklist.",
+   "source": "https://www.sf.gov/guide-opening-restaurant",
+   "match": "seller'?s permit|ca-cdtfa",
+   "agencyMatch": "tax and fee administration|CDTFA"
+  },
+  {
+   "key": "ca-edd",
+   "name": "Employer payroll tax account registration (DE 1)",
+   "agency": "California Employment Development Department",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "note": "Register within 15 days of paying more than $100 in wages in a calendar quarter.",
+   "source": "https://edd.ca.gov/en/Payroll_Taxes/Am_I_Required_to_Register_as_an_Employer",
+   "match": "employer|DE ?1|edd",
+   "agencyMatch": "employment development department|\\bEDD\\b"
+  },
+  {
+   "key": "ca-food-manager",
+   "name": "Food safety (manager) certification, at least one owner or employee",
+   "agency": "Local environmental health agency (California Health and Safety Code 113947.1)",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "note": "Within 60 days of opening; valid 5 years.",
+   "source": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
+   "match": "food (safety|protection) (manager|certif)|certified food|food manager|manager'?s food safety",
+   "agencyMatch": "environmental health|retail food code|health",
+   "levels": [
+    "state",
+    "county",
+    "city"
+   ]
+  },
+  {
+   "key": "ca-food-handler",
+   "name": "California Food Handler Card for food employees",
+   "agency": "Local environmental health agency (California Health and Safety Code 113948)",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "note": "Within 30 days of hire; valid 3 years; food managers exempt.",
+   "source": "https://www.fresnocountyca.gov/files/assets/county/public-health/environmental-health/food-safety/california-food-handler-card.pdf",
+   "match": "food handler",
+   "agencyMatch": "environmental health|retail food code|health",
+   "levels": [
+    "state",
+    "county",
+    "city"
+   ]
+  },
+  {
+   "key": "ca-fbn",
+   "name": "Fictitious Business Name statement",
+   "agency": "County Clerk",
+   "level": "county",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "condition": "Only when trading under a name other than the legal name.",
+   "source": "https://www.sf.gov/guide-opening-restaurant",
+   "match": "(fictitious business name|\\bFBN\\b|\\bDBA\\b).*(clerk)|(clerk).*(fictitious business name|\\bFBN\\b|\\bDBA\\b)",
+   "agencyMatch": "clerk"
+  },
+  {
+   "key": "lac-plan",
+   "name": "Food facility plan check",
+   "agency": "Los Angeles County Department of Public Health, Environmental Health",
+   "level": "county",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://admin.publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+   "match": "(plan (check|review)).*(los angeles county)|(los angeles county).*(plan (check|review))",
+   "agencyMatch": "los angeles county",
+   "quote": "Submit your plans for approval to the EH Plan Check Program; then submit the plans to your local building and safety office for approval.",
+   "note": "County EH covers all of Los Angeles County except Long Beach, Pasadena and Vernon (catering facilities page)."
+  },
+  {
+   "key": "lac-permit",
+   "name": "Public health permit (food facility)",
+   "agency": "Los Angeles County Department of Public Health, Environmental Health",
+   "level": "county",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://admin.publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+   "match": "(public health permit|health permit).*(los angeles county)|(los angeles county).*(public health permit|health permit)",
+   "agencyMatch": "los angeles county",
+   "quote": "After payment of the Public Health Permit fee is made, the permit will be issued."
+  },
+  {
+   "key": "sgb-license",
+   "name": "Business license",
+   "agency": "City of San Gabriel",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://sangabrielcity.com/DocumentCenter/View/19742/City-Business-License-Guidelines-and-Fees-2023",
+   "match": "(business licen).*(san gabriel)|(san gabriel).*(business licen)",
+   "agencyMatch": "san gabriel",
+   "note": "Verified 2026-10-18 from the City's own Business License Guidelines and Fees PDF (read with curl); earlier the city's site refused requests and this item was unverified.",
+   "quote": "A Business License Certificate must be issued prior to conducting business."
+  },
+  {
+   "key": "sgb-building",
+   "name": "Building permit for the build-out",
+   "agency": "City of San Gabriel Building and Safety",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://admin.publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+   "match": "(building permit|tenant improvement|build-?out|plan check.*building|building and safety).*(san gabriel)|(san gabriel).*(building permit|tenant improvement|build-?out|plan check.*building|building and safety)",
+   "agencyMatch": "san gabriel",
+   "quote": "then submit the plans to your local building and safety office for approval. After approvals, you may begin construction."
+  }
+ ],
+ "order": [
+  {
+   "before": "ca-llc",
+   "after": "ein",
+   "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+   "why": "IRS: \"form your entity through the secretary of state before you apply for an EIN.\"",
+   "verified": true
+  },
+  {
+   "before": "lac-plan",
+   "after": "lac-permit",
+   "source": "https://admin.publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm",
+   "why": "Plans approved before construction; the permit is issued after the final inspection and the fee.",
+   "verified": true
+  }
+ ],
+ "mustNotInclude": [],
+ "facts": [
+  {
+   "key": "ca-wholesale-bakery",
+   "match": "^ca-wholesale-bakery$",
+   "source": "https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/FDBPrograms/FoodSafetyProgram/PFRFAQs.aspx",
+   "quote": "General foods such as bakery products, noodles, seafood (except molluscan shellfish)",
+   "read": "2026-10-21",
+   "required": true
+  },
+  {
+   "key": "ca-takeout-restrooms",
+   "match": "^ca-takeout-restrooms$",
+   "source": "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
+   "quote": "that provides space for the consumption of food on the premises shall provide clean toilet facilities in good repair for consumers",
+   "read": "2026-10-21",
+   "required": true
+  }
+ ],
+ "mustNotFacts": [
+  {
+   "match": "^nyc-grease-drinks$",
+   "why": "New York City's rule."
+  },
+  {
+   "match": "^kc-bakery-risk$",
+   "why": "King County's rule."
+  }
+ ]
+}

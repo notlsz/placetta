@@ -116,6 +116,14 @@ html[lang="zh-CN"] .answer p{font-size:19px;line-height:1.8}
 @media (max-width:600px){.sheet{padding:4px 18px}.sheet div{grid-template-columns:1fr;gap:2px}}
 .note{border-left:2px solid var(--navy);padding-left:20px}
 .note p{margin:0}
+/* what differs for this kind of business here, each in the agency's own words */
+.kinds{margin:40px 0}
+.kinds>p{color:var(--ink2);line-height:1.6;margin:0 0 8px}
+.kfact{border-left:2px solid var(--navy);padding:2px 0 2px 20px;margin:22px 0 0}
+.kfact h3{font:500 18px/1.35 var(--serif);letter-spacing:-.01em;margin:0 0 6px}
+.kfact p{margin:0;line-height:1.6}
+.kfact blockquote{margin:10px 0 8px;color:var(--ink2);font-size:15px;line-height:1.55}
+.kfact .src{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13.5px;color:var(--muted)}
 .lines{width:100%;border-collapse:collapse;font-size:15px}
 .lines thead th{text-align:left;font-weight:500;font-size:13px;color:var(--muted);padding:0 12px 10px 0;border-bottom:1px solid var(--rule2)}
 .lines tbody th{text-align:left;font:500 14px/1.4 var(--sans);white-space:nowrap;padding:12px 16px 12px 0;vertical-align:top;color:var(--ink2);width:110px}

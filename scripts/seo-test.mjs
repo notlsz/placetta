@@ -207,9 +207,16 @@ group("guides: answer first, quotable, tables, FAQ, hreflang, no thin duplicates
     for (const sec of b.split(/<section\b/).slice(1)) { const n = strip(sec.split("</section>")[0]).split(/\s+/).length; if (n > 1200) { note("sections sized for AI chunking (<1200 words)", `${f} ${n}`); break; } }
     if (/<meta name="robots" content="noindex/.test(h) && !/The same filings as <a href=/.test(h)) note("a noindexed guide points to the one indexed", f);
   }
-  // no two indexed guides in a city with the same filings
+  // no two indexed guides in a city with the same filings and the same official facts on what differs by kind of business
+  // (src/forms/kinds.ts: a milk tea shop's guide with a fact of its own is its own page, not the restaurant's again)
   const seen = new Map();
-  for (const f of guides) { const h = pages.get(f); if (/noindex/.test(metaOf(h, "name", "robots") ?? "")) continue; const k = f.split("/")[2] + ":" + [...h.matchAll(/<li id="s\d+">[\s\S]*?<a href="([^"]+)"/g)].map(m => m[1]).join(","); if (seen.has(k)) note("no indexed near-duplicates", `${f} = ${seen.get(k)}`); seen.set(k, f); }
+  for (const f of guides) {
+    const h = pages.get(f); if (/noindex/.test(metaOf(h, "name", "robots") ?? "")) continue;
+    const facts = (h.match(/<section class="kinds"[^>]*data-facts="([^"]*)"/) ?? [, ""])[1];
+    if (facts && [...h.matchAll(/<div class="kfact"><h3>[^<]+<\/h3><p>[^<]+<\/p><blockquote lang="en">“[^”]+”<\/blockquote><p class="src">[^<]*<a href="https?:\/\//g)].length !== facts.split(",").length) note("every fact on what differs is quoted, with its official link", f);
+    const k = f.split("/")[2] + ":" + [...h.matchAll(/<li id="s\d+">[\s\S]*?<a href="([^"]+)"/g)].map(m => m[1]).join(",") + "|" + facts;
+    if (seen.has(k)) note("no indexed near-duplicates", `${f} = ${seen.get(k)}`); seen.set(k, f);
+  }
   const zh = [...pages.keys()].filter(f => f.startsWith("site/guides/zh/")).slice(0, 200);
   for (const f of zh) if (!/<meta name="applicable-device" content="pc,mobile">/.test(pages.get(f)) || !/<html lang="zh-CN">/.test(pages.get(f))) note("Chinese pages carry zh-CN and the Baidu tags", f);
   for (const [k, fs] of Object.entries(bad)) check(k, false, `${fs.length}: ${fs.slice(0, 4).join(" | ")}`);

@@ -35,7 +35,7 @@ import { FORMS, formsFor, segmentOf } from "../../src/forms/registry";
 import type { Application, Level } from "../../src/model";
 import { answerChecks } from "./answers";
 import { officialSource } from "./official";
-import { UNREAD, formProof, logStats, planRowProof } from "./proof";
+import { UNREAD, formProof, logStats, planRowProof, proofProblems } from "./proof";
 import { MAX_PROOF_AGE } from "../../src/plan/ask";
 import { strictProblems } from "./strict";
 import { failClosedChecks } from "./failclosed";
@@ -51,7 +51,10 @@ const load = (name: string): Gold[] => { const d = setDir(name); if (!d) return 
 // before any fix for them (scripts/eval/heldout). strict: the top 15 cities and top 15 states for Chinese brands, every
 // expected answer quoted from its official page (scripts/eval/strict). SET=gold, heldout or strict scores one; all three
 // by default, and only the held-out set with GENERAL_ONLY.
-const SETS = (process.env.SET ? [process.env.SET] : process.env.GENERAL_ONLY ? ["heldout"] : ["gold", "heldout", "strict"]).map(name => ({ name, cases: load(name) }));
+// kinds: the same place opened as a different kind of food business (a bubble tea shop and a restaurant on one Flushing
+// street, a bakery at the San Gabriel restaurant's address), scored on the filings and on what differs by kind
+// (scripts/eval/kinds, src/forms/kinds.ts).
+const SETS = (process.env.SET ? [process.env.SET] : process.env.GENERAL_ONLY ? ["heldout"] : ["gold", "heldout", "strict", "kinds"]).map(name => ({ name, cases: load(name) }));
 // npm passes its own arguments after the script's "exit", so the quiet mode is an environment variable: QUIET=1
 const showMisses = !process.env.QUIET;
 /** A row that hedges whether the requirement applies ("if the city requires one", "We'll confirm with ...") asserts
@@ -213,6 +216,8 @@ const fails: string[] = [];
     const i = g.input;
     const p = previewPlan(i.what, i.where, OPENING, { entity: i.entity, employees: i.employees, buildout: i.buildout, signage: i.signage, today: TODAY });
     for (const a of p.apps) { rowsChecked++; if (a.abstain) abstentions++; else claims++; for (const x of planRowProof(a, TODAY)) problems.add(`${g.id}: ${x}`); }
+    // what differs by kind of business: every fact the plan states carries its quote, in the read log, from an official page
+    for (const k of p.facts) { rowsChecked++; claims++; for (const x of [...proofProblems({ id: k.id, url: k.source.url, quote: k.source.quote, checked: k.source.checked }), ...(officialSource(k.source.url) ? [] : [`${k.id}: not an official page`])]) problems.add(`${g.id} (fact): ${x}`); }
     for (const r of library(g)) { rowsChecked++; const f = FORMS.find(x => x.id === r.id); if (f && !r.abstain) for (const x of formProof(f)) problems.add(`${g.id} (library): ${x}`); }
   }
   const st = logStats();
@@ -231,7 +236,42 @@ for (const { name: set, cases } of SETS.filter(s => s.name === "strict")) {
 const TITLE: Record<string, string> = {
   gold: "Gold set (in-sample: the library was fixed against it)", heldout: GENERAL ? "Held-out set, city entries removed (GENERAL_ONLY)" : "Held-out set (scripts/eval/heldout)",
   strict: "Strict set (scripts/eval/strict: top cities and states, every answer quoted from its official page)",
+  kinds: "Store-type set (scripts/eval/kinds: the same place as a tea shop, coffee shop, bakery or restaurant)",
 };
+
+/* ------------------------------------------------------------------ what differs by kind of business */
+// Each case with expected facts: the instant plan and the forms tool must state every expected fact, with the official
+// page's own words from the URL the case names, and no fact on the case's must-not list; a fact that matches nothing the
+// case expects is invented. Targets: recall and precision 100%, for both paths.
+const factTotals = { want: 0, found: 0, stated: 0, right: 0 };
+for (const { name: set, cases } of SETS) for (const g of cases.filter(x => x.facts?.length || x.mustNotFacts?.length)) {
+  const i = g.input;
+  const p = previewPlan(i.what, i.where, OPENING, { entity: i.entity, employees: i.employees, buildout: i.buildout, signage: i.signage, today: TODAY });
+  const segment = segmentOf(i.what);
+  const lib = libraryAnswer(i.what, i.where, { employees: i.employees ?? true, buildout: i.buildout ?? true, signage: i.signage ?? true, newEntity: !i.entity, imports: false, alcohol: sellsAlcohol(i.what) }, TODAY);
+  for (const [path, facts] of [["instant plan", p.facts], ["library", lib.facts]] as const) {
+    const miss: string[] = [], bad: string[] = [];
+    for (const want of g.facts ?? []) {
+      factTotals.want++;
+      const hit = facts.find(f => re(want.match).test(f.id));
+      if (!hit) { miss.push(`missing ${want.key}`); continue; }
+      if (hit.source.url !== want.source || hit.source.quote !== want.quote) { miss.push(`${want.key}: quoted from ${hit.source.url} ("${hit.source.quote}"), the case reads ${want.source}`); continue; }
+      factTotals.found++;
+    }
+    for (const f of facts) {
+      factTotals.stated++;
+      const no = (g.mustNotFacts ?? []).find(m => re(m.match).test(f.id));
+      if (no) { bad.push(`wrong ${f.id}: ${no.why}`); continue; }
+      if (!(g.facts ?? []).some(w => re(w.match).test(f.id))) { bad.push(`invented ${f.id}`); continue; }
+      const proof = proofProblems({ id: f.id, url: f.source.url, quote: f.source.quote, checked: f.source.checked });
+      if (proof.length || !officialSource(f.source.url)) { bad.push(`${f.id}: ${proof.join("; ") || "not an official page"}`); continue; }
+      factTotals.right++;
+    }
+    if (segment !== "restaurant" && facts.length) bad.push(`${facts.length} facts for a ${segment} business`);
+    if (miss.length || bad.length) { fails.push(`${set} ${g.id} ${path} facts: ${[...miss, ...bad].join("; ")}`); console.log(`  ${set} ${g.id} (${path}): ${[...miss, ...bad].join("; ")}`); }
+  }
+}
+console.log(`\nWhat differs by kind of business (both paths): ${factTotals.found}/${factTotals.want} expected facts stated with their official words (recall ${pct(factTotals.found, factTotals.want)}), ${factTotals.right}/${factTotals.stated} stated facts right (precision ${pct(factTotals.right, factTotals.stated)})`);
 for (const { name: set, cases } of SETS) {
   const unverified = cases.flatMap(g => g.items.filter(i => !i.verified).map(i => `${g.id}: ${i.name}${i.note ? ` (${i.note})` : ""}`));
   console.log(`\n================ ${TITLE[set] ?? set} ================`);

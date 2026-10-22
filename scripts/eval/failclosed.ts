@@ -15,12 +15,13 @@ import { COUNTIES } from "../../src/forms/usplace";
 import { libraryAnswer, previewPlan, sellsAlcohol } from "../../src/plan/preview";
 import { MAX_PROOF_AGE, proofCurrent } from "../../src/plan/ask";
 import { groundedAnswer } from "../../src/answer";
-import { formProof, planRowProof } from "./proof";
+import { formProof, planRowProof, proofProblems } from "./proof";
+import { officialSource } from "./official";
 
 type Check = { name: string; pass: boolean; detail?: string };
 const STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY",
   "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
-const STORES: { what: string; entity?: string }[] = [{ what: "Restaurant" }, { what: "Bubble tea shop" }, { what: "Bakery" }, { what: "Clothing store" }, { what: "Franchised milk tea shop", entity: "existing" }];
+const STORES: { what: string; entity?: string }[] = [{ what: "Restaurant" }, { what: "Bubble tea shop" }, { what: "Bakery" }, { what: "Coffee shop" }, { what: "Clothing store" }, { what: "Franchised milk tea shop", entity: "existing" }];
 const addDays = (iso: string, n: number) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 
 /** Every US place the library names: the county table's cities and towns, the world table's US cities, a town per state. */
@@ -35,12 +36,19 @@ function places(): string[] {
 export function failClosedChecks(today: string) {
   const checks: Check[] = [];
   const check = (name: string, pass: boolean, detail?: unknown) => checks.push({ name, pass, ...(pass ? {} : { detail: JSON.stringify(detail)?.slice(0, 600) }) });
-  let plans = 0, rows = 0, claims = 0, abstentions = 0;
-  const problems = new Set<string>(), parity = new Set<string>();
+  let plans = 0, rows = 0, claims = 0, abstentions = 0, facts = 0;
+  const problems = new Set<string>(), parity = new Set<string>(), factProblems = new Set<string>();
   for (const where of places()) for (const s of STORES) {
     const p = previewPlan(s.what, where, "2027-04-01", { entity: s.entity, today });
     plans++;
     for (const a of p.apps) { rows++; if (a.abstain) abstentions++; else claims++; for (const x of planRowProof(a, today)) problems.add(`${where}, ${s.what}: ${x}`); }
+    // what differs by kind of business: a fact is stated only with its quote, seen on its official page within the window
+    for (const k of p.facts) {
+      facts++;
+      const bad = [...proofProblems({ id: k.id, url: k.source.url, quote: k.source.quote, checked: k.source.checked }), ...(officialSource(k.source.url) ? [] : ["not an official page"]), ...(proofCurrent({ read: k.source.url, quote: k.source.quote }, today) ? [] : ["quote not current"])];
+      for (const x of bad) factProblems.add(`${where}, ${s.what}: ${k.id}: ${x}`);
+    }
+    if (segmentOf(s.what) !== "restaurant" && p.facts.length) factProblems.add(`${where}, ${s.what}: store-type facts on a ${segmentOf(s.what)} business`);
     // the agent's tool claims what the plan claims: never a form the plan abstains on, never one without a current quote
     const segment = segmentOf(s.what), needs = { employees: true, buildout: true, signage: true, newEntity: !s.entity, food: segment === "restaurant", imports: false, alcohol: sellsAlcohol(s.what) };
     const known = libraryAnswer(s.what, where, needs, today);
@@ -50,7 +58,8 @@ export function failClosedChecks(today: string) {
       if (row && claimed === !!row.abstain) parity.add(`${where}, ${s.what}: the tool and the plan disagree on ${f.id}`);
     }
   }
-  check(`sweep: every row of ${plans} plans (every place the library names and a town in every state, 5 store types) claims with a current official quote or abstains naming who to ask`, !problems.size, [...problems].slice(0, 12));
+  check(`sweep: every row of ${plans} plans (every place the library names and a town in every state, ${STORES.length} store types) claims with a current official quote or abstains naming who to ask`, !problems.size, [...problems].slice(0, 12));
+  check(`sweep: every store-type fact those plans state (${facts}) carries its official quote, in the read log and current, and only food businesses get them`, !factProblems.size, [...factProblems].slice(0, 12));
   check("sweep: the agent's forms tool claims exactly what the instant plan claims, and nothing without a current quote", !parity.size, [...parity].slice(0, 12));
 
   // stale: the day after every quote ages out, a San José milk tea shop's plan claims nothing at all
@@ -59,6 +68,8 @@ export function failClosedChecks(today: string) {
     const p = previewPlan("Milk tea shop", "San Jose, CA", "2027-08-01", { today: later });
     check(`stale: ${MAX_PROOF_AGE + 30} days on with no re-read, every row of a San José plan abstains (${p.apps.length} rows) and none sets a file-by date`,
       p.apps.length > 0 && p.apps.every(a => a.abstain) && !p.deadlines.some(d => d.kind === "due"), p.apps.filter(a => !a.abstain).map(a => a.official ?? a.id));
+    check(`stale: the same day, the San José milk tea shop's store-type facts are withheld (${p.withheld.length}), none stated and none on a row`,
+      p.withheld.length > 0 && !p.facts.length && !p.apps.some(a => a.notes?.length), { facts: p.facts.map(f => f.id), withheld: p.withheld });
   }
   // gone: a quote the last re-read didn't find (here, words that aren't on the page) claims nothing
   {

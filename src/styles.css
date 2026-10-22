@@ -1817,6 +1817,11 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 .sh-pv { display: flex; align-items: flex-start; gap: 8px; margin: 10px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--ink2); }
 .sh-pv svg { flex: none; margin-top: 3px; color: var(--blue-ink); }
 .sh-f.sh-f-pv > span { color: var(--ink2); }
+/* what differs for this kind of business here (src/forms/kinds.ts), under the row it bears on */
+.sh-note { margin: 10px 0 0; padding: 10px 12px; border: 1px solid var(--line, rgba(0,0,0,.08)); border-radius: 10px; font-size: 14px; line-height: 1.5; color: var(--ink); }
+.sh-note p { margin: 0 0 6px; }
+.sh-note b { font-weight: 600; }
+.sh-note > a { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--blue-ink); }
 /* ================================================================================================================ */
 
 /* ============================================================================================================

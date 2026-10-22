@@ -12,6 +12,10 @@ export type Gold = {
   input: { what: string; where: string; lang: "en" | "zh"; entity?: string; employees?: boolean; buildout?: boolean; signage?: boolean };
   items: GoldItem[]; order: { before: string; after: string; source: string; why: string; verified: boolean; quote?: string; read?: string }[];
   mustNotInclude: { name: string; why: string; match: string; source?: string; quote?: string; read?: string }[];
+  // what differs for this kind of food business here (src/forms/kinds.ts): the facts the plan must state, each with the
+  // official page's words, URL and read day, and the ones it must not (another kind's, another place's)
+  facts?: { key: string; match: string; source: string; quote: string; read: string; required: boolean }[];
+  mustNotFacts?: { match: string; why: string }[];
 };
 
 type Entry = { id: string; read: string; quote: string; checked: string; method: "curl" | "webfetch"; found: boolean };

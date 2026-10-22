@@ -8,7 +8,9 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { CITIES, COUNTRIES } from "../src/forms/world.ts";
-import { FORMS, METHOD, formById, formsFor, type Needs, type OfficialForm, type Segment } from "../src/forms/registry.ts";
+import { FORMS, METHOD, formById, formsFor, placesOf, type Needs, type OfficialForm, type Segment } from "../src/forms/registry.ts";
+import { kindFactsAt, type KindFact, type StoreKind } from "../src/forms/kinds.ts";
+import { proofCurrent } from "../src/plan/ask.ts";
 import { ANSWERS } from "./guides-answers.mts";
 // the site's address and the company entity: one place for every canonical, sitemap and JSON-LD (scripts/seo/config.mjs)
 import { BAIDU_META, ORG_ID, ORIGIN, SEARCH_PATH, SITE_ID, ldTag, orgLd, websiteLd } from "./seo/config.mjs";
@@ -30,18 +32,19 @@ const an = (s: string) => (/^[aeiou]/i.test(s) ? "an" : "a");
 
 /* ------------------------------------------------------------ businesses, topics and places */
 
-type Biz = { slug: string; seg: Segment; name: Bi; plural: Bi; chip: string; needs: Needs; note: Bi };
+// kinds: what src/forms/kinds.ts calls this business, for the facts an official page states differ for it
+type Biz = { slug: string; seg: Segment; name: Bi; plural: Bi; chip: string; needs: Needs; note: Bi; kinds?: StoreKind[] };
 const FOOD: Needs = { food: true, employees: true, newEntity: true, buildout: true, signage: true };
 const BUSINESSES: Biz[] = [
-  { slug: "milk-tea-shop", seg: "restaurant", name: B("milk tea shop", "奶茶店"), plural: B("Milk tea and bubble tea shops", "奶茶店"), chip: "Milk tea", needs: FOOD,
+  { slug: "milk-tea-shop", seg: "restaurant", name: B("milk tea shop", "奶茶店"), plural: B("Milk tea and bubble tea shops", "奶茶店"), chip: "Milk tea", needs: FOOD, kinds: ["tea"],
     note: B("A tea shop that makes drinks to order is a food service business, so the health permit and food safety training apply even with no kitchen.", "现制饮品的奶茶店属于餐饮服务，即使没有厨房，也需要卫生许可和食品安全培训。") },
-  { slug: "coffee-shop", seg: "restaurant", name: B("coffee shop", "咖啡店"), plural: B("Coffee shops", "咖啡店"), chip: "Coffee", needs: FOOD,
+  { slug: "coffee-shop", seg: "restaurant", name: B("coffee shop", "咖啡店"), plural: B("Coffee shops", "咖啡店"), chip: "Coffee", needs: FOOD, kinds: ["coffee"],
     note: B("A coffee shop that prepares drinks or food on site is a food service business, licensed and inspected like a restaurant.", "现场制作饮品或食品的咖啡店属于餐饮服务，与餐厅一样需要许可和检查。") },
-  { slug: "restaurant", seg: "restaurant", name: B("restaurant", "餐厅"), plural: B("Restaurants", "餐厅"), chip: "Restaurant", needs: FOOD,
+  { slug: "restaurant", seg: "restaurant", name: B("restaurant", "餐厅"), plural: B("Restaurants", "餐厅"), chip: "Restaurant", needs: FOOD, kinds: ["restaurant"],
     note: B("A restaurant files the most: company and tax registration, then the build-out, the health permit and the inspections that come with it.", "餐厅需要办理的最多：先是公司和税务登记，然后是装修、卫生许可以及随之而来的检查。") },
-  { slug: "hot-pot-restaurant", seg: "restaurant", name: B("hot pot restaurant", "火锅店"), plural: B("Hot pot restaurants", "火锅店"), chip: "Restaurant", needs: FOOD,
+  { slug: "hot-pot-restaurant", seg: "restaurant", name: B("hot pot restaurant", "火锅店"), plural: B("Hot pot restaurants", "火锅店"), chip: "Restaurant", needs: FOOD, kinds: ["restaurant"],
     note: B("Tabletop cooking adds questions for the build-out and fire review, so the plan for the space matters more than usual.", "桌边加热会给装修和消防审查带来更多问题，因此场地方案比一般餐厅更关键。") },
-  { slug: "bakery", seg: "restaurant", name: B("bakery", "烘焙店"), plural: B("Bakeries", "烘焙店"), chip: "Bakery and desserts", needs: FOOD,
+  { slug: "bakery", seg: "restaurant", name: B("bakery", "烘焙店"), plural: B("Bakeries", "烘焙店"), chip: "Bakery and desserts", needs: FOOD, kinds: ["bakery"],
     note: B("A bakery that bakes on site needs the kitchen approved before opening, the same as a restaurant.", "现场烘焙的店铺需要在开业前通过厨房审批，与餐厅相同。") },
   { slug: "dessert-shop", seg: "restaurant", name: B("dessert shop", "甜品店"), plural: B("Dessert shops", "甜品店"), chip: "Bakery and desserts", needs: FOOD,
     note: B("Desserts served on site make it a food service business, with the health permit and inspection that go with it.", "现场供应甜品即属于餐饮服务，需要相应的卫生许可和检查。") },
@@ -322,15 +325,20 @@ const write = (path: string, html: string) => {
 const keepOg = (() => { try { return readFileSync("site/guides/og.png"); } catch { return null; } })();
 rmSync("site/guides", { recursive: true, force: true });
 
-type Guide = { place: Place; biz: Biz; forms: OfficialForm[] };
+// facts: what an official page says differs for this kind of business here (src/forms/kinds.ts), each with the day its
+// quote was last seen; only facts whose quote is current are printed (fail closed, as in the plans)
+type Fact = KindFact & { seen: string };
+type Guide = { place: Place; biz: Biz; forms: OfficialForm[]; facts: Fact[] };
 const guides: Guide[] = [];
 const topicPages: { place: Place; topic: Topic; forms: OfficialForm[] }[] = [];
 const usedBy = new Map<string, Guide[]>();
+const factsFor = (biz: Biz, place: Place): Fact[] => !biz.kinds?.length || place.country !== "US" ? []
+  : kindFactsAt(biz.kinds, placesOf(place.where)).flatMap(k => { const seen = proofCurrent(k.proof, TODAY); return seen ? [{ ...k, seen }] : []; });
 for (const place of PLACES) {
   for (const biz of BUSINESSES) {
     const forms = formsFor({ segment: biz.seg, where: place.where, needs: { ...biz.needs, ...(place.country !== "US" ? { foreignEntity: true } : {}) } });
     if (forms.length < 3) continue;
-    const g = { place, biz, forms }; guides.push(g);
+    const g = { place, biz, forms, facts: factsFor(biz, place) }; guides.push(g);
     for (const f of forms) usedBy.set(f.id, [...(usedBy.get(f.id) ?? []), g]);
   }
   const all = [...new Map(guides.filter(g => g.place === place).flatMap(g => g.forms).map(f => [f.id, f])).values()].sort((a, b) => a.order - b.order);
@@ -342,23 +350,42 @@ const findGuide = (place: string, seg: string) => guides.find(g => g.place.slug 
 const guideLabel = (g: Guide, l: L) => (l === "zh" ? `${g.place.name.zh}：${g.biz.name.zh}` : `${g.biz.plural.en} in ${g.place.name.en}`);
 const placesUsed = PLACES.filter(p => guides.some(g => g.place === p));
 
-/* Near-duplicates. In a city, kinds of business that file exactly the same filings (a milk tea shop, a coffee shop and a
-   restaurant all do) would be the same page under different names. The first of PRIMARY is the one search engines index;
-   the others stay up for visitors and links (noindex, follow) and the indexed one names them. Same for topic pages. */
+/* Near-duplicates. In a city, kinds of business that file exactly the same filings and for which no official page states
+   anything different (a dessert shop and a restaurant, often) would be the same page under different names. The first
+   of PRIMARY is the one search engines index; the others stay up for visitors and links (noindex, follow) and the indexed
+   one names them. A guide whose filings match another's but whose facts differ (a milk tea shop's grease interceptor rule
+   in New York City, a bakery's wholesale registration in California) is its own page. Same for topic pages. */
 const PRIMARY = ["restaurant", "retail-store", "grocery-store", "importer-ecommerce", "warehouse-3pl", "cosmetics-store", "toy-store", "milk-tea-shop", "coffee-shop", "hot-pot-restaurant", "bakery", "dessert-shop"];
 const sig = (forms: OfficialForm[]) => forms.map(f => f.id).join(",");
+/** What makes a guide the page it is: its filings, and what an official page says differs for its kind of business. */
+const sigG = (g: Guide) => sig(g.forms) + "|" + g.facts.map(k => k.id).join(",");
+const byPrimary = (a: Guide, b: Guide) => PRIMARY.indexOf(a.biz.slug) - PRIMARY.indexOf(b.biz.slug);
 const dupGuide = new Map<Guide, Guide>(), alsoGuide = new Map<Guide, Guide[]>();
+/** A guide with the same filings as an indexed guide in its city but facts of its own: the one it shares filings with. */
+const sameFilings = new Map<Guide, Guide>();
 const dupTopicOf = new Map<(typeof topicPages)[number], string>();
 for (const p of placesUsed) {
   const bySig = new Map<string, Guide[]>();
-  for (const g of guides.filter(x => x.place === p)) bySig.set(sig(g.forms), [...(bySig.get(sig(g.forms)) ?? []), g]);
+  for (const g of guides.filter(x => x.place === p)) bySig.set(sigG(g), [...(bySig.get(sigG(g)) ?? []), g]);
   for (const gs of bySig.values()) {
-    const [first, ...rest] = gs.sort((a, b) => PRIMARY.indexOf(a.biz.slug) - PRIMARY.indexOf(b.biz.slug));
+    const [first, ...rest] = gs.sort(byPrimary);
     for (const x of rest) dupGuide.set(x, first);
     if (rest.length) alsoGuide.set(first, rest);
   }
+  // a guide with no fact of its own adds nothing to the guide ahead of it with the same filings, even when that one has
+  // facts (a dessert shop next to a New York restaurant whose grease interceptor rule is stated): it points there instead
+  for (const g of guides.filter(x => x.place === p && !x.facts.length && !dupGuide.has(x))) {
+    const o = guides.filter(x => x.place === p && x !== g && !dupGuide.has(x) && sig(x.forms) === sig(g.forms) && byPrimary(x, g) < 0).sort(byPrimary)[0];
+    if (!o) continue;
+    dupGuide.set(g, o); alsoGuide.set(o, [...(alsoGuide.get(o) ?? []), g, ...(alsoGuide.get(g) ?? [])]);
+    for (const x of alsoGuide.get(g) ?? []) dupGuide.set(x, o);
+    alsoGuide.delete(g);
+  }
+  const indexedHere = guides.filter(x => x.place === p && !dupGuide.has(x)).sort(byPrimary);
+  for (const g of indexedHere) { const o = indexedHere.find(x => x !== g && sig(x.forms) === sig(g.forms)); if (o && byPrimary(o, g) < 0) sameFilings.set(g, o); }
   // a topic page listing exactly a guide's filings (often "permit costs" and the restaurant guide) is that guide again
-  const seen = new Map<string, string>(guides.filter(x => x.place === p && !dupGuide.has(x)).map(g => [sig(g.forms), "g:" + g.biz.slug]));
+  const seen = new Map<string, string>();
+  for (const g of indexedHere) if (!seen.has(sig(g.forms))) seen.set(sig(g.forms), "g:" + g.biz.slug);
   for (const tp of topicPages.filter(x => x.place === p)) { const k = sig(tp.forms); if (seen.has(k)) dupTopicOf.set(tp, seen.get(k)!); else seen.set(k, "t:" + tp.topic.slug); }
 }
 
@@ -419,6 +446,8 @@ function guideFaq(g: Guide, l: L): [string, string][] {
     qa.push([`Which agencies issue the permits for ${an(biz)} ${biz} in ${city}?`, `The ${plural(g.forms.length, "filing goes", "filings go")} to ${plural(ags.length, "agency", "agencies")}: ${listEn(ags)}.`]);
     qa.push([`What is the first filing to open ${an(biz)} ${biz} in ${city}?`, `The ${lower1(t(first.title, l))}, with the ${t(first.agency, l).replace(/^The /, "")}. ${endDot(t(first.how, l), l)}`]);
   }
+  // what an official page says differs for this kind of business here, in the same words as the section on the page
+  if (g.facts.length) qa.push([l === "zh" ? `${factsHeading(g, l)}？` : `${factsHeading(g, l)}?`, g.facts.map(k => endDot(t(k.text, l), l)).join(l === "zh" ? "" : " ")]);
   return qa;
 }
 const stateOf = (p: Place) => (p.country === "US" && p.state && US_STATES[p.state] ? p.state : "");
@@ -430,6 +459,21 @@ const stateForms = (code: string) => FORMS.filter(f => f.where === code && f.lev
 const STATE_HUBS = [...new Set(placesUsed.map(stateOf).filter(Boolean))].filter(code => stateForms(code).length >= 2).sort();
 const placeCrumbs = (p: Place, l: L): [string, string][] => [[UI.guides[l], base(l) + "/"], ...(STATE_HUBS.includes(stateOf(p)) ? [[US_STATES[stateOf(p)][l], statePath(stateOf(p), l)] as [string, string]] : []), [p.name[l], cityPath(p, l)]];
 const checkedBit = (forms: OfficialForm[], l: L) => { const d = checkedOf(forms); return d ? [`${l === "zh" ? "来源核对于" : "Sources checked"} ${fmtDay(d, l)}`] : []; };
+
+/* What differs for this kind of business here: each official page's own words, the agency, the link and the day read. */
+const factsHeading = (g: Guide, l: L) => (l === "zh" ? `在${g.place.name.zh}开${g.biz.name.zh}有何不同` : `What's different for ${an(g.biz.name.en)} ${g.biz.name.en} in ${g.place.name.en}`);
+function factsSection(g: Guide, l: L) {
+  if (!g.facts.length) return "";
+  const same = sameFilings.get(g);
+  const intro = same ? (l === "zh" ? `在${g.place.name.zh}，${g.biz.name.zh}的申请与<a href="${guidePath(same, l)}">${esc(same.biz.name.zh)}</a>相同，不同之处在下面，每一项都出自机构官网原文。` : `In ${esc(g.place.name.en)}, ${esc(g.biz.plural.en.toLowerCase())} file the same filings as <a href="${guidePath(same, l)}">${esc(same.biz.plural.en.toLowerCase())}</a>. What differs is below, each in the agency's own words.`)
+    : (l === "zh" ? "以下每一项都出自机构官网原文。" : "Each of these is in the agency's own words.");
+  return `<section class="kinds" id="differs" data-facts="${g.facts.map(k => k.id).join(",")}"><h2>${esc(factsHeading(g, l))}</h2><p>${intro}</p>
+${g.facts.map(k => `<div class="kfact"><h3>${esc(t(k.title, l))}</h3><p>${esc(t(k.text, l))}</p><blockquote lang="en">“${esc(k.proof.quote)}”</blockquote><p class="src">${esc(t(k.agency, l))}<a href="${esc(k.proof.read)}" rel="noopener">${l === "zh" ? `官方原文，读取于 ${fmtDay(k.seen, l)}` : `The official page, read ${fmtDay(k.seen, l)}`}</a></p></div>`).join("\n")}
+</section>
+`;
+}
+/** "Sources checked": the latest day any of the guide's sources was read, its facts' pages included. */
+const guideChecked = (g: Guide, l: L) => { const d = [checkedOf(g.forms), ...g.facts.map(k => k.seen)].sort().pop(); return d ? [`${l === "zh" ? "来源核对于" : "Sources checked"} ${fmtDay(d, l)}`] : []; };
 
 const bizHubsEn: { b: Biz }[] = [];
 for (const l of ["en", "zh"] as L[]) {
@@ -446,10 +490,10 @@ for (const l of ["en", "zh"] as L[]) {
     const siblings = guides.filter(x => x.place === g.place && x !== g);
     const qs = ANSWERS.filter(a => a.forms.some(id => g.forms.some(f => f.id === id))).slice(0, 6);
     const tps = topicPages.filter(x => x.place === g.place);
-    const body = `${hero(title, answer, [...bitsFor(l, g.forms.length), ...checkedBit(g.forms, l)])}
+    const body = `${hero(title, answer, [...bitsFor(l, g.forms.length), ...guideChecked(g, l)])}
 <div class="cols wrap"><div class="main">
 ${glance(g.forms, l, [esc(t(g.biz.note, l)), esc(alsoLine), dupLine].filter(Boolean).join(" "))}
-${steps(g.forms, l)}
+${factsSection(g, l)}${steps(g.forms, l)}
 ${faqHtml(l, qa)}
 ${embed(title, g.forms, ORIGIN + guidePath(g, l), l)}
 ${tps.length ? `<section class="more"><h2>${l === "zh" ? `${city}专题` : `More on opening in ${city}`}</h2><ul class="links">${tps.map(x => `<li><a href="${topicPath(x.place, x.topic, l)}">${esc(x.topic.title(city, l))}</a></li>`).join("")}</ul></section>` : ""}
@@ -588,7 +632,8 @@ ${sourcing(l, true)}
   const bizSeen = new Map<string, Biz>();
   for (const b of [...BUSINESSES].sort((x, y) => PRIMARY.indexOf(x.slug) - PRIMARY.indexOf(y.slug))) {
     const gs = guides.filter(g => g.biz === b); if (gs.length < 2) continue;
-    const k = gs.map(g => g.place.slug + ":" + sig(g.forms)).join("|"), same = bizSeen.get(k); if (!same) bizSeen.set(k, b);
+    // the same hub as an earlier one when, city by city, its guide is the same page as that one's (or points to it)
+    const k = gs.map(g => g.place.slug + ":" + sigG(dupGuide.get(g) ?? g)).join("|"), same = bizSeen.get(k); if (!same) bizSeen.set(k, b);
     bizHubs.push({ b, gs }); if (l === "en") bizHubsEn.push({ b });
     const title = l === "zh" ? `${b.name.zh}开店执照与许可：按城市查看` : `Licenses and permits to open ${an(b.name.en)} ${b.name.en}, city by city`;
     const counts = gs.map(g => g.forms.length), lo = Math.min(...counts), hi = Math.max(...counts);
@@ -689,7 +734,8 @@ if (LOGOS.length) { mkdirSync("site/guides/sponsors", { recursive: true }); for 
 const data = {
   updated: TODAY, publisher: "Placetta", url: ORIGIN + "/guides/",
   cities: placesUsed.map(p => ({ city: p.name.en, country: countryName(p.country).en, url: ORIGIN + cityPath(p, "en"),
-    guides: guides.filter(g => g.place === p).map(g => ({ business: g.biz.plural.en, url: ORIGIN + guidePath(g, "en"), filings: g.forms.map(f => ({ name: f.title.en, agency: f.agency.en, fee: f.fee, currency: f.currency ?? "USD", official_link: f.url })) })) })),
+    guides: guides.filter(g => g.place === p).map(g => ({ business: g.biz.plural.en, url: ORIGIN + guidePath(g, "en"), filings: g.forms.map(f => ({ name: f.title.en, agency: f.agency.en, fee: f.fee, currency: f.currency ?? "USD", official_link: f.url })),
+      ...(g.facts.length ? { differs: g.facts.map(k => ({ fact: k.text.en, agency: k.agency.en, quote: k.proof.quote, official_link: k.proof.read, read: k.seen })) } : {}) })) })),
   answers: ANSWERS.map(a => ({ question: a.q.en, url: ORIGIN + answerPath(a.slug, "en") })),
   // the counts every page quotes (llms.txt, the About page), so no number is written by hand anywhere
   coverage: { cities: placesUsed.length, countries: new Set(placesUsed.map(p => p.country)).size, us_cities: placesUsed.filter(p => p.country === "US").length,
@@ -715,7 +761,7 @@ ${ANSWERS.map(a => {
 }).join("\n\n")}
 
 ## City guides
-${guides.filter(indexed).map(g => `### ${g.biz.plural.en} in ${g.place.name.en}\n${ORIGIN}${guidePath(g, "en")}\n${guideAnswer(g, "en")}${alsoGuide.get(g) ? ` The same filings apply to ${listEn(alsoGuide.get(g)!.map(x => x.biz.plural.en.toLowerCase()))}.` : ""}\n${g.forms.map((f, i) => `${i + 1}. ${f.title.en}, ${f.agency.en}. ${clean(f.how.en)} Fee: ${fee(f, "en")}.${f.takes ? ` Takes: ${clean(f.takes.en)}` : ""} ${f.url}`).join("\n")}`).join("\n\n")}
+${guides.filter(indexed).map(g => `### ${g.biz.plural.en} in ${g.place.name.en}\n${ORIGIN}${guidePath(g, "en")}\n${guideAnswer(g, "en")}${alsoGuide.get(g) ? ` The same filings apply to ${listEn(alsoGuide.get(g)!.map(x => x.biz.plural.en.toLowerCase()))}.` : ""}\n${g.forms.map((f, i) => `${i + 1}. ${f.title.en}, ${f.agency.en}. ${clean(f.how.en)} Fee: ${fee(f, "en")}.${f.takes ? ` Takes: ${clean(f.takes.en)}` : ""} ${f.url}`).join("\n")}${g.facts.length ? `\n${factsHeading(g, "en")}:\n${g.facts.map(k => `- ${clean(k.text.en)} ${k.agency.en}: "${k.proof.quote}" ${k.proof.read} (read ${k.seen})`).join("\n")}` : ""}`).join("\n\n")}
 `);
 
 /* sitemaps by type (the index, sitemap.xml, and the website's own pages come from scripts/seo/build.mjs); noindex pages stay out */
