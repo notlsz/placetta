@@ -1,5 +1,109 @@
 # Pricing
 
+The simple model, approved by the founder on 2026-10-22 and updated by him the same day: one subscription per store,
+each new license priced on its own. Every workspace that wasn't already a customer is on it. Customers from before keep
+their plans (grandfathered, at the end of this page).
+
+**Every cost and margin figure on this page is an estimate (est.).** The prices are the founder's. The code is the
+source of truth: `src/pricing.ts` (`SIMPLE`, `COMPLEX_LIST`, `SIMPLE_PRICE_ENV`), `supabase/functions/billing`
+(`license_quote`, `license_pay`, `plan_checkout`), migration `20261023120000_simple_pricing.sql`. The research behind
+each number is in `docs/PRICING-RESEARCH.md`; how the team quotes it is in `docs/SALES-PLAYBOOK.md`.
+
+## The list
+
+| Item | Price | When it's charged |
+| --- | --- | --- |
+| Store plan | $149 a store a month, billed yearly ($1,788 a store) | At checkout, for every store in the workspace, after the owner agrees to the renewal terms next to the button. Renews yearly at the same price; auto-renew off in Settings, Billing |
+| What the store plan covers | Tracking every license and renewal date, renewal monitoring, rule-change alerts, the document vault, Odelia's chat, and every renewal Odelia files on her own | Included |
+| A new license, permit or registration | $299, filed and tracked to approval | When the owner approves that filing, at the price its card showed |
+| A complex license | $999 | The same. Only for the fixed list: liquor licenses, building plan review, import permits (`COMPLEX_LIST`) |
+| A renewal the plan doesn't include | $99 | After a one-tap approval: on the saved card when there is one, else Stripe Checkout. "Doesn't include" means the renewal needs Placetta's team (a wet signature, mail only, or no route Odelia can use), or the store has no plan |
+| 10 or more stores on the store plan | Every new license included too | Nothing extra: the plan price only |
+| Never charged | Certificates staff earn themselves (food handler cards, food manager certificates) and inspections inside a permit | Tracked free (`NOT_CHARGED`) |
+| Plan preview | Free | Never |
+| Government, agency and notary fees | At cost, never marked up | Paid by the business to the agency, or passed through at cost |
+
+What changed from the founder's first numbers, and why: the update made the $149 store plan the main subscription for
+every store (it had been the 10+ chain plan only), so tracking moved from free into the plan and renewals Odelia files
+on her own are included in it. The plan preview stays the free entry point. The $299, $999 and $99 prices and
+government fees at cost are the founder's numbers, unchanged: each sits inside the range of the real alternatives
+(`docs/PRICING-RESEARCH.md`).
+
+## Rules every charge follows
+
+- Shown before approval, in English and Chinese, in the filing's own approval card (`src/FilingCharge.tsx`) or the plans
+  sheet (`src/cloud/Plans.tsx`), with the agency's own fee named as passed through at cost.
+- Never charged without the owner's approval of that exact price and kind. The billing function works the quote out
+  again on approval (`simpleApproval`) and refuses it if it differs by a cent.
+- Charged only from its own Stripe price, named by an env var below, and only when Stripe's amount, currency and
+  interval match exactly (`simplePriceOk`). The code never creates these prices. When the env var is missing or the
+  price differs, the card and the sheet say the team sends a quote, a team task is opened, and nothing is charged.
+- The database enforces it too: on the simple model a filing goes in only when its own charge is paid, or recorded as
+  included at $0, or the workspace has 10 or more stores on the plan (`can_file_app`, policy "members request filings
+  they can file").
+- No discounts and no promotion codes on the simple model.
+- The open-by-date guarantee is not offered on the simple model (it refunded an opening fee, which no longer exists).
+  No lapse guarantee is advertised. Customers who bought the guarantee keep it under their terms.
+
+## Stripe prices the founder must create
+
+All in USD, standard (per unit) pricing. Set each price id as the env var on the billing function and the stripe
+webhook. Names are what the invoice shows.
+
+| Env var | Product name | Amount | Interval |
+| --- | --- | --- | --- |
+| `STRIPE_PRICE_STORE_PLAN` | Placetta store plan, a store | $1,788.00 | yearly (interval count 1) |
+| `STRIPE_PRICE_LICENSE` | Placetta license, filed | $299.00 | one time |
+| `STRIPE_PRICE_LICENSE_COMPLEX` | Placetta complex license, filed | $999.00 | one time |
+| `STRIPE_PRICE_RENEWAL` | Placetta renewal | $99.00 | one time |
+
+Until each exists, its item falls back to a team quote. The webhook needs no new event: license payments come in on
+`checkout.session.completed` (metadata `kind=license`) and the store plan on the subscription events (metadata
+`plan=store`).
+
+## Grandfathering
+
+- Migration `20261023120000_simple_pricing` sets `billing.price_model` once: `legacy` for every workspace that already
+  had a Stripe customer, a subscription, an entry plan or a comp; `simple` for every other workspace. New workspaces
+  default to `simple`. A row already marked is never changed by a rerun.
+- `legacy` workspaces keep their plan, its price and every old action (entry plan, Essentials and Pro, openings, the
+  guarantee, packs, modules, filings past the allowance, terms, the brand plan). Their app shows the old plans sheet.
+- `simple` workspaces see only the new model; the billing function refuses the old checkouts for them.
+- Moving a legacy customer to the new model is a manual decision (set `price_model` to `simple` with the customer's
+  written agreement); nothing does it automatically.
+- Before the migration runs, the app and the billing function treat every workspace as `legacy`, so nothing changes
+  until the database knows who is grandfathered.
+
+## Margin math (all estimates)
+
+Inputs, as for the legacy plans below: team time $60 an hour loaded; Stripe 3.6% (card plus Billing); AI from
+`docs/AI_COSTS.md` (a filing job about $0.30 to $1; a store's typical month $3 to $5, capped at $25 by the allowance).
+
+| Item | Price (est.) | AI (est.) | Hosting (est.) | Team hours (est.) | Other (est.) | Stripe (est.) | Cost (est.) | Gross margin (est.) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Store plan, a store a year | $1,788 | $60 | $24 | 1.5 ($90) support and renewal review | $18, about 6 renewals Odelia files on her own at $3 each | $64.37 | $256 | 86% |
+| New license, each | $299 | $1 | $0.50 | 0.5 ($30), a mix of filings Odelia sends and ones the team sends | $3 printing and postage | $10.76 | $45 | 85% |
+| Complex license, each | $999 | $5 | $1 | 5 ($300), plan check corrections, hearings, follow-ups | | $35.96 | $342 | 66% |
+| Renewal outside the plan, each | $99 | $0.50 | $0.50 | 0.5 ($30) | $3 | $3.56 | $38 | 62% |
+| Plan preview | $0 | under $0.10 (the registry, no model) | | | up to $5 a month of free Odelia allowance | | up to $5 a month | an acquisition cost |
+
+Example accounts, a year (est.):
+
+| | Revenue (est.) | Cost (est.) | Gross margin (est.) |
+| --- | --- | --- | --- |
+| One restaurant opening (9 licenses, 2 complex) plus its first year on the plan | $6,477 | $1,345 | 79% |
+| The same restaurant, second year, one renewal that needs the team | $1,887 | $294 | 84% |
+| A 12-store chain on the plan opening 3 stores (every new license included) | $21,456 | $6,339 | 70% |
+| A 4-store operator on the plan opening 1 store | $11,841 | $2,113 | 82% |
+
+**Blended target: about 80% (est.).** A book of single stores and small operators sits above it; complex licenses and
+chains that open many stores at once sit below. Watch two things: a complex license that keeps needing more than about
+8 team hours (it drops below 50%), and a 10+ chain that opens more than a quarter of its stores in a year (below 70%).
+The levers are the same as before: more agency routes Odelia files on her own, AI cost a store, and ACH on yearly
+invoices.
+
+## Legacy plans: customers before October 2026
+
 The founder approved the owner prices below on 2026-10-22. This page has the whole list with its units, the Stripe
 prices to create for it, and the margin each one is expected to leave.
 
@@ -12,7 +116,7 @@ Code: `src/pricing.ts` (the list), `src/modules.ts` (units and quotes), `src/ove
 `src/hqPlan.ts` (the brand plan), `src/contract.ts` (terms), `supabase/functions/billing` (quotes and charges),
 migration `20261022163712_owner_prices.sql`.
 
-## Rules every owner price follows
+### Rules every owner price follows
 
 - Shown only to a signed-in owner (Settings, Billing and Modules; a filing's approval card; the plans sheet). None of
   these prices goes on the landing page. `scripts/growth-test.ts` fails if one shows up in `site/index.html`.
@@ -25,7 +129,7 @@ migration `20261022163712_owner_prices.sql`.
 - Agency, notary and other government fees are never included. The business pays them to the agency, or they are passed
   through at cost.
 
-## Published prices (on the landing page, unchanged)
+### Published prices (on the landing page, unchanged)
 
 | Item | Price (est.) | Unit |
 | --- | --- | --- |
@@ -38,7 +142,7 @@ migration `20261022163712_owner_prices.sql`.
 | Odelia pack | $49 | one time, adds $25 of Odelia allowance |
 | Open-by-date guarantee | $2,500 | an opening store, one time |
 
-## Owner prices (approved 2026-10-22)
+### Owner prices (approved 2026-10-22)
 
 | Item | Price (est.) | Unit | How the app counts it |
 | --- | --- | --- | --- |
@@ -65,7 +169,7 @@ store), Settings offers the new units with a new quote; nothing changes on its o
 The multi-year discount applies to the per-location plan price only, not to modules, packs or one-time fees. The
 discounted price carries into each yearly renewal, as the renewal terms say ("renews every year at the same price").
 
-### Not confirmed yet (still marked FOUNDER TO CONFIRM in `src/pricing.ts`)
+#### Not confirmed yet (still marked FOUNDER TO CONFIRM in `src/pricing.ts`)
 
 | Item | Value (est.) |
 | --- | --- |
@@ -73,7 +177,7 @@ discounted price carries into each yearly renewal, as the renewal terms say ("re
 | Highest monthly cap an owner can set in the app | $5,000 |
 | Hours a filing, a renewal and an entity report would have taken (value report only) | 3, 1, 1 |
 
-## Stripe prices the founder must create
+### Stripe prices the founder must create
 
 All in USD, standard (per unit) pricing, recurring prices with an interval count of 1. Set each price id as the env
 var on the billing function. Names are what the invoice shows.
@@ -96,7 +200,7 @@ var on the billing function. Names are what the invoice shows.
 The automated filing uses the existing Odelia pack price (`STRIPE_PRICE_PACK`, or the `placetta_odelia_pack` lookup
 key), so it needs no new price. Until each price above exists, its item falls back to a team quote.
 
-## Margin assumptions
+### Margin assumptions
 
 Gross margin here is price less the cost of delivering it: AI, hosting, Stripe fees and team time. Pass-through fees
 are not revenue and not cost. The inputs, all estimates:
@@ -137,7 +241,7 @@ Two things the table assumes that are worth watching. An assisted filing is the 
 of team time it drops below 50%, and past about 3 hours it loses money (est.), so a form that keeps needing more should move to automation or to a team quote. And a new
 country is priced to cover the setup work, not to earn the plan's margin; the location price there carries the rest.
 
-## Blended gross margin
+### Blended gross margin
 
 Target: **about 82% (est.)** across the book.
 
