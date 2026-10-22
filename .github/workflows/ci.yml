@@ -2,7 +2,7 @@
 # function type-checked, every migration applied to a fresh Postgres with the database tests run against it, and the
 # security checks (no secrets in the commits, no high or critical advisory in any dependency, Dependabot watching
 # every manifest). Server functions deploy only after this passes on main (deploy-functions.yml).
-# Branch protection requires all four jobs before a merge: .github/branch-protection.json, docs/soc2/runbooks/branch-protection.md.
+# Branch protection requires all four jobs, and eval.yml's eval job (no regression on real models), before a merge: .github/branch-protection.json, docs/soc2/runbooks/branch-protection.md.
 # Every action is pinned to a full commit SHA (the tag it was taken from is in the comment), so a moved or hijacked tag
 # can't change what runs here; Dependabot's github-actions entry proposes new SHAs as pull requests.
 name: CI
@@ -36,6 +36,8 @@ jobs:
       - run: npm run test:redteam
       # the live evaluation's harness, on its scripted model (no key in CI): scenarios, tools, graders and report
       - run: npm run eval:live -- --dry --out /tmp/eval.md --json /tmp/eval.json
+      # the harness's own plumbing: argument checks, A/B, the dated history, the merge gate, skipping without a key
+      - run: npm run test:eval
       - run: npm run test:plan
       # every form Placetta fills on the agency's own PDF: filled with test answers, then read back line by line
       - run: npm run test:forms

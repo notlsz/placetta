@@ -5,7 +5,8 @@
       { "context": "app" },
       { "context": "functions" },
       { "context": "database" },
-      { "context": "security" }
+      { "context": "security" },
+      { "context": "eval" }
     ]
   },
   "enforce_admins": true,

@@ -1,0 +1,87 @@
+# Odelia on real models (docs/EVAL.md). Runs the live evaluation with the judge when the repository has a model key,
+# and skips cleanly when it doesn't (forks' pull requests never see secrets; before the founder adds a key nothing runs):
+#   push to main          every scenario; the result becomes the baseline the next pull requests are gated on
+#   pull request          only when it touches the agent (prompt, tools, loop, routes, skills, the eval itself); fails
+#                         when it regresses against main's baseline (scripts/eval/harness.ts, gate)
+#   by hand               any variant or A/B, optionally saved as the baseline
+# The baseline travels in the Actions cache (written on main, read by pull requests); the committed
+# docs/eval-history/baseline.json is the fallback. Results are uploaded as the run's eval-results artifact.
+# Every action is pinned to a full commit SHA (the tag it was taken from is in the comment).
+name: Eval
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      ab:
+        description: "Variants to compare, comma-separated (default, gemini, sonnet, opus, openai, plan=provider:model, prompt:file)"
+        required: false
+        default: ""
+      set_baseline:
+        description: "Save this run as the baseline"
+        type: boolean
+        default: false
+concurrency:
+  group: eval-${{ github.ref }}
+  cancel-in-progress: true
+permissions: { contents: read }
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_PAID: ${{ vars.GEMINI_PAID }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      EVAL_OPENAI_MODEL: ${{ vars.EVAL_OPENAI_MODEL }}
+      EVAL_BUDGET: ${{ vars.EVAL_BUDGET || '15' }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with: { fetch-depth: 0 }
+      # a pull request that doesn't touch the agent costs nothing: the job passes without a model call
+      - name: Does this change touch the agent?
+        id: scope
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then echo "run=1" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep -Eq '^(src/(live|serverRun|skills|autonomy|guard|harness|jobs|finish|toolArgs|toolIntent)\.ts|src/forms/|supabase/functions/(_shared/llm|_shared/stream|agent-run/)|scripts/live-eval\.ts|scripts/eval/|scripts/fixtures/eval/)'; then echo "run=1" >> "$GITHUB_OUTPUT"; else echo "run=0" >> "$GITHUB_OUTPUT"; echo "Nothing the agent runs changed: no live evaluation needed." >> "$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        if: steps.scope.outputs.run == '1'
+        with: { node-version: 22, cache: npm }
+      - if: steps.scope.outputs.run == '1'
+        run: npm ci
+      - name: The baseline from main
+        if: steps.scope.outputs.run == '1'
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: .eval-baseline
+          key: eval-baseline-${{ github.run_id }}
+          restore-keys: eval-baseline-
+      - name: Live evaluation (skips without a key)
+        if: steps.scope.outputs.run == '1'
+        run: |
+          mkdir -p .eval-baseline
+          [ -f .eval-baseline/baseline.json ] || cp docs/eval-history/baseline.json .eval-baseline/ 2>/dev/null || true
+          AB="${{ github.event.inputs.ab }}"
+          SET=""
+          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event.inputs.set_baseline }}" = "true" ]; then SET="--set-baseline"; fi
+          npm run eval:live -- --if-keys --judge --budget "$EVAL_BUDGET" --concurrency 3 \
+            ${AB:+--ab "$AB"} --gate .eval-baseline/baseline.json --history docs/eval-history $SET \
+            --label "${{ github.event_name }}" --commit "${{ github.sha }}"
+          if [ -n "$SET" ] && [ -f docs/eval-history/baseline.json ]; then cp docs/eval-history/baseline.json .eval-baseline/baseline.json; fi
+      - name: Save the baseline
+        if: steps.scope.outputs.run == '1' && (github.event_name == 'push' || github.event.inputs.set_baseline == 'true')
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: .eval-baseline
+          key: eval-baseline-${{ github.run_id }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always() && steps.scope.outputs.run == '1'
+        with:
+          name: eval-results
+          path: |
+            docs/EVAL.md
+            docs/eval-scorecard.json
+            docs/eval-history/
+          if-no-files-found: ignore

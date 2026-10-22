@@ -41,7 +41,7 @@ gh api repos/notlsz/placetta/branches/main/protection 2>&1 | head -3
 
 ## Step 3. Apply the protection rules
 
-The rules live in [.github/branch-protection.json](../../../.github/branch-protection.json): the four CI jobs (`app`, `functions`, `database`, `security`) must pass on an up-to-date branch, one approval from a code owner ([.github/CODEOWNERS](../../../.github/CODEOWNERS)), stale approvals dismissed, the last push re-approved, conversations resolved, no force pushes or deletion, and **enforced for admins**.
+The rules live in [.github/branch-protection.json](../../../.github/branch-protection.json): the four CI jobs (`app`, `functions`, `database`, `security`) and the live evaluation's `eval` job (eval.yml: no regression on real models; it passes without a model call when a change doesn't touch the agent or no key is set) must pass on an up-to-date branch, one approval from a code owner ([.github/CODEOWNERS](../../../.github/CODEOWNERS)), stale approvals dismissed, the last push re-approved, conversations resolved, no force pushes or deletion, and **enforced for admins**.
 
 From the repository root, signed in as the admin:
 
@@ -76,7 +76,7 @@ gh api repos/notlsz/placetta/branches/main/protection \
          admins: .enforce_admins.enabled, force_pushes: .allow_force_pushes.enabled, deletions: .allow_deletions.enabled}'
 ```
 
-Expected: `checks` lists `app`, `functions`, `database`, `security`; `strict` true; `approvals` 1; `code_owners` true; `last_push` true; `admins` true; `force_pushes` false; `deletions` false.
+Expected: `checks` lists `app`, `functions`, `database`, `security`, `eval`; `strict` true; `approvals` 1; `code_owners` true; `last_push` true; `admins` true; `force_pushes` false; `deletions` false.
 
 Then prove it works, and save each result (screenshot or terminal output, dated) in the evidence folder:
 
