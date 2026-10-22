@@ -6205,6 +6205,7 @@ applyAll(); fitTable(); bindCounters(); setPlay(vPlaying); onScroll(); requestAn
   const root = document.documentElement, hdr = document.getElementById("hdr"), sheet = document.getElementById("mSheet"), mb = document.getElementById("mnBtn");
   const setMenu = open => { if (!sheet || !mb) return; sheet.hidden = !open; mb.setAttribute("aria-expanded", open); mb.setAttribute("aria-label", t(open ? "menu.close" : "menu.open")); if (open) root.classList.remove("p95hide"); };
   if (mb) mb.addEventListener("click", () => { setMenu(sheet.hidden); track("menu_toggle", {open: !sheet.hidden}); });
+  if (mb) { const orig = applyAll; applyAll = function(){ orig.apply(this, arguments); mb.setAttribute("aria-label", t(sheet.hidden ? "menu.open" : "menu.close")); }; }
   if (sheet) sheet.addEventListener("click", e => { if (e.target.closest("a,[data-open]")) setMenu(false); });
   document.addEventListener("click", e => { if (sheet && !sheet.hidden && !e.target.closest(".hwrap")) setMenu(false); });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && sheet && !sheet.hidden) { setMenu(false); mb.focus(); } });
