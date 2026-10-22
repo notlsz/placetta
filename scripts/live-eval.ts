@@ -37,6 +37,10 @@ const ROOT = process.env.LIVE_EVAL_ROOT ?? process.cwd();
 const args = process.argv.slice(2);
 const flag = (k: string) => args.includes("--" + k);
 const opt = (k: string, d: string) => { const i = args.indexOf("--" + k); return i < 0 ? d : args[i + 1] ?? d; };
+/* --bridge DIR (or LIVE_EVAL_BRIDGE): each model call is written to DIR/<scenario>/req_<n>.json and waits for
+   DIR/<scenario>/resp_<n>.json, so a person or another agent (Claude in a chat, say) can be the model, with no key.
+   The graders are the same; usage and cost are recorded as zero. */
+const BRIDGE = (() => { const i = process.argv.indexOf("--bridge"); return i >= 0 ? process.argv[i + 1] ?? "" : process.env.LIVE_EVAL_BRIDGE ?? ""; })();
 const DRY = flag("dry"), JUDGE = flag("judge"), RESEARCH = flag("research"), LIST = flag("list"), IF_KEYS = flag("if-keys"), NO_HISTORY = flag("no-history"), SET_BASELINE = flag("set-baseline");
 /** A/B: --ab sonnet,gemini (or any variants, comma-separated); one variant alone: --variant openai. */
 const VARIANTS: Variant[] = (opt("ab", "") || opt("variant", "default")).split(",").map(v => parseVariant(v, (k) => process.env[k]));
@@ -277,6 +281,24 @@ function liveSend(log: CallLog[], spent: { usd: number }, envOf: (k: string) => 
     log.push({ role: r0, model: r.model, ok: r.ok, status: r.status, usd, ms: Date.now() - t });
     if (!r.ok) throw Object.assign(new Error(scrub(`model ${r.model || "(none)"} answered ${r.status}: ${r.text.slice(0, 200)}`)), { code: r.status === 429 ? "rate_limited" : "upstream_error" });
     return r.data as { content: Block[]; stop_reason: string };
+  };
+}
+
+/** --bridge: the call goes to a file and the answer comes back from one (the model is whoever answers). */
+const bridgeN = new Map<string, number>();
+function bridgeSend(id: string, log: CallLog[]): Send {
+  return async (body, deep, role) => {
+    const dir = resolve(BRIDGE, id); mkdirSync(dir, { recursive: true });
+    const n = (bridgeN.get(id) ?? 0) + 1; bridgeN.set(id, n);
+    const r0: Role = deep && role === "plan" ? "deep" : role ?? "plan";
+    writeFileSync(join(dir, `req_${n}.json`), JSON.stringify({ scenario: id, n, role: r0, json_only: !body.tools, ...body }, null, 1));
+    const t = Date.now(), at = join(dir, `resp_${n}.json`);
+    while (!existsSync(at)) await new Promise(r => setTimeout(r, 400));
+    await new Promise(r => setTimeout(r, 200));
+    let data: { content: Block[]; stop_reason: string };
+    try { data = JSON.parse(readFileSync(at, "utf8")); } catch (e) { throw Object.assign(new Error(`bridge answer ${at} isn't JSON: ${(e as Error).message}`), { code: "upstream_error" }); }
+    log.push({ role: r0, model: "bridge:claude", ok: true, status: 200, usd: 0, ms: Date.now() - t });
+    return data;
   };
 }
 
@@ -524,6 +546,7 @@ async function runOne(sc: Scenario, v: Variant = VARIANTS[0]): Promise<Outcome> 
     // the tools this round offered, for the schema checks (onTools below adds the ones not offered yet)
     for (const t of Array.isArray(body.tools) ? body.tools as { name?: string; input_schema?: Schema }[] : []) if (t.name && t.input_schema) schemas.set(t.name, t.input_schema);
     if (role === "review") checkerRan = true;
+    if (BRIDGE) return bridgeSend(sc.id, log)(body, deep, role);
     if (!DRY) return liveSend(log, spent, venv)(body, deep, role);
     log.push({ role, model: "dry:scripted", ok: true, status: 200, usd: 0, ms: 0 });
     let out: { content: Block[]; stop_reason: string };
@@ -544,10 +567,10 @@ async function runOne(sc: Scenario, v: Variant = VARIANTS[0]): Promise<Outcome> 
   for (; turn < said.length && !error && !paused; turn++) {
     round = 0;
     const state: RunState = { ...startState(history, said[turn]), ...(sc.plainSms ? { plainSms: true } : {}) };
-    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), DRY ? 60_000 : 420_000);
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), BRIDGE ? 4 * 3600_000 : DRY ? 60_000 : 420_000);
     try {
       const out = await runRounds({ state, ws: () => w, apply: p => { w = p(w); }, step: s => { steps.push(s); }, send, lang: sc.lang, deep: false, account: true, svc, files, signal: ctl.signal,
-        until: Date.now() + (DRY ? 50_000 : 400_000), research: RESEARCH, channel: sc.channel, role: sc.channel && sc.channel !== "app" ? "short" : "plan",
+        until: Date.now() + (BRIDGE ? 4 * 3600_000 : DRY ? 50_000 : 400_000), research: RESEARCH, channel: sc.channel, role: sc.channel && sc.channel !== "app" ? "short" : "plan",
         // every tool the run may call (tools by intent offer fewer a round; one called by name still runs)
         onTools: defs => { for (const t of defs) schemas.set(t.name, t.input_schema as Schema); } });
       if ("reply" in out) reply = out.reply.text.map(t => t[sc.lang] || t.en).join("\n\n"); else paused = true;
@@ -666,7 +689,7 @@ async function runVariant(picked: Scenario[], v: Variant, spent: { total: number
 async function main() {
   const picked = SCENARIOS.filter(s => !ONLY || s.id.includes(ONLY) || s.category === ONLY);
   if (LIST) { for (const s of SCENARIOS) console.log(`${s.id.padEnd(34)} ${s.category.padEnd(11)} ${s.lang}  ${s.prompt.slice(0, 80)}\n${"".padEnd(49)}must hold: ${mustHold(s.expect)}`); console.log(`\n${SCENARIOS.length} scenarios`); return; }
-  if (!DRY && !canConverse(env)) {
+  if (!DRY && !BRIDGE && !canConverse(env)) {
     // --if-keys: CI and scheduled runs skip cleanly when no key is set (a fork's pull request, or before the founder adds one)
     if (IF_KEYS) { console.log(`Skipped: no model key is set (${Object.values(PROVIDER_KEYS).join(", ")}). Nothing ran and nothing was written.`); return; }
     console.error(`No model key here can run Odelia. Set one or more of: ${Object.values(PROVIDER_KEYS).join(", ")} (a Gemini key needs GEMINI_PAID=1).\nOr run the harness without a key: npm run eval:live -- --dry`);
