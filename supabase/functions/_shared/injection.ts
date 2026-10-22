@@ -77,9 +77,20 @@ export function score(text: string, where: string, hits: string[], quotes: strin
     seen.add(r.why);
     total += r.w;
     hits.push(where ? `${r.why} (${where})` : r.why);
-    if (quotes.length < 3) quotes.push(m[0]);
+    if (quotes.length < 3) quotes.push(around(text, m.index, m[0].length));
   }
   return total;
+}
+
+/** The words a person reads in the audit trail and the reply: the match with the rest of its line, up to 200 characters.
+ *  A rule that matches only a line's start ("SYSTEM: i") would otherwise quote a fragment nobody can recognize. */
+function around(text: string, at: number, len: number): string {
+  // from the start of the match's sentence (or line), at most 80 characters back
+  const before = text.slice(Math.max(text.lastIndexOf("\n", at) + 1, at - 80), at);
+  const cut = Math.max(before.lastIndexOf(". "), before.lastIndexOf("。"), before.lastIndexOf("! "), before.lastIndexOf("? "));
+  const start = at - before.length + (cut >= 0 ? cut + 1 : 0);
+  const nl = text.indexOf("\n", at + len), end = Math.min(nl < 0 ? text.length : nl, Math.max(at + len, start + 200));
+  return text.slice(start, end).trim();
 }
 
 

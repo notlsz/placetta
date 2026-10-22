@@ -24,7 +24,7 @@ import type { Application, Approval, Change, CheckItem, Doc, Field, FactGroup, L
 import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMemory } from "./memory";
 import { contactFor } from "./recall";
 import { daysFromNow, money, nowIso } from "./time";
-import { cadence, ensureProof, MAIN_BOT, MAX_CHILDREN, met, nextRun, settleJobs, type Job, type Routine, type StepCheck } from "./jobs";
+import { cadence, ensureProof, MAIN_BOT, MAX_CHILDREN, MAX_RUN_CHILDREN, met, nextRun, settleJobs, type Job, type Routine, type StepCheck } from "./jobs";
 import { replyMoment, scrubStep, traced } from "./replay";
 import { claimsAction, emailsIn, HONEST, injected, SECRET_WHY, secretNumber } from "./guard";
 import { basisLine, openingLine, openingPath, preflight } from "./smart";
@@ -39,7 +39,7 @@ import { furnitureNeeds } from "./forms/furniture";
 import type { Lang } from "./i18n";
 import { anthropicMessage } from "../supabase/functions/_shared/stream.ts";
 import { FORMS, METHOD, formById, formsFor, placeInfo, searchForms, segmentOf, type OfficialForm } from "./forms/registry";
-import { libraryAnswer } from "./plan/preview";
+import { dealsInFood, libraryAnswer } from "./plan/preview";
 import { proofCurrent } from "./plan/ask";
 import { addUsed, citedPages, sourceLinks, sourcesLine, type Used, usedBy } from "./sources";
 import { STAFF_LANGS, staffLanguageCheck, staffLanguages } from "./staff";
@@ -479,7 +479,10 @@ export async function docxRead(b: Blob): Promise<{ text: string; hidden: { why: 
 }
 /** quarantined: what the shield found (the document goes to no model); flagged: content that holds instructions or hidden
  *  text but is read, marked as such. */
-type Readable = { text?: string; images?: Blob[]; pdfs?: Blob[]; quarantined?: string; flagged?: string; plain?: string };
+type Readable = { text?: string; images?: Blob[]; pdfs?: Blob[]; quarantined?: string; flagged?: string; plain?: string;
+  /** Instructions that were hidden in the file (display:none, white text, a Word file's hidden runs) and taken out
+   *  before reading: the visible text still goes to the model, marked flagged; these are what the person is told. */
+  hidden?: string };
 /** How many pages a PDF has, counted from its page objects. A PDF that packs them into object streams counts low (even 0),
  *  which only means the page cap can't be enforced on it, not that it's refused. */
 export async function pdfPages(blob: Blob): Promise<number> {
@@ -494,8 +497,14 @@ export async function pdfPages(blob: Blob): Promise<number> {
  *  text and its scripts found; a file with instructions aimed at an AI is quarantined and goes to no model. */
 async function readable(name: string, blob: Blob, model: Model, shield: Shield = defaultShield()): Promise<Readable | "too_big" | null> {
   const prov = { source: "document" as const, title: name };
-  const verdict = (ing: { quarantined: boolean; detection: { verdict: string; quote: string | null; hits: string[] } }, text: string): Readable =>
-    ing.quarantined ? { quarantined: ing.detection.quote ?? ing.detection.hits[0] ?? "instructions aimed at an AI", plain: text } : { text, ...(ing.detection.verdict === "flagged" ? { flagged: ing.detection.quote ?? ing.detection.hits[0] } : {}) };
+  // Quarantined only for what was hidden in it: the hidden part is already gone from the text, so the visible text, scored
+  // on its own and clean, is read (flagged, the run tainted, the person told). Instructions in the visible text still
+  // keep the whole file from any model.
+  const verdict = (ing: { quarantined: boolean; hidden?: unknown[]; detection: { verdict: string; quote: string | null; hits: string[] } }, text: string): Readable => {
+    const said = ing.detection.quote ?? ing.detection.hits[0] ?? "instructions aimed at an AI";
+    if (ing.quarantined && ing.hidden?.length && text.trim() && detectInjection(text).verdict === "clean") return { text, flagged: said, hidden: said };
+    return ing.quarantined ? { quarantined: said, plain: text } : { text, ...(ing.detection.verdict === "flagged" ? { flagged: ing.detection.quote ?? ing.detection.hits[0] } : {}) };
+  };
   if (READABLE_TEXT.test(name)) { const ing = shield.take((await blob.text()).slice(0, 20000), prov, name); return verdict(ing, ing.plain.slice(0, 12000)); }
   if (READABLE_DOCX.test(name)) {
     let d: { text: string; hidden: { why: string; text: string }[] };
@@ -712,7 +721,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const place = str(i.place) || get().locations.map(l => `${l.name.en}, ${l.county.en}`).join("; ");
         const needs = { ...(i.hires_staff ? { employees: true } : {}), ...(i.imports_goods ? { imports: true } : {}), ...(i.new_us_company ? { newEntity: true } : {}), ...(i.foreign_company_registers ? { foreignEntity: true } : {}),
           ...(i.builds_out ? { buildout: true } : {}), ...(i.exterior_sign ? { signage: true } : {}), ...(i.hazmat_or_batteries ? { hazmat: true } : {}), ...(i.sells_cosmetics ? { cosmetics: true } : {}),
-          ...(i.food_warehouse || segment === "restaurant" ? { food: true } : {}), ...(i.manhattan_below_96th ? { manhattan: true } : {}), ...(i.serves_alcohol ? { alcohol: true } : {}), ...(i.outdoor_seating ? { terrace: true } : {}),
+          ...(i.food_warehouse || dealsInFood(str(i.business) || get().business.en, segment) ? { food: true } : {}), ...(i.manhattan_below_96th ? { manhattan: true } : {}), ...(i.serves_alcohol ? { alcohol: true } : {}), ...(i.outdoor_seating ? { terrace: true } : {}),
           // a furniture brand: wood goods, upholstered furniture, dressers and chests (src/forms/furniture.ts)
           ...furnitureNeeds(str(i.business) || get().business.en) };
         const list: OfficialForm[] = str(i.search) ? searchForms({ text: str(i.search), where: str(i.place) || undefined }) : formsFor({ segment, where: place, needs });
@@ -1636,7 +1645,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
             // the document's instructions never become its type, a reminder's title or a cell in the table
             if (injected(str(o.document_type, 300)) || detectInjection(str(o.document_type, 300)).verdict !== "clean") o.document_type = "";
           }
-          const inside = instructionsIn(r, o?.instructions_inside);
+          const inside = r.hidden ?? instructionsIn(r, o?.instructions_inside);
           if (o) delete o.instructions_inside;
           if (inside) { flag(d.name, inside, r.text ?? inside); found.push({ document: d.name, says: inside }); }
           rows.push([d.name, o]);
@@ -1771,7 +1780,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
   function splitTool(): Tool {
     return {
       name: "split_job",
-      description: `Split a request that covers several stores ("get all 3 stores ready for inspection", "renew everything due this quarter at every location") into one job per store. Each store gets its own bot, Odelia for that store, which works its part on Placetta's server at the same time as the others, from that store's own facts and applications; a separate reviewer checks each store's part. A few run at once and the rest wait their turn. Use it only for work that is really per store, across two or more stores; for one store or one filing, do it yourself. Write the instructions for one store, complete on their own (each bot gets the same instructions for its own store and sees nothing else of this conversation), and the done list each store's part must meet. At most ${MAX_CHILDREN} stores. After splitting, don't do the stores' work yourself: end your reply in a sentence or two saying which stores are being worked on. When every store's bot has finished you get their results and write one combined summary.`,
+      description: `Split a request that covers several stores ("get all 3 stores ready for inspection", "renew everything due this quarter at every location") into one job per store. Each store gets its own bot, Odelia for that store, which works its part on Placetta's server at the same time as the others, from that store's own facts and applications; a separate reviewer checks each store's part. A few run at once and the rest wait their turn. Use it only for work that is really per store, across two or more stores; for one store or one filing, do it yourself. Write the instructions for one store, complete on their own (each bot gets the same instructions for its own store and sees nothing else of this conversation), and the done list each store's part must meet. At most ${MAX_CHILDREN} stores a call; for more, call it again in the same turn with the next stores (up to ${MAX_RUN_CHILDREN} in one request). After splitting, don't do the stores' work yourself: end your reply in a sentence or two saying which stores are being worked on. When every store's bot has finished you get their results and write one combined summary.`,
       inputSchema: { type: "object" as const, properties: {
         title: { type: "string", description: "The whole request, short, e.g. 'Get every store ready for its next inspection'" },
         instructions: { type: "string", description: "What each store's bot does for its store, start to end, complete on its own" },
@@ -1785,7 +1794,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         if (how.length < 20) throw new Error("Write the instructions each store's bot follows: what to do for its store, start to end.");
         const asked = [...new Set(arr(i.store_ids).map(v => str(v, 80)).filter(Boolean))];
         const ids = asked.length ? asked : (get().stores ?? []).map(s => s.id);
-        if (ids.length > MAX_CHILDREN) throw new Error(`At most ${MAX_CHILDREN} stores in one split (you gave ${ids.length}). Split the first ${MAX_CHILDREN} now and the rest once they finish.`);
+        if (ids.length > MAX_CHILDREN) throw new Error(`At most ${MAX_CHILDREN} stores in one split (you gave ${ids.length}). Split the first ${MAX_CHILDREN} now, then call split_job again in the same turn with the rest.`);
         const stores = ids.map(id => findStore(id));
         if (stores.length < 2) throw new Error("Split only across two or more stores. For one store, do the work yourself.");
         // Team review's "Ask Odelia to prepare" (src/review.ts): only the applications picked in the review table
@@ -1798,7 +1807,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         }
         const yours = only.filter(a => !stores.some(s => (s.apps ?? []).includes(a)));
         const before = (made.split ?? []).reduce((n, p) => n + ((get().jobs ?? []).find(j => j.id === p)?.children?.length ?? 0), 0);
-        if (before + stores.length > MAX_CHILDREN) throw new Error(`This run already split ${before} store jobs; at most ${MAX_CHILDREN} in one run.`);
+        if (before + stores.length > MAX_RUN_CHILDREN) throw new Error(`This run already split ${before} store jobs; at most ${MAX_RUN_CHILDREN} in one run. Split the ${MAX_RUN_CHILDREN - before} you can now and tell the person which stores are left for their next request.`);
         const doneTexts = arr(i.done).map(v => str(v, 200)).filter(Boolean).slice(0, 8);
         if (doneTexts.length < 2) throw new Error("Give each store's part its done list: 2 to 8 things that will be true when that store's part is finished, each something the workspace can show. A separate reviewer checks each store against it.");
         const now = new Date().toISOString(), w0 = get();
@@ -2012,7 +2021,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
               const e = await extract(x.model, app, item?.label[lang] ?? "", d.name, r, lang, x.signal);
               apply(applyExtract(app.id, item?.id, id, d.name, e.fields, e.facts, lang));
               filled = e.fields.map(f => f.label); facts = e.facts;
-              if ((inside = e.instructions)) flag(d.name, inside, r.text ?? inside);
+              if ((inside = r.hidden ?? e.instructions)) flag(d.name, inside, r.text ?? inside);
             }
           }
           mark();
@@ -2208,7 +2217,8 @@ Write name, agency, fee and timeline in ${LANG[lang]}. Include only items that c
           return;
         }
         step({ state: "weaving", label: B("Pulling out what the application needs", "提取申请所需信息") });
-        const { fields, facts, instructions } = await extract(model, app, item?.label[lang] ?? "", f.name, r, lang, signal);
+        const got = await extract(model, app, item?.label[lang] ?? "", f.name, r, lang, signal);
+        const { fields, facts } = got, instructions = r.hidden ?? got.instructions;
         apply(applyExtract(app.id, req.upload.item, did, f.name, fields, facts, lang));
         // instructions hidden in the upload are flagged to the person, never followed (src/guard.ts)
         if (instructions) apply(audit("agent", B("Found instructions inside a document and didn't follow them", "在文件中发现指令，未予执行"), same(f.name), same(instructions)));

@@ -51,8 +51,12 @@ export type Job = {
 };
 /** The main Odelia, as the bot on a replay's moments; a store's bot is its store id. */
 export const MAIN_BOT = "odelia";
-/** The most stores one request splits into. */
+/** The most stores one split_job call takes. */
 export const MAX_CHILDREN = 12;
+/** The most store jobs one run starts, across its split_job calls: a 20-store franchise's renewal season is two splits in
+ *  one request (12, then 8), not a second request. Each store job is its own run under the workspace's parallel cap,
+ *  its own token cap and the allowance. */
+export const MAX_RUN_CHILDREN = 48;
 export type Every = "daily" | "weekly" | "monthly";
 export type Routine = {
   id: string; title: Bi; prompt: string; every: Every;

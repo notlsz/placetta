@@ -991,18 +991,19 @@ async function storeBots() {
         bad("split_job", { title: "One", instructions: HOW, done: DONE, store_ids: ["s1"] }), bad("split_job", { title: "No list", instructions: HOW, done: [], store_ids: ids(2) }),
         bad("split_job", { title: "Vague", instructions: "Do it.", done: DONE, store_ids: ids(2) })),
       () => askAll(["split_job", { title: "Renew what's due at twelve stores", instructions: HOW, done: DONE, store_ids: [...ids(12), "s0", "s1"] }]),
-      () => askAll(bad("split_job", { title: "The rest", instructions: HOW, done: DONE, store_ids: ids(2, 12) })),
-      c => askAll(["set_plan", { job_id: c.out("split_job").parent_job, title: "Done", steps: [{ title: "All", done: true }], status: "done" }]),
+      () => askAll(["split_job", { title: "The rest", instructions: HOW, done: DONE, store_ids: ids(2, 12) }]),
+      c => askAll(["set_plan", { job_id: c.calls.filter(x => x.name === "split_job" && x.ok)[0].parsed!.parent_job, title: "Done", steps: [{ title: "All", done: true }], status: "done" }]),
       () => say("All twelve stores are done."),
     ],
   });
   const errs = named(r, "split_job").filter(c => !c.ok).map(c => c.out);
   ok(/At most 12 stores in one split \(you gave 14\)/.test(errs[0]) && /No store "nowhere"/.test(errs[1]) && /two or more stores/.test(errs[2]) && /done list/.test(errs[3]) && /instructions each store's bot follows/.test(errs[4]),
     "14 stores, a made-up store, one store, no done list and empty instructions are each refused with why", errs);
-  ok(/already split 12 store jobs; at most 12 in one run/.test(errs[5] ?? ""), "past 12 store jobs in one run, more are refused", errs[5]);
-  const parent = (r.w.jobs ?? []).find(j => j.children?.length)!;
-  eq([(r.w.jobs ?? []).filter(j => j.children?.length).length, parent.children!.length, new Set((r.w.jobs ?? []).filter(j => j.parent).map(j => j.store)).size], [1, 12, 12], "one split job, 12 store jobs, each store once (repeats dropped)");
-  eq([fam.rows.filter(x => x.status === "running").length, fam.rows.filter(x => x.status === "queued").length], [3, 10], "the cap holds: the main run and 2 stores at work, 10 waiting their turn");
+  // past 12 in one call, the rest go in a second call in the same run (up to 48 a run): no second request needed
+  ok(errs.length === 5 && named(r, "split_job").filter(c => c.ok).length === 2, "the 2 stores past the first 12 split in a second call, in the same run", errs);
+  const parent = (r.w.jobs ?? []).find(j => j.children?.length === 12)!;
+  eq([(r.w.jobs ?? []).filter(j => j.children?.length).length, parent.children!.length, new Set((r.w.jobs ?? []).filter(j => j.parent).map(j => j.store)).size], [2, 12, 14], "two split jobs, 12 and 2 store jobs, each of the 14 stores once (repeats dropped)");
+  eq([fam.rows.filter(x => x.status === "running").length, fam.rows.filter(x => x.status === "queued").length], [3, 12], "the cap holds: the main run and 2 stores at work, 12 waiting their turn");
   ok(parent.status !== "done" && parent.steps.length === 12 && parent.steps.every(s => !s.done), "the split job can't be set done: its steps stay one per store, none proven", { status: parent.status, steps: parent.steps.length });
   ok(!!r.waiting && /isn't finished|Not finished yet/.test(textOf(r)) === false, "the run waits on its stores instead of claiming done", textOf(r));
 

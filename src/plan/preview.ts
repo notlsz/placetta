@@ -276,13 +276,18 @@ function generic(g: GenericRow, today: string): Application {
 
 /* --------------------------------------------------------------- the plan */
 
+/** Whether the business makes, serves, sells or imports food. An importer or seller of tea, coffee or drinks deals in
+ *  food too (FDA registers it; CPSC's certificate isn't for it). Whole words, and never a furniture brand: "teak", a
+ *  "coffee table" or a "tea cabinet" isn't food. The instant plan and find_official_forms read it the same way. */
+export function dealsInFood(what: string, segment: Segment = segmentOf(what)): boolean {
+  return segment === "restaurant" || /grocery|supermarket|market|food|snack|超市|生鲜|食品|零食/i.test(what)
+    || (!FURNITURE.test(what) && /\b(teas?|coffees?|beverages?|drinks?|juices?|candy|candies|confectionery|spices?|sauces?|seasonings?|noodles?)\b|茶|咖啡|饮料|饮品|糖果|调料|酱/i.test(what));
+}
+
 export function previewPlan(what: string, where: string, opening?: string, o: PreviewOptions = {}): PreviewPlan {
   const today = o.today ?? daysFromNow(0);
   const segment = segmentOf(what);
-  // an importer or seller of tea, coffee or drinks deals in food too (FDA registers it; CPSC's certificate isn't for it).
-  // Whole words, and never a furniture brand: "teak", a "coffee table" or a "tea cabinet" isn't food
-  const food = segment === "restaurant" || /grocery|supermarket|market|food|snack|超市|生鲜|食品|零食/i.test(what)
-    || (!FURNITURE.test(what) && /\b(teas?|coffees?|beverages?|drinks?|juices?|candy|candies|confectionery|spices?|sauces?|seasonings?|noodles?)\b|茶|咖啡|饮料|饮品|糖果|调料|酱/i.test(what));
+  const food = dealsInFood(what, segment);
   const employees = o.employees ?? true, buildout = o.buildout ?? true;
   const alcohol = o.alcohol ?? sellsAlcohol(what);
   // a furniture brand: wood goods, upholstered furniture and clothing storage units, read from what it is (src/forms/furniture.ts)
