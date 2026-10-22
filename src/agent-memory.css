@@ -2,6 +2,7 @@
 .am-meta { display: flex; flex-wrap: wrap; column-gap: 14px; row-gap: 2px; }
 .am-meta span { white-space: nowrap; }
 .am-meta .out { color: var(--warm); }
+.am-why { display: block; color: var(--ink3); }
 .am-cap { font-size: 13px; color: var(--ink2); }
 .am-cap.warn { color: var(--warm); }
 .am-banner { margin: 8px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; line-height: 1.45; color: var(--ink2); }

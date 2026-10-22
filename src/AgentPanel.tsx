@@ -124,6 +124,24 @@ function Memory({ text }: { text: Bi }) {
 
 const UndoMark = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></svg>;
 
+/** The agent memories this answer drew on, as one quiet line ("Used 2 memories") that opens to each one and why it came
+ *  up: what in the request it matched, why it matters, where it came from (ChatGPT's memory Sources under a reply). */
+function UsedLine({ items }: { items?: { id: string; text: Bi; why: Bi }[] }) {
+  const { b, lang } = useApp();
+  const [open, setOpen] = useState(false);
+  if (!items?.length) return null;
+  const zh = lang === "zh";
+  return (
+    <div className="kept">
+      <button type="button" className="kept-t" aria-expanded={open} onClick={() => setOpen(v => !v)}><I.spark /><span>{zh ? `用到了 ${items.length} 条记忆` : `Used ${items.length} ${items.length === 1 ? "memory" : "memories"}`}</span><i className={open ? "up" : ""} aria-hidden="true"><I.chev /></i></button>
+      {open && <div className="kept-b">
+        {items.map(x => <p key={x.id} className="mem"><I.spark /><span><b>{b(x.text)}</b><small className="mem-why">{zh ? "为什么想起这条：" : "Why Odelia remembered this: "}{b(x.why)}</small></span></p>)}
+        <p className="mem-foot">{zh ? "在设置的助理记忆中可修改或删除。" : "Change or delete any of them in Settings, Agent memory."}</p>
+      </div>}
+    </div>
+  );
+}
+
 /** What a run kept, as one quiet line ("Remembered 2 things") that opens to the details, each with its Forget. */
 function KeptLine({ memory, remembered, learned }: { memory?: Bi[]; remembered?: { id: string; text: Bi; suggested?: boolean }[]; learned?: Bi[] }) {
   const { b, t, lang, memory: book } = useApp();
@@ -289,6 +307,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
           {/* the agency's forms this run filled again: each opens the filled form on its application */}
           {r.forms?.map(n => <FilledCard key={n.app + n.version} n={n} />)}
           {done.map(id => { const a = ws.closed.find(x => x.id === id)!; return a.withdrawn ? <WithdrawnRow key={id} a={a} /> : <p key={id} className="resolved"><span className="ok-dot"><I.check /></span><span>{b(a.title)}</span><em>{t("approvedIt")}</em></p>; })}
+          <UsedLine items={r.recalled} />
           <KeptLine memory={r.memory} remembered={r.remembered} learned={r.skills} />
           {showSources && <SourcesRow said={said} links={r.sources} />}
           {last && r.matches && <button type="button" className="pill quiet" onClick={() => go("find")}>{b({ en: "Open the results", zh: "查看结果" })}</button>}

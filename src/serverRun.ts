@@ -28,7 +28,8 @@ import { scrubCredentials } from "./security/secrets";
 import { keepOwnerControls } from "./security/controls";
 import { scanServerResults } from "./security/web";
 // Agent memory (src/odeliaMemory/): the cache-ordered prompt, the memory tools, and the processors every call goes through
-import { commandNote, emptyOut, memoryTools, systemFor, type RunMemory, type RunMemoryOut } from "./odeliaMemory/context";
+import { commandNote, emptyOut, memoryTools, scopeNames, systemFor, using, type RunMemory, type RunMemoryOut } from "./odeliaMemory/context";
+import { usedFor } from "./odeliaMemory/retrieve";
 import { addCall, cacheUse, emptyStats, type CacheStats } from "./odeliaMemory/cache";
 import { shape } from "./odeliaMemory/processors";
 
@@ -665,7 +666,12 @@ export async function runRounds(o: {
   /* ---- end Sources ---- */
 
   step(replyMoment(line ? `${final}\n\n${line}` : final));
+  // the agent memories that fit this request, each with why, shown under the answer (ChatGPT's memory Sources); none for
+  // a store's bot, a temporary chat or with memory off
+  const recalled = !o.child && o.memory && using(o.memory) && st.request
+    ? usedFor(o.memory.memory, st.request, { me: o.memory.me, now: new Date().toISOString(), names: { ...scopeNames(o.ws()), ...(o.memory.names ?? {}) } }) : [];
   return { reply: { text: [same(line ? `${final}\n\n${line}` : final)], apps: [...made.apps].slice(0, 3), approvals: made.approvals, memory: made.memory, skills: made.skills.length ? made.skills : undefined, matches: made.matches,
+    ...(recalled.length ? { recalled } : {}),
     files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: line ? (links.length ? links : undefined) : cited.length ? cited : undefined, ...(undoId ? { undo: undoId } : {}),
     // the filled forms go back with the answer: a card in the app, an attachment by email, a short link by text or chat
     ...(st.filled?.length ? { forms: st.filled } : {}) } };

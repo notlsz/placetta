@@ -57,6 +57,7 @@ export type Reply = {
   next?: { label: Bi; req: Request };
   sources?: { title: string; url: string }[];   // official pages the agent read, cited
   remembered?: { id: string; text: Bi; suggested?: boolean }[];   // details the person mentioned that this run kept (src/recall.ts)
+  recalled?: { id: string; text: Bi; why: Bi }[];   // agent memories that fit this request, each with why (src/odeliaMemory/retrieve.ts usedFor)
   table?: { title: Bi; columns: Bi[]; rows: string[][]; cite?: string[][] };   // a grid the agent built, e.g. reviewed documents; cite: the document's words behind each cell
   undo?: string;            // the run's undo point (src/rewind.ts): "Undo what she did" on this turn
   forms?: FilledNote[];     // the agency's forms this run filled again, each a new version (src/forms/versions.ts)
