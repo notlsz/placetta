@@ -4,7 +4,7 @@
 
 Odelia, Placetta's AI agent, prepares each application from your documents. You review and approve it, then Odelia files it and follows up until the agency decides. When an agency needs a person, in person or on the phone, our team steps in.
 
-Free license guides: 74 cities in 13 countries (41 in the US), 12 kinds of business, 401 official forms, in English and Chinese. Every guide lists the filings in the order they are made, with the agency, how each is filed, the government fee and a link to the agency's own page. Agencies change requirements; check the agency's page before filing. Placetta is not a law firm and does not give legal advice.
+Free license guides: 92 cities in 22 countries (41 in the US), 12 kinds of business, 481 official forms, in English and Chinese. Every guide lists the filings in the order they are made, with the agency, how each is filed, the government fee and a link to the agency's own page. Agencies change requirements; check the agency's page before filing. Placetta is not a law firm and does not give legal advice.
 
 ## Start here
 - [Placetta](https://www.placetta.com/): what it does, pricing and the FAQ
@@ -58,6 +58,7 @@ Free license guides: 74 cities in 13 countries (41 in the US), 12 kinds of busin
 - [Nevada](https://www.placetta.com/guides/states/nevada.html)
 - [New York State](https://www.placetta.com/guides/states/new-york-state.html)
 - [Ohio](https://www.placetta.com/guides/states/ohio.html)
+- [Oregon](https://www.placetta.com/guides/states/oregon.html)
 - [Pennsylvania](https://www.placetta.com/guides/states/pennsylvania.html)
 - [Texas](https://www.placetta.com/guides/states/texas.html)
 - [Virginia](https://www.placetta.com/guides/states/virginia.html)
@@ -102,6 +103,10 @@ Free license guides: 74 cities in 13 countries (41 in the US), 12 kinds of busin
 - [New York City, United States](https://www.placetta.com/guides/new-york-city/)
 - [Los Angeles, United States](https://www.placetta.com/guides/los-angeles/)
 - [Houston, United States](https://www.placetta.com/guides/houston/)
+- [Mexico City, Mexico](https://www.placetta.com/guides/mexico-city/)
+- [Monterrey, Mexico](https://www.placetta.com/guides/monterrey/)
+- [Guadalajara, Mexico](https://www.placetta.com/guides/guadalajara/)
+- [Cancún, Mexico](https://www.placetta.com/guides/cancun/)
 - [Beijing, China](https://www.placetta.com/guides/beijing/)
 - [Shanghai, China](https://www.placetta.com/guides/shanghai/)
 - [Shenzhen, China](https://www.placetta.com/guides/shenzhen/)
@@ -126,7 +131,21 @@ Free license guides: 74 cities in 13 countries (41 in the US), 12 kinds of busin
 - [Milan, Italy](https://www.placetta.com/guides/milan/)
 - [Rome, Italy](https://www.placetta.com/guides/rome/)
 - [Amsterdam, Netherlands](https://www.placetta.com/guides/amsterdam/)
+- [Rotterdam, Netherlands](https://www.placetta.com/guides/rotterdam/)
 - [Dublin, Ireland](https://www.placetta.com/guides/dublin/)
+- [Brussels, Belgium](https://www.placetta.com/guides/brussels/)
+- [Lisbon, Portugal](https://www.placetta.com/guides/lisbon/)
+- [Zurich, Switzerland](https://www.placetta.com/guides/zurich/)
+- [Vienna, Austria](https://www.placetta.com/guides/vienna/)
+- [Stockholm, Sweden](https://www.placetta.com/guides/stockholm/)
+- [Copenhagen, Denmark](https://www.placetta.com/guides/copenhagen/)
+- [Warsaw, Poland](https://www.placetta.com/guides/warsaw/)
+- [Helsinki, Finland](https://www.placetta.com/guides/helsinki/)
+- [Cork, Ireland](https://www.placetta.com/guides/cork/)
+- [Bern, Switzerland](https://www.placetta.com/guides/bern/)
+- [Graz, Austria](https://www.placetta.com/guides/graz/)
+- [Gothenburg, Sweden](https://www.placetta.com/guides/gothenburg/)
+- [Aarhus, Denmark](https://www.placetta.com/guides/aarhus/)
 - [Dubai, United Arab Emirates](https://www.placetta.com/guides/dubai/)
 - [Abu Dhabi, United Arab Emirates](https://www.placetta.com/guides/abu-dhabi/)
 - [Sharjah, United Arab Emirates](https://www.placetta.com/guides/sharjah/)
