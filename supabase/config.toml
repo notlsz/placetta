@@ -47,3 +47,9 @@ verify_jwt = false
 # Supabase session. It checks the token itself (only its SHA-256 is stored) and rate-limits each token.
 [functions.scim]
 verify_jwt = false
+
+# Placetta's own MCP server: Claude, ChatGPT and other MCP clients call it with a workspace token (Settings, AI
+# assistants), not a Supabase session. It checks the token itself (only its SHA-256 is stored), reads only that token's
+# workspace, rate-limits each token and logs every call.
+[functions.mcp]
+verify_jwt = false

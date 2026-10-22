@@ -1282,20 +1282,98 @@ function Provisioning() {
   );
 }
 
+/** Placetta in the person's own AI assistant: a read-only MCP server (supabase/functions/mcp) with a workspace token. */
+const MCP_SCOPES: { id: api.McpScope; label: Bi }[] = [
+  { id: "status", label: B("Compliance status by store", "各门店合规状态") },
+  { id: "deadlines", label: B("Upcoming deadlines", "即将到期的期限") },
+  { id: "readiness", label: B("Store readiness", "门店就绪度") },
+  { id: "plan", label: B("Permit plan preview", "许可规划预览") },
+  { id: "filings", label: B("Filing status", "申报进度") },
+];
+function AssistantAccess() {
+  const { lang, cloud, say } = useApp();
+  const zh = lang === "zh";
+  const pin = usePin();
+  const [list, setList] = useState<api.McpToken[] | null>(null);
+  const [form, setForm] = useState<{ label: string; scopes: api.McpScope[] } | null>(null);
+  const [shown, setShown] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const wsId = cloud?.wsId ?? "";
+  const load = useCallback(async () => { if (!wsId || !cloud?.admin) return; try { setList(await api.mcpTokenList(wsId)); } catch { setList([]); } }, [wsId, cloud?.admin]);
+  useEffect(() => { void load(); }, [load]);
+  const title = B("AI assistants (MCP)", "AI 助手（MCP）");
+  const note = B("Ask Claude, ChatGPT or any assistant that supports MCP about your stores: compliance status, upcoming deadlines, readiness, permit plans and filings. It only reads, only this workspace, and only what the token allows. Every call is logged, and you can revoke a token at any time.",
+    "在 Claude、ChatGPT 或任何支持 MCP 的助手中询问您的门店：合规状态、即将到期的期限、就绪度、许可规划和申报进度。它只能读取，只限这个工作区，且只限令牌允许的内容。每次调用都有记录，令牌可随时撤销。");
+  if (!cloud) return null;
+  if (!cloud.admin) return <Group id="assistants" title={title} note={B("Owners and admins make tokens that let an AI assistant read this workspace.", "所有者和管理员可以创建令牌，让 AI 助手读取这个工作区。")} />;
+  const act = async (fn: () => Promise<unknown>, done?: string) => { setBusy(true); try { await fn(); if (done) say(done); await load(); } catch (e) { say((e as api.ApiError).message); } setBusy(false); };
+  const make = (f: { label: string; scopes: api.McpScope[] }) => act(async () => { const r = await api.mcpTokenCreate(wsId, f.label.trim() || (zh ? "AI 助手" : "AI assistant"), f.scopes); setForm(null); setShown(r.token); });
+  const live = (list ?? []).filter(t => !t.revoked_at);
+  const scopeWords = (sc: api.McpScope[]) => sc.length === MCP_SCOPES.length ? (zh ? "全部只读工具" : "every read-only tool") : MCP_SCOPES.filter(x => sc.includes(x.id)).map(x => x.label[zh ? "zh" : "en"]).join(zh ? "、" : ", ");
+  const rows: Row[] = [
+    ...live.map(t => ({ label: { en: t.label, zh: t.label },
+      sub: <>{`plc_mcp_${t.prefix}_…`}, {scopeWords(t.scopes)}<br />{(zh ? "创建于 " : "Made ") + fmtDay(t.created_at, lang, true)}{t.last_used_at ? (zh ? `，最近使用 ${fmtAgo(t.last_used_at, lang)}` : `, last used ${fmtAgo(t.last_used_at, lang)}`) : (zh ? "，尚未使用" : ", not used yet")}</>,
+      right: <Btn kind="warm" guard disabled={busy} onClick={() => { if (window.confirm(zh ? `撤销“${t.label}”？使用它的助手将立即无法读取。` : `Revoke "${t.label}"? Assistants using it stop reading right away.`)) void act(() => api.mcpTokenRevoke(t.id), zh ? "令牌已撤销" : "Token revoked"); }}>{zh ? "撤销" : "Revoke"}</Btn> })),
+    { label: B("New token", "新令牌"), sub: zh ? "每个助手用一个令牌，方便单独撤销。" : "One token for each assistant, so you can revoke each on its own.",
+      right: <Btn kind="ink" guard disabled={busy || live.length >= 10} onClick={() => setForm({ label: "", scopes: MCP_SCOPES.map(x => x.id) })}>{zh ? "创建" : "Make a token"}</Btn> },
+  ];
+  const url = api.mcpUrl();
+  const setup = shown ? [
+    { who: B("Claude (claude.ai and the desktop app)", "Claude（claude.ai 和桌面应用）"), how: B("Settings, Connectors, Add custom connector. Paste this address; it carries the token, so keep it private.", "设置，连接器，添加自定义连接器。粘贴此地址；地址中含有令牌，请勿外传。"), code: `${url}/${shown}` },
+    { who: B("ChatGPT", "ChatGPT"), how: B("Settings, Apps and connectors, Advanced, turn on developer mode, then Create. Paste this address and pick no authentication; the token is in the address.", "设置，应用与连接器，高级，开启开发者模式，然后创建。粘贴此地址并选择无需认证；令牌已包含在地址中。"), code: `${url}/${shown}` },
+    { who: B("Claude Code", "Claude Code"), how: B("Run this in a terminal.", "在终端中运行。"), code: `claude mcp add --transport http placetta ${url} --header "Authorization: Bearer ${shown}"` },
+    { who: B("Other MCP clients", "其他 MCP 客户端"), how: B("Add a Streamable HTTP server with this configuration.", "添加一个 Streamable HTTP 服务器，配置如下。"), code: JSON.stringify({ mcpServers: { placetta: { type: "http", url, headers: { Authorization: `Bearer ${shown}` } } } }, null, 2) },
+  ] : [];
+  return (
+    <Group id="assistants" title={title} note={note} rows={list ? rows : []}>
+      {form && (
+        <SetSheet title={zh ? "新的 AI 助手令牌" : "New AI assistant token"} sub={zh ? "选择这个助手可以读取的内容。" : "Choose what this assistant may read."} onClose={() => setForm(null)}>
+          <form className="sst-form" onSubmit={e => { e.preventDefault(); if (form.scopes.length) pin.guard(() => void make(form)); }}>
+            <input type="text" autoFocus maxLength={60} value={form.label} onChange={e => setForm({ ...form, label: e.target.value })} placeholder={zh ? "名称，例如“总部的 Claude”" : "Name, e.g. \"Claude at HQ\""} aria-label={zh ? "名称" : "Name"} autoComplete="off" />
+            {MCP_SCOPES.map(x => (
+              <label key={x.id} className="check"><input type="checkbox" checked={form.scopes.includes(x.id)} onChange={e => setForm({ ...form, scopes: e.target.checked ? [...form.scopes, x.id] : form.scopes.filter(y => y !== x.id) })} /><span>{x.label[zh ? "zh" : "en"]}</span></label>
+            ))}
+            <p className="sg-fine">{zh ? "只能读取。令牌只显示一次，快哉只保存它的哈希值。若创建者不再是所有者或管理员，令牌会自动失效。" : "Read only. The token is shown once and Placetta keeps only its hash. It stops working if the person who made it is no longer an owner or admin."}</p>
+            <div className="sst-act">
+              <button type="button" className="sbtn quiet" onClick={() => setForm(null)}>{zh ? "取消" : "Cancel"}</button>
+              <button type="submit" className="sbtn ink" disabled={busy || !form.scopes.length}>{busy ? (zh ? "正在创建…" : "Making...") : (zh ? "创建" : "Make the token")}</button>
+            </div>
+          </form>
+        </SetSheet>
+      )}
+      {shown && (
+        <SetSheet title={zh ? "您的 AI 助手令牌" : "Your AI assistant token"} sub={zh ? "现在复制到助手中。关闭后不会再显示，快哉只保存它的哈希值。" : "Copy it into your assistant now. It isn't shown again; Placetta keeps only its hash."} onClose={() => setShown(null)}>
+          <div className="sst-form">
+            <code className="sg-code wrap">{shown}</code>
+            {setup.map(x => (
+              <div key={x.who.en}>
+                <p><b>{x.who[zh ? "zh" : "en"]}</b><br /><small>{x.how[zh ? "zh" : "en"]}</small></p>
+                <code className="sg-code wrap">{x.code}</code>
+                <Btn onClick={() => copy(x.code, say, zh)}>{zh ? "复制" : "Copy"}</Btn>
+              </div>
+            ))}
+            <div className="sst-act"><button type="button" className="sbtn ink" onClick={() => setShown(null)}>{zh ? "完成" : "Done"}</button></div>
+          </div>
+        </SetSheet>
+      )}
+    </Group>
+  );
+}
+
 /* Settings categories, Anthropic style: a few clear groups in the sidebar, one shown at a time. */
 const SETTINGS_CATS: { id: string; label: Bi; items: string[] }[] = [
   { id: "general", label: B("General", "通用"), items: ["account", "appearance", "language"] },
   { id: "facts", label: B("Business facts", "企业资料"), items: ["facts", "house", "entities"] },
   { id: "team", label: B("Team", "团队"), items: ["team", "hq", "partner"] },
   { id: "odelia", label: B("Odelia", "Odelia"), items: ["agent", "autonomy", "brules", "phone", "approvals", "memory", "agentmemory", "skills"] },
-  { id: "connections", label: B("Connections", "连接"), items: ["integrations", "logins"] },
+  { id: "connections", label: B("Connections", "连接"), items: ["integrations", "assistants", "logins"] },
   { id: "billing", label: B("Billing", "账单"), items: ["billing", "contract", "modules", "filingcap", "spending"] },
   { id: "security", label: B("Security", "安全"), items: ["security", "sso", "scim", "pin"] },
   { id: "privacy", label: B("Privacy and data", "隐私与数据"), items: ["data"] },
   { id: "activity", label: B("Activity", "活动记录"), items: ["activity"] },
   { id: "help", label: B("Help and legal", "帮助与法律"), items: ["help", "legal"] },
 ];
-const CLOUD_ONLY = new Set(["team", "hq", "partner", "security", "sso", "scim", "pin", "phone", "contract", "filingcap"]);
+const CLOUD_ONLY = new Set(["team", "hq", "partner", "security", "sso", "scim", "pin", "phone", "contract", "filingcap", "assistants"]);
 const catOf = (k: string) => SETTINGS_CATS.find(c => c.id === k || c.items.includes(k))?.id;
 const readCat = () => { try { return catOf(localStorage.getItem("placetta-settings-cat") ?? ""); } catch { return undefined; } };
 let settingsTarget: string | null = null;
@@ -1415,6 +1493,7 @@ export function Settings() {
           {show("filingcap") && <FilingCapGroup />}
 
           {show("integrations") && <Integrations />}
+          {show("assistants") && <AssistantAccess />}
           {show("logins") && <Logins />}
 
           <Group id="agent" hidden={!show("agent")} title={B("Agent and voice", "助理与语音")} rows={[

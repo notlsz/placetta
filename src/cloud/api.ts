@@ -618,6 +618,15 @@ export const ssoSetEnforced = (ws: string, on: boolean, method: string) => rpcDa
 export const scimTokenCreate = (ws: string) => rpcData<{ prefix: string; token: string }>("scim_token_create", { ws });
 export const scimTokenRevoke = (ws: string) => rpcVoid("scim_token_revoke", { ws });
 export const scimGroupRole = (ws: string, group: string, role: ScimGroup["role"]) => rpcVoid("scim_group_role", { ws, p_group: group, p_role: role });
+/** Placetta's own MCP server (supabase/functions/mcp): workspace tokens for Claude, ChatGPT and other assistants. Owners
+ *  and admins make, list and revoke them; a new token is in the answer once and never again. */
+export type McpScope = "status" | "deadlines" | "readiness" | "plan" | "filings";
+export type McpToken = { id: string; label: string; prefix: string; scopes: McpScope[]; created_at: string; last_used_at: string | null; revoked_at: string | null };
+export const mcpTokenCreate = (ws: string, label: string, scopes: McpScope[]) => rpcData<{ id: string; prefix: string; token: string }>("mcp_token_create", { ws, p_label: label, p_scopes: scopes });
+export const mcpTokenList = (ws: string) => rpcData<McpToken[]>("mcp_token_list", { ws });
+export const mcpTokenRevoke = (id: string) => rpcVoid("mcp_token_revoke", { p_id: id });
+/** The MCP server's address. */
+export const mcpUrl = () => `${URL_.replace(/\/+$/, "")}/functions/v1/mcp`;
 /** SCIM's base URL for the identity provider. */
 export const scimUrl = () => `${URL_.replace(/\/+$/, "")}/functions/v1/scim/v2`;
 
