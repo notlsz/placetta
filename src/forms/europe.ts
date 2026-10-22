@@ -30,6 +30,8 @@ export type EuEntry = {
   /** [the page read, the sentence as written, its English translation when the page isn't in English] */
   proof?: readonly [string, string, string?];
   info?: string;
+  /** places inside `where` where a local entry replaces this one (Paris's Préfecture de police for the mairie) */
+  except?: string[];
 };
 export function E(o: EuEntry): OfficialForm {
   const info = o.proof?.[0] ?? o.info ?? o.url;
@@ -38,7 +40,7 @@ export function E(o: EuEntry): OfficialForm {
     ...(o.needs ? { needs: o.needs } : {}), ...(o.unless ? { unless: o.unless } : {}), method: o.method, how: b(o.how), url: o.url, info,
     fee: o.fee === undefined ? null : o.fee, currency: o.cur, ...(o.feeNote ? { feeNote: b(o.feeNote) } : {}), ...(o.takes ? { takes: b(o.takes) } : {}),
     ...(o.renews ? { renews: b(o.renews) } : {}), fields: [], ...(o.foreign ? { foreign: b(o.foreign) } : {}), ...(o.specialist ? { specialist: b(o.specialist) } : {}),
-    ...(o.plain ? { plain: b(o.plain) } : {}), checked: "page", order: o.order,
+    ...(o.plain ? { plain: b(o.plain) } : {}), ...(o.except ? { except: o.except } : {}), checked: o.proof ? "page" : "known", order: o.order,
     ...(o.proof ? { proof: { read: o.proof[0], quote: o.proof[1], checked: READ_EU, ...(o.proof[2] ? { en: o.proof[2] } : {}) } } : {}),
   };
 }
@@ -127,4 +129,118 @@ export const UK_FORMS: OfficialForm[] = [
     renews: ["Every year.", "每年一次。"], proof: [`${GOVUK}/prepare-file-annual-accounts-for-limited-company`, "After the end of its financial year, your private limited company must prepare:"] }),
 ];
 
-export const EUROPE_FORMS: OfficialForm[] = [...UK_FORMS];
+/* ------------------------------------------------------------------ the EU's own rules, in every member state ("EU") */
+const GPSR = "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023R0988";
+const EUDR = "https://environment.ec.europa.eu/topics/forests/deforestation/regulation-deforestation-free-products_en";
+const PPWR = "https://environment.ec.europa.eu/topics/waste-and-recycling/packaging-waste_en";
+const HYGIENE = "https://food.ec.europa.eu/food-safety/biological-safety/food-hygiene_en";
+
+export const EU_FORMS: OfficialForm[] = [
+  E({ id: "eu-food-hygiene", where: "EU", level: "federal", segs: ["restaurant", "retail", "warehouse", "seller"], needs: { food: true }, method: "none", order: 78, cur: "EUR",
+    form: "Regulation (EC) No 852/2004", title: ["EU food hygiene rules (Regulation (EC) 852/2004)", "欧盟食品卫生规则（第 852/2004 号法规）"],
+    agency: ["European Union (Regulation (EC) 852/2004), checked by the national food inspectors", "欧盟（第 852/2004 号法规），由国家食品监管部门检查"],
+    how: ["Nothing to file: every food business keeps to the hygiene rules and runs food safety procedures based on HACCP principles, which the local food inspectors check. The registration it requires is the country's own food business registration.", "无需申报：所有食品企业须遵守卫生规则，并执行基于 HACCP 原则的食品安全程序，由当地食品监管部门检查。该法规要求的登记即各国自己的食品企业登记。"],
+    url: HYGIENE, plain: ["The EU's hygiene rules every food business follows, inspected locally.", "所有食品企业都须遵守的欧盟卫生规则，由当地检查。"],
+    proof: [HYGIENE, "All food businesses operating in the EU, regardless of their size or type, must comply with basic hygiene requirements."] }),
+  E({ id: "eu-gpsr", where: "EU", level: "federal", segs: ["retail", "seller"], unless: ["food"], method: "none", order: 79, cur: "EUR",
+    form: "Regulation (EU) 2023/988 (GPSR)", title: ["General Product Safety Regulation: a responsible operator in the EU", "通用产品安全法规：欧盟境内的责任经营者"],
+    agency: ["European Union (Regulation (EU) 2023/988), enforced by the national market surveillance authority", "欧盟（第 2023/988 号法规），由国家市场监管机构执行"],
+    how: ["Nothing to file: a consumer product made outside the EU is sold there only with an economic operator in the EU responsible for it, named with its contact details on the product.", "无需申报：欧盟境外制造的消费品须有一家欧盟境内的经济经营者对其负责，并在产品上标明其名称和联系方式，方可在欧盟销售。"],
+    url: GPSR, plain: ["Every consumer product sold in the EU has a responsible business in the EU, named on it.", "在欧盟销售的每件消费品都须有一家欧盟境内的责任企业，并在产品上标明。"],
+    proof: [GPSR, "A product covered by this Regulation shall not be placed on the market unless there is an economic operator"] }),
+  E({ id: "eu-ppwr", where: "EU", level: "federal", segs: ["retail", "seller", "warehouse"], needs: { imports: true }, method: "none", order: 80, cur: "EUR",
+    form: "Regulation (EU) 2025/40 (PPWR)", title: ["Packaging and Packaging Waste Regulation", "包装与包装废弃物法规"],
+    agency: ["European Union (Regulation (EU) 2025/40), with each country's producer register for packaging", "欧盟（第 2025/40 号法规），及各国的包装生产者登记"],
+    how: ["Goods imported in packaging meet the regulation's packaging requirements, and the importer registers as the producer of that packaging in each country it sells in (extended producer responsibility).", "进口商品的包装须符合该法规的要求，进口商须在每个销售国登记为该包装的生产者（生产者延伸责任）。"],
+    url: PPWR, plain: ["The EU's packaging rules for imported goods, and the producer registration that goes with them.", "欧盟针对进口商品包装的规则及相应的生产者登记。"],
+    proof: [PPWR, "The PPWR establishes a new set of requirements in line with Europe's waste rules that cover the entire packaging life cycle"] }),
+  E({ id: "eu-eudr", where: "EU", level: "federal", segs: ["retail", "seller", "warehouse"], needs: { wood: true }, method: "online", order: 43, cur: "EUR",
+    form: "Due diligence statement (EUDR Information System)", title: ["Deforestation Regulation: due diligence for wood furniture", "反毁林法规：木制家具尽职调查"],
+    agency: ["European Commission, EUDR Information System (checked by the national competent authority)", "欧盟委员会 EUDR 信息系统（由国家主管机关检查）"],
+    how: ["Wood furniture placed on the EU market needs due diligence on where the wood came from, and a due diligence statement submitted in the EUDR Information System. It applies to large and medium operators from 30 December 2026, and to micro and small operators from 30 June 2027.", "投放欧盟市场的木制家具须对木材来源进行尽职调查，并在 EUDR 信息系统提交尽职调查声明。大中型经营者自 2026 年 12 月 30 日起适用，小微经营者自 2027 年 6 月 30 日起适用。"],
+    url: "https://green-forum.ec.europa.eu/nature-and-biodiversity/deforestation-regulation-implementation_en",
+    plain: ["Proof that the wood in the furniture didn't come from deforested land, filed before it goes on sale in the EU.", "证明家具所用木材并非来自毁林土地，在欧盟上市销售前提交。"],
+    proof: [EUDR, "Large and medium operators: 30 December 2026 Micro and small operators: 30 June 2027"] }),
+];
+
+/* ------------------------------------------------------------------ France (Paris; Lyon and elsewhere through the mairie) */
+const SPE = "https://entreprendre.service-public.fr/vosdroits";
+const FR_BAR = `${SPE}/F22387`, FR_LICENCE = `${SPE}/F22379`, FR_ERP = `${SPE}/F31687`;
+const FR_MAIRIE: T = ["The mairie (town hall) of the commune", "所在市镇政府（mairie）"];
+
+export const FRANCE_FORMS: OfficialForm[] = [
+  E({ id: "fr-guichet", where: "FR", level: "federal", method: "online", order: 10, cur: "EUR",
+    form: "Guichet unique des formalités d'entreprises", title: ["Company or branch registration (one-stop formalities portal)", "公司或分支机构登记（企业手续统一窗口）"],
+    agency: ["INPI, Guichet unique des formalités des entreprises", "法国国家工业产权局（INPI）企业手续统一窗口"],
+    how: ["Every company creation, and a foreign company's French branch, is declared online on formalites.entreprises.gouv.fr, which passes it to the trade register, the tax office and Urssaf and returns the SIREN and SIRET numbers.", "所有公司设立及外国公司在法国的分支机构均在 formalites.entreprises.gouv.fr 在线申报，平台会转交商业登记处、税务局和 Urssaf，并发放 SIREN 和 SIRET 编号。"],
+    url: "https://formalites.entreprises.gouv.fr", feeNote: ["Registry and legal notice fees depend on the company form; the portal lists them.", "登记费和法定公告费视公司形式而定，平台会列出。"],
+    foreign: ["A company formed abroad can register a French branch (succursale) through the same portal, with its articles translated into French.", "境外公司可通过同一平台登记法国分支机构（succursale），其章程须附法文译本。"],
+    plain: ["Registers the company or branch in France; its SIREN goes on every other filing.", "在法国登记公司或分支机构，SIREN 编号会用在其他所有申请上。"],
+    proof: ["https://formalites.entreprises.gouv.fr/cadre-juridique.php", "l’ensemble des formalités d’entreprise doit être déposé en ligne auprès d’un organisme unique.", "all business formalities must be filed online with a single body."] }),
+  E({ id: "fr-tva", where: "FR", level: "federal", method: "online", order: 25, cur: "EUR",
+    form: "Numéro de TVA intracommunautaire", title: ["VAT number and the business tax office (SIE)", "增值税号与企业税务局（SIE）"], agency: ["Service des impôts des entreprises (DGFiP)", "企业税务局（法国公共财政总局）"],
+    how: ["The business tax office sends the intra-EU VAT number at registration; VAT and business taxes are then filed and paid in the company's professional space on impots.gouv.fr.", "企业税务局在登记时发放欧盟增值税号；之后在 impots.gouv.fr 的企业专属空间申报缴纳增值税和企业税。"],
+    url: "https://www.impots.gouv.fr/professionnel",
+    proof: [`${SPE}/F23570`, "Le service des impôts des entreprises (SIE) transmet automatiquement le numéro de TVA intracommunautaire à l'entreprise au moment de son immatriculation.", "The business tax office (SIE) automatically sends the company its intra-EU VAT number when it registers."] }),
+  E({ id: "fr-dpae", where: "FR", level: "federal", needs: { employees: true }, method: "online", order: 60, cur: "EUR",
+    form: "Déclaration préalable à l'embauche (DPAE)", title: ["Pre-hiring declaration for each employee (DPAE)", "每位员工的入职前申报（DPAE）"], agency: ["Urssaf", "法国社会保险费征收机构（Urssaf）"],
+    how: ["Declared online to Urssaf for each new employee, before they start and no earlier than 8 days before. The first one also registers the company as an employer.", "每位新员工上岗前、最早提前 8 天向 Urssaf 在线申报。首次申报同时将公司登记为雇主。"], url: "https://www.urssaf.fr",
+    proof: [`${SPE}/F23107`, "au plus tôt dans les 8 jours précédant la date de l’embauche", "no earlier than 8 days before the hiring date"] }),
+  E({ id: "fr-ddpp", where: "FR", level: "county", segs: ["restaurant", "retail"], needs: { food: true }, method: "online", order: 74, cur: "EUR",
+    form: "Déclaration de manipulation de denrées alimentaires d'origine animale (Cerfa 13984)", title: ["Food establishment declaration to the DDPP", "向省级民众保护局（DDPP）申报食品经营场所"],
+    agency: ["Direction départementale de la protection des populations (DDPP)", "省级民众保护局（DDPP）"],
+    how: ["Declared before opening, online or by post, by any shop or restaurant that handles food of animal origin (milk, eggs, meat) for consumers; the DDPP then schedules its inspections.", "凡为消费者处理动物源性食品（奶、蛋、肉）的门店或餐厅，须在开业前在线或邮寄申报；DDPP 随后安排检查。"],
+    url: "https://mesdemarches.agriculture.gouv.fr",
+    proof: [FR_BAR, "Une déclaration doit être effectuée pour toute activité manipulant des denrées d'origine animale destinées à des consommateurs.", "A declaration must be made for any business handling food of animal origin intended for consumers."] }),
+  E({ id: "fr-hygiene-training", where: "FR", level: "county", segs: ["restaurant"], needs: { food: true }, method: "none", order: 73, cur: "EUR",
+    form: "Formation à l'hygiène alimentaire", title: ["Food hygiene training (the operator and at least one staff member)", "食品卫生培训（经营者及至少一名员工）"], agency: ["Direction départementale de la protection des populations (DDPP)", "省级民众保护局（DDPP）"],
+    how: ["Nothing to file: the operator and at least one staff member complete food hygiene training, which the DDPP checks at inspection.", "无需申报：经营者及至少一名员工须完成食品卫生培训，DDPP 检查时核查。"], url: FR_BAR,
+    proof: [FR_BAR, "Formation aux règles d'hygiène alimentaire (l'exploitant et au moins un membre du personnel).", "Training in food hygiene rules (the operator and at least one staff member)."] }),
+  E({ id: "fr-erp", where: "FR", level: "city", segs: STORES, needs: { buildout: true }, except: ["FR-PAR"], method: "pdf_mail", order: 65, cur: "EUR",
+    form: "Demande d'autorisation de construire, d'aménager ou de modifier un ERP", title: ["Works permit for a shop open to the public (ERP), with the fire safety review", "公众场所（ERP）装修许可，含消防安全审查"], agency: FR_MAIRIE,
+    how: ["Fitting out or changing a shop or restaurant open to the public is authorised by the mairie after the departmental safety and accessibility commission checks the fire and accessibility rules; the file goes to the mairie in 4 copies.", "装修或改造对公众开放的门店或餐厅，须经省级安全与无障碍委员会审查消防和无障碍规则后，由市镇政府批准；申请材料一式 4 份交市镇政府。"],
+    url: FR_ERP,
+    proof: [FR_ERP, "Les travaux sont autorisés par la mairie après vérification des règles d'accessibilité et de sécurité par la commission consultative départementale de sécurité et d'accessibilité", "The works are authorised by the mairie after the departmental safety and accessibility commission checks the accessibility and safety rules"] }),
+  E({ id: "fr-licence", where: "FR", level: "city", segs: STORES, needs: { alcohol: true }, except: ["FR-PAR"], method: "pdf_mail", order: 71, cur: "EUR",
+    form: "Déclaration d'ouverture d'un débit de boissons (Cerfa 11542)", title: ["Alcohol licence: opening declaration at the mairie", "酒类经营许可：向市镇政府提交开业申报"], agency: FR_MAIRIE,
+    how: ["Any place selling alcohol holds a licence of the right category; the operator declares it at the mairie at least 15 days before opening and keeps the receipt as proof.", "凡售酒场所须持有相应类别的执照；经营者须在开业前至少 15 天向市镇政府申报，并保留回执作为证明。"],
+    url: FR_LICENCE, takes: ["Declared at least 15 days before opening.", "开业前至少 15 天申报。"],
+    proof: [FR_LICENCE, "Tout établissement qui vend de l’alcool à consommer sur place ou à emporter doit posséder une licence.", "Every establishment that sells alcohol to drink on site or to take away must hold a licence."] }),
+  E({ id: "fr-permis-exploitation", where: "FR", level: "federal", segs: ["restaurant"], needs: { alcohol: true }, method: "in_person", order: 70, cur: "EUR",
+    form: "Permis d'exploitation", title: ["Operating permit training for serving alcohol", "售酒经营许可培训（permis d'exploitation）"], agency: ["An approved training body", "经认可的培训机构"],
+    how: ["A place serving alcohol on site needs the operator's permis d'exploitation, earned by a mandatory training course; the certificate goes with the licence declaration.", "现场供酒的场所须由经营者取得经营许可（permis d'exploitation），须参加强制培训；证书随执照申报一并提交。"], url: FR_LICENCE,
+    proof: [FR_LICENCE, "Le permis d'exploitation est obtenu suite à une formation obligatoire", "The operating permit is obtained after a mandatory training course"] }),
+  E({ id: "fr-terrasse", where: "FR", level: "city", segs: STORES, needs: { terrace: true }, except: ["FR-PAR"], method: "pdf_mail", order: 73, cur: "EUR",
+    form: "Autorisation d'occupation temporaire (permis de stationnement)", title: ["Terrace permit on the pavement", "人行道露台许可"], agency: ["The mairie, or the préfecture", "市镇政府或省政府"],
+    how: ["Tables on the pavement or a square need an authorisation to occupy public space: a permis de stationnement for an open terrace.", "在人行道或广场摆放桌椅须取得公共空间占用许可：开放式露台为 permis de stationnement。"], url: FR_BAR,
+    proof: [FR_BAR, "Si vous souhaitez occuper une partie de l'espace public (trottoirs, places) pour votre bar ou restaurant, vous devez en demander l'autorisation", "If you want to use part of the public space (pavements, squares) for your bar or restaurant, you must apply for authorisation"] }),
+  E({ id: "fr-eori", where: "FR", level: "federal", segs: ["seller", "warehouse", "retail"], needs: { imports: true }, method: "online", order: 35, cur: "EUR",
+    form: "Numéro EORI", title: ["EORI number for importing", "进口用 EORI 号码"], agency: ["Direction générale des douanes et droits indirects", "法国海关总署"],
+    how: ["Requested online from French customs before the first import.", "首次进口前向法国海关在线申请。"], url: "https://www.douane.gouv.fr" }),
+  /* Paris: the Préfecture de police and the Ville de Paris */
+  E({ id: "fr-par-erp", where: "FR-PAR", level: "city", segs: STORES, needs: { buildout: true }, method: "online", order: 65, cur: "EUR",
+    form: "Autorisation de travaux ERP (Paris)", title: ["Works permit for a shop open to the public (ERP), Paris", "巴黎公众场所（ERP）装修许可"], agency: ["Préfecture de police de Paris, with the Ville de Paris urban planning office", "巴黎警察局，及巴黎市城市规划局"],
+    how: ["In Paris the fire safety and accessibility review of an ERP's works runs through the Préfecture de police; the file is lodged with the Ville de Paris's urban planning office (BASU).", "在巴黎，ERP 装修的消防与无障碍审查由巴黎警察局负责；申请材料交巴黎市城市规划局（BASU）。"],
+    url: "https://www.prefecturedepolice.interieur.gouv.fr",
+    proof: [FR_ERP, "Pour les démarches concernant des ERP à Paris, nous vous invitions à consulter le site internet de la préfecture de police", "For procedures about ERPs in Paris, we invite you to consult the Préfecture de police's website"] }),
+  E({ id: "fr-par-licence", where: "FR-PAR", level: "city", segs: STORES, needs: { alcohol: true }, method: "pdf_mail", order: 71, cur: "EUR",
+    form: "Déclaration d'ouverture d'un débit de boissons (Cerfa 11542)", title: ["Alcohol licence: opening declaration at the Préfecture de police", "酒类经营许可：向巴黎警察局提交开业申报"], agency: ["Préfecture de police de Paris", "巴黎警察局"],
+    how: ["In Paris the alcohol licence is declared to the Préfecture de police, not the mairie, at least 15 days before opening, with the permis d'exploitation.", "在巴黎，酒类执照须向巴黎警察局而非市政府申报，须在开业前至少 15 天提交，并附经营许可证书。"],
+    url: FR_LICENCE, takes: ["Declared at least 15 days before opening.", "开业前至少 15 天申报。"],
+    proof: [FR_LICENCE, "Effectuer la déclaration préalable à la mairie (à Paris et en Alsace-Moselle auprès de la préfecture)", "Make the prior declaration at the mairie (in Paris and Alsace-Moselle, at the préfecture)"] }),
+  E({ id: "fr-par-terrasse", where: "FR-PAR", level: "city", segs: STORES, needs: { terrace: true }, method: "online", order: 73, cur: "EUR",
+    form: "Demande de terrasse ou d'étalage", title: ["Terrace permit, Ville de Paris", "巴黎市露台许可"], agency: ["Ville de Paris", "巴黎市政府"],
+    how: ["Applied for online on the Ville de Paris's terraces, displays and signs service, under the city's terrace rules.", "依照巴黎市露台规定，在巴黎市露台、陈列与招牌在线服务申请。"], url: "https://www.paris.fr/pages/terrasses-et-etalages-3516",
+    proof: ["https://www.paris.fr/pages/terrasses-et-etalages-3516", "Pour cela, vous devez obtenir une autorisation de la Ville de Paris.", "For this, you must obtain an authorisation from the Ville de Paris."] }),
+  E({ id: "fr-par-enseigne", where: "FR-PAR", level: "city", segs: PREMISES, needs: { signage: true }, method: "online", order: 66, cur: "EUR",
+    form: "Demande d'enseigne", title: ["Shop sign permit, Ville de Paris", "巴黎市招牌许可"], agency: ["Ville de Paris, Direction de l'urbanisme", "巴黎市城市规划局"],
+    how: ["Every permanent or temporary shop sign is applied for online on the Ville de Paris's terraces, displays and signs service.", "所有永久或临时招牌均须在巴黎市露台、陈列与招牌在线服务申请。"], url: "https://www.paris.fr/pages/enseignes-et-publicites-3514",
+    proof: ["https://www.paris.fr/pages/enseignes-et-publicites-3514", "Toutes les demandes d'enseignes (permanentes ou temporaires) doivent désormais être effectuées via le téléservice", "All sign applications (permanent or temporary) must now be made through the online service"] }),
+  /* running it */
+  E({ id: "fr-comptes", where: "FR", level: "federal", needs: { newEntity: true }, method: "online", order: 92, cur: "EUR",
+    form: "Dépôt des comptes annuels", title: ["Annual accounts filed with the commercial court registry", "向商事法院书记处提交年度账目"], agency: ["Greffe du tribunal de commerce", "商事法院书记处"],
+    how: ["After the yearly meeting approves the accounts, the manager files them with the registry, online on the one-stop formalities portal.", "年度会议批准账目后，由负责人在企业手续统一窗口在线提交书记处。"], url: "https://formalites.entreprises.gouv.fr", renews: ["Every year.", "每年一次。"],
+    proof: [`${SPE}/F31214`, "Après la tenue de l'assemblée annuelle d'approbation des comptes, le dirigeant doit déposer les comptes annuels au greffe du tribunal du commerce.", "After the annual meeting approving the accounts, the manager must file the annual accounts with the commercial court registry."] }),
+];
+
+export const EUROPE_FORMS: OfficialForm[] = [...UK_FORMS, ...EU_FORMS, ...FRANCE_FORMS];

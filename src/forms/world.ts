@@ -2,7 +2,7 @@ import { B, type Bi } from "../bi";
 import type { Level } from "../model";
 import type { FormField, Method, Needs, OfficialForm, Segment } from "./registry";
 import { usLocality } from "./usplace";
-import { UK_FORMS } from "./europe";
+import { EUROPE_FORMS } from "./europe";
 
 /* Beyond the US forms library: the major cities in China, Europe, the Middle East and the US tier 1, with each
    country's core registrations and each city's own portal. Links are the agencies' official sites. These entries are
@@ -305,23 +305,8 @@ export const WORLD_FORMS: OfficialForm[] = [
     form: `${zh}企业开办一网通办`, title: [`Open the business on ${en}'s one-stop portal`, `在${zh}企业开办平台一网通办`], agency: [aen, azh],
     how: [`${en}'s portal takes the company registration, seal, tax, social insurance and invoices in one online application, and is where the food business license is applied for.`, `${zh}的平台一次在线申请即可办理企业登记、刻章、税务、社保和发票，食品经营许可证也在此申请。`], url })),
 
-  /* United Kingdom: src/forms/europe.ts */
-  ...UK_FORMS,
-
-  /* ------------------------------- France ------------------------------- */
-  W({ id: "fr-guichet", where: "FR", level: "federal", method: "online", order: 10, cur: "EUR",
-    form: "Guichet unique des formalités d'entreprises", title: ["Company creation (one-stop formalities portal)", "企业设立（统一手续窗口）"], agency: ["INPI, Guichet unique", "法国工业产权局统一窗口（INPI）"],
-    how: ["All company creations are filed online here; the registration gives the SIREN and SIRET numbers and the intra-EU VAT number follows from the tax office.", "所有企业设立均在此在线办理，登记后取得 SIREN、SIRET 编号，欧盟增值税号随后由税务机关分配。"],
-    url: "https://formalites.entreprises.gouv.fr", feeNote: ["Registry and legal notice fees depend on the company form.", "登记费和法定公告费视公司形式而定。"] }),
-  W({ id: "fr-tax", where: "FR", level: "federal", method: "online", order: 25, cur: "EUR", fee: 0,
-    form: "Espace professionnel impots.gouv.fr", title: ["Business tax account and VAT", "企业税务账户与增值税"], agency: ["Direction générale des Finances publiques", "法国公共财政总局（DGFiP）"],
-    how: ["Open the professional space to file and pay VAT and business taxes online.", "开通企业专属空间，在线申报缴纳增值税和企业税。"], url: "https://www.impots.gouv.fr/professionnel" }),
-  W({ id: "fr-food", where: "FR", level: "city", segs: ["restaurant", "warehouse", "seller"], needs: { food: true }, method: "online", order: 60, cur: "EUR", fee: 0,
-    form: "Cerfa 13984", title: ["Food establishment declaration", "食品经营场所申报"], agency: ["Direction départementale de la protection des populations (DDPP)", "省级民众保护局（DDPP）"],
-    how: ["Declared online before opening, for any business that prepares, handles or stores food of animal origin.", "加工、处理或储存动物源性食品的企业须在开业前在线申报。"], url: "https://mesdemarches.agriculture.gouv.fr" }),
-  W({ id: "fr-eori", where: "FR", level: "federal", segs: ["seller", "warehouse", "retail"], needs: { imports: true }, method: "online", order: 35, cur: "EUR", fee: 0,
-    form: "Numéro EORI", title: ["EORI number for importing", "进口用 EORI 号码"], agency: ["Direction générale des douanes", "法国海关总署"],
-    how: ["Requested online from French customs before the first import.", "首次进口前向法国海关在线申请。"], url: "https://www.douane.gouv.fr" }),
+  /* the UK, the EU's own rules and the European countries a brand enters first: src/forms/europe.ts */
+  ...EUROPE_FORMS,
 
   /* ------------------------------- Germany ------------------------------- */
   W({ id: "de-handelsregister", where: "DE", level: "federal", needs: { newEntity: true }, method: "in_person", order: 10, cur: "EUR",

@@ -3216,5 +3216,175 @@
   "found": true,
   "sha256": "9eb421ade35d4fa9",
   "context": "accounts and tax returns apply to extend your accounts filing deadline overview after the end of its financial year, your private limited company must prepare: full ('statutory') annual accounts a company tax return you need your accounts "
+ },
+ {
+  "id": "eu-food-hygiene",
+  "read": "https://food.ec.europa.eu/food-safety/biological-safety/food-hygiene_en",
+  "quote": "All food businesses operating in the EU, regardless of their size or type, must comply with basic hygiene requirements.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "866e90c2b7bc6307",
+  "context": " releases food hygiene rules in the eu: consistent safety across the food chain all food businesses operating in the eu, regardless of their size or type, must comply with basic hygiene requirements. since 2006, the eu has applied a harmonised food hygiene policy known as the \"h"
+ },
+ {
+  "id": "eu-ppwr",
+  "read": "https://environment.ec.europa.eu/topics/waste-and-recycling/packaging-waste_en",
+  "quote": "The PPWR establishes a new set of requirements in line with Europe's waste rules that cover the entire packaging life cycle",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "fc71368d0a8c06d6",
+  "context": "nised set of rules that apply in all member states. what's included in the law? the ppwr establishes a new set of requirements in line with europe's waste rules that cover the entire packaging life cycle – from product design to waste handling, including: restrictions on certain sin"
+ },
+ {
+  "id": "eu-eudr",
+  "read": "https://environment.ec.europa.eu/topics/forests/deforestation/regulation-deforestation-free-products_en",
+  "quote": "Large and medium operators: 30 December 2026 Micro and small operators: 30 June 2027",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "976a2282862466f3",
+  "context": "burdens for companies covered by the regulation. the entry into application is: large and medium operators: 30 december 2026 micro and small operators: 30 june 2027 micro and small operators already covered by the eu timber regulation (eutr): 3"
+ },
+ {
+  "id": "fr-guichet",
+  "read": "https://formalites.entreprises.gouv.fr/cadre-juridique.php",
+  "quote": "l’ensemble des formalités d’entreprise doit être déposé en ligne auprès d’un organisme unique.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "a91b47a0b9531471",
+  "context": "oi pacte (n° 2019-486 du 22 mai 2019) prévoit qu'à partir du 1 er janvier 2023, l'ensemble des formalités d'entreprise doit être déposé en ligne auprès d'un organisme unique. l'objectif de cette réforme est de faciliter les démarches des entreprises, en "
+ },
+ {
+  "id": "fr-tva",
+  "read": "https://entreprendre.service-public.fr/vosdroits/F23570",
+  "quote": "Le service des impôts des entreprises (SIE) transmet automatiquement le numéro de TVA intracommunautaire à l'entreprise au moment de son immatriculation.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "fb98ce1677acf2b8",
+  "context": "es et les réponses s'afficheront automatiquement entreprise redevable de la tva le service des impôts des entreprises (sie) transmet automatiquement le numéro de tva intracommunautaire à l'entreprise au moment de son immatriculation. le numéro doit figurer sur les documents commerciaux et administratifs de l'ent"
+ },
+ {
+  "id": "fr-dpae",
+  "read": "https://entreprendre.service-public.fr/vosdroits/F23107",
+  "quote": "au plus tôt dans les 8 jours précédant la date de l’embauche",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "4fde7ce6b1e39a6a",
+  "context": "ntent) compétente avant la prise de fonction ou le début de la période d'essai, au plus tôt dans les 8 jours précédant la date de l'embauche. comment transmettre la dpae ? la démarche varie selon que le salarié dépend du"
+ },
+ {
+  "id": "fr-ddpp",
+  "read": "https://entreprendre.service-public.fr/vosdroits/F22387",
+  "quote": "Une déclaration doit être effectuée pour toute activité manipulant des denrées d'origine animale destinées à des consommateurs.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "c466f8804e0ea47d",
+  "context": " les boissons alcoolisées ou non. déclaration pour la vente de denrées animales une déclaration doit être effectuée pour toute activité manipulant des denrées d'origine animale destinées à des consommateurs. cette obligation concerne les professionnels qui vendent ou remettent directeme"
+ },
+ {
+  "id": "fr-hygiene-training",
+  "read": "https://entreprendre.service-public.fr/vosdroits/F22387",
+  "quote": "Formation aux règles d'hygiène alimentaire (l'exploitant et au moins un membre du personnel).",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "c466f8804e0ea47d",
+  "context": "ents gestion des déchets respect de la chaîne du froid, du chaud et congélation formation aux règles d'hygiène alimentaire (l'exploitant et au moins un membre du personnel). à noter pour connaître en détail les règles d'hygiène, vous pouvez consulter no"
+ },
+ {
+  "id": "fr-erp",
+  "read": "https://entreprendre.service-public.fr/vosdroits/F31687",
+  "quote": "Les travaux sont autorisés par la mairie après vérification des règles d'accessibilité et de sécurité par la commission consultative départementale de sécurité et d'accessibilité",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "11031c4c76393ffa",
+  "context": "ité aux règles d'accessibilité et de sécurité contre l'incendie et la panique). les travaux sont autorisés par la mairie après vérification des règles d'accessibilité et de sécurité par la commission consultative départementale de sécurité et d'accessibilité (ccdsa). faire votre demande de travaux de construction d'un erp pour la déclar"
+ },
+ {
+  "id": "fr-licence",
+  "read": "https://entreprendre.service-public.fr/vosdroits/F22379",
+  "quote": "Tout établissement qui vend de l’alcool à consommer sur place ou à emporter doit posséder une licence.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "22201a0af35efdab",
+  "context": "public / direction de l'information légale et administrative (premier ministre) tout établissement qui vend de l'alcool à consommer sur place ou à emporter doit posséder une licence. il peut s'agir d'un café, d'un pub, d'un bar, d'un restaurant, d'une discothèqu"
+ },
+ {
+  "id": "fr-permis-exploitation",
+  "read": "https://entreprendre.service-public.fr/vosdroits/F22379",
+  "quote": "Le permis d'exploitation est obtenu suite à une formation obligatoire",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "22201a0af35efdab",
+  "context": "n de la licence de la catégorie sollicitée. 1. obtenir le permis d'exploitation le permis d'exploitation est obtenu suite à une formation obligatoire. la formation porte sur la réglementation de l'exploitation d'un débit de boiss"
+ },
+ {
+  "id": "fr-terrasse",
+  "read": "https://entreprendre.service-public.fr/vosdroits/F22387",
+  "quote": "Si vous souhaitez occuper une partie de l'espace public (trottoirs, places) pour votre bar ou restaurant, vous devez en demander l'autorisation",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "c466f8804e0ea47d",
+  "context": " postal ? exemple: sainte-cécile-les-vignes ou 95200 mairie préfecture terrasse si vous souhaitez occuper une partie de l'espace public (trottoirs, places) pour votre bar ou restaurant, vous devez en demander l'autorisation (en mairie ou préfecture). il s'agit d'une aot: titlecontent. vous avez le choi"
+ },
+ {
+  "id": "fr-par-erp",
+  "read": "https://entreprendre.service-public.fr/vosdroits/F31687",
+  "quote": "Pour les démarches concernant des ERP à Paris, nous vous invitions à consulter le site internet de la préfecture de police",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "11031c4c76393ffa",
+  "context": "nial remarquable: titlecontent, réserve naturelle, parc national...). attention pour les démarches concernant des erp à paris, nous vous invitions à consulter le site internet de la préfecture de police, compte tenu des spécificités de l'organisation parisienne. vous pouvez égaleme"
+ },
+ {
+  "id": "fr-par-licence",
+  "read": "https://entreprendre.service-public.fr/vosdroits/F22379",
+  "quote": "Effectuer la déclaration préalable à la mairie (à Paris et en Alsace-Moselle auprès de la préfecture)",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "22201a0af35efdab",
+  "context": "exploitation. l'attestation est fournie par l'organisme de la formation suivie. effectuer la déclaration préalable à la mairie (à paris et en alsace-moselle auprès de la préfecture) transmettre le permis et la déclaration en mairie (à la préfecture pour paris e"
+ },
+ {
+  "id": "fr-par-terrasse",
+  "read": "https://www.paris.fr/pages/terrasses-et-etalages-3516",
+  "quote": "Pour cela, vous devez obtenir une autorisation de la Ville de Paris.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "0b1e01e3b5605a95",
+  "context": "merçant ou commerçante et vous souhaitez installer une terrasse ou un étalage ? pour cela, vous devez obtenir une autorisation de la ville de paris. retrouvez le règlement applicable à paris et accédez au téléservice. fin de la "
+ },
+ {
+  "id": "fr-par-enseigne",
+  "read": "https://www.paris.fr/pages/enseignes-et-publicites-3514",
+  "quote": "Toutes les demandes d'enseignes (permanentes ou temporaires) doivent désormais être effectuées via le téléservice",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "ce27005018660d0d",
+  "context": "paris.fr après le signe @] un nouveau téléservice pour vos demandes d'enseignes toutes les demandes d'enseignes (permanentes ou temporaires) doivent désormais être effectuées via le téléservice \" terrasses, étalages, enseignes\". téléservice enseignes crédit photo: le trait"
+ },
+ {
+  "id": "fr-comptes",
+  "read": "https://entreprendre.service-public.fr/vosdroits/F31214",
+  "quote": "Après la tenue de l'assemblée annuelle d'approbation des comptes, le dirigeant doit déposer les comptes annuels au greffe du tribunal du commerce.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "6972b21db31dc248",
+  "context": "ion légale et administrative (premier ministre), ministère chargé de la justice après la tenue de l'assemblée annuelle d'approbation des comptes, le dirigeant doit déposer les comptes annuels au greffe du tribunal du commerce. le dépôt s'effectue en ligne sur le guichet des formalités des entreprises ou p"
  }
 ]
