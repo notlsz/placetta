@@ -31,7 +31,7 @@ function walk(s: Schema, v: unknown, at: string, errors: string[], unknown: stri
     errors.push(`${at || "arguments"} must be ${types.join(" or ")}, got ${got} ${show(v)}${hint}`);
     return;
   }
-  if (s.enum && !s.enum.some(e => e === v)) { errors.push(`${at} must be one of ${s.enum.map(e => JSON.stringify(e)).join(", ")}, got ${show(v)}`); return; }
+  if (s.enum && !s.enum.some(e => e === v)) { errors.push(`${at} must be one of ${s.enum.map(e => JSON.stringify(e)).join(", ")}, got ${show(v)}${s.description ? ` (${s.description})` : ""}`); return; }
   if (typeof v === "number") {
     if (s.minimum !== undefined && v < s.minimum) errors.push(`${at} must be at least ${s.minimum}, got ${v}`);
     if (s.maximum !== undefined && v > s.maximum) errors.push(`${at} must be at most ${s.maximum}, got ${v}`);

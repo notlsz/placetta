@@ -41,6 +41,8 @@ export const TOOL_SCOPES: Record<string, Scope> = {
   find_official_forms: "read", network_lessons: "read", skill_read: "read", memory_search: "read", search_past_chats: "read", show_licenses: "read", memory_recall: "read",
   city_records: "read", check_progress: "read", address_rules: "read", inspection_guide: "read", search_email: "read", read_email: "read",
   find_files: "read", get_income: "read", get_sales: "read", get_staff: "read", read_comments: "read",
+  // src/toolIntent.ts: offers more of the run's own tools; changes nothing
+  load_tools: "read",
   set_plan: "plan", hand_off: "plan", split_job: "plan",
   prepare_application: "write", fill_fields: "write", update_application: "write", add_deadline: "write", remember: "write", skill_save: "write",
   schedule_routine: "write", cancel_routine: "write", add_store: "write", update_store: "write", edit_workspace: "write", edit_deadline: "write",

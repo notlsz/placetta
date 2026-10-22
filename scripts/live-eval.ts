@@ -507,7 +507,7 @@ async function runOne(sc: Scenario, v: Variant = VARIANTS[0]): Promise<Outcome> 
   let round = 0, turn = 0, checkerRan = false;
   const send: Send = async (body0, deep, role) => {
     const body = applyPrompt(body0, v, f => readFileSync(resolve(ROOT, f), "utf8"));
-    // the tools this round offered, for the schema checks
+    // the tools this round offered, for the schema checks (onTools below adds the ones not offered yet)
     for (const t of Array.isArray(body.tools) ? body.tools as { name?: string; input_schema?: Schema }[] : []) if (t.name && t.input_schema) schemas.set(t.name, t.input_schema);
     if (role === "review") checkerRan = true;
     if (!DRY) return liveSend(log, spent, venv)(body, deep, role);
@@ -528,7 +528,9 @@ async function runOne(sc: Scenario, v: Variant = VARIANTS[0]): Promise<Outcome> 
     const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), DRY ? 60_000 : 420_000);
     try {
       const out = await runRounds({ state, ws: () => w, apply: p => { w = p(w); }, step: s => { steps.push(s); }, send, lang: sc.lang, deep: false, account: true, svc, files, signal: ctl.signal,
-        until: Date.now() + (DRY ? 50_000 : 400_000), research: RESEARCH, channel: sc.channel, role: sc.channel && sc.channel !== "app" ? "short" : "plan" });
+        until: Date.now() + (DRY ? 50_000 : 400_000), research: RESEARCH, channel: sc.channel, role: sc.channel && sc.channel !== "app" ? "short" : "plan",
+        // every tool the run may call (tools by intent offer fewer a round; one called by name still runs)
+        onTools: defs => { for (const t of defs) schemas.set(t.name, t.input_schema as Schema); } });
       if ("reply" in out) reply = out.reply.text.map(t => t[sc.lang] || t.en).join("\n\n"); else paused = true;
     } catch (e) { error = scrub(String((e as Error)?.message ?? e)); } finally { clearTimeout(timer); }
     calls.push(...ctxOf({ messages: state.messages }).calls);

@@ -79,7 +79,7 @@ type Run = { w: Workspace; reply?: Record<string, unknown>; paused?: RunState; w
 /** One request through runRounds. json answers the model's reads (documents) and the checker; checkerDown makes every
  *  checker call fail, as when the review model is unreachable. */
 async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; script: Turn[]; json?: (prompt: string) => unknown; checkerDown?: boolean; svc?: Services; until?: number; state?: RunState; files?: Map<string, File>; maxRounds?: number; delay?: number; channel?: Channel; sender?: string; role?: Role; loop?: Turn; send?: (inner: Send) => Send;
-  runId?: string; child?: { job: string; store: string }; family?: { pending(): Promise<number>; results(): Promise<ChildResult[]> }; notify?: (n: Notice) => void }): Promise<Run> {
+  runId?: string; child?: { job: string; store: string }; family?: { pending(): Promise<number>; results(): Promise<ChildResult[]> }; notify?: (n: Notice) => void; toolLoading?: boolean }): Promise<Run> {
   let w = o.ws, i = 0;
   const steps: Step[] = [], bodies: Record<string, unknown>[] = [], roles: (Role | undefined)[] = [];
   const state = o.state ?? startState([], o.prompt ?? "");
@@ -101,7 +101,7 @@ async function agent(o: { ws: Workspace; prompt?: string; lang?: "en" | "zh"; sc
   try {
     out = await runRounds({ state, ws: () => w, apply: p => { w = p(w); }, step: s => { steps.push(s); }, send, lang: o.lang ?? "en", deep: false, account: true,
       svc: o.svc, files: o.files, signal: new AbortController().signal, until: o.until ?? Date.now() + 60_000, maxRounds: o.maxRounds, research: false, channel: o.channel, sender: o.sender, role: o.role,
-      runId: o.runId, child: o.child, family: o.family, notify: o.notify });
+      runId: o.runId, child: o.child, family: o.family, notify: o.notify, toolLoading: o.toolLoading });
   } catch (e) { error = e; }
   const calls = callsOf(state.messages);
   for (const c of calls) record(c);
@@ -766,7 +766,7 @@ async function toolMatrix() {
     spend: { policy: { ...DEFAULT_POLICY, on: true, perPurchase: 1000 }, purchases: [] },
   });
   const r = await agent({
-    ws, svc: acct.svc, files, prompt: "Exercise everything.",
+    ws, svc: acct.svc, files, prompt: "Exercise everything.", toolLoading: false,   // every tool offered at once (not by intent)
     json: () => ({ document_type: "Permit", number: "FSE-1", expires: "2027-06-30", quotes: { number: "Permit No. FSE-1", expires: "Expiration Date: 2027-06-30" }, fields: [], facts: [] }),
     script: [
       () => askAll(
@@ -1400,7 +1400,8 @@ async function connectedApps() {
   // in the app: reads run right away, a change becomes a card and runs nothing
   {
     const m = mcpAccount();
-    const r = await agent({ ws: workspace(), svc: m.svc, prompt: "Find our health permit notes in Notion and add an opening checklist page.",
+    // every app's tools offered (not by intent, src/toolIntent.ts): this checks how each is named and described
+    const r = await agent({ ws: workspace(), svc: m.svc, prompt: "Find our health permit notes in Notion and add an opening checklist page.", toolLoading: false,
       script: [
         () => ask(["mcp__notion__notion-search", { query: "health permit" }], ["mcp__notion__notion-create-pages", { title: "Opening checklist", parent: { id: "p1" }, props: '{"Status": "Draft"}', tags: ["opening"] }]),
         () => say("Found the notes. The checklist page is waiting for your approval."),
@@ -1478,8 +1479,15 @@ async function connectedApps() {
     const many: McpTool[] = [...Array.from({ length: 118 }, (_, i) => T(i % 2 ? "airtable" : "linear", i % 2 ? "Airtable" : "Linear", `${["list", "get", "update", "archive"][i % 4]}_record_${i + 1}`, i % 4 < 2, `Record tool number ${i + 1} for inventory, payroll and marketing.`)),
       T("notion", "Notion", "find_health_permit", true, "Find the health permit and its renewal date."), T("notion", "Notion", "create_inspection_task", false, "Create an inspection task.")];
     const m = mcpAccount({ tools: many });
-    const r = await agent({ ws: workspace(), svc: m.svc, prompt: "When does our health permit renew, and add an inspection task.", script: [() => say("Checking.")] });
+    const r = await agent({ ws: workspace(), svc: m.svc, prompt: "When does our health permit renew, and add an inspection task.", toolLoading: false, script: [() => say("Checking.")] });
     const names = offered(r).map(t => t.name);
+    // by intent (the default): only the app whose tools are about the request, and far fewer tokens a round
+    const lean = await agent({ ws: workspace(), svc: m.svc, prompt: "When does our health permit renew, and add an inspection task.", script: [() => say("Checking.")] });
+    const leanNames = offered(lean).map(t => t.name);
+    const full = JSON.stringify(r.bodies[0].tools).length, cut = JSON.stringify(lean.bodies[0].tools).length;
+    console.log(`     with 40 connected tools: ${Math.round(cut / 4)} tokens of tool definitions a round instead of ${Math.round(full / 4)} (${Math.round((1 - cut / full) * 100)}% fewer)`);
+    eq(leanNames.sort(), ["mcp__notion__create_inspection_task", "mcp__notion__find_health_permit"], "by intent, only the app whose tools match the request is offered");
+    ok(cut / full < 0.5, "by intent, a round's tool definitions cost under half", cut / full);
     ok(names.length === MCP_CAP && MCP_CAP === 40, `120 connected tools, ${names.length} offered (the cap is 40)`, names.length);
     ok(names.includes("mcp__notion__find_health_permit") && names.includes("mcp__notion__create_inspection_task"), "the ones that match the request are among them", names.slice(0, 5));
     eq(pickTools(many, "health permit inspection task", 2).map(t => t.name), ["find_health_permit", "create_inspection_task"], "picked by name, title and description overlap with the request");

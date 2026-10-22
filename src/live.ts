@@ -48,6 +48,7 @@ import { defaultShield, secureTools, type Shield } from "./security/secure";
 import { UNTRUSTED_RULE, wrapUntrusted } from "./security/untrusted";
 import { detectInjection } from "./security/detect";
 import { scanPdf } from "./security/pdf";
+import { argError, checkArgs, type Schema } from "./toolArgs";
 import { agencyUrlOk } from "./security/registry";
 import { sanitizeOutput } from "./security/output";
 import { scrubCredentials } from "./security/secrets";
@@ -148,6 +149,10 @@ export async function runTool(tools: Tool[], u: Block): Promise<ToolResult> {
     const input = u.input && typeof u.input === "object" && !Array.isArray(u.input) ? u.input : {};
     const missing = (tool.inputSchema.required ?? []).filter(k => input[k] == null || input[k] === "");
     if (missing.length) throw new Error(`Missing ${missing.join(", ")}.`);
+    // the rest of the schema (types, allowed values, lengths, list sizes) before anything runs: a call that doesn't fit
+    // does nothing and the model reads every problem at once (src/toolArgs.ts)
+    const fit = checkArgs(tool.inputSchema as Schema, input);
+    if (!fit.ok) throw new Error(argError(String(u.name), tool.inputSchema as Schema, fit));
     const out = await tool.execute(input);
     let content: string;
     try { content = typeof out === "string" ? out : JSON.stringify(out ?? "ok"); } catch { content = "ok"; }
@@ -164,7 +169,7 @@ export async function runTool(tools: Tool[], u: Block): Promise<ToolResult> {
 /** Tools that only look things up. When the model asks for several in one round, they run at the same time; anything
  *  that changes the workspace runs on its own, in the order the model asked, so a lookup after a change sees it. */
 export const READ_ONLY = new Set(["find_official_forms", "network_lessons", "skill_read", "memory_search", "search_past_chats", "check_progress", "address_rules",
-  "inspection_guide", "city_records", "search_email", "read_email", "find_files", "get_income", "get_sales", "get_staff", "read_comments"]);
+  "inspection_guide", "city_records", "search_email", "read_email", "find_files", "get_income", "get_sales", "get_staff", "read_comments", "load_tools"]);
 /** Every tool the model asked for in one round, results in its order: a run of lookups together, everything else one by one. */
 export async function runAll<R>(uses: Block[], one: (u: Block) => Promise<R>): Promise<R[]> {
   const out: R[] = [];
@@ -878,7 +883,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     {
       name: "update_application",
       description: "Change an application's status or next step, or mark a preview application (from the instant plan) verified once you checked it against the agency's own page and nothing needed changing. Statuses you can set: draft (Placetta is preparing it), needs (waiting on a document or answer from the person), waiting (blocked by another filing or someone else), todo (not started). An application becomes ready only through request_filing_approval. Nothing already filed or with the filing team can be changed.",
-      inputSchema: { type: "object", properties: { application_id: { type: "string" }, status: { type: "string", enum: ["draft", "needs", "waiting", "todo"] }, next_step: { type: "string", description: "The one next step, in a short sentence" },
+      inputSchema: { type: "object", properties: { application_id: { type: "string" }, status: { type: "string", enum: ["draft", "needs", "waiting", "todo"], description: "Ready to file is never set here: request_filing_approval marks it ready" }, next_step: { type: "string", description: "The one next step, in a short sentence" },
         verified: { type: "boolean", description: "True once you checked a preview application against the agency's current page or form: clears its preview mark. Only after you read the agency's own page." } }, required: ["application_id"] },
       execute(i) {
         const a = findApp(i.application_id); notFiled(a);

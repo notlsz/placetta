@@ -4,7 +4,8 @@ import { loaderWith } from "./forms/fill";
 import { answersHash, refreshForms, type FilledCopy } from "./forms/versions";
 import type { Lang } from "./i18n";
 import type { Workspace } from "./model";
-import { clean, honest, makeTools, messagesModel, official, outOfSteps, rules, runAll, runTool, type Block, type Made, type Role, type Services, type Source, type Turn } from "./live";
+import { clean, honest, makeTools, messagesModel, official, outOfSteps, rules, runAll, runTool, type Block, type Made, type Role, type Services, type Source, type Tool, type Turn } from "./live";
+import { groupOf, groupsFor, toolLoader } from "./toolIntent";
 import { B } from "./bi";
 import { MAIN_BOT, proven, reconcile, settleJobs, STOPPED_HERE, type Job } from "./jobs";
 import { finishWork, reportLines, stampFilings } from "./finish";
@@ -94,6 +95,8 @@ export type RunState = {
   mem?: RunMemoryOut;
   /** The prompt cache: tokens each provider served from its cache, and the stable prefix's fingerprint. */
   cache?: CacheStats;
+  /** The tool groups offered so far (src/toolIntent.ts), so a resumed chunk offers the same tools. */
+  toolGroups?: string[];
 };
 
 const MAX_ROUNDS = 16;
@@ -286,6 +289,10 @@ export async function runRounds(o: {
    *  search, and the processors' settings (src/odeliaMemory/). Without it the run still gets the pinned facts from the
    *  records, the cache-ordered prompt and the processors. */
   memory?: RunMemory;
+  /** Tools by intent (src/toolIntent.ts): the core plus the groups the request is about. On unless set to false. */
+  toolLoading?: boolean;
+  /** Every tool the run may use, as definitions (the live evaluation checks calls against these). */
+  onTools?: (defs: { name: string; description: string; input_schema: unknown }[]) => void;
 }): Promise<{ reply: Reply } | { paused: RunState } | { waiting: RunState; reply?: Reply }> {
   const st = o.state;
   st.started ??= new Date().toISOString();
@@ -374,6 +381,17 @@ export async function runRounds(o: {
     ...(isRemote(o.channel) ? { asked: { via: o.channel!, ...(o.sender ? { sender: o.sender.slice(0, 120) } : {}) } } : {}), ...(o.child ? { child: o.child } : {}) }), ctl),
     ...(o.memory ? memoryTools(o.memory, memOut, { w: o.ws, runId: o.runId, now: () => new Date().toISOString(), store: o.child?.store, remote: isRemote(o.channel) }) : [])], shield, { get: o.ws, apply, appReadOnly: mcpReads });
   if (isRemote(o.channel)) from.mcpReads = new Set(tools.map(t => t.name).filter(n => n.startsWith(MCP_PREFIX)));
+  /* Tools by intent (src/toolIntent.ts): the core, plus the groups this request is about (its words and the last few
+     things the person said, files sent with it, a store's bot, connected apps it names). load_tools goes through the
+     policy gate like every other call. A call to a tool that wasn't offered still runs, through the gate, and its group
+     is offered from then on. */
+  const groupsAll = [...new Set(tools.map(t => groupOf(t.name)).filter((g): g is string => !!g))];
+  if (o.toolLoading === false) st.toolGroups = groupsAll;
+  st.toolGroups ??= groupsFor([st.request ?? "", ...st.messages.filter(m => m.role === "user" && typeof m.content === "string").slice(-3).map(m => String(m.content))].join("\n"),
+    { files: o.files?.size ?? 0, child: !!o.child, apps: groupsAll.filter(g => g.startsWith("app:")).map(g => ({ id: g.slice(4), text: tools.filter(t => groupOf(t.name) === g).map(t => `${t.name} ${t.description}`).join(" ") })) });
+  const loader = toolLoader(tools, st.toolGroups, t => secureTools([t], shield, { get: o.ws, apply })[0]);
+  const defsOf = (list: Tool[]) => list.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
+  o.onTools?.(defsOf(loader.all));
   /* The agency's forms, once the work is done: every application whose answers this run changed (by any tool) is filled
      again, one new version each, kept in Documents and handed back with the reply; a card for answers that changed is
      taken back and a fresh one put up. Plain SMS changes nothing, so it fills nothing. */
@@ -430,7 +448,6 @@ export async function runRounds(o: {
     return s.messages;
   };
   const counted = (data: { usage?: unknown; model?: unknown }) => { st.cache = addCall(st.cache ?? emptyStats(), cacheUse(data.usage as Record<string, unknown> | undefined), shaped.prefix); };
-  const defs = tools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   const sources = new Map(st.sources.map(s => [s.url, s]));
   const max = o.maxRounds ?? MAX_ROUNDS;
   let finished = false;
@@ -454,7 +471,7 @@ export async function runRounds(o: {
       st.rounds++; st.seatRounds = (st.seatRounds ?? 0) + 1;
       // streamed into the draft: the app shows the words as the model writes them, not when the round ends
       const before = st.text;
-      const data = await o.send({ messages: context(), max_tokens: 3500, system, tools: defs, cache_breaks: shaped.breaks, cache_key: shaped.prefix }, o.deep, mainRole,
+      const data = await o.send({ messages: context(), max_tokens: 3500, system, tools: defsOf(loader.offered()), cache_breaks: shaped.breaks, cache_key: shaped.prefix }, o.deep, mainRole,
         o.draft ? t => { if (t) o.draft!(clean((before ? before + "\n\n" + t : t).slice(made.lastToolAt))); } : undefined);
       counted(data as { usage?: unknown });
       last = data.content;
@@ -481,7 +498,8 @@ export async function runRounds(o: {
           out = { type: "tool_result", tool_use_id: String(u.id ?? ""), content: refused, is_error: true };
           content = refused; error = true;
         } else {
-          const r = await runTool(tools, u);
+          const r = await runTool(loader.all, u);
+          loader.used(name); st.toolGroups = loader.loaded();
           if (!r.is_error) addUsed(st.used ??= [], usedBy(name, input, r.content, o.ws()));
           const note = r.is_error ? null : channelNote(from, name);
           out = (note ? { ...r, content: `${r.content}\n\nNote: ${note}` } : r) as unknown as Record<string, unknown>;
