@@ -261,7 +261,7 @@ create or replace function public.agent_memory_pin(p_id text, p_on boolean) retu
 language plpgsql security definer set search_path = '' as $$
 declare ws uuid;
 begin
-  select workspace_id into ws from public.agent_memories where id = p_id;
+  select workspace_id into ws from public.agent_memories where id = p_id and (scope_kind <> 'person' or scope_id = auth.uid()::text);
   if ws is null or not public.is_member(ws) then raise exception 'You can''t change memories in this workspace.'; end if;
   update public.agent_memories set pinned = coalesce(p_on, false), updated_by = auth.uid(), updated_at = now() where id = p_id;
 end $$;
@@ -302,8 +302,8 @@ begin
   select * into p from public.agent_memory_proposals where id = p_id;
   if p.id is null or not public.is_member(p.workspace_id) then raise exception 'You can''t review briefs in this workspace.'; end if;
   if p_approve then
-    insert into public.agent_memory_briefs (workspace_id, scope_kind, scope_id, body, updated_by, updated_at) values (p.workspace_id, p.scope_kind, p.scope_id, '- ' || p.line, auth.uid(), now())
-    on conflict (workspace_id, scope_kind, scope_id) do update set body = left(case when agent_memory_briefs.body = '' then '' else agent_memory_briefs.body || E'\n' end || '- ' || p.line, 4000), updated_by = auth.uid(), updated_at = now();
+    insert into public.agent_memory_briefs (workspace_id, scope_kind, scope_id, body, updated_by, updated_at) values (p.workspace_id, p.scope_kind, p.scope_id, p.line, auth.uid(), now())
+    on conflict (workspace_id, scope_kind, scope_id) do update set body = left(case when agent_memory_briefs.body = '' then '' else agent_memory_briefs.body || E'\n' end || p.line, 4000), updated_by = auth.uid(), updated_at = now();
   end if;
   delete from public.agent_memory_proposals where id = p_id;
 end $$;

@@ -36,7 +36,7 @@ export function propose(m: AgentMemory, scope: Scope, line: string, why: string,
 export function approveProposal(m: AgentMemory, scope: Scope, id: string, now: string, by?: string): AgentMemory {
   const b = briefOf(m, scope), p = b?.proposals.find(x => x.id === id);
   if (!b || !p) return m;
-  const body = (b.body ? b.body + "\n" : "") + "- " + p.line;
+  const body = (b.body ? b.body + "\n" : "") + p.line;
   return { ...m, briefs: m.briefs.map(x => (x === b ? { ...x, body: body.slice(0, BRIEF_MAX), updated: now, ...(by ? { by } : {}), proposals: x.proposals.filter(y => y.id !== id) } : x)) };
 }
 export function rejectProposal(m: AgentMemory, scope: Scope, id: string): AgentMemory {

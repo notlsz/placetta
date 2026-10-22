@@ -220,7 +220,7 @@ export type Workspace = {
   controls?: Controls;
   undo?: UndoPoint[];
   /** Agent memory outside an account (the sample): its observations, briefs and settings (src/odeliaMemory/). An account
-   *  keeps it in its own tables with row-level security (migration 20261022171905_agent_memory), never here. */
+   *  keeps it in its own tables with row-level security (migration 20261022211905_agent_memory), never here. */
   agentMemory?: import("./odeliaMemory/types").AgentMemory;
 };
 /** The plan a new workspace starts with: what and where the person typed, when, and how many permits the registry listed.

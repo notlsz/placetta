@@ -1,6 +1,6 @@
 import { DEFAULT_MEM_SETTINGS, type AgentMemory, type Brief, type BriefProposal, type Conflict, type MemSettings, type Observation, type ScopeKind, type SourceKind } from "./types";
 
-/* Agent memory as the database keeps it (migration 20261022171905_agent_memory): one row per memory, brief, proposal and
+/* Agent memory as the database keeps it (migration 20261022211905_agent_memory): one row per memory, brief, proposal and
    conflict. The same mapping for the app (src/cloud/memoryApi.ts) and agent-run. */
 
 export type MemoryRow = {

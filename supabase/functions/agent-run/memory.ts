@@ -2,7 +2,7 @@
 // run's own workspace; the service role writes only suggestions (status suggested), what the person asked to remember
 // in the app (approved, with them as its author), merges and the history of a superseded fact. Approving a suggestion,
 // editing, deleting and turning memory on happen only in the app, through the database's own functions, which check the
-// person's role. Before migration 20261022171905_agent_memory is applied every read comes back empty and memory is off.
+// person's role. Before migration 20261022211905_agent_memory is applied every read comes back empty and memory is off.
 
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
 // @ts-types="./agent.d.ts"

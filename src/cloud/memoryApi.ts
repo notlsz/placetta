@@ -2,7 +2,7 @@ import { supabase, type ApiError } from "./api";
 import { MEMORY_COLS, memoryOf, type BriefRow, type ConflictRow, type MemoryRow, type ProposalRow, type SettingsRow } from "../odeliaMemory/rows";
 import type { AgentMemory, Scope } from "../odeliaMemory/types";
 
-/* Agent memory in an account (migration 20261022171905_agent_memory). Anyone on the workspace reads it; the database's
+/* Agent memory in an account (migration 20261022211905_agent_memory). Anyone on the workspace reads it; the database's
    own functions decide who may change what (members edit, delete and pin; owners and admins approve, turn memory on and
    forget all; viewers read). These only ask. Before the migration is applied the reads come back empty and memory shows
    as off. */

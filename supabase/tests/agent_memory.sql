@@ -1,4 +1,4 @@
--- Agent memory (20261022171905_agent_memory.sql): row-level security per workspace, the four roles, no secrets, approval
+-- Agent memory (20261022211905_agent_memory.sql): row-level security per workspace, the four roles, no secrets, approval
 -- with supersede, the memory cap, forget all, briefs and proposals, the nightly check against the records, and the run's
 -- cache record. Run with scripts/test-db.sh (ends by raising TEST_RESULTS, so nothing is kept).
 do $test$
@@ -131,7 +131,7 @@ begin
   execute 'set local role authenticated';
   perform set_config('request.jwt.claims', (jsonb_build_object('sub', mb, 'role', 'authenticated', 'aal', 'aal1') || pw)::text, true);
   perform public.agent_memory_proposal_review('p1', true);
-  res := res || jsonb_build_object('an approved proposal joins the brief', (select body from public.agent_memory_briefs where workspace_id = w and scope_kind = 'store' and scope_id = 'flushing') like '%- Inspector asked for hood cleaning tags last visit');
+  res := res || jsonb_build_object('an approved proposal joins the brief', (select body from public.agent_memory_briefs where workspace_id = w and scope_kind = 'store' and scope_id = 'flushing') like '%Inspector asked for hood cleaning tags last visit');
 
   -- forget all: owners and admins; the briefs stay
   begin perform public.agent_memory_forget_all(w); res := res || '{"member can''t clear": false}';
