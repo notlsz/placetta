@@ -111,9 +111,12 @@ export function stripePriceMatches(p: { unit_amount?: number | null; currency?: 
 
 /* ================================================================== the simple model (approved 2026-10-22)
 
-   The model every new workspace sees: one price per license, filed; a fixed list of complex licenses at a higher
-   price; renewals at one price after a one-tap approval; tracking free; a chain plan for 10 or more stores; government
-   fees passed through at cost. docs/PRICING.md has the Stripe prices to create and the margin math,
+   The model every new workspace sees (the founder's update of 2026-10-22): one subscription, the store plan, at $149 a
+   store a month billed yearly, for tracking, renewal monitoring, alerts, the document vault, Odelia's chat and every
+   renewal Odelia files on her own; each new license on top at $299, $999 for a fixed list of complex licenses; a renewal
+   that needs Placetta's team, or for a store without the plan, $99 after a one-tap approval; 10 or more stores on the
+   plan: every new license included too (the chain plan); the plan preview free; government fees passed through at
+   cost. docs/PRICING.md has the Stripe prices to create and the margin math,
    docs/PRICING-RESEARCH.md the research each number was checked against, docs/SALES-PLAYBOOK.md how the team quotes.
 
    Grandfathering: a workspace that was already a customer when this model shipped (billing.price_model = 'legacy', set
@@ -122,16 +125,17 @@ export function stripePriceMatches(p: { unit_amount?: number | null; currency?: 
 
 /** The simple list. Public: the landing page shows these. Changing one changes a public price: don't, without the founder. */
 export const SIMPLE = {
-  licenseUsd: 299,          // any license, permit or registration, filed and tracked to approval
-  complexUsd: 999,          // a license on COMPLEX_LIST
-  renewalUsd: 99,           // a renewal of a license already approved, after the owner's one-tap approval
-  trackingUsd: 0,           // tracking, rule-change alerts and the plan preview: free
-  chainStoreMonthUsd: 149,  // the chain plan: a store a month, billed yearly, every license and renewal included
-  chainMinStores: 10,
+  planStoreMonthUsd: 149,   // the store plan, a store a month, billed yearly: tracking, renewal monitoring, alerts, the
+                            // document vault, Odelia's chat, and every renewal Odelia files on her own
+  licenseUsd: 299,          // a new license, permit or registration, filed and tracked to approval
+  complexUsd: 999,          // a new license on COMPLEX_LIST
+  renewalUsd: 99,           // a renewal the plan doesn't include (it needs Placetta's team, or the store has no plan), after a one-tap approval
+  previewUsd: 0,            // the plan preview: every license a store needs, with fees and timelines, free
+  chainMinStores: 10,       // 10 or more stores on the plan: every new license is included too
 } as const;
 
-/** A chain plan store's year, the amount its Stripe price must have: $149 × 12. */
-export const CHAIN_STORE_YEAR_USD = SIMPLE.chainStoreMonthUsd * 12;
+/** A store plan year, the amount its Stripe price must have: $149 × 12. */
+export const PLAN_STORE_YEAR_USD = SIMPLE.planStoreMonthUsd * 12;
 
 export type ComplexId = "liquor" | "plan_review" | "import";
 /** The complex list, fixed: a license is complex only when its name matches one of these. Nothing else costs $999. */
@@ -149,6 +153,9 @@ export const COMPLEX_LIST: { id: ComplexId; name: { en: string; zh: string }; ma
 export const NOT_CHARGED = /\b(final|pre-?opening|routine) inspection\b|\binspection$|food handler (cards?|certificates?)|food (protection )?manager|food protection certificate|食品经理|食品处理员/i;
 
 export type LicenseTier = "license" | "complex" | "renewal" | "free";
+/** What a quote can be: a priced tier, or included (in the store plan: a renewal Odelia files on her own; in the chain
+ *  plan: everything). */
+export type QuoteTier = LicenseTier | "plan" | "chain";
 /** The complex item a name matches, or null. */
 export const complexOf = (name: string) => COMPLEX_LIST.find(c => c.match.test(name) && !(c.not && c.not.test(name))) ?? null;
 /** What one filing costs on the simple model, from its name and whether that license was approved before (a renewal). */
@@ -165,7 +172,7 @@ export const SIMPLE_PRICE_ENV = {
   license: { env: "STRIPE_PRICE_LICENSE", cents: SIMPLE.licenseUsd * 100, interval: null },
   complex: { env: "STRIPE_PRICE_LICENSE_COMPLEX", cents: SIMPLE.complexUsd * 100, interval: null },
   renewal: { env: "STRIPE_PRICE_RENEWAL", cents: SIMPLE.renewalUsd * 100, interval: null },
-  chain: { env: "STRIPE_PRICE_CHAIN_STORE", cents: CHAIN_STORE_YEAR_USD * 100, interval: "year" },
+  plan: { env: "STRIPE_PRICE_STORE_PLAN", cents: PLAN_STORE_YEAR_USD * 100, interval: "year" },
 } as const;
 export type SimpleItem = keyof typeof SIMPLE_PRICE_ENV;
 
@@ -188,7 +195,7 @@ export const EXPEDITER_RESTAURANT_USD = { low: 2000, high: 7500, source: "https:
 
 /** A simple-model charge as the owner sees it before approving: what, how much, and the government fee passed through. */
 export type LicenseQuote = {
-  tier: LicenseTier | "chain";
+  tier: QuoteTier;
   cents: number;
   /** false: Stripe doesn't have the approved price yet, so the team sends a quote and nothing is charged */
   priceOk: boolean;
@@ -201,12 +208,13 @@ const usd0 = (n: number) => "$" + n.toLocaleString("en-US");
 export function licenseQuoteLine(tier: LicenseQuote["tier"], priceOk: boolean, paid = false, govFee?: string | null): { en: string; zh: string } {
   const gov = govFee ? { en: ` The agency's own fee (${govFee}) is passed through at cost, paid to the agency.`, zh: `机构规费（${govFee}）按实际金额代付，直接付给机构。` }
     : { en: " Any agency fee is passed through at cost, paid to the agency.", zh: "如有机构规费，按实际金额代付，直接付给机构。" };
-  if (tier === "chain") return { en: "Included in your chain plan." + gov.en, zh: "已包含在连锁方案中。" + gov.zh };
+  if (tier === "chain") return { en: `Included: with ${SIMPLE.chainMinStores} or more stores on the plan, every license is.` + gov.en, zh: `已包含：方案内有 ${SIMPLE.chainMinStores} 家及以上门店，每项执照都包含在内。` + gov.zh };
+  if (tier === "plan") return { en: "Included in your store plan: Odelia files this renewal on her own." + gov.en, zh: "已包含在门店方案中：此次续期由 Odelia 自行提交。" + gov.zh };
   if (tier === "free") return { en: "Free: Placetta tracks it and your team completes it.", zh: "免费：快哉负责跟踪，由您的团队完成。" };
   const usd = tierUsd(tier);
   if (paid) return { en: `Paid: ${usd0(usd)}. Approve and it's filed.` + gov.en, zh: `已付款：${usd} 美元。批准后即提交。` + gov.zh };
   const what = tier === "complex" ? { en: `${usd0(usd)}, a complex license (liquor, building plan review or an import permit), filed and tracked to approval.`, zh: `${usd} 美元，复杂执照（酒类、建筑图纸审查或进口许可），提交并跟踪至获批。` }
-    : tier === "renewal" ? { en: `${usd0(usd)} for this renewal, charged only after you approve it.`, zh: `本次续期 ${usd} 美元，经您批准后才收费。` }
+    : tier === "renewal" ? { en: `${usd0(usd)} for this renewal, charged only after you approve it. Renewals Odelia files on her own are included in the $${SIMPLE.planStoreMonthUsd} store plan.`, zh: `本次续期 ${usd} 美元，经您批准后才收费。Odelia 自行提交的续期包含在每月 ${SIMPLE.planStoreMonthUsd} 美元的门店方案中。` }
     : { en: `${usd0(usd)} for this license, filed and tracked to approval.`, zh: `本项执照 ${usd} 美元，提交并跟踪至获批。` };
   if (!priceOk) return { en: `${what.en} Online payment isn't set up for it yet, so the team sends a quote. Nothing is charged.`, zh: `${what.zh}该项暂不能在线支付，团队会向您报价，不会收取任何费用。` };
   return { en: what.en + gov.en, zh: what.zh + gov.zh };
@@ -217,5 +225,5 @@ export function priceFacts(model: PriceModel = "simple"): string {
   const s = SIMPLE;
   return model === "legacy"
     ? "This workspace is on a plan it bought before October 2026 and keeps it unchanged; for its price, point the person to Settings, Billing. New customers pay per license."
-    : `Placetta's prices (new customers): any license, permit or registration filed and tracked to approval $${s.licenseUsd}; complex licenses $${s.complexUsd}, only for ${COMPLEX_LIST.map(c => c.name.en.toLowerCase()).join(", ")}; a renewal $${s.renewalUsd}, charged only after the owner's one-tap approval; tracking, rule-change alerts and the plan preview free; ${s.chainMinStores} or more stores: $${s.chainStoreMonthUsd} a store a month billed yearly, every license and renewal included; government fees passed through at cost, never marked up. Every charge is shown to an owner before approval and nothing is charged without it. No discounts. Never quote any other number.`;
+    : `Placetta's prices (new customers): the store plan, $${s.planStoreMonthUsd} a store a month billed yearly, covers tracking, renewal monitoring, alerts, the document vault, chat with you and every renewal you file on your own; each new license, permit or registration filed and tracked to approval $${s.licenseUsd}; complex licenses $${s.complexUsd}, only for ${COMPLEX_LIST.map(c => c.name.en.toLowerCase()).join(", ")}; a renewal that needs Placetta's team, or for a store without the plan, $${s.renewalUsd} after the owner's one-tap approval; ${s.chainMinStores} or more stores on the plan: every new license included too; the plan preview is free; government fees passed through at cost, never marked up. Every charge is shown to an owner before approval and nothing is charged without it. No discounts. Never quote any other number.`;
 }

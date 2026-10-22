@@ -14,7 +14,7 @@ function useCost(): Cost {
   const { ws, cloud } = useApp();
   return useMemo(() => {
     const bl = cloud?.billing;
-    const billing: Billed | undefined = cloud ? { plan: cloud.plan, tier: bl?.subscription_plan === "pro" ? "pro" : "essentials", comped: !!bl?.comped, free: !!bl?.free, entryMarkets: bl?.entry_markets ?? 0 } : undefined;
+    const billing: Billed | undefined = cloud ? { plan: cloud.plan, tier: bl?.subscription_plan === "pro" ? "pro" : "essentials", comped: !!bl?.comped, free: !!bl?.free, entryMarkets: bl?.entry_markets ?? 0, model: bl?.price_model === "simple" ? "simple" : "legacy", paidLocations: (bl as { paid_locations?: number } | undefined)?.paid_locations ?? 0 } : undefined;
     return costToOpen(ws, { today: daysFromNow(0), billing });
   }, [ws, cloud]);
 }

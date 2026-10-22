@@ -1,5 +1,7 @@
--- The simple pricing model (src/pricing.ts SIMPLE, docs/PRICING.md): any license $299, a complex one $999, a renewal
--- $99, tracking free, 10 or more stores $149 a store a month billed yearly, government fees at cost.
+-- The simple pricing model (src/pricing.ts SIMPLE, docs/PRICING.md): the store plan, $149 a store a month billed
+-- yearly (tracking, renewal monitoring, alerts, the document vault, Odelia's chat, and renewals Odelia files on her
+-- own); each new license $299, a complex one $999; a renewal the plan doesn't include $99; with 10 or more stores on
+-- the plan every new license is included too; the plan preview free; government fees at cost.
 --
 -- Grandfathering: every workspace that was already a customer when this runs (it has a Stripe customer, a
 -- subscription, an entry plan, or is comped) is marked 'legacy' once and keeps its plan. Every other workspace, and
@@ -26,7 +28,8 @@ create table if not exists public.license_charges (
   id uuid primary key default gen_random_uuid(),
   workspace_id uuid not null references public.workspaces(id) on delete cascade,
   ref text not null check (length(ref) between 1 and 120),
-  tier text not null check (tier in ('license', 'complex', 'renewal', 'free')),
+  -- included: $0, a renewal Odelia files on her own for a store on the plan; free: $0, what staff complete themselves
+  tier text not null check (tier in ('license', 'complex', 'renewal', 'free', 'included')),
   cents int not null check (cents between 0 and 100000),
   -- pending: Stripe Checkout is open; paid: paid (or free), waiting for its filing; used: its filing went in; void: let go
   status text not null default 'pending' check (status in ('pending', 'paid', 'used', 'void')),
@@ -67,16 +70,16 @@ create or replace function public.license_charge_open(p_ws uuid, p_ref text, p_t
 language plpgsql security definer set search_path = '' as $$
 declare had public.license_charges; nid uuid;
 begin
-  if p_tier not in ('license', 'complex', 'renewal', 'free') then return jsonb_build_object('ok', false, 'code', 'bad_tier'); end if;
-  if p_cents is null or p_cents < 0 or p_cents > 100000 or (p_tier = 'free') <> (p_cents = 0) then return jsonb_build_object('ok', false, 'code', 'bad_price'); end if;
+  if p_tier not in ('license', 'complex', 'renewal', 'free', 'included') then return jsonb_build_object('ok', false, 'code', 'bad_tier'); end if;
+  if p_cents is null or p_cents < 0 or p_cents > 100000 or (p_tier in ('free', 'included')) <> (p_cents = 0) then return jsonb_build_object('ok', false, 'code', 'bad_price'); end if;
   perform 1 from public.billing where workspace_id = p_ws for update;
   select * into had from public.license_charges where workspace_id = p_ws and ref = p_ref and status = 'paid';
   if had.id is not null then return jsonb_build_object('ok', true, 'id', had.id, 'paid', true, 'again', true); end if;
   update public.license_charges set status = 'void' where workspace_id = p_ws and ref = p_ref and status = 'pending';
   insert into public.license_charges (workspace_id, ref, tier, cents, status, approved_by, paid_at)
-    values (p_ws, p_ref, p_tier, p_cents, case when p_tier = 'free' then 'paid' else 'pending' end, p_user, case when p_tier = 'free' then now() end)
+    values (p_ws, p_ref, p_tier, p_cents, case when p_cents = 0 then 'paid' else 'pending' end, p_user, case when p_cents = 0 then now() end)
     returning id into nid;
-  return jsonb_build_object('ok', true, 'id', nid, 'paid', p_tier = 'free', 'again', false);
+  return jsonb_build_object('ok', true, 'id', nid, 'paid', p_cents = 0, 'again', false);
 end $$;
 
 -- Stripe said it's paid (the webhook, or the billing function after an off-session charge), or refused (void).
@@ -99,7 +102,8 @@ grant execute on function public.license_state(uuid, text), public.license_charg
 
 /* ------------------------------ who may file ------------------------------ */
 
--- plan_of gains 'simple': a simple-model workspace with no chain plan. A chain plan is a subscription, so 'monthly'.
+-- plan_of gains 'simple': a simple-model workspace without the store plan. The store plan is a subscription, so
+-- 'monthly' (Odelia's allowance a store), but on the simple model a subscription alone doesn't file a new license.
 -- A workspace without a billing row (every workspace gets one when it's made) stays 'none': fail closed.
 create or replace function public.plan_of(ws uuid) returns text
 language sql stable security definer set search_path = '' as $$
@@ -113,13 +117,18 @@ language sql stable security definer set search_path = '' as $$
   ), 'none') end;
 $$;
 
--- A filing may go in on a paid plan (as before), or on the simple model once its own charge is paid.
+-- A filing may go in: for a customer from before, on a paid plan (as before). On the simple model: comped, or with 10
+-- or more stores paid for on the plan (every license included), or once its own charge is paid (or recorded as
+-- included, $0). While payments are off, everything is open, as before.
 create or replace function public.can_file_app(ws uuid, p_app text) returns boolean
 language sql stable security definer set search_path = '' as $$
-  select public.can_file(ws) or (
-    public.plan_of(ws) = 'simple'
-    and exists (select 1 from public.workspaces w where w.id = ws and w.authorized_at is not null)
-    and exists (select 1 from public.license_charges c where c.workspace_id = ws and c.ref = p_app and c.status = 'paid'));
+  select case
+    when not public.payments_on() or coalesce((select b.price_model from public.billing b where b.workspace_id = ws), 'legacy') <> 'simple' then public.can_file(ws)
+    else exists (select 1 from public.workspaces w where w.id = ws and w.authorized_at is not null) and (
+      exists (select 1 from public.billing b where b.workspace_id = ws and (b.comped
+        or (b.subscription_status in ('active', 'trialing') and coalesce(b.paid_locations, 0) >= 10)))
+      or exists (select 1 from public.license_charges c where c.workspace_id = ws and c.ref = p_app and c.status = 'paid'))
+  end;
 $$;
 revoke execute on function public.can_file_app(uuid, text) from public, anon;
 grant execute on function public.can_file_app(uuid, text) to authenticated, service_role;
@@ -143,13 +152,13 @@ create trigger license_charge_use after insert on public.filings for each row ex
 create or replace function public.ai_rules() returns jsonb
 language sql immutable set search_path = '' as $$
   select jsonb_build_object(
-    'per_location_month', 25,      -- Essentials (legacy) and the chain plan, $149 a store a month: up to $25 of AI
+    'per_location_month', 25,      -- Essentials (legacy) and the store plan, $149 a store a month: up to $25 of AI
     'per_location_month_pro', 50,  -- Pro (legacy), $299 a location a month: up to $50 of AI
     'opening_store_month', 50,     -- each store still opening (its opening fee paid): $50 more a month while it opens
     'entry_per_market', 15,        -- $299 a market, once (legacy): $15 of AI for 30 days
     'entry_days', 30,
     'comped_month', 200,
-    'simple_month', 5,             -- the simple model, free: tracking, alerts and the plan preview, $5 of AI a month
+    'simple_month', 5,             -- the simple model without the plan: the plan preview and a little chat, $5 of AI a month
     'simple_per_license', 5,       -- and $5 more for each license or renewal paid in the last 30 days
     'reduced_at', 0.6,             -- from 60% of the budget, saver mode: cheaper models, no web research
     'alert_at', jsonb_build_array(0.5, 0.8),   -- the owner hears at 50% and 80%

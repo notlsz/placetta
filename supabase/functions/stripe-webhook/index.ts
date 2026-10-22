@@ -1,7 +1,7 @@
 // Stripe tells us when someone pays. Signature checked by hand (HMAC-SHA256), each event applied once.
 //   checkout.session.completed (payment, plan=entry)  -> billing.entry_markets += markets (added in SQL, atomically)
 //   checkout.session.completed (payment, kind=license) -> that filing's license charge is paid (license_charge_settle)
-//   a chain plan subscription (plan=chain)             -> billing.subscription_*, plan 'chain', its stores paid for
+//   a store plan subscription (plan=store)             -> billing.subscription_*, plan 'store', its stores paid for
 //   customer.subscription.created / updated / deleted  -> billing.subscription_*, unless an event created later was
 //                                                        already applied (Stripe doesn't deliver in order)
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
@@ -114,8 +114,8 @@ Deno.serve(async (req) => {
         const tierOf = (p: { id?: string; lookup_key?: string | null } | undefined) => {
           const it = itemOf(p, env);
           if (it === "essentials" || it === "pro") return it;
-          // the simple model's chain plan: a store a month, billed yearly (src/pricing.ts SIMPLE_PRICE_ENV)
-          if (p?.id && env(SIMPLE_PRICE_ENV.chain.env) === p.id) return "chain" as const;
+          // the simple model's store plan: a store a month, billed yearly (src/pricing.ts SIMPLE_PRICE_ENV)
+          if (p?.id && env(SIMPLE_PRICE_ENV.plan.env) === p.id) return "store" as const;
           return (["essentials", "pro"] as const).find((t) => Object.values(TERM_PRICE_ENV[t]).some((k) => !!p?.id && env(k) === p.id));
         };
         const located = items.filter((i) => !!tierOf(i.price));

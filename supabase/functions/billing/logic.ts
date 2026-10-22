@@ -160,12 +160,14 @@ export function licenseFactsOf(apps: unknown, ref: unknown): LicenseFacts | null
   return { name: a.name.en.slice(0, 200), govFeeUsd: fees.length ? fees.reduce((s, n) => s + n, 0) : null };
 }
 
-/** The quote an owner sees before approving a filing on the simple model: included on the chain plan (or any paid plan),
- *  free for what staff complete themselves, else $299, $999 or a $99 renewal, from its own Stripe price only. */
-export function simpleQuote(f: LicenseFacts, x: { renewal: boolean; paid: { tier: string; cents: number } | null; covered: boolean; priceOk: (item: SimpleItem) => boolean }): LicenseQuote {
+/** The quote an owner sees before approving a filing on the simple model: everything included with 10 or more stores
+ *  on the plan (the chain plan); a renewal Odelia files on her own included in the store plan; free for what staff
+ *  complete themselves; else $299, $999 or a $99 renewal, from its own Stripe price only. */
+export function simpleQuote(f: LicenseFacts, x: { renewal: boolean; paid: { tier: string; cents: number } | null; chain: boolean; onPlan: boolean; automated: boolean; priceOk: (item: SimpleItem) => boolean }): LicenseQuote {
   const gov = f.govFeeUsd ? "$" + f.govFeeUsd.toLocaleString("en-US", { maximumFractionDigits: 2 }) : null;
-  if (x.covered) return { tier: "chain", cents: 0, priceOk: true, line: licenseQuoteLine("chain", true, false, gov) };
+  if (x.chain) return { tier: "chain", cents: 0, priceOk: true, line: licenseQuoteLine("chain", true, false, gov) };
   const tier = licenseTierOf(f.name, x.renewal);
+  if (tier === "renewal" && x.onPlan && x.automated && !x.paid) return { tier: "plan", cents: 0, priceOk: true, line: licenseQuoteLine("plan", true, false, gov) };
   if (x.paid) {
     const t = (["license", "complex", "renewal", "free"].includes(x.paid.tier) ? x.paid.tier : tier) as LicenseTier;
     return { tier: t, cents: x.paid.cents, priceOk: true, paid: true, line: licenseQuoteLine(t, true, true, gov) };
@@ -181,8 +183,10 @@ export function simpleApproval(q: LicenseQuote, shown: { tier?: unknown; cents?:
   return { ok: true };
 }
 
-/** The chain plan: 10 stores or more, every store in the workspace, billed yearly. */
-export const chainQuantity = (stores: number): number | null => (stores >= SIMPLE.chainMinStores ? Math.min(stores, 2000) : null);
+/** The store plan: every store in the workspace (at least one), billed yearly. */
+export const planQuantity = (stores: number): number => Math.min(Math.max(1, Math.floor(stores) || 0), 2000);
+/** 10 or more stores paid for on the plan: every new license is included too (the chain plan). */
+export const isChain = (paidLocations: number): boolean => paidLocations >= SIMPLE.chainMinStores;
 
 /** Whether a simple-model Stripe price is exactly the approved one. */
 export const simplePriceOk = (item: SimpleItem, p: Parameters<typeof stripePriceMatches>[0]) =>
