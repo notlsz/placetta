@@ -141,5 +141,11 @@ export function usPlace(where: string): UsPlace {
   if (city) city = city.replace(/\d{5}(-\d{4})?/g, "").trim();
   if (city && /^\d/.test(city)) city = undefined;
   const row = city && state ? CITY[`${city.toLowerCase().replace(/\s+/g, " ")}|${state}`] : undefined;
+  // an address that names the county instead of a town ("..., Santa Clara County, CA") is in the county's unincorporated
+  // area: the county's steps apply, and no city's
+  if (!row && city && state && /\bcounty$/i.test(city)) {
+    const county = Object.values(COUNTIES).find(c => c.state === state && c.en.toLowerCase() === city!.toLowerCase());
+    if (county) return { city: undefined, state, county, unincorporated: true, locality };
+  }
   return { city, state, county: row ? COUNTIES[row.county] : undefined, unincorporated: !!row?.uninc, ownHealth: row?.ownHealth, locality };
 }

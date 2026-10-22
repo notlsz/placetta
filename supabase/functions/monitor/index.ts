@@ -22,6 +22,7 @@ import { deadlineRules } from "../_shared/business_rules.ts";
 // @deno-types="../_shared/opening.d.ts"
 import { approvalsLine, type FilingRow, finishWork, MAX_RESUMES, normalizeState, openingLine, openingPath, overdue, publishedDays, resumable, runsOn, type Routine, stampFilings } from "../_shared/opening.js";
 import { cityOf, cityRecords, type CityRecord } from "../../../src/opendata.ts";
+import { workspaceToday } from "../../../src/localDay.ts";
 import { wsDailyLimit } from "../_shared/ai_gate.ts";
 import { weeklyGovernance } from "./governance.ts";
 import { dueNotices, noticeFor, type RenewalRow } from "./renewal_notice.ts";
@@ -478,7 +479,9 @@ Deno.serve(async (req) => {
     for (const w of rows ?? []) {
       names.set(w.id, String(w.name ?? "Your business"));
       const st = (w.state ?? {}) as { deadlines?: unknown };
-      byWs.set(w.id, [...deadlineUpdates(w.id, st.deadlines, today), ...storeUpdates(w.id, (w.state as { stores?: unknown } | null)?.stores, today)]);
+      // days to a deadline count from the stores' own date, not UTC's (src/localDay.ts)
+      const local = workspaceToday((w.state as { stores?: unknown } | null)?.stores, started);
+      byWs.set(w.id, [...deadlineUpdates(w.id, st.deadlines, local), ...storeUpdates(w.id, (w.state as { stores?: unknown } | null)?.stores, local)]);
       states.set(w.id, (w.state ?? null) as { deadlines?: unknown; stores?: unknown } | null);
       all.push({ id: w.id, state: { apps: (w.state as { apps?: unknown } | null)?.apps } });
     }
@@ -774,8 +777,9 @@ Deno.serve(async (req) => {
       update: async (u) => { const { error } = await admin.from("updates").upsert({ ...u, app_id: u.app_id ?? null, body: u.body ?? null }, { onConflict: "workspace_id,dedupe", ignoreDuplicates: true }); if (error) console.error("renewal update", u.workspace_id, error.code); },
     };
     for (const [ws, st] of states) {
-      const due = renewalJobs(ws, st, today);
-      if (due.length && (await planOf(ws)) !== "none") await startRenewals(ws, due, today, io);
+      const local = workspaceToday(st?.stores, started);
+      const due = renewalJobs(ws, st, local);
+      if (due.length && (await planOf(ws)) !== "none") await startRenewals(ws, due, local, io);
     }
     // filings with the agency well past its published processing time: one check every two weeks
     for (const f of ((filings ?? []) as (Filing & { submitted_at?: string | null })[]).filter((x) => x.status === "submitted")) {

@@ -41,6 +41,7 @@ import { elapsed, fromRow, merge, napper, pollDelay, reveal, startFeed, stepTime
 import { addSpan, keep, MAX_SPANS, totals, tree, type Span, type TraceFilter } from "../src/trace";
 import { readdirSync, readFileSync } from "node:fs";
 import { econTests } from "./econ-test";
+import { edgeTests } from "./edge-test";
 import { addRule, allowOptions, allowRule, autoOk, HOUSE_MAX, houseBrief, houseCheck, jobsDone, markSecond, planApprovalId, runMode, secondStep, workPrompt } from "../src/autonomy";
 import { addUndo, undoRun } from "../src/rewind";
 import { deadlineEvents, fire, validRule, type Notice } from "../src/businessRules";
@@ -2560,6 +2561,7 @@ growthTests(ok, eq);
 await memoryTests(ok, eq);
 await journeyTests(ok, eq);
 econTests(ok, eq);
+edgeTests(ok, eq);
 
 console.log("\n# Every declared tool is exercised");
 const missed = declared.filter(n => !covered.has(n));
