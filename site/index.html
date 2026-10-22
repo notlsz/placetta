@@ -3054,6 +3054,21 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 #pricing .prdet{margin-top:28px}
 #pricing .prdet .prmb{padding-top:8px}
 #faqList.fold95:not(.open95)>:nth-child(n+5){display:none}
+
+/* security, laid out like devin.ai (Oct 22) */
+.dv95{margin-top:112px}
+.dvg{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,8fr);gap:48px}
+@media (max-width:899px){.dvg{grid-template-columns:minmax(0,1fr);gap:28px}.dv95{margin-top:72px}}
+.dvh h2{font-family:var(--serif);font-weight:400;font-size:clamp(34px,3.6vw,48px);line-height:1.08;letter-spacing:-.02em;margin:0;color:var(--ink)}
+.dvh h2 em{font-style:normal;color:var(--muted);display:block}
+.dvlink{display:inline-block;margin-top:20px;font-size:15px;color:var(--ink2);text-underline-offset:3px}
+.dvb{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.dvb>div{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:120px;border-radius:16px;background:var(--card);text-align:center;padding:16px}
+.dvb b{font-family:var(--serif);font-weight:400;font-size:22px;letter-spacing:-.01em;color:var(--ink)}
+.dvb small{font-size:13px;color:var(--muted)}
+.dvl{list-style:none;margin:28px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 40px}
+.dvl li{font-size:17px;line-height:1.45;color:var(--ink2)}
+@media (max-width:599px){.dvb b{font-size:15px;white-space:nowrap}.dvb>div{min-height:96px;padding:12px 8px}.dvl{grid-template-columns:minmax(0,1fr);gap:14px}.dvl li{font-size:16px}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -3619,58 +3634,24 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 </section>
 
 <!-- ======================= SECURITY: devin.ai's enterprise security layout, only what is built ======================= -->
-<section class="rv sc95" data-rv="up" id="security" aria-labelledby="scH">
+<section class="rv dv95" data-rv="up" id="security" aria-labelledby="scH">
   <div class="ctr">
-    <div class="sc95g">
-      <div class="sc95l">
-        <h2 class="sc95h" id="scH"><span data-i18n="sc.h1">Enterprise security</span> <span class="sc95t" data-i18n="sc.h2">with every step on the record</span></h2>
-        <p class="sc95i" data-i18n="sc.in">Placetta holds no security certification yet. Each control here is marked as it stands today.</p>
-        <p class="sc95a"><a href="/trust" data-i18n="sec.trust">Visit our Trust Center</a><a href="privacy.html" data-legal="privacy.html" data-i18n="sec.link">Read our privacy policy</a><a href="/trust#report" data-i18n="sc.rp">Report a security issue</a></p>
-        <p class="sc95c"><span data-i18n="sc.ct">Security contact</span><a href="mailto:security@placetta.com">security@placetta.com</a></p>
-      </div>
-      <div class="sc95r">
-        <div class="sc95b">
-          <div><b data-i18n="sc.b1">SOC 2 Type I</b><small data-i18n="sc.b1s">In progress</small></div>
-          <div><b data-i18n="sc.b2">SAML 2.0 SSO</b><small data-i18n="sc.b2s">Rolling out</small></div>
-          <div><b data-i18n="sc.b3">SCIM 2.0</b><small data-i18n="sc.b3s">Rolling out</small></div>
+    <div class="dvg">
+      <div class="dvh"><h2 id="scH"><span data-i18n="dv.h1">Enterprise security</span> <em data-i18n="dv.h2">with fine-grained controls</em></h2><a class="dvlink" href="/trust" data-i18n="dv.tc">Trust Center</a></div>
+      <div class="dvr">
+        <div class="dvb">
+          <div><b data-i18n="dv.b1">SOC 2 Type I</b><small data-i18n="dv.b1s">In progress</small></div>
+          <div><b data-i18n="dv.b2">SAML SSO</b><small data-i18n="dv.b2s">Rolling out</small></div>
+          <div><b data-i18n="dv.b3">SCIM</b><small data-i18n="dv.b3s">Rolling out</small></div>
         </div>
-        <div class="sc95lists">
-          <div class="scg"><p class="sct sct-ok" data-i18n="sc.ip">In place</p><ul>
-            <li data-i18n="sc.r3">Nothing filed or paid without your approval</li>
-            <li data-i18n="sc.p1">Encrypted in transit with TLS 1.2 or newer, and at rest</li>
-            <li data-i18n="sc.p2">Saved agency logins kept in Supabase Vault, readable only by our server</li>
-            <li data-i18n="sc.p3">Two-step sign-in for your team, and required for our staff before they open customer records</li>
-            <li data-i18n="sc.p4">Card payments handled by Stripe; we never see full card numbers</li>
-            <li data-i18n="sc.p5">Placetta doesn't use your content to train AI models, and doesn't sell it</li>
-            <li data-i18n="sc.r4">Every requirement linked to its official source</li>
-          </ul></div>
-          <div class="scg"><p class="sct sct-ro" data-i18n="sc.b2s">Rolling out</p><ul>
-            <li data-i18n="sc.l1">Owner, admin, member and viewer roles, enforced by the database</li>
-            <li data-i18n="sc.l2">SAML 2.0 single sign-on, plus Google Workspace, Microsoft Entra ID and OpenID Connect sign-in</li>
-            <li data-i18n="sc.l3">Single sign-on required for everyone at your verified email domain</li>
-            <li data-i18n="sc.l4">SCIM 2.0 provisioning for users and groups</li>
-            <li data-i18n="sc.r1">An append-only audit trail, exportable as CSV</li>
-            <li data-i18n="sc.p6">Every sign-in recorded in the audit trail</li>
-            <li data-i18n="sc.r2">Each portal filing runs in its own new browser session, with its temporary files deleted after</li>
-          </ul></div>
-          <div class="scg"><p class="sct sct-pr" data-i18n="sc.b1s">In progress</p><ul>
-            <li data-i18n="sc.p7">SOC 2 Type I audit</li>
-            <li data-i18n="sc.p8">Written confirmation from each AI provider that it keeps none of what we send</li>
-          </ul></div>
-        </div>
-        <div class="scsub" role="group" aria-labelledby="scSubH">
-          <p class="scsubh" id="scSubH" data-i18n="sc.sh">Where your data goes</p>
-          <dl class="scsubl">
-            <div><dt>Supabase</dt><dd data-i18n="sc.s1">Database, files and sign-in, in its US East region</dd></div>
-            <div><dt>Vercel</dt><dd data-i18n="sc.s2">Hosts placetta.com and the app</dd></div>
-            <div><dt>Stripe</dt><dd data-i18n="sc.s3">Plan payments</dd></div>
-            <div><dt>Resend</dt><dd data-i18n="sc.s4">Sign-in links, reminders and filing updates by email</dd></div>
-            <div><dt>Anthropic</dt><dd data-i18n="sc.s5">Claude AI models</dd></div>
-            <div><dt>Render</dt><dd data-i18n="sc.s6">Runs portal filing, in Oregon</dd></div>
-          </dl>
-          <a class="scsuba" href="/trust#subprocessors" data-i18n="sc.sa">All subprocessors, and the AI models used only when needed</a>
-        </div>
-        <p class="sc95n" data-i18n="sc.note">Roles, single sign-on, SCIM and the audit trail are rolling out now. Our Trust Center shows where each control stands.</p>
+        <ul class="dvl">
+          <li data-i18n="dv.l1">Your filings and documents are always yours</li>
+          <li data-i18n="dv.l4">Each filing runs in its own browser session</li>
+          <li data-i18n="dv.l2">Nothing filed or paid without your approval</li>
+          <li data-i18n="dv.l5">Owner, admin, member and viewer roles</li>
+          <li data-i18n="dv.l3">A full audit trail of every action</li>
+          <li data-i18n="dv.l6">Encrypted in transit and at rest</li>
+        </ul>
       </div>
     </div>
   </div>
@@ -4119,6 +4100,8 @@ zh:{
 Object.assign(T.en, {"np.aria":"Customer results","np.1n":"5 months","np.1s":"saved in approval time","np.2n":"3 filings","np.2s":"handled end to end for a store GM","np.3l":"Wakimasu Wagyu","np.3n":"10 requirements","np.3s":"mapped from Japan to a New York dining room"});
 Object.assign(T.zh, {"np.aria":"客户成果","np.1n":"5 个月","np.1s":"节省的审批时间","np.2n":"3 项申报","np.2s":"为门店总经理全程代办","np.3l":"Wakimasu 和牛","np.3n":"10 项要求","np.3s":"从日本工厂到纽约餐厅，逐项梳理"});
 /* hero and before and after, from the Oct 17 redesign */
+Object.assign(T.en, {"dv.h1":"Enterprise security","dv.h2":"with fine-grained controls","dv.tc":"Trust Center","dv.b1":"SOC 2 Type I","dv.b1s":"In progress","dv.b2":"SAML SSO","dv.b2s":"Rolling out","dv.b3":"SCIM","dv.b3s":"Rolling out","dv.l1":"Your filings and documents are always yours","dv.l2":"Nothing filed or paid without your approval","dv.l3":"A full audit trail of every action","dv.l4":"Each filing runs in its own browser session","dv.l5":"Owner, admin, member and viewer roles","dv.l6":"Encrypted in transit and at rest"});
+Object.assign(T.zh, {"dv.h1":"企业级安全","dv.h2":"精细的权限控制","dv.tc":"信任中心","dv.b1":"SOC 2 Type I","dv.b1s":"审计进行中","dv.b2":"SAML 单点登录","dv.b2s":"即将上线","dv.b3":"SCIM","dv.b3s":"即将上线","dv.l1":"您的申报和文件始终归您所有","dv.l2":"未经您批准，不申报、不付款","dv.l3":"每项操作都有完整审计记录","dv.l4":"每次申报都在独立的浏览器会话中运行","dv.l5":"所有者、管理员、成员和查看者角色","dv.l6":"传输和存储全程加密"});
 Object.assign(T.en, {"price.det":"See details","price.detsub":"The math on waiting, how Placetta compares, and the rent calculator.","price.moresub":"A one-time entry plan, new store openings and headquarters.","foot.about":"About"});
 Object.assign(T.zh, {"price.det":"查看详情","price.detsub":"等待的成本、与其他方式的对比，以及租金计算器。","price.moresub":"一次性开店合规计划、新店开业和总部方案。","foot.about":"关于我们"});
 Object.assign(T.en, {"diff.src": "Sources: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a> (expediter, restaurant permits), <a href=\"https://clio.com/resources/legal-trends/compare-lawyer-rates/\" target=\"_blank\" rel=\"noopener\">Clio Legal Trends</a> (US average lawyer rate, 2025), BLS median pay for <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">operations managers</a> (May 2023) and <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">bookkeepers</a> (May 2025)", "diff.h": "Four people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "4 → 1", "diff.2s": "People to hire and chase, down to one agent you approve", "diff.1b": "About 1 minute", "diff.1s": "From one line to a full entry plan", "diff.team": "Store owner", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
