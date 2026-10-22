@@ -99,6 +99,9 @@
 <h3>Calls and spoken replies</h3>
 <p>On phone calls, Telnyx runs Odelia's voice: the speech recognition, the AI model that talks with you, and the voice you hear. Every call opens with Odelia saying she's an AI and that the call is transcribed. Placetta doesn't record call audio. In the app, Microsoft Azure turns her replies into speech when you have them read aloud.</p>
 
+<h3>Agent memory <span class="tag t-prog">Off by default</span></h3>
+<p>If an owner or admin turns it on in Settings, Odelia keeps short notes about your business between conversations, each with its source and date. She only suggests them; an owner or admin approves each one, and what an email, upload or web page says can only become a suggestion. Memory never keeps ID numbers, card or bank numbers, or passwords, and stays inside your workspace. Your team can see, edit and delete every note, clear it all, or keep a conversation out of memory. To cut cost, the model providers above may hold the unchanging start of a request in their prompt cache for a short time (from minutes to an hour); it isn't used for training.</p>
+
 <h2 id="email" data-anchor="email">Email to Odelia <span class="tag t-roll">Rolling out</span></h2>
 <p>You'll be able to email Odelia, or forward her an agency's letter, from the address you sign in with. Anyone can fake the sender of an email, so she acts only when the message proves where it came from: a valid DKIM signature from your email domain that covers the sender line and the whole message. We check that signature ourselves on the raw message, or use our email provider's own DMARC or DKIM verdict, never headers the sender can write. Signing keys are looked up in public DNS, through Cloudflare and Google.</p>
 <p>If a message can't be verified, nothing starts, and you get a short note saying why. Email from an address that isn't a Placetta account gets no reply at all. Nothing is filed, paid, sent or deleted by email. Odelia answers with a link to the approval in the app.</p>
@@ -271,6 +274,9 @@
 <p>我们的软件也可以使用 OpenAI 或 DeepSeek 的模型，但两者都保持关闭，除非我们主动开启。DeepSeek 总部位于中国，绝不会收到您的文件。</p>
 <h3>电话与语音朗读</h3>
 <p>通话中，Odelia 的语音由 Telnyx 运行，包括语音识别、与您对话的 AI 模型以及您听到的声音。每次通话开始时，Odelia 都会说明她是 AI，并告知通话会被转录。快哉不录制通话音频。在应用中，当您让 Odelia 朗读回复时，由 Microsoft Azure 将回复转换为语音。</p>
+
+<h3>助理记忆 <span class="tag t-prog">默认关闭</span></h3>
+<p>所有者或管理员在“设置”中开启后，Odelia 会在对话之间记住关于您企业的简短记录，每条都注明来源和日期。她只提出建议，每条都由所有者或管理员批准；邮件、上传文件或网页中的内容只能成为建议。记忆不会保存证件号、卡号、银行账号或密码，也不会离开您的工作区。您的团队可以查看、编辑和删除每一条记录，全部清空，或让某次对话不被记住。为降低成本，上述模型服务商可能会把请求中固定不变的开头部分在其提示缓存中短暂保存（几分钟到一小时），不会用于训练。</p>
 
 <h2 data-anchor="email">给 Odelia 发邮件 <span class="tag t-roll">上线中</span></h2>
 <p>您将可以用登录快哉的邮箱给 Odelia 发邮件，或把机构的来信转发给她。任何人都可以伪造邮件的发件人，所以只有当邮件能证明自己的来源时，她才会处理：邮件须带有来自您邮箱域名的有效 DKIM 签名，且签名覆盖发件人一栏和整封邮件。我们会在原始邮件上自行验证签名，或采用邮件服务商自己的 DMARC 或 DKIM 验证结果，绝不依赖发件人自己能写的邮件头。签名公钥通过 Cloudflare 和 Google 的公共 DNS 查询。</p>
