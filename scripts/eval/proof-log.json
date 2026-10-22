@@ -3496,5 +3496,105 @@
   "found": true,
   "sha256": "7c85243255499e12",
   "context": "n vor ort aufgrund nur eingeschränkt arbeiten können. [stand: 21.10.2026 22:00] der antrag für eine vereinfachte baugenehmigung ist erforderlich, wenn sie werbeanlagen errichten und/oder ändern möchten und diese werbeanlagen nicht verfahrensfrei sind. verfahrensablauf 1. es wird empfohlen, vor erstellung und einreichung der unter"
+ },
+ {
+  "id": "it-registro",
+  "read": "https://www.impresainungiorno.gov.it/web/l-impresa-e-l-europa/setting-up-a-business",
+  "quote": "Tutte le imprese di qualsiasi natura giuridica si debbono iscrivere al Registro delle imprese.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "3a246cb59c51e882",
+  "context": "hiede l'iscrizione al registro delle imprese gestito dalle camere di commercio. tutte le imprese di qualsiasi natura giuridica si debbono iscrivere al registro delle imprese. l'iscrizione prevede il pagamento di un diritto annuale. per creare una nuova i"
+ },
+ {
+  "id": "it-iva",
+  "read": "https://www.impresainungiorno.gov.it/web/l-impresa-e-l-europa/setting-up-a-business",
+  "quote": "Agenzia delle Entrate (per i fini fiscali)",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "3a246cb59c51e882",
+  "context": "fronti delle seguenti autorità: registro delle imprese (per i fini costitutivi) agenzia delle entrate (per i fini fiscali) istituto nazionale assicurazione infortuni sul lavoro (per i fini assicurativi)"
+ },
+ {
+  "id": "it-inps",
+  "read": "https://www.impresainungiorno.gov.it/web/l-impresa-e-l-europa/setting-up-a-business",
+  "quote": "Istituto Nazionale della Previdenza Sociale (per i fini previdenziali)",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "3a246cb59c51e882",
+  "context": "istituto nazionale assicurazione infortuni sul lavoro (per i fini assicurativi) istituto nazionale della previdenza sociale (per i fini previdenziali) la domanda deve essere corredata da documentazione di prova. il contenuto della"
+ },
+ {
+  "id": "it-scia",
+  "read": "https://www.impresainungiorno.gov.it/web/l-impresa-e-l-europa/setting-up-a-business",
+  "quote": "è sufficiente l’autocertificazione con la presentazione in modalità digitale della Segnalazione Certificata di Inizio attività (SCIA)",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "3a246cb59c51e882",
+  "context": "verso lo sportello unico per le attività produttive. per pratiche più semplici, è sufficiente l'autocertificazione con la presentazione in modalità digitale della segnalazione certificata di inizio attività (scia). per le iniziative più complesse si ricorre a procedimenti di tipo ordinario ch"
+ },
+ {
+  "id": "it-mil-vicinato",
+  "read": "https://fareimpresa.comune.milano.it/it/vendita/esercizi-vicinato",
+  "quote": "Per aprire o modificare un esercizio di vicinato occorre presentare, esclusivamente per via telematica al SUAP (Sportello Unico Attività Produttive) del Comune di Milano",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "ae2eb8d0117bb61b",
+  "context": "ocali inerenti gli esercizi di vicinato c1,c3 e d8. presentazione della domanda per aprire o modificare un esercizio di vicinato occorre presentare, esclusivamente per via telematica al suap (sportello unico attività produttive) del comune di milano tramite la piattaforma nazionale impresainungiorno.gov.it, una segnalazione cer"
+ },
+ {
+  "id": "it-mil-somministrazione",
+  "read": "https://fareimpresa.comune.milano.it/it/somministrazione/somministrazione-pubblici-esercizi-bar-ristorante",
+  "quote": "Per avviare/modificare/ un’attività di somministrazione di alimenti e bevande (pubblico esercizio) nelle Zone non tutelate è necessario inviare, esclusivamente per via telematica al SUAP",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "f53c2c9fade4e43d",
+  "context": "istrazione di alimenti e bevande (pubblico esercizio) nelle \"zone non tutelate\" per avviare/modificare/ un'attività di somministrazione di alimenti e bevande (pubblico esercizio) nelle zone non tutelate è necessario inviare, esclusivamente per via telematica al suap (sportello unico attività produttive) del comune di milano, tramite la piattafo"
+ },
+ {
+  "id": "it-mil-notifica",
+  "read": "https://fareimpresa.comune.milano.it/documents/87339536/190972146/MG+modulo_notifica-sanitaria_luglio2017.pdf/195a13f6-40b1-e695-cd6e-ece97de6f72e?t=1594025662959",
+  "quote": "NOTIFICA AI FINI DELLA REGISTRAZIONE (ART. 6, REG. CE N. 852/2004)",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "0cc856e3e4d533e0",
+  "context": " ________________________ indirizzo ___________________________________________ notifica ai fini della registrazione (art. 6, reg. ce n. 852/2004) pec / posta elettronica ____________________________________________ notifica a"
+ },
+ {
+  "id": "it-mil-insegna",
+  "read": "https://fareimpresa.comune.milano.it/documents/20126/526414/Modulo+SCIA+per+insegne+e+targhe+professionali.pdf/20cf0075-f30e-02af-0f4d-9886b19587b9?t=1637749345425",
+  "quote": "SEGNALAZIONE CERTIFICATA INIZIO ATTIVITA’ finalizzata alla installazione di insegne di esercizio e/o targhe professionali",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "4b918067970e4698",
+  "context": "ica del 28 dicembre 2000 n. 445 s.m.i. e la decadenza dai benefici conseguenti, segnalazione certificata inizio attivita' finalizzata alla installazione di insegne di esercizio e/o targhe professionali, come da riportato prospetto, e a tal fine d i c h i a r a di essere consapevol"
+ },
+ {
+  "id": "it-mil-dehors",
+  "read": "https://www.comune.milano.it/en/servizi/impresa/occupazione-suolo-con-strutture-leggere-semirigide-amovibili",
+  "quote": "Applications for occupation of public land with outdoor seating must be submitted using the specific forms",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "20a2dcfd36da5dfb",
+  "context": "eed help? search bar search go to the insights page index other request methods applications for occupation of public land with outdoor seating must be submitted using the specific forms, duly completed, signed and accompanied by the required documentation, exclusiv"
+ },
+ {
+  "id": "it-diritto-annuale",
+  "read": "https://www.impresainungiorno.gov.it/web/l-impresa-e-l-europa/setting-up-a-business",
+  "quote": "L'iscrizione prevede il pagamento di un diritto annuale",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "3a246cb59c51e882",
+  "context": "e di qualsiasi natura giuridica si debbono iscrivere al registro delle imprese. l'iscrizione prevede il pagamento di un diritto annuale. per creare una nuova impresa la modalità è esclusivamente digitale e si chiama"
  }
 ]

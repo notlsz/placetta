@@ -11,16 +11,31 @@
  "items": [
   {
    "key": "gb-incorporate",
-   "name": "Company incorporation",
+   "name": "Company registration with Companies House",
    "agency": "Companies House",
    "level": "federal",
    "required": true,
-   "verified": false,
-   "fee": null,
-   "source": "https://www.gov.uk/government/organisations/companies-house",
+   "verified": true,
+   "fee": 100,
+   "source": "https://www.gov.uk/limited-company-formation/register-your-company",
+   "quote": "It costs £100 and can be paid by debit or credit card.",
+   "read": "2026-10-21",
    "match": "\\bgb-incorporate\\b",
-   "agencyMatch": "companies house",
-   "note": "Not researched in this pass: the row abstains and names the office; set aside."
+   "agencyMatch": "Companies House"
+  },
+  {
+   "key": "gb-corp-tax",
+   "name": "Corporation Tax registration",
+   "agency": "HM Revenue & Customs",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.gov.uk/limited-company-formation/register-your-company",
+   "quote": "You will usually be set up for Corporation Tax at the same time,",
+   "read": "2026-10-21",
+   "match": "\\bgb-corp-tax\\b",
+   "agencyMatch": "HM Revenue & Customs"
   },
   {
    "key": "gb-vat",
@@ -28,12 +43,13 @@
    "agency": "HM Revenue & Customs",
    "level": "federal",
    "required": true,
-   "verified": false,
+   "verified": true,
    "fee": null,
    "source": "https://www.gov.uk/register-for-vat",
+   "quote": "You must register if your total taxable turnover for the last 12 months goes over £90,000.",
+   "read": "2026-10-21",
    "match": "\\bgb-vat\\b",
-   "agencyMatch": "revenue",
-   "note": "Not researched in this pass: the row abstains and names the office; set aside."
+   "agencyMatch": "HM Revenue & Customs"
   },
   {
    "key": "gb-paye",
@@ -41,25 +57,55 @@
    "agency": "HM Revenue & Customs",
    "level": "federal",
    "required": true,
-   "verified": false,
+   "verified": true,
    "fee": null,
    "source": "https://www.gov.uk/register-employer",
+   "quote": "You must register before the first payday to get your employer PAYE reference number.",
+   "read": "2026-10-21",
    "match": "\\bgb-paye\\b",
-   "agencyMatch": "revenue",
-   "note": "Not researched in this pass: the row abstains and names the office; set aside."
+   "agencyMatch": "HM Revenue & Customs"
   },
   {
    "key": "gb-eori",
-   "name": "EORI number",
+   "name": "EORI number for importing",
    "agency": "HM Revenue & Customs",
    "level": "federal",
    "required": true,
-   "verified": false,
+   "verified": true,
    "fee": null,
    "source": "https://www.gov.uk/eori",
+   "quote": "You may need an Economic Operators Registration and Identification number",
+   "read": "2026-10-21",
    "match": "\\bgb-eori\\b",
-   "agencyMatch": "revenue",
-   "note": "Not researched in this pass: the row abstains and names the office; set aside."
+   "agencyMatch": "HM Revenue & Customs"
+  },
+  {
+   "key": "gb-pension",
+   "name": "Workplace pension (automatic enrolment)",
+   "agency": "The Pensions Regulator",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.gov.uk/workplace-pensions-employers",
+   "quote": "You must enrol and make an employer’s contribution for all staff who:",
+   "read": "2026-10-21",
+   "match": "\\bgb-pension\\b",
+   "agencyMatch": "The Pensions Regulator"
+  },
+  {
+   "key": "gb-el-insurance",
+   "name": "Employers' liability insurance",
+   "agency": "Authorised insurer (cover the law requires)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.gov.uk/employers-liability-insurance",
+   "quote": "as soon as you become an employer to cover you for at least £5 million from an authorised insurer",
+   "read": "2026-10-21",
+   "match": "\\bgb-el-insurance\\b",
+   "agencyMatch": "Authorised insurer"
   }
  ],
  "order": [],

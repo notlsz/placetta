@@ -10,7 +10,25 @@ const OFFICIAL_HOSTS = /(^|\.)(dallascityhall\.com|lafd\.org|octaxcol\.com|flori
 // Abroad (added 2026-10-21 for the furniture set's EU and UK cases): the European Union's own domain (europa.eu: the
 // Commission, EUR-Lex), the UK government's (gov.uk, legislation.gov.uk) and France's (gouv.fr), each reserved to that
 // government.
-const ABROAD = /(^|\.)(europa\.eu|gov\.uk|gouv\.fr)$/;
+// Added 2026-10-21 with the European and Mexican store filings (src/forms/europe.ts, src/forms/mexico.ts): each a
+// national, state or city government's own site, or a public body the law charges with the filing (Urssaf, INPS, the
+// Berufsgenossenschaften's DGUV, the Chambers of Commerce' registers).
+const ABROAD = new RegExp("(^|\\.)(" + [
+  "europa\\.eu", "gov\\.uk", "gouv\\.fr", "service-public\\.fr", "paris\\.fr", "lyon\\.fr", "urssaf\\.fr",
+  "berlin\\.de", "elster\\.de", "arbeitsagentur\\.de", "dguv\\.de", "handelsregister\\.de", "transparenzregister\\.de", "zoll\\.de", "muenchen\\.de", "hamburg\\.de", "frankfurt\\.de", "bund\\.de",
+  "gov\\.it", "comune\\.milano\\.it", "comune\\.roma\\.it", "registroimprese\\.it", "inps\\.it", "vigilfuoco\\.it",
+  "gob\\.es", "madrid\\.es", "barcelona\\.cat", "seg-social\\.es", "paeelectronico\\.es",
+  "overheid\\.nl", "business\\.gov\\.nl", "kvk\\.nl", "belastingdienst\\.nl", "amsterdam\\.nl", "rotterdam\\.nl", "nvwa\\.nl", "rijksoverheid\\.nl",
+  "gov\\.ie", "revenue\\.ie", "cro\\.ie", "fsai\\.ie", "dublincity\\.ie", "corkcity\\.ie",
+  "belgium\\.be", "fgov\\.be", "brussels\\.be", "bruxelles\\.be", "antwerpen\\.be", "afsca\\.be", "favv-afsca\\.be",
+  "gov\\.pt", "cm-lisboa\\.pt", "cm-porto\\.pt",
+  "admin\\.ch", "easygov\\.swiss", "stadt-zuerich\\.ch", "bern\\.ch", "zh\\.ch", "be\\.ch",
+  "gv\\.at", "wien\\.gv\\.at", "graz\\.at",
+  "verksamt\\.se", "skatteverket\\.se", "bolagsverket\\.se", "stockholm\\.se", "goteborg\\.se", "livsmedelsverket\\.se",
+  "virk\\.dk", "skat\\.dk", "kk\\.dk", "aarhus\\.dk", "foedevarestyrelsen\\.dk",
+  "altinn\\.no", "brreg\\.no", "skatteetaten\\.no", "oslo\\.kommune\\.no", "bergen\\.kommune\\.no", "mattilsynet\\.no",
+  "gob\\.mx", "cdmx\\.gob\\.mx", "monterrey\\.gob\\.mx", "guadalajara\\.gob\\.mx", "qroo\\.gob\\.mx", "cancun\\.gob\\.mx", "nl\\.gob\\.mx", "jalisco\\.gob\\.mx",
+].join("|") + ")$");
 const OFFICIAL_PATHS: [RegExp, RegExp][] = [[/^content\.civicplus\.com$/, /^\/api\/assets\//], [/^cms2\.revize\.com$/, /^\/revize\/edisonnj\//]];
 export const hostOf = (u?: string) => { try { return new URL(u ?? "").hostname.replace(/^www\d?\./, ""); } catch { return ""; } };
 export const officialSource = (u?: string) => {
