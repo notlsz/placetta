@@ -3846,5 +3846,75 @@
   "found": true,
   "sha256": "339cba632f348347",
   "context": "a ciudadanía para el trámite de licencia de uso de edificación, que consiste en solicitar la autorización del municipio para hacer construcciones en diferentes zonas habitacionales y determinar el funcionamiento específico del predio. ii. alcance este procedimiento es aplicable a la dirección general para un des"
+ },
+ {
+  "id": "ie-revenue",
+  "read": "https://www.revenue.ie/en/starting-a-business/registering-for-tax/index.aspx",
+  "quote": "You must register for tax with Revenue when you:",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "710d398c78646a5d",
+  "context": "s and filing of tax returns exclusion from mandatory electronic filing overview you must register for tax with revenue when you: become a sole trader set up a trust or partnership or start a new company. regi"
+ },
+ {
+  "id": "ie-food",
+  "read": "https://www.fsai.ie/business-advice/starting-a-food-business",
+  "quote": "Before starting a food business you must: register your food business",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "dd01d76dd5a82c30",
+  "context": "nts, café's, coffee shops, food trucks, retailers, distributors, manufacturers. before starting a food business you must: register your food business your business may also need approval understand the basics of food hygiene have"
+ },
+ {
+  "id": "be-bce",
+  "read": "https://business.belgium.be/fr/assistance/find-support/le-guichet-dentreprises-votre-point-de-depart-pour-un-demarrage-en-douceur",
+  "quote": "Avant de démarrer votre activité, vous devez inscrire votre entreprise auprès de la Banque-Carrefour des Entreprises (BCE).",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b1f000444eaf6a3e",
+  "context": "t belge pour accompagner les entrepreneurs dans les formalités administratives. avant de démarrer votre activité, vous devez inscrire votre entreprise auprès de la banque-carrefour des entreprises (bce). cette inscription s'effectue toujours par l'intermédiaire d'un guichet d'entrep"
+ },
+ {
+  "id": "be-tva",
+  "read": "https://business.belgium.be/fr/assistance/find-support/le-guichet-dentreprises-votre-point-de-depart-pour-un-demarrage-en-douceur",
+  "quote": "Vous pouvez également activer vous-même gratuitement votre numéro d’entreprise auprès de la TVA sur le site du SPF Finances",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "b1f000444eaf6a3e",
+  "context": "prise auprès de la tva ? oui mais il s'agit d'un service complémentaire payant. vous pouvez également activer vous-même gratuitement votre numéro d'entreprise auprès de la tva sur le site du spf finances. puis-je utiliser un guichet d'entreprises en ligne ? oui. tous les guichets d'"
+ },
+ {
+  "id": "pt-empresa",
+  "read": "https://www2.gov.pt/servicos/criar-uma-empresa-na-hora",
+  "quote": "Num balcão da Empresa na Hora é possível criar sociedades por quotas, sociedades unipessoais por quotas e sociedades anónimas de forma rápida e simples.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "7412ac1faf48063b",
+  "context": "gov.pt saltar para o conteúdo serviços criar uma empresa na hora num balcão da empresa na hora é possível criar sociedades por quotas, sociedades unipessoais por quotas e sociedades anónimas de forma rápida e simples. atualizado em 04.09.2026 nesta página quem pode realizar o serviço como e onde "
+ },
+ {
+  "id": "ch-mwst",
+  "read": "https://www.estv.admin.ch/de/mwst-steuerpflicht",
+  "quote": "Ein Unternehmen mit Sitz im Inland ist grundsätzlich steuerpflichtig, wenn es:",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "81d77381b4878f4b",
+  "context": "ragen und antworten zur steuerpflicht grundsätzliches zur mehrwertsteuerpflicht ein unternehmen mit sitz im inland ist grundsätzlich steuerpflichtig, wenn es: selbstständig einer beruflichen oder gewerblichen tätigkeit nachgeht, unter eig"
+ },
+ {
+  "id": "at-gewerbe",
+  "read": "https://www.usp.gv.at/gruendung/EAP/gewerbeanmeldung.html",
+  "quote": "Das Gewerbe muss bei der Gewerbebehörde angemeldet werden.",
+  "checked": "2026-10-21",
+  "method": "curl",
+  "found": true,
+  "sha256": "69b84e71721f88cd",
+  "context": "je nach gewerbe das → magistratische bezirksamt oder die ma 63 verfahrensablauf das gewerbe muss bei der gewerbebehörde angemeldet werden. die anmeldung kann - formlos oder mittels formular - persönlich, schriftlich od"
  }
 ]

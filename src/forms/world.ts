@@ -313,20 +313,13 @@ export const WORLD_FORMS: OfficialForm[] = [
 
   /* ------------------------------- the rest of Europe: the core national steps ------------------------------- */
   ...([
-    ["ie-cro", "IE", "Company registration (CORE)", "公司注册（CORE）", "Companies Registration Office", "爱尔兰公司注册处", "https://core.cro.ie", "Register the company online, then register for tax with Revenue.", "在线注册公司，之后向税务局登记税务。"],
-    ["ie-revenue", "IE", "Tax and VAT registration", "税务与增值税登记", "Revenue", "爱尔兰税务局", "https://www.revenue.ie", "Register for corporation tax, VAT and employer PAYE through Revenue Online.", "通过税务局在线系统登记公司税、增值税和雇主预扣税。"],
-    ["ie-food", "IE", "Food business registration", "食品企业登记", "Food Safety Authority of Ireland", "爱尔兰食品安全局", "https://www.fsai.ie", "Food businesses register with the inspecting authority before opening.", "食品企业开业前须向监管机构登记。"],
-    ["be-kbo", "BE", "Enterprise number (Crossroads Bank)", "企业编号（企业交叉数据库）", "FPS Economy", "比利时联邦经济部", "https://economie.fgov.be", "Register through an approved enterprise counter, which issues the enterprise number.", "通过认可的企业窗口登记，取得企业编号。"],
-    ["pt-empresa", "PT", "Company creation (Empresa na Hora / ePortugal)", "公司设立（ePortugal）", "Instituto dos Registos e do Notariado", "葡萄牙登记与公证局", "https://eportugal.gov.pt", "Create the company online or same day at a one-stop desk.", "可在线或在一站式窗口当天设立公司。"],
-    ["ch-easygov", "CH", "Business registration (EasyGov)", "企业登记（EasyGov）", "State Secretariat for Economic Affairs", "瑞士联邦经济事务秘书处", "https://www.easygov.swiss", "Register in the commercial register, VAT and social insurance through EasyGov.", "通过 EasyGov 办理商业登记、增值税和社保。"],
-    ["at-usp", "AT", "Business start (USP)", "企业开办（USP）", "Unternehmensserviceportal", "奥地利企业服务门户", "https://www.usp.gv.at", "Register the trade and the company online through the business service portal.", "通过企业服务门户在线办理营业登记和公司注册。"],
     ["se-verksamt", "SE", "Company registration (Verksamt)", "公司注册（Verksamt）", "Bolagsverket and Skatteverket", "瑞典公司注册局与税务局", "https://www.verksamt.se", "Register the company and for tax, VAT and as an employer in one place.", "在同一平台注册公司并登记税务、增值税和雇主身份。"],
     ["dk-virk", "DK", "Company registration (Virk)", "公司注册（Virk）", "Danish Business Authority", "丹麦商业管理局", "https://virk.dk", "Register the company and its CVR number, VAT and employer status online.", "在线注册公司、CVR 编号、增值税和雇主身份。"],
     ["no-brreg", "NO", "Business registration (Altinn)", "企业登记（Altinn）", "Brønnøysund Register Centre", "挪威布朗尼松登记中心", "https://www.brreg.no", "Register the business and VAT through the coordinated register notice.", "通过协调登记表在线登记企业和增值税。"],
     ["fi-ytj", "FI", "Business registration (YTJ)", "企业登记（YTJ）", "Finnish Patent and Registration Office and Tax Administration", "芬兰专利注册局与税务局", "https://www.ytj.fi", "One start-up notification registers the company, VAT and employer status.", "一份开业通知即可登记公司、增值税和雇主身份。"],
     ["pl-biznes", "PL", "Business registration (biznes.gov.pl)", "企业登记（biznes.gov.pl）", "Ministry of Development", "波兰发展部", "https://www.biznes.gov.pl", "Register the company in the court register and for tax and social insurance online.", "在线办理法院登记、税务和社保登记。"],
-  ] as const).map(([id, where, ten, tzh, aen, azh, url, hen, hzh]) => W({ id, where, level: id === "ie-food" ? "city" : "federal", method: "online", order: id.endsWith("food") ? 60 : id === "ie-revenue" ? 25 : 10, cur: COUNTRIES.find(x => x.code === where)!.currency,
-    ...(id === "ie-food" ? { needs: { food: true } } : {}), form: ten, title: [ten, tzh], agency: [aen, azh], how: [hen, hzh], url })),
+  ] as const).map(([id, where, ten, tzh, aen, azh, url, hen, hzh]) => W({ id, where, level: "federal", method: "online", order: 10, cur: COUNTRIES.find(x => x.code === where)!.currency,
+    form: ten, title: [ten, tzh], agency: [aen, azh], how: [hen, hzh], url })),
 
   /* ------------------------------- Middle East ------------------------------- */
   W({ id: "ae-dxb-licence", where: "AE-DXB", level: "city", method: "online", order: 10, cur: "AED",

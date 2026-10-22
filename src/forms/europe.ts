@@ -468,4 +468,72 @@ export const NETHERLANDS_FORMS: OfficialForm[] = [
     proof: [NL_HORECA, "You must also take fire safety measures."] }),
 ];
 
-export const EUROPE_FORMS: OfficialForm[] = [...UK_FORMS, ...EU_FORMS, ...FRANCE_FORMS, ...GERMANY_FORMS, ...ITALY_FORMS, ...SPAIN_FORMS, ...NETHERLANDS_FORMS];
+/* ------------------------------------------------------------------ Ireland, Belgium, Portugal, Switzerland, Austria: the
+   national steps (each capital and largest commercial city through its own local office) */
+const IE_FSAI = "https://www.fsai.ie/business-advice/starting-a-food-business";
+const IE_TAX = "https://www.revenue.ie/en/starting-a-business/registering-for-tax/index.aspx";
+const BE_GUICHET = "https://business.belgium.be/fr/assistance/find-support/le-guichet-dentreprises-votre-point-de-depart-pour-un-demarrage-en-douceur";
+const AT_GEWERBE = "https://www.usp.gv.at/gruendung/EAP/gewerbeanmeldung.html";
+
+export const REST_FORMS: OfficialForm[] = [
+  /* Ireland (Dublin, Cork) */
+  E({ id: "ie-cro", where: "IE", level: "federal", needs: { newEntity: true }, method: "online", order: 10, cur: "EUR",
+    form: "Form A1 (CORE)", title: ["Company registration with the CRO", "在爱尔兰公司注册处（CRO）注册公司"], agency: ["Companies Registration Office", "爱尔兰公司注册处"],
+    how: ["The company is registered online through the CRO's CORE system; a foreign company opening a branch registers the branch.", "通过 CRO 的 CORE 系统在线注册公司；外国公司开设分支机构须登记该分支。"], url: "https://core.cro.ie" }),
+  E({ id: "ie-revenue", where: "IE", level: "federal", method: "online", order: 25, cur: "EUR",
+    form: "eRegistration (TR2 for companies)", title: ["Tax registration with Revenue (corporation tax, VAT, employer PAYE)", "向爱尔兰税务局登记（公司税、增值税、雇主预扣税）"], agency: ["Revenue (Office of the Revenue Commissioners)", "爱尔兰税务局"],
+    how: ["A new company registers online with Revenue through eRegistration, for corporation tax and, as they apply, VAT and employer PAYE.", "新公司须通过 eRegistration 在线向税务局登记公司税，并视情况登记增值税和雇主预扣税。"], url: "https://www.ros.ie",
+    proof: [IE_TAX, "You must register for tax with Revenue when you:"] }),
+  E({ id: "ie-food", where: "IE", level: "city", segs: ["restaurant", "retail", "warehouse", "seller"], needs: { food: true }, method: "pdf_mail", order: 74, cur: "EUR",
+    form: "Food business registration", title: ["Food business registration", "食品企业登记"], agency: ["HSE Environmental Health Service (the inspecting official agency)", "爱尔兰卫生服务署环境卫生部门（负责检查的官方机构）"],
+    how: ["Before starting, a food business registers with the official agency that inspects it, and has food hygiene training, traceability and a food safety management system.", "食品企业开业前须向负责检查的官方机构登记，并具备食品卫生培训、可追溯体系和食品安全管理体系。"], url: IE_FSAI,
+    proof: [IE_FSAI, "Before starting a food business you must: register your food business"] }),
+  E({ id: "ie-outdoor", where: "IE", level: "city", segs: STORES, needs: { terrace: true }, method: "online", order: 73, cur: "EUR",
+    form: "Section 254 licence (outdoor seating)", title: ["Licence for tables and chairs on the street", "街道桌椅许可"], agency: ["The city council (Dublin City Council, Cork City Council)", "市议会（都柏林市议会、科克市议会）"],
+    how: ["Tables and chairs on the public footpath need the city council's licence.", "在公共人行道摆放桌椅须取得市议会许可。"], url: "https://www.dublincity.ie" }),
+  /* Belgium (Brussels, Antwerp) */
+  E({ id: "be-bce", where: "BE", level: "federal", method: "in_person", order: 12, cur: "EUR",
+    form: "Inscription à la Banque-Carrefour des Entreprises", title: ["Crossroads Bank for Enterprises registration, through an enterprise counter", "经企业服务窗口在企业交叉数据库（BCE）登记"], agency: ["An approved guichet d'entreprises (enterprise counter), for the BCE", "经认可的企业服务窗口（代 BCE 办理）"],
+    how: ["Before starting, the business registers with the BCE through an approved enterprise counter, which issues the enterprise number; a company first has its deed and articles filed with the enterprise court registry.", "开业前须经认可的企业服务窗口在 BCE 登记并取得企业编号；公司须先将设立文书和章程提交企业法院书记处。"], url: "https://economie.fgov.be",
+    feeNote: ["A fixed fee set by law, the same at every enterprise counter.", "法定固定费用，各企业服务窗口相同。"],
+    specialist: ["A Belgian company (SRL or SA) is incorporated by a notarial deed: Placetta prepares the details and hands them to a notary.", "比利时公司（SRL 或 SA）须以公证文书设立：快哉准备资料并交给公证人。"],
+    proof: [BE_GUICHET, "Avant de démarrer votre activité, vous devez inscrire votre entreprise auprès de la Banque-Carrefour des Entreprises (BCE).", "Before starting your activity, you must register your business with the Crossroads Bank for Enterprises (BCE)."] }),
+  E({ id: "be-tva", where: "BE", level: "federal", method: "online", order: 25, cur: "EUR", fee: 0,
+    form: "Activation du numéro d'entreprise à la TVA", title: ["VAT activation of the enterprise number", "在增值税系统激活企业编号"], agency: ["SPF Finances", "比利时联邦财政部"],
+    how: ["The enterprise number is activated for VAT online on the SPF Finances site, free, or by the enterprise counter for a fee.", "可在联邦财政部网站免费在线激活企业编号的增值税功能，或由企业服务窗口代办（收费）。"], url: "https://finances.belgium.be",
+    proof: [BE_GUICHET, "Vous pouvez également activer vous-même gratuitement votre numéro d’entreprise auprès de la TVA sur le site du SPF Finances", "You can also activate your enterprise number for VAT yourself, free, on the SPF Finances site"] }),
+  E({ id: "be-afsca", where: "BE", level: "federal", segs: ["restaurant", "retail", "warehouse", "seller"], needs: { food: true }, method: "online", order: 74, cur: "EUR",
+    form: "Enregistrement / autorisation AFSCA", title: ["Food chain registration or authorisation with the AFSCA", "向比利时联邦食品链安全局（AFSCA）登记或申请许可"], agency: ["Agence fédérale pour la sécurité de la chaîne alimentaire (AFSCA)", "比利时联邦食品链安全局（AFSCA）"],
+    how: ["Every operator in the food chain registers with the AFSCA, and some activities need its authorisation, before starting.", "食品链中的每个经营者须在开业前向 AFSCA 登记，部分活动须取得其许可。"], url: "https://favv-afsca.be" }),
+  /* Portugal (Lisbon, Porto) */
+  E({ id: "pt-empresa", where: "PT", level: "federal", needs: { newEntity: true }, method: "in_person", order: 10, cur: "EUR",
+    form: "Empresa na Hora", title: ["Company creation (Empresa na Hora)", "公司设立（Empresa na Hora，即时设立）"], agency: ["Instituto dos Registos e do Notariado (IRN)", "葡萄牙登记与公证局（IRN）"],
+    how: ["A limited company (sociedade por quotas or unipessoal) or a public limited company is created at an Empresa na Hora desk, or online.", "有限责任公司（sociedade por quotas 或一人公司）或股份有限公司可在 Empresa na Hora 窗口或在线设立。"], url: "https://eportugal.gov.pt",
+    proof: ["https://www2.gov.pt/servicos/criar-uma-empresa-na-hora", "Num balcão da Empresa na Hora é possível criar sociedades por quotas, sociedades unipessoais por quotas e sociedades anónimas de forma rápida e simples.", "At an Empresa na Hora desk, limited companies, single-member limited companies and public limited companies can be created quickly and simply."] }),
+  E({ id: "pt-financas", where: "PT", level: "federal", method: "online", order: 25, cur: "EUR",
+    form: "Declaração de início de atividade", title: ["Start-of-activity tax declaration", "开业税务申报"], agency: ["Autoridade Tributária e Aduaneira (Finanças)", "葡萄牙税务与海关局"],
+    how: ["The company declares the start of its activity to the tax authority, which registers it for VAT and income tax.", "公司须向税务机关申报开始经营，税务机关据此登记增值税和所得税。"], url: "https://www.gov.pt/servicos/abrir-atividade-nas-financas" }),
+  /* Switzerland (Bern, Zurich) */
+  E({ id: "ch-hr", where: "CH", level: "state", needs: { newEntity: true }, method: "online", order: 10, cur: "CHF",
+    form: "Handelsregistereintrag", title: ["Commercial register entry (canton)", "商业登记（州）"], agency: ["The canton's commercial register office (Handelsregisteramt)", "州商业登记处"],
+    how: ["The company is entered in the canton's commercial register, prepared through EasyGov; a GmbH or AG is founded by a notarised deed.", "公司须在所在州商业登记处登记，可通过 EasyGov 准备；GmbH 或 AG 须以公证文书设立。"], url: "https://www.easygov.swiss",
+    specialist: ["A Swiss notary notarises the founding deed of a GmbH or AG: Placetta prepares the details and hands them to one.", "瑞士 GmbH 或 AG 的设立文书须由瑞士公证人公证：快哉准备资料并交给公证人。"] }),
+  E({ id: "ch-mwst", where: "CH", level: "federal", method: "online", order: 25, cur: "CHF",
+    form: "Anmeldung MWST", title: ["VAT registration with the Federal Tax Administration", "向瑞士联邦税务局登记增值税"], agency: ["Eidgenössische Steuerverwaltung (ESTV)", "瑞士联邦税务局（ESTV）"],
+    how: ["A business established in Switzerland is in principle liable to VAT and registers online with the ESTV once its turnover reaches the threshold.", "在瑞士设立的企业原则上负有增值税纳税义务，营业额达到门槛时须向 ESTV 在线登记。"], url: "https://www.estv.admin.ch/de/mwst-steuerpflicht",
+    proof: ["https://www.estv.admin.ch/de/mwst-steuerpflicht", "Ein Unternehmen mit Sitz im Inland ist grundsätzlich steuerpflichtig, wenn es:", "A business based in Switzerland is in principle liable to VAT if it:"] }),
+  E({ id: "ch-ahv", where: "CH", level: "federal", needs: { employees: true }, method: "online", order: 60, cur: "CHF",
+    form: "Anschluss an eine Ausgleichskasse", title: ["Employer affiliation with a compensation fund (AHV)", "雇主加入补偿基金（AHV）"], agency: ["The canton's or trade's Ausgleichskasse (AHV compensation fund)", "州或行业补偿基金（AHV）"],
+    how: ["An employer joins a compensation fund for old-age and survivors' insurance contributions before paying wages.", "雇主须在发薪前加入补偿基金，缴纳养老和遗属保险费。"], url: "https://www.kmu.admin.ch" }),
+  /* Austria (Vienna, Graz) */
+  E({ id: "at-gewerbe", where: "AT", level: "city", method: "online", order: 20, cur: "EUR",
+    form: "Gewerbeanmeldung", title: ["Trade registration (Gewerbeanmeldung)", "营业登记（Gewerbeanmeldung）"], agency: ["Gewerbebehörde: the Bezirkshauptmannschaft, in a statutory city the Magistrat (in Vienna the Magistratisches Bezirksamt or MA 63)", "营业主管机关：区行政机关，法定城市为市政府（维也纳为区办事处或 MA 63）"],
+    how: ["The trade is registered with the trade authority for the location, in person, in writing or online through the business service portal.", "须向经营所在地的营业主管机关登记，可现场、书面或通过企业服务门户在线办理。"], url: "https://www.usp.gv.at",
+    proof: [AT_GEWERBE, "Das Gewerbe muss bei der Gewerbebehörde angemeldet werden.", "The trade must be registered with the trade authority."] }),
+  E({ id: "at-fb", where: "AT", level: "federal", needs: { newEntity: true }, method: "online", order: 10, cur: "EUR",
+    form: "Firmenbucheintragung (GmbH)", title: ["Company register entry (Firmenbuch)", "公司登记（Firmenbuch）"], agency: ["Firmenbuchgericht (the regional court)", "公司登记法院（地区法院）"],
+    how: ["A GmbH is founded by a notarial act and entered in the company register; the business service portal offers a simplified online route for some.", "GmbH 须以公证文书设立并在公司登记簿登记；企业服务门户为部分情形提供简化的在线途径。"], url: "https://www.usp.gv.at",
+    specialist: ["An Austrian notary prepares the founding act of a GmbH: Placetta prepares the details and hands them to one.", "奥地利 GmbH 的设立文书须由奥地利公证人出具：快哉准备资料并交给公证人。"] }),
+];
+
+export const EUROPE_FORMS: OfficialForm[] = [...UK_FORMS, ...EU_FORMS, ...FRANCE_FORMS, ...GERMANY_FORMS, ...ITALY_FORMS, ...SPAIN_FORMS, ...NETHERLANDS_FORMS, ...REST_FORMS];
