@@ -1,0 +1,101 @@
+{
+  "id": "dubai-retail",
+  "title": "A clothing store in Dubai",
+  "read": "2026-10-22",
+  "input": {
+    "what": "Clothing store",
+    "where": "Dubai Mall, Financial Centre Rd, Dubai, United Arab Emirates",
+    "lang": "en"
+  },
+  "assumptions": "A new mainland company opening a clothing store in Dubai with staff. Each item quotes the federal portal or ministry page the registry entry was verified on (read 2026-10-22).",
+  "order": [],
+  "mustNotInclude": [
+    {
+      "name": "US filings",
+      "why": "Not in the US.",
+      "match": "irs-|cbp-|fincen|\\\\bEIN\\\\b|secretary of state"
+    },
+    {
+      "name": "Other emirates",
+      "why": "Not in Abu Dhabi or Sharjah.",
+      "match": "ae-auh-|ae-shj-"
+    },
+    {
+      "name": "Food",
+      "why": "Sells no food.",
+      "match": "food"
+    }
+  ],
+  "items": [
+    {
+      "key": "ae-company",
+      "name": "Mainland company formation",
+      "agency": "The emirate's economic department, under the federal Commercial Companies Law",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://u.ae/en/information-and-services/business/Doing-business/doing-business-on-the-mainland/steps-to-start-a-business-on-the-mainland",
+      "quote": "drafting a Memorandum of Association and local service agent agreement",
+      "read": "2026-10-22",
+      "match": "\\bae-company\\b",
+      "agencyMatch": "economic department|Economy"
+    },
+    {
+      "key": "ae-dxb-licence",
+      "name": "Dubai trade licence",
+      "agency": "Dubai Department of Economy and Tourism",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://u.ae/en/information-and-services/business/Doing-business/doing-business-on-the-mainland/steps-to-start-a-business-on-the-mainland",
+      "quote": "investor can collect the business licence from service centres of the economic departments or through their websites.",
+      "read": "2026-10-22",
+      "match": "\\bae-dxb-licence\\b",
+      "agencyMatch": "Dubai"
+    },
+    {
+      "key": "ae-tax",
+      "name": "Corporate tax and VAT registration",
+      "agency": "Federal Tax Authority",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "source": "https://mof.gov.ae/en/public-finance/tax/corporate-tax-in-the-uae/",
+      "quote": "All Taxable Persons (including Free Zone Persons) will be required to register for Corporate Tax and obtain a Corporate Tax Registration Number.",
+      "read": "2026-10-22",
+      "match": "\\bae-tax\\b",
+      "agencyMatch": "Federal Tax Authority"
+    },
+    {
+      "key": "ae-mohre",
+      "name": "Employer registration",
+      "agency": "Ministry of Human Resources and Emiratisation",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://u.ae/en/information-and-services/jobs/Sector-of-employment/employment-in-the-private-sector/work-permits",
+      "quote": "employers may not recruit or employ any worker unless a work permit is issued in accordance with MoHRE procedures.",
+      "read": "2026-10-22",
+      "match": "\\bae-mohre\\b",
+      "agencyMatch": "Human Resources"
+    },
+    {
+      "key": "ae-dxb-premises",
+      "name": "Premises zoning and lease",
+      "agency": "Dubai Department of Economy and Tourism; Dubai Land Department (Ejari); Dubai Municipality",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://u.ae/en/information-and-services/business/Doing-business/doing-business-on-the-mainland/steps-to-start-a-business-on-the-mainland",
+      "quote": "The business premises and location must comply with the requirements defined by the respective emirate’s Department of Economic Development",
+      "read": "2026-10-22",
+      "match": "\\bae-dxb-premises\\b",
+      "agencyMatch": "Dubai"
+    }
+  ]
+}

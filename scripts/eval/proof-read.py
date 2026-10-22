@@ -35,6 +35,9 @@ WEBFETCH_SEEN = {
     "https://chicago.gov/content/city/en/sites/chicago-business-licensing/home/wholesalefood.html": "2026-10-21",
     # furniture (src/forms/kinds.ts): EUR-Lex answers curl with an empty 202 (a bot wall)
     "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023R0988": "2026-10-21",
+    # the finishing pass (src/forms/finish.ts): pages that build their text in script, so curl gets the frame without it
+    "https://www.skatteverket.se/foretag/arbetsgivare/arbetsgivarregistrering/registreradig.4.18e1b10334ebe8bc80003496.html": "2026-10-22",
+    "https://cro.ie/registration/company/required-steps/": "2026-10-22",
 }
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128 Safari/537.36"
 
@@ -53,7 +56,12 @@ def text_of(url, ua=UA):
         # across columns when laid out, so a quote is found in either)
         out = subprocess.run(["pdftotext", "-layout", pdf, "-"], capture_output=True, text=True).stdout + "\n\f\n" + subprocess.run(["pdftotext", pdf, "-"], capture_output=True, text=True).stdout; os.unlink(pdf)
         return out, "200"
-    s = data.decode("utf-8", errors="replace")
+    # the page's own charset when it declares one (gesetze-im-internet.de serves ISO-8859-1), else UTF-8
+    m = re.search(rb"charset=[\"']?([A-Za-z0-9_-]+)", data[:4000])
+    try:
+        s = data.decode(m.group(1).decode() if m else "utf-8", errors="replace")
+    except LookupError:
+        s = data.decode("utf-8", errors="replace")
     s = re.sub(r"(?is)<(script|style|noscript|svg)[^>]*>.*?</\1>", " ", s)
     s = re.sub(r"<[^>]+>", " ", s)
     return html.unescape(s), "200"

@@ -1,0 +1,127 @@
+{
+  "id": "montreal-restaurant",
+  "title": "A restaurant in Montréal",
+  "read": "2026-10-22",
+  "input": {
+    "what": "Restaurant",
+    "where": "1000 Rue Sainte-Catherine O, Montréal, QC H3B 1G7, Canada",
+    "lang": "en"
+  },
+  "assumptions": "A new federal corporation opening a restaurant in Montréal with staff, a fit-out and a sign, no alcohol. GST/HST applies above the small supplier limit, so it is conditional. The QST and CNESST registrations could not be read on Revenu Québec and the CNESST (403), so they are not gold items; the plan abstains on them.",
+  "order": [],
+  "mustNotInclude": [
+    {
+      "name": "US and California filings",
+      "why": "Canada code is CA, like California; no US filing applies.",
+      "match": "california|irs-|cbp-|fincen|\\\\bEIN\\\\b"
+    },
+    {
+      "name": "Ontario and BC",
+      "why": "Montréal is in Québec.",
+      "match": "ca-on-|ca-tor-|ca-bc-|ca-van-"
+    }
+  ],
+  "items": [
+    {
+      "key": "ca-ised-incorporate",
+      "name": "Federal incorporation",
+      "agency": "Corporations Canada (Innovation, Science and Economic Development Canada)",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 200,
+      "source": "https://ised-isde.canada.ca/cc/lgcy/index.html",
+      "quote": "Incorporate ($200)",
+      "read": "2026-10-21",
+      "match": "\\bca-ised-incorporate\\b",
+      "agencyMatch": "Corporations Canada"
+    },
+    {
+      "key": "ca-qc-req",
+      "name": "Registration in Québec",
+      "agency": "Registraire des entreprises du Québec",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.quebec.ca/en/businesses-and-self-employed-workers/start-entreprise/register-constitute-enterprise/learn-about-registration/about-registration",
+      "quote": "In Québec, most enterprises must register with the Registraire des entreprises as soon as they are created, by filing a declaration of registration.",
+      "read": "2026-10-22",
+      "match": "\\bca-qc-req\\b",
+      "agencyMatch": "Registraire des entreprises"
+    },
+    {
+      "key": "ca-cra-bn",
+      "name": "Business number",
+      "agency": "Canada Revenue Agency",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/business-registration/business-number-program-account/how-register.html",
+      "quote": "Find out how to register for a business number (BN) and Canada Revenue Agency (CRA) program accounts for your business.",
+      "read": "2026-10-21",
+      "match": "\\bca-cra-bn\\b",
+      "agencyMatch": "Canada Revenue Agency"
+    },
+    {
+      "key": "ca-cra-gst",
+      "name": "GST/HST registration",
+      "agency": "Canada Revenue Agency",
+      "level": "federal",
+      "required": false,
+      "verified": true,
+      "fee": 0,
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/when-register-charge.html",
+      "quote": "You are no longer a small supplier and have to charge GST/HST on the supply that made you exceed $30,000 within the calendar quarter.",
+      "read": "2026-10-21",
+      "match": "\\bca-cra-gst\\b",
+      "agencyMatch": "Canada Revenue Agency"
+    },
+    {
+      "key": "ca-qc-mapaq",
+      "name": "Food permit (MAPAQ)",
+      "agency": "Ministère de l'Agriculture, des Pêcheries et de l'Alimentation du Québec (MAPAQ)",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": 367,
+      "source": "https://www.quebec.ca/entreprises-et-travailleurs-autonomes/industrie-bioalimentaire/permis-alimentaires/permis-restauration-vente-detail",
+      "quote": "Vous devez recevoir votre permis avant de commencer vos activités et l’afficher à la vue des clients.",
+      "en": "You must receive your permit before starting and display it where customers can see it.",
+      "read": "2026-10-22",
+      "match": "\\bca-qc-mapaq\\b",
+      "agencyMatch": "MAPAQ"
+    },
+    {
+      "key": "ca-mtl-occupation",
+      "name": "Occupancy permit",
+      "agency": "Ville de Montréal, the borough's permit counter",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://montreal.ca/articles/ouvrir-un-commerce-ou-lancer-une-entreprise-18507",
+      "quote": "Faites ensuite une demande de permis d’occupation pour activité commerciale ou professionnelle, aussi appelé «certificat d’occupation» ou «certificat d’autorisation d’usage».",
+      "en": "Then apply for the occupancy permit for a commercial or professional activity, also called a certificate of occupancy or of authorised use.",
+      "read": "2026-10-22",
+      "match": "\\bca-mtl-occupation\\b",
+      "agencyMatch": "Montréal"
+    },
+    {
+      "key": "ca-mtl-enseigne",
+      "name": "Sign permit",
+      "agency": "Ville de Montréal, the borough's permit counter",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://montreal.ca/demarches/obtenir-un-permis-denseigne-commerciale",
+      "quote": "Vous voulez installer une enseigne commerciale, la remplacer ou en modifier la structure ou le message? À Montréal, un permis est nécessaire.",
+      "en": "Want to install, replace or change a commercial sign? In Montréal, a permit is needed.",
+      "read": "2026-10-22",
+      "match": "\\bca-mtl-enseigne\\b",
+      "agencyMatch": "Montréal"
+    }
+  ]
+}

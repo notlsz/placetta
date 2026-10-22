@@ -229,6 +229,16 @@
   "context": "r form print form submission cover sheet (rev 03/2024) secretary of state llc-1 articles of organization limited liability company (llc) filing fee - $70.00 certified copy fee (optional) - $5.00 note: llcs may have to pay minimum $800 t"
  },
  {
+  "id": "ca-llc-5",
+  "read": "https://bpd.cdn.sos.ca.gov/pdf/be-fee-schedule-062018.pdf",
+  "quote": "Application to Register a Foreign Limited Liability Company (Form LLC-5)",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "78f53a96fa98241c",
+  "context": "continued) foreign (formed outside of california) limited liability companies  application to register a foreign limited liability company (form llc-5)........................................................$ 70.00  amendment to r"
+ },
+ {
   "id": "ca-ftb-3522",
   "read": "https://www.ftb.ca.gov/file/business/types/limited-liability-company/index.html",
   "quote": "Every LLC that is doing business or organized in California must pay an annual tax of $800.",
@@ -291,10 +301,11 @@
   "id": "lac-plan-check",
   "read": "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
   "quote": "shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food",
-  "checked": "2026-10-21",
-  "method": "webfetch",
+  "checked": "2026-10-22",
+  "method": "curl",
   "found": true,
-  "note": "curl got 403; read with WebFetch on 2026-10-21"
+  "sha256": "7b91a046f9ae2c7d",
+  "context": "ns drawn to scale, and specifications to the enforcement agency for review, and shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food facility, (b) plans and specifications may also be required by the enforcement "
  },
  {
   "id": "lac-health-permit",
@@ -434,6 +445,126 @@
   "found": true,
   "sha256": "f851fa8256cb133c",
   "context": "is required. if corrections are required, call 832.393.5100 for a reinspection. if inspection is passed then an operating permit is invoiced and processed when payment is received. schedule by phone to request an inspection or re-inspection, call 832-393-5100."
+ },
+ {
+  "id": "cn-business-license",
+  "read": "https://www.gov.cn/zhengce/content/2021-08/24/content_5632964.htm",
+  "quote": "未经登记，不得以市场主体名义从事经营活动。",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "6bce43590342ff2d",
+  "context": "合作社（联合社）及其分支机构； （四）个体工商户； （五）外国公司分支机构； （六）法律、行政法规规定的其他市场主体。 第三条 市场主体应当依照本条例办理登记。未经登记，不得以市场主体名义从事经营活动。法律、行政法规规定无需办理登记的除外。 市场主体登记包括设立登记、变更登记和注销登记。 第四条 市场主体登记管理应当遵循依法合规、规范统一、公开透明、便捷高效的"
+ },
+ {
+  "id": "cn-tax",
+  "read": "https://fgk.chinatax.gov.cn/zcfgk/c100009/c5195081/content.html",
+  "quote": "自领取营业执照之日起三十日内，持有关证件，向税务机关申报办理税务登记。",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "4abc9efcf8bf74b2",
+  "context": "务管理 第一节 税务登记 第十五条 企业，企业在外地设立的分支机构和从事生产、经营的场所，个体工商户和从事生产、经营的事业单位（以下统称从事生产、经营的纳税人）自领取营业执照之日起三十日内，持有关证件，向税务机关申报办理税务登记。税务机关应当于收到申报的当日办理登记并发给税务登记证件。 工商行政管理机关应当将办理登记注册、核发营业执照的情况，定期向税务机关通报。 本条第一款规定以外的纳税"
+ },
+ {
+  "id": "cn-social",
+  "read": "https://shanghai.chinatax.gov.cn/zcfw/zcfgk/sbf/202202/t462174.html",
+  "quote": "用人单位应当自用工之日起三十日内为其职工向社会保险经办机构申请办理社会保险登记。",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "f925468cda637470",
+  "context": "机关应当及时向社会保险经办机构通报用人单位的成立、终止情况，公安机关应当及时向社会保险经办机构通报个人的出生、死亡以及户口登记、迁移、注销等情况。 第五十八条 用人单位应当自用工之日起三十日内为其职工向社会保险经办机构申请办理社会保险登记。未办理社会保险登记的，由社会保险经办机构核定其应当缴纳的社会保险费。 自愿参加社会保险的无雇工的个体工商户、未在用人单位参加社会保险的非全日制从业人员以及其他灵"
+ },
+ {
+  "id": "cn-food-license",
+  "read": "https://www.gov.cn/gongbao/2023/issue_10606/202307/content_6894763.html",
+  "quote": "从事食品销售和餐饮服务活动，应当依法取得食品经营许可。",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "a02943f8752b8784",
+  "context": "品，下同）的备案，以及相关监督检查工作，适用本办法。 第三条 食品经营许可和备案应当遵循依法、公开、公平、公正、便民、高效的原则。 第四条 在中华人民共和国境内从事食品销售和餐饮服务活动，应当依法取得食品经营许可。 下列情形不需要取得食品经营许可： （一）销售食用农产品； （二）仅销售预包装食品； （三）医疗机构、药品零售企业销售特殊医学用途配方食品中的特定全营养配方食品"
+ },
+ {
+  "id": "cn-fire",
+  "read": "https://js.119.gov.cn/202111/608cd5a920fb4644b27aa41edc5ab073_c_86038aff349a45b5824e.html",
+  "quote": "公众聚集场所投入使用、营业前消防安全检查实行告知承诺管理。",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "92a29c3375f54630",
+  "context": "其他建设工程经依法抽查不合格的，应当停止使用。 第十四条 建设工程消防设计审查、消防验收、备案和抽查的具体办法，由国务院住房和城乡建设主管部门规定。 第十五条 公众聚集场所投入使用、营业前消防安全检查实行告知承诺管理。公众聚集场所在投入使用、营业前，建设单位或者使用单位应当向场所所在地的县级以上地方人民政府消防救援机构申请消防安全检查，作出场所符合消防技术标准和管理规定的承诺"
+ },
+ {
+  "id": "cn-open-bj",
+  "read": "https://scjgj.beijing.gov.cn/ztzl/qykb/zcwjkb/202104/t20210413_2353382.html",
+  "quote": "近年来，北京市已实现开办企业一网通办",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "ce56f7e6b3a3d9bf",
+  "context": "有效性] 北京市开办企业实现一网通办、一天办结 时间: 2021-04-09 来源: ​北京市市场监督管理局 分享： x 【字体： 大 中 小 】 打印 收藏 近年来，北京市已实现开办企业一网通办 、一天办结。 申请人可通过北京市企业服务 e窗通平台\"一窗\"填报，办理营业执照、获得免费公章、办理涉税事项、员工\"五险一金\"信息采集、企业银行开户服务等相关业"
+ },
+ {
+  "id": "cn-open-sh",
+  "read": "https://www.shanghai.gov.cn/lctjkbqy/index.html",
+  "quote": "开办企业一网通办 最快2天可营业",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "25acba89e0e5a0e8",
+  "context": "开办企业_上海市人民政府 首页 营造超一流营商环境 流程图解 开办企业 开办企业 开办企业一网通办 最快2天可营业"
+ },
+ {
+  "id": "cn-open-sz",
+  "read": "https://amr.sz.gov.cn/xxgk/qt/ztlm/qykb/",
+  "quote": "整合企业设立登记、公章刻制、申领发票、员工参保登记、住房公积金企业缴存登记等环节。",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "5d42ede0d52ef5ce",
+  "context": "开办企业一窗通-深圳市市场监督管理局 深圳市市场监督管理局 | 开办企业一窗通 无障碍 长者版 返回首页 深圳市开办企业一窗通平台 整合企业设立登记、公章刻制、申领发票、员工参保登记、住房公积金企业缴存登记等环节。实现企业开办一表填表、一窗通取。 办理入口 操作指南 点我咨询 办理流程 分时办理 首次登陆\"开办企业一窗通\"平台，仅办理了企业登记注册，未同时办理公章刻制、申"
+ },
+ {
+  "id": "cn-open-gz",
+  "read": "https://scjgj.gz.gov.cn/zmhd/cjwt/ssdj/content/post_8663614.html",
+  "quote": "各部门在平台同步联办，最快0.5天就可以办结",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "38e63a51fd079ee6",
+  "context": "大 中 小 申请人登陆一网通平台一次性填报注册登记、刻制印章、申领发票（含税控设备）、就业和参保登记、住房公积金缴存登记、预约银行开户等开办企业业务的全部信息，各部门在平台同步联办，最快0.5天就可以办结，申请人收到领取通知后，到拟设立企业所在区政务大厅领取营业执照、税务ukey和发票、公章等。 标签： 浏览次数： - 分享 微信好友 qq好友 qq空间 新浪微"
+ },
+ {
+  "id": "cn-open-wh",
+  "read": "https://fgw.wuhan.gov.cn/xwzx/fgyw/202102/t20210223_1638311.html",
+  "quote": "我市全面推行企业开办“一事联办”“全城通办”",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "a5be848c6943d9d7",
+  "context": "业开办\"一事联办\"\"全城通办\" 发布时间: 2021-02-23 09:46:28 来源： 长江日报 字号： [ 大 中 小 ] 分享： 便利市场主体准入准营，我市全面推行企业开办\"一事联办\"\"全城通办\"。22日长江日报记者获悉，武汉市出台市场监管优化营商环境\"23条\"，为市场主体创新发展出实招、送实惠、求实效。 具体举措包括便利市场主体准入准营、激发市场主体创"
+ },
+ {
+  "id": "cn-open-nj",
+  "read": "https://njsj.nanjing.gov.cn/xwdt/202308/t20230823_3993598.html",
+  "quote": "已将企业开办涉及的市场主体登记、公章刻制、银行开户、税务登记、就业参保登记、医保参保登记、公积金登记等七个事项合并办理",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "51b3d3b8397223ac",
+  "context": "不动产登记一体化办理平台，交易登记由原来的18个环节简化为3个，商品房、存量房登记从10个工作日提速至现场办结。市市场监管局介绍全市企业开办\"一件事\"改革情况，已将企业开办涉及的市场主体登记、公章刻制、银行开户、税务登记、就业参保登记、医保参保登记、公积金登记等七个事项合并办理，实现企业开办1个环节、0成本、0.5天办结。 据悉， \"一件事\"改革是以企业、群众办好\"一件事\"为目标，整合事项、再造流程、共享信息，逐步形成\"一窗受理、一次"
+ },
+ {
+  "id": "cn-open-su",
+  "read": "https://www.suzhou.gov.cn/szsrmzf/szyw/202603/4e27892a644d4fa19f6c544811639a30.shtml",
+  "quote": "创业者通过“全链通”平台即可完成登录、信息填报、电子签名、提交审核全流程操作",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "ad4c138fa19fa43e",
+  "context": "措，大幅压缩办理时限、提升服务效能，全力打造\"苏州最舒心\"营商环境。 在企业开办环节，\"一人公司\"（opc）可通过全程网办，最快0.5个工作日即可领取营业执照。创业者通过\"全链通\"平台即可完成登录、信息填报、电子签名、提交审核全流程操作，系统会自动提示登记要点，实名认证与电子签名功能实现全程网办闭环。平台还集成公章刻制、银行开户、税务登记等基础服务，同步打通社保、公积金、用电报装等开办运营事项"
  },
  {
   "id": "gb-incorporate",
@@ -801,7 +932,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "b47ddbe418a681bb",
+  "sha256": "b409a2697506a078",
   "context": " elektronisch mit einem fragebogen zur steuerlichen erfassung beantragt werden. der fragebogen muss innerhalb eines monats nach aufnahme ihrer tätigkeit unaufgefordert an ihr zuständiges finanzamt übermittelt werden. wo und wie bekomme ich jetzt die steuernummer für mein unternehmen? füllen sie "
  },
  {
@@ -895,6 +1026,36 @@
   "context": "zu stehen. wenn jemand diesen gemeingebrauch durch eine andere art der nutzung, wie das herausstellen von tischen und stühlen (schankvorgarten) vor eigenen geschäftsräumen einschränkt, handelt es sich dabei um eine sondernutzung. online verfahren --> sie können diese dienstleistung auch online in anspruch ne"
  },
  {
+  "id": "de-gewerbe-muc",
+  "read": "https://stadt.muenchen.de/service/info/gewerbeamt/10164604/",
+  "quote": "Reichen Sie Ihre Gewerbeanmeldung rechtzeitig vor oder spätestens mit Aufnahme der Tätigkeit ein.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "0561f725d4635d2e",
+  "context": "t, gewinn zu erzielen und nicht die tatsächliche erwirtschaftung eines gewinns. reichen sie ihre gewerbeanmeldung rechtzeitig vor oder spätestens mit aufnahme der tätigkeit ein. so funktioniert die online-anmeldung: anmeldung starten mit bayernid anmelden w"
+ },
+ {
+  "id": "de-gewerbe-ham",
+  "read": "https://www.hamburg.de/service/info/11258072/n0/",
+  "quote": "Wenn Sie ein stehendes Gewerbe anfangen, müssen Sie dieses gleichzeitig anmelden.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "64a99ce163cfd34c",
+  "context": "he seite schließen hamburg.de hamburg service gewerbe anmelden gewerbe anmelden wenn sie ein stehendes gewerbe anfangen, müssen sie dieses gleichzeitig anmelden. drucken teilen schließen de en online-service nutzen gewerbeanzeige beschreibun"
+ },
+ {
+  "id": "de-gewerbe-fra",
+  "read": "https://www.gesetze-im-internet.de/gewo/__14.html",
+  "quote": "Wer den selbständigen Betrieb eines stehenden Gewerbes, einer Zweigniederlassung oder einer unselbständigen Zweigstelle anfängt, muss dies der zuständigen Behörde gleichzeitig anzeigen.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "3f663960d4911100",
+  "context": "altsverzeichnis gewerbeordnung § 14 anzeigepflicht; verordnungsermächtigung (1) wer den selbständigen betrieb eines stehenden gewerbes, einer zweigniederlassung oder einer unselbständigen zweigstelle anfängt, muss dies der zuständigen behörde gleichzeitig anzeigen. das gleiche gilt, wenn 1. der betrieb verlegt wird, 2. der gegenstand des gewer"
+ },
+ {
   "id": "it-registro",
   "read": "https://www.impresainungiorno.gov.it/web/l-impresa-e-l-europa/setting-up-a-business",
   "quote": "Tutte le imprese di qualsiasi natura giuridica si debbono iscrivere al Registro delle imprese.",
@@ -935,13 +1096,23 @@
   "context": "verso lo sportello unico per le attività produttive. per pratiche più semplici, è sufficiente l'autocertificazione con la presentazione in modalità digitale della segnalazione certificata di inizio attività (scia). per le iniziative più complesse si ricorre a procedimenti di tipo ordinario ch"
  },
  {
+  "id": "it-vvf",
+  "read": "https://www.vigilfuoco.it/comando-vvf-potenza/prevenzione-incendi",
+  "quote": "considerate a maggior rischio d'incendio, che sono sottoposte a controllo dei Vigili del Fuoco.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "4d7a41828ba834ca",
+  "context": "dm 16 febbraio 1982, un elenco di 80 attività (denominate \"attività soggette\"), considerate a maggior rischio d'incendio, che sono sottoposte a controllo dei vigili del fuoco. i responsabili (enti e privati) delle \"attività soggette\" sono tenuti a rispett"
+ },
+ {
   "id": "it-mil-vicinato",
   "read": "https://fareimpresa.comune.milano.it/it/vendita/esercizi-vicinato",
   "quote": "Per aprire o modificare un esercizio di vicinato occorre presentare, esclusivamente per via telematica al SUAP (Sportello Unico Attività Produttive) del Comune di Milano",
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "f09c0807b538bb58",
+  "sha256": "ae2eb8d0117bb61b",
   "context": "ocali inerenti gli esercizi di vicinato c1,c3 e d8. presentazione della domanda per aprire o modificare un esercizio di vicinato occorre presentare, esclusivamente per via telematica al suap (sportello unico attività produttive) del comune di milano tramite la piattaforma nazionale impresainungiorno.gov.it, una segnalazione cer"
  },
  {
@@ -1055,6 +1226,16 @@
   "context": "tirada y gestión de residuos procedentes de obras de construcción y demolición. la ocupación de la vía pública, cuando resulte necesario. asimismo, deberá comunicarse el cambio de titularidad cuando se produzca una mo"
  },
  {
+  "id": "es-bcn-licencia",
+  "read": "https://ajuntament.barcelona.cat/comerc/en/do-you-have-establishment/how-open-business-barcelona-step-step",
+  "quote": "It is compulsory to request it before starting any business activity.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "1c24704bea03f3ba",
+  "context": "ss. before opening up, you must have clear concepts such as: municipal licence. it is compulsory to request it before starting any business activity. you can do this procedure through the business advice office. taxes. to start t"
+ },
+ {
   "id": "nl-bv",
   "read": "https://business.gov.nl/starting-your-business/preparations/step-by-step-plan-how-to-start-a-business-in-the-netherlands/",
   "quote": "Private limited companies and public limited companies have to register via a civil-law notary.",
@@ -1165,6 +1346,15 @@
   "context": "k make sure your business complies with fire safety requirements open mandatory you must also take fire safety measures. for example, use non-flammable or flame-retardant materials. read more about fi"
  },
  {
+  "id": "ie-cro",
+  "read": "https://cro.ie/registration/company/required-steps/",
+  "quote": "Please submit a Form A1 and constitution on CORE.",
+  "checked": "2026-10-22",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-22"
+ },
+ {
   "id": "ie-revenue",
   "read": "https://www.revenue.ie/en/starting-a-business/registering-for-tax/index.aspx",
   "quote": "You must register for tax with Revenue when you:",
@@ -1205,6 +1395,36 @@
   "context": "prise auprès de la tva ? oui mais il s'agit d'un service complémentaire payant. vous pouvez également activer vous-même gratuitement votre numéro d'entreprise auprès de la tva sur le site du spf finances. puis-je utiliser un guichet d'entreprises en ligne ? oui. tous les guichets d'"
  },
  {
+  "id": "pt-empresa",
+  "read": "https://registo.justica.gov.pt/Empresas/Empresa-na-Hora",
+  "quote": "No balcão Empresa na Hora pode fazer todo o processo de constituição de uma sociedade comercial",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "1decf25bf752d2df",
+  "context": "uisar login serviços empresas criar empresa na hora quer iniciar o seu negócio? no balcão empresa na hora pode fazer todo o processo de constituição de uma sociedade comercial ou sociedade civil sob a forma comercial num único balcão, num único momento. n"
+ },
+ {
+  "id": "pt-financas",
+  "read": "https://areadocomerciante.dgae.gov.pt/documentacao1/documentos/20250530-guia-da-restauracao_2025-pdf.aspx",
+  "quote": "A apresentação à Autoridade Tributária e Aduaneira (AT) da declaração início da atividade é obrigatória",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "e0c4a73ad1c3822b",
+  "context": ".3 comunicar o início de atividade à autoridade tributária e à segurança social a apresentação à autoridade tributária e aduaneira (at) da declaração início da atividade é obrigatória quer para empresários em nome individual, quer para pessoas coletivas. para mai"
+ },
+ {
+  "id": "ch-hr",
+  "read": "https://www.kmu.admin.ch/de/anmeldung-eines-unternehmens-im-handelsregister",
+  "quote": "Der Eintrag im Handelsregister erfolgt erst nach dem Gründungsakt bei der Notarin oder beim Notar.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "a71122ec2854f461",
+  "context": "reitet easygov zuerst die gründung in form eines auftrages an das notariat vor. der eintrag im handelsregister erfolgt erst nach dem gründungsakt bei der notarin oder beim notar. die vorschriften für die firmennamensbildung hängen von der rechtsform ab. sie "
+ },
+ {
   "id": "ch-mwst",
   "read": "https://www.estv.admin.ch/de/mwst-steuerpflicht",
   "quote": "Ein Unternehmen mit Sitz im Inland ist grundsätzlich steuerpflichtig, wenn es:",
@@ -1215,6 +1435,16 @@
   "context": "ragen und antworten zur steuerpflicht grundsätzliches zur mehrwertsteuerpflicht ein unternehmen mit sitz im inland ist grundsätzlich steuerpflichtig, wenn es: selbstständig einer beruflichen oder gewerblichen tätigkeit nachgeht, unter eig"
  },
  {
+  "id": "ch-ahv",
+  "read": "https://faq.bsv.admin.ch/de/alters-und-hinterlassenenversicherung-ahv/ahv-beitraege-arbeitgeber/welche-pflichten-habe-ich-als",
+  "quote": "Als Arbeitgeber melden Sie sich bei der Ausgleichskasse an.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "e2e20ccc982f957d",
+  "context": "ahv ahv-beiträge arbeitgeber welche pflichten habe ich als arbeitgeber? antwort als arbeitgeber melden sie sich bei der ausgleichskasse an. zuständig ist eine verbands­ ausgleichskasse, sofern sie mitglied in deren grün"
+ },
+ {
   "id": "at-gewerbe",
   "read": "https://www.usp.gv.at/gruendung/EAP/gewerbeanmeldung.html",
   "quote": "Das Gewerbe muss bei der Gewerbebehörde angemeldet werden.",
@@ -1223,6 +1453,16 @@
   "found": true,
   "sha256": "69b84e71721f88cd",
   "context": "je nach gewerbe das → magistratische bezirksamt oder die ma 63 verfahrensablauf das gewerbe muss bei der gewerbebehörde angemeldet werden. die anmeldung kann - formlos oder mittels formular - persönlich, schriftlich od"
+ },
+ {
+  "id": "at-fb",
+  "read": "https://www.usp.gv.at/themen/betrieb-und-umwelt/laufender-betrieb/firmenbuch.html",
+  "quote": "In der Regel erlangt die Gesellschaft mit der Eintragung in das Firmenbuch Rechtspersönlichkeit.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "bcd3486939e07f5e",
+  "context": "rmenbuch steht weiters die firmeninformation im internet zur verfügung. hinweis in der regel erlangt die gesellschaft mit der eintragung in das firmenbuch rechtspersönlichkeit. die eintragung in das firmenbuch ersetzt nicht die erlangung der gewerbeberecht"
  },
  {
   "id": "mx-sociedad",
@@ -1243,6 +1483,16 @@
   "found": true,
   "sha256": "95c7322aee3280d8",
   "context": "d de inscripción en el rfc de personas morales en la adsc. quiénes lo presentan personas morales de nueva creación a través de sus representantes legales, como son entre otras: asociaciones civiles, sociedades civiles, sociedades anó"
+ },
+ {
+  "id": "mx-imss",
+  "read": "https://ventanillamipymes.economia.gob.mx/inscripcion-al-imss-persona-moral/",
+  "quote": "Este trámite te permite registrarte ante el Instituto Mexicano del Seguro Social (IMSS) para cumplir con tus obligaciones patronales.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "f1edba2a3564ede5",
+  "context": "l anotación ¿eres patrón persona moral o retenedor de cuotas obrero patronales? este trámite te permite registrarte ante el instituto mexicano del seguro social (imss) para cumplir con tus obligaciones patronales. requisitos e.firma de la empresa comprobante de domicilio acta constitutiva res"
  },
  {
   "id": "mx-cofepris",
@@ -1303,6 +1553,166 @@
   "found": true,
   "sha256": "339cba632f348347",
   "context": "a ciudadanía para el trámite de licencia de uso de edificación, que consiste en solicitar la autorización del municipio para hacer construcciones en diferentes zonas habitacionales y determinar el funcionamiento específico del predio. ii. alcance este procedimiento es aplicable a la dirección general para un des"
+ },
+ {
+  "id": "mx-gdl-licencia",
+  "read": "https://apitramites.guadalajara.gob.mx/pdf/380",
+  "quote": "Te permite obtener tu licencia de funcionamiento para giros de riesgo medio",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "870e46d1d9a11d7c",
+  "context": "licencia de giro comercial tipo b te permite obtener tu licencia de funcionamiento para giros de riesgo medio que por su tipo de actividad requiere de supervisión previo al otorgamiento de "
+ },
+ {
+  "id": "mx-cun-licencia",
+  "read": "https://cancun.gob.mx/cancun/noticias/leer/3383",
+  "quote": "La dependencia invita a la ciudadanía en general a que obtenga su licencia de funcionamiento en línea,",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "f01f11c96c66833e",
+  "context": "a anual de funcionamiento, bajo la campaña \"negocio al día, tu mejor garantía\". la dependencia invita a la ciudadanía en general a que obtenga su licencia de funcionamiento en línea, accediendo a través de la página oficial: www.cancun.gob.mx, para que le den el"
+ },
+ {
+  "id": "se-verksamt",
+  "read": "https://bolagsverket.se/foretag/aktiebolag/startaaktiebolag.html",
+  "quote": "Anmäl företaget för registrering till Bolagsverket.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "053a84b934d143b1",
+  "context": "kunden. aktieboken är offentlig. 6. anmäl och betala avgiften till bolagsverket anmäl företaget för registrering till bolagsverket. anmälan måste ni lämna in senast sex månader efter att stiftelseurkunden har up"
+ },
+ {
+  "id": "dk-virk",
+  "read": "https://erhvervsstyrelsen.dk/vejledning-stiftelse-af-aps-og-as",
+  "quote": "Når du vil drive en virksomhed som et anpartsselskab eller aktieselskab, skal dette stiftes i overensstemmelse med lovgivningen og registreres på Virk.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "ce607df1b65f3a3f",
+  "context": "til opstart, drift og udvikling. vejledning om ejerforhold kapitel 1 indledning når du vil drive en virksomhed som et anpartsselskab eller aktieselskab, skal dette stiftes i overensstemmelse med lovgivningen og registreres på virk. reglerne om stiftelse af anpartsselskaber og aktieselskaber findes i selskabslo"
+ },
+ {
+  "id": "fi-ytj",
+  "read": "https://www.prh.fi/fi/yrityksetjayhteisot/yrityksenperustaminen/osakeyhtion-perustaminen-ja-perustamisilmoitus_1.html",
+  "quote": "Osakeyhtiö syntyy, kun se rekisteröidään kaupparekisteriin.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "07a566b9ba7556e8",
+  "context": "n ja pe­rus­ta­mi­sil­moi­tus kaup­pa­re­kis­te­riin kir­jau­du ytj-pal­ve­luun osakeyhtiö syntyy, kun se rekisteröidään kaupparekisteriin. rekisteröintiä varten yhtiön täytyy tehdä perustamisilmoitus. voit perustaa osa"
+ },
+ {
+  "id": "pl-biznes",
+  "read": "https://www.biznes.gov.pl/pl/portal/ou1503",
+  "quote": "Musisz uzyskać wpis do rejestru przedsiębiorców w Krajowym Rejestrze Sądowym (KRS).",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "2726451fbddf356b",
+  "context": "opublikowano 23.08.2013 chcesz założyć spółkę z ograniczoną odpowiedzialnością? musisz uzyskać wpis do rejestru przedsiębiorców w krajowym rejestrze sądowym (krs). sprawdź, jak to zrobić. jak załatwić sprawę zrealizuj usługę online złóż wniose"
+ },
+ {
+  "id": "ae-dxb-licence",
+  "read": "https://u.ae/en/information-and-services/business/Doing-business/doing-business-on-the-mainland/steps-to-start-a-business-on-the-mainland",
+  "quote": "investor can collect the business licence from service centres of the economic departments or through their websites.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "4cb07558cd9be11d",
+  "context": "vest in dubai collecting the business licence after completing the above steps, investor can collect the business licence from service centres of the economic departments or through their websites. documents required for getting a licence for all legal forms the following docu"
+ },
+ {
+  "id": "ae-auh-licence",
+  "read": "https://u.ae/en/information-and-services/business/Doing-business/doing-business-on-the-mainland/steps-to-start-a-business-on-the-mainland",
+  "quote": "investor can collect the business licence from service centres of the economic departments or through their websites.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "4cb07558cd9be11d",
+  "context": "vest in dubai collecting the business licence after completing the above steps, investor can collect the business licence from service centres of the economic departments or through their websites. documents required for getting a licence for all legal forms the following docu"
+ },
+ {
+  "id": "ae-shj-licence",
+  "read": "https://u.ae/en/information-and-services/business/Doing-business/doing-business-on-the-mainland/steps-to-start-a-business-on-the-mainland",
+  "quote": "investor can collect the business licence from service centres of the economic departments or through their websites.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "4cb07558cd9be11d",
+  "context": "vest in dubai collecting the business licence after completing the above steps, investor can collect the business licence from service centres of the economic departments or through their websites. documents required for getting a licence for all legal forms the following docu"
+ },
+ {
+  "id": "ae-tax",
+  "read": "https://mof.gov.ae/en/public-finance/tax/corporate-tax-in-the-uae/",
+  "quote": "All Taxable Persons (including Free Zone Persons) will be required to register for Corporate Tax and obtain a Corporate Tax Registration Number.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "f7a7bac529069669",
+  "context": "ctible for corporate tax purposes. registering, filing and paying corporate tax all taxable persons (including free zone persons) will be required to register for corporate tax and obtain a corporate tax registration number. the federal tax authority may also request certain exempt persons to register f"
+ },
+ {
+  "id": "ae-dxb-food",
+  "read": "https://www.dm.gov.ae/municipality-business/food-safety-department-2/important-information-to-food-establishment/",
+  "quote": "Request for Layout Assessment for Food Establishment Licensing",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "9a3260a4867672b7",
+  "context": "o register and assess a food item request for permit related to food activities request for layout assessment for food establishment licensing apply to accredit food related establishment request for public kitchen in labo"
+ },
+ {
+  "id": "ae-mohre",
+  "read": "https://u.ae/en/information-and-services/jobs/Sector-of-employment/employment-in-the-private-sector/work-permits",
+  "quote": "employers may not recruit or employ any worker unless a work permit is issued in accordance with MoHRE procedures.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "d21cf09832c5c987",
+  "context": " issued by the ministry of human resources and emiratisation (mohre). likewise, employers may not recruit or employ any worker unless a work permit is issued in accordance with mohre procedures. types of work permits mohre has 13 types of work permits. it issues the permits"
+ },
+ {
+  "id": "tr-mersis",
+  "read": "https://ticaret.gov.tr/ic-ticaret/ticaret-sicili/merkezi-sicil-kayit-sistemi-mersis",
+  "quote": "Bu sayede, ticaret sicili müdürlükleri şirket kuruluşlarında tek temas noktası haline getirilmiştir.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "ba7a45f9e081e07d",
+  "context": " yürütülen birçok süreç, dijital ortama taşınarak mersi̇s'te birleştirilmiştir. bu sayede, ticaret sicili müdürlükleri şirket kuruluşlarında tek temas noktası haline getirilmiştir. mersi̇s kamu kurumlarınca tutulan bilgi sistemleriyle (merni̇s, kps, uavt, geli"
+ },
+ {
+  "id": "tr-gib",
+  "read": "https://cdn.gib.gov.tr/api/gibportal-file/file/getFileResources?objectKey=arsiv%2Fonceki-dokumanlar%2Fuser_upload%2Fyayinlar%2Fkurumlar_vergisi.pdf",
+  "quote": "İşe başlama bildirimi, şirketlerin kuruluş aşamasında işe başlama tarihinden itibaren 10 gün içinde ticaret sicili memurluğunca ilgili vergi dairesine yapılır.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "78dc10ff782639d5",
+  "context": "birlikte vergi dairesi sicil yoklama servisine müracaat edilmesi gerekmektedir. i̇şe başlama bildirimi, şirketlerin kuruluş aşamasında işe başlama tarihinden itibaren 10 gün içinde ticaret sicili memurluğunca ilgili vergi dairesine yapılır. ticaret sicili memurlukları, kurumlar vergisi mükellefi olup, türk ticaret kanu"
+ },
+ {
+  "id": "tr-ist-ruhsat",
+  "read": "https://beyoglu.bel.tr/hizmetlerimiz/basvuru-kaynaklari/isyeri-acma-ve-calisma-ruhsatlari/",
+  "quote": "İşyeri Açma ve Çalışma Ruhsatı Müracaatları Gerekli evraklar hazırlandıktan sonra Belediyemiz Ruhsat ve Denetim Müdürlüğüne Şahsen veya şirkette imzaya yetkili kişilerce yapılır.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "05dbedb450514124",
+  "context": " açılacak yerin tapu fotokopisi ile belediyemize danışmanız lehinize olacaktır… i̇şyeri açma ve çalışma ruhsatı müracaatları gerekli evraklar hazırlandıktan sonra belediyemiz ruhsat ve denetim müdürlüğüne şahsen veya şirkette imzaya yetkili kişilerce yapılır. i̇lgili işletmenin iş nev'ine göre ruhsat ve denetim müdürlüğü tarafından; i̇st"
+ },
+ {
+  "id": "il-sos",
+  "read": "https://dceo.illinois.gov/content/dam/soi/en/web/dceo/smallbizassistance/beginhere/documents/starting-your-business-handbook-2026.pdf",
+  "quote": "The following entities must file formation documents with the SOS:",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "494057916ff0966f",
+  "context": " you must register with the secretary of state (sos). required sos registration the following entities must file formation documents with the sos:  limited liability companies (llcs)  corporations (c-corp and s-corp) startin"
  },
  {
   "id": "wa-sos",
@@ -1554,7 +1964,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "94e4dddeed1fd0ef",
+  "sha256": "cb3a3cc234a14937",
   "context": " determine which applies to your business. new or remodeled food establishments if you are building a new food or drink establishment or remodeling an existing facility: apply on dallasnow ​​ ​​​ ​​upload two identical sets of scaled plans, including: ​floor plan and "
  },
  {
@@ -1564,8 +1974,8 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "49447ff7d800c725",
-  "context": "aintitleheader ​food establishment dch body page content ​ ​ permit information food establishment permits are required for restaurants, bars, grocery stores, schools and other retail food establishments. the applicant is responsible for scheduling and coordinating all required healt"
+  "sha256": "0a74184b00deb504",
+  "context": "aintitleheader ​food establishment dch body page content ​ ​ permit information food establishment permits are required for restaurants, bars, grocery stores, schools and other retail food establishments. the applicant is responsible for schedulin​g and coordinating all required heal"
  },
  {
   "id": "dal-sign",
@@ -1576,6 +1986,16 @@
   "found": true,
   "sha256": "ec0b0f6518bd25df",
   "context": "submitted. see here for a complete list of items needed for sign permit review. a permit is required for all signs (new or re-face) if any sign: has an effective area greater than 20-square-feet. is located in excess of eigh"
+ },
+ {
+  "id": "dal-fire-hood",
+  "read": "https://dallascityhall.com/departments/fire-rescue/FPEI%20Docs/Schedule%20of%20Permit%20Fees%202024.pdf",
+  "quote": "Commercial Cooking Fire-Extinguishing System $250",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "e1accfa7ccfcdd12",
+  "context": " storage (misc.), annual $390 fire apparatus access roads $380 plan review fees commercial cooking fire-extinguishing system $250 limited access gates/barriers $330 compressed gas filling/storage/use, annual $"
  },
  {
   "id": "aus-co",
@@ -1638,6 +2058,16 @@
   "context": " portal maps top 10 developer delays contact & connect certificate of occupancy a certificate of occupancy is required for all businesses in the city of san antonio. no building or structure can be used or occupied until our department has issue"
  },
  {
+  "id": "tpa-business-tax",
+  "read": "https://www.tampa.gov/service/new-business-tax-receipt-application",
+  "quote": "the first step in applying for a business tax receipt for a new business operating in the City of Tampa.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "43188e8bbf705251",
+  "context": "tion new business tax receipt application this business tax application form is the first step in applying for a business tax receipt for a new business operating in the city of tampa. a possible on-site inspection may be required. if you need assistance completin"
+ },
+ {
   "id": "sdg-business-tax",
   "read": "https://www.sandiego.gov/treasurer/taxesfees/btax",
   "quote": "All businesses operating in the City of San Diego are required to obtain a Business Tax Certificate.",
@@ -1694,7 +2124,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "239d04aa1adb8fa3",
+  "sha256": "96c70fa16ed00b31",
   "context": "ps will serve as a guide throughout the process subsequent to plan approval. 1. plan approval: congratulations on the approval of your submitted plans, which allows you to initiate construction. it is the responsibility of the submitter to provide evidence of this approval "
  },
  {
@@ -1704,7 +2134,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "28ddbfe436639b57",
+  "sha256": "20e8b51cd03cbf6d",
   "context": "respectively. inspection requests shall be requested 5 working days in advance. a health permit will be issued upon completion of a final inspection. you may not start construction until plans from all agencies have been reviewed"
  },
  {
@@ -1824,7 +2254,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "501e785e2c13cd17",
+  "sha256": "bc52b977187aeda0",
   "context": "c record that registers your business name and address with the city of boston. massachusetts law requires most businesses operating under a trade name to file with the city clerk's office. you must renew every four years. contact city clerk 617-635-4601 cityclerk@bost"
  },
  {
@@ -1834,7 +2264,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "7f8117e8aefbb28e",
+  "sha256": "629d542395356d11",
   "context": "twice each year. we add businesses to our online database as we do inspections. depending on your situation, you may also need a plan review before we can issue your permit. the food service permit is issued by the inspectional services department. cont"
  },
  {
@@ -1874,7 +2304,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "0b3a533d131693e4",
+  "sha256": "cf685c4d2dde5d5e",
   "context": "usiness in boston. if you plan to serve alcohol you'll need a separate license. you must have this license before you can apply for a food service health permit from the inspectional services department health division (isd). if you also plan to serve alcohol, or let guests bring their own, you'll need a"
  },
  {
@@ -1884,7 +2314,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "7f8117e8aefbb28e",
+  "sha256": "629d542395356d11",
   "context": " or sell food to the public in boston. some businesses also need a plan review. before you can serve food to the public, you need to apply for a food service permit and pass a health inspection. we inspect food service businesses at least once a year, but usually twice each"
  },
  {
@@ -2002,8 +2432,18 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "0db216496abf224f",
+  "sha256": "217b43af3cb102c8",
   "context": "pply or renew online. the city of sacramento does not issue a business license. all businesses that operate in the city of sacramento or do business with the city of sacramento must pay a business operation tax. visit the city's online data porta l for a searchable list of businesses in the"
+ },
+ {
+  "id": "sacc-plan-review",
+  "read": "https://emd.saccounty.gov/us/en/environmental-health/eh-plan-review.html",
+  "quote": "that is built or remodeled in Sacramento County must submit plans and have them approved by the EMD Plan Review staff.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "7175ec3d31618a27",
+  "context": "etail food facility, public swimming pool, spa, or recreational aquatic feature that is built or remodeled in sacramento county must submit plans and have them approved by the emd plan review staff. this video: remodeling​ or upgrading your food facility? explains what types of"
  },
  {
   "id": "sacc-health-permit",
@@ -2611,7 +3051,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "552ff2a0aa35a413",
+  "sha256": "223e7a0f457590d1",
   "context": "l an administrative citation view the rules governing hearings before the board food establishment construction, remodeling, and plan review information see plan review page for more information. additional information and resources dogs on patios (pdf, 226kb) ( en español ("
  },
  {
@@ -2645,6 +3085,26 @@
   "context": "ss food safety food plan review search the city search food plan review process the city must approve your plan to start, remodel or expand a food business. overview in minneapolis, food businesses must submit a food plan application to"
  },
  {
+  "id": "oh-vendor",
+  "read": "https://auditor.franklincountyohio.gov/Consumer/Licensing-Types",
+  "quote": "Upon completion, this application can be submitted along with the $50 filing fee to Franklin County Auditor,",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "04822905c935497b",
+  "context": " also access the application for vendor's license to make taxable sales (st 1). upon completion, this application can be submitted along with the $50 filing fee to franklin county auditor, vendor's license section, 373 s high st, 21st floor, columbus, oh 43215. licens"
+ },
+ {
+  "id": "oh-ui",
+  "read": "https://codes.ohio.gov/ohio-revised-code/section-4141.20",
+  "quote": "Every contributory employer shall file a quarterly contribution and wage report.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "3ef54edd4474ef18",
+  "context": "n that the employer is required by this chapter to furnish to the director. (b) every contributory employer shall file a quarterly contribution and wage report. the quarterly report shall be filed not later than the last day of the first mo"
+ },
+ {
   "id": "cmh-plan-review",
   "read": "https://www.columbus.gov/Services/Food-Protection-Program",
   "quote": "Complete a plan review packet and send it to our office with a payment to begin the process of getting a license.",
@@ -2653,6 +3113,16 @@
   "found": true,
   "sha256": "3b60ac512d53ed42",
   "context": "isit the cities of columbus and worthington. new businesses new food business – complete a plan review packet and send it to our office with a payment to begin the process of getting a license. important note standard review - may take up to 30 days to review once a paymen"
+ },
+ {
+  "id": "cmh-food-license",
+  "read": "https://www.columbus.gov/Services/Food-Protection-Program",
+  "quote": "Before opening, you’ll need to complete an application for a license and pass a final inspection.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "3b60ac512d53ed42",
+  "context": "work. step 4 - contact us at least three business days before you want to open. before opening, you'll need to complete an application for a license and pass a final inspection. mobile and temporary food licenses mobile food operations – requirements for a "
  },
  {
   "id": "or-payroll",
@@ -3049,7 +3519,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "8778d3e986fc726a",
+  "sha256": "3de93297528806d5",
   "context": "4.1-302. illegal sale of alcoholic beverages in general; penalty. if any person who is not licensed sells any alcoholic beverages except as permitted by this subtitle, he shall be guilty of a class 1 misdemeanor. in the event of a second or subsequent conviction under this section, a jail se"
  },
  {
@@ -3089,7 +3559,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "1bf5d52edbcbad37",
+  "sha256": "6121ab8f13b294e9",
   "context": "lcoholic beverages section 2. no person shall manufacture, with intent to sell, sell or expose or keep for sale, store, transport, import or export alcoholic beverages or alcohol, except as authorized by this chapter; but the provisions of this chapter shall not apply to sales, storage or transp"
  },
  {
@@ -3726,6 +4196,16 @@
   "context": "e area code) articles of organization - limited liability company 11/17) title: $100 processing fees are nonrefundable. please make check payable to \"corporation division\". free copies are available "
  },
  {
+  "id": "oh-sos-llc",
+  "read": "https://codes.ohio.gov/ohio-revised-code/section-1706.16",
+  "quote": "A limited liability company is formed when the articles of organization are filed by the secretary of state",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "9fa7374cef40c9b1",
+  "context": "nizers or the members determine to include in the articles of organization. (b) a limited liability company is formed when the articles of organization are filed by the secretary of state or at any later date or time specified in the articles of organization. (c) the"
+ },
+ {
   "id": "ny-dos-foreign-llc",
   "read": "https://dos.ny.gov/application-authority-foreign-limited-liability-companies",
   "quote": "The completed application, together with the filing fee of $250, should be forwarded to the New York Department of State,",
@@ -3944,6 +4424,886 @@
   "found": true,
   "sha256": "2f4b718ef90bb47a",
   "context": " be made does not exceed r120 000 in any consecutive period of 12 months. it is compulsory for a person to register for vat if the value of taxable supplies made or to be made, is in excess of r2.3 million in any consecutive 12 month period. voluntary registration is possible under ce"
+ },
+ {
+  "id": "at-finanzamt",
+  "read": "https://www.usp.gv.at/themen/steuern-finanzen/steuerliche-rechte-und-pflichten/pflichten-des-unternehmers.html",
+  "quote": "Die Betriebseröffnung ist dem Finanzamt Österreich innerhalb eines Monats anzuzeigen.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "e410c6bae20d34fb",
+  "context": "neugründung bekommt das unternehmen vom finanzamt österreich eine steuernummer. die betriebseröffnung ist dem finanzamt österreich innerhalb eines monats anzuzeigen. für die anzeige reicht eine mitteilung, in der das unternehmen die betriebseröf"
+ },
+ {
+  "id": "at-oegk",
+  "read": "https://www.usp.gv.at/themen/mitarbeiter-und-gesundheit/einstellung-mitarbeiter-und-arten-der-beschaeftigung/weitere-informationen-einstellen-von-personal/anmeldung-dienstnehmer.html",
+  "quote": "Die/der Dienstgebende muss jede beschäftigte Person (Voll- und Teilversicherte) vor Arbeitsantritt beim zuständigen Krankenversicherungsträger anmelden.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "0da2af4274c2897e",
+  "context": "izierung und signatur hilfs- und problemlösungsdienste allgemeine informationen die/der dienstgebende muss jede beschäftigte person (voll- und teilversicherte) vor arbeitsantritt beim zuständigen krankenversicherungsträger anmelden. je nach art der beschäftigung gibt es verschiedene verfahrensabläufe, die bei a"
+ },
+ {
+  "id": "at-vie-betriebsanlage",
+  "read": "https://www.wien.gv.at/amtswege/genehmigung-betriebsanlage",
+  "quote": "Die Genehmigung muss vor Errichtung oder Änderung der Betriebsanlage vorliegen.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "28e8cde6b1922c7f",
+  "context": "er: datenschutzrechtliche information voraussetzungen keine fristen und termine die genehmigung muss vor errichtung oder änderung der betriebsanlage vorliegen. zuständige stelle für betriebsanlagen im 1. und 3. bis 8. bezirk: magistratisch"
+ },
+ {
+  "id": "at-vie-gastgarten",
+  "read": "https://www.wien.gv.at/amtswege/betrieb-gastgarten-anzeige",
+  "quote": "Für den Betrieb von Gastgärten ist im Allgemeinen eine Bewilligung nach der Gewerbeordnung erforderlich.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "ce38bfd730b83d41",
+  "context": " sich online auch mit ihrem stadt wien konto anmelden. allgemeine informationen für den betrieb von gastgärten ist im allgemeinen eine bewilligung nach der gewerbeordnung erforderlich. wenn bestimmte voraussetzungen erfüllt sind (§ 76a gewerbeordnung), ist keine b"
+ },
+ {
+  "id": "at-grz-betriebsanlage",
+  "read": "https://www.graz.at/cms/beitrag/10223874/7708483",
+  "quote": "Grundsätzlich sind Bewilligungsverfahren binnen 6 Monaten ab Antragstellung zu erledigen",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "e7cefd2158d0a2bb",
+  "context": "rkblatt für gastgewerbliche betriebsanlagen entnommen werden. fristen + termine grundsätzlich sind bewilligungsverfahren binnen 6 monaten ab antragstellung zu erledigen, wobei die frist ab vorliegen aller beurteilungsrelevanten unterlagen (vollstän"
+ },
+ {
+  "id": "ch-zh-hr",
+  "read": "https://www.zh.ch/de/wirtschaft-arbeit/unternehmensportal/opu/firma-gruenden/rechtsform-waehlen/gmbh-gruenden.html",
+  "quote": "Nach der notariellen Beurkundung melden Sie Ihre GmbH beim Handelsregisteramt Zürich an.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "efbec6addbc5a6a1",
+  "context": "dient zur einreichung beim handelsregisteramt. 4. ins handelsregister eintragen nach der notariellen beurkundung melden sie ihre gmbh beim handelsregisteramt zürich an. was sie einreichen: die öffentliche urkunde, die für das handelsregisteramt ged"
+ },
+ {
+  "id": "ch-be-hr",
+  "read": "https://www.hra.dij.be.ch/de/start/rechtsformen/gmbH.html",
+  "quote": "Die Gründung einer Gesellschaft mit beschränkter Haftung muss öffentlich beurkundet werden.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "4c61f0a421187ecb",
+  "context": "vermögen. vorgehen bei der gründung einer gesellschaft mit beschränkter haftung die gründung einer gesellschaft mit beschränkter haftung muss öffentlich beurkundet werden. wir bitten sie daher, sich an eine notarin bzw. einen notar zu wenden. diese od"
+ },
+ {
+  "id": "ch-zrh-gastro-project",
+  "read": "https://www.stadt-zuerich.ch/de/planen-und-bauen/bauvorschriften-und-planerische-grundlagen/bauten-anlagen/lebensmittelbetriebe.html",
+  "quote": "Betriebe benötigen eine Bewilligung, wenn sie Speisen und Getränke mit oder ohne Bedienung anbieten.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "7bd3561fcc28f1e3",
+  "context": "line holen sie sich geballtes fachwissen mit unserem online-tool. betriebsarten betriebe benötigen eine bewilligung, wenn sie speisen und getränke mit oder ohne bedienung anbieten. in der stadt zürich wird zwischen vier kategorien von lebensmittelbetrieben unt"
+ },
+ {
+  "id": "ch-zrh-patent",
+  "read": "https://www.stadt-zuerich.ch/de/stadtleben/veranstaltungen-und-bewilligungen/gastgewerbe/der-weg-zum-restaurant.html",
+  "quote": "Dafür brauchen Sie ein Gastwirtschaftspatent und eine Betriebsbewilligung.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "a8afa39b154932a7",
+  "context": "lässe im innern und auf privatgrund) sie möchten eine gastwirtschaft betreiben? dafür brauchen sie ein gastwirtschaftspatent und eine betriebsbewilligung. hier die bedingungen schritt für schritt. das gastwirtschaftspatent kann nur er"
+ },
+ {
+  "id": "ch-zrh-baubewilligung",
+  "read": "https://www.stadt-zuerich.ch/de/planen-und-bauen/baubewilligungen/bewilligungspflichtige-vorhaben.html",
+  "quote": "Eine Baubewilligung ist zum Beispiel nötig für:",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "0a3a6e471b510b13",
+  "context": "lle finden sie informationen zu den einzelnen vorhaben. beispiele häufige fälle eine baubewilligung ist zum beispiel nötig für: neu- und umbauten abbruch von gebäuden in kernzonen bestimmte änderungen in der"
+ },
+ {
+  "id": "ch-zrh-reklame",
+  "read": "https://www.stadt-zuerich.ch/de/planen-und-bauen/baubewilligungen/reklame-aussenwerbung/gesuche.html",
+  "quote": "Sie brauchen vorgängig eine Bewilligung, wenn Sie bestehende Reklameanlagen abändern oder neue Reklameanlagen anbringen wollen.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "e0d2dc9dc66c000d",
+  "context": " sie eine reklameanlage bewilligen lassen? hier erklären wir ihnen den prozess. sie brauchen vorgängig eine bewilligung, wenn sie bestehende reklameanlagen abändern oder neue reklameanlagen anbringen wollen. dazu können sie online eine voranfrage stellen, oder direkt ein reklamegesuch e"
+ },
+ {
+  "id": "ch-zrh-boulevard",
+  "read": "https://www.stadt-zuerich.ch/de/planen-und-bauen/bauvorschriften-und-planerische-grundlagen/bauten-anlagen/lebensmittelbetriebe.html",
+  "quote": "Die Bewilligung für die Benutzung des öffentlichen Grundes (Boulevardcafé) erteilt die Stadtpolizei.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "7bd3561fcc28f1e3",
+  "context": "bewilligungspflichtig. der plan zum innenausbauprojekt dient als plangrundlage. die bewilligung für die benutzung des öffentlichen grundes (boulevardcafé) erteilt die stadtpolizei. die gesuchsunterlagen sind mindestens 4 wochen vor geplanten betriebseröffnung/"
+ },
+ {
+  "id": "ch-be-gastro",
+  "read": "https://www.rsta.dij.be.ch/de/start/themen/gastgewerbe/betriebsbewilligung-gastgewerbe.html",
+  "quote": "Um im Kanton Bern einen Gastgewerbebetrieb zu eröffnen oder zu übernehmen, benötigen Sie eine Betriebsbewilligung Gastgewerbe.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "b05ba96f37cf42d1",
+  "context": "ung gastgewerbe inhalt merkblätter fumoir alkoholfreie getränke: preisvergleich um im kanton bern einen gastgewerbebetrieb zu eröffnen oder zu übernehmen, benötigen sie eine betriebsbewilligung gastgewerbe. wie sie vorgehen müssen und welche angaben wir von ihnen benötigen, erfahren si"
+ },
+ {
+  "id": "ch-be-food",
+  "read": "https://www.rsta.dij.be.ch/de/start/themen/gastgewerbe/betriebsbewilligung-gastgewerbe.html",
+  "quote": "Erstellen Sie die Dokumentation zur Selbstkontrolle und reichen Sie diese zusammen mit dem Gesuch um Betriebsbewilligung Gastgewerbe dem Kantonalen Laboratorium Bern ein.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "b05ba96f37cf42d1",
+  "context": " für nicht öffentliche veranstaltungen) können sie diesen schritt überspringen. erstellen sie die dokumentation zur selbstkontrolle und reichen sie diese zusammen mit dem gesuch um betriebsbewilligung gastgewerbe dem kantonalen laboratorium bern ein. anleitung zum erstellen einer selbstkontrolle kantonales laboratorium muesmatts"
+ },
+ {
+  "id": "ch-brn-baubewilligung",
+  "read": "https://www.rsta.dij.be.ch/de/start/themen/gastgewerbe/betriebsbewilligung-gastgewerbe.html",
+  "quote": "Prüfen Sie vorgängig, ob die erforderliche Baubewilligung vorliegt.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "b05ba96f37cf42d1",
+  "context": "müssen und welche angaben wir von ihnen benötigen, erfahren sie hier. schritt 1 prüfen sie vorgängig, ob die erforderliche baubewilligung vorliegt. schritt 2 füllen sie das gesuch um betriebsbewilligung gastgewerbe vollständig "
+ },
+ {
+  "id": "se-moms",
+  "read": "https://www.skatteverket.se/foretag/moms/momsregistrering/registreradittforetagformoms.4.deeebd105a602bfe38000256.html",
+  "quote": "Du ska registrera ditt företag för moms om båda dessa förutsättningar gäller för dig:",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "6fc89b9af3789a85",
+  "context": " momssatser och undantag från moms då måste du registrera ditt företag för moms du ska registrera ditt företag för moms om båda dessa förutsättningar gäller för dig: du driver eller har för avsikt att driva en ekonomisk verksamhet där du fortlöp"
+ },
+ {
+  "id": "se-arbetsgivare",
+  "read": "https://www.skatteverket.se/foretag/arbetsgivare/arbetsgivarregistrering/registreradig.4.18e1b10334ebe8bc80003496.html",
+  "quote": "Du behöver registrera dig som arbetsgivare om du ska betala ut ersättning för arbete",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "dce272b3a7ea790e",
+  "context": "arbetsgivarregistrering » registrera dig lyssna registrera dig som arbetsgivare du behöver registrera dig som arbetsgivare om du ska betala ut ersättning för arbete till en person eller ett företag som inte är godkänd för f-skatt. använd e-tjän"
+ },
+ {
+  "id": "se-sto-livsmedel",
+  "read": "https://tillstand.stockholm/tillstand-regler-och-tillsyn/servering-av-mat/anmala-livsmedels--eller-kontaktmaterialverksamhet/",
+  "quote": "Du får inte starta verksamheten innan du anmält den.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "5d1be398339766ff",
+  "context": "öförvaltningen. vissa verksamheter ska i stället anmälas till livsmedelsverket. du får inte starta verksamheten innan du anmält den. vem ska anmäla sin verksamhet? du ska anmäla verksamheten om du till exempel dr"
+ },
+ {
+  "id": "se-sto-bygglov",
+  "read": "https://tillstand.stockholm/tillstand-regler-och-tillsyn/lokal-och-fastigheter/ansoka-om-bygglov-eller-gora-en-bygganmalan/",
+  "quote": "Ska du bygga nytt, bygga till, riva eller göra en ändring av din lokal? Då kan du behöva söka bygglov eller göra en anmälan.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "58237a00428bf641",
+  "context": "r/ansoka-om-bygglov-eller-gora-en-bygganmalan/ kopiera länk länken är kopierad. ska du bygga nytt, bygga till, riva eller göra en ändring av din lokal? då kan du behöva söka bygglov eller göra en anmälan. viktig information om ny plan- och bygglag en ny plan- och bygglag gäller från "
+ },
+ {
+  "id": "se-sto-skylt",
+  "read": "https://tillstand.stockholm/tillstand-regler-och-tillsyn/lokal-och-fastigheter/ansoka-om-bygglov-for-skylt/",
+  "quote": "Du behöver oftast bygglov för att sätta upp, flytta eller ändra en skylt.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "d06273a3ed9788ff",
+  "context": "l-och-fastigheter/ansoka-om-bygglov-for-skylt/ kopiera länk länken är kopierad. du behöver oftast bygglov för att sätta upp, flytta eller ändra en skylt. reglerna beror på var skylten sitter och hur den är utformad. det kan vara olik"
+ },
+ {
+  "id": "se-sto-servering",
+  "read": "https://tillstand.stockholm/tillstand-regler-och-tillsyn/servering-av-alkohol/ansok-om-serveringstillstand-for-alkohol/",
+  "quote": "Ska du servera alkohol året runt behöver du ett stadigvarande tillstånd för allmänheten eller slutet sällskap.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "3bfd7bb9b7a39bec",
+  "context": "eller bara vid enstaka tillfällen. tillstånd för servering av alkohol året runt ska du servera alkohol året runt behöver du ett stadigvarande tillstånd för allmänheten eller slutet sällskap. tillstånd vid catering ska du servera alkohol vid catering behöver du stadigvar"
+ },
+ {
+  "id": "se-sto-uteservering",
+  "read": "https://tillstand.stockholm/tillstand-regler-och-tillsyn/anvanda-offentlig-plats/anvanda-offentlig-plats-for-uteservering/",
+  "quote": "Vill du ha en uteservering utanför din butik, restaurang, ett kafé eller på en parkeringsyta måste du söka polistillstånd.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "846bab8596a10bf0",
+  "context": "lats/anvanda-offentlig-plats-for-uteservering/ kopiera länk länken är kopierad. vill du ha en uteservering utanför din butik, restaurang, ett kafé eller på en parkeringsyta måste du söka polistillstånd. i vissa fall behöver du även bygglov. aktuellt för att förenkla reglerna för di"
+ },
+ {
+  "id": "se-got-livsmedel",
+  "read": "https://goteborg.se/wps/portal/start/foretag-och-organisationer/tillstand-och-regler/salja-och-servera/livsmedel/registrera-livsmedelsverksamhet",
+  "quote": "Innan du tar över eller startar en livsmedelsverksamhet i Göteborg måste du registrera den.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "b73a3ba4a1c504f6",
+  "context": "ra livsmedel registrera livsmedelsverksamhet {} registrera livsmedelsverksamhet innan du tar över eller startar en livsmedelsverksamhet i göteborg måste du registrera den. om du byter organisationsnummer eller flyttar verksamheten till ny lokal måste "
+ },
+ {
+  "id": "se-got-bygglov",
+  "read": "https://goteborg.se/wps/portal/start/bygga-bo-och-leva-hallbart/bygga-riva-och-forandra/vad-ska-du-bygga/andra-inomhus/andra-anvandning",
+  "quote": "Du behöver bygglov för att avsevärt ändra användningen av en byggnad eller en del av en byggnad.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "8dcd8a5d6955c1f1",
+  "context": "h förändra vad ska du bygga? ändra inomhus ändra användning {} ändra användning du behöver bygglov för att avsevärt ändra användningen av en byggnad eller en del av en byggnad. när du vill ändra användning av en byggnad 1 ta reda på om du behöver bygglov e"
+ },
+ {
+  "id": "se-got-servering",
+  "read": "https://goteborg.se/wps/portal/start/foretag-och-organisationer/tillstand-och-regler/salja-och-servera/serveringstillstand-for-alkohol/ansok-om-serveringstillstand-ny/serveringstillstand-for-restauranger-ny2",
+  "quote": "Om du ska servera alkohol på en restaurang, bar eller liknande behöver du ett serveringstillstånd som gäller tills vidare",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "60064ccd44443566",
+  "context": "rveringstillstånd för restaurang {} ansök om serveringstillstånd för restaurang om du ska servera alkohol på en restaurang, bar eller liknande behöver du ett serveringstillstånd som gäller tills vidare, ett så kallat stadigvarande serveringstillstånd till allmänheten. vem kan söka"
+ },
+ {
+  "id": "dk-moms",
+  "read": "https://skat.dk/erhverv/guides-og-webinarer-til-start-ups/start-up-med-skat/for-selskaber/de-foerste-trin",
+  "quote": "Hvis selskabet forventes at omsætte for mere end 50.000 kr. i løbet af 12 måneder, skal det som udgangspunkt registreres for moms.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "db271f418380262a",
+  "context": "dre ansatte, skal det registreres som arbejdsgiver. lær om løn til ansatte moms hvis selskabet forventes at omsætte for mere end 50.000 kr. i løbet af 12 måneder, skal det som udgangspunkt registreres for moms. læs om momsregistrering lønsumsafgift hvis selskabet sælger momsfri ydelser (fx"
+ },
+ {
+  "id": "dk-arbejdsgiver",
+  "read": "https://skat.dk/erhverv/guides-og-webinarer-til-start-ups/start-up-med-skat/for-selskaber/ansatte/del-1-kom-i-gang",
+  "quote": "Før du kan udbetale løn fra selskabet, skal du registrere selskabet som arbejdsgiver.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "32ad6a392d8c3ff8",
+  "context": "lv, skal du gøre det på præcis samme måde. registrer selskabet som arbejdsgiver før du kan udbetale løn fra selskabet, skal du registrere selskabet som arbejdsgiver. herefter skal du hver måned indberette og betale a-skat og am-bidrag til skatte"
+ },
+ {
+  "id": "dk-cph-byggetilladelse",
+  "read": "https://www.kk.dk/erhverv/butik-gadesalg-og-restaurant/tjekliste-for-nye-restauratoerer",
+  "quote": "Hvis du ønsker at etablere en restaurant, skal du ansøge om byggetilladelse.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "a6f833b2890b1867",
+  "context": " en alkoholbevilling. læs mere om ansøgning af alkoholbevilling byggetilladelse hvis du ønsker at etablere en restaurant, skal du ansøge om byggetilladelse. vær opmærksom på, at der kan være krav til brandsikkerhed, flugtveje og tilgæng"
+ },
+ {
+  "id": "dk-cph-alkohol",
+  "read": "https://www.kk.dk/erhverv/butik-gadesalg-og-restaurant/alkoholbevilling",
+  "quote": "Restaurationer i København skal søge via blanketter på Politiets hjemmeside.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "4e89ba00c39f02f6",
+  "context": " butik, gadesalg og restaurant alkoholbevilling sådan søger du alkoholbevilling restaurationer i københavn skal søge via blanketter på politiets hjemmeside. søg om alkoholbevilling hos politiet søg om alkoholbevilling hos politiet søg o"
+ },
+ {
+  "id": "dk-cph-udeservering",
+  "read": "https://www.kk.dk/erhverv/butik-gadesalg-og-restaurant/tjekliste-for-nye-restauratoerer",
+  "quote": "Hvis der er nok plads uden for din café eller restaurant, kan du muligvis få tilladelse til udeservering.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "a6f833b2890b1867",
+  "context": "sbrugere) i virksomheden. læs mere om ansøgning af byggetilladelse udeservering hvis der er nok plads uden for din café eller restaurant, kan du muligvis få tilladelse til udeservering. se, hvordan du får tilladelse til udeservering kontakt os om din nye restaurant"
+ },
+ {
+  "id": "dk-aar-byggetilladelse",
+  "read": "https://aarhus.dk/borger/bolig-byggeri-og-miljoe/byggeri/vil-du-aendre-brugen-af-din-bygning",
+  "quote": "Du må ikke begynde på byggeriet, og du må ikke ændre anvendelsen, før du har en byggetilladelse.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "7db55ba4bec19391",
+  "context": "planramme og lokalplan, der er gældende for dit område. du finder dem på ois.dk du må ikke begynde på byggeriet, og du må ikke ændre anvendelsen, før du har en byggetilladelse. vil du bruge carporten til bolig? du skal altid søge om tilladelse, hvis en gar"
+ },
+ {
+  "id": "dk-aar-alkohol",
+  "read": "https://aarhus.dk/virksomhed/tilladelser/alkoholbevilling",
+  "quote": "Hvis du vil servere alkohol, med en alkoholvolumen på 2,8% eller højere, skal du have en alkoholbevilling.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "5a1e57ecfce81e15",
+  "context": "g print forstør tekst 75 % 100 % 125 % 150 % del link kopieret alkoholbevilling hvis du vil servere alkohol, med en alkoholvolumen på 2,8% eller højere, skal du have en alkoholbevilling. her på siden, kan du finde svar på en række spørgsmål omkring alkoholbevillinge"
+ },
+ {
+  "id": "dk-aar-udeservering",
+  "read": "https://aarhus.dk/virksomhed/tilladelser/soeg-til-udeservering",
+  "quote": "Hvis du som restauratør i Aarhus Kommune vil bruge et offentligt areal foran din café eller restaurant til udeservering, skal du søge om tilladelse.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "3ca85a3d0a04d409",
+  "context": "00 % 125 % 150 % del link kopieret skal du søge om tilladelse til udeservering? hvis du som restauratør i aarhus kommune vil bruge et offentligt areal foran din café eller restaurant til udeservering, skal du søge om tilladelse. print forstør tekst 75% 100% 125% 150% del link kopieret indhold begrebet udese"
+ },
+ {
+  "id": "fi-vat",
+  "read": "https://www.vero.fi/en/businesses-and-corporations/taxes-and-charges/vat/how-to-register-for-vat/",
+  "quote": "it has to be entered in the VAT register if its turnover exceeds €20,000 in a calendar year.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "7f970ce541722d9d",
+  "context": "y form. the company's liability to pay vat the company is liable to pay vat and it has to be entered in the vat register if its turnover exceeds €20,000 in a calendar year. in some circumstances, the company can register for vat voluntarily, for exampl"
+ },
+ {
+  "id": "fi-employer",
+  "read": "https://www.vero.fi/en/businesses-and-corporations/taxes-and-charges/being-an-employer/employer-register/",
+  "quote": "Companies acting as regular employers must always sign up for the register of employers.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "28d60a74611bb071",
+  "context": " regular or casual. regular or casual employer – when is registration required? companies acting as regular employers must always sign up for the register of employers. a company is considered to be a regular employer in the following circumstances"
+ },
+ {
+  "id": "fi-hel-food",
+  "read": "https://www.hel.fi/en/business-and-work/apply-for-permits-and-facilities/food-business/registering-a-food-business",
+  "quote": "Submit your notification four weeks before commencing food business activities.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "e18dac1e6116fbf9",
+  "context": "otification regarding new food business activities online, by email or by post. submit your notification four weeks before commencing food business activities. attach a floor plan of the food premises to your notification. if necessary, yo"
+ },
+ {
+  "id": "fi-hel-build",
+  "read": "https://www.hel.fi/static/rakvv/ohjeet/Ravintola_kahvila.pdf",
+  "quote": "Rakentamislupa käyttötarkoituksen muutokselle tai teknisille muutoksille tarvitaan, jos huoneiston käyttötarkoitus muutetaan esimerkiksi myymälästä, kahvilasta tai liiketilasta ravintolaksi",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "5b15402ac8642f95",
+  "context": "katselmoidulla rakennusluvalla tai rakentamisluvalla tähän käyttötarkoitukseen. rakentamislupa käyttötarkoituksen muutokselle tai teknisille muutoksille tarvitaan, jos huoneiston käyttötarkoitus muutetaan esimerkiksi myymälästä, kahvilasta tai liiketilasta ravintolaksi ja/tai tehdään luvanvaraisia muutoksia keittiötyyppiin, ilmanvaihtoon, uloskäyt"
+ },
+ {
+  "id": "pl-vat",
+  "read": "https://www.biznes.gov.pl/pl/portal/ou1609",
+  "quote": "Masz obowiązek rejestracji jako podatnik VAT, jeżeli: wartość twojej sprzedaży w poprzednim roku przekroczyła kwotę 240 000 złotych",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "197999e2ed00e709",
+  "context": ", handlowcy, usługodawcy, w tym podmioty pozyskujące zasoby naturalne, rolnicy. masz obowiązek rejestracji jako podatnik vat, jeżeli: wartość twojej sprzedaży w poprzednim roku przekroczyła kwotę 240 000 złotych sprzedajesz towary lub usługi wymienione w ustawie o vat. uwaga! od 1 stycznia "
+ },
+ {
+  "id": "pl-zus",
+  "read": "https://www.biznes.gov.pl/pl/portal/00275",
+  "quote": "Pracownika lub współpracownika musisz zgłosić do ZUS w ciągu 7 dni od dnia rozpoczęcia pracy lub współpracy,",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "074a97850c459cf2",
+  "context": "ak przesyłać dokumenty do zus. zgłoszenie do zus pracowników i współpracowników pracownika lub współpracownika musisz zgłosić do zus w ciągu 7 dni od dnia rozpoczęcia pracy lub współpracy, czyli od dnia rozpoczęcia wykonywania umowy-zlecenia, umowy agencyjnej lub inne"
+ },
+ {
+  "id": "pl-waw-sanepid",
+  "read": "https://www.biznes.gov.pl/pl/portal/ou521",
+  "quote": "Wniosek złóż co najmniej 14 dni przed planowanym rozpoczęciem działalności.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "074d1809a7f07384",
+  "context": "ności, zaopatrzenia ich w wodę czy wentylację. kiedy powinieneś załatwić sprawę wniosek złóż co najmniej 14 dni przed planowanym rozpoczęciem działalności. gdzie załatwisz sprawę usługę można zrealizować w: powiatowe stacje sanitarno-e"
+ },
+ {
+  "id": "pl-waw-use",
+  "read": "https://www.biznes.gov.pl/pl/portal/ou555",
+  "quote": "Chcesz zmienić sposób użytkowania budynku lub lokalu? Musisz zgłosić zmianę sposobu użytkowania.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "7cf058a1eaf2f4f9",
+  "context": "sposobu użytkowania obiektu budowlanego lub jego części opublikowano 25.10.2011 chcesz zmienić sposób użytkowania budynku lub lokalu? musisz zgłosić zmianę sposobu użytkowania. dowiedz się jak to zrobić. jak załatwić sprawę sprawę załatwisz przez portal e-"
+ },
+ {
+  "id": "pl-waw-alcohol",
+  "read": "https://warszawa19115.pl/en/-/zezwolenie-na-sprzedaz-napojow-alkoholowych-przeznaczonych-do-spozycia-w-miejscu-sprzedazy-gastronomia-",
+  "quote": "Zezwolenie wydawane jest w formie decyzji administracyjnej.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "fa55b614d6d7ddba",
+  "context": "cia w miejscu sprzedaży np. w restauracji – musisz mieć odpowiednie zezwolenie. zezwolenie wydawane jest w formie decyzji administracyjnej. zezwolenia wydajemy oddzielnie na trzy rodzaje napojów alkoholowych: zawierając"
+ },
+ {
+  "id": "be-societe",
+  "read": "https://business.belgium.be/fr/creer-votre-entreprise/enregistrer-votre-entreprise/creer-votre-societe",
+  "quote": "L’acte constitutif doit être déposé au greffe du tribunal de l’entreprise compétent, dans les 30 jours après la signature de l’acte constitutif.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "e4e48f28306ca8c6",
+  "context": "e site manage my business par toutes les parties enregistrer l'acte constitutif l'acte constitutif doit être déposé au greffe du tribunal de l'entreprise compétent, dans les 30 jours après la signature de l'acte constitutif. responsabilité limitée (srl, sa, sc) responsabilité illimitée (snc, scomm) qui "
+ },
+ {
+  "id": "be-onss",
+  "read": "https://www.socialsecurity.be/site_fr/general/first_visit/access/register-as-employer.htm",
+  "quote": "Tout employeur qui engage quelqu'un pour la première fois doit s'identifier en tant qu'employeur à l'ONSS.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "332eea1c662f8468",
+  "context": "es en ligne: être identifié comme employeur, et être enregistré sur le portail. tout employeur qui engage quelqu'un pour la première fois doit s'identifier en tant qu'employeur à l'onss. vous recevez alors un numéro onss. vous avez besoin de ce numéro pour utiliser "
+ },
+ {
+  "id": "be-bru-urbanisme",
+  "read": "https://www.bruxelles.be/obtenir-une-autorisation-pour-ouvrir-un-commerce",
+  "quote": "D’après l’ordonnance régionale du 12 décembre 2002, les activités ci-dessous sont soumises à un permis d’urbanisme :",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "b890a37fd0f5aca4",
+  "context": "s urbanistiques liées à l'immeuble occupé changement d'affectation urbanistique d'après l'ordonnance régionale du 12 décembre 2002, les activités ci-dessous sont soumises à un permis d'urbanisme: un restaurant, un snack, une friterie, un débit de boisson, un café, ou tout au"
+ },
+ {
+  "id": "be-bru-horeca",
+  "read": "https://www.bruxelles.be/horeca-autorisation-exploitation",
+  "quote": "Vous ouvrez un restaurant, café, snack ? N'oubliez pas de faire une demande d'autorisation d'exploitation ! Vous devez l'obtenir avant l'ouverture.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "6a7c0f3b1d237cbb",
+  "context": "de conformité) horeca - autorisation d'exploitation (attestation de conformité) vous ouvrez un restaurant, café, snack ? n'oubliez pas de faire une demande d'autorisation d'exploitation ! vous devez l'obtenir avant l'ouverture. l'autorisation d'exploitation (ou attestation de conformité) est un document of"
+ },
+ {
+  "id": "be-bru-terrasse",
+  "read": "https://www.bruxelles.be/horeca-terrasse",
+  "quote": "Une autorisation est nécessaire pour garantir le respect des règles d'occupation de l'espace public et assurer la sécurité des usagers.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "2fc6817f85cbbbc7",
+  "context": " terrasse devant votre établissement pour accueillir vos clients en extérieur ? une autorisation est nécessaire pour garantir le respect des règles d'occupation de l'espace public et assurer la sécurité des usagers. mybxl faire ma demande en ligne prendre rendez-vous conditions établissement: ê"
+ },
+ {
+  "id": "pt-seg-social",
+  "read": "https://areadocomerciante.dgae.gov.pt/documentacao1/documentos/20250530-guia-da-restauracao_2025-pdf.aspx",
+  "quote": "A admissão de novos trabalhadores nas 24 horas anteriores ao início de produção de efeitos do contrato de trabalho",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "e0c4a73ad1c3822b",
+  "context": " solicitados pelos serviços competentes de segurança social; página 34 de 46  a admissão de novos trabalhadores nas 24 horas anteriores ao início de produção de efeitos do contrato de trabalho, ou durante as 24 horas seguintes ao início da atividade quando por razões exce"
+ },
+ {
+  "id": "pt-lis-utilizacao",
+  "read": "https://areadocomerciante.dgae.gov.pt/documentacao1/documentos/20250530-guia-da-restauracao_2025-pdf.aspx",
+  "quote": "Qualquer que seja o espaço onde irá ser instalado o seu estabelecimento, necessita de autorização de utilização, que é concedida pela câmara municipal.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "e0c4a73ad1c3822b",
+  "context": " o estabelecimento 1.1 licenças de que vou precisar  autorização de utilização qualquer que seja o espaço onde irá ser instalado o seu estabelecimento, necessita de autorização de utilização, que é concedida pela câmara municipal. se o edifício for novo deve solicitar a atribuição da autorização. se o edifíci"
+ },
+ {
+  "id": "pt-lis-mcp",
+  "read": "https://areadocomerciante.dgae.gov.pt/documentacao1/documentos/20250530-guia-da-restauracao_2025-pdf.aspx",
+  "quote": "A abertura de um estabelecimento de restauração ou de bebidas está sujeita a um de dois procedimentos, a efetuar no Portal Gov.pt:",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "e0c4a73ad1c3822b",
+  "context": "iado nos balcões e atendimento das lojas e espaços cidadão/empresa disponíveis. a abertura de um estabelecimento de restauração ou de bebidas está sujeita a um de dois procedimentos, a efetuar no portal gov.pt: a) mera comunicação prévia dirigida à câmara municipal territorialmente compete"
+ },
+ {
+  "id": "ie-paye",
+  "read": "https://www.revenue.ie/en/employing-people/becoming-an-employer-and-ongoing-obligations/registration-of-employers-for-paye-purposes/index.aspx",
+  "quote": "If you hire an employee, you must register as an employer.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "4da57a911f8de1cd",
+  "context": "ration numbers for the same employer change of ownership of a business overview if you hire an employee, you must register as an employer. you must notify revenue of your name and address, and your intention to pay sta"
+ },
+ {
+  "id": "ie-fsc",
+  "read": "https://www.gov.ie/en/dublin-city-council/services/getting-a-fire-safety-certificate/",
+  "quote": "This is required where the applicant proposes a new building, a new building extension, material alterations to an existing building",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "c2c8af1321c5fa2a",
+  "context": "fees appeals feedback types of fire safety certificates fire safety certificate this is required where the applicant proposes a new building, a new building extension, material alterations to an existing building or a change of use of an existing building. revised fire safety certificate thi"
+ },
+ {
+  "id": "ie-dub-planning",
+  "read": "https://www.dublincity.ie/planning-and-land-use/make-planning-application/apply-planning-permission",
+  "quote": "In general, you need to apply for planning permission for:",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "0360c6074abeb04e",
+  "context": "cklist to help you complete your application and follow our step by step guide. in general, you need to apply for planning permission for: any building or demolition work alterations to land or buildings a significant "
+ },
+ {
+  "id": "ie-ork-planning",
+  "read": "https://www.corkcity.ie/en/council-services/services/planning/planning-application-process/",
+  "quote": "All development that is not exempted under planning law requires planning permission.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "d01820fb0a3ab824",
+  "context": "development act 2000 and planning and development regulations 2001, as amended. all development that is not exempted under planning law requires planning permission. privacy-statement_ccp_development-management-_rev.-001_14.7-21.pdf (size 286.5 "
+ },
+ {
+  "id": "de-muc-bau",
+  "read": "https://stadt.muenchen.de/service/info/referat-fur-stadtplanung-und-bauordnung/10331531/",
+  "quote": "In der Regel benötigen Sie für Baumaßnahmen wie Neubau, Erweiterung oder Umbau sowie für Nutzungsänderungen eine Baugenehmigung durch die Untere Bauaufsichtsbehörde.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "7a341fabb8239f47",
+  "context": " referat für stadtplanung und bauordnung baugenehmigung baugenehmigung vorlesen in der regel benötigen sie für baumaßnahmen wie neubau, erweiterung oder umbau sowie für nutzungsänderungen eine baugenehmigung durch die untere bauaufsichtsbehörde. kontakt seiteninhalt beschreibung benötigte unterlagen dauer und kosten links u"
+ },
+ {
+  "id": "de-muc-gaststaette",
+  "read": "https://stadt.muenchen.de/service/info/gaststattenerlaubnis/1063662/n0/",
+  "quote": "Schank- und Speisewirtschaften sowie Beherbergungsbetriebe benötigen eine Gaststättenerlaubnis, wenn alkoholische Getränke ausgeschenkt werden.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "35bf181be78462e9",
+  "context": "nen gaststättenerlaubnis gaststätten und kantinen gaststättenerlaubnis vorlesen schank- und speisewirtschaften sowie beherbergungsbetriebe benötigen eine gaststättenerlaubnis, wenn alkoholische getränke ausgeschenkt werden. zuständige stelle seiteninhalt beschreibung voraussetzungen benötigte unterlage"
+ },
+ {
+  "id": "de-ham-bau",
+  "read": "https://www.hamburg.de/service/info/11981617/n0/",
+  "quote": "Bevor Sie die genehmigte Nutzungsart einer baugenehmigungsbedürftigen Anlage ändern können, benötigen Sie eine Baugenehmigung zur Nutzungsänderung.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "93232f3c8ad95fbe",
+  "context": " von gebäuden und... nutzungsänderung von gebäuden und gebäudeteilen beantragen bevor sie die genehmigte nutzungsart einer baugenehmigungsbedürftigen anlage ändern können, benötigen sie eine baugenehmigung zur nutzungsänderung. drucken teilen schließen de en online-service nutzen bauantrag stellen 2.0 besc"
+ },
+ {
+  "id": "es-bcn-obres",
+  "read": "https://ajuntament.barcelona.cat/urbanisme-accio-climatica-mobilitat-pla-barris-serveis-urbans/en/services/urban-planning/eobres",
+  "quote": "The Prior Consultation procedure is mandatory and allows you to find out the intervention regime that will be applied to the works",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "dcd2b56a6b13ff2f",
+  "context": "ut more about electronic notification at this link. prior consultation of works the prior consultation procedure is mandatory and allows you to find out the intervention regime that will be applied to the works that you want to carry out depending on the location, the type of action and th"
+ },
+ {
+  "id": "ae-company",
+  "read": "https://u.ae/en/information-and-services/business/Doing-business/doing-business-on-the-mainland/steps-to-start-a-business-on-the-mainland",
+  "quote": "drafting a Memorandum of Association and local service agent agreement",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "4cb07558cd9be11d",
+  "context": "for a trade licence registering the trade name applying for an initial approval drafting a memorandum of association and local service agent agreement selecting a location to conduct business getting additional government approval"
+ },
+ {
+  "id": "ae-food-consent",
+  "read": "https://moccae.gov.ae/assets/download/3d703379/L10-15%20Eng.pdf.aspx",
+  "quote": "related to the trading of food or feed, including the initial production facilities, before obtaining the prior official consent of the competent authority",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "2c40a4efb09ce896",
+  "context": "ed to exercise any commercial, industrial or professional activity in the state related to the trading of food or feed, including the initial production facilities, before obtaining the prior official consent of the competent authority, in accordance with the systems in force. 2- the food and feed manufacturers, p"
+ },
+ {
+  "id": "ae-dxb-premises",
+  "read": "https://u.ae/en/information-and-services/business/Doing-business/doing-business-on-the-mainland/steps-to-start-a-business-on-the-mainland",
+  "quote": "The business premises and location must comply with the requirements defined by the respective emirate’s Department of Economic Development",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "4cb07558cd9be11d",
+  "context": "ess location all businesses in the uae must have a physical address to operate. the business premises and location must comply with the requirements defined by the respective emirate's department of economic development, as well as the land planning regulations of the local municipalities. office a"
+ },
+ {
+  "id": "ae-auh-premises",
+  "read": "https://u.ae/en/information-and-services/business/Doing-business/doing-business-on-the-mainland/steps-to-start-a-business-on-the-mainland",
+  "quote": "The business premises and location must comply with the requirements defined by the respective emirate’s Department of Economic Development",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "4cb07558cd9be11d",
+  "context": "ess location all businesses in the uae must have a physical address to operate. the business premises and location must comply with the requirements defined by the respective emirate's department of economic development, as well as the land planning regulations of the local municipalities. office a"
+ },
+ {
+  "id": "ae-shj-premises",
+  "read": "https://u.ae/en/information-and-services/business/Doing-business/doing-business-on-the-mainland/steps-to-start-a-business-on-the-mainland",
+  "quote": "The business premises and location must comply with the requirements defined by the respective emirate’s Department of Economic Development",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "4cb07558cd9be11d",
+  "context": "ess location all businesses in the uae must have a physical address to operate. the business premises and location must comply with the requirements defined by the respective emirate's department of economic development, as well as the land planning regulations of the local municipalities. office a"
+ },
+ {
+  "id": "tr-sgk",
+  "read": "https://www.sgk.gov.tr/Content/Post/3affeaef-df73-4c5b-926f-86376b4e07bf/Isyeri-Isveren-ve-Isyerinin-Bildirimi-2022-05-15-06-04-21",
+  "quote": "işverenler, örneği Kurumca hazırlanacak işyeri bildirgesini en geç sigortalı çalıştırmaya başladığı tarihte, Kuruma vermekle yükümlü tutulmuşlardır.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "f927c8afb478262f",
+  "context": "ılı kanunun 11 inci maddesinin üçüncü fıkrasında yer alan düzenlemeye istinaden işverenler, örneği kurumca hazırlanacak işyeri bildirgesini en geç sigortalı çalıştırmaya başladığı tarihte, kuruma vermekle yükümlü tutulmuşlardır. bu doğrultuda işyerinde, kanunun 4 üncü maddesinin birinci fıkrasının (a) bendi"
+ },
+ {
+  "id": "tr-ist-gida",
+  "read": "https://istanbul.tarimorman.gov.tr/Belgeler/DepoPerakende%20ve%20Toplu%20T%C3%BCketim%20Yerleri%20Kay%C4%B1t%20%C4%B0%C5%9Flemleri%20(04.01.2023).pdf",
+  "quote": "gıda işletmelerinin kayıt belgesi alma zorunluluğu bulunmaktadır.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "c9f834f941486b4a",
+  "context": "fından yardım amaçlı hazırlandığı, depolandığı ve sunulduğu yerler, haricindeki gıda işletmelerinin kayıt belgesi alma zorunluluğu bulunmaktadır. gıda i̇şletmelerinin kayıt ve onay i̇şlemlerine dair yönetmelik'te 24.11.2016 t"
+ },
+ {
+  "id": "tr-ist-imar-itfaiye",
+  "read": "https://beyoglu.bel.tr/hizmetlerimiz/basvuru-kaynaklari/isyeri-acma-ve-calisma-ruhsatlari/sihhi-muesseseler-ve-aranacak-sartlar/",
+  "quote": "İstanbul Büyük Şehir İtfaiye Müdürlüğüne (Yangın, patlama v.b yönünden), Belediye İmar ve Şehircilik Müdürlüğüne (imar yönünden)",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "42b57f490a9332ed",
+  "context": "lır. i̇lgili işletmenin iş nev'ine göre ruhsat ve denetim müdürlüğü tarafından; i̇stanbul büyük şehir i̇tfaiye müdürlüğüne (yangın, patlama v.b yönünden), belediye i̇mar ve şehircilik müdürlüğüne (imar yönünden) gerekli görüldüğünde diğer resmi-özel kurum ve kuruluşlara uygunluk görüşü alma"
+ },
+ {
+  "id": "mx-gdl-uso-suelo",
+  "read": "https://apitramites.guadalajara.gob.mx/pdf/375",
+  "quote": "El Dictamen de Trazo, Usos y Destinos Específicos te permite certificar los usos de suelo permitidos en el predio",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "160971d73df73d58",
+  "context": "dictamen de trazo, usos y destinos específicos el dictamen de trazo, usos y destinos específicos te permite certificar los usos de suelo permitidos en el predio, así como las normas de control de la urbanización y edificación del mismo. ést"
+ },
+ {
+  "id": "mx-cun-uso-suelo",
+  "read": "https://cancun.gob.mx/cancun/noticias/leer/3383",
+  "quote": "permiso de utilización de uso de suelo y dictamen de Protección Civil vigente.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "f01f11c96c66833e",
+  "context": " del impuesto predial 2026, derecho de recolección de residuos sólidos vigente, permiso de utilización de uso de suelo y dictamen de protección civil vigente. para realizar el procedimiento, el usuario debe crear una cuenta con una cuenta"
+ },
+ {
+  "id": "ca-qc-req",
+  "read": "https://www.quebec.ca/en/businesses-and-self-employed-workers/start-entreprise/register-constitute-enterprise/learn-about-registration/about-registration",
+  "quote": "In Québec, most enterprises must register with the Registraire des entreprises as soon as they are created, by filing a declaration of registration.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "a1fdb612fe785eba",
+  "context": "egistraire des entreprises and understand why an enterprise must be registered. in québec, most enterprises must register with the registraire des entreprises as soon as they are created, by filing a declaration of registration. the purpose of registration is to consolidate, in the enterprise register, info"
+ },
+ {
+  "id": "ca-qc-mapaq",
+  "read": "https://www.quebec.ca/entreprises-et-travailleurs-autonomes/industrie-bioalimentaire/permis-alimentaires/permis-restauration-vente-detail",
+  "quote": "Vous devez recevoir votre permis avant de commencer vos activités et l’afficher à la vue des clients.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "42e978452bb69277",
+  "context": "s fournis amendes pour les contrevenants coordonnées informations sur le permis vous devez recevoir votre permis avant de commencer vos activités et l'afficher à la vue des clients. il est valable pour une période d'un an. avant de déposer votre demande, vérifi"
+ },
+ {
+  "id": "ca-mtl-occupation",
+  "read": "https://montreal.ca/articles/ouvrir-un-commerce-ou-lancer-une-entreprise-18507",
+  "quote": "Faites ensuite une demande de permis d’occupation pour activité commerciale ou professionnelle, aussi appelé «certificat d’occupation» ou «certificat d’autorisation d’usage».",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "295cddd3b408cd0f",
+  "context": "a carte interactive communiquer avec le comptoir des permis permis d'occupation faites ensuite une demande de permis d'occupation pour activité commerciale ou professionnelle, aussi appelé «certificat d'occupation» ou «certificat d'autorisation d'usage». cette procédure est valable même s'il s'agit d'utiliser une partie de votre log"
+ },
+ {
+  "id": "ca-mtl-enseigne",
+  "read": "https://montreal.ca/demarches/obtenir-un-permis-denseigne-commerciale",
+  "quote": "Vous voulez installer une enseigne commerciale, la remplacer ou en modifier la structure ou le message? À Montréal, un permis est nécessaire.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "b5cc8ff6746c90ba",
+  "context": "erciale obtenir un permis d'enseigne commerciale mis à jour le 1 septembre 2026 vous voulez installer une enseigne commerciale, la remplacer ou en modifier la structure ou le message? à montréal, un permis est nécessaire. voici comment faire pour vous le procurer. notez qu'un permis d'enseigne commer"
+ },
+ {
+  "id": "pa-foreign-registration",
+  "read": "https://www.pa.gov/content/dam/copapwp-pagov/en/dos/programs/business/guides/Business-Guide.pdf",
+  "quote": "desiring to do business in this commonwealth must register with the Department of State by filing a Foreign Registration Statement",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "b9e0d6a42ecc5288",
+  "context": "ylvania. foreign filing associations and foreign limited liability partnerships desiring to do business in this commonwealth must register with the department of state by filing a foreign registration statement (form dscb:15-412), accompanied by a docketing statement. a foreign filing asso"
+ },
+ {
+  "id": "nv-foreign-registration",
+  "read": "https://www.leg.state.nv.us/NRS/NRS-086.html",
+  "quote": "Before transacting business in this State, a foreign limited-liability company must register with the Secretary of State.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "07acfa90f3a53e77",
+  "context": "rtain illegal purposes; required provisions of application for registration. 1. before transacting business in this state, a foreign limited-liability company must register with the secretary of state. a person shall not register a foreign limited-liability company with the secret"
+ },
+ {
+  "id": "az-foreign-registration",
+  "read": "https://azcc.gov/docs/default-source/corps-files/fee-schedules/fee-schedule-llcs.pdf",
+  "quote": "Foreign Registration Statement $150.00 $185.00",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "816faac7a4df678d",
+  "context": " of good standing $10.00 $45.00 certificate for any other purpose $10.00 $45.00 foreign registration statement $150.00 $185.00 llc statement of change $5.00 $40.00 of manager or member addresses llc stateme"
+ },
+ {
+  "id": "or-foreign-registration",
+  "read": "https://sos.oregon.gov/business/Documents/business-registry-forms/fllc-authority.pdf",
+  "quote": "Required Processing Fee $275",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "d775e0b6694625a0",
+  "context": "inted name: title: contact n ame: (to resolve questions with this filing.) fees required processing fee $275 processing fees are nonrefundable. please make check payable to \"corporation di"
+ },
+ {
+  "id": "va-foreign-registration",
+  "read": "https://www.scc.virginia.gov/businesses/business-faqs/foreign-business-entities/",
+  "quote": "may not transact business in Virginia until it obtains a certificate of authority or certificate of registration from the State Corporation Commission.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "a526dcfc3dea5d2b",
+  "context": "y company, business trust, limited partnership or limited liability partnership may not transact business in virginia until it obtains a certificate of authority or certificate of registration from the state corporation commission. certain limited business activities are excluded from the definition of \"transa"
+ },
+ {
+  "id": "nj-foreign-registration",
+  "read": "https://www.nj.gov/treasury/revenue/gettingregistered.shtml",
+  "quote": "All individuals or companies doing business in New Jersey must be registered.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "1ae966d357509201",
+  "context": "opportunities --> contact us --> --> home getting registered getting registered all individuals or companies doing business in new jersey must be registered. this includes businesses: withholding payroll taxes for an employee; planning t"
+ },
+ {
+  "id": "co-foreign-registration",
+  "read": "https://www.sos.state.co.us/pubs/business/FAQs/foreigns.html",
+  "quote": "A foreign entity can obtain authority to transact business in Colorado by filing a Statement of Foreign Entity Authority",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "2e2d37a5c04a86db",
+  "context": "oreign entity is required to obtain authority to transact business in colorado. a foreign entity can obtain authority to transact business in colorado by filing a statement of foreign entity authority with the colorado secretary of state. navigate to the business organizations pa"
+ },
+ {
+  "id": "mn-foreign-registration",
+  "read": "https://www.revisor.mn.gov/statutes/cite/322C.0802",
+  "quote": "by filing an application with the secretary of state together with a total fee of $185.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "039dfba21d49b068",
+  "context": "pany shall obtain a certificate of authority to transact business in this state by filing an application with the secretary of state together with a total fee of $185. the application must state: (1) the name of the company and any alternate name "
+ },
+ {
+  "id": "oh-foreign-registration",
+  "read": "https://codes.ohio.gov/ohio-revised-code/section-1706.511",
+  "quote": "the foreign limited liability company shall register with the secretary of state.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "72f745f1dc99fedd",
+  "context": "ty company or any one or more of its series to transact business in this state, the foreign limited liability company shall register with the secretary of state. neither a foreign limited liability company nor any one or more of its series m"
+ },
+ {
+  "id": "md-foreign-registration",
+  "read": "https://dat.maryland.gov/sdat%20forms/llc-foreign.pdf",
+  "quote": "This document must be accompanied by written proof of existence from the home state",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "44f50f2e185abadf",
+  "context": "any registration (for non-maryland limited liability company) (filing fee $100) this document must be accompanied by written proof of existence from the home state, equivalent to a certificate of good standing and issued within the last 60 day"
+ },
+ {
+  "id": "dc-foreign-registration",
+  "read": "https://dlcp.dc.gov/page/corporations-division-fees-foreign-non-dc-entities",
+  "quote": "Foreign registration statement: two hundred twenty dollars ($220);",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "6d77e7d08a0fed51",
+  "context": "ted liability partnership, limited cooperative association and statutory trust. foreign registration statement: two hundred twenty dollars ($220); amendment of foreign registration statement: two hundred twenty dollars ($220);"
+ },
+ {
+  "id": "az-jt1",
+  "read": "https://azdor.gov/business/withholding-tax/employer-withholding-filing-obligations",
+  "quote": "Completing and submitting Arizona Form JT-1 also begins the process of registering the employer for unemployment compensation insurance",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "d8598693d2792a65",
+  "context": "arizona form jt-1), available once enrolled for an user account on aztaxes.gov. completing and submitting arizona form jt-1 also begins the process of registering the employer for unemployment compensation insurance with the arizona department of economic security. once registered with ador, th"
+ },
+ {
+  "id": "nyc-tobacco-dealer",
+  "read": "https://nyc-business.nyc.gov/nycbusiness/description/cigarette-retail-dealer-license",
+  "quote": "You need this license to sell cigarettes or tobacco products to people.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "c71070cbf43b80fe",
+  "context": "sumer and worker protection (dcwp) offers a license for tobacco retail dealers. you need this license to sell cigarettes or tobacco products to people. \"> the new york city department of consumer and worker protection (dcwp) offers"
+ },
+ {
+  "id": "nyc-outdoor-dining",
+  "read": "https://nyc-business.nyc.gov/nycbusiness/business-services/initiatives/outdoor-dining",
+  "quote": "Eligible food service establishments may apply for outdoor dining in the roadway, sidewalk, or both.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "513cdc0426534c6b",
+  "context": "program is managed by the new york city department of transportation (nyc dot). eligible food service establishments may apply for outdoor dining in the roadway, sidewalk, or both. the requirements for how sidewalk and roadway cafes are designed, built, and op"
+ },
+ {
+  "id": "chi-sidewalk-cafe",
+  "read": "https://www.chicago.gov/city/en/depts/bacp/supp_info/sidewalkcafe.html",
+  "quote": "Applications for sidewalk cafes must be made through the permitting web portal .",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "4e74df8c09c7a391",
+  "context": "nfo sidewalk cafe sidewalk cafe sidewalk café renewal applications are now open applications for sidewalk cafes must be made through the permitting web portal. overview: the bacp-issued sidewalk café permit allows brick-and-mortar retail f"
+ },
+ {
+  "id": "la-alarm-permit",
+  "read": "https://finance.lacity.gov/alarm-permits-and-alarm-ordinance-faqs",
+  "quote": "The Alarm Ordinance requires that an alarm permit be obtained to operate an alarm system in the City of Los Angeles.",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "bf8cfbac859a24df",
+  "context": "an alarm permit required to operate an alarm system in the city of los angeles? the alarm ordinance requires that an alarm permit be obtained to operate an alarm system in the city of los angeles. it is a misdemeanor to operate an alarm system without the required alarm permi"
  },
  {
   "id": "kind:us-tsca-label",
@@ -4228,10 +5588,11 @@
   "id": "kind:ca-takeout-restrooms",
   "read": "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
   "quote": "that provides space for the consumption of food on the premises shall provide clean toilet facilities in good repair for consumers",
-  "checked": "2026-10-21",
-  "method": "webfetch",
+  "checked": "2026-10-22",
+  "method": "curl",
   "found": true,
-  "note": "curl got 403; read with WebFetch on 2026-10-21"
+  "sha256": "7b91a046f9ae2c7d",
+  "context": "eet of floor space. for any building that is constructed after january 1, 2004, that provides space for the consumption of food on the premises shall provide clean toilet facilities in good repair for consumers, guests or invitees. these facilities shall be located where consumers, guests,"
  },
  {
   "id": "kind:ca-wholesale-bakery",
@@ -4435,10 +5796,11 @@
   "id": "generic:publichealth.lacounty.gov:https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
   "read": "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
   "quote": "shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food",
-  "checked": "2026-10-21",
-  "method": "webfetch",
+  "checked": "2026-10-22",
+  "method": "curl",
   "found": true,
-  "note": "curl got 403; read with WebFetch on 2026-10-21"
+  "sha256": "7b91a046f9ae2c7d",
+  "context": "ns drawn to scale, and specifications to the enforcement agency for review, and shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food facility, (b) plans and specifications may also be required by the enforcement "
  },
  {
   "id": "generic:health.alamedacountyca.gov:https://health.alamedacountyca.gov/alameda-county-plan-check-guide-for-retail-food-facilities/",

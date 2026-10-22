@@ -30,6 +30,10 @@ Each market is read at a sample storefront address for a new milk tea shop with 
 | Spring Valley (unincorporated Clark County) | 13 | 11 | 4 | 6 | 2 |
 | Rowland Heights (unincorporated Los Angeles County) | 13 | 12 | 5 | 8 | 1 |
 | Tysons (Fairfax County) | 11 | 10 | 2 | 8 | 1 |
+| Tampa | 11 | 10 | 5 | 9 | 1 |
+| Phoenix | 8 | 8 | 3 | 5 | 0 |
+| Sacramento | 12 | 11 | 5 | 8 | 1 |
+| Columbus | 9 | 8 | 1 | 5 | 1 |
 | California | 8 | 8 | 3 | 7 | 0 |
 | New York | 6 | 6 | 2 | 5 | 0 |
 | Massachusetts | 7 | 7 | 1 | 6 | 0 |
@@ -41,7 +45,7 @@ Each market is read at a sample storefront address for a new milk tea shop with 
 | Maryland | 4 | 4 | 2 | 3 | 0 |
 | Nevada | 6 | 6 | 2 | 2 | 0 |
 | Virginia | 6 | 6 | 2 | 5 | 0 |
-| Arizona | 3 | 3 | 2 | 3 | 0 |
+| Arizona | 4 | 4 | 2 | 3 | 0 |
 | Hawaii | 6 | 6 | 1 | 4 | 0 |
 | Florida | 8 | 8 | 5 | 7 | 0 |
 | Utah | 4 | 4 | 0 | 4 | 0 |
@@ -220,7 +224,7 @@ Read at 2172 S Archer Ave, Chicago, IL 60616. Jurisdictions: US, IL, CHI.
 
 | Filing | Official form or portal | Agency PDF filled | Route | Gap |
 |---|---|---|---|---|
-| LLC formation: We'll confirm with the Illinois Secretary of State | `il-sos` Articles of Organization (Form LLC-5.5) · [PDF](https://www.ilsos.gov/publications/pdf_publications/llc55.pdf) | yes | Placetta team: ilsos.gov refuses automated reads, so the online filing's address couldn't be confirmed on the Secretary's own page. |  |
+| LLC formation | `il-sos` Articles of Organization (Form LLC-5.5) · [PDF](https://www.ilsos.gov/publications/pdf_publications/llc55.pdf) | yes | Placetta team: ilsos.gov refuses automated reads, so the online filing's address couldn't be confirmed on the Secretary's own page. |  |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Illinois business registration (sales tax) | `il-tax` Form REG-1 (MyTax Illinois) · [PDF](https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/reg/documents/reg-1.pdf) · portal mytax.illinois.gov | yes | portal (mytax.illinois.gov) |  |
 | Chicago food service sanitation certificate | `chi-sanitation` City of Chicago Food Service Sanitation Certificate | no | Owner packet: "To obtain a CDPH Foodservice Sanitation Manager Certificate you must attend and pass an approved course", or apply for reciprocity with a valid ANSI-accredited food protection manager certificate: the person being certified does it. | The owner (or the person certified) does it: "To obtain a CDPH Foodservice Sanitation Manager Certificate you must attend and pass an approved course", or apply for reciprocity with a valid ANSI-accredited food protection manager certificate: the person being certified does it. |
@@ -464,6 +468,74 @@ Read at 8065 Leesburg Pike, Tysons, VA 22182. Jurisdictions: US, VA, FFX.
 | Building permit for the build-out: We'll confirm with Fairfax County building department | none | no | Placetta team: no official form to route yet | The planner lists "Building permit for the build-out: We'll confirm with Fairfax County building department" with no official form in the registry for this place yet. |
 | Food establishment permit to operate | `ffx-food-permit` Food establishment permit application (PLUS) · portal plus.fairfaxcounty.gov | no | portal (plus.fairfaxcounty.gov) | Online only (plus.fairfaxcounty.gov): Placetta prepares the answers summary for the agency's site. |
 
+## Tampa
+
+Read at 1600 E 7th Ave, Tampa, FL 33605. Jurisdictions: US, FL, TPA, HILL. Hillsborough County (HILL) issues the county business tax receipt; the city issues its own.
+
+| Filing | Official form or portal | Agency PDF filled | Route | Gap |
+|---|---|---|---|---|
+| LLC formation | `fl-sunbiz` Articles of Organization · [PDF](https://form.sunbiz.org/pdf/cr2e047.pdf) · portal efile.sunbiz.org | yes | portal (efile.sunbiz.org) (an agency fee keeps email, fax and mail with the team) |  |
+| Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
+| Florida sales tax and reemployment tax registration | `fl-dor` Form DR-1 (Florida Business Tax Application) · [PDF](https://floridarevenue.com/Forms_library/current/dr1.pdf) · portal taxapps.floridarevenue.com | yes | portal (taxapps.floridarevenue.com) |  |
+| Registration of a fictitious name (DBA): We'll confirm with the Florida Department of State, Division of Corporations | `fl-fictitious` CR4E001 (10/20) · [PDF](https://form.sunbiz.org/pdf/cr4e001.pdf) · portal efile.sunbiz.org | yes | portal (efile.sunbiz.org) (an agency fee keeps email, fax and mail with the team) |  |
+| Certified food protection manager | `fl-food-manager` Certified food protection manager (section 509.039, Florida Statutes) | no | Owner packet: "Florida law requires food managers to complete training and pass a certification exam within 30 days of employment. Private entities provide the training and testing." | The owner (or the person certified) does it: "Florida law requires food managers to complete training and pass a certification exam within 30 days of employment. Private entities provide the training and testing." |
+| Hillsborough County local business tax receipt: We'll confirm with the Hillsborough County Tax Collector | `hc-business-tax` Local Business Tax Receipt (BTExpress) · portal county-taxes.net | no | portal (county-taxes.net) | Online only (county-taxes.net): Placetta prepares the answers summary for the agency's site. |
+| City of Tampa business tax receipt | `tpa-business-tax` New Business Tax Receipt Application · portal apps.tampagov.net | no | portal (apps.tampagov.net) | Online only (apps.tampagov.net): Placetta prepares the answers summary for the agency's site. |
+| Food service plan review | `fl-dbpr-plan` Food service plan review (with the license application) · [PDF](https://www2.myfloridalicense.com/hr/forms/documents/dbpr_hr_7005_application_for_plan_review.pdf) · portal www.myfloridalicense.com | yes | portal (www.myfloridalicense.com) |  |
+| Workers' compensation insurance | `fl-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
+| Building permit for the build-out: We'll confirm with the City of Tampa building department | none | no | Placetta team: no official form to route yet | The planner lists "Building permit for the build-out: We'll confirm with the City of Tampa building department" with no official form in the registry for this place yet. |
+| Florida public food service license | `fl-dbpr` Permanent food service license (seating or non-seating) · [PDF](https://www2.myfloridalicense.com/hr/forms/documents/dbpr_hr_7035_application_for_fixed_food_service_license.pdf) · portal www.myfloridalicense.com | yes | portal (www.myfloridalicense.com) |  |
+
+## Phoenix
+
+Read at 668 N 44th St, Phoenix, AZ 85008. Jurisdictions: US, AZ, PHX, MARI. Maricopa County Environmental Services runs the food permits.
+
+| Filing | Official form or portal | Agency PDF filled | Route | Gap |
+|---|---|---|---|---|
+| Arizona LLC formation | `az-llc` Articles of Organization (Form L010) · [PDF](https://www.azcc.gov/docs/default-source/corps-files/forms/l010-articles-of-organization.pdf) · portal arizonabusinesscenter.azcc.gov | yes | portal (arizonabusinesscenter.azcc.gov), fax, mail |  |
+| Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
+| Transaction privilege tax (TPT) license | `az-tpt` Arizona Joint Tax Application (JT-1/UC-001) · [PDF](https://www.azdor.gov/sites/default/files/2023-03/FORMS_TPT_10196_f.pdf) · portal www.aztaxes.gov | yes | portal (www.aztaxes.gov) |  |
+| Certified food protection manager | `mc-cfpm` Certified Food Protection Manager (Maricopa County Environmental Health Code, Chapter VII) | no | Placetta team: not researched | Online only (www.maricopa.gov): Placetta prepares the answers summary for the agency's site. |
+| Food establishment plan review | `mc-plan-review` Plan Review Application (food establishment) · portal maricopacountyaz-energovweb.tylerhost.net | no | portal (maricopacountyaz-energovweb.tylerhost.net) | Online only (maricopacountyaz-energovweb.tylerhost.net): Placetta prepares the answers summary for the agency's site. |
+| Employer registration for withholding and unemployment insurance (JT-1) | `az-jt1` Arizona Joint Tax Application (Form JT-1), on AZTaxes.gov | no | Placetta team: not researched | Online only (www.aztaxes.gov): Placetta prepares the answers summary for the agency's site. |
+| Building permit and Certificate of Occupancy | `phx-co` Construction Permit Plan Review Application and Certificate of Occupancy · [PDF](https://www.phoenix.gov/content/dam/phoenix/pddsite/documents/trt/external/dsd_trt_pdf_00033.pdf) | yes | Placetta team: Not an application: the Certificate of Occupancy is generated once the building permit's inspections pass, and that permit goes through plan review by the design professional. |  |
+| Food establishment permit | `mc-food-permit` Food Establishment Permit · portal maricopacountyaz-energovweb.tylerhost.net | no | portal (maricopacountyaz-energovweb.tylerhost.net) | Online only (maricopacountyaz-energovweb.tylerhost.net): Placetta prepares the answers summary for the agency's site. |
+
+## Sacramento
+
+Read at 5591 Stockton Blvd, Sacramento, CA 95824. Jurisdictions: US, CA, SAC, SACC. Sacramento County's Environmental Management Department (SACC) runs the food permits.
+
+| Filing | Official form or portal | Agency PDF filled | Route | Gap |
+|---|---|---|---|---|
+| Articles of Organization (California LLC) | `ca-llc-1` Form LLC-1 · [PDF](https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf) · portal bizfileonline.sos.ca.gov | yes | portal (bizfileonline.sos.ca.gov) (an agency fee keeps email, fax and mail with the team) |  |
+| Statement of Information (California LLC) | `ca-llc-12` Form LLC-12 (REV 12/2022) · [PDF](https://bpd.cdn.sos.ca.gov/llc/forms/llc-12.pdf) · portal bizfileonline.sos.ca.gov | yes | portal (bizfileonline.sos.ca.gov) (an agency fee keeps email, fax and mail with the team) |  |
+| Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
+| Seller's permit | `ca-cdtfa` CDTFA seller's permit (online registration) · portal onlineservices.cdtfa.ca.gov | no | portal (onlineservices.cdtfa.ca.gov) | Online only (onlineservices.cdtfa.ca.gov): Placetta prepares the answers summary for the agency's site. |
+| Certified food protection manager | `ca-food-manager` Food Safety Certificate (Health and Safety Code 113947.1) | no | Owner packet: An owner or employee passes a food protection manager exam from an accredited organization; the person keeps the certificate for the inspector. | The owner (or the person certified) does it: An owner or employee passes a food protection manager exam from an accredited organization; the person keeps the certificate for the inspector. |
+| Food handler cards for staff | `ca-food-handler` California Food Handler Card (Health and Safety Code 113948) | no | Owner packet: Each employee who handles food earns their own California Food Handler Card from an accredited course and exam within 30 days of hire; the card is the employee's. | The owner (or the person certified) does it: Each employee who handles food earns their own California Food Handler Card from an accredited course and exam within 30 days of hire; the card is the employee's. |
+| City of Sacramento business tax certificate (Business Operations Tax) | `sac-bot` Business Operations Tax certificate application · [PDF](https://www.cityofsacramento.gov/content/dam/portal/finance/Revenue/BUSINESS-TAX-app_Revised-12-2019-FILLABLE.pdf) · portal sacramento.hdlgov.com | yes | portal (sacramento.hdlgov.com), email, mail |  |
+| Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
+| Food facility plan review | `sacc-plan-review` Food Facility Plan Review Application (Rev. 07/01/26) · [PDF](https://emd.saccounty.gov/content/dam/emd/docs/transition/Application%20for%20Food%20Facility%20Plan%20Review%202026-2027.pdf) | yes | Placetta team: A printed plan set goes to 11080 White Rock Rd; for electronic submittal the county sends instructions on request (EHPlanReview@SacCounty.gov), so there's no route Placetta can send the whole packet on. |  |
+| Workers' compensation insurance | `ca-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
+| Building permit for the build-out: We'll confirm with the City of Sacramento building department | none | no | Placetta team: no official form to route yet | The planner lists "Building permit for the build-out: We'll confirm with the City of Sacramento building department" with no official form in the registry for this place yet. |
+| Health permit to operate a food facility | `sacc-health-permit` Application to operate a food facility | no | Placetta team: The application to operate goes in with the fees before opening; the county's guide names no inbox or online route. | No agency PDF found. |
+
+## Columbus
+
+Read at 3420 E Main St, Columbus, OH 43213. Jurisdictions: US, OH, CMH. Franklin County's Auditor issues the vendor's license; the registry files it under Columbus (CMH).
+
+| Filing | Official form or portal | Agency PDF filled | Route | Gap |
+|---|---|---|---|---|
+| Articles of Organization (Ohio LLC) | `oh-sos-llc` Articles of Organization for a Domestic Limited Liability Company | no | Placetta team: not researched | Online only (www.ohiosos.gov): Placetta prepares the answers summary for the agency's site. |
+| Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
+| Ohio vendor's license (sales tax) | `oh-vendor` ST 1, Application for Vendor's License to Make Taxable Sales · portal franklincountyohio.jotform.com | no | portal (franklincountyohio.jotform.com), mail (an agency fee keeps email, fax and mail with the team) | Online only (franklincountyohio.jotform.com): Placetta prepares the answers summary for the agency's site. |
+| Food safety certification for the person in charge: We'll confirm with the Ohio Department of Health, with the local health district | `oh-pic` Person in charge certification (Ohio Administrative Code 3701-21-25) | no | Owner packet: Person in charge certification belongs to the person who takes the course; at least one certified person is on site on every shift. | The owner (or the person certified) does it: Person in charge certification belongs to the person who takes the course; at least one certified person is on site on every shift. |
+| Unemployment insurance employer account | `oh-ui` Employer registration (Ohio Unemployment SOURCE) · portal thesource.jfs.ohio.gov | no | portal (thesource.jfs.ohio.gov) | Online only (thesource.jfs.ohio.gov): Placetta prepares the answers summary for the agency's site. |
+| Food service plan review | `cmh-plan-review` Plan Review Application (food service operation) · [PDF](https://www.columbus.gov/files/sharedassets/city/v/10/public-health/planreview-application.pdf) | yes | email |  |
+| Workers' compensation insurance: We'll confirm with the Ohio Bureau of Workers' Compensation (the state fund) | `oh-workers-comp` BWC Form U-3 (Application for coverage), with the state fund | no | Placetta team: not researched | Nothing to fill: Ohio employers buy coverage from the state's own fund, the Bureau of Workers' Compensation, not from a private insurer (unless self-insured). |
+| Building permit for the build-out: We'll confirm with the City of Columbus building department | none | no | Placetta team: no official form to route yet | The planner lists "Building permit for the build-out: We'll confirm with the City of Columbus building department" with no official form in the registry for this place yet. |
+| Columbus food service license | `cmh-food-license` Food service operation license | no | Placetta team: Completed at the final inspection, where the fee is collected. | Filed in person; Completed at the final inspection, where the fee is collected. |
+
 ## California (state filings)
 
 Read at 727 N Broadway, Los Angeles, CA 90012. Jurisdictions: US, CA.
@@ -538,7 +610,7 @@ Read at 2172 S Archer Ave, Chicago, IL 60616. Jurisdictions: US, IL.
 
 | Filing | Official form or portal | Agency PDF filled | Route | Gap |
 |---|---|---|---|---|
-| LLC formation: We'll confirm with the Illinois Secretary of State | `il-sos` Articles of Organization (Form LLC-5.5) · [PDF](https://www.ilsos.gov/publications/pdf_publications/llc55.pdf) | yes | Placetta team: ilsos.gov refuses automated reads, so the online filing's address couldn't be confirmed on the Secretary's own page. |  |
+| LLC formation | `il-sos` Articles of Organization (Form LLC-5.5) · [PDF](https://www.ilsos.gov/publications/pdf_publications/llc55.pdf) | yes | Placetta team: ilsos.gov refuses automated reads, so the online filing's address couldn't be confirmed on the Secretary's own page. |  |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Illinois business registration (sales tax) | `il-tax` Form REG-1 (MyTax Illinois) · [PDF](https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/reg/documents/reg-1.pdf) · portal mytax.illinois.gov | yes | portal (mytax.illinois.gov) |  |
 | Unemployment insurance employer registration | `il-ides` Report to Determine Liability (REG-UI-1) or MyTax Illinois · [PDF](https://ides.illinois.gov/content/dam/soi/en/web/ides/ides_forms_and_publications/REG-UI-1.pdf) · portal mytax.illinois.gov | yes | portal (mytax.illinois.gov) |  |
@@ -612,6 +684,7 @@ Read at 668 N 44th St, Phoenix, AZ 85008. Jurisdictions: US, AZ.
 | Arizona LLC formation | `az-llc` Articles of Organization (Form L010) · [PDF](https://www.azcc.gov/docs/default-source/corps-files/forms/l010-articles-of-organization.pdf) · portal arizonabusinesscenter.azcc.gov | yes | portal (arizonabusinesscenter.azcc.gov), fax, mail |  |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Transaction privilege tax (TPT) license | `az-tpt` Arizona Joint Tax Application (JT-1/UC-001) · [PDF](https://www.azdor.gov/sites/default/files/2023-03/FORMS_TPT_10196_f.pdf) · portal www.aztaxes.gov | yes | portal (www.aztaxes.gov) |  |
+| Employer registration for withholding and unemployment insurance (JT-1) | `az-jt1` Arizona Joint Tax Application (Form JT-1), on AZTaxes.gov | no | Placetta team: not researched | Online only (www.aztaxes.gov): Placetta prepares the answers summary for the agency's site. |
 
 ## Hawaii (state filings)
 

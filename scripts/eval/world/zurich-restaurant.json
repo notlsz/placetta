@@ -1,0 +1,136 @@
+{
+  "id": "zurich-restaurant",
+  "title": "A restaurant in Zurich",
+  "read": "2026-10-22",
+  "input": {
+    "what": "Restaurant",
+    "where": "Bahnhofstrasse 20, 8001 Zürich, Switzerland",
+    "lang": "en"
+  },
+  "assumptions": "A new GmbH opening a restaurant in the city of Zurich with staff, a fit-out and a sign, no terrace. Each item quotes the page the registry entry was verified on (read 2026-10-22).",
+  "order": [],
+  "mustNotInclude": [
+    {
+      "name": "US filings",
+      "why": "Not in the US.",
+      "match": "irs-|cbp-|fincen|\\\\bEIN\\\\b|secretary of state"
+    },
+    {
+      "name": "Bern",
+      "why": "Not in Bern.",
+      "match": "ch-be-|ch-brn-"
+    },
+    {
+      "name": "EU rules",
+      "why": "Switzerland is not in the EU.",
+      "match": "\\\\beu-"
+    }
+  ],
+  "items": [
+    {
+      "key": "ch-zh-hr",
+      "name": "Commercial register entry (canton of Zurich)",
+      "agency": "Handelsregisteramt des Kantons Zürich",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.zh.ch/de/wirtschaft-arbeit/unternehmensportal/opu/firma-gruenden/rechtsform-waehlen/gmbh-gruenden.html",
+      "quote": "Nach der notariellen Beurkundung melden Sie Ihre GmbH beim Handelsregisteramt Zürich an.",
+      "en": "After the notarial deed, you register your GmbH with the Zurich commercial register office.",
+      "read": "2026-10-22",
+      "match": "\\bch-zh-hr\\b",
+      "agencyMatch": "Handelsregisteramt"
+    },
+    {
+      "key": "ch-mwst",
+      "name": "VAT registration",
+      "agency": "Eidgenössische Steuerverwaltung (ESTV)",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.estv.admin.ch/de/mwst-steuerpflicht",
+      "quote": "Ein Unternehmen mit Sitz im Inland ist grundsätzlich steuerpflichtig, wenn es:",
+      "en": "A business based in Switzerland is in principle liable to VAT if it:",
+      "read": "2026-10-21",
+      "match": "\\bch-mwst\\b",
+      "agencyMatch": "ESTV|Steuerverwaltung"
+    },
+    {
+      "key": "ch-ahv",
+      "name": "Employer affiliation with an AHV fund",
+      "agency": "The canton's or trade's Ausgleichskasse (AHV compensation fund)",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://faq.bsv.admin.ch/de/alters-und-hinterlassenenversicherung-ahv/ahv-beitraege-arbeitgeber/welche-pflichten-habe-ich-als",
+      "quote": "Als Arbeitgeber melden Sie sich bei der Ausgleichskasse an.",
+      "en": "As an employer you register with the compensation fund.",
+      "read": "2026-10-22",
+      "match": "\\bch-ahv\\b",
+      "agencyMatch": "Ausgleichskasse"
+    },
+    {
+      "key": "ch-zrh-gastro-project",
+      "name": "Food business project approval",
+      "agency": "City of Zurich, Umwelt- und Gesundheitsschutz (UGZ)",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.stadt-zuerich.ch/de/planen-und-bauen/bauvorschriften-und-planerische-grundlagen/bauten-anlagen/lebensmittelbetriebe.html",
+      "quote": "Betriebe benötigen eine Bewilligung, wenn sie Speisen und Getränke mit oder ohne Bedienung anbieten.",
+      "en": "Businesses need a permit when they offer food and drink, with or without table service.",
+      "read": "2026-10-22",
+      "match": "\\bch-zrh-gastro-project\\b",
+      "agencyMatch": "Zurich"
+    },
+    {
+      "key": "ch-zrh-baubewilligung",
+      "name": "Building permit",
+      "agency": "City of Zurich, Amt für Baubewilligungen",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.stadt-zuerich.ch/de/planen-und-bauen/baubewilligungen/bewilligungspflichtige-vorhaben.html",
+      "quote": "Eine Baubewilligung ist zum Beispiel nötig für:",
+      "en": "A building permit is needed, for example, for:",
+      "read": "2026-10-22",
+      "match": "\\bch-zrh-baubewilligung\\b",
+      "agencyMatch": "Zurich"
+    },
+    {
+      "key": "ch-zrh-patent",
+      "name": "Restaurant licence",
+      "agency": "City of Zurich, Stadtpolizei, Kommissariat Verwaltungspolizei (Bewilligung Gastro)",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.stadt-zuerich.ch/de/stadtleben/veranstaltungen-und-bewilligungen/gastgewerbe/der-weg-zum-restaurant.html",
+      "quote": "Dafür brauchen Sie ein Gastwirtschaftspatent und eine Betriebsbewilligung.",
+      "en": "For that you need a restaurant licence and an operating permit.",
+      "read": "2026-10-22",
+      "match": "\\bch-zrh-patent\\b",
+      "agencyMatch": "Zurich"
+    },
+    {
+      "key": "ch-zrh-reklame",
+      "name": "Sign permit",
+      "agency": "City of Zurich, Amt für Baubewilligungen",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://www.stadt-zuerich.ch/de/planen-und-bauen/baubewilligungen/reklame-aussenwerbung/gesuche.html",
+      "quote": "Sie brauchen vorgängig eine Bewilligung, wenn Sie bestehende Reklameanlagen abändern oder neue Reklameanlagen anbringen wollen.",
+      "en": "You need a permit beforehand to change an existing sign or put up a new one.",
+      "read": "2026-10-22",
+      "match": "\\bch-zrh-reklame\\b",
+      "agencyMatch": "Zurich"
+    }
+  ]
+}

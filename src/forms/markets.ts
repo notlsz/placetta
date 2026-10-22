@@ -36,6 +36,11 @@ export const MARKETS: Market[] = [
     "Las Vegas's Chinatown: Clark County licenses the business, and the Southern Nevada Health District the food."),
   city(undefined, "rowland-heights", "Rowland Heights (unincorporated Los Angeles County)", "CA", "18414 Colima Rd, Rowland Heights, CA 91748", ["LAC", "LACU"]),
   city(undefined, "tysons", "Tysons (Fairfax County)", "VA", "8065 Leesburg Pike, Tysons, VA 22182", ["FFX"]),
+  // added 2026-10-22 with the finishing pass: the guide cities whose every core step is now verified (docs/COVERAGE.md)
+  city(undefined, "tampa", "Tampa", "FL", "1600 E 7th Ave, Tampa, FL 33605", ["TPA", "HILL"], "Hillsborough County (HILL) issues the county business tax receipt; the city issues its own."),
+  city(undefined, "phoenix", "Phoenix", "AZ", "668 N 44th St, Phoenix, AZ 85008", ["PHX", "MARI"], "Maricopa County Environmental Services runs the food permits."),
+  city(undefined, "sacramento", "Sacramento", "CA", "5591 Stockton Blvd, Sacramento, CA 95824", ["SAC", "SACC"], "Sacramento County's Environmental Management Department (SACC) runs the food permits."),
+  city(undefined, "columbus", "Columbus", "OH", "3420 E Main St, Columbus, OH 43213", ["CMH"], "Franklin County's Auditor issues the vendor's license; the registry files it under Columbus (CMH)."),
 ];
 
 /** The states, read at a storefront in each: only their federal and state filings count for the state row. */

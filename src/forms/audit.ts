@@ -20,6 +20,14 @@ export type Fix = {
   proof?: Proof | null;
   /** drop the processing time whose only source is gone */
   dropTakes?: boolean;
+  /** places inside the entry's `where` where a local entry now replaces it (src/forms/finish.ts) */
+  except?: string[];
+  /** a new title, when the old one named a step the entry doesn't cover */
+  title?: { en: string; zh: string };
+  /** the agency that actually takes the filing, when the old entry named a portal's owner instead */
+  agency?: { en: string; zh: string };
+  /** a fee an official page states (with its note), for an entry that had none */
+  fee?: number | null; feeNote?: { en: string; zh: string };
   why: string;
 };
 
@@ -82,15 +90,20 @@ export const FIXES: Fix[] = [
 ];
 
 /** Apply the audit's fixes to the library (in place). Returns the ids it couldn't find, which the test fails on. */
-export function applyFixes(forms: OfficialForm[]): string[] {
+export function applyFixes(forms: OfficialForm[], fixes: Fix[] = FIXES): string[] {
   const missing: string[] = [];
-  for (const x of FIXES) {
+  for (const x of fixes) {
     const f = forms.find(g => g.id === x.id);
     if (!f) { missing.push(x.id); continue; }
     if (x.url) f.url = x.url;
     if (x.info) f.info = x.info;
     if (x.pdf === null) delete f.pdf; else if (x.pdf) f.pdf = x.pdf;
     if (x.dropTakes) { delete f.takes; f.takesDays = null; }
+    if (x.except) f.except = [...(f.except ?? []), ...x.except.filter(e => !(f.except ?? []).includes(e))];
+    if (x.title) f.title = x.title;
+    if (x.agency) f.agency = x.agency;
+    if (x.fee !== undefined) f.fee = x.fee;
+    if (x.feeNote) f.feeNote = x.feeNote;
     if (x.takesSource === null) delete f.takesSource; else if (x.takesSource) f.takesSource = x.takesSource;
     if (x.proof === null) delete f.proof;
     // the link and the quote always match (src/forms/registry.ts): a new proof moves the agency link to the page it was read on

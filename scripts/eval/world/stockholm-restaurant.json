@@ -1,0 +1,135 @@
+{
+  "id": "stockholm-restaurant",
+  "title": "A restaurant in Stockholm",
+  "read": "2026-10-22",
+  "input": {
+    "what": "Restaurant",
+    "where": "Drottninggatan 50, 111 21 Stockholm, Sweden",
+    "lang": "en"
+  },
+  "assumptions": "A new aktiebolag opening a restaurant in Stockholm with staff, a fit-out and a sign, no alcohol and no outdoor seating. Each item quotes the agency or city page the registry entry was verified on (read 2026-10-22).",
+  "order": [],
+  "mustNotInclude": [
+    {
+      "name": "US filings",
+      "why": "Not in the US.",
+      "match": "irs-|cbp-|fincen|\\\\bEIN\\\\b|secretary of state"
+    },
+    {
+      "name": "Gothenburg",
+      "why": "Not in Gothenburg.",
+      "match": "se-got-"
+    },
+    {
+      "name": "Alcohol",
+      "why": "No alcohol asked for.",
+      "match": "servering"
+    }
+  ],
+  "items": [
+    {
+      "key": "se-verksamt",
+      "name": "Company registration (Verksamt)",
+      "agency": "Bolagsverket and Skatteverket",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 2400,
+      "source": "https://bolagsverket.se/foretag/aktiebolag/startaaktiebolag.html",
+      "quote": "Anmäl företaget för registrering till Bolagsverket.",
+      "en": "Register the company with the Swedish Companies Registration Office.",
+      "read": "2026-10-22",
+      "match": "\\bse-verksamt\\b",
+      "agencyMatch": "Bolagsverket"
+    },
+    {
+      "key": "se-moms",
+      "name": "VAT and F-tax registration",
+      "agency": "Skatteverket (Swedish Tax Agency)",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "source": "https://www.skatteverket.se/foretag/moms/momsregistrering/registreradittforetagformoms.4.deeebd105a602bfe38000256.html",
+      "quote": "Du ska registrera ditt företag för moms om båda dessa förutsättningar gäller för dig:",
+      "en": "You must register your business for VAT if both of these conditions apply to you:",
+      "read": "2026-10-22",
+      "match": "\\bse-moms\\b",
+      "agencyMatch": "Skatteverket"
+    },
+    {
+      "key": "se-arbetsgivare",
+      "name": "Employer registration",
+      "agency": "Skatteverket (Swedish Tax Agency)",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": 0,
+      "source": "https://www.skatteverket.se/foretag/arbetsgivare/arbetsgivarregistrering/registreradig.4.18e1b10334ebe8bc80003496.html",
+      "quote": "Du behöver registrera dig som arbetsgivare om du ska betala ut ersättning för arbete",
+      "en": "You need to register as an employer if you will pay compensation for work",
+      "read": "2026-10-22",
+      "match": "\\bse-arbetsgivare\\b",
+      "agencyMatch": "Skatteverket"
+    },
+    {
+      "key": "se-sto-livsmedel",
+      "name": "Food business registration",
+      "agency": "City of Stockholm, Miljöförvaltningen (food control)",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://tillstand.stockholm/tillstand-regler-och-tillsyn/servering-av-mat/anmala-livsmedels--eller-kontaktmaterialverksamhet/",
+      "quote": "Du får inte starta verksamheten innan du anmält den.",
+      "en": "You may not start the business before you have registered it.",
+      "read": "2026-10-22",
+      "match": "\\bse-sto-livsmedel\\b",
+      "agencyMatch": "Stockholm"
+    },
+    {
+      "key": "se-sto-bygglov",
+      "name": "Building permit or notice",
+      "agency": "City of Stockholm, Stadsbyggnadskontoret (building permits)",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://tillstand.stockholm/tillstand-regler-och-tillsyn/lokal-och-fastigheter/ansoka-om-bygglov-eller-gora-en-bygganmalan/",
+      "quote": "Ska du bygga nytt, bygga till, riva eller göra en ändring av din lokal? Då kan du behöva söka bygglov eller göra en anmälan.",
+      "en": "Building new, extending, demolishing or altering your premises? Then you may need a building permit or to file a notice.",
+      "read": "2026-10-22",
+      "match": "\\bse-sto-bygglov\\b",
+      "agencyMatch": "Stockholm"
+    },
+    {
+      "key": "se-sto-skylt",
+      "name": "Sign permit",
+      "agency": "City of Stockholm, Stadsbyggnadskontoret (building permits)",
+      "level": "city",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://tillstand.stockholm/tillstand-regler-och-tillsyn/lokal-och-fastigheter/ansoka-om-bygglov-for-skylt/",
+      "quote": "Du behöver oftast bygglov för att sätta upp, flytta eller ändra en skylt.",
+      "en": "You usually need a building permit to put up, move or change a sign.",
+      "read": "2026-10-22",
+      "match": "\\bse-sto-skylt\\b",
+      "agencyMatch": "Stockholm"
+    },
+    {
+      "key": "eu-food-hygiene",
+      "name": "EU food hygiene rules",
+      "agency": "European Union (Regulation (EC) 852/2004), checked by the national food inspectors",
+      "level": "federal",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "source": "https://food.ec.europa.eu/food-safety/biological-safety/food-hygiene_en",
+      "quote": "All food businesses operating in the EU, regardless of their size or type, must comply with basic hygiene requirements.",
+      "read": "2026-10-21",
+      "match": "\\beu-food-hygiene\\b",
+      "agencyMatch": "European Union"
+    }
+  ]
+}

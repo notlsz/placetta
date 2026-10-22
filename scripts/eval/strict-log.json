@@ -444,7 +444,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "4749cb020b7fc46c",
+  "sha256": "14a68795ca4d4268",
   "context": "c record that registers your business name and address with the city of boston. massachusetts law requires most businesses operating under a trade name to file with the city clerk's office. you must renew every four years. contact city clerk 617-635-4601 cityclerk@bost"
  },
  {
@@ -464,7 +464,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "154108507dc1e563",
+  "sha256": "7c023dc160a6e213",
   "context": "twice each year. we add businesses to our online database as we do inspections. depending on your situation, you may also need a plan review before we can issue your permit. the food service permit is issued by the inspectional services department. cont"
  },
  {
@@ -484,7 +484,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "e7de3fa8941dc407",
+  "sha256": "357c7782b8477da8",
   "context": "usiness in boston. if you plan to serve alcohol you'll need a separate license. you must have this license before you can apply for a food service health permit from the inspectional services department health division (isd). if you also plan to serve alcohol, or let guests bring their own, you'll need a"
  },
  {
@@ -514,7 +514,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "154108507dc1e563",
+  "sha256": "7c023dc160a6e213",
   "context": " or sell food to the public in boston. some businesses also need a plan review. before you can serve food to the public, you need to apply for a food service permit and pass a health inspection. we inspect food service businesses at least once a year, but usually twice each"
  },
  {
@@ -534,7 +534,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "e7de3fa8941dc407",
+  "sha256": "357c7782b8477da8",
   "context": "usiness in boston. if you plan to serve alcohol you'll need a separate license. you must have this license before you can apply for a food service health permit from the inspectional services department health division (isd). if you also plan to serve alcohol, or let guests bring their own, you'll need a"
  },
  {
@@ -723,7 +723,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "94e4dddeed1fd0ef",
+  "sha256": "cb3a3cc234a14937",
   "context": " determine which applies to your business. new or remodeled food establishments if you are building a new food or drink establishment or remodeling an existing facility: apply on dallasnow ​​ ​​​ ​​upload two identical sets of scaled plans, including: ​floor plan and "
  },
  {
@@ -733,8 +733,8 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "49447ff7d800c725",
-  "context": "aintitleheader ​food establishment dch body page content ​ ​ permit information food establishment permits are required for restaurants, bars, grocery stores, schools and other retail food establishments. the applicant is responsible for scheduling and coordinating all required healt"
+  "sha256": "0a74184b00deb504",
+  "context": "aintitleheader ​food establishment dch body page content ​ ​ permit information food establishment permits are required for restaurants, bars, grocery stores, schools and other retail food establishments. the applicant is responsible for schedulin​g and coordinating all required heal"
  },
  {
   "id": "dallas-restaurant:tx-workers-comp",
@@ -745,6 +745,26 @@
   "found": true,
   "sha256": "cc72ec115f07c6c2",
   "context": " one year) effective from (mm/dd/yyyy) to (mm/dd/yyyy) 10. reason for filing a. annual filing, between february 1 and april 30 each year. (required for all non-subscribers) b. business terminated workers' compensation"
+ },
+ {
+  "id": "dallas-restaurant:dal-fire-hood",
+  "read": "https://dallascityhall.com/departments/fire-rescue/FPEI%20Docs/Schedule%20of%20Permit%20Fees%202024.pdf",
+  "quote": "Commercial Cooking Fire-Extinguishing System $250",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "e1accfa7ccfcdd12",
+  "context": " storage (misc.), annual $390 fire apparatus access roads $380 plan review fees commercial cooking fire-extinguishing system $250 limited access gates/barriers $330 compressed gas filling/storage/use, annual $"
+ },
+ {
+  "id": "dallas-restaurant:dal-fire-hood:fee",
+  "read": "https://dallascityhall.com/departments/fire-rescue/FPEI%20Docs/Schedule%20of%20Permit%20Fees%202024.pdf",
+  "quote": "Commercial Cooking Fire-Extinguishing System $250",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "e1accfa7ccfcdd12",
+  "context": " storage (misc.), annual $390 fire apparatus access roads $380 plan review fees commercial cooking fire-extinguishing system $250 limited access gates/barriers $330 compressed gas filling/storage/use, annual $"
  },
  {
   "id": "dc-bubble-tea:dc-formation",
@@ -1122,7 +1142,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "239d04aa1adb8fa3",
+  "sha256": "5bfad3cca83eda96",
   "context": "ps will serve as a guide throughout the process subsequent to plan approval. 1. plan approval: congratulations on the approval of your submitted plans, which allows you to initiate construction. it is the responsibility of the submitter to provide evidence of this approval "
  },
  {
@@ -1132,7 +1152,7 @@
   "checked": "2026-10-22",
   "method": "curl",
   "found": true,
-  "sha256": "28ddbfe436639b57",
+  "sha256": "354ff59ff34cedbb",
   "context": "respectively. inspection requests shall be requested 5 working days in advance. a health permit will be issued upon completion of a final inspection. you may not start construction until plans from all agencies have been reviewed"
  },
  {
@@ -1349,11 +1369,10 @@
   "id": "la-bubble-tea:lac-plan-check",
   "read": "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
   "quote": "shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food",
-  "checked": "2026-10-22",
-  "method": "curl",
+  "checked": "2026-10-21",
+  "method": "webfetch",
   "found": true,
-  "sha256": "7b91a046f9ae2c7d",
-  "context": "ns drawn to scale, and specifications to the enforcement agency for review, and shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food facility, (b) plans and specifications may also be required by the enforcement "
+  "note": "curl got 403; read with WebFetch on 2026-10-21"
  },
  {
   "id": "la-bubble-tea:la-ladbs",
@@ -1397,11 +1416,10 @@
   "id": "la-bubble-tea:order:lac-plan-check>lac-health-permit",
   "read": "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm",
   "quote": "shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food",
-  "checked": "2026-10-22",
-  "method": "curl",
+  "checked": "2026-10-21",
+  "method": "webfetch",
   "found": true,
-  "sha256": "7b91a046f9ae2c7d",
-  "context": "ns drawn to scale, and specifications to the enforcement agency for review, and shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food facility, (b) plans and specifications may also be required by the enforcement "
+  "note": "curl got 403; read with WebFetch on 2026-10-21"
  },
  {
   "id": "lasvegas-clothing:irs-ss4",
@@ -1892,6 +1910,16 @@
   "found": true,
   "sha256": "c4c27253537678db",
   "context": "ts premises a separate file containing food employee training documentation. e. each food establishment shall have at least one (1) certified food protection manager on staff. f. each food establishment shall replace the certified food protection manager "
+ },
+ {
+  "id": "phoenix-restaurant:az-jt1",
+  "read": "https://azdor.gov/business/withholding-tax/employer-withholding-filing-obligations",
+  "quote": "Completing and submitting Arizona Form JT-1 also begins the process of registering the employer for unemployment compensation insurance",
+  "checked": "2026-10-22",
+  "method": "curl",
+  "found": true,
+  "sha256": "d8598693d2792a65",
+  "context": "arizona form jt-1), available once enrolled for an user account on aztaxes.gov. completing and submitting arizona form jt-1 also begins the process of registering the employer for unemployment compensation insurance with the arizona department of economic security. once registered with ador, th"
  },
  {
   "id": "seattle-bakery:wa-sos",

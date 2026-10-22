@@ -84,6 +84,8 @@ export const CITIES: City[] = [
   /* Canada: each city's province is its state code ("CA-ON" Ontario, "CA-BC" British Columbia), for the province's own steps */
   c("CA-TOR", "CA", "Toronto", "多伦多", ["toronto", "多伦多", "scarborough, on", "north york", "markham, on"], true, "CA-ON"),
   c("CA-VAN", "CA", "Vancouver", "温哥华", ["vancouver, bc", "vancouver, british columbia", "vancouver", "温哥华"], true, "CA-BC"),
+  // Québec and Montréal, added in the finishing pass of 2026-10-22 (src/forms/finish.ts)
+  c("CA-MTL", "CA", "Montréal", "蒙特利尔", ["montreal", "montréal", "蒙特利尔", "montreal, qc", "montreal, quebec"], true, "CA-QC"),
 
   /* South America, Southeast Asia and Africa (src/forms/intl.ts): the national steps apply; Kuala Lumpur's and Nairobi's
      own licence is in the library, the others' local steps are researched live */
@@ -139,7 +141,7 @@ export const CITIES: City[] = [
   c("IE-DUB", "IE", "Dublin", "都柏林", ["dublin", "都柏林"]),
   c("BE-BRU", "BE", "Brussels", "布鲁塞尔", ["brussels", "bruxelles", "brussel", "布鲁塞尔"]),
   c("PT-LIS", "PT", "Lisbon", "里斯本", ["lisbon", "lisboa", "里斯本"]),
-  c("CH-ZRH", "CH", "Zurich", "苏黎世", ["zurich", "zürich", "苏黎世"]),
+  c("CH-ZRH", "CH", "Zurich", "苏黎世", ["zurich", "zürich", "苏黎世"], true, "CH-ZH"),
   c("AT-VIE", "AT", "Vienna", "维也纳", ["vienna", "wien", "维也纳"]),
   c("SE-STO", "SE", "Stockholm", "斯德哥尔摩", ["stockholm", "斯德哥尔摩"]),
   c("DK-CPH", "DK", "Copenhagen", "哥本哈根", ["copenhagen", "københavn", "哥本哈根"]),
@@ -148,7 +150,7 @@ export const CITIES: City[] = [
   c("FI-HEL", "FI", "Helsinki", "赫尔辛基", ["helsinki", "赫尔辛基"]),
   // the largest commercial city beside each capital, added 2026-10-21 with the national steps (src/forms/europe.ts)
   c("IE-ORK", "IE", "Cork", "科克", ["cork, ireland", "cork city", "科克"]),
-  c("CH-BRN", "CH", "Bern", "伯尔尼", ["bern", "berne", "伯尔尼"]),
+  c("CH-BRN", "CH", "Bern", "伯尔尼", ["bern", "berne", "伯尔尼"], true, "CH-BE"),
   c("AT-GRZ", "AT", "Graz", "格拉茨", ["graz", "格拉茨"]),
   c("SE-GOT", "SE", "Gothenburg", "哥德堡", ["gothenburg", "goteborg", "哥德堡"]),
   c("DK-AAR", "DK", "Aarhus", "奥胡斯", ["aarhus", "århus", "奥胡斯"]),
