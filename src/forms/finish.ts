@@ -478,7 +478,45 @@ const IRELAND: OfficialForm[] = [
     proof: [ORK_PLAN, "All development that is not exempted under planning law requires planning permission."] }),
 ];
 
-export const FINISH_FORMS: OfficialForm[] = [...AUSTRIA, ...SWITZERLAND, ...SWEDEN, ...DENMARK, ...FINLAND, ...POLAND, ...BELGIUM, ...PORTUGAL, ...IRELAND];
+/* ------------------------------------------------------------------ Germany (Munich, Hamburg, Frankfurt), Spain (Barcelona), Italy */
+const MUC_GEW = "https://stadt.muenchen.de/service/info/gewerbeamt/10164604/";
+const MUC_BAU = "https://stadt.muenchen.de/service/info/referat-fur-stadtplanung-und-bauordnung/10331531/";
+const MUC_GAST = "https://stadt.muenchen.de/service/info/gaststattenerlaubnis/1063662/n0/";
+const HAM_GEW = "https://www.hamburg.de/service/info/11258072/n0/";
+const HAM_BAU = "https://www.hamburg.de/service/info/11981617/n0/";
+const GEWO_14 = "https://www.gesetze-im-internet.de/gewo/__14.html";
+const BCN_OPEN = "https://ajuntament.barcelona.cat/comerc/en/do-you-have-establishment/how-open-business-barcelona-step-step";
+const BCN_OBRES = "https://ajuntament.barcelona.cat/urbanisme-accio-climatica-mobilitat-pla-barris-serveis-urbans/en/services/urban-planning/eobres";
+const VVF = "https://www.vigilfuoco.it/comando-vvf-potenza/prevenzione-incendi";
+
+const GERMANY_SPAIN_ITALY: OfficialForm[] = [
+  N({ id: "de-muc-bau", where: "DE-MUC", level: "city", segs: PREMISES, method: "online", order: 50, cur: "EUR",
+    form: "Bauantrag (Baugenehmigung or Nutzungsänderung)", title: ["Building permit, including a change of use", "建筑许可（含用途变更）"],
+    agency: ["Landeshauptstadt München, Referat für Stadtplanung und Bauordnung, Lokalbaukommission (LBK)", "慕尼黑市城市规划与建筑管理局（地方建筑委员会 LBK）"],
+    how: ["New building, extensions, alterations and changes of use as a rule need a building permit from the city's lower building authority; a new restaurant's licence waits for the LBK's written release.", "新建、扩建、改建及用途变更原则上须取得市下级建筑监管机关的建筑许可；新餐厅的经营许可须待 LBK 书面放行。"],
+    url: MUC_BAU,
+    proof: [MUC_BAU, "In der Regel benötigen Sie für Baumaßnahmen wie Neubau, Erweiterung oder Umbau sowie für Nutzungsänderungen eine Baugenehmigung durch die Untere Bauaufsichtsbehörde.", "As a rule, building work such as new construction, extension or conversion, and changes of use, need a building permit from the lower building authority."] }),
+  N({ id: "de-muc-gaststaette", where: "DE-MUC", level: "city", segs: ["restaurant"], needs: { alcohol: true }, method: "online", order: 71, cur: "EUR",
+    form: "Gaststättenerlaubnis", title: ["Restaurant licence to serve alcohol (Gaststättenerlaubnis)", "供应酒类的餐饮经营许可（Gaststättenerlaubnis）"],
+    agency: ["Landeshauptstadt München, Kreisverwaltungsreferat (Gewerbeamt)", "慕尼黑市行政管理局（营业管理处）"],
+    how: ["A restaurant that serves alcohol needs the city's licence; for a new or altered restaurant the final licence follows the building authority's written release, and a food law course at the IHK is required.", "供应酒类的餐厅须取得市政府许可；新建或改建餐厅须待建筑监管机关书面放行后取得正式许可，并须参加工商会的食品法课程。"],
+    url: MUC_GAST, feeNote: ["100 to 6,000 euros, depending on the size and location of the premises.", "100 至 6,000 欧元，视场所面积和所在区域而定。"],
+    proof: [MUC_GAST, "Schank- und Speisewirtschaften sowie Beherbergungsbetriebe benötigen eine Gaststättenerlaubnis, wenn alkoholische Getränke ausgeschenkt werden.", "Bars, restaurants and accommodation businesses need a restaurant licence if they serve alcoholic drinks."] }),
+  N({ id: "de-ham-bau", where: "DE-HAM", level: "city", segs: PREMISES, method: "online", order: 50, cur: "EUR",
+    form: "Bauantrag zur Nutzungsänderung", title: ["Building permit for a change of use", "用途变更建筑许可"],
+    agency: ["Freie und Hansestadt Hamburg, Bezirksamt (Bauprüfabteilung) for the address", "汉堡市地址所属区政府（建筑审查处）"],
+    how: ["Changing the approved use of a building that needs a permit, for example a shop into a restaurant, needs a building permit for the change of use, applied for with the district's building office.", "变更须经许可之建筑物的核准用途（例如将商店改为餐厅），须向区建筑审查处申请用途变更建筑许可。"],
+    url: HAM_BAU,
+    proof: [HAM_BAU, "Bevor Sie die genehmigte Nutzungsart einer baugenehmigungsbedürftigen Anlage ändern können, benötigen Sie eine Baugenehmigung zur Nutzungsänderung.", "Before you can change the approved use of a structure that needs a building permit, you need a building permit for the change of use."] }),
+  N({ id: "es-bcn-obres", where: "ES-BCN", level: "city", segs: PREMISES, needs: { buildout: true }, method: "online", order: 50, cur: "EUR",
+    form: "Consulta prèvia d'obres, then a works licence or notice (comunicat)", title: ["Building works licence or notice (after the mandatory prior consultation)", "装修工程许可或申报（须先经强制预先咨询）"],
+    agency: ["Ajuntament de Barcelona, Urbanisme (district licensing department)", "巴塞罗那市政府城市规划处（区许可部门）"],
+    how: ["Works start with the mandatory prior consultation, which sets the regime (licence, or immediate or deferred notice) and the documents; the file is then created online with a digital certificate.", "工程须先进行强制预先咨询，确定适用的程序（许可、即时申报或延后申报）及所需文件，然后凭数字证书在线建档。"],
+    url: BCN_OBRES,
+    proof: [BCN_OBRES, "The Prior Consultation procedure is mandatory and allows you to find out the intervention regime that will be applied to the works"] }),
+];
+
+export const FINISH_FORMS: OfficialForm[] = [...AUSTRIA, ...SWITZERLAND, ...SWEDEN, ...DENMARK, ...FINLAND, ...POLAND, ...BELGIUM, ...PORTUGAL, ...IRELAND, ...GERMANY_SPAIN_ITALY];
 
 export const FINISH_FIXES: Fix[] = [
   P("at-fb", AT_FB, "In der Regel erlangt die Gesellschaft mit der Eintragung in das Firmenbuch Rechtspersönlichkeit.", "As a rule the company becomes a legal person on its entry in the company register.",
@@ -509,6 +547,20 @@ export const FINISH_FIXES: Fix[] = [
   { ...P("ie-revenue", "https://www.revenue.ie/en/starting-a-business/registering-for-tax/index.aspx", "You must register for tax with Revenue when you:", undefined,
     "Retitled: the employer registration is its own entry now (ie-paye); this one is the company's corporation tax and VAT registration."),
     title: { en: "Tax registration with Revenue (corporation tax and VAT)", zh: "向爱尔兰税务局登记税务（公司税和增值税）" } },
+  { ...P("de-gewerbe-muc", MUC_GEW, "Reichen Sie Ihre Gewerbeanmeldung rechtzeitig vor oder spätestens mit Aufnahme der Tätigkeit ein.", "File your trade registration in good time before, or at the latest when, you start the activity.",
+    "Proof added from the City of Munich's own service page, which states the fee."),
+    url: MUC_GEW, feeNote: { en: "50 to 60 euros, depending on the legal form.", zh: "50 至 60 欧元，视法律形式而定。" } },
+  { ...P("de-gewerbe-ham", HAM_GEW, "Wenn Sie ein stehendes Gewerbe anfangen, müssen Sie dieses gleichzeitig anmelden.", "When you start a fixed-site trade, you must register it at the same time.",
+    "Proof added from the City of Hamburg's own service page."), url: HAM_GEW },
+  P("de-gewerbe-fra", GEWO_14, "Wer den selbständigen Betrieb eines stehenden Gewerbes, einer Zweigniederlassung oder einer unselbständigen Zweigstelle anfängt, muss dies der zuständigen Behörde gleichzeitig anzeigen.", "Whoever starts an independent fixed-site trade, a branch or a dependent outlet must notify the competent authority at the same time.",
+    "Proof added from the federal Trade Regulation Act, section 14 (gesetze-im-internet.de, the federal law site): frankfurt.de and Hessen's service portal refuse automated reads (403, robots), so the requirement is quoted from the law the Ordnungsamt applies."),
+  { ...P("es-bcn-licencia", BCN_OPEN, "It is compulsory to request it before starting any business activity.", undefined,
+    "Proof added from the Ajuntament de Barcelona's own guide to opening a business (the municipal licence)."), url: BCN_OPEN },
+  { ...P("it-registro", "https://www.impresainungiorno.gov.it/web/l-impresa-e-l-europa/setting-up-a-business", "Tutte le imprese di qualsiasi natura giuridica si debbono iscrivere al Registro delle imprese.", "Every business, whatever its legal form, must enter the business register.",
+    "Retitled to the company registration it is (the proof was already there): the business register entry through ComUnica forms the company's legal record."),
+    title: { en: "Company registration in the business register (ComUnica)", zh: "在企业登记处注册公司（ComUnica）" } },
+  P("it-vvf", VVF, "considerate a maggior rischio d'incendio, che sono sottoposte a controllo dei Vigili del Fuoco.", "considered at higher fire risk, which are subject to the fire brigade's control.",
+    "Proof added from the fire brigade's own page (vigilfuoco.it): the 80 activities listed in annex I of DPR 151/2011 are subject to its control."),
   P("ch-ahv", CH_AHV, "Als Arbeitgeber melden Sie sich bei der Ausgleichskasse an.", "As an employer you register with the compensation fund.",
     "Proof added from the Federal Social Insurance Office's FAQ (bsv.admin.ch)."),
 ];

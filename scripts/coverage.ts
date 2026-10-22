@@ -20,13 +20,20 @@ import { FINISH_FIXES, FINISH_FORMS } from "../src/forms/finish";
 /** Each guide city's status in the audit of 2026-10-22, before the finishing pass (src/forms/finish.ts). */
 const BEFORE: Record<string, string> = {"New York City": "covered", "Los Angeles": "covered", "Houston": "covered", "San Francisco": "covered", "San Jose": "covered", "Chicago": "partial", "Seattle": "covered", "Boston": "covered", "Miami": "covered", "Dallas": "covered", "Austin": "covered", "Washington, DC": "covered", "Atlanta": "covered", "Philadelphia": "covered", "Las Vegas": "covered", "San Antonio": "covered", "Tampa": "partial", "San Diego": "covered", "Irvine": "covered", "Orlando": "covered", "Fort Worth": "covered", "Phoenix": "partial", "Oakland": "covered", "Sacramento": "partial", "Portland": "covered", "Plano": "covered", "Arlington": "covered", "Fairfax County": "covered", "Edison": "covered", "Jersey City": "covered", "Denver": "covered", "Minneapolis": "covered", "Columbus": "unverified", "Cupertino": "covered", "Milpitas": "covered", "Daly City": "covered", "Arcadia": "covered", "Alhambra": "covered", "Fort Lee": "covered", "Bellevue": "covered", "Rockville": "covered", "Mexico City": "partial", "Monterrey": "partial", "Guadalajara": "partial", "Cancún": "partial", "Beijing": "unverified", "Shanghai": "unverified", "Shenzhen": "unverified", "Guangzhou": "unverified", "Hangzhou": "unverified", "Chengdu": "unverified", "Chongqing": "unverified", "Wuhan": "unverified", "Nanjing": "unverified", "Suzhou": "unverified", "Tianjin": "unverified", "Xi'an": "unverified", "London": "covered", "Manchester": "covered", "Paris": "covered", "Berlin": "covered", "Munich": "partial", "Hamburg": "partial", "Frankfurt": "partial", "Madrid": "partial", "Barcelona": "partial", "Milan": "partial", "Rome": "partial", "Amsterdam": "covered", "Rotterdam": "covered", "Dublin": "partial", "Cork": "partial", "Brussels": "unverified", "Lisbon": "unverified", "Zurich": "unverified", "Bern": "unverified", "Vienna": "unverified", "Graz": "unverified", "Stockholm": "unverified", "Gothenburg": "unverified", "Copenhagen": "unverified", "Aarhus": "unverified", "Warsaw": "unverified", "Helsinki": "unverified", "Dubai": "unverified", "Abu Dhabi": "unverified", "Sharjah": "unverified", "Riyadh": "unverified", "Jeddah": "unverified", "Dammam": "unverified", "Doha": "unverified", "Istanbul": "unverified"};
 
+/** Filings that are two steps at once by the agency's own words: Madrid's responsible declaration opens the activity and
+    covers the works it needs, so for coverage it counts as the city's building step as well as its licence. */
+export const ALSO_COVERS: Record<string, { topic: Topic; read: string; quote: string; en: string }> = {
+  "es-mad-dr": { topic: "building", read: "https://www.madrid.es/portales/munimadrid/es/Como-poner-en-marcha-una-actividad-economica/?vgnextfmt=default&vgnextoid=b13a369f792f7710VgnVCM1000001d4a900aRCRD&vgnextchannel=2af331d3b28fe410VgnVCM1000000b205a0aRCRD",
+    quote: "Para iniciar o modificar una actividad económica en la ciudad de Madrid, incluidas las obras necesarias para su desarrollo,", en: "To start or change an economic activity in the city of Madrid, including the works it needs," },
+};
+
 /** Countries with no general local trade licence for a shop or restaurant: the city's own list of what a new restaurant
     needs names national registrations and local permits (building, alcohol, outdoor seating) and no trade licence. There
     the local licence step is met by the city's verified building or use permit. Each is a judgement on an official page,
     quoted, for the founder to check. */
 export const NO_TRADE_LICENCE: Record<string, { read: string; quote: string; en: string; why: string }> = {
   DK: { read: "https://www.kk.dk/erhverv/butik-gadesalg-og-restaurant/tjekliste-for-nye-restauratoerer", quote: "Nødvendige tilladelser og registreringer",
-    en: "Necessary permits and registrations", why: "Copenhagen's checklist for new restaurateurs lists, under this heading, the Danish Veterinary and Food Administration's registration, the alcohol licence, the building permit and outdoor seating; Denmark has no general trade licence (næringsbrev for restaurants was abolished)." },
+    en: "Necessary permits and registrations", why: "Copenhagen's checklist for new restaurateurs lists, under this heading, the Danish Veterinary and Food Administration's registration, the alcohol licence, the building permit and outdoor seating, and no trade licence." },
 };
 
 const OUT = `${process.cwd()}/docs/COVERAGE.md`;
@@ -79,6 +86,8 @@ function rowFor(city: string, country: string): Row {
     cells[k] ??= { v: 0, u: 0, ids: [] };
     if (f.proof) cells[k].v++; else cells[k].u++;
     cells[k].ids.push(f.id);
+    const also = ALSO_COVERS[f.id];
+    if (also && f.proof) { const k2 = `${f.level}:${also.topic}`; cells[k2] ??= { v: 0, u: 0, ids: [] }; cells[k2].v++; cells[k2].ids.push(f.id); }
   }
   // what a city needs at minimum: national company and tax, an employer registration somewhere, a food permit, a
   // building or use step and a local licence or registration (any level below national)
@@ -153,6 +162,8 @@ function main() {
   p("| City | Country | Before | After | Still short |");
   p("|---|---|---|---|---|");
   for (const r of guideRows.filter(r => BEFORE[r.city] !== "covered" || r.status !== "covered")) p(`| ${r.city} | ${r.country} | ${BEFORE[r.city] ?? "new"} | ${r.status} | ${r.gaps.join("; ") || "none"} |`);
+  p();
+  for (const [id, x] of Object.entries(ALSO_COVERS)) p(`\`${id}\` also counts as the ${x.topic} step: "${x.quote}" (${x.en}), ${x.read}.`);
   p();
   for (const [code, x] of Object.entries(NO_TRADE_LICENCE)) p(`No general trade licence in ${COUNTRIES.find(k => k.code === code)?.en ?? code}: ${x.why} Quote: "${x.quote}" (${x.en}), ${x.read}. The city's verified building or use permit stands as its local step there.`);
   p();

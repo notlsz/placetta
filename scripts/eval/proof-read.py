@@ -56,7 +56,12 @@ def text_of(url, ua=UA):
         # across columns when laid out, so a quote is found in either)
         out = subprocess.run(["pdftotext", "-layout", pdf, "-"], capture_output=True, text=True).stdout + "\n\f\n" + subprocess.run(["pdftotext", pdf, "-"], capture_output=True, text=True).stdout; os.unlink(pdf)
         return out, "200"
-    s = data.decode("utf-8", errors="replace")
+    # the page's own charset when it declares one (gesetze-im-internet.de serves ISO-8859-1), else UTF-8
+    m = re.search(rb"charset=[\"']?([A-Za-z0-9_-]+)", data[:4000])
+    try:
+        s = data.decode(m.group(1).decode() if m else "utf-8", errors="replace")
+    except LookupError:
+        s = data.decode("utf-8", errors="replace")
     s = re.sub(r"(?is)<(script|style|noscript|svg)[^>]*>.*?</\1>", " ", s)
     s = re.sub(r"<[^>]+>", " ", s)
     return html.unescape(s), "200"
