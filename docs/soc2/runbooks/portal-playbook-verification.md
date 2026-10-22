@@ -19,7 +19,13 @@ Online (3). Washington CCFS, Georgia eCorp and Virginia CIS follow when a custom
    requirement checked. Never file a made-up application on a government portal.
 2. Get the customer's portal account into the vault the usual way (the customer connects it in the app). Staff never
    type or see the password.
-3. On Render, set `FILER_ALLOW_UNVERIFIED=1` on the filer worker **only for the session**, and note the time.
+3. On Render, check `FILER_ENABLED=1`, then set `FILER_ALLOW_UNVERIFIED=1` on the filer worker **only for the
+   session**, and note the time.
+4. The filer's sandbox (`worker/filer/src/sandbox.ts`) only lets the browser go to the destination's allowlisted
+   hosts. Open the portal's sign-in in your own browser first: if it sends you to another host (a state single
+   sign-on page, a payment page), add that host to the destination's `alsoOn` list in `supabase/functions/file/destinations.ts`
+   before the session, or the run stops there. A run also has a hard time limit; a portal that needs a long wait
+   (an ID check, a callback) is handed back to you, which is expected.
 
 ## Each portal
 
