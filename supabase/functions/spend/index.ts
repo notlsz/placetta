@@ -141,7 +141,8 @@ serve(async (req) => {
     const r = await one(ws, uuidParam(body.id, "id"));
     if (r.status !== "approved") throw new HttpError("bad_request", "Only an approved purchase can be marked paid.");
     const receipt = body.receipt_path ? String(body.receipt_path).slice(0, 300) : null;
-    if (receipt && !receipt.startsWith(`${ws}/`)) throw new HttpError("bad_request", "That receipt isn't in this workspace.");
+    // inside this workspace's folder, with no way back out of it ("ws/../other-ws/...")
+    if (receipt && (!receipt.startsWith(`${ws}/`) || receipt.split("/").some((p) => p === ".." || p === "."))) throw new HttpError("bad_request", "That receipt isn't in this workspace.");
     const { data } = await admin.from("purchases").update({ status: "paid", paid_at: new Date().toISOString(), receipt_path: receipt }).eq("id", r.id).select("*").single();
     await audit({ workspace_id: ws, actor: "you", actor_id: user.id, action: { en: "Paid", zh: "已支付" }, object: what(r) });
     return ok({ purchase: toPurchase(data as Row) });

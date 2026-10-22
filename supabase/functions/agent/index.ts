@@ -12,6 +12,7 @@ import { callModel, canConverse, ROLES, type Role } from "../_shared/llm.ts";
 import { sse } from "../_shared/stream.ts";
 import { gate, record } from "../_shared/ai_gate.ts";
 import { secretValues, withoutEnv } from "../_shared/secrets.ts";
+import { clientAnswer } from "./answer.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -76,7 +77,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
   const env = (k: string) => Deno.env.get(k);
   // some vendor with a key may take the conversation (a Gemini key without GEMINI_PAID may not; Cerebras counts)
-  if (!canConverse(env)) return fail(503, "not_configured", "Add a model key (for example ANTHROPIC_API_KEY) in the Edge Function secrets.");
+  if (!canConverse(env)) return (console.error("not configured: add a model key in the Edge Function secrets"), fail(503, "not_configured", "The agent isn't set up on the server yet. Placetta's team has been told."));
   if (Number(req.headers.get("content-length") ?? 0) > BODY_MAX) return fail(413, "bad_request", "That request is too large.");
 
   const jwt = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
@@ -157,6 +158,9 @@ Deno.serve(async (req) => {
     return { status: code === "rate_limited" ? 429 : 502, code, message: code === "rate_limited" ? "The agent is busy. Try again in a moment." : "Couldn't reach the agent's model. Try again." };
   };
   const saver = g.tier === "reduced" ? { saver: true, renews_at: g.period_end } : {};
+  // The app gets the answer and why it stopped. Which vendor and model wrote it, the vendor's message id and the token
+  // counts stay here (ai_events, and the Replay for Placetta's team).
+  const forClient = (d: unknown) => clientAnswer(d);
 
   // Streamed (the app asks with stream: true): the model's words go out as they're written, as server-sent events:
   // "text" with each new piece ({d}), or the whole text again ({reset, d}) when a model broke off and the next one
@@ -176,7 +180,7 @@ Deno.serve(async (req) => {
           if (!out.ok) { const f = failed(out); send("error", { error: { code: f.code, message: f.message } }); return; }
           const data = out.data as { usage?: Record<string, never> };
           await record(admin, g.event, out.model, data.usage, role);
-          send("message", { ...data, ...saver });
+          send("message", { ...forClient(data), ...saver });
         } catch (e) {
           console.error("agent stream", String(e).slice(0, 200));
           send("error", { error: { code: "upstream_error", message: "Couldn't reach the agent's model. Try again." } });
@@ -189,5 +193,5 @@ Deno.serve(async (req) => {
   if (!out.ok) { const f = failed(out); return fail(f.status, f.code, f.message); }
   const data = out.data as { usage?: Record<string, never> };
   await record(admin, g.event, out.model, data.usage, role);
-  return json(200, { ...data, ...saver });
+  return json(200, { ...forClient(data), ...saver });
 });

@@ -176,7 +176,7 @@ export function rules(w: Workspace, lang: Lang, account: boolean, research: bool
   const apps = connected.map(c => APP_NAMES[c]).filter(Boolean);
   const missing = [["Email (Gmail or Outlook)", MAIL], ["a calendar", CAL], ["Google Drive or Dropbox", DRIVES], ["QuickBooks", ["quickbooks"]], ["Square or Toast (sales and staff)", POS]].filter(([, k]) => !has(k as string[])).map(([n]) => n);
   const mail = has(MAIL) && can("search_email"), drives = has(DRIVES) && can("find_files"), cal = has(CAL) && can("add_calendar_event");
-  return `You are Odelia, the AI compliance agent at Placetta (快哉). Introduce yourself as Odelia when it's natural, and if anyone asks, say plainly that you are an AI, not a person. You get business licenses, permits and registrations done for the business you work for, and keep them current. You work inside its Placetta workspace (JSON below). Today is ${daysFromNow(0)}.
+  return `You are Odelia, the AI compliance agent at Placetta (快哉). Introduce yourself as Odelia when it's natural, and if anyone asks, say plainly that you are an AI, not a person. If someone asks which AI model or company is behind you, say that Placetta uses leading AI models from vetted providers and that the providers are listed in its privacy policy (placetta.com/privacy); don't guess at more than that. You get business licenses, permits and registrations done for the business you work for, and keep them current. You work inside its Placetta workspace (JSON below). Today is ${daysFromNow(0)}.
 
 How you write (this matters as much as getting the work right):
 - Reply in ${extra.speak ?? replyLanguage(lang)}, or in the language the person writes in if it's a different one.

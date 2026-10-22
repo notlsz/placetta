@@ -150,10 +150,17 @@ begin
     'the browser can''t write it', not has_function_privilege('authenticated', 'public.agent_run_cache(uuid, int, int, int, int, int, numeric, text)', 'execute'),
     'the browser can''t run the check', not has_function_privilege('authenticated', 'public.agent_memory_check()', 'execute'),
     'memory is off by default', (select column_default from information_schema.columns where table_name = 'agent_memory_settings' and column_name = 'enabled') = 'false');
-  execute 'set local role authenticated';
-  perform set_config('request.jwt.claims', (jsonb_build_object('sub', vw, 'role', 'authenticated', 'aal', 'aal1') || pw)::text, true);
+  -- the cache stats carry Placetta's AI cost per run: the team's (and the server's) only (20261026090000_security_audit.sql)
+  perform set_config('request.jwt.claims', '{"role": "service_role"}', true);
   j := public.agent_cache_stats(w);
   res := res || jsonb_build_object('cache hit rate per workspace', (j->>'hit_rate')::numeric = 0.6923);
+  execute 'set local role authenticated';
+  perform set_config('request.jwt.claims', (jsonb_build_object('sub', vw, 'role', 'authenticated', 'aal', 'aal1') || pw)::text, true);
+  begin
+    j := public.agent_cache_stats(w);
+    res := res || '{"a customer can''t read the cost per run": false}';
+  exception when others then res := res || '{"a customer can''t read the cost per run": true}';
+  end;
   reset role;
   raise exception 'TEST_RESULTS %', res;
 end $test$;

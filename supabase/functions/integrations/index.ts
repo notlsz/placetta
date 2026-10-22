@@ -496,7 +496,7 @@ async function filerMailSend(body: Record<string, unknown>): Promise<Response> {
   if (claimError) throw new Error(`filing claim failed: ${claimError.code ?? ""}`);
   if (!claimed?.length) throw new HttpError("too_late", "This filing's email was already sent.", "这份申请的邮件已经发出。");
   const sent = await sendFrom(ws, body.kind, to, subject, content, files);
-  const { data: row } = await admin.from("filings").select("app_id").eq("id", filingId).maybeSingle();
+  const { data: row } = await admin.from("filings").select("app_id").eq("id", filingId).eq("workspace_id", ws).maybeSingle();
   await track(ws, sent, to, subject, { filing_id: filingId, app_id: (row?.app_id as string | undefined) ?? undefined });
   return ok(sent);
 }
