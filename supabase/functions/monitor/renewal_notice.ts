@@ -5,10 +5,13 @@
 // headquarters pays for (headquarters' own plan is billed to headquarters).
 import { noticeDue, renewalNotice, yearUsd } from "../../../src/contract.ts";
 import { headline, valueReport, type ValueFiling } from "../../../src/value.ts";
+import { modulesYearCents } from "../../../src/modules.ts";
 
 export type RenewalRow = {
   workspace_id: string; current_period_end: string | null; subscription_status: string | null; subscription_plan: string | null;
   paid_locations: number | null; auto_renew: boolean | null; renewal_notice_for: string | null; hq_paid_by: string | null; subscription_id: string | null;
+  /** the contract term (its discount carries into each yearly renewal) and the units each module bills */
+  term_years?: number | null; module_qty?: Record<string, number> | null;
 };
 type Bi = { en: string; zh: string };
 type State = { business?: Bi; apps?: unknown; stores?: unknown; deadlines?: unknown; docs?: unknown } | null;
@@ -37,5 +40,5 @@ export function noticeFor(r: RenewalRow, name: string, state: State, filings: Fi
   }, today);
   const tier = r.subscription_plan === "pro" ? "pro" as const : "essentials" as const;
   const locations = Math.max(1, r.paid_locations ?? 1);
-  return renewalNotice({ business: name, renewsOn: String(r.current_period_end).slice(0, 10), yearUsd: yearUsd({ years: 1, tier, locations }), locations, tier, delivered: headline(report.brand), cancelUrl });
+  return renewalNotice({ business: name, renewsOn: String(r.current_period_end).slice(0, 10), yearUsd: yearUsd({ years: r.term_years ?? 1, tier, locations }) + modulesYearCents(r.module_qty) / 100, locations, tier, delivered: headline(report.brand), cancelUrl });
 }

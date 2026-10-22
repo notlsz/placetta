@@ -413,6 +413,8 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
       if (body.action === "sync_locations") return json({ ok: true, synced: false });
       const no = needOwner(); if (no) return no;
       if (body.action === "portal") return fnErr("not_configured", "Billing management opens Stripe on the live app.", 409);
+      // owner prices are quoted from Stripe on the live app only; the preview never shows or charges one
+      if (["module_quote", "add_module", "filing_quote", "filing_charge"].includes(String(body.action))) return fnErr("not_configured", "Prices for modules and filings past the plan show on the live app.", 409);
       // the plans sheet asks for "locations" with its tier (Essentials or Pro): that turns the yearly plan on too
       const set = body.plan === "locations" ? { subscription_status: "active", subscription_plan: body.tier === "pro" ? "pro" : "essentials" } : PLAN_SET[String(body.plan)];
       const b = t("billing").find(x => x.workspace_id === ws); if (b) Object.assign(b, set ?? {}, { stripe_customer_id: "cus_preview" });

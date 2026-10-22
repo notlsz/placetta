@@ -69,6 +69,24 @@ begin
   r := public.filing_charge_reserve(w, 'bad', 'license', 4900, 4, o);
   res := res || jsonb_build_object('a plan''s own license is never charged here', r->>'code' = 'bad_kind');
 
+  -- who does the work (migration 20261022163712_owner_prices): an assisted filing is never inside the allowance
+  r := public.filing_charge_reserve(w, 'asst-1', 'entity', 19900, 4, o, 'assisted');
+  res := res || jsonb_build_object('an assisted filing past the cap: refused', r->>'code' = 'over_cap');
+  r := public.filing_charge_reserve(w3, 'asst-2', 'sales_tax', 0, 2, x, 'assisted');
+  res := res || jsonb_build_object('an assisted filing is never counted in the allowance, even with room left', r->>'code' = 'price_changed');
+  r := public.filing_charge_reserve(w3, 'auto-1', 'sales_tax', 0, 2, x, 'automated');
+  res := res || jsonb_build_object('an automated one is', r->>'kind' = 'allowance' and (select mode from public.filing_charges where id = (r->>'id')::uuid) = 'automated');
+  update public.billing set filing_cap_cents = 50000 where workspace_id = w3;
+  r := public.filing_charge_reserve(w3, 'asst-3', 'entity', 19900, 2, x, 'assisted');
+  res := res || jsonb_build_object('an assisted filing under the cap: reserved at its price', r->>'kind' = 'charge'
+    and (select mode = 'assisted' and cents = 19900 from public.filing_charges where id = (r->>'id')::uuid));
+  r := public.filing_charge_reserve(w3, 'auto-2', 'sales_tax', 0, 2, x, 'automated');
+  res := res || jsonb_build_object('assisted filings don''t use up the allowance', r->>'kind' = 'allowance');
+  r := public.filing_charge_reserve(w3, 'odd', 'sales_tax', 0, 2, x, 'robot');
+  res := res || jsonb_build_object('only automated or assisted', r->>'code' = 'bad_mode');
+  begin insert into public.filing_charges (workspace_id, ref, kind, mode, month, cents) values (w3, 'm', 'other', 'other', current_date, 0); ok := false; exception when check_violation then ok := true; end;
+  res := res || jsonb_build_object('the mode is checked', ok);
+
   /* ---------------- the term, the online cancel, the renewal notice ---------------- */
   perform public.billing_term_apply(w, 2);
   res := res || jsonb_build_object('the term is recorded', (select term_years = 2 and term_started = current_date from public.billing where workspace_id = w));
@@ -96,6 +114,20 @@ begin
   res := res || jsonb_build_object('billed: on, no longer waiting', b.modules = '{alcohol}' and b.modules_requested = '{}');
   begin perform public.module_apply(w, 'vendor_marketplace', true, o); ok := false; exception when others then ok := sqlerrm = 'Unknown module.'; end;
   res := res || jsonb_build_object('only the six modules exist', ok);
+  -- billed by unit: the units kept, a country charged once
+  perform public.module_bill_apply(w, 'sales_tax', 3, null, o);
+  perform public.module_bill_apply(w, 'abroad', 2, '{mx,ES}', o);
+  perform public.module_bill_apply(w, 'abroad', 1, '{MX}', o);
+  select * into b from public.billing where workspace_id = w;
+  res := res || jsonb_build_object('a module billed by unit keeps its units', (b.module_qty->>'sales_tax')::int = 3 and 'sales_tax' = any (b.modules),
+    'countries charged once each', b.abroad_countries = '{ES,MX}' and not (b.module_qty ? 'abroad'));
+  begin perform public.module_bill_apply(w, 'sales_tax', -1, null, o); ok := false; exception when others then ok := true; end;
+  res := res || jsonb_build_object('no negative units', ok);
+  execute 'set local role authenticated';
+  perform set_config('request.jwt.claims', json_build_object('sub', o, 'role', 'authenticated', 'aal', 'aal1')::text, true);
+  begin perform public.module_bill_apply(w, 'security', 1, null, o); ok := false; exception when insufficient_privilege then ok := true; end;
+  execute 'reset role'; perform set_config('request.jwt.claims', '', true);
+  res := res || jsonb_build_object('only billing turns a billed module on', ok);
 
   /* ---------------- the brand plan ---------------- */
   execute 'set local role authenticated';

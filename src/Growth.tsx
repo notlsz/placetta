@@ -4,9 +4,9 @@ import { B } from "./bi";
 import * as api from "./cloud/api";
 import { Btn, Group } from "./Settings";
 import { ARL_SOURCE, commitmentEnd, expansions, NOTICE_MAX, NOTICE_MIN, yearUsd } from "./contract.ts";
-import { addLine, MODULES, moduleStates, modulePrice, type Module } from "./modules.ts";
+import { MODULES, moduleFactsOf, moduleQuantity, modulesYearCents, moduleStates, priceLabel, unitCount, type Module, type ModuleQuote } from "./modules.ts";
 import { allowanceOf, quoteFiling } from "./overage.ts";
-import { PROPOSED } from "./pricing.ts";
+import { APPROVED, MODULE_PRICES, PROPOSED, PUBLISHED } from "./pricing.ts";
 import { entityDeadlines, obligations, REGISTERED_AGENT, type Entity, type EntityKind } from "./entity.ts";
 import { stateCode } from "./counties";
 import { daysFromNow, daysUntil, fmtDay } from "./time";
@@ -45,7 +45,7 @@ export function ContractGroup() {
   const subscribed = cloud.billing?.subscription_status === "active" || cloud.billing?.subscription_status === "trialing";
   const left = end ? daysUntil(end.slice(0, 10)) : null;
   const tier = cloud.billing?.subscription_plan === "pro" ? "pro" as const : "essentials" as const;
-  const year = yearUsd({ years: 1, tier, locations: Math.max(1, g?.paid_locations ?? 1) });
+  const year = yearUsd({ years: g?.term_years ?? 1, tier, locations: Math.max(1, g?.paid_locations ?? 1) }) + modulesYearCents(g?.module_qty) / 100;
   const toggle = async (on: boolean) => {
     setBusy(true);
     try { await api.setAutoRenew(cloud.wsId, on); await load(); say(on ? (zh ? "已重新开启自动续费。" : "Auto-renew is back on.") : (zh ? "已取消自动续费。方案在当前期限结束时终止，不会再收费。" : "Auto-renew is off. The plan ends with this term and nothing more is charged.")); }
@@ -70,18 +70,34 @@ export function ContractGroup() {
   );
 }
 
-/** Modules on the plan, the Vanta frameworks pattern: added through billing, quoted until a price is confirmed. */
+/** Modules on the plan, the Vanta frameworks pattern: each priced by its own unit from the workspace's facts, shown to
+ *  an owner with what adding it charges now, and billed only at that exact amount (src/modules.ts). */
 export function ModulesGroup() {
-  const { b, lang, cloud, ws, say } = useApp();
+  const { b, lang, cloud, ws, editWs, say } = useApp();
   const { g, load } = useGrowth();
   const [asking, setAsking] = useState<Module | null>(null);
+  const [quote, setQuote] = useState<{ q: ModuleQuote; at: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const [links, setLinks] = useState(0);
   useEffect(() => { if (cloud?.wsId) void api.hqLinks(cloud.wsId).then(l => setLinks(l.length), () => setLinks(0)); }, [cloud?.wsId]);
   const zh = lang === "zh";
+  const owner = !!cloud?.owner;
   const states = moduleStates(g?.modules ?? [], g?.modules_requested ?? []);
-  const subscribed = cloud?.billing?.subscription_status === "active" || cloud?.billing?.subscription_status === "trialing";
   const facts = ws.facts.map(f => `${f.label.en} ${f.value.en}`).join(" ");
+  // what each module would count now, from this workspace's own facts (the server counts the same way when it quotes)
+  const counted = useMemo(() => moduleFactsOf(ws), [ws]);
+  const charged = g?.abroad_countries ?? [];
+  const units = (m: Module) => moduleQuantity(m.id, counted, charged);
+  const billedUnits = (m: Module) => Math.max(0, Math.floor(Number(g?.module_qty?.[m.id]) || 0));
+  /** On, but the workspace now counts more or fewer units than the plan bills (or a new country): worth a new quote. */
+  const changed = (m: Module) => states[m.id] === "on" && (MODULE_PRICES[m.id].per === "once" ? units(m) > 0 : billedUnits(m) > 0 && units(m) !== billedUnits(m));
+  const ask = async (m: Module) => {
+    if (!cloud) return;
+    setAsking(m); setQuote(null); setBusy(true);
+    try { const r = await api.moduleQuote(cloud.wsId, m.id); setQuote({ q: r.quote, at: r.quote_at }); }
+    catch (e) { const er = e as api.ApiError; say((zh && er.message_zh) || er.message); setAsking(null); }
+    setBusy(false);
+  };
   const grow = useMemo(() => expansions({
     storeStates: (ws.stores ?? []).map(s => { const m = /,\s*([A-Za-z .]+?)\s+\d{5}(?:-\d{4})?\s*$/.exec(s.address ?? "") ?? /,\s*([A-Z]{2})\s*$/.exec(s.address ?? ""); return m ? stateCode(m[1]) : ""; }).filter(Boolean),
     entityStates: (ws.entities ?? []).flatMap(e => e.registrations.map(r => r.state)),
@@ -91,27 +107,44 @@ export function ModulesGroup() {
     locations: (ws.stores ?? []).length, hq: links > 0,
   }), [ws, g, links]);
   const add = async (m: Module) => {
-    if (!cloud) return;
+    if (!cloud || !quote) return;
     setBusy(true);
     try {
-      const r = await api.addModule(cloud.wsId, m.id);
+      const r = await api.addModule(cloud.wsId, m.id, { qty: quote.q.qty, cents: quote.q.dueNowCents, at: quote.at });
       await load();
-      say(r.state === "on" ? (zh ? `已添加${m.name.zh}。` : `${m.name.en} is on your plan.`) : (zh ? `已申请${m.name.zh}报价，团队会尽快联系您。` : `Asked for a quote on ${m.name.en}. Our team gets back to you.`));
-      setAsking(null);
+      say(r.state === "on" ? (zh ? `${m.name.zh}已在方案中。` : `${m.name.en} is on your plan.`) : (zh ? `已申请${m.name.zh}报价，团队会尽快联系您。` : `Asked for a quote on ${m.name.en}. Our team gets back to you.`));
+      setAsking(null); setQuote(null);
     } catch (e) { const er = e as api.ApiError; say((zh && er.message_zh) || er.message); }
     setBusy(false);
   };
+  // the Alcohol module counts the stores marked as holding a liquor license; an owner marks them here
+  const stores = ws.stores ?? [];
+  const toggleLiquor = (id: string, on: boolean) => { editWs(w => ({ ...w, stores: (w.stores ?? []).map(s => s.id === id ? { ...s, liquor: on } : s) })); setQuote(null); };
+  const status = (m: Module) => states[m.id] === "on"
+    ? (MODULE_PRICES[m.id].per === "once" ? b(B("On your plan", "已在方案中")) : zh ? `已在方案中：${unitCount(MODULE_PRICES[m.id].unit, billedUnits(m)).zh}` : `On your plan: ${unitCount(MODULE_PRICES[m.id].unit, billedUnits(m)).en}`)
+    : states[m.id] === "requested" ? b(B("Quote requested", "已申请报价")) : "";
+  const canAct = (m: Module) => states[m.id] === "off" || changed(m);
   return (
-    <Group id="modules" title={B("Modules", "模块")} note={B("Add what your business grows into, on the same yearly contract. Nothing is charged until you accept the price.", "随业务发展添加模块，沿用同一份年度合同。您接受价格前不会收费。")}
+    <Group id="modules" title={B("Modules", "模块")} note={B("Add what your business grows into, on the same yearly contract. Each price counts its own unit from your workspace, and is shown before anything is charged. Nothing is charged until you approve it.", "随业务发展添加模块，沿用同一份年度合同。每项价格按您工作区中的实际数量计算，并在收费前显示。您批准前不会收费。")}
       rows={MODULES.map(m => ({
-        label: m.name, sub: <>{b(m.does)} <em>{states[m.id] === "on" ? b(B("On your plan", "已在方案中")) : states[m.id] === "requested" ? b(B("Quote requested", "已申请报价")) : b(m.ready)}</em></>,
-        right: !cloud ? undefined : states[m.id] !== "off" ? undefined : !cloud.owner ? <em className="lock">{zh ? "由所有者管理" : "Managed by owners"}</em>
-          : <Btn guard disabled={busy} onClick={() => setAsking(m)}>{zh ? "添加模块" : "Add module"}</Btn>,
+        label: m.name,
+        sub: <>{b(m.does)}{owner && <> <b>{b(priceLabel(m.id))}</b></>}{status(m) && <> <em>{status(m)}</em></>}</>,
+        right: !cloud || !canAct(m) ? undefined : !owner ? <em className="lock">{zh ? "由所有者管理" : "Managed by owners"}</em>
+          : <Btn guard disabled={busy} onClick={() => void ask(m)}>{states[m.id] === "on" ? (zh ? "查看新价格" : "See the new price") : (zh ? "查看价格" : "See the price")}</Btn>,
       }))}>
-      {asking && cloud && (
+      {asking && cloud && owner && (
         <div className="sg-form">
-          <p className="sg-note"><b>{b(asking.name)}</b> {b(addLine(asking, modulePrice(asking.id) != null && subscribed))}</p>
-          <div className="sg-form-act"><button type="button" className="sbtn" onClick={() => setAsking(null)}>{zh ? "取消" : "Cancel"}</button><button type="button" className="sbtn ink" disabled={busy} onClick={() => void add(asking)}>{zh ? "确认添加" : "Add it"}</button></div>
+          {asking.id === "alcohol" && stores.length > 0 && (
+            <fieldset className="sg-note">
+              <legend><b>{zh ? "哪些门店持有酒牌？" : "Which stores hold a liquor license?"}</b></legend>
+              {stores.map(s => <label key={s.id} className="guar"><input type="checkbox" checked={s.liquor === true} onChange={e => toggleLiquor(s.id, e.target.checked)} /><span>{b(s.name)}</span></label>)}
+              <Btn disabled={busy} onClick={() => void ask(asking)}>{zh ? "按所选门店重新计价" : "Price the stores marked"}</Btn>
+            </fieldset>
+          )}
+          <p className="sg-note"><b>{b(asking.name)}</b> {quote ? b(quote.q.line) : (zh ? "正在计算价格…" : "Working out the price…")}</p>
+          <div className="sg-form-act"><button type="button" className="sbtn" onClick={() => { setAsking(null); setQuote(null); }}>{zh ? "取消" : "Cancel"}</button>
+            {quote && (quote.q.billed || quote.q.reason === "no_price") && <button type="button" className="sbtn ink" disabled={busy} onClick={() => void add(asking)}>
+              {quote.q.billed ? (zh ? "批准此价格" : "Approve this price") : (zh ? "申请报价" : "Ask for a quote")}</button>}</div>
         </div>
       )}
       {grow.length > 0 && (
@@ -146,10 +179,10 @@ export function FilingCapGroup() {
   };
   return (
     <Group id="filingcap" title={B("Filings past your plan", "方案之外的申报")}
-      note={B(`Your stores' own licenses and renewals are always included. Other filings, such as a sales tax return or an annual report, are included up to ${PROPOSED.extraFilingsPerLocationMonth} a location each month. Past that, each one shows its price before you approve it, and nothing is charged above the monthly cap you set here.`,
-        `门店自身的执照和续期始终包含在方案中。其他申报（如销售税申报、年报）每店每月包含 ${PROPOSED.extraFilingsPerLocationMonth} 次。超出后，每次申报都会在您批准前显示价格，且收费不会超过您在此设定的每月上限。`)}
+      note={B(`Your stores' own licenses and renewals are always included. Other filings Odelia completes on her own, such as a sales tax return or a simple renewal, are included up to ${APPROVED.includedAutomatedPerLocationMonth} a location each month, then $${APPROVED.packsPerAutomatedFiling * PUBLISHED.packUsd} each (${APPROVED.packsPerAutomatedFiling} Odelia pack). A filing that needs Placetta's team, such as a wet signature or a portal Odelia can't work on her own, is $${APPROVED.assistedFilingUsd} each. Each one shows its price before you approve it, and nothing is charged above the monthly cap you set here.`,
+        `门店自身的执照和续期始终包含在方案中。Odelia 可自行完成的其他申报（如销售税申报、简单续期）每店每月包含 ${APPROVED.includedAutomatedPerLocationMonth} 次，超出后每次 $${APPROVED.packsPerAutomatedFiling * PUBLISHED.packUsd}（${APPROVED.packsPerAutomatedFiling} 个 Odelia 加量包）。需快哉团队办理的申报（如需手写签名，或 Odelia 无法自行操作的网站）每次 $${APPROVED.assistedFilingUsd}。每次申报都会在您批准前显示价格，且收费不会超过您在此设定的每月上限。`)}
       rows={m ? [
-        { label: B("This month", "本月"), sub: zh ? `方案外申报 ${m.used} 次（包含 ${allow} 次），已收费 ${usd(m.charged_cents / 100)}` : `${m.used} filing${m.used === 1 ? "" : "s"} outside your plan (${allow} included), ${usd(m.charged_cents / 100)} charged` },
+        { label: B("This month", "本月"), sub: zh ? `方案外自动申报 ${m.used} 次（包含 ${allow} 次），团队办理 ${m.assisted ?? 0} 次，已收费 ${usd(m.charged_cents / 100)}` : `${m.used} automated filing${m.used === 1 ? "" : "s"} outside your plan (${allow} included), ${m.assisted ?? 0} by Placetta's team, ${usd(m.charged_cents / 100)} charged` },
         ...(next ? [{ label: B("The next one", "下一次"), sub: b(next.line) }] : []),
       ] : [{ label: B("This month", "本月"), sub: b(B("Shows once filings past a plan are switched on for your account.", "为您的账户开启方案外申报后显示。")) }]}>
       {m && (cloud.owner ? (

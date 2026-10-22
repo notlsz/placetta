@@ -4,11 +4,11 @@
      franchisee  each franchisee pays for its own stores at the published per-location price; headquarters pays
                  nothing extra to see them all (as the landing page says)
      hq          headquarters pays for every location that joined: the per-location price, plus each person on the
-                 franchisees' teams past the included number (FOUNDER TO CONFIRM), with the published "from $25,000 a
-                 year" as the floor
+                 franchisees' teams past the 3 included per location at $240 a person a year (approved 2026-10-22,
+                 billed from STRIPE_PRICE_HQ_PERSON), with the published "from $25,000 a year" as the floor
    Headquarters' own people who only look at the dashboard are never counted. No imports but the price list, so the
    billing function (Deno) prices it with the same code. */
-import { PROPOSED, PUBLISHED } from "./pricing.ts";
+import { APPROVED, PUBLISHED } from "./pricing.ts";
 
 type Bi = { en: string; zh: string };
 const B = (en: string, zh: string): Bi => ({ en, zh });
@@ -25,18 +25,18 @@ const money = (n: number) => "$" + Math.round(n).toLocaleString("en-US");
 /** What the brand plan costs headquarters a year, line by line. Billed to franchisees, headquarters owes nothing. */
 export function hqQuote(x: HqPlanIn): HqQuote {
   const locations = Math.max(0, Math.floor(x.locations)), people = Math.max(0, Math.floor(x.people));
-  const includedPeople = locations * PROPOSED.includedPeoplePerLocation, extraPeople = Math.max(0, people - includedPeople);
+  const includedPeople = locations * APPROVED.includedPeoplePerLocation, extraPeople = Math.max(0, people - includedPeople);
   const per = (x.tier === "pro" ? PUBLISHED.proMonth : PUBLISHED.essentialsMonth) * 12;
   if (x.billTo === "franchisee") {
     return { billTo: x.billTo, locations, people, includedPeople, extraPeople, locationsUsd: 0, peopleUsd: 0, floorUsd: 0, topUpUsd: 0, yearUsd: 0,
       lines: [B(`Each franchisee pays for its own stores at ${money(per / 12)} a location a month, billed yearly. Headquarters pays nothing to see them all.`, `每位加盟商按每店每月 ${money(per / 12)}（按年计费）为自己的门店付费。总部查看所有门店无需付费。`)] };
   }
-  const locationsUsd = locations * per, peopleUsd = extraPeople * PROPOSED.personYearUsd;
+  const locationsUsd = locations * per, peopleUsd = extraPeople * APPROVED.personYearUsd;
   const floorUsd = PUBLISHED.hqFromYear, sum = locationsUsd + peopleUsd, topUpUsd = locations > 0 ? Math.max(0, floorUsd - sum) : 0;
   const lines = [
     B(`${locations} location${locations === 1 ? "" : "s"} × ${money(per)} a year = ${money(locationsUsd)}`, `${locations} 家门店 × 每年 ${money(per)} = ${money(locationsUsd)}`),
-    B(`${people} ${people === 1 ? "person" : "people"} on franchisee teams, ${includedPeople} included (${PROPOSED.includedPeoplePerLocation} a location)${extraPeople ? `, ${extraPeople} more × ${money(PROPOSED.personYearUsd)} a year = ${money(peopleUsd)}` : ""}`,
-      `加盟商团队共 ${people} 人，含 ${includedPeople} 人（每店 ${PROPOSED.includedPeoplePerLocation} 人）${extraPeople ? `，另外 ${extraPeople} 人 × 每年 ${money(PROPOSED.personYearUsd)} = ${money(peopleUsd)}` : ""}`),
+    B(`${people} ${people === 1 ? "person" : "people"} on franchisee teams, ${includedPeople} included (${APPROVED.includedPeoplePerLocation} a location)${extraPeople ? `, ${extraPeople} more × ${money(APPROVED.personYearUsd)} a year = ${money(peopleUsd)}` : ""}`,
+      `加盟商团队共 ${people} 人，含 ${includedPeople} 人（每店 ${APPROVED.includedPeoplePerLocation} 人）${extraPeople ? `，另外 ${extraPeople} 人 × 每年 ${money(APPROVED.personYearUsd)} = ${money(peopleUsd)}` : ""}`),
     ...(topUpUsd ? [B(`Headquarters plans start at ${money(floorUsd)} a year: ${money(topUpUsd)} brings it to that`, `总部方案每年 ${money(floorUsd)} 起：补足 ${money(topUpUsd)}`)] : []),
   ];
   return { billTo: x.billTo, locations, people, includedPeople, extraPeople, locationsUsd, peopleUsd, floorUsd, topUpUsd, yearUsd: sum + topUpUsd, lines };
