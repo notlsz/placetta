@@ -2690,6 +2690,207 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 @media (max-width:767px){.vcard{aspect-ratio:auto;padding:16px 12px 52px}.vdemo #appRows .arow:nth-child(n+6){display:none}.vdemo .ahead em{font-size:12px}}
 /* market tracker: shorter on phones (Oct 21) */
 @media (max-width:767px){#monitor .mndone,#monitor .mnst,#monitor .mnside .mnsc:not(.mnsc2){display:none}#monitor .mnls>*:nth-child(n+5){display:none}}
+/* land95:css */
+/* land95 (Oct 21): a shorter page. Built for trust in alven.ai's card layout, security in devin.ai's enterprise layout,
+   folds and tabs instead of long stacks, and space, tone and card shapes instead of horizontal rules */
+
+/* industries: a list and a panel, as on alven.ai, with no scroll track (the track was 185vh of empty scrolling) */
+@media (min-width:1024px){.inscroll{height:auto}.instick{position:static;height:auto;display:block;padding-top:0}.inrow{height:640px!important}}
+
+/* ---------- built for trust: alven.ai's cards. Heading in a 336px column, 102px gap, three #F0-tone cards (16px radius,
+   24px padding, 264px tall, 24px apart), a 16/1.2 title top left, a 56px grey line icon centred below. Phones: two
+   cards a row, 206px tall, 8px radius, 16px padding, 8px apart, the third centred ---------- */
+.tr95r{display:flex;flex-direction:column;gap:24px}
+@media (min-width:1024px){.tr95r{flex-direction:row;gap:102px;align-items:flex-start}}
+.tr95h{flex:none;width:336px;max-width:100%}
+.tr95c{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}
+@media (min-width:1024px){.tr95c{flex-wrap:nowrap;gap:24px;flex:1;min-width:0}}
+.tr95k{display:flex;flex-direction:column;gap:10px;width:calc(50% - 4px);min-height:206px;padding:16px;border-radius:8px;background:var(--card);overflow:clip}
+@media (min-width:1024px){.tr95k{flex:1;width:auto;height:264px;padding:24px;border-radius:16px}}
+.tr95k p{font-size:14px;line-height:1.2;letter-spacing:-.14px;color:var(--ink)}
+@media (min-width:1024px){.tr95k p{font-size:16px;letter-spacing:-.16px}}
+.tr95k small{display:block;margin-top:6px;font-size:12px;line-height:1.35;letter-spacing:0;color:var(--muted)}
+@media (min-width:1024px){.tr95k small{font-size:13px}}
+.tr95i{margin-top:auto;display:flex;justify-content:center;padding:16px 0 12px;color:#A9AEB8}
+@media (min-width:1024px){.tr95i{padding:0 0 36px}}
+.tr95i svg{width:56px;height:56px;flex:none}
+
+/* ---------- security: devin.ai's "Enterprise security" block. One column for the two-tone heading, two for the
+   proof: a row of three cells split by hairline verticals (no seals: Placetta holds no certificate), then the controls
+   in two columns of grey 16/24 type. Rows are spaced, not ruled ---------- */
+.sc95{margin-top:96px}
+@media (min-width:1024px){.sc95{margin-top:120px}}
+.sc95g{display:grid;gap:40px}
+@media (min-width:1024px){.sc95g{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
+@media (min-width:1024px){.sc95r{grid-column:span 2}}
+.sc95h{font-family:var(--serif);font-weight:300;font-size:34px;line-height:1.04;letter-spacing:-.9px;color:var(--ink);max-width:361px}
+@media (min-width:1024px){.sc95h{font-size:40px;letter-spacing:-1.2px}}
+html[lang="zh-CN"] .sc95h{font-family:var(--zhserif);letter-spacing:0;line-height:1.2}
+.sc95h span{display:block}
+.sc95t{color:rgba(15,27,51,.4)}
+.sc95a{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:20px;font-size:14px}
+.sc95a a{color:var(--gs-ink);text-decoration:none}
+.sc95a a:hover{text-decoration:underline}
+.sc95b{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.sc95b>div{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:132px;padding:24px 16px;text-align:center;border-left:1px solid rgba(15,27,51,.08)}
+.sc95b>div:first-child{border-left:0}
+.sc95b b{font-family:var(--serif);font-weight:300;font-size:22px;line-height:1.1;letter-spacing:-.4px;color:rgba(15,27,51,.62)}
+@media (min-width:1024px){.sc95b b{font-size:26px}}
+html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-size:20px}
+.sc95b small{font-size:12px;line-height:1.3;color:var(--muted);letter-spacing:.2px}
+.sc95lists{display:grid;gap:0 16px;margin-top:36px}
+@media (min-width:768px){.sc95lists{grid-template-columns:1fr 1fr}}
+.sc95lists ul{list-style:none;margin:0;padding:0}
+.sc95lists li{padding:12px 0;font-size:16px;line-height:24px;color:rgba(15,27,51,.45)}
+@media (min-width:768px){.sc95lists ul li:first-child{padding-top:0}}
+.sc95lists ul:first-child li:first-child{padding-top:0}
+.sc95n{margin-top:20px;font-size:13px;line-height:1.45;color:var(--muted);max-width:640px}
+
+/* ---------- product shot (vdemo): devin.ai's hero framing. A pale photographic ground with an 8px radius (alven.ai),
+   a desktop window with a quiet title bar, a 10px radius, a hairline edge and a soft two-layer shadow, small dense type,
+   and the projected opening floated as a second card over the window's right edge. Same rows, same timing ---------- */
+#vcard.vcard{aspect-ratio:auto;height:613px;padding:0;display:block;border-radius:8px;clip-path:inset(0 round 8px);background:#E8EDF3;overflow:hidden}
+@media (min-width:768px){#vcard.vcard{height:680px}}
+#vcard .vph{inset:-2%;width:104%;height:104%;filter:blur(2px) saturate(.35) brightness(1.9) contrast(.55);opacity:.85}
+#vcard::before{background:radial-gradient(60% 50% at 15% 10%,rgba(255,244,230,.45),transparent 70%),linear-gradient(180deg,rgba(246,248,251,.5),rgba(236,240,246,.72) 70%,rgba(228,234,242,.85))}
+#vcard .astage{position:absolute;z-index:2;left:12px;right:12px;top:24px;width:auto;margin:0}
+@media (min-width:768px){#vcard .astage{left:50%;right:auto;top:56px;width:min(1100px,calc(100% - 96px));transform:translateX(-50%)}}
+#vcard .app{width:100%;border:1px solid rgba(15,27,51,.09);border-radius:10px;box-shadow:0 1px 2px rgba(15,27,51,.05),0 18px 48px rgba(15,27,51,.12);overflow:visible;padding-top:34px;background:#fff}
+#vcard .app::before{content:"";position:absolute;left:0;right:0;top:0;height:34px;border-radius:10px 10px 0 0;background:radial-gradient(circle at 18px 17px,#D9DDE4 4.5px,transparent 5px),radial-gradient(circle at 34px 17px,#D9DDE4 4.5px,transparent 5px),radial-gradient(circle at 50px 17px,#D9DDE4 4.5px,transparent 5px),#F7F8FA}
+#vcard .atop{padding:14px 20px 4px}
+#vcard .alogo.hplogo{width:32px;height:32px;border-radius:8px!important}
+#vcard .aid b{font-size:13.5px}
+#vcard .aid small{font-size:11.5px}
+#vcard .alist{padding:10px 20px 16px}
+#vcard .aask{font-size:13px;padding:6px 6px 6px 12px;border-radius:8px;margin-bottom:12px;background:#FAFBFC}
+#vcard .asend{width:24px;height:24px;border-radius:6px}
+#vcard .ahead b{font-size:12.5px}
+#vcard .aprog{height:4px;margin-bottom:8px}
+#vcard .arow{padding:6px 10px;border-radius:8px}
+#vcard .arow .n{font-size:13px}
+#vcard .arow .a{font-size:11.5px}
+#vcard .asx{font-size:11px;padding:3px 9px}
+@media (min-width:1024px){
+  #vcard .app{width:720px;margin-right:auto}
+  #vcard .abody{display:block}
+  #vcard .alist{padding-right:96px}
+  #vcard .aside{display:flex;position:absolute;left:650px;top:72px;width:380px;margin:0;background:#fff;border:1px solid rgba(15,27,51,.09);border-radius:10px;box-shadow:0 2px 4px rgba(15,27,51,.05),0 28px 64px rgba(15,27,51,.18);padding:20px;gap:16px}
+  #vcard .proj strong{font-size:34px}
+}
+@media (min-width:1200px){#vcard .aside{left:670px}}
+#vcard .vctl{bottom:18px;right:16px}
+#vcard .vprog{height:2px}
+
+/* ---------- tabs (.seg95): alven.ai's segmented control, a #F0-tone track with a white pill for the open tab ---------- */
+.seg95{display:inline-flex;gap:2px;padding:4px;border-radius:10px;background:var(--card);margin:0 0 24px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.seg95::-webkit-scrollbar{display:none}
+.seg95 button{flex:none;border:0;background:none;padding:8px 14px;border-radius:7px;font-size:14px;line-height:16px;letter-spacing:-.2px;color:var(--ink2);white-space:nowrap;transition:background-color .2s,color .2s}
+.seg95 button:hover{color:var(--ink)}
+.seg95 button[aria-selected="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(15,27,51,.06)}
+@media (min-width:1024px){.seg95{margin-bottom:32px}}
+@media (max-width:767px){.seg95{display:flex;flex-wrap:wrap;width:100%;overflow:visible}.seg95 button{flex:1 1 auto;padding:8px 10px;font-size:13px}}
+/* folded panels sit flush under their tabs */
+#how .p95,#diff .p95,#case .p95,#pricing .p95,#backers .p95{margin-top:0!important;padding-top:0}
+#how .p95h.h2{font-size:24px;line-height:1.2;letter-spacing:-.24px}
+@media (min-width:1024px){#how .p95h.h2{font-size:28px;letter-spacing:-.28px}}
+#how .sh + .seg95{margin-top:8px}
+#how #teammate .sh{margin-bottom:24px}
+#how #portal .ptrow{margin-top:0}
+#how #itl .irow{margin-top:0}
+#cost .d95s{margin-top:10px;font-size:15px;line-height:1.45;color:var(--ink2);max-width:320px}
+#diff #cost .dl{gap:28px}
+
+/* ---------- folds: "Show all" in the page's own pill button; the list keeps its first few ---------- */
+.more95{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:9px 16px;border:0;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(15,27,51,.08),inset 0 0 0 1px rgba(15,27,51,.06);font-size:14px;font-weight:500;color:var(--ink);justify-self:start;align-self:start}
+.more95:hover{box-shadow:0 2px 8px rgba(15,27,51,.10),inset 0 0 0 1px rgba(15,27,51,.08)}
+.more95::after{content:"";width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg) translate(-1px,-2px);transition:transform .2s}
+.more95[aria-expanded="true"]::after{transform:rotate(225deg) translate(-1px,-1px)}
+@media (min-width:1024px){.faqrow>.more95{grid-column:2}}
+#faqList.fold95:not(.open95)>:nth-child(n+7){display:none}
+/* industries: phones keep six (and whichever is open); desktop shows the whole list beside the panel */
+@media (max-width:1023px){.inlist.fold95:not(.open95)>.inb:nth-of-type(n+7):not(.on){display:none}.inlist+.more95{margin-top:4px}}
+@media (min-width:1024px){.inlist+.more95{display:none}}
+/* rule changes: phones show the featured change first; the deadlines and all markets open from a button */
+@media (max-width:767px){#monitor .mnside.fold95:not(.open95){display:none}#monitor .mngrid>.more95{margin:16px 16px 4px}}
+@media (min-width:768px){#monitor .mngrid>.more95{display:none}}
+
+/* ---------- one rhythm: 96px between sections on desktop, 64px on phones; security sits closer under trust ---------- */
+@media (min-width:1024px){
+  #diff,#case,#industries,#how,#agencies,#cn,#trust,#backers,#franchise,#pricing,#faq,#together{margin-top:96px!important}
+  #security{margin-top:72px!important}
+  #backers{padding-top:0}
+  .ctas{padding:64px 16px 72px}
+}
+@media (max-width:1023px){
+  #diff,#case,#industries,#how,#agencies,#cn,#trust,#backers,#franchise,#pricing,#faq,#together{margin-top:64px!important}
+  #security{margin-top:56px!important}
+  #backers{padding-top:0}
+  .ctas{padding:56px 24px 72px}
+}
+/* security on phones: shorter cells, tighter rows */
+@media (max-width:767px){.sc95b>div{min-height:104px;padding:16px 8px}.sc95lists{margin-top:24px}.sc95lists li{padding:8px 0;font-size:15px;line-height:22px}}
+
+/* ---------- fit: blocks that now open under a tab lose the gap they had as stand-alone blocks ---------- */
+#case #c95a .tssec{margin-top:0}
+#case #c95b .cshd.cshd{margin-top:0}
+#pricing #p95a .pmath{margin-top:0}
+#pricing .pr95{margin-top:48px}
+@media (max-width:1023px){#pricing .pr95{margin-top:32px}}
+#case .pfrow{margin-bottom:32px}
+/* industries: the row is as tall as its list, so the eleven industries never run into the next section */
+@media (min-width:1024px){.inrow{height:auto!important;min-height:600px}}
+/* the open tab already names the math on waiting; its heading stays for screen readers only */
+#p95a .pmhd h3{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- phone folds: included list, the rent calculator, the region list, the brands' backers ---------- */
+@media (max-width:767px){
+  #pricing .prlist.fold95:not(.open95)>li:nth-child(n+4){display:none}
+  #pmCalc.fold95:not(.open95){display:none}
+  #invR.fold95:not(.open95)>:nth-child(n+7){display:none}
+}
+@media (min-width:768px){#pricing .prlist+.more95,#pmCalc+.more95,#invR+.more95{display:none}}
+@media (max-width:1023px){#agTabs.fold95:not(.open95)>.agb:nth-of-type(n+5):not([aria-selected="true"]){display:none}}
+@media (min-width:1024px){#agTabs+.more95{display:none}}
+#pricing .prlist+.more95{margin-top:4px}
+#pmCalc+.more95{justify-self:start}
+@media (max-width:767px){#invR+.more95{display:flex;margin:16px auto 0}}
+
+/* ---------- compaction on desktop: the same content with less padding ---------- */
+@media (min-width:1024px){
+  #diff .dcard{padding:40px 44px;gap:32px}
+  .ox .addc.frc{height:620px;padding-top:88px}
+}
+
+/* ---------- no horizontal rules: rows and blocks are separated by space, tone or a card shape instead ----------
+   Kept on purpose: the demo's playback bar (#vBar) and the story tabs' timer bar, which show progress, not divisions;
+   vertical hairlines (the named proof strip, the security cells) are not horizontal rules */
+#diff .ds,#diff .bal{border-bottom:0!important}
+#diff .ds{padding-bottom:8px}
+#diff .bal{padding-bottom:0}
+#how .hwr,#how .hwmore,#how .fcrow,#how .tmrow,#how .tmapps,#how .tmcal{border-top:0!important}
+#how .ptbar{border-bottom:0!important;background:#F4F5F7}
+#monitor .mnside{border-top:0!important}
+#cn .dtr{border-top:0!important}
+#backers .bkinv{border-top:0!important;padding-top:8px}
+#franchise .tdv{display:none!important}
+#franchise .tr{border-bottom:0!important}
+#franchise .tr.th{background:#F6F7F9;border-radius:8px}
+#pricing .wres{border-top:0!important}
+#pricing .prmore{border-top:0!important;border-bottom:0!important;background:var(--card);border-radius:16px;padding-inline:24px}
+#together .chbox{border-top:0!important}
+
+/* phones: tabs stay on one row and scroll inside the bar when there are more than fit (the page itself never scrolls sideways) */
+@media (max-width:767px){
+  .seg95{flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+  .seg95 button{flex:1 0 auto!important}
+  #h95{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent);padding-right:40px}
+  /* pricing: the promise line repeats the first included item right below it */
+  #pricing .psub2{display:none}
+}
+
+/* final call to action: devin.ai sets its closing line in two lines at about 64px */
+@media (min-width:1024px){.ctas .ctah,.ctas p.ctah{font-size:clamp(40px,4.4vw,64px)}}
+/* /land95:css */
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -2808,7 +3009,8 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 <!-- ======================= BEFORE / AFTER: the team you'd hire, or Odelia ======================= -->
 <section class="ox mt160 rv" data-rv="up" id="diff" aria-labelledby="diffH">
   <div class="ctr">
-    <div class="drow">
+    <div class="seg95" role="tablist" id="d95" aria-label="Two ways to see it" data-i18n-aria="d95.aria"><button type="button" role="tab" id="d95t0" aria-selected="true" aria-controls="d95a" tabindex="0" data-i18n="d95.t1">Who you'd hire</button><button type="button" role="tab" id="d95t1" aria-selected="false" aria-controls="cost" tabindex="-1" data-i18n="d95.t2">What waiting costs</button></div>
+    <div class="drow p95" id="d95a" role="tabpanel" aria-labelledby="d95t0">
       <div class="dl">
         <h2 class="t28" id="diffH" data-i18n="diff.h">Four people on the clock, and still no permit</h2>
         <div>
@@ -2827,6 +3029,13 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         </div>
         <p class="dsrc" data-i18n="diff.src">Sources: <a href="https://permitplace.com/permit-expediter-cost-guide/" target="_blank" rel="noopener">PermitPlace</a> (expediter, restaurant permits), <a href="https://clio.com/resources/legal-trends/compare-lawyer-rates/" target="_blank" rel="noopener">Clio Legal Trends</a> (US average lawyer rate, 2025), BLS median pay for <a href="https://www.bls.gov/oes/current/oes111021.htm" target="_blank" rel="noopener">operations managers</a> (May 2023) and <a href="https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm" target="_blank" rel="noopener">bookkeepers</a> (May 2025)</p>
       </div>
+    </div>
+    <div class="drow p95" id="cost" role="tabpanel" aria-labelledby="d95t1" hidden>
+      <div class="dl cbig"><h3 class="t28" id="costH" data-i18n="cost.h">Permits set your opening date.</h3><p class="d95s" data-i18n="cost.sub">One permit running late moves the whole opening, and the rules keep changing while you wait.</p>
+        <div class="cbn"><b data-i18n="cost.big">3–6 mo</b><span data-i18n="cost.bigs">The typical permit phase for a new restaurant. One late approval holds up every step that depends on it.</span></div>
+        <div class="ds"><b>15,000</b><span data-i18n="cost.s3s">New state and local laws passed every year</span><small data-i18n="cost.s3src">Source: Gusto</small></div>
+      </div>
+      <div class="dcard wcard" id="wcard"></div>
     </div>
   </div>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><g id="sil" fill="#D3D9E3"><circle cx="15" cy="9" r="8.6"/><path d="M5.5 21.5h19a5.5 5.5 0 0 1 5.5 5.5v21.5a4.5 4.5 0 0 1-4.5 4.5h-1.6L22 87.2a2.2 2.2 0 0 1-2.2 2.1h-9.6A2.2 2.2 0 0 1 8 87.2L6.1 53H4.5A4.5 4.5 0 0 1 0 48.5V27a5.5 5.5 0 0 1 5.5-5.5z"/></g></defs></svg>
@@ -2882,11 +3091,15 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
       <div role="listitem"><b>2</b><span>languages for every plan and dashboard: English and Chinese</span></div>
       <div role="listitem"><b>0</b><span>filings sent without your approval</span></div>
     </div>
+    <div class="seg95" role="tablist" id="c95" aria-label="Customers" data-i18n-aria="c95.aria"><button type="button" role="tab" id="c95t0" aria-selected="true" aria-controls="c95a" tabindex="0" data-i18n="ts.tabs">Customer stories</button><button type="button" role="tab" id="c95t1" aria-selected="false" aria-controls="c95b" tabindex="-1" data-i18n="bel.cases">Case studies</button></div>
+    <div class="p95" id="c95a" role="tabpanel" aria-labelledby="c95t0">
     <div class="tssec" id="tsSec">
       <h3 class="tsh3" id="tsH" data-i18n="ts.h">Don't just take our word for it.</h3>
       <div class="tsbar" id="tsBar"><div class="tstabs" role="tablist" id="tsTabs" aria-label="Customer stories" data-i18n-aria="ts.tabs"></div></div>
       <div class="tsgrid" id="tsGrid" role="tabpanel" tabindex="0"></div>
     </div>
+    </div>
+    <div class="p95" id="c95b" role="tabpanel" aria-labelledby="c95t1" hidden>
     <div class="cshd">
       <h3 class="h3" data-i18n="bel.cases">Case studies</h3>
       <div class="tstabs cstabs" role="tablist" id="caseTabs" aria-label="Case studies" data-i18n-aria="bel.cases"></div>
@@ -2929,6 +3142,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <p class="belsrc" id="teaSrc"></p>
       </div>
     </div>
+    </div>
   </div>
 </section>
 
@@ -2948,9 +3162,56 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
   </div>
 </section>
 
-<section class="sec rv" data-rv="up" id="teammate" aria-labelledby="tmH">
+
+
+
+<!-- ======================= HOW IT WORKS: map, approve and file, keep current ======================= -->
+<section class="sec" id="how" aria-labelledby="howH">
   <div class="ctr">
-    <div class="sh"><h2 class="h2" id="tmH" data-i18n="tm.h">Your newest teammate.</h2><p class="sub" data-i18n="tm.sub">Add Odelia, Placetta's AI agent, to your expansion team like any other hire. She owns permits and licenses for every store, works in the tools your team already uses, and comes to you only for what needs a person.</p></div>
+    <div class="sh"><h2 class="h2" id="howH" data-i18n="how.h">Mapped by Odelia. Filed by Odelia.</h2><p class="sub" data-i18n="how.sub">Odelia, Placetta's AI agent, finds every license, permit and registration your business needs and prepares each application. You approve, and it's filed, tracked and renewed.</p><a class="howtry" href="/app/" data-track="how_try_agent"><span data-i18n="how.try">Try it on your store</span><span aria-hidden="true">→</span></a></div>
+    <div class="seg95" role="tablist" id="h95" aria-label="What Odelia does" data-i18n-aria="h95.aria"><button type="button" role="tab" id="h95t0" aria-selected="true" aria-controls="how95a" tabindex="0" data-i18n="h95.t1">Maps and files</button><button type="button" role="tab" id="h95t1" aria-selected="false" aria-controls="teammate" tabindex="-1" data-i18n="h95.t2">Joins your team</button><button type="button" role="tab" id="h95t2" aria-selected="false" aria-controls="portal" tabindex="-1" data-i18n="h95.t3">Works in portals</button><button type="button" role="tab" id="h95t3" aria-selected="false" aria-controls="itl" tabindex="-1" data-i18n="h95.t4">Asks first</button><button type="button" role="tab" id="h95t4" aria-selected="false" aria-controls="monitor" tabindex="-1" data-i18n="h95.t5">Tracks rule changes</button></div>
+    <div class="p95" id="how95a" role="tabpanel" aria-labelledby="h95t0"><div class="feat">
+      <article class="fcard">
+        <div class="fct"><h3 data-i18n="f1.h">Every license, mapped</h3><p data-i18n="f1.p">Federal to city, in the order they run, with timelines and estimated agency fees.</p></div>
+        <div class="fcv">
+          <div class="fui">
+            <div class="fhd"><b data-i18n="lm.plan">Entry plan</b><span data-i18n="hw.wals">San José, CA</span></div>
+            <div class="fprog"><i></i></div>
+            <div class="hwplan" id="hwPlan" role="list"></div>
+          </div>
+          <div class="ftoast" data-st data-ms="700"><span class="orb"></span><span><b data-i18n="f1.t">Entry plan ready</b><small data-i18n="f1.ts">8 requirements, in order, with estimated fees</small></span></div>
+        </div>
+      </article>
+      <article class="fcard">
+        <div class="fct"><h3 data-i18n="f2.h">You approve. Odelia files.</h3><p data-i18n="f2.p">Nothing is filed until you say so. Odelia submits each approved application, and our team steps in when an agency needs a person.</p></div>
+        <div class="fcv">
+          <div class="fui">
+            <div class="fmsg" data-st data-ms="500"><span class="orb"></span><div><small data-i18n="f2.from">Odelia, Placetta agent</small><p data-i18n="f2.m">The health permit packet for Santa Clara County is ready for your review.</p></div></div>
+            <div class="ffile" data-st data-ms="900"><span class="fi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="1.8" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></span><span><b data-i18n="itl.f1">Plan-check packet</b><small data-i18n="itl.m1">14-page PDF</small></span></div>
+            <div class="fbtns" data-st data-ms="700"><span class="fbtn on" data-st data-fx="press" data-ms="1000"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="f2.ok">Approve</span></span><span class="fbtn" data-i18n="f2.ch">Request changes</span></div>
+          </div>
+          <div class="ftoast" data-st data-ms="800"><span class="tick"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span><span><b data-i18n="f2.t">Filed by Odelia</b><small data-i18n="f2.ts">Santa Clara County, just now</small></span></div>
+        </div>
+      </article>
+      <article class="fcard">
+        <div class="fct"><h3 data-i18n="f3.h">Kept current after you open</h3><p data-i18n="f3.p">Renewal dates, inspections and rule changes, tracked for every location.</p></div>
+        <div class="fcv">
+          <div class="fui">
+            <div class="fhd"><b data-i18n="lm.wallet">Renewal calendar</b><span data-i18n="hw.wals">San José, CA</span></div>
+            <div class="hwcal" id="hwCal" aria-hidden="true"></div>
+            <div class="fcrow" data-st data-ms="450"><i class="dot a"></i><span class="nm" data-i18n="f3.r1">Health permit</span><span class="pill p-r" data-i18n="f3.r1d">Due in 30 days</span></div>
+            <div class="fcrow" data-st data-ms="450"><i class="dot"></i><span class="nm" data-i18n="f3.r2">Business tax certificate</span><span class="dt" data-i18n="f3.r2d">Renews Jan 2027</span></div>
+            <div class="fcrow" data-st data-ms="450"><i class="dot"></i><span class="nm" data-i18n="f3.r3">Fire inspection</span><span class="dt" data-i18n="f3.r3d">Due Jun 2027</span></div>
+            <div class="fcrow" data-st data-ms="450"><i class="dot r"></i><span class="nm" data-i18n="f3.r4">New city rule on menu labels</span><span class="pill p-b" data-i18n="f3.r4d">Action needed</span></div>
+          </div>
+          <div class="ftoast" data-st data-ms="900"><span class="orb"></span><span><b data-i18n="f3.t">Health permit renewal filed</b><small data-i18n="f3.ts">Santa Clara County DEH, just now</small></span></div>
+        </div>
+      </article>
+    </div>
+    <p class="fnote" data-i18n="feat.note">Product screens show sample data.</p>
+    </div>
+    <div class="p95" id="teammate" role="tabpanel" aria-labelledby="h95t1" hidden>
+    <div class="sh"><h3 class="h2 p95h" id="tmH" data-i18n="tm.h">Your newest teammate.</h3><p class="sub" data-i18n="tm.sub">Add Odelia, Placetta's AI agent, to your expansion team like any other hire. She owns permits and licenses for every store, works in the tools your team already uses, and comes to you only for what needs a person.</p></div>
     <div class="feat tmfeat">
       <article class="fcard">
         <div class="fct"><h3 data-i18n="tm.c1h">She joins your team</h3><p data-i18n="tm.c1p">Add Odelia like any other hire. She has a seat on your expansion team and a status you can see.</p></div>
@@ -2994,75 +3255,11 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
       </article>
     </div>
     <a class="howtry" href="/app/" data-track="teammate_try"><span data-i18n="tm.cta">Put Odelia to work on your stores</span><span aria-hidden="true">→</span></a>
-  </div>
-</section>
-
-<section class="sec rv" data-rv="up" id="cost" aria-labelledby="costH">
-  <div class="ctr">
-    <div class="sh"><h2 class="h2" id="costH" data-i18n="cost.h">Permits set your opening date.</h2><p class="sub" data-i18n="cost.sub">One permit running late moves the whole opening, and the rules keep changing while you wait.</p></div>
-    <div class="drow">
-      <div class="dl cbig">
-        <div class="cbn"><b data-i18n="cost.big">3–6 mo</b><span data-i18n="cost.bigs">The typical permit phase for a new restaurant. One late approval holds up every step that depends on it.</span></div>
-        <div class="ds"><b>15,000</b><span data-i18n="cost.s3s">New state and local laws passed every year</span><small data-i18n="cost.s3src">Source: Gusto</small></div>
       </div>
-      <div class="dcard wcard" id="wcard"></div>
-    </div>
-  </div>
-</section>
-
-
-<!-- ======================= HOW IT WORKS: map, approve and file, keep current ======================= -->
-<section class="sec" id="how" aria-labelledby="howH">
-  <div class="ctr">
-    <div class="sh"><h2 class="h2" id="howH" data-i18n="how.h">Mapped by Odelia. Filed by Odelia.</h2><p class="sub" data-i18n="how.sub">Odelia, Placetta's AI agent, finds every license, permit and registration your business needs and prepares each application. You approve, and it's filed, tracked and renewed.</p><a class="howtry" href="/app/" data-track="how_try_agent"><span data-i18n="how.try">Try it on your store</span><span aria-hidden="true">→</span></a></div>
-    <div class="feat">
-      <article class="fcard">
-        <div class="fct"><h3 data-i18n="f1.h">Every license, mapped</h3><p data-i18n="f1.p">Federal to city, in the order they run, with timelines and estimated agency fees.</p></div>
-        <div class="fcv">
-          <div class="fui">
-            <div class="fhd"><b data-i18n="lm.plan">Entry plan</b><span data-i18n="hw.wals">San José, CA</span></div>
-            <div class="fprog"><i></i></div>
-            <div class="hwplan" id="hwPlan" role="list"></div>
-          </div>
-          <div class="ftoast" data-st data-ms="700"><span class="orb"></span><span><b data-i18n="f1.t">Entry plan ready</b><small data-i18n="f1.ts">8 requirements, in order, with estimated fees</small></span></div>
-        </div>
-      </article>
-      <article class="fcard">
-        <div class="fct"><h3 data-i18n="f2.h">You approve. Odelia files.</h3><p data-i18n="f2.p">Nothing is filed until you say so. Odelia submits each approved application, and our team steps in when an agency needs a person.</p></div>
-        <div class="fcv">
-          <div class="fui">
-            <div class="fmsg" data-st data-ms="500"><span class="orb"></span><div><small data-i18n="f2.from">Odelia, Placetta agent</small><p data-i18n="f2.m">The health permit packet for Santa Clara County is ready for your review.</p></div></div>
-            <div class="ffile" data-st data-ms="900"><span class="fi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="1.8" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></span><span><b data-i18n="itl.f1">Plan-check packet</b><small data-i18n="itl.m1">14-page PDF</small></span></div>
-            <div class="fbtns" data-st data-ms="700"><span class="fbtn on" data-st data-fx="press" data-ms="1000"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span data-i18n="f2.ok">Approve</span></span><span class="fbtn" data-i18n="f2.ch">Request changes</span></div>
-          </div>
-          <div class="ftoast" data-st data-ms="800"><span class="tick"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span><span><b data-i18n="f2.t">Filed by Odelia</b><small data-i18n="f2.ts">Santa Clara County, just now</small></span></div>
-        </div>
-      </article>
-      <article class="fcard">
-        <div class="fct"><h3 data-i18n="f3.h">Kept current after you open</h3><p data-i18n="f3.p">Renewal dates, inspections and rule changes, tracked for every location.</p></div>
-        <div class="fcv">
-          <div class="fui">
-            <div class="fhd"><b data-i18n="lm.wallet">Renewal calendar</b><span data-i18n="hw.wals">San José, CA</span></div>
-            <div class="hwcal" id="hwCal" aria-hidden="true"></div>
-            <div class="fcrow" data-st data-ms="450"><i class="dot a"></i><span class="nm" data-i18n="f3.r1">Health permit</span><span class="pill p-r" data-i18n="f3.r1d">Due in 30 days</span></div>
-            <div class="fcrow" data-st data-ms="450"><i class="dot"></i><span class="nm" data-i18n="f3.r2">Business tax certificate</span><span class="dt" data-i18n="f3.r2d">Renews Jan 2027</span></div>
-            <div class="fcrow" data-st data-ms="450"><i class="dot"></i><span class="nm" data-i18n="f3.r3">Fire inspection</span><span class="dt" data-i18n="f3.r3d">Due Jun 2027</span></div>
-            <div class="fcrow" data-st data-ms="450"><i class="dot r"></i><span class="nm" data-i18n="f3.r4">New city rule on menu labels</span><span class="pill p-b" data-i18n="f3.r4d">Action needed</span></div>
-          </div>
-          <div class="ftoast" data-st data-ms="900"><span class="orb"></span><span><b data-i18n="f3.t">Health permit renewal filed</b><small data-i18n="f3.ts">Santa Clara County DEH, just now</small></span></div>
-        </div>
-      </article>
-    </div>
-    <p class="fnote" data-i18n="feat.note">Product screens show sample data.</p>
-  </div>
-</section>
-
-<!-- ======================= WORKS WHERE YOU WORK: Odelia in a permit portal ======================= -->
-<section class="sec rv" data-rv="up" id="portal" aria-labelledby="ptH">
-  <div class="ctr">
+    <div class="p95" id="portal" role="tabpanel" aria-labelledby="h95t2" hidden>
     <div class="ptrow">
       <div class="ptl">
-        <h2 class="t28" id="ptH" data-i18n="pt.h">Odelia works in the portals you dread.</h2>
+        <h3 class="t28 p95h" id="ptH" data-i18n="pt.h">Odelia works in the portals you dread.</h3>
         <p class="ptsub" data-i18n="pt.sub">City permit sites, county health portals, state tax accounts, customs systems. She signs in once with your OK, then does the clicking.</p>
         <ol class="ptsteps" id="ptSteps">
           <li data-s="0"><b data-i18n="pt.s1">Signs in with your approval</b><span data-i18n="pt.s1s">One tap from you. Your password never leaves your vault.</span></li>
@@ -3091,8 +3288,58 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
       </div>
     </div>
     <p class="fnote" data-i18n="pt.note">Sample run with sample data.</p>
+      </div>
+    <div class="ox p95" id="itl" role="tabpanel" aria-labelledby="h95t3" hidden>
+    <div class="irow">
+      <div class="il"><h3 class="t28 p95h" data-i18n="itl.h">Odelia asks before every filing, and remembers your answer</h3></div>
+      <div class="ir">
+        <div class="icard"><div class="icol">
+          <div class="ipop" style="width:100%"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.a1">Health permit packet for Santa Clara County is ready. Submit it?</p>
+            <div class="bfile"><div class="fl"><div class="fi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></div><div><b data-i18n="itl.f1">Plan-check packet</b><small data-i18n="itl.m1">14-page PDF</small></div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg></div></div></div></div></div>
+          <svg class="ipop" style="animation-delay:500ms" width="16" height="29" viewBox="0 0 16 29" aria-hidden="true"><path d="M8 0v29" stroke="#D3D9E3"/><circle cx="8" cy="14.5" r="7" fill="#3F9A62"/><path d="M5 14.6l2 2 4-4.2" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+          <div class="ipop" style="width:100%;animation-delay:1000ms"><div class="bub"><div><span class="av you" data-i18n="you.init">HP</span><div class="bc"><p data-i18n="itl.u1">Yes, submit it 👍</p></div></div></div></div>
+          <div class="ipop itlw" style="animation-delay:1500ms"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.a2">Submitted. I'll book the inspection when the county opens a slot.</p></div></div></div>
+            <div class="ichip" style="--sd:3040ms"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span data-i18n="itl.saved">Saved to your playbook</span></div></div>
+        </div></div>
+        <div class="icard"><div class="icol">
+          <div class="ipop" style="width:100%;animation-delay:250ms"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.b1">The sign permit needs your landlord's authorization. Send the request to them?</p>
+            <div class="bfile"><div class="fl"><div class="fi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B6FD9" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></div><div><b data-i18n="itl.f2">Landlord letter</b><small data-i18n="itl.m2">1-page doc</small></div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg></div></div></div></div></div>
+          <svg class="ipop" style="animation-delay:750ms" width="17" height="30" viewBox="0 0 17 30" aria-hidden="true"><path d="M8.5 0v30" stroke="#D3D9E3"/><circle cx="8.5" cy="15" r="7" fill="#D0574A"/><path d="M6 12.5l5 5M11 12.5l-5 5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <div class="ipop" style="width:100%;animation-delay:1250ms"><div class="bub"><div><span class="av you" data-i18n="you.init">HP</span><div class="bc"><p data-i18n="itl.u2">No, send landlord requests to me first. I'll forward them.</p></div></div></div></div>
+          <div class="ipop itlw" style="animation-delay:1750ms"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.b2">Got it. Landlord requests go to you first, at every location.</p></div></div></div>
+            <div class="ichip" style="--sd:3290ms"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span data-i18n="itl.saved">Saved to your playbook</span></div></div>
+        </div></div>
+      </div>
+    </div>
+      </div>
+    <div class="p95" id="monitor" role="tabpanel" aria-labelledby="h95t4" hidden>
+    <div class="mnhd">
+      <div>
+        <h3 class="h2 p95h" id="monH" data-i18n="mon.h2">Rules change after you open.<br>We tell you what to do.</h3>
+        <p class="sub" data-i18n="mon.body3">Every rule change in your markets, with what it means for your stores and what to do next.</p>
+      </div>
+      <div class="mncta"><button type="button" class="btn b-ink" id="trAlert" data-i18n="mon.alert">Get alerts for my markets</button><small><span data-i18n="mon.price">Included in every monthly plan</span><button type="button" class="mnsa" id="mnSampleB" data-i18n="mon.sample">See a sample alert</button></small></div>
+    </div>
+    <div class="mnstage">
+      <div class="mnwrap">
+        <div class="mnkpi" id="mnKpi"></div>
+        <div class="mngrid">
+          <div class="mnhero" id="mnDet" aria-live="polite"></div>
+          <div class="mnside">
+            <div class="mnsc"><div class="mnch"><b data-i18n="mon.dl">Upcoming deadlines</b><span data-i18n="mon.dl6">Next 6 months</span></div><div class="mndl" id="mnDl"></div></div>
+            <div class="mnsc mnsc2"><div class="mnch"><div class="mnmk" id="mnMk"><button type="button" class="mnmkb" id="mnMkB" aria-haspopup="listbox" aria-expanded="false" aria-controls="mnMkP"><b id="mnLsH"></b><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="mnmkp" id="mnMkP" role="listbox" hidden></div></div><span id="mnCnt"></span></div><div class="mnls" id="mnList" role="listbox" aria-labelledby="mnLsH"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="trnote" data-i18n="mon.note">Summaries for information only, not legal advice. Each item links to its source.</p>
+    <div class="mnpv" id="mnPv" hidden><div class="mnpvc" role="dialog" aria-modal="true" aria-labelledby="mnPvT"><button type="button" class="mnpvx" id="mnPvX" aria-label="Close" data-i18n-aria="aria.close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div id="mnPvB"></div></div></div>
+    </div>
   </div>
 </section>
+
+<!-- ======================= WORKS WHERE YOU WORK: Odelia in a permit portal ======================= -->
+
 
 <!-- ======================= AGENCIES A PLAN COVERS (names set in type; no agency seals or logos) ======================= -->
 <section class="mt160 rv" data-rv="up" id="agencies" aria-labelledby="agH">
@@ -3143,60 +3390,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
   </div>
 </section>
 
-<!-- ======================= LIVE POLICY + INDUSTRY MONITOR ======================= -->
-<section class="sec rv" data-rv="up" id="monitor" aria-labelledby="monH">
-  <div class="ctr">
-    <div class="mnhd">
-      <div>
-        <h2 class="h2" id="monH" data-i18n="mon.h2">Rules change after you open.<br>We tell you what to do.</h2>
-        <p class="sub" data-i18n="mon.body3">Every rule change in your markets, with what it means for your stores and what to do next.</p>
-      </div>
-      <div class="mncta"><button type="button" class="btn b-ink" id="trAlert" data-i18n="mon.alert">Get alerts for my markets</button><small><span data-i18n="mon.price">Included in every monthly plan</span><button type="button" class="mnsa" id="mnSampleB" data-i18n="mon.sample">See a sample alert</button></small></div>
-    </div>
-    <div class="mnstage">
-      <div class="mnwrap">
-        <div class="mnkpi" id="mnKpi"></div>
-        <div class="mngrid">
-          <div class="mnhero" id="mnDet" aria-live="polite"></div>
-          <div class="mnside">
-            <div class="mnsc"><div class="mnch"><b data-i18n="mon.dl">Upcoming deadlines</b><span data-i18n="mon.dl6">Next 6 months</span></div><div class="mndl" id="mnDl"></div></div>
-            <div class="mnsc mnsc2"><div class="mnch"><div class="mnmk" id="mnMk"><button type="button" class="mnmkb" id="mnMkB" aria-haspopup="listbox" aria-expanded="false" aria-controls="mnMkP"><b id="mnLsH"></b><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="mnmkp" id="mnMkP" role="listbox" hidden></div></div><span id="mnCnt"></span></div><div class="mnls" id="mnList" role="listbox" aria-labelledby="mnLsH"></div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <p class="trnote" data-i18n="mon.note">Summaries for information only, not legal advice. Each item links to its source.</p>
-  </div>
-  <div class="mnpv" id="mnPv" hidden><div class="mnpvc" role="dialog" aria-modal="true" aria-labelledby="mnPvT"><button type="button" class="mnpvx" id="mnPvX" aria-label="Close" data-i18n-aria="aria.close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div id="mnPvB"></div></div></div>
-</section>
 
-
-
-<section class="ox mt160 rv" data-rv="up" id="itl">
-  <div class="ctr">
-    <div class="irow">
-      <div class="il"><h2 class="t28" data-i18n="itl.h">Odelia asks before every filing, and remembers your answer</h2></div>
-      <div class="ir">
-        <div class="icard"><div class="icol">
-          <div class="ipop" style="width:100%"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.a1">Health permit packet for Santa Clara County is ready. Submit it?</p>
-            <div class="bfile"><div class="fl"><div class="fi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D0574A" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></div><div><b data-i18n="itl.f1">Plan-check packet</b><small data-i18n="itl.m1">14-page PDF</small></div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg></div></div></div></div></div>
-          <svg class="ipop" style="animation-delay:500ms" width="16" height="29" viewBox="0 0 16 29" aria-hidden="true"><path d="M8 0v29" stroke="#D3D9E3"/><circle cx="8" cy="14.5" r="7" fill="#3F9A62"/><path d="M5 14.6l2 2 4-4.2" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
-          <div class="ipop" style="width:100%;animation-delay:1000ms"><div class="bub"><div><span class="av you" data-i18n="you.init">HP</span><div class="bc"><p data-i18n="itl.u1">Yes, submit it 👍</p></div></div></div></div>
-          <div class="ipop itlw" style="animation-delay:1500ms"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.a2">Submitted. I'll book the inspection when the county opens a slot.</p></div></div></div>
-            <div class="ichip" style="--sd:3040ms"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span data-i18n="itl.saved">Saved to your playbook</span></div></div>
-        </div></div>
-        <div class="icard"><div class="icol">
-          <div class="ipop" style="width:100%;animation-delay:250ms"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.b1">The sign permit needs your landlord's authorization. Send the request to them?</p>
-            <div class="bfile"><div class="fl"><div class="fi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B6FD9" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></div><div><b data-i18n="itl.f2">Landlord letter</b><small data-i18n="itl.m2">1-page doc</small></div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg></div></div></div></div></div>
-          <svg class="ipop" style="animation-delay:750ms" width="17" height="30" viewBox="0 0 17 30" aria-hidden="true"><path d="M8.5 0v30" stroke="#D3D9E3"/><circle cx="8.5" cy="15" r="7" fill="#D0574A"/><path d="M6 12.5l5 5M11 12.5l-5 5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <div class="ipop" style="width:100%;animation-delay:1250ms"><div class="bub"><div><span class="av you" data-i18n="you.init">HP</span><div class="bc"><p data-i18n="itl.u2">No, send landlord requests to me first. I'll forward them.</p></div></div></div></div>
-          <div class="ipop itlw" style="animation-delay:1750ms"><div class="bub"><div><span class="orb av"></span><div class="bc"><p data-i18n="itl.b2">Got it. Landlord requests go to you first, at every location.</p></div></div></div>
-            <div class="ichip" style="--sd:3290ms"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9AA1AE" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span data-i18n="itl.saved">Saved to your playbook</span></div></div>
-        </div></div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- ======================= BUILT FOR BRANDS GOING GLOBAL, BUILT FOR TRUST ======================= -->
 <section class="ox mt160 rv" data-rv="up" id="cn">
@@ -3231,15 +3425,39 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 </svg><div class="icol"><div class="dash" id="dashB"></div></div><span class="cnlm" data-i18n="cn.lm2">New York</span></div>
       </div>
     </div>
-    <div class="irow cntrust trustblk">
-      <div class="il"><h2 class="t28" data-i18n="trust.h">Built for trust</h2><a class="seclink" href="/trust" data-i18n="sec.trust">Visit our Trust Center</a><a class="seclink" href="privacy.html" data-legal="privacy.html" data-i18n="sec.link">Read our privacy policy</a></div>
-      <div class="ir trustr">
-      <div class="tiles cntiles">
-        <div class="tile"><p data-i18n="trust.1">Independent licensed attorneys</p><p class="tsub" data-i18n="trust.1s">When a filing legally needs a lawyer, we introduce an independent licensed attorney you engage directly.</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M28 9v38M19 47h18M11 16h34M28 9v7"/><path d="M11 16 5 30a6 6 0 0 0 12 0zM45 16l-6 14a6 6 0 0 0 12 0z"/></svg></div></div>
-        <div class="tile"><p data-i18n="trust.2">Local permit expediters</p><p class="tsub" data-i18n="trust.2s">In-person filings, pick-ups and inspections, handled in the city where you open.</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M28 49S14 36.5 14 25a14 14 0 0 1 28 0c0 11.5-14 24-14 24z"/><path d="M22 25l4.5 4.5L34 22"/></svg></div></div>
-        <div class="tile"><p data-i18n="trust.ap">Your approval, every time</p><p class="tsub" data-i18n="trust.3s">Nothing is filed until you approve it, and every value shows the source it came from.</p><div><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#3B5F8E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="12" y="8" width="32" height="40" rx="4"/><path d="M20 18h16M20 25h16M20 32h8"/><path d="m29 39 4 4 8-9"/></svg></div></div>
+  </div>
+</section>
+
+<!-- ======================= BUILT FOR TRUST: alven.ai's trust cards ======================= -->
+<section class="mt160 rv tr95" data-rv="up" id="trust" aria-labelledby="trH">
+  <div class="ctr">
+    <div class="tr95r">
+      <h2 class="t28 tr95h" id="trH" data-i18n="trust.h">Built for trust</h2>
+      <div class="tr95c">
+        <div class="tr95k"><p><span data-i18n="trust.1">Independent licensed attorneys</span><small data-i18n="trust.1s">When a filing legally needs a lawyer, we introduce an independent licensed attorney you engage directly.</small></p><div class="tr95i"><svg aria-hidden="true" width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M28 9v38M19 47h18M11 16h34M28 9v7"/><path d="M11 16 5 30a6 6 0 0 0 12 0zM45 16l-6 14a6 6 0 0 0 12 0z"/></svg></div></div>
+        <div class="tr95k"><p><span data-i18n="trust.2">Local permit expediters</span><small data-i18n="trust.2s">In-person filings, pick-ups and inspections, handled in the city where you open.</small></p><div class="tr95i"><svg aria-hidden="true" width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M28 49S14 36.5 14 25a14 14 0 0 1 28 0c0 11.5-14 24-14 24z"/><path d="M22 25l4.5 4.5L34 22"/></svg></div></div>
+        <div class="tr95k"><p><span data-i18n="trust.ap">Your approval, every time</span><small data-i18n="trust.3s">Nothing is filed until you approve it, and every value shows the source it came from.</small></p><div class="tr95i"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="12" y="8" width="32" height="40" rx="4"/><path d="M20 18h16M20 25h16M20 32h8"/><path d="m29 39 4 4 8-9"/></svg></div></div>
       </div>
-        <div class="cnsec"><h3 class="sech" data-i18n="sec.h">Security</h3><ul class="secl"><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.4">Nothing filed, paid or sent without your approval</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.1">Agency logins encrypted in a vault</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.2">Every use of a login is logged</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.3">A full audit trail of every action</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.6">We never sell your content or use it to train AI models</span></li><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B5F8E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-i18n="sec.5">Payments run through Stripe, and we never see full card numbers</span></li></ul><p class="secsoc"><b>SOC 2 Type I</b><span data-i18n="sec.soc">In preparation. We have no SOC 2 report yet, and our Trust Center shows where each control stands.</span><a href="/trust" data-i18n="sec.det">Details →</a></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= SECURITY: devin.ai's enterprise security layout, only what is built ======================= -->
+<section class="rv sc95" data-rv="up" id="security" aria-labelledby="scH">
+  <div class="ctr">
+    <div class="sc95g">
+      <div class="sc95l">
+        <h2 class="sc95h" id="scH"><span data-i18n="sc.h1">Enterprise security</span> <span class="sc95t" data-i18n="sc.h2">with every step on the record</span></h2>
+        <p class="sc95a"><a href="/trust" data-i18n="sec.trust">Visit our Trust Center</a><a href="privacy.html" data-legal="privacy.html" data-i18n="sec.link">Read our privacy policy</a></p>
+      </div>
+      <div class="sc95r">
+        <div class="sc95b">
+          <div><b data-i18n="sc.b1">SOC 2 Type I</b><small data-i18n="sc.b1s">In progress</small></div>
+          <div><b data-i18n="sc.b2">SAML 2.0 SSO</b><small data-i18n="sc.b2s">Rolling out</small></div>
+          <div><b data-i18n="sc.b3">SCIM 2.0</b><small data-i18n="sc.b3s">Rolling out</small></div>
+        </div>
+        <div class="sc95lists"><ul><li data-i18n="sc.l1">Owner, admin, member and viewer roles, enforced by the database</li><li data-i18n="sc.l2">SAML 2.0 single sign-on, plus Google Workspace, Microsoft Entra ID and OpenID Connect sign-in</li><li data-i18n="sc.l3">Single sign-on required for everyone at your verified email domain</li><li data-i18n="sc.l4">SCIM 2.0 provisioning for users and groups</li></ul><ul><li data-i18n="sc.r1">An append-only audit trail, exportable as CSV</li><li data-i18n="sc.r2">Each portal filing runs in its own new browser session, with its temporary files deleted after</li><li data-i18n="sc.r3">Nothing filed or paid without your approval</li><li data-i18n="sc.r4">Every requirement linked to its official source</li></ul></div>
+        <p class="sc95n" data-i18n="sc.note">Roles, single sign-on, SCIM and the audit trail are rolling out now. Our Trust Center shows where each control stands.</p>
       </div>
     </div>
   </div>
@@ -3248,6 +3466,8 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 <!-- ======================= BACKED BY OPERATORS ======================= -->
 <section class="mt160 rv" data-rv="up" id="backers" aria-labelledby="bkH">
   <div class="ctr">
+    <div class="seg95" role="tablist" id="bk95" aria-label="People behind Placetta" data-i18n-aria="bk95.aria"><button type="button" role="tab" id="bk95t0" aria-selected="true" aria-controls="bk95a" tabindex="0" data-i18n="bk95.t1">Our backers</button><button type="button" role="tab" id="bk95t1" aria-selected="false" aria-controls="experts" tabindex="-1" data-i18n="bk95.t2">Our experts</button></div>
+    <div class="p95" id="bk95a" role="tabpanel" aria-labelledby="bk95t0">
     <p class="t28 bkh" id="bkH" data-i18n="bk.h">Backed by operators from</p>
     <ul class="bkg bkt fold" id="bkG"></ul>
     <button type="button" class="bkmore" id="bkMore" aria-controls="bkG" aria-expanded="false"><span data-i18n="bk.more">Show all</span><i aria-hidden="true"></i></button>
@@ -3256,19 +3476,17 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
       <p class="invl" id="invL" data-i18n="inv.l">The brands we serve are backed by</p>
       <div class="invr" id="invR"></div>
     </div>
-  </div>
-</section>
-
-<!-- ======================= EXPERTS ======================= -->
-<section class="mt160 rv" data-rv="up" id="experts" aria-labelledby="xpH">
-  <div class="ctr">
+      </div>
+    <div class="p95" id="experts" role="tabpanel" aria-labelledby="bk95t1" hidden>
     <p class="t28 xph" id="xpH" data-i18n="xp.h">Our experts previously worked at:</p>
     <div class="xpwall" aria-hidden="true"><canvas id="xpWall"></canvas></div>
     <div class="xpart" id="xpArt" aria-label="Placetta advisors" data-i18n-aria="xp.ppl"></div>
     <button type="button" class="xpmore" id="xpMore" aria-expanded="false" aria-controls="xpArt">Show all</button>
     <p class="bknote" data-i18n="xp.note">Our advisors previously worked at these organizations. The organizations are not affiliated with Placetta and do not endorse it.</p>
+      </div>
   </div>
 </section>
+
 
 <!-- ======================= FOR FRANCHISORS ======================= -->
 <section class="sec rv" data-rv="up" id="franchise" aria-labelledby="frH">
@@ -3302,16 +3520,7 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
 </section>
 
 <!-- ======================= PRICING ======================= -->
-<section class="sec rv" data-rv="up" id="compare" aria-labelledby="cmpH">
-  <div class="ctr">
-    <div class="sh"><h2 class="h2" id="cmpH" data-i18n="cmp.h">Three ways to open a store.</h2><p class="sub" data-i18n="cmp.sub">Every opening needs the same licenses. What changes is who finds them, who files them and who remembers to renew them.</p></div>
-    <div class="cmp">
-      <div class="cmpc"><p class="cmpl" data-i18n="cmp.a">Doing it yourself</p><ul><li data-i18n="cmp.a.1">Weeks on agency websites to work out what you need</li><li data-i18n="cmp.a.2">One agency at a time, in whatever order you find them</li><li data-i18n="cmp.a.3">Renewal dates kept in a spreadsheet, if anywhere</li><li data-i18n="cmp.a.4">English only, and the rules change without notice</li></ul></div>
-      <div class="cmpc"><p class="cmpl" data-i18n="cmp.b">A permit expediter</p><ul><li data-i18n="cmp.b.1">Quoted per job, often per filing</li><li data-i18n="cmp.b.2">Usually one city, so every new market means a new firm</li><li data-i18n="cmp.b.3">The work often ends on opening day</li><li data-i18n="cmp.b.4">Updates by phone and email</li></ul></div>
-      <div class="cmpc us"><p class="cmpl" data-i18n="cmp.c">Placetta</p><ul><li data-i18n="cmp.c.1">Every license mapped in minutes, each one linked to the agency's own page</li><li data-i18n="cmp.c.2">Federal to city, in the order agencies require, for every location</li><li data-i18n="cmp.c.3">Renewals, inspections and rule changes tracked for as long as you're open</li><li data-i18n="cmp.c.4">English or Chinese, and nothing is filed until you approve it</li></ul></div>
-    </div>
-  </div>
-</section>
+
 
 <section class="sec rv" data-rv="up" id="pricing" aria-labelledby="priceH">
   <div class="ctr">
@@ -3333,6 +3542,8 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         </ul>
       </div>
     </div>
+    <div class="seg95 pr95" role="tablist" id="p95" aria-label="Why it pays" data-i18n-aria="p95.aria"><button type="button" role="tab" id="p95t0" aria-selected="true" aria-controls="p95a" tabindex="0" data-i18n="price.m.h">The math on waiting</button><button type="button" role="tab" id="p95t1" aria-selected="false" aria-controls="compare" tabindex="-1" data-i18n="p95.t2">Three ways to open</button></div>
+    <div class="p95" id="p95a" role="tabpanel" aria-labelledby="p95t0">
     <div class="pmath">
       <div class="pmhd"><h3 class="t28" data-i18n="price.m.h">The math on waiting</h3><p class="pmsub" data-i18n="price.m.sub">One month of waiting costs more than a restaurant opening and a full year with Odelia.</p></div>
       <div class="pmgrid">
@@ -3346,6 +3557,15 @@ html[lang="zh-CN"] .belrows.st2 .sk{letter-spacing:.02em}
         <p class="pmnote" data-i18n="price.m.note">Illustrative calculation, not a quote or a promise. Your rent, timeline and agency fees will differ.</p>
       </div>
     </div>
+    </div>
+    <div class="p95" id="compare" role="tabpanel" aria-labelledby="p95t1" hidden>
+    <div class="sh"><h3 class="t28 p95h" id="cmpH" data-i18n="cmp.h">Three ways to open a store.</h3><p class="sub" data-i18n="cmp.sub">Every opening needs the same licenses. What changes is who finds them, who files them and who remembers to renew them.</p></div>
+    <div class="cmp">
+      <div class="cmpc"><p class="cmpl" data-i18n="cmp.a">Doing it yourself</p><ul><li data-i18n="cmp.a.1">Weeks on agency websites to work out what you need</li><li data-i18n="cmp.a.2">One agency at a time, in whatever order you find them</li><li data-i18n="cmp.a.3">Renewal dates kept in a spreadsheet, if anywhere</li><li data-i18n="cmp.a.4">English only, and the rules change without notice</li></ul></div>
+      <div class="cmpc"><p class="cmpl" data-i18n="cmp.b">A permit expediter</p><ul><li data-i18n="cmp.b.1">Quoted per job, often per filing</li><li data-i18n="cmp.b.2">Usually one city, so every new market means a new firm</li><li data-i18n="cmp.b.3">The work often ends on opening day</li><li data-i18n="cmp.b.4">Updates by phone and email</li></ul></div>
+      <div class="cmpc us"><p class="cmpl" data-i18n="cmp.c">Placetta</p><ul><li data-i18n="cmp.c.1">Every license mapped in minutes, each one linked to the agency's own page</li><li data-i18n="cmp.c.2">Federal to city, in the order agencies require, for every location</li><li data-i18n="cmp.c.3">Renewals, inspections and rule changes tracked for as long as you're open</li><li data-i18n="cmp.c.4">English or Chinese, and nothing is filed until you approve it</li></ul></div>
+    </div>
+      </div>
     <details class="prmore" id="prMore">
       <summary><span><b data-i18n="price.more">More plans</b><small data-i18n="price.moresub">A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.</small></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
       <div class="prmb">
@@ -3686,6 +3906,21 @@ Object.assign(T.zh, {"diff.src": "来源：<a href=\"https://permitplace.com/per
 /* Oct 18 section pass: new strings for the sections changed that day */
 Object.assign(T.en, {"map.ccnt": "{m}: {n} city and county permits and filings in our form library, plus the state's {s} and {f} federal.", "map.ccnt0": "{m}: its city and county forms are researched when you start a plan there.", "map.cnt": "{m}: {n} permits and filings in our form library, {s} state and {l} city and county, plus {f} federal.", "map.cnt0": "{m}: {f} federal filings in our form library. Its state and city forms are researched when you start a plan.", "map.tipn": "{n} state and local forms", "final.h": "Stop paying rent on an empty store.<br>Hire Odelia.", "wt.h": "Answer from the app your team already uses", "ch.aria": "Channels", "ch.wechat": "WeChat", "ch.slack": "Slack", "ch.lark": "Lark / 飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "Email", "ch.tel": "Phone", "ch.note": "Text Odelia on WhatsApp or iMessage, email her, call her, or add her to your team's Slack or Lark. Our team is on WeChat.", "ch.add": "Add us on WeChat", "ch.qr": "Scan with WeChat to add Placetta", "price.x": "Less than three hours of an expediter.", "price.xsub": "Permit expediters in New York City typically bill $50 to $250 an hour. Odelia is one price per store, and each franchisee pays for its own.", "price.src": "Source: <a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow, NYC permit expediter costs</a>", "price.lu": "per location a month", "price.inc": "Included", "price.i1": "Every license and permit mapped, filed with your approval and tracked", "price.i2": "Renewals filed before they lapse", "price.i3": "Staff certificates and vendor proof for every store", "price.i4": "Rule-change alerts for your markets", "price.i5": "Odelia included, with a monthly allowance per location", "price.i6": "English and Chinese, for your whole team", "price.more": "More plans", "price.moresub": "A one-time entry plan, Pro for stores inspected often, new store openings and headquarters.", "fr.hqv": "Headquarters sees each store's status, never its documents.", "sec.trust": "Visit our Trust Center", "sec.soc": "In preparation. We have no SOC 2 report yet, and our Trust Center shows where each control stands.", "sec.det": "Details →", "mon.st": "Store affected", "mon.usd": "At stake", "mon.save": "You could save", "mon.smp": "Sample", "pt.f5": "Hours of operation", "pt.who": "Your answer, in WeChat", "pt.tr": "Translated from your answer in Chinese", "pt.rc": "Application received", "pt.rc1": "Confirmation no.", "pt.rc2": "Form", "pt.rc3": "Submitted", "pt.rc3v": "Oct 18, 2026, 10:42 AM", "pt.rcs": "Sample receipt, saved to your documents", "hw.more": "3 more, through the certificate of occupancy", "hw.mo": "January 2027", "ts.h": "Don't just take our word for it.", "in.h": "Every kind of store has its own permits.", "in.pm": "Permits", "app.ask": "Opening a tea house in San José. What do I need?"});
 Object.assign(T.zh, {"map.ccnt": "{m}：我们的表格库中有市县级许可与申报 {n} 项，另有州级 {s} 项和联邦 {f} 项。", "map.ccnt0": "{m}：在您开始计划时，我们会逐项调研当地市县的表格。", "map.cnt": "{m}：我们的表格库中有 {n} 项许可与申报，州级 {s} 项，市县级 {l} 项，另有联邦 {f} 项。", "map.cnt0": "{m}：表格库中有联邦 {f} 项。该州和城市的表格会在您开始计划时逐项调研。", "map.tipn": "州和地方表格 {n} 项", "final.h": "别再为空店付房租。<br>让 Odelia 加入您的团队。", "wt.h": "在团队常用的应用里直接回复", "ch.aria": "沟通渠道", "ch.wechat": "微信", "ch.slack": "Slack", "ch.lark": "飞书", "ch.wa": "WhatsApp", "ch.im": "iMessage", "ch.mail": "邮件", "ch.tel": "电话", "ch.note": "在 WhatsApp 或 iMessage 上给 Odelia 发消息、发邮件、打电话，或把她加入团队的 Slack 或飞书。我们的团队在微信上。", "ch.add": "添加我们的微信", "ch.qr": "用微信扫码添加快哉", "price.x": "不到代办三小时的费用。", "price.xsub": "纽约市的许可代办通常每小时收费 50 至 250 美元。Odelia 每家门店一个价格，每位加盟商为自己的门店付费。", "price.src": "来源：<a href=\"https://www.permitflow.com/blog/nyc-permit-expediter\" target=\"_blank\" rel=\"noopener\">PermitFlow，纽约市许可代办费用</a>", "price.lu": "每家门店每月", "price.inc": "包含", "price.i1": "每一项执照和许可：逐项梳理，经您批准后提交，并持续跟踪", "price.i2": "到期前完成续期", "price.i3": "每家门店的员工证书与供应商凭证", "price.i4": "您所在市场的规则变化提醒", "price.i5": "包含 Odelia，每家门店每月都有额度", "price.i6": "中英文双语，全团队可用", "price.more": "更多方案", "price.moresub": "一次性开店计划、适合常受检查门店的专业版、新店开业和品牌总部方案。", "fr.hqv": "总部能看到每家门店的进度，但看不到门店的文件。", "sec.trust": "查看信任中心", "sec.soc": "准备中。我们目前还没有 SOC 2 报告，信任中心列出了每项控制的进展。", "sec.det": "详情 →", "mon.st": "受影响门店", "mon.usd": "涉及金额", "mon.save": "可节省", "mon.smp": "示例", "pt.f5": "营业时间", "pt.who": "您在微信里的回答", "pt.tr": "根据您的中文回答译成英文", "pt.rc": "申请已受理", "pt.rc1": "受理编号", "pt.rc2": "表格", "pt.rc3": "提交时间", "pt.rc3v": "2026年10月18日 上午10:42", "pt.rcs": "示例回执，已存入您的文件", "hw.more": "还有 3 项，直到使用许可证", "hw.mo": "2027年1月", "ts.h": "别只听我们说。", "in.h": "每一种店，都有自己的一套许可。", "in.pm": "许可", "app.ask": "我要在圣何塞开一家茶饮店，需要办哪些手续？"});
+/* land95 (Oct 21): the trust and security sections, and the folds and tabs that shorten the page */
+Object.assign(T.en, {"sc.h1": "Enterprise security", "sc.h2": "with every step on the record", "sc.b1": "SOC 2 Type I", "sc.b1s": "In progress", "sc.b2": "SAML 2.0 SSO", "sc.b2s": "Rolling out", "sc.b3": "SCIM 2.0", "sc.b3s": "Rolling out", "sc.l1": "Owner, admin, member and viewer roles, enforced by the database", "sc.l2": "SAML 2.0 single sign-on, plus Google Workspace, Microsoft Entra ID and OpenID Connect sign-in", "sc.l3": "Single sign-on required for everyone at your verified email domain", "sc.l4": "SCIM 2.0 provisioning for users and groups", "sc.r1": "An append-only audit trail, exportable as CSV", "sc.r2": "Each portal filing runs in its own new browser session, with its temporary files deleted after", "sc.r3": "Nothing filed or paid without your approval", "sc.r4": "Every requirement linked to its official source", "sc.note": "Roles, single sign-on, SCIM and the audit trail are rolling out now. Our Trust Center shows where each control stands."});
+Object.assign(T.zh, {"sc.h1": "企业级安全", "sc.h2": "每一步都有据可查", "sc.b1": "SOC 2 Type I", "sc.b1s": "进行中", "sc.b2": "SAML 2.0 单点登录", "sc.b2s": "陆续上线", "sc.b3": "SCIM 2.0", "sc.b3s": "陆续上线", "sc.l1": "所有者、管理员、成员和查看者四种角色，由数据库强制执行", "sc.l2": "SAML 2.0 单点登录，并支持 Google Workspace、Microsoft Entra ID 和 OpenID Connect 登录", "sc.l3": "可要求您已验证邮箱域名下的所有人使用单点登录", "sc.l4": "通过 SCIM 2.0 开通和停用用户与用户组", "sc.r1": "只增不改的审计记录，可导出为 CSV", "sc.r2": "每次在政府网站上的申报都在全新的浏览器会话中进行，临时文件随后删除", "sc.r3": "未经您批准，不提交、不付款", "sc.r4": "每项要求都附官方来源链接", "sc.note": "角色、单点登录、SCIM 和审计记录正在陆续上线。信任中心列出每项控制的进展。"});
+Object.assign(T.en, {"d95.aria": "Two ways to see it", "d95.t1": "Who you'd hire", "d95.t2": "What waiting costs", "h95.aria": "What Odelia does", "h95.t1": "Maps and files", "h95.t2": "Joins your team", "h95.t3": "Works in portals", "h95.t4": "Asks first"});
+Object.assign(T.zh, {"d95.aria": "两种角度", "d95.t1": "您原本要请的人", "d95.t2": "等待的代价", "h95.aria": "Odelia 的工作", "h95.t1": "梳理与申报", "h95.t2": "加入您的团队", "h95.t3": "在政府网站上办理", "h95.t4": "先问再办"});
+Object.assign(T.en, {"c95.aria": "Customers"});
+Object.assign(T.zh, {"c95.aria": "客户"});
+Object.assign(T.en, {"p95.aria": "Why it pays", "p95.t2": "Three ways to open", "f95.all": "Show all {n} questions", "f95.less": "Show fewer", "m95.more": "Show deadlines and all markets", "m95.less": "Hide deadlines and markets", "in95.all": "Show all {n} industries", "in95.less": "Show fewer"});
+Object.assign(T.zh, {"p95.aria": "为什么划算", "p95.t2": "三种开店方式", "f95.all": "显示全部 {n} 个问题", "f95.less": "收起", "m95.more": "查看截止日期和全部市场", "m95.less": "收起截止日期和市场", "in95.all": "显示全部 {n} 个行业", "in95.less": "收起"});
+Object.assign(T.en, {"bk95.aria": "People behind Placetta", "bk95.t1": "Our backers", "bk95.t2": "Our experts"});
+Object.assign(T.zh, {"bk95.aria": "快哉背后的人", "bk95.t1": "我们的投资人", "bk95.t2": "我们的专家"});
+Object.assign(T.en, {"h95.t5": "Tracks rule changes"});
+Object.assign(T.zh, {"h95.t5": "追踪规则变化"});
+Object.assign(T.en, {"g95.all": "Show all {n}", "g95.less": "Show fewer", "ag95.all": "Show all {n} regions", "calc95.open": "Try it with your rent", "calc95.less": "Hide the calculator"});
+Object.assign(T.zh, {"g95.all": "显示全部 {n} 项", "g95.less": "收起", "ag95.all": "显示全部 {n} 个地区", "calc95.open": "用您的租金算一算", "calc95.less": "收起计算器"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 
 /* furniture variant: placetta.com/furniture or ?for=furniture */
@@ -5127,7 +5362,7 @@ function renderInd(k){
   const sc = document.getElementById("inScroll"); if (!sc) return;
   const lg = () => matchMedia("(min-width:1024px)").matches;
   document.querySelector(".inlist").addEventListener("click", e => { const b = e.target.closest(".inb"); if (!b) return; const k = +b.dataset.k;
-    if (lg() && !RM){ inLock = Date.now() + 1200; const top = sc.getBoundingClientRect().top + scrollY, span = sc.offsetHeight - innerHeight; scrollTo({top: top + span * (k + .5) / IND.length, behavior: "smooth"}); }
+    if (lg() && !RM && sc.offsetHeight > innerHeight + 40){ inLock = Date.now() + 1200; const top = sc.getBoundingClientRect().top + scrollY, span = sc.offsetHeight - innerHeight; scrollTo({top: top + span * (k + .5) / IND.length, behavior: "smooth"}); }
     renderInd(k); track("industry_select", {k}); });
   addEventListener("scroll", () => { if (!lg() || Date.now() < inLock) return; const r = sc.getBoundingClientRect(), span = sc.offsetHeight - innerHeight; if (r.top > 0 || -r.top > span) return;
     const k = Math.min(IND.length - 1, Math.floor(-r.top / span * IND.length)); if (k !== inK) renderInd(k); }, {passive: true});
@@ -5618,7 +5853,7 @@ addEventListener("resize", () => { const pn = document.querySelector(".inpanel")
 
 const AGG = [[["United States", "美国"], [["CBP", "CBP", "U.S. Customs and Border Protection", "美国海关与边境保护局", "Customs, tariffs, forced-labor checks", "报关、关税、强迫劳动审查", "p"], ["FDA", "FDA", "Food and Drug Administration", "美国食品药品监督管理局", "Food, cosmetics, devices", "食品、化妆品、医疗器械", "f"], ["FCC", "FCC", "Federal Communications Commission", "美国联邦通信委员会", "Radios and electronics", "无线电与电子产品", "p"], ["CPSC", "CPSC", "Consumer Product Safety Commission", "美国消费品安全委员会", "Product certificates and eFiling", "产品合规证书与电子申报", "f"], ["FTC", "FTC", "Federal Trade Commission", "美国联邦贸易委员会", "Advertising, reviews and data", "广告、评价与数据", "m"], ["State and local", "州与地方", "State, county and city offices", "州、县、市政府部门", "Registration, health, building, fire", "公司登记、卫生、建筑、消防", "f"], ["USDA", "USDA", "Department of Agriculture", "美国农业部", "Plants, animals, organic", "动植物产品、有机认证", "f"], ["EPA", "EPA", "Environmental Protection Agency", "美国环境保护署", "Chemicals and pesticides", "化学品与农药", "f"], ["TTB", "TTB", "Alcohol and Tobacco Tax and Trade Bureau", "美国酒类和烟草税务贸易局", "Alcohol permits and labels", "酒类许可与标签", "f"], ["CFIUS", "CFIUS", "Committee on Foreign Investment in the U.S.", "美国外国投资委员会", "Foreign investment review", "外国投资审查", "p"], ["BIS", "BIS", "Bureau of Industry and Security", "美国商务部工业与安全局", "Export controls", "出口管制", "m"], ["OFAC", "OFAC", "Office of Foreign Assets Control", "美国财政部海外资产控制办公室", "Sanctions screening", "制裁筛查", "m"], ["USPTO", "USPTO", "Patent and Trademark Office", "美国专利商标局", "Trademarks", "商标", "p"], ["USCIS", "USCIS", "Citizenship and Immigration Services", "美国公民及移民服务局", "Visas for your team", "员工签证", "p"], ["SEC", "SEC", "Securities and Exchange Commission", "美国证券交易委员会", "Securities offerings", "证券发行", "p"], ["IRS", "IRS", "Internal Revenue Service", "美国国税局", "Employer ID (EIN) and federal tax", "雇主识别号（EIN）与联邦税务", "f"], ["DOL", "DOL", "Department of Labor", "美国劳工部", "Wages, hours and hiring rules", "工资、工时与雇佣规则", "m"], ["OSHA", "OSHA", "Occupational Safety and Health Administration", "职业安全与健康管理局", "Workplace safety", "工作场所安全", "m"], ["FinCEN", "FinCEN", "Financial Crimes Enforcement Network", "金融犯罪执法局", "Beneficial ownership reporting", "受益所有人申报", "m"], ["USTR", "USTR", "Office of the U.S. Trade Representative", "美国贸易代表办公室", "Section 301 tariffs and exclusions", "301 关税与豁免", "m"], ["NHTSA", "NHTSA", "National Highway Traffic Safety Administration", "国家公路交通安全管理局", "Vehicles and vehicle equipment", "汽车与汽车配件", "m"]]], [["Canada", "加拿大"], [["CBSA", "CBSA", "Canada Border Services Agency", "加拿大边境服务局", "Customs and duties", "海关与关税", "p"], ["CFIA", "CFIA", "Canadian Food Inspection Agency", "加拿大食品检验局", "Food licences, plants, animals", "食品许可与动植物", "f"], ["Health Canada", "加拿大卫生部", "Federal health department", "联邦卫生部门", "Cosmetics, health and consumer products", "化妆品、健康产品与消费品", "f"], ["ISED", "ISED", "Innovation, Science and Economic Development Canada", "加拿大创新、科学及经济发展部", "Foreign investment review", "外国投资审查", "p"], ["Competition Bureau", "加拿大竞争局", "Competition Bureau Canada", "加拿大竞争局", "Advertising and labeling", "广告与标签", "m"], ["CRA", "CRA", "Canada Revenue Agency", "加拿大税务局", "Business number, GST/HST, import account", "企业编号、GST/HST、进口账户", "f"], ["IRCC", "IRCC", "Immigration, Refugees and Citizenship Canada", "加拿大移民、难民与公民部", "Work permits for your team", "团队工作许可", "p"], ["CIPO", "CIPO", "Canadian Intellectual Property Office", "加拿大知识产权局", "Trademarks", "商标", "p"], ["ECCC", "ECCC", "Environment and Climate Change Canada", "加拿大环境与气候变化部", "Chemicals and new substances", "化学品与新物质", "m"], ["Transport Canada", "加拿大交通部", "Transport Canada", "加拿大交通部", "Vehicles, tires and child seats", "汽车、轮胎与儿童座椅", "m"], ["GAC", "GAC", "Global Affairs Canada", "加拿大全球事务部", "Import and export permits, sanctions", "进出口许可与制裁", "m"]]], [["Mexico", "墨西哥"], [["ANAM", "ANAM", "National Customs Agency", "墨西哥国家海关署", "Customs", "海关", "p"], ["COFEPRIS", "COFEPRIS", "Federal Commission for Protection against Sanitary Risks", "墨西哥联邦卫生风险保护委员会", "Health, food, cosmetics", "卫生、食品与化妆品", "p"], ["SE", "SE", "Secretariat of Economy", "墨西哥经济部", "Foreign investment, product standards", "外国投资与产品标准", "p"], ["IMPI", "IMPI", "Mexican Institute of Industrial Property", "墨西哥工业产权局", "Trademarks", "商标", "p"], ["PROFECO", "PROFECO", "Federal Consumer Protection Agency", "墨西哥联邦消费者保护署", "Consumer protection and labeling", "消费者保护与标签", "m"], ["SAT", "SAT", "Tax Administration Service", "墨西哥税务局", "Tax ID (RFC) and importer registry", "税号（RFC）与进口商登记", "p"], ["SENASICA", "SENASICA", "National Service for Agri-Food Health, Safety and Quality", "国家农业食品卫生、安全与质量服务局", "Plant and animal imports", "动植物进口", "p"], ["IMSS", "IMSS", "Mexican Social Security Institute", "墨西哥社会保障局", "Employer registration", "雇主登记", "p"], ["SEMARNAT", "SEMARNAT", "Secretariat of Environment and Natural Resources", "环境与自然资源部", "Environmental permits", "环境许可", "m"], ["INM", "INM", "National Migration Institute", "国家移民局", "Visas and work permits", "签证与工作许可", "p"]]], [["Europe", "欧洲"], [["EC", "EC", "European Commission", "欧盟委员会", "AI, digital and competition rules", "人工智能、数字与竞争规则", "m"], ["EMA", "EMA", "European Medicines Agency", "欧洲药品管理局", "Medicines", "药品", "p"], ["EFSA", "EFSA", "European Food Safety Authority", "欧洲食品安全局", "Food safety", "食品安全", "m"], ["ECHA", "ECHA", "European Chemicals Agency", "欧洲化学品管理局", "REACH and chemical registration", "REACH 与化学品注册", "m"], ["EUIPO", "EUIPO", "EU Intellectual Property Office", "欧盟知识产权局", "EU trademarks and designs", "欧盟商标与外观设计", "p"], ["DG TAXUD", "DG TAXUD", "EU customs union (national customs authorities)", "欧盟关税同盟（各国海关）", "Customs, EORI number, duties", "海关、EORI 号码与关税", "p"], ["Notified bodies", "公告机构", "EU notified bodies", "欧盟公告机构", "CE marking for regulated products", "受监管产品的 CE 认证", "p"], ["DPAs", "数据保护机构", "National data protection authorities", "各国数据保护机构", "GDPR", "GDPR", "m"], ["EU AI Office", "欧盟人工智能办公室", "European AI Office", "欧盟人工智能办公室", "AI Act obligations", "《人工智能法案》义务", "m"]]], [["United Kingdom", "英国"], [["Companies House", "英国公司注册处", "Companies House", "英国公司注册处", "Company registration", "公司注册", "f"], ["HMRC", "HMRC", "HM Revenue and Customs", "英国税务海关总署", "Customs, VAT and EORI", "海关、增值税与 EORI", "p"], ["FSA", "FSA", "Food Standards Agency", "英国食品标准局", "Food business registration and safety", "食品经营登记与安全", "p"], ["MHRA", "MHRA", "Medicines and Healthcare products Regulatory Agency", "药品和保健产品监管局", "Medicines and medical devices", "药品与医疗器械", "p"], ["OPSS", "OPSS", "Office for Product Safety and Standards", "产品安全与标准办公室", "Product safety and UKCA marking", "产品安全与 UKCA 标志", "m"], ["ICO", "ICO", "Information Commissioner's Office", "信息专员办公室", "Data protection", "数据保护", "m"], ["UKIPO", "UKIPO", "UK Intellectual Property Office", "英国知识产权局", "Trademarks", "商标", "p"]]], [["China", "中国"], [["SAMR", "市场监管总局", "State Administration for Market Regulation", "国家市场监督管理总局", "Company registration, standards, food business", "企业登记、标准与食品经营", "p"], ["GACC", "海关总署", "General Administration of Customs", "海关总署", "Imports, exporter and food facility registration", "进出口与境外食品企业注册", "p"], ["NMPA", "药监局", "National Medical Products Administration", "国家药品监督管理局", "Drugs, cosmetics, devices", "药品、化妆品与医疗器械", "p"], ["CNIPA", "知识产权局", "China National Intellectual Property Administration", "国家知识产权局", "Trademarks and patents", "商标与专利", "p"], ["MOFCOM", "商务部", "Ministry of Commerce", "商务部", "Foreign investment and trade", "外商投资与贸易", "m"], ["CAC", "网信办", "Cyberspace Administration of China", "国家互联网信息办公室", "Data and cross-border transfers", "数据与跨境传输", "m"]]], [["Japan", "日本"], [["MHLW", "厚生劳动省", "Ministry of Health, Labour and Welfare", "厚生劳动省", "Food imports, drugs, cosmetics", "食品进口、药品与化妆品", "p"], ["Japan Customs", "日本海关", "Japan Customs", "日本海关", "Imports and duties", "进口与关税", "p"], ["METI", "经济产业省", "Ministry of Economy, Trade and Industry", "经济产业省", "Product safety marks and trade", "产品安全标志与贸易", "m"], ["JPO", "JPO", "Japan Patent Office", "日本特许厅", "Trademarks", "商标", "p"], ["PPC", "PPC", "Personal Information Protection Commission", "个人信息保护委员会", "Data protection", "数据保护", "m"]]], [["Singapore", "新加坡"], [["ACRA", "ACRA", "Accounting and Corporate Regulatory Authority", "会计与企业管制局", "Company registration", "公司注册", "p"], ["SFA", "SFA", "Singapore Food Agency", "新加坡食品局", "Food licences and imports", "食品执照与进口", "p"], ["HSA", "HSA", "Health Sciences Authority", "卫生科学局", "Health products and cosmetics", "健康产品与化妆品", "p"], ["Singapore Customs", "新加坡海关", "Singapore Customs", "新加坡海关", "Imports, permits and GST", "进口、许可与消费税", "p"]]]];
 let agSel = 0, agAll = false;
-const AGTOP_DESK = 7;   // first tile spans two cells, so seven fill two rows of four
+const AGTOP_DESK = 3;   // first tile spans two cells, so three fill one row of four; "See all" opens the rest (land95: one row, was two)
 const AGTOP = matchMedia("(max-width: 767px)").matches ? 3 : AGTOP_DESK;   // phones: the wide first tile and two more, then "See all"
 // each region tab also points the map: the US map for the United States, the world map zoomed to the country otherwise
 const AGMAP = ["us", "CA", "MX", "EU", "GB", "CN", "JP", "SG"], EUK = ["FR", "DE", "IT", "ES", "PL", "NL", "BE", "AT", "PT", "SE"];
@@ -5716,6 +5951,56 @@ applyAll(); fitTable(); bindCounters(); setPlay(vPlaying); onScroll(); requestAn
     else if (k++ > items.length + 3) { items.slice(START).forEach(li => li.classList.remove("on")); k = START; }
   }, 1100);
 })();
+/* land95:js */
+/* land95 (Oct 21): tabs and folds that keep every section while shortening the page */
+(function land95(){
+  /* tabs: a .seg95 tablist shows one of its panels; arrow keys move between tabs. Opening a panel sends a resize, so a
+     canvas, map or table inside it measures itself again */
+  function pick(list, btn, focus){
+    const tabs = [...list.querySelectorAll('[role="tab"]')];
+    tabs.forEach(x => { const on = x === btn; x.setAttribute("aria-selected", on); x.tabIndex = on ? 0 : -1; const p = document.getElementById(x.getAttribute("aria-controls")); if (p) p.hidden = !on; });
+    if (focus) btn.focus();
+    dispatchEvent(new Event("resize"));
+    track("tab_" + list.id, {tab: tabs.indexOf(btn)});
+  }
+  document.querySelectorAll(".seg95").forEach(list => {
+    list.addEventListener("click", e => { const b = e.target.closest('[role="tab"]'); if (b) pick(list, b); });
+    list.addEventListener("keydown", e => { const d = {ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1}[e.key]; if (!d) return; e.preventDefault();
+      const tabs = [...list.querySelectorAll('[role="tab"]')], k = tabs.indexOf(document.activeElement); pick(list, tabs[(k + d + tabs.length) % tabs.length], true); });
+  });
+  // customers: with no quotes to show (PROOF.testimonials off), no tabs, just the case studies
+  const ts = document.getElementById("tsGrid"), cs = document.getElementById("c95");
+  if (cs && ts && ts.hidden) { cs.hidden = true; document.getElementById("c95a").hidden = true; document.getElementById("c95b").hidden = false; }
+
+  /* folds: a long list shows its first few, and a button opens the rest. The CSS decides where a fold applies
+     (some only on phones); the button hides itself where nothing is folded */
+  const folds = [];
+  function fold(list, o){
+    if (!list) return;
+    const btn = document.createElement("button"); btn.type = "button"; btn.className = "more95"; btn.setAttribute("aria-expanded", "false");
+    if (list.id) btn.setAttribute("aria-controls", list.id);
+    list.classList.add("fold95");
+    const label = () => { const open = list.classList.contains("open95"), n = list.querySelectorAll(o.items || ":scope > *").length;
+      btn.textContent = open ? t(o.less) : t(o.all).replace("{n}", n); btn.hidden = n <= (o.keep || 0); };
+    btn.addEventListener("click", () => { const open = list.classList.toggle("open95"); btn.setAttribute("aria-expanded", open); label(); track("fold_" + (list.id || o.name), {open}); if (!open && o.back) o.back.scrollIntoView({block: "nearest"}); });
+    if (o.before) list.before(btn); else list.after(btn);
+    folds.push(label); label();
+  }
+  const faq = document.getElementById("faqList");
+  fold(faq, {keep: 6, all: "f95.all", less: "f95.less", back: faq});
+  const inl = document.querySelector(".inlist");
+  fold(inl, {keep: 6, items: ".inb", all: "in95.all", less: "in95.less", name: "industries", back: inl});
+  const mns = document.querySelector("#monitor .mnside");
+  if (mns) { mns.id = mns.id || "mnSide"; fold(mns, {keep: 0, items: ".mnsc", all: "m95.more", less: "m95.less", before: true}); }
+  // phones only (the CSS folds these below 768px or 1024px, and hides the buttons above)
+  fold(document.querySelector("#pricing .prlist"), {keep: 3, items: "li", all: "g95.all", less: "g95.less", name: "included"});
+  fold(document.getElementById("pmCalc"), {keep: -1, items: ":scope", all: "calc95.open", less: "calc95.less"});
+  fold(document.getElementById("agTabs"), {keep: 4, items: ".agb", all: "ag95.all", less: "g95.less"});
+  fold(document.getElementById("invR"), {keep: 6, items: "img", all: "g95.all", less: "g95.less"});
+  const relabel = () => folds.forEach(f => f());
+  const orig = applyAll; applyAll = function(){ orig.apply(this, arguments); relabel(); };
+})();
+/* /land95:js */
 track("page_view", {});
 })();
 
