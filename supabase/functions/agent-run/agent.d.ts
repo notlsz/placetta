@@ -156,3 +156,9 @@ export type ToolLog = { at: string; run?: string; tool: string; scope: string | 
 export declare const CLASSIFIER_SYSTEM: string;
 export declare function classifierPrompt(text: string): string;
 export declare function parseClassifier(answer: string): boolean;
+
+// The online grader (src/qa/grade.ts): plain checks on a sampled share of finished runs, for the staff triage queue
+export type QaFinding = { kind: string; severity: "high" | "medium" | "low"; source: string; subject: string; repro: string; fix: string };
+export declare function sampled(runId: string, rate: number): boolean;
+export declare function gradeRun(o: { runId: string; reply: string; calls: { name: string; ok: boolean }[]; ws: Workspace; apps: string[]; today: string }): QaFinding[];
+export declare const GRADER_SAMPLE_RATE: number;

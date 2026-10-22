@@ -43,7 +43,9 @@
     "test:channels": "esbuild scripts/channels-test.mts --bundle --platform=node --format=esm --outfile=.channels-test.mjs --log-level=error && node .channels-test.mjs; s=$?; rm -f .channels-test.mjs; exit $s",
     "proof:read": "esbuild scripts/eval/proof-dump.ts --bundle --platform=node --format=esm --outfile=.proof-dump.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .proof-dump.mjs > .proofs.json && python3 -I scripts/eval/proof-read.py .proofs.json scripts/eval/proof-log.json; s=$?; rm -f .proof-dump.mjs .proofs.json; exit $s",
     "strict:read": "esbuild scripts/eval/strict-dump.ts --bundle --platform=node --format=esm --outfile=.strict-dump.mjs --log-level=error && node .strict-dump.mjs > .strict.json && python3 -I scripts/eval/proof-read.py .strict.json scripts/eval/strict-log.json .strict-checks.json; s=$?; rm -f .strict-dump.mjs .strict.json .strict-checks.json; exit $s",
-    "test:accuracy":"esbuild scripts/eval/accuracy.ts --bundle --platform=node --format=esm --outfile=.accuracy-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .accuracy-test.mjs; s=$?; rm -f .accuracy-test.mjs; exit $s"
+    "test:accuracy":"esbuild scripts/eval/accuracy.ts --bundle --platform=node --format=esm --outfile=.accuracy-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .accuracy-test.mjs; s=$?; rm -f .accuracy-test.mjs; exit $s",
+    "qa": "node scripts/qa.mjs",
+    "econ":"esbuild scripts/econ/measure.ts --bundle --platform=node --format=esm --outfile=.econ.mjs '--external:*.pdf?inline' --external:thinking-orbs --external:playwright-core --log-level=error && node .econ.mjs; s=$?; rm -f .econ.mjs; exit $s"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

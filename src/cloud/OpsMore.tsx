@@ -15,10 +15,10 @@ import { keep, SLOW_MS, totals, tree, type Span, type TraceFilter } from "../tra
    throttles, the slowest and most expensive runs with a replay of each, and the weekly summaries), partners (approve,
    set the share, record payouts) and the incident log. Each opens at /app/queue/<tab>. */
 
-export type OpsTab = "filings" | "reviews" | "health" | "partners" | "incidents";
+export type OpsTab = "filings" | "reviews" | "health" | "quality" | "partners" | "incidents";
 const TABS: { id: OpsTab; label: Bi }[] = [
   { id: "filings", label: B("Filing queue", "申报队列") }, { id: "reviews", label: B("Review queue", "审核队列") },
-  { id: "health", label: B("Agent health", "Agent 健康") }, { id: "partners", label: B("Partners", "合作伙伴") }, { id: "incidents", label: B("Incident log", "事件记录") },
+  { id: "health", label: B("Agent health", "Agent 健康") }, { id: "quality", label: B("Quality", "质量") }, { id: "partners", label: B("Partners", "合作伙伴") }, { id: "incidents", label: B("Incident log", "事件记录") },
 ];
 export const useOpsTab = (): OpsTab => { const { sub } = useApp(); return TABS.some(t => t.id === sub) ? (sub as OpsTab) : "filings"; };
 
@@ -70,7 +70,62 @@ export function OpsMore({ tab }: { tab: Exclude<OpsTab, "filings"> }) {
   if (tab === "reviews") return <ReviewQueue />;
   if (tab === "health") return <AgentHealth />;
   if (tab === "partners") return <PartnersAdmin />;
+  if (tab === "quality") return <QualityQueue />;
   return <Incidents />;
+}
+
+/* ------------------------------ the quality queue ------------------------------ */
+
+const QA_KIND: Record<ops.QaFinding["kind"], Bi> = {
+  drift: B("An agency's page no longer says what we quote", "机构网页已不再是我们引用的内容"),
+  fee: B("An agency's fee may have changed", "机构费用可能已变"),
+  stale: B("A rule due for its re-read date", "规则需要更新核对日期"),
+  unreachable: B("An agency's page didn't open", "机构网页无法打开"),
+  grader: B("A finished run broke a check", "已完成的运行未通过检查"),
+  edge: B("A way of writing a business or address breaks a plan", "某种业务或地址写法导致方案出错"),
+};
+const QA_SEV: Record<ops.QaFinding["severity"], Bi> = { high: B("High", "高"), medium: B("Medium", "中"), low: B("Low", "低") };
+
+/** What the nightly sweep, the mutation generator and the online grader found, the most severe first, each with how to
+ *  see it again and the fix it proposes. Staff approve the fix, mark it fixed or dismiss it; nothing here changes what a
+ *  customer sees or files anything. */
+function QualityQueue() {
+  const { b, lang, say } = useApp();
+  const zh = lang === "zh";
+  const [rows, setRows] = useState<ops.QaFinding[] | null>(null);
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const load = useCallback(async () => { try { setRows(await ops.qaQueue()); } catch (e) { say((e as api.ApiError).message); setRows([]); } }, [say]);
+  useEffect(() => { void load(); }, [load]);
+  const decide = async (r: ops.QaFinding, status: "approved" | "dismissed" | "fixed") => {
+    if (status === "dismissed" && !(notes[r.id] ?? "").trim()) { say(zh ? "请说明为什么不处理。" : "Say why it's dismissed."); return; }
+    try { await ops.qaDecide(r.id, status, notes[r.id]); say(zh ? "已记录" : "Recorded"); await load(); } catch (e) { say((e as api.ApiError).message); }
+  };
+  const list = rows ?? [], count = (s: ops.QaFinding["severity"]) => list.filter(r => r.severity === s).length;
+  return (
+    <Frame tab="quality" title={B("Quality", "质量")} sub={B("What the nightly sweep of agency pages, the mutation generator and the online grader found. A safe fee fix arrives as a draft pull request; everything else waits for you here. Nothing here changes what a customer sees.", "每晚的机构网页核查、变体测试和在线评分发现的问题。安全的费用修正会以草稿合并请求提交；其他问题都在这里等您处理。这里的操作不会改变客户看到的内容。")}>
+      <dl className="hq-tot ops-tot">
+        <div className={count("high") ? "warn" : ""}><dt>{b(QA_SEV.high)}</dt><dd>{count("high")}</dd></div>
+        <div><dt>{b(QA_SEV.medium)}</dt><dd>{count("medium")}</dd></div>
+        <div><dt>{b(QA_SEV.low)}</dt><dd>{count("low")}</dd></div>
+      </dl>
+      {rows === null ? <p className="quiet">{zh ? "加载中…" : "Loading…"}</p> : list.length === 0 ? <div className="empty"><p>{zh ? "没有待处理的问题。" : "Nothing to look at."}</p></div> : (
+        <div className="rq-list">{list.map(r => (
+          <article key={r.id} className="rq">
+            <header><span><b>{b(QA_KIND[r.kind])}</b><small>{[b(QA_SEV[r.severity]), r.subject, r.seen > 1 ? (zh ? `出现 ${r.seen} 次` : `seen ${r.seen} times`) : "", r.status === "approved" ? (zh ? "已批准修正" : "fix approved") : ""].filter(Boolean).join(zh ? "，" : ", ")}</small></span><Sla due={r.due_at} /></header>
+            <p className="rq-meta">{r.repro}</p>
+            <q className="rq-note">{r.fix}</q>
+            {r.source.startsWith("https://") && <p className="rq-meta"><a href={r.source} target="_blank" rel="noreferrer">{r.source}<I.ext /></a></p>}
+            <form className="rq-form" onSubmit={e => { e.preventDefault(); void decide(r, "fixed"); }}>
+              <input value={notes[r.id] ?? ""} onChange={e => setNotes(x => ({ ...x, [r.id]: e.target.value }))} maxLength={2000} placeholder={zh ? "备注（不处理时必填）" : "A note (needed to dismiss)"} aria-label={zh ? "备注" : "Note"} />
+              {r.status !== "approved" && <button type="button" className="sbtn" onClick={() => void decide(r, "approved")}>{zh ? "批准修正" : "Approve the fix"}</button>}
+              <button type="button" className="sbtn" onClick={() => void decide(r, "dismissed")}>{zh ? "不处理" : "Dismiss"}</button>
+              <button type="submit" className="sbtn ink">{zh ? "已修正" : "Mark fixed"}</button>
+            </form>
+          </article>
+        ))}</div>
+      )}
+    </Frame>
+  );
 }
 
 /* ------------------------------ the review queue ------------------------------ */

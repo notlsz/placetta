@@ -1,0 +1,490 @@
+{
+  "measured": "2026-10-22",
+  "prices": "supabase/functions/_shared/ai_cost.ts (Anthropic and Gemini read 2026-10-22)",
+  "assumptions": "src/economics.ts ASSUME (FOUNDER TO CONFIRM)",
+  "journeys": [
+    {
+      "id": "chat_turn",
+      "what": "One chat turn on an open store (the average of \"what's due\" and \"which licenses\")",
+      "calls": 2,
+      "prompt": 29111.5,
+      "cached": 13639.5,
+      "output": 41.5,
+      "gemini": 0.0128,
+      "gemini2027": 0.0256,
+      "geminiNoCache": 0.022,
+      "anthropic": 0.0405,
+      "thinkingPer1k": 0.0075,
+      "thinkingPer1k2027": 0.015
+    },
+    {
+      "id": "new_license",
+      "what": "A new license: found, prepared, filled from the workspace, put up for approval",
+      "calls": 5,
+      "prompt": 56051,
+      "cached": 44208,
+      "output": 429,
+      "gemini": 0.0138,
+      "gemini2027": 0.0276,
+      "geminiNoCache": 0.0436,
+      "anthropic": 0.0383,
+      "thinkingPer1k": 0.0188,
+      "thinkingPer1k2027": 0.0375
+    },
+    {
+      "id": "complex_license",
+      "what": "A complex license: beer and wine in Flushing (SLA license, community board notice, TTB registration)",
+      "calls": 5,
+      "prompt": 57150,
+      "cached": 42476,
+      "output": 626,
+      "gemini": 0.0165,
+      "gemini2027": 0.0331,
+      "geminiNoCache": 0.0452,
+      "anthropic": 0.0472,
+      "thinkingPer1k": 0.0188,
+      "thinkingPer1k2027": 0.0375
+    },
+    {
+      "id": "renewal",
+      "what": "A renewal the monitor starts: found, prepared, filled, put up for approval",
+      "calls": 5,
+      "prompt": 67426,
+      "cached": 53294,
+      "output": 282,
+      "gemini": 0.0157,
+      "gemini2027": 0.0313,
+      "geminiNoCache": 0.0516,
+      "anthropic": 0.0435,
+      "thinkingPer1k": 0.0188,
+      "thinkingPer1k2027": 0.0375
+    },
+    {
+      "id": "plan_markets_4",
+      "what": "A four-city entry: four stores added, one plan_markets packet",
+      "calls": 3,
+      "prompt": 34133,
+      "cached": 15586,
+      "output": 219,
+      "gemini": 0.0159,
+      "gemini2027": 0.0318,
+      "geminiNoCache": 0.0264,
+      "anthropic": 0.0501,
+      "thinkingPer1k": 0.0113,
+      "thinkingPer1k2027": 0.0225
+    }
+  ],
+  "filer": {
+    "tokensPerStep": 1732,
+    "usdPerStep": 0.0041,
+    "steps": 30,
+    "maxSteps": 80,
+    "usdAtMax": 0.3251
+  },
+  "routeMix": {
+    "licenses": 580,
+    "stores": 63,
+    "byRoute": {
+      "portal": 248,
+      "email": 1,
+      "fax": 0,
+      "mail": 0,
+      "owner": 15,
+      "team": 316
+    },
+    "byTier": {
+      "license": 471,
+      "free": 66,
+      "complex": 109
+    },
+    "automatedShare": 0.4293,
+    "renewalsPerStoreYear": 2.21,
+    "renewalTeamShare": 0.3853
+  },
+  "teamMinutesPerLicense": 31.34,
+  "fixedMonthUsd": 172,
+  "fixedYearUsd": 2064,
+  "items": [
+    {
+      "item": "Store plan, a store a month (typical)",
+      "price": 149,
+      "ai": 0.7,
+      "delivery": 0.08,
+      "team": 0.57,
+      "stripe": 5.39,
+      "cost": 6.74,
+      "margin": 0.9547651006711408,
+      "note": "20 chat turns, 4 weekly checks, 0.11 included renewals"
+    },
+    {
+      "item": "Store plan, a store a month (heavy chat)",
+      "price": 149,
+      "ai": 3,
+      "delivery": 0.08,
+      "team": 0.57,
+      "stripe": 5.39,
+      "cost": 9.04,
+      "margin": 0.9393288590604028,
+      "note": "200 chat turns"
+    },
+    {
+      "item": "Store plan, a store a month (abusive: at the allowance)",
+      "price": 149,
+      "ai": 44,
+      "delivery": 0.08,
+      "team": 0.57,
+      "stripe": 5.39,
+      "cost": 50.04,
+      "margin": 0.6641610738255034,
+      "note": "the gate holds AI at the store plan's $44 allowance (the $50 ceiling less running cost)"
+    },
+    {
+      "item": "New license",
+      "price": 299,
+      "ai": 0.01,
+      "delivery": 0.06,
+      "team": 31.34,
+      "stripe": 8.97,
+      "cost": 40.38,
+      "margin": 0.8649498327759197,
+      "note": "route mix measured over 580 licenses"
+    },
+    {
+      "item": "New license, pessimistic AI and all by the team",
+      "price": 299,
+      "ai": 0.04,
+      "delivery": 0,
+      "team": 45,
+      "stripe": 8.97,
+      "cost": 54.01,
+      "margin": 0.8193645484949833,
+      "note": "worst route, the team files it"
+    },
+    {
+      "item": "Complex license (liquor)",
+      "price": 999,
+      "ai": 0.02,
+      "delivery": 0,
+      "team": 300,
+      "stripe": 29.27,
+      "cost": 329.29,
+      "margin": 0.6703803803803804,
+      "note": "team-led: hearings, notices, corrections"
+    },
+    {
+      "item": "Renewal the plan doesn't include ($99)",
+      "price": 99,
+      "ai": 0.02,
+      "delivery": 0,
+      "team": 30,
+      "stripe": 3.17,
+      "cost": 33.19,
+      "margin": 0.6647474747474748,
+      "note": "it needs the team by definition"
+    },
+    {
+      "item": "Four-city entry (plan_markets), the planning run",
+      "price": 0,
+      "ai": 0.02,
+      "delivery": 0,
+      "team": 0,
+      "stripe": 0,
+      "cost": 0.02,
+      "margin": -1,
+      "note": "the plan preview is free; licenses are bought one by one"
+    }
+  ],
+  "customers": [
+    {
+      "who": "One store, open",
+      "stores": 1,
+      "opens": 0,
+      "revenue": 1872.23,
+      "cost": 109.12,
+      "margin": 0.9417165626018171,
+      "licensesIncluded": 0,
+      "aiRunStoreMonth": 6.4,
+      "teamStoreMonth": 2.7,
+      "feesStoreMonth": 7.02,
+      "fits": true,
+      "profitStoreMonth": 146.93
+    },
+    {
+      "who": "One store, opening (the typical San José restaurant)",
+      "stores": 1,
+      "opens": 1,
+      "revenue": 7455.23,
+      "cost": 1171.56,
+      "margin": 0.8428539428025695,
+      "licensesIncluded": 0,
+      "aiRunStoreMonth": 14.1,
+      "teamStoreMonth": 50.99,
+      "feesStoreMonth": 265.18,
+      "fits": true,
+      "profitStoreMonth": 349.09
+    },
+    {
+      "who": "5-store chain, opens 1 a year",
+      "stores": 5,
+      "opens": 1,
+      "revenue": 14944.14,
+      "cost": 1608.03,
+      "margin": 0.8923972874986449,
+      "licensesIncluded": 0,
+      "aiRunStoreMonth": 8.5,
+      "teamStoreMonth": 15.87,
+      "feesStoreMonth": 77.43,
+      "fits": true,
+      "profitStoreMonth": 202.06
+    },
+    {
+      "who": "20-store chain, opens 1 a year",
+      "stores": 20,
+      "opens": 1,
+      "revenue": 38338.57,
+      "cost": 3105.53,
+      "margin": 0.9189972395944868,
+      "licensesIncluded": 11,
+      "aiRunStoreMonth": 6.39,
+      "teamStoreMonth": 6.23,
+      "feesStoreMonth": 6.85,
+      "fits": true,
+      "profitStoreMonth": 143.22
+    },
+    {
+      "who": "20-store chain, opens 5 a year (25% growth)",
+      "stores": 20,
+      "opens": 5,
+      "revenue": 41914.57,
+      "cost": 6798.21,
+      "margin": 0.8378079507913359,
+      "licensesIncluded": 55,
+      "aiRunStoreMonth": 6.38,
+      "teamStoreMonth": 18.8,
+      "feesStoreMonth": 6.24,
+      "fits": true,
+      "profitStoreMonth": 130.06
+    },
+    {
+      "who": "10-store chain, opens 3 a year (25% growth, just over the line)",
+      "stores": 10,
+      "opens": 3,
+      "revenue": 21404.29,
+      "cost": 3860.69,
+      "margin": 0.8196300835019522,
+      "licensesIncluded": 33,
+      "aiRunStoreMonth": 6.38,
+      "teamStoreMonth": 21.59,
+      "feesStoreMonth": 6.1,
+      "fits": true,
+      "profitStoreMonth": 127.13
+    }
+  ],
+  "guardrail": {
+    "aiShareOfRevenueAlert": 0.1,
+    "aiNoRevenueAlertUsd": 5,
+    "teamOverBudgetFactor": 1.5,
+    "graderSampleRate": 0.2,
+    "sweepStaleDays": 90
+  },
+  "ceiling": {
+    "max": 50,
+    "soft": 35,
+    "running": 5.48,
+    "aiHard": 44,
+    "aiSoft": 29
+  },
+  "heavyMonth": {
+    "chats": 200,
+    "licenses": 5,
+    "complex": 1,
+    "teamRenewals": 2,
+    "ai": 8.91,
+    "running": 5.48,
+    "licenseAi": 0.37,
+    "fees": 2692,
+    "team": 516.7,
+    "feeStripe": 80.46
+  },
+  "perChatTurn": {
+    "typical": 0.0128,
+    "worst": 0.0405
+  },
+  "filingKinds": [
+    {
+      "kind": "business_license",
+      "form": "sj-business-tax",
+      "route": "team",
+      "before": {
+        "runs": 2,
+        "rounds": 7,
+        "tools": 5,
+        "prompt": 81852,
+        "usd": 0.0253
+      },
+      "after": {
+        "runs": 2,
+        "rounds": 4,
+        "tools": 2,
+        "prompt": 41977,
+        "usd": 0.0186
+      },
+      "profileComplete": {
+        "runs": 1,
+        "rounds": 2,
+        "usd": 0.0093
+      },
+      "teamMinutes": 45
+    },
+    {
+      "kind": "health_permit",
+      "form": "nyc-fse",
+      "route": "portal",
+      "before": {
+        "runs": 2,
+        "rounds": 7,
+        "tools": 5,
+        "prompt": 79557,
+        "usd": 0.0241
+      },
+      "after": {
+        "runs": 2,
+        "rounds": 4,
+        "tools": 2,
+        "prompt": 42239,
+        "usd": 0.0184
+      },
+      "profileComplete": {
+        "runs": 1,
+        "rounds": 2,
+        "usd": 0.0095
+      },
+      "teamMinutes": 15
+    },
+    {
+      "kind": "sellers_permit",
+      "form": "ca-cdtfa",
+      "route": "portal",
+      "before": {
+        "runs": 2,
+        "rounds": 7,
+        "tools": 5,
+        "prompt": 85973,
+        "usd": 0.0265
+      },
+      "after": {
+        "runs": 2,
+        "rounds": 4,
+        "tools": 2,
+        "prompt": 43851,
+        "usd": 0.0195
+      },
+      "profileComplete": {
+        "runs": 1,
+        "rounds": 2,
+        "usd": 0.0101
+      },
+      "teamMinutes": 15
+    },
+    {
+      "kind": "sign_permit",
+      "form": "sj-sign",
+      "route": "portal",
+      "before": {
+        "runs": 2,
+        "rounds": 7,
+        "tools": 5,
+        "prompt": 81165,
+        "usd": 0.0243
+      },
+      "after": {
+        "runs": 2,
+        "rounds": 4,
+        "tools": 2,
+        "prompt": 41484,
+        "usd": 0.0178
+      },
+      "profileComplete": {
+        "runs": 1,
+        "rounds": 2,
+        "usd": 0.0093
+      },
+      "teamMinutes": 15
+    },
+    {
+      "kind": "building_permit",
+      "form": "sj-building-ti",
+      "route": "portal",
+      "before": {
+        "runs": 2,
+        "rounds": 7,
+        "tools": 5,
+        "prompt": 81650,
+        "usd": 0.0247
+      },
+      "after": {
+        "runs": 2,
+        "rounds": 4,
+        "tools": 2,
+        "prompt": 41801,
+        "usd": 0.018
+      },
+      "profileComplete": {
+        "runs": 1,
+        "rounds": 2,
+        "usd": 0.0094
+      },
+      "teamMinutes": 15
+    },
+    {
+      "kind": "liquor",
+      "form": "ny-sla-rw",
+      "route": "portal",
+      "before": {
+        "runs": 2,
+        "rounds": 7,
+        "tools": 5,
+        "prompt": 79722,
+        "usd": 0.0238
+      },
+      "after": {
+        "runs": 2,
+        "rounds": 4,
+        "tools": 2,
+        "prompt": 41423,
+        "usd": 0.0178
+      },
+      "profileComplete": {
+        "runs": 1,
+        "rounds": 2,
+        "usd": 0.0093
+      },
+      "teamMinutes": 300
+    },
+    {
+      "kind": "entity_registration",
+      "form": "ca-llc-1",
+      "route": "portal",
+      "before": {
+        "runs": 2,
+        "rounds": 7,
+        "tools": 5,
+        "prompt": 83600,
+        "usd": 0.0265
+      },
+      "after": {
+        "runs": 2,
+        "rounds": 4,
+        "tools": 2,
+        "prompt": 42275,
+        "usd": 0.0192
+      },
+      "profileComplete": {
+        "runs": 1,
+        "rounds": 2,
+        "usd": 0.0093
+      },
+      "teamMinutes": 15
+    }
+  ]
+}

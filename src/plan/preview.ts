@@ -189,6 +189,8 @@ const EMPLOYER_FORMS = new Set(["md-cra", "hi-ui", "ut-ui", "ny-dol-100", "ca-ed
 const ALCOHOL = /\b(beer|wine|liquor|alcohol(ic)?|spirits|cocktails?|sake|soju|brewery|brewpub|pub|tavern|wine bar|cocktail bar|sports bar)\b|啤酒|葡萄酒|白酒|洋酒|酒吧|酒水|卖酒/i;
 const NO_ALCOHOL = /\b(no|without|non-?)\s*(alcohol|beer|wine|liquor)|alcohol-free|不(卖|售)酒|无酒精/i;
 export const sellsAlcohol = (what: string) => ALCOHOL.test(what) && !NO_ALCOHOL.test(what);
+/** What it is says it sells food from a vehicle or cart: "food truck", "taco truck", "餐车". */
+export const mobileFood = (what: string) => /\b(food trucks?|food carts?|mobile food|catering trucks?|taco trucks?|ice cream trucks?|food trailers?)\b|餐车|流动餐|流动摊/i.test(what);
 /** What it is says it imports what it sells. */
 export const imports = (what: string) => /\bimport(s|er|ers|ing)?\b|进口|跨境/i.test(what);
 /** What it is says it puts tables outside: "café with a terrace", "outdoor seating", "露台". */
@@ -288,10 +290,12 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
   const today = o.today ?? daysFromNow(0);
   const segment = segmentOf(what);
   const food = dealsInFood(what, segment);
-  const employees = o.employees ?? true, buildout = o.buildout ?? true;
+  // a food truck or cart has no premises to build out or put a sign on
+  const mobile = mobileFood(what);
+  const employees = o.employees ?? true, buildout = o.buildout ?? !mobile;
   const alcohol = o.alcohol ?? sellsAlcohol(what);
   // a furniture brand: wood goods, upholstered furniture and clothing storage units, read from what it is (src/forms/furniture.ts)
-  const needs = { food, employees, signage: o.signage ?? true, buildout, newEntity: !(o.entity ?? "").trim(), imports: o.imports ?? imports(what), alcohol, terrace: o.terrace ?? terrace(what), ...furnitureNeeds(what) };
+  const needs = { food, employees, signage: o.signage ?? !mobile, buildout, newEntity: !(o.entity ?? "").trim(), imports: o.imports ?? imports(what), alcohol, terrace: o.terrace ?? terrace(what), ...furnitureNeeds(what) };
   const info = placeInfo(where), places = placesOf(where);
   const country = info.country ?? "US";
   const us = country === "US";
@@ -377,6 +381,16 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
       } : {
         id: "food-permit", level: healthLevel, name: B(term[0], term[1]), ask: healthAsk, agency: health, source: !healthKnown ? permitter?.src ?? ask.source : SRC_SBA, est: B("Issued after the opening inspection", "开业检查通过后发放"),
         plain: B("The permit that lets a food place open, issued after an inspection. Odelia confirms the issuing office and its form.", "让餐饮场所开业的许可证，检查通过后发放。Odelia 会核实发证机构及其表格。"),
+      }, today) });
+    }
+    // a food truck or cart: the fixed facility's plan check and health permit don't apply. The health office permits the
+    // vehicle itself, usually with a commissary it works from; the library has none of those forms yet, so the row
+    // abstains and names who decides, instead of listing a restaurant's permits
+    if (mobile && foodPlace) {
+      for (let k = rows.length - 1; k >= 0; k--) if (["food", "plan"].includes(roleOf(rows[k].f, rows[k].a))) rows.splice(k, 1);
+      rows.push({ order: ORDER.food, f: null, a: generic({
+        id: "mobile-food", level: healthLevel, name: B("Mobile food facility permit (the vehicle, and its commissary)", "流动食品设施许可（车辆及其后勤厨房）"), ask: healthAsk, agency: health, source: ask.source,
+        plain: B("A food truck or cart is permitted as a vehicle, not a building: the health office inspects it and usually the commissary it works from. Odelia confirms the office and its forms.", "餐车或食品推车按车辆而非建筑发证：卫生部门检查车辆，通常还会检查其后勤厨房。Odelia 会核实办理机构及表格。"),
       }, today) });
     }
     if (alcohol && !forms.some(f => f.needs?.alcohol && f.level !== "federal")) {

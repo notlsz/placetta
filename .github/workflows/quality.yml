@@ -1,0 +1,48 @@
+# The nightly quality run (docs/QUALITY.md): re-reads every agency page Placetta's rules quote and every form's own fee,
+# runs the mutation generator over the accuracy fixtures, sends what it finds to the staff triage queue, and opens a
+# draft pull request for the safe class of fix (a fee changed on the form's own cited page). Nothing is merged, deployed
+# or filed by it: a person reviews every pull request and every other finding in the queue.
+# Every action is pinned to a full commit SHA (the tag it was taken from is in the comment).
+name: Quality
+on:
+  schedule:
+    - cron: "23 9 * * *"   # 09:23 UTC, after the US night
+  workflow_dispatch:
+concurrency:
+  group: quality
+  cancel-in-progress: false
+permissions: { contents: write, pull-requests: write }
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      # unset, findings stay in the run's artifact and nothing reaches the queue
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.QA_SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Sweep, mutate and propose safe fixes
+        id: qa
+        run: npm run qa -- --sweep --mutate --fix
+        continue-on-error: true
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with: { name: qa-findings, path: qa-findings.json, retention-days: 30 }
+      - name: Draft pull request for the safe fixes
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          if git diff --quiet -- src/forms; then echo "no safe fixes"; exit 0; fi
+          branch="qa/safe-fixes-$(date -u +%Y%m%d)"
+          git config user.name "Claude"
+          git config user.email "noreply@anthropic.com"
+          git checkout -b "$branch"
+          git add src/forms
+          git commit -m "Registry: fees changed on the agencies' own pages (nightly sweep)"
+          git push origin "$branch"
+          gh pr create --draft --title "Registry fees from the nightly sweep" --body "Each change is a fee the form's own cited page now shows (qa-findings.json in the run's artifact lists the page and the day it was read). Review against the page before merging; nothing deploys until a person merges."
+      - name: Fail on a high finding
+        if: steps.qa.outcome == 'failure'
+        run: exit 1

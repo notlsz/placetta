@@ -57,6 +57,7 @@ import { secretValues, withoutEnv } from "../_shared/secrets.ts";
 // Agent memory (src/odeliaMemory/): read before a run, saved after it
 // @ts-types="./agent.d.ts"
 import { loadMemory, saveRun, type RunMemory } from "./agent.js";
+import { gradeRun, GRADER_SAMPLE_RATE, sampled } from "./agent.js";
 import { memoryDb, pastRuns } from "./memory.ts";
 
 type Workspace = ReturnType<typeof normalizeState>;
@@ -154,7 +155,8 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
     throw err("not_configured", "Add a model key (for example ANTHROPIC_API_KEY) in the Edge Function secrets.");
   if (overTaskLimit(who.spent, TASK_LIMIT_USD)) throw err("task_limit", "This task grew too large for one go, so I stopped here. Ask for the next part on its own.");
   // budget, rate limits and the company's ceiling
-  const g = await gate(admin, (k) => Deno.env.get(k), ws, who.uid, "call");
+  // a call after this task's first one is mid-task: never stopped part way for the allowance (saver mode instead)
+  const g = await gate(admin, (k) => Deno.env.get(k), ws, who.uid, "call", { midTask: (who.events?.length ?? 0) > 0 });
   if (!g.ok) throw err(g.code, g.message);
   // kept with the run, so a run that fails on our side or the vendor's gives these calls back (refundFailed)
   if (who.events && who.events.length < 500) who.events.push(g.event);
@@ -392,6 +394,25 @@ async function distill(ws: string, w: Workspace, evidence: unknown, keys: string
   for (const id of d.contradict) await admin.rpc("lesson_vote", { p_lesson: id, p_ws: ws, p_vote: -1 });
   for (const n of d.fresh) await admin.rpc("lesson_add", { p_ws: ws, p_kind: n.kind, p_key: n.key, p_en: n.text.en, p_zh: n.text.zh, p_url: n.source_url ?? null, p_official: n.official });
   return { confirm: d.confirm.length, contradict: d.contradict.length, added: d.fresh.length };
+}
+
+/** The online grader (src/qa/grade.ts): a sampled share of finished runs is graded with plain checks, no model, and
+ *  what it finds goes to the staff triage queue (qa_report). Never changes the run or what the person sees. */
+export async function gradeOnline(run: Run, w: Workspace, st: RunState, reply: Reply) {
+  try {
+    if (!sampled(run.id, GRADER_SAMPLE_RATE)) return;
+    const msgs = (st.messages ?? []) as { role: string; content: unknown }[];
+    const names = new Map<string, string>(), calls: { name: string; ok: boolean }[] = [], apps = new Set<string>();
+    for (const m of msgs) for (const b of (Array.isArray(m.content) ? m.content : []) as Record<string, unknown>[]) {
+      if (b.type === "tool_use") names.set(String(b.id), String(b.name));
+      if (b.type === "tool_result") {
+        calls.push({ name: names.get(String(b.tool_use_id)) ?? "?", ok: !b.is_error });
+        for (const id of String(b.content ?? "").match(/"application_id":"([^"]{1,80})"/g) ?? []) apps.add(id.slice(18, -1));
+      }
+    }
+    const found = gradeRun({ runId: run.id, reply: reply.text.map((t) => t.en).join("\n"), calls, ws: w, apps: [...apps], today: new Date().toISOString().slice(0, 10) });
+    if (found.length) { const { error } = await admin.rpc("qa_report", { p_findings: found }); if (error) console.error("qa_report", error.code); }
+  } catch (e) { console.error("grade run", run.id, String((e as Error)?.message ?? e).slice(0, 160)); }
 }
 
 export async function learnFromRun(run: Run, w: Workspace, st: RunState, reply: Reply) {
@@ -783,6 +804,7 @@ export async function work(runId: string, token: string | null, ticket: string |
     bg(cacheLog(runId, state));
     bg(saveMemory(run, memory, state, cur, out.reply, who, who0.actor.role));
     bg(learnFromRun(run, cur, state, out.reply));
+    bg(gradeOnline(run, cur, state, out.reply));
   } catch (e) {
     clearTimeout(flushT);
     // An instance that lost the run says and saves nothing: the one holding it does.

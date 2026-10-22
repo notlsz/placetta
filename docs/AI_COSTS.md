@@ -9,6 +9,11 @@ the section on it says what it rests on.
 Code: `supabase/functions/_shared/llm.ts` (routes and vendor rules), `ai_cost.ts` (prices), `ai_gate.ts` (the gate),
 migration `20261016160000_ai_routing_margin.sql` (saver mode, alerts, throttles, margin views).
 
+Prices were read again from Anthropic's and Google's own pages on 2026-10-22: Gemini 3.8 Flash is $0.75 in and $3.75
+out (it had been priced at half that), doubling on 2027-01-01; Sonnet and Opus 5.5 read cached tokens at 5%; Gemini
+2.5 at 10%. The measured cost of each journey and the margin per customer are in `docs/UNIT-ECONOMICS.md`; the
+estimates on this page are the older budget and run lower than the measured AI per job on the cheap route.
+
 ## The roles and their routes
 
 Gemini first (3.8 Flash for the work, 2.5 Flash when 3.8 is unavailable), Anthropic as the

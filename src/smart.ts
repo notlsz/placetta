@@ -11,6 +11,7 @@ import { formById, placesOf, segmentOf } from "./forms/registry";
 import type { Application, Approval, Field, Status, Store, Workspace } from "./model";
 import { publishedDays, type FormStat } from "./plan";
 import { BY_HAND, carriesIdentifier, emailsIn, governmentAddress, SECRET_NOTE, secretNumber } from "./guard";
+import { ein as einCheck, latin as latinCheck, premises as premisesCheck, PREMISES_LINE } from "./validate";
 
 /* ------------------------------------------------------------------ preflight */
 
@@ -64,10 +65,13 @@ const RULES: Rule[] = [
   { test: /\b(ssn|social security|itin)\b/i, check: (v, c) =>
       v.includes("•") ? null : /^(\d{3}|\*{3}|x{3})-?(\d{2}|\*{2}|x{2})-?\d{4}$/i.test(v.trim()) || (/\b(f?ein|tin|tax id)\b/i.test(c.label) && /^\d{2}-?\d{7}$/.test(v.trim())) ? null
       : err(B(c.label, c.label), B("A Social Security number or ITIN is 9 digits.", "社会安全号或 ITIN 为 9 位数字。")) },
-  { test: /\b(ein|fein)\b|employer identification|federal (tax|employer) id/i, check: (v, c) =>
-      v.includes("•") ? null : /^\d{2}-?\d{7}$/.test(v.trim()) ? null
-      : /applied|pending|apply/i.test(v) ? warn(B(c.label, c.label), B("No EIN yet. Most agencies won't take the filing until it's issued.", "尚未取得 EIN。多数机构要等 EIN 下发后才受理。"))
-      : err(B(c.label, c.label), B("An EIN is 9 digits, written 12-3456789.", "EIN 为 9 位数字，格式如 12-3456789。")) },
+  { test: /\b(ein|fein)\b|employer identification|federal (tax|employer) id/i, check: (v, c) => {
+      if (v.includes("•")) return null;
+      if (/applied|pending|apply/i.test(v) && !/\d{2}-?\d{7}/.test(v)) return warn(B(c.label, c.label), B("No EIN yet. Most agencies won't take the filing until it's issued.", "尚未取得 EIN。多数机构要等 EIN 下发后才受理。"));
+      // the format, a prefix the IRS assigns, and an ITIN written where the EIN goes (src/validate.ts)
+      const p = einCheck(v);
+      return p ? { level: p.level, label: B(c.label, c.label), note: p.note } : null;
+    } },
   { test: /e-?mail/i, check: (v, c) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.trim()) ? null : err(B(c.label, c.label), B("That isn't an email address.", "这不是有效的电子邮箱地址。")) },
   { test: /phone|telephone|mobile|\bcell\b|\bfax\b/i, check: (v, c) => {
       const d = digits(v);
@@ -89,7 +93,9 @@ const RULES: Rule[] = [
       if (/birth|\bdob\b/i.test(c.label) && d > c.today) return err(B(c.label, c.label), B("A birth date can't be in the future.", "出生日期不能晚于今天。"));
       return null;
     } },
-  { test: /address/i, skip: /mail|e-?mail|home|residen|owner|officer|member|agent|landlord|billing|previous|web/i, check: (v, c) => {
+  { test: /address|premises|business location|location of (the )?business/i, skip: /mail|e-?mail|home|residen|owner|officer|member|agent|landlord|billing|previous|web/i, check: (v, c) => {
+      // where the business is can't be a P.O. box (src/validate.ts premises)
+      if (PREMISES_LINE.test(c.label) || /^(business |store |site )?address$/i.test(c.label.trim())) { const p = premisesCheck(v); if (p) return { level: p.level, label: B(c.label, c.label), note: p.note }; }
       const s = c.app && storeOfApp(c.w, c.app.id);
       if (!s?.address) return null;
       const city = cityOf(s.address), no = streetNo(s.address), val = v.toLowerCase();
@@ -154,6 +160,8 @@ export function preflight(w: Workspace, a: Approval, today: string): Preflight {
     if (PLACEHOLDER.test(v)) { add(err(f.label, B("Still has a placeholder in it.", "仍包含占位文字。")), f.id); continue; }
     // the line against its source: a value read from a document must say what the document's own words say
     if (f.quote) { const s = sourceCheck(f, v); if (s) { add(s, f.id); continue; } }
+    // a US agency's own form takes English letters (src/validate.ts latin); abroad, the agency's own script is fine
+    if (offForm && (offForm.currency ?? "USD") === "USD" && a.kind === "file") { const p = latinCheck(v); if (p) { add({ level: p.level, label: f.label, note: p.note }, f.id); continue; } }
     for (const r of RULES) {
       if (!r.test.test(label) || r.skip?.test(label)) continue;
       add(r.check(v, { w, app, today, label }), f.id);

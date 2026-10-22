@@ -208,8 +208,20 @@ export function fromOpenAI(d: Record<string, unknown>, model: string): Record<st
   return {
     id: String(d.id ?? ""), type: "message", role: "assistant", model, content,
     stop_reason: content.some((b) => b.type === "tool_use") ? "tool_use" : fr === "length" ? "max_tokens" : "end_turn",
-    usage: { input_tokens: Math.max(0, Number(u.prompt_tokens ?? 0) - cached), output_tokens: Number(u.completion_tokens ?? 0), ...(cached ? { cache_read_input_tokens: cached } : {}) },
+    usage: { input_tokens: Math.max(0, Number(u.prompt_tokens ?? 0) - cached), output_tokens: billedOutput(u), ...(cached ? { cache_read_input_tokens: cached } : {}) },
   };
+}
+
+/** The output tokens a vendor bills, from OpenAI-style usage. Gemini 3 models always think ("Reasoning cannot be turned
+ *  off for Gemini 2.5 Pro or 3 models", ai.google.dev/gemini-api/docs/openai) and bill thinking as output; OpenAI counts
+ *  reasoning inside completion_tokens, but a vendor that reports it apart (in total_tokens or reasoning_tokens) would
+ *  otherwise go unpriced. The largest reading wins, so thinking is never left out of a call's cost. */
+export function billedOutput(u: Record<string, unknown>): number {
+  const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) && v > 0 ? v : 0);
+  const completion = num(u.completion_tokens);
+  const reasoning = num(((u.completion_tokens_details as Record<string, unknown>) ?? {}).reasoning_tokens);
+  const rest = num(u.total_tokens) ? Math.max(0, num(u.total_tokens) - num(u.prompt_tokens)) : 0;
+  return Math.max(completion, rest, reasoning > completion ? completion + reasoning : 0);
 }
 
 /** One call to Anthropic. A streamed answer that started fine is left unread for the caller (text is ""); anything

@@ -31,6 +31,8 @@ const KIND: Record<string, Bi> = {
   line_health: B("An iMessage line needs care", "iMessage 线路需要处理"),
   ai_spend: B("Unusual AI spend, in saver mode today", "AI 用量异常，今日为节省模式"),
   ask_person: B("A customer asks for a person", "客户请求真人协助"),
+  margin: B("AI cost is high against this customer's revenue", "AI 成本相对该客户收入偏高"),
+  team_time: B("This filing took longer than its budget", "此项申报用时超出预算"),
 };
 
 /** What Odelia's models cost this month against what the plans pay, with the ten workspaces that cost the most. */
@@ -84,6 +86,7 @@ function Detail({ f, me, onChange }: { f: api.QueueRow; me: string; onChange: ()
   const [payUrl, setPayUrl] = useState(f.payment_url ?? "");
   const [fee, setFee] = useState(String(f.fee_paid ?? f.fee_estimate ?? ""));
   const [note, setNote] = useState(f.note ?? "");
+  const [minutes, setMinutes] = useState("");
   const [checked, setChecked] = useState(f.requirements_checked);
   useEffect(() => setChecked(f.requirements_checked), [f.requirements_checked]);
   useEffect(() => { void api.listLogins(f.workspace_id).then(setLogins).catch(() => setLogins([])); }, [f.workspace_id]);
@@ -176,6 +179,13 @@ function Detail({ f, me, onChange }: { f: api.QueueRow; me: string; onChange: ()
           <b>{lang === "zh" ? "已提交至机构" : "Submitted to the agency"}</b>
           <input value={conf} onChange={e => setConf(e.target.value)} placeholder={lang === "zh" ? "确认号" : "Confirmation number"} aria-label="Confirmation number" />
           <Pill sm kind="ink">{lang === "zh" ? "标记已提交" : "Mark submitted"}</Pill>
+        </form>
+
+        <form className="q-form" onSubmit={e => { e.preventDefault(); const n = Math.round(Number(minutes)); if (!(n >= 1 && n <= 1440)) { say(lang === "zh" ? "请输入 1 到 1440 分钟" : "Enter 1 to 1440 minutes"); return; }
+          void api.addTeamMinutes(f.id, n).then(r => { setMinutes(""); say(lang === "zh" ? `共 ${r.minutes} 分钟，预算 ${r.budget} 分钟${r.over ? "，已超出" : ""}` : `${r.minutes} minutes in all, budget ${r.budget}${r.over ? ", over it" : ""}`); }, er => say((er as api.ApiError).message)); }}>
+          <b>{lang === "zh" ? "团队用时" : "Team time on this filing"}</b>
+          <input value={minutes} onChange={e => setMinutes(e.target.value)} inputMode="numeric" placeholder={lang === "zh" ? "分钟" : "Minutes"} aria-label={lang === "zh" ? "分钟" : "Minutes"} className="sm" />
+          <Pill sm>{lang === "zh" ? "记录" : "Add"}</Pill>
         </form>
 
         <div className="q-row">

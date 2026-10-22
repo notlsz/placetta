@@ -51,6 +51,8 @@ export const TOOL_SCOPES: Record<string, Scope> = {
   memory_suggest: "draft",
   draft_message: "send", send_email: "send",
   request_filing_approval: "file",
+  // prepares, fills and puts complete filings up for approval through the tools above (src/filingPlaybooks)
+  follow_playbook: "file",
   request_purchase: "pay",
   remove_store: "delete", remove_application: "delete",
   change_setting: "settings",

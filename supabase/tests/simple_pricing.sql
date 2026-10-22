@@ -23,7 +23,8 @@ begin
     'a legacy customer keeps its plan', public.plan_of(wl) = 'entry',
     'with 10 or more stores on the plan every license is included', public.plan_of(wc) = 'monthly' and public.can_file_app(wc, 'any'),
     'the store plan alone does not file a new license', public.plan_of(wp) = 'monthly' and not public.can_file_app(wp, 'any'),
-    'a store plan gets Odelia''s allowance per store', (public.ai_budget(wp)->>'budget_usd')::numeric = 75,
+    -- the $50 store ceiling (20261025090000_margin_guard): $44 of AI a store, saver mode from $29
+    'a store plan gets Odelia''s allowance per store', (public.ai_budget(wp)->>'budget_usd')::numeric = 132 and (public.ai_budget(wp)->>'soft_usd')::numeric = 87,
     'a legacy customer on a paid plan files as before', public.can_file_app(wl, 'x') = public.can_file(wl),
     'the simple model gets Odelia free, with a small allowance', (public.ai_budget(w)->>'plan') = 'simple' and (public.ai_budget(w)->>'budget_usd')::numeric = 5,
     'a legacy workspace without a plan still gets no AI', (public.ai_budget(wl)->>'plan') = 'entry_ended',
