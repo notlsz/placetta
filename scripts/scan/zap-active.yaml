@@ -1,0 +1,38 @@
+# ZAP automation plan: the active scan (it sends attack payloads), for LOCAL targets only: the local build
+# (scripts/scan/serve-dist.mjs) and the local edge functions (scripts/scan/backend.ts, every outside service stubbed).
+# Never point this at production. Run by scripts/scan/local.sh; ${SITE}, ${API} and ${OUT} come from its environment.
+env:
+  contexts:
+    - name: placetta-local
+      urls: ["${SITE}/", "${SITE}/app/"]   # the API is seeded by the requestor job below
+      includePaths: ["${SITE}/.*", "${API}/.*"]
+      excludePaths: ["${SITE}/guides/(?!new-york-city/milk-tea-shop|answers/get-an-ein).*", "${SITE}/.*\\.(png|jpg|jpeg|webp|svg|mp4|mp3|pdf|woff2?)$"]
+  parameters: { failOnError: true, progressToStdout: true }
+jobs:
+  - type: passiveScan-config
+    parameters: { maxAlertsPerRule: 10, scanOnlyInScope: true }
+  # the functions take JSON bodies and query parameters; seed the scanner with one request each so it has something to inject into
+  - type: requestor
+    requests:
+      - { url: "${API}/functions/v1/partner-api/v1/plan?type=Milk%20tea&city=Flushing,%20NY&ref=ABCD2345&lang=en", method: GET }
+      - { url: "${API}/functions/v1/partner-api/v1/referrals", method: GET, headers: ["Authorization:Bearer plk_0a1b2c3d_000000000000000000000000000000000000000000000000"] }
+      - { url: "${API}/functions/v1/mcp", method: POST, headers: ["Content-Type:application/json", "Authorization:Bearer plc_mcp_abcd1234_000000000000000000000000000000000000000000000000"], data: '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"plan_preview","arguments":{"business":"tea","city":"Flushing, NY"}}}' }
+      - { url: "${API}/functions/v1/agent-run", method: POST, headers: ["Content-Type:application/json"], data: '{"action":"start","workspace_id":"00000000-0000-0000-0000-000000000000","prompt":"hi"}' }
+      - { url: "${API}/functions/v1/file", method: POST, headers: ["Content-Type:application/json"], data: '{"action":"view","id":"00000000-0000-0000-0000-000000000000"}' }
+      - { url: "${API}/functions/v1/sso", method: POST, headers: ["Content-Type:application/json"], data: '{"action":"status","workspace_id":"00000000-0000-0000-0000-000000000000"}' }
+      - { url: "${API}/functions/v1/oauth-callback?state=x&code=y", method: GET }
+      - { url: "${API}/functions/v1/calendar-feed?t=abc", method: GET }
+      - { url: "${API}/rest/v1/rpc/partner_lookup", method: POST, headers: ["Content-Type:application/json"], data: '{"p_code":"ABCD2345"}' }
+      - { url: "${API}/rest/v1/plan_requests", method: POST, headers: ["Content-Type:application/json"], data: '{"email":"a@b.test","market":"Flushing, NY"}' }
+  - type: spider
+    parameters: { context: placetta-local, url: "${SITE}/", maxDuration: 2, maxChildren: 15 }
+  - type: passiveScan-wait
+    parameters: { maxDuration: 5 }
+  - type: activeScan
+    parameters: { context: placetta-local, maxRuleDurationInMins: 2, maxScanDurationInMins: 25, threadPerHost: 2, maxAlertsPerRule: 10 }
+  - type: passiveScan-wait
+    parameters: { maxDuration: 5 }
+  - type: report
+    parameters: { template: traditional-json, reportDir: "${OUT}", reportFile: zap-active.json }
+  - type: report
+    parameters: { template: traditional-html, reportDir: "${OUT}", reportFile: zap-active.html }

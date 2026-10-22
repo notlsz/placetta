@@ -27,3 +27,5 @@ leads/
 .claude/worktrees/
 bundles/
 qa-findings.json
+# npm run scan:local reports
+scan-results/

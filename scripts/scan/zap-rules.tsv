@@ -1,0 +1,7 @@
+10055	WARN	(CSP: style-src unsafe-inline. Accepted: inline style attributes, no inline scripts; docs/SECURITY-AUDIT.md)
+90003	IGNORE	(SRI missing: only the Google Fonts stylesheet, whose CSS differs per browser so it cannot carry a hash)
+10096	IGNORE	(Timestamp disclosure: numbers in the minified bundle, not server times)
+90004	IGNORE	(COEP missing: require-corp would block Google Fonts; COOP same-origin is sent)
+10027	IGNORE	(Suspicious comments: layout notes in the page source, no secrets or internals)
+10109	IGNORE	(Modern web application: informational)
+10049	IGNORE	(Non-storable content: no-cache on purpose for the landing page and app shell)
