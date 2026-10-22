@@ -45,7 +45,7 @@
     ".foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}.foot p{margin:0;font-size:12px;color:#98A0AB;max-width:34ch}" +
     ".w{margin:10px 0 0;padding:8px 12px;border-radius:10px;background:#FBF3E3;color:#A86F14;font-size:13px}" +
     "@media (max-width:520px){.b{padding:18px 16px}form{grid-template-columns:minmax(0,1fr)}.go{width:100%}li{grid-template-columns:20px minmax(0,1fr)}li em{grid-column:2}}";
-  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
   var money = function (n) { return "$" + Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 }); };
 
   function mount(host) {
@@ -65,7 +65,7 @@
           (plan.fees_set_by_agency ? (lang === "zh" ? "，" : ", ") + t("varies", { v: plan.fees_set_by_agency }) : "") + "</span><ol>" +
           shown.map(function (p, i) { return "<li><i>" + (i + 1) + "</i><span>" + esc(p.name[lang] || p.name.en) + "<small>" + esc(p.agency[lang] || p.agency.en) + "</small></span><em>" + (p.fee_usd == null ? t("free") : p.fee_usd === 0 ? t("none") : money(p.fee_usd)) + "</em></li>"; }).join("") + "</ol>" +
           (rest > 0 ? "<p class='m'>" + t("more", { n: rest }) + "</p>" : "") +
-          "<div class='foot'><p>" + t("note") + (plan.partner ? " " + t("with", { p: esc(plan.partner.org_name) }) : "") + "</p><a class='st' target='_blank' rel='noopener' href='" + esc(plan.start_url) + "'>" + t("start") + "</a></div></div>";
+          "<div class='foot'><p>" + t("note") + (plan.partner ? " " + t("with", { p: esc(plan.partner.org_name) }) : "") + "</p><a class='st' target='_blank' rel='noopener' href='" + esc(/^https:\/\//.test(String(plan.start_url)) ? plan.start_url : "https://placetta.com/app/") + "'>" + t("start") + "</a></div></div>";
       }
       root.innerHTML = html + "</div>";
     }

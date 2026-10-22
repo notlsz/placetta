@@ -6,7 +6,7 @@ import { I } from "./ui";
 import { awayWait, cadence, continuePrompt, family, nextAction, nextRun, progress, proven, storeOf, type Job, type Routine } from "./jobs";
 import { reportLines } from "./finish";
 import { PREVIEW } from "./cloud/api";
-import { toolbox } from "./harness";
+import { toolbox } from "./jobs";
 import { hasReplay } from "./replay";
 import { AgentBot, StoreBot } from "./Bot";
 import type { Store, Workspace } from "./model";

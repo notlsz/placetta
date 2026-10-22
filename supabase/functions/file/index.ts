@@ -522,7 +522,7 @@ async function signed(f: Filing, path: string, by: string) {
   if (last?.kind !== "wet_signature") throw new HttpError("bad_request", "This filing isn't waiting for a signed copy.");
   const d = DEST[f.payload.official ?? ""];
   if (!canFaxSignedFor(f, d, env())) throw new HttpError("bad_request", "Placetta can't fax this form yet. Send it yourself, then tap \"I've done it\".", "快哉暂时无法传真这份表格。请您自行提交，然后点击“我已完成”。");
-  if (!path.startsWith(`${f.workspace_id}/`)) throw new HttpError("bad_request", "That file isn't in this workspace.");
+  if (!path.startsWith(`${f.workspace_id}/`) || path.split("/").some((p) => p === ".." || p === ".")) throw new HttpError("bad_request", "That file isn't in this workspace.");
   const { data: doc, error } = await admin.from("documents").select("path, name, mime").eq("workspace_id", f.workspace_id).eq("path", path).maybeSingle();
   if (error) throw new Error(`documents lookup failed: ${error.code ?? ""}`);
   if (!doc) throw new HttpError("bad_request", "Upload the signed copy to Documents first.");

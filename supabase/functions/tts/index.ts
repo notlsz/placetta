@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
   const key = Deno.env.get("AZURE_SPEECH_KEY"), region = Deno.env.get("AZURE_SPEECH_REGION");
-  if (!key || !region) return fail(503, "not_configured", "Set AZURE_SPEECH_KEY and AZURE_SPEECH_REGION in the Edge Function secrets.");
+  if (!key || !region) return (console.error("not configured: set the speech key and region in the Edge Function secrets"), fail(503, "not_configured", "Voice isn't set up on the server yet."));
   // the reply text goes to Microsoft's speech service: only when it's on the zero-retention list, if one is required
   if (!zdrAllows((k) => Deno.env.get(k), "azure_speech")) return fail(503, "not_configured", "Reading aloud is off: zero data retention is required and azure_speech isn't on AI_ZDR_PROVIDERS.");
 

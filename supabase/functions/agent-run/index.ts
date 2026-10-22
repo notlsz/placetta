@@ -151,8 +151,10 @@ type Who = { uid: string | null; spent: number; reduced?: "allowance" | "throttl
  */
 async function model(ws: string, body: Record<string, unknown>, deep: boolean, location: { city?: string; region?: string } | undefined, signal: AbortSignal, role: Role = "plan", who: Who = { uid: null, spent: 0 }, onText?: (text: string) => void) {
   if (signal.aborted) throw err("cancelled", "Stopped");
-  if (!configured())
-    throw err("not_configured", "Add a model key (for example ANTHROPIC_API_KEY) in the Edge Function secrets.");
+  if (!configured()) {
+    console.error("not configured: add a model key in the Edge Function secrets");
+    throw err("not_configured", "The agent isn't set up on the server yet. Placetta's team has been told.");
+  }
   if (overTaskLimit(who.spent, TASK_LIMIT_USD)) throw err("task_limit", "This task grew too large for one go, so I stopped here. Ask for the next part on its own.");
   // budget, rate limits and the company's ceiling
   // a call after this task's first one is mid-task: never stopped part way for the allowance (saver mode instead)
@@ -1124,7 +1126,7 @@ export async function handle(req: Request): Promise<Response> {
     const may = await mayUseAgent(admin, ws, uid);
     if (may === "not_member") return fail(403, "forbidden", "This isn't their workspace.");
     if (may === "no_plan") return fail(402, "payment_required", "Get the entry plan to start the agent.");
-    if (!configured()) return fail(503, "not_configured", "Add a model key (ANTHROPIC_API_KEY or GEMINI_API_KEY) in the Edge Function secrets.");
+    if (!configured()) return (console.error("not configured: add a model key in the Edge Function secrets"), fail(503, "not_configured", "The agent isn't set up on the server yet. Placetta's team has been told."));
     const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
     if (!prompt) return fail(400, "bad_request", "prompt is required.");
     const history = (Array.isArray(body.history) ? body.history : []).filter((t: { role?: string; content?: unknown }) => (t.role === "user" || t.role === "assistant") && typeof t.content === "string").slice(-8)
@@ -1169,7 +1171,7 @@ export async function handle(req: Request): Promise<Response> {
     const { data: plan } = await admin.rpc("plan_of", { ws });
     if (plan === "none") return fail(402, "payment_required", "Get the entry plan to start the agent.");
   }
-  if (!configured()) return fail(503, "not_configured", "Add a model key (ANTHROPIC_API_KEY or GEMINI_API_KEY) in the Edge Function secrets.");
+  if (!configured()) return (console.error("not configured: add a model key in the Edge Function secrets"), fail(503, "not_configured", "The agent isn't set up on the server yet. Placetta's team has been told."));
   const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
   if (!prompt) return fail(400, "bad_request", "prompt is required.");
   // "/apply" and "/go" carry out an owner's approval (held changes, an approved plan: src/held.ts): only an owner starts them
