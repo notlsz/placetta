@@ -88,7 +88,7 @@ language plpgsql security definer set search_path = '' as $$
 declare m date := date_trunc('month', now() at time zone 'utc')::date; b public.billing; used int; charged int; had public.filing_charges; nid uuid;
 begin
   if p_kind not in ('sales_tax', 'entity', 'amendment', 'other') then return jsonb_build_object('ok', false, 'code', 'bad_kind'); end if;
-  if p_cents is null or p_cents <= 0 or p_cents > 500000 then return jsonb_build_object('ok', false, 'code', 'bad_price'); end if;
+  if p_cents is null or p_cents < 0 or p_cents > 500000 then return jsonb_build_object('ok', false, 'code', 'bad_price'); end if;
   select * into b from public.billing where workspace_id = p_ws for update;
   if b.workspace_id is null then return jsonb_build_object('ok', false, 'code', 'no_billing'); end if;
   select * into had from public.filing_charges where workspace_id = p_ws and ref = p_ref and month = m and status <> 'void';
@@ -99,6 +99,8 @@ begin
     insert into public.filing_charges (workspace_id, ref, kind, month, cents, status, approved_by, settled_at) values (p_ws, p_ref, p_kind, m, 0, 'allowance', p_user, now()) returning id into nid;
     return jsonb_build_object('ok', true, 'id', nid, 'kind', 'allowance', 'again', false);
   end if;
+  -- past the allowance a charge needs its price: the one the owner was shown
+  if p_cents = 0 then return jsonb_build_object('ok', false, 'code', 'price_changed'); end if;
   if coalesce(b.filing_cap_cents, 0) <= 0 then return jsonb_build_object('ok', false, 'code', 'no_cap'); end if;
   if charged + p_cents > b.filing_cap_cents then return jsonb_build_object('ok', false, 'code', 'over_cap', 'left_cents', greatest(b.filing_cap_cents - charged, 0)); end if;
   insert into public.filing_charges (workspace_id, ref, kind, month, cents, status, approved_by) values (p_ws, p_ref, p_kind, m, p_cents, 'reserved', p_user) returning id into nid;

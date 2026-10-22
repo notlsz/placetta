@@ -52,6 +52,8 @@ begin
   res := res || jsonb_build_object('an owner sets a $100 cap', (select filing_cap_cents from public.billing where workspace_id = w) = 10000,
     'with an audit line', exists (select 1 from public.audit_log where workspace_id = w and action->>'en' like 'Set the monthly cap%'));
 
+  r := public.filing_charge_reserve(w, 'zero', 'entity', 0, 4, o);
+  res := res || jsonb_build_object('past the allowance, a charge needs the price shown', r->>'code' = 'price_changed');
   r := public.filing_charge_reserve(w, 'app-5', 'entity', 4900, 4, o);
   cid := (r->>'id')::uuid;
   res := res || jsonb_build_object('past the allowance under the cap: reserved', r->>'kind' = 'charge' and (select status from public.filing_charges where id = cid) = 'reserved');
