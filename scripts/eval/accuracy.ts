@@ -56,9 +56,10 @@ const load = (name: string): Gold[] => { const d = setDir(name); if (!d) return 
 // kinds: the same place opened as a different kind of food business (a bubble tea shop and a restaurant on one Flushing
 // street, a bakery at the San Gabriel restaurant's address), scored on the filings and on what differs by kind
 // (scripts/eval/kinds, src/forms/kinds.ts).
+// world: store openings abroad (src/forms/europe.ts, src/forms/mexico.ts), each answer quoted in the agency's language.
 // furniture: furniture brands importing and opening showrooms (an upholstered brand into Los Angeles, a dresser brand
 // into New Jersey), scored on the filings (src/forms/furniture.ts) and on what the plan states beyond them.
-const SETS = (process.env.SET ? [process.env.SET] : process.env.GENERAL_ONLY ? ["heldout"] : ["gold", "heldout", "strict", "kinds", "furniture"]).map(name => ({ name, cases: load(name) }));
+const SETS = (process.env.SET ? [process.env.SET] : process.env.GENERAL_ONLY ? ["heldout"] : ["gold", "heldout", "strict", "kinds", "furniture", "world"]).map(name => ({ name, cases: load(name) }));
 // npm passes its own arguments after the script's "exit", so the quiet mode is an environment variable: QUIET=1
 const showMisses = !process.env.QUIET;
 /** A row that hedges whether the requirement applies ("if the city requires one", "We'll confirm with ...") asserts
@@ -242,6 +243,7 @@ const TITLE: Record<string, string> = {
   strict: "Strict set (scripts/eval/strict: top cities and states, every answer quoted from its official page)",
   kinds: "Store-type set (scripts/eval/kinds: the same place as a tea shop, coffee shop, bakery or restaurant)",
   furniture: "Furniture set (scripts/eval/furniture: furniture brands importing and opening showrooms)",
+  world: "World set (scripts/eval/world: store openings in Europe and Mexico, quoted in the agencies' own languages)",
 };
 
 /* ------------------------------------------------------------------ what differs by kind of business */

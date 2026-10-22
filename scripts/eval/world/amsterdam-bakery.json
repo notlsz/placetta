@@ -1,0 +1,174 @@
+{
+ "id": "amsterdam-bakery",
+ "title": "A bakery in Amsterdam",
+ "read": "2026-10-21",
+ "input": {
+  "what": "Bakery",
+  "where": "Amsterdam, Netherlands",
+  "lang": "en"
+ },
+ "assumptions": "A new Dutch BV opening a bakery with staff, a fit-out and a sign. The operating permit applies if customers eat and drink on the premises; the environment and planning permits apply when the works, the use or the sign need one.",
+ "items": [
+  {
+   "key": "nl-bv",
+   "name": "Private limited company (BV) through a civil-law notary",
+   "agency": "Civil-law notary (notaris)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://business.gov.nl/starting-your-business/preparations/step-by-step-plan-how-to-start-a-business-in-the-netherlands/",
+   "quote": "Private limited companies and public limited companies have to register via a civil-law notary.",
+   "read": "2026-10-21",
+   "match": "\\bnl-bv\\b",
+   "agencyMatch": "Civil-law notary"
+  },
+  {
+   "key": "nl-kvk",
+   "name": "Business register entry (KVK)",
+   "agency": "Kamer van Koophandel (KVK)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+   "quote": "New businesses must register with the Netherlands Chamber of Commerce KVK.",
+   "read": "2026-10-21",
+   "match": "\\bnl-kvk\\b",
+   "agencyMatch": "Kamer van Koophandel"
+  },
+  {
+   "key": "nl-btw",
+   "name": "VAT numbers from the tax office (Belastingdienst)",
+   "agency": "Belastingdienst",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+   "quote": "If the Tax Administration sees you as an entrepreneur, you will receive a VAT identification number and a VAT number.",
+   "read": "2026-10-21",
+   "match": "\\bnl-btw\\b",
+   "agencyMatch": "Belastingdienst"
+  },
+  {
+   "key": "nl-loonheffing",
+   "name": "Employer registration for payroll tax",
+   "agency": "Belastingdienst",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://business.gov.nl/starting-your-business/registering-your-business/registering-with-the-netherlands-tax-administration/",
+   "quote": "Before you can hire staff, you will first need to register as an employer for social security purposes with the Tax Administration.",
+   "read": "2026-10-21",
+   "match": "\\bnl-loonheffing\\b",
+   "agencyMatch": "Belastingdienst"
+  },
+  {
+   "key": "nl-nvwa",
+   "name": "Food business registration with the NVWA",
+   "agency": "Nederlandse Voedsel- en Warenautoriteit (NVWA)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+   "quote": "If your company manufactures, processes, or sells food products, you must register your business with the Netherlands Food and Consumer Product Safety Authority (NVWA).",
+   "read": "2026-10-21",
+   "match": "\\bnl-nvwa\\b",
+   "agencyMatch": "Nederlandse Voedsel- en Warenautoriteit"
+  },
+  {
+   "key": "eu-food-hygiene",
+   "name": "EU food hygiene rules (Regulation (EC) 852/2004)",
+   "agency": "European Union (Regulation (EC) 852/2004), checked by the national food inspectors",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://food.ec.europa.eu/food-safety/biological-safety/food-hygiene_en",
+   "quote": "All food businesses operating in the EU, regardless of their size or type, must comply with basic hygiene requirements.",
+   "read": "2026-10-21",
+   "match": "\\beu-food-hygiene\\b",
+   "agencyMatch": "European Union"
+  },
+  {
+   "key": "nl-brand",
+   "name": "Fire safety measures (checked by the municipality and the fire service)",
+   "agency": "The gemeente (municipality): Gemeente Amsterdam, Gemeente Rotterdam",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+   "quote": "You must also take fire safety measures.",
+   "read": "2026-10-21",
+   "match": "\\bnl-brand\\b",
+   "agencyMatch": "The gemeente"
+  },
+  {
+   "key": "nl-exploitatie",
+   "name": "Catering operating permit for the premises (exploitatievergunning)",
+   "agency": "The gemeente (municipality): Gemeente Amsterdam, Gemeente Rotterdam",
+   "level": "city",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "source": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+   "quote": "If customers eat and drink in your restaurant or café you need a catering establishment operating permit",
+   "read": "2026-10-21",
+   "match": "\\bnl-exploitatie\\b",
+   "agencyMatch": "The gemeente",
+   "condition": "Only when it applies to this opening (see the assumptions)."
+  },
+  {
+   "key": "nl-omgeving",
+   "name": "Environment and planning permit, where the plans don't fit the environment plan",
+   "agency": "The gemeente (municipality): Gemeente Amsterdam, Gemeente Rotterdam",
+   "level": "city",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "source": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+   "quote": "If your plans do not fit within the environment plan, you will need to apply for an environment and planning permit",
+   "read": "2026-10-21",
+   "match": "\\bnl-omgeving\\b",
+   "agencyMatch": "The gemeente",
+   "condition": "Only when it applies to this opening (see the assumptions)."
+  },
+  {
+   "key": "nl-reclame",
+   "name": "Permit for the shop sign",
+   "agency": "The gemeente (municipality): Gemeente Amsterdam, Gemeente Rotterdam",
+   "level": "city",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "source": "https://business.gov.nl/starting-your-business/starting-situations/starting-a-hotel-restaurant-or-cafe-step-by-step-plan/",
+   "quote": "In that case, you will often need an environment and planning permit as well.",
+   "read": "2026-10-21",
+   "match": "\\bnl-reclame\\b",
+   "agencyMatch": "The gemeente",
+   "condition": "Only when it applies to this opening (see the assumptions)."
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "US filings",
+   "why": "Not in the US.",
+   "match": "irs-|cbp-|fincen|\\bEIN\\b|secretary of state"
+  },
+  {
+   "name": "Alcohol and terrace",
+   "why": "No alcohol, no terrace asked for.",
+   "match": "alcohol|terras"
+  },
+  {
+   "name": "Product safety and wood rules",
+   "why": "Not a seller of consumer goods or furniture.",
+   "match": "eu-gpsr|eu-eudr|eu-ppwr"
+  }
+ ]
+}

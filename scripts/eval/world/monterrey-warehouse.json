@@ -1,0 +1,107 @@
+{
+ "id": "monterrey-warehouse",
+ "title": "A warehouse in Monterrey",
+ "read": "2026-10-21",
+ "input": {
+  "what": "Warehouse",
+  "where": "Monterrey, Nuevo León, Mexico",
+  "lang": "en"
+ },
+ "assumptions": "A new Mexican company opening a warehouse for non-food goods, with staff. IMSS's and Monterrey civil protection's pages couldn't be read, so those rows abstain and are set aside.",
+ "items": [
+  {
+   "key": "mx-sociedad",
+   "name": "Company incorporation before a Mexican notary (fedatario público)",
+   "agency": "Notario or corredor público, then the Registro Público de Comercio",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.sat.gob.mx/gobmx/Paginas/Ficha_43_cff.html",
+   "quote": "Documento constitutivo protocolizado (copia certificada).",
+   "quoteEn": "Notarised deed of incorporation (certified copy).",
+   "read": "2026-10-21",
+   "match": "\\bmx-sociedad\\b",
+   "agencyMatch": "Notario or corredor público"
+  },
+  {
+   "key": "mx-rfc",
+   "name": "Federal taxpayer registration (RFC) with the SAT",
+   "agency": "Servicio de Administración Tributaria (SAT)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.sat.gob.mx/gobmx/Paginas/Ficha_43_cff.html",
+   "quote": "Personas morales de nueva creación a través de sus representantes legales",
+   "quoteEn": "Newly created companies, through their legal representatives",
+   "read": "2026-10-21",
+   "match": "\\bmx-rfc\\b",
+   "agencyMatch": "Servicio de Administración Tributaria"
+  },
+  {
+   "key": "mx-mty-edificacion",
+   "name": "Building use licence (uso de edificación), or the SARE fast track",
+   "agency": "Municipio de Monterrey, Secretaría de Desarrollo Urbano Sostenible",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.monterrey.gob.mx/pdf/new/Procedimientos/Sedue/P_SDU_DEC_16_Licencia_del_Uso_de_Edificacion.pdf",
+   "quote": "solicitar la autorización del municipio para hacer construcciones en diferentes zonas habitacionales y determinar el funcionamiento específico del predio",
+   "quoteEn": "apply for the city's authorisation to build in different zones and set the property's specific use",
+   "read": "2026-10-21",
+   "match": "\\bmx-mty-edificacion\\b",
+   "agencyMatch": "Municipio de Monterrey"
+  },
+  {
+   "key": "mx-imss",
+   "name": "Employer registration with the IMSS",
+   "agency": "Instituto Mexicano del Seguro Social (IMSS)",
+   "level": "federal",
+   "required": true,
+   "verified": false,
+   "fee": null,
+   "source": "https://www.gob.mx/imss",
+   "match": "\\bmx-imss\\b",
+   "agencyMatch": "Instituto Mexicano del Seguro Social",
+   "note": "No sentence on the agency's page could be read in this pass: the row abstains and names the office; set aside."
+  },
+  {
+   "key": "mx-mty-pc",
+   "name": "Civil protection sign-off",
+   "agency": "Municipio de Monterrey, Dirección de Protección Civil",
+   "level": "city",
+   "required": true,
+   "verified": false,
+   "fee": null,
+   "source": "https://www.monterrey.gob.mx",
+   "match": "\\bmx-mty-pc\\b",
+   "agencyMatch": "Municipio de Monterrey",
+   "note": "No sentence on the agency's page could be read in this pass: the row abstains and names the office; set aside."
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "US filings",
+   "why": "Not in the US.",
+   "match": "irs-|cbp-|fincen|\\bEIN\\b|secretary of state"
+  },
+  {
+   "name": "EU-wide rules",
+   "why": "Not in the EU.",
+   "match": "\\beu-"
+  },
+  {
+   "name": "Food filings",
+   "why": "A warehouse for non-food goods.",
+   "match": "cofepris"
+  },
+  {
+   "name": "Mexico City's notices",
+   "why": "Not in Mexico City.",
+   "match": "mx-cdmx"
+  }
+ ]
+}

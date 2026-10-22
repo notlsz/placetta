@@ -1,0 +1,124 @@
+{
+ "id": "madrid-coffee",
+ "title": "A coffee shop in Madrid",
+ "read": "2026-10-21",
+ "input": {
+  "what": "Coffee shop",
+  "where": "Madrid, Spain",
+  "lang": "en"
+ },
+ "assumptions": "A new Spanish SL opening a coffee shop with staff and a fit-out. Madrid's food handler and health registration rules weren't quotable from an official page in this pass, so they aren't scored.",
+ "items": [
+  {
+   "key": "es-sl",
+   "name": "Limited company (SL) deed and commercial register entry",
+   "agency": "Notary and Registro Mercantil",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://paeelectronico.es/Documents/Formacion/SociedadResponsabilidadLimitada/1.1%20INFOGRAFIA_sociedad%20limitada_constitucion_DEF.pdf",
+   "quote": "firmen la Escritura Pública de constitución de la sociedad. Este es un trámite obligatorio.",
+   "quoteEn": "sign the public deed of incorporation of the company. This step is mandatory.",
+   "read": "2026-10-21",
+   "match": "\\bes-sl\\b",
+   "agencyMatch": "Notary and Registro Mercantil"
+  },
+  {
+   "key": "es-nif",
+   "name": "Company tax number (NIF)",
+   "agency": "Agencia Tributaria",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://sede.agenciatributaria.gob.es/Sede/censos/plazo-presentacion-modelo-306-037.html",
+   "quote": "Las personas jurídicas y entidades sin personalidad jurídica, deberán solicitar su NIF antes de realizar cualquier actividad u operación con trascendencia tributaria.",
+   "quoteEn": "Companies and entities without legal personality must apply for their NIF before carrying out any activity or operation with tax effect.",
+   "read": "2026-10-21",
+   "match": "\\bes-nif\\b",
+   "agencyMatch": "Agencia Tributaria"
+  },
+  {
+   "key": "es-036",
+   "name": "Tax census declaration (Modelo 036) for VAT and income tax",
+   "agency": "Agencia Tributaria",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://sede.agenciatributaria.gob.es/Sede/censos/plazo-presentacion-modelo-306-037.html",
+   "quote": "Debes presentar la declaración censal de alta antes del inicio de tus actividades u operaciones",
+   "quoteEn": "You must file the census registration return before you start your activities or operations",
+   "read": "2026-10-21",
+   "match": "\\bes-036\\b",
+   "agencyMatch": "Agencia Tributaria"
+  },
+  {
+   "key": "es-ss",
+   "name": "Employer registration with Social Security (contribution account code)",
+   "agency": "Tesorería General de la Seguridad Social",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.seg-social.es/wps/portal/wss/internet/Empresarios/Inscripcion/1227/1234",
+   "quote": "Applications for Contribution Account Codes, changes to details or end of active contributor status must be formalised by filling in the following forms:",
+   "read": "2026-10-21",
+   "match": "\\bes-ss\\b",
+   "agencyMatch": "Tesorería General de la Seguridad Social"
+  },
+  {
+   "key": "es-mad-dr",
+   "name": "Responsible declaration to open (or a licence where required)",
+   "agency": "Ayuntamiento de Madrid, Agencia de Actividades (or an authorised ECU)",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.madrid.es/portales/munimadrid/es/Como-poner-en-marcha-una-actividad-economica/?vgnextfmt=default&vgnextoid=b13a369f792f7710VgnVCM1000001d4a900aRCRD&vgnextchannel=2af331d3b28fe410VgnVCM1000000b205a0aRCRD",
+   "quote": "Declaración responsable, con carácter general, que permite una tramitación ágil y directa.",
+   "quoteEn": "A responsible declaration, as the general rule, which allows a quick and direct procedure.",
+   "read": "2026-10-21",
+   "match": "\\bes-mad-dr\\b",
+   "agencyMatch": "Ayuntamiento de Madrid"
+  },
+  {
+   "key": "eu-food-hygiene",
+   "name": "EU food hygiene rules (Regulation (EC) 852/2004)",
+   "agency": "European Union (Regulation (EC) 852/2004), checked by the national food inspectors",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://food.ec.europa.eu/food-safety/biological-safety/food-hygiene_en",
+   "quote": "All food businesses operating in the EU, regardless of their size or type, must comply with basic hygiene requirements.",
+   "read": "2026-10-21",
+   "match": "\\beu-food-hygiene\\b",
+   "agencyMatch": "European Union"
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "US filings",
+   "why": "Not in the US.",
+   "match": "irs-|cbp-|fincen|\\bEIN\\b|secretary of state"
+  },
+  {
+   "name": "Terrace",
+   "why": "No terrace asked for.",
+   "match": "terraza|terrace"
+  },
+  {
+   "name": "Barcelona's licence",
+   "why": "Not in Barcelona.",
+   "match": "es-bcn"
+  },
+  {
+   "name": "Product safety and wood rules",
+   "why": "Not a seller of consumer goods or furniture.",
+   "match": "eu-gpsr|eu-eudr|eu-ppwr"
+  }
+ ]
+}

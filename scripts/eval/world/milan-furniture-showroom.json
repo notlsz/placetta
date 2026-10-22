@@ -1,0 +1,136 @@
+{
+ "id": "milan-furniture-showroom",
+ "title": "A furniture showroom in Milan",
+ "read": "2026-10-21",
+ "input": {
+  "what": "Furniture showroom",
+  "where": "Milan, Italy",
+  "lang": "en"
+ },
+ "assumptions": "A furniture brand's showroom selling wood and upholstered furniture, formed as an Italian SRL, with staff and a sign. The SCIA covers a sales area up to 250 m² (an esercizio di vicinato); a larger showroom needs an authorisation instead.",
+ "items": [
+  {
+   "key": "it-registro",
+   "name": "Business register entry through ComUnica",
+   "agency": "Registro delle imprese, Camera di commercio",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.impresainungiorno.gov.it/web/l-impresa-e-l-europa/setting-up-a-business",
+   "quote": "Tutte le imprese di qualsiasi natura giuridica si debbono iscrivere al Registro delle imprese.",
+   "quoteEn": "Every business, whatever its legal form, must enter the business register.",
+   "read": "2026-10-21",
+   "match": "\\bit-registro\\b",
+   "agencyMatch": "Registro delle imprese"
+  },
+  {
+   "key": "it-iva",
+   "name": "VAT number (partita IVA)",
+   "agency": "Agenzia delle Entrate",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.impresainungiorno.gov.it/web/l-impresa-e-l-europa/setting-up-a-business",
+   "quote": "Agenzia delle Entrate (per i fini fiscali)",
+   "quoteEn": "Revenue Agency (for tax purposes)",
+   "read": "2026-10-21",
+   "match": "\\bit-iva\\b",
+   "agencyMatch": "Agenzia delle Entrate"
+  },
+  {
+   "key": "it-inps",
+   "name": "Employer registration with INPS and INAIL",
+   "agency": "INPS and INAIL",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.impresainungiorno.gov.it/web/l-impresa-e-l-europa/setting-up-a-business",
+   "quote": "Istituto Nazionale della Previdenza Sociale (per i fini previdenziali)",
+   "quoteEn": "National Social Security Institute (for social security purposes)",
+   "read": "2026-10-21",
+   "match": "\\bit-inps\\b",
+   "agencyMatch": "INPS and INAIL"
+  },
+  {
+   "key": "it-mil-vicinato",
+   "name": "Shop opening notice (SCIA), for a shop of up to 250 m² of sales area",
+   "agency": "Comune di Milano, SUAP (Sportello Unico Attività Produttive)",
+   "level": "city",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "source": "https://fareimpresa.comune.milano.it/it/vendita/esercizi-vicinato",
+   "quote": "Per aprire o modificare un esercizio di vicinato occorre presentare, esclusivamente per via telematica al SUAP (Sportello Unico Attività Produttive) del Comune di Milano",
+   "quoteEn": "To open or change a neighbourhood shop you must file, online only, with the City of Milan's SUAP",
+   "read": "2026-10-21",
+   "match": "\\bit-mil-vicinato\\b",
+   "agencyMatch": "Comune di Milano",
+   "condition": "Only when it applies to this opening (see the assumptions)."
+  },
+  {
+   "key": "eu-eudr",
+   "name": "Deforestation Regulation: due diligence for wood furniture",
+   "agency": "European Commission, EUDR Information System (checked by the national competent authority)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://environment.ec.europa.eu/topics/forests/deforestation/regulation-deforestation-free-products_en",
+   "quote": "Large and medium operators: 30 December 2026 Micro and small operators: 30 June 2027",
+   "read": "2026-10-21",
+   "match": "\\beu-eudr\\b",
+   "agencyMatch": "European Commission"
+  },
+  {
+   "key": "eu-gpsr",
+   "name": "General Product Safety Regulation: a responsible operator in the EU",
+   "agency": "European Union (Regulation (EU) 2023/988), enforced by the national market surveillance authority",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023R0988",
+   "quote": "A product covered by this Regulation shall not be placed on the market unless there is an economic operator",
+   "read": "2026-10-21",
+   "match": "\\beu-gpsr\\b",
+   "agencyMatch": "European Union"
+  },
+  {
+   "key": "it-mil-insegna",
+   "name": "Shop sign notice (SCIA)",
+   "agency": "Comune di Milano, Area Pubblicità e Occupazione Suolo",
+   "level": "city",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "source": "https://fareimpresa.comune.milano.it/documents/20126/526414/Modulo+SCIA+per+insegne+e+targhe+professionali.pdf/20cf0075-f30e-02af-0f4d-9886b19587b9?t=1637749345425",
+   "quote": "SEGNALAZIONE CERTIFICATA INIZIO ATTIVITA’ finalizzata alla installazione di insegne di esercizio e/o targhe professionali",
+   "quoteEn": "Certified notice of start of activity for putting up business signs or professional plates",
+   "read": "2026-10-21",
+   "match": "\\bit-mil-insegna\\b",
+   "agencyMatch": "Comune di Milano",
+   "condition": "Only when it applies to this opening (see the assumptions)."
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "US filings",
+   "why": "Not in the US.",
+   "match": "irs-|cbp-|fincen|\\bEIN\\b|secretary of state"
+  },
+  {
+   "name": "Food filings",
+   "why": "Not a food business.",
+   "match": "notifica|somministrazione|food"
+  },
+  {
+   "name": "Rome's or the national SCIA row",
+   "why": "Milan's own SUAP entry replaces it.",
+   "match": "\\bit-scia\\b"
+  }
+ ]
+}

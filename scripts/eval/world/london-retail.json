@@ -1,0 +1,173 @@
+{
+ "id": "london-retail",
+ "title": "A retail store in London",
+ "read": "2026-10-21",
+ "input": {
+  "what": "Clothing store",
+  "where": "London, UK",
+  "lang": "en"
+ },
+ "assumptions": "A new UK private limited company opening a clothing store, with staff, a fit-out and a sign. VAT applies once turnover passes the threshold; planning permission and advertisement consent apply when the change of use or the sign needs them.",
+ "items": [
+  {
+   "key": "gb-incorporate",
+   "name": "Company registration with Companies House",
+   "agency": "Companies House",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 100,
+   "source": "https://www.gov.uk/limited-company-formation/register-your-company",
+   "quote": "It costs £100 and can be paid by debit or credit card.",
+   "read": "2026-10-21",
+   "match": "\\bgb-incorporate\\b",
+   "agencyMatch": "Companies House"
+  },
+  {
+   "key": "gb-corp-tax",
+   "name": "Corporation Tax registration",
+   "agency": "HM Revenue & Customs",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.gov.uk/limited-company-formation/register-your-company",
+   "quote": "You will usually be set up for Corporation Tax at the same time,",
+   "read": "2026-10-21",
+   "match": "\\bgb-corp-tax\\b",
+   "agencyMatch": "HM Revenue & Customs"
+  },
+  {
+   "key": "gb-vat",
+   "name": "VAT registration",
+   "agency": "HM Revenue & Customs",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.gov.uk/register-for-vat",
+   "quote": "You must register if your total taxable turnover for the last 12 months goes over £90,000.",
+   "read": "2026-10-21",
+   "match": "\\bgb-vat\\b",
+   "agencyMatch": "HM Revenue & Customs"
+  },
+  {
+   "key": "gb-paye",
+   "name": "Employer registration (PAYE)",
+   "agency": "HM Revenue & Customs",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.gov.uk/register-employer",
+   "quote": "You must register before the first payday to get your employer PAYE reference number.",
+   "read": "2026-10-21",
+   "match": "\\bgb-paye\\b",
+   "agencyMatch": "HM Revenue & Customs"
+  },
+  {
+   "key": "gb-pension",
+   "name": "Workplace pension (automatic enrolment)",
+   "agency": "The Pensions Regulator",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.gov.uk/workplace-pensions-employers",
+   "quote": "You must enrol and make an employer’s contribution for all staff who:",
+   "read": "2026-10-21",
+   "match": "\\bgb-pension\\b",
+   "agencyMatch": "The Pensions Regulator"
+  },
+  {
+   "key": "gb-el-insurance",
+   "name": "Employers' liability insurance",
+   "agency": "Authorised insurer (cover the law requires)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.gov.uk/employers-liability-insurance",
+   "quote": "as soon as you become an employer to cover you for at least £5 million from an authorised insurer",
+   "read": "2026-10-21",
+   "match": "\\bgb-el-insurance\\b",
+   "agencyMatch": "Authorised insurer"
+  },
+  {
+   "key": "gb-business-rates",
+   "name": "Business rates on the premises",
+   "agency": "Local council (in London, the borough council for the address)",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.gov.uk/introduction-to-business-rates",
+   "quote": "Business rates are charged on most non-domestic properties, like:",
+   "read": "2026-10-21",
+   "match": "\\bgb-business-rates\\b",
+   "agencyMatch": "Local council"
+  },
+  {
+   "key": "gb-fire",
+   "name": "Fire risk assessment (no sign-off: the fire authority inspects)",
+   "agency": "Local fire and rescue authority",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.gov.uk/workplace-fire-safety-your-responsibilities",
+   "quote": "carry out a fire risk assessment of the premises and review it regularly",
+   "read": "2026-10-21",
+   "match": "\\bgb-fire\\b",
+   "agencyMatch": "Local fire and rescue authority"
+  },
+  {
+   "key": "gb-planning",
+   "name": "Planning permission (a change of use or major works)",
+   "agency": "Local planning authority (the council)",
+   "level": "city",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.gov.uk/planning-permission-england-wales",
+   "quote": "change the use of your building",
+   "read": "2026-10-21",
+   "match": "\\bgb-planning\\b",
+   "agencyMatch": "Local planning authority",
+   "condition": "Only when it applies to this opening (see the assumptions)."
+  },
+  {
+   "key": "gb-signage",
+   "name": "Advertisement consent for the shop sign",
+   "agency": "Local planning authority (the council)",
+   "level": "city",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.gov.uk/guidance/advertisements",
+   "quote": "Those which require the express consent of the local planning authority.",
+   "read": "2026-10-21",
+   "match": "\\bgb-signage\\b",
+   "agencyMatch": "Local planning authority",
+   "condition": "Only when it applies to this opening (see the assumptions)."
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "US filings",
+   "why": "Not in the US.",
+   "match": "irs-|cbp-|fincen|\\bEIN\\b|secretary of state"
+  },
+  {
+   "name": "EU-wide rules",
+   "why": "Not in the EU.",
+   "match": "\\beu-"
+  },
+  {
+   "name": "Food and alcohol licences",
+   "why": "A clothing store.",
+   "match": "gb-food|premises licence|personal licence|pavement"
+  }
+ ]
+}

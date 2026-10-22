@@ -1,0 +1,124 @@
+{
+ "id": "cdmx-restaurant",
+ "title": "A restaurant in Mexico City",
+ "read": "2026-10-21",
+ "input": {
+  "what": "Restaurant",
+  "where": "Mexico City, Mexico",
+  "lang": "en"
+ },
+ "assumptions": "A new Mexican S. de R.L. de C.V. opening a restaurant with staff and a fit-out. IMSS's pages refused every read, so the employer registration abstains and names IMSS; it is set aside.",
+ "items": [
+  {
+   "key": "mx-sociedad",
+   "name": "Company incorporation before a Mexican notary (fedatario público)",
+   "agency": "Notario or corredor público, then the Registro Público de Comercio",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.sat.gob.mx/gobmx/Paginas/Ficha_43_cff.html",
+   "quote": "Documento constitutivo protocolizado (copia certificada).",
+   "quoteEn": "Notarised deed of incorporation (certified copy).",
+   "read": "2026-10-21",
+   "match": "\\bmx-sociedad\\b",
+   "agencyMatch": "Notario or corredor público"
+  },
+  {
+   "key": "mx-rfc",
+   "name": "Federal taxpayer registration (RFC) with the SAT",
+   "agency": "Servicio de Administración Tributaria (SAT)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.sat.gob.mx/gobmx/Paginas/Ficha_43_cff.html",
+   "quote": "Personas morales de nueva creación a través de sus representantes legales",
+   "quoteEn": "Newly created companies, through their legal representatives",
+   "read": "2026-10-21",
+   "match": "\\bmx-rfc\\b",
+   "agencyMatch": "Servicio de Administración Tributaria"
+  },
+  {
+   "key": "mx-cdmx-zonificacion",
+   "name": "Land use certificate for the activity (uso de suelo)",
+   "agency": "Secretaría de Desarrollo Urbano y Vivienda (SEDUVI)",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.congresocdmx.gob.mx/media/documentos/674707c7d7b1fd7d269dc81619514990e9551158.pdf",
+   "quote": "Certificado de Zonificación de uso del suelo para el giro que se pretende operar",
+   "quoteEn": "Land use zoning certificate for the activity to be operated",
+   "read": "2026-10-21",
+   "match": "\\bmx-cdmx-zonificacion\\b",
+   "agencyMatch": "Secretaría de Desarrollo Urbano y Vivienda"
+  },
+  {
+   "key": "mx-cdmx-vecinal",
+   "name": "Notice of operation for a restaurant (impacto vecinal)",
+   "agency": "Mexico City alcaldía, through SEDECO's SIAPEM system",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.congresocdmx.gob.mx/media/documentos/674707c7d7b1fd7d269dc81619514990e9551158.pdf",
+   "quote": "presenten por medio del Sistema un Aviso de Funcionamiento para Establecimiento Mercantil de Impacto Vecinal",
+   "quoteEn": "file through the System a Notice of Operation for a Commercial Establishment of Neighbourhood Impact",
+   "read": "2026-10-21",
+   "match": "\\bmx-cdmx-vecinal\\b",
+   "agencyMatch": "Mexico City alcaldía"
+  },
+  {
+   "key": "mx-cofepris",
+   "name": "Health notice of operation (aviso de funcionamiento) for a food establishment",
+   "agency": "COFEPRIS (or the state health protection authority)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.gob.mx/cms/uploads/attachment/file/348567/Instructivo_Aviso_Funcionamiento.pdf",
+   "quote": "Cuando se trate de la notificación de un establecimiento nuevo o de una nueva sucursal.",
+   "quoteEn": "When notifying a new establishment or a new branch.",
+   "read": "2026-10-21",
+   "match": "\\bmx-cofepris\\b",
+   "agencyMatch": "COFEPRIS"
+  },
+  {
+   "key": "mx-imss",
+   "name": "Employer registration with the IMSS",
+   "agency": "Instituto Mexicano del Seguro Social (IMSS)",
+   "level": "federal",
+   "required": true,
+   "verified": false,
+   "fee": null,
+   "source": "https://www.gob.mx/imss",
+   "match": "\\bmx-imss\\b",
+   "agencyMatch": "Instituto Mexicano del Seguro Social",
+   "note": "No sentence on the agency's page could be read in this pass: the row abstains and names the office; set aside."
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "US filings",
+   "why": "Not in the US.",
+   "match": "irs-|cbp-|fincen|\\bEIN\\b|secretary of state"
+  },
+  {
+   "name": "EU-wide rules",
+   "why": "Not in the EU.",
+   "match": "\\beu-"
+  },
+  {
+   "name": "Monterrey's and the low-impact notice",
+   "why": "A restaurant in Mexico City is of neighbourhood impact.",
+   "match": "mx-mty|mx-cdmx-bajo"
+  },
+  {
+   "name": "Street tables",
+   "why": "No terrace asked for.",
+   "match": "enseres"
+  }
+ ]
+}

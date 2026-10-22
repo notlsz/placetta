@@ -1,0 +1,201 @@
+{
+ "id": "berlin-restaurant",
+ "title": "A restaurant in Berlin",
+ "read": "2026-10-21",
+ "input": {
+  "what": "Restaurant",
+  "where": "Berlin, Germany",
+  "lang": "en"
+ },
+ "assumptions": "A new GmbH opening a restaurant that serves no alcohol, with staff, a build-out and a sign. The building permit and the sign permit apply when the works or the sign aren't exempt.",
+ "items": [
+  {
+   "key": "de-gmbh",
+   "name": "Commercial register entry for the GmbH",
+   "agency": "Local court (Registergericht), through a notary",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://service.berlin.de/dienstleistung/327425/",
+   "quote": "Wenn Sie eine Gesellschaft mit beschränkter Haftung (GmbH) errichten wollen, müssen Sie diese zur Eintragung in das Handelsregister anmelden.",
+   "quoteEn": "If you want to set up a limited liability company (GmbH), you must apply to have it entered in the commercial register.",
+   "read": "2026-10-21",
+   "match": "\\bde-gmbh\\b",
+   "agencyMatch": "Local court"
+  },
+  {
+   "key": "de-steuer",
+   "name": "Tax registration questionnaire (tax number and VAT ID)",
+   "agency": "Finanzamt (tax office), through ELSTER",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.elster.de/elsterweb/infoseite/unternehmensgruendung",
+   "quote": "Der Fragebogen muss innerhalb eines Monats nach Aufnahme Ihrer Tätigkeit unaufgefordert an Ihr zuständiges Finanzamt übermittelt werden.",
+   "quoteEn": "The questionnaire must be sent to your tax office, unprompted, within a month of starting your activity.",
+   "read": "2026-10-21",
+   "match": "\\bde-steuer\\b",
+   "agencyMatch": "Finanzamt"
+  },
+  {
+   "key": "de-bg",
+   "name": "Statutory accident insurance registration",
+   "agency": "The trade's Berufsgenossenschaft (statutory accident insurer)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://service.berlin.de/dienstleistung/293946/",
+   "quote": "Wer ein neues Unternehmen eröffnet, muss dieses binnen einer Woche beim zuständigen Unfallversicherungsträger anmelden.",
+   "quoteEn": "Anyone opening a new business must register it with the responsible accident insurer within a week.",
+   "read": "2026-10-21",
+   "match": "\\bde-bg\\b",
+   "agencyMatch": "The trade's Berufsgenossenschaft"
+  },
+  {
+   "key": "de-betriebsnummer",
+   "name": "Employer number for social insurance (Betriebsnummer)",
+   "agency": "Bundesagentur für Arbeit, Betriebsnummern-Service",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.arbeitsagentur.de/unternehmen/betriebsnummern-service/alles-wichtige/beantragung",
+   "quote": "Erst ab der Einstellung des ersten Beschäftigten unterliegen Arbeitgeberinnen und Arbeitgeber der Meldepflicht und benötigen eine Betriebsnummer.",
+   "quoteEn": "Employers are subject to the reporting duty, and need an employer number, from hiring their first employee.",
+   "read": "2026-10-21",
+   "match": "\\bde-betriebsnummer\\b",
+   "agencyMatch": "Bundesagentur für Arbeit"
+  },
+  {
+   "key": "de-gewerbe-ber",
+   "name": "Trade registration (Gewerbeanmeldung)",
+   "agency": "Bezirksamt (district office) for the address, Ordnungsamt",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://service.berlin.de/dienstleistung/121921/",
+   "quote": "Die Gewerbeanmeldung ist gleichzeitig mit dem Beginn des Betriebs vorzunehmen.",
+   "quoteEn": "The trade must be registered at the same time as the business starts.",
+   "read": "2026-10-21",
+   "match": "\\bde-gewerbe-ber\\b",
+   "agencyMatch": "Bezirksamt"
+  },
+  {
+   "key": "de-ber-food",
+   "name": "Food business registration",
+   "agency": "Bezirksamt (district office) for the address, Veterinär- und Lebensmittelaufsicht",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.berlin.de/ba-spandau/politik-und-verwaltung/aemter/ordnungsamt/veterinaer-und-lebensmittelueberwachung/lebensmittelaufsicht-bezirksamt-spandau-1344989.php",
+   "quote": "Meldung eines Lebensmittelbetriebes nach Artikel 6 der Verordnung (EG) Nr. 852/2004 über Lebensmittelhygiene",
+   "quoteEn": "Registration of a food business under Article 6 of Regulation (EC) No 852/2004 on food hygiene",
+   "read": "2026-10-21",
+   "match": "\\bde-ber-food\\b",
+   "agencyMatch": "Bezirksamt"
+  },
+  {
+   "key": "de-ber-ifsg",
+   "name": "Infection protection instruction certificate for food staff",
+   "agency": "Bezirksamt (district office) for the address, Gesundheitsamt",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://service.berlin.de/dienstleistung/324295/",
+   "quote": "Wenn Sie im Bereich der Lebensmittelzubereitung, des Lebensmittelverkaufs oder in der Gastronomie tätig werden wollen, benötigen Sie eine Bescheinigung.",
+   "quoteEn": "If you want to work in food preparation, food sales or hospitality, you need a certificate.",
+   "read": "2026-10-21",
+   "match": "\\bde-ber-ifsg\\b",
+   "agencyMatch": "Bezirksamt"
+  },
+  {
+   "key": "eu-food-hygiene",
+   "name": "EU food hygiene rules (Regulation (EC) 852/2004)",
+   "agency": "European Union (Regulation (EC) 852/2004), checked by the national food inspectors",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://food.ec.europa.eu/food-safety/biological-safety/food-hygiene_en",
+   "quote": "All food businesses operating in the EU, regardless of their size or type, must comply with basic hygiene requirements.",
+   "read": "2026-10-21",
+   "match": "\\beu-food-hygiene\\b",
+   "agencyMatch": "European Union"
+  },
+  {
+   "key": "de-ber-bau",
+   "name": "Building permit for works or a change of use",
+   "agency": "Bezirksamt (district office) for the address, Stadtentwicklungsamt, Bau- und Wohnungsaufsicht",
+   "level": "city",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "source": "https://service.berlin.de/dienstleistung/350893/",
+   "quote": "wenn Sie Anlagen errichten und/oder ändern und/oder deren Nutzung ändern möchten und diese Anlagen nicht verfahrensfrei sind.",
+   "quoteEn": "if you want to build or alter structures, or change their use, and the structures are not exempt from the procedure.",
+   "read": "2026-10-21",
+   "match": "\\bde-ber-bau\\b",
+   "agencyMatch": "Bezirksamt",
+   "condition": "Only when it applies to this opening (see the assumptions)."
+  },
+  {
+   "key": "de-ber-werbeanlage",
+   "name": "Permit for the shop sign (Werbeanlage)",
+   "agency": "Bezirksamt (district office) for the address, Stadtentwicklungsamt, Bau- und Wohnungsaufsicht",
+   "level": "city",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "source": "https://service.berlin.de/dienstleistung/350896/",
+   "quote": "Der Antrag für eine vereinfachte Baugenehmigung ist erforderlich, wenn Sie Werbeanlagen errichten und/oder ändern möchten und diese Werbeanlagen nicht verfahrensfrei sind.",
+   "quoteEn": "A simplified building permit is required if you want to put up or alter signs that are not exempt from the procedure.",
+   "read": "2026-10-21",
+   "match": "\\bde-ber-werbeanlage\\b",
+   "agencyMatch": "Bezirksamt",
+   "condition": "Only when it applies to this opening (see the assumptions)."
+  },
+  {
+   "key": "de-transparenz",
+   "name": "Transparency register (beneficial owners)",
+   "agency": "Transparency register (Bundesanzeiger Verlag)",
+   "level": "federal",
+   "required": false,
+   "verified": false,
+   "fee": null,
+   "source": "https://www.transparenzregister.de",
+   "match": "\\bde-transparenz\\b",
+   "agencyMatch": "Transparency register",
+   "condition": "Only when it applies to this opening (see the assumptions).",
+   "note": "No sentence on the agency's page could be read in this pass: the row abstains and names the office; set aside."
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "US filings",
+   "why": "Not in the US.",
+   "match": "irs-|cbp-|fincen|\\bEIN\\b|secretary of state"
+  },
+  {
+   "name": "Other cities' trade offices",
+   "why": "Berlin's district office registers the trade.",
+   "match": "de-gewerbe-(muc|ham|fra)"
+  },
+  {
+   "name": "Product safety and wood rules",
+   "why": "Not a seller of consumer goods or furniture.",
+   "match": "eu-gpsr|eu-eudr|eu-ppwr"
+  },
+  {
+   "name": "Terrace",
+   "why": "No terrace asked for.",
+   "match": "terrasse|sondernutzung"
+  }
+ ]
+}
