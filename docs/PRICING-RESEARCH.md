@@ -196,11 +196,56 @@ marked as such.
 
 ## What this means for each of the founder's numbers
 
+The founder's first model was per license with free tracking and $149 a store only for 10+ stores. His update the same
+day made the $149 store plan the main subscription for every store, with new licenses priced on top. Both are checked
+here; the second is what shipped.
+
 | Founder's number | The real alternatives | Verdict |
 | --- | --- | --- |
-| Any license, filed: $299 | Harbor $100 to $175 (annual reports) and from $299 (foreign qualification), TaxJar registration $299, Avalara registration $403, CorpNet $349 for research only, LegalZoom $99 for a list only | In line. Keep $299 |
+| Store plan: $149 a store a month, billed yearly ($1,788). Tracking, renewal monitoring, alerts, the document vault, Odelia's chat, and renewals Odelia files on her own | Harbor's software alone (no filings) $399 to $799 a year; Harbor's registered agent $149 a year a state; TaxJar Starter from $39 a month plus $50 a return; Jolt from about $90 a month for food-safety checklists; LegalZoom $99 a year for a license list and alerts | In line for what it includes, and the same $149 the old Essentials plan charged, so no customer sees a jump. Keep |
+| A new license, filed: $299 | Harbor $100 to $175 (annual reports) and from $299 (foreign qualification), TaxJar registration $299, Avalara registration $403, CorpNet $349 for research only, LegalZoom $99 for a list only | In line. Keep $299 |
 | Complex license (liquor, building plan review, import permits): $999 | Expediters $2,000 to $7,500 per restaurant, $2,000 to $10,000 per tenant improvement | Well below the alternative. Keep $999 |
-| Renewal: $99 | Northwest $125 a year a state, Harbor $149 and $100 to $175, Atlas $100, LegalZoom $99, TaxJar $50 to $55 a return | In line. Keep $99 |
-| Tracking: free | LegalZoom charges $99 a year for monitoring; Harbor's software is $399 to $799 a year | A real difference. Keep free |
-| 10+ stores: $149 a store a month, all-inclusive, billed yearly | Jolt about $90 a month for operations software; multi-site expediting $1,000 to $3,500 per location per opening; Harbor License Manager $399 to $799 a year, software only | In line, and the same $149 the old Essentials plan charged. Keep |
+| A renewal the plan doesn't include (needs the team, or a store without the plan): $99 | Northwest $125 a year a state, Harbor $149 and $100 to $175, Atlas $100, LegalZoom $99, TaxJar $50 to $55 a return | In line. Keep $99 |
+| Free entry point | Free tiers are standard in AI (Grok, Perplexity, ChatGPT, Claude) and rare in compliance (Vanta, Avalara, LicenseLogix are quote-only) | The plan preview stays free. Tracking moved into the store plan with the founder's update |
+| 10+ stores on the plan: every new license included | Multi-site expediting $1,000 to $3,500 per location per opening | An anchor for chains. Watch the margin on chains that open many stores at once (docs/PRICING.md) |
 | Government fees at cost | Every company above passes them through, none includes them | Keep |
+
+## The value case for $149 a store a month
+
+The founder asked for a 30 to 50x value case: $53,640 to $89,400 of value a store a year against the plan's $1,788.
+Only sourced numbers are used below, and every derived figure says how it was derived. The honest result: **the
+typical year is worth a few times the price; 30 to 50x is what one avoided closure is worth, not what an average year
+returns.** Sell it as insurance against a lapse, and don't claim 30 to 50x as a typical saving.
+
+### The inputs
+
+| Input | Number | Source |
+| --- | --- | --- |
+| A US restaurant or foodservice outlet's sales, average | about $1.5 million a year, about $4,100 a day (derived: $1.5 trillion of 2025 sales across "more than 1 million" outlets, so this is an upper bound) | [National Restaurant Association, Feb 2025](https://restaurant.org/research-and-media/media/press-releases/restaurant-industry-poised-for-growth-in-2025-industry-expected-to-employ-15-9-million-people-and-r/) |
+| Operating after a health permit is suspended | fines of up to $500 a day (El Dorado County, CA) | [CBS Sacramento](https://www.cbsnews.com/sacramento/news/el-dorado-county-restaurants-health-permits-stay-open/) |
+| A late city business tax renewal | 25% penalty the day after it's due, another 25% a month later, plus 1.5% interest a month (San José, CA) | [City of San José](https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration/pay-business-tax) |
+| Time a small business spends on regulatory compliance | 735 hours in 2024 (Canada, all regulation, not licenses alone) | [CFIB via Lexpert](https://www.lexpert.ca/news/litigation-law/small-businesses-lose-a-month-each-year-to-red-tape-canadian-federation-of-independent-business/390941) |
+| What that time costs | $38.81 an hour, the median compliance officer, May 2025 | [BLS](https://www.bls.gov/ooh/business-and-financial/compliance-officers.htm) |
+| How long a permit phase runs, and what a late one costs | 3 to 6 months for a new restaurant; a Sacramento restaurant waited 8 months against a plan of 2 | DoorDash Merchants and the San Francisco Chronicle, both already cited on the landing page |
+
+### The case, a store a year
+
+| Value | How it's worked out | Amount | Multiple of $1,788 |
+| --- | --- | --- | --- |
+| Hours saved | Assumption, not sourced: licenses and renewals are 10% of the 735 compliance hours, 73.5 hours, at $38.81 | about $2,850 | 1.6x |
+| A late business tax renewal avoided | San José's 50% penalty on a business tax bill; on a $1,000 bill (an illustrative amount, not a typical one) | $500 | 0.3x |
+| A week of operating on a suspended health permit avoided | $500 a day for 7 days, where the county fines rather than closes | $3,500 | 2x |
+| One day closed avoided | The average outlet's sales for a day (revenue, not profit) | about $4,100 | 2.3x |
+| 13 days closed avoided | The same, for 13 days | about $53,400 | 30x |
+| 22 days closed avoided | The same, for 22 days | about $90,400 | 50x |
+
+Reading it honestly:
+
+- **A typical year with no lapse** returns the hours and the avoided late penalties: about 2x on these numbers. That is
+  the same value story Gusto and TaxJar tell (filings done without the owner), and it is enough to justify $149 next
+  to the alternatives above.
+- **30x is two weeks closed; 50x is three.** Revenue is not profit, and the average outlet number is an upper bound.
+  The claim that holds up: "one lapse that closes a store for two weeks costs about 30 times a year of the plan."
+- **What not to say.** No "30 to 50x ROI", no "saves $50,000 a year", no number for fines avoided unless it's the
+  customer's own city and its published penalty. The landing page uses the expediter anchor (sourced) and the typical
+  opening (from Placetta's own plan), not this table.
