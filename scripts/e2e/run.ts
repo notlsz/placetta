@@ -215,6 +215,10 @@ try {
     const r = await rpc("create_workspace", { p_name: "Golden Ox Noodle", p_state: seedState, p_authorized: true }, owner.jwt);
     check("owner creates the workspace through PostgREST", r.status === 200 && typeof r.data === "string", r);
     ws = r.data;
+    // Golden Ox is a customer from before the simple model (20261023120000_simple_pricing): its entry plan, Pro,
+    // packs and opening fees below are the grandfathered plan, so it's marked legacy the way that migration marks one
+    const lg = await sql`update public.billing set price_model = 'legacy' where workspace_id = ${ws} returning price_model`;
+    check("a new workspace starts on the simple model; the grandfathered customer is marked legacy", lg[0]?.price_model === "legacy", lg);
     // the clickwrap: the owner accepts the current Terms through PostgREST, and the record keeps the version and browser
     const st0 = await rpc("terms_status", {}, owner.jwt);
     check("terms_status: a new account has not accepted the Terms", st0.status === 200 && st0.data?.accepted === false && typeof st0.data?.current === "string", st0);
@@ -1360,7 +1364,7 @@ try {
   await scenario("e. billing", async () => {
     const checkout = async (extra: Record<string, unknown> = {}) => {
       mark = recorded.length;
-      const r = await call("billing", { action: "checkout", plan: "locations", workspace_id: ws, return_url: `${APP}/app/`, ...extra }, { jwt: owner.jwt });
+      const r = await call("billing", { action: "checkout", plan: "locations", workspace_id: ws, return_url: `${APP}/app/`, renewal_consent: true, ...extra }, { jwt: owner.jwt });
       return { r, sess: since(mark).find((x) => x.service === "stripe" && x.path === "/v1/checkout/sessions")?.body, cpn: since(mark).find((x) => x.service === "stripe" && x.path === "/v1/coupons")?.body };
     };
     // Pro with the open-by-date guarantee: the Pro price per location, a food opening, and the guarantee for it
@@ -1380,7 +1384,11 @@ try {
     check("asking again doesn't add a second quote task", (await sql`select count(*)::int n from public.team_tasks where kind = 'quote' and workspace_id = ${ws}`)[0].n === 1);
     await saveState((s) => ({ ...s, stores: s.stores.filter((x) => x.id !== "st-bar") }));
     mark = recorded.length;
-    const co = await call("billing", { action: "checkout", plan: "locations", workspace_id: ws, return_url: `${APP}/app/` }, { jwt: owner.jwt });
+    // the automatic renewal terms (src/contract.ts) are agreed to next to the button, or nothing opens
+    const noConsent = await call("billing", { action: "checkout", plan: "locations", workspace_id: ws, return_url: `${APP}/app/` }, { jwt: owner.jwt });
+    check("without agreeing to the renewal terms, checkout is refused", noConsent.status === 400 && noConsent.data?.error?.code === "consent_required", noConsent);
+    mark = recorded.length;
+    const co = await call("billing", { action: "checkout", plan: "locations", workspace_id: ws, return_url: `${APP}/app/`, renewal_consent: true }, { jwt: owner.jwt });
     check("checkout answers with Stripe's URL", co.status === 200 && /^https:\/\/checkout\.stripe\.com\//.test(co.data?.url ?? ""), co);
     const sess = since(mark).find((x) => x.service === "stripe" && x.path === "/v1/checkout/sessions")?.body;
     check("line items: 2 locations (one open, one opening), 1 restaurant opening fee", sess?.line_items?.["0"]?.price === "price_location" && sess?.line_items?.["0"]?.quantity === "2" && sess?.line_items?.["1"]?.price === "price_opening_food" && sess?.line_items?.["1"]?.quantity === "1" && !sess?.line_items?.["2"], sess?.line_items);
