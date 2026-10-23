@@ -63,7 +63,7 @@ async function http(path: string, o: { method?: string; key?: string; jwt?: stri
 
 let stack: Stack | null = null;
 let gateway: { stop: () => Promise<void> } | null = null;
-const FUNCTIONS = ["agent-run", "agent", "billing", "file", "team", "integrations", "logins", "spend", "sso", "forms", "tts", "calendar-feed", "monitor", "mcp", "partner-api", "chat-events", "oauth-callback", "scim"];
+const FUNCTIONS = ["agent-run", "agent", "billing", "file", "team", "integrations", "logins", "spend", "sso", "forms", "tts", "calendar-feed", "monitor", "mcp", "partner-api", "chat-events", "oauth-callback", "scim", "voice"];
 out("Placetta two-account test");
 try {
   stack = await startStack((s) => out(`  ${s}`));
@@ -127,6 +127,11 @@ try {
   const runId = crypto.randomUUID(), filingId = crypto.randomUUID(), memId = `mem-${crypto.randomUUID().slice(0, 8)}`;
   await sql`insert into public.agent_runs (id, workspace_id, prompt, created_by, reply) values (${runId}, ${WA}, ${"Plan my opening " + MARK}, ${A.id}, ${"Reply " + MARK})`;
   await sql`insert into public.odelia_messages (workspace_id, channel, direction, body) values (${WA}, 'sms', 'in', ${"Chat " + MARK})`;
+  // a call with its transcript, summary and recording (as odelia-voice writes them)
+  const callId = crypto.randomUUID(), recPath = `${WA}/${callId}.wav`;
+  await sql`insert into public.voice_calls (id, workspace_id, user_id, kind, direction, brain, lang, status, consent, recording_path, transcript, summary)
+            values (${callId}, ${WA}, ${A.id}, 'agency_phone', 'out', 'openai', 'en', 'ended', 'announced', ${recPath}, ${sql.json([{ who: "agency", at: 1, text: "In review " + MARK }])}, ${sql.json({ en: "Call " + MARK })})`;
+  await sql`insert into storage.objects (bucket_id, name) values ('call-recordings', ${recPath})`;
   await sql`insert into public.agent_memories (id, workspace_id, topic, entity, attr, value, text_en, text_zh, source_kind, status, trust)
             values (${memId}, ${WA}, 'company', 'entity:e1', 'name', ${"Acme LLC " + MARK}, ${"Acme files as " + MARK}, 'x', 'chat', 'suggested', 'agent')`;
   await sql`insert into public.filings (id, workspace_id, app_id, payload, title) values (${filingId}, ${WA}, 'app-1', ${sql.json({ note: MARK })}, ${sql.json({ en: "Business license " + MARK, zh: "x" })})`;
@@ -162,9 +167,9 @@ try {
   const before = await snapshot(cutoff);
   const counts = new Map((await Promise.all(scoped.filter((c) => c.ws).map(async (c) => [c.t, (await sql.unsafe(`select count(*)::int n from public."${c.t}" where workspace_id = '${WA}'`))[0].n as number] as const))));
   const recordedBefore = stubs.recorded.length;
-  const signedA = `sign/documents/${WA}`;
-  const leaks = (r: Res) => r.text.includes(MARK) || r.text.includes(signedA) || r.text.includes(encodeURIComponent(WA) + "%2F");
-  const ids: [string, string][] = [["workspace", WA], ["user", A.id], ["run", runId], ["filing", filingId], ["document", docId ?? WA], ["token", tokJ.id ?? WA], ["comment", commentId ?? WA]];
+  const signedA = `sign/documents/${WA}`, signedCall = `sign/call-recordings/${WA}`;
+  const leaks = (r: Res) => r.text.includes(MARK) || r.text.includes(signedA) || r.text.includes(signedCall) || r.text.includes(encodeURIComponent(WA) + "%2F");
+  const ids: [string, string][] = [["workspace", WA], ["user", A.id], ["run", runId], ["filing", filingId], ["document", docId ?? WA], ["token", tokJ.id ?? WA], ["comment", commentId ?? WA], ["call", callId]];
 
   /* ---------------- B, then anon, try everything ---------------- */
   const callers: { name: string; jwt?: string; role: "authenticated" | "anon"; sub: string | null }[] = [
@@ -211,7 +216,7 @@ try {
       const actions = [...new Set([...src.matchAll(/action\s*===\s*"([a-z_]+)"|case\s+"([a-z_]+)"\s*:/g)].map((m) => m[1] ?? m[2]))].slice(0, 120);
       for (const action of actions.length ? actions : [""]) {
         for (const [, id] of ids) {
-          const body = { action, workspace_id: WA, ws: WA, id, filing_id: filingId, document_id: docId, doc_id: docId, run_id: runId, token_id: tokJ.id, app_id: "app-1", store_id: "store-1", path: docPath, user_id: A.id, memory_id: memId };
+          const body = { action, workspace_id: WA, ws: WA, id, filing_id: filingId, document_id: docId, doc_id: docId, run_id: runId, token_id: tokJ.id, app_id: "app-1", store_id: "store-1", path: docPath, user_id: A.id, memory_id: memId, call_id: callId };
           const r = await http(`/functions/v1/${fn}`, { method: "POST", jwt: who.jwt, body });
           calls++;
           check(`${fn} ${action || "(no action)"} with A's ${id === WA ? "workspace" : "ids"} gives nothing of A's`, !leaks(r), `${r.status} ${r.text.slice(0, 200)}`);
