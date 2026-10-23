@@ -7,11 +7,15 @@ import type { Workspace, Status, Store } from "./model";
 import { readiness } from "./stores.ts";
 import { previewPlan, stateOf } from "./plan/preview";
 import { normalizeState } from "./core";
+import { appealById, daysLeft, NOT_A_LAW_FIRM, ROUTE_NAME } from "./appeals/index";
 
 export type Scope = "status" | "deadlines" | "readiness" | "plan" | "filings";
 export const SCOPES: Scope[] = ["status", "deadlines", "readiness", "plan", "filings"];
 export type Lang = "en" | "zh";
-export type FilingRow = { app_id: string; title: { en?: string; zh?: string } | null; agency: { en?: string; zh?: string } | null; status: string; confirmation_number: string | null; submitted_at: string | null; decided_at: string | null; updated_at: string };
+export type FilingRow = { id?: string; app_id: string; title: { en?: string; zh?: string } | null; agency: { en?: string; zh?: string } | null; status: string; confirmation_number: string | null; submitted_at: string | null; decided_at: string | null; updated_at: string };
+/** One line of a filing's timeline (filing_events, migration 20261026120000_status_tracking): a status change, what the
+ *  agency's own lookup showed, an escalation, an appeal deadline or an inspection, with its source and confidence. */
+export type EventRow = { filing_id: string; at: string; kind: string; status: string | null; title: { en?: string; zh?: string } | null; source: string; confidence: number | null; url: string | null };
 
 const READ = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 const lang = { type: "string", enum: ["en", "zh"], description: "Language of names and notes: en (default) or zh" };
@@ -25,9 +29,13 @@ const OUT: Record<string, unknown> = {
   compliance_status: obj({ business: { type: "string" }, as_of: { type: "string" }, stores: arr }),
   upcoming_deadlines: obj({ as_of: { type: "string" }, days: { type: "integer" }, total: { type: "integer" }, deadlines: arr, next_cursor: { type: "string" } }),
   store_readiness: obj({ as_of: { type: "string" }, stores: arr }),
-  plan_preview: obj({ business: { type: "string" }, place: { type: "string" }, total_known_fees_usd: { type: "number" }, fees_that_vary: { type: "boolean" }, permits: arr, note: { type: "string" } }),
+  plan_preview: obj({ business: { type: "string" }, place: { type: "string" }, total_known_fees_usd: { type: "number" }, fees_that_vary: { type: "boolean" }, permits_with_fees_that_vary: { type: "integer" }, permits: arr, note: { type: "string" } }),
   filing_status: obj({ as_of: { type: "string" }, which: { type: "string" }, total: { type: "integer" }, filings: arr, next_cursor: { type: "string" } }),
+  status_timeline: obj({ as_of: { type: "string" }, total: { type: "integer" }, filings: arr, next_cursor: { type: "string" } }),
+  appeals: obj({ as_of: { type: "string" }, total: { type: "integer" }, appeals: arr, note: { type: "string" } }),
+  inspections: obj({ as_of: { type: "string" }, total: { type: "integer" }, inspections: arr }),
 };
+const app_id = { type: "string", maxLength: 120, description: "An application's id from compliance_status or filing_status. Leave out for every one." };
 
 export const TOOLS = [
   { name: "compliance_status", scope: "status" as Scope, title: "Compliance status by store",
@@ -45,6 +53,15 @@ export const TOOLS = [
   { name: "filing_status", scope: "filings" as Scope, title: "Filing status",
     description: "The filings Placetta's team submits for the business: status (requested, in progress, submitted, accepted, needs info, rejected), confirmation numbers and dates. open: only filings not yet decided (default); all: every filing.",
     inputSchema: { type: "object", properties: { which: { type: "string", enum: ["open", "all"] }, store_id: store, cursor, lang }, additionalProperties: false } },
+  { name: "status_timeline", scope: "filings" as Scope, title: "Filing timeline",
+    description: "Each filing's timeline, newest first, like a parcel's: status changes, what the agency's own lookup showed, escalations when an agency runs past its published time, appeal deadlines and inspections, each with where it came from, how sure it is and when. For one application or all.",
+    inputSchema: { type: "object", properties: { application_id: app_id, store_id: store, cursor, lang }, additionalProperties: false } },
+  { name: "appeals", scope: "filings" as Scope, title: "Appeals and their deadlines",
+    description: "Denials being appealed: the agency's appeal route, the last day the rule allows and the safer file-by date, the stage (questions, drafted, waiting for approval, filed, hearing, decided, with an attorney), the hearing and the outcome. Placetta isn't a law firm; where an attorney is advised it says so.",
+    inputSchema: { type: "object", properties: { store_id: store, lang }, additionalProperties: false } },
+  { name: "inspections", scope: "readiness" as Scope, title: "Inspections booked and their results",
+    description: "Inspections booked or being booked for each store: the inspection and agency, how it's booked, its status, the slot, and the result with any corrections and the reinspection date.",
+    inputSchema: { type: "object", properties: { store_id: store, lang }, additionalProperties: false } },
 // securitySchemes: ChatGPT apps read it per tool to show the sign-in and the scope asked for
 // (https://developers.openai.com/apps-sdk/build/auth); every tool needs the OAuth scope of its own name
 ].map(t => ({ ...t, outputSchema: OUT[t.name], annotations: { ...READ, title: t.title }, securitySchemes: [{ type: "oauth2" as const, scopes: [t.scope] }] }));
@@ -92,7 +109,7 @@ const storeFor = (w: Workspace, appId?: string) => (appId ? (w.stores ?? []).fin
 
 /** Runs one tool on the caller's workspace. Unknown arguments are refused (a workspace id among them: the token
  *  decides the workspace). */
-export function runMcpTool(name: string, args: Record<string, unknown>, ctx: { workspace: { name: string; state: unknown }; filings: FilingRow[]; today: string }): unknown {
+export function runMcpTool(name: string, args: Record<string, unknown>, ctx: { workspace: { name: string; state: unknown }; filings: FilingRow[]; events?: EventRow[]; today: string }): unknown {
   const tool = TOOLS.find(t => t.name === name);
   if (!tool) throw new ToolError(`No tool named ${name}.`, "unknown_tool");
   const allowed = Object.keys(tool.inputSchema.properties);
@@ -110,7 +127,7 @@ export function runMcpTool(name: string, args: Record<string, unknown>, ctx: { w
     const opening = typeof args.opening === "string" && /^\d{4}-\d{2}-\d{2}$/.test(args.opening) ? args.opening : undefined;
     const p = previewPlan(business, place, opening, { today });
     return {
-      business, place, total_known_fees_usd: p.fees, fees_that_vary: p.varies,
+      business, place, total_known_fees_usd: p.fees, fees_that_vary: p.varies > 0, permits_with_fees_that_vary: p.varies,
       permits: p.apps.map(a => ({ name: t(a.name), agency: t(a.agency), level: a.level, fees: a.fees.map(f => ({ label: t(f.label), usd: f.tbd ? null : f.amount })), typical_time: t(a.est), source: a.source })),
       note: L === "zh" ? "这是根据官方来源整理的预览，请以机构的要求为准，并非法律意见。" : "A preview from official sources; check it against the agency. Not legal advice.",
     };
@@ -152,6 +169,41 @@ export function runMcpTool(name: string, args: Record<string, unknown>, ctx: { w
     return { as_of: today, stores: stores.map(s => { const r = readiness(s, w); return { store_id: s.id, name: t(s.name), stage: s.stage, score: r.score, band: r.band, measures: t(r.label), parts: r.parts.map(p => ({ part: t(p.label), got: Math.round(p.got * 10) / 10, of: p.max, note: t(p.note) })) }; }) };
   }
 
+  if (name === "status_timeline") {
+    const only = args.store_id === undefined ? null : pickStore(w, args.store_id);
+    const appId = typeof args.application_id === "string" ? args.application_id : null;
+    const filings = ctx.filings.filter(f => f.status !== "canceled" && (!appId || f.app_id === appId) && (!only || (only[0].apps ?? []).includes(f.app_id)));
+    if (appId && !filings.length) throw new ToolError(`No filing for application "${appId.slice(0, 60)}" in this workspace. filing_status lists them.`, "not_found");
+    const rows = filings.map(f => {
+      const ev = (ctx.events ?? []).filter(e => f.id && e.filing_id === f.id).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 30);
+      return { application_id: f.app_id, title: t(f.title), agency: t(f.agency) || undefined, status: f.status, store_id: storeFor(w, f.app_id)?.id ?? null,
+        events: ev.map(e => ({ at: e.at, kind: e.kind, status: e.status ?? undefined, what: t(e.title), source: e.source, confidence: e.confidence ?? undefined, link: e.url ?? undefined })) };
+    });
+    const p = page(rows, args.cursor);
+    return { as_of: today, total: rows.length, filings: p.items, ...(p.next ? { next_cursor: p.next } : {}) };
+  }
+
+  if (name === "appeals") {
+    const only = args.store_id === undefined ? null : pickStore(w, args.store_id)[0];
+    const list = (w.appeals ?? []).filter(c => !only || c.store === only.id || (only.apps ?? []).includes(c.app)).map(c => {
+      const ap = appealById(c.playbook), app = w.apps.find(a => a.id === c.app);
+      return { appeal_id: c.id, application_id: c.app, application: app ? t(app.name) : undefined, store_id: c.store ?? storeFor(w, c.app)?.id ?? null,
+        route: ap ? t(ap.name) : c.playbook, decided_by: ap ? t(ap.body) : undefined, attorney_advised: c.route === "attorney", how: t(ROUTE_NAME[c.route]),
+        stage: c.stage, decided: c.decided, last_day: c.lastDay, file_by: c.fileBy, days_left: c.fileBy ? daysLeft(c.fileBy, today) : undefined,
+        hearing: c.hearing?.date, outcome: c.outcome ? { result: c.outcome.result, on: c.outcome.at.slice(0, 10) } : undefined };
+    }).sort((a, b) => (a.file_by ?? "9999").localeCompare(b.file_by ?? "9999"));
+    return { as_of: today, total: list.length, appeals: list, note: t(NOT_A_LAW_FIRM) };
+  }
+
+  if (name === "inspections") {
+    const only = args.store_id === undefined ? null : pickStore(w, args.store_id)[0];
+    const list = (w.bookings ?? []).filter(b => !only || b.store === only.id).map(b => ({
+      store_id: b.store, inspection: t(b.name), agency: t(b.agency), booked_by: b.method, status: b.status, slot: b.slot, slots_offered: b.slot ? undefined : b.slots,
+      confirmation: b.confirmation, deadline: b.deadline, result: b.result ? { on: b.result.at.slice(0, 10), outcome: b.result.outcome, corrections: b.result.corrections, next: b.result.next } : undefined,
+    })).sort((a, b) => (a.slot ?? a.deadline ?? "9999").localeCompare(b.slot ?? b.deadline ?? "9999"));
+    return { as_of: today, total: list.length, inspections: list };
+  }
+
   // filing_status
   const which = args.which === "all" ? "all" : "open";
   const only = args.store_id === undefined ? null : pickStore(w, args.store_id)[0];
@@ -168,12 +220,14 @@ export function runMcpTool(name: string, args: Record<string, unknown>, ctx: { w
 // deadlines ahead and the open filings. Read only, built from the same tools, so a resource and its tool always agree.
 
 export type McpResource = { uri: string; name: string; title: string; description: string; mimeType: "application/json"; scope: Scope };
-type Ctx = { workspace: { name: string; state: unknown }; filings: FilingRow[]; today: string };
+type Ctx = { workspace: { name: string; state: unknown }; filings: FilingRow[]; events?: EventRow[]; today: string };
 const STORE_URI = /^placetta:\/\/stores\/([^/]{1,80})\/(status|readiness)$/;
+const TIMELINE_URI = /^placetta:\/\/filings\/([^/]{1,120})\/timeline$/;
 
 export const RESOURCE_TEMPLATES = [
   { uriTemplate: "placetta://stores/{store_id}/status", name: "store_status", title: "One store's compliance status", description: "Where each license and permit stands for one store, with its open items and next steps. Store ids come from placetta://status.", mimeType: "application/json", scope: "status" as Scope },
   { uriTemplate: "placetta://stores/{store_id}/readiness", name: "store_readiness", title: "One store's readiness", description: "A store's 0 to 100 ready-to-open or inspection-ready score, with each part.", mimeType: "application/json", scope: "readiness" as Scope },
+  { uriTemplate: "placetta://filings/{application_id}/timeline", name: "filing_timeline", title: "One filing's timeline", description: "A filing's status changes, the agency's own lookups, escalations, appeal deadlines and inspections, newest first. Application ids come from placetta://filings/open.", mimeType: "application/json", scope: "filings" as Scope },
 ];
 
 /** The resources this workspace has: the fixed ones, then one per store. */
@@ -183,6 +237,8 @@ export function listResources(ctx: Ctx): McpResource[] {
     { uri: "placetta://status", name: "status", title: "Compliance status, every store", description: "Every store's licenses and permits by status, with the open items.", mimeType: "application/json", scope: "status" },
     { uri: "placetta://deadlines", name: "deadlines", title: "Deadlines in the next 60 days", description: "Filing dates and renewals in the next 60 days, soonest first.", mimeType: "application/json", scope: "deadlines" },
     { uri: "placetta://filings/open", name: "open_filings", title: "Open filings", description: "Filings submitted or in progress and not yet decided.", mimeType: "application/json", scope: "filings" },
+    { uri: "placetta://appeals", name: "appeals", title: "Appeals and their deadlines", description: "Denials being appealed, soonest file-by date first, with the stage and the outcome.", mimeType: "application/json", scope: "filings" },
+    { uri: "placetta://inspections", name: "inspections", title: "Inspections", description: "Inspections booked or being booked, with their slots and results.", mimeType: "application/json", scope: "readiness" },
   ];
   return [...fixed, ...(w.stores ?? []).map(s => ({ uri: `placetta://stores/${encodeURIComponent(s.id)}/status`, name: `store_${s.id}`.slice(0, 90), title: `${s.name.en || s.id}: compliance status`, description: `${s.address || s.name.en || s.id}: licenses and permits by status, with the open items.`, mimeType: "application/json" as const, scope: "status" as Scope }))];
 }
@@ -193,7 +249,8 @@ export function resourceScope(uri: string): Scope | null {
   if (m) return m[2] === "readiness" ? "readiness" : "status";
   if (uri === "placetta://status") return "status";
   if (uri === "placetta://deadlines") return "deadlines";
-  if (uri === "placetta://filings/open") return "filings";
+  if (uri === "placetta://filings/open" || uri === "placetta://appeals" || TIMELINE_URI.test(uri)) return "filings";
+  if (uri === "placetta://inspections") return "readiness";
   return null;
 }
 
@@ -205,6 +262,9 @@ export function readResource(uri: string, ctx: Ctx): { uri: string; mimeType: "a
   else if (m) out = runMcpTool(m[2] === "readiness" ? "store_readiness" : "compliance_status", { store_id: decodeURIComponent(m[1]) }, ctx);
   else if (uri === "placetta://deadlines") out = runMcpTool("upcoming_deadlines", {}, ctx);
   else if (uri === "placetta://filings/open") out = runMcpTool("filing_status", { which: "open" }, ctx);
+  else if (uri === "placetta://appeals") out = runMcpTool("appeals", {}, ctx);
+  else if (uri === "placetta://inspections") out = runMcpTool("inspections", {}, ctx);
+  else if (TIMELINE_URI.test(uri)) out = runMcpTool("status_timeline", { application_id: decodeURIComponent(TIMELINE_URI.exec(uri)![1]) }, ctx);
   else throw new ToolError(`No resource at ${uri.slice(0, 80)}. resources/list has the addresses.`, "not_found");
   return { uri, mimeType: "application/json", text: JSON.stringify(out) };
 }
@@ -221,6 +281,10 @@ export const PROMPTS: McpPrompt[] = [
     arguments: [{ name: "lang", description: "en or zh" }], scopes: ["deadlines", "status"] },
   { name: "opening_readiness", title: "Am I ready to open?", description: "A store's readiness score and what's left before opening or the next inspection.",
     arguments: [{ name: "store_id", description: "The store's id (placetta://status lists them)", required: true }, { name: "lang", description: "en or zh" }], scopes: ["readiness", "status"] },
+  { name: "appeal_deadlines", title: "Which appeals are due?", description: "Every denial being appealed, with its file-by date, the days left and what happens next, the closest first.",
+    arguments: [{ name: "lang", description: "en or zh" }], scopes: ["filings"] },
+  { name: "inspection_prep", title: "Get ready for the next inspection", description: "A store's booked inspections, its readiness score and the parts still short, as a prep list.",
+    arguments: [{ name: "store_id", description: "The store's id (placetta://status lists them)", required: true }, { name: "lang", description: "en or zh" }], scopes: ["readiness"] },
 ];
 
 const embed = (uri: string, data: unknown) => ({ role: "user" as const, content: { type: "resource" as const, resource: { uri, mimeType: "application/json", text: JSON.stringify(data) } } });
@@ -250,6 +314,21 @@ export function getPrompt(name: string, raw: Record<string, unknown>, ctx: Ctx):
       ask(zh ? "根据附上的 Placetta 数据，告诉我这周需要我处理的事：未来 7 天的截止日期，以及等待我们处理的事项，最紧急的放前面。简短直接。"
         : "From the Placetta data attached, tell me what needs me this week: deadlines in the next 7 days and the items waiting on the business, most urgent first. Short and direct."),
       embed("placetta://deadlines", dl), embed("placetta://status", st)] };
+  }
+  if (name === "appeal_deadlines") {
+    const ap = runMcpTool("appeals", { lang }, ctx);
+    return { description: p.title, messages: [
+      ask(zh ? "根据附上的 Placetta 数据，列出每一项正在申诉的事项：提交截止日期、剩余天数、目前阶段和下一步，最近的放前面。注明哪些建议请律师。只用附上的数据。"
+        : "From the Placetta data attached, list each appeal: its file-by date, the days left, where it stands and the next step, closest first. Say which ones an attorney is advised for. Use only the attached data."),
+      embed("placetta://appeals", ap)] };
+  }
+  if (name === "inspection_prep") {
+    if (!store) throw new ToolError("store_id is required. placetta://status lists the store ids.");
+    const ins = runMcpTool("inspections", { store_id: store, lang }, ctx), rd = runMcpTool("store_readiness", { store_id: store, lang }, ctx);
+    return { description: p.title, messages: [
+      ask(zh ? "根据附上的 Placetta 数据，为这家门店的下一次检查列一份准备清单：已预约的检查和时间、准备度得分，以及还差的部分，每项写明要做什么。"
+        : "From the Placetta data attached, make a prep list for this store's next inspection: the inspections booked and when, the readiness score, and each part still short with what to do about it."),
+      embed("placetta://inspections", ins), embed(`placetta://stores/${encodeURIComponent(store)}/readiness`, rd)] };
   }
   // opening_readiness
   if (!store) throw new ToolError("store_id is required. placetta://status lists the store ids.");

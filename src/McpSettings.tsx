@@ -41,7 +41,9 @@ const GROUPS: { id: CatalogEntry["group"]; en: string; zh: string }[] = [
 const Logo = ({ src }: { src?: string }) => <span className={"sg-logo" + (src === notionLogo || src === squareLogo ? " mono" : "")} aria-hidden="true">{src ? <img src={src} alt="" /> : <I.plug />}</span>;
 const host = (url: string) => { try { return new URL(url).host; } catch { return url; } };
 
-export function McpConnectors({ pin }: { pin: Pin }) {
+/** q: the directory's search (Settings, Integrations), matched on the app's name and what Odelia uses it for; connected:
+ *  only the ones already connected. */
+export function McpConnectors({ pin, q = "", connected = false }: { pin: Pin; q?: string; connected?: boolean }) {
   const { lang, cloud, say } = useApp();
   const zh = lang === "zh";
   const owner = !!cloud?.owner;
@@ -85,6 +87,8 @@ export function McpConnectors({ pin }: { pin: Pin }) {
   };
 
   const byCatalog = (id: string) => servers.find(s => s.catalog_id === id);
+  const needle = q.trim().toLowerCase();
+  const matches = (e: CatalogEntry) => !needle || [e.name, e.zh ?? "", e.use.en, e.use.zh].some(s => s.toLowerCase().includes(needle));
   const srv = servers.find(s => s.id === shown);
   return (
     <div className="sg-sub mcp">
@@ -160,11 +164,11 @@ export function McpConnectors({ pin }: { pin: Pin }) {
         </SetSheet>
       )}
 
-      {GROUPS.map(g => (
+      {GROUPS.map(g => ({ g, list: MCP_CATALOG.filter(e => e.group === g.id && (!connected || !!byCatalog(e.id)) && matches(e)) })).filter(x => x.list.length).map(({ g, list }) => (
         <div key={g.id} className="sg-sub">
           <h3>{zh ? g.zh : g.en}</h3>
           <ul className="sg-list">
-            {MCP_CATALOG.filter(e => e.group === g.id).map(e => {
+            {list.map(e => {
               const have = byCatalog(e.id);
               const open = !cloud || !ready || ready[e.id] !== false;
               let right;

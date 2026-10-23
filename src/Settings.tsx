@@ -102,7 +102,9 @@ const PROVIDER_OF: Partial<Record<IntegrationKind, keyof api.Availability>> = { 
 const PLACES_WHY = B("Your stores' addresses, phones and hours, so Odelia adds stores and fills those lines on forms without asking again", "门店地址、电话和营业时间，Odelia 据此添加门店并填写表格中的这些栏目，无需再问");
 const POS_WHY = B("Monthly sales for sales tax and permit fees, the team's schedules and hours for labor-law and food handler checks", "月度销售额用于销售税和许可费，团队排班和工时用于劳动法和食品从业人员证检查");
 
-type Item = { kind: IntegrationKind | "feed"; name: string; zh?: string; why: Bi; logo?: string; wide?: boolean; hook?: boolean; bot?: boolean };
+/** maps: what Placetta checks the app's data against for licenses (src/connectorFacts.ts), where it does. */
+type Item = { kind: IntegrationKind | "feed"; name: string; zh?: string; why: Bi; maps?: Bi; logo?: string; wide?: boolean; hook?: boolean; bot?: boolean };
+const MAPS_PLACE = B("Each address is checked against its store and every application that names it", "每个地址都会与门店记录和写有该地址的每份申请核对");
 const CHAT_WHY = B("Deadlines, renewals and filing updates in your team's group", "截止日期、续期和申报进展推送到团队群");
 const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
   { group: B("Email", "邮件"), items: [
@@ -134,15 +136,15 @@ const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
     { kind: "dropbox", name: "Dropbox", why: B("Import leases, floor plans and certificates", "导入租约、平面图和证书"), logo: dropboxLogo },
   ] },
   { group: B("Sales, payroll and accounting", "销售、薪资与财务"), items: [
-    { kind: "square", name: "Square", why: POS_WHY, logo: squareLogo },
+    { kind: "square", name: "Square", why: POS_WHY, maps: MAPS_PLACE, logo: squareLogo },
     { kind: "toast", name: "Toast", why: POS_WHY, logo: toastLogo, wide: true },
     { kind: "quickbooks", name: "QuickBooks", why: B("Gross receipts for business tax and renewals", "营业总额用于营业税和续期"), logo: qbLogo },
-    { kind: "xero", name: "Xero", why: B("The company's legal name, addresses and tax number for the forms", "公司法定名称、地址和税号，用于填写表格") },
+    { kind: "xero", name: "Xero", why: B("The company's legal name, addresses and tax number for the forms", "公司法定名称、地址和税号，用于填写表格"), maps: B("Its legal name is checked against the entity your filings use", "其法定名称会与申报所用的实体核对") },
   ] },
   { group: B("Stores and locations", "门店与地点"), items: [
-    { kind: "gbp", name: "Google Business Profile", zh: "Google 商家资料", why: PLACES_WHY },
-    { kind: "clover", name: "Clover", why: PLACES_WHY },
-    { kind: "shopify", name: "Shopify", why: PLACES_WHY },
+    { kind: "gbp", name: "Google Business Profile", zh: "Google 商家资料", why: PLACES_WHY, maps: MAPS_PLACE },
+    { kind: "clover", name: "Clover", why: PLACES_WHY, maps: MAPS_PLACE },
+    { kind: "shopify", name: "Shopify", why: PLACES_WHY, maps: MAPS_PLACE },
   ] },
   { group: B("Signatures", "签署"), items: [
     { kind: "dropbox_sign", name: "Dropbox Sign", why: B("Send the papers a filing needs from someone else, like the landlord's authorization letter, for signature, and see who has signed", "把申报需要他人签署的文件（如房东授权信）发出签署，并查看谁已签署") },
@@ -256,6 +258,8 @@ function Integrations() {
   const { b, lang, cloud, say } = useApp();
   const pin = usePin();
   const [feed, setFeed] = useState("");
+  const [q, setQ] = useState("");
+  const [only, setOnly] = useState(false);
   const [avail, setAvail] = useState<api.Availability | null>(null);
   const [form, setForm] = useState<{ kind: HookKind; url: string; secret: string; busy?: boolean } | null>(null);
   // done: WeChat is connected and the form stays to show what goes into WeChat's console (the Token and key aren't shown again)
@@ -309,9 +313,22 @@ function Integrations() {
     const ok = await cloud.connectHook(form.kind, form.url.trim(), form.secret.trim());
     setForm(ok ? null : { ...form, busy: false });
   };
+  // the directory, the way Claude's connector directory works: search by name or use, and see only what's connected
+  const needle = q.trim().toLowerCase();
+  const shown = INTEGRATIONS.map(g => ({ ...g, items: g.items.filter(it => (!only || (it.kind !== "feed" && !!conn(it.kind)))
+    && (!needle || [it.name, it.zh ?? "", it.why.en, it.why.zh, g.group.en, g.group.zh, it.maps?.en ?? "", it.maps?.zh ?? ""].some(s => s.toLowerCase().includes(needle)))) })).filter(g => g.items.length);
+  const linked = (cloud?.integrations ?? []).filter(i => i.status === "connected").length;
   return (
     <Group id="integrations" title={B("Integrations", "集成")} note={B("Only what gets you licensed and keeps you compliant. Placetta reads what a task needs and nothing else; disconnect any time.", "只连接拿证和保持合规所需的服务。快哉只读取任务所需的内容，可随时断开。")}>
-      {INTEGRATIONS.map(g => (
+      <div className="sg-dir" role="search">
+        <input className="sk-q" type="search" value={q} onChange={e => setQ(e.target.value)} placeholder={zh ? "搜索应用，如 Notion、日历、地址" : "Search apps, like Notion, calendar or address"} aria-label={zh ? "搜索应用" : "Search apps"} />
+        <span className="sg-dir-f" role="group" aria-label={zh ? "显示" : "Show"}>
+          <button type="button" className={"sbtn " + (!only ? "line" : "quiet")} aria-pressed={!only} onClick={() => setOnly(false)}>{zh ? "全部" : "All"}</button>
+          <button type="button" className={"sbtn " + (only ? "line" : "quiet")} aria-pressed={only} onClick={() => setOnly(true)}>{zh ? `已连接（${linked}）` : `Connected (${linked})`}</button>
+        </span>
+      </div>
+      {!shown.length && <p className="sg-note">{zh ? "没有匹配的内置应用。下面可以连接任何提供 MCP 服务器的应用。" : "No built-in app matches. Below, connect any app that offers an MCP server."}</p>}
+      {shown.map(g => (
         <div key={g.group.en} className="sg-sub">
           <h3>{b(g.group)}</h3>
           <ul className="sg-list">
@@ -337,7 +354,7 @@ function Integrations() {
               return [
                 <li key={it.kind} className="sg-row">
                   <Tile logo={it.logo} wide={it.wide} chat={it.hook || it.bot} />
-                  <span className="sg-tx"><b>{zh && it.zh ? it.zh : it.name}</b><small>{b(why)}</small>{c?.account && <small className="sg-acct">{c.account}</small>}</span>
+                  <span className="sg-tx"><b>{zh && it.zh ? it.zh : it.name}</b><small>{b(why)}</small>{it.maps && <small className="sg-maps">{b(it.maps)}</small>}{c?.account && <small className="sg-acct">{c.account}</small>}</span>
                   {(status || right) && <span className="sg-r">{status}{right}</span>}
                 </li>,
                 (it.kind === "wechat_bot" || it.kind === "telegram_bot") && c && c.status === "connected" && cloud ? <ChatLink key={it.kind + "-link"} kind={it.kind === "wechat_bot" ? "wechat" : "telegram"} account={c.account} /> : null,
@@ -463,7 +480,7 @@ function Integrations() {
       )}
       {feed && <p className="sg-note mono">{feed}</p>}
       {/* any app's own MCP server, and the one-click list (src/McpSettings.tsx) */}
-      <McpConnectors pin={pin} />
+      <McpConnectors pin={pin} q={q} connected={only} />
     </Group>
   );
 }

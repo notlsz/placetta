@@ -6,7 +6,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { type Audit, type Deps, handle, type Token } from "./logic.ts";
 // @ts-types="./tools.d.ts"
-import { checkArgs, getPrompt, listResources, page, PROMPTS, readResource, RESOURCE_TEMPLATES, resourceScope, runMcpTool, ToolError, TOOLS, type FilingRow } from "./tools.js";
+import { checkArgs, getPrompt, listResources, page, PROMPTS, readResource, RESOURCE_TEMPLATES, resourceScope, runMcpTool, ToolError, TOOLS, type EventRow, type FilingRow } from "./tools.js";
 
 const URL_ = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(URL_, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
@@ -31,10 +31,17 @@ const deps: Deps = {
     return data as { name: string; state: unknown } | null;
   },
   async filings(id) {
-    const { data, error } = await admin.from("filings").select("app_id, title, agency, status, confirmation_number, submitted_at, decided_at, updated_at")
+    const { data, error } = await admin.from("filings").select("id, app_id, title, agency, status, confirmation_number, submitted_at, decided_at, updated_at")
       .eq("workspace_id", id).order("updated_at", { ascending: false }).limit(200);
     if (error) throw new Error(`filings read failed: ${error.code ?? ""}`);
     return (data ?? []) as FilingRow[];
+  },
+  // the timelines (migration 20261026120000_status_tracking); before it is applied, none
+  async events(id) {
+    const { data, error } = await admin.from("filing_events").select("filing_id, at, kind, status, title, source, confidence, url")
+      .eq("workspace_id", id).order("at", { ascending: false }).limit(1000);
+    if (error) { if (!["42P01", "PGRST205"].includes(String(error.code))) console.error("filing_events", error.code ?? ""); return []; }
+    return (data ?? []) as EventRow[];
   },
   async audit(a: Audit) {
     const { error } = await admin.from("agent_tool_calls").insert({ workspace_id: a.workspace_id, actor_id: a.actor_id, actor_role: a.actor_role, tool: a.tool, scope: "read", input_hash: a.input_hash, decision: a.decision, code: a.code, reason: a.reason ?? null });

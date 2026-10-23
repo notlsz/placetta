@@ -33,6 +33,7 @@ import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMe
 import { contactFor } from "./recall";
 import { daysFromNow, money, nowIso } from "./time";
 import { cadence, ensureProof, MAIN_BOT, MAX_CHILDREN, MAX_RUN_CHILDREN, met, nextRun, settleJobs, type Job, type Routine, type StepCheck } from "./jobs";
+import { companyFacts, factLines, placeFacts, type PlaceRecord } from "./connectorFacts";
 import { replyMoment, scrubStep, traced } from "./replay";
 import { emailsIn, injected, SECRET_WHY, secretNumber } from "./guard";
 import { basisLine, openingLine, openingPath, preflight } from "./smart";
@@ -2420,7 +2421,12 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           mark();
           // names and addresses are typed by people into another company's app: read as data, never as instructions
           const places = r.places.slice(0, 60).map(p => { const ing = take(JSON.stringify(p), { source: "app", from: p.source }, `a location from ${p.source}`); return ing.quarantined ? { source: p.source, quarantined: ing.text } : ing.detection.verdict !== "clean" ? { source: p.source, flagged: wrapUntrusted(ing.plain, { source: "app", from: p.source }, ing.detection.verdict) } : p; });
-          return { places, read: r.read, ...(r.failed?.length ? { failed: r.failed, note: "These apps didn't answer; the rest is complete." } : {}) };
+          // what each clean location means for the stores and their licenses (src/connectorFacts.ts), each with its quote
+          const clean = places.filter((p): p is (typeof r.places)[number] => "address" in p && !!p.address) as PlaceRecord[];
+          const facts = placeFacts(get(), clean);
+          const lines = factLines(facts);
+          return { places, read: r.read, ...(lines.length ? { for_licenses: lines, proposals: facts.filter(f => f.propose).map(f => ({ ...f.propose, why: f.quote })) } : { for_licenses: ["Every location matches its store record and its applications."] }),
+            ...(r.failed?.length ? { failed: r.failed, note: "These apps didn't answer; the rest is complete." } : {}) };
         },
       },
       {
@@ -2433,7 +2439,11 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           const r = await svc.integration<{ profile: Record<string, unknown> }>("company_profile", {});
           mark();
           const ing = take(JSON.stringify(r.profile), { source: "app", from: "Xero" }, "the company's record in Xero");
-          return ing.quarantined ? { source: "Xero", quarantined: ing.text } : ing.detection.verdict !== "clean" ? { source: "Xero", flagged: wrapUntrusted(ing.plain, { source: "app", from: "Xero" }, ing.detection.verdict) } : r.profile;
+          if (ing.quarantined) return { source: "Xero", quarantined: ing.text };
+          if (ing.detection.verdict !== "clean") return { source: "Xero", flagged: wrapUntrusted(ing.plain, { source: "app", from: "Xero" }, ing.detection.verdict) };
+          // its legal name against the entities on file (src/connectorFacts.ts), with Xero's own words
+          const lines = factLines(companyFacts(get(), { source: "Xero", ...(r.profile as { name?: string; legal_name?: string }), name: String((r.profile as { name?: unknown }).name ?? "") }));
+          return { ...r.profile, for_licenses: lines.length ? lines : ["The legal name matches the entity on file."] };
         },
       },
     ];
