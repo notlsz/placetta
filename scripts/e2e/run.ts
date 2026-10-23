@@ -1262,6 +1262,8 @@ try {
       { text: "The food service permit is complete and waiting for your approval." },
     ] },
     { name: "weekly-watch", match: (p) => p.startsWith("Weekly check"), turns: [{ text: "No changes." }] },
+    // The daily status check for a filing with no lookup in code (monitor/status_checks.ts): one filing, one line back
+    { name: "status-check", match: (p) => p.startsWith("Scheduled job") && p.includes("Status check, one filing only."), turns: [{ text: "No changes." }] },
     // The monitor's renewal jobs: a permit expiring within 60 days, or lapsed, starts a background job. Odelia
     // checks where things stand and says what's next; from a background job nothing is filed, paid or sent.
     { name: "renewal-job", match: (p) => p.startsWith("Scheduled job") && p.includes("Start the renewal:"), turns: [

@@ -152,3 +152,69 @@ Where the answer is yes (research answers and general documents), Placetta shoul
 5. A document whose instructions were hidden is still read, with the hidden sentence quoted in full to the owner; visible instructions still keep it from any model.
 
 Skipped, by the rule "only if it improves our agent": routing simple rounds to a cheaper model (the cache is per model, so it costs more, measured), and a cost estimate before each run (runs cost about a cent; the price that matters, the license's, is already shown before approval).
+
+## Lifecycle: tracking, corrections, appeals and inspections (added 2026-10-22)
+
+What happens after a filing goes in: knowing where it stands, answering the agency, contesting a no, and getting the
+inspector out. Scores are out of 10 for that job, Placetta's judgment from the cited pages (competitors) and this
+repository's tests (Odelia). "Before" is Odelia before this pass. Where a competitor's public pages don't describe
+something, it scores 1.
+
+| | Tracking | Corrections | Appeals | Inspections | Overall |
+|---|---:|---:|---:|---:|---:|
+| **Odelia, before** | 4 | 6 | 1 | 3 | 3.5 |
+| **Odelia, after** | 8 | 8 | 7 | 7 | 7.5 |
+| Harbor Compliance | 6 | 5 | 1 | 1 | 3.3 |
+| LicenseLogix (CT Corporation since 2021) | 5 | 6 | 1 | 1 | 3.3 |
+| Wolters Kluwer CT Corporation | 5 | 6 | 1 | 1 | 3.3 |
+| Avalara License Management | 6 | 4 | 1 | 1 | 3.0 |
+| Permit expediters | 6 | 8 | 4 | 4 | 5.5 |
+| Harvey and Legora | 1 | 3 | 7 | 1 | 3.0 |
+| Perplexity Computer and ChatGPT agent | 3 | 3 | 4 | 3 | 3.3 |
+
+Odelia before: the weekly background check looked statuses up with the model, the agency's questions became a drafted
+answer (agencyAsks), there was no appeals workflow (grep "appeal" found only the legal pages), and inspection_guide
+gave prep only. After, each score rests on tests:
+- **Tracking 8:** daily checks for every filing with an agency and anything hot (`supabase/functions/monitor/status_checks_test.ts`), free where the city publishes it, a timeline per filing with source, time and confidence, SLA escalation. Not 10: only three cities' building permits are read in code; the rest are Odelia's checks.
+- **Corrections 8:** a denial now carries its deadline and both ways forward (`supabase/functions/monitor/appeals_test.ts`, `scripts/agent-test.ts` "Appeals").
+- **Appeals 7:** 14 playbooks; 6 deadline rules confirmed on an official page, 3 counted from statute text read on unofficial copies (UNVERIFIED), 5 read from the decision letter (UNVERIFIED). Computed in the deciding body's time zone and calendared at once; never filed by Placetta. Not higher: the UNVERIFIED ones, and counsel handoff is a team task until partner attorneys are signed.
+- **Inspections 7:** booking methods for 38 opening inspections in 14 places, portal booking through the worker on four agency sites (LADBS, LAFD, FDNY Business, SJPermits) with the owner's approval of the slot, results tracked, a mock inspection. Not higher: PermitSF and the Texas and Arizona portals are booked by the team until their start pages are confirmed.
+
+### Competitor by competitor
+
+**Harbor Compliance.** Strength copied: every license's status and renewals in one view, with advance reminders: "Track status and renewals of firm and individual licenses", "Custom reminders provide advance notice of deadlines" ([License Manager](https://www.harborcompliance.com/license-manager-software)); Odelia's timeline and "last checked" give that view per filing. Weakness beaten: reviews summarized by Discern, a competitor, cite "complaints about cancellations, renewals, and missed filings" and "Harbor repeatedly failed to complete work they had paid for" ([Discern](https://www.discern.com/resources/harbor-compliance-reviews)). Odelia checks every open filing daily, escalates when nothing moves past the agency's published time, and a job isn't done until the agency's confirmation is on file. Appeals and inspections aren't described. Odelia before / after: 3.5 / 7.5, against 3.3.
+
+**LicenseLogix (part of CT Corporation).** Strength copied: "research, filing and ongoing compliance management" as one service ([Wolters Kluwer, 2021-10-29](https://www.wolterskluwer.com/en/news/wolters-kluwer-acquires-licenselogix)); Odelia now runs the whole lifecycle, from the plan through the appeal and the inspection. Weakness beaten: the public pages show no per-filing status the business can see and nothing after a denial; Odelia's owner sees every event and its source. 3.5 / 7.5, against 3.3.
+
+**Wolters Kluwer CT Corporation.** Strength copied: experts "support your business throughout its life cycle" ([CT Corporation](https://wolterskluwer.com/en/solutions/ct-corporation/faqs/business-license-compliance-software-by-ct-corporation)); Odelia hands the human steps (a phone booking, a stalled agency, counsel) to Placetta's team as tasks with the script and the deadline. Weakness beaten: its license pages describe no status tracking, appeals or inspections. 3.5 / 7.5, against 3.3.
+
+**Avalara License Management.** Strength copied: "Track filings, renewals, and more with an interactive dashboard" and "Receive alerts for upcoming renewals" ([Avalara](https://www.avalara.com/us/en/products/business-licenses/license-management.html)); Odelia's alerts fire only on a real change. Weakness beaten: appeals and inspections aren't described, and it tracks licenses held rather than the agency's decision on a pending one. 3.5 / 7.5, against 3.0.
+
+**Permit expediters.** Strength copied: the expediter is the "strategic liaison" who keeps "tracking its progress and resolving any issues that arise during the plan review" ([PermitPlace](https://permitplace.com/permit-expediter-cost-california/), an expediter); Odelia's escalation drafts that follow-up and the team makes the call. Weakness beaten: cost, "$500 to over $15,000", commercial work "3-8% of total project costs" (same page); Odelia's daily checks cost about $0.54 a store-month (docs/UNIT-ECONOMICS.md). Expediters still lead on corrections in complex plan review. 3.5 / 7.5, against 5.5.
+
+**Harvey and Legora.** Strength copied: cited drafts, and deadline discipline: every rule in the appeal outline cites its source by number for the owner to check, and the deadline is computed by rule from the trigger date, as Clio's court-rules calendaring does ([Clio](https://www.clio.com/blog/track-court-deadlines-court-rules/)). Weakness beaten: they draft for lawyers, without the agencies' appeal bodies, forms, fees and deadlines city by city; Odelia's playbooks hold those, and route to counsel where the appeal body itself advises it. 3.5 / 7.5, against 3.0.
+
+**Perplexity Computer and ChatGPT agent.** Strength copied: live web lookup; Odelia's model check does the same for a filing with no lookup in code, one filing at a time and only when due. Weakness beaten: nothing watches between requests, and a deadline they state has no rule behind it. DoNotPay's "robot lawyer" claims ended in an FTC order ([FTC](https://www.ftc.gov/node/87474)); Odelia never files an appeal, never predicts the outcome, gives no legal opinion, and says Placetta isn't a law firm. 3.5 / 7.5, against 3.3.
+
+### Patterns copied, by feature
+
+| Feature | Copied from | Public page |
+|---|---|---|
+| Status timeline, newest first, with source and time | UPS and FedEx tracking, Amazon and Shopify order timelines | [Shopify order details](https://help.shopify.com/manual/orders/manage-orders/managing-orders) |
+| Daily checks instead of point-in-time ones | Vanta's "automated, hourly tests" | [Vanta](https://www.vanta.com/products/automated-compliance?r_done=1) |
+| Change detection by hash; alerts only on a real change | Visualping and Distill.io: "Alerts are change-triggered, not presence-triggered" | [Distill.io](https://distill.io/docs/web-monitor/using-conditions-to-get-alert-on-important-changes/), [Visualping](https://visualping.io/blog/alert-on-error) |
+| SLA badge: on track, at risk, past due | Zendesk and Linear SLAs | [Linear](https://linear.app/changelog/2023-03-16-slas), [Zendesk](https://support.zendesk.com/hc/en-us/articles/4408885881498-Troubleshooting-common-SLA-issues) |
+| Deadline counted from the decision and calendared at once | Clio Court Rules and CompuLaw | [Clio](https://www.clio.com/blog/track-court-deadlines-court-rules/) |
+| Cited appeal drafts | Harvey and Legora | [Harvey](https://help.harvey.ai/en/articles/10580373-getting-started-with-harvey) |
+| Offer times, pick one, confirm | Calendly and OpenTable | [Calendly](https://calendly.com/help/how-to-book-meetings-in-real-time) |
+| Notify only on change | Stripe and GitHub notifications | [GitHub](https://docs.github.com/en/enterprise/2.17/user/github/receiving-notifications-about-activity-on-github/about-notifications) |
+
+### Jack & Jill (AI recruiting agent), where it helps a licensing agent
+
+From the founder's notes on a jobright.ai review (a competitor's article) and Trustpilot reviews.
+- **Their tracker gap is our edge.** Their users are re-shown jobs they applied to or were rejected from. Odelia now reads each filing's agency decision, marks forms already in the workspace or declined by the owner, won't prepare an approved permit again (a renewal says so), and remembers "we don't serve alcohol" or "no outdoor seating" so those licenses stay gone across sessions (`scripts/agent-test.ts`, "The plan reflects each filing's real state").
+- **Stale or irrelevant recommendations.** Already guarded: a form is claimed only with a current quote from its page (the sweeper's threshold), places come from the address, and alcohol or outdoor seating appear only when the business says so. test:accuracy: 100% precision, every row sourced. The new journey test adds a Flushing plan holding only New York's forms.
+- **Mock interview, as a mock inspection.** Built: `inspection_booking` mock walks the inspector's own checklist one item at a time, with photos, and each gap becomes a fix.
+- **Document-first onboarding.** Not built, because it exists: "Upload my lease" is a starter in the composer and the agent panel, and an upload is read into facts the plan fills from.
+- **"Forgets context."** Impossible by design, now tested: a job's plan, its handoff notes and the facts are in front of Odelia in a later session without the old conversation (`scripts/agent-test.ts`, "Context persists across sessions").
+- **Pay on hire.** Jack & Jill charges employers 10% only on a hire, with a 3-month refund. Placetta's equivalent would be charging a license only once the agency issues it. Not built: pricing is the founder's decision.
