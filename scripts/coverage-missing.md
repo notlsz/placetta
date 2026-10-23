@@ -9,8 +9,8 @@ What the audit looked for and the registry still doesn't hold, by country and le
 ### United States
 
 - Federal: FCC equipment authorization for importers of electronics (out of scope for food and retail stores, listed for completeness); USDA FSIS import inspection for meat, poultry and egg products; state new-hire reporting. BOI: current, see `fincen-boir` (FinCEN's final rule, effective August 14, 2026, keeps U.S.-formed companies exempt).
-- State: workers' compensation for Arizona, Hawaii and Utah (Washington's runs through the business license, already in `wa-bls`); out-of-state company registration for Illinois is unverified (ilsos.gov and ilga.gov refused every read; the other eleven states were added in the finishing pass, with Nevada's and Ohio's fees not confirmed on an official page); cottage food; weights and measures device registration (county sealers in California); tobacco retailer licences (California's CDTFA page moved, and the new one wasn't found); Ohio's formation fee (its site was down for maintenance); Illinois's LLC filing fee (no official page could be read, so no fee is claimed).
-- County: fictitious business name filings outside Los Angeles and Santa Clara counties (Orange, San Diego, Alameda, San Mateo, Sacramento, San Francisco); New York's county-level DBA for sole proprietors.
+- State: workers' compensation for Hawaii and Utah (Arizona's was added in the verification pass, `az-workers-comp`; capitol.hawaii.gov answered 403 and Utah's code page built in script; Washington's runs through the business license, already in `wa-bls`); California's Proposition 65 row stays unverified (OEHHA's pages build in script); out-of-state company registration for Illinois is unverified (ilsos.gov and ilga.gov refused every read; the other eleven states were added in the finishing pass, with Nevada's and Ohio's fees not confirmed on an official page); cottage food; weights and measures device registration (county sealers in California); tobacco retailer licences (California's CDTFA page moved, and the new one wasn't found); Ohio's formation fee (its site was down for maintenance); Illinois's LLC filing fee (no official page could be read, so no fee is claimed).
+- County: fictitious business name filings outside Los Angeles and Santa Clara counties (Orange, San Diego, Alameda, San Mateo, Sacramento, San Francisco), and those two counties' own entries are unverified (both sites answered 403); New York's county-level DBA for sole proprietors.
 - City: alarm permits for Houston and Dallas (Los Angeles is in, `la-alarm-permit`); San Francisco's Shared Spaces outdoor seating (New York's `nyc-outdoor-dining` and Chicago's `chi-sidewalk-cafe` are in; SF's pages returned navigation only); grease interceptor and FOG permits beyond New York City (a kind fact); tobacco retail licences beyond New York City (`nyc-tobacco-dealer`); food handler cards for cities that run their own. Tobacco and alarm have no intake question yet, so their entries are listed in the library (reference) and not added to plans.
 - Music licensing (ASCAP, BMI, SESAC): private licences under federal copyright law, not government filings; not in the registry.
 
@@ -20,7 +20,7 @@ What the audit looked for and the registry still doesn't hold, by country and le
 
 ### Canada
 
-- Quebec: the QST registration with Revenu Québec and the CNESST employer registration are unverified (both sites answered 403 on every read); Montreal's occupancy and sign permits are in. Ontario's Employer Health Tax; Toronto's zoning and building permits; Vancouver's business licence and BC liquor licence are unverified; Toronto Public Health's food premises inspection.
+- Quebec: the QST registration with Revenu Québec and the CNESST employer registration are unverified (both sites answered 403 on every read); Montreal's occupancy and sign permits are in. Ontario's Employer Health Tax; Toronto's zoning approval (its building permit, `ca-tor-building`, and Vancouver Coastal Health's food premises permit, `ca-van-food-permit`, were added in the verification pass); Vancouver's business licence is unverified (vancouver.ca answered 403; the BC liquor licence was verified in the verification pass); Ontario's food handler training rule is unverified (ontario.ca/laws builds in script); Toronto Public Health's food premises inspection.
 
 ### Europe (top six)
 
@@ -28,7 +28,7 @@ What the audit looked for and the registry still doesn't hold, by country and le
 
 ### South America, Southeast Asia and Africa
 
-- One national company step and one tax step per country, most unverified; city licences only for Kuala Lumpur and Nairobi. Missing: municipal licences (São Paulo, Santiago, Bogotá, Buenos Aires, Lima, Bangkok, Ho Chi Minh City, Jakarta, Manila, Lagos, Johannesburg, Casablanca), food premises permits (Singapore's SFA licence is unverified; the others are missing), social security employer registrations, and liquor licences.
+- One national company step and one tax step per country; the verification pass verified Brazil's (CNPJ through Redesim, and ANVISA), Argentina's CUIT, Peru's RUC, Nigeria's CAC registration and Kenya's KRA PIN, while Chile, Colombia, Thailand, Vietnam, Indonesia, the Philippines, South Africa and Morocco stay unverified (their pages carry menus only, build in script or answered 403); city licences only for Kuala Lumpur and Nairobi. Missing: municipal licences (São Paulo, Santiago, Bogotá, Buenos Aires, Lima, Bangkok, Ho Chi Minh City, Jakarta, Manila, Lagos, Johannesburg, Casablanca), food premises permits (Singapore's SFA licence is unverified; the others are missing), social security employer registrations, and liquor licences.
 
 ### China, the Gulf and the rest of Europe
 
