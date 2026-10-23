@@ -56,8 +56,10 @@ const wordsOf = (t: string) => new Set((t.toLowerCase().match(/[a-z]{5,}/g) ?? [
 
 /** The groups a request is about: its words, files sent with it, a store's bot, and each connected app it names or
  *  whose tools share a distinctive word with it (apps: the app's id and its tools' names and descriptions). */
-export function groupsFor(text: string, o: { files?: number; child?: boolean; apps?: { id: string; text: string }[] } = {}): string[] {
-  const out = new Set<string>();
+export function groupsFor(text: string, o: { files?: number; child?: boolean; apps?: { id: string; text: string }[]; own?: string[] } = {}): string[] {
+  // Placetta's own groups offered from the start, in a fixed order, so the tool list (the first thing the prompt cache
+  // reads) is the same run after run; then the ones this request's words, files or store add
+  const out = new Set<string>(o.own ?? []);
   for (const [g, x] of Object.entries(GROUPS)) if (x.words.test(text)) out.add(g);
   if (o.files) out.add("documents");
   if (o.child) { out.add("stores"); out.add("inspections"); }

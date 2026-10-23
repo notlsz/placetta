@@ -6,6 +6,7 @@ import type { Lang } from "./i18n";
 import type { Workspace } from "./model";
 import { clean, honest, makeTools, messagesModel, official, outOfSteps, rules, runAll, runTool, type Block, type Made, type Role, type Services, type Source, type Tool, type Turn } from "./live";
 import { groupOf, groupsFor, toolLoader } from "./toolIntent";
+import { instantAnswer } from "./plan/instant";
 import { addSpan, modelSpan, type Span } from "./trace";
 import { B } from "./bi";
 import { MAIN_BOT, proven, reconcile, settleJobs, STOPPED_HERE, type Job } from "./jobs";
@@ -304,8 +305,11 @@ export async function runRounds(o: {
    *  search, and the processors' settings (src/odeliaMemory/). Without it the run still gets the pinned facts from the
    *  records, the cache-ordered prompt and the processors. */
   memory?: RunMemory;
-  /** Tools by intent (src/toolIntent.ts): the core plus the groups the request is about. On unless set to false. */
-  toolLoading?: boolean;
+  /** Tools by intent (src/toolIntent.ts). By default every one of Placetta's own groups is offered from the first call
+   *  (one stable tool list, so the prompt cache's prefix holds across runs) and only connected apps' groups wait for the
+   *  request to be about them; "intent" loads Placetta's own groups by intent too (the 2026-10-22 behaviour, kept for
+   *  the A/B in scripts/live-eval.ts --tools); false offers every tool, connected apps' included. */
+  toolLoading?: boolean | "intent";
   /** Every tool the run may use, as definitions (the live evaluation checks calls against these). */
   onTools?: (defs: { name: string; description: string; input_schema: unknown }[]) => void;
 }): Promise<{ reply: Reply } | { paused: RunState } | { waiting: RunState; reply?: Reply }> {
@@ -414,7 +418,10 @@ export async function runRounds(o: {
   const groupsAll = [...new Set(tools.map(t => groupOf(t.name)).filter((g): g is string => !!g))];
   if (o.toolLoading === false) st.toolGroups = groupsAll;
   st.toolGroups ??= groupsFor([st.request ?? "", ...st.messages.filter(m => m.role === "user" && typeof m.content === "string").slice(-3).map(m => String(m.content))].join("\n"),
-    { files: o.files?.size ?? 0, child: !!o.child, apps: groupsAll.filter(g => g.startsWith("app:")).map(g => ({ id: g.slice(4), text: tools.filter(t => groupOf(t.name) === g).map(t => `${t.name} ${t.description}`).join(" ") })) });
+    { files: o.files?.size ?? 0, child: !!o.child, apps: groupsAll.filter(g => g.startsWith("app:")).map(g => ({ id: g.slice(4), text: tools.filter(t => groupOf(t.name) === g).map(t => `${t.name} ${t.description}`).join(" ") })),
+      // a stable prefix: measured on the 60 fixtures, Placetta's own groups offered every time take the cache hit rate
+      // from 76% to 85% and a run's mean cost down 8% (docs/COMPETITIVE.md, the 9 pass)
+      own: o.toolLoading === "intent" ? [] : groupsAll.filter(g => !g.startsWith("app:")) });
   const loader = toolLoader(tools, st.toolGroups, t => secureTools([t], shield, { get: o.ws, apply })[0]);
   const defsOf = (list: Tool[]) => list.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }));
   o.onTools?.(defsOf(loader.all));
@@ -490,6 +497,7 @@ export async function runRounds(o: {
   const unchecked: string[] = [];      // jobs the checker couldn't look at: they stay open, never done on the agent's word
   const recheck = new Set<string>();   // sent back by the checker: checked again after the fixes
   let last: Block[] = [];
+  let instantShown = false;
 
   work: for (;;) {
     // A run working a job may hand it through fresh seats; any other run has one seat's rounds.
@@ -533,6 +541,12 @@ export async function runRounds(o: {
         } else {
           const r = await runTool(loader.all, u);
           loader.used(name); st.toolGroups = loader.loaded();
+          // the first answer, from the registry, while the model still works (src/plan/instant.ts): only before the
+          // model has written anything, once a run, and replaced by the model's own words when it writes
+          if (name === "find_official_forms" && !r.is_error && !instantShown && !st.text.trim() && o.draft) {
+            const line = instantAnswer(r.content, o.lang === "zh" ? "zh" : "en");
+            if (line) { instantShown = true; o.draft(line); }
+          }
           if (!r.is_error) addUsed(st.used ??= [], usedBy(name, input, r.content, o.ws()));
           const note = r.is_error ? null : channelNote(from, name);
           out = (note ? { ...r, content: `${r.content}\n\nNote: ${note}` } : r) as unknown as Record<string, unknown>;
