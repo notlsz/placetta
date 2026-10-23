@@ -3091,10 +3091,10 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 
 /* brand backers as a logo marquee (Oct 22) */
 #invR.invr{display:block;overflow:hidden;max-width:1288px;margin-inline:auto;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
-#invR .ivt{display:flex;align-items:center;gap:56px;width:max-content;padding-right:56px;animation:ivmq 48s linear infinite}
+#invR .ivt{display:flex;align-items:center;gap:56px;width:max-content;padding-right:56px;animation:ivmq 48s linear infinite;will-change:transform;transform:translate3d(0,0,0);backface-visibility:hidden}
 #invR:hover .ivt{animation-play-state:paused}
 #invR .ivt img{flex:none}
-@keyframes ivmq{to{transform:translateX(-50%)}}
+@keyframes ivmq{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
 @media (max-width:767px){#invR .ivt{gap:36px;padding-right:36px;animation-duration:36s}#invR+.more95{display:none!important}}
 @media (prefers-reduced-motion:reduce){#invR .ivt{animation:none;flex-wrap:wrap;justify-content:center;width:auto;gap:24px 36px}#invR .ivt img[aria-hidden]{display:none}}
 
@@ -4306,7 +4306,7 @@ const INV = [
   {k:"greylock", n:["Greylock","格雷洛克"], h:26}, {k:"yc", n:["Y Combinator","Y Combinator 创业加速器"], h:32}, {k:"softbank", n:["SoftBank","软银"], h:22},
   {k:"sequoia", n:["Sequoia","红杉资本"], h:16}, {k:"hillhouse", n:["Hillhouse Investment","高瓴投资"], h:38}, {k:"idg", n:["IDG Capital","IDG资本"], h:24}, {k:"azureworld", n:["AzureWorld","湛蓝领域"], h:38}, {k:"blackstone", n:["Blackstone","黑石"], h:34}, {k:"apollo", n:["Apollo","阿波罗"], h:20}
 ];
-function renderInv(){ const i = L(), one = (hide) => INV.map(v => `<img src="logos/investors/${v.k}.png" alt="${hide ? "" : esc(v.n[i])}"${hide ? ' aria-hidden="true"' : ""} style="--h:${v.h}px" loading="lazy" decoding="async">`).join("");
+function renderInv(){ const i = L(), one = (hide) => INV.map(v => `<img src="logos/investors/${v.k}.png" alt="${hide ? "" : esc(v.n[i])}"${hide ? ' aria-hidden="true"' : ""} style="--h:${v.h}px" loading="eager" decoding="sync" draggable="false">`).join("");
   document.getElementById("invR").innerHTML = `<div class="ivt">${one(false)}${one(true)}</div>`; }
 function applyAll(){ applyStatic(); if (typeof renderBk === "function") renderBk(); if (typeof renderOld === "function") renderOld(); renderApp(); renderCost(); renderPrice(); renderProof(); renderFaq(); renderTs(); if (typeof renderMon === "function") renderMon(); if (typeof renderBel === "function") renderBel(false); if (typeof renderStrip === "function") renderStrip(); if (typeof renderFlows === "function") renderFlows(); if (typeof renderInv === "function") renderInv(); }
 function setLang(l){ if (l === lang) return; if (ONZH && l === "en") { try { localStorage.setItem("placetta-lang", "en"); } catch(e){} location.href = "/" + location.search + location.hash; return; } lang = l; try { localStorage.setItem("placetta-lang", l); } catch(e){} track("language_switch", {to: l}); applyAll(); if (typeof renderMap === "function") renderMap(); if (!document.getElementById("modal").hidden) renderStep(); if (typeof updateResume === "function") updateResume(); }
