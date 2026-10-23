@@ -819,6 +819,10 @@ async function toolMatrix() {
         ["get_income", { year: 2025 }], bad("get_income", { year: 1999 }),
         ["get_sales", { from_month: "2026-09" }], bad("get_sales", { from_month: "September" }),
         ["get_staff", { from: "2026-10-01", to: "2026-10-14" }], bad("get_staff", { from: "2026-02-30" }),
+        ["appeal_options", { application_id: "a1", decision_date: "2026-10-20", reason: "Denied: the plans are missing the grease interceptor." }], bad("appeal_options", { application_id: "a1", decision_date: "20261020" }),
+      ),
+      c => askAll(
+        ["inspection_booking", { action: "plan", store_id: "st1", inspection_id: (c.out("inspection_guide") as { inspections?: { id: string }[] }).inspections?.[0]?.id ?? "" }], bad("inspection_booking", { action: "confirm", store_id: "st1", booking_id: "ghost" }),
       ),
       () => say("Exercised."),
     ],

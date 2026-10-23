@@ -10,13 +10,13 @@ A form can have more than one channel. Team only means Placetta has no route it 
 
 | Channel | Before (2026-10-17) | Now |
 |---|---:|---:|
-| Team only | 231 | 193 |
+| Team only | 231 | 194 |
 | Email | 5 | 14 |
 | Fax | 4 | 12 |
 | Certified mail | 13 | 30 |
-| Agency portal | 16 | 123 |
+| Agency portal | 16 | 122 |
 | Owner packet | 0 | 31 |
-| Any route Placetta sends on | 140 | 147 |
+| Any route Placetta sends on | 140 | 146 |
 
 ## How each form would go on its first try
 
@@ -24,14 +24,14 @@ With every channel switched on, a saved login for each portal and a connected ma
 
 | Route | Before (2026-10-17) | Now |
 |---|---:|---:|
-| On the agency's portal | 16 | 123 |
+| On the agency's portal | 16 | 122 |
 | By email | 1 | 1 |
 | By fax | 0 | 0 |
 | By certified mail | 0 | 0 |
 | Owner packet: the owner sends it | 0 | 31 |
 | Signed by hand, then Placetta faxes it | 3 | 4 |
 | Signed by hand and sent by the owner | 6 | 17 |
-| The Placetta team | 233 | 195 |
+| The Placetta team | 233 | 196 |
 
 ## Forms Placetta can route
 
@@ -54,7 +54,6 @@ With every channel switched on, a saved login for each portal and a connected ma
 | New York State | New employer registration for unemployment insurance and withholding (`ny-dol-100`) | fax, mail, portal: www.businessexpress.ny.gov, +15184858010, NYS Department of Labor, Unemployment Insurance Division, Registration Section, Albany | On the agency's portal | by hand | no fee | [page](https://dol.ny.gov/system/files/documents/2021/02/nys100-1.pdf) (2026-10-13) |
 | New York City | Food Service Establishment Permit (`nyc-fse`) | portal: a816-hlst.nyc.gov | On the agency's portal | typed | on the portal | [page](https://nyc-business.nyc.gov/nycbusiness/description/food-service-establishment-permit) (2026-10-18) |
 | New York City | Food Protection Certificate (course and exam) (`nyc-fpc`) | owner packet | Owner packet: the owner sends it | none | in person | [page](https://www.nyc.gov/site/doh/business/health-academy/food-protection-online-free.page) (2026-10-09) |
-| New York City | Restaurant wine license (beer and wine) (`ny-sla-rw`) | portal: www.businessexpress.ny.gov | On the agency's portal | typed | sent with it | [page](https://sla.ny.gov/restaurant-license-quick-reference-0) (2026-10-18) |
 | New York City | Commercial Rent Tax registration and returns (`nyc-crt`) | portal: a836-btseservices.nyc.gov | On the agency's portal | typed | no fee | [page](https://www.nyc.gov/site/finance/business/business-commercial-rent-tax-crt.page) (2026-10-18) |
 | California | Articles of Organization (California LLC) (`ca-llc-1`) | portal: bizfileonline.sos.ca.gov | On the agency's portal | typed | on the portal | [page](https://www.sos.ca.gov/business-programs/business-entities/faqs) (2026-10-18) |
 | California | Application to Register a Foreign LLC (`ca-llc-5`) | portal: bizfileonline.sos.ca.gov | On the agency's portal | typed | on the portal | [page](https://www.sos.ca.gov/business-programs/business-entities/faqs) (2026-10-18) |
@@ -230,6 +229,7 @@ With every channel switched on, a saved login for each portal and a connected ma
 | New York City | Certificate of Occupancy for the use (`nyc-co`) | A change of use is an architect's or engineer's DOB NOW job; otherwise it's a lookup, not a filing. | [page](https://www.nyc.gov/site/buildings/property-or-business-owner/certificate-of-occupancy.page) (2026-10-13) |
 | New York City | Building permit for the build-out (DOB alteration) (`nyc-dob-alt`) | "Most kitchen and bathroom renovations require an ALT2 permit application, which must be filed by a PE or RA": the design professional files it. | [page](https://www.nyc.gov/site/buildings/property-or-business-owner/renovating-kitchens-bathrooms.page) (2026-10-18) |
 | New York City | Community board notice for the liquor license (`nyc-cb-notice`) | The notice goes to the community board for the address 30 days before the SLA filing, but the SLA's page doesn't say how it is delivered, and each board has its own address. | [page](https://sla.ny.gov/community-board-faqs) (2026-10-18) |
+| New York City | Restaurant wine license (beer and wine) (`ny-sla-rw`) | Not researched yet. |  |
 | California | Packaging producer registration (EPR) (`ca-sb54`) | Registration is with Circular Action Alliance, the producer organization, not a government agency. | [page](https://calrecycle.ca.gov/packaging/packaging-epr/) (2026-10-17) |
 | California | Proposition 65 warning labels (`ca-prop65`) | Nothing is filed: businesses give a "clear and reasonable" warning. | [page](https://www.p65warnings.ca.gov/business-resources/frequently-asked-questions-businesses) (2026-10-18) |
 | Los Angeles County | Food facility plan check (`lac-plan-check`) | Two steps: an email asking for a SharePoint upload link, then the plans go to that link, and review waits for the invoiced fee. | [page](https://admin.publichealth.lacounty.gov/eh/i-want-to/submit-electronic-plan.htm) (2026-10-13) |

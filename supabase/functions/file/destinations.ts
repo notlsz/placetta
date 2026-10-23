@@ -1248,14 +1248,12 @@ export const DEST: Record<string, Dest> = {
     checked: "2026-10-18", source: "https://www.ttb.gov/system/files/images/pdfs/forms/f56305d.pdf",
     also: ["https://www.ttb.gov/nrc/retail-beverage-alcohol-dealers"],
   },
-  "ny-sla-rw": {
-    // "From there you will find the Application Wizard" on New York Business Express; the coversheet gives the fee.
-    portal: "www.businessexpress.ny.gov",
-    signature: "typed", payment: "with_filing", onBehalf: "unstated",
-    attach: ["Proof of the 30-day community board notice"],
-    checked: "2026-10-18", source: "https://sla.ny.gov/restaurant-license-quick-reference-0",
-    also: ["https://sla.ny.gov/community-board-faqs"],
-  },
+  // "ny-sla-rw" (the SLA retail license) was listed here as filed on New York Business Express. Re-read 2026-10-22, it
+  // isn't: "All on-premises ... applications are provided through New York Business Express as fillable forms", the
+  // wizard only finds "the appropriate license and fee" and offers "downloading or emailing the summary, application,
+  // and instructions", and "after your check is cashed, it can take up to 15 days to receive a receipt"
+  // (sla.ny.gov/get-license, /how-apply-sla-license). No page read says where the paper application goes, so it has no
+  // verified destination and stays with the team until one is confirmed.
   "co-sos": {
     // "File a form to create a new record" (coloradosos.gov/biz/FileDoc.do).
     portal: "www.coloradosos.gov", portalUrl: "https://www.coloradosos.gov/biz/FileDoc.do",
