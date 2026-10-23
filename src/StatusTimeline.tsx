@@ -6,6 +6,7 @@ import { ago, sla, NORM_WORDS } from "./tracking";
 import { publishedDays } from "./plan";
 import { CallsList } from "./Calls";
 import { TalkSheet } from "./Talk";
+import { useChannels } from "./channels";
 
 /*
  * A filing's timeline, the way a parcel's is: UPS and FedEx tracking, Amazon's and Shopify's order timelines
@@ -34,6 +35,7 @@ export function StatusTimeline({ a, filing }: { a: Application; filing: api.Fili
   const [calls, setCalls] = useState(false);
   const [sheet, setSheet] = useState<api.VoiceMode | null>(null);
   const [said, setSaid] = useState("");
+  const ch = useChannels();   // before any return: a hook runs on every render
   useEffect(() => {
     let live = true;
     api.filingTimeline(filing.id).then(x => { if (live) setT(x); }, () => { if (live) setT(null); });
@@ -64,13 +66,14 @@ export function StatusTimeline({ a, filing }: { a: Application; filing: api.Fili
         {tr?.agency_norm && <span>{zh ? `机构记录：${NORM_WORDS[tr.agency_norm]?.zh ?? tr.agency_status}` : `Agency's record: ${NORM_WORDS[tr.agency_norm]?.en ?? tr.agency_status}`}</span>}
         <span className="quiet">{zh ? "每天检查，有真正变化才通知您" : "Checked daily; you hear only when something really changes"}</span>
       </p>
-      {acts && (
+      {/* each voice action only where its channel is set up (src/channels.ts); with none, a quiet Coming soon */}
+      {acts && ch && (ch.calls && withAgency || ch.rehearse || ch.interpreter ? (
         <div className="tl-voice">
-          {withAgency && <button type="button" className="vc-btn" onClick={() => void phone()}>{zh ? "让 Odelia 致电机构" : "Have Odelia call the agency"}</button>}
-          <button type="button" className="vc-btn" onClick={() => setSheet("rehearse")}>{zh ? "先试听这通电话" : "Hear the call first"}</button>
-          <button type="button" className="vc-btn" onClick={() => setSheet("interpreter")}>{zh ? "现场翻译" : "Interpreter"}</button>
+          {ch.calls && withAgency && <button type="button" className="vc-btn" onClick={() => void phone()}>{zh ? "让 Odelia 致电机构" : "Have Odelia call the agency"}</button>}
+          {ch.rehearse && <button type="button" className="vc-btn" onClick={() => setSheet("rehearse")}>{zh ? "先试听这通电话" : "Hear the call first"}</button>}
+          {ch.interpreter && <button type="button" className="vc-btn" onClick={() => setSheet("interpreter")}>{zh ? "现场翻译" : "Interpreter"}</button>}
         </div>
-      )}
+      ) : <p className="tl-soon quiet">{zh ? "致电机构和现场翻译即将推出。" : "Agency calls and the interpreter are coming soon."}</p>)}
       {said && <p className="tl-said" role="status">{said}</p>}
       {t.events.length > 0 && (
         <ol className="tl-events">

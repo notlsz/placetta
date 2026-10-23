@@ -238,12 +238,28 @@ async function media(req: Request, body: Record<string, unknown>) {
   return json(200, { url: data.signedUrl, expires_in: 600 });
 }
 
+/** Whether talking, the interpreter and rehearsals can start here, without starting one: the app shows those buttons
+ *  only when they can (a button that opens onto "isn't set up" is a broken action). The same test session() makes. */
+export function voiceReady(get: (k: string) => string | undefined): { talk: boolean; interpreter: boolean; rehearse: boolean } {
+  const ok = (surface: Surface, lang: Lang) => {
+    const pick = pickBrain({ surface, lang, env: get });
+    return !!get("OPENAI_API_KEY") && (pick.brain === "openai" || pick.brain === "openai_mini") && zdrAllows(get, "openai");
+  };
+  return { talk: ok("app_talk", "en") || ok("app_talk", "zh"), interpreter: ok("app_interpreter", "zh"), rehearse: ok("rehearse", "en") || ok("rehearse", "zh") };
+}
+async function ready(req: Request, body: Record<string, unknown>) {
+  const a = await authed(req, body);
+  if ("error" in a) return a.error!;
+  return json(200, { ...voiceReady(env), acts: a.acts });
+}
+
 export async function handle(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return fail(400, "bad_request", "Send JSON."); }
   switch (body.action) {
+    case "ready": return await ready(req, body);
     case "session": return await session(req, body);
     case "end": return await end(req, body);
     case "tool": return await tool(req, body);

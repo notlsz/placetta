@@ -19,7 +19,7 @@ import { appPdf, fillForm, stampSignature } from "./forms/fill";
 import { readBack } from "./forms/readback";
 import { answersHash, fieldsOf, fileable, formName, latestVersion, needsForm, problemLine, problemsOf, refreshForms, TYPING_MS, type FilledCopy } from "./forms/versions";
 import { ApproveModal, AppDrawer } from "./Drawer";
-import { INITIAL_FEED, type FeedItem, type Turn } from "./feed";
+import { initialFeed, type FeedItem, type Turn } from "./feed";
 import { PERMANENT, accountAgent, serverModel, type Model, type Turn as Msg } from "./agentCore";
 import type { Services } from "./live";
 /* Odelia's instructions, tools and playbooks run on the server (agent-run). The whole agent in this browser (the viewer's
@@ -46,6 +46,7 @@ import { Headquarters } from "./Headquarters";
 import { LegalReader } from "./Legal";
 import { UPDATED } from "./legal";
 import { daysFromNow, daysUntil, inDays, nowIso } from "./time";
+import { todos } from "./doNext";
 import { preflight } from "./smart";
 import { I, Menu, Modal } from "./ui";
 import * as api from "./cloud/api";
@@ -266,7 +267,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   useEffect(() => { wsRef.current = view_; }, [view_]);
   const plan = cloud ? api.planOf(billing) : "monthly";
 
-  const [feed, setFeed] = useState<FeedItem[]>(cloud ? [] : INITIAL_FEED);
+  const [feed, setFeed] = useState<FeedItem[]>(() => (cloud ? [] : initialFeed(view_, daysFromNow(0))));
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
   const [step, setStep] = useState<Step | null>(null);
@@ -1357,13 +1358,17 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     hq: cloud?.hq.length ? <Headquarters lang={lang} initial={cloud.hq} /> : !cloud ? <Headquarters lang={lang} initial={[]} sample={{ ws: view_, team: collab }} /> : <Overview />,
     partner: <PartnerPage lang={lang} sample={!cloud} />,
   }[view];
-  const badge: Partial<Record<View, number>> = { overview: view_.approvals.length, odelia: waitingJobs };
+  // Home's count is everything waiting on the owner: the same list as Home's "Do this next" and "Waiting on you" and the
+  // chat's greeting (src/doNext.ts todos), never the approvals alone
+  const badge: Partial<Record<View, number>> = { overview: todos(view_, daysFromNow(0)).length, odelia: waitingJobs };
   const wsSub = cloud ? (billing?.free && !billing.subscription_status ? b(B("Early access", "抢先体验")) : plan === "monthly" ? b(PLAN_LABEL[billing?.subscription_plan ?? ""] ?? B("Monthly plan", "月度方案")) : plan === "entry" ? b(B("Entry plan", "开店计划")) : b(B("No plan yet", "尚未开通"))) : t("sampleWs");
   const current = (v: View) => view === v || (v === "permits" && view === "find");
   /* The bell: unread updates, always in reach (the sidebar's top on a desktop, the top bar on a phone). */
   const bell = (
     <a {...navLink("odelia", "updates")} className="bellb" aria-label={unread ? (lang === "zh" ? `${unread} 条新动态` : `${unread} new update${unread === 1 ? "" : "s"}`) : t("nav_updates")} title={t("nav_updates")}>
-      <I.bell />{unread > 0 && <em>{unread}</em>}
+      {/* a mark, not a number: the one count of what needs you is Home's (src/doNext.ts todos); a second number beside
+          it, counting updates, read as a disagreement */}
+      <I.bell />{unread > 0 && <em className="mark" aria-hidden="true" />}
     </a>
   );
 

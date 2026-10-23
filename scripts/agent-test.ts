@@ -75,6 +75,7 @@ import { connectorFactsTests } from "./connector-facts-test";
 import { journeyTests } from "./journeys-test";
 import { voiceJourneys } from "./voice-journeys";
 import { citeTests } from "./cite-test";
+import { reviewFixTests } from "./review-fixes-test";
 import { filingProgressTests } from "./filing-progress-test";
 
 /* ------------------------------------------------------------------ checks */
@@ -3164,6 +3165,7 @@ connectorFactsTests(ok, eq);
 econTests(ok, eq);
 edgeTests(ok, eq);
 citeTests(ok, eq);
+reviewFixTests(ok, eq);
 filingProgressTests(ok, eq);
 
 console.log("\n# Every declared tool is exercised");

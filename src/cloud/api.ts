@@ -412,6 +412,12 @@ export type VoiceCall = {
   transcript: CallLine[]; summary: Bi | null; actions: CallAction[]; flags: string[]; started_at: string; ended_at: string | null; seconds: number; agency_key: string | null;
 };
 export type Said = { en: string; zh: string };
+/** Which live voice modes can start in this workspace (the server's keys and data rules), without starting one. Any
+ *  failure reads as not ready, so a button is never shown that opens onto "isn't set up". */
+export type VoiceReady = { talk: boolean; interpreter: boolean; rehearse: boolean };
+export const voiceReady = (ws: string): Promise<VoiceReady> =>
+  fn<VoiceReady>("voice", { action: "ready", workspace_id: ws }).then(r => ({ talk: !!r?.talk, interpreter: !!r?.interpreter, rehearse: !!r?.rehearse }))
+    .catch(() => ({ talk: false, interpreter: false, rehearse: false }));
 export const voiceSession = (ws: string, mode: VoiceMode, lang: "en" | "zh", filingId?: string) => fn<VoiceSession>("voice", { action: "session", workspace_id: ws, mode, lang, ...(filingId ? { filing_id: filingId } : {}) });
 export const voiceEnd = (ws: string, callId: string, seconds: number, transcript: CallLine[]) => fn<{ ok: boolean; summary: Bi }>("voice", { action: "end", workspace_id: ws, call_id: callId, seconds, transcript });
 export const voiceTool = (ws: string, callId: string, name: string, args: Record<string, unknown>) => fn<{ ok: boolean; result: string; start?: string }>("voice", { action: "tool", workspace_id: ws, call_id: callId, name, args });

@@ -679,6 +679,35 @@ export function choices(reason: string, ap: Appeal | null, dl: Deadline | null, 
   ];
 }
 
+/* ------------------------------ saying it ------------------------------ */
+
+const lowerThe = (s: string) => s.replace(/^The\b/, "the");
+/** A label's first letter lowered to sit mid-sentence, unless it starts an acronym or a name. */
+const low = (s: string) => (/^[A-Z][a-z]/.test(s) && !/^(DCWP|OATH|NYC|SF|LA|Office|Board|Supreme)\b/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
+const firstUp = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+const unitSay = (r: Rule) => ({ en: r.unit === "business" ? "business days" : r.unit === "months" ? "months" : "days", zh: r.unit === "business" ? "个工作日" : r.unit === "months" ? "个月" : "天" });
+
+/** The route in plain sentences: what it is, who decides it, the deadline (or that there is none) and the next step. A
+ *  route's name is a label ("Health plan check rejected (California Retail Food Code)") and its body a noun phrase
+ *  ("The county environmental health agency"); pasted into one sentence they read "…, heard by The county …", so each
+ *  is placed where it reads as written. The agent's reply and the permit drawer's appeal panel both say it this way. */
+export function appealSay(ap: Appeal, dl: Deadline | null = null): { route: Bi; deadline: Bi; next: Bi } {
+  const r = ap.deadline, u = unitSay(r);
+  const route = B(`The route: ${ap.name.en}. ${firstUp(lowerThe(ap.body.en))} decides it.`, `申诉途径：${ap.name.zh}。由${ap.body.zh}受理。`);
+  const deadline = dl
+    ? B(`The rule: ${dl.days} ${u.en} from ${low(r.trigger.en)}, counted to ${dl.date} (${r.section}).${dl.verified ? "" : " Not confirmed on an official source: check the decision letter."}`,
+      `规定：${r.trigger.zh}起 ${dl.days} ${u.zh}，算至 ${dl.date}（${r.section}）。${dl.verified ? "" : "未经官方来源确认，请以决定函为准。"}`)
+    : r.days != null
+      ? B(`The deadline is ${r.days} ${u.en} from ${low(r.trigger.en)} (${r.section}).${r.verified ? "" : " Not confirmed on an official source: check the decision letter."}`,
+        `期限：${r.trigger.zh}起 ${r.days} ${u.zh}（${r.section}）。${r.verified ? "" : "未经官方来源确认，请以决定函为准。"}`)
+      : /^no appeal period/i.test(r.trigger.en)
+        ? B(`${firstUp(r.trigger.en)} (${r.section}).`, `${r.trigger.zh}（${r.section}）。`)
+        : B(`The deadline is set by ${low(r.trigger.en)} (${r.section}).`, `期限以${r.trigger.zh}为准（${r.section}）。`);
+  const bare = (s: string) => s.trim().replace(/[.。]$/, "");
+  const next = B(`Next: ${low(bare(ap.form.en))}. Where to file: ${low(bare(ap.file.en))}.`, `下一步：${bare(ap.form.zh)}。提交至：${bare(ap.file.zh)}。`);
+  return { route, deadline, next };
+}
+
 /** What every appeal output carries, word for word. */
 export const NOT_A_LAW_FIRM = B("Placetta isn't a law firm and this isn't legal advice. Placetta prepares the deadline, the evidence and the papers for you to review; it files only what you approve, never where an attorney is advised, and it doesn't predict how an appeal will go.",
   "快哉不是律师事务所，以上不构成法律意见。快哉为您准备截止日期、证据和文件供您审阅；只提交您批准的内容，建议聘请律师的事项不代为提交，也不预测上诉结果。");

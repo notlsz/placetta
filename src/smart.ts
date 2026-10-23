@@ -8,7 +8,7 @@
 import { B, type Bi } from "./bi";
 import { filingBlockers, isBlank } from "./core";
 import { formById, placesOf, segmentOf } from "./forms/registry";
-import type { Application, Approval, Field, Status, Store, Workspace } from "./model";
+import type { Application, Approval, Deadline, Field, Status, Store, Workspace } from "./model";
 import { publishedDays, type FormStat } from "./plan";
 import { BY_HAND, carriesIdentifier, emailsIn, governmentAddress, SECRET_NOTE, secretNumber } from "./guard";
 import { ein as einCheck, latin as latinCheck, premises as premisesCheck, PREMISES_LINE } from "./validate";
@@ -310,6 +310,45 @@ export function openingPath(s: Store, w: Workspace, today: string, ev: Evidence 
   const slack = between(landing, s.plannedOpen);
   return { verdict: slack < 0 ? "late" : slack < 7 ? "tight" : "on_track", landing, slack, blocker, guessed, basis };
 }
+
+/* The opening date has one source: where a store's permits land today (openingPath). The store card, the cost line on
+   Permits, Deadlines, Home and Odelia's answers all read it from here, so one store never shows three dates. The date
+   the brand planned (plannedOpen) is only ever said as the room against it ("12 days to spare"). */
+
+/** A store's opening: where its permits put it today; null for a store already open or not mapped yet. */
+export function openingOf(s: Store, w: Workspace, today: string, ev: Evidence = {}): string | null {
+  if (s.stage !== "opening") return null;
+  const p = openingPath(s, w, today, ev);
+  return p.verdict === "not_mapped" ? null : p.landing;
+}
+
+/** The workspace's opening: the latest of its stores still opening, else the plan written at sign-up (before any store
+ *  has permits of its own). */
+export function workspaceOpening(w: Workspace, today: string, ev: Evidence = {}): { date: string; store?: Store } | null {
+  let best: { date: string; store?: Store } | null = null;
+  for (const s of w.stores ?? []) {
+    const d = openingOf(s, w, today, ev);
+    if (d && (!best || d > best.date)) best = { date: d, store: s };
+  }
+  return best ?? (w.firstPlan?.projectedOpen ? { date: w.firstPlan.projectedOpen } : null);
+}
+
+/** Deadlines with each opening store's opening as its one milestone. A stored "Target opening" milestone (the sample's,
+ *  or the one written at sign-up from the month the person typed) is replaced, so the calendar never disagrees with
+ *  the store card. */
+export function withOpenings(w: Workspace, today: string, ev: Evidence = {}): Deadline[] {
+  const opening = (w.stores ?? []).map(s => ({ s, d: openingOf(s, w, today, ev) })).filter((x): x is { s: Store; d: string } => !!x.d);
+  if (!opening.length) return w.deadlines;
+  const many = opening.length > 1;
+  return [
+    ...w.deadlines.filter(d => !isOpeningMilestone(d)),
+    ...opening.map(({ s, d }) => ({ id: `open-${s.id}`, date: d, kind: "milestone" as const,
+      title: many ? B(`Opening: ${s.name.en}`, `开业：${s.name.zh}`) : B("Opening, where the permits put it", "开业日（按许可进度）"),
+      agency: B("Placetta, from the permits' progress", "快哉根据许可进度推算") })),
+  ];
+}
+/** A stored opening milestone: superseded by the one worked out from the permits. */
+export const isOpeningMilestone = (d: Deadline) => d.kind === "milestone" && (/(^|-)dl-open$/.test(d.id) || /^target opening/i.test(d.title.en));
 
 /** One line for a store card or a text: "On track, 12 days to spare" / "9 days late: health permit, needs your lease". */
 export function openingLine(p: OpeningPath): Bi | null {

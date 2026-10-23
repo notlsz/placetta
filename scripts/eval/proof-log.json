@@ -249,16 +249,6 @@
   "context": "iability company filing information (ftb 3556) for more information. annual tax every llc that is doing business or organized in california must pay an annual tax of $800. this yearly tax will be due, even if you are not conducting business, until you"
  },
  {
-  "id": "ca-cdtfa",
-  "read": "https://www.sf.gov/guide-opening-restaurant",
-  "quote": "Every location must have this permit to sell taxable goods.",
-  "checked": "2026-10-22",
-  "method": "curl",
-  "found": true,
-  "sha256": "f53c95d94fe027bc",
-  "context": "ler's permits are from the ca department of tax and fee administration (cdtfa). every location must have this permit to sell taxable goods. obtain workers' compensation insurance you will need this insurance if you will"
- },
- {
   "id": "ca-edd-de1",
   "read": "https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer",
   "quote": "If you operate a business and hire employees or household workers, you must register as an employer within 15 days when:",
@@ -1824,15 +1814,6 @@
   "note": "curl got 403; read with WebFetch on 2026-10-21"
  },
  {
-  "id": "scc-plan-check",
-  "read": "https://www.sjeconomy.com/how-we-help/programs-and-services/streamlined-restaurant-program",
-  "quote": "Ideally, required County Department of Environmental Health (DEH) plans",
-  "checked": "2026-10-18",
-  "method": "webfetch",
-  "found": true,
-  "note": "curl got 403; read with WebFetch on 2026-10-18"
- },
- {
   "id": "sj-building-ti",
   "read": "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement",
   "quote": "To obtain a building permit for a tenant improvement project, you must submit plans.",
@@ -1842,37 +1823,9 @@
   "note": "curl got 403; read with WebFetch on 2026-10-18"
  },
  {
-  "id": "sj-fire-systems",
-  "read": "https://www.sjeconomy.com/how-we-help/programs-and-services/streamlined-restaurant-program",
-  "quote": "Projects proposing individual carbon dioxide (CO2) tanks over 100 pounds",
-  "checked": "2026-10-18",
-  "method": "webfetch",
-  "found": true,
-  "note": "curl got 403; read with WebFetch on 2026-10-18"
- },
- {
   "id": "sj-building-final",
   "read": "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/building-division/inspections/inspection-success",
   "quote": "This final inspection is made after finish grading and the building is completed and ready for occupancy or use.",
-  "checked": "2026-10-18",
-  "method": "webfetch",
-  "found": true,
-  "note": "curl got 403; read with WebFetch on 2026-10-18"
- },
- {
-  "id": "scc-health-permit",
-  "read": "https://www.milpitas.gov/DocumentCenter/View/248",
-  "quote": "Any “food facility” that serves food and/or beverage to the public has to be permitted by Santa Clara County Department of Environmental Health.",
-  "checked": "2026-10-22",
-  "method": "curl",
-  "found": true,
-  "sha256": "e0eb5e3042e09e27",
-  "context": "itas, ca 95035 408-586-3240 department of www.milpitas.gov environmental health any \"food facility\" that serves food and/or beverage to the public has to be permitted by santa clara county department of environmental health. food facilities include: 1. any place that sells only prepackaged food (i.e can"
- },
- {
-  "id": "sj-sign",
-  "read": "https://www.sjeconomy.com/how-we-help/programs-and-services/streamlined-restaurant-program",
-  "quote": "Review sign permit info (if you are proposing new signage).",
   "checked": "2026-10-18",
   "method": "webfetch",
   "found": true,
@@ -6630,5 +6583,51 @@
   "found": true,
   "sha256": "46afa75082381583",
   "context": " of public health offices duties of public health offices public health centers the public health centers license business facilities such as restaurants, food stores, and manufacturers; supervise and provide instructional guidance for these facilities; and hold se"
+ },
+ {
+  "id": "scc-plan-check",
+  "read": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/restaurant-grocery-store-or-other-fixed-food",
+  "quote": "Before obtaining an operating permit, the layout of the food facility needs to be approved.",
+  "checked": "2026-10-23",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-23"
+ },
+ {
+  "id": "scc-health-permit",
+  "read": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/restaurant-grocery-store-or-other-fixed-food",
+  "quote": "After you have successfully completed one of these steps, you can file for an operating permit.",
+  "checked": "2026-10-23",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-23"
+ },
+ {
+  "id": "sj-fire-systems",
+  "read": "https://www.sanjoseca.gov/your-government/departments-offices/fire-department/fire-prevention-permits/fire-development-construction-permit-appointments/fire-development-express-permit-appointments",
+  "quote": "Express plan review appointments for small sprinkler, suppression, and alarm projects for fire protection systems.",
+  "checked": "2026-10-23",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-23"
+ },
+ {
+  "id": "sj-sign",
+  "read": "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/planning-division/start-a-new-project-or-use/applications-and-appointments",
+  "quote": "Signs - Sign Permit Application",
+  "checked": "2026-10-23",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-23"
+ },
+ {
+  "id": "ca-cdtfa",
+  "read": "https://www.cdtfa.ca.gov/formspubs/pub73.pdf",
+  "quote": "You must get a seller’s permit if you:",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "49bd2fb32d0dfec8",
+  "context": "obtaining a seller’s permit who must get a seller’s permit? you must get a seller’s permit if you: • are engaged in business in california, and • intend to sell or lease tangible personal property"
  }
 ]

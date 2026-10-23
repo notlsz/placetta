@@ -303,7 +303,7 @@ const SRC = {
   edd: { label: "edd.ca.gov", url: "https://edd.ca.gov" },
   cdph: { label: "cdph.ca.gov", url: "https://www.cdph.ca.gov" },
   sos: { label: "sos.ca.gov", url: "https://www.sos.ca.gov" },
-  scc: { label: "sccgov.org", url: "https://www.sccgov.org" },
+  scc: { label: "deh.santaclaracounty.gov", url: "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/restaurant-grocery-store-or-other-fixed-food" },
   sj: { label: "sanjoseca.gov", url: "https://www.sanjoseca.gov" },
   fremont: { label: "fremont.gov", url: "https://www.fremont.gov" },
   acgov: { label: "acgov.org", url: "https://www.acgov.org" },
@@ -344,6 +344,7 @@ export const SAMPLE_STORES: Store[] = [
       { id: "m8", area: B("Posting", "张贴"), label: B("Letter grade and permit displayed", "字母评级和许可证已张贴"), ok: true },
     ] },
     value: { closures: 0, fines: 0, caught: 3 },
+    apps: ["fl-sign"],
     permits: [
       { name: B("Food Service Establishment permit", "餐饮服务场所许可证"), expires: inDays(212) },
       { name: B("Certificate of Authority (sales tax)", "销售税授权证书"), expires: inDays(9999) },
@@ -352,7 +353,7 @@ export const SAMPLE_STORES: Store[] = [
   },
   {
     id: "sanjose", name: B("San Jose, North First St", "圣何塞 North First St 店"), address: ADDR, stage: "opening",
-    plannedOpen: inDays(162), projectedOpen: inDays(154), rules: [], logs: [], certs: [
+    plannedOpen: inDays(162), rules: [], logs: [], certs: [
       { id: "c4", person: "Jun H.", kind: B("California Food Handler Card", "加州食品从业人员卡"), expires: inDays(1080) },
     ],
     value: { closures: 0, fines: 0, caught: 1 },
@@ -540,10 +541,22 @@ export const SAMPLE: Workspace = {
       est: B("Usually booked within a week", "通常一周内可约"), source: SRC.sj, fields: [],
       checklist: [{ id: "building", label: B("Finished build-out", "装修完工"), state: "missing", dep: "building" }],
     },
+    // a denial, so the sample shows what happens after a no: the permit drawer's appeal panel and the appeal deadline on
+    // Deadlines (src/appeals, src/Drawer.tsx AppealPanel)
+    {
+      id: "fl-sign", name: B("Sign permit for the new awning", "新雨篷招牌许可"), agency: B("NYC Department of Buildings", "纽约市建筑局"), level: "city", status: "needs",
+      next: B("Denied by the Department of Buildings. Appeal or fix and file again", "被纽约市建筑局驳回：上诉，或修改后重新提交"), fees: [{ label: B("Sign permit", "招牌许可"), amount: 0, tbd: true }],
+      est: B("To be confirmed", "待确认"), official: "nyc-sign",
+      source: { label: "nyc.gov", url: "https://www.nyc.gov/site/buildings/property-or-business-owner/sign-permit.page" },
+      form: B("Sign permit (DOB NOW: Build)", "招牌许可（DOB NOW: Build）"), fields: [F("addr", "Site address", "场地地址", "Main St, Flushing, NY (sample)", fromLease)],
+      checklist: [{ id: "dwg", label: B("Sign drawing with dimensions", "带尺寸的招牌图纸"), state: "done", doc: "d-fl-dwg" }],
+      filed: { status: "rejected", submitted: inDays(-20), decided: inDays(-6), note: "The awning sign is larger than the sign rules allow for this district (sample)" },
+    },
   ],
   docs: [
     { id: "d-signapp", name: "sign-permit-application.pdf", kind: "pdf", size: 342_000, by: "agent", at: ago(185), app: "sign", tag: B("Prepared", "已准备") },
     { id: "d-signdwg", name: "sign-drawing.pdf", kind: "pdf", size: 518_000, by: "agent", at: ago(190), app: "sign", tag: B("Prepared", "已准备") },
+    { id: "d-fl-dwg", name: "awning-sign-drawing.pdf", kind: "pdf", size: 402_000, by: "agent", at: ago(20 * 1440), app: "fl-sign", tag: B("Prepared", "已准备") },
     { id: "d-btc", name: "business-tax-receipt.pdf", kind: "pdf", size: 84_000, by: "agent", at: ago(2 * 1440 + 40), app: "btc", tag: B("Receipt", "收据") },
     { id: "d-finish", name: "finish-schedule.xlsx", kind: "xlsx", size: 41_000, by: "agent", at: ago(3 * 1440), app: "plancheck", tag: B("Prepared", "已准备") },
     { id: "d-seller", name: "sellers-permit.pdf", kind: "pdf", size: 121_000, by: "agency", at: ago(1440 + 120), app: "seller", tag: B("Issued", "已签发") },
@@ -563,7 +576,6 @@ export const SAMPLE: Workspace = {
     { id: "dl-soi", date: inDays(21), kind: "due", title: B("LLC Statement of Information due ($20)", "有限责任公司信息声明到期（$20）"), agency: B("California Secretary of State", "加州州务卿"), ask: B("Prepare it", "准备申报"), prompt: B("Prepare the Statement of Information", "准备信息声明") },
     { id: "dl-wages", date: inDays(27), kind: "due", app: "edd", title: B("First payroll: employer registration must be filed first", "首次发薪：须先完成雇主登记"), agency: B("California EDD", "加州就业发展局"), ask: B("File what's ready", "提交已就绪的申请"), prompt: B("File everything that's ready", "把能提交的都提交") },
     { id: "dl-plan", date: inDays(38), kind: "estimate", app: "plancheck", title: B("Plan check decision, if it's filed this week", "如本周提交，图纸审查预计出结果"), agency: DEH },
-    { id: "dl-open", date: "2027-03-01", kind: "milestone", title: B("Target opening", "目标开业日"), agency: B("Moonleaf Tea", "Moonleaf Tea") },
     { id: "dl-btcr", date: inDays(363), kind: "renewal", app: "btc", title: B("Business Tax Certificate renewal", "营业税证书续期"), agency: SJ },
   ],
   nudges: [

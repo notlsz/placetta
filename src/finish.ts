@@ -2,7 +2,8 @@ import { B, type Bi } from "./bi";
 import { audit } from "./core";
 import { continuePrompt, jobApps, nextAction, proofMet, reconcile, STOPPED_HERE, type DoneFiling, type DoneReport, type Filed, type Job } from "./jobs";
 import type { Application, Deadline, Workspace } from "./model";
-import { appealFor, deadlineFor } from "./appeals";
+import { appealFor, appealSay, deadlineFor, TIERS } from "./appeals";
+import { datesFor } from "./appeals/flow";
 
 /* ------------------------------------------------------------------ *
  * Finishing: a job runs until the work is done in the real world, not
@@ -98,6 +99,25 @@ export function scheduleRenewals<W extends Workspace>(w: W, today: string): W {
 
 /* ------------------------------------------------------------------ appeals */
 
+/** A denied application's way forward, for the permit drawer's "Denied? Appeal" panel: the playbook for it here, the
+ *  deadline counted by its rule from the decision (null when the rule's days aren't confirmed, or there is no period),
+ *  the file-by date a few days earlier, and the route said in sentences. null: not denied, or no playbook fits. */
+export function denialAppeal(w: Workspace, a: Application, today: string, denial?: { decided?: string | null; reason?: string | null }) {
+  const decided = (denial?.decided ?? (a.filed?.status === "rejected" ? a.filed.decided : undefined))?.slice(0, 10);
+  if (!decided || a.id.startsWith("appeal-")) return null;
+  const reason = denial?.reason ?? a.filed?.note ?? "";
+  const ap = appealFor(a, addressOf(w, a), reason);
+  if (!ap) return null;
+  const dates = datesFor(ap, decided, today);
+  return { ap, decided, reason, dl: dates?.dl ?? null, fileBy: dates?.fileBy ?? null, passed: !!dates?.passed, say: appealSay(ap, dates?.dl ?? null), tier: TIERS[ap.id], deadlineId: `appeal-${a.id}-${decided}` };
+}
+/** The address an application's appeal is routed by: its store's, else the business's city and state. A sample address
+ *  without a ZIP still names its state ("Main St, Flushing, NY (sample)"). */
+function addressOf(w: Workspace, a: Application) {
+  const addr = (w.stores ?? []).find(s => s.apps?.includes(a.id))?.address ?? [w.meta?.city, w.meta?.region].filter(Boolean).join(", ");
+  return /\b[A-Z]{2}\s*\d{5}/.test(addr) ? addr : addr.replace(/,\s*(CA|NY|TX)\b.*$/, ", $1 00000");
+}
+
 /** The last day to appeal or ask for a hearing goes on Deadlines the moment a filing is denied (src/appeals): counted
  *  from the agency's decision by the playbook's rule, once per decision, and only when the rule's days are confirmed on
  *  an official page. An unconfirmed one is read from the decision letter instead (the monitor asks Odelia to). */
@@ -107,7 +127,7 @@ export function scheduleAppeals<W extends Workspace>(w: W, today: string): W {
     const decided = a.filed?.status === "rejected" ? a.filed.decided : undefined;
     // an appeal that was itself denied: its outcome and next step come from appeal_case (src/appeals/flow.ts)
     if (!decided || a.id.startsWith("appeal-")) continue;
-    const address = (w.stores ?? []).find(s => s.apps?.includes(a.id))?.address ?? [w.meta?.city, w.meta?.region].filter(Boolean).join(", ");
+    const address = addressOf(w, a);
     const ap = appealFor(a, address, a.filed?.note ?? "");
     const dl = ap ? deadlineFor(ap.deadline, decided, ap.tz) : null;
     if (!ap || !dl || dl.date < today) continue;

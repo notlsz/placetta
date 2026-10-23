@@ -22,7 +22,10 @@ const FFX_HEALTH = "https://www.fairfaxcounty.gov/health/permits/new-food-establ
 const NY_LLC = "https://dos.ny.gov/node/16156";
 const MA_ALLERGEN = "https://www.mass.gov/lists/food-allergen-awareness-guidance";
 const NJ_REG = "https://www.nj.gov/treasury/revenue/gettingregistered.shtml";
-const SJ_SRP = "https://www.sjeconomy.com/how-we-help/programs-and-services/streamlined-restaurant-program";
+const SJ_FIRE_EXPRESS = "https://www.sanjoseca.gov/your-government/departments-offices/fire-department/fire-prevention-permits/fire-development-construction-permit-appointments/fire-development-express-permit-appointments";
+const SJ_PLANNING_APPS = "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/planning-division/start-a-new-project-or-use/applications-and-appointments";
+const SCC_DEH_FIXED = "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/restaurant-grocery-store-or-other-fixed-food";
+const CDTFA_PUB73 = "https://www.cdtfa.ca.gov/formspubs/pub73.pdf";
 const NV_TAX = "https://tax.nv.gov/faqs/register-a-business/";
 const DAL_CO = "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/certificate_occupancy.aspx";
 const AUS_FOOD = "https://www.austintexas.gov/health/programs/fixed-food-establishments";
@@ -59,7 +62,9 @@ export const PROOF: Record<string, Proof> = {
 
   /* California */
   "ca-llc-1": at("https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf", "Articles of Organization Limited Liability Company (LLC) Filing Fee - $70.00"),
-  "ca-cdtfa": at("https://www.sf.gov/guide-opening-restaurant", "Every location must have this permit to sell taxable goods."),
+  // the CDTFA's own Publication 73 (read with curl 2026-10-23); was San Francisco's restaurant guide, a city page cited for
+  // a state permit on every California store's plan, San José's and LA's included
+  "ca-cdtfa": { quote: "You must get a seller’s permit if you:", checked: "2026-10-23", read: CDTFA_PUB73, link: CDTFA_PUB73 },
   "ca-edd-de1": at("https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer", "If you operate a business and hire employees or household workers, you must register as an employer within 15 days when:"),
   "ca-food-manager": at(VENTURA, "food facilities that prepare, handle, or serve non-prepackaged potentially hazardous food (PHF), except temporary food facilities, to have at least one owner or employee"),
   "ca-food-handler": at(VENTURA, "A food handler shall obtain a food hander card within 30 days after the date of hire."),
@@ -70,15 +75,17 @@ export const PROOF: Record<string, Proof> = {
   "la-ladbs": p("https://dbs.lacity.gov/services/plan-review-permitting/building-permits", "Building Permits are required for new constructions, additions, alterations, and demolition/removal of a building or structure."),
   "sj-business-tax": at("https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration/register-for-a-business-tax-certificate", "must register for a Business Tax Certificate within 90 days of starting their business."),
   "sj-building-ti": p("https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement", "To obtain a building permit for a tenant improvement project, you must submit plans."),
-  "sj-fire-systems": at(SJ_SRP, "Projects proposing individual carbon dioxide (CO2) tanks over 100 pounds"),
-  "sj-sign": at(SJ_SRP, "Review sign permit info (if you are proposing new signage)."),
+  // the City's own pages (sanjoseca.gov refuses curl: read with WebFetch on 2026-10-23); were the economic development
+  // site sjeconomy.com, which isn't the agency that issues either permit
+  "sj-fire-systems": { quote: "Express plan review appointments for small sprinkler, suppression, and alarm projects for fire protection systems.", checked: "2026-10-23", read: SJ_FIRE_EXPRESS, link: SJ_FIRE_EXPRESS },
+  "sj-sign": { quote: "Signs - Sign Permit Application", checked: "2026-10-23", read: SJ_PLANNING_APPS, link: SJ_PLANNING_APPS },
   "sj-building-final": p("https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/building-division/inspections/inspection-success", "This final inspection is made after finish grading and the building is completed and ready for occupancy or use."),
-  "scc-plan-check": at(SJ_SRP, "Ideally, required County Department of Environmental Health (DEH) plans"),
-  // was a field label on San José's business tax page ("County Health Permit Number (If applicable)"), which proves the
-  // permit exists, not that a food facility needs it. The county's own pages answer curl and WebFetch with a Cloudflare
-  // wall, so the proof is the City of Milpitas Building Safety handout on the county's rule (a city inside the county),
-  // read with curl and pdftotext on 2026-10-22
-  "scc-health-permit": { quote: "Any “food facility” that serves food and/or beverage to the public has to be permitted by Santa Clara County Department of Environmental Health.", checked: "2026-10-22", read: "https://www.milpitas.gov/DocumentCenter/View/248", link: "https://www.milpitas.gov/DocumentCenter/View/248" },
+  // the County of Santa Clara Department of Environmental Health's own page (deh.santaclaracounty.gov answers curl with a
+  // Cloudflare wall: read with WebFetch on 2026-10-23)
+  "scc-plan-check": { quote: "Before obtaining an operating permit, the layout of the food facility needs to be approved.", checked: "2026-10-23", read: SCC_DEH_FIXED, link: SCC_DEH_FIXED },
+  // the county's own page (read with WebFetch on 2026-10-23). It was the City of Milpitas Building Safety handout: a
+  // neighboring city's PDF cited as the source of a San José store's county permit (the 2026-10-23 sample review)
+  "scc-health-permit": { quote: "After you have successfully completed one of these steps, you can file for an operating permit.", checked: "2026-10-23", read: SCC_DEH_FIXED, link: SCC_DEH_FIXED },
   "sf-business-registration": p("https://sftreasurer.org/registration", "In general, businesses must register if any of the below statements are true: Maintain a fixed place of business within San Francisco ."),
   "sf-formula-retail": p("https://sfplanning.org/permit/chain-stores-businesses", "By a voter initiative in 2007 (Proposition G), formula retail use was made subject to a Conditional Use Authorization in any NC district"),
   "sf-dph-plan-check": p("https://sf.gov/guide-building-and-remodeling-food-facility", "Submit your plans The process for getting a building permit includes review by the Department of Public Health."),

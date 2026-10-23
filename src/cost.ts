@@ -3,7 +3,7 @@ import { B, type Bi } from "./bi";
 import { COMPLEX_LIST, licenseTierOf, PLAN_STORE_YEAR_USD, SIMPLE } from "./pricing";
 import { formById } from "./forms/registry";
 import type { Store, Workspace } from "./model";
-import { basisLine, openingPath } from "./smart";
+import { basisLine, openingPath, workspaceOpening, type Evidence } from "./smart";
 
 /* ------------------------------------------------------------------ *
  * What it costs to open, before anyone asks. Harvey, Legora and
@@ -68,7 +68,7 @@ export function feeOf(a: Workspace["apps"][number]): FeeRow {
 }
 
 /** The cost to open for this workspace, today. */
-export function costToOpen(w: Workspace, o: { today: string; billing?: Billed }): Cost {
+export function costToOpen(w: Workspace, o: { today: string; billing?: Billed; ev?: Evidence }): Cost {
   const fees = w.apps.map(feeOf);
   const known = fees.filter(f => f.fee != null);
   const agencyUSD = known.filter(f => f.currency === "USD").reduce((s, f) => s + f.fee!, 0);
@@ -120,12 +120,9 @@ export function costToOpen(w: Workspace, o: { today: string; billing?: Billed })
   const placettaUSD = placetta.filter(r => !r.paid).reduce((s, r) => s + (r.amount ?? 0), 0);
 
   // the time to open: where the permits put the latest store still opening (or the plan written at sign-up)
-  let landing: string | null = null, basis: Bi | null = null;
-  for (const s of opening) {
-    const p = openingPath(s, w, o.today);
-    if (p.landing && (!landing || p.landing > landing)) { landing = p.landing; basis = basisLine(p); }
-  }
-  landing ??= w.firstPlan?.projectedOpen ?? null;
+  // (the same date the store card, Deadlines and Home show: src/smart.ts workspaceOpening)
+  const open = workspaceOpening(w, o.today, o.ev);
+  const landing = open?.date ?? null, basis: Bi | null = open?.store ? basisLine(openingPath(open.store, w, o.today, o.ev)) : null;
 
   return { fees, agencyUSD, published: known.length, unpublished: fees.length - known.length, otherCurrencies: [...other].map(([currency, amount]) => ({ currency, amount })),
     placetta, placettaUSD, quoted: placetta.filter(r => r.amount == null).length, totalUSD: agencyUSD + placettaUSD, landing, basis };
