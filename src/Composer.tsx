@@ -14,6 +14,7 @@ import { taskVerb } from "./tasks";
 import { useSlash } from "./SlashMenu";
 import { cleanSpeech, recordClip } from "./speech";
 import { transcribe } from "./cloud/api";
+import { TalkButton } from "./Talk";
 
 const BEAM = ["#7399C6", "#9DB8DA", "#5F88BA", "#B9CFE8", "#8FAED3", "#C9D8EC", "#A7BFE0"];
 const BAND = { core: "#FFFFFF", above: "#8FAED3", mid: "#C9D8EC", below: "#B9CFE8" };
@@ -203,6 +204,7 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
           <textarea id={"ask-" + variant} ref={ta} rows={1} value={draft} placeholder={slash.plan ? (lang === "zh" ? "要做什么？她先写计划" : "What's the job? She plans it first") : narrow ? t("askPhShort") : t("askPh")} onChange={e => setDraft(e.target.value)}
             {...slash.inputProps} onKeyDown={e => { if (slash.onKey(e)) return; if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
           {slash.toggle(busy)}
+          {cloud && <TalkButton />}
           <button type="button" className="ic mic" aria-label={t("talk")} title={t("talk")} onClick={startVoice} disabled={busy}><I.mic /></button>
           {busy && !draft.trim()
             ? <button type="button" className="sendb stop" onClick={stop} aria-label={t("stop")} title={t("stop")}><I.stopSq /></button>

@@ -72,6 +72,7 @@ import type { Bi } from "../src/bi";
 import { growthTests } from "./growth-test";
 import { memoryTests } from "./memory-test";
 import { journeyTests } from "./journeys-test";
+import { voiceJourneys } from "./voice-journeys";
 import { citeTests } from "./cite-test";
 import { filingProgressTests } from "./filing-progress-test";
 
@@ -3157,6 +3158,7 @@ console.log("\n# Research tools paused mid-turn: every call sends each web looku
 growthTests(ok, eq);
 await memoryTests(ok, eq);
 await journeyTests(ok, eq);
+await voiceJourneys(ok, eq);
 econTests(ok, eq);
 edgeTests(ok, eq);
 citeTests(ok, eq);

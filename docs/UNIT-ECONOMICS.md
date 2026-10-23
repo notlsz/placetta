@@ -90,6 +90,26 @@ Heavy use is a fifth of one percent of the $50 ceiling, under the founder's $1 a
 notes stay. Clips share the read-aloud daily budget (a clip counts as 250 characters of `tts_chars`), which caps one
 workspace at about 80 clips a day. `npm run test:speech` checks these numbers.
 
+## Live voice: calls, agency calls, interpreting (added 2026-10-23)
+
+The talking itself (docs/CHANNELS.md, Voice, has every price and its source): OpenAI gpt-realtime mini for owners, the
+full model for agency calls and interpreting, on Placetta's Telnyx number. All in, a minute: $0.046 an owner's call, $0.093
+an agency call (recorded), $0.106 a three-way interpreted call, $0.035 talking in the app, $0.08 interpreting in the app;
+$1 a month for the number.
+
+| A store a month | Voice | With the rest of the month's AI and running cost | Under $50 |
+|---|---:|---:|---|
+| Typical: 10 min of calls, 15 min in the app, 4 agency calls of 12 min, 20 min interpreting | $8.06 | $14.46 | yes |
+| Heavy, uncapped: 60 min, 60 min, 12 agency calls of 25 min, 2 hours interpreting | $43.40 | $57.79 | no |
+| Heavy, as the gate holds it: voice at most half the store's $44 AI allowance | $22.00 | $36.39 | yes |
+
+**FOUNDER TO CONFIRM.** Live voice is far past the $1 a store a month line set for voice notes: a typical month is about
+$8, almost all of it agency calls (hold time is billed like talk). It fits the $50 ceiling because `voice_gate` gives voice
+at most half the AI allowance and every call's price goes into `ai_events`. Cheaper options if $8 is too much: agency
+calls on gpt-realtime mini ($0.048 a minute, `VOICE_BRAIN_AGENCY_PHONE_EN=openai_mini`) halve the biggest line; a lower
+share in `voice_gate`; or calls only for filings past the agency's usual time. `deno test
+supabase/functions/_shared/voice_test.ts` checks these numbers.
+
 ## What was measured, and how
 
 **AI per journey.** Each journey runs through `runRounds` (`src/serverRun.ts`, what agent-run runs) with a scripted

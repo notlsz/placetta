@@ -20,6 +20,7 @@ import { replayTour } from "./Walkthrough";
 import { AuditTrail, ContextPage } from "./pages";
 import { PartnerSharing } from "./Partner";
 import { AutonomyGroup, BusinessRulesGroup, HouseRulesGroup } from "./OwnerRules";
+import { CallsList } from "./Calls";
 import gmailLogo from "./assets/integrations/gmail.png";
 import outlookLogo from "./assets/integrations/outlook.svg";
 import gcalLogo from "./assets/integrations/calendar.png";
@@ -782,7 +783,7 @@ function PhoneGroup() {
   return (
     <Group id="phone" title={B("Text and call Odelia", "发短信或致电 Odelia")}
       // The consent text is in src/consent.ts: when it changes, bump phone_consent_version() (..._phone_consent_log.sql).
-      note={B("Text or call Odelia like a coworker. She answers from your workspace, starts work for you, and texts you first when something needs you. Odelia is an AI: her calls use an AI voice and are transcribed as they happen, and your texts and a record of each call are kept with your account. Filing, paying, sending and deleting still wait for your approval in the app.", "像和同事一样给 Odelia 发短信或打电话。她根据您的工作区回答问题、替您开始办理，有事需要您时会先发短信给您。Odelia 是 AI：通话使用 AI 语音并会实时转录，您的短信和每次通话的记录随您的账户保存。提交、付款、发送和删除仍需您在应用中批准。")}
+      note={B("Text or call Odelia like a coworker. She answers from your workspace, starts work for you, and texts you first when something needs you. Odelia is an AI: her calls use an AI voice and are recorded and transcribed unless you ask her not to, and your texts and each call's record are kept with your account under your retention setting, to listen back below. Filing, paying, sending and deleting still wait for your approval in the app.", "像和同事一样给 Odelia 发短信或打电话。她根据您的工作区回答问题、替您开始办理，有事需要您时会先发短信给您。Odelia 是 AI：通话使用 AI 语音，除非您要求不录，否则会录音和转录；您的短信和每次通话的记录按您的保留期限随账户保存，可在下方回听。提交、付款、发送和删除仍需您在应用中批准。")}
       rows={rows}>
       {showForm && (
         <form className="sg-form invite" onSubmit={e => { e.preventDefault(); void start(link?.last_error === "text_first" ? "in" : undefined); }}>
@@ -833,6 +834,7 @@ function PhoneGroup() {
           {log.length > 8 && <div className="sg-act"><Btn onClick={() => setAll(v => !v)}>{all ? (zh ? "收起" : "Show less") : (zh ? "显示全部" : "Show all")}</Btn></div>}
         </div>
       )}
+      <CallsList />
     </Group>
   );
 }

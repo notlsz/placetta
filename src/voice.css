@@ -1,0 +1,37 @@
+/* ------------------------------ voice: Talk, Interpreter, Calls (src/Talk.tsx, src/Calls.tsx) ------------------------------ */
+/* plain icons and pill buttons only: no circle behind an icon, no dots between words */
+.ic.talkb { color: var(--blue-ink); }
+.ic.talkb:hover:not(:disabled) { background: none; color: var(--ink); }
+.vc-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: 99px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 13px; }
+.vc-btn:hover { border-color: var(--blue-ink); }
+.vc-btn svg { width: 16px; height: 16px; }
+.tl-voice { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
+.tl-said { margin: 0 0 10px; font-size: 12.5px; color: var(--ink2); }
+.talk .tk-you { margin: 18px 0 0; max-width: 40ch; font-size: 15px; color: var(--ink3); }
+.tk-status { position: relative; z-index: 1; margin: 0; text-align: center; font-size: 12.5px; color: var(--ink3); padding: 0 16px; }
+.tk-split { display: grid; grid-template-rows: 1fr 1fr; min-height: 0; }
+.tk-half { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; padding: 24px 16px; text-align: center; min-height: 0; overflow-y: auto; }
+.tk-clerk { transform: rotate(180deg); border-bottom: 1px solid var(--line); }
+.tk-hint { margin: 0; font-size: 13px; color: var(--ink3); max-width: 40ch; }
+.tk-cap { margin: 0; max-width: 24ch; font: 400 clamp(22px, 4vh, 32px)/1.25 var(--display); color: var(--ink); text-wrap: balance; min-height: 1.25em; }
+.tk-owner .tk-cap { font-family: var(--zh); }
+.calls { margin-top: 18px; }
+.calls-h { margin: 0 0 8px; font-size: 14px; }
+.calls-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.call { border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+.call-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; text-align: left; color: var(--ink); }
+.call-row > svg { width: 18px; height: 18px; color: var(--ink3); }
+.call-what { display: grid; min-width: 0; }
+.call-what b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.call-what small { color: var(--ink3); }
+.call-body { padding: 0 12px 12px; display: grid; gap: 10px; }
+.call-sum { margin: 0; }
+.call-acts { display: grid; gap: 2px; font-size: 13px; }
+.call-acts p { margin: 0; color: var(--ink2); }
+.call-audio { width: 100%; }
+.call-tx { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 13.5px; max-height: 320px; overflow-y: auto; }
+.call-tx li { display: grid; gap: 2px; }
+.call-tx small { color: var(--ink3); }
+.call-tx .tr { color: var(--ink2); }
+.call-tx .warn em { color: var(--warm); font-style: normal; font-size: 12px; }
+.calls .err { margin: 0; color: var(--warm); font-size: 13px; }

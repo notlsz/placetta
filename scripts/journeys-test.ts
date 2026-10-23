@@ -350,3 +350,6 @@ function memDb(): MemoryDb & { rows: MemoryRow[]; settingsRow: { enabled: boolea
   };
   return self;
 }
+
+/** The harness, for the voice journeys (scripts/voice-journeys.ts). */
+export { ask as journeyAsk, run as journeyRun, say as journeySay, workspace as journeyWorkspace };
