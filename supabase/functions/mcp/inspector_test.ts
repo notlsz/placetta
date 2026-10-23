@@ -12,9 +12,27 @@
 // client, redirect, PKCE and resource; refresh tokens rotate). The workspace is a tea shop with two stores, a filing
 // with its timeline, an appeal and a booked inspection.
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
-import { Client } from "npm:@modelcontextprotocol/sdk@1.32.1/client/index.js";
-import { StreamableHTTPClientTransport } from "npm:@modelcontextprotocol/sdk@1.32.1/client/streamableHttp.js";
-import { UnauthorizedError, type OAuthClientProvider } from "npm:@modelcontextprotocol/sdk@1.32.1/client/auth.js";
+
+// The SDK (a devDependency, pinned in package.json) is loaded at run time: its subpath exports carry no types Deno's
+// checker finds under a node_modules directory, so the few shapes used here are declared below.
+const SDK = "npm:@modelcontextprotocol/sdk@1.32.1";
+type OAuthClientProvider = {
+  readonly redirectUrl: string; readonly clientMetadata: Record<string, unknown>;
+  clientInformation(): unknown; saveClientInformation(i: unknown): void; tokens(): unknown; saveTokens(t: unknown): void;
+  saveCodeVerifier(v: string): void; codeVerifier(): string; redirectToAuthorization(url: URL): Promise<void>;
+};
+type Transport = { finishAuth(code: string): Promise<void> };
+type Listed = { tools?: unknown[]; resources?: unknown[]; resourceTemplates?: unknown[]; prompts?: unknown[] };
+type McpClient = {
+  connect(t: Transport): Promise<void>; close(): Promise<void>; getServerVersion(): { name: string } | undefined;
+  listTools(): Promise<Listed>; listResources(): Promise<Listed>; listResourceTemplates(): Promise<Listed>; listPrompts(): Promise<Listed>;
+  callTool(p: { name: string; arguments: Record<string, unknown> }): Promise<{ isError?: boolean; content: unknown; structuredContent?: unknown }>;
+  readResource(p: { uri: string }): Promise<{ contents: unknown[] }>;
+  getPrompt(p: { name: string; arguments: Record<string, string> }): Promise<{ messages: unknown[] }>;
+};
+const { Client } = await import(`${SDK}/client/index.js`) as { Client: new (info: { name: string; version: string }) => McpClient };
+const { StreamableHTTPClientTransport } = await import(`${SDK}/client/streamableHttp.js`) as { StreamableHTTPClientTransport: new (url: URL, o: { authProvider: OAuthClientProvider }) => Transport };
+const { UnauthorizedError } = await import(`${SDK}/client/auth.js`) as { UnauthorizedError: new (...a: unknown[]) => Error };
 import { type Deps, handle, sha256, type Token } from "./logic.ts";
 import { type Grant, s256 } from "./oauth.ts";
 // @ts-types="./tools.d.ts"

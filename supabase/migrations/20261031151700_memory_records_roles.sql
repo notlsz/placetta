@@ -55,6 +55,7 @@ begin
   end if;
   return new;
 end $$;
+revoke execute on function public.agent_memories_link() from public, anon, authenticated;
 drop trigger if exists agent_memories_link on public.agent_memories;
 create trigger agent_memories_link before insert or update of entity on public.agent_memories for each row execute function public.agent_memories_link();
 -- memories kept before this migration
