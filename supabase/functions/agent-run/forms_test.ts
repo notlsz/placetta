@@ -1,16 +1,17 @@
 // Run: deno test -A supabase/functions/agent-run/forms_test.ts
 // Filling the agencies' forms on the server: the same fill and read-back the app runs (src/forms/), from agent.js, in
-// Deno with npm:pdf-lib. The SS-4 comes inside the bundle; a box-map form comes the way agent-run gets it (formPdf),
-// here read from public/forms/. Each filled copy is read back, and no SSN is ever on it.
+// Deno with npm:pdf-lib. Every agency PDF comes the way agent-run gets it (formPdf, from the site's /app/forms/), here
+// read from public/forms/; the SS-4 and CBP 5106 too, which aren't inside agent.js (the 5 MB deploy limit). Each filled
+// copy is read back, and no SSN is ever on it.
 // @ts-types="./agent.d.ts"
-import { answersHash, appPdf, fillForm, pdfFile, readBack, type Field, type LoadPdf } from "./agent.js";
+import { answersHash, fillForm, pdfFile, readBack, type Field, type LoadPdf } from "./agent.js";
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
 import { filledLines, filledSay, formFileName, formLinkUrl, formToken } from "../_shared/form_links.ts";
 import { sendMail } from "../_shared/mail.ts";
 
 const root = new URL("../../../", import.meta.url);
-/** As agent-run's formPdf: the site's copy for a map, nothing for the two inside the bundle (they fall back to it). */
-const disk: LoadPdf = async (file) => file.startsWith("pdf/") ? await appPdf(file) : await Deno.readFile(new URL("public/forms/" + file, root));
+/** As agent-run's formPdf (sitePdf): the site's copy, "pdf/irs-fss4.pdf" served as /app/forms/irs-fss4.pdf. */
+const disk: LoadPdf = async (file) => await Deno.readFile(new URL("public/forms/" + file.replace(/^pdf\//, ""), root));
 const F = (id: string, value: string): Field => ({ id, label: { en: id, zh: id }, value });
 const SSN = /\b\d{3}-\d{2}-\d{4}\b/;
 
@@ -21,7 +22,7 @@ async function textOf(pdf: Uint8Array): Promise<string[]> {
   return d.getForm().getFields().map((f: any) => { try { return String(f.getText?.() ?? ""); } catch { return ""; } }).filter(Boolean);
 }
 
-Deno.test("the SS-4 fills on the server from the bundle's own copy, reads back, and never carries an SSN", async () => {
+Deno.test("the SS-4 fills on the server from the site's copy, reads back, and never carries an SSN", async () => {
   assertEquals(pdfFile("irs-ss4"), "pdf/irs-fss4.pdf");
   const fields = [F("l1", "Moonleaf Tea LLC"), F("l2", "Moonleaf Tea"), F("l4a", "100 N First St"), F("l4b", "San Jose, CA 95113"), F("l7a", "Mei Lin"),
     F("l7b", "123-45-6789"), F("l8a", "Yes"), F("l10", "Started a new milk tea shop"), F("l16", "Accommodation & food service"), F("phone", "(408) 555-0142")];
