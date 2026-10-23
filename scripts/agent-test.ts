@@ -1605,7 +1605,7 @@ async function spending() {
 function appealRules() {
   console.log("\n# Appeal playbooks: official sources, deadline math, cited drafts, counsel handoff");
   // official hosts only: the statute, the regulation, the city code's publisher or the agency's own pages
-  const OFFICIAL = /^https:\/\/(abcab\.ca\.gov|www\.abc\.ca\.gov|www\.tabc\.texas\.gov|statutes\.capitol\.texas\.gov|www\.nysenate\.gov|(www\.)?sf\.gov|planning\.lacity\.gov|finance\.lacity\.gov|dbs\.lacity\.gov|ochealthinfo\.com|dallascityhall\.com|nyc-business\.nyc\.gov|www\.nyc\.gov)\//;
+  const OFFICIAL = /^https:\/\/(abcab\.ca\.gov|www\.abc\.ca\.gov|www\.tabc\.texas\.gov|statutes\.capitol\.texas\.gov|www\.nysenate\.gov|(www\.)?sf\.gov|planning\.lacity\.gov|finance\.lacity\.gov|dbs\.lacity\.gov|leginfo\.legislature\.ca\.gov|ochealthinfo\.com|dallascityhall\.com|nyc-business\.nyc\.gov|www\.nyc\.gov)\//;
   const HAN = (s: string) => /[一-鿿]/.test(s);
   for (const a of APPEALS) {
     const r = a.deadline;
@@ -1616,7 +1616,7 @@ function appealRules() {
     ok(a.sources.every(u => u.startsWith("https://")) && HAN(a.name.zh) && a.grounds.every(g => HAN(g.zh)) && a.hearing.every(h => HAN(h.zh)), `${a.id}: sources are https and every line has its Chinese`);
     if (a.fee.usd != null) ok(a.fee.verified, `${a.id}: a dollar fee only when confirmed`);
   }
-  eq(APPEALS.filter(a => !a.deadline.verified).map(a => a.id).sort(), ["business_license_denial", "ca_abc_denial_hearing", "la_bbsc_appeal"], "only three rules stay unverified, each behind a bot check");
+  eq(APPEALS.filter(a => !a.deadline.verified).map(a => a.id).sort(), ["business_license_denial"], "only the business license route stays unverified (San José and Houston)");
   eq(BUSINESS_LICENSE_ROUTES.map(r => r.city), ["San Francisco", "Los Angeles", "New York City", "Dallas", "San José", "Houston"], "business license denial is defined city by city");
   const by = (id: string) => APPEALS.find(a => a.id === id)!;
   // weekends: Dallas allows the next business day, Placetta's target never moves later
@@ -1690,7 +1690,7 @@ async function appeals() {
   ok(bp?.fee?.usd === 175 && bp.fee.confirmed && /boardofappeals@sfgov\.org/.test(bp.how_to_file), "the fee and where to file, from the Board's page");
   ok(Array.isArray(bp?.letter_outline) && bp.letter_outline.some((l: string) => /\[1\]/.test(l)) && bp.sources.every((s: { url: string }) => /^https:\/\//.test(s.url)), "the letter outline cites its sources");
   ok(bp?.options?.find((o: { id: string }) => o.id === "resubmit")?.fits_the_reason === true, "a missing item on the plans fits fixing and refiling");
-  ok(abc?.playbook === "ca_abc_denial_hearing" && abc.deadline.last_day === null && abc.counsel.advisable === true, "liquor: the hearing request's deadline comes from the letter, and counsel is advisable", abc?.deadline);
+  ok(abc?.playbook === "ca_abc_denial_hearing" && typeof abc.deadline.last_day === "string" && abc.deadline.confirmed_on_official_page === true && abc.counsel.advisable === true, "liquor: 10 days after ABC mails the notice (B&P 24011), confirmed, and counsel is advisable", abc?.deadline);
   ok(abc?.options?.find((o: { id: string }) => o.id === "appeal")?.fits_the_reason === true, "a protest fits an appeal, not a refile");
   ok(/isn't a law firm/.test(bp?.not_a_law_firm ?? "") && /never file/i.test((bp?.do_next ?? []).join(" ")), "every answer says Placetta isn't a law firm and never files");
   ok(!callNamed(r, "appeal_options")[2].ok, "a malformed decision date is refused");
