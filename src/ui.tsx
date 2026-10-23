@@ -39,7 +39,8 @@ export const I = {
   pencil: () => <svg {...sv} width={14} height={14}><path d="M4 20h4L19 9l-4-4L4 16z" /><path d="M13.5 6.5l4 4" /></svg>,
   pause: () => <svg {...sv} width={12} height={12}><path d="M9 6v12M15 6v12" strokeWidth={2.4} /></svg>,
   menu: () => <svg {...sv} width={20} height={20}><path d="M4 7h16M4 12h16M4 17h16" /></svg>,
-  panel: () => <svg {...sv}><rect x="3.5" y="4.5" width="17" height="15" rx="2.5" /><path d="M14.5 4.5v15" /></svg>,
+  /* the top bar's pair, on Lucide's geometry (panel-right and bell), so they read as one size and weight */
+  panel: () => <svg {...sv}><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M15 3v18" /></svg>,
   form: () => <svg {...sv} width={18} height={18}><rect x="5" y="3.5" width="14" height="17" rx="2" /><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4" /></svg>,
   card: () => <svg {...sv}><rect x="3" y="5.5" width="18" height="13" rx="2.5" /><path d="M3 10h18M7 15h3" /></svg>,
   message: () => <svg {...sv}><path d="M4 5h16v11H9l-5 4z" /></svg>,
@@ -55,7 +56,7 @@ export const I = {
   help: () => <svg {...sv}><circle cx="12" cy="12" r="8.5" /><path d="M9.6 9.5a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.6M12 17h.01" /></svg>,
   scale: () => <svg {...sv}><path d="M12 4v16M7 20h10M5 7h14M7.5 7l-3 6.5h6zM16.5 7l-3 6.5h6z" /></svg>,
   logout: () => <svg {...sv}><path d="M14 4.5h4.5a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H14M10 16.5L5.5 12 10 7.5M5.5 12H16" /></svg>,
-  bell: () => <svg {...sv}><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15zM10 20.5h4" /></svg>,
+  bell: () => <svg {...sv}><path d="M10.27 21a2 2 0 0 0 3.46 0M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.41 13.96 18 12.5 18 8A6 6 0 0 0 6 8c0 4.5-1.41 5.96-2.74 7.33" /></svg>,
   thermo: () => <svg {...sv}><path d="M10 14.5V5a2 2 0 0 1 4 0v9.5a3.5 3.5 0 1 1-4 0z" /><path d="M12 9v7" /></svg>,
   hq: () => <svg {...sv}><path d="M4.5 20.5V6.5l7-3v17M11.5 9.5h8v11M2.5 20.5h19M7.5 8.5v.01M7.5 12v.01M7.5 15.5v.01M15 13v.01M15 16.5v.01" /></svg>,
   book: () => <svg {...sv}><path d="M5 4.5h9.5a2 2 0 0 1 2 2V20H7a2 2 0 0 1-2-2z" /><path d="M5 18a2 2 0 0 1 2-2h9.5" /><path d="M9 8.5h4.5" /></svg>,

@@ -14,7 +14,7 @@ import { taskVerb } from "./tasks";
 import { StoresStrip } from "./Stores";
 import { B, type Bi } from "./model";
 import { takeAutostart } from "./cloud/handoff";
-import { awayWait, nextAction, nextRun } from "./jobs";
+import { awayWait, nextRun } from "./jobs";
 import { ChiefRow, PlanCard } from "./Work";
 import { hrefOf, plainClick } from "./route";
 import { HomeMetrics } from "./Metrics";
@@ -26,7 +26,9 @@ import { CommentsButton, MineToggle, useTeam, type Collab } from "./Comments";
 import { SignButton } from "./SignDoc";
 import { shortName } from "./collab";
 import { AlsoNeed } from "./AlsoNeed";
-import { StillNeeded } from "./StillNeeded";
+import { findItAsk } from "./StillNeeded";
+import { headline, nextRenewal, todos, type Todo } from "./doNext";
+import { readPasted, type Read } from "./intakeParse";
 
 /** What the Mine filter keeps: an application or job assigned to this person, or a job about one that is. */
 const mineApp = (team: Collab, id?: string) => !!id && team.isMine({ kind: "app", id });
@@ -232,10 +234,111 @@ function firstLine(n: number, ms: number, won: boolean, lines: number): Bi {
   return B(`Mapped ${p} in ${s.en}`, `${took}：梳理了 ${n} 项许可`);
 }
 
-/** Home answers three questions at a glance, in this order: what needs me, what is Odelia doing, what's next. A section
- *  shows only when it has something to say. */
+/* Home answers one question first: what do I do next? (Duolingo's one big next action.) Then, in order: what else is
+   waiting on me (Linear's Inbox and Ramp's "Things to do", at most three, each with one button), what Odelia is doing
+   (one line each, the timeline a tap away), and what's done (folded). Everything else (the plan, dates, updates, this
+   month's numbers, stores, what else a business may need) sits behind tabs below. Nothing needed: a calm "You're all
+   set" with the next renewal (Superhuman's inbox zero). Progress is one line and a bar until it's done (Stripe's
+   "Get started" checklist). The order of what to do is src/doNext.ts. */
+
+type HomeTab = "plan" | "dates" | "updates" | "month" | "stores" | "also";
+const HOME_TAB = "placetta-home-tab";
+const readTab = (): HomeTab => { try { const v = localStorage.getItem(HOME_TAB); if (v && ["plan", "dates", "updates", "month", "stores", "also"].includes(v)) return v as HomeTab; } catch { /* storage blocked */ } return "plan"; };
+
+/** The one primary button a to-do needs: Approve opens the approval (you confirm there), Upload opens the file picker on
+ *  the document it's for, Pay opens the agency's page. big: the "Do this next" card's. */
+function TodoButton({ x, big }: { x: Todo; big?: boolean }) {
+  const { b, t, busy, openApproval, openApp, approve, upload, go } = useApp();
+  const pick = useRef<HTMLInputElement>(null);
+  const hold = useApprovalHold(x.kind === "approval" ? x.a.id : "");
+  const cls = "pill " + (big ? "ink dtn-go" : "primary sm");
+  const btn = (label: string, on: () => void) => <button type="button" className={cls} disabled={busy} onClick={on}><span>{label}</span><i aria-hidden="true"><I.arrow /></i></button>;
+  const picker = (app: string, item: string) => <input ref={pick} type="file" hidden multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx" onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) upload(app, item, f); }} />;
+  if (x.kind === "doc") return <>{btn(b(B("Photo or file", "拍照或上传")), () => pick.current?.click())}{picker(x.app.id, x.item)}</>;
+  if (x.kind === "job") {
+    const app = x.app;
+    return btn(b(B("Open", "打开")), () => (app ? openApp(app.id, "check") : go("odelia", "work")));
+  }
+  const a = x.a;
+  if (hold) return <LocalHold hold={hold} compact={!big} />;
+  if (a.kind === "pay") return btn(b(B("Pay the agency", "去付款")), () => approve(a.id));
+  if (a.kind === "upload") {
+    const missing = x.app?.checklist.find(c => c.state === "missing" && !c.dep);
+    return <>{btn(t("upload"), () => (x.app && missing ? pick.current?.click() : x.app && openApp(x.app.id, "check")))}{x.app && missing && picker(x.app.id, missing.id)}</>;
+  }
+  return btn(big ? b(B("Review and approve", "查看并批准")) : t("approve"), () => openApproval(a.id));
+}
+
+/** Why it's first, in one line: its date, that the opening waits on it, or what happens once you act. */
+function whyLine(x: Todo, lang: "en" | "zh", t: (k: Key) => string): string {
+  const zh = lang === "zh";
+  const parts: string[] = [];
+  if (x.due && x.days != null) parts.push(x.days < 0 ? (zh ? `已过期 ${-x.days} 天。` : `${-x.days} day${x.days === -1 ? "" : "s"} late.`) : zh ? `${fmtDay(x.due.date, lang)}到期，${fmtIn(x.days, lang)}。` : `Due ${fmtDay(x.due.date, lang)}, ${fmtIn(x.days, lang).toLowerCase()}.`);
+  if (x.blocks) parts.push(zh ? "开业日期取决于这一项。" : "Your opening date waits on this.");
+  if (x.kind === "approval") {
+    const a = x.a, fee = a.kind === "pay" ? a.fee ?? 0 : x.app && a.kind === "file" ? feeTotal(x.app) : 0;
+    const say = {
+      file: zh ? "Odelia 已填好，您批准后她就提交。" : "Odelia filled it in. She files it once you approve.",
+      send: zh ? "Odelia 已写好，您批准后才会发出。" : "Odelia wrote it. Nothing goes out until you approve.",
+      upload: zh ? "缺少这些文件，申请就交不了。" : "The application can't go in without it.",
+      pay: zh ? "机构收到付款后才会继续办理。" : "The agency moves on once it's paid.",
+      change: zh ? "您确认之前，Odelia 不会做任何更改。" : "Odelia changes nothing until you confirm.",
+    }[a.kind];
+    if (!x.blocks || a.kind !== "upload") parts.push(say);
+    if (fee && x.app) parts.push(zh ? `费用 ${feeText(x.app, t)}，直接付给机构。` : `Fee ${feeText(x.app, t)}, paid to the agency.`);
+    else if (fee) parts.push(zh ? `费用 ${money(fee)}。` : `Fee ${money(fee)}.`);
+  } else if (x.kind === "doc") {
+    if (!x.blocks) parts.push(zh ? `${x.app.name.zh}需要它才能提交。` : `The ${x.app.name.en.charAt(0).toLowerCase() + x.app.name.en.slice(1)} needs it to go in.`);
+  } else if (x.job.waiting) parts.push(zh ? x.job.waiting.zh : x.job.waiting.en);
+  return parts.join(" ");
+}
+
+/** The single most important thing, with one big button and a why line. Not now moves it to the end for this visit. */
+function DoNextCard({ x, n, onLater, docs }: { x: Todo; n: number; onLater?: () => void; docs?: { i: number; of: number } }) {
+  const { b, t, lang, busy, ask } = useApp();
+  const zh = lang === "zh";
+  return (
+    <section className="dtn" data-do-next={x.key} aria-labelledby="dtn-h">
+      <p className="dtn-k">{zh ? "下一步" : "Do this next"}{docs && docs.of > 1 ? <span>{zh ? `还需要的文件，第 ${docs.i} 项，共 ${docs.of} 项` : `Document ${docs.i} of ${docs.of}`}</span> : null}</p>
+      <h2 id="dtn-h">{b(headline(x))}</h2>
+      <p className="dtn-why">{whyLine(x, lang, t)}</p>
+      <div className="dtn-act">
+        <TodoButton x={x} big />
+        {x.kind === "doc" && <button type="button" className="lnk" disabled={busy} onClick={() => ask(b(findItAsk(x.label, x.app.name)))}>{zh ? "帮我找" : "Find it for me"}</button>}
+        {onLater && n > 1 && <button type="button" className="lnk quiet" onClick={onLater}>{x.kind === "doc" ? (zh ? "跳过" : "Skip") : (zh ? "稍后再说" : "Not now")}</button>}
+      </div>
+    </section>
+  );
+}
+
+/** One row of "Waiting on you": what it is, and its one button. */
+function TodoRow({ x }: { x: Todo }) {
+  const { b, lang, busy, ask } = useApp();
+  if (x.kind === "approval") return <NeedRow a={x.a} compact />;
+  if (x.kind === "job") return <PlanCard job={x.job} compact actions />;
+  const zh = lang === "zh";
+  return (
+    <div className="appr compact k-doc">
+      <span className="appr-ico k-upload"><I.clip /></span>
+      <span className="appr-tx"><b>{b(headline(x))}</b><span>{b(x.app.name)}</span></span>
+      <span className="appr-btns">
+        <button type="button" className="lnk" disabled={busy} onClick={() => ask(b(findItAsk(x.label, x.app.name)))}>{zh ? "帮我找" : "Find it for me"}</button>
+        <TodoButton x={x} />
+      </span>
+    </div>
+  );
+}
+
+/** "Odelia is working on": one line each; a tap opens the timeline. */
+function WorkLine({ title, status, children, onOpen }: { title: string; status: string; children?: ReactNode; onOpen?: () => void }) {
+  const line = <><b>{title}</b><span>{status}</span></>;
+  if (onOpen) return <li><button type="button" className="wl" onClick={onOpen}>{line}<I.chevR /></button></li>;
+  if (!children) return <li><div className="wl">{line}</div></li>;
+  return <li><details className="wl-d"><summary className="wl">{line}<I.chevR /></summary><div className="wl-body">{children}</div></details></li>;
+}
+
 export function Overview() {
-  const { t, b, ws, lang, go, ask, busy, live, updates, queued, editWs } = useApp();
+  const { t, b, ws, lang, go, ask, busy, live, updates, queued, editWs, openApp } = useApp();
   const n = ws.apps.length;
   /* Time to plan: from the signup press (src/cloud/Root.tsx) to this plan on screen, recorded once in the workspace,
      with one line in the audit trail, and the first win's approval request logged the way Odelia's is. */
@@ -256,70 +359,82 @@ export function Overview() {
     return () => cancelAnimationFrame(frame);
   }, []);   // once, when Home first shows the plan // eslint-disable-line react-hooks/exhaustive-deps
   const team = useTeam();
+  const [later, setLater] = useState<string[]>([]);
+  const [all, setAll] = useState(false);
+  const [tab, setTabState] = useState<HomeTab>(readTab);
+  const setTab = (v: HomeTab) => { setTabState(v); try { localStorage.setItem(HOME_TAB, v); } catch { /* storage blocked */ } };
   if (!n) return <Welcome />;
+  const zh = lang === "zh";
+  const today = daysFromNow(0);
   const c = (s: Status[]) => ws.apps.filter(a => s.includes(a.status)).length;
   /* Team review: Mine keeps what's assigned to this person (and the jobs about it) in each section below */
   const mine = team.mine && teamOf(team);
   const mineN = ws.apps.filter(a => mineApp(team, a.id)).length + (ws.jobs ?? []).filter(j => j.status !== "done" && j.status !== "stopped" && team.isMine({ kind: "job", id: j.id })).length;
-  const approved = c(["approved"]), agency = c(["review", "filing"]), you = c(["ready", "needs"]);
-  const today = daysFromNow(0);
-  const zh = lang === "zh";
+  const approved = c(["approved"]), agency = c(["review", "filing"]);
 
-  /* 1. Needs you: every approval, and every job stuck on you that no approval row already covers */
+  /* 1. What needs you, most urgent first; Not now sends one to the end for this visit */
+  const list = todos(ws, today, mine ? { app: id => mineApp(team, id), job: j => mineJob(team, j) } : {});
+  const ordered = [...list.filter(x => !later.includes(x.key)), ...later.map(k => list.find(x => x.key === k)).filter((x): x is Todo => !!x)];
+  const top = ordered[0], rest = ordered.slice(1);
+  const docsAll = ordered.filter(x => x.kind === "doc");
+  const docAt = top?.kind === "doc" ? { i: list.filter(x => x.kind === "doc").findIndex(x => x.key === top.key) + 1, of: docsAll.length } : undefined;
+  const shown = all ? rest : rest.slice(0, 3);
+
+  /* 2. Odelia is working on */
   const jobs = ws.jobs ?? [];
-  // a job split across stores waits on a store's part, which shows here itself
-  // a job with the agency or Placetta's filing team needs nobody: it shows under what's in motion instead
-  const waitingJobs = jobs.filter(j => j.status === "waiting" && !j.children?.length && !awayWait(j)).filter(j => {
-    const act = nextAction(ws, j);
-    if (!act || act.who !== "you") return true;
-    if (act.kind === "approve") return !ws.approvals.some(a => a.id === act.id);
-    if (act.kind === "answer") return !ws.approvals.some(a => a.kind === "pay" && a.app === act.app);
-    return !ws.approvals.some(a => a.kind === "upload" && a.app === act.app);
-  }).filter(j => !mine || mineJob(team, j));
-  const approvals = mine ? ws.approvals.filter(a => mineApp(team, a.app)) : ws.approvals;
-  const needs = approvals.length + waitingJobs.length;
-
-  /* 2. Odelia is working on: what she coordinates across stores (each store's bot and where its part stands), running
-     jobs with their live plan, background watchers, what's queued, and the routines */
   const chiefs = jobs.filter(j => j.children?.length && j.status !== "done" && j.status !== "stopped" && (!mine || mineJob(team, j)));
   const running = jobs.filter(j => (j.status === "running" || awayWait(j)) && !j.parent && !j.children?.length && (!mine || mineJob(team, j)));
   const routines = ws.routines ?? [], active = routines.filter(r => !r.paused);
   const nextRoutine = active.map(r => nextRun(r, today)).filter((d): d is string => !!d).sort()[0];
   const routineLine = !routines.length ? "" : !active.length ? t("hm_routinesPaused", { n: routines.length })
     : t(routines.length === 1 ? "hm_routines1" : "hm_routinesN", { n: routines.length, d: nextRoutine ? fmtDay(nextRoutine, lang) : "" });
-  const working = chiefs.length > 0 || running.length > 0 || ws.running.length > 0 || queued.length > 0 || routines.length > 0 || (busy && !!live);
+  const withAgency = ws.apps.filter(a => FILED.includes(a.status) && a.status !== "approved" && (!mine || mineApp(team, a.id)));
+  const decision = (id: string) => ws.deadlines.filter(d => d.app === id && d.kind === "estimate" && d.date >= today).sort((x, y) => x.date.localeCompare(y.date))[0];
+  const unread = updates.filter(u => !u.read).length;
+  const working = chiefs.length + running.length + ws.running.length + withAgency.length > 0 || queued.length > 0 || routines.length > 0 || (busy && !!live);
+  const steps = (j: { steps: { done: boolean }[] }) => zh ? `${j.steps.filter(s => s.done).length}/${j.steps.length} 步` : `${j.steps.filter(s => s.done).length} of ${j.steps.length} steps`;
 
-  /* 3. The opening plan: the count, where it stands, when it lands, and the next permits in order */
+  /* 3. All set: what's issued */
+  const done = ws.apps.filter(a => a.status === "approved" && (!mine || mineApp(team, a.id)));
+
+  /* the opening date, only where the plan or a store's path gives one */
   const fp = ws.firstPlan;
   const previews = ws.apps.filter(isPreview).length;
   const landing = fp?.projectedOpen
     ?? (ws.stores ?? []).filter(s => s.stage === "opening").map(s => openingPath(s, ws, today).landing).filter((d): d is string => !!d).sort().at(-1) ?? null;
-  const nextUp = [...ws.apps].filter(a => a.status !== "approved" && (!mine || mineApp(team, a.id))).sort(byPriority).slice(0, 3);
+  const renewal = nextRenewal(ws, today);
 
-  /* the line under the title: the business, its place (unless the name already says it) and the goal, whichever exist */
+  /* behind the tabs: the plan, the dates, the updates, this month, the stores, and what else a business may need */
+  const nextUp = [...ws.apps].filter(a => a.status !== "approved" && (!mine || mineApp(team, a.id))).sort(byPriority).slice(0, 3);
   const biz = b(ws.business), place = ws.locations[0] ? b(ws.locations[0].name) : "", goal = b(ws.goal);
-  // with one store and a street address, the plan is that address's plan, and says so
   const at = (ws.stores ?? []).length === 1 && /^\d/.test(ws.stores![0].address ?? "") ? ws.stores![0].address! : "";
   const base = place ? biz.replace(` in ${place}`, "").replace(place, "").trim() : biz;
   const ctxParts = [at ? (!base ? at : zh ? `${base}，${at}` : `${base} at ${at}`) : place && !biz.includes(place) ? t("ov_in", { biz, place }) : biz, goal].filter(Boolean);
   const ctxLine = ctxParts.length ? ctxParts.join(zh ? "。" : ". ") + (zh ? "。" : ".") : "";
-
-  /* 4 and 5. Coming up, and the latest updates */
   const soon = [...ws.deadlines].filter(d => daysUntil(d.date) >= 0).sort((x, y) => x.date.localeCompare(y.date)).slice(0, 5);
   const latest = updates.slice(0, 3);
+  const tabs: { id: HomeTab; label: string; on: boolean }[] = ([
+    { id: "plan", label: zh ? "开店计划" : "Your plan", on: true },
+    { id: "dates", label: zh ? "日期" : "Dates", on: soon.length > 0 },
+    { id: "updates", label: zh ? "动态" : "Updates", on: latest.length > 0 || ws.nudges.length > 0 },
+    { id: "month", label: zh ? "本月" : "This month", on: true },
+    { id: "stores", label: t("nav_stores"), on: (ws.stores ?? []).length > 0 },
+    { id: "also", label: zh ? "其他事项" : "Also check", on: !!fp?.also?.length },
+  ] as { id: HomeTab; label: string; on: boolean }[]).filter(x => x.on);
+  const cur = tabs.some(x => x.id === tab) ? tab : "plan";
 
   return (
     <div className="page home">
-      <header className="hero">
-        <div className="hero-bot"><AgentBot size={120} busy={busy} task={busy ? live?.state : undefined} gaze={[0, 2.4]} /></div>
-        <h1>{n === 1 ? t("ov_title1") : t("ov_title", { n })}</h1>
-        <p className="lede">{t("ov_state", { a: approved, r: agency, n: you })}</p>
-        <div className="progress" aria-label={t("ov_done", { d: approved + agency, n })}>
-          <span className="bar"><i style={{ width: `${((approved + agency) / n) * 100}%` }} /></span>
-          <span className="pl">{t("ov_done", { d: approved + agency, n })}</span>
+      <header className="hm-top">
+        <div className="hm-bot"><AgentBot size={64} busy={busy} task={busy ? live?.state : undefined} gaze={[0, 2.4]} /></div>
+        <div className="hm-tx">
+          <h1>{biz}</h1>
+          <div className="progress" aria-label={zh ? `${n} 项许可已办好 ${approved} 项` : `${approved} of ${n} permits done`}>
+            <span className="bar"><i style={{ width: `${(approved / n) * 100}%` }} /><i className="b2" style={{ width: `${(agency / n) * 100}%` }} /></span>
+            <span className="pl">{zh ? `已办好 ${approved}/${n} 项许可` : `${approved} of ${n} permits done`}{agency > 0 && <small>{zh ? `，${agency} 项在机构审核` : `, ${agency} with the agency`}</small>}</span>
+          </div>
+          {landing && <p className="hm-open"><I.deadlines />{zh ? `预计 ${fmtDay(landing, lang, true)} 前后开业` : `Likely opening ${fmtDay(landing, lang, true)}`}</p>}
         </div>
-        {ctxLine && <p className="ctx">{ctxLine}</p>}
-        <LiveLine />
       </header>
 
       {teamOf(team) && (
@@ -328,111 +443,115 @@ export function Overview() {
           {mine && <p className="mine-note">{zh ? "只显示分配给您的申请和工作。" : "Showing only the applications and jobs assigned to you."}</p>}
         </div>
       )}
-      {mine && needs === 0 && !chiefs.length && !running.length && <p className="quiet mine-empty">{zh ? "没有分配给您、需要处理的事项。" : "Nothing assigned to you needs you right now."}</p>}
 
-      {needs > 0 && (
-        <section className="sec hm-needs">
-          <SecHead title={t("needsYou")} count={needs} />
-          {!mine && <BatchApprove />}
-          <div className="stack">
-            {approvals.map(a => <NeedRow key={a.id} a={a} />)}
-            {waitingJobs.map(j => <PlanCard key={j.id} job={j} compact actions />)}
-          </div>
+      {top ? <DoNextCard x={top} n={ordered.length} docs={docAt} onLater={() => setLater(l => [...l.filter(k => k !== top.key), top.key])} /> : (
+        <section className="hm-calm" aria-live="polite">
+          <span className="hm-calm-i" aria-hidden="true"><I.check /></span>
+          <h2>{mine ? (zh ? "没有分配给您、需要处理的事项。" : "Nothing assigned to you needs you.") : zh ? "都办好了。" : "You're all set."}</h2>
+          <p>{zh ? "有需要您处理的事，Odelia 会告诉您。" : "Odelia will tell you when something needs you."}</p>
+          {renewal && <p className="hm-calm-r">{zh ? `下次续期：${b(renewal.title)}，${fmtDay(renewal.date, lang, true)}` : `Next renewal: ${b(renewal.title)}, ${fmtDay(renewal.date, lang, true)}`}</p>}
         </section>
       )}
-      {!mine && <StillNeeded />}
+
+      {rest.length > 0 && (
+        <section className="sec hm-needs">
+          <SecHead title={zh ? "等您处理" : "Waiting on you"} count={rest.length} />
+          {all && !mine && <BatchApprove />}
+          <div className="stack">{shown.map(x => <TodoRow key={x.key} x={x} />)}</div>
+          {all && docsAll.length > 1 && <button type="button" className="lnk more" disabled={busy} onClick={() => ask(b(findItAsk(B(docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.en} (${x.app.name.en})` : "").join("; "), docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.zh}（${x.app.name.zh}）` : "").join("；")), B("open applications", "进行中的申请"), true)))}><I.spark />{zh ? `把 ${docsAll.length} 份文件都交给 Odelia 找` : `Have Odelia find all ${docsAll.length} documents`}</button>}
+          {rest.length > 3 && <button type="button" className="lnk more" onClick={() => setAll(!all)}>{all ? (zh ? "收起" : "Show fewer") : (zh ? `查看全部 ${rest.length} 项` : `See all ${rest.length}`)}</button>}
+        </section>
+      )}
 
       {working && (
         <section className="sec hm-work">
-          <SecHead title={t("hm_working")} more={t("nav_work")} onMore={() => go("odelia", "work")} />
-          {chiefs.map(j => <ChiefRow key={j.id} job={j} compact />)}
-          {running.map(j => <PlanCard key={j.id} job={j} compact />)}
-          {(ws.running.length > 0 || queued.length > 0 || routineLine) && (
-            <ul className="tray runs">
-              {ws.running.map(r => (
-                <li key={r.id} className="row"><TaskBot id={r.id} label={b(r.label)} /><span>{b(r.label)}{r.detail && <small>{b(r.detail)}</small>}</span></li>
-              ))}
-              {queued.length > 0 && <li className="row rt-line"><span className="rt-ico" aria-hidden="true"><I.queue /></span><span>{zh ? `${queued.length} 项排队中，当前任务完成后开始` : `${queued.length} waiting in line, next when she finishes`}</span></li>}
-              {routineLine && <li className="row rt-line"><span className="rt-ico" aria-hidden="true"><I.deadlines /></span><button type="button" className="lnk" onClick={() => go("odelia", "work")}>{routineLine}</button></li>}
-            </ul>
-          )}
-        </section>
-      )}
-
-      <section className="sec hm-plan">
-        <SecHead title={t("hm_plan")} more={t("nav_apps")} onMore={() => go("permits")} />
-        <div className="plan-card">
-          <p className="plan-sum">{t(n === 1 ? "hm_plan1" : "hm_planN", { n, a: approved, r: agency, t: n - approved - agency })}</p>
-          {landing && <p className="plan-open"><I.deadlines />{t("hm_open", { d: fmtDay(landing, lang, true) })}</p>}
-          <CostLine />
-
-          {nextUp.length > 0 && (
-            <>
-              <p className="plan-h">{t("hm_next")}</p>
-              <ol className="plan-next">
-                {nextUp.map((a, i) => (
-                  <li key={a.id}>
-                    <span className="plan-n">{i + 1}</span>
-                    <AppRow a={a} />
-                  </li>
-                ))}
-              </ol>
-            </>
-          )}
-          {previews > 0 && <p className="plan-note"><I.spark />{t("hm_preview")}</p>}
-          <div className="plan-act">
-            <button type="button" className="pill quiet sm" onClick={() => go("permits")}>{t("viewAll")}<I.chevR /></button>
-            <button type="button" className="pill quiet sm" onClick={() => go("find")}><I.find />{t("nav_find")}</button>
-          </div>
-        </div>
-        {fp?.ms != null && previews > 0 && <p className="plan-time" data-indent><I.check />{b(firstLine(fp.apps, fp.ms, !!fp.win && ws.apps.some(a => a.id === fp.win), fp.filled ?? 0))}</p>}
-      </section>
-
-      {fp?.also?.length ? <AlsoNeed fp={fp} zh={zh} /> : null}
-
-      <HomeMetrics />
-
-      {(ws.stores ?? []).length > 0 && (
-        <section className="sec">
-          <SecHead title={t("nav_stores")} more={t("viewAll")} onMore={() => go("stores")} />
-          <StoresStrip onOpen={() => go("stores")} />
-        </section>
-      )}
-
-      {soon.length > 0 && (
-        <section className="sec">
-          <SecHead title={t("comingUp")} more={t("viewAll")} onMore={() => go("permits", "deadlines")} />
-          <ul className="tray soon">
-            {soon.map(d => {
-              const k = daysUntil(d.date);
-              return (
-                <li key={d.id} className="row">
-                  <span className="soon-t">{b(d.title)}</span>
-                  <span className={"soon-d" + (k <= 7 ? " hot" : "")}>{fmtDay(d.date, lang)}<small>{fmtIn(k, lang)}</small></span>
-                </li>
-              );
-            })}
+          <SecHead title={t("hm_working")} more={unread ? (zh ? `动态 ${unread}` : `Updates ${unread}`) : zh ? "动态" : "Updates"} onMore={() => go("odelia", "updates")} />
+          <LiveLine />
+          <ul className="wls">
+            {chiefs.map(j => <WorkLine key={j.id} title={b(j.title)} status={zh ? "多家门店同时进行" : "Across your stores"}><ChiefRow job={j} compact /></WorkLine>)}
+            {running.map(j => <WorkLine key={j.id} title={b(j.title)} status={steps(j)}><PlanCard job={j} compact /></WorkLine>)}
+            {withAgency.map(a => { const d = decision(a.id); return <WorkLine key={a.id} title={b(a.name)} status={d ? (zh ? `机构审核中，预计 ${fmtDay(d.date, lang)} 出结果` : `With the agency, decision ${fmtDay(d.date, lang)}`) : zh ? "机构审核中" : "With the agency"} onOpen={() => openApp(a.id, "progress")} />; })}
+            {ws.running.map(r => <li key={r.id}><div className="wl"><TaskBot id={r.id} label={b(r.label)} /><b>{b(r.label)}</b>{r.detail && <span>{b(r.detail)}</span>}</div></li>)}
+            {queued.length > 0 && <li><div className="wl"><b>{zh ? `${queued.length} 项排队中` : `${queued.length} waiting in line`}</b><span>{zh ? "当前任务完成后开始" : "Next when she finishes"}</span></div></li>}
+            {routineLine && <WorkLine title={routineLine} status={zh ? "例行任务" : "Routines"} onOpen={() => go("odelia", "work")} />}
           </ul>
         </section>
       )}
 
-      {(latest.length > 0 || ws.nudges.length > 0) && (
-        <section className="sec">
-          <SecHead title={t("hm_updates")} more={t("hm_seeAll")} onMore={() => go("odelia", "updates")} />
-          {ws.nudges.length > 0 && (
-            <div className="notes">
-              {ws.nudges.map(x => (
-                <div key={x.id} className="note-card">
-                  <span className="nc-ico"><I.spark /></span>
-                  <p>{b(x.text)}{x.sample && <em className="sample">{t("sampleTag")}</em>}</p>
-                  <button type="button" className="pill quiet sm" disabled={busy} onClick={() => ask(b(x.prompt))}>{b(x.ask)}</button>
+      {done.length > 0 && (
+        <details className="sec hm-done">
+          <summary><span>{zh ? "已办好" : "All set"}</span><em>{done.length}</em><I.chevR /></summary>
+          <div className="tray">{done.map(a => <AppRow key={a.id} a={a} />)}</div>
+        </details>
+      )}
+
+      <section className="sec hm-more" aria-label={zh ? "更多" : "More"}>
+        <nav className="ptabs hm-tabs" role="tablist">
+          {tabs.map(x => <button key={x.id} type="button" role="tab" aria-selected={x.id === cur} onClick={() => setTab(x.id)}>{x.label}</button>)}
+        </nav>
+        <div role="tabpanel" className="hm-panel">
+          {cur === "plan" && (
+            <div className="hm-plan">
+              <div className="plan-card">
+                {ctxLine && <p className="ctx">{ctxLine}</p>}
+                <p className="plan-sum">{t(n === 1 ? "hm_plan1" : "hm_planN", { n, a: approved, r: agency, t: n - approved - agency })}</p>
+                {landing && <p className="plan-open"><I.deadlines />{t("hm_open", { d: fmtDay(landing, lang, true) })}</p>}
+                <CostLine />
+                {nextUp.length > 0 && (
+                  <>
+                    <p className="plan-h">{t("hm_next")}</p>
+                    <ol className="plan-next">
+                      {nextUp.map((a, i) => <li key={a.id}><span className="plan-n">{i + 1}</span><AppRow a={a} /></li>)}
+                    </ol>
+                  </>
+                )}
+                {previews > 0 && <p className="plan-note"><I.spark />{t("hm_preview")}</p>}
+                <div className="plan-act">
+                  <button type="button" className="pill quiet sm" onClick={() => go("permits")}>{zh ? "全部许可" : "All permits"}<I.chevR /></button>
+                  <button type="button" className="pill quiet sm" onClick={() => go("find")}><I.find />{t("nav_find")}</button>
                 </div>
-              ))}
+              </div>
+              {fp?.ms != null && previews > 0 && <p className="plan-time" data-indent><I.check />{b(firstLine(fp.apps, fp.ms, !!fp.win && ws.apps.some(a => a.id === fp.win), fp.filled ?? 0))}</p>}
             </div>
           )}
-          {latest.length > 0 && <UpdateList items={latest} />}
-        </section>
-      )}
+          {cur === "dates" && (
+            <>
+              <ul className="tray soon">
+                {soon.map(d => {
+                  const k = daysUntil(d.date);
+                  return (
+                    <li key={d.id} className="row">
+                      <span className="soon-t">{b(d.title)}</span>
+                      <span className={"soon-d" + (k <= 7 ? " hot" : "")}>{fmtDay(d.date, lang)}<small>{fmtIn(k, lang)}</small></span>
+                    </li>
+                  );
+                })}
+              </ul>
+              <button type="button" className="lnk more" onClick={() => go("permits", "deadlines")}>{zh ? "全部日期" : "All dates"}<I.chevR /></button>
+            </>
+          )}
+          {cur === "updates" && (
+            <>
+              {ws.nudges.length > 0 && (
+                <div className="notes">
+                  {ws.nudges.map(x => (
+                    <div key={x.id} className="note-card">
+                      <span className="nc-ico"><I.spark /></span>
+                      <p>{b(x.text)}{x.sample && <em className="sample">{t("sampleTag")}</em>}</p>
+                      <button type="button" className="pill quiet sm" disabled={busy} onClick={() => ask(b(x.prompt))}>{b(x.ask)}</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {latest.length > 0 && <UpdateList items={latest} />}
+              <button type="button" className="lnk more" onClick={() => go("odelia", "updates")}>{zh ? "全部动态" : "All updates"}<I.chevR /></button>
+            </>
+          )}
+          {cur === "month" && <HomeMetrics />}
+          {cur === "stores" && <StoresStrip onOpen={() => go("stores")} />}
+          {cur === "also" && fp?.also?.length ? <AlsoNeed fp={fp} zh={zh} /> : null}
+        </div>
+      </section>
       <Footer />
     </div>
   );
@@ -711,6 +830,28 @@ function FactRow({ f }: { f: Fact }) {
   );
 }
 
+/** Update the facts by pasting instead of typing (Stripe Atlas and Mercury prefill): an email signature, the website or
+ *  an EIN letter's text, read here (src/intakeParse.ts); each value found is a chip to tap, with the words it came from.
+ *  A document goes to Documents instead, where Odelia reads it with its quotes. */
+function FactImport() {
+  const { b, lang, ws, editFact } = useApp();
+  const zh = lang === "zh";
+  const [text, setText] = useState("");
+  const [got, setGot] = useState<Read | null>(null);
+  const MAP: [keyof Read, RegExp][] = [["legal", /^legal name$/i], ["owner", /^owner$/i], ["address", /^(storefront|address|store address)$/i], ["ein", /^ein$/i], ["website", /^website$/i], ["phone", /^phone$/i]];
+  const offers = got ? MAP.map(([k, re]) => ({ k, f: ws.facts.find(x => re.test(x.label.en) && !x.locked), v: got[k] })).filter(o => o.f && o.v && b(o.f.value) !== o.v.value) : [];
+  return (
+    <div className="fact-imp">
+      <textarea rows={2} value={text} onChange={e => setText(e.target.value)} placeholder={zh ? "粘贴邮件签名、网站或 EIN 函内容来更新资料" : "Paste an email signature, website or EIN letter to update these"} aria-label={zh ? "粘贴资料" : "Paste anything"} />
+      <div className="fact-imp-act">
+        <button type="button" className="pill quiet sm" disabled={!text.trim()} onClick={() => setGot(readPasted(text))}>{zh ? "读取" : "Read it"}</button>
+        {got && !offers.length && <small>{zh ? "没有可更新的内容。" : "Nothing new to update."}</small>}
+        {offers.map(o => <button key={o.k} type="button" className="chip" title={o.v!.quote} onClick={() => { editFact(o.f!.id, o.v!.value); setGot(g => (g ? { ...g, [o.k]: undefined } : g)); }}><I.plus />{b(o.f!.label)}{zh ? "：" : ": "}{o.v!.value}</button>)}
+      </div>
+    </div>
+  );
+}
+
 /** Business facts (Settings): what Placetta knows about the business, and fills every form from. */
 export function ContextPage() {
   const { t, ws } = useApp();
@@ -718,6 +859,7 @@ export function ContextPage() {
   return (
     <section className="sg embed" id="set-facts" aria-labelledby="set-facts-h">
       <header className="embed-h"><div><h2 id="set-facts-h">{t("nav_context")}</h2><p>{t("cx_sub")}</p></div></header>
+      <FactImport />
       {groups.map(g => (
         <section key={g} className="sec">
           <SecHead title={t(("g_" + g) as Key)} />
