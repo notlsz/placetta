@@ -597,7 +597,7 @@ const STATES = [
   { name: "work-open", go: async p => { await open(p, "odelia/work"); const a = await click(p, ".hz-tog"); const b = await click(p, ".sec-h.tog"); return a || b; } },
   { name: "store-detail", go: async p => { await open(p, "stores"); return click(p, "button.store"); } },
   { name: "store-detail-2", go: async p => { await open(p, "stores"); const l = p.locator("button.store").filter({ visible: true }); if (await l.count() < 2) return false; await l.nth(1).click(); await settle(p); return true; } },
-  { name: "stores-plan-many", go: async p => { await open(p, "stores"); return clickText(p, "Plan many stores"); } },
+  { name: "stores-plan-many", go: async p => { await open(p, "stores"); await p.locator(".st-more .pill").first().click().catch(() => {}); return clickText(p, "Plan many stores"); } },
   /* Team review: cells picked in the review table, each bulk action open, a cell opened by headquarters, and a
      document's comments */
   { name: "review-picked", go: async p => { await open(p, "permits/review"); const l = p.locator(".rv-pick").filter({ visible: true }); if (!(await l.count())) return false; await l.first().check(); await settle(p); return true; } },
@@ -606,9 +606,9 @@ const STATES = [
   { name: "hq-picked-ask", go: async p => { await open(p, "headquarters"); const l = p.locator(".rv-pick").filter({ visible: true }); if (!(await l.count())) return false; await l.first().check(); await settle(p); return clickText(p, "Ask the franchisee"); } },
   { name: "hq-item", go: async p => { await open(p, "headquarters"); return click(p, ".rv-c.s-missing .rv-open, .rv-open"); } },
   { name: "doc-comments", go: async p => { await open(p, "permits/documents"); return click(p, ".cmt-btn.has, .cmt-btn"); } },
-  { name: "stores-check", go: async p => { await open(p, "stores"); return clickText(p, "Check stores already open"); } },
-  { name: "stores-check-list", go: async p => { await open(p, "stores"); if (!(await clickText(p, "Check stores already open"))) return false; await p.locator(".sc-f input").first().fill("Flushing, NY"); return clickText(p, "Check my stores"); } },
-  { name: "stores-check-gaps", go: async p => { await open(p, "stores"); if (!(await clickText(p, "Check stores already open"))) return false; await p.locator(".sc-f input").first().fill("Irvine, CA"); if (!(await clickText(p, "Check my stores"))) return false; return clickText(p, "Show my gaps"); } },
+  { name: "stores-check", go: async p => { await open(p, "stores"); await p.locator(".st-more .pill").first().click().catch(() => {}); return clickText(p, "Check stores already open"); } },
+  { name: "stores-check-list", go: async p => { await open(p, "stores"); await p.locator(".st-more .pill").first().click().catch(() => {}); if (!(await clickText(p, "Check stores already open"))) return false; await p.locator(".sc-f input").first().fill("Flushing, NY"); return clickText(p, "Check my stores"); } },
+  { name: "stores-check-gaps", go: async p => { await open(p, "stores"); await p.locator(".st-more .pill").first().click().catch(() => {}); if (!(await clickText(p, "Check stores already open"))) return false; await p.locator(".sc-f input").first().fill("Irvine, CA"); if (!(await clickText(p, "Check my stores"))) return false; return clickText(p, "Show my gaps"); } },
   { name: "app-drawer", tabs: true, go: async p => { await open(p, "permits"); return click(p, ".apps-t .tr.row, button.row.arow"); } },
   { name: "app-drawer-crit", tabs: true, go: async p => { await open(p, "permits"); return click(p, ".apps-t .tr.row.crit, button.row.arow.crit"); } },
   ...[0, 1, 2].map(step => ({ name: "tour" + (step ? "-step" + (step + 1) : ""), go: async p => {

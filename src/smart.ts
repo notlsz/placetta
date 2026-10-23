@@ -6,6 +6,7 @@
 //   suggestions:   the next asks from the workspace's own state, not a fixed list
 // Pure functions: the app, the agent's tools, the monitor and the tests all call them; nothing here talks to a server.
 import { B, type Bi } from "./bi";
+import { fmtDay } from "./time";
 import { filingBlockers, isBlank } from "./core";
 import { formById, placesOf, segmentOf } from "./forms/registry";
 import type { Application, Approval, Field, Status, Store, Workspace } from "./model";
@@ -320,7 +321,7 @@ export function openingLine(p: OpeningPath): Bi | null {
     case "on_track": return B(`On track, ${ab.toLowerCase()}${p.slack} days to spare`, `进度正常，还有${az}${p.slack} 天余量`);
     case "tight": return tail(`Tight: ${ab.toLowerCase()}${p.slack} day${p.slack === 1 ? "" : "s"} to spare`, `时间紧张：仅余${az}${p.slack} 天`);
     case "late": return tail(`${ab}${-p.slack!} day${p.slack === -1 ? "" : "s"} behind the opening date`, `比开业日期晚${az}${-p.slack!} 天`);
-    case "no_date": return p.landing ? B(`Permits in hand around ${p.landing}`, `预计 ${p.landing} 前后取得全部许可`) : null;
+    case "no_date": return p.landing ? B(`Permits in hand around ${fmtDay(p.landing, "en", true)}`, `预计 ${fmtDay(p.landing, "zh", true)}前后取得全部许可`) : null;
     case "not_mapped": return B("Permits not mapped yet", "尚未梳理许可");
     default: return null;
   }

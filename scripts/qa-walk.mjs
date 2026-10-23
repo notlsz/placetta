@@ -810,6 +810,7 @@ flow("stores", ["sample", "preview"], async w => {
   }
   // the check for stores already open
   await w.go("stores");
+  await w.tap(p.locator(".st-more .pill").filter({ visible: true }).first(), { what: "the stores' More menu" });   // the extra actions sit behind More
   if (await w.tap(new RegExp(w.L("Check stores already open", "检查已开业")), { what: "Check stores already open" })) {
     await w.look("existing-stores check");
     await storeCheck(w, ".sc-panel");
@@ -819,6 +820,7 @@ flow("stores", ["sample", "preview"], async w => {
     }
   }
   await w.go("stores");
+  await w.tap(p.locator(".st-more .pill").filter({ visible: true }).first(), { optional: true });
   if (await w.tap(new RegExp(w.L("Plan many stores", "规划多家")), { optional: true })) { await w.look("plan many stores"); await w.close(); }
 });
 

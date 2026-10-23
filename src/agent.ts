@@ -766,7 +766,10 @@ function match(what: string, where: string): Plan {
   const food = /tea|coffee|caf|restaurant|bak|food|truck|bar|kitchen(?!ware|\s*supply)|juice|boba|奶茶|餐|咖啡|面包|食|饮/i.test(what);
   const w = where.trim() || "your city";
   const steps: Step[] = [
-    S("weaving", `Working out what a ${what.trim().toLowerCase() || "business"} does`, `分析“${what.trim() || "企业"}”的经营内容`),
+    // a business named in a few words ("milk tea shop") reads back in the step; a whole request doesn't
+    what.trim() && what.trim().length <= 40 && !/[.:?]/.test(what)
+      ? S("weaving", `Working out what a ${what.trim().toLowerCase()} needs`, `分析“${what.trim()}”需要哪些许可`)
+      : S("weaving", "Working out what this business needs", "分析这家企业需要哪些许可"),
     S("searching", "Checking federal requirements on irs.gov", "查阅 irs.gov 的联邦要求", "irs.gov"),
     S("searching", "Checking state requirements", "查阅州级要求", isSJ || isFr ? "cdtfa.ca.gov" : undefined),
     isSJ ? S("searching", "Checking Santa Clara County Environmental Health rules", "查阅圣克拉拉县环境卫生局规定", "sccgov.org")

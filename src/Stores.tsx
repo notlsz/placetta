@@ -7,7 +7,7 @@ import { countyOf, stateCode, cityName } from "./counties";
 import { FWW_SOURCE, FWW_THRESHOLD, GRADES_SOURCE, readiness, todayLogs, usLocations, valueOf, type Readiness } from "./stores";
 import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn, inDays } from "./time";
 import { basisLine, openingLine, openingPath, type Evidence } from "./smart";
-import { I, Pill, StatusChip } from "./ui";
+import { I, Menu, Pill, StatusChip } from "./ui";
 import { saveFile } from "./files";
 import { parseStoreList, permitsOnOpening, planCsv, planStores, toWorkspace, type FormStat } from "./plan";
 import * as api from "./cloud/api";
@@ -28,13 +28,14 @@ function jobsAt(ws: Workspace, s: Store) {
   const live = (j: Job) => j.status !== "done" && j.status !== "stopped";
   return { open: mine.filter(live).sort((a, b) => Number(b.status === "waiting") - Number(a.status === "waiting") || b.updated.localeCompare(a.updated)), done: mine.filter(j => !live(j)) };
 }
-/** "Its bot: 1 job needs you", in a line; under the bot's own heading (bare), just "1 job needs you". */
+/** The store's work in a line, in the owner's words: "1 job needs you", "Odelia is on 2 jobs here", "Nothing waiting". */
 function botLine(jobs: Job[], zh: boolean, finished = 0, bare = false) {
   const needs = jobs.filter(j => j.status === "waiting").length, n = jobs.length;
-  if (!n && finished) return bare ? (zh ? `已完成 ${finished} 项工作，暂无进行中的` : `Finished ${finished} job${finished === 1 ? "" : "s"}, nothing open`) : zh ? `这家店的助手已完成 ${finished} 项工作，暂无进行中的` : `Its bot finished ${finished} job${finished === 1 ? "" : "s"} and has nothing open`;
-  if (!n) return bare ? (zh ? "暂无进行中的工作" : "Nothing open") : zh ? "这家店的助手暂无进行中的工作" : "Its bot has nothing open";
-  if (needs) return bare ? (zh ? `${needs} 项工作需要您` : `${needs} job${needs === 1 ? "" : "s"} need${needs === 1 ? "s" : ""} you`) : zh ? `这家店的助手：${needs} 项工作需要您` : `Its bot: ${needs} job${needs === 1 ? "" : "s"} need${needs === 1 ? "s" : ""} you`;
-  return bare ? (zh ? `正在处理 ${n} 项工作` : `On ${n} job${n === 1 ? "" : "s"}`) : zh ? `这家店的助手正在处理 ${n} 项工作` : `Its bot is on ${n} job${n === 1 ? "" : "s"}`;
+  const s = (k: number) => (k === 1 ? "" : "s");
+  if (!n && finished) return bare ? (zh ? `已完成 ${finished} 项，暂无待办` : `${finished} job${s(finished)} done, nothing waiting`) : zh ? `这家店已完成 ${finished} 项工作，暂无待办` : `${finished} job${s(finished)} done here, nothing waiting`;
+  if (!n) return bare ? (zh ? "暂无待办" : "Nothing waiting") : zh ? "这家店暂无待办" : "Nothing waiting on this store";
+  if (needs) return zh ? `${needs} 项工作需要您` : `${needs} job${s(needs)} need${needs === 1 ? "s" : ""} you`;
+  return bare ? (zh ? `正在处理 ${n} 项工作` : `On ${n} job${s(n)}`) : zh ? `Odelia 正在处理这家店的 ${n} 项工作` : `Odelia is on ${n} job${s(n)} here`;
 }
 
 function Ring({ score, band, size = 64 }: { score: number; band: Readiness["band"]; size?: number }) {
@@ -468,11 +469,14 @@ export function Stores() {
   return (
     <div className="page">
       <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p>{b(B("Every store inspection-ready every day, measured on what matters: opening on time, staying open, no fines.", "每家门店每天都做好迎检准备，用三件事衡量：按期开业、持续营业、零罚款。"))}</p></div>
-        <div className="ph-acts">
+        {/* one action in view, the rest behind More: four pills in a row read as clutter, and stack four deep on a phone */}
+        <div className="ph-acts st-acts">
           {stores.length > 0 && <Pill onClick={() => setReport(true)}>{lang === "zh" ? "价值报告" : "Value report"}</Pill>}
-          {cloud?.owner && stores.length > 0 && <Pill onClick={() => openSettings(go, "hq")}>{lang === "zh" ? "与总部共享" : "Share with headquarters"}</Pill>}
-          {!bulk && <Pill onClick={() => setBulk(true)}>{lang === "zh" ? "规划多家门店" : "Plan many stores"}</Pill>}
-          {!check && <Pill onClick={() => setCheck(true)}>{lang === "zh" ? "检查已开业门店" : "Check stores already open"}</Pill>}
+          <Menu className="st-more" buttonClass="pill" label={lang === "zh" ? "更多" : "More"} button={<>{lang === "zh" ? "更多" : "More"}<I.chev /></>} items={[
+            ...(!bulk ? [{ key: "bulk", label: lang === "zh" ? "规划多家门店" : "Plan many stores", onPick: () => setBulk(true) }] : []),
+            ...(!check ? [{ key: "check", label: lang === "zh" ? "检查已开业门店" : "Check stores already open", onPick: () => setCheck(true) }] : []),
+            ...(cloud?.owner && stores.length > 0 ? [{ key: "hq", label: lang === "zh" ? "与总部共享" : "Share with headquarters", onPick: () => openSettings(go, "hq") }] : []),
+          ]} />
         </div></header>
       {report && <ValueReportSheet onClose={() => setReport(false)} />}
       {bulk && <BulkPlan onClose={() => setBulk(false)} />}

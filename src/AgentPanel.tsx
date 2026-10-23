@@ -25,6 +25,7 @@ import { UndoTurn } from "./UndoTurn";
 import { PlanGate } from "./PlanGate";
 import { FilledCard, WithdrawnRow } from "./FilledForm";
 import { planApprovalId } from "./autonomy";
+import { shownPrompt } from "./internalPrompt";
 import { hasReplay } from "./replay";
 import { elapsed, reveal, stepTimes } from "./cloud/runFeed";
 import "./panel-clean.css";
@@ -44,7 +45,7 @@ type Poke = { what: PanelAction; n: number };
 export function AgentPanel({ feed, tts, mode, onHide, asked }: {
   feed: FeedItem[]; tts: Speaker; mode: "dock" | "sheet" | "page"; onHide?: () => void; asked: string[];
 }) {
-  const { t, b, lang, ws, busy, live, go, say: toast } = useApp();
+  const { t, lang, ws, busy, live, go, say: toast } = useApp();
   const zh = lang === "zh";
 
   const scroller = useRef<HTMLDivElement>(null);
@@ -83,7 +84,8 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
         <span className="pn-bot"><LiveBot size={44} busy={busy} task={busy && live ? live.state : undefined} label={t("agentName")} interactive /></span>
         <span className="pn-t">
           <b>{t("agentName")}</b>
-          <small aria-live="polite">{busy && live ? <><em className="pn-verb">{b(taskVerb(live.state))}…</em>{b(live.label)}</> : agencies ? t("idle", { n: agencies }) : t("idleNew")}</small>
+          {/* the live step shows once, in full, in the thread below; the header only says she's on it */}
+          <small>{busy ? <em className="pn-verb">{t("working")}</em> : agencies ? t("idle", { n: agencies }) : t("idleNew")}</small>
         </span>
         {mode !== "page" && <button type="button" className="pn-work" onClick={() => { go("odelia", "work"); if (mode === "sheet") onHide?.(); }}>{t("nav_work")}</button>}
         {onHide && <button type="button" className="icbtn" onClick={onHide} aria-label={t("close")} title={t("close")}><I.x /></button>}
@@ -96,7 +98,7 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
             <p>{lang === "zh" ? "比如：梳理我的许可、本周有什么到期、上传我的租约。您说，我来做；提交、付款和发送都先经您批准。" : "Try: map my permits, what's due this week, or upload your lease. You say it, I do it; nothing is filed, paid or sent without your approval."}</p>
           </div>
         )}
-        {feed.map(m => m.kind === "user" ? <div key={m.id} className="you"><p>{m.text}</p></div>
+        {feed.map(m => m.kind === "user" ? <YouLine key={m.id} text={m.text} />
           : m.kind === "memory" ? <Memory key={m.id} text={m.text} />
             : <TurnView key={m.id} m={m} last={m === last} latest={m === latest} speaking={tts.speaking} onSay={say} asked={askedBefore(feed, m)}
                 onAskPerson={() => setAsking(true)} poke={poke?.turn === m.id ? poke : undefined} />)}
@@ -106,6 +108,13 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
       <div className="pn-dock"><Composer variant="panel" tts={tts} asked={asked} /></div>
     </aside>
   );
+}
+
+/** The person's turn as they typed it. One the app sent for them when they approved a plan shows nothing: the plan's own
+ *  "Approved" row above already says it (src/internalPrompt.ts). */
+function YouLine({ text }: { text: string }) {
+  const s = shownPrompt(text);
+  return s.kind === "line" ? null : <div className="you"><p>{s.text}</p></div>;
 }
 
 /** What the person asked right before a run, for the allowance note on a long job. */
@@ -258,7 +267,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
         {live && cur ? <LiveBot task={cur.state} size={26} label={b(cur.label)} solo />
           : !live && asking ? <span className="wico"><I.pause /></span> : <span className="spark"><I.spark /></span>}
         {live && cur
-          ? <span className="wh-now" aria-live="polite"><b>{b(taskVerb(cur.state))}…</b><small>{b(cur.label)}</small></span>
+          ? <span className="wh-now" aria-live="polite"><b>{b(taskVerb(cur.state))}…</b>{m.steps.length > 0 ? <span className="sr">{b(cur.label)}</span> : <small>{b(cur.label)}</small>}</span>
           : <span>{live ? t("working") : asking ? t("waitingYou") : m.ms ? t("workedFor", { s: Math.max(1, Math.round(m.ms / 1000)) }) : fmtAgo(m.at, lang)}</span>}
         {sinceStart && <span className="wh-time" aria-label={lang === "zh" ? `已用时 ${sinceStart}` : `Working for ${sinceStart}`}>{sinceStart}</span>}
       </div>
