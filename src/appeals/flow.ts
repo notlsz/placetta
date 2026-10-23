@@ -267,7 +267,7 @@ const ABC_AB9418 = "https://abcab.ca.gov/decisions/ab-9000-to-9999/pdf/ab-9418-i
 const SLA_NOTICE = "https://sla.ny.gov/faq-municipalcommunity-board-notices-premises-applicants";
 const SLA_FORM = "https://sla.ny.gov/standardized-notice-form";
 
-export type PrepId = "hearing_request" | "protest_response" | "conditions_offer" | "neighbor_letter" | "community_board" | "evidence_packet" | "attorney_handoff";
+export type PrepId = "hearing_request" | "protest_response" | "conditions_offer" | "neighbor_letter" | "community_board" | "evidence_packet" | "counsel_packet";
 export type Prep = { id: PrepId; title: Bi; does: Bi; says?: string; source?: string; draft: (ap: Appeal, c: AppealCase, x: Ctx) => string };
 
 /** Everything a non-lawyer can lawfully do on a liquor protest or a zoning appeal, in order, each from its source.
@@ -303,7 +303,7 @@ export function prepFor(ap: Appeal): Prep[] {
   if (isLiquor(ap.id) || isZoning(ap.id)) add({ id: "evidence_packet", title: B("Build the evidence packet", "整理证据材料"),
     does: B("Every document on the evidence list, labeled as an exhibit, in one place for the hearing and for counsel", "将证据清单中的每份文件编为证物，集中备用于听证和律师"),
     draft: (a) => evidenceFor(a).map((e, i) => `Exhibit ${String.fromCharCode(65 + i)}: ${e.label.en}`).join("\n") });
-  if (TIERS[ap.id].route === "attorney") add({ id: "attorney_handoff", title: B("Hand the packet to counsel", "将材料交给律师"),
+  if (TIERS[ap.id].route === "attorney") add({ id: "counsel_packet", title: B("Hand the packet to counsel", "将材料交给律师"),
     does: B("Everything above in one message for the attorney who represents you: the decision, the deadline and how it was counted, the request as filed, the protest answers, the conditions offered, the evidence and what's missing", "以上全部材料一次性交给代理您的律师：决定、截止日期及计算方式、已提交的申请、抗议答复、提出的条件、证据及缺少的材料"),
     says: TIERS[ap.id].says, source: TIERS[ap.id].source, draft: (a, c, x) => attorneyHandoff(a, c, x, []).body.join("\n") });
   return steps;

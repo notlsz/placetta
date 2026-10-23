@@ -1575,7 +1575,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           not_a_law_firm: NOT_A_LAW_FIRM.en,
           do_next: [dl && !onCalendar ? `add_deadline ${dl.date} ("Last day: ${ap.name.en}", kind due, application ${a.id})` : "", "explain the reason in plain words", "show both options and let the owner choose",
             `to appeal: appeal_case start for application ${a.id} (it calendars a file-by date with room to spare and asks one question at a time)`,
-            ap.counsel.advised ? "an attorney is advised: appeal_case prepares what the owner may do and the counsel packet (appeal_case handoff); ask who their attorney is if you don't know" : "",
+            ap.counsel.advised ? "an attorney is advised: appeal_case prepares what the owner may do and the counsel packet (appeal_case counsel); ask who their attorney is if you don't know" : "",
             "never file, send or pay anything for the appeal without the owner's approval card"].filter(Boolean),
         };
       },
@@ -1794,18 +1794,18 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
   function appealCaseTool(): Tool {
     return {
       name: "appeal_case",
-      description: "Carry a denial through its appeal, one step at a time, after appeal_options. action: start (the denied application: opens the case, puts the last day and a file-by date a few days earlier on Deadlines, says whether the owner can file it themselves and why, and returns the first question), answer (the owner's answer to the question you asked: question_id and value; returns the next question; ask exactly one question per message, in the owner's language), draft (when the questions are done: the cited letter and the appeal's own application for approval), evidence (attach an uploaded document: item_id and document_id), file (checks it's complete and returns what to call: request_filing_approval for the appeal application, then request_purchase for the fee), status (where it stands with the body, from the daily status checks), hearing (the hearing date and a one-page script), prep (liquor and zoning: the hearing request, protest answers, conditions offer, neighbor letter, community board prep, evidence packet; step to draft one), handoff (the packet for counsel; attorney is their attorney's name and email when known), outcome (granted, granted_with_conditions, denied, withdrawn or settled, as the body decided). Never file, send or pay anything without the owner's approval card; never file where an attorney is advised except the request the rule lets an applicant make; never predict the result or claim a success rate.",
+      description: "Carry a denial through its appeal, one step at a time, after appeal_options. action: start (the denied application: opens the case, puts the last day and a file-by date a few days earlier on Deadlines, says whether the owner can file it themselves and why, and returns the first question), answer (the owner's answer to the question you asked: question_id and value; returns the next question; ask exactly one question per message, in the owner's language), draft (when the questions are done: the cited letter and the appeal's own application for approval), evidence (attach an uploaded document: item_id and document_id), file (checks it's complete and returns what to call: request_filing_approval for the appeal application, then request_purchase for the fee), status (where it stands with the body, from the daily status checks), hearing (the hearing date and a one-page script), prep (liquor and zoning: the hearing request, protest answers, conditions offer, neighbor letter, community board prep, evidence packet; step to draft one), counsel (the packet for counsel; attorney is their attorney's name and email when known), outcome (granted, granted_with_conditions, denied, withdrawn or settled, as the body decided). Never file, send or pay anything without the owner's approval card; never file where an attorney is advised except the request the rule lets an applicant make; never predict the result or claim a success rate.",
       inputSchema: { type: "object", properties: {
-        action: { type: "string", enum: ["start", "answer", "draft", "evidence", "file", "status", "hearing", "prep", "handoff", "outcome"] },
+        action: { type: "string", enum: ["start", "answer", "draft", "evidence", "file", "status", "hearing", "prep", "counsel", "outcome"] },
         case_id: { type: "string" }, application_id: { type: "string", description: "start: the denied application" }, playbook: { type: "string", description: "start: the next playbook an outcome named, when the appeal itself was lost" },
         decision_date: { type: "string", description: "start: YYYY-MM-DD on the decision, when the record doesn't have it" }, reason: { type: "string", description: "start: the agency's reason in its words, when the record doesn't have it" },
         served: { type: "string", enum: ["mail", "hand", "email", "unknown"] },
         question_id: { type: "string" }, value: { description: "answer: the owner's answer (a string, or a list of option ids for a pick-all question)" },
         item_id: { type: "string" }, document_id: { type: "string" },
-        step: { type: "string", enum: ["hearing_request", "protest_response", "conditions_offer", "neighbor_letter", "community_board", "evidence_packet", "attorney_handoff"] },
+        step: { type: "string", enum: ["hearing_request", "protest_response", "conditions_offer", "neighbor_letter", "community_board", "evidence_packet", "counsel_packet"] },
         date: { type: "string", description: "hearing/outcome: YYYY-MM-DD" }, how: { type: "string", description: "hearing: in person, phone, video or online" },
         result: { type: "string", enum: ["granted", "granted_with_conditions", "denied", "withdrawn", "settled"] }, note: { type: "string" },
-        attorney: { type: "string", description: "handoff: their attorney's name and email, when they have one" },
+        attorney: { type: "string", description: "counsel: their attorney's name and email, when they have one" },
       }, required: ["action"] },
       execute(i) {
         const action = str(i.action), today = daysFromNow(0), now = nowIso();
@@ -1895,7 +1895,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
             evidence: evidenceFor(ap).map(e => ({ item_id: e.id, item: e.label[lang], required: e.required, on_file: !!fa?.checklist.find(k => k.id === e.id && k.state === "done") })),
             not_a_law_firm: NOT_A_LAW_FIRM[lang],
             do_next: appId ? `Save the letter with draft_document (content: the letter as given; application_id ${appId}, checklist_item letter) for the owner to read and sign. Ask them to upload the decision letter and any evidence they have, then attach each with appeal_case evidence. Then appeal_case file.`
-              : "Save the letter with draft_document for counsel, then appeal_case handoff." };
+              : "Save the letter with draft_document for counsel, then appeal_case counsel." };
         }
         if (action === "evidence") {
           const fa = filingApp(); if (!fa) throw new Error("Draft the appeal first (appeal_case draft).");
@@ -1916,7 +1916,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           return { case_id: c.id, attached: item.label[lang], still_needed: filingBlockers(now2).missing.map(m => m[lang]) };
         }
         if (action === "file") {
-          if (!mayFile(ap)) throw new Error(`An attorney is advised for ${ap.name.en} (${TIERS[ap.id].why.en}). Placetta doesn't file it: use appeal_case handoff.`);
+          if (!mayFile(ap)) throw new Error(`An attorney is advised for ${ap.name.en} (${TIERS[ap.id].why.en}). Placetta doesn't file it: use appeal_case counsel.`);
           const fa = filingApp(); if (!fa) throw new Error("Draft the appeal first (appeal_case draft).");
           const bl = filingBlockers(fa);
           if (bl.empty.length || bl.missing.length) { mark(); return { ready: false, empty_fields: bl.empty.map(b => b[lang]), missing_documents: bl.missing.map(b => b[lang]), do_next: "Fill or attach what's missing (fill_fields, draft_document, appeal_case evidence), asking the owner in one short list." }; }
@@ -1966,9 +1966,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           c.prep = { ...(c.prep ?? {}), [s.id]: today }; put(c); mark();
           return { case_id: c.id, step: s.id, title: s.title[lang], does: s.does[lang], ...(s.says ? { source_says: s.says, source: s.source } : {}), draft: s.draft(ap, c, x),
             do_next: s.id === "neighbor_letter" || s.id === "protest_response" || s.id === "conditions_offer" ? "Save it with draft_document for the owner to edit, and if it goes to someone, draft_message it for their approval. Nothing is sent before they approve."
-              : s.id === "attorney_handoff" ? "Use appeal_case handoff." : "Save it with draft_document for the owner." };
+              : s.id === "counsel_packet" ? "Use appeal_case counsel." : "Save it with draft_document for the owner." };
         }
-        if (action === "handoff") {
+        if (action === "counsel") {
           const fa = filingApp();
           const ev = evidenceFor(ap).map(e => ({ item: e.label.en, on_file: !!fa?.checklist.find(k => k.id === e.id && k.state === "done") }));
           const to = str(i.attorney, 160) || PARTNER;
@@ -1993,7 +1993,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           return { case_id: c.id, outcome: OUTCOMES[result][lang], decided: date, note, ...(r.next ? { next: { playbook: r.next.id, name: r.next.name[lang], route: r.next.route, last_day: r.next.last_day, days_left: r.next.days_left } } : {}),
             do_next: result === "denied" && r.next ? `Explain plainly what was decided. The next step is ${r.next.name.en}${r.next.last_day ? ` by ${r.next.last_day}` : ""}${r.next.route === "attorney" ? ", and an attorney is advised for it" : ""}: offer to start it with appeal_case start on the original application.` : result.startsWith("granted") ? "Tell the owner plainly, and update the original application's next step (conditions, if any, go on its record)." : "Tell the owner plainly what was recorded." };
         }
-        throw new Error("action must be start, answer, draft, evidence, file, status, hearing, prep, handoff or outcome");
+        throw new Error("action must be start, answer, draft, evidence, file, status, hearing, prep, counsel or outcome");
       },
     };
   }

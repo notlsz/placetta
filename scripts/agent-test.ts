@@ -1891,7 +1891,7 @@ async function appealLiquor() {
         return ask(["draft_document", { title: "Petition and request for hearing", content: o.letter, application_id: o.application_id, checklist_item: "letter", file_name: "abc-petition.docx" }],
           ["appeal_case", { action: "evidence", case_id: caseId, item_id: "decision", document_id: "d-abc" }]); },
       () => ask(["appeal_case", { action: "file", case_id: caseId }]),
-      () => ask(["request_filing_approval", { application_id: "appeal-abc" }], ["appeal_case", { action: "handoff", case_id: caseId }]),
+      () => ask(["request_filing_approval", { application_id: "appeal-abc" }], ["appeal_case", { action: "counsel", case_id: caseId }]),
       () => say("The hearing request is ready for your approval, and the packet is ready for an attorney. Placetta isn't a law firm."),
     ],
   });
@@ -1902,7 +1902,7 @@ async function appealLiquor() {
   const c0 = r.w.appeals?.find(c => c.id === caseId)!;
   ok(c0?.served === "mail" && c0.lastDay === daysFromNow(9) && r.w.deadlines.some(d => d.id === `appeal-abc-${decided}`), "the hearing request deadline: 10 days after ABC mails the notice (B&P 24011), on Deadlines", c0);
   const steps = outs.find(o => Array.isArray(o?.steps))?.steps as { step: string }[];
-  eq(steps?.map(s => s.step), ["hearing_request", "protest_response", "conditions_offer", "neighbor_letter", "evidence_packet", "attorney_handoff"], "everything a non-lawyer may do, in order, then the handoff");
+  eq(steps?.map(s => s.step), ["hearing_request", "protest_response", "conditions_offer", "neighbor_letter", "evidence_packet", "counsel_packet"], "everything a non-lawyer may do, in order, then the handoff");
   const cond = outs.find(o => o?.step === "conditions_offer");
   ok(/Petition for Conditional License/.test(cond?.source_says ?? "") && cond.source === "https://www.abc.ca.gov/form/abc-510" && /shorter hours for alcohol sales; no sales to take away/.test(cond.draft), "the conditions offer: ABC's own words, and the conditions the owner picked", cond);
   ok(/104 N First St|neighbor/i.test(outs.find(o => o?.step === "neighbor_letter")?.draft ?? "") && /Exhibit A/.test(outs.find(o => o?.step === "evidence_packet")?.draft ?? ""), "the neighbor letter and the evidence packet are drafted");

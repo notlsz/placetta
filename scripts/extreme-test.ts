@@ -827,6 +827,7 @@ async function toolMatrix() {
         ["connected_locations", {}], bad("connected_locations", { source: "myspace" }),
         ["company_profile", {}], bad("company_profile", {}),
         ["appeal_options", { application_id: "a1", decision_date: "2026-10-20", reason: "Denied: the plans are missing the grease interceptor." }], bad("appeal_options", { application_id: "a1", decision_date: "20261020" }),
+        ["appeal_case", { action: "start", application_id: "a1", decision_date: "2026-10-20", reason: "Denied: the plans are missing the grease interceptor." }], bad("appeal_case", { action: "answer", case_id: "ghost", question_id: "facts", value: "x" }),
       ),
       c => askAll(
         ["inspection_booking", { action: "plan", store_id: "st1", inspection_id: (c.out("inspection_guide") as { inspections?: { id: string }[] }).inspections?.[0]?.id ?? "" }], bad("inspection_booking", { action: "confirm", store_id: "st1", booking_id: "ghost" }),
