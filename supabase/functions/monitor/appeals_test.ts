@@ -25,11 +25,10 @@ Deno.test("a San Francisco building permit denial: 15 calendar days from the day
   eq(a.appeal?.counsel, false, "the Board says parties needn't have attorneys");
 });
 
-Deno.test("a liquor denial in California asks for the hearing; its deadline isn't confirmed, so the letter decides and counsel is offered", () => {
+Deno.test("a liquor denial in California asks for the hearing within 10 days of mailing (B&P 24011), and counsel is offered", () => {
   const states = new Map<string, unknown>([["w", ws([{ id: "abc", name: "On-sale beer and wine license (Type 41)", agency: "California ABC" }], "100 N First St, San Jose, CA 95113")]]);
   const [a] = agencyAsks([filing({ app_id: "abc", title: b("Beer and wine license"), note: "Denied after protests: undue concentration." })], states, "2026-10-20T12:00:00Z", "2026-10-22");
-  eq(a.appeal?.id, "ca_abc_denial_hearing"); eq(a.appeal?.last_day, null); eq(a.appeal?.counsel, true);
-  ok(/decision letter states the deadline/.test(a.update.body!.en));
+  eq(a.appeal?.id, "ca_abc_denial_hearing"); eq(a.appeal?.last_day, "2026-10-30"); eq(a.appeal?.counsel, true);
   ok(/attorney/.test(a.prompt) && /draft_message/.test(a.prompt));
 });
 
@@ -45,13 +44,13 @@ Deno.test("deadlines: calendar days never roll forward without a rule; business 
   eq(deadlineFor(board.deadline, "2026-10-23T03:00:00Z", board.tz)!.date, "2026-12-01", "3 a.m. UTC is still the 22nd in Los Angeles");
 });
 
-Deno.test("settling a denial puts the deadline on Deadlines once, and only from a confirmed rule", () => {
+Deno.test("settling denials puts each confirmed deadline on Deadlines once", () => {
   const base = normalizeState("Tea", { ...ws([{ id: "bp", name: "Building permit", agency: "SF DBI" }, { id: "abc", name: "Beer and wine license", agency: "California ABC" }], "760 14th St, San Francisco, CA 94114"), deadlines: [] });
   const rows = [{ app_id: "bp", status: "rejected", decided_at: "2026-10-20T23:30:00Z", note: "Denied" }, { app_id: "abc", status: "rejected", decided_at: "2026-10-20T20:00:00Z", note: "Denied" }];
   const w = finishWork(stampFilings(base, rows), "2026-10-22T12:00:00Z") as unknown as { deadlines: { id: string; date: string; title: { en: string } }[] };
   const ap = w.deadlines.filter((d) => d.id.startsWith("appeal-"));
-  eq(ap.map((d) => [d.id, d.date]), [["appeal-bp-2026-10-20", "2026-11-04"]], "the building permit's, not the liquor license's unconfirmed one");
+  eq(ap.map((d) => [d.id, d.date]).sort(), [["appeal-abc-2026-10-20", "2026-10-30"], ["appeal-bp-2026-10-20", "2026-11-04"]], "both rules are confirmed now");
   ok(/Last day to appeal/.test(ap[0].title.en));
   const again = finishWork(w as unknown as Record<string, unknown>, "2026-10-23T12:00:00Z") as unknown as { deadlines: { id: string }[] };
-  eq(again.deadlines.filter((d) => d.id.startsWith("appeal-")).length, 1, "never twice");
+  eq(again.deadlines.filter((d) => d.id.startsWith("appeal-")).length, 2, "never twice");
 });
