@@ -91,6 +91,26 @@ export const valuesOf = (fields: Field[]) => Object.fromEntries(fields.filter(f 
 /** Placetta writes the answers into this form's own PDF (the agency's file, never a Placetta copy). */
 export const fillable = (formId: string) => !!formById(formId)?.fill || !!MAPS[formId];
 
+/** A line with set choices (Yes/No, a box to tick): the answer as the form will take it, or null when no box on the
+ *  form takes it. Decided the way the fill decides (each box's own `if` on the form's map), with an answer that starts
+ *  with a choice ("No, it's an LLC") taken as that choice. A line with no choices, or not on a map, takes anything. */
+export function asChoice(formId: string, lineId: string, value: string): string | null {
+  const line = formById(formId)?.fields.find(f => f.id === lineId);
+  const options = line?.options ?? [];
+  const boxes = MAPS[formId]?.boxes[lineId];
+  // only a form filled by its map decides box by box; the two filled by code (the SS-4, CBP 5106) take free text on
+  // their "Other" lines, and a form Placetta doesn't fill takes whatever the person writes
+  if (!options.length || !boxes?.length) return value;
+  // a listed choice is always an answer, even one that ticks nothing ("Neither")
+  const exact = options.find(c => c.toLowerCase() === value.trim().toLowerCase());
+  if (exact) return exact === value ? value : exact;
+  const takes = (v: string) => boxes.some(b => !("if" in b) || !b.if || new RegExp(b.if, "i").test(v.trim()));
+  if (takes(value)) return value;
+  const low = value.trim().toLowerCase();
+  const lead = options.find(c => low.startsWith(c.toLowerCase()) && !/[a-z0-9]/i.test(low.charAt(c.length)));
+  return lead && takes(lead) ? lead : null;
+}
+
 /** Where the app keeps the agencies' PDFs: /app/forms/ in the app, ./forms/ next to the one-file preview. */
 const FORMS_BASE = import.meta.env?.MODE === "single" ? "forms/" : `${import.meta.env?.BASE_URL ?? "/"}forms/`;
 

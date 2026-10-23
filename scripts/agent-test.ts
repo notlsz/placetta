@@ -3,6 +3,7 @@
    format, the way Claude would. Each scenario checks what the run did to the workspace, what it replied, its steps and
    audit trail, and that errors go back to the model instead of ending the run.
    npm run test:agent */
+import { pairServerTools } from "../src/serverTools";
 import { entityNeed, homeStateOf } from "../src/entityHome";
 import { answerFits, prefillFromProfile } from "../src/filingPlaybooks/fill";
 import { formsFor as formsForReg, segmentOf as segmentOfReg } from "../src/forms/registry";
@@ -224,6 +225,8 @@ const fileOf = (name: string, text: string) => new File([text], name, { type: "t
 
 /* ================================================================== scenarios */
 
+/** A choice line on the SS-4 takes one of its choices (fill_fields refuses anything else). */
+const ss4Choice = (label: string) => formById("irs-ss4")?.fields.find(f => f.options?.length && [f.label.en, `${f.line}: ${f.label.en}`, `Line ${f.line}: ${f.label.en}`].includes(label))?.options?.[0];
 async function mapStore() {
   console.log("\n# Map a new store: add_store, find_official_forms, prepare_application xN, fill_fields, add_deadline, request_filing_approval");
   const { svc } = account();
@@ -239,7 +242,7 @@ async function mapStore() {
         const prepared = c.outs("prepare_application").filter(p => !p.already_in_workspace);
         const ss4 = prepared.find(p => String(p.application_id).includes("employer-identification"))!, fse = prepared.find(p => String(p.application_id).includes("food-service"))!;
         return ask(
-          ["fill_fields", { application_id: ss4.application_id, fields: (ss4.empty_fields as string[]).map(l => ({ label: l, value: real(l) ?? "Lucky Leaf Tea LLC (" + l.slice(0, 12) + ")", source: "From Context" })) }],
+          ["fill_fields", { application_id: ss4.application_id, fields: (ss4.empty_fields as string[]).map(l => ({ label: l, value: ss4Choice(l) ?? real(l) ?? "Lucky Leaf Tea LLC (" + l.slice(0, 12) + ")", source: "From Context" })) }],
           // the form's own label without its "Business:" prefix: used to add a duplicate field and leave the line empty
           ["fill_fields", { application_id: fse.application_id, fields: [{ label: "Legal name and trade name", value: "Lucky Leaf Tea LLC, Lucky Leaf" }, { label: "Premises address", value: "136-20 Roosevelt Ave, Flushing, NY 11354" }, { label: "Owner", value: "Mei Chen" }, { label: "Seats and hours", value: "12 seats, 10am to 10pm" }] }],
           ["add_deadline", { date: "2027-03-01", title: "Planned opening", kind: "due" }],
@@ -3078,6 +3081,58 @@ console.log("\n# Filing playbooks: one call per kind, every store, one question"
   ok(answerFits("Tax ID (Houston, Bellaire Blvd)", "Tax ID", "Houston, Bellaire Blvd", ["Houston, Bellaire Blvd", "Chicago, China Pl"]), "a store's answer fits that store");
   ok(!answerFits("Tax ID (Houston, Bellaire Blvd)", "Tax ID", "Chicago, China Pl", ["Houston, Bellaire Blvd", "Chicago, China Pl"]), "and not another store");
   ok(answerFits("Trade name of business (if different from line 1)", "Line 2: Trade name of business (if different from line 1)", "Irvine"), "a label's own note in parentheses isn't taken for a store");
+}
+
+console.log("\n# A line with set choices takes one of them (fill_fields)");
+{
+  // production probe, 2026-10-23: AP-201 line 8 (merger, Yes/No) was filled "Not applicable: LLC", which no box on the
+  // form matches; it went up for approval and missed the form
+  const w = workspace({ apps: [app("ap201", "draft", { name: B("Texas Sales and Use Tax Permit", "德州销售和使用税许可"), agency: B("Texas Comptroller", "德州主计长"), level: "state", official: "tx-ap201" })] });
+  const r = await agent({ ws: w, prompt: "Fill the AP-201", script: [
+    () => ask(["fill_fields", { application_id: "ap201", fields: [{ label: "8", value: "Not applicable: LLC" }] }]),
+    () => ask(["fill_fields", { application_id: "ap201", fields: [{ label: "Line 8", value: "No, it's an LLC" }] }]),
+    () => say("Filled line 8."),
+  ] });
+  const [first, second] = callNamed(r, "fill_fields");
+  ok(/not_a_choice/.test(first.out) && /"Yes","No"/.test(first.out), "a value that isn't a choice is refused, with the choices", first.out.slice(0, 300));
+  const vals = r.w.apps.find(a => a.id === "ap201")!.fields.map(f => f.value);
+  ok(vals.some(v => /^No\b/.test(v)) && !vals.includes("Not applicable: LLC"), "an answer the form's No box takes is kept", vals);
+  ok(!/not_a_choice/.test(second.out), "and isn't refused", second.out.slice(0, 200));
+}
+
+console.log("\n# Research tools paused mid-turn: every call sends each web lookup with its result (src/serverTools.ts)");
+{
+  // production, 2026-10-23: a web_fetch paused the turn (pause_turn) and a later call was refused with "web_fetch tool
+  // use ... was found without a corresponding web_fetch_tool_result block", which stopped the run
+  const paired = (body: Record<string, unknown>) => {
+    const ms = body.messages as { role: string; content: unknown }[];
+    for (let i = 0; i < ms.length; i++) {
+      if (i > 0 && ms[i].role === "assistant" && ms[i - 1].role === "assistant") return `two assistant messages in a row at ${i}`;
+      if (ms[i].role !== "assistant" || !Array.isArray(ms[i].content) || i === ms.length - 1) continue;
+      const bs = ms[i].content as Block[];
+      for (const b of bs) if (b.type === "server_tool_use" && !bs.some(x => x.type === "web_fetch_tool_result" && x.tool_use_id === b.id)) return `message ${i}: ${b.id} has no result`;
+    }
+    return "";
+  };
+  const fetchUse = (id: string) => ({ type: "server_tool_use", id, name: "web_fetch", input: { url: "https://www.irs.gov/forms-pubs/about-form-ss-4" } });
+  const fetchResult = (id: string) => ({ type: "web_fetch_tool_result", tool_use_id: id, content: { type: "web_fetch_result", url: "https://www.irs.gov/forms-pubs/about-form-ss-4", content: { type: "document", source: { type: "text", media_type: "text/plain", data: "Form SS-4 is used to apply for an EIN." } } } });
+  const r = await agent({ ws: workspace(), prompt: "Do I need an EIN?", script: [
+    () => ({ content: [{ type: "text", text: "Checking the IRS page." }, fetchUse("srvtoolu_1")], stop_reason: "pause_turn" }),
+    () => ({ content: [fetchResult("srvtoolu_1"), ...ask(["set_plan", { note: "EIN first" }]).content], stop_reason: "tool_use" }),
+    () => ({ content: [fetchUse("srvtoolu_2")], stop_reason: "pause_turn" }),
+    () => say("Yes: the IRS issues it on Form SS-4."),
+  ] });
+  const bad = r.bodies.map(paired).filter(Boolean);
+  eq(bad, [], "no call sends a web lookup without its result, or two assistant turns in a row");
+  ok(/SS-4/.test(textOf(r)), "and the run finishes with its answer", textOf(r));
+  // the paused turn being continued keeps its open request: that's what the API carries on from
+  const third = r.bodies[3]?.messages as { role: string; content: Block[] }[] | undefined;
+  ok(third?.at(-1)?.role === "assistant" && third.at(-1)!.content.some(b => b.type === "server_tool_use"), "a paused turn is sent back as it is, to be continued");
+  // a request whose result never came (a broken stream, an old saved run) is dropped rather than sent
+  const fixed = pairServerTools([{ role: "user", content: "q" }, { role: "assistant", content: [fetchUse("lost")] }, { role: "user", content: "next" }]);
+  eq((fixed[1].content as Block[]).some(b => b.type === "server_tool_use"), false, "an orphaned lookup is dropped");
+  const same = [{ role: "user", content: "q" }, { role: "assistant", content: [fetchUse("a"), fetchResult("a")] }];
+  ok(pairServerTools(same) === same, "a conversation that's already right is left as it is");
 }
 
 growthTests(ok, eq);

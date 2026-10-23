@@ -44,6 +44,20 @@ export const CASES: Case[] = [
   { id: "hi-get", form: "hi-bb1", business: "Kapahulu Shave Ice", what: "a shave ice and tea shop", address: "820 Kapahulu Ave, Honolulu, HI 96816", facts: [llc("Kapahulu Shave Ice", "Hawaii"), "EIN 88-9191919", OWNER, "Retail sales from 2026-12-01"] },
 ];
 
+/** What a customer answers when Odelia asks for the rest: the details every license form asks somewhere. */
+export function answersOf(c: Case): string {
+  return [
+    "Here's everything else you might need:",
+    `Mailing address: the same as the store, ${c.address}.`,
+    "Owner's home address: 2150 Lemoine Ave, Apt 4B, Fort Lee, NJ 07024. Owner's date of birth: 1988-04-12. Title: managing member, 100% owner.",
+    "Business email: owner@probe-test.example. Business phone: (917) 555-0142.",
+    "Bank: JPMorgan Chase, business checking. Card processor: Square.",
+    "About 1,500 sq ft, 30 seats, open 10am to 10pm every day. Expected sales about $35,000 a month. 4 employees from 2026-12-01, first payroll 2026-12-15.",
+    "Fiscal year ends December 31, cash basis. No alcohol, tobacco, vapor products, motor fuel or amusement machines. Not run from a home. No other locations in this state. No previous permits, no merger, not buying an existing business. No representatives or agents.",
+    "For any other yes/no line that doesn't apply to us, the answer is No. Fill it all in and put it up for my approval.",
+  ].join("\n");
+}
+
 /** What Odelia is asked, as a customer would put it. */
 export function promptOf(c: Case, title: string): string {
   return [

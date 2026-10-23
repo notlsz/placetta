@@ -23,7 +23,7 @@
    --json file  --md file. Exits 1 when anything failed. */
 import { readFileSync, writeFileSync } from "node:fs";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { CASES, promptOf, type Case } from "./cases";
+import { answersOf, CASES, promptOf, type Case } from "./cases";
 import { formById } from "../../src/forms/registry";
 import { fillForm, loaderWith, type LoadPdf } from "../../src/forms/fill";
 import { readBack } from "../../src/forms/readback";
@@ -148,8 +148,8 @@ async function call(fn: string, body: unknown, auth: { jwt?: string; monitor?: b
 
 type RunRow = { id: string; status: string; reply: { text?: { en: string; zh: string }[] } | null; error: string | null; cost_usd?: number | null };
 /** Starts a run as this member and waits for it to finish (including any store runs it split into). */
-async function ask(p: Person, ws: string, prompt: string, lang: "en" | "zh" = "en", minutes = 9): Promise<{ run?: RunRow; status: number; error?: string }> {
-  const r = await call("agent-run", { action: "start", workspace_id: ws, prompt, lang }, { jwt: p.jwt });
+async function ask(p: Person, ws: string, prompt: string, lang: "en" | "zh" = "en", minutes = 9, history: { role: "user" | "assistant"; content: string }[] = []): Promise<{ run?: RunRow; status: number; error?: string }> {
+  const r = await call("agent-run", { action: "start", workspace_id: ws, prompt, lang, ...(history.length ? { history } : {}) }, { jwt: p.jwt });
   if (r.status !== 202 || typeof r.json.id !== "string") return { status: r.status, error: JSON.stringify(r.json).slice(0, 300) };
   const id = r.json.id, end = Date.now() + minutes * 60_000;
   while (Date.now() < end) {
@@ -246,16 +246,25 @@ async function license(c: Case): Promise<Result> {
     const form = formById(c.form);
     if (!ok("the form is in the registry", form, c.form)) return r;
     const p = await person(c.id), ws = await workspace(p, c.business);
-    const a = await ask(p, ws, promptOf(c, `${form!.title.en} (${form!.form.split(" (")[0]})`), c.lang ?? "en");
+    const first = promptOf(c, `${form!.title.en} (${form!.form.split(" (")[0]})`);
+    const a = await ask(p, ws, first, c.lang ?? "en");
     r.run = a.run?.id; r.reply = replyText(a.run).slice(0, 1200); r.cost = Number(a.run?.cost_usd ?? 0) || undefined;
     if (!ok("Odelia's run finishes", a.run?.status === "done", a.error ?? a.run?.error ?? a.run?.status)) return r;
-    const w = await load(ws);
+    let w = await load(ws);
     const want = [c.form, ...(c.alt ?? [])];
-    const app = w.apps.find((x) => x.official && want.includes(x.official));
+    let app = w.apps.find((x) => x.official && want.includes(x.official));
     if (!ok("the plan has the right official form", app, `forms in plan: ${w.apps.map((x) => x.official ?? x.name.en).join(", ")}`)) return r;
     const words = r.reply!.split(/\s+/).filter(Boolean).length;
     ok("the reply is short (under 220 words)", words <= 220, `${words} words`);
-    const ap = w.approvals.find((x) => x.kind === "file" && x.app === app!.id);
+    let ap = w.approvals.find((x) => x.kind === "file" && x.app === app!.id);
+    if (!ap) {
+      // she asked for what the form still needs: answer the way a customer would, in the same conversation
+      const b = await ask(p, ws, answersOf(c), c.lang ?? "en", 9, [{ role: "user", content: first }, { role: "assistant", content: replyText(a.run) }]);
+      r.reply += `\n--- after the answers ---\n${replyText(b.run).slice(0, 1200)}`; r.cost = (r.cost ?? 0) + (Number(b.run?.cost_usd ?? 0) || 0);
+      if (!ok("the follow-up run finishes", b.run?.status === "done", b.error ?? b.run?.error ?? b.run?.status)) return r;
+      w = await load(ws); app = w.apps.find((x) => x.id === app!.id) ?? app;
+      ap = w.approvals.find((x) => x.kind === "file" && x.app === app!.id);
+    }
     if (!ok("an approval card is up for it", ap, `cards: ${w.approvals.map((x) => `${x.kind}:${x.app ?? ""}`).join(", ") || "none"}; status ${app!.status}`)) return r;
     const empty = app!.fields.filter((x) => !x.value.trim()).map((x) => x.label.en);
     ok("every line on the card has an answer", !empty.length, empty.join(", "));

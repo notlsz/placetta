@@ -34,6 +34,7 @@ import { commandNote, emptyOut, memoryTools, scopeNames, systemFor, using, type 
 import { usedFor } from "./odeliaMemory/retrieve";
 import { addCall, cacheUse, emptyStats, type CacheStats } from "./odeliaMemory/cache";
 import { shape } from "./odeliaMemory/processors";
+import { pairServerTools } from "./serverTools";
 
 /* ------------------------------------------------------------------ *
  * The agent's tool loop as the server runs it: the same tools and
@@ -479,11 +480,12 @@ export async function runRounds(o: {
   const system = shaped.system;
   /** The conversation as each call sends it: through the processors (src/odeliaMemory/processors.ts). The run keeps the
    *  whole conversation; the important lines of turns folded away are kept for the brief's proposals. */
+  // every call's conversation with the research tools' requests paired with their results (src/serverTools.ts)
   const context = () => {
-    if (o.memory?.processors === false) return st.messages;
+    if (o.memory?.processors === false) return pairServerTools(st.messages);
     const s = shape(st.messages, o.memory?.processors || {});
     for (const f of s.flushed) if (!memOut.flushed.includes(f.line)) memOut.flushed = [...memOut.flushed, f.line].slice(-40);
-    return s.messages;
+    return pairServerTools(s.messages);
   };
   const counted = (data: { usage?: unknown; model?: unknown }) => { st.cache = addCall(st.cache ?? emptyStats(), cacheUse(data.usage as Record<string, unknown> | undefined), shaped.prefix); };
   const sources = new Map(st.sources.map(s => [s.url, s]));

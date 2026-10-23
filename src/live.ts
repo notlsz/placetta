@@ -13,7 +13,7 @@ import { canFill } from "./forms/canFill";
 import { addressProblems, checkAddress, formState, RULE_LABEL } from "./forms/addressCheck";
 import { ADDRESS_RULES } from "./forms/address-rules/index";
 import type { AddressCheck } from "./forms/addressCheck";
-import { loaderWith, type LoadPdf } from "./forms/fill";
+import { asChoice, BY_HAND, loaderWith, type LoadPdf } from "./forms/fill";
 import { answersHash, fillAndRead, formName, formOf, latestVersion, problemsOf, type FilledCopy } from "./forms/versions";
 
 /* An address the agency doesn't accept on a line, as a tool tells the model: what's wrong, what the agency accepts,
@@ -683,8 +683,21 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const lineLabel = (f: Field) => { const id = lineOf(f); return a.fields.find(y => y.id === id)?.label.en ?? off?.fields.find(o => o.id === id)?.label.en ?? ""; };
         const secrets = given.filter(f => secretNumber(`${f.label.en} ${lineLabel(f)}`, f.value));
         const kept = secrets.length ? { not_stored: secrets.map(f => f.label.en), why_not_stored: SECRET_WHY } : {};
-        const incoming = given.filter(f => !refused.some(x => x.f === f) && !secrets.includes(f));
-        if (!incoming.length && (refused.length || secrets.length)) { mark(); return { filled: 0, ...kept, ...(refused.length ? { address_not_filled: refused.map(x => addrOut(off!.id, x.id!, x.f.value, x.c!)), do_next: ADDR_NEXT } : {}) }; }
+        // a line with set choices (Yes/No, a box to tick) takes one of them: "No, it's an LLC" becomes "No"; anything
+        // that isn't a choice stays off, with the choices, rather than going up for approval and missing the form
+        const choiceOf = (f: Field) => { const id = lineOf(f); return id ? off?.fields.find(o => o.id === id && o.options?.length) : undefined; };
+        const offChoice: { line: string; label: string; value: string; choices: string[] }[] = [];
+        const chosen = given.map(f => {
+          const o = choiceOf(f);
+          if (!o || secrets.includes(f) || isBlank(f.value) || BY_HAND.test(f.value.trim())) return f;
+          const hit = asChoice(off!.id, o.id, f.value);
+          if (hit !== null) return hit === f.value ? f : { ...f, value: hit };
+          offChoice.push({ line: o.line, label: o.label.en, value: f.value.trim(), choices: o.options! });
+          return null;
+        });
+        const notChoice = offChoice.length ? { not_a_choice: offChoice, fix_choice: "Fill each of these again with one of its choices, word for word. A line that doesn't apply to this business takes the choice that says so (usually No)." } : {};
+        const incoming = chosen.filter((f): f is Field => !!f && !refused.some(x => x.f === f) && !secrets.includes(f));
+        if (!incoming.length && (refused.length || secrets.length || offChoice.length)) { mark(); return { filled: 0, ...kept, ...notChoice, ...(refused.length ? { address_not_filled: refused.map(x => addrOut(off!.id, x.id!, x.f.value, x.c!)), do_next: ADDR_NEXT } : {}) }; }
         const added: string[] = [];
         S("shaping", L(`Filling ${incoming.length} field${incoming.length === 1 ? "" : "s"} on the ${nm(a)}`, `填写${nm(a)}的 ${incoming.length} 项`), a.source.label || undefined);
         apply(w => ({ ...w, apps: w.apps.map(x => {
@@ -727,7 +740,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const now = get().apps.find(x => x.id === a.id)!;
         // a US agency's form prints English letters only: say so now, not first at approval
         const cjk = off && (!off.currency || off.currency === "USD") ? given.filter(f => /[㐀-鿿豈-﫿]/.test(f.value)).map(f => f.label) : [];
-        return { status: now.status, still_empty: now.fields.filter(f => isBlank(f.value)).map(f => f.label.en), ...kept,
+        return { status: now.status, still_empty: now.fields.filter(f => isBlank(f.value)).map(f => f.label.en), ...kept, ...notChoice,
           ...(cjk.length ? { not_in_english: cjk, fix_now: "A US agency's form takes English letters only: fill these lines again in English, with no Chinese characters (not even in parentheses), or approval refuses them." } : {}), ...(refused.length ? { address_not_filled: refused.map(x => addrOut(off!.id, x.id!, x.f.value, x.c!)), do_next: ADDR_NEXT } : {}), ...(added.length ? { added_as_new_fields: added, ...(off ? { note: "These matched no line on the official form. If you meant an existing line, fill it by its label or line number." } : {}) } : {}),
           ...(also ? { also_filled_on: `${also} other open application${also === 1 ? "" : "s"}${x.asked ? "" : ", and saved to Context"}` } : {}),
           ...(x.asked && wide.length ? { not_saved_to_context: `This came from outside the app, so Context (the business facts) didn't change. To keep ${wide.map(f => SHARED[f.id][0].en).join(", ")} there, use remember: it asks an owner to confirm in the app.` } : {}) };
