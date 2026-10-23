@@ -352,7 +352,10 @@ async function servicesFor(ws: string, run: Run, token: string | null): Promise<
 /** The agencies' PDFs this instance already fetched, by file name (they're the same for everyone). */
 const PDFS = new Map<string, Uint8Array>();
 async function sitePdf(file: string): Promise<Uint8Array | null> {
-  if (file.startsWith("pdf/") || !/^[\w.-]+\.pdf$/.test(file)) return null;
+  // the two the app keeps with its code (src/forms/pdf: the SS-4 and CBP 5106) are on the site as /app/forms/<name>.pdf
+  // too; the server fetches them like the rest rather than carrying them in its bundle (the 5 MB deploy limit)
+  if (file.startsWith("pdf/")) file = file.slice(4);
+  if (!/^[\w.-]+\.pdf$/.test(file)) return null;
   const had = PDFS.get(file);
   if (had) return had;
   let bytes: Uint8Array | null = null;
