@@ -1,5 +1,5 @@
 // oauth-callback: the redirect URI for every provider. Deployed with verify_jwt off; it trusts only its own signed state.
-// GET ?code&state (&realmId for QuickBooks, &error when the user declined).
+// GET ?code&state (&realmId for QuickBooks, &merchant_id for Clover, &shop&hmac for Shopify, &error when the user declined).
 // It exchanges the code and parks the tokens in oauth_pending. It does not connect anything: the app finishes
 // the connection with integrations {action: "finish", id} as the signed-in user, which binds it to that user.
 // Always ends in a 302 back to the app: ?connect_finish=<id>&kind=<kind>, or ?connect_error=<short code>.
@@ -77,10 +77,10 @@ Deno.serve(async (req) => {
 
   let ex;
   try {
-    ex = await exchangeCode(kind, code, q.get("realmId"));
+    ex = await exchangeCode(kind, code, q.get("realmId"), q);
   } catch (e) {
     if (e instanceof HttpError) {
-      const short = e.code === "not_configured" ? "not_configured" : e.message === "missing_realm" ? "missing_realm" : e.message === "no_webhook" ? "no_webhook" : "token_exchange";
+      const short = e.code === "not_configured" ? "not_configured" : ["missing_realm", "no_webhook", "bad_signature", "missing_merchant"].includes(e.message) ? e.message : "token_exchange";
       console.error(`${kind} code exchange failed:`, short);
       return fail(short);
     }

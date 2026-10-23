@@ -40,7 +40,7 @@ export type Scope = "read" | "plan" | "write" | "draft" | "send" | "file" | "pay
 export const TOOL_SCOPES: Record<string, Scope> = {
   find_official_forms: "read", plan_markets: "read", network_lessons: "read", skill_read: "read", memory_search: "read", search_past_chats: "read", show_licenses: "read", memory_recall: "read",
   city_records: "read", check_progress: "read", address_rules: "read", inspection_guide: "read", appeal_options: "read", search_email: "read", read_email: "read",
-  find_files: "read", get_income: "read", get_sales: "read", get_staff: "read", read_comments: "read",
+  find_files: "read", get_income: "read", get_sales: "read", get_staff: "read", read_comments: "read", connected_locations: "read", company_profile: "read",
   // src/toolIntent.ts: offers more of the run's own tools; changes nothing
   load_tools: "read",
   set_plan: "plan", hand_off: "plan", split_job: "plan",

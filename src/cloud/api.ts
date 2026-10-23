@@ -84,7 +84,7 @@ export const planOf = (b: Billing | null): Plan =>
   !b ? "none" : b.free || b.comped || b.subscription_status === "active" || b.subscription_status === "trialing" ? "monthly" : b.price_model === "simple" ? "simple" : b.entry_markets > 0 ? "entry" : "none";
 export type DocRow = { id: string; workspace_id: string; app_id: string | null; filing_id: string | null; name: string; path: string; size: number; mime: string | null; source: string; created_at: string };
 export type Integration = { id: string; kind: IntegrationKind; account: string | null; status: "connected" | "error"; error: string | null; meta: Record<string, unknown>; connected_at: string; last_used_at: string | null };
-export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "slack_bot" | "lark_bot" | "wechat_bot" | "square" | "toast" | "webhook";
+export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "slack_bot" | "lark_bot" | "wechat_bot" | "square" | "toast" | "webhook" | "gbp" | "clover" | "shopify" | "xero" | "dropbox_sign";
 /** Team chats linked by pasting a group's incoming-webhook link. */
 export type HookKind = "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "webhook";
 /** The business's own Slack or Lark bot, or its own WeChat Official Account: talk to Odelia there. */
@@ -93,7 +93,8 @@ export type BotKind = "slack_bot" | "lark_bot" | "wechat_bot";
  *  EncodingAESKey to use and any server addresses to whitelist. */
 export type BotSetup = { events_url: string; manifest?: string; token?: string; aes_key?: string; ips?: string[] };
 /** Which sign-in connections the server can offer now. */
-export type Availability = { google: boolean; microsoft: boolean; dropbox: boolean; quickbooks: boolean; slack: boolean; square: boolean; toast: boolean };
+export type Availability = { google: boolean; microsoft: boolean; dropbox: boolean; quickbooks: boolean; slack: boolean; square: boolean; toast: boolean;
+  gbp?: boolean; clover?: boolean; shopify?: boolean; xero?: boolean; dropbox_sign?: boolean };
 /** A member's own WeChat link to the workspace's WeChat Official Account. */
 export type WechatLink = { connected: boolean; linked: boolean; linked_at: string | null; waiting: boolean };
 export type AgencyLogin = { id: string; agency: string; url: string | null; username: string; note: string | null; created_at: string; last_opened_at: string | null };
@@ -891,7 +892,13 @@ export const toastCode = (ws: string) => integration<{ code: string }>(ws, "toas
 export type SpendState = { policy: import("../spend.ts").SpendPolicy; purchases: import("../spend.ts").Purchase[] };
 export const spend = <T>(ws: string, action: string, body: Record<string, unknown> = {}) => fn<T>("spend", { workspace_id: ws, action, ...body });
 export const spendGet = (ws: string) => (PREVIEW ? Promise.resolve(null) : spend<SpendState>(ws, "get").catch(() => null));
-export const connectUrl = (ws: string, kind: IntegrationKind) => integration<{ url: string }>(ws, "connect", { kind, return_to: appHome() });
+export const connectUrl = (ws: string, kind: IntegrationKind, extra: { shop?: string } = {}) => integration<{ url: string }>(ws, "connect", { kind, return_to: appHome(), ...extra });
+/** E-signature with the business's own Dropbox Sign account: connect with its API key, send a document from Documents
+ *  for signature (an owner's click is the approval), and read where each signer stands. */
+export type SignRequest = { id: string; title: string; complete: boolean; declined: boolean; signers: { email: string; status: string; signed_at: string | null }[] };
+export const esignConnect = (ws: string, api_key: string) => integration<{ kind: "dropbox_sign"; account: string | null }>(ws, "esign_connect", { api_key });
+export const esignSend = (ws: string, o: { path: string; title: string; message?: string; signers: { name: string; email: string }[] }) => integration<{ request: SignRequest; test_mode: boolean }>(ws, "esign_send", o);
+export const esignStatus = (ws: string, id: string) => integration<{ request: SignRequest }>(ws, "esign_status", { id });
 
 /* ------------------------------ agency logins ------------------------------ */
 

@@ -23,6 +23,7 @@ import { CostLine } from "./CostToOpen";
 /* Team review: the review table, comments on documents, and the Mine filter (src/ReviewTable.tsx, src/Comments.tsx) */
 import { hasReview, PermitsReview } from "./ReviewTable";
 import { CommentsButton, MineToggle, useTeam, type Collab } from "./Comments";
+import { SignButton } from "./SignDoc";
 import { shortName } from "./collab";
 
 /** What the Mine filter keeps: an application or job assigned to this person, or a job about one that is. */
@@ -537,7 +538,7 @@ export function Documents() {
           <input ref={input} type="file" multiple hidden onChange={e => { const fs = Array.from(e.target.files ?? []); e.target.value = ""; if (fs.length) upload("", "", fs); }} />
         </div>
       </div>
-      {docs.length ? <div className="files grid">{docs.map(d => <FileCard key={d.id} d={d} extra={<CommentsButton item={{ kind: "doc", id: d.id }} title={{ en: d.name, zh: d.name }} />} />)}</div> : <p className="quiet tab-empty">{t("empty")}</p>}
+      {docs.length ? <div className="files grid">{docs.map(d => <FileCard key={d.id} d={d} extra={<><CommentsButton item={{ kind: "doc", id: d.id }} title={{ en: d.name, zh: d.name }} /><SignButton d={d} /></>} />)}</div> : <p className="quiet tab-empty">{t("empty")}</p>}
     </div>
   );
 }

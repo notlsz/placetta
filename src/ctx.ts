@@ -46,7 +46,9 @@ export type CloudCtx = {
   /** The simple model's store plan for every store, billed yearly (the renewal terms agreed to next to the button). */
   startPlan(stores: number): Promise<void>;
   buyPack(): Promise<void>;
-  connect(kind: IntegrationKind): Promise<void>;
+  connect(kind: IntegrationKind, extra?: { shop?: string }): Promise<void>;
+  /** Dropbox Sign: the business's own API key, checked before it's kept. */
+  connectSign(apiKey: string): Promise<boolean>;
   disconnect(kind: IntegrationKind): Promise<void>;
   /** Link a team chat by its webhook link; true once the test message went through. */
   connectHook(kind: import("./cloud/api").HookKind, url: string, secret?: string): Promise<boolean>;

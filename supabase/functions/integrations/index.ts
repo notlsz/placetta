@@ -33,6 +33,7 @@ import {
 import {
   authorizeUrl,
   Conn,
+  cloverApi,
   creds,
   dropSecret,
   findIntegration,
@@ -42,7 +43,9 @@ import {
   NAMES,
   PROVIDER,
   qbApiBase,
+  readBundle,
   revoke,
+  SHOPIFY_VERSION,
   SQUARE_VERSION,
   squareBase,
   toastBase,
@@ -54,6 +57,8 @@ import { type WechatBot, wxCredsWork, wxKeyBytes, wxNewSecrets, type WxTokenProb
 import { wechatBundle } from "../_shared/wechat_db.ts";
 import { type Call, lastFullMonth, monthsBetween, PosError, type SavedToken, squareSales, squareStaff, type ToastCtx, toastMatches, toastPlace, type ToastPlace, toastSales, toastStaff, toastTokens } from "./pos.ts";
 import { mayRead, READ_REFUSED } from "./access.ts";
+import { cloverPlaces, gbpPlaces, type Place, shopifyPlaces, squarePlaces, xeroProfile } from "./places.ts";
+import { checkSend, dsAccount, dsSend, dsStatus, SignError } from "./esign.ts";
 import { MCP_ACTIONS, mcpFinish, mcpRemote } from "./mcp.ts";
 import { MCP_OWNER_ACTIONS } from "./mcp_rules.ts";
 
@@ -1198,19 +1203,28 @@ const available: Action = async () => {
     square: oauth && has("SQUARE_CLIENT_ID", "SQUARE_CLIENT_SECRET"),
     // Toast has no redirect: Placetta's partner credentials are enough
     toast: has("TOAST_CLIENT_ID", "TOAST_CLIENT_SECRET"),
+    // Google approves each project for the Business Profile APIs on request: offered only once GBP_API_APPROVED is set
+    gbp: oauth && has("GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET") && Deno.env.get("GBP_API_APPROVED") === "1",
+    clover: oauth && has("CLOVER_APP_ID", "CLOVER_APP_SECRET"),
+    shopify: oauth && has("SHOPIFY_CLIENT_ID", "SHOPIFY_CLIENT_SECRET"),
+    xero: oauth && has("XERO_CLIENT_ID", "XERO_CLIENT_SECRET"),
+    // the business's own API key: nothing of Placetta's to register
+    dropbox_sign: true,
   });
 };
 
 // ------------------------------------------------------------------ connect, disconnect, feed
 
 const connect: Action = async (c) => {
-  const kind = kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack", "square"]);
+  const kind = kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack", "square", "gbp", "clover", "shopify", "xero"]);
   creds(PROVIDER[kind]);
+  // Shopify signs in on the store's own address, which the owner types
+  const shop = kind === "shopify" ? String(c.body.shop ?? "").trim().toLowerCase() : undefined;
   const origins = appOrigins();
   if (!origins.length) throw new HttpError("not_configured", "OAuth is not configured. Set APP_ORIGINS.");
   const ret = allowedReturn(c.body.return_to, origins) ?? `${origins[0]}/`;
   const state = await signState({ ws: c.ws, uid: c.user.id, kind, ret });
-  return ok({ url: authorizeUrl(kind, state) });
+  return ok({ url: authorizeUrl(kind, state, { shop }) });
 };
 
 // ------------------------------------------------------------------ finish: bind a pending OAuth connection to its user
@@ -1306,7 +1320,7 @@ const finish: Action = async (c) => {
 };
 
 const disconnect: Action = async (c) => {
-  const kind = (isHookKind(c.body.kind) || isBotKind(c.body.kind) ? c.body.kind : kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack", "square", "toast"])) as Kind;
+  const kind = (isHookKind(c.body.kind) || isBotKind(c.body.kind) ? c.body.kind : kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack", "square", "toast", "gbp", "clover", "shopify", "xero", "dropbox_sign"])) as Kind;
   const name = isBotKind(kind) ? BOT_NAMES[kind as BotKind] : isHookKind(kind) ? HOOK_NAMES[kind as HookKind] : NAMES[kind];
   const row = await findIntegration(c.ws, kind);
   if (!row) throw new HttpError("not_found", `${name.en} is not connected.`);
@@ -1344,6 +1358,92 @@ const feedUrl: Action = async (c) => {
   return ok({ url: `${SUPABASE_URL}/functions/v1/calendar-feed?t=${enc(data)}` });
 };
 
+// ------------------------------------------------------------------ store locations, the company's profile, e-signature
+
+/** Where store locations come from: Google Business Profile, Clover, Shopify, Square (places.ts). */
+const PLACE_KINDS: Kind[] = ["gbp", "clover", "shopify", "square"];
+
+/** The business's store locations from every connected app that keeps them (or the one asked for): name, address,
+ *  phone and, from Google Business Profile, regular hours. Read only. An owner, or the member who connected the app. */
+const placesRead: Action = async (c) => {
+  const only = c.body.source === undefined || c.body.source === null || c.body.source === "" ? null : kindParam(c.body.source, PLACE_KINDS);
+  const rows = (await listIntegrations(c.ws, only ? [only] : PLACE_KINDS)).filter((r) => mayRead(c.access, r, c.user.id));
+  if (!rows.length) throw new HttpError("not_connected", "Connect Google Business Profile, Clover, Shopify or Square in Settings.", "请在设置中连接 Google 商家资料、Clover、Shopify 或 Square。");
+  const places: Place[] = [], read: string[] = [], failed: string[] = [];
+  for (const row of rows) {
+    try {
+      const conn = await Conn.fromRow(row);
+      const call: Call = (url, init) => conn.call(url, init ?? {}, 30000);
+      if (row.kind === "gbp") places.push(...await gbpPlaces(call));
+      else if (row.kind === "clover") places.push(...await cloverPlaces(call, row.meta?.env === "sandbox" ? "https://apisandbox.dev.clover.com" : cloverApi(), String(row.meta?.merchant_id ?? "")));
+      else if (row.kind === "shopify") places.push(...await shopifyPlaces(call, String(row.meta?.shop ?? ""), SHOPIFY_VERSION()));
+      else if (row.kind === "square") places.push(...await squarePlaces(call, squareBaseOf(conn), SQUARE_VERSION()));
+      read.push(NAMES[row.kind].en);
+    } catch (e) {
+      if (rows.length === 1) posFail(e);
+      console.error(`${row.kind} places failed:`, e instanceof Error ? e.message.slice(0, 80) : "");
+      failed.push(NAMES[row.kind].en);
+    }
+  }
+  return ok({ places: places.slice(0, 200), read, ...(failed.length ? { failed } : {}) });
+};
+
+/** The company's own record in Xero: legal name, addresses, phone, tax and registration numbers. Read only. */
+const companyProfile: Action = async (c) => {
+  const conn = await openToRead(c, "xero");
+  const tenant = String(conn.row.meta?.tenant_id ?? "");
+  if (!/^[0-9a-f-]{36}$/i.test(tenant)) throw new HttpError("not_connected", "Reconnect Xero in Settings.", "请在设置中重新连接 Xero。");
+  try {
+    return ok({ profile: await xeroProfile((url, init) => conn.call(url, init ?? {}, 30000), tenant) });
+  } catch (e) { posFail(e); }
+};
+
+function signFail(e: unknown): never {
+  if (e instanceof SignError) throw new HttpError(e.status === 400 ? "bad_request" : e.status === 401 ? "not_connected" : "upstream_error", e.message, e.zh);
+  throw e;
+}
+/** The business's Dropbox Sign API key, from the vault. */
+async function signKey(ws: string): Promise<{ key: string; row: NonNullable<Awaited<ReturnType<typeof findIntegration>>> }> {
+  const row = await findIntegration(ws, "dropbox_sign");
+  const key = row ? (await readBundle(row.secret_id))?.access_token ?? "" : "";
+  if (!row || !key) throw new HttpError("not_connected", "Connect Dropbox Sign in Settings.", "请在设置中连接 Dropbox Sign。");
+  return { key, row };
+}
+const signTest = () => Deno.env.get("DROPBOX_SIGN_TEST_MODE") === "1";
+
+/** Connect Dropbox Sign with the business's own API key (Dropbox Sign, Settings, API). Checked before it's kept. Owners. */
+const esignConnect: Action = async (c) => {
+  const key = typeof c.body.api_key === "string" ? c.body.api_key.trim() : "";
+  if (!/^[A-Za-z0-9]{32,128}$/.test(key)) throw new HttpError("bad_request", "Paste the API key from Dropbox Sign: Settings, API.", "请粘贴 Dropbox Sign 的 API 密钥：设置 → API。");
+  let account: string | null = null;
+  try { account = await dsAccount(fetch, key); } catch (e) { signFail(e); }
+  const old = await findIntegration(c.ws, "dropbox_sign");
+  const secret = await writeBundle({ access_token: key, refresh_token: null, expires_at: null, token_type: "api_key" }, `integration:dropbox_sign:${c.ws}`, old?.secret_id ?? null);
+  const { error } = await admin.from("integrations").upsert({ workspace_id: c.ws, kind: "dropbox_sign", account, scopes: "api_key", status: "connected", error: null, secret_id: secret, meta: { via: "api_key" }, connected_by: c.user.id, connected_at: new Date().toISOString() }, { onConflict: "workspace_id,kind" });
+  if (error) throw new Error(`integration upsert failed: ${error.code ?? ""}`);
+  await audit({ ...you(c), action: { en: "Connected Dropbox Sign", zh: "已连接 Dropbox Sign" }, object: NAMES.dropbox_sign, detail: account ? same(account) : null });
+  return ok({ kind: "dropbox_sign", account });
+};
+
+/** Send one document from Documents for signature. An owner's click is the approval; nothing goes out otherwise. */
+const esignSend: Action = async (c) => {
+  const { key } = await signKey(c.ws);
+  const [file] = await loadAttachments(c.ws, [{ path: c.body.path }]);
+  const title = text(c.body.title, "title", 1, 200);
+  try {
+    const signers = checkSend({ title, signers: c.body.signers, file });
+    const st = await dsSend(fetch, key, { title, subject: optText(c.body.subject, "subject", 200) ?? undefined, message: optText(c.body.message, "message", 2000) ?? undefined, signers, file, test: signTest() });
+    await audit({ ...you(c), action: { en: `Sent ${file.name} for signature with Dropbox Sign`, zh: `已通过 Dropbox Sign 发送 ${file.name} 签署` }, object: NAMES.dropbox_sign, detail: same(signers.map((x) => x.email).join(", ")) });
+    return ok({ request: st, test_mode: signTest() });
+  } catch (e) { signFail(e); }
+};
+
+/** Where a signature request stands: each signer's status and when they signed. */
+const esignStatus: Action = async (c) => {
+  const { key } = await signKey(c.ws);
+  try { return ok({ request: await dsStatus(fetch, key, typeof c.body.id === "string" ? c.body.id : "") }); } catch (e) { signFail(e); }
+};
+
 // ------------------------------------------------------------------ router
 
 const ACTIONS: Record<string, Action> = {
@@ -1368,6 +1468,11 @@ const ACTIONS: Record<string, Action> = {
   toast_connect: toastConnect,
   pos_sales: posSales,
   pos_staff: posStaff,
+  places_read: placesRead,
+  company_profile: companyProfile,
+  esign_connect: esignConnect,
+  esign_send: esignSend,
+  esign_status: esignStatus,
   available,
   feed_url: feedUrl,
   ...MCP_ACTIONS,
@@ -1375,7 +1480,7 @@ const ACTIONS: Record<string, Action> = {
 
 /** What only an owner can do: connect or disconnect an account, send mail or Slack posts as the business, and read
  *  sales and staff from Square or Toast. */
-const OWNER_ONLY = new Set<Action>([connect, disconnect, mailSend, slackPost, hookConnect, botSetup, botConnect, toastSetup, toastConnect, posSales, posStaff,
+const OWNER_ONLY = new Set<Action>([connect, disconnect, mailSend, slackPost, hookConnect, botSetup, botConnect, toastSetup, toastConnect, posSales, posStaff, esignConnect, esignSend,
   // and for an app's own MCP server: connecting, refreshing, switching tools, disconnecting, approving and declining
   ...MCP_OWNER_ACTIONS.map((a) => MCP_ACTIONS[a])]);
 
