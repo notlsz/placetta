@@ -217,7 +217,8 @@ ok(!["N/A", "None", "0", "No", "Unknown Pleasures LLC", "TBD Holdings Inc", "-5"
   k.set(w => ({ ...w, apps: w.apps.map(a => (a.id === id ? { ...a, status: "review" } : a)) }));
   ok(/already filed/i.test((await k.call("fill_fields", { application_id: id, fields: [{ label: "Business phone", value: "1" }] })).err ?? ""), "edge: a filed application can't be edited");
   ok(/already/i.test((await k.call("request_filing_approval", { application_id: id })).err ?? ""), "edge: a filed application can't be filed again");
-  ok((await k.call("prepare_application", { official_form_id: "aus-co", store_id: s1 })).r!.application_id !== id, "edge: once filed, preparing it again (a renewal) makes a new one");
+  ok((await k.call("prepare_application", { official_form_id: "aus-co", store_id: s1 })).r!.already_filed === true, "edge: once filed, preparing it again without renewal points back to the filed one");
+  ok((await k.call("prepare_application", { official_form_id: "aus-co", store_id: s1, renewal: true })).r!.application_id !== id, "edge: once filed, preparing it as a renewal makes a new one");
 
   // deadlines
   ok(/real (calendar )?date/.test((await k.call("add_deadline", { date: "2027-13-01", title: "x" })).err ?? ""), "edge: month 13 is refused");
