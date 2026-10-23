@@ -7,8 +7,9 @@
 import { B, same, type Bi } from "../bi";
 import { formsEntity as formsEntityFor, formsFor, placeInfo, placesOf, segmentOf, type OfficialForm, type Segment, type Where } from "../forms/registry";
 import { usPlace } from "../forms/usplace";
-import { FURNITURE_KINDS, kindFactsAt, kindsOf, type KindFact, type StoreKind } from "../forms/kinds";
+import { FURNITURE_KINDS, SECTOR_KINDS, kindFactsAt, kindsOf, type KindFact, type StoreKind } from "../forms/kinds";
 import { FURNITURE, furnitureNeeds } from "../forms/furniture";
+import { sectorNeeds } from "../forms/sectors";
 import { FOOD_PERMITTER, MUNICIPAL_BUILDING, proofCurrent, whoToAsk, type Src } from "./ask";
 import type { Application, CheckItem, Deadline, Field, Level, Store, Workspace } from "../model";
 import { publishedDays } from "../plan";
@@ -304,7 +305,7 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
   const employees = o.employees ?? true, buildout = o.buildout ?? !mobile;
   const alcohol = o.alcohol ?? sellsAlcohol(what);
   // a furniture brand: wood goods, upholstered furniture and clothing storage units, read from what it is (src/forms/furniture.ts)
-  const needs = { food, employees, signage: o.signage ?? !mobile, buildout, newEntity: !(o.entity ?? "").trim(), imports: o.imports ?? imports(what), alcohol, terrace: o.terrace ?? terrace(what), ...furnitureNeeds(what),
+  const needs = { food, employees, signage: o.signage ?? !mobile, buildout, newEntity: !(o.entity ?? "").trim(), imports: o.imports ?? imports(what), alcohol, terrace: o.terrace ?? terrace(what), ...furnitureNeeds(what), ...sectorNeeds(what),
     // the intake's answers win over what the words suggest
     ...(o.upholstered !== undefined && FURNITURE.test(what) ? { upholstered: o.upholstered } : {}), ...(o.children !== undefined ? { children: o.children } : {}) };
   const info = placeInfo(where), places = placesOf(where);
@@ -528,7 +529,7 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
   // while its official quote is current; it goes on the row it bears on (the permit to open, the plan review, the build-out)
   // (food kinds only for a food business; furniture's for a showroom or an importer, but not a warehouse, which stores
   // goods it doesn't label or sell)
-  const kinds = kindsOf(what).filter(k => segment === "restaurant" || (segment !== "warehouse" && FURNITURE_KINDS.includes(k)));
+  const kinds = kindsOf(what).filter(k => segment === "restaurant" || (segment !== "warehouse" && (FURNITURE_KINDS.includes(k) || SECTOR_KINDS.includes(k))));
   const withheld: string[] = [];
   const near: Record<NonNullable<KindFact["about"]>, Role[]> = { food: ["food", "plan", "license"], plan: ["plan", "building", "food"], building: ["building", "plan", "food"], license: ["license", "food"] };
   const facts: PlanFact[] = kindFactsAt(kinds, places, needs).flatMap(k => {

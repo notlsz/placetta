@@ -1,7 +1,8 @@
 /* Builds site/guides/ and the files search and AI engines read (sitemap.xml, robots.txt, llms.txt, llms-full.txt,
    guides/data.json). Every fact comes from the official forms library (src/forms/registry.ts and world.ts) or the
    answers in guides-answers.mts, and links the agency's own page. English and Chinese.
-   Per city: a city page, a guide per kind of business (12) and a page per topic (8). Plus a page per official form,
+   Per city: a city page, a guide per kind of business (one or more for each sector on the landing page) and a page per
+   topic (8). Plus a page per official form,
    a page per question and the hub. Each page ends in the same conversion: the plan for your exact address.
    Run: npm run guides (output is committed; Vite copies site/ into dist/). */
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -33,33 +34,80 @@ const an = (s: string) => (/^[aeiou]/i.test(s) ? "an" : "a");
 /* ------------------------------------------------------------ businesses, topics and places */
 
 // kinds: what src/forms/kinds.ts calls this business, for the facts an official page states differ for it
-type Biz = { slug: string; seg: Segment; name: Bi; plural: Bi; chip: string; needs: Needs; note: Bi; kinds?: StoreKind[] };
+// sector: the landing page's sector it belongs to (the hub groups its links by them)
+// only: built in a place only when its filings or facts there include what makes it this kind of business (a salon's own
+// license, a factory's stormwater permit); where the library has none, no guide is built rather than a page that leaves
+// out the filing that defines it
+type SectorId = "food" | "retail" | "tech" | "game" | "consumer" | "manufacturing" | "beauty" | "health" | "auto" | "logistics" | "home";
+type Biz = { slug: string; seg: Segment; name: Bi; plural: Bi; chip: string; needs: Needs; note: Bi; kinds?: StoreKind[]; sector: SectorId;
+  only?: (forms: OfficialForm[], facts: KindFact[], place: Place) => boolean };
+/** The sectors on the landing page (site/index.html, "in.*"), in its order, with its names. */
+const SECTORS: { id: SectorId; name: Bi }[] = [
+  { id: "food", name: B("Food and beverage", "餐饮") }, { id: "retail", name: B("Retail", "零售") }, { id: "tech", name: B("Technology", "科技") },
+  { id: "game", name: B("Game studios", "游戏") }, { id: "consumer", name: B("Consumer goods", "消费品") }, { id: "manufacturing", name: B("Manufacturing", "制造业") },
+  { id: "beauty", name: B("Beauty and personal care", "美妆个护") }, { id: "health", name: B("Healthcare and life sciences", "医疗与生命科学") },
+  { id: "auto", name: B("Automotive and EV", "汽车与新能源") }, { id: "logistics", name: B("Logistics and warehousing", "物流仓储") }, { id: "home", name: B("Home and furniture", "家居家具") },
+];
+const US_ONLY = (_f: OfficialForm[], _k: KindFact[], p: Place) => p.country === "US";
+/** In the US, and with at least one filing that needs this (a salon license, an auto repair registration). */
+const withForm = (need: keyof Needs) => (f: OfficialForm[], _k: KindFact[], p: Place) => p.country === "US" && f.some(x => !!x.needs?.[need]);
+const OFFICE: Needs = { employees: true, newEntity: true, buildout: true, office: true };
+const SALON: Needs = { employees: true, newEntity: true, signage: true, buildout: true, salon: true };
 const FOOD: Needs = { food: true, employees: true, newEntity: true, buildout: true, signage: true };
 const BUSINESSES: Biz[] = [
-  { slug: "milk-tea-shop", seg: "restaurant", name: B("milk tea shop", "奶茶店"), plural: B("Milk tea and bubble tea shops", "奶茶店"), chip: "Milk tea", needs: FOOD, kinds: ["tea"],
+  { slug: "milk-tea-shop", sector: "food", seg: "restaurant", name: B("milk tea shop", "奶茶店"), plural: B("Milk tea and bubble tea shops", "奶茶店"), chip: "Milk tea", needs: FOOD, kinds: ["tea"],
     note: B("A tea shop that makes drinks to order is a food service business, so the health permit and food safety training apply even with no kitchen.", "现制饮品的奶茶店属于餐饮服务，即使没有厨房，也需要卫生许可和食品安全培训。") },
-  { slug: "coffee-shop", seg: "restaurant", name: B("coffee shop", "咖啡店"), plural: B("Coffee shops", "咖啡店"), chip: "Coffee", needs: FOOD, kinds: ["coffee"],
+  { slug: "coffee-shop", sector: "food", seg: "restaurant", name: B("coffee shop", "咖啡店"), plural: B("Coffee shops", "咖啡店"), chip: "Coffee", needs: FOOD, kinds: ["coffee"],
     note: B("A coffee shop that prepares drinks or food on site is a food service business, licensed and inspected like a restaurant.", "现场制作饮品或食品的咖啡店属于餐饮服务，与餐厅一样需要许可和检查。") },
-  { slug: "restaurant", seg: "restaurant", name: B("restaurant", "餐厅"), plural: B("Restaurants", "餐厅"), chip: "Restaurant", needs: FOOD, kinds: ["restaurant"],
+  { slug: "restaurant", sector: "food", seg: "restaurant", name: B("restaurant", "餐厅"), plural: B("Restaurants", "餐厅"), chip: "Restaurant", needs: FOOD, kinds: ["restaurant"],
     note: B("A restaurant files the most: company and tax registration, then the build-out, the health permit and the inspections that come with it.", "餐厅需要办理的最多：先是公司和税务登记，然后是装修、卫生许可以及随之而来的检查。") },
-  { slug: "hot-pot-restaurant", seg: "restaurant", name: B("hot pot restaurant", "火锅店"), plural: B("Hot pot restaurants", "火锅店"), chip: "Restaurant", needs: FOOD, kinds: ["restaurant"],
+  { slug: "hot-pot-restaurant", sector: "food", seg: "restaurant", name: B("hot pot restaurant", "火锅店"), plural: B("Hot pot restaurants", "火锅店"), chip: "Restaurant", needs: FOOD, kinds: ["restaurant"],
     note: B("Tabletop cooking adds questions for the build-out and fire review, so the plan for the space matters more than usual.", "桌边加热会给装修和消防审查带来更多问题，因此场地方案比一般餐厅更关键。") },
-  { slug: "bakery", seg: "restaurant", name: B("bakery", "烘焙店"), plural: B("Bakeries", "烘焙店"), chip: "Bakery and desserts", needs: FOOD, kinds: ["bakery"],
+  { slug: "bakery", sector: "food", seg: "restaurant", name: B("bakery", "烘焙店"), plural: B("Bakeries", "烘焙店"), chip: "Bakery and desserts", needs: FOOD, kinds: ["bakery"],
     note: B("A bakery that bakes on site needs the kitchen approved before opening, the same as a restaurant.", "现场烘焙的店铺需要在开业前通过厨房审批，与餐厅相同。") },
-  { slug: "dessert-shop", seg: "restaurant", name: B("dessert shop", "甜品店"), plural: B("Dessert shops", "甜品店"), chip: "Bakery and desserts", needs: FOOD,
+  { slug: "dessert-shop", sector: "food", seg: "restaurant", name: B("dessert shop", "甜品店"), plural: B("Dessert shops", "甜品店"), chip: "Bakery and desserts", needs: FOOD,
     note: B("Desserts served on site make it a food service business, with the health permit and inspection that go with it.", "现场供应甜品即属于餐饮服务，需要相应的卫生许可和检查。") },
-  { slug: "grocery-store", seg: "retail", name: B("grocery store", "超市"), plural: B("Grocery stores", "超市"), chip: "Grocery", needs: { food: true, employees: true, newEntity: true, signage: true },
+  { slug: "grocery-store", sector: "food", seg: "retail", name: B("grocery store", "超市"), plural: B("Grocery stores", "超市"), chip: "Grocery", needs: { food: true, employees: true, newEntity: true, signage: true },
     note: B("Selling packaged food adds food rules on top of a store's usual registrations.", "销售包装食品会在门店常规登记之外增加食品方面的要求。") },
-  { slug: "retail-store", seg: "retail", name: B("retail store", "零售门店"), plural: B("Retail stores", "零售门店"), chip: "Retail", needs: { employees: true, newEntity: true, signage: true },
+  { slug: "retail-store", sector: "retail", seg: "retail", name: B("retail store", "零售门店"), plural: B("Retail stores", "零售门店"), chip: "Retail", needs: { employees: true, newEntity: true, signage: true },
     note: B("A store's filings are mostly registration and tax, plus the sign and occupancy for the space.", "零售门店的申请主要是登记和税务，再加上招牌和场所使用许可。") },
-  { slug: "cosmetics-store", seg: "retail", name: B("cosmetics store", "美妆店"), plural: B("Cosmetics stores", "美妆店"), chip: "Retail", needs: { employees: true, newEntity: true, signage: true, cosmetics: true, imports: true },
+  { slug: "cosmetics-store", sector: "beauty", seg: "retail", name: B("cosmetics store", "美妆店"), plural: B("Cosmetics stores", "美妆店"), chip: "Retail", needs: { employees: true, newEntity: true, signage: true, cosmetics: true, imports: true },
     note: B("Importing cosmetics brings product registration and import filings on top of the store's own.", "进口化妆品需要在门店本身的申请之外，办理产品注册和进口手续。") },
-  { slug: "toy-store", seg: "retail", name: B("toy store", "玩具店"), plural: B("Toy stores", "玩具店"), chip: "Retail", needs: { employees: true, newEntity: true, signage: true, children: true, imports: true },
+  { slug: "toy-store", sector: "retail", seg: "retail", name: B("toy store", "玩具店"), plural: B("Toy stores", "玩具店"), chip: "Retail", needs: { employees: true, newEntity: true, signage: true, children: true, imports: true },
     note: B("Imported children's products need product safety certificates at entry, in addition to the store's registrations.", "进口儿童产品在入境时需要产品安全证书，此外还有门店本身的登记。") },
-  { slug: "importer-ecommerce", seg: "seller", name: B("importer or e-commerce seller", "进口商或跨境电商卖家"), plural: B("Importers and online sellers", "进口与电商"), chip: "Importer or online seller", needs: { imports: true, newEntity: true },
+  { slug: "importer-ecommerce", sector: "consumer", seg: "seller", name: B("importer or e-commerce seller", "进口商或跨境电商卖家"), plural: B("Importers and online sellers", "进口与电商"), chip: "Importer or online seller", needs: { imports: true, newEntity: true },
     note: B("Selling imported goods online means customs registration and import paperwork before the first shipment lands.", "在线销售进口商品，需要在首批货物到港前完成海关登记和进口手续。") },
-  { slug: "warehouse-3pl", seg: "warehouse", name: B("warehouse or 3PL", "仓库或第三方物流"), plural: B("Warehouses and 3PLs", "仓储物流"), chip: "Warehouse or 3PL", needs: { imports: true, employees: true, newEntity: true, hazmat: true },
+  { slug: "warehouse-3pl", sector: "logistics", seg: "warehouse", name: B("warehouse or 3PL", "仓库或第三方物流"), plural: B("Warehouses and 3PLs", "仓储物流"), chip: "Warehouse or 3PL", needs: { imports: true, employees: true, newEntity: true, hazmat: true },
     note: B("A warehouse adds occupancy and fire rules for storage, and customs filings when it handles imports.", "仓库需要满足仓储方面的场所使用和消防要求，处理进口货物时还要办理海关手续。") },
+  /* the landing page's other sectors (src/forms/sectors.ts): US cities, where the library holds what defines them */
+  { slug: "tech-office", sector: "tech", seg: "retail", name: B("tech office", "科技公司办公室"), plural: B("Tech offices and startups", "科技公司办公室"), chip: "Technology company", needs: OFFICE, only: US_ONLY,
+    note: B("No license is specific to software: a tech office files the company, tax and employer registrations and the permits for its space. The sales tax registration applies if it sells taxable goods or services in the state.", "软件行业没有专门的执照：科技公司办公室需要办理公司、税务和雇主登记，以及办公场所的许可。如在该州销售应税商品或服务，还需办理销售税登记。") },
+  { slug: "game-studio", sector: "game", seg: "retail", name: B("game studio", "游戏工作室"), plural: B("Game studios", "游戏工作室"), chip: "Game studio", needs: OFFICE, kinds: ["game"], only: US_ONLY,
+    note: B("A game studio files what any office does. No government license rates or approves a game: age ratings are voluntary.", "游戏工作室的申请与一般办公室相同。没有政府执照为游戏评级或审批：年龄分级是自愿的。") },
+  { slug: "consumer-products-brand", sector: "consumer", seg: "seller", name: B("consumer products brand", "消费品品牌"), plural: B("Consumer products brands", "消费品品牌"), chip: "Consumer goods", needs: { imports: true, newEntity: true, employees: true }, kinds: ["consumer"],
+    only: (_f, k, p) => p.country === "US" && k.length > 0,
+    note: B("A brand that imports and sells consumer products adds customs filings and a product safety certificate for each product a CPSC rule covers.", "进口并销售消费品的品牌，需要办理海关手续，并为受 CPSC 规定管辖的每种产品出具产品安全证书。") },
+  { slug: "cosmetics-brand", sector: "beauty", seg: "seller", name: B("cosmetics brand", "化妆品品牌"), plural: B("Cosmetics and skincare brands", "化妆品与护肤品牌"), chip: "Cosmetics brand", needs: { imports: true, newEntity: true, employees: true, cosmetics: true }, only: withForm("cosmetics"),
+    note: B("Under MoCRA a cosmetics brand lists each product with FDA, and the facility that makes or processes it registers, on top of the import filings.", "根据 MoCRA，化妆品品牌须向 FDA 列名每个产品，生产或加工设施须注册，此外还有进口手续。") },
+  { slug: "nail-salon", sector: "beauty", seg: "retail", name: B("nail salon", "美甲店"), plural: B("Nail salons", "美甲店"), chip: "Nail salon", needs: SALON, kinds: ["nail"], only: withForm("salon"),
+    note: B("The state board licenses the salon itself, besides each technician's own license, and may inspect it before it opens.", "州委员会为沙龙本身发证，另有每位技师的个人执照，并可能在开业前检查。") },
+  { slug: "hair-salon", sector: "beauty", seg: "retail", name: B("hair salon", "美发店"), plural: B("Hair salons and barbershops", "美发店与理发店"), chip: "Hair salon", needs: SALON, only: withForm("salon"),
+    note: B("The state board licenses the salon or shop itself, besides each stylist's or barber's own license, and may inspect it before it opens.", "州委员会为美发店或理发店本身发证，另有每位发型师或理发师的个人执照，并可能在开业前检查。") },
+  { slug: "medical-device-importer", sector: "health", seg: "seller", name: B("medical device importer", "医疗器械进口商"), plural: B("Medical device importers and distributors", "医疗器械进口与分销"), chip: "Medical devices", needs: { imports: true, newEntity: true, employees: true, devices: true }, kinds: ["device"], only: withForm("devices"),
+    note: B("An importer of medical devices registers its establishment with FDA every year and pays FDA's registration fee, on top of the customs filings.", "医疗器械进口商须每年向 FDA 注册其企业并缴纳注册费，此外还有海关手续。") },
+  { slug: "auto-repair-shop", sector: "auto", seg: "retail", name: B("auto repair shop", "汽车维修店"), plural: B("Auto repair shops", "汽车维修店"), chip: "Auto repair", needs: { employees: true, newEntity: true, signage: true, buildout: true, autoRepair: true }, only: withForm("autoRepair"),
+    note: B("A shop paid to repair other people's vehicles registers with the state before it takes work, besides the usual business, tax and building filings.", "有偿维修他人车辆的店铺须在接单前向州政府登记，此外还有常规的营业、税务和建筑申请。") },
+  { slug: "light-manufacturing", sector: "manufacturing", seg: "warehouse", name: B("light manufacturing facility", "轻工制造工厂"), plural: B("Light manufacturing facilities", "轻工制造工厂"), chip: "Manufacturing", needs: { employees: true, newEntity: true, buildout: true, hazmat: true, manufactures: true }, only: withForm("manufactures"),
+    note: B("A factory adds environmental filings where its activity is covered: the industrial stormwater permit, air permits for equipment that emits, and a plan for hazardous materials kept on site.", "工厂在其活动属适用范围时需增加环保申请：工业雨水排放许可、排放设备的空气许可，以及场内危险品的业务计划。") },
+  { slug: "furniture-showroom", sector: "home", seg: "retail", name: B("furniture showroom", "家具展厅"), plural: B("Furniture showrooms and stores", "家具展厅与门店"), chip: "Furniture showroom", needs: { employees: true, newEntity: true, signage: true, wood: true, upholstered: true }, kinds: ["furniture", "upholstered"],
+    only: (_f, k, p) => p.country === "US" && k.length > 0,
+    note: B("A furniture store sells under the labeling rules for composite wood and, in some states, upholstered furniture licensing.", "家具门店须遵守复合木材标签规定，部分州还要求软体家具执照。") },
+  { slug: "furniture-importer", sector: "home", seg: "seller", name: B("furniture importer", "家具进口商"), plural: B("Furniture importers and brands", "家具进口商与品牌"), chip: "Furniture importer", needs: { imports: true, newEntity: true, employees: true, wood: true, upholstered: true }, kinds: ["furniture", "upholstered"],
+    only: (_f, k, p) => p.country === "US" && k.length > 0,
+    note: B("Importing furniture adds the wood declaration, the composite wood certification and the security filing for each ocean shipment to the customs registrations.", "进口家具除海关登记外，还需办理木材申报、复合木材认证以及每批海运货物的安全申报。") },
+  { slug: "furniture-maker", sector: "home", seg: "warehouse", name: B("furniture maker", "家具制造商"), plural: B("Furniture makers", "家具制造商"), chip: "Furniture maker", needs: { employees: true, newEntity: true, buildout: true, hazmat: true, manufactures: true, wood: true, upholstered: true }, kinds: ["furniture", "upholstered"],
+    only: withForm("manufactures"),
+    note: B("A furniture factory files what any factory does where it applies, and makes upholstered pieces under the state's furniture rules.", "家具工厂在适用时须办理与一般工厂相同的申请，并按州家具规定生产软体家具。") },
 ];
 
 type Topic = { slug: string; title: (c: string, l: L) => string; dek: Bi; pick: (f: OfficialForm) => boolean };
@@ -331,12 +379,14 @@ const guides: Guide[] = [];
 const topicPages: { place: Place; topic: Topic; forms: OfficialForm[] }[] = [];
 const usedBy = new Map<string, Guide[]>();
 const factsFor = (biz: Biz, place: Place): Fact[] => !biz.kinds?.length || place.country !== "US" ? []
-  : kindFactsAt(biz.kinds, placesOf(place.where)).flatMap(k => { const seen = proofCurrent(k.proof, TODAY); return seen ? [{ ...k, seen }] : []; });
+  : kindFactsAt(biz.kinds, placesOf(place.where), biz.needs).flatMap(k => { const seen = proofCurrent(k.proof, TODAY); return seen ? [{ ...k, seen }] : []; });
 for (const place of PLACES) {
   for (const biz of BUSINESSES) {
     const forms = formsFor({ segment: biz.seg, where: place.where, needs: { ...biz.needs, ...(place.country !== "US" ? { foreignEntity: true } : {}) } });
     if (forms.length < 3) continue;
-    const g = { place, biz, forms, facts: factsFor(biz, place) }; guides.push(g);
+    const g = { place, biz, forms, facts: factsFor(biz, place) };
+    if (biz.only && !biz.only(forms, g.facts, place)) continue;
+    guides.push(g);
     for (const f of forms) usedBy.set(f.id, [...(usedBy.get(f.id) ?? []), g]);
   }
   const all = [...new Map(guides.filter(g => g.place === place).flatMap(g => g.forms).map(f => [f.id, f])).values()].sort((a, b) => a.order - b.order);
@@ -353,7 +403,9 @@ const placesUsed = PLACES.filter(p => guides.some(g => g.place === p));
    of PRIMARY is the one search engines index; the others stay up for visitors and links (noindex, follow) and the indexed
    one names them. A guide whose filings match another's but whose facts differ (a milk tea shop's grease interceptor rule
    in New York City, a bakery's wholesale registration in California) is its own page. Same for topic pages. */
-const PRIMARY = ["restaurant", "retail-store", "grocery-store", "importer-ecommerce", "warehouse-3pl", "cosmetics-store", "toy-store", "milk-tea-shop", "coffee-shop", "hot-pot-restaurant", "bakery", "dessert-shop"];
+const PRIMARY = ["restaurant", "retail-store", "grocery-store", "importer-ecommerce", "warehouse-3pl", "cosmetics-store", "toy-store", "milk-tea-shop", "coffee-shop", "hot-pot-restaurant", "bakery", "dessert-shop",
+  "tech-office", "game-studio", "consumer-products-brand", "cosmetics-brand", "hair-salon", "nail-salon", "medical-device-importer", "auto-repair-shop", "light-manufacturing",
+  "furniture-showroom", "furniture-importer", "furniture-maker"];
 const sig = (forms: OfficialForm[]) => forms.map(f => f.id).join(",");
 /** What makes a guide the page it is: its filings, and what an official page says differs for its kind of business. */
 const sigG = (g: Guide) => sig(g.forms) + "|" + g.facts.map(k => k.id).join(",");
@@ -709,7 +761,8 @@ ${sourcing(l)}
 <section class="wrap block" id="cities"><h2 class="sec">${l === "zh" ? "品牌正在扩张的城市" : "Where brands are expanding"}</h2>
 <div class="tabs" role="tablist" aria-label="${l === "zh" ? "地区" : "Region"}">${REGIONS.map((r, i) => `<button type="button" role="tab" id="t-${r.id}" aria-controls="r-${r.id}" aria-selected="${i === 0}">${esc(r.name[l])}<span>${placesUsed.filter(p => REGION(p.country) === r.id).length}</span></button>`).join("")}</div>
 ${regionPanels}</section>
-<section class="wrap block" id="by-business"><h2 class="sec">${l === "zh" ? "按业务" : "By kind of business"}</h2><ul class="qgrid">${bizHubs.map(x => `<li><a href="${bizPath(x.b, l)}">${esc(x.b.plural[l])}</a></li>`).join("")}</ul></section>
+<section class="wrap block" id="by-business"><h2 class="sec">${l === "zh" ? "按行业" : "By sector"}</h2>
+${SECTORS.map(sc => ({ sc, hs: bizHubs.filter(x => x.b.sector === sc.id) })).filter(x => x.hs.length).map(({ sc, hs }) => `<div class="sector" id="sector-${sc.id}"><h3>${esc(sc.name[l])}</h3><ul class="qgrid">${hs.map(x => `<li><a href="${bizPath(x.b, l)}">${esc(x.b.plural[l])}</a></li>`).join("")}</ul></div>`).join("\n")}</section>
 <section class="wrap block" id="by-permit"><h2 class="sec">${l === "zh" ? "按许可类型" : "By kind of permit"}</h2><ul class="qgrid">${permitHubs.map(x => `<li><a href="${permitPath(x.tp, l)}">${esc(x.tp.title(l === "zh" ? "各城市" : "each city", l))}</a></li>`).join("")}</ul></section>
 <section class="wrap block" id="by-state"><h2 class="sec">${l === "zh" ? "按美国州" : "By US state"}</h2><ul class="qgrid">${STATE_HUBS.map(c => `<li><a href="${statePath(c, l)}">${esc(US_STATES[c][l])}</a></li>`).join("")}</ul></section>
 <section class="wrap block" id="answers"><h2 class="sec">${UI.answers[l]}</h2><ul class="qgrid">${ANSWERS.map(a => `<li data-f="${esc((a.q.en + " " + a.q.zh).toLowerCase())}"><a href="${answerPath(a.slug, l)}">${esc(a.q[l])}</a></li>`).join("")}</ul></section>

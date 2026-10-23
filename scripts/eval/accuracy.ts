@@ -33,6 +33,7 @@ import { libraryAnswer, previewPlan, sellsAlcohol } from "../../src/plan/preview
 import { proofCurrent } from "../../src/plan/ask";
 import { FORMS, formsFor, segmentOf } from "../../src/forms/registry";
 import { furnitureNeeds } from "../../src/forms/furniture";
+import { sectorNeeds } from "../../src/forms/sectors";
 import { FURNITURE_KINDS } from "../../src/forms/kinds";
 import type { Application, Level } from "../../src/model";
 import { answerChecks } from "./answers";
@@ -96,7 +97,7 @@ function library(g: Gold): Row[] {
   const i = g.input, segment = segmentOf(i.what);
   // the flags the model sets, read the way the instant plan reads them ("noodle bar" isn't a bar that serves alcohol)
   const imports = i.intake?.imports ?? /import|进口/i.test(i.what), alcohol = sellsAlcohol(i.what);
-  const needs = { employees: i.intake?.employees ?? i.employees ?? true, buildout: i.buildout ?? true, signage: i.signage ?? true, newEntity: !i.entity, food: segment === "restaurant" || /food|snack|食品/i.test(i.what), imports, alcohol, ...furnitureNeeds(i.what),
+  const needs = { employees: i.intake?.employees ?? i.employees ?? true, buildout: i.buildout ?? true, signage: i.signage ?? true, newEntity: !i.entity, food: segment === "restaurant" || /food|snack|食品/i.test(i.what), imports, alcohol, ...furnitureNeeds(i.what), ...sectorNeeds(i.what),
     ...(i.intake?.upholstered !== undefined ? { upholstered: i.intake.upholstered } : {}), ...(i.intake?.children !== undefined ? { children: i.intake.children } : {}) };
   const known = libraryAnswer(i.what, i.where, needs, TODAY);
   const forms = formsFor({ segment, where: i.where, needs }).filter(f => f.order < 88).map(f => {

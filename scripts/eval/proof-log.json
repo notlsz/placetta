@@ -6251,5 +6251,215 @@
   "found": true,
   "sha256": "6ae8b7fe3c010d52",
   "context": "g cosmetic product facilities, retailers, and industry responsible persons that it does not provide certificates or other documents to verify compliance for cosmetic product facility registration. february 11, 2026 today, the u.s. food and drug administration announced update"
+ },
+ {
+  "id": "ca-bbc-establishment",
+  "read": "https://www.barbercosmo.ca.gov/forms_pubs/forms/estab_app.pdf",
+  "quote": "The non-refundable application fee of $50 must accompany this application.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "6cca32e88a76df10",
+  "context": "plete the application on behalf of the corporation or llc. notice to applicants the non-refundable application fee of $50 must accompany this application. application for establishment schedule of fees fee type fee amount application "
+ },
+ {
+  "id": "ny-dos-aeb",
+  "read": "https://dos.ny.gov/appearance-enhancement-business",
+  "quote": "An Appearance Enhancement Business License allows an individual to operate an Appearance Enhancement establishment",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "099208c3985ef55f",
+  "context": "aiming your license or application and completing transactions online. overview an appearance enhancement business license allows an individual to operate an appearance enhancement establishment that provides any or all of the services included in the practice of cosmetolog"
+ },
+ {
+  "id": "tx-tdlr-establishment",
+  "read": "https://www.tdlr.texas.gov/barbering-and-cosmetology/establishments/apply.htm",
+  "quote": "Establishment licenses are valid for two years from the date of issue.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "a5a987cd80a87954",
+  "context": "lishment license also see mini-establishment faq apply online apply by mail $70 establishment licenses are valid for two years from the date of issue. all requirements must be met within one year of the date the application is rec"
+ },
+ {
+  "id": "wa-dol-salon",
+  "read": "https://dol.wa.gov/node/1395",
+  "quote": "Anyone who operates a Salon Shop, Personal Service, or Mobile Unit in Washington",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "306d2e81dc5ac9df",
+  "context": " service, or mobile unit that offers cosmetology services. who needs a license? anyone who operates a salon shop, personal service, or mobile unit in washington where cosmetology, barbering, manicuring, hair design, esthetics, or master est"
+ },
+ {
+  "id": "ma-cosmetology-salon",
+  "read": "https://www.mass.gov/how-to/apply-for-a-cosmetology-salon-license",
+  "quote": "If your salon has a new address or a new owner, you must apply for a new salon license.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "9a156c5baba1cc1c",
+  "context": "on, or the floor plan has changed, submit a salon expansion application online. if your salon has a new address or a new owner, you must apply for a new salon license. fees application fees are non-refundable. a debit or credit card is required to"
+ },
+ {
+  "id": "ga-salon",
+  "read": "https://rules.sos.ga.gov/gac/240-12",
+  "quote": "Any person or persons desiring to operate a salon/shop which offers and performs cosmetology or barber services shall submit a complete application",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "eebe75e653da4499",
+  "context": "er salon/shop rule 240-12-.01 application for cosmetology/barber salon/shop (1) any person or persons desiring to operate a salon/shop which offers and performs cosmetology or barber services shall submit a complete application with the required application processing fee for a license using the form furni"
+ },
+ {
+  "id": "va-salon",
+  "read": "https://www.dpor.virginia.gov/sites/default/files/boards/BarberCosmo/A450-1213BUS.pdf",
+  "quote": "Provide the name of the legal business entity which will operate the salon, shop, spa, or parlor.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "30437c70977c1977",
+  "context": "ate 2. shop/salon/spa name (complete a or b, as appropriate) a. business name  provide the name of the legal business entity which will operate the salon, shop, spa, or parlor. the name must be the same as the name of your organization/business. all busine"
+ },
+ {
+  "id": "or-hlo-facility",
+  "read": "https://www.oregon.gov/oha/PH/HLO/Pages/Board-Cosmetology-Business-Authorizations.aspx",
+  "quote": "All practitioners who provide services in Oregon must do so in a licensed facility",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "b6372a26b013ef37",
+  "context": "ting schedule contact us driving directions recent four types of authorizations all practitioners who provide services in oregon must do so in a licensed facility, which is defined as \"...an establishment operated on a regular or irregular ba"
+ },
+ {
+  "id": "pa-cosmetology-salon",
+  "read": "https://www.pa.gov/agencies/dos/department-and-offices/bpoa/boards-commissions/cosmetology.html",
+  "quote": "cosmetology salons, esthetician salons, nail technology salons, and cosmetology schools",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "faca62da6e449a04",
+  "context": "hnicians, cosmetology teachers, esthetician teachers, nail technology teachers, cosmetology salons, esthetician salons, nail technology salons, and cosmetology schools as well as the unlicensed practice of the profession. under this authority, it "
+ },
+ {
+  "id": "ca-bar-ard",
+  "read": "https://www.bar.ca.gov/apply",
+  "quote": "Required to diagnose, service, or repair vehicles for compensation.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "413387d24858a54a",
+  "context": "sing requirements. business licenses automotive repair dealer license overview: required to diagnose, service, or repair vehicles for compensation. this includes mobile, referral, or sublet repair services. also required to hol"
+ },
+ {
+  "id": "ny-dmv-repair",
+  "read": "https://dmv.ny.gov/business/open-repair-or-body-shop",
+  "quote": "To become a registered repair shop in New York State, you must submit Original Facility Application (VS-1)",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "daa0cecbb5c2f2d1",
+  "context": "lso call the office of vehicle safety and clean air for more information. apply to become a registered repair shop in new york state, you must submit original facility application (vs-1) proof that you have permission to use the property at the business location. th"
+ },
+ {
+  "id": "fl-fdacs-repair",
+  "read": "https://www.fdacs.gov/Business-Services/Motor-Vehicle-Repair",
+  "quote": "requires anyone who is paid to repair motor vehicles owned by other individuals to register with the Florida Department of Agriculture and Consumer Services",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "6fca5f3ee07bbc45",
+  "context": "ow to create your account and get started. the florida motor vehicle repair act requires anyone who is paid to repair motor vehicles owned by other individuals to register with the florida department of agriculture and consumer services (fdacs). select a question to expand the answer. how can i apply for a military"
+ },
+ {
+  "id": "fda-device-reg",
+  "read": "https://www.fda.gov/medical-devices/how-study-and-market-your-device/device-registration-and-listing",
+  "quote": "intended for use in the U.S. are required to register annually with the FDA.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "c2e9755f1ffddd3d",
+  "context": "shments that are involved in the production and distribution of medical devices intended for use in the u.s. are required to register annually with the fda. this process is known as establishment registration ( 21 cfr part 807). congres"
+ },
+ {
+  "id": "ca-igp",
+  "read": "https://www.waterboards.ca.gov/water_issues/programs/stormwater/industrial.html",
+  "quote": "The Industrial General Permit regulates industrial storm water discharges and authorized non-storm water discharges from industrial facilities in California.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "7fa12cbaa192a167",
+  "context": "uality santa monica bay restoration calepa search industrial stormwater program the industrial general permit regulates industrial storm water discharges and authorized non-storm water discharges from industrial facilities in california. the industrial general permit is called a general permit because many industria"
+ },
+ {
+  "id": "tx-msgp",
+  "read": "https://www.tceq.texas.gov/permitting/stormwater/industrial",
+  "quote": "Requirements and options for stormwater discharges from industrial facilities under the Multi-Sector General Permit TXR050000.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "58392b477b79431f",
+  "context": "its industrial stormwater multi-sector general permit for industrial facilities requirements and options for stormwater discharges from industrial facilities under the multi-sector general permit txr050000. https://www.tceq.texas.gov/permitting/stormwater/industrial https://www.tceq.te"
+ },
+ {
+  "id": "scaqmd-permit-lac",
+  "read": "https://www.aqmd.gov/home/permits",
+  "quote": "For installation of new or relocated equipment or alteration of existing equipment",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "25d6aafad562d9d1",
+  "context": " some equipment require one or more of the following): permit to construct (pc) for installation of new or relocated equipment or alteration of existing equipment (including physical modification or change of operating conditions), where oper"
+ },
+ {
+  "id": "scaqmd-permit-orc",
+  "read": "https://www.aqmd.gov/home/permits",
+  "quote": "For installation of new or relocated equipment or alteration of existing equipment",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "25d6aafad562d9d1",
+  "context": " some equipment require one or more of the following): permit to construct (pc) for installation of new or relocated equipment or alteration of existing equipment (including physical modification or change of operating conditions), where oper"
+ },
+ {
+  "id": "ca-hmbp",
+  "read": "https://calepa.ca.gov/hazardous-materials-business-plan-program/",
+  "quote": "Certified Unified Program Agencies (CUPAs), and Participating Agencies (PAs), implement the program at the local level",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "5ab0c19cac9fe08f",
+  "context": "cy (calepa) oversees the implementation of the hmbp program at the state level. certified unified program agencies (cupas), and participating agencies (pas), implement the program at the local level and are responsible for enforcement and administration in their respective juri"
+ },
+ {
+  "id": "kind:ny-nail-wage-bond",
+  "read": "https://dos.ny.gov/become-appearance-enhancement-business",
+  "quote": "must maintain a Wage Bond as described below.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "00d88c1969455197",
+  "context": " application. in addition, evidence of such must be maintained on the premises. must maintain a wage bond as described below. wages legally due to workers and other providers of nail services of: at least "
+ },
+ {
+  "id": "kind:us-game-ratings",
+  "read": "https://tile.loc.gov/storage-services/service/ll/usrep/usrep564/usrep564786/usrep564786.pdf",
+  "quote": "The video-game industry’s voluntary rating system already accomplishes that to a large extent.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "c495d65ba0c8e28f",
+  "context": "ed of parents who wish to restrict their chil­ dren's access to violent videos. the video-game industry's voluntary rating system already accomplishes that to a large extent. moreover, as a means of assisting parents the act is greatly overinclusive, sin"
+ },
+ {
+  "id": "kind:us-device-importer-address",
+  "read": "https://www.fda.gov/medical-devices/device-registration-and-listing/who-must-register-list-and-pay-fee",
+  "quote": "The initial importer must have a physical address in the United States staffed by individuals responsible for ensuring the compliance of imported devices",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "fbb2e5a738d274e1",
+  "context": "ise change the container, wrapper, or labeling of the device or device package. the initial importer must have a physical address in the united states staffed by individuals responsible for ensuring the compliance of imported devices with all applicable fda laws and regulations. manufacturer - makes by chemical,"
  }
 ]

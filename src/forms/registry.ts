@@ -17,6 +17,7 @@ import { applyFixes } from "./audit";
 import { US_GAPS } from "./us-gaps";
 import { INTL_FORMS } from "./intl";
 import { FINISH_FIXES, FINISH_FORMS } from "./finish";
+import { SECTOR_FORMS } from "./sectors";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -30,6 +31,7 @@ export type Method = "online" | "pdf_mail" | "pdf_fax" | "portal" | "in_person" 
 export type FormField = { id: string; line: string; label: Bi; hint?: Bi; options?: string[] };
 export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; alcohol?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; outOfState?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean; reference?: boolean;
   wood?: boolean; upholstered?: boolean; clothingStorage?: boolean;
+  salon?: boolean; autoRepair?: boolean; devices?: boolean; manufactures?: boolean; office?: boolean;   // the landing page's sectors (src/forms/sectors.ts)
   terrace?: boolean };   // terrace: tables and chairs outside on the street (a pavement licence, a terrasse, a Sondernutzung)   // furniture: wood goods, upholstered furniture, clothing storage units (src/forms/furniture.ts)   // reference: listed in the library and answers, never added to a plan
 
 export type SignSpot = { page: number; x: number; y: number; w: number; h: number; date?: { x: number; y: number; size: number } };
@@ -292,8 +294,9 @@ export const FORMS: OfficialForm[] = [
   {
     id: "cpsc-cert", form: "General Certificate of Conformity / Children's Product Certificate (16 CFR 1110)", title: B("Product safety certificate, filed electronically at entry", "产品安全合格证书（入境时电子申报）"),
     // not for a food importer: the Consumer Product Safety Act's "consumer product" excludes "(I) food" as the FD&C Act
-    // defines it (15 U.S.C. 2052(a)(5)(I), govinfo.gov USCODE-2023); FDA's registration and prior notice cover it instead
-    agency: B("U.S. Consumer Product Safety Commission", "美国消费品安全委员会（CPSC）"), level: "federal", where: "US", segments: ["seller", "retail"], needs: { imports: true }, unless: ["food"], method: "online", order: 50,
+    // defines it (15 U.S.C. 2052(a)(5)(I), govinfo.gov USCODE-2023); FDA's registration and prior notice cover it instead.
+    // Nor for medical devices, which the same definition excludes (2052(a)(5)(H)); FDA's device registration covers them
+    agency: B("U.S. Consumer Product Safety Commission", "美国消费品安全委员会（CPSC）"), level: "federal", where: "US", segments: ["seller", "retail"], needs: { imports: true }, unless: ["food", "devices"], method: "online", order: 50,
     how: B("The importer issues the certificate itself (there is no government form) and, under the eFiling rule, files the certificate data with CBP at entry.", "由进口商自行出具证书（无政府表格），并按电子申报规则在入境报关时向 CBP 申报证书数据。"),
     url: "https://www.cpsc.gov/eFiling", info: "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification", fee: 0, checked: "page", fields: [],
   },
@@ -673,7 +676,7 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
-FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES, ...FURNITURE_FORMS, ...US_GAPS, ...INTL_FORMS, ...FINISH_FORMS);
+FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES, ...FURNITURE_FORMS, ...US_GAPS, ...INTL_FORMS, ...FINISH_FORMS, ...SECTOR_FORMS);
 
 /* County steps are filed under the county (src/forms/usplace.ts), not the city they were first researched for, so every
    city in the county gets them: Alameda County's food permits apply in Fremont as in Oakland, King County's in Bellevue

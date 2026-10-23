@@ -178,6 +178,8 @@ body:not(.tabbed) .tabs{display:none}
 .qgrid li{}
 .qgrid a{display:block;padding:12px 0;font:400 19px/1.35 var(--serif);letter-spacing:-.02em;text-decoration:none}
 .qgrid a:hover{color:var(--blue)}
+.sector{margin:0 0 28px}
+.sector h3{margin:0 0 4px;font:500 13px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .fgroup{background:var(--white);border-radius:20px;padding:4px 22px;margin-bottom:10px;box-shadow:0 1px 2px rgba(26,24,22,.04)}
 .fgroup:last-child{margin-bottom:88px}
 .fgroup summary{display:flex;justify-content:space-between;align-items:center;padding:16px 2px;cursor:pointer;list-style:none}

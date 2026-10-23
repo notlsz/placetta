@@ -26,11 +26,16 @@
 import { B, type Bi } from "../bi";
 import type { Level } from "../model";
 import type { Needs } from "./registry";
+import { FDA_DEVICE_WHO, NY_AEB_APPLY } from "./sectors";
 import { BHGS_LABELS, CPSC_CPC, CPSC_CSU, CPSC_TRACKING, EPA_TSCA, isFurniture, furnitureNeeds, furnitureOrigin } from "./furniture";
 
-export type StoreKind = "tea" | "coffee" | "bakery" | "restaurant" | "furniture" | "upholstered" | "storage" | "children" | "china" | "cnbedroom";
+export type StoreKind = "tea" | "coffee" | "bakery" | "restaurant" | "furniture" | "upholstered" | "storage" | "children" | "china" | "cnbedroom"
+  | "nail" | "consumer" | "game" | "device";
 /** The kinds that aren't food: their facts hold for any segment (a showroom, an importer, a warehouse). */
 export const FURNITURE_KINDS: StoreKind[] = ["furniture", "upholstered", "storage", "children", "china", "cnbedroom"];
+/** The landing page's other sectors (src/forms/sectors.ts): a nail salon, a consumer products brand, a game studio, a
+    medical device importer. Like furniture's, their facts hold for a store or a brand, not for a warehouse. */
+export const SECTOR_KINDS: StoreKind[] = ["nail", "consumer", "game", "device"];
 export type KindFact = {
   id: string;
   kinds: StoreKind[];          // the kinds of business it is about
@@ -49,6 +54,12 @@ export type KindFact = {
 
 const READ = "2026-10-21";
 const P = (read: string, quote: string) => ({ quote, read, checked: READ });
+/** The sectors pass (src/forms/sectors.ts), read 2026-10-23. */
+const P23 = (read: string, quote: string) => ({ quote, read, checked: "2026-10-23" });
+const CPSC_GCC = "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification/General-Certificate-of-Conformity";
+const BHGS_FLYER = "https://bhgs.dca.ca.gov/forms_pubs/19-012_statelicflyer.pdf";
+/** Brown v. Entertainment Merchants Association, 564 U.S. 786 (2011), as the Library of Congress publishes the U.S. Reports. */
+const BROWN_EMA = "https://tile.loc.gov/storage-services/service/ll/usrep/usrep564/usrep564786/usrep564786.pdf";
 
 const KC_RISK = "https://cdn.kingcounty.gov/-/media/king-county/depts/dph/documents/certificates-permits-licenses/food-worker-business-permits/permanent-businesses/food-establishment-risk-levels.pdf?rev=fa5058bfe2344c0da374012f74cac082&hash=6343EB80E0FD05EB643F9899D4DA212D";
 const FDACS = "https://www.fdacs.gov/Business-Services/Food/Food-Establishments/Retail-Food-Establishment-Permit";
@@ -296,6 +307,48 @@ export const KIND_FACTS: KindFact[] = [
     proof: P(GB_FIRE_8, "any visible part of the cover shall pass the match test in Part I of Schedule 5 to these Regulations"),
   },
 
+  /* ------------------------------------------------ The landing page's other sectors (src/forms/sectors.ts) ------------------------------------------------ */
+  {
+    id: "ny-nail-wage-bond", kinds: ["nail"], where: "NY", form: ["ny-dos-aeb"], about: "license", level: "state",
+    title: B("A nail salon keeps a wage bond", "美甲店须备有工资保证金"),
+    text: B("New York requires an appearance enhancement business that employs nail specialty workers to keep a wage bond for wages due to them, sized by the number of full-time nail workers: at least $25,000 for two to five.",
+      "纽约州要求雇用美甲从业人员的美容美甲经营者备有工资保证金，以保障其应得工资，金额按全职美甲人员数量确定：2 至 5 人至少 25,000 美元。"),
+    agency: B("New York Department of State, Division of Licensing Services", "纽约州务院执照服务处"),
+    proof: P23(NY_AEB_APPLY, "must maintain a Wage Bond as described below."),
+  },
+  {
+    id: "us-cpsc-gcc", kinds: ["consumer"], where: "US", needs: ["imports"], form: ["cpsc-cert"], level: "federal",
+    title: B("A General Certificate of Conformity for each regulated product", "每种受监管产品须有一般合格证书"),
+    text: B("The importer of a general-use (not children's) product that a CPSC safety rule covers certifies, in a General Certificate of Conformity, that it meets each rule that applies. Placetta lists it; it doesn't certify products.",
+      "受 CPSC 安全规定管辖的一般用途（非儿童）产品，其进口商须以一般合格证书证明产品符合每项适用规定。快哉列出此项，但不认证产品。"),
+    agency: B("U.S. Consumer Product Safety Commission", "美国消费品安全委员会"),
+    proof: P23(CPSC_GCC, "requires domestic manufacturers and importers of certain general-use products (i.e., non-children’s products)"),
+  },
+  {
+    id: "us-game-ratings", kinds: ["game"], where: "US", level: "federal",
+    title: B("Game ratings are voluntary: no license rates a game", "游戏分级是自愿的：没有执照为游戏评级"),
+    text: B("Age ratings for video games (ESRB in the US) are the industry's own voluntary system, as the Supreme Court said in striking down California's violent video game law; no agency issues them, though many stores and platforms ask for one.",
+      "电子游戏的年龄分级（美国为 ESRB）是行业自己的自愿体系，最高法院在推翻加州暴力游戏法时即如此表述；分级不由政府机构颁发，但许多商店和平台会要求提供。"),
+    agency: B("U.S. Supreme Court, Brown v. Entertainment Merchants Association (2011)", "美国最高法院，布朗诉娱乐商协会案（2011 年）"),
+    proof: P23(BROWN_EMA, "The video-game industry’s voluntary rating system already accomplishes that to a large extent."),
+  },
+  {
+    id: "us-device-importer-address", kinds: ["device"], where: "US", form: ["fda-device-reg"], level: "federal",
+    title: B("A staffed US address for the imported devices", "须有配备人员的美国地址负责进口器械"),
+    text: B("FDA's initial importer has a physical address in the United States with staff responsible for the imported devices' compliance with FDA's rules, and identifies the foreign manufacturers it imports from when it registers.",
+      "FDA 规定首次进口商须在美国有实际地址，并配备负责进口器械符合 FDA 规定的人员；注册时须列明其进口的境外制造商。"),
+    agency: B("U.S. Food and Drug Administration", "美国食品药品监督管理局"),
+    proof: P23(FDA_DEVICE_WHO, "The initial importer must have a physical address in the United States staffed by individuals responsible for ensuring the compliance of imported devices"),
+  },
+  {
+    id: "ca-bhgs-maker", kinds: ["upholstered"], where: "CA", needs: ["manufactures"], about: "license", level: "state",
+    title: B("Making upholstered furniture takes California's manufacturer license", "生产软体家具须持有加州制造商执照"),
+    text: B("A company that makes upholstered furniture or bedding sold in California, in whole or in part, holds the Bureau of Household Goods and Services' furniture and bedding manufacturer license.",
+      "全部或部分生产在加州销售的软体家具或床上用品的企业，须持有加州家居用品与服务局的家具及床上用品制造商执照。"),
+    agency: B("California Bureau of Household Goods and Services", "加州家居用品与服务局"),
+    proof: P23(BHGS_FLYER, "Furniture and Bedding Manufacturer—A company that produces upholstered furniture or bedding in whole or in part"),
+  },
+
   /* ------------------------------------------------ New York ------------------------------------------------ */
   {
     id: "ny-wholesale-bakery", kinds: ["bakery"], where: "NY", about: "food", level: "state",
@@ -509,6 +562,12 @@ export function kindsOf(what: string): StoreKind[] {
       ...(o.china ? ["china" as const] : []), ...(o.chinaBedroom ? ["cnbedroom" as const] : [])];
   }
   const w = what.toLowerCase(), out: StoreKind[] = [];
+  // the landing page's other sectors: what an official page says differs for them (src/forms/sectors.ts)
+  if (/\bnail\b|美甲/.test(w)) out.push("nail");
+  if (/\bconsumer (goods|products?)\b|消费品/.test(w)) out.push("consumer");
+  if (/\bgames?\b.*\bstudio\b|\bgame (developer|publisher)\b|游戏/.test(w)) out.push("game");
+  if (/\bmedical (device|equipment)s?\b|医疗器械/.test(w)) out.push("device");
+  if (out.length) return out;
   if (/\b(tea|boba)\b|奶茶|茶饮|茶铺|茶店/.test(w)) out.push("tea");
   if (/\b(coffee|caf[eé]s?|espresso)\b|咖啡/.test(w)) out.push("coffee");
   if (/\b(bak(e|ery|eries|ing|ed)|bakehouse|pastr(y|ies)|patisserie)\b|面包|烘焙|糕点|西点|蛋糕/.test(w)) out.push("bakery");
