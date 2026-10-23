@@ -34,6 +34,7 @@ import wecomLogo from "./assets/integrations/wecom.svg";
 import dingtalkLogo from "./assets/integrations/dingtalk.svg";
 import teamsLogo from "./assets/integrations/teams.svg";
 import wechatLogo from "./assets/integrations/wechat.svg";
+import telegramLogo from "./assets/integrations/telegram.svg";
 import { McpConnectors } from "./McpSettings";
 import { AgentMemoryGroup } from "./AgentMemory";
 import "./agent-memory.css";
@@ -125,6 +126,8 @@ const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
     { kind: "wechat_bot", name: "Odelia in WeChat", zh: "微信中的 Odelia", why: B("Teammates message your WeChat Official Account: she does the job as the teammate who asked and answers in the chat. Each teammate links their WeChat once with a code", "同事给您的微信公众号发消息：她以提问的同事身份完成工作，并在聊天中回复。每位同事用验证码关联一次自己的微信"), logo: wechatLogo, bot: true },
     { kind: "slack_bot", name: "Odelia in Slack", zh: "Slack 中的 Odelia", why: B("Mention @Odelia in a channel or message her: she does the job as the teammate who asked and answers in the thread. Only Placetta teammates (same email) can give her jobs", "在频道里 @Odelia 或私信她：她以提问的团队成员身份完成工作并在话题中回复。只有快哉团队成员（邮箱相同）可以给她派任务"), logo: slackLogo, bot: true },
     { kind: "lark_bot", name: "Odelia in Lark (Feishu)", zh: "飞书中的 Odelia", why: B("@Odelia in a group or message her: she does the job as the teammate who asked and replies there. Only Placetta teammates (same email) can give her jobs", "在群里 @Odelia 或私信她：她以提问的团队成员身份完成工作并直接回复。只有快哉团队成员（邮箱相同）可以给她派任务"), logo: larkLogo, bot: true },
+    { kind: "teams_bot", name: "Odelia in Microsoft Teams", zh: "Microsoft Teams 中的 Odelia", why: B("Message Odelia or @mention her in a channel: she does the job as the teammate who asked and replies in the thread, with a button to approve in Placetta. Only people in your company's Microsoft tenant (same email) can give her jobs", "私信 Odelia 或在频道里 @Odelia：她以提问的同事身份完成工作并在话题中回复，附带在快哉中批准的按钮。只有贵公司 Microsoft 租户内的成员（邮箱相同）可以给她派任务"), logo: teamsLogo, bot: true },
+    { kind: "telegram_bot", name: "Odelia in Telegram", zh: "Telegram 中的 Odelia", why: B("Your own Telegram bot: message it, or @mention it in a group, and she does the job as the teammate who asked. Each teammate links their Telegram once with a code", "您自己的 Telegram 机器人：私信它，或在群里 @ 它，她以提问的同事身份完成工作。每位同事用验证码关联一次自己的 Telegram"), logo: telegramLogo, bot: true },
   ] },
   { group: B("Documents", "文件"), items: [
     { kind: "gdrive", name: "Google Drive", why: B("Import leases, floor plans and certificates", "导入租约、平面图和证书"), logo: gdriveLogo },
@@ -150,17 +153,25 @@ const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
 const CodeBlock = ({ text, copy, zh }: { text: string; copy: (t: string) => void; zh: boolean }) =>
   <pre className="sg-code"><button type="button" className="lnk" onClick={() => copy(text)}>{zh ? "复制" : "Copy"}</button>{text}</pre>;
 
-/** Each teammate's own WeChat: a code to send to the workspace's WeChat Official Account, which links their WeChat to
- *  them so Odelia works as them there. Any member, for themselves; the settings PIN when it's on, like linking a phone. */
-function WechatLink({ account }: { account: string | null }) {
+/** What differs between linking a WeChat and linking a Telegram: the calls, and the words. */
+const LINKS = {
+  wechat: { status: api.wechatLinkStatus, code: api.wechatLinkCode, unlink: api.wechatUnlink, name: B("WeChat", "微信"), place: B("the account", "公众号") },
+  telegram: { status: api.telegramLinkStatus, code: api.telegramLinkCode, unlink: api.telegramUnlink, name: B("Telegram", "Telegram"), place: B("the bot", "机器人") },
+} as const;
+
+/** Each teammate's own WeChat or Telegram: a code to send to the workspace's WeChat Official Account or Telegram bot
+ *  (for Telegram, also a link that opens the bot with the code in it), which links it to them so Odelia works as them
+ *  there. Any member, for themselves; the settings PIN when it's on, like linking a phone. */
+function ChatLink({ kind, account }: { kind: keyof typeof LINKS; account: string | null }) {
   const { lang, cloud, say } = useApp();
   const zh = lang === "zh";
   const pin = usePin();
   const wsId = cloud?.wsId ?? "";
+  const L = LINKS[kind], name = zh ? L.name.zh : L.name.en;
   const [st, setSt] = useState<api.WechatLink | null>(null);
-  const [code, setCode] = useState<{ code: string; expires_at: string } | null>(null);
+  const [code, setCode] = useState<{ code: string; expires_at: string; link?: string | null } | null>(null);
   const [busy, setBusy] = useState(false);
-  const load = useCallback(async () => { if (!wsId) return; try { setSt(await api.wechatLinkStatus(wsId)); } catch { setSt(null); } }, [wsId]);
+  const load = useCallback(async () => { if (!wsId) return; try { setSt(await L.status(wsId)); } catch { setSt(null); } }, [wsId, L]);
   useEffect(() => { void load(); }, [load]);
   // while a code waits to be sent, look every few seconds: it links the moment the account gets it
   useEffect(() => {
@@ -168,36 +179,40 @@ function WechatLink({ account }: { account: string | null }) {
     const t = setInterval(() => void load(), 3000);
     return () => clearInterval(t);
   }, [code, st?.linked, load]);
-  useEffect(() => { if (code && st?.linked) { setCode(null); say(zh ? "微信已关联。现在可以在微信里给 Odelia 派活了。" : "Your WeChat is linked. Message Odelia there anytime."); } }, [code, st?.linked, say, zh]);
+  useEffect(() => { if (code && st?.linked) { setCode(null); say(zh ? `${name}已关联。现在可以在${name}里给 Odelia 派活了。` : `Your ${name} is linked. Message Odelia there anytime.`); } }, [code, st?.linked, say, zh, name]);
   const getCode = async () => {
     if (pin.locked) { pin.guard(() => void getCode()); return; }
     setBusy(true);
-    try { const r = await api.wechatLinkCode(wsId); setCode({ code: r.code, expires_at: r.expires_at }); }
+    try { const r = await L.code(wsId); setCode({ code: r.code, expires_at: r.expires_at, link: "link" in r && typeof r.link === "string" ? r.link : null }); }
     catch (e) { const x = e as api.ApiError; say((zh && x.message_zh) || x.message); }
     setBusy(false);
   };
   const unlink = () => {
-    if (!window.confirm(zh ? "取消关联您的微信？之后在微信里发的消息不会再交给 Odelia。" : "Unlink your WeChat? Messages from it stop reaching Odelia.")) return;
-    pin.guard(() => void api.wechatUnlink(wsId).then(() => { setCode(null); return load(); }, e => say((e as api.ApiError).message)));
+    if (!window.confirm(zh ? `取消关联您的${name}？之后在${name}里发的消息不会再交给 Odelia。` : `Unlink your ${name}? Messages from it stop reaching Odelia.`)) return;
+    pin.guard(() => void L.unlink(wsId).then(() => { setCode(null); return load(); }, e => say((e as api.ApiError).message)));
   };
   if (!st?.connected) return null;
+  const place = zh ? L.place.zh : L.place.en;
   return (
     <li className="sg-hook sg-bot">
       {st.linked ? (
-        <p>{zh ? `您的微信已关联${st.linked_at ? `（${fmtDay(st.linked_at, lang, true)} 起）` : ""}。给${account ? ` ${account} ` : "公众号"}发消息即可以您的身份给 Odelia 派活。` : `Your WeChat is linked${st.linked_at ? ` since ${fmtDay(st.linked_at, lang, true)}` : ""}. Message the account${account ? ` ${account}` : ""} to give Odelia jobs as you.`}{" "}
+        <p>{zh ? `您的${name}已关联${st.linked_at ? `（${fmtDay(st.linked_at, lang, true)} 起）` : ""}。给${account ? ` ${account} ` : place}发消息即可以您的身份给 Odelia 派活。` : `Your ${name} is linked${st.linked_at ? ` since ${fmtDay(st.linked_at, lang, true)}` : ""}. Message ${place}${account ? ` ${account}` : ""} to give Odelia jobs as you.`}{" "}
           <button type="button" className="linkish" onClick={unlink}>{zh ? "取消关联" : "Unlink"}</button></p>
       ) : code ? (
         <>
-          <p>{zh ? "用您自己的微信，把这 6 位验证码发给公众号：" : "From your own WeChat, send this 6-digit code to the account:"}</p>
+          <p>{kind === "telegram"
+            ? (zh ? "用您自己的 Telegram 打开下面的链接并点“开始”，或在私聊中把这 6 位验证码发给机器人：" : "On your own Telegram, open the link below and tap Start, or send the bot this 6-digit code in a private chat:")
+            : (zh ? "用您自己的微信，把这 6 位验证码发给公众号：" : "From your own WeChat, send this 6-digit code to the account:")}</p>
           <code className="text-code" aria-label={zh ? "要发送的验证码" : "Code to send"}>{code.code}</code>
-          <p className="sg-note" aria-live="polite">{zh ? "收到后会自动关联，30 分钟内有效。" : "It links as soon as the account gets it. The code works for 30 minutes."}{" "}
+          {code.link && <p><a className="sbtn line" href={code.link} target="_blank" rel="noopener noreferrer">{zh ? "在 Telegram 中打开" : "Open in Telegram"}</a></p>}
+          <p className="sg-note" aria-live="polite">{zh ? "收到后会自动关联，30 分钟内有效。" : `It links as soon as ${place} gets it. The code works for 30 minutes.`}{" "}
             <button type="button" className="linkish" onClick={() => void getCode()}>{zh ? "换一个验证码" : "Get a new code"}</button></p>
         </>
       ) : (
-        <p>{zh ? "每位同事关联一次自己的微信，Odelia 才能确认是谁在提问。" : "Each teammate links their own WeChat once, so Odelia knows who is asking."}{" "}
-          <button type="button" className={"sbtn line" + (pin.locked ? " pinned" : "")} disabled={busy} onClick={() => void getCode()}>{pin.locked && <I.lock />}{busy ? "…" : zh ? "关联我的微信" : "Link my WeChat"}</button></p>
+        <p>{zh ? `每位同事关联一次自己的${name}，Odelia 才能确认是谁在提问。` : `Each teammate links their own ${name} once, so Odelia knows who is asking.`}{" "}
+          <button type="button" className={"sbtn line" + (pin.locked ? " pinned" : "")} disabled={busy} onClick={() => void getCode()}>{pin.locked && <I.lock />}{busy ? "…" : zh ? `关联我的${name}` : `Link my ${name}`}</button></p>
       )}
-      {cloud?.owner && <>
+      {kind === "wechat" && cloud?.owner && <>
         <p className="sg-fine">{zh ? "微信“消息与事件推送”的服务器地址：" : "The server address for WeChat's Message push:"}</p>
         <CodeBlock text={api.wechatServerUrl(wsId)} copy={(t) => { void navigator.clipboard?.writeText(t).then(() => say(zh ? "已复制" : "Copied"), () => undefined); }} zh={zh} />
       </>}
@@ -293,7 +308,7 @@ function Integrations() {
                   <span className="sg-tx"><b>{zh && it.zh ? it.zh : it.name}</b><small>{b(why)}</small>{c?.account && <small className="sg-acct">{c.account}</small>}</span>
                   {(status || right) && <span className="sg-r">{status}{right}</span>}
                 </li>,
-                it.kind === "wechat_bot" && c && c.status === "connected" && cloud ? <WechatLink key="wechat-link" account={c.account} /> : null,
+                (it.kind === "wechat_bot" || it.kind === "telegram_bot") && c && c.status === "connected" && cloud ? <ChatLink key={it.kind + "-link"} kind={it.kind === "wechat_bot" ? "wechat" : "telegram"} account={c.account} /> : null,
               ];
             })}
           </ul>
@@ -366,6 +381,19 @@ function Integrations() {
                 : (zh ? "API IP 白名单保持关闭。如果微信给账号管理员发消息，询问是否允许快哉的服务器，请选择允许。" : "Keep the API IP whitelist off. If WeChat messages the account's admin asking to allow Placetta's server, allow it.")}</li>
               <li>{zh ? "把 AppID 和 AppSecret 填在下面，连同这个 Token 和 EncodingAESKey（也可换成账号已在用的），点“连接”：" : "Paste the AppID and AppSecret below, with this Token and EncodingAESKey (or the ones the account already uses), and connect:"}</li>
             </ol>
+          ) : bot.kind === "teams_bot" ? (
+            <ol>
+              <li>{zh ? "在 Teams 开发者门户（dev.teams.microsoft.com）：工具 → 机器人管理 → 新建机器人，命名为 Odelia。在“配置”中把终结点地址设为：" : "In the Teams Developer Portal (dev.teams.microsoft.com): Tools, Bot management, New bot, named Odelia. Under Configure, set the endpoint address to:"}</li>
+              {bot.setup?.events_url ? <CodeBlock text={bot.setup.events_url} copy={copy} zh={zh} /> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
+              <li>{zh ? "在“客户端密码”中添加一个密码并复制，再复制机器人 ID。租户 ID 在 Azure 门户的 Microsoft Entra ID 概览页。" : "Under Client secrets, add one and copy it, then copy the bot ID. Your tenant ID is on the Microsoft Entra ID overview page in the Azure portal."}</li>
+              <li>{zh ? "然后在“应用”中新建应用 → 应用功能 → 机器人，选择这个机器人，勾选“个人”和“团队”，发布到您的组织（Teams 管理员批准后即可使用）。" : "Then Apps, New app, App features, Bot: pick this bot, tick Personal and Team, and publish it to your org (a Teams admin approves it)."}</li>
+            </ol>
+          ) : bot.kind === "telegram_bot" ? (
+            <ol>
+              <li>{zh ? "在 Telegram 中打开 @BotFather，发送 /newbot，按提示给机器人起名（例如“Lucky Leaf Odelia”）。" : "In Telegram, open @BotFather, send /newbot and name the bot (for example Lucky Leaf Odelia)."}</li>
+              <li>{zh ? "复制 BotFather 给的令牌，粘贴到下面。快哉会自动设置机器人的 webhook，不需要再做别的。" : "Copy the token BotFather gives you and paste it below. Placetta sets the bot's webhook itself; there's nothing else to set up."}</li>
+              <li>{zh ? "想在群里用：把机器人加进群，然后 @ 它、用 /ask 提问，或回复它的消息。" : "For a group: add the bot to it, then @mention it, use /ask, or reply to one of its messages."}</li>
+            </ol>
           ) : (
             <ol>
               <li>{zh ? "在飞书开放平台（open.feishu.cn）创建企业自建应用，添加“机器人”能力。" : "In the Lark developer console (open.larksuite.com, or open.feishu.cn in China), create a custom app and add the Bot feature."}</li>
@@ -380,13 +408,18 @@ function Integrations() {
               : bot.kind === "wechat_bot"
               // the Token and EncodingAESKey stay visible: they're typed into WeChat's console too
               ? [["app_id", "AppID (wx...)", true, "text"], ["app_secret", "AppSecret", true, "password"], ["token", "Token", true, "text"], ["aes_key", zh ? "EncodingAESKey（安全模式）" : "EncodingAESKey (safe mode)", false, "text"]]
+              : bot.kind === "teams_bot"
+              ? [["app_id", zh ? "机器人 ID" : "Bot ID", true, "text"], ["app_secret", zh ? "客户端密码" : "Client secret", true, "password"], ["tenant_id", zh ? "租户 ID（Microsoft Entra）" : "Tenant ID (Microsoft Entra)", true, "text"]]
+              : bot.kind === "telegram_bot"
+              ? [["bot_token", zh ? "机器人令牌（来自 @BotFather）" : "Bot token (from @BotFather)", true, "password"]]
               : [["app_id", "App ID (cli_...)", true, "text"], ["app_secret", "App Secret", true, "password"], ["verification_token", "Verification Token", true, "password"], ["encrypt_key", zh ? "Encrypt Key（可选）" : "Encrypt Key (optional)", false, "password"]]
             ).map(([k, ph, req, type]) => <input key={k as string} type={type as string} required={!!req} value={bot.v[k as string] ?? ""} onChange={e => setBot({ ...bot, v: { ...bot.v, [k as string]: e.target.value.trim() } })} placeholder={ph as string} aria-label={ph as string} autoComplete="off" spellCheck={false} />)}
             {bot.kind === "lark_bot" && <Select value={bot.v.domain ?? "feishu"} onChange={e => setBot({ ...bot, v: { ...bot.v, domain: e.target.value } })} aria-label={zh ? "版本" : "Edition"}><option value="feishu">{zh ? "飞书（中国）" : "Feishu (China)"}</option><option value="lark">{zh ? "Lark（国际版）" : "Lark (international)"}</option></Select>}
             {bot.kind === "wechat_bot" ? <>
               <p className="sg-fine">{zh ? "连接后，再把服务器地址、Token 和 EncodingAESKey 填进微信的“消息与事件推送”（下一步会显示）。微信提交时会立即检查这个地址，所以要先在这里连接。" : "After connecting, the server address, Token and EncodingAESKey go into WeChat's Message push (the next step shows them). WeChat checks the address the moment it's submitted, so connect here first."}</p>
               <p className="sg-fine">{zh ? "只有关联了微信的快哉团队成员可以给她派任务，她以对方的身份工作。任何申报、付款或发送仍需在快哉中批准。" : "Only Placetta teammates who linked their WeChat can give her jobs, and she works as them. Anything to file, pay or send still waits for approval in Placetta."}</p>
-            </> : <p className="sg-fine">{zh ? "她以连接者的身份工作，频道里的任何人都可以给她派活。任何申报、付款或发送仍需在快哉中批准。" : "She works as the person who connects her, and anyone in the channel can give her a job. Anything to file, pay or send still waits for approval in Placetta."}</p>}
+            </> : bot.kind === "telegram_bot" ? <p className="sg-fine">{zh ? "只有关联了 Telegram 的快哉团队成员可以给她派任务，她以对方的身份工作。任何申报、付款或发送仍需在快哉中批准。" : "Only Placetta teammates who linked their Telegram can give her jobs, and she works as them. Anything to file, pay or send still waits for approval in Placetta."}</p>
+            : <p className="sg-fine">{zh ? "她以提问的快哉团队成员的身份工作（按邮箱匹配），访客和其他公司的人无法派活。任何申报、付款或发送仍需在快哉中批准。" : "She works as the Placetta teammate who asks (matched by email); guests and people from other companies can't give her jobs. Anything to file, pay or send still waits for approval in Placetta."}</p>}
             <div className="sst-act">
               <button type="button" className="sbtn quiet" onClick={() => setBot(null)}>{zh ? "取消" : "Cancel"}</button>
               <button type="submit" className="sbtn ink" disabled={bot.busy}>{bot.busy ? (zh ? "正在检查…" : "Checking...") : (zh ? "连接" : "Connect")}</button>
