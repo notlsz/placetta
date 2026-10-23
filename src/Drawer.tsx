@@ -18,6 +18,8 @@ import { preflight } from "./smart";
 import { FileCard, I, LevelTag, Modal, Pill, Sheet, StatusChip, feeText, feeTotal } from "./ui";
 import { INK } from "./pages";
 import { filingBlockers } from "./core";
+import { findItAsk } from "./StillNeeded";
+import { B } from "./bi";
 import { BY_HAND } from "./guard";
 import { Working } from "./Bot";
 import { AllowRule } from "./AllowRule";
@@ -181,7 +183,7 @@ function Checklist({ a }: { a: Application }) {
 }
 
 function CheckRow({ a, c }: { a: Application; c: CheckItem }) {
-  const { b, t, ws, uploading, upload, busy } = useApp();
+  const { b, t, ws, uploading, upload, busy, ask, lang } = useApp();
   const input = useRef<HTMLInputElement>(null);
   const doc = c.doc ? ws.docs.find(d => d.id === c.doc) : undefined;
   const dep = c.dep ? ws.apps.find(x => x.id === c.dep) : undefined;
@@ -207,7 +209,8 @@ function CheckRow({ a, c }: { a: Application; c: CheckItem }) {
         {c.state === "missing" && !c.dep && !reading && (
           <div className="ck-act">
             <button type="button" className="pill ink sm" disabled={busy} onClick={() => input.current?.click()}><I.upload />{t("upload")}</button>
-            <input ref={input} type="file" hidden onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) upload(a.id, c.id, f); }} />
+            <button type="button" className="pill quiet sm" disabled={busy} onClick={() => ask(b(findItAsk(c.label, a.name)))}>{lang === "zh" ? "帮我找" : "Find it for me"}</button>
+            <input ref={input} type="file" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx" hidden onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) upload(a.id, c.id, f); }} />
           </div>
         )}
       </div>
@@ -361,7 +364,7 @@ function Receipt({ a }: { a: Application }) {
 /* ------------------------------- approval ------------------------------- */
 
 export function ApproveModal({ id, onClose }: { id: string; onClose: () => void }) {
-  const { b, t, lang, ws, approve, openApp, busy, cloud, go } = useApp();
+  const { b, t, lang, ws, approve, openApp, busy, cloud, go, ask } = useApp();
   const a = ws.approvals.find(x => x.id === id);
   const [sig, setSig] = useState<Signed | null>(null);
   const allow = useRef<(() => void) | null>(null);   // Always allow, ticked on this card (src/AllowRule.tsx): added on approve
@@ -407,6 +410,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
               {left.empty.map((l, i) => <li key={"f" + i}>{b(l)}</li>)}
               {left.missing.map((l, i) => <li key={"d" + i}>{b(l)}<small>{lang === "zh" ? "文件" : " (document)"}</small></li>)}
             </ul>
+            {app && <button type="button" className="pill sm" disabled={busy} onClick={() => { onClose(); ask(b(findItAsk(B([...left.empty, ...left.missing].map(x => x.en).join(", "), [...left.empty, ...left.missing].map(x => x.zh).join("、")), app.name, true))); }}><I.spark />{zh ? "交给 Odelia 找齐" : "Have Odelia find these"}</button>}
           </section>
         )}
         <section>

@@ -25,6 +25,7 @@ import { hasReview, PermitsReview } from "./ReviewTable";
 import { CommentsButton, MineToggle, useTeam, type Collab } from "./Comments";
 import { SignButton } from "./SignDoc";
 import { shortName } from "./collab";
+import { StillNeeded } from "./StillNeeded";
 
 /** What the Mine filter keeps: an application or job assigned to this person, or a job about one that is. */
 const mineApp = (team: Collab, id?: string) => !!id && team.isMine({ kind: "app", id });
@@ -338,6 +339,7 @@ export function Overview() {
           </div>
         </section>
       )}
+      {!mine && <StillNeeded />}
 
       {working && (
         <section className="sec hm-work">

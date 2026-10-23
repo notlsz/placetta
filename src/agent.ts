@@ -510,7 +510,20 @@ function waiting(ctx: Context): Plan {
 }
 
 /** Promise requests, checked before the lookup of a requirement so "our permit was denied" isn't answered as a lookup. */
+/** "Find it for me" (src/StillNeeded.tsx): she looks where it can be found and asks only when a person must give it. */
+function findIt(_ctx: Context, text: string): Plan {
+  const what = /: (.+?)\. Get /.exec(text)?.[1] ?? /：(.+?)。/.exec(text)?.[1] ?? "";
+  const personal = /\b(ID|passport|signature|social security|SSN|driver)\b|证件|签名|护照/i.test(what);
+  return {
+    steps: [S("searching", "Looking in your documents and email", "查找您的文件和邮件"), S("connecting", "Checking connected apps and public records", "查看已连接的应用和公开记录"), S("shaping", "Filling in what I found", "填入找到的内容")],
+    reply: { text: [personal
+      ? B(`${what} has to come from you: it's yours to give, not on any record I can reach. A photo of it is enough.`, `${what}必须由您本人提供，我能查到的记录里没有。拍张照片就行。`)
+      : B(`Looking for it in your documents, email, connected apps and public records${what ? `: ${what}` : ""}. I'll fill in what I find and come back only if it truly needs you.`, `正在您的文件、邮件、已连接的应用和公开记录中查找${what ? `：${what}` : ""}。找到就直接填好，只有确实需要您时才会再问。`)] },
+  };
+}
+
 const PROMISES: { match: RegExp; plan: (ctx: Context, text: string) => Plan }[] = [
+  { match: /^Find (this|these) for the |^为.+找到(这些|这一项)/, plan: findIt },
   { match: /\bwhere (does|do|is|are)\b.*\bstand|\bstatus of\b|\bhow is\b.*\bgoing|进展|进度|怎么样了/i, plan: where },
   { match: /waiting (for|on) (my|me)\b|needs? (my )?approval|what (do|does) .*need from me|等我(批准|处理)|待(我)?批准|需要我(批准|做)/i, plan: (ctx) => waiting(ctx) },
   { match: /\bappeal|\bdenied\b|\breject(ed|ion)\b|申诉|驳回|被拒/i, plan: appeal },
