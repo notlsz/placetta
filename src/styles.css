@@ -2312,3 +2312,121 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 .also-src li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 4px; }
 .also-src .also-n { font-variant-numeric: tabular-nums; text-align: right; padding-right: 4px; }
 @media (max-width: 480px) { .hm-also { padding: 16px; } }
+
+/* ============================================================================================================
+   Home, rebuilt around one next step (src/pages.tsx Overview, src/doNext.ts): a short header with the progress line,
+   the "Do this next" card, Waiting on you (three at most), Odelia is working on (one line each), All set (folded),
+   and the rest behind tabs. Plain icons, no discs behind them.
+   ============================================================================================================ */
+.page.home { padding-top: 44px; }
+.hm-top { display: flex; align-items: center; gap: 18px; }
+.hm-bot { flex: none; display: grid; place-items: center; width: 64px; height: 64px; }
+.hm-tx { min-width: 0; }
+.hm-tx h1 { margin: 0; font-family: var(--display); font-size: 26px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; overflow-wrap: anywhere; }
+.hm-tx .progress { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 8px; }
+.hm-tx .progress .bar { display: flex; width: 140px; }
+.hm-tx .progress .bar i.b2 { background: var(--blue); opacity: .45; border-radius: 0; }
+.hm-tx .progress .pl small { font-size: inherit; color: var(--ink3); }
+.hm-open { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; font-size: 13px; color: var(--ink2); }
+.hm-open svg { width: 14px; height: 14px; color: var(--ink3); }
+.page.home .mine-row { margin-top: 20px; }
+
+.dtn { margin-top: 28px; padding: 26px 28px 24px; border-radius: 24px; background: linear-gradient(180deg, var(--card) 0%, var(--card2) 100%); box-shadow: var(--frost), 0 0 0 1px var(--line); }
+.dtn-k { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0; font-size: 13px; font-weight: 600; color: var(--warm); }
+.dtn-k span { font-weight: 500; color: var(--ink3); }
+.dtn h2 { margin: 8px 0 0; font-family: var(--display); font-size: 26px; font-weight: 600; letter-spacing: -.02em; line-height: 1.22; }
+.dtn-why { margin: 8px 0 0; font-size: 15px; line-height: 1.5; color: var(--ink2); }
+.dtn-act { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 20px; }
+.dtn-act .pill.dtn-go { height: 48px; padding: 0 10px 0 22px; font-size: 15.5px; }
+.dtn-act .lnk { display: inline-flex; align-items: center; min-height: 44px; padding: 0; border: 0; background: none; font: inherit; font-size: 14px; color: var(--blue-ink); cursor: pointer; }
+.dtn-act .lnk.quiet { color: var(--ink3); }
+.dtn-act .hold { margin: 0; }
+
+.hm-calm { margin-top: 28px; padding: 34px 28px; border-radius: 24px; text-align: center; background: var(--sky-wash); }
+.hm-calm-i { display: inline-grid; place-items: center; color: var(--blue-ink); }
+.hm-calm-i svg { width: 28px; height: 28px; }
+.hm-calm h2 { margin: 8px 0 0; font-family: var(--display); font-size: 24px; font-weight: 600; letter-spacing: -.02em; }
+.hm-calm p { margin: 6px 0 0; font-size: 15px; color: var(--ink2); }
+.hm-calm .hm-calm-r { margin-top: 14px; font-size: 13.5px; color: var(--ink3); }
+
+.page.home .hm-needs .lnk.more, .page.home .hm-panel .lnk.more { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; margin-top: 6px; padding: 0; border: 0; background: none; font: inherit; font-size: 13.5px; color: var(--blue-ink); cursor: pointer; }
+.appr.k-doc .lnk { padding: 0 4px; border: 0; background: none; font: inherit; font-size: 13px; color: var(--blue-ink); cursor: pointer; white-space: nowrap; }
+
+.wls { list-style: none; margin: 4px 0 0; padding: 0; border-radius: 18px; background: var(--card); box-shadow: 0 0 0 1px var(--line); overflow: hidden; }
+.wls > li + li { border-top: 1px solid var(--line); }
+.wl { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 10px 16px; border: 0; background: none; font: inherit; text-align: left; color: var(--ink); cursor: pointer; list-style: none; }
+div.wl { cursor: default; }
+.wl::-webkit-details-marker { display: none; }
+.wl b { flex: 1 1 auto; min-width: 0; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wl span { flex: none; max-width: 48%; font-size: 13px; color: var(--ink3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wl > svg { flex: none; width: 14px; height: 14px; color: var(--ink3); transition: transform .2s; }
+.wl-d[open] > .wl > svg { transform: rotate(90deg); }
+.wl-body { padding: 0 12px 12px; }
+.hm-work .liveline { margin: 0 0 10px; }
+
+.hm-done > summary { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 15px; font-weight: 600; cursor: pointer; list-style: none; }
+.hm-done > summary::-webkit-details-marker { display: none; }
+.hm-done > summary em { font-style: normal; font-size: 12px; font-weight: 500; padding: 0 8px; border-radius: 99px; background: var(--mist2); color: var(--ink2); }
+.hm-done > summary svg { width: 14px; height: 14px; color: var(--ink3); transition: transform .2s; }
+.hm-done[open] > summary svg { transform: rotate(90deg); }
+
+.hm-tabs { margin-bottom: 16px; }
+.hm-tabs button { display: inline-flex; align-items: center; min-height: 36px; padding: 7px 15px; border: 0; border-radius: 999px; background: none; font: inherit; font-size: 13.5px; font-weight: 500; color: var(--ink2); white-space: nowrap; cursor: pointer; }
+.hm-tabs button:hover { color: var(--ink); }
+.hm-tabs button[aria-selected="true"] { background: var(--bg); color: var(--ink); box-shadow: 0 1px 2px rgba(var(--e), .08), 0 0 0 .5px rgba(var(--e), .04); }
+.hm-panel .sec.met, .hm-panel .sec.hm-also { margin-top: 0; }
+.hm-panel .plan-card .ctx { margin: 0 0 8px; font-size: 13px; color: var(--ink3); }
+
+@media (max-width: 859px) {
+  .page.home { padding-top: 20px; }
+  .hm-top { gap: 12px; }
+  .hm-bot { width: 52px; height: 52px; }
+  .hm-tx h1 { font-size: 22px; }
+  .hm-tx .progress .bar { width: 96px; }
+  .dtn { margin-top: 20px; padding: 20px 18px 18px; border-radius: 20px; }
+  .dtn h2 { font-size: 22px; }
+  .dtn-act .pill.dtn-go { width: 100%; justify-content: space-between; }
+  .wl span { max-width: 42%; }
+  .appr.k-doc { grid-template-columns: 34px minmax(0, 1fr); }
+  .appr.k-doc .appr-btns { grid-column: 2; flex-wrap: wrap; }
+}
+
+/* Top bar icons: one set, one size. Lucide's 20px at a 1.5px stroke (1.8 in the 24 unit box), the same color, a 44px
+   target each, centered on the wordmark; no disc behind them. Desktop: the bell and the collapse button by the logo;
+   phone: the menu, the bell and settings. */
+.side-top { height: 44px; padding: 0 0 0 12px; }
+.side-tools { gap: 0; }
+.side-top .brand { padding: 2px; }
+.bellb, .slimb, .mbar .icbtn, .side-top .icbtn { width: 44px; height: 44px; border-radius: 12px; color: var(--ink2); }
+.bellb svg, .slimb svg, .mbar .icbtn svg, .side-top .icbtn svg { width: 20px; height: 20px; stroke-width: 1.8; }
+.bellb em { top: 6px; right: 6px; }
+.mbar { padding: 2px 4px; }
+.mbar .brand { padding: 2px; }
+.slim .side-top { gap: 4px; }
+
+/* Onboarding's last screen (src/cloud/MoreStep.tsx): paste or drop to fill, then one question at a time with chips to
+   confirm what was found. */
+.onb-bar { height: 4px; margin: 2px 0 18px; border-radius: 99px; background: var(--sky); overflow: hidden; }
+.onb-bar i { display: block; height: 100%; border-radius: inherit; background: var(--blue-ink); transition: width .4s ease; }
+.onb-import { display: flex; flex-direction: column; gap: 8px; margin: 0 0 22px; padding: 16px; border-radius: 18px; background: var(--sky-wash); }
+.onb-import > p { margin: 0; font-size: 14px; font-weight: 500; color: var(--ink); }
+.onb-paste { display: flex; flex-direction: column; gap: 8px; }
+.onb-paste textarea { width: 100%; min-height: 56px; padding: 10px 12px; border: 0; border-radius: 12px; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .1); font: inherit; font-size: 14px; color: var(--ink); resize: vertical; }
+.onb-paste-act { display: flex; flex-wrap: wrap; gap: 8px; }
+.onb-paste-act .sbtn { height: 40px; }
+.onb-paste-act svg { width: 15px; height: 15px; }
+.onb-import .onb-hint { font-size: 12.5px; color: var(--ink3); }
+.onb-import .onb-read { margin: 0; font-size: 13px; }
+.onb-one h1 { margin: 0 0 6px; font-size: 26px; }
+.onb-confirm { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.onb-confirm .chip { display: inline-flex; align-items: center; gap: 8px; height: 46px; max-width: 100%; padding: 0 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.onb-confirm .chip.on { background: var(--ink); color: var(--on-ink); box-shadow: none; }
+.onb-confirm .chip svg { flex: none; width: 15px; height: 15px; }
+.onb-more .onb-act3 .sbtn { height: 44px; }
+.onb-more .onb-skipall { align-self: flex-start; min-height: 40px; }
+.fact-imp { display: flex; flex-direction: column; gap: 8px; margin: 0 0 18px; }
+.fact-imp textarea { width: 100%; min-height: 52px; padding: 10px 12px; border: 0; border-radius: 12px; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .1); font: inherit; font-size: 14px; color: var(--ink); resize: vertical; }
+.fact-imp-act { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.fact-imp-act small { font-size: 13px; color: var(--ink3); }
+.fact-imp-act .chip { display: inline-flex; align-items: center; gap: 6px; height: 36px; font-size: 13px; }
+.fact-imp-act .chip svg { width: 14px; height: 14px; }

@@ -19,6 +19,22 @@ async function pdfjs() {
 /** Where the build put pdf.js's image decoders and standard fonts. */
 const BASE = (import.meta.env?.MODE === "single" ? "" : (import.meta.env?.BASE_URL ?? "/")) + "pdfjs/";
 
+/** The words on the first pages of a PDF, for reading business facts out of a document dropped at sign-up
+ *  (src/intakeParse.ts). Nothing leaves the browser. */
+export async function pdfText(bytes: Uint8Array, pages = 4): Promise<string> {
+  const m = await pdfjs();
+  const doc = await m.getDocument({ data: bytes.slice(), isEvalSupported: false, wasmUrl: BASE + "wasm/", standardFontDataUrl: BASE + "standard_fonts/" }).promise;
+  const out: string[] = [];
+  try {
+    for (let n = 1; n <= Math.min(pages, doc.numPages); n++) {
+      const c = await (await doc.getPage(n)).getTextContent();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      out.push(c.items.map((i: any) => (i.str ?? "") + (i.hasEOL ? "\n" : " ")).join(""));
+    }
+  } finally { void doc.destroy(); }
+  return out.join("\n");
+}
+
 const toUrl = (c: HTMLCanvasElement) => new Promise<string>((ok, no) => c.toBlob(b => (b ? ok(URL.createObjectURL(b)) : no(new Error("no image"))), "image/png"));
 export type Picture = { url: string; w: number; h: number };
 

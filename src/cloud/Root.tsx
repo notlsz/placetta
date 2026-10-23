@@ -17,6 +17,8 @@ import type { HqRow } from "../hq";
 import { firstPlanClock } from "../plan/prefill";
 import { CITIES, ownWords, parsePlace, readLine, SELLS, STATES, streetIn, zipIn } from "../plan/line";
 import { firstWorkspace } from "../plan/start";
+import { MoreStep } from "./MoreStep";
+import type { Read } from "../intakeParse";
 import { intakeQuestions, type Intake } from "../plan/intake";
 import { phoneConsent } from "../consent";
 import { captureStart, claimStart, clearStart, peekStart, pendingStart, type StartClaim, type StartPeek } from "./textStart";
@@ -504,6 +506,10 @@ function Onboard({ lang, email, agreedAtSignup = false, onCreated, onCancel }: {
     if (q) setIntake(x => { const n = { ...x }; if (v === undefined) delete n[q.key]; else n[q.key] = v; return n; });
     if (qi + 1 < questions.length) setQi(qi + 1); else setStep("more");
   };
+  // what was pasted or dropped on the last screen: extra facts (EIN, website, phone), and the files, saved to Documents
+  // once the workspace exists so Odelia reads them (review_documents) with their quotes
+  const [found, setFound] = useState<Read>({});
+  const [files, setFiles] = useState<File[]>([]);
   const create = async (skip = false) => {
     const at = settle();
     if (!at) return;
@@ -520,8 +526,15 @@ function Onboard({ lang, email, agreedAtSignup = false, onCreated, onCancel }: {
       address: (skip ? "" : more.address.trim()) || (streetNow ? `${streetNow}, ${city}, ${state}` : ""),
       intake: Object.fromEntries(Object.entries(intake).filter(([k]) => questions.some(q => q.key === k))),
     });
+    // the EIN, website and phone read from a paste or a document, as business facts with the words they came from
+    const extra = ([["ein", B("EIN", "EIN")], ["website", B("Website", "网站")], ["phone", B("Phone", "电话")]] as const)
+      .filter(([k, label]) => found[k] && !ws.facts.some(x => x.label.en === label.en))
+      .map(([k, label]) => ({ id: "f-" + k, group: "business" as const, label, value: B(found[k]!.value, found[k]!.value), source: B(`From what you pasted: "${found[k]!.quote.slice(0, 80)}"`, `来自您粘贴的内容：“${found[k]!.quote.slice(0, 80)}”`) }));
+    if (!skip && extra.length) ws.facts = [...ws.facts, ...extra];
     try {
       const id = await api.createWorkspace(brand, ws);
+      // the documents dropped at sign-up, in Documents for Odelia to read (a failed upload doesn't hold up the plan)
+      for (const file of skip ? [] : files) await api.uploadDoc(id, file).catch(() => null);
       // the box they checked, recorded with the version they were shown (if it fails, the app asks again)
       await api.acceptTerms(UPDATED, id).catch(() => null);
       await claimReferral(id, share);
@@ -596,38 +609,10 @@ function Onboard({ lang, email, agreedAtSignup = false, onCreated, onCancel }: {
   if (step === "more") {
     const ex = parsed ?? { city: placeNow.replace(/,.*$/, "").trim() || "Flushing", state: f.state || "NY" };
     return (
-      <div className="gate-card wide">
-        <OnbProgress lang={lang} step={2} />
-        <h1>{more.address ? L(B("Two answers fill your first application.", "再答两个问题，第一份申请就填好了。")) : L(B("Three answers fill your first application.", "回答三个问题，第一份申请就填好了。"))}</h1>
-        <p className="gate-sub">{L(B("All optional. Skip any; Odelia asks when she needs it.", "都是选填。可以跳过，Odelia 需要时再问。"))}</p>
-        <form className="onb" onSubmit={e => { e.preventDefault(); void create(); }}>
-          <div className="q">
-            <span id="onb-legal-t">{L(B("Legal business name", "企业法定名称"))}</span>
-            <div className="onb-pair">
-              <input id="onb-legal" aria-labelledby="onb-legal-t" value={more.notFormed ? "" : more.legal} disabled={more.notFormed} onChange={e => setMore({ ...more, legal: e.target.value })} placeholder="Lucky Leaf Tea LLC" autoComplete="organization" autoFocus />
-              <button type="button" role="checkbox" aria-checked={more.notFormed} className="chip" onClick={() => setMore({ ...more, notFormed: !more.notFormed })}>{L(B("Not formed yet", "还没注册公司"))}</button>
-            </div>
-            <small className="onb-hint">{L(B("Exactly as the state has it, with LLC or Inc.", "与州政府登记的完全一致，包括 LLC 或 Inc."))}</small>
-          </div>
-          <label className="q">
-            <span>{L(B("Owner's full name", "所有人全名"))}</span>
-            <input id="onb-owner" value={more.owner} onChange={e => setMore({ ...more, owner: e.target.value })} placeholder="Mei Chen" autoComplete="name" />
-            <small className="onb-hint">{L(B("As on your ID, in English letters.", "与证件一致，请用英文或拼音。"))}</small>
-          </label>
-          <label className="q">
-            <span>{L(B("Store address", "门店地址"))}</span>
-            <input id="onb-address" value={more.address} onChange={e => setMore({ ...more, address: e.target.value })} placeholder={`38 Main St, ${ex.city}, ${ex.state}`} autoComplete="street-address" />
-            <small className="onb-hint">{L(B("Street, city, state and ZIP code.", "街道、城市、州和邮编，请用英文。"))}</small>
-          </label>
-          <div className="onb-act onb-act3">
-            <button type="button" className="sbtn quiet" disabled={busy} onClick={() => { setErr(""); if (questions.length) { setQi(questions.length - 1); setStep("about"); } else setStep("line"); }}>{L(B("Back", "返回"))}</button>
-            <button type="button" className="sbtn line" disabled={busy} onClick={() => void create(true)}>{L(B("Skip", "跳过"))}</button>
-            <button type="submit" className="sbtn ink big" disabled={busy}>{busy ? "…" : L(B("Fill my application", "填好申请"))}</button>
-          </div>
-        </form>
-        {err && <p className="gate-err" role="alert">{err}</p>}
-        <p className="onb-who">{L(B(`Signed in as ${email}`, `已登录 ${email}`))}</p>
-      </div>
+      <MoreStep lang={lang} more={more} setMore={setMore} found={found} setFound={setFound} files={files} setFiles={setFiles} busy={busy} err={err} email={email}
+        placeholder={`38 Main St, ${ex.city}, ${ex.state}`}
+        onBack={() => { setErr(""); if (questions.length) { setQi(questions.length - 1); setStep("about"); } else setStep("line"); }}
+        onSkip={() => void create(true)} onDone={() => void create()} />
     );
   }
   return (

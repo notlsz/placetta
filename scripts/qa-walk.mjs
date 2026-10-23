@@ -296,12 +296,20 @@ async function signUp(p, w, { email = "qa@example.com", line, answers = true, no
   await p.locator("#onb-agree").check();
   await p.waitForTimeout(250);
   await p.click("form.onb button[type=submit]");
+  // the yes-or-no questions that apply (src/plan/intake.ts), answered "Not sure"
+  for (let i = 0; i < 8 && !(await p.locator("#onb-legal").count()); i++) {
+    if (await p.locator("#onb-q").count()) { await p.locator(".onb-act3 .sbtn.line").click(); await p.waitForTimeout(250); } else await p.waitForTimeout(400);
+  }
   if (!(await appear("#onb-legal"))) return null;
   if (notFormed) await p.locator(".onb-pair .chip").click();
-  else if (answers) await p.fill("#onb-legal", "Lucky Leaf Tea LLC");
-  if (answers) { await p.fill("#onb-owner", "Mei Chen"); await p.fill("#onb-address", "1 N First St, San Jose, CA 95113"); }
+  // the last screen asks one question at a time (src/cloud/MoreStep.tsx): the legal name, the owner, the address
+  if (answers) for (const [id, v] of notFormed ? [["#onb-owner", "Mei Chen"], ["#onb-address", "1 N First St, San Jose, CA 95113"]] : [["#onb-legal", "Lucky Leaf Tea LLC"], ["#onb-owner", "Mei Chen"], ["#onb-address", "1 N First St, San Jose, CA 95113"]]) {
+    if (!(await appear(id, 5000))) break;
+    await p.fill(id, v);
+    if (id !== "#onb-address") { await p.click("form.onb button[type=submit]"); await p.waitForTimeout(200); }
+  }
   const t0 = Date.now();
-  if (skip) await p.locator(".onb-act3 .sbtn.line").click(); else await p.click("form.onb button[type=submit]");
+  if (skip) await p.locator(".onb-skipall").click(); else await p.click("form.onb button[type=submit]");
   // Home, with the plan on it
   await p.locator("main.content h1").first().waitFor({ timeout: 15000 }).catch(() => {});
   return Date.now() - t0;
@@ -435,10 +443,14 @@ flow("signup-one-line", ["preview"], async w => {
   await w.tap(new RegExp("^" + w.L("Back", "返回") + "$"), { what: "Back on the second screen" });
   await w.expect(await p.locator("#onb-line").count(), "Back didn't return to the one line");
   await w.tap("form.onb button[type=submit]", { what: "Start again" });
-  await p.fill("#onb-legal", "Lucky Leaf Tea LLC"); await p.fill("#onb-owner", "Mei Chen"); await p.fill("#onb-address", "1 N First St, San Jose, CA 95113");
+  for (const [id, v] of [["#onb-legal", "Lucky Leaf Tea LLC"], ["#onb-owner", "Mei Chen"], ["#onb-address", "1 N First St, San Jose, CA 95113"]]) {
+    await p.locator(id).waitFor({ timeout: 5000 }).catch(() => {});
+    await p.fill(id, v);
+    if (id !== "#onb-address") { await p.click("form.onb button[type=submit]"); await p.waitForTimeout(200); }
+  }
   const t0 = Date.now();
   await p.click("form.onb button[type=submit]");
-  const ein = p.locator(".appr", { hasText: /EIN|Employer Identification|雇主识别/ }).first();
+  const ein = p.locator(".dtn, .appr", { hasText: /EIN|Employer Identification|雇主识别/ }).first();
   const ok = await ein.waitFor({ timeout: 8000 }).then(() => true, () => false);
   const ms = Date.now() - t0;
   await w.look("home after sign-up");
@@ -538,6 +550,8 @@ flow("home-needs-you", ["sample"], async w => {
   await w.go("");
   await w.look("home");
   // Approve: two taps (the card, then the sheet)
+  // the sign permit waits behind "See all" (Home shows the next step and three more)
+  await w.tap(new RegExp("^" + w.L("See all", "查看全部")), { optional: true, what: "See all in Waiting on you" });
   const card = p.locator(".appr").filter({ hasText: w.L("sign permit", "招牌许可") }).first();
   if (!(await w.expect(await card.count(), "no sign permit card in Needs you"))) return;
   await card.getByRole("button", { name: w.L("Approve", "批准") }).click(); await p.waitForTimeout(500);
@@ -621,12 +635,14 @@ flow("home-sections", ["sample", "preview"], async w => {
     await rows.nth(i).scrollIntoViewIfNeeded().catch(() => {});
     await rows.nth(i).click(); await p.waitForTimeout(500); await w.look(`plan row ${i + 1}`); await w.close();
   }
-  // the monthly numbers card
+  // the monthly numbers card, behind Home's This month tab
+  await w.tap(p.getByRole("tab", { name: w.L("This month", "本月") }), { optional: true, what: "the This month tab" });
   const tiles = p.locator("main .met-tile");
   const nt = await tiles.count();
   if (w.combo.build === "sample") await w.expect(nt >= 4, `the monthly numbers card has ${nt} tiles`);
   for (let i = 0; i < nt; i++) {
     await w.go("");
+    await p.getByRole("tab", { name: w.L("This month", "本月") }).click().catch(() => {});
     const t = p.locator("main .met-tile").nth(i);
     const label = (await t.innerText().catch(() => "")).replace(/\s+/g, " ").slice(0, 40);
     await t.scrollIntoViewIfNeeded().catch(() => {}); await t.click().catch(() => {}); await p.waitForTimeout(500);
@@ -636,6 +652,7 @@ flow("home-sections", ["sample", "preview"], async w => {
   // Coming up and Recent updates
   await w.go("");
   for (const name of [w.L("Draft it", "起草"), w.L("See what changed", "查看变化")]) {
+    await p.getByRole("tab", { name: w.L("Updates", "动态") }).click().catch(() => {});
     if (await w.tap(new RegExp("^" + name), { optional: true, wait: 600 })) { await w.look(name); await w.idle(); await w.look(name + " done"); await w.close(); await w.go(""); }
   }
   for (const name of [w.L("Open", "打开"), w.L("Handle it", "处理")]) {
@@ -1156,7 +1173,7 @@ flow("tour", ["sample", "preview"], async w => {
   await p.evaluate(() => { try { localStorage.removeItem("placetta-tour-1"); } catch { /* blocked */ } }).catch(() => {});
   await w.go("", { tourOff: false });
   // a new account's tour waits while the application filled at sign-up waits, so the first tap is Approve
-  if (w.combo.build === "preview" && await p.locator(".appr", { hasText: /EIN|Employer Identification|雇主识别/ }).count()) {
+  if (w.combo.build === "preview" && await p.locator(".dtn, .appr", { hasText: /EIN|Employer Identification|雇主识别/ }).count()) {
     await p.waitForTimeout(1500);
     await w.expect(!(await p.locator(".tour").filter({ visible: true }).count()), "the tour opened over the first win waiting for approval");
     await w.go("settings/help", { tourOff: false });

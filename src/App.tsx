@@ -85,11 +85,12 @@ const NAV: { v: View; k: Key; Icon: () => React.ReactElement }[] = [
 ];
 /* The pages that moved under tabs, for anyone who knew them as entries of their own: a folded "More" group below the
    four places (it opens when you're on one of them, and remembers open or closed per browser), and the same list in
-   the phone menu. Each links to the page's new address and lights up there. */
+   the phone menu. Each links to the page's new address and lights up there. Updates isn't listed: the bell by the logo
+   (and in the phone's top bar) opens it with its unread count, and so do Odelia's Updates tab and Home's "Odelia is
+   working on". */
 const MORE: { id: string; v: View; sub?: string; k: Key; Icon: () => React.ReactElement }[] = [
   { id: "work", v: "odelia", sub: "work", k: "nav_work", Icon: I.queue },
   { id: "playbooks", v: "odelia", sub: "playbooks", k: "nav_playbooks", Icon: I.book },
-  { id: "updates", v: "odelia", sub: "updates", k: "nav_updates", Icon: I.bell },
   { id: "documents", v: "permits", sub: "documents", k: "nav_docs", Icon: I.docs },
   { id: "deadlines", v: "permits", sub: "deadlines", k: "nav_deadlines", Icon: I.deadlines },
   { id: "find", v: "find", k: "nav_find", Icon: I.find },
@@ -1366,7 +1367,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
 
   const slim = slimPref && !phone;
   // the pages that moved under tabs, with the counts the old Work and Updates entries carried
-  const moreBadge: Record<string, number> = { work: waitingJobs, updates: unread };
+  const moreBadge: Record<string, number> = { work: waitingJobs };
   const moreRows = MORE.map(m => (
     <li key={m.id}><a {...navLink(m.v, m.sub)} aria-current={atMore(m, view, sub) ? "page" : undefined} title={slim ? t(m.k) : undefined}>
       <m.Icon /><span>{t(m.k)}</span>{moreBadge[m.id] ? <em>{moreBadge[m.id]}</em> : null}
@@ -1378,7 +1379,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}>{slim ? <Mark size={22} /> : <Logo lang={lang} height={17} />}</button>
         {phone
           ? <button type="button" className="icbtn" onClick={() => setNavOpen(false)} aria-label={t("close")}><I.x /></button>
-          : <span className="side-tools">{!slim && bell}<button type="button" className="slimb" onClick={() => setSlimPref(v => !v)} aria-label={t(slim ? "expandMenu" : "collapseMenu")} title={t(slim ? "expandMenu" : "collapseMenu")} aria-expanded={!slim}><I.panel /></button></span>}
+          : <span className="side-tools">{bell}<button type="button" className="slimb" onClick={() => setSlimPref(v => !v)} aria-label={t(slim ? "expandMenu" : "collapseMenu")} title={t(slim ? "expandMenu" : "collapseMenu")} aria-expanded={!slim}><I.panel /></button></span>}
       </div>
       {cloud ? (
         <Menu className="wsname-wrap" buttonClass="wsname" label={b(B("Workspaces", "工作区"))} button={<><b>{b(view_.business)}</b><span>{wsSub}</span><I.chev /></>}
