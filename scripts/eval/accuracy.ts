@@ -59,7 +59,9 @@ const load = (name: string): Gold[] => { const d = setDir(name); if (!d) return 
 // world: store openings abroad (src/forms/europe.ts, src/forms/mexico.ts), each answer quoted in the agency's language.
 // furniture: furniture brands importing and opening showrooms (an upholstered brand into Los Angeles, a dresser brand
 // into New Jersey), scored on the filings (src/forms/furniture.ts) and on what the plan states beyond them.
-const SETS = (process.env.SET ? [process.env.SET] : process.env.GENERAL_ONLY ? ["heldout"] : ["gold", "heldout", "strict", "kinds", "furniture", "world"]).map(name => ({ name, cases: load(name) }));
+// lifecycle: five openings scored on their permits and on what the plan says beyond them (scripts/eval/lifecycle,
+// src/forms/lifecycle.ts, src/plan/also.ts), with the intake's answers.
+const SETS = (process.env.SET ? [process.env.SET] : process.env.GENERAL_ONLY ? ["heldout"] : ["gold", "heldout", "strict", "kinds", "furniture", "world", "lifecycle"]).map(name => ({ name, cases: load(name) }));
 // npm passes its own arguments after the script's "exit", so the quiet mode is an environment variable: QUIET=1
 const showMisses = !process.env.QUIET;
 /** A row that hedges whether the requirement applies ("if the city requires one", "We'll confirm with ...") asserts
@@ -82,10 +84,10 @@ const TARGET: Record<keyof Totals, number> = { recall: GENERAL ? 0 : 1, covered:
 const fee = (a: Application) => a.fees.some(f => f.tbd) ? null : a.fees.reduce((s, f) => s + f.amount, 0);
 const rowOfApp = (a: Application, id = a.official ?? a.id): Row => ({ id, name: a.name.en, agency: a.agency.en, level: a.level, source: a.source?.url, fee: fee(a), abstain: !!a.abstain, quote: a.source?.quote });
 
+/** The instant plan for a case, with the intake's answers where the case gives them. */
+const planOf = (g: Gold) => { const i = g.input; return previewPlan(i.what, i.where, OPENING, { entity: i.entity, employees: i.intake?.employees ?? i.employees, buildout: i.buildout, signage: i.signage, today: TODAY, ...(i.intake ?? {}) }); };
 function instantPlan(g: Gold): Row[] {
-  const i = g.input;
-  const p = previewPlan(i.what, i.where, OPENING, { entity: i.entity, employees: i.employees, buildout: i.buildout, signage: i.signage, today: TODAY });
-  return p.apps.map(a => rowOfApp(a));
+  return planOf(g).apps.map(a => rowOfApp(a));
 }
 
 /** What find_official_forms returns (src/live.ts), with the flags the model sets for this case: the library's forms, each
@@ -93,8 +95,9 @@ function instantPlan(g: Gold): Row[] {
 function library(g: Gold): Row[] {
   const i = g.input, segment = segmentOf(i.what);
   // the flags the model sets, read the way the instant plan reads them ("noodle bar" isn't a bar that serves alcohol)
-  const imports = /import|进口/i.test(i.what), alcohol = sellsAlcohol(i.what);
-  const needs = { employees: i.employees ?? true, buildout: i.buildout ?? true, signage: i.signage ?? true, newEntity: !i.entity, food: segment === "restaurant" || /food|snack|食品/i.test(i.what), imports, alcohol, ...furnitureNeeds(i.what) };
+  const imports = i.intake?.imports ?? /import|进口/i.test(i.what), alcohol = sellsAlcohol(i.what);
+  const needs = { employees: i.intake?.employees ?? i.employees ?? true, buildout: i.buildout ?? true, signage: i.signage ?? true, newEntity: !i.entity, food: segment === "restaurant" || /food|snack|食品/i.test(i.what), imports, alcohol, ...furnitureNeeds(i.what),
+    ...(i.intake?.upholstered !== undefined ? { upholstered: i.intake.upholstered } : {}), ...(i.intake?.children !== undefined ? { children: i.intake.children } : {}) };
   const known = libraryAnswer(i.what, i.where, needs, TODAY);
   const forms = formsFor({ segment, where: i.where, needs }).filter(f => f.order < 88).map(f => {
     const claim = known.claim(f), seen = f.proof ? proofCurrent(f.proof, TODAY) : undefined;
@@ -219,7 +222,7 @@ const fails: string[] = [];
   const problems = new Set<string>(); let rowsChecked = 0, claims = 0, abstentions = 0;
   for (const { cases } of SETS) for (const g of cases) {
     const i = g.input;
-    const p = previewPlan(i.what, i.where, OPENING, { entity: i.entity, employees: i.employees, buildout: i.buildout, signage: i.signage, today: TODAY });
+    const p = planOf(g);
     for (const a of p.apps) { rowsChecked++; if (a.abstain) abstentions++; else claims++; for (const x of planRowProof(a, TODAY)) problems.add(`${g.id}: ${x}`); }
     // what differs by kind of business: every fact the plan states carries its quote, in the read log, from an official page
     for (const k of p.facts) { rowsChecked++; claims++; for (const x of [...proofProblems({ id: k.id, url: k.source.url, quote: k.source.quote, checked: k.source.checked }), ...(officialSource(k.source.url) ? [] : [`${k.id}: not an official page`])]) problems.add(`${g.id} (fact): ${x}`); }
@@ -244,7 +247,39 @@ const TITLE: Record<string, string> = {
   kinds: "Store-type set (scripts/eval/kinds: the same place as a tea shop, coffee shop, bakery or restaurant)",
   furniture: "Furniture set (scripts/eval/furniture: furniture brands importing and opening showrooms)",
   world: "World set (scripts/eval/world: store openings in Europe and Mexico, quoted in the agencies' own languages)",
+  lifecycle: "Lifecycle set (scripts/eval/lifecycle: the permits, and what the plan says beyond them)",
 };
+
+/* ------------------------------------------------------------------ beyond the permits */
+// Each lifecycle case: the plan states every expected line in its group (recall), with the official words and URL the
+// case names where verified, or abstains (no quote) where the case says the page couldn't be read; states no line the
+// case doesn't expect (precision) and none on its must-not list; and every quoted line's words are in the read log, from
+// an official page. Targets: 100%.
+const lifeTotals = { want: 0, found: 0, stated: 0, right: 0 };
+for (const { name: set, cases } of SETS) for (const g of cases.filter(x => x.lifecycle)) {
+  const p = planOf(g), lc = g.lifecycle!;
+  const miss: string[] = [], bad: string[] = [];
+  for (const w of lc.expect) {
+    lifeTotals.want++;
+    const hit = p.also.find(a => a.id === w.id);
+    if (!hit) { miss.push(`missing ${w.id}`); continue; }
+    if (hit.group !== w.group) { miss.push(`${w.id}: in ${hit.group}, the case puts it in ${w.group}`); continue; }
+    if (hit.verified !== w.verified || hit.sources[0].url !== w.source || (w.verified && hit.sources[0].quote !== w.quote)) { miss.push(`${w.id}: quoted from ${hit.sources[0].url} ("${hit.sources[0].quote ?? "no quote"}"), the case reads ${w.source}`); continue; }
+    lifeTotals.found++;
+  }
+  for (const a of p.also) {
+    lifeTotals.stated++;
+    const no = lc.mustNot.find(m => m.id === a.id);
+    if (no) { bad.push(`wrong ${a.id}: ${no.why}`); continue; }
+    if (!lc.expect.some(w => w.id === a.id)) { bad.push(`invented ${a.id}`); continue; }
+    const problems = a.sources.flatMap(x => x.quote ? [...proofProblems({ id: a.id, url: x.url, quote: x.quote, checked: x.read }), ...(officialSource(x.url) ? [] : [`${a.id}: not an official page`])] : officialSource(x.url) ? [] : [`${a.id}: abstains without an official link`]);
+    if (problems.length) { bad.push(...problems); continue; }
+    if (!a.verified && a.fee != null) { bad.push(`${a.id}: states a fee without a quote`); continue; }
+    lifeTotals.right++;
+  }
+  if (miss.length || bad.length) { fails.push(`${set} ${g.id} beyond the permits: ${[...miss, ...bad].join("; ")}`); console.log(`  ${set} ${g.id} (beyond the permits): ${[...miss, ...bad].join("; ")}`); }
+}
+if (lifeTotals.want) console.log(`\nBeyond the permits (src/plan/also.ts): ${lifeTotals.found}/${lifeTotals.want} expected lines stated in their group with their official words (recall ${pct(lifeTotals.found, lifeTotals.want)}), ${lifeTotals.right}/${lifeTotals.stated} stated lines right (precision ${pct(lifeTotals.right, lifeTotals.stated)})`);
 
 /* ------------------------------------------------------------------ what differs by kind of business */
 // Each case with expected facts: the instant plan and the forms tool must state every expected fact, with the official
@@ -253,7 +288,7 @@ const TITLE: Record<string, string> = {
 const factTotals = { want: 0, found: 0, stated: 0, right: 0 };
 for (const { name: set, cases } of SETS) for (const g of cases.filter(x => x.facts?.length || x.mustNotFacts?.length)) {
   const i = g.input;
-  const p = previewPlan(i.what, i.where, OPENING, { entity: i.entity, employees: i.employees, buildout: i.buildout, signage: i.signage, today: TODAY });
+  const p = planOf(g);
   const segment = segmentOf(i.what);
   const lib = libraryAnswer(i.what, i.where, { employees: i.employees ?? true, buildout: i.buildout ?? true, signage: i.signage ?? true, newEntity: !i.entity, imports: /import|进口/i.test(i.what), alcohol: sellsAlcohol(i.what) }, TODAY);
   for (const [path, facts] of [["instant plan", p.facts], ["library", lib.facts]] as const) {

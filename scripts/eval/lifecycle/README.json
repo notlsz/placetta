@@ -1,0 +1,14 @@
+{
+ "what": "The lifecycle set: five openings scored on their permits (both paths, as the other sets) and on what the plan says beyond them (src/forms/lifecycle.ts, src/plan/also.ts): every expected line in its group, with its official words where verified, and none of the lines the case must not have. A furniture maker in San Francisco (the founder's example), a furniture importer in Los Angeles, a tea shop in New York City, a cosmetics brand selling online from Texas and a consumer-products e-commerce seller in Florida, each with the intake's answers.",
+ "researched": "2026-10-23, from official pages only (.gov, GovInfo's CFR, state statutes, agency pages), each quote read with curl through scripts/eval/proof-read.py's own fetch and normalization and kept in scripts/eval/proof-log.json. In-sample: the permits are the registry's quoted entries for each place.",
+ "left_out": [
+  {
+   "what": "New York's remote seller threshold, NYC Earned Safe and Sick Time, Los Angeles's wage rates, Proposition 65 for products other than furniture",
+   "why": "Their official pages refused automated reads (403 or script-built); the lines are UNVERIFIED and name the office."
+  },
+  {
+   "what": "California cottage food, the California Retail Food Code, San Francisco's FOG program",
+   "why": "Not read on an official page in this pass."
+  }
+ ]
+}

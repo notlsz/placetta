@@ -316,7 +316,7 @@ export const LIFECYCLE: LifeItem[] = [
     id: "ca-bhgs-manufacturer", stage: "sell", kind: "filing", level: "state", where: "CA", needs: ["manufactures", "upholstered"],
     title: L("California furniture and bedding manufacturer license", "加州家具及床上用品制造商执照"), detail: L("Bureau of Household Goods and Services", "加州家居用品与服务局"),
     when: L("if you make upholstered furniture, in whole or in part", "如果您全部或部分生产软体家具"),
-    why: L("The state license for a company that makes upholstered furniture sold in California. Fee not confirmed.", "在加州销售的软体家具，其生产企业须持有的州执照。费用尚未确认。"),
+    why: L("The state license for a company that makes upholstered furniture sold in California.", "在加州销售的软体家具，其生产企业须持有的州执照。"),
     agency: L("California Bureau of Household Goods and Services", "加州家居用品与服务局（BHGS）"), url: BHGS_FLYER, renews: undefined,
     source: { url: BHGS_FLYER, quote: "Furniture and Bedding Manufacturer—A company that produces upholstered furniture or bedding in whole or in part" },
   },
@@ -324,7 +324,7 @@ export const LIFECYCLE: LifeItem[] = [
     id: "life-bhgs-retail", stage: "sell", kind: "filing", level: "state", refs: ["ca-bhgs-retail"], needs: ["upholstered"], unless: ["imports"], segments: ["retail"],
     title: L("California retail furniture dealer's license", "加州家具零售商执照"), detail: L("Bureau of Household Goods and Services", "加州家居用品与服务局"),
     when: L("if you sell upholstered furniture", "如果您销售软体家具"),
-    why: L("One license for each store selling upholstered furniture. Fee not confirmed.", "每家销售软体家具的门店一张执照。费用尚未确认。"), agency: L("California Bureau of Household Goods and Services", "加州家居用品与服务局（BHGS）"),
+    why: L("One license for each store selling upholstered furniture.", "每家销售软体家具的门店一张执照。"), agency: L("California Bureau of Household Goods and Services", "加州家居用品与服务局（BHGS）"),
   },
   {
     id: "life-bhgs-importer", stage: "sell", kind: "filing", level: "state", refs: ["ca-bhgs-importer"], needs: ["imports", "upholstered"],

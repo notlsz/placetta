@@ -16,6 +16,82 @@ import { US_GAPS } from "../src/forms/us-gaps";
 import { INTL_FORMS } from "../src/forms/intl";
 import { MEXICO_GAPS } from "../src/forms/mexico";
 import { FINISH_FIXES, FINISH_FORMS } from "../src/forms/finish";
+import { LIFECYCLE, READ_LIFE, type LifeItem } from "../src/forms/lifecycle";
+import { KIND_FACTS } from "../src/forms/kinds";
+import { previewPlan } from "../src/plan/preview";
+import { proofCurrent } from "../src/plan/ask";
+
+/* ------------------------------------------------------------------ lifecycle and product compliance */
+
+const STAGE: Record<LifeItem["stage"], string> = { start: "A. Start", open: "B. Open", employ: "C. Employ", sell: "D. Sell products", online: "E. Online and retailers" };
+const KIND: Record<LifeItem["kind"], string> = { filing: "filing", checklist: "label or design checklist", advisory: "an agency decides" };
+const TRIGGER: Record<string, string> = { newEntity: "no company yet", foreignEntity: "formed abroad", employees: "has employees", manufactures: "manufactures", imports: "imports",
+  upholstered: "sells upholstered", children: "children's products", online: "sells online", food: "food", packagedFood: "packaged food", cosmetics: "cosmetics", furniture: "furniture",
+  clothingStorage: "dressers and chests", textile: "textiles", consumer: "consumer products", premises: "a store open to the public" };
+const md = (s: string) => s.replace(/\|/g, "\\|");
+/** An item's proof as the plan uses it: its registry filing's, its kinds fact's, or its own; none is UNVERIFIED. */
+function lifeProof(i: LifeItem): { url: string; quote?: string; read?: string; via: string } {
+  const f = (i.refs ?? []).map(id => FORMS.find(x => x.id === id)).find(Boolean);
+  const k = i.fact ? KIND_FACTS.find(x => x.id === i.fact) : undefined;
+  const pr = f?.proof ? { url: f.proof.read, quote: f.proof.quote, via: `registry \`${f.id}\`` } : k ? { url: k.proof.read, quote: k.proof.quote, via: `kinds fact \`${k.id}\`` } : i.source ? { url: i.source.url, quote: i.source.quote, via: "own" } : { url: i.url ?? "", via: "none" };
+  const read = pr.quote ? proofCurrent({ read: pr.url, quote: pr.quote }, READ_LIFE) : undefined;
+  return read ? { ...pr, read } : { url: pr.url, via: pr.via };
+}
+const triggers = (i: LifeItem) => [...(i.needs ?? []).map(k => TRIGGER[k] ?? k), ...(i.any?.length ? [`${i.any.map(k => TRIGGER[k] ?? k).join(" or ")}`] : []), ...(i.unless ?? []).map(k => `not ${TRIGGER[k] ?? k}`),
+  ...(i.segments ? [i.segments.join("/")] : []), ...(i.refs?.length ? [`where the registry files ${i.refs.map(r => `\`${r}\``).join(", ")}${i.refsLike ? " (or the state's own)" : ""}`] : [])].join("; ") || "everyone";
+/** The customer types the matrix walks, each as a plan in one US city with the intake's answers. */
+const CUSTOMERS: { type: string; what: string; where: string; o: Record<string, boolean> }[] = [
+  { type: "F&B (restaurant)", what: "Restaurant", where: "Los Angeles, CA", o: {} },
+  { type: "Tea and coffee shop", what: "Milk tea shop", where: "New York, NY", o: {} },
+  { type: "Packaged food maker", what: "Packaged snack manufacturer", where: "Los Angeles, CA", o: { manufactures: true, online: true } },
+  { type: "Retail store", what: "Gift shop", where: "San Francisco, CA", o: { manufactures: false, imports: false } },
+  { type: "Furniture manufacturer", what: "Upholstered furniture manufacturer", where: "San Francisco, CA", o: { manufactures: true } },
+  { type: "Furniture importer", what: "Furniture importer", where: "Los Angeles, CA", o: { upholstered: true } },
+  { type: "Furniture retailer", what: "Furniture showroom", where: "San Jose, CA", o: { manufactures: false, imports: false } },
+  { type: "Cosmetics and personal care", what: "Cosmetics brand", where: "Austin, TX", o: { manufactures: true, online: true } },
+  { type: "Consumer products", what: "Home goods brand", where: "Miami, FL", o: { manufactures: true, children: false } },
+  { type: "E-commerce seller", what: "Consumer products e-commerce seller", where: "Miami, FL", o: { online: true } },
+  { type: "Importer", what: "Housewares importer", where: "Houston, TX", o: { imports: true } },
+  { type: "Cosmetics brand into the UK", what: "Cosmetics brand", where: "London, UK", o: {} },
+];
+function lifecycleSection(p: (s?: string) => void) {
+  p("## Lifecycle and product compliance");
+  p();
+  p(`What a business needs beyond its permits to open, from forming the company to selling online (src/forms/lifecycle.ts, read ${READ_LIFE}). Three kinds, kept apart: a **filing** Placetta prepares and files (or hands to the professional who must); a **label or design checklist** Placetta lists with where to verify it, and never certifies; and an item **an agency decides** (OEHHA on Proposition 65, CBP on a tariff classification, a city's wage ordinance, the bank on an account), where Placetta cites the rule and tracks it. The plan shows them grouped as "You may also need these", "Because you manufacture, your products may also need labels", the store and staff, and what an agency decides, each line with a numbered source footnote (src/plan/also.ts). The intake asks the triggers one at a time, skipping any that don't apply (src/plan/intake.ts).`);
+  p();
+  const all = LIFECYCLE.map(i => ({ i, pr: lifeProof(i) }));
+  const stages = Object.keys(STAGE) as LifeItem["stage"][];
+  p("| Stage | Items | Verified | Unverified | Filings | Checklists | Agency decides |");
+  p("|---|---|---|---|---|---|---|");
+  for (const st of stages) {
+    const xs = all.filter(x => x.i.stage === st);
+    p(`| ${STAGE[st]} | ${xs.length} | ${xs.filter(x => x.pr.read).length} | ${xs.filter(x => !x.pr.read).length} | ${xs.filter(x => x.i.kind === "filing").length} | ${xs.filter(x => x.i.kind === "checklist").length} | ${xs.filter(x => x.i.kind === "advisory").length} |`);
+  }
+  p(`| Total | ${all.length} | ${all.filter(x => x.pr.read).length} | ${all.filter(x => !x.pr.read).length} | ${all.filter(x => x.i.kind === "filing").length} | ${all.filter(x => x.i.kind === "checklist").length} | ${all.filter(x => x.i.kind === "advisory").length} |`);
+  p();
+  p("### By customer type");
+  p();
+  p("Each row is the plan for that business in one city, with the intake's answers; a cell lists the lines the plan states at that stage (`?` marks one whose official page couldn't be read: it names the office and states no fee).");
+  p();
+  p(`| Customer | Place | ${stages.map(st => STAGE[st]).join(" | ")} |`);
+  p(`|---|---|${stages.map(() => "---").join("|")}|`);
+  for (const c of CUSTOMERS) {
+    const plan = previewPlan(c.what, c.where, undefined, { today: READ_LIFE, ...c.o });
+    p(`| ${c.type} | ${c.where} | ${stages.map(st => plan.also.filter(a => a.stage === st).map(a => `\`${a.id}\`${a.verified ? "" : "?"}`).join(" ") || "·").join(" | ")} |`);
+  }
+  p();
+  p("### Every item");
+  p();
+  p("| Stage | Item | Kind | Trigger | Level and agency | Form or portal | Fee | Renewal | Source | Why | 为什么 |");
+  p("|---|---|---|---|---|---|---|---|---|---|---|");
+  for (const { i, pr } of all) {
+    const f = (i.refs ?? []).map(id => FORMS.find(x => x.id === id)).find(Boolean);
+    const fee = !pr.read ? "not stated (UNVERIFIED)" : i.fee != null ? `$${i.fee}` : f && f.fee != null && (i.refs ?? []).length === 1 ? `$${f.fee}` : "not published";
+    const src = pr.read ? `${pr.url} "${md(pr.quote!)}" (read ${pr.read}, ${pr.via})` : `UNVERIFIED: ${pr.url || "no page"}`;
+    p(`| ${STAGE[i.stage]} | \`${i.id}\` ${md(i.title.en)} | ${KIND[i.kind]} | ${md(triggers(i))} | ${i.level}, ${md(i.agency.en)} | ${md(i.form ?? f?.form ?? "·")} | ${fee} | ${md(i.renews?.en ?? f?.renews?.en ?? "·")} | ${src} | ${md(i.why.en)} | ${md(i.why.zh)} |`);
+  }
+  p();
+}
 
 /** Each guide city's status in the audit of 2026-10-22, before the finishing pass (src/forms/finish.ts). */
 const BEFORE: Record<string, string> = {"New York City": "covered", "Los Angeles": "covered", "Houston": "covered", "San Francisco": "covered", "San Jose": "covered", "Chicago": "partial", "Seattle": "covered", "Boston": "covered", "Miami": "covered", "Dallas": "covered", "Austin": "covered", "Washington, DC": "covered", "Atlanta": "covered", "Philadelphia": "covered", "Las Vegas": "covered", "San Antonio": "covered", "Tampa": "partial", "San Diego": "covered", "Irvine": "covered", "Orlando": "covered", "Fort Worth": "covered", "Phoenix": "partial", "Oakland": "covered", "Sacramento": "partial", "Portland": "covered", "Plano": "covered", "Arlington": "covered", "Fairfax County": "covered", "Edison": "covered", "Jersey City": "covered", "Denver": "covered", "Minneapolis": "covered", "Columbus": "unverified", "Cupertino": "covered", "Milpitas": "covered", "Daly City": "covered", "Arcadia": "covered", "Alhambra": "covered", "Fort Lee": "covered", "Bellevue": "covered", "Rockville": "covered", "Mexico City": "partial", "Monterrey": "partial", "Guadalajara": "partial", "Cancún": "partial", "Beijing": "unverified", "Shanghai": "unverified", "Shenzhen": "unverified", "Guangzhou": "unverified", "Hangzhou": "unverified", "Chengdu": "unverified", "Chongqing": "unverified", "Wuhan": "unverified", "Nanjing": "unverified", "Suzhou": "unverified", "Tianjin": "unverified", "Xi'an": "unverified", "London": "covered", "Manchester": "covered", "Paris": "covered", "Berlin": "covered", "Munich": "partial", "Hamburg": "partial", "Frankfurt": "partial", "Madrid": "partial", "Barcelona": "partial", "Milan": "partial", "Rome": "partial", "Amsterdam": "covered", "Rotterdam": "covered", "Dublin": "partial", "Cork": "partial", "Brussels": "unverified", "Lisbon": "unverified", "Zurich": "unverified", "Bern": "unverified", "Vienna": "unverified", "Graz": "unverified", "Stockholm": "unverified", "Gothenburg": "unverified", "Copenhagen": "unverified", "Aarhus": "unverified", "Warsaw": "unverified", "Helsinki": "unverified", "Dubai": "unverified", "Abu Dhabi": "unverified", "Sharjah": "unverified", "Riyadh": "unverified", "Jeddah": "unverified", "Dammam": "unverified", "Doha": "unverified", "Istanbul": "unverified"};
@@ -199,6 +275,7 @@ function main() {
   p();
   list(INTL_FORMS).forEach(s => p(s));
   p();
+  lifecycleSection(p);
   p("## Unverified entries");
   p();
   p("Entries with no proof from an official page. Their plan rows abstain and name the office; no fee is claimed for them unless an official page stated it.");

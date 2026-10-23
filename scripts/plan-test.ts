@@ -121,3 +121,62 @@ for (const [where, x] of Object.entries(want)) {
   const teak = ids("Teak furniture importer", "Houston, TX"), tables = ids("Coffee table and dining table store", "Dallas, TX");
   eq([teak.includes("fda-ffr"), teak.includes("cpsc-cert"), tables.includes("fda-ffr")], [false, true, false], "teak furniture and coffee tables aren't food; the furniture importer keeps its CPSC certificate");
 }
+
+// The lifecycle beyond the permits (src/forms/lifecycle.ts, src/plan/also.ts, src/plan/intake.ts), in the founder's
+// format: grouped lines, each with a numbered source footnote; filings, label checklists and what an agency decides kept
+// apart; the intake asks only the questions that apply, one at a time.
+import { LIFECYCLE } from "../src/forms/lifecycle";
+import { FORMS as LIBRARY } from "../src/forms/registry";
+import { KIND_FACTS as FACTS } from "../src/forms/kinds";
+import { alsoText } from "../src/plan/also";
+import { intakeQuestions } from "../src/plan/intake";
+import { officialSource } from "./eval/official";
+{
+  const T = "2026-10-23";
+  eq(LIFECYCLE.flatMap(i => (i.refs ?? []).filter(r => !LIBRARY.some(f => f.id === r))), [], "every lifecycle item's registry filing exists");
+  eq(LIFECYCLE.filter(i => i.fact && !FACTS.some(k => k.id === i.fact)).map(i => i.id), [], "every lifecycle label's kinds fact exists");
+  eq(new Set(LIFECYCLE.map(i => i.id)).size, LIFECYCLE.length, "lifecycle ids are unique");
+  eq(LIFECYCLE.filter(i => i.source && !officialSource(i.source.url)).map(i => i.id), [], "every lifecycle source is an official page");
+  eq(LIFECYCLE.filter(i => i.source?.quote && i.source.quote.split(/\s+/).length >= 25).map(i => i.id), [], "every lifecycle quote is under 25 words");
+  eq(LIFECYCLE.filter(i => i.kind === "advisory" && !i.decides).map(i => i.id), [], "every advisory item names who decides");
+  eq(LIFECYCLE.filter(i => i.kind === "checklist" && !i.verify).map(i => i.id), [], "every checklist item says where to verify it");
+  eq(LIFECYCLE.filter(i => !i.source?.quote && i.fee != null).map(i => i.id), [], "no fee on an unverified item");
+
+  // the founder's example: an upholstered furniture manufacturer opening in San Francisco
+  const sf = previewPlan("Upholstered furniture manufacturer", "San Francisco, CA", "2027-04-01", { today: T, manufactures: true });
+  const line = (id: string) => sf.also.find(a => a.id === id)?.line.en ?? "";
+  eq(line("life-formation"), "Company formation (California LLC-1, $70, plus the $800 annual LLC tax), if you haven't formed a US company yet.", "SF: formation with the $800 tax, as the founder wrote it");
+  eq(line("life-employer"), "State employer registration (free), within 15 days of paying over $100 in wages.", "SF: EDD within 15 days of $100 in wages");
+  eq(line("life-workers-comp"), "Workers' compensation insurance, required with even one employee.", "SF: workers' comp with one employee");
+  eq(line("life-bhgs-retail"), "California retail furniture dealer's license (Bureau of Household Goods and Services), if you sell upholstered furniture. Fee not confirmed.", "SF: the BHGS retail license, fee not confirmed");
+  eq(line("life-formula-retail").includes("only if you have 11 or more other locations worldwide"), true, "SF: formula retail only with 11 or more other locations");
+  eq(["life-law-label", "life-tb117", "life-tsca-label"].every(id => sf.also.find(a => a.id === id)?.group === "labels"), true, "SF: the law label, TB 117-2013 and TSCA labels are labels");
+  eq(sf.also.find(a => a.id === "life-prop65-furniture")?.group, "decides", "SF: Prop 65 is OEHHA's to decide");
+  const txt = alsoText(sf.also, sf.have, "en");
+  eq(["You may also need these", "Because you manufacture, your products may also need labels", "Sources"].every(h => txt.split("\n").includes(h)), true, "SF: the founder's headings");
+  const body = txt.split("\nSources\n")[0];
+  eq(/[•·]|^\s*[-*] /m.test(txt) || /(^|[^\d.,$])0\d/.test(body), false, "no bullets or leading zeros in the text");
+  eq(/\[1\] California Secretary of State: https:\/\/bpd\.cdn\.sos\.ca\.gov\/llc\/forms\/llc-1\.pdf, "Articles of Organization/.test(txt), true, "footnotes carry the agency, link and the page's words");
+  eq(alsoText(sf.also, sf.have, "zh").includes("因为您自己生产，产品可能还需要这些标签"), true, "the Chinese headings");
+
+  // a tea shop gets no product labels; an importer's labels say why; a dresser brand gets the tip-over rule
+  const tea = previewPlan("Tea shop", "New York, NY", "2027-04-01", { today: T });
+  eq(tea.also.some(a => a.group === "labels"), false, "a tea shop has no product label lines");
+  eq(tea.also.some(a => a.id === "nyc-sick-leave" && !a.verified), true, "NYC sick leave abstains: its page refused automated reads");
+  const dressers = previewPlan("Dresser importer", "Newark, NJ", "2027-04-01", { today: T });
+  eq(dressers.also.some(a => a.id === "cpsc-sturdy" && a.verified), true, "dressers get the STURDY rule");
+  const cos = previewPlan("Cosmetics brand selling online", "Austin, TX", "2027-04-01", { today: T, manufactures: true });
+  eq(["life-mocra-facility", "life-mocra-listing", "cosmetic-ingredients", "cosmetics-no-certificate"].every(id => cos.also.some(a => a.id === id)), true, "a cosmetics maker gets MoCRA, the ingredient label and the no-certificate note");
+  eq(cos.also.some(a => a.id === "tx-economic-nexus" || a.id === "tx-marketplace"), false, "a Texas seller isn't told Texas's remote seller rules");
+  const london = previewPlan("Cosmetics brand", "London, UK", "2027-04-01", { today: T });
+  eq(london.also.map(a => a.id).sort(), ["gb-cosmetics-rp", "gb-cosmetics-scpn"], "abroad, only that country's lines (no California, no US)");
+
+  // the intake: one question at a time, only those that apply
+  const keys = (w: string) => intakeQuestions(w).map(q => q.key);
+  eq(keys("Milk tea shop"), ["employees"], "a tea shop is asked only about staff");
+  eq(keys("Furniture importer"), ["employees", "manufactures", "upholstered", "children", "online"], "a furniture importer isn't asked whether it imports");
+  eq(keys("Dresser brand"), ["employees", "manufactures", "imports", "children", "online"], "a dresser brand isn't asked about upholstery");
+  eq(keys("Cosmetics brand selling online"), ["employees", "manufactures", "imports"], "a cosmetics brand isn't asked about children's products or selling online");
+  const no = previewPlan("Furniture store", "San Francisco, CA", "2027-04-01", { today: T, upholstered: false });
+  eq([no.apps.some(a => a.official === "ca-bhgs-retail"), no.also.some(a => a.id === "life-law-label")], [false, false], "answering no to upholstery drops the BHGS license and the law label");
+}

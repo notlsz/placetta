@@ -1,0 +1,358 @@
+{
+ "id": "fl-ecommerce-consumer",
+ "title": "Consumer-products e-commerce seller in Florida",
+ "read": "2026-10-23",
+ "input": {
+  "what": "Consumer products e-commerce seller",
+  "where": "Miami, FL",
+  "lang": "en",
+  "intake": {
+   "manufactures": false,
+   "imports": true,
+   "children": false
+  }
+ },
+ "assumptions": "A Miami e-commerce seller of general consumer products that imports what it sells: answered the intake (doesn't manufacture, imports, no children's products). Customs filings, origin marking, the GCC and HTS as CBP's to decide, and other states' remote seller thresholds; Florida's own remote seller rule isn't stated for a Florida seller.",
+ "items": [
+  {
+   "key": "fl-sunbiz",
+   "name": "LLC formation",
+   "agency": "Florida Division of Corporations (Sunbiz)",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 125,
+   "source": "https://www.flsenate.gov/Laws/Statutes/2025/605.0201",
+   "quote": "One or more persons may act as authorized representatives to form a limited liability company by signing and delivering articles of organization",
+   "read": "2026-10-22",
+   "match": "\\bfl-sunbiz\\b|llc formation",
+   "agencyMatch": "florida division of corporations"
+  },
+  {
+   "key": "irs-ss4",
+   "name": "Application for Employer Identification Number (EIN)",
+   "agency": "Internal Revenue Service",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+   "quote": "You never have to pay a fee for an EIN.",
+   "read": "2026-10-22",
+   "match": "\\birs-ss4\\b|application for employer identification number",
+   "agencyMatch": "internal revenue service",
+   "note": "The IRS charges nothing. Sites that charge for an EIN are resellers."
+  },
+  {
+   "key": "cbp-5106",
+   "name": "Create/Update Importer Identity Form",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf",
+   "quote": "shall file CBP Form 5106 with the first formal entry.",
+   "read": "2026-10-18",
+   "match": "\\bcbp-5106\\b|create/update importer identity form",
+   "agencyMatch": "u\\.s\\. customs and border protection"
+  },
+  {
+   "key": "cbp-301",
+   "name": "Customs Bond",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part142.pdf",
+   "quote": "unless a single entry or continuous bond on Customs Form 301, containing the bond conditions set forth in § 113.62 of this chapter,",
+   "read": "2026-10-22",
+   "match": "\\bcbp-301\\b|customs bond",
+   "agencyMatch": "u\\.s\\. customs and border protection",
+   "note": "No CBP fee. The surety charges a premium; a continuous bond is at least $50,000 of coverage."
+  },
+  {
+   "key": "cbp-ace",
+   "name": "ACE Secure Data Portal account for importers",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf",
+   "quote": "register an entity as an Importer of Record (IOR) in the Automated Commercial Environment (ACE)",
+   "read": "2026-10-22",
+   "match": "\\bcbp-ace\\b|ace secure data portal account for importers",
+   "agencyMatch": "u\\.s\\. customs and border protection"
+  },
+  {
+   "key": "fl-dor",
+   "name": "Florida sales tax and reemployment tax registration",
+   "agency": "Florida Department of Revenue",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://floridarevenue.com/taxes/taxesfees/Pages/sales_tax.aspx",
+   "quote": "If they are, you must register to collect sales tax or pay use tax.",
+   "read": "2026-10-22",
+   "match": "\\bfl-dor\\b|florida sales tax and reemployment tax registration",
+   "agencyMatch": "florida department of revenue",
+   "note": "The agency's page lists no fee for this."
+  },
+  {
+   "key": "mia-btr",
+   "name": "City of Miami business tax receipt",
+   "agency": "City of Miami",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.miami.gov/Business/Business-Tax-Receipt-BTR",
+   "quote": "Every business needs to obtain a Business Tax Receipt to operate in the City (also known as an Occupational License).",
+   "read": "2026-10-22",
+   "match": "\\bmia-btr\\b|city of miami business tax receipt",
+   "agencyMatch": "city of miami"
+  },
+  {
+   "key": "mdc-btr",
+   "name": "Miami-Dade County local business tax receipt",
+   "agency": "Miami-Dade County Tax Collector",
+   "level": "county",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.miami.gov/Business/Business-Tax-Receipt-BTR",
+   "quote": "In addition, every business is also required to obtain a Miami-Dade County Local Business Tax Receipt (formerly known as an Occupational License).",
+   "read": "2026-10-22",
+   "match": "\\bmdc-btr\\b|miami-dade county local business tax receipt",
+   "agencyMatch": "miami-dade county tax collector"
+  },
+  {
+   "key": "fl-workers-comp",
+   "name": "Workers' compensation insurance",
+   "agency": "Florida Department of Financial Services, Division of Workers' Compensation",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.myfloridacfo.com/division/wc/employer/coverage-requirements",
+   "quote": "Non-Construction Industry Employers with four (4) or more employees, including business owners who are corporate officers",
+   "read": "2026-10-22",
+   "match": "\\bfl-workers-comp\\b|workers' compensation insurance",
+   "agencyMatch": "florida department of financial services"
+  },
+  {
+   "key": "mia-cu",
+   "name": "City of Miami CU (use approval)",
+   "agency": "City of Miami, Office of Zoning",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.miami.gov/Business/Business-Tax-Receipt-BTR",
+   "quote": "Most businesses need a CU before they can get a BTR.",
+   "read": "2026-10-22",
+   "match": "\\bmia-cu\\b|city of miami cu",
+   "agencyMatch": "city of miami",
+   "note": "A $50 non-refundable application fee, then an invoice for the inspections."
+  }
+ ],
+ "order": [
+  {
+   "before": "fl-sunbiz",
+   "after": "irs-ss4",
+   "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+   "why": "The company is formed before its EIN.",
+   "verified": true
+  }
+ ],
+ "mustNotInclude": [
+  {
+   "name": "Food permits",
+   "why": "Not a food business.",
+   "match": "food (facility|establishment|permit)|fda-"
+  }
+ ],
+ "lifecycle": {
+  "expect": [
+   {
+    "id": "life-formation",
+    "group": "also",
+    "verified": true,
+    "source": "https://www.flsenate.gov/Laws/Statutes/2025/605.0201",
+    "quote": "One or more persons may act as authorized representatives to form a limited liability company by signing and delivering articles of organization"
+   },
+   {
+    "id": "life-boi",
+    "group": "decides",
+    "verified": true,
+    "source": "https://www.fincen.gov/boi",
+    "quote": "U.S. companies are exempt from BOI reporting requirements and therefore, are no longer required to file BOI reports."
+   },
+   {
+    "id": "life-dba",
+    "group": "also",
+    "verified": false,
+    "source": "https://dos.fl.gov/sunbiz/start-business/efile/fl-fictitious-name-registration/"
+   },
+   {
+    "id": "uspto-trademark",
+    "group": "also",
+    "verified": true,
+    "source": "https://www.uspto.gov/learning-and-resources/fees-and-payment/uspto-fee-schedule",
+    "quote": "Base application, per class 350.00"
+   },
+   {
+    "id": "bank-account",
+    "group": "decides",
+    "verified": true,
+    "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title31-vol3/pdf/CFR-2025-title31-vol3-sec1010-230.pdf",
+    "quote": "Identify the beneficial owner(s) of each legal entity customer at the time a new account is opened"
+   },
+   {
+    "id": "life-employer",
+    "group": "also",
+    "verified": true,
+    "source": "https://floridarevenue.com/taxes/taxesfees/Pages/sales_tax.aspx",
+    "quote": "If they are, you must register to collect sales tax or pay use tax."
+   },
+   {
+    "id": "life-workers-comp",
+    "group": "also",
+    "verified": true,
+    "source": "https://www.myfloridacfo.com/division/wc/employer/coverage-requirements",
+    "quote": "Non-Construction Industry Employers with four (4) or more employees, including business owners who are corporate officers"
+   },
+   {
+    "id": "new-hire-report",
+    "group": "also",
+    "verified": true,
+    "source": "https://www.acf.hhs.gov/css/employers/employer-responsibilities/new-hire-reporting",
+    "quote": "Federal law requires employers to report basic information on new and rehired employees within 20 days of hire"
+   },
+   {
+    "id": "us-posters",
+    "group": "workplace",
+    "verified": true,
+    "source": "https://www.dol.gov/general/topics/posters",
+    "quote": "require that notices be provided to employees and/or posted in the workplace."
+   },
+   {
+    "id": "i9",
+    "group": "workplace",
+    "verified": true,
+    "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title8-vol1/pdf/CFR-2025-title8-vol1-sec274a-2.pdf",
+    "quote": "must examine documents that evidence the identity and employment authorization of the individual"
+   },
+   {
+    "id": "fl-everify",
+    "group": "workplace",
+    "verified": true,
+    "source": "https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0400-0499/0448/Sections/0448.095.html",
+    "quote": "Beginning on July 1, 2023, a private employer with 25 or more employees shall use the E-Verify system"
+   },
+   {
+    "id": "prop65-products",
+    "group": "decides",
+    "verified": false,
+    "source": "https://www.p65warnings.ca.gov/new-proposition-65-warnings/businesses"
+   },
+   {
+    "id": "cpsc-gcc",
+    "group": "labels",
+    "verified": true,
+    "source": "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification/General-Certificate-of-Conformity",
+    "quote": "requires domestic manufacturers and importers of certain general-use products (i.e., non-children’s products)"
+   },
+   {
+    "id": "origin-marking",
+    "group": "labels",
+    "verified": true,
+    "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-part134.pdf",
+    "quote": "shall be marked in a conspicuous place as legibly, indelibly, and permanently as the nature of the article (or container) will permit"
+   },
+   {
+    "id": "life-isf",
+    "group": "also",
+    "verified": true,
+    "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part149.pdf",
+    "quote": "later than 24 hours before the cargo is laden aboard the vessel at the foreign port."
+   },
+   {
+    "id": "hts-ruling",
+    "group": "decides",
+    "verified": true,
+    "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part177.pdf",
+    "quote": "binding tariff classification ruling letter (including pre-entry classification decisions)"
+   },
+   {
+    "id": "ca-economic-nexus",
+    "group": "also",
+    "verified": true,
+    "source": "https://www.cdtfa.ca.gov/industry/wayfair.htm",
+    "quote": "by the retailer and all persons related to the retailer exceed $500,000."
+   },
+   {
+    "id": "tx-economic-nexus",
+    "group": "also",
+    "verified": true,
+    "source": "https://comptroller.texas.gov/taxes/sales/remote-sellers.php",
+    "quote": "Remote sellers with total Texas revenue of less than $500,000 in the preceding twelve calendar months are not required to obtain a tax permit"
+   },
+   {
+    "id": "ny-economic-nexus",
+    "group": "also",
+    "verified": false,
+    "source": "https://www.tax.ny.gov/bus/st/register.htm"
+   },
+   {
+    "id": "ca-marketplace",
+    "group": "decides",
+    "verified": true,
+    "source": "https://cdtfa.ca.gov/industry/MPFAct.htm",
+    "quote": "A marketplace facilitator is generally responsible for collecting, reporting, and paying the tax on retail sales made through their marketplace"
+   },
+   {
+    "id": "tx-marketplace",
+    "group": "decides",
+    "verified": true,
+    "source": "https://comptroller.texas.gov/taxes/sales/remote-sellers.php",
+    "quote": "who only sells through a marketplace provider that certifies they are collecting and reporting sales and use tax on the remote seller’s behalf"
+   },
+   {
+    "id": "fl-marketplace",
+    "group": "decides",
+    "verified": true,
+    "source": "https://floridarevenue.com/taxes/eservices/Pages/registration.aspx",
+    "quote": "are required to register online to collect and must electronically report and remit Florida sales tax"
+   },
+   {
+    "id": "retailer-certificates",
+    "group": "labels",
+    "verified": true,
+    "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title16-vol2/pdf/CFR-2025-title16-vol2-part1110.pdf",
+    "quote": "to each distributor and retailer of the product in question."
+   }
+  ],
+  "mustNot": [
+   {
+    "id": "fl-economic-nexus",
+    "why": "A Florida seller registers in Florida as an in-state dealer."
+   },
+   {
+    "id": "ada-access",
+    "why": "Online only, no store open to the public."
+   },
+   {
+    "id": "cpsc-cpc-children",
+    "why": "No children's products."
+   },
+   {
+    "id": "care-label",
+    "why": "Not clothing."
+   }
+  ]
+ }
+}

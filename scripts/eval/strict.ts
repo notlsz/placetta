@@ -9,13 +9,18 @@ import { officialSource } from "./official";
 export type GoldItem = { key: string; name: string; agency: string; level: Level; levels?: Level[]; required: boolean; verified: boolean; fee: number | null; source: string; match: string; agencyMatch: string; condition?: string; note?: string; quote?: string; read?: string; feeQuote?: string };
 export type Gold = {
   id: string; title: string; read: string;
-  input: { what: string; where: string; lang: "en" | "zh"; entity?: string; employees?: boolean; buildout?: boolean; signage?: boolean };
+  input: { what: string; where: string; lang: "en" | "zh"; entity?: string; employees?: boolean; buildout?: boolean; signage?: boolean;
+    // the intake's answers (src/plan/intake.ts), for the lifecycle set
+    intake?: { employees?: boolean; manufactures?: boolean; imports?: boolean; upholstered?: boolean; children?: boolean; online?: boolean } };
   items: GoldItem[]; order: { before: string; after: string; source: string; why: string; verified: boolean; quote?: string; read?: string }[];
   mustNotInclude: { name: string; why: string; match: string; source?: string; quote?: string; read?: string }[];
   // what differs for this kind of food business here (src/forms/kinds.ts): the facts the plan must state, each with the
   // official page's words, URL and read day, and the ones it must not (another kind's, another place's)
   facts?: { key: string; match: string; source: string; quote: string; read: string; required: boolean }[];
   mustNotFacts?: { match: string; why: string }[];
+  // beyond the permits (src/plan/also.ts): every line the plan must state, in its group, with the official words where
+  // verified (or none where the page couldn't be read), and the lines it must not state
+  lifecycle?: { expect: { id: string; group: string; verified: boolean; source: string; quote?: string }[]; mustNot: { id: string; why: string }[] };
 };
 
 type Entry = { id: string; read: string; quote: string; checked: string; method: "curl" | "webfetch"; found: boolean };

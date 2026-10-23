@@ -1,0 +1,449 @@
+{
+ "id": "la-furniture-importer",
+ "title": "Furniture importer in Los Angeles",
+ "read": "2026-10-23",
+ "input": {
+  "what": "Furniture importer",
+  "where": "Los Angeles, CA",
+  "lang": "en",
+  "intake": {
+   "manufactures": false,
+   "upholstered": true,
+   "children": false,
+   "online": false
+  }
+ },
+ "assumptions": "A brand importing upholstered furniture into Los Angeles and selling it from a warehouse, answering the intake: doesn't manufacture, sells upholstered pieces, no children's products, not online. The furniture filings are those of the furniture set's la-upholstered-importer case; beyond them, the plan states the labels a California importer's goods carry, origin marking, and the tariff classification as CBP's to decide.",
+ "items": [
+  {
+   "key": "ca-llc-1",
+   "name": "Articles of Organization (California LLC)",
+   "agency": "California Secretary of State",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 70,
+   "source": "https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf",
+   "quote": "Articles of Organization Limited Liability Company (LLC) Filing Fee - $70.00",
+   "read": "2026-10-22",
+   "match": "\\bca-llc-1\\b|articles of organization",
+   "agencyMatch": "california secretary of state"
+  },
+  {
+   "key": "ca-llc-12",
+   "name": "Statement of Information (California LLC)",
+   "agency": "California Secretary of State",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 20,
+   "source": "https://www.sos.ca.gov/business-programs/business-entities/statements",
+   "quote": "Failure to file the required Statement of Information with the Secretary of State as outlined in statute may result in penalties",
+   "read": "2026-10-22",
+   "match": "\\bca-llc-12\\b|statement of information",
+   "agencyMatch": "california secretary of state",
+   "note": "$20 filing fee; a certified copy is $5 more. Filing late can bring a $250 penalty."
+  },
+  {
+   "key": "irs-ss4",
+   "name": "Application for Employer Identification Number (EIN)",
+   "agency": "Internal Revenue Service",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+   "quote": "You never have to pay a fee for an EIN.",
+   "read": "2026-10-22",
+   "match": "\\birs-ss4\\b|application for employer identification number",
+   "agencyMatch": "internal revenue service",
+   "note": "The IRS charges nothing. Sites that charge for an EIN are resellers."
+  },
+  {
+   "key": "cbp-5106",
+   "name": "Create/Update Importer Identity Form",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf",
+   "quote": "shall file CBP Form 5106 with the first formal entry.",
+   "read": "2026-10-18",
+   "match": "\\bcbp-5106\\b|create/update importer identity form",
+   "agencyMatch": "u\\.s\\. customs and border protection"
+  },
+  {
+   "key": "cbp-301",
+   "name": "Customs Bond",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part142.pdf",
+   "quote": "unless a single entry or continuous bond on Customs Form 301, containing the bond conditions set forth in § 113.62 of this chapter,",
+   "read": "2026-10-22",
+   "match": "\\bcbp-301\\b|customs bond",
+   "agencyMatch": "u\\.s\\. customs and border protection",
+   "note": "No CBP fee. The surety charges a premium; a continuous bond is at least $50,000 of coverage."
+  },
+  {
+   "key": "cbp-isf",
+   "name": "Importer Security Filing (ISF) for ocean shipments",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part149.pdf",
+   "quote": "later than 24 hours before the cargo is laden aboard the vessel at the foreign port.",
+   "read": "2026-10-22",
+   "match": "\\bcbp-isf\\b|importer security filing \\(isf\\) for ocean shipments",
+   "agencyMatch": "u\\.s\\. customs and border protection",
+   "note": "CBP charges no fee; the broker charges for filing it."
+  },
+  {
+   "key": "cbp-ace",
+   "name": "ACE Secure Data Portal account for importers",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf",
+   "quote": "register an entity as an Importer of Record (IOR) in the Automated Commercial Environment (ACE)",
+   "read": "2026-10-22",
+   "match": "\\bcbp-ace\\b|ace secure data portal account for importers",
+   "agencyMatch": "u\\.s\\. customs and border protection"
+  },
+  {
+   "key": "aphis-ppq505",
+   "name": "Lacey Act plant and plant product declaration (PPQ Form 505)",
+   "agency": "USDA Animal and Plant Health Inspection Service (APHIS)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.aphis.usda.gov/sites/default/files/ppq505.pdf",
+   "quote": "Importers should have a copy of the form available for CBP to review at the port of entry.",
+   "read": "2026-10-22",
+   "match": "\\baphis-ppq505\\b|lacey act plant and plant product declaration",
+   "agencyMatch": "usda animal and plant health inspection service",
+   "note": "The form lists no fee."
+  },
+  {
+   "key": "epa-tsca-import",
+   "name": "TSCA Title VI import certification for composite wood",
+   "agency": "U.S. Environmental Protection Agency (EPA)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.epa.gov/node/155807",
+   "quote": "Importers to provide import certification under TSCA beginning March 22, 2019;",
+   "read": "2026-10-22",
+   "match": "\\bepa-tsca-import\\b|tsca title vi import certification for composite wood",
+   "agencyMatch": "u\\.s\\. environmental protection agency",
+   "note": "EPA's page names no fee. The third-party certifier charges for certifying the panels."
+  },
+  {
+   "key": "ca-cdtfa",
+   "name": "Seller's permit",
+   "agency": "California Department of Tax and Fee Administration",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.sf.gov/guide-opening-restaurant",
+   "quote": "Every location must have this permit to sell taxable goods.",
+   "read": "2026-10-22",
+   "match": "\\bca-cdtfa\\b|seller's permit",
+   "agencyMatch": "california department of tax and fee administration",
+   "note": "Free. CDTFA may ask for a security deposit."
+  },
+  {
+   "key": "la-btrc",
+   "name": "City of Los Angeles business tax registration",
+   "agency": "City of Los Angeles Office of Finance",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc",
+   "quote": "Once you completed the registration process, you will receive a temporary Business Tax Registration Certificate or Registration Number.",
+   "read": "2026-10-22",
+   "match": "\\bla-btrc\\b|city of los angeles business tax registration",
+   "agencyMatch": "city of los angeles office of finance",
+   "note": "Tax depends on the business class and gross receipts."
+  },
+  {
+   "key": "ca-bhgs-importer",
+   "name": "California importer's license for upholstered furniture",
+   "agency": "California Bureau of Household Goods and Services",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 750,
+   "source": "https://bhgs.dca.ca.gov/forms_pubs/app_importer.pdf",
+   "quote": "An importer’s license is required for those who manufacture or wholesale, through employees or agents, any article of upholstered furniture,",
+   "read": "2026-10-22",
+   "match": "\\bca-bhgs-importer\\b|california importer's license for upholstered furniture",
+   "agencyMatch": "california bureau of household goods and services"
+  },
+  {
+   "key": "ca-sb54",
+   "name": "Packaging producer registration (EPR)",
+   "agency": "CalRecycle, through Circular Action Alliance",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://calrecycle.ca.gov/packaging/packaging-epr/producerguidance/",
+   "quote": "Producers must apply to participate in the PRO (Circular Actional Alliance) plan, submit an independent producer application, or obtain a small producer exemption.",
+   "read": "2026-10-22",
+   "match": "\\bca-sb54\\b|packaging producer registration",
+   "agencyMatch": "calrecycle"
+  },
+  {
+   "key": "ca-edd-de1",
+   "name": "Registration Form for Commercial Employers",
+   "agency": "California Employment Development Department",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer",
+   "quote": "If you operate a business and hire employees or household workers, you must register as an employer within 15 days when:",
+   "read": "2026-10-21",
+   "match": "\\bca-edd-de1\\b|registration form for commercial employers",
+   "agencyMatch": "california employment development department"
+  },
+  {
+   "key": "ca-workers-comp",
+   "name": "Workers' compensation insurance",
+   "agency": "California Department of Industrial Relations, Division of Workers' Compensation",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://dir.ca.gov/DWC/Employer.htm",
+   "quote": "California employers are required by law to have workers' compensation insurance, even if they have only one employee.",
+   "read": "2026-10-22",
+   "match": "\\bca-workers-comp\\b|workers' compensation insurance",
+   "agencyMatch": "california department of industrial relations"
+  }
+ ],
+ "order": [
+  {
+   "before": "ca-llc-1",
+   "after": "irs-ss4",
+   "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+   "why": "The company is formed before its EIN.",
+   "verified": true
+  }
+ ],
+ "mustNotInclude": [
+  {
+   "name": "California retail furniture dealer's license",
+   "why": "The importer's license covers selling at retail (BHGS).",
+   "match": "\\bca-bhgs-retail\\b|retail furniture dealer"
+  },
+  {
+   "name": "Food permits",
+   "why": "Not a food business.",
+   "match": "food (facility|establishment|permit)|fda-ffr"
+  }
+ ],
+ "lifecycle": {
+  "expect": [
+   {
+    "id": "life-formation",
+    "group": "also",
+    "verified": true,
+    "source": "https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf",
+    "quote": "Articles of Organization Limited Liability Company (LLC) Filing Fee - $70.00"
+   },
+   {
+    "id": "ca-agent",
+    "group": "also",
+    "verified": true,
+    "source": "https://www.sos.ca.gov/business-programs/business-entities/service-process",
+    "quote": "Corporations, limited liability companies, limited partnerships, and limited liability partnerships are required by statute to designate an agent for service of process."
+   },
+   {
+    "id": "life-boi",
+    "group": "decides",
+    "verified": true,
+    "source": "https://www.fincen.gov/boi",
+    "quote": "U.S. companies are exempt from BOI reporting requirements and therefore, are no longer required to file BOI reports."
+   },
+   {
+    "id": "life-dba",
+    "group": "also",
+    "verified": false,
+    "source": "https://lavote.gov/home/county-clerk/fictitious-business-names/frequently-asked-questions"
+   },
+   {
+    "id": "uspto-trademark",
+    "group": "also",
+    "verified": true,
+    "source": "https://www.uspto.gov/learning-and-resources/fees-and-payment/uspto-fee-schedule",
+    "quote": "Base application, per class 350.00"
+   },
+   {
+    "id": "bank-account",
+    "group": "decides",
+    "verified": true,
+    "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title31-vol3/pdf/CFR-2025-title31-vol3-sec1010-230.pdf",
+    "quote": "Identify the beneficial owner(s) of each legal entity customer at the time a new account is opened"
+   },
+   {
+    "id": "life-employer",
+    "group": "also",
+    "verified": true,
+    "source": "https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer",
+    "quote": "If you operate a business and hire employees or household workers, you must register as an employer within 15 days when:"
+   },
+   {
+    "id": "life-workers-comp",
+    "group": "also",
+    "verified": true,
+    "source": "https://dir.ca.gov/DWC/Employer.htm",
+    "quote": "California employers are required by law to have workers' compensation insurance, even if they have only one employee."
+   },
+   {
+    "id": "ca-new-hire",
+    "group": "also",
+    "verified": true,
+    "source": "https://edd.ca.gov/en/payroll_taxes/new_hire_reporting",
+    "quote": "Use e-Services for Business to submit a Report of New Employee(s) (DE 34)."
+   },
+   {
+    "id": "us-posters",
+    "group": "workplace",
+    "verified": true,
+    "source": "https://www.dol.gov/general/topics/posters",
+    "quote": "require that notices be provided to employees and/or posted in the workplace."
+   },
+   {
+    "id": "ca-posters",
+    "group": "workplace",
+    "verified": true,
+    "source": "https://www.dir.ca.gov/wpnodb.html",
+    "quote": "On or before February 1, 2026, and each year after that, an employer must provide employees a required workplace rights notice."
+   },
+   {
+    "id": "i9",
+    "group": "workplace",
+    "verified": true,
+    "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title8-vol1/pdf/CFR-2025-title8-vol1-sec274a-2.pdf",
+    "quote": "must examine documents that evidence the identity and employment authorization of the individual"
+   },
+   {
+    "id": "ca-sick-leave",
+    "group": "decides",
+    "verified": true,
+    "source": "https://www.dir.ca.gov/dlse/paid_sick_leave.htm",
+    "quote": "Starting on January 1, 2024, employers must generally provide 5 days or 40 hours of paid sick leave to their employees in California."
+   },
+   {
+    "id": "la-minimum-wage",
+    "group": "decides",
+    "verified": false,
+    "source": "https://wagesla.lacity.gov/"
+   },
+   {
+    "id": "life-bhgs-importer",
+    "group": "also",
+    "verified": true,
+    "source": "https://bhgs.dca.ca.gov/forms_pubs/app_importer.pdf",
+    "quote": "An importer’s license is required for those who manufacture or wholesale, through employees or agents, any article of upholstered furniture,"
+   },
+   {
+    "id": "life-law-label",
+    "group": "labels",
+    "verified": true,
+    "source": "https://bhgs.dca.ca.gov/forms_pubs/19-014_furnbedlawflyer.pdf",
+    "quote": "Every article of upholstered furniture and bedding products must have a law label to identify the manufacturer,"
+   },
+   {
+    "id": "life-tb117",
+    "group": "labels",
+    "verified": true,
+    "source": "https://bhgs.dca.ca.gov/forms_pubs/19-014_furnbedlawflyer.pdf",
+    "quote": "Products meeting Technical Bulletin 117-2013 must also have the flammability chemical statement on the label."
+   },
+   {
+    "id": "life-tsca-label",
+    "group": "labels",
+    "verified": true,
+    "source": "https://www.epa.gov/node/155807",
+    "quote": "must include the fabricator’s name, the date the finished good was produced (in month/year format), and a TSCA Title VI compliance statement."
+   },
+   {
+    "id": "life-prop65-furniture",
+    "group": "decides",
+    "verified": true,
+    "source": "https://www.p65warnings.ca.gov/sites/default/files/downloads/factsheets/furniture_products_fact_sheet.pdf",
+    "quote": "Proposition 65 requires businesses to determine if they must provide a warning about significant exposure to listed chemicals."
+   },
+   {
+    "id": "cpsc-gcc",
+    "group": "labels",
+    "verified": true,
+    "source": "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification/General-Certificate-of-Conformity",
+    "quote": "requires domestic manufacturers and importers of certain general-use products (i.e., non-children’s products)"
+   },
+   {
+    "id": "origin-marking",
+    "group": "labels",
+    "verified": true,
+    "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-part134.pdf",
+    "quote": "shall be marked in a conspicuous place as legibly, indelibly, and permanently as the nature of the article (or container) will permit"
+   },
+   {
+    "id": "life-sb54",
+    "group": "also",
+    "verified": true,
+    "source": "https://calrecycle.ca.gov/packaging/packaging-epr/producerguidance/",
+    "quote": "Producers must apply to participate in the PRO (Circular Actional Alliance) plan, submit an independent producer application, or obtain a small producer exemption."
+   },
+   {
+    "id": "life-isf",
+    "group": "also",
+    "verified": true,
+    "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part149.pdf",
+    "quote": "later than 24 hours before the cargo is laden aboard the vessel at the foreign port."
+   },
+   {
+    "id": "hts-ruling",
+    "group": "decides",
+    "verified": true,
+    "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part177.pdf",
+    "quote": "binding tariff classification ruling letter (including pre-entry classification decisions)"
+   },
+   {
+    "id": "retailer-certificates",
+    "group": "labels",
+    "verified": true,
+    "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title16-vol2/pdf/CFR-2025-title16-vol2-part1110.pdf",
+    "quote": "to each distributor and retailer of the product in question."
+   }
+  ],
+  "mustNot": [
+   {
+    "id": "ca-bhgs-manufacturer",
+    "why": "Doesn't manufacture."
+   },
+   {
+    "id": "life-bhgs-retail",
+    "why": "Covered by the importer's license."
+   },
+   {
+    "id": "ada-access",
+    "why": "No store open to the public in this case."
+   }
+  ]
+ }
+}

@@ -112,7 +112,7 @@ export function alsoFor(o: { places: string[]; segment: Segment; have: Have; tod
     const group: AlsoGroup = i.kind === "filing" ? "also" : i.kind === "advisory" ? "decides" : i.stage === "sell" || i.stage === "online" ? "labels" : "workplace";
     // a license whose agency publishes no fee says so, as the founder's example does; not insurance, dues the
     // producer organization sets, or a filing whose agency explains its fee in words
-    const unknownFee = i.kind === "filing" && fee == null && verified && !i.feeless && !f?.feeNote && f?.method !== "insurer" && !/fee not confirmed/i.test(i.why.en);
+    const unknownFee = i.kind === "filing" && fee == null && verified && !i.feeless && !f?.feeNote && f?.method !== "insurer";
     rows.push({
       id: i.id, group, stage: i.stage, kind: i.kind, level: f?.level ?? i.level, title: i.title, why: i.why, agency, verified,
       line: line(i.title, detail, (f && i.whenAt?.[f.where]) || i.when, unknownFee),
