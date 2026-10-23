@@ -50,7 +50,7 @@ alter table public.voice_calls enable row level security;
 revoke all on public.voice_calls from public, anon, authenticated;
 grant select on public.voice_calls to authenticated;
 drop policy if exists "members and team read calls" on public.voice_calls;
-create policy "members and team read calls" on public.voice_calls for select to authenticated using (public.is_member(workspace_id) or public.is_staff());
+create policy "members and team read calls" on public.voice_calls for select to authenticated using (public.can_view(workspace_id) or public.is_staff());
 
 -- the timeline takes phone calls, and links each such event to its call
 alter table public.filing_events add column if not exists call_id uuid references public.voice_calls(id) on delete set null;
