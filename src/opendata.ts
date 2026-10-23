@@ -78,7 +78,7 @@ export async function cityRecords(address: string, o: { days?: number; f?: typeo
       title: `${r.work_type ?? "Building"} permit`, status: r.permit_status ?? "Approved", date: day(r.approved_date), detail: r.job_description?.slice(0, 160),
       url: "https://a810-dobnow.nyc.gov/publish/Index.html#!/" });
   } else if (city === "sf") {
-    const rows = await socrata(f, `https://data.sfgov.org/resource/i98e-djp9.json?$limit=20&$order=${q("status_date DESC")}&$where=${q(`street_number='${like(a.number)}' AND upper(street_name) like '%${like(a.core)}%' AND status_date >= '${since}'`)}`);
+    const rows = await socrata(f, `https://data.sf.gov/resource/i98e-djp9.json?$limit=20&$order=${q("status_date DESC")}&$where=${q(`street_number='${like(a.number)}' AND upper(street_name) like '%${like(a.core)}%' AND status_date >= '${since}'`)}`);
     for (const r of rows) out.push({ source: "sf_permits", kind: "permit", id: `sf_permits:${r.permit_number}:${r.status}`, title: `${r.permit_type_definition ?? "Building"} permit`,
       status: r.status ?? "", date: day(r.status_date), detail: r.description?.slice(0, 160), url: `https://dbiweb02.sfgov.org/dbipts/default.aspx?page=Permit&PermitNumber=${q(r.permit_number ?? "")}` });
   } else if (city === "la") {

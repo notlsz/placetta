@@ -395,6 +395,16 @@ export async function markPaid(id: string) {
   if (error) throw fromPg(error);
 }
 
+/** One filing's timeline (migration 20261026120000_status_tracking): every event with its source, time and confidence,
+    newest first, and when the daily status check last looked. Null before the migration is applied. */
+export type TimelineEvent = { at: string; kind: string; status: string | null; title: Bi; source: string; confidence: number | null; url: string | null };
+export type Timeline = { events: TimelineEvent[]; tracking: { last_checked_at: string | null; next_check_at: string | null; agency_status: string | null; agency_norm: string | null; last_movement_at: string | null; escalated_at: string | null } | null };
+export async function filingTimeline(filingId: string): Promise<Timeline | null> {
+  const { data, error } = await supabase().rpc("filing_timeline", { p_filing: filingId });
+  if (error) { if (error.code === "PGRST202" || error.code === "42883") return null; throw fromPg(error); }
+  return (data ?? null) as Timeline | null;
+}
+
 /* ------------------------------ documents ------------------------------ */
 
 const safeName = (n: string) => n.replace(/[^\w.\- ()一-鿿]+/g, "_").slice(-120) || "file";

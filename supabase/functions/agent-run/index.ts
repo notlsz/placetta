@@ -527,8 +527,8 @@ async function cacheLog(runId: string, st: RunState) {
 
 const short = (s: string, n = 90) => (s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s);
 const WATCH = {
-  en: (what: string, where: string) => `Weekly check, in the background. 1) For each application that has been submitted or approved, look up its current status on the agency's own public lookup or records page (search the agency's site with the business name, license number or confirmation number) and compare it with the workspace. 2) Search official government sources for new or changed requirements, fees, inspections or deadlines in the last month that affect a ${what || "business like this one"} in ${where || "its city"}. Add a deadline for any new due date. Report only what changed, each with its source. If nothing changed, reply exactly: No changes.`,
-  zh: (what: string, where: string) => `每周后台检查。1）对每项已提交或已批准的申请，在该机构官方的公开查询或记录页面（用企业名称、执照号或确认号在机构网站搜索）查看当前状态，并与工作区对比。2）在政府官方来源中查找近一个月内影响${where || "所在城市"}${what || "此类企业"}的新增或变更的要求、费用、检查或截止日期。如有新的截止日期，请添加。只报告变化，并注明来源。如果没有变化，请只回复：No changes。`,
+  en: (what: string, where: string) => `Weekly check, in the background. Applications' statuses are checked daily by Placetta's status tracker, so don't look them up. Search official government sources for new or changed requirements, fees, inspections or deadlines in the last month that affect a ${what || "business like this one"} in ${where || "its city"}. Add a deadline for any new due date. Report only what changed, each with its source. If nothing changed, reply exactly: No changes.`,
+  zh: (what: string, where: string) => `每周后台检查。申请状态由快哉的状态追踪每天检查，无需查询。在政府官方来源中查找近一个月内影响${where || "所在城市"}${what || "此类企业"}的新增或变更的要求、费用、检查或截止日期。如有新的截止日期，请添加。只报告变化，并注明来源。如果没有变化，请只回复：No changes。`,
 };
 
 /** A job Odelia does in the background on a schedule: a routine the business set up, a renewal coming due, or a filing

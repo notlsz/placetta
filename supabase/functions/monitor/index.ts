@@ -6,9 +6,10 @@
 // and the Placetta team gets an email about approved filings nobody has picked up for a day.
 // Mondays, with email on, each headquarters email a workspace shares with (hq_links) gets one page across every
 // franchisee that shared with it: totals, then one line per store at risk. hq_reports keeps it to once a week.
-// Once a week per workspace (on a weekday picked from its id, so the load spreads), it also starts the agent's
-// background check (agent-run, kind "watch"): each submitted application's status on the agency's own lookup page, and
-// new or changed rules for that business and city. That needs ANTHROPIC_API_KEY or GEMINI_API_KEY; WEEKLY_CHECKS=off turns it off.
+// Every day it checks each filing with an agency (status_checks.ts): in code from the city's open data where it can,
+// by the agency page's hash where the team set one, by Odelia otherwise. Once a week per workspace (on a weekday picked
+// from its id, so the load spreads), it also starts the agent's background check (agent-run, kind "watch") for new or
+// changed rules for that business and city. That needs ANTHROPIC_API_KEY or GEMINI_API_KEY; WEEKLY_CHECKS=off turns it off.
 // Owners who linked a phone (Settings, Text and call Odelia) also hear about what matters most there: a call for
 // something urgent if they want calls, a text for what needs them this week. Those go into odelia_outbox, and
 // odelia-sms sends them outside their quiet hours, at most one call and three texts a day.
@@ -20,7 +21,7 @@ import { appLink, noticeText, urgency } from "../_shared/odelia.ts";
 import { HOOK_KINDS, hookDigest, postHook, type HookKind } from "../_shared/channels.ts";
 import { deadlineRules } from "../_shared/business_rules.ts";
 // @deno-types="../_shared/opening.d.ts"
-import { approvalsLine, type FilingRow, finishWork, MAX_RESUMES, normalizeState, openingLine, openingPath, overdue, publishedDays, resumable, runsOn, type Routine, stampFilings } from "../_shared/opening.js";
+import { approvalsLine, type FilingRow, finishWork, MAX_RESUMES, normalizeState, openingLine, openingPath, resumable, runsOn, type Routine, stampFilings } from "../_shared/opening.js";
 import { cityOf, cityRecords, type CityRecord } from "../../../src/opendata.ts";
 import { workspaceToday } from "../../../src/localDay.ts";
 import { wsDailyLimit } from "../_shared/ai_gate.ts";
@@ -31,6 +32,7 @@ import { canConverse } from "../_shared/llm.ts";
 import { mayEmail, wantsTexts } from "../_shared/reach.ts";
 import { deliverNotices, noticeDb, outboxText } from "../_shared/notices.ts";
 import { stageAlert, stageUpdates, type StageFiling, type StageUpdate } from "./stage.ts";
+import { runStatusChecks, type StatusFiling, type StatusIO, type StatusRun, type WsState } from "./status_checks.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -500,6 +502,51 @@ function stageOut(key: string) {
   };
 }
 
+/* ------------------------------ the daily status check: the database and the ways out ------------------------------ */
+
+function statusIO(start: (ws: string, prompt: string, title: Bi) => Promise<string | null>): StatusIO {
+  const fetchOk = async (url: string, accept: string) => {
+    const res = await fetch(url, { headers: { Accept: accept, "User-Agent": "Placetta status check (+https://placetta.com)" }, redirect: "follow", signal: AbortSignal.timeout(8000) });
+    if (!res.ok) throw new Error(`${res.status}`);
+    return res;
+  };
+  return {
+    async tracking(ids) {
+      const out = new Map();
+      for (let i = 0; i < ids.length; i += 200) {
+        const { data, error } = await admin.from("filing_tracking").select("filing_id, lookup_url, last_checked_at, next_check_at, unchanged_checks, check_errors, last_hash, agency_status, agency_norm, last_movement_at, escalated_at").in("filing_id", ids.slice(i, i + 200));
+        if (error) throw new Error("filing_tracking: " + error.code);   // before the migration: no status checks
+        for (const r of data ?? []) out.set(r.filing_id as string, r);
+      }
+      return out;
+    },
+    fetchJson: async (url) => (await fetchOk(url, "application/json")).json(),
+    fetchText: async (url) => (await (await fetchOk(url, "text/html")).text()).slice(0, 400_000),
+    async saveTracking(id, ws, t) {
+      const { error } = await admin.from("filing_tracking").upsert({ filing_id: id, workspace_id: ws, last_checked_at: t.last_checked_at ?? null, next_check_at: t.next_check_at ?? null,
+        unchanged_checks: t.unchanged_checks ?? 0, check_errors: t.check_errors ?? 0, last_hash: t.last_hash ?? null, agency_status: t.agency_status ?? null, agency_norm: t.agency_norm ?? null,
+        agency_status_at: t.agency_status_at ?? null, last_movement_at: t.last_movement_at ?? null, escalated_at: t.escalated_at ?? null, updated_at: new Date().toISOString() }, { onConflict: "filing_id" });
+      if (error) console.error("filing_tracking", error.code);
+    },
+    async check(c) { const { error } = await admin.from("filing_checks").insert(c); if (error) console.error("filing_checks", error.code); },
+    async event(e) {
+      const { data, error } = await admin.from("filing_events").upsert(e, { onConflict: "filing_id,dedupe", ignoreDuplicates: true }).select("id");
+      if (error) { console.error("filing_events", error.code); return false; }
+      return (data ?? []).length > 0;
+    },
+    async update(u) {
+      const { data, error } = await admin.from("updates").upsert({ ...u, app_id: u.app_id ?? null, body: u.body ?? null }, { onConflict: "workspace_id,dedupe", ignoreDuplicates: true }).select("dedupe");
+      if (error) { console.error("status update", u.workspace_id, error.code); return false; }
+      return (data ?? []).length > 0;
+    },
+    async teamTask(filingId, ws, title, dedupe) {
+      const { error } = await admin.from("team_tasks").upsert({ kind: "check_agency", filing_id: filingId, workspace_id: ws, title, dedupe }, { onConflict: "dedupe", ignoreDuplicates: true });
+      if (error) console.error("status team task", error.code);
+    },
+    start,
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json(405, { error: "Use POST." });
   const { data: okKey } = await admin.rpc("monitor_key_ok", { p_key: req.headers.get("x-monitor-key") ?? "" });
@@ -785,7 +832,7 @@ Deno.serve(async (req) => {
   // prepares the renewal and puts it up for approval), filings past the agency's usual time (she checks and drafts a
   // status inquiry), filings the agency sent back or asked about (she drafts the answer), and jobs she stopped partway
   // (she picks them back up).
-  let jobs = 0, resumed = 0, answered = 0;
+  let jobs = 0, resumed = 0, answered = 0, status: StatusRun | null = null;
   if (canConverse((k) => Deno.env.get(k)) && Deno.env.get("ODELIA_JOBS") !== "off") {
     let left = Math.max(0, Number(Deno.env.get("ODELIA_JOBS_PER_DAY") ?? "60") || 0);
     const plans = new Map<string, string>();
@@ -832,20 +879,14 @@ Deno.serve(async (req) => {
       const due = renewalJobs(ws, st, local);
       if (due.length && (await planOf(ws)) !== "none") await startRenewals(ws, due, local, io);
     }
-    // filings with the agency well past its published processing time: one check every two weeks
-    for (const f of ((filings ?? []) as (Filing & { submitted_at?: string | null })[]).filter((x) => x.status === "submitted")) {
-      const app = ((((states.get(f.workspace_id) ?? {}) as { apps?: { id: string; est?: Bi; name?: Bi; agency?: Bi }[] }).apps) ?? []).find((a) => a.id === f.app_id);
-      const od = overdue(f.submitted_at, app ? publishedDays(app.est) : null, today);
-      if (!od) continue;
-      const name = bi(app?.name ?? f.title), agency = bi(app?.agency ?? "the agency");
-      const dedupe = `chase:${f.id}:${Math.floor(od.waited / 14)}`;
-      const { data: fresh } = await admin.from("updates").upsert({ workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, dedupe,
-        title: { en: `${name.en}: past the agency's usual time`, zh: `${name.zh}：已超过机构通常的办理时间` },
-        body: { en: `With ${agency.en} for ${od.waited} days; it usually takes about ${od.usual}. Odelia is checking on it.`, zh: `已提交${agency.zh} ${od.waited} 天，通常约 ${od.usual} 天。Odelia 正在跟进。` } },
-        { onConflict: "workspace_id,dedupe", ignoreDuplicates: true }).select("dedupe");
-      if (!fresh?.length) continue;
-      await start(f.workspace_id, `The ${name.en} went to ${agency.en} on ${String(f.submitted_at).slice(0, 10)}, ${od.waited} days ago${f.confirmation_number ? ` (confirmation ${f.confirmation_number})` : ""}; the agency usually takes about ${od.usual} days. Check its status on the agency's own lookup page. If there's still no decision, draft a short, polite status inquiry to the agency with draft_message for the owner to approve, and add a deadline to check again in 7 days.`,
-        { en: `Checked on: ${name.en}`, zh: `已跟进：${name.zh}` });
+    // The daily status check (status_checks.ts): every filing with an agency, and anything hot, once a day; in code
+    // where the city publishes it, by hash where the team set the agency's page, by Odelia otherwise (backing off while
+    // nothing moves). Past the agency's published time with nothing moving, it escalates. STATUS_CHECKS=off turns it off.
+    if (Deno.env.get("STATUS_CHECKS") !== "off") {
+      try {
+        status = await runStatusChecks({ filings: (filings ?? []) as StatusFiling[], states: states as Map<string, WsState>, today, now, app: APP, io: statusIO(start),
+          max: Number(Deno.env.get("STATUS_CHECKS_PER_RUN") ?? "300") || 300, maxModel: Math.min(left, Number(Deno.env.get("STATUS_MODEL_CHECKS_PER_RUN") ?? "30") || 30) });
+      } catch (e) { console.error("status checks", String(e).slice(0, 160)); }
     }
     // the agency sent a filing back or asked for more: she drafts the answer and the corrected application, for the
     // owner's approval. The Update is the claim, so a filing's change is answered once.
@@ -887,5 +928,5 @@ Deno.serve(async (req) => {
     { app: APP, today, limit: 500 }).catch((e) => { console.error("mention notices", String(e).slice(0, 160)); return null; });
 
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, agency_asks: answered, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled });
+  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, agency_asks: answered, status_checks: status, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled });
 });

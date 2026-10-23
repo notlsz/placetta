@@ -54,6 +54,26 @@ changes a price or a promise): keep complex licenses at $999 on the chain plan (
 an opening takes); include a set number of new licenses a store a year and price the rest at $299; or leave it, since
 the margin watch and the team-time alert show it as it happens.
 
+## Daily status checks (added 2026-10-22)
+
+Every filing with an agency (submitted, in progress, needs info) and anything holding up an opening or with a deadline
+in the next 30 days is checked daily (`supabase/functions/monitor/status_checks.ts`, `src/tracking`). The weekly
+background check no longer looks up statuses, only new or changed rules.
+
+| Check | How | Model | Cost a check |
+|---|---|---|---:|
+| City open data (SF DBI, LADBS, NYC DOB NOW) | fetch the feed by permit or job number, parse in code | never | $0 |
+| Agency status page the team set on the filing | fetch, strip times and tokens, SHA-256; read only when the hash changed | on change | $0, or one model check |
+| No lookup in code (liquor, health, most others) | Odelia's one-filing check, backing off 1, 1, 2, 4, 7 days while nothing moves; daily while hot | each check | $0.0128 default route, $0.0405 Anthropic only |
+
+A model check is priced at the measured chat turn above (2 calls), since it is one short background run. Per store-month
+(`checksPerStoreMonth` in `src/tracking`, est.): three filings in flight, one with a city feed, half hot: 72 checks,
+42 by the model, **$0.54** on the default route ($0.0075 a check on average), $1.70 on Anthropic only. Worst case, nine
+filings all hot with no feed, all on Anthropic: 270 checks, **$10.94**. Both fit inside the $50 ceiling with the rest of
+the month's AI. Real numbers: `select public.status_check_costs(30)` (staff) reports checks, model checks, cost per
+check and per store-month from `filing_checks`. A model check's own cost is on its run in `agent_runs.cost_usd`
+(`filing_checks.run_id`).
+
 ## What was measured, and how
 
 **AI per journey.** Each journey runs through `runRounds` (`src/serverRun.ts`, what agent-run runs) with a scripted

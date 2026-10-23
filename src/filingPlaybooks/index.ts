@@ -12,6 +12,8 @@
      rejections   why an agency sends this kind of filing back, and the check in code that prevents it
      judgment     what the model still decides
      fallback     when it goes to Placetta's team
+     lookups      where the agency publishes its status, read every day (./status.ts, src/tracking)
+     book_inspection  the step after issue for permits an inspector signs off: book it (src/inspections/booking.ts)
    The agency's time, the renewal cycle, the fee, the form's own lines and how it's sent (portal, email, fax, mail, the
    owner, or the team) are read from the registry entry and the verified destination of each store's own form
    (src/forms/registry.ts, supabase/functions/file/destinations.ts), so a playbook is never out of step with them.
@@ -23,6 +25,7 @@ import { B, type Bi } from "../bi";
 import type { OfficialForm } from "../forms/registry";
 import { complexOf } from "../pricing";
 import type { ValidatorId } from "../validate";
+import type { LookupId } from "./status";
 
 export type PlaybookId = "business_license" | "health_permit" | "sellers_permit" | "sign_permit" | "building_permit" | "liquor" | "entity_registration" | "sales_tax_return";
 export type Input = {
@@ -32,7 +35,7 @@ export type Input = {
   validator?: ValidatorId;
 };
 export type Doc = { key: string; label: Bi; /** a document already in the workspace that can be reused */ reuse: RegExp };
-export type Step = "find_form" | "prefill" | "reuse_documents" | "validate" | "ask_once" | "approve" | "send" | "track";
+export type Step = "find_form" | "prefill" | "reuse_documents" | "validate" | "ask_once" | "approve" | "send" | "track" | "book_inspection";
 export type Rejection = { why: Bi; check: "preflight" | "jurisdiction" | "premises" | "ein" | "latin" | "legal_name" | "attachments" | "expired" | "fee" | "duplicate" | "readback" };
 export type Playbook = {
   id: PlaybookId; name: Bi;
@@ -41,6 +44,8 @@ export type Playbook = {
   perStore: boolean;
   inputs: Input[]; documents: Doc[]; steps: Step[]; rejections: Rejection[];
   judgment: Bi[]; fallback: Bi;
+  /** Where the agency publishes this kind of filing's status (./status.ts): read daily, in code where it can be. */
+  lookups?: LookupId[];
 };
 
 const NOT = /plan (check|review)|pre-?opening|inspection|food (handler|worker|protection|safety) (card|certificate|course)|manager|final/i;
@@ -86,7 +91,7 @@ export const PLAYBOOKS: Playbook[] = [
     inputs: [LEGAL, PREMISES, OWNER, PHONE, OPENING, { key: "hours", label: B("Seats and opening hours", "座位数与营业时间"), from: { fact: /seats|hours/i } }],
     documents: [{ key: "plan_approval", label: B("Plan check approval", "图纸审查批准"), reuse: /plan (check|review)|图纸/i },
       { key: "manager_cert", label: B("Food manager certificate", "食品经理证书"), reuse: /food (manager|protection|safety)|经理证/i }],
-    steps: COMMON_STEPS, rejections: [R.jurisdiction, R.legal, R.premises, R.attach, R.expired, R.latin, R.twice],
+    steps: [...COMMON_STEPS, "book_inspection"], rejections: [R.jurisdiction, R.legal, R.premises, R.attach, R.expired, R.latin, R.twice],
     judgment: [B("The menu's risk category when the agency asks for one", "机构要求时判断菜单风险等级")], fallback: TEAM,
   },
   {
@@ -113,8 +118,9 @@ export const PLAYBOOKS: Playbook[] = [
       { key: "valuation", label: B("Value of the work", "工程造价"), from: "ask" }],
     documents: [{ key: "plans", label: B("Plans stamped by the architect or engineer", "建筑师或工程师盖章的图纸"), reuse: /plans?|drawings?|图纸/i },
       { key: "landlord", label: B("Landlord's consent", "房东同意书"), reuse: /landlord|consent|房东/i }],
-    steps: COMMON_STEPS, rejections: [R.jurisdiction, R.attach, R.premises, R.fee, R.twice],
+    steps: [...COMMON_STEPS, "book_inspection"], rejections: [R.jurisdiction, R.attach, R.premises, R.fee, R.twice],
     judgment: [B("Answers to the plan checker's comments, which the team reviews", "回复图纸审查意见，由团队审核")], fallback: TEAM,
+    lookups: ["sf_dbi_permits", "la_ladbs_permits", "nyc_dob_now_jobs"],
   },
   {
     id: "liquor", name: B("Liquor license", "酒类执照"), perStore: true,
@@ -126,6 +132,7 @@ export const PLAYBOOKS: Playbook[] = [
       { key: "diagram", label: B("Floor plan of the licensed premises", "持牌场所平面图"), reuse: /floor plan|diagram|平面图/i }],
     steps: COMMON_STEPS, rejections: [R.jurisdiction, R.legal, R.premises, R.attach, R.expired, R.latin, R.twice],
     judgment: [B("Answers about the owners' history and the premises that only the owner can give", "只有负责人能回答的关于股东背景和场所的问题")],
+    lookups: ["ca_abc_license", "ny_sla_license", "tx_tabc_license"],
     fallback: B("A liquor license is complex: Placetta's team leads it with the owner (notices, hearings, the agency's questions), with Odelia preparing every form.", "酒类执照属于复杂执照：由快哉团队与负责人一起办理（公示、听证、机构问询），Odelia 准备全部表格。"),
   },
   {
