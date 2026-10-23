@@ -86,7 +86,7 @@ const LINES = {
   idle: { en: "I'll let you go. Text me anytime. Goodbye.", zh: "那我先挂了，有需要随时发短信给我。再见。" },
 };
 
-function greeting(lang: Lang, name: string | null, mode: "verified" | "code" | "outbound", business: string) {
+export function greeting(lang: Lang, name: string | null, mode: "verified" | "code" | "outbound", business: string) {
   if (lang === "zh") {
     // Every call opens by saying Odelia is an AI and the call is recorded and transcribed (California's bot and recording rules, the FCC's AI-voice ruling).
     const hi = `您好${name ? `，${name}` : ""}，我是快哉的 AI 助理 Odelia。本次通话会录音和转录，以便为您办理；如您不同意录音请直接说。`;
@@ -403,7 +403,7 @@ async function agencyCallFromOwner(call: Call, named: string): Promise<Record<st
   const hits = list.filter((f) => { const t = `${f.title?.en ?? ""} ${f.title?.zh ?? ""}`.toLowerCase(); return words.some((w) => t.includes(w)) || (!!named.trim() && t.includes(named.trim().toLowerCase())); });
   const one = hits.length === 1 ? hits[0] : list.length === 1 ? list[0] : null;
   if (!one) return { ok: false, result: list.length ? `Ask which one: ${list.slice(0, 5).map((f) => f.title?.[call.lang] || f.title?.en).join("; ")}.` : "Nothing is with an agency right now, so there's nothing to ask them. Tell them so." };
-  const r = await agencyCall({ filing_id: one.id, user_id: call.user_id!, lang: call.lang });
+  const r = await agencyCall({ workspace_id: call.workspace_id!, filing_id: one.id, user_id: call.user_id!, lang: call.lang });
   return r.ok ? { ok: true, result: "Odelia is calling the agency now. Tell them the answer will be on the filing's timeline and you'll text them." } : { ok: false, result: `Tell them: ${r.say[call.lang]}` };
 }
 
@@ -472,6 +472,11 @@ async function mcp(req: Request): Promise<Response> {
   return out ? json(200, out) : new Response(null, { status: 202 });
 }
 
+/** A member (owner, admin or member) of the workspace, with a plan: who an agency call may be placed for. */
+async function isMember(ws: string, uid: string) {
+  return UUID.test(ws) && UUID.test(uid) && (await mayUseAgent(admin, ws, uid)) === "ok";
+}
+
 /** Accept the call at OpenAI with the session Placetta decided for it, or turn it away when the token was not ours. */
 async function acceptOrReject(callId: string, spec: SpecWithBrain | null) {
   const key = env("OPENAI_API_KEY") ?? "";
@@ -526,12 +531,12 @@ export async function handle(req: Request): Promise<Response> {
   try { body = await req.json(); } catch { return fail(400, "bad_request", "Send JSON."); }
   if (!(await monitorKeyOk(req.headers.get("x-monitor-key")))) return fail(401, "unauthorized", "unauthorized");
   if (body.action === "dial") return await dial(String(body.outbox_id ?? ""));
-  if (body.action === "agency_call") {
-    const r = await agencyCall({ filing_id: String(body.filing_id ?? ""), user_id: String(body.user_id ?? ""), lang: body.lang === "zh" ? "zh" : "en" });
-    return json(r.ok ? 200 : 409, r);
-  }
-  if (body.action === "interpret_call") {
-    const r = await interpretCall({ filing_id: String(body.filing_id ?? ""), user_id: String(body.user_id ?? "") });
+  if (body.action === "agency_call" || body.action === "interpret_call") {
+    // the person the call is for must still be a member of the workspace the filing is in, whoever asked
+    const ws = String(body.workspace_id ?? ""), uid = String(body.user_id ?? "");
+    if (!(await isMember(ws, uid))) return fail(403, "forbidden", "Not a member of that workspace.");
+    const o = { workspace_id: ws, filing_id: String(body.filing_id ?? ""), user_id: uid };
+    const r = body.action === "agency_call" ? await agencyCall({ ...o, lang: body.lang === "zh" ? "zh" : "en" }) : await interpretCall(o);
     return json(r.ok ? 200 : 409, r);
   }
   if (body.action === "purge_recordings") return json(200, await purgeRecordings());

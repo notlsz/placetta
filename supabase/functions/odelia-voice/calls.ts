@@ -96,9 +96,9 @@ const NO: Record<string, Said> = {
   dial_failed: { en: "The call didn't go through. Odelia will try again in the next business hours.", zh: "电话没有接通。Odelia 会在下一个办公时间再试。" },
 };
 
-async function filingAndBusiness(filingId: string): Promise<{ f: FilingRow & { app_id: string }; business: string; team: TeamNumber[] } | null> {
-  if (!UUID.test(filingId)) return null;
-  const { data: f } = await D.admin.from("filings").select("id, workspace_id, app_id, title, agency, status, confirmation_number, submitted_at, payload").eq("id", filingId).maybeSingle();
+async function filingAndBusiness(filingId: string, ws: string): Promise<{ f: FilingRow & { app_id: string }; business: string; team: TeamNumber[] } | null> {
+  if (!UUID.test(filingId) || !UUID.test(ws)) return null;
+  const { data: f } = await D.admin.from("filings").select("id, workspace_id, app_id, title, agency, status, confirmation_number, submitted_at, payload").eq("id", filingId).eq("workspace_id", ws).maybeSingle();
   if (!f) return null;
   const [{ data: w }, { data: team }] = await Promise.all([
     D.admin.from("workspaces").select("name").eq("id", f.workspace_id).maybeSingle(),
@@ -109,8 +109,8 @@ async function filingAndBusiness(filingId: string): Promise<{ f: FilingRow & { a
 
 /** Place a status call: every check in planAgencyCall, then the caps (voice_gate), then the dial. The caller (the voice
  *  function or a tool on a call) has already checked that the person may act in this workspace. */
-export async function agencyCall(o: { filing_id: string; user_id: string; lang: Lang }): Promise<Out> {
-  const got = await filingAndBusiness(o.filing_id);
+export async function agencyCall(o: { workspace_id: string; filing_id: string; user_id: string; lang: Lang }): Promise<Out> {
+  const got = await filingAndBusiness(o.filing_id, o.workspace_id);
   if (!got || !UUID.test(o.user_id)) return { ok: false, code: "bad", say: NO.bad };
   const plan = planAgencyCall({ filing: got.f, business: got.business, lang: o.lang, now: new Date(), env: D.env, team: got.team });
   if (!plan.ok) return plan;
@@ -138,7 +138,7 @@ export async function agencyCall(o: { filing_id: string; user_id: string; lang: 
 async function agencySpec(id: string): Promise<SpecWithBrain | null> {
   const row = await rowById(id);
   if (!row || row.ended_at || !row.filing_id) return null;
-  const got = await filingAndBusiness(row.filing_id);
+  const got = await filingAndBusiness(row.filing_id, row.workspace_id);
   if (!got) return null;
   // the hours were checked when it was dialed; rebuild the session as of then
   const plan = planAgencyCall({ filing: got.f, business: got.business, lang: row.lang, now: new Date(row.started_at), env: D.env, team: got.team });
@@ -183,8 +183,8 @@ export async function agencyToolCall(id: string, name: string, args: Record<stri
 
 /** Odelia calls the owner, then the agency's official line, and interprets between them in one conference. Needs the
  *  speech-to-speech brain on SIP; without it, the app's Interpreter (phone on the counter) is the way. */
-export async function interpretCall(o: { filing_id: string; user_id: string }): Promise<Out> {
-  const got = await filingAndBusiness(o.filing_id);
+export async function interpretCall(o: { workspace_id: string; filing_id: string; user_id: string }): Promise<Out> {
+  const got = await filingAndBusiness(o.filing_id, o.workspace_id);
   if (!got || !UUID.test(o.user_id)) return { ok: false, code: "bad", say: NO.bad };
   const pick = pickBrain({ surface: "interpreter_phone", lang: "zh", env: D.env });
   if (pick.brain === "telnyx" || !phoneReady(pick.brain, D.env)) return { ok: false, code: "not_configured", say: { en: "Interpreting on a phone call needs the speech-to-speech voice, which isn't set up yet. Use Interpreter in the app, with the phone on the counter.", zh: "电话三方翻译需要语音模型，尚未开通。请在应用中使用“翻译”，把手机放在柜台上。" } };

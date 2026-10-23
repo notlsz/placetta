@@ -68,7 +68,7 @@ export const COMMIT_LINE: Record<CommitKind, Record<Lang, string>> = {
 /** Lines where Odelia herself agreed to something only the owner decides: checked on every transcript after the call;
  *  any hit opens a team task so a person can correct it with the agency. */
 export function commitmentsSaid(odeliaLines: string[]): string[] {
-  const re = /\b(i|we) (agree|accept|will pay|'ll pay|authorize|admit|consent to)\b|\bthat'?s fine,? (we|the business) will\b|\byes,? (charge|pay|move the (deadline|date))\b|我们(同意|接受|会付|承认)|可以.{0,4}(扣款|付款)/i;
+  const re = /\b(i|we)( will|'ll)? (agree|accept|pay|authorize|admit|consent to)\b|\bthat'?s fine,? (we|the business) will\b|\byes,? (charge|pay|move the (deadline|date))\b|我们(同意|接受|会付|承认)|可以.{0,4}(扣款|付款)/i;
   return odeliaLines.filter((l) => re.test(l));
 }
 

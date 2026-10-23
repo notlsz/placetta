@@ -22,6 +22,8 @@ const PROOF: Record<string, RegExp[]> = {
   "sso": [/requireUser\(req\)/, /requireAccess\(ws, user, jwt, "admin"\)/],
   "team": [/requireUser\(req\)/, /requireAccess\(ws, user, jwt/],
   "tts": [/auth\.getUser\(/, /accessFor\(/],
+  // every action: the session, then access_for on the workspace; a recording only from the workspace's own folder
+  "voice": [/auth\.getUser\(/, /accessRpc\(admin, ws, user\.id, jwt\)/, /startsWith\(`\$\{a\.ws\}\/`\)/],
   "forms": [/requireUser\(req\)/, /monitor_key_ok/],
   // their own credential: a hashed token, a signed webhook, a signed state, the monitor key
   "calendar-feed": [/calendar_feeds"\)\.select\("workspace_id"\)\.eq\("token", token\)/],

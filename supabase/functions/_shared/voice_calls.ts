@@ -22,16 +22,16 @@ const say = (en: string, zh: string) => ({ en, zh });
  *   the agency's line is official: in the registry, or added by the team from a government page
  *   the agency is open, in its own time zone
  */
-export function planAgencyCall(o: { filing: FilingRow; business: string; lang: Lang; now: Date; env: Env; team?: TeamNumber[] }): AgencyPlan {
+export function planAgencyCall(o: { filing: FilingRow; business: string; lang: Lang; now: Date; env: Env; team?: TeamNumber[]; rehearse?: boolean }): AgencyPlan {
   const f = o.filing;
-  if (!["submitted", "needs_info", "in_progress"].includes(f.status))
+  if (!o.rehearse && !["submitted", "needs_info", "in_progress"].includes(f.status))
     return { ok: false, code: "not_filed", say: say("There's nothing to ask the agency yet: this filing hasn't been sent. Odelia calls once it's with them.", "这份申请还没有提交给机构，暂时没有可问的。提交后 Odelia 会去电询问。") };
   const line = lineForForm(f.payload?.official);
   if (!line) return { ok: false, code: "no_line", say: say("Placetta doesn't have this agency's official phone line yet, so Odelia won't call. The daily status check keeps watching, and the team can add the line from the agency's own page.", "快哉还没有这家机构的官方电话，Odelia 不会拨打。每日状态检查会继续跟进，团队可以从机构官网添加电话。") };
   const official = officialNumbers((o.team ?? []).filter((t) => t.agency_key === line.key).map((t) => t.number));
   const dial = mayDial(line.number, official, "registry");
   if (!dial.ok) return dial;
-  const open = agencyOpen(o.now, line);
+  const open = o.rehearse ? { open: true, why: "rehearsal" } : agencyOpen(o.now, line);
   if (!open.open) return { ok: false, code: "closed", say: say(`${line.agency.en} is closed right now (${open.why}). Odelia will call during their business hours; nothing needs doing.`, `${line.agency.zh}现在不在办公时间（${open.why}）。Odelia 会在对方办公时间致电，您无需操作。`) };
   const pick = pickBrain({ surface: "agency_phone", lang: o.lang, env: o.env });
   const title = (o.lang === "zh" ? f.title?.zh : f.title?.en) || f.title?.en || "the application";

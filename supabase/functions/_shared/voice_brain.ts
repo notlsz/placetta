@@ -215,6 +215,8 @@ export type SessionSpec = {
   terms: string[];
   /** Interpreter mode: no tools of its own, translate both ways. */
   interpret?: boolean;
+  /** A session in the app: the tools are function calls the app answers (each through Placetta's server), not MCP. */
+  client?: boolean;
 };
 
 const VOICES = { openai: { en: "marin", zh: "marin" }, grok: { en: "Ara", zh: "Ara" } };
@@ -234,7 +236,8 @@ export function sessionConfig(brain: BrainId, s: SessionSpec, env: Env, tts?: Tt
           transcription: { model: "gpt-4o-transcribe", language: s.lang, prompt: s.terms.join(", ").slice(0, 900) } },
         output: { voice: env(`OPENAI_VOICE_${s.lang.toUpperCase()}`) ?? VOICES.openai[s.lang] },
       },
-      tools: s.tools.length ? [{ type: "mcp", server_label: "placetta", server_url: s.toolUrl, headers: { "x-odelia-call": s.token }, require_approval: "never", allowed_tools: s.tools.map((t) => t.name) }] : [],
+      tools: s.client ? s.tools.map((t) => ({ type: "function", name: t.name, description: t.description, parameters: { type: "object", properties: t.properties, required: t.required } }))
+        : s.tools.length ? [{ type: "mcp", server_label: "placetta", server_url: s.toolUrl, headers: { "x-odelia-call": s.token }, require_approval: "never", allowed_tools: s.tools.map((t) => t.name) }] : [],
     };
   }
   if (brain === "grok") {
