@@ -3463,6 +3463,63 @@ html[lang="zh-CN"] .c96ch b{font-family:var(--zhserif);font-weight:500;font-size
   .hero .mqt span:not(.lg){font-size:16px}
 }
 .hero .mq{-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+/* hero 9.5, second pass. Phone: the film is enlarged from its bottom edge so the lit shop window fills the top half
+   (no dim empty band), a touch brighter, with the shade only where the words are. Laptop: "Book a demo" sits beside
+   "Get my plan" as its secondary button, Devin's pair; the live demo rises 40px so more of the product is on the first
+   screen, as on Stripe and Devin. */
+@media (max-width:767px){
+  .hero .hvid{transform-origin:50% 100%;transform:scale(1.35);filter:brightness(1.12) saturate(1.1)}
+  .hero::after{background:linear-gradient(180deg,rgba(9,19,36,.30) 0%,rgba(9,19,36,0) 18%,rgba(9,19,36,.1) 40%,rgba(9,19,36,.78) 62%,rgba(9,19,36,.96) 100%)!important}
+}
+@media (min-width:1024px){
+  .hero .hst{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:12px 12px;width:700px!important;max-width:calc(100vw - 160px)!important}
+  .hero .hst .starter{flex:0 1 520px;width:520px;max-width:520px;margin-bottom:0!important}
+  .hero .hst .hnote{flex-basis:100%;order:3}
+  .hero .stalt{display:flex;align-self:center;margin:0!important;padding:0}
+  .hero .hl{bottom:176px!important}
+  .hero .stalt a{margin-block:0!important;padding-block:0!important;height:50px;padding:0 20px;border:1px solid rgba(255,255,255,.45);border-radius:12px;background:rgba(9,19,36,.28);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);font-size:15px;font-weight:500;color:#fff}
+  .hero .stalt a:hover{text-decoration:none;background:rgba(9,19,36,.45);border-color:#fff}
+  .hero .stalt i{display:none}
+  .vdemo{margin-top:-80px!important}
+  .hero .hbot{bottom:104px!important}
+}
+/* the comparison, Oct 23: Placetta is the dark column (the pick on a pricing page), the others recede; on a phone each
+   row is a short stack, Placetta first, instead of three columns crushed into 390px. The typical-opening card matches. */
+.c96l{display:none}
+@media (min-width:768px){
+  .c96t thead th.us{background:var(--ink);color:#fff;border-radius:0}
+  .c96t td.us{background:var(--ink);border-top-color:rgba(255,255,255,.12)}
+  .c96t td.us b{color:#fff}
+  .c96t td.us small{color:rgba(255,255,255,.66)}
+  .c96t td:not(.us) b{color:var(--ink2)}
+  .c96t tbody th{color:var(--ink2)}
+  .c96t tr.c96wait td{background:var(--gs-ll)}
+  .c96t tr.c96wait td b{color:var(--ink)}
+}
+.c96p{background:var(--ink)!important}
+.c96p small,.c96p span{color:rgba(255,255,255,.66)!important}
+.c96p b{color:#fff!important}
+@media (max-width:767px){
+  .c96t,.c96t thead,.c96t tbody,.c96t tr,.c96t th,.c96t td{display:block!important}
+  .c96t thead{display:none!important}
+  .c96t tbody tr{display:flex!important;flex-direction:column;gap:0;padding:16px 16px 12px;border-top:1px solid var(--line)}
+  .c96t tbody tr:first-child{border-top:0}
+  .c96t tbody th{order:-2;padding:0 0 10px!important;border:0!important;font-size:12px!important;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)!important}
+  .c96t tbody td{display:flex!important;align-items:baseline;justify-content:space-between;gap:12px;padding:10px 0!important;border:0!important;border-top:1px solid var(--line)!important;background:none!important}
+  .c96t tbody th+td{border-top:0!important}
+  .c96t tbody td.us{order:-1;margin:0 -8px 4px;padding:12px!important;border:0!important;border-radius:12px;background:var(--ink)!important}
+  .c96t tbody td.us+td{border-top:0!important}
+  .c96l{display:block;flex:none;width:38%;font-style:normal;font-size:13px;line-height:1.35;color:var(--muted)}
+  .c96t td.us .c96l{color:rgba(255,255,255,.7)}
+  .c96t td b,.c96t tbody tr:nth-child(-n+2) td b{flex:1;font-family:inherit!important;font-weight:500!important;font-size:15px!important;line-height:1.35!important;letter-spacing:-.1px!important;text-align:right;color:var(--ink2)}
+  .c96t tbody td.us b{color:#fff!important}
+  .c96t td small{display:none}
+  .c96t td.us small{display:block;flex-basis:100%;margin:2px 0 0;text-align:right;color:rgba(255,255,255,.62)}
+  .c96t tbody td.us{flex-wrap:wrap}
+  .c96t tr.c96wait td{display:block!important;padding:0!important;border:0!important}
+  .c96t tr.c96wait td b{text-align:left;color:var(--ink)}
+  .c96t tr.c96wait td small{display:block;text-align:left;color:var(--ink2)}
+}
 @media (max-width:767px) and (max-height:740px){.hero h1{font-size:38px!important}.hero .mqt span.lg img{height:22px}.hero .mqt span.lg.tall img{height:27px}}
 @media (min-width:1024px){
   .hero .badge{display:inline-flex;align-self:flex-start;width:auto;gap:8px;padding:6px 14px 6px 10px;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(255,255,255,.08);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
@@ -4017,9 +4074,9 @@ html[lang="zh-CN"] .c96ch b{font-family:var(--zhserif);font-weight:500;font-size
           <!-- The "Your team's time" row (hours of your team's work for each way) is out until Placetta has measured it on
                real customers: bring it back only with time logged on customer openings, each figure sourced, never an
                estimate shown as a fact. The "How long" row below is the agencies' own clock, from the World Bank. -->
-          <tr><th scope="row" data-i18n="c96.r2">费用</th><td><b data-i18n="c96.a2">每小时 378 美元</b><small data-i18n="c96.a2s">企业设立与合规业务的平均费率</small></td><td><b data-i18n="c96.b2">2,000 至 7,500 美元</b><small data-i18n="c96.b2s">通常只做一个城市</small></td><td class="us"><b data-i18n="c96.c2">每家门店每月 149 美元</b><small data-i18n="c96.c2s">另加每项执照 299 美元</small></td></tr>
-          <tr><th scope="row" data-i18n="c96.r3">由谁提交</th><td><b data-i18n="c96.a3">律师事务所，按小时计费</b></td><td><b data-i18n="c96.b3">代办公司</b></td><td class="us"><b data-i18n="c96.c3">Odelia 替您提交</b></td></tr>
-          <tr><th scope="row" data-i18n="c96.r4">开业之后</th><td><b data-i18n="c96.a4">每次续期另行计费</b></td><td><b data-i18n="c96.b4">开业当天就结束</b></td><td class="us"><b data-i18n="c96.c4">只要门店在营业，续期和检查都替您处理</b></td></tr>
+          <tr><th scope="row" data-i18n="c96.r2">费用</th><td><i class="c96l" aria-hidden="true" data-i18n="c96.a">请律师</i><b data-i18n="c96.a2">每小时 378 美元</b><small data-i18n="c96.a2s">企业设立与合规业务的平均费率</small></td><td><i class="c96l" aria-hidden="true" data-i18n="c96.b">许可代办公司</i><b data-i18n="c96.b2">2,000 至 7,500 美元</b><small data-i18n="c96.b2s">通常只做一个城市</small></td><td class="us"><i class="c96l" aria-hidden="true" data-i18n="c96.c">快哉</i><b data-i18n="c96.c2">每家门店每月 149 美元</b><small data-i18n="c96.c2s">另加每项执照 299 美元</small></td></tr>
+          <tr><th scope="row" data-i18n="c96.r3">由谁提交</th><td><i class="c96l" aria-hidden="true" data-i18n="c96.a">请律师</i><b data-i18n="c96.a3">律师事务所，按小时计费</b></td><td><i class="c96l" aria-hidden="true" data-i18n="c96.b">许可代办公司</i><b data-i18n="c96.b3">代办公司</b></td><td class="us"><i class="c96l" aria-hidden="true" data-i18n="c96.c">快哉</i><b data-i18n="c96.c3">Odelia 替您提交</b></td></tr>
+          <tr><th scope="row" data-i18n="c96.r4">开业之后</th><td><i class="c96l" aria-hidden="true" data-i18n="c96.a">请律师</i><b data-i18n="c96.a4">每次续期另行计费</b></td><td><i class="c96l" aria-hidden="true" data-i18n="c96.b">许可代办公司</i><b data-i18n="c96.b4">开业当天就结束</b></td><td class="us"><i class="c96l" aria-hidden="true" data-i18n="c96.c">快哉</i><b data-i18n="c96.c4">只要门店在营业，续期和检查都替您处理</b></td></tr>
           <tr class="c96wait"><th scope="row" data-i18n="c96.r5">需要多久</th><td colspan="3"><b data-i18n="c96.w">无论由谁提交，时间都由政府机构决定。</b><small data-i18n="c96.ws">办理一项建筑许可，洛杉矶用时 68 天，纽约市 89 天。</small></td></tr>
         </tbody>
       </table>
