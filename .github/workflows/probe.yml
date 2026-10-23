@@ -8,7 +8,7 @@
 # When it fails: the "Production probe" issue is opened (or updated) with what failed, and Claude reads the failures,
 # finds the cause in the code and opens a pull request with the fix and a test. Nothing is merged or deployed by it:
 # CI and a person review every pull request.
-# The keys come from the Supabase management API with the SUPABASE_ACCESS_TOKEN the deploy already uses, and are masked.
+# It needs only the SUPABASE_ACCESS_TOKEN the deploy already uses.
 # Every action is pinned to a full commit SHA (the tag it was taken from is in the comment).
 name: Production probe
 on:
@@ -24,8 +24,6 @@ concurrency:
   group: probe
   cancel-in-progress: false
 permissions: { contents: read }
-env:
-  PROJECT_REF: esquxzcfsylffuijvzec
 jobs:
   probe:
     runs-on: ubuntu-latest
@@ -37,22 +35,6 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      - name: Production keys (masked)
-        env: { SUPABASE_ACCESS_TOKEN: "${{ secrets.SUPABASE_ACCESS_TOKEN }}" }
-        run: |
-          api="https://api.supabase.com/v1/projects/$PROJECT_REF"
-          # the legacy keys come unredacted; with a token that may reveal secret keys, ?reveal=true also works
-          keys=$(curl -fsS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" "$api/api-keys" || curl -fsS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" "$api/api-keys?reveal=true")
-          echo "$keys" | jq -r '.[] | "\(.name) \(.type // "legacy") \((.api_key // "") | length)"' 
-          service=$(echo "$keys" | jq -r '[.[] | select(.name == "service_role")][0].api_key')
-          anon=$(echo "$keys" | jq -r '[.[] | select(.name == "anon")][0].api_key')
-          monitor=$(curl -fsS -X POST -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" "$api/database/query" \
-            -d '{"query": "select decrypted_secret as k from vault.decrypted_secrets where name = '"'"'monitor_key'"'"' limit 1"}' | jq -r '.[0].k')
-          for v in "$service" "$anon" "$monitor"; do
-            if [ -z "$v" ] || [ "$v" = "null" ]; then echo "a production key is missing"; exit 1; fi
-            echo "::add-mask::$v"
-          done
-          { echo "SUPABASE_SERVICE_ROLE_KEY=$service"; echo "SUPABASE_ANON_KEY=$anon"; echo "MONITOR_KEY=$monitor"; echo "SUPABASE_URL=https://$PROJECT_REF.supabase.co"; } >> "$GITHUB_ENV"
       - name: Which licenses
         id: pick
         run: |
@@ -67,6 +49,9 @@ jobs:
           echo "args=$args" >> "$GITHUB_OUTPUT"
       - name: Probe production
         id: run
+        # the management token the deploy already uses: the probe's own reads and writes go through the project's SQL
+        # endpoint; customers' paths go through the public endpoints with the probe's own signed-in accounts
+        env: { SUPABASE_ACCESS_TOKEN: "${{ secrets.SUPABASE_ACCESS_TOKEN }}" }
         run: npm run probe -- ${{ steps.pick.outputs.args }} --json probe.json --md probe.md
         continue-on-error: true
       - name: Summary
