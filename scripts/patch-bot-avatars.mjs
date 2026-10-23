@@ -16,6 +16,8 @@
 //   fluff     headphones press into the pile: a deeper dent under the band and cups, a pale ridge beside them
 //   motion    a hop on a real arc that lands into a small squash and settles, no spin on the busy hop, and a blink
 //             every 4 to 7 seconds
+//   bounds    the squash scales never go below 0.2, an eye's turn never below 0.02, and no radius below 0
+//             (scripts/bot-avatars-math.mjs, tested by npm run test:bot): a canvas throws on a negative radius
 //
 // Nothing changes for a bot that doesn't ask: the face and outfits only switch on for a canvas with a data-pc
 // attribute (what the cloud wears, for example "glasses-round" or "beret"), the motion only when
@@ -26,10 +28,11 @@
 // patched by the older blush-only version of this script is first un-patched by removing that block.
 // The app bundles the ES build; the CommonJS build is not used, so only the ES build is patched.
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { BOT_MATH } from "./bot-avatars-math.mjs";
 
 const FILE = "node_modules/bot-avatars/dist/index.es.js";
 const ORIG = FILE + ".placetta-orig";
-const MARK = "/* placetta-patched v4 */";
+const MARK = "/* placetta-patched v5 */";
 const OLD_MARK = "/* placetta-blush */";   // kept in the output so older copies of this script see it and skip
 const OLD_BLUSH = `  ${OLD_MARK}
   if (o.face === "mouth" && globalThis.__botBlush) {
@@ -46,6 +49,7 @@ const OLD_BLUSH = `  ${OLD_MARK}
    in the face's units: the body is 100 tall and the eyes sit 25 apart. The light comes from the upper left. */
 const HELPERS = String.raw`
 ${MARK}
+${BOT_MATH.map(String).join("\n")}
 const __pcNavy = "#132A55", __pcHi = "#3D5F98", __pcLo = "#0A1734";
 // a capsule (a pill standing upright) as a sub-path, for the eyes
 function __pcCap(t, cx, top, hw, bot) {
@@ -107,9 +111,12 @@ function __pcWear(t, n, s, eyes, phase) {
 
   // glasses: thin navy frames over the eyes, clear (no tint over the flat eyes)
   const gl = has("glasses-round") ? "round" : has("glasses-square") ? "square" : null;
-  if (gl && eyes && facing > 0.01) {
+  // An eye's sx and sy are cosines of how far it has turned, so they go negative once the head turns past about 65
+  // degrees (the spin in a hop, or a hard turn toward the work). A negative scale made a negative lens radius, which the
+  // canvas throws on: so the frames only show while both eyes face the viewer, and every radius is clamped as well.
+  if (gl && eyes && facing > 0.01 && eyes[0].z > 0.02 && eyes[1].z > 0.02) {
     const lens = (e) => {
-      const rx = (gl === "round" ? 9.6 : 10.8) * e.sx, ry = (gl === "round" ? 9.6 : 8.9) * e.sy, p = new Path2D();
+      const rx = __pcRadius((gl === "round" ? 9.6 : 10.8) * __pcFore(e.sx)), ry = __pcRadius((gl === "round" ? 9.6 : 8.9) * __pcFore(e.sy)), p = new Path2D();
       if (gl === "round") p.ellipse(e.x, e.y + 0.4, rx, ry, 0, 0, Math.PI * 2);
       else { const r = Math.min(rx, ry, 4.6); p.moveTo(e.x - rx + r, e.y - ry); p.arcTo(e.x + rx, e.y - ry, e.x + rx, e.y + ry, r); p.arcTo(e.x + rx, e.y + ry, e.x - rx, e.y + ry, r); p.arcTo(e.x - rx, e.y + ry, e.x - rx, e.y - ry, r); p.arcTo(e.x - rx, e.y - ry, e.x + rx, e.y - ry, r); p.closePath(); }
       return { p, rx, ry };
@@ -119,8 +126,8 @@ function __pcWear(t, n, s, eyes, phase) {
     frame.addPath(L.p); frame.addPath(R.p);
     const lx = eyes[0].x + L.rx, rx = eyes[1].x - R.rx, by = (eyes[0].y + eyes[1].y) / 2 - 1.2;
     frame.moveTo(lx, by); frame.quadraticCurveTo((lx + rx) / 2, by - 3.2, rx, by);
-    frame.moveTo(eyes[0].x - L.rx, eyes[0].y - 1.6); frame.lineTo(eyes[0].x - L.rx - 3.6 * eyes[0].sx, eyes[0].y - 2.8);
-    frame.moveTo(eyes[1].x + R.rx, eyes[1].y - 1.6); frame.lineTo(eyes[1].x + R.rx + 3.6 * eyes[1].sx, eyes[1].y - 2.8);
+    frame.moveTo(eyes[0].x - L.rx, eyes[0].y - 1.6); frame.lineTo(eyes[0].x - L.rx - 3.6 * __pcFore(eyes[0].sx), eyes[0].y - 2.8);
+    frame.moveTo(eyes[1].x + R.rx, eyes[1].y - 1.6); frame.lineTo(eyes[1].x + R.rx + 3.6 * __pcFore(eyes[1].sx), eyes[1].y - 2.8);
     t.save(); t.globalAlpha *= facing; t.lineCap = "round"; t.lineJoin = "round";
     if (shadow) {
       t.translate(0.9, 1.6);
@@ -282,6 +289,8 @@ const PATCHES = [
       let tilt = 0;
       if (this.__pcTilt && this.state === "default") { const ph = (o % 8.5) / 8.5; tilt = W(0.5, 0.6, ph) * (1 - W(0.74, 0.86, ph)); }
       s.yaw += cur[0] + 0.1 * tilt, s.pitch += cur[1] + 0.06 * tilt, s.roll += cur[2] + 0.17 * tilt;
+      // the squash and stretch never turn the body inside out, whatever the hop, the flip and the jelly add up to
+      s.sx = __pcScale(s.sx), s.sy = __pcScale(s.sy);
       const gr = this.__pcGround, fo = this.__pcFollow, h = Math.max(0, Math.min(1, -m / 18));
       if (gr) { const v = "scale(" + (1 - 0.34 * h).toFixed(3) + ")"; gr.style.transform !== v && (gr.style.transform = v, gr.style.opacity = (1 - 0.5 * h).toFixed(3)); }
       if (fo) { const v = "translateY(" + (s.y * (this.__pcPx || 1)).toFixed(1) + "px)"; fo.style.transform !== v && (fo.style.transform = v); }
@@ -292,17 +301,12 @@ const PATCHES = [
         this.hopPhase += n / HOP;
         if (this.hopPhase >= 1) this.state === "working" ? (this.hopPhase -= 1, this.hopCount += 1) : (this.hopPhase = 0, this.hopGain = 0);
         const P = this.hopGain, q = this.hopPhase, big = this.hopCount % 3 === 2;
-        let sq = 0;
+        // the squash is bounded (scripts/bot-avatars-math.mjs), and the pose's scales are clamped again after every frame
+        const sq = __pcHopSquash(q, AIR, this.state === "working", this.hopCount === 0);
         if (q < AIR) {
           const u = q / AIR, V = 4 * u * (1 - u);
           m -= (big ? 17 : 12) * V * P;
-          sq = this.hopCount > 0 || this.state !== "working" ? 0.5 * Math.pow(Math.max(0, 1 - u / 0.14), 2) : 0;
-          sq -= 0.35 * Math.abs(1 - 2 * u) * Math.min(1, u / 0.1) * Math.min(1, (1 - u) / 0.1);
           x += (this.hopCount % 2 === 0 ? 1 : -1) * 3.5 * Bn * Math.sin(Math.PI * u) * P;
-        } else {
-          const u = (q - AIR) / (1 - AIR);
-          sq = (1 - Math.exp(-u * 36)) * Math.exp(-u * 5.2) * Math.cos(u * Math.PI * 2.3);
-          if (this.state === "working") sq += 0.5 * Math.pow(Math.max(0, (u - 0.7) / 0.3), 2);
         }
         A += 0.11 * sq * P, g -= 0.13 * sq * P;
       } else {
