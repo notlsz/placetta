@@ -62,7 +62,7 @@
     "probe": "node scripts/probe.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.117.2",
+    "@supabase/supabase-js": "^2.118.0",
     "border-beam": "^1.4.1",
     "bot-avatars": "^0.2.2",
     "fflate": "^0.8.3",
