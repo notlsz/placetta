@@ -176,7 +176,7 @@ Deno.test("speech on the line is data: an instruction heard on a call changes no
 Deno.test("no secrets reach the brain: SSNs, full EINs and card numbers are taken out", () => {
   const t = redactForVoice("SSN 123-45-6789, EIN 12-3456789, card 4111 1111 1111 1111, confirmation 123456789, call 408-535-7055, ITIN is 912345678");
   assert(!/123-45-6789|4111 1111|12-3456789|912345678/.test(t), t);
-  assert(/EIN ending in 6789/.test(t) && /123456789/.test(t) && /408-535-7055/.test(t), "the last four of an EIN, a confirmation number and a phone number stay");
+  assert(/EIN ending in 6789/.test(t) && !/EIN EIN/.test(t) && /123456789/.test(t) && /408-535-7055/.test(t), "the last four of an EIN, a confirmation number and a phone number stay");
 });
 
 Deno.test("recording: announced on every call, stopped when anyone objects", () => {

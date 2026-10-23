@@ -6,7 +6,7 @@ import * as api from "./cloud/api";
 import { Guard } from "./SafeBoundary";
 import { I } from "./ui";
 import "./voice.css";
-import { type Heard, type Live, type LiveState, pairLines, startLive } from "./voice/realtime";
+import { answerTool, type Heard, type Live, type LiveState, pairLines, startLive } from "./voice/realtime";
 
 /*
  * Talking live with Odelia, in three modes, in one sheet:
@@ -77,12 +77,8 @@ export function TalkSheet({ mode, filingId, onClose }: { mode: api.VoiceMode; fi
         secret: s.secret, url: s.connect.url, maxMinutes: s.max_minutes,
         onState: st => { setState(st); if (st === "ended" || st === "failed") void finish(); },
         onHeard: h => { linesRef.current = [...linesRef.current, h].slice(-400); setLines(linesRef.current); },
-        onTool: async t => {
-          if (mode === "rehearse") return JSON.stringify({ ok: true, result: `Rehearsal: ${t.name} would run here. Carry on.` });
-          const r = await api.voiceTool(cloud.wsId, s.call_id, t.name, t.args);
-          if (r.start) ask(r.start, true);   // real work goes into the chat, exactly like a typed request
-          return JSON.stringify({ ok: r.ok, result: r.result });
-        },
+        // real work goes into the chat, exactly like a typed request; a rehearsal runs nothing
+        onTool: t => answerTool(t, { mode, call: (name, args) => api.voiceTool(cloud.wsId, s.call_id, name, args), ask: text => ask(text, true) }),
       });
     })();
     return () => { gone = true; void finish(); };

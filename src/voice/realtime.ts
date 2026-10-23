@@ -35,6 +35,17 @@ export function pairLines(lines: Heard[]): { at: number; said: string; translate
   return out;
 }
 
+/**
+ * The answer to a tool the brain called in the app, as the brain reads it. In a rehearsal nothing runs. In a talk the
+ * server answers (with the person's own access), and work it starts goes into the chat exactly like a typed request.
+ */
+export async function answerTool(t: ToolCall, o: { mode: "talk" | "interpreter" | "rehearse"; call(name: string, args: Record<string, unknown>): Promise<{ ok: boolean; result: string; start?: string }>; ask(text: string): void }): Promise<string> {
+  if (o.mode !== "talk") return JSON.stringify({ ok: true, result: `Rehearsal: ${t.name} would run here. Carry on.` });
+  const r = await o.call(t.name, t.args);
+  if (r.start) o.ask(r.start);
+  return JSON.stringify({ ok: r.ok, result: r.result });
+}
+
 export async function startLive(o: {
   secret: string; url: string; maxMinutes: number;
   onHeard(h: Heard): void; onState(s: LiveState): void; onSpeaking?(on: boolean): void;

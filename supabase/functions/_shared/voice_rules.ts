@@ -88,7 +88,7 @@ export function redactForVoice(text: string): string {
     .replace(/(?<![\d-])(\d{3})[- ](\d{2})[- ](\d{4})(?![\d-])/g, (m, a: string) => (/^(000|666)$/.test(a) ? m : "[SSN or ITIN removed]"))
     .replace(/\b(SSN|social security( number)?|ITIN|taxpayer id(entification)?( number)?)(\s*(number|no\.?|#|is|:))*\s*\d{9}\b/gi, "$1 [removed]")
     .replace(/(社会安全号|社安号|个人报税号)[^\d]{0,6}\d{9}/g, "$1 [已删除]")
-    .replace(/(?<![\d-])\d{2}-(\d{3})(\d{4})(?![\d-])/g, (_m, _a: string, last: string) => `EIN ending in ${last}`)
+    .replace(/(?<![\d-])\d{2}-(\d{3})(\d{4})(?![\d-])/g, (_m, _a: string, last: string) => `ending in ${last}`)
     .replace(/(?<!\d)(?:\d[ -]?){13,19}(?!\d)/g, (m) => (luhn(m.replace(/\D/g, "")) ? "[card number removed]" : m));
 }
 
