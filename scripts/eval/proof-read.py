@@ -40,6 +40,8 @@ WEBFETCH_SEEN = {
     "https://cro.ie/registration/company/required-steps/": "2026-10-22",
     # the expansion cities (src/forms/expansion.ts): Auckland Council answers curl with 406
     "https://aucklandcouncil.govt.nz/en/licences-regulations/business-licences/food-businesses-quality-grading/open-food-business/apply-food-registration.html": "2026-10-23",
+    # the verification pass (src/forms/verify.ts): Santa Clara County's DEH answers curl with 403
+    "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and": "2026-10-23",
 }
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128 Safari/537.36"
 

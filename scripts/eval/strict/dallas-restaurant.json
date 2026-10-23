@@ -181,9 +181,25 @@
       "read": "2026-10-22",
       "match": "\\bdal-fire-hood\\b|hood",
       "agencyMatch": "Dallas Fire"
+    },
+    {
+      "key": "dal-building",
+      "name": "Building permit for the tenant finish-out",
+      "agency": "City of Dallas Planning and Development",
+      "level": "city",
+      "required": false,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the verification pass of 2026-10-23 (src/forms/verify.ts), when the registry row got its proof.",
+      "source": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/commercial_overview.aspx",
+      "quote": "A commercial building permit is an official authorization required before constructing, altering, or renovating a commercial property.",
+      "read": "2026-10-23",
+      "match": "\\bdal-building\\b|building permit",
+      "agencyMatch": "dallas",
+      "condition": "Only with a build-out."
     }
   ],
   "order": [],
   "mustNotInclude": [],
-  "notes": "Not included (no official page found that states it): the Dallas building permit for the finish-out. The plan lists it as an abstention naming the City of Dallas."
+  "notes": "The building permit for the finish-out (dal-building) was added in the verification pass of 2026-10-23, from Dallas Permitting and Inspections' commercial permits page."
 }

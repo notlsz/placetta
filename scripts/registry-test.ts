@@ -17,6 +17,7 @@ import { US_GAPS } from "../src/forms/us-gaps";
 import { INTL_FORMS } from "../src/forms/intl";
 import { MEXICO_GAPS } from "../src/forms/mexico";
 import { FINISH_FORMS } from "../src/forms/finish";
+import { VERIFY_BLOCKED, VERIFY_FIXES, VERIFY_FORMS } from "../src/forms/verify";
 
 let failed = 0;
 const fail = (m: string) => { failed++; console.error("FAIL", m); };
@@ -64,7 +65,7 @@ for (const k of KIND_FACTS) {
 if (AUDIT_MISSING.length) fail(`the audit fixes entries the registry doesn't have: ${AUDIT_MISSING.join(", ")}`);
 
 // the entries this audit added: bilingual copy, no bullet or dot separators, no leading zeros
-for (const f of [...US_GAPS, ...INTL_FORMS, ...MEXICO_GAPS, ...FINISH_FORMS]) {
+for (const f of [...US_GAPS, ...INTL_FORMS, ...MEXICO_GAPS, ...FINISH_FORMS, ...VERIFY_FORMS]) {
   for (const b of [f.title, f.how, f.agency, f.plain, f.feeNote, f.takes, f.renews, f.specialist].filter(Boolean)) {
     for (const s of [b!.en, b!.zh]) {
       if (/[·•∙]/.test(s)) fail(`${f.id}: a dot separator in "${s.slice(0, 60)}"`);
@@ -73,6 +74,16 @@ for (const f of [...US_GAPS, ...INTL_FORMS, ...MEXICO_GAPS, ...FINISH_FORMS]) {
     if (!b!.zh.trim()) fail(`${f.id}: no Chinese copy`);
   }
 }
+
+// the verification pass (src/forms/verify.ts): every proof it adds was read on the day of the pass, is under 25 words
+// and comes from an official page; every entry still unverified names what blocked it; no blocked entry has a proof
+for (const x of VERIFY_FIXES) {
+  if (!x.proof) continue;
+  if (x.proof.checked !== "2026-10-23") fail(`${x.id}: verification proof read date ${x.proof.checked}`);
+  if (x.proof.quote.trim().split(/\s+/).length >= 25) fail(`${x.id}: verification quote has 25 words or more`);
+}
+for (const f of FORMS.filter(f => !f.proof)) if (!VERIFY_BLOCKED[f.id]) fail(`${f.id} is unverified but src/forms/verify.ts VERIFY_BLOCKED doesn't say what blocked it`);
+for (const id of Object.keys(VERIFY_BLOCKED)) { const f = FORMS.find(x => x.id === id); if (!f) fail(`VERIFY_BLOCKED names ${id}, which the registry doesn't have`); else if (f.proof) fail(`${id} has a proof but VERIFY_BLOCKED still lists it`); }
 
 // the unverified entries are listed as such in docs/COVERAGE.md
 const cov = readFileSync("docs/COVERAGE.md", "utf8");

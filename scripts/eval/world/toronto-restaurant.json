@@ -26,6 +26,10 @@
       "source": "https://www.toronto.ca/services-payments/permits-licences-bylaws/restaurants-cafes-grocery-variety-and-retail-stores-selling-food/eating-or-drinking-establishment/",
       "quote": "Application fee: $268.32", "read": "2026-10-22", "match": "\\bca-tor-eating\\b|eating or drinking establishment", "agencyMatch": "Toronto" },
     { "key": "ca-on-food-handler", "name": "Certified food handler on site (O. Reg. 493/17)", "agency": "Ontario Ministry of Health (local public health unit)", "level": "state", "required": true, "verified": false, "fee": null,
-      "source": "https://www.ontario.ca/laws/regulation/170493", "read": "2026-10-22", "match": "\\bca-on-food-handler\\b|food handler", "agencyMatch": "Ontario" }
+      "source": "https://www.ontario.ca/laws/regulation/170493", "read": "2026-10-22", "match": "\\bca-on-food-handler\\b|food handler", "agencyMatch": "Ontario" },
+    { "key": "ca-tor-building", "name": "Building permit for the build-out", "agency": "City of Toronto, Toronto Building", "level": "city", "required": false, "verified": true, "fee": null,
+      "note": "Added in the verification pass of 2026-10-23 (src/forms/verify.ts), when the registry row got its proof.", "condition": "Only with a build-out.",
+      "source": "https://www.toronto.ca/services-payments/building-construction/apply-for-a-building-permit/",
+      "quote": "A building permit is required under the Building Code Act for most construction, demolition, additions, or major renovations.", "read": "2026-10-23", "match": "\\bca-tor-building\\b|building permit", "agencyMatch": "Toronto" }
   ]
 }

@@ -122,6 +122,21 @@
       "read": "2026-10-22",
       "match": "\\baz-jt1\\b|JT-1",
       "agencyMatch": "Arizona Department of Revenue"
+    },
+    {
+      "key": "az-workers-comp",
+      "name": "Workers' compensation insurance",
+      "agency": "Industrial Commission of Arizona",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the verification pass of 2026-10-23 (src/forms/verify.ts), when the registry row got its proof.",
+      "source": "https://www.azleg.gov/ars/23/00961.htm",
+      "quote": "Employers shall secure workers' compensation to their employees in one of the following ways:",
+      "read": "2026-10-23",
+      "match": "\\baz-workers-comp\\b|workers'? comp",
+      "agencyMatch": "Industrial Commission of Arizona"
     }
   ],
   "order": [],

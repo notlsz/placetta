@@ -75,6 +75,21 @@
       "source": "https://www.clarkcountynv.gov/business/doing_business_with_clark_county/faq",
       "match": "city of las vegas business license|lv-license",
       "agencyMatch": "city of las vegas"
+    },
+    {
+      "key": "nv-workers-comp",
+      "name": "Workers' compensation insurance",
+      "agency": "Nevada Division of Industrial Relations, Workers' Compensation Section",
+      "level": "state",
+      "required": true,
+      "verified": true,
+      "fee": null,
+      "note": "Added in the verification pass of 2026-10-23 (src/forms/verify.ts), when the registry row got its proof.",
+      "source": "https://www.leg.state.nv.us/nrs/nrs-616b.html",
+      "quote": "NRS 616B.633 Applicability to all employers who employ at least one employee.",
+      "read": "2026-10-23",
+      "match": "\\bnv-workers-comp\\b|workers'? comp",
+      "agencyMatch": "Industrial Relations"
     }
   ],
   "order": [

@@ -128,6 +128,22 @@
    "match": "\\baus-sign\\b|sign permit",
    "agencyMatch": "city of austin development services",
    "note": "Set by the city's sign fee schedule."
+  },
+  {
+   "key": "aus-building",
+   "name": "Building permit for the tenant finish-out",
+   "agency": "City of Austin Development Services",
+   "level": "city",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "note": "Added in the verification pass of 2026-10-23 (src/forms/verify.ts), when the registry row got its proof.",
+   "source": "https://www.austintexas.gov/development-services/small-business-permitting",
+   "quote": "Required to erect, construct, enlarge, alter, repair, improve, or convert any building or structure within the City's zoning jurisdiction",
+   "read": "2026-10-23",
+   "match": "\\baus-building\\b|building permit",
+   "agencyMatch": "Austin",
+   "condition": "Only with a build-out."
   }
  ],
  "order": [

@@ -232,6 +232,22 @@
    "read": "2026-10-22",
    "match": "\\bca-workers-comp\\b|workers' compensation insurance",
    "agencyMatch": "california department of industrial relations"
+  },
+  {
+   "key": "cpsc-cert",
+   "name": "Product safety certificate filed at entry",
+   "agency": "U.S. Consumer Product Safety Commission",
+   "level": "federal",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "note": "Added in the verification pass of 2026-10-23 (src/forms/verify.ts), when the registry row got its proof.",
+   "source": "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification",
+   "quote": "Certificates are required to accompany the applicable product or shipment of products covered by the certificate,",
+   "read": "2026-10-23",
+   "match": "\\bcpsc-cert\\b|product safety certificate",
+   "agencyMatch": "Consumer Product Safety",
+   "condition": "Only for imported products a CPSC rule covers."
   }
  ],
  "order": [

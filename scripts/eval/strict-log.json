@@ -2277,5 +2277,55 @@
   "found": true,
   "sha256": "c2a25891fcb54d81",
   "context": "in return, are prevented from suing employers over those injuries. as a result, california employers are required by law to have workers' compensation insurance, even if they have only one employee. and, if your employees get hurt or sick because of work, you are required to pa"
+ },
+ {
+  "id": "lasvegas-clothing:nv-workers-comp",
+  "read": "https://www.leg.state.nv.us/nrs/nrs-616b.html",
+  "quote": "NRS 616B.633 Applicability to all employers who employ at least one employee.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "2f9511c8146c8d04",
+  "context": " board and administrator if contractor no longer provides industrial insurance. nrs 616b.633 applicability to all employers who employ at least one employee. nrs 616b.636 actions at law by employees. nrs 616b.639 limitation of liability "
+ },
+ {
+  "id": "phoenix-restaurant:az-workers-comp",
+  "read": "https://www.azleg.gov/ars/23/00961.htm",
+  "quote": "Employers shall secure workers' compensation to their employees in one of the following ways:",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "20adb053fbab5c42",
+  "context": "ethods of securing compensation by employers; deficit premium; civil penalty a. employers shall secure workers' compensation to their employees in one of the following ways: 1. by insuring and keeping insured the payment of such compensation with an ins"
+ },
+ {
+  "id": "dc-bubble-tea:dc-workers-comp",
+  "read": "https://code.dccouncil.gov/us/dc/council/code/sections/32-1534",
+  "quote": "Every employer shall secure the payment of compensation under this chapter:",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "60b6fa2a58f4b10a",
+  "context": "f the district of columbia § 32–1534. security for payment of compensation. (a) every employer shall secure the payment of compensation under this chapter: (1) by insuring and keeping insured the payment of such compensation with any s"
+ },
+ {
+  "id": "dallas-restaurant:dal-building",
+  "read": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/commercial_overview.aspx",
+  "quote": "A commercial building permit is an official authorization required before constructing, altering, or renovating a commercial property.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "dea20aa0b8a22cf4",
+  "context": "mitting & inspections commercial maintitleheader ​​commercial permits dch body ​a commercial building permit is an official authorization required before constructing, altering, or renovating a commercial property. it ensures that all work complies with local building codes, zoning regulations"
+ },
+ {
+  "id": "austin-bubble-tea:aus-building",
+  "read": "https://www.austintexas.gov/development-services/small-business-permitting",
+  "quote": "Required to erect, construct, enlarge, alter, repair, improve, or convert any building or structure within the City's zoning jurisdiction",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "25ef6e8670485b6e",
+  "context": "ortal commercial building permits name description how to apply building permit required to erect, construct, enlarge, alter, repair, improve, or convert any building or structure within the city's zoning jurisdiction or in a municipal utility district (mud) if the consent agreement between the m"
  }
 ]
