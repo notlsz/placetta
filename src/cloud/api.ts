@@ -84,9 +84,9 @@ export const planOf = (b: Billing | null): Plan =>
   !b ? "none" : b.free || b.comped || b.subscription_status === "active" || b.subscription_status === "trialing" ? "monthly" : b.price_model === "simple" ? "simple" : b.entry_markets > 0 ? "entry" : "none";
 export type DocRow = { id: string; workspace_id: string; app_id: string | null; filing_id: string | null; name: string; path: string; size: number; mime: string | null; source: string; created_at: string };
 export type Integration = { id: string; kind: IntegrationKind; account: string | null; status: "connected" | "error"; error: string | null; meta: Record<string, unknown>; connected_at: string; last_used_at: string | null };
-export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "slack_bot" | "lark_bot" | "wechat_bot" | "square" | "toast";
+export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "slack_bot" | "lark_bot" | "wechat_bot" | "square" | "toast" | "webhook";
 /** Team chats linked by pasting a group's incoming-webhook link. */
-export type HookKind = "slack" | "lark" | "wecom" | "dingtalk" | "teams";
+export type HookKind = "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "webhook";
 /** The business's own Slack or Lark bot, or its own WeChat Official Account: talk to Odelia there. */
 export type BotKind = "slack_bot" | "lark_bot" | "wechat_bot";
 /** What to set up before connecting a bot: its event address, Slack's manifest, and for WeChat a Token and

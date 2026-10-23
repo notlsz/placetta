@@ -93,6 +93,7 @@ const HOOK_HELP: Record<HookKind, { how: Bi; ph: string }> = {
   wecom: { how: B("In the WeCom group chat: the top-right menu, Add group robot, New. Copy its webhook address.", "在企业微信群聊中：右上角菜单 → 添加群机器人 → 新创建，复制 webhook 地址。"), ph: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=..." },
   dingtalk: { how: B("In the DingTalk group: Group settings, Bots, Add robot, Custom. Copy its webhook address. If you choose signing as its security setting, paste the secret (SEC...) too.", "在钉钉群中：群设置 → 机器人 → 添加机器人 → 自定义，复制 Webhook 地址。如安全设置选择“加签”，请一并填写密钥（SEC 开头）。"), ph: "https://oapi.dingtalk.com/robot/send?access_token=..." },
   teams: { how: B("In the Teams channel: More options, Workflows, then the template that posts to a channel when a webhook request is received. Copy the URL it gives you.", "在 Teams 频道中：更多选项 → 工作流，选择“收到 webhook 请求时发布到频道”模板，复制生成的 URL。"), ph: "https://...logic.azure.com/workflows/..." },
+  webhook: { how: B("In Zapier, start a Zap with Webhooks by Zapier, Catch Hook; in Make, a Custom webhook; in n8n, a Webhook node. Paste the https address it gives you. Add a signing secret if your system checks Standard Webhooks signatures.", "在 Zapier 中用 Webhooks by Zapier 的 Catch Hook 开始一个 Zap；在 Make 中用 Custom webhook；在 n8n 中用 Webhook 节点。粘贴它给出的 https 地址。如果您的系统会校验 Standard Webhooks 签名，请填写签名密钥。"), ph: "https://hooks.zapier.com/hooks/catch/..." },
 };
 /** Which provider's app keys a sign-in connection needs. */
 const PROVIDER_OF: Partial<Record<IntegrationKind, keyof api.Availability>> = { gmail: "google", gcal: "google", gdrive: "google", outlook_mail: "microsoft", outlook_cal: "microsoft", dropbox: "dropbox", quickbooks: "quickbooks", square: "square", toast: "toast" };
@@ -116,6 +117,7 @@ const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
     { kind: "wecom", name: "WeCom", zh: "企业微信", why: CHAT_WHY, hook: true, logo: wecomLogo },
     { kind: "dingtalk", name: "DingTalk", zh: "钉钉", why: CHAT_WHY, hook: true, logo: dingtalkLogo },
     { kind: "teams", name: "Microsoft Teams", why: CHAT_WHY, hook: true, logo: teamsLogo },
+    { kind: "webhook", name: "Webhook (Zapier, Make, n8n)", zh: "Webhook（Zapier、Make、n8n）", why: B("The same updates as data for Zapier, Make, n8n or your own system, signed when you add a secret", "同样的动态以数据形式发给 Zapier、Make、n8n 或您自己的系统，填写密钥后会签名"), hook: true },
   ] },
   { group: B("Give Odelia jobs from chat", "在聊天中给 Odelia 派活"), items: [
     { kind: "wechat_bot", name: "Odelia in WeChat", zh: "微信中的 Odelia", why: B("Teammates message your WeChat Official Account: she does the job as the teammate who asked and answers in the chat. Each teammate links their WeChat once with a code", "同事给您的微信公众号发消息：她以提问的同事身份完成工作，并在聊天中回复。每位同事用验证码关联一次自己的微信"), logo: wechatLogo, bot: true },
@@ -296,7 +298,7 @@ function Integrations() {
           <p>{b(HOOK_HELP[form.kind].how)}</p>
           <form className="sst-form" onSubmit={e => { e.preventDefault(); void submit(); }}>
             <input type="url" required autoFocus value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder={HOOK_HELP[form.kind].ph} aria-label={zh ? "Webhook 链接" : "Webhook link"} spellCheck={false} autoComplete="off" />
-            {form.kind === "lark" && <input type="password" value={form.secret} onChange={e => setForm({ ...form, secret: e.target.value })} placeholder={zh ? "签名密钥（可选）" : "Signing secret (optional)"} aria-label={zh ? "签名密钥" : "Signing secret"} autoComplete="off" />}
+            {(form.kind === "lark" || form.kind === "webhook") && <input type="password" value={form.secret} onChange={e => setForm({ ...form, secret: e.target.value })} placeholder={zh ? "签名密钥（可选）" : "Signing secret (optional)"} aria-label={zh ? "签名密钥" : "Signing secret"} autoComplete="off" />}
             <div className="sst-act">
               <button type="button" className="sbtn quiet" onClick={() => setForm(null)}>{zh ? "取消" : "Cancel"}</button>
               <button type="submit" className="sbtn ink" disabled={form.busy || !form.url.trim()}>{form.busy ? (zh ? "正在发送测试消息…" : "Sending a test message...") : (zh ? "连接并发送测试" : "Connect and test")}</button>

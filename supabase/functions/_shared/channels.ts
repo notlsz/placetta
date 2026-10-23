@@ -2,7 +2,11 @@
 // and Placetta posts its updates there: deadlines, renewals and filing changes. No app approval or sign-in needed; the
 // link itself is the secret, so it's kept in the vault and only the server reads it.
 
-export const HOOK_KINDS = ["slack", "lark", "wecom", "dingtalk", "teams"] as const;
+// webhook (added 2026-10-22): any https address that takes JSON, so Zapier ("Catch Hook"), Make, n8n or the business's own
+// system gets the same updates as structured data, signed the Standard Webhooks way when a secret is given
+// (https://www.standardwebhooks.com/). The route to the thousands of apps no one-click connector covers yet (payroll,
+// e-signature, other point-of-sale systems), copied from how Grok's and Dots's plugin catalogs reach them.
+export const HOOK_KINDS = ["slack", "lark", "wecom", "dingtalk", "teams", "webhook"] as const;
 export type HookKind = (typeof HOOK_KINDS)[number];
 export const isHookKind = (v: unknown): v is HookKind => typeof v === "string" && (HOOK_KINDS as readonly string[]).includes(v);
 
@@ -12,7 +16,16 @@ export const HOOK_NAMES: Record<HookKind, { en: string; zh: string }> = {
   wecom: { en: "WeCom", zh: "企业微信" },
   dingtalk: { en: "DingTalk", zh: "钉钉" },
   teams: { en: "Microsoft Teams", zh: "Microsoft Teams" },
+  webhook: { en: "Webhook", zh: "Webhook" },
 };
+
+/** A host a webhook may not point at: an address literal, this machine, or a private or internal name. */
+export function privateHost(h: string): boolean {
+  const host = h.toLowerCase().replace(/^\[|\]$/g, "");
+  if (!host.includes(".") || host.includes(":")) return true;   // no dot (intranet names) or an IPv6 literal
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return true;          // any IPv4 literal: a name is required
+  return /(^|\.)(localhost|local|internal|intranet|lan|home|corp|localdomain|home\.arpa)$/.test(host);
+}
 
 /** The link is the kind's own incoming-webhook address, over https, and nothing else. */
 export function hookUrl(kind: HookKind, raw: string): URL | null {
@@ -26,8 +39,22 @@ export function hookUrl(kind: HookKind, raw: string): URL | null {
     case "wecom": return h === "qyapi.weixin.qq.com" && p === "/cgi-bin/webhook/send" && /^[\w-]{10,}$/.test(u.searchParams.get("key") ?? "") ? u : null;
     case "dingtalk": return h === "oapi.dingtalk.com" && p === "/robot/send" && /^[\w-]{20,}$/.test(u.searchParams.get("access_token") ?? "") ? u : null;
     case "teams": return /(\.logic\.azure\.com|\.powerplatform\.com|\.webhook\.office\.com)$/.test(h) ? u : null;
+    case "webhook": return !privateHost(h) && u.hash === "" ? u : null;
   }
 }
+
+/** Standard Webhooks: webhook-id, webhook-timestamp and webhook-signature "v1,<base64 HMAC-SHA256 of id.timestamp.body>".
+ *  The key is the secret's base64 after "whsec_", or the secret's own bytes otherwise. */
+export async function signWebhook(raw: string, secret: string, id: string, ts: number): Promise<Record<string, string>> {
+  let key: Uint8Array<ArrayBuffer>;
+  if (secret.startsWith("whsec_")) { try { key = Uint8Array.from(atob(secret.slice(6)), (c) => c.charCodeAt(0)); } catch { key = new TextEncoder().encode(secret); } }
+  else key = new TextEncoder().encode(secret);
+  const k = await crypto.subtle.importKey("raw", key, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(`${id}.${ts}.${raw}`)));
+  return { "webhook-id": id, "webhook-timestamp": String(ts), "webhook-signature": `v1,${btoa(String.fromCharCode(...sig))}` };
+}
+/** What a webhook gets: the message as text (for a step that just forwards it) and, when the sender has it, the data. */
+export type HookData = { type: string; business?: string; link?: string; updates?: { title: { en: string; zh: string }; body?: { en: string; zh: string } }[] } & Record<string, unknown>;
 
 /** DingTalk's optional signature: base64(HMAC-SHA256(key = secret, message = "timestamp_ms\nsecret")), on the link. */
 async function dingSign(secret: string, ts: number): Promise<string> {
@@ -43,8 +70,9 @@ async function larkSign(secret: string, ts: number): Promise<string> {
   return btoa(String.fromCharCode(...sig));
 }
 
-async function body(kind: HookKind, text: string, secret?: string): Promise<unknown> {
+async function body(kind: HookKind, text: string, secret?: string, data?: HookData): Promise<unknown> {
   switch (kind) {
+    case "webhook": return { ...(data ?? { type: "placetta.message" }), text, sent_at: new Date().toISOString() };
     case "slack": return { text: text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") };
     case "lark": {
       const b: Record<string, unknown> = { msg_type: "text", content: { text } };
@@ -62,21 +90,25 @@ async function body(kind: HookKind, text: string, secret?: string): Promise<unkn
 export type HookResult = { ok: true } | { ok: false; gone: boolean; why: string };
 
 /** Post one message. `gone`: the link no longer works (deleted bot, removed channel), so the connection needs redoing. */
-export async function postHook(kind: HookKind, url: string, text: string, secret?: string): Promise<HookResult> {
+export async function postHook(kind: HookKind, url: string, text: string, secret?: string, data?: HookData, send: typeof fetch = fetch): Promise<HookResult> {
   const u = hookUrl(kind, url);
   if (!u) return { ok: false, gone: true, why: "not a webhook link" };
   if (kind === "dingtalk" && secret) { const ts = Date.now(); u.searchParams.set("timestamp", String(ts)); u.searchParams.set("sign", await dingSign(secret, ts)); }
+  const raw = JSON.stringify(await body(kind, text.slice(0, 3800), secret, data));
+  const signed = kind === "webhook" && secret ? await signWebhook(raw, secret, `msg_${crypto.randomUUID().replace(/-/g, "")}`, Math.floor(Date.now() / 1000)) : {};
   let res: Response;
   try {
-    res = await fetch(u, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(await body(kind, text.slice(0, 3800), secret)), signal: AbortSignal.timeout(15000) });
+    // a webhook isn't followed through redirects: a public address can't bounce the post somewhere internal
+    res = await send(u, { method: "POST", headers: { "Content-Type": "application/json", ...(kind === "webhook" ? { "User-Agent": "Placetta-Webhooks/1" } : {}), ...signed }, body: raw, signal: AbortSignal.timeout(15000), ...(kind === "webhook" ? { redirect: "manual" as const } : {}) });
   } catch {
     return { ok: false, gone: false, why: "no answer" };
   }
-  const raw = (await res.text()).slice(0, 400);
+  if (kind === "webhook" && res.status >= 300 && res.status < 400) return { ok: false, gone: false, why: `${res.status}: redirects aren't followed` };
+  const answer = (await res.text()).slice(0, 400);
   if (kind === "lark" || kind === "wecom" || kind === "dingtalk") {
     // they answer 200 with their own code: Lark {code: 0} (older bots {StatusCode: 0}), WeCom and DingTalk {errcode: 0}
     let j: Record<string, unknown> = {};
-    try { j = JSON.parse(raw); } catch { /* not JSON */ }
+    try { j = JSON.parse(answer); } catch { /* not JSON */ }
     const code = kind === "lark" ? (j.code ?? j.StatusCode) : j.errcode;
     if (res.ok && code === 0) return { ok: true };
     const msg = String(j.msg ?? j.errmsg ?? j.StatusMessage ?? res.status).split(/, hint:|, from ip:/)[0];   // never show our server's address
@@ -86,7 +118,7 @@ export async function postHook(kind: HookKind, url: string, text: string, secret
   }
   if (res.ok) return { ok: true };
   // Teams answers 401 WorkflowNotFound for a deleted workflow
-  return { ok: false, gone: [400, 403, 404, 410].includes(res.status) || (kind === "teams" && res.status === 401), why: `${res.status}: ${raw.slice(0, 120)}` };
+  return { ok: false, gone: [400, 403, 404, 410].includes(res.status) || (kind === "teams" && res.status === 401), why: `${res.status}: ${answer.slice(0, 120)}` };
 }
 
 /** The welcome post that proves the link works before it's saved. */
@@ -94,7 +126,12 @@ export const hookHello = (business: string, lang: "en" | "zh") => lang === "zh"
   ? `快哉已连接${business ? `（${business}）` : ""}。截止日期、续期提醒和申报进展会发到这里。`
   : `Placetta is connected${business ? ` for ${business}` : ""}. Deadlines, renewals and filing updates will post here.`;
 
-type Item = { title: { en: string; zh: string }; body?: { en: string; zh: string } };
+type Item = { title: { en: string; zh: string }; body?: { en: string; zh: string }; kind?: string; app_id?: string | null };
+/** A digest as data, for a webhook: each update's title and body in both languages, its kind and its application. */
+export const hookData = (business: string, items: Item[], link: string): HookData => ({
+  type: "placetta.updates", business, link,
+  updates: items.slice(0, 50).map((u) => ({ title: u.title, ...(u.body ? { body: u.body } : {}), ...(u.kind ? { kind: u.kind } : {}), ...(u.app_id ? { application_id: u.app_id } : {}) })),
+});
 /** A day's new updates as one short message: a line each, at most eight, then a link to the app. */
 export function hookDigest(business: string, items: Item[], lang: "en" | "zh", link: string): string {
   const head = lang === "zh" ? `${business}：${items.length} 条新动态` : `${business}: ${items.length} new update${items.length === 1 ? "" : "s"}`;

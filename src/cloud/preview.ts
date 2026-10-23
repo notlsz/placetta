@@ -474,7 +474,7 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
       if (body.action === "toast_setup" || body.action === "toast_connect") { const no = needOwner(); if (no) return no; return body.action === "toast_setup" ? json({ ok: true, code: "PLACETTA-PREVIEW2" }) : json({ error: { code: "not_configured", message: "Toast connects on the live app.", message_zh: "Toast 需在正式版应用中连接。" } }, 409); }
       if (body.action === "available") return json({ ok: true, google: true, microsoft: true, dropbox: true, quickbooks: true, slack: false, square: false, toast: false });
       if (body.action === "hook_connect") {
-        const names: Record<string, [string, string]> = { slack: ["Slack channel", "Slack 群"], lark: ["Lark channel", "飞书群"], wecom: ["WeCom channel", "企业微信群"], dingtalk: ["DingTalk channel", "钉钉群"], teams: ["Microsoft Teams channel", "Microsoft Teams 群"] };
+        const names: Record<string, [string, string]> = { webhook: ["Webhook", "Webhook"], slack: ["Slack channel", "Slack 群"], lark: ["Lark channel", "飞书群"], wecom: ["WeCom channel", "企业微信群"], dingtalk: ["DingTalk channel", "钉钉群"], teams: ["Microsoft Teams channel", "Microsoft Teams 群"] };
         if (!names[String(body.kind)] || !/^https:\/\//.test(String(body.url ?? ""))) return fnErr("bad_request", "That isn't a webhook link.", 400);
         const rows = t("integrations").filter(i => !(i.workspace_id === ws && i.kind === body.kind));
         const account = names[String(body.kind)][body.lang === "zh" ? 1 : 0];

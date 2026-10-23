@@ -19,7 +19,7 @@
 // goes into saver mode until midnight UTC with a task for the team (ai_throttle_sweep).
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { appLink, noticeText, urgency } from "../_shared/odelia.ts";
-import { HOOK_KINDS, hookDigest, postHook, type HookKind } from "../_shared/channels.ts";
+import { HOOK_KINDS, hookData, hookDigest, postHook, type HookKind } from "../_shared/channels.ts";
 import { deadlineRules } from "../_shared/business_rules.ts";
 // @deno-types="../_shared/opening.d.ts"
 import { appealFor, approvalsLine, daysLeft, deadlineFor, type FilingRow, finishWork, MAX_RESUMES, normalizeState, NOT_A_LAW_FIRM, openingLine, openingPath, resumable, runsOn, type Routine, stampFilings } from "../_shared/opening.js";
@@ -516,7 +516,7 @@ function stageOut(key: string) {
         try { const b = JSON.parse(String(raw ?? "")); link = b.webhook_url ?? ""; secret = b.secret || undefined; } catch { /* no saved link */ }
         if (!link) continue;
         const lang = (h.meta as { lang?: string } | null)?.lang === "zh" ? "zh" : "en";
-        const r = await postHook(h.kind as HookKind, link, hookDigest(business, items, lang, appLink(APP, ws)), secret);
+        const r = await postHook(h.kind as HookKind, link, hookDigest(business, items, lang, appLink(APP, ws)), secret, hookData(business, items, appLink(APP, ws)));
         if (r.ok) { n++; await admin.from("integrations").update({ last_used_at: new Date().toISOString() }).eq("id", h.id); }
         else console.error("stage chat", h.kind, r.why);
       }
@@ -748,7 +748,7 @@ Deno.serve(async (req) => {
       if (!link) continue;   // a Slack sign-in without a channel link
       const lang = (h.meta as { lang?: string } | null)?.lang === "zh" ? "zh" : "en";
       const items = fresh.get(h.workspace_id as string) ?? [];
-      const r = await postHook(h.kind as HookKind, link, hookDigest(names.get(h.workspace_id as string) ?? "", items, lang, appLink(APP, h.workspace_id as string)), secret);
+      const r = await postHook(h.kind as HookKind, link, hookDigest(names.get(h.workspace_id as string) ?? "", items, lang, appLink(APP, h.workspace_id as string)), secret, hookData(names.get(h.workspace_id as string) ?? "", items, appLink(APP, h.workspace_id as string)));
       if (r.ok) { chats++; await admin.from("integrations").update({ last_used_at: new Date().toISOString() }).eq("id", h.id); }
       else {
         console.error("team chat", h.kind, r.why);

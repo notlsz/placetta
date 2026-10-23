@@ -199,7 +199,8 @@ Deno.serve(async (req) => {
       dingtalk: "https://oapi.dingtalk.com/robot/send?access_token=0000000000000000000000000000000000000000000000000000000000000000",
       teams: "https://prod-00.westus.logic.azure.com/workflows/00000000000000000000000000000000/triggers/manual/paths/invoke?api-version=2016-06-01&sig=x",
     };
-    const hooks = await Promise.all(HOOK_KINDS.map(async (k) => [k, await postHook(k, fake[k], "Placetta probe")] as const));
+    // the chat apps only: a webhook goes wherever the business points it, so there is no fixed service to probe
+    const hooks = await Promise.all(HOOK_KINDS.filter((k) => k !== "webhook").map(async (k) => [k, await postHook(k, fake[k], "Placetta probe")] as const));
     const slackBot = await slackWho("xoxb-0000000000-0000000000000-000000000000000000000000");
     const larkBot = await larkWorks({ kind: "lark_bot", app_id: "cli_00000000000000", app_secret: "x".repeat(32), verification_token: "x", domain: "feishu" });
     // WeChat should call made-up credentials wrong ("credentials"); "ip" or "confirm" means its address rules changed
