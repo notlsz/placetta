@@ -2,6 +2,8 @@ import { answerFits, prefillFromProfile } from "./filingPlaybooks/fill";
 import { entityNeed } from "./entityHome";
 import { PUBLIC_BUNDLE } from "./publicBundle";
 import { inspectionsFor } from "./inspections/forStore";
+import { bookingWay, callScript, isWindow, METHOD_WORDS, slotText } from "./inspections/booking";
+import { INSPECTIONS } from "./inspections/index";
 import { appealById, appealFor, choices, daysLeft, deadlineFor, letterOutline, NOT_A_LAW_FIRM } from "./appeals";
 import { priceFacts } from "./pricing";
 import { DEFAULT_POLICY, SPEND_CATEGORIES, decide, suggestBudgets, type Budget, type Purchase, type SpendCategory } from "./spend.ts";
@@ -24,7 +26,7 @@ import {
   uid, viaWords,
 } from "./core";
 import { B, same, type Bi } from "./bi";
-import type { Application, Approval, Change, CheckItem, Doc, Field, FactGroup, Level, MemoryKind, Status, Store, Workspace } from "./model";
+import type { Application, Approval, Change, CheckItem, Doc, Field, FactGroup, InspectionBooking, Level, MemoryKind, Status, Store, Workspace } from "./model";
 import { emptyBook, memoryBrief, remember as rememberFact, searchChats, searchMemory } from "./memory";
 import { contactFor } from "./recall";
 import { daysFromNow, money, nowIso } from "./time";
@@ -1526,6 +1528,134 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
             "draft_document the letter from letter_outline, keeping every [n] citation", ap.counsel.advised ? "draft_message to their attorney with the deadline, the decision and the evidence list (ask who their attorney is if you don't know)" : "",
             "never file, send or pay anything for the appeal yourself"].filter(Boolean),
         };
+      },
+    },
+    {
+      name: "inspection_booking",
+      description: "Book a store's inspection and see it through, and run a mock inspection first. action: plan (how this agency takes bookings and what it needs), book (with the one slot the owner picked from the times you offered: for an agency site Placetta can use, it makes the booking request for the owner to approve with request_filing_approval, and the portal worker books it with the owner's own login; by phone or email it returns the call script or the email for draft_message, and the team makes the call), confirm (the date, window and confirmation once the agency confirms: it goes on Deadlines with a reminder), result (passed, failed with the inspector's corrections, or a re-inspection booked), mock (walk the inspector's checklist with the owner one item at a time: pass ok true or false for the item you asked about, and a document_id when they sent a photo; it returns the next item). Never create an account on an agency site, never get past a CAPTCHA (the owner does it in the live view), and never book a time the owner didn't approve.",
+      inputSchema: { type: "object", properties: {
+        action: { type: "string", enum: ["plan", "book", "confirm", "result", "mock"] },
+        store_id: { type: "string" }, inspection_id: { type: "string", description: "An id from inspection_guide" }, booking_id: { type: "string" },
+        slots: { type: "array", items: { type: "string" }, description: "plan/book: times to offer, as 'YYYY-MM-DD, morning' (up to 3)" },
+        date: { type: "string", description: "book/confirm: YYYY-MM-DD" }, window: { type: "string", description: "book/confirm: morning, afternoon, all day or HH:MM-HH:MM" },
+        permit_number: { type: "string" }, contact_name: { type: "string" }, contact_phone: { type: "string" }, confirmation: { type: "string" },
+        outcome: { type: "string", enum: ["passed", "failed", "reinspection"] }, corrections: { type: "array", items: { type: "string" } },
+        item_id: { type: "string" }, ok: { type: "boolean" }, document_id: { type: "string" }, note: { type: "string" },
+      }, required: ["action"] },
+      execute(i) {
+        const action = str(i.action), today = daysFromNow(0), now = nowIso();
+        const booking = str(i.booking_id) ? (get().bookings ?? []).find(x => x.id === str(i.booking_id)) : undefined;
+        if (str(i.booking_id) && !booking) throw new Error(`No booking "${str(i.booking_id)}".`);
+        const st = findStore(i.store_id || booking?.store);
+        const guide = inspectionsFor(st.address);
+        if (!guide) return { covered: false, why: `Placetta's inspection guides don't cover ${st.address} yet. Use the agency's own page and say where each step comes from.` };
+        const insId = str(i.inspection_id) || booking?.inspection || "";
+        const ins = guide.inspections.find(x => x.id === insId);
+        if (!ins) throw new Error(`No inspection "${insId}" for this store. Ids: ${guide.inspections.map(x => x.id).join(", ")}.`);
+        const base = ins.id.replace(/^[a-z]+-(?=(building|fire|health)-)/, "");
+        const where = placesOf(st.address).find(c => INSPECTIONS[c]?.inspections.some(x => x.id === base && x.agency.en === ins.agency.en)) ?? placesOf(st.address)[0] ?? "";
+        const way = bookingWay(where, { ...ins, id: base });
+        const setBooking = (bk: InspectionBooking) => apply(w => ({ ...w, bookings: [...(w.bookings ?? []).filter(x => x.id !== bk.id), bk] }));
+        const open = ins.checklist.filter(c => !st.ready?.[`${ins.id}:${c.id}`]);
+        const slots = arr(i.slots).map(s => str(s, 60)).filter(Boolean).slice(0, 3);
+        if (action === "plan") {
+          mark();
+          return { inspection: ins.name.en, agency: ins.agency.en, how: METHOD_WORDS[way.method].en, method: way.method, agency_says: ins.book.en, needs: way.needs.en, book_url: ins.bookUrl, phone: ins.phone, lead: ins.lead?.en, source: ins.source,
+            placetta_can_book: way.method === "portal" && !!way.dest, needs_your_account: !!way.account,
+            prep: { still_open: open.length, of: ins.checklist.length, offer_mock: open.length > 0 },
+            do_next: way.method === "not_booked" ? "Nothing to book: say who schedules it and offer the mock inspection." : "Offer the owner up to three times (date and window) that fit the agency's lead time and their opening; when they pick one, call book with it." };
+        }
+        if (action === "book") {
+          const date = str(i.date, 10), window = str(i.window, 20) || "any time";
+          if (way.method === "not_booked") throw new Error(`The ${ins.name.en} isn't booked by the business: ${way.needs.en}`);
+          if (!date && slots.length) {
+            const id = booking?.id ?? freshId(get(), "bk");
+            setBooking({ id, store: st.id, inspection: ins.id, where, name: ins.name, agency: ins.agency, method: way.method, status: "proposed", slots, created: booking?.created ?? now, updated: now });
+            mark();
+            return { booking_id: id, status: "proposed", slots, do_next: "Ask the owner which one; then call book again with that date and window. Nothing is booked yet." };
+          }
+          if (!isDate(date) || date < today) throw new Error("date must be a future YYYY-MM-DD the owner picked");
+          if (!isWindow(window)) throw new Error("window must be morning, afternoon, all day, any time or HH:MM-HH:MM");
+          const slot = slotText(date, window), id = booking?.id ?? freshId(get(), "bk");
+          const permit = str(i.permit_number, 40), contact = [str(i.contact_name, 80), str(i.contact_phone, 30)].filter(Boolean).join(", ");
+          if (way.method === "portal" && way.dest) {
+            const appId = `book-${st.id}-${base}`.slice(0, 60);
+            const fields = [
+              { id: "permit", label: B("Permit or application number", "许可或申请编号"), value: permit },
+              { id: "type", label: B("Inspection requested", "申请的检查"), value: ins.name.en },
+              { id: "date", label: B("Requested inspection date", "申请的检查日期"), value: date },
+              { id: "window", label: B("Requested time window", "申请的时段"), value: window },
+              { id: "site", label: B("Site address", "现场地址"), value: st.address },
+              { id: "contact", label: B("Site contact name", "现场联系人"), value: str(i.contact_name, 80) },
+              { id: "contact_phone", label: B("Site contact phone", "现场联系电话"), value: str(i.contact_phone, 30) },
+            ];
+            const app: Application = { id: appId, name: B(`Inspection request: ${ins.name.en}`, `检查预约：${ins.name.zh}`), agency: ins.agency, level: "city", status: "draft", fees: [], est: B("The agency confirms the time", "由机构确认时间"),
+              source: { label: ins.agency.en, url: ins.bookUrl ?? ins.source }, form: B("The agency's inspection request", "机构的检查预约"), official: way.dest, fields, checklist: [],
+              next: B(`Approve the slot ${slot} to book it`, `批准 ${slot} 时段即可预约`) };
+            apply(w => audit("agent", L("Prepared an inspection booking", "准备了检查预约"), ins.name, same(slot))({ ...w, apps: [...w.apps.filter(a => a.id !== appId), app],
+              stores: (w.stores ?? []).map(x => (x.id === st.id ? { ...x, apps: [...new Set([...(x.apps ?? []), appId])] } : x)) }));
+            setBooking({ id, store: st.id, inspection: ins.id, where, name: ins.name, agency: ins.agency, method: way.method, status: "awaiting_approval", slots: slots.length ? slots : [slot], slot, app: appId, permit, created: booking?.created ?? now, updated: now });
+            made.apps.add(appId); mark();
+            const empty = fields.filter(f => !f.value).map(f => f.label.en);
+            return { booking_id: id, application_id: appId, slot, status: "awaiting_approval", ...(empty.length ? { still_needed: empty } : {}),
+              do_next: empty.length ? `Ask the owner for: ${empty.join(", ")}; fill them with fill_fields on ${appId}; then request_filing_approval.` : `request_filing_approval for ${appId}: the owner approves exactly this slot.`,
+              how_it_books: `After approval the portal worker books it on ${ins.agency.en}'s site with the owner's saved login. ${way.account ? "If there's no saved login, the team asks the owner for one; Placetta never creates an account. " : ""}A CAPTCHA, a code or a payment goes to the owner in the live view.` };
+          }
+          // phone, email, plan checker, the applicant of record, a form, or a portal Placetta can't use: drafted for the team
+          const script = callScript({ business: get().business.en, address: st.address, inspection: ins.name, agency: ins.agency, permit, slots: [slot, ...slots.filter(s => s !== slot)], contact, phone: ins.phone });
+          setBooking({ id, store: st.id, inspection: ins.id, where, name: ins.name, agency: ins.agency, method: way.method, status: "with_team", slots: slots.length ? slots : [slot], slot, permit, script, created: booking?.created ?? now, updated: now });
+          mark();
+          return { booking_id: id, status: "with_team", method: way.method, needs: way.needs.en, ...(way.method === "phone" || way.method === "plan_checker" ? { call_script: script, phone: ins.phone } : {}),
+            do_next: way.method === "email" || way.method === "applicant_of_record" || way.method === "plan_checker"
+              ? `Draft the request with draft_message (to ${way.method === "applicant_of_record" ? "their architect or engineer of record, who requests it in DOB NOW" : way.method === "plan_checker" ? "their plan checker" : "the address the agency gives"}), with the slot, the permit and the site contact, for the owner to approve. Placetta's team follows up.`
+              : "Placetta's team calls with this script (the morning check creates their task). Tell the owner the time isn't booked until the agency confirms; then call confirm." };
+        }
+        if (action === "confirm") {
+          if (!booking) throw new Error("booking_id is required for confirm (from book).");
+          const date = str(i.date, 10), window = str(i.window, 20) || booking.slot?.split(", ")[1] || "any time";
+          if (!isDate(date)) throw new Error("date must be YYYY-MM-DD as the agency confirmed it");
+          const dlId = `insp-${booking.id}-${date}`;
+          apply(w => addDeadline({ id: dlId, date, kind: "milestone", title: B(`${booking.name.en}, ${window}`, `${booking.name.zh}，${window}`), agency: booking.agency, app: booking.app,
+            ask: B("Run the mock inspection", "进行模拟检查"), prompt: B(`My ${booking.name.en} is on ${date}. Walk me through the inspector's checklist one item at a time (inspection_booking mock).`, `我的${booking.name.zh}在 ${date}。请按检查员清单逐项带我过一遍（inspection_booking mock）。`) })({ ...w, deadlines: w.deadlines.filter(d => d.id !== booking.deadline) }));
+          setBooking({ ...booking, status: "booked", slot: slotText(date, window), confirmation: str(i.confirmation, 60) || booking.confirmation, deadline: dlId, updated: now });
+          mark();
+          return { booking_id: booking.id, status: "booked", on_deadlines: dlId, reminder: "Reminders go out 7, 3 and 1 days before and on the day, with the prep.", prep_still_open: open.length };
+        }
+        if (action === "result") {
+          if (!booking) throw new Error("booking_id is required for result (from book).");
+          const outcome = str(i.outcome) as "passed" | "failed" | "reinspection";
+          if (!["passed", "failed", "reinspection"].includes(outcome)) throw new Error("outcome must be passed, failed or reinspection");
+          const corrections = arr(i.corrections).map(c => str(c, 200)).filter(Boolean).slice(0, 30);
+          if (outcome === "failed" && !corrections.length) throw new Error("A failed inspection needs the inspector's corrections, as written on the notice.");
+          const next = str(i.date, 10);
+          if (outcome === "reinspection" && !isDate(next)) throw new Error("A re-inspection needs its date (YYYY-MM-DD).");
+          setBooking({ ...booking, status: outcome === "passed" ? "passed" : outcome === "failed" ? "failed" : "reinspection", result: { at: now, outcome, corrections, ...(next ? { next } : {}) }, updated: now });
+          if (outcome === "reinspection") apply(addDeadline({ id: `insp-${booking.id}-${next}`, date: next, kind: "milestone", title: B(`Re-inspection: ${booking.name.en}`, `复检：${booking.name.zh}`), agency: booking.agency, app: booking.app }));
+          apply(audit("agent", L("Recorded an inspection result", "记录了检查结果"), booking.name, same(outcome)));
+          mark();
+          return { booking_id: booking.id, status: outcome, ...(corrections.length ? { corrections, do_next: "Make each correction a step with set_plan (who fixes it, by when), then book the re-inspection with book." } : {}) };
+        }
+        if (action === "mock") {
+          const checks = st.mock && st.mock.checks.length && st.mock.checks[0]?.area.en === ins.name.en ? st.mock.checks
+            : ins.checklist.map(c => ({ id: c.id, area: ins.name, label: c.item, ok: null as boolean | null }));
+          let updated = checks;
+          const item = str(i.item_id);
+          if (item) {
+            if (!checks.some(c => c.id === item)) throw new Error(`No checklist item "${item}" on the ${ins.name.en}.`);
+            const doc = str(i.document_id) ? get().docs.find(d => d.id === str(i.document_id)) : undefined;
+            if (str(i.document_id) && !doc) throw new Error(`No document "${str(i.document_id)}".`);
+            updated = checks.map(c => (c.id === item ? { ...c, ok: typeof i.ok === "boolean" ? i.ok : c.ok, ...(doc ? { doc: doc.id, photo: true } : {}), ...(str(i.note) ? { note: same(str(i.note, 200)) } : {}) } : c));
+          }
+          apply(w => ({ ...w, stores: (w.stores ?? []).map(x => (x.id === st.id ? { ...x, mock: { date: today, checks: updated }, ready: { ...(x.ready ?? {}), ...Object.fromEntries(updated.filter(c => c.ok === true).map(c => [`${ins.id}:${c.id}`, true])) } } : x)) }));
+          const nextItem = updated.find(c => c.ok === null), gaps = updated.filter(c => c.ok === false);
+          const PHOTO = /hood|tag|sink|thermometer|sign|placard|extinguisher|label|certificate|permit posted|exit/i;
+          mark();
+          return { inspection: ins.name.en, done: updated.filter(c => c.ok !== null).length, of: updated.length,
+            ...(nextItem ? { next: { item_id: nextItem.id, check: nextItem.label.en, why: ins.checklist.find(c => c.id === nextItem.id)?.why?.en, photo_helps: PHOTO.test(nextItem.label.en) } } : { finished: true }),
+            gaps: gaps.map(g => ({ item_id: g.id, check: g.label.en })),
+            do_next: nextItem ? "Ask about this one item only, in plain words (and ask for a photo when photo_helps). Then call mock again with item_id, ok and any document_id." : gaps.length ? "Summarize the gaps and make each a step with set_plan (who fixes it, by when, before the inspection date)." : "Tell them they're ready on every item." };
+        }
+        throw new Error("action must be plan, book, confirm, result or mock");
       },
     },
     {

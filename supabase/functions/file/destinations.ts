@@ -138,6 +138,16 @@ export const DEST: Record<string, Dest> = {
   "sf-business-registration": { portal: "etaxstatement.sfgov.org", signature: "typed", payment: "portal", checked: "2026-10-13", source: "https://sftreasurer.org/business/register-business" },
   "sj-building-ti": { portal: "sjpermits.org", portalUrl: "https://www.sjpermits.org/", signature: "drawn", payment: "portal", checked: "2026-10-13", source: "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement" },
   "sj-sign": { portal: "sjpermits.org", portalUrl: "https://www.sjpermits.org/", signature: "drawn", payment: "invoice", checked: "2026-10-13", source: "https://www.sanjoseca.gov/business/development-services-permit-center/online-permits-at-sjpermits-org/planning-online-permits" },
+  // Inspection bookings (src/inspections/booking.ts): the agency's own scheduling page, from the inspection guides
+  // (src/inspections/data, read 2026-10-15). The worker books the slot the owner approved, with the owner's own saved
+  // login (no login: the team asks for it; Placetta never creates an account). Nothing is signed; a fee is paid by the
+  // owner in the live view.
+  "insp-la-building-final": { portal: "www.ladbsservices2.lacity.org", portalUrl: "https://www.ladbsservices2.lacity.org/OnlineServices/?service=rfi", signature: "none", payment: "none", onBehalf: "unstated", checked: "2026-10-15", source: "https://dbs.lacity.gov/services/inspection" },
+  // "Pick a preferred date, then pay" (FIMS, with the Transaction ID and street name; no account named)
+  "insp-la-fire-final": { portal: "inspect.lafd.org", portalUrl: "https://inspect.lafd.org/", noLogin: true, signature: "none", payment: "portal", onBehalf: "unstated", checked: "2026-10-15", source: "https://inspect.lafd.org/Content/AttachedFiles/FIMS_Help.pdf", also: ["https://lafd.org/fire-prevention/fire-development-services"] },
+  // FDNY Business needs an NYC.ID account: the owner's own
+  "insp-nyc-fire-hood": { portal: "fires.fdnycloud.org", portalUrl: "https://fires.fdnycloud.org/CitizenAccess/", signature: "none", payment: "portal", onBehalf: "unstated", checked: "2026-10-15", source: "https://www.nyc.gov/assets/fdny/downloads/pdf/business/restaurant-fire-safety-guide.pdf" },
+  "insp-sj-building-final": { portal: "sjpermits.org", portalUrl: "https://www.sjpermits.org/", signature: "none", payment: "none", onBehalf: "unstated", checked: "2026-10-15", source: "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/building-division/inspections/inspection-success" },
   "aus-building": { portal: "abc.austintexas.gov", signature: "typed", payment: "invoice", checked: "2026-10-13", source: "https://www.austintexas.gov/development-services/commercial-plan-review" },
   "la-ladbs": { portal: "eplanla.lacity.org", signature: "typed", checked: "2026-10-13", source: "https://dbs.lacity.gov/" },
 

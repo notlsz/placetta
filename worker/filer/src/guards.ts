@@ -14,7 +14,18 @@ export type PageState = {
   hidden?: string[];
 };
 
-export type Stop = { reason: "captcha" | "identity" | "payment" | "secret_number" | "code"; en: string; zh: string };
+export type Stop = { reason: "captcha" | "identity" | "payment" | "secret_number" | "code" | "account"; en: string; zh: string };
+
+/** A page that makes a new account on the agency's site: a password typed twice, or a registration heading with a
+ *  password box. Placetta never creates an account for the owner; it uses only the login they saved. */
+const REGISTER = /\b(create (an |your )?account|register (an |for an )?account|new (user|account) registration|sign ?up)\b/i;
+export function makesAccount(s: PageState): boolean {
+  const pw = s.controls.filter((c) => c.type === "password").length;
+  const confirm = s.controls.some((c) => /confirm|re-?enter|repeat|verify/i.test(describeControl(c)) && c.type === "password");
+  const heads = [s.title, ...s.headings].join(" ");
+  // a sign-in page that also offers "Sign up" is a sign-in page
+  return pw >= 2 || confirm || (pw >= 1 && REGISTER.test(heads) && !/\b(sign ?in|log ?in)\b/i.test(heads));
+}
 
 const CAPTCHA_FRAME = /recaptcha|hcaptcha|challenges\.cloudflare\.com|turnstile|arkoselabs|funcaptcha/i;
 const CAPTCHA_MARK = /g-recaptcha|h-captcha|cf-turnstile|captcha/i;
@@ -31,6 +42,9 @@ export function mustStop(s: PageState): Stop | null {
   try { host = new URL(s.url).hostname; } catch { /* about:blank */ }
   if (s.frames.some((f) => CAPTCHA_FRAME.test(f)) || s.markers.some((m) => CAPTCHA_MARK.test(m)) || /i'?m not a robot/i.test(s.text)) {
     return { reason: "captcha", en: "The agency's site is asking for a CAPTCHA. Open the live view and complete it, then tap \"I've done it\".", zh: "机构网站要求完成验证码。请打开实时画面完成后点击“我已完成”。" };
+  }
+  if (makesAccount(s)) {
+    return { reason: "account", en: "The agency's site wants a new account made. Placetta never creates one for you. If you have an account, save its login in Settings; if not, open the live view and create it yourself, then tap \"I've done it\".", zh: "机构网站要求新建账户。快哉从不代您创建账户。如您已有账户，请在设置中保存登录信息；如没有，请打开实时画面自行创建后点击“我已完成”。" };
   }
   if (ID_HOST.test(host) || s.frames.some((f) => /id\.me|login\.gov/i.test(f))) {
     return { reason: "identity", en: "The agency needs you to verify your identity. Open the live view and sign in, then tap \"I've done it\".", zh: "机构需要您验证身份。请打开实时画面登录后点击“我已完成”。" };
@@ -82,7 +96,8 @@ export function onPortal(url: string, portalHost: string): boolean {
 export function isFinal(text: string): boolean {
   const t = norm(text);
   if (/\b(sign ?in|sign ?up|log ?in|sign ?out|log ?out|choose file|file upload|upload file|profile)\b/.test(t)) return false;
-  return /\b(submit|file|pay|sign)\b/.test(t);
+  // booking an inspection sends a request too: "Schedule", "Book", "Request inspection"
+  return /\b(submit|file|pay|sign|schedule|book|request (an )?inspection)\b/.test(t);
 }
 
 /** Approved values the review page doesn't show. Empty when it matches the payload. */

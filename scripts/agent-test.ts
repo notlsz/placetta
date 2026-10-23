@@ -1628,6 +1628,53 @@ async function appeals() {
   eq(r.w.apps.find(a => a.id === "bp")?.status, "draft", "the application wasn't touched");
 }
 
+async function inspectionBookings() {
+  console.log("\n# Inspection booking: plan, pick a slot, approve, confirm, result, and the mock inspection");
+  const store = (id: string, address: string) => ({ id, name: same(id), address, stage: "opening" as const, rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] as string[] });
+  const ws = workspace({ stores: [store("la", "1200 W 7th St, Los Angeles, CA 90017"), store("ny", "136-20 Roosevelt Ave, Flushing, NY 11354")],
+    docs: [{ id: "d-hood", name: "hood-tag.jpg", kind: "img", size: 1000, by: "you", at: "2026-10-20", tag: same("Photo") } as unknown as Workspace["docs"][number]] });
+  const soon = daysFromNow(10);
+  const r = await agent({
+    ws, prompt: "Book the building final in LA and the health pre-opening in Flushing, and practice the hood inspection.",
+    script: [
+      () => ask(["inspection_booking", { action: "plan", store_id: "la", inspection_id: "building-final" }],
+        ["inspection_booking", { action: "book", store_id: "la", inspection_id: "building-final", slots: [`${soon}, morning`, `${daysFromNow(11)}, afternoon`] }]),
+      c => ask(["inspection_booking", { action: "book", booking_id: (c.outs("inspection_booking")[1] as { booking_id: string }).booking_id, date: soon, window: "morning", permit_number: "25016-30000-05143", contact_name: "Mei Chen", contact_phone: "718-555-0100" }],
+        ["inspection_booking", { action: "book", store_id: "ny", inspection_id: "health-preopening", date: soon, window: "08:00-10:00", permit_number: "PA-1" }],
+        ["inspection_booking", { action: "book", store_id: "la", inspection_id: "building-final", date: "2020-01-01", window: "morning" }],
+        ["inspection_booking", { action: "book", store_id: "ny", inspection_id: "health-routine", date: soon, window: "morning" }]),
+      c => { const la = c.outs("inspection_booking")[2] as { application_id: string; booking_id: string }; const ny = c.outs("inspection_booking")[3] as { booking_id: string };
+        return ask(["request_filing_approval", { application_id: la.application_id }],
+          ["inspection_booking", { action: "confirm", booking_id: ny.booking_id, date: soon, window: "08:00-10:00", confirmation: "DOH-77" }],
+          ["inspection_booking", { action: "result", booking_id: ny.booking_id, outcome: "failed", corrections: ["Seal the gap under the back door", "Post the pest control contract"] }],
+          ["inspection_booking", { action: "result", booking_id: ny.booking_id, outcome: "failed" }],
+          ["inspection_booking", { action: "mock", store_id: "ny", inspection_id: "fire-hood" }]); },
+      () => ask(["inspection_booking", { action: "mock", store_id: "ny", inspection_id: "fire-hood", item_id: "matches-plans", ok: true }],
+        ["inspection_booking", { action: "mock", store_id: "ny", inspection_id: "fire-hood", item_id: "installer", ok: false, document_id: "d-hood", note: "Tag is from 2024" }]),
+      () => say("Booked requests are up for your approval; the mock inspection found one gap."),
+    ],
+  });
+  const calls = callNamed(r, "inspection_booking");
+  const [plan, proposed, la, ny, past, routine] = calls.map(c => c.parsed as Record<string, any>);
+  ok(plan?.method === "portal" && plan.placetta_can_book === true && plan.needs_your_account === true && /^https:\/\//.test(plan.source), "LADBS's final is booked on its site, with the owner's account", plan);
+  ok(proposed?.status === "proposed" && proposed.slots.length === 2 && /Nothing is booked yet/.test(proposed.do_next), "up to three times are offered; nothing is booked until one is picked");
+  ok(la?.status === "awaiting_approval" && la.application_id && !la.still_needed && /never creates an account/.test(la.how_it_books), "the picked slot becomes a booking request for approval, with the owner's own login", la);
+  const app = r.w.apps.find(a => a.id === la?.application_id);
+  ok(app?.official === "insp-la-building-final" && app.fields.some(f => f.value === soon) && app.fields.some(f => f.value === "morning"), "the request carries exactly the approved slot");
+  ok(r.w.approvals.some(a => a.app === la?.application_id && a.kind === "file"), "the owner approves the slot before the worker books it");
+  ok(ny?.status === "with_team" && /212-676-1600/.test(ny.phone ?? "") && /Ask for, in order/.test(ny.call_script), "NYC's pre-operating inspection is by phone: a call script for the team", ny);
+  ok(!calls[4].ok && !calls[5].ok, "a past date and an inspection the agency schedules are refused", [past, routine]);
+  const nyB = r.w.bookings?.find(b => b.store === "ny" && b.inspection === "health-preopening");
+  ok(nyB?.status === "failed" && nyB.result?.corrections.length === 2 && nyB.confirmation === "DOH-77", "the confirmed booking and its failed result with the corrections");
+  ok(r.w.deadlines.some(d => d.id.startsWith("insp-") && d.date === soon && d.kind === "milestone"), "the confirmed inspection is on Deadlines (and the calendar)");
+  ok(!calls[8].ok, "a failed result needs the inspector's corrections");
+  const mock0 = calls[9].parsed as Record<string, any>, mock2 = calls[11].parsed as Record<string, any>;
+  ok(mock0?.next?.item_id === "matches-plans" && mock0.done === 0, "the mock inspection asks one item at a time, from the inspector's own list", mock0);
+  ok(mock2?.gaps?.[0]?.item_id === "installer" && mock2.done === 2 && mock2.next?.item_id === "auto-shutoff", "a gap is recorded and the next item comes up", mock2);
+  const st = r.w.stores?.find(s => s.id === "ny");
+  ok(st?.mock?.checks.find(c => c.id === "installer")?.doc === "d-hood" && st.ready?.["fire-hood:matches-plans"] === true, "the photo is kept on the item, and a passed item ticks the store's checklist");
+}
+
 async function addresses() {
   console.log("\n# Addresses: address_rules, and an address the agency doesn't accept stays off the form");
   const ws = workspace({ stores: [{ id: "st1", name: same("Main St"), address: "1 Main St, Houston, TX 77002", stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }] });
@@ -2380,6 +2427,7 @@ await stores();
 await spending();
 await addresses();
 await appeals();
+await inspectionBookings();
 await fieldsAndDocs();
 await writing();
 await pointOfSale();

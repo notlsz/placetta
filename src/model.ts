@@ -161,7 +161,16 @@ export type LogKind = "temps" | "cleaning" | "pest";
 export type DailyLog = { date: string; kind: LogKind; done: boolean; by?: string; reading?: string };
 /** lang: the language this person reads, for the messages Odelia drafts to them (src/staff.ts). */
 export type Cert = { id: string; person: string; kind: Bi; expires: string; lang?: "en" | "zh" | "es" };
-export type MockCheck = { id: string; area: Bi; label: Bi; ok: boolean | null };
+export type MockCheck = { id: string; area: Bi; label: Bi; ok: boolean | null; doc?: string; note?: Bi; photo?: boolean };
+/** An inspection being booked or tracked (src/inspections/booking.ts): how it is booked, the slots offered and the one
+ *  approved, the booking application the portal worker files (for a portal), and the result. */
+export type InspectionBooking = {
+  id: string; store: string; inspection: string; where: string; name: Bi; agency: Bi; method: string;
+  status: "proposed" | "awaiting_approval" | "with_team" | "requested" | "booked" | "passed" | "failed" | "reinspection" | "canceled";
+  slots?: string[]; slot?: string; app?: string; permit?: string; confirmation?: string; deadline?: string; script?: string;
+  result?: { at: string; outcome: "passed" | "failed" | "reinspection"; corrections: string[]; next?: string };
+  created: string; updated: string;
+};
 export type StoreRule = "nyc_grades" | "nyc_fww";
 export type Store = {
   id: string;
@@ -222,6 +231,8 @@ export type Workspace = {
   /** Agent memory outside an account (the sample): its observations, briefs and settings (src/odeliaMemory/). An account
    *  keeps it in its own tables with row-level security (migration 20261022211905_agent_memory), never here. */
   agentMemory?: import("./odeliaMemory/types").AgentMemory;
+  /** Inspections booked or being booked, and their results (src/inspections/booking.ts). */
+  bookings?: InspectionBooking[];
 };
 /** The plan a new workspace starts with: what and where the person typed, when, and how many permits the registry listed.
  *  filled: the form lines filled from the signup answers (src/plan/prefill.ts); win: the application put up for approval

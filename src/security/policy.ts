@@ -46,6 +46,9 @@ export const TOOL_SCOPES: Record<string, Scope> = {
   set_plan: "plan", hand_off: "plan", split_job: "plan",
   prepare_application: "write", fill_fields: "write", update_application: "write", add_deadline: "write", remember: "write", skill_save: "write",
   schedule_routine: "write", cancel_routine: "write", add_store: "write", update_store: "write", edit_workspace: "write", edit_deadline: "write",
+  // src/inspections/booking.ts: records bookings and results and prepares a booking request; the booking itself goes
+  // through request_filing_approval (file), a message through draft_message (send)
+  inspection_booking: "write",
   memory_save: "write", review_documents: "write", draft_document: "write", import_file: "write", add_calendar_event: "write", set_budgets: "write",
   // agent memory (src/odeliaMemory/context.ts): a suggestion only waits for an owner or admin, so it is a draft
   memory_suggest: "draft",

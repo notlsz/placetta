@@ -74,6 +74,7 @@ const WORDS: Record<string, Bi> = {
   address_rules: B("Read the agency's address rules", "查阅机构的地址规则"),
   inspection_guide: B("Read the inspection checklist", "查阅检查清单"),
   appeal_options: B("Read the appeal process", "查阅上诉流程"),
+  inspection_booking: B("Worked on an inspection booking", "处理检查预约"),
   request_purchase: B("Asked to buy something", "申请购买"),
   set_budgets: B("Proposed budgets", "提议预算"),
   search_email: B("Searched email", "搜索邮件"),

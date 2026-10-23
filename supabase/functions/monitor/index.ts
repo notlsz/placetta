@@ -32,6 +32,7 @@ import { canConverse } from "../_shared/llm.ts";
 import { mayEmail, wantsTexts } from "../_shared/reach.ts";
 import { deliverNotices, noticeDb, outboxText } from "../_shared/notices.ts";
 import { stageAlert, stageUpdates, type StageFiling, type StageUpdate } from "./stage.ts";
+import { inspectionWork, PREP } from "./inspections.ts";
 import { runStatusChecks, type StatusFiling, type StatusIO, type StatusRun, type WsState } from "./status_checks.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
@@ -84,7 +85,7 @@ export function deadlineUpdates(ws: string, list: unknown, today: string): Updat
       const b = bucket(n, [0, 1, 3, 7, 14]);
       if (b !== undefined) out.push({ workspace_id: ws, kind: "deadline", app_id: d.app ?? null, dedupe: `deadline:${d.id}:${d.date}:${b}`,
         title: { en: `${title.en}: ${when(n, d.kind === "due" ? "due" : "", d.kind === "due" ? "截止" : "").en}`, zh: `${title.zh}：${when(n, d.kind === "due" ? "due" : "", d.kind === "due" ? "截止" : "").zh}` },
-        body: { en: `Date: ${d.date}.`, zh: `日期：${d.date}。` } });
+        body: d.id.startsWith("insp-") ? { en: `Date: ${d.date}. ${PREP.en}`, zh: `日期：${d.date}。${PREP.zh}` } : { en: `Date: ${d.date}.`, zh: `日期：${d.date}。` } });
     } else if (d.kind === "due" && n >= -30) {
       out.push({ workspace_id: ws, kind: "deadline", app_id: d.app ?? null, dedupe: `overdue:${d.id}:${d.date}`,
         title: { en: `Overdue: ${title.en}`, zh: `已逾期：${title.zh}` }, body: { en: `It was due ${d.date}.`, zh: `截止日期为 ${d.date}。` } });
@@ -595,6 +596,7 @@ Deno.serve(async (req) => {
   const names = new Map<string, string>();
   const all: { id: string; state: unknown }[] = [];
   const states = new Map<string, { deadlines?: unknown; stores?: unknown } | null>();
+  const inspectionTasks: ReturnType<typeof inspectionWork>["tasks"] = [];
   for (let from = 0; ; from += 500) {
     const { data: rows, error } = await admin.from("workspaces").select("id, name, state").order("created_at").range(from, from + 499);
     if (error) return json(500, { error: "workspaces: " + error.code });
@@ -603,7 +605,9 @@ Deno.serve(async (req) => {
       const st = (w.state ?? {}) as { deadlines?: unknown };
       // days to a deadline count from the stores' own date, not UTC's (src/localDay.ts)
       const local = workspaceToday((w.state as { stores?: unknown } | null)?.stores, started);
-      byWs.set(w.id, [...deadlineUpdates(w.id, st.deadlines, local), ...storeUpdates(w.id, (w.state as { stores?: unknown } | null)?.stores, local)]);
+      const insp = inspectionWork(w.id, w.state, local);
+      byWs.set(w.id, [...deadlineUpdates(w.id, st.deadlines, local), ...storeUpdates(w.id, (w.state as { stores?: unknown } | null)?.stores, local), ...insp.updates]);
+      inspectionTasks.push(...insp.tasks);
       states.set(w.id, (w.state ?? null) as { deadlines?: unknown; stores?: unknown } | null);
       all.push({ id: w.id, state: { apps: (w.state as { apps?: unknown } | null)?.apps } });
     }
@@ -656,6 +660,12 @@ Deno.serve(async (req) => {
     if (error) { console.error("updates insert", ws, error.code); continue; }
     const got = new Set((fresh ?? []).map((r) => r.dedupe));
     created.push(...list.filter((u) => got.has(u.dedupe)));
+  }
+
+  // Inspections to book by phone or email: a task for the team with the call script, once per booking and slot.
+  for (const t of inspectionTasks) {
+    const { error } = await admin.from("team_tasks").upsert({ kind: "handoff", workspace_id: t.workspace_id, title: t.title, detail: t.detail, dedupe: t.dedupe }, { onConflict: "dedupe", ignoreDuplicates: true });
+    if (error) console.error("inspection task", error.code);
   }
 
   // Business rules on deadlines (src/businessRules.ts): each "a deadline is under N days away" rule fires once per
