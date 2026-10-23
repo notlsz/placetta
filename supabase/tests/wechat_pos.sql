@@ -21,7 +21,7 @@ begin
     ok := true;
   exception when others then ok := false; end;
   res := res || jsonb_build_object('integrations take wechat_bot, square and toast', ok);
-  begin insert into public.integrations (workspace_id, kind) values (w, 'clover'); ok := false; exception when check_violation then ok := true; end;
+  begin insert into public.integrations (workspace_id, kind) values (w, 'lightspeed'); ok := false; exception when check_violation then ok := true; end;
   res := res || jsonb_build_object('an unknown kind is still refused', ok);
   begin insert into public.oauth_pending (id, workspace_id, user_id, kind, secret_id) values (repeat('c', 64), w, a, 'square', public.vault_put('t', 'integration:square')); ok := true;
   exception when others then ok := false; end;
