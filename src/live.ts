@@ -4,7 +4,7 @@ import { PUBLIC_BUNDLE } from "./publicBundle";
 import { inspectionsFor } from "./inspections/forStore";
 import { bookingWay, callScript, isWindow, METHOD_WORDS, slotText } from "./inspections/booking";
 import { INSPECTIONS } from "./inspections/index";
-import { appealById, appealFor, choices, daysLeft, deadlineFor, letterOutline, NOT_A_LAW_FIRM } from "./appeals";
+import { appealById, appealFor, choices, counselPacket, daysLeft, deadlineFor, letterOutline, NOT_A_LAW_FIRM, type Served } from "./appeals";
 import { priceFacts } from "./pricing";
 import { DEFAULT_POLICY, SPEND_CATEGORIES, decide, suggestBudgets, type Budget, type Purchase, type SpendCategory } from "./spend.ts";
 import { canFill } from "./forms/canFill";
@@ -1517,6 +1517,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         application_id: { type: "string" },
         decision_date: { type: "string", description: "YYYY-MM-DD on the decision or notice, when the filing record doesn't have it" },
         reason: { type: "string", description: "The agency's reason, in its words, when the record doesn't have it" },
+        served: { type: "string", enum: ["mail", "hand", "email", "unknown"], description: "How the decision reached the owner, when the letter says (a mailing extension applies only where the rule provides one)" },
       }, required: ["application_id"] },
       execute(i) {
         const a = findApp(i.application_id), w = get();
@@ -1526,28 +1527,37 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const address = (w.stores ?? []).find(s => s.apps?.includes(a.id))?.address ?? [w.meta?.city, w.meta?.region].filter(Boolean).join(", ");
         const ap = appealFor(a, address, reason);
         const today = daysFromNow(0);
-        const dl = ap && decided ? deadlineFor(ap.deadline, decided, ap.tz) : null;
-        const short = ap?.shorter && decided ? deadlineFor(ap.shorter.rule, decided, ap.tz) : null;
+        const served = (["mail", "hand", "email", "unknown"].includes(str(i.served)) ? str(i.served) : "unknown") as Served;
+        const dl = ap && decided ? deadlineFor(ap.deadline, decided, ap.tz, { served }) : null;
+        const short = ap?.shorter && decided ? deadlineFor(ap.shorter.rule, decided, ap.tz, { served }) : null;
         const onCalendar = !!dl && w.deadlines.some(d => d.app === a.id && d.date === dl.date);
         mark();
         if (!ap) return { covered: false, not_a_law_firm: NOT_A_LAW_FIRM.en, options: choices(reason, null, null, today).map(c => ({ id: c.id, title: c.title.en, when: c.when.en, cost: c.cost.en, fits_the_reason: c.recommended })),
           do_next: "Placetta has no appeal playbook for this agency yet. Read the decision letter (it must name who hears an appeal and by when): add that date with add_deadline citing the letter, explain the reason plainly, and offer fixing and refiling. Never file anything yourself." };
-        const lo = letterOutline(ap, { business: w.business.en, name: a.name.en, agency: a.agency.en, decided: decided || "(date on the letter)", reason: reason || "(the reason in the letter)", confirmation: a.filed?.confirmation });
+        const lo = letterOutline(ap, { business: w.business.en, name: a.name.en, agency: a.agency.en, decided: decided || "(date on the letter)", reason: reason || "(the reason in the letter)", confirmation: a.filed?.confirmation, deadline: dl });
+        const evidence = ap.evidence.map(e => ({ item: e.en, in_workspace: /application exactly as filed|confirmation number/i.test(e.en) ? !!a.filed : w.docs.some(d => e.en.toLowerCase().split(/\W+/).filter(x => x.length > 5).some(k => d.name.toLowerCase().includes(k))) }));
+        const before = ap.before ? appealById(ap.before) : undefined;
+        const beforeDl = before && decided ? deadlineFor(before.deadline, decided, before.tz, { served }) : null;
         return {
           playbook: ap.id, name: ap.name.en, body: ap.body.en, covers: ap.covers.en,
-          deadline: dl ? { last_day: dl.date, days_left: daysLeft(dl.date, today), counted: dl.counted, rule: dl.rule, confirmed_on_official_page: dl.verified, on_deadlines: onCalendar }
-            : { last_day: null, rule: ap.deadline.says, do_next: decided ? "Not confirmed on an official page: read the date from the decision letter, then add_deadline with the letter as its source." : "No decision date on record: ask for the decision letter (its date and the deadline it states)." },
+          deadline: dl ? { last_day: dl.date, legal_last_day: dl.legal, days_left: daysLeft(dl.date, today), trigger: dl.trigger, counted: dl.counted, section: dl.section, rule: dl.rule, confirmed_on_official_page: dl.verified, on_deadlines: onCalendar,
+              ...(dl.cutoff ? { by_local_time: dl.cutoff } : {}), ...(dl.atLeast ? { at_the_earliest: true, note: "The shortest period for this kind of decision: if the letter gives a later date, use the letter's." } : {}),
+              ...(served === "unknown" && ap.deadline.mail ? { ask: "Ask how the decision was delivered: by mail adds days under this rule." } : {}) }
+            : { last_day: null, trigger: ap.deadline.trigger.en, section: ap.deadline.section, rule: ap.deadline.says, ...(ap.deadline.check?.length ? { confirm_at: ap.deadline.check } : {}),
+              do_next: ap.deadline.days === null && /no appeal period/i.test(ap.deadline.trigger.en) ? "No appeal deadline: fix each item and resubmit." : decided ? "Not confirmed on an official source: read the date from the decision letter, then add_deadline with the letter as its source." : "No decision date on record: ask for the decision letter (its date and the deadline it states)." },
+          ...(before ? { first: { playbook: before.id, name: before.name.en, rule: before.deadline.says, ...(beforeDl ? { last_day: beforeDl.date, legal_last_day: beforeDl.legal, counted: beforeDl.counted } : {}), why: "Without it this appeal may be lost." } } : {}),
           ...(short && ap.shorter ? { shorter_if: { when: ap.shorter.when.en, last_day: short.date, rule: short.rule } } : {}),
           form: ap.form.en, how_to_file: ap.file.en, fee: { usd: ap.fee.usd, says: ap.fee.says.en, confirmed: ap.fee.verified },
           grounds: ap.grounds.map(g => g.en), hearing_prep: ap.hearing.map(h => h.en), outcomes: ap.outcomes.map(o => o.en),
-          evidence: ap.evidence.map(e => ({ item: e.en, in_workspace: /application exactly as filed|confirmation number/i.test(e.en) ? !!a.filed : w.docs.some(d => e.en.toLowerCase().split(/\W+/).filter(x => x.length > 5).some(k => d.name.toLowerCase().includes(k))) })),
-          counsel: { advisable: ap.counsel.advised, why: ap.counsel.why.en },
+          evidence,
+          counsel: { advisable: ap.counsel.advised, why: ap.counsel.why.en,
+            handoff: counselPacket(ap, { business: w.business.en, name: a.name.en, agency: a.agency.en, decided: decided || "(date on the letter)", reason: reason || "(the reason in the letter)", deadline: dl, evidence: evidence.map(e => ({ item: e.item, on_file: e.in_workspace })) }) },
           options: choices(reason, ap, dl, today).map(c => ({ id: c.id, title: c.title.en, when: c.when.en, cost: c.cost.en, fits_the_reason: c.recommended })),
           letter_outline: lo.outline, sources: lo.sources, read: ap.read,
           ...(ap.next ? { if_this_is_lost: appealById(ap.next)?.name.en } : {}),
           not_a_law_firm: NOT_A_LAW_FIRM.en,
           do_next: [dl && !onCalendar ? `add_deadline ${dl.date} ("Last day: ${ap.name.en}", kind due, application ${a.id})` : "", "explain the reason in plain words", "show both options and let the owner choose",
-            "draft_document the letter from letter_outline, keeping every [n] citation", ap.counsel.advised ? "draft_message to their attorney with the deadline, the decision and the evidence list (ask who their attorney is if you don't know)" : "",
+            "draft_document the letter from letter_outline, keeping every [n] citation", ap.counsel.advised ? "draft_message to their attorney from counsel.handoff (subject, body and questions as given; ask who their attorney is if you don't know)" : "",
             "never file, send or pay anything for the appeal yourself"].filter(Boolean),
         };
       },

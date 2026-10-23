@@ -115,7 +115,8 @@ export function scheduleAppeals<W extends Workspace>(w: W, today: string): W {
     const hearing = /hearing/i.test(ap.name.en) && !/appeal/i.test(ap.name.en);
     const d: Deadline = {
       id, date: dl.date, kind: "due", app: a.id, agency: ap.body,
-      title: hearing ? B(`Last day to ask for a hearing: ${a.name.en}`, `申请听证截止：${a.name.zh}`) : B(`Last day to appeal: ${a.name.en}`, `上诉截止：${a.name.zh}`),
+      title: hearing ? B(`Last day to ask for a hearing: ${a.name.en}${dl.atLeast ? " (earliest; check the letter)" : ""}`, `申请听证截止：${a.name.zh}${dl.atLeast ? "（最早日期，请核对来函）" : ""}`)
+        : B(`Last day to appeal: ${a.name.en}${dl.atLeast ? " (earliest; check the letter)" : ""}`, `上诉截止：${a.name.zh}${dl.atLeast ? "（最早日期，请核对来函）" : ""}`),
       ask: B("Prepare the appeal", "准备上诉"),
       prompt: B(`The ${lower(a.name.en)} was denied on ${decided}. Use appeal_options for it, explain the reason plainly, show me fixing and refiling against appealing, and prepare whichever I choose for my approval.`,
         `${a.name.zh}已于 ${decided} 被拒。请用 appeal_options 查看，用简单的话解释原因，对比修正重交和上诉两种做法，并按我的选择准备好交我批准。`),

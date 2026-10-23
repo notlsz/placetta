@@ -21,6 +21,7 @@ import { callModel } from "../supabase/functions/_shared/llm";
 import { median, monthMetrics } from "../src/monthly";
 import { addApproval } from "../src/core";
 import { daysFromNow } from "../src/time";
+import { APPEALS, appealFor as appealForRule, BUSINESS_LICENSE_ROUTES, counselPacket, deadlineFor as appealDeadline, holidaysOf, letterOutline as appealLetter, sourcesOf, type Rule as AppealRule } from "../src/appeals";
 import { emailsIn } from "../src/guard";
 import { BUILTIN } from "../src/skills";
 import { lessonKeys, lessonsBrief, parseDistill, rank, runEvidence, score, scrubLesson, worthLearning, type Lesson } from "../src/learning";
@@ -1597,6 +1598,73 @@ async function spending() {
   ok(ig.ok && (ig.parsed?.covered === false || (Array.isArray(ig.parsed?.inspections) && ig.parsed.inspections.every((x: { still_open: unknown[]; source: string }) => Array.isArray(x.still_open) && /^https?:/.test(x.source)))), "inspection_guide returns the city's inspections with what's still open and the agency's page", ig.out?.slice(0, 200));
 }
 
+
+function appealRules() {
+  console.log("\n# Appeal playbooks: official sources, deadline math, cited drafts, counsel handoff");
+  // official hosts only: the statute, the regulation, the city code's publisher or the agency's own pages
+  const OFFICIAL = /^https:\/\/(abcab\.ca\.gov|www\.abc\.ca\.gov|www\.tabc\.texas\.gov|statutes\.capitol\.texas\.gov|www\.nysenate\.gov|(www\.)?sf\.gov|planning\.lacity\.gov|finance\.lacity\.gov|dbs\.lacity\.gov|ochealthinfo\.com|dallascityhall\.com|nyc-business\.nyc\.gov|www\.nyc\.gov)\//;
+  const HAN = (s: string) => /[一-鿿]/.test(s);
+  for (const a of APPEALS) {
+    const r = a.deadline;
+    ok(!!r.section && !!r.trigger.en && !!r.trigger.zh && !!r.says, `${a.id}: the rule names its section and trigger`);
+    if (r.verified) ok(OFFICIAL.test(r.verified.source) && /^\d{4}-\d{2}-\d{2}$/.test(r.verified.on), `${a.id}: verified on an official page, with the day it was read`, r.verified);
+    else ok(/UNVERIFIED/.test(r.says) && r.days === null && (r.check ?? []).every(u => u.startsWith("https://")) && (r.check?.length ?? 0) > 0, `${a.id}: unverified, so no date, and the official page to open is listed`, r);
+    ok(!/cornell\.edu|public\.law|justia|casetext/.test(JSON.stringify(r)), `${a.id}: no unofficial copy is cited for the rule`);
+    ok(a.sources.every(u => u.startsWith("https://")) && HAN(a.name.zh) && a.grounds.every(g => HAN(g.zh)) && a.hearing.every(h => HAN(h.zh)), `${a.id}: sources are https and every line has its Chinese`);
+    if (a.fee.usd != null) ok(a.fee.verified, `${a.id}: a dollar fee only when confirmed`);
+  }
+  eq(APPEALS.filter(a => !a.deadline.verified).map(a => a.id).sort(), ["business_license_denial", "ca_abc_denial_hearing", "la_bbsc_appeal"], "only three rules stay unverified, each behind a bot check");
+  eq(BUSINESS_LICENSE_ROUTES.map(r => r.city), ["San Francisco", "Los Angeles", "New York City", "Dallas", "San José", "Houston"], "business license denial is defined city by city");
+  const by = (id: string) => APPEALS.find(a => a.id === id)!;
+  // weekends: Dallas allows the next business day, Placetta's target never moves later
+  const dal = appealDeadline(by("dal_building_appeals_board").deadline, "2026-10-23", "America/Chicago")!;
+  ok(dal.date === "2026-11-07" && dal.legal === "2026-11-09" && dal.cutoff === "16:30", "Dallas: day 15 is a Saturday, so the rule's last day is Monday; the target stays Saturday", dal);
+  // Texas holidays: 30 days from a final order on Oct 27 lands on Thanksgiving; the Friday after is a state holiday Placetta doesn't roll over
+  const tx = appealDeadline(by("tx_tabc_court_appeal").deadline, "2026-10-27", "America/Chicago")!;
+  ok(tx.date === "2026-11-26" && tx.legal === "2026-11-27", "Texas: Thanksgiving rolls to the next day (Gov't Code 311.014), never further", tx);
+  ok(holidaysOf("TX", 2026).has("2026-11-11") && !holidaysOf("core", 2026).has("2026-11-11"), "Veterans Day is a Texas national holiday, not one every government closes for");
+  // New York: four months, General Construction Law 30 and 25-a, with its own holidays
+  const art78 = by("ny_sla_disapproval").deadline;
+  const feb = appealDeadline(art78, "2026-10-31", "America/New_York")!;
+  ok(feb.date === "2027-02-28" && feb.legal === "2027-03-01", "four months from Oct 31 ends Feb 28 (the month's last day); a Sunday moves to Monday", feb);
+  const lincoln = appealDeadline(art78, "2026-10-12", "America/New_York")!;
+  ok(lincoln.date === "2027-02-12" && lincoln.legal === "2027-02-16", "Lincoln's Birthday and Washington's Birthday are New York public holidays: Feb 12 rolls past both to Feb 16", lincoln);
+  ok(holidaysOf("NY", 2026).has("2026-11-03"), "general election day is a New York public holiday");
+  // business days skip only holidays the jurisdiction closes for: Columbus Day isn't skipped in California
+  const biz: AppealRule = { days: 1, unit: "business", from: "decision", trigger: B("x", "x"), section: "test", says: "x", verified: null };
+  eq(appealDeadline(biz, "2026-10-09", "America/Los_Angeles")!.date, "2026-10-12", "California: a business day after Friday Oct 9 is Monday Oct 12 (Columbus Day isn't a California closure)");
+  eq(appealDeadline({ ...biz, holidays: "NY" }, "2026-10-09", "America/New_York")!.date, "2026-10-13", "New York skips Columbus Day (General Construction Law 24)");
+  eq(appealDeadline({ ...biz, days: 3 }, "2026-11-25", "America/Los_Angeles")!.date, "2026-12-01", "Thanksgiving and the weekend skipped");
+  // mailing: days are added only where the rule provides them, and only when it was mailed
+  const mailRule: AppealRule = { days: 10, unit: "calendar", from: "decision", trigger: B("Service", "送达"), section: "test", says: "x", verified: null, mail: { days: 5, says: "five days for mail", section: "CCP 1013(a)", verified: null } };
+  ok(appealDeadline(mailRule, "2026-10-01", "America/Los_Angeles", { served: "mail" })!.date === "2026-10-16" && appealDeadline(mailRule, "2026-10-01", "America/Los_Angeles", { served: "hand" })!.date === "2026-10-11", "a mailed notice adds the rule's five days; handed over, it doesn't");
+  eq(appealDeadline(by("ca_abc_appeals_board").deadline, "2026-10-01", "America/Los_Angeles", { served: "mail" })!.date, "2026-11-10", "a rule without a mailing extension never gets one");
+  // time zones: the decision's day is where the body sits
+  eq(appealDeadline(by("ca_health_closure_hearing").deadline, "2026-03-01T06:30:00Z", "America/Los_Angeles")!.date, "2026-03-15", "6:30 UTC on Mar 1 is still Feb 28 in Los Angeles");
+  eq(appealDeadline(by("tx_tabc_denial_hearing").deadline, "2026-03-01T05:30:00Z", "America/Chicago")!.date, "2026-03-30", "and 5:30 UTC is 11:30 p.m. on Feb 28 in Texas");
+  ok(appealDeadline(by("la_planning_appeal").deadline, "2026-10-22", "America/Los_Angeles")!.atLeast, "Los Angeles Planning: the shortest period is flagged, the letter's date governs");
+  eq(appealDeadline(by("ca_health_plan_review").deadline, "2026-10-22", "America/Los_Angeles"), null, "a plan check rejection has no appeal clock");
+  // which playbook
+  const route = (name: string, agency: string, addr: string, said = "") => appealForRule({ name: B(name, name), agency: B(agency, agency) }, addr, said)?.id;
+  eq([route("Mixed beverage permit", "TABC", "1 Main St, Houston, TX 77002", "Commission order signed denying the application"), route("Mixed beverage permit", "TABC", "1 Main St, Houston, TX 77002", "motion for rehearing overruled; final and appealable"),
+    route("Health permit", "County Environmental Health", "1 Main St, San Jose, CA 95113", "Immediate closure: imminent health hazard"), route("Health plan check", "County Environmental Health", "1 Main St, Irvine, CA 92618", "Plans rejected"),
+    route("Certificate of Occupancy", "Dallas Building Inspection", "1500 Main St, Dallas, TX 75201"), route("Business Tax Registration Certificate", "LA Office of Finance", "1 Main St, Los Angeles, CA 90012"),
+    route("Tobacco retail dealer license", "NYC DCWP", "1 Main St, Brooklyn, NY 11201"), route("Tobacco sales permit", "SF Department of Public Health", "1 Market St, San Francisco, CA 94105")],
+    ["tx_tabc_rehearing", "tx_tabc_court_appeal", "ca_health_closure_hearing", "ca_health_plan_review", "dal_building_appeals_board", "la_tax_assessment_review", "nyc_dcwp_denial", "sf_board_of_appeals_permit"], "each decision goes to its own playbook");
+  // drafts: every claim cites its own source; counsel gets one packet
+  for (const a of APPEALS) {
+    const lo = appealLetter(a, { business: "Lucky Leaf Tea LLC", name: "Permit", agency: "Agency", decided: "2026-10-20", reason: "Denied.", deadline: appealDeadline(a.deadline, "2026-10-20", a.tz) });
+    const claims = lo.outline.filter(l => /^(2\. Timeliness|Form:|Filing:|Fee:)/.test(l));
+    ok(claims.length === 4 && claims.every(l => /\[(\d+|UNVERIFIED)[^\]]*\]/.test(l) || (a.sources.length === 0 && !/Timeliness/.test(l))), `${a.id}: every rule, form, filing and fee line in the draft carries a citation`, claims);
+    const ns = [...lo.outline.join(" ").matchAll(/\[(\d+)\]/g)].map(m => +m[1]);
+    ok(ns.every(n => lo.sources.some(s => s.n === n)), `${a.id}: every citation number resolves to a source`);
+  }
+  const ap = by("tx_tabc_court_appeal"), dl = appealDeadline(ap.deadline, "2026-10-27", ap.tz);
+  const pk = counselPacket(ap, { business: "Lucky Leaf", name: "Mixed beverage permit", agency: "TABC", decided: "2026-10-27", reason: "Denied", deadline: dl, evidence: [{ item: "Decision letter", on_file: true }, { item: "SOAH record", on_file: false }] });
+  ok(/2026-11-27/.test(pk.subject) && pk.body.some(l => /11\.67\(b\)\(1\)/.test(l)) && pk.body.some(l => /Missing: SOAH record/.test(l)) && pk.body.some(l => /Motion for rehearing/.test(l)) && pk.questions.length === 4, "the counsel packet: the deadline and its section, what's missing, the step that must come first, the questions", pk);
+  ok(sourcesOf(ap)[0].url === ap.deadline.verified!.source, "the rule's own source is [1]");
+}
+
 async function appeals() {
   console.log("\n# Appeals: appeal_options, the deadline calendared, nothing filed");
   const ws = workspace({
@@ -2484,6 +2552,7 @@ await remote();
 await stores();
 await spending();
 await addresses();
+appealRules();
 await appeals();
 await inspectionBookings();
 await planStaysTrue();

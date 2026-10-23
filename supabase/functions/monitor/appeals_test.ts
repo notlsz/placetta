@@ -33,7 +33,7 @@ Deno.test("a liquor denial in California asks for the hearing; its deadline isn'
   ok(/attorney/.test(a.prompt) && /draft_message/.test(a.prompt));
 });
 
-Deno.test("deadlines: calendar days never roll forward; business days skip weekends and federal holidays; zones decide the day", () => {
+Deno.test("deadlines: calendar days never roll forward without a rule; business days skip weekends and the holidays every government closes; zones decide the day", () => {
   const board = appealFor({ name: b("Liquor license"), agency: b("ABC") }, "1 Main St, Los Angeles, CA 90012", "appeal of the Director's decision after hearing")!;
   eq(board.id, "ca_abc_appeals_board");
   eq(deadlineFor(board.deadline, "2026-10-22", board.tz)!.date, "2026-12-01", "40 days from Oct 22");

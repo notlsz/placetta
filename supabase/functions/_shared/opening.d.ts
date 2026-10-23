@@ -25,9 +25,9 @@ export declare const MAX_RESUMES: number;
 export declare function approvalsLine(w: Ws, today: string, o: { account: boolean; filings: boolean }): { title: Bi; body: Bi } | null;
 export declare function overdue(submittedAt: string | null | undefined, agencyDays: number | null, today: string): { waited: number; usual: number } | null;
 /** Appeals (src/appeals): the playbook for a denied application at an address, and its deadline. */
-export type AppealRule = { days: number | null; unit: "calendar" | "business"; from: "decision" | "day_after"; says: string; verified: { on: string; source: string } | null };
+export type AppealRule = { days: number | null; unit: "calendar" | "business" | "months"; from: "decision" | "day_after"; trigger: Bi; says: string; section: string; verified: { on: string; source: string } | null; roll?: boolean; holidays?: "core" | "TX" | "NY"; atLeast?: boolean; cutoff?: string; mail?: { days: number; says: string; section: string; verified: { on: string; source: string } | null }; check?: string[] };
 export type AppealPlaybook = { id: string; name: Bi; body: Bi; tz: string; deadline: AppealRule; counsel: { advised: boolean; why: Bi }; sources: string[] };
 export declare function appealFor(app: { name?: Bi; agency?: Bi }, address: string, said?: string): AppealPlaybook | null;
-export declare function deadlineFor(rule: AppealRule, decided: string, tz: string): { date: string; days: number; unit: string; counted: string; verified: boolean; tz: string; rule: string } | null;
+export declare function deadlineFor(rule: AppealRule, decided: string, tz: string, opts?: { served?: "mail" | "hand" | "email" | "unknown" }): { date: string; legal: string; days: number; unit: string; counted: string; verified: boolean; tz: string; rule: string; section: string; trigger: string; atLeast: boolean; cutoff?: string; mailed?: number } | null;
 export declare function daysLeft(date: string, today: string): number;
 export declare const NOT_A_LAW_FIRM: Bi;
