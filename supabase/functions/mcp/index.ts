@@ -47,6 +47,38 @@ const deps: Deps = {
   today: () => new Date().toISOString().slice(0, 10),
   origins,
   x: { page, RESOURCE_TEMPLATES, listResources, resourceScope, readResource, PROMPTS, getPrompt },
+  // OAuth sign-in for Claude's connector directory and ChatGPT apps (oauth.ts; migration 20261028090000_mcp_oauth).
+  // MCP_PUBLIC_URL: the address people add (the resource and issuer), when it isn't the function's own.
+  // MCP_CONSENT_URL: the app page that asks the person, when it isn't <first APP_ORIGINS>/app/.
+  oauth: {
+    base: (Deno.env.get("MCP_PUBLIC_URL") ?? `${URL_}/functions/v1/mcp`).replace(/\/+$/, ""),
+    consent: Deno.env.get("MCP_CONSENT_URL") ?? `${(Deno.env.get("APP_ORIGINS") ?? "").split(",")[0].trim().replace(/\/+$/, "")}/app/`,
+    async limit(key, max, windowSeconds) {
+      const { data, error } = await admin.rpc("rate_hit", { p_key: key, p_limit: max, p_window_seconds: windowSeconds });
+      if (error) { console.error("rate_hit", error.code ?? ""); return false; }
+      return data === true;
+    },
+    async register(name, redirects) {
+      const { data, error } = await admin.rpc("mcp_oauth_register", { p_name: name, p_redirects: redirects });
+      if (error) { if (!/invalid_redirect_uri/.test(error.message ?? "")) console.error("mcp_oauth_register", error.code ?? ""); return null; }
+      return data as { client_id: string; client_name: string; redirect_uris: string[] };
+    },
+    async client(id, redirect) {
+      const { data, error } = await admin.rpc("mcp_oauth_client", { p_client_id: id, p_redirect: redirect });
+      if (error) { console.error("mcp_oauth_client", error.code ?? ""); return null; }
+      return (data as { name: string; redirect_ok: boolean } | null) ?? null;
+    },
+    async exchange(codeHash, clientId, redirect, challenge, resource) {
+      const { data, error } = await admin.rpc("mcp_oauth_exchange", { p_code_hash: codeHash, p_client_id: clientId, p_redirect: redirect, p_challenge: challenge, p_resource: resource });
+      if (error) { console.error("mcp_oauth_exchange", error.code ?? ""); return { error: "invalid_grant" }; }
+      return data as Record<string, never>;
+    },
+    async refresh(refreshHash, clientId) {
+      const { data, error } = await admin.rpc("mcp_oauth_refresh", { p_refresh_hash: refreshHash, p_client_id: clientId });
+      if (error) { console.error("mcp_oauth_refresh", error.code ?? ""); return { error: "invalid_grant" }; }
+      return data as Record<string, never>;
+    },
+  },
 };
 
 Deno.serve(async (req) => {

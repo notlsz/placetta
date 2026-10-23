@@ -13,6 +13,11 @@ What is built in this repository for enterprise customers, how each piece works,
 | [Filer isolation](#5-portal-filing-isolation) | Each portal filing run gets a new browser session and its own temporary folder, both removed when the run ends | Deploy the filer |
 | [Zero data retention](#6-zero-data-retention) | An allowlist: with `AI_ZDR_REQUIRED=1`, AI calls go only to providers and modes on `AI_ZDR_PROVIDERS`, everything else is refused | Get each provider's written zero-retention confirmation, then set the two secrets. **Not in force today** |
 | [Private networking](#7-private-networking) | Nothing in code | A contract item: Supabase Team or Enterprise and AWS PrivateLink, database connections only |
+| [Retention per workspace](#8-retention-per-workspace) | Owners set 30, 90, 180 or 365 days for Odelia's conversations; the daily purge clears them; audited (2026-10-22) | Apply `20261028110000_workspace_retention.sql` |
+| [Role matrix](#9-role-matrix) | The table below, from the database rules | None |
+| [AI providers: no training, zero retention](#10-ai-providers-no-training-and-zero-retention) | The settings in code, and what to ask each provider for | Written confirmations (section 6) |
+| [Data residency](#11-data-residency) | One region: Supabase US East | A second region is a project and a contract, not code |
+| [AI assistants and webhooks](#12-ai-assistants-and-webhooks) | OAuth sign-in for Claude and ChatGPT (read only); signed outbound webhooks | Apply `20261028090000_mcp_oauth.sql` and `20261028100000_webhook_connector.sql`, redeploy `mcp`, `integrations`, `monitor`, `chat-events` |
 
 ## 1. Roles
 
@@ -153,6 +158,65 @@ Founder steps:
 ## 7. Private networking
 
 Not built and not needed for the app as it runs: the app, the functions and the filer reach Supabase over its public HTTPS API, which PrivateLink doesn't cover. Supabase PrivateLink is for Team and Enterprise customers and carries direct Postgres and PgBouncer connections only, not the API, Storage, Auth or Realtime ([docs](https://supabase.com/docs/guides/platform/privatelink)). It's a contract item: if an enterprise customer's contract needs it, the founder moves the project to Team or Enterprise, sets up the AWS PrivateLink connection in the project's settings (same AWS region, accept the resource share within 12 hours, security groups for ports 5432 and 6543), points any direct database clients at the private endpoint, and then may restrict public database access.
+
+## 8. Retention per workspace
+
+Copied from Harvey's enterprise posture, where the customer sets how long conversation history is kept. Settings, Data
+controls, "Keep Odelia's conversations": Placetta's default (requests and answers kept while the workspace exists,
+working notes cleared a year after a task finishes), or 30, 90, 180 or 365 days. Only an owner changes it
+(`retention_set`, with two-step sign-in when it's on), and each change is an audit entry ("Changed how long
+conversations are kept", from and to). With a period set, `purge_expired()` calls `retention_purge()`, which clears every
+finished conversation older than the period (the request, the answer, steps, working notes, trace) and deletes that
+workspace's texts and calls with Odelia. Costs and timings stay, without words, for billing and the spending limits.
+Applications, filings, documents, approved memories and the audit trail are kept: they are records the business keeps
+on purpose, and the audit trail's own period is the founder's decision (C1.2b). Tests: `supabase/tests/workspace_retention.sql`.
+
+## 9. Role matrix
+
+From the database rules (`is_owner`, `is_admin`, `is_member`, `can_view` and each function's check), not from the app.
+
+| Action | Owner | Admin | Member | Viewer |
+| --- | :-: | :-: | :-: | :-: |
+| Read everything in the workspace, including the audit trail | Yes | Yes | Yes | Yes |
+| Work with Odelia, upload documents, comment | Yes | Yes | Yes | No |
+| Approve a filing, a payment, or a message sent as the business | Yes | No | No | No |
+| Manage billing; connect accounts, saved logins and apps over MCP | Yes | No | No | No |
+| Set how long conversations are kept | Yes | No | No | No |
+| Invite people, change roles (not owners), remove people (not owners) | Yes | Yes | No | No |
+| Make, change or remove an owner | Yes | No | No | No |
+| Single sign-on and SCIM settings | Yes | Yes | No | No |
+| Export the audit trail (CSV) | Yes | Yes | No | No |
+| Make AI assistant tokens; allow an assistant to connect by OAuth | Yes | Yes | No | No |
+
+## 10. AI providers: no training and zero retention
+
+What the code already does (`supabase/functions/_shared/llm.ts`): Anthropic and OpenAI are used under their API terms
+(the code's own note: both don't train on API traffic); Gemini gets conversations only with `GEMINI_PAID=1`, because
+Google's free tier may use prompts; OpenRouter calls ask for hosts that don't keep or train on prompts
+(`provider: { data_collection: "deny" }`); the free tiers and open-model backups never get files. With
+`AI_ZDR_REQUIRED=1` only providers on `AI_ZDR_PROVIDERS` are used (section 6).
+
+What to request, in writing, for Placetta's account (founder): zero data retention from Anthropic (Messages, and web
+search and fetch if they stay on), Google (Gemini paid tier), and Groq, Cerebras and OpenRouter if they stay in the
+routes; Telnyx for calls; Microsoft for Azure Speech. Then list exactly what's confirmed in `AI_ZDR_PROVIDERS`. Until
+then the trust page says zero retention is being requested, never that it is in place.
+
+## 11. Data residency
+
+Today there is one region. The database, files, sign-in and server functions are in Supabase's US East region; the
+portal filer runs on Render in Oregon; the app is served by Vercel. The sign-in screen's region menu lists Europe, Asia
+Pacific and Australia as not available yet. A second region would be a second Supabase project in that region with its
+own deploy of every function, and AI providers that process in that region under contract; none of that exists, so no
+page may offer residency outside the US.
+
+## 12. AI assistants and webhooks
+
+- Claude, ChatGPT and other MCP clients connect to Placetta's read-only MCP server by OAuth: an owner or admin signs in
+  to Placetta and allows the assistant, choosing the workspace and scopes. Access tokens last an hour, refresh tokens
+  rotate, and a reused refresh token disconnects the assistant and is audited ([MCP_SERVER.md](MCP_SERVER.md)).
+- A generic webhook (Settings, Team chat, Webhook) sends the same updates as JSON to Zapier, Make, n8n or the
+  customer's own system, signed with Standard Webhooks headers when a secret is set; private hosts, address literals
+  and redirects are refused.
 
 ## Deploy
 

@@ -221,7 +221,11 @@ html[lang="zh-CN"] .hero h1 { word-break: keep-all; max-width: 13em; letter-spac
 .tray, .card { margin: 0; padding: 6px; list-style: none; border-radius: 18px; background: var(--mist); display: flex; flex-direction: column; gap: 2px; }
 .row { border-radius: 12px; padding: 12px 14px; transition: background .15s; }
 button.row { width: 100%; }
-button.row:hover { background: rgba(var(--w), .9); }
+button.row:hover, div.tr.row[role="row"]:hover { background: rgba(var(--w), .9); }
+div.tr.row[role="row"] { cursor: pointer; }
+.c-name .c-src { align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; font-size: 12.5px; color: var(--blue-ink); overflow-wrap: anywhere; }
+.c-name .c-src svg { width: 12px; height: 12px; flex: none; }
+.c-name .c-src:hover { color: var(--blue-deep); text-decoration: underline; }
 .arow { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; }
 .arow-n { display: flex; flex-direction: column; min-width: 0; line-height: 1.4; }
 .arow-n b { font-weight: 500; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -960,6 +964,10 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .terms-band .sbtn { height: 36px; padding: 0 16px; font-size: 13.5px; }
 .ap-hold { display: block; margin: 0 0 6px; font-weight: 550; color: var(--warm); }
 .onb-act { display: flex; justify-content: flex-end; gap: 8px; }
+/* An AI assistant asking to sign in (src/cloud/McpConsent.tsx) */
+.mcp-consent .mcp-scopes { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; border: 0; text-align: left; }
+.mcp-consent .mcp-scopes .check { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink2); cursor: pointer; }
+.mcp-consent .onb-f { display: flex; flex-direction: column; gap: 6px; text-align: left; font-size: 14px; font-weight: 500; }
 .onb-act .sbtn { height: 44px; padding: 0 22px; }
 
 @media (max-width: 1280px) { .page { padding-inline: 40px; } }
@@ -1399,6 +1407,21 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .fl-t small { font-size: 12.5px; color: var(--ink3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fl .tag { flex: none; padding: 1px 8px; border-radius: 99px; background: var(--mist2); color: var(--ink2); font-size: 11.5px; }
 .fl-stop { flex: none; gap: 6px; }
+/* The agency guide's pages, done, now and next (src/filingProgress.ts), and the page the filer is on */
+.fl-prog { margin: 0 14px 6px; padding: 10px 12px; border-radius: 14px; background: var(--mist); }
+.fl-prog-h { margin: 0 0 6px; font-size: 13px; color: var(--ink); }
+.fl-prog-h b { font-weight: 600; }
+.fl-bar { display: block; height: 4px; border-radius: 99px; background: rgba(var(--e), .08); overflow: hidden; }
+.fl-bar i { display: block; height: 100%; border-radius: 99px; background: #3F9A62; transition: width .4s ease-out; }
+.fl-steps { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 8px 0 0; padding: 0; font-size: 12.5px; color: var(--ink3); }
+.fl-steps li { display: inline-flex; align-items: center; gap: 5px; min-width: 0; }
+.fl-steps li svg { width: 12px; height: 12px; color: #3F9A62; }
+.fl-steps li em { font-style: normal; font-variant-numeric: tabular-nums; font-size: 11.5px; color: var(--ink3); }
+.fl-steps li.s-done { color: var(--ink2); }
+.fl-steps li.s-now { color: var(--ink); font-weight: 600; }
+.fl-steps li.s-now em { color: var(--blue-ink); }
+.fl-live { display: block; width: 100%; margin-top: 10px; padding: 0; border-radius: 12px; overflow: hidden; max-height: 260px; }
+.fl-live .shot { display: block; max-height: 260px; overflow: hidden; }
 .fl-evs { list-style: none; margin: 0; padding: 2px 14px 6px; }
 .fl-evs > li { position: relative; display: grid; grid-template-columns: 18px minmax(0, 1fr) auto auto; align-items: start; gap: 10px; padding: 6px 0; font-size: 13.5px; line-height: 1.45; color: var(--ink2); animation: stepin .3s ease-out; }
 .fl-evs > li::before { content: ""; position: absolute; left: 8.5px; top: 22px; bottom: -6px; width: 1px; background: rgba(var(--e), .09); }
@@ -2022,6 +2045,17 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 .sources em { font-style: normal; padding: 2px 9px; border-radius: 99px; background: var(--mist); color: var(--ink2); }
 .sources.unchecked { color: var(--warm); }
 .sources a small { margin-left: 6px; font-size: 11.5px; color: var(--ink3); }
+.sources a .sn { margin-right: 6px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--blue-ink); }
+/* Inline citations (src/ui.tsx CiteMark): a number after each sentence, the passage and read date on hover or focus */
+.cite-n { position: relative; font-size: 10.5px; line-height: 0; vertical-align: super; margin-left: 2px; }
+.cite-n a { display: inline-block; min-width: 15px; padding: 0 4px; border-radius: 99px; background: var(--sky-wash); color: var(--blue-ink); font-weight: 600; text-align: center; line-height: 15px; font-variant-numeric: tabular-nums; }
+.cite-n a:hover, .cite-n a:focus-visible { background: var(--sky); color: var(--blue-deep); }
+.cite-pop { position: absolute; z-index: 30; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); width: min(300px, 76vw); padding: 10px 12px; border-radius: 12px; background: var(--card); box-shadow: var(--lift); color: var(--ink); font-size: 12.5px; line-height: 1.45; text-align: left; white-space: normal; visibility: hidden; opacity: 0; transition: opacity .12s; pointer-events: none; }
+.cite-n:hover .cite-pop, .cite-n:focus-within .cite-pop { visibility: visible; opacity: 1; }
+.cite-pop b { display: block; font-weight: 600; }
+.cite-pop small { display: block; color: var(--ink3); font-size: 11.5px; }
+.cite-pop q { display: block; margin: 6px 0 0; color: var(--ink2); }
+.cite-pop em { display: block; margin-top: 6px; font-style: normal; color: var(--ink3); font-size: 11.5px; }
 
 /* The undo window (src/SendHold.tsx): the countdown, Undo and Send now. */
 .hold { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin: 10px 0 0; padding: 10px 12px 10px 14px; border-radius: 16px; background: var(--warm-soft); }

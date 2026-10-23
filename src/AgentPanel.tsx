@@ -17,7 +17,7 @@ import { LiveBot, Working } from "./Bot";
 import { taskVerb } from "./tasks";
 import { PlanCard } from "./Work";
 import { RememberedChips } from "./Remembered";
-import { NOT_CHECKED, splitSources } from "./sources";
+import { NOT_CHECKED, splitSources, type Cite } from "./sources";
 import { LocalHold, useApprovalHold } from "./SendHold";
 import { AskSheet } from "./AskPerson";
 import { AllowanceNote } from "./Allowance";
@@ -284,7 +284,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
       {live && draft && <p className="drafting" aria-live="polite">{draft}</p>}
       {r && (
         <div className="answer">
-          {r.text.map((p, i) => { const body = splitSources(b(p))[0]; return body ? <Prose key={i} text={body} /> : null; })}
+          {r.text.map((p, i) => { const body = splitSources(b(p))[0]; return body ? <Prose key={i} text={body} cites={i === r.text.length - 1 ? r.sources : undefined} /> : null; })}
           {r.chain && <ol className="chain">{r.chain.map((c, i) => <li key={i}>{b(c)}</li>)}</ol>}
           {filed.map(id => <FilingLive key={id} app={id} />)}
           {(r.apps?.some(id => !covered.has(id) && !filed.includes(id)) || (r.files?.length && !filed.length)) ? (
@@ -327,7 +327,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
 
 /** Where the answer came from (src/sources.ts): the Sources line the reply ends with, shown as links where there's a
  *  page; the plain note when it states a rule nothing was checked against; the cited pages of an older reply otherwise. */
-function SourcesRow({ said, links }: { said: string; links?: { title: string; url: string }[] }) {
+function SourcesRow({ said, links }: { said: string; links?: Cite[] }) {
   const { b } = useApp();
   const line = splitSources(said)[1];
   if (line === NOT_CHECKED.en || line === NOT_CHECKED.zh) return <p className="sources unchecked"><span>{line}</span></p>;
@@ -338,7 +338,8 @@ function SourcesRow({ said, links }: { said: string; links?: { title: string; ur
   const plain = named.filter(n => !(links ?? []).some(x => n.startsWith(x.title)));
   return (
     <p className="sources"><span>{b({ en: "Sources", zh: "来源" })}</span>
-      {(links ?? []).map(x => <a key={x.url} href={x.url} target="_blank" rel="noreferrer" title={x.url}>{line ? x.title : host(x.url)}{line && x.title !== host(x.url) && <small>{host(x.url)}</small>}</a>)}
+      {/* numbered as in the text above, so a number there is the link here */}
+      {(links ?? []).map((x, i) => <a key={x.url} href={x.url} target="_blank" rel="noreferrer" title={x.quote ? `“${x.quote}”` : x.url}><b className="sn">{i + 1}</b>{line ? x.title : host(x.url)}{line && x.title !== host(x.url) && <small>{host(x.url)}</small>}</a>)}
       {plain.map(n => <em key={n}>{n}</em>)}
     </p>
   );

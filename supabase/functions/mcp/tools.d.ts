@@ -1,6 +1,6 @@
 // Types for tools.js (bundled from src/mcpServer.ts and src/toolArgs.ts by scripts/build-agent.mjs). Kept by hand.
 export type Scope = "status" | "deadlines" | "readiness" | "plan" | "filings";
-export type McpToolDef = { name: string; scope: Scope; title: string; description: string; inputSchema: { type: "object"; properties: Record<string, unknown>; required?: string[]; additionalProperties?: boolean }; outputSchema?: unknown; annotations: Record<string, unknown> };
+export type McpToolDef = { name: string; scope: Scope; title: string; description: string; inputSchema: { type: "object"; properties: Record<string, unknown>; required?: string[]; additionalProperties?: boolean }; outputSchema?: unknown; annotations: Record<string, unknown>; securitySchemes?: { type: "oauth2" | "noauth"; scopes?: string[] }[] };
 export type FilingRow = { app_id: string; title: { en?: string; zh?: string } | null; agency: { en?: string; zh?: string } | null; status: string; confirmation_number: string | null; submitted_at: string | null; decided_at: string | null; updated_at: string };
 export type McpCtx = { workspace: { name: string; state: unknown }; filings: FilingRow[]; today: string };
 export type McpResource = { uri: string; name: string; title: string; description: string; mimeType: "application/json"; scope: Scope };

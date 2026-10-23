@@ -26,6 +26,7 @@ import { claimReferral, PartnerHome, ReferralConsent } from "../Partner";
 import { existingWorkspace, StoresCheck } from "../StoresCheck";
 import { KINDS as STORE_KINDS, toPlan, type StoreResult } from "../plan/existing";
 import { partnerMe } from "./partnersApi";
+import { captureMcpAuth, McpConsent, pendingMcpAuth } from "./McpConsent";
 
 /* Signed-in Placetta: sign in with Google, Microsoft or an email code, then two-step sign-in if it's on.
    Invites to a teammate's workspace are accepted on sign-in. New businesses start with onboarding (and the filing
@@ -678,7 +679,8 @@ function SetPassword({ lang, onDone, onCancel }: { lang: Lang; onDone: () => voi
   );
 }
 
-type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "sso"; email: string; method: string } | { k: "onboard"; email: string; back?: string } | { k: "claim"; email: string; token: string; peek: StartPeek } | { k: "hq"; email: string; rows: HqRow[] } | { k: "partner"; email: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string };
+type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "sso"; email: string; method: string } | { k: "onboard"; email: string; back?: string } | { k: "claim"; email: string; token: string; peek: StartPeek } | { k: "hq"; email: string; rows: HqRow[] } | { k: "partner"; email: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string }
+  | { k: "mcp"; email: string; req: api.McpAuthRequest; rows: { id: string; name: string }[]; start: string };
 
 export function CloudRoot() {
   const [lang, setLangState] = useState<Lang>(() => readHandoff()?.lang ?? readLang());
@@ -745,6 +747,9 @@ export function CloudRoot() {
         setPhase(hq.length ? { k: "hq", email: me.email, rows: hq } : partner || /\/partner\/?$/.test(location.pathname) ? { k: "partner", email: me.email } : { k: "onboard", email: me.email });
         return;
       }
+      // an AI assistant signing in to Placetta (src/cloud/McpConsent.tsx): the person decides, then goes back to it
+      const mcpReq = pendingMcpAuth();
+      if (mcpReq) { setPhase({ k: "mcp", email: me.email, req: mcpReq, rows: rows.filter(r => r.role === "owner" || r.role === "admin").map(r => ({ id: r.id, name: r.name })), start: row.id }); return; }
       if (joined) notice = lang === "zh" ? `已加入 ${joined} 个团队工作区。` : `You joined ${joined} team workspace${joined > 1 ? "s" : ""}.`;
       lastWs.set(row.id);
       const params = new URLSearchParams(location.search);
@@ -783,6 +788,7 @@ export function CloudRoot() {
     // A link from one of Odelia's texts names the workspace (?ws=) it's about.
     // a partner's link (?ref=) or plan box (?line=): kept before anything else reads the address (src/referral.ts)
     captureRef();
+    captureMcpAuth();
     const boot = () => { if (booted.current) return; booted.current = true; void open(new URLSearchParams(location.search).get("ws") || lastWs.get()); };
     void api.getSession().then(s => (s ? boot() : setPhase({ k: "signin" })));
     const sub = api.onAuth((s, event) => {
@@ -822,6 +828,7 @@ export function CloudRoot() {
         </div>
       )}
       {phase.k === "twostep" && <TwoStepCode lang={lang} factorId={phase.factorId} onDone={() => void open(lastWs.get())} onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
+      {phase.k === "mcp" && <McpConsent lang={lang} email={phase.email} req={phase.req} rows={phase.rows} start={phase.start} onDone={() => void open(phase.start)} />}
       {phase.k === "onboard" && <Onboard lang={lang} email={phase.email} onCreated={id => void open(id)} onCancel={phase.back !== undefined ? () => void open(phase.back!) : undefined} />}
       {phase.k === "error" && <div className="gate-card"><h1>{L(B("Something went wrong.", "出了点问题。"))}</h1><p className="gate-sub">{phase.msg}</p><button type="button" className="sbtn ink" onClick={() => void open(lastWs.get())}>{L(B("Try again", "重试"))}</button></div>}
     </Frame>

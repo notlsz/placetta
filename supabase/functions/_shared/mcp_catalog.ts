@@ -23,6 +23,7 @@
 //   HubSpot    https://developers.hubspot.com/docs/apps/developer-platform/build-apps/integrate-with-the-remote-hubspot-mcp-server
 //                                                                                https://mcp.hubspot.com
 //   Square     https://developer.squareup.com/docs/mcp                           https://mcp.squareup.com/mcp
+//   Gusto      https://docs.gusto.com/app-integrations/docs/mcp                  https://mcp.api.gusto.com
 //   Stripe     https://docs.stripe.com/mcp                                       https://mcp.stripe.com
 //   Zapier     https://docs.zapier.com/mcp/get-started/connect/other             https://mcp.zapier.com/api/v1/connect
 //   Box        https://developer.box.com/guides/box-mcp/remote/                  https://mcp.box.com
@@ -82,6 +83,13 @@ export const MCP_CATALOG: CatalogEntry[] = [
   { id: "zapier", name: "Zapier", url: "https://mcp.zapier.com/api/v1/connect", group: "tasks",
     token: { en: "Or paste the connection token from Zapier's Connect tab", zh: "也可粘贴 Zapier 连接页上的令牌" },
     use: { en: "Reaches the other apps you set up in Zapier, like your scheduling or inventory tools", zh: "通过 Zapier 连接您设置的其他应用，例如排班或库存工具" } },
+  // Gusto (added 2026-10-22): https://docs.gusto.com/app-integrations/docs/mcp. Probed that day: tools/list answers 401
+  // with resource_metadata; its sign-in server registers clients (registration_endpoint, client_secret_basic or _post) and
+  // takes PKCE S256. Only the two read scopes Odelia needs are asked for: the employer's legal name, EIN and locations
+  // (get_company), and the team (list_employees) for headcount-based rules. Gusto's own tools that run payroll or file
+  // anything aren't reachable with these scopes, and every write still goes through the approval gate.
+  { id: "gusto", name: "Gusto", url: "https://mcp.api.gusto.com", group: "money", scope: "companies:read employees:read",
+    use: { en: "Reads your company's EIN, locations and headcount for employer filings; needs a Gusto admin", zh: "读取公司的 EIN、门店和员工人数，用于雇主申报；需要 Gusto 管理员" } },
   { id: "square", name: "Square", url: "https://mcp.squareup.com/mcp", group: "money",
     use: { en: "Looks up locations, catalog, orders and team details", zh: "查询门店、商品目录、订单和团队信息" } },
   { id: "stripe", name: "Stripe", url: "https://mcp.stripe.com", group: "money",

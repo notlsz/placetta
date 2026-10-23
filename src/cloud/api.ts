@@ -84,9 +84,9 @@ export const planOf = (b: Billing | null): Plan =>
   !b ? "none" : b.free || b.comped || b.subscription_status === "active" || b.subscription_status === "trialing" ? "monthly" : b.price_model === "simple" ? "simple" : b.entry_markets > 0 ? "entry" : "none";
 export type DocRow = { id: string; workspace_id: string; app_id: string | null; filing_id: string | null; name: string; path: string; size: number; mime: string | null; source: string; created_at: string };
 export type Integration = { id: string; kind: IntegrationKind; account: string | null; status: "connected" | "error"; error: string | null; meta: Record<string, unknown>; connected_at: string; last_used_at: string | null };
-export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "slack_bot" | "lark_bot" | "wechat_bot" | "square" | "toast";
+export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "slack_bot" | "lark_bot" | "wechat_bot" | "square" | "toast" | "webhook";
 /** Team chats linked by pasting a group's incoming-webhook link. */
-export type HookKind = "slack" | "lark" | "wecom" | "dingtalk" | "teams";
+export type HookKind = "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "webhook";
 /** The business's own Slack or Lark bot, or its own WeChat Official Account: talk to Odelia there. */
 export type BotKind = "slack_bot" | "lark_bot" | "wechat_bot";
 /** What to set up before connecting a bot: its event address, Slack's manifest, and for WeChat a Token and
@@ -671,8 +671,16 @@ export const scimGroupRole = (ws: string, group: string, role: ScimGroup["role"]
 /** Placetta's own MCP server (supabase/functions/mcp): workspace tokens for Claude, ChatGPT and other assistants. Owners
  *  and admins make, list and revoke them; a new token is in the answer once and never again. */
 export type McpScope = "status" | "deadlines" | "readiness" | "plan" | "filings";
-export type McpToken = { id: string; label: string; prefix: string; scopes: McpScope[]; created_at: string; last_used_at: string | null; revoked_at: string | null };
+export type McpToken = { id: string; label: string; prefix: string; scopes: McpScope[]; created_at: string; last_used_at: string | null; revoked_at: string | null; oauth?: boolean };
+/** OAuth sign-in from an assistant (supabase/functions/mcp/oauth.ts): the request the consent screen gets, the assistant's name
+ *  and whether its redirect is one it registered, and the one-time code once the person allows it. */
+export type McpAuthRequest = { client_id: string; redirect_uri: string; scope: string; state: string; code_challenge: string; resource: string; iss: string };
+export const mcpOauthClient = (clientId: string, redirect: string) => rpcData<{ name: string; redirect_ok: boolean } | null>("mcp_oauth_client", { p_client_id: clientId, p_redirect: redirect });
+export const mcpOauthApprove = (ws: string, r: McpAuthRequest, scopes: McpScope[]) => rpcData<string>("mcp_oauth_approve", { ws, p_client_id: r.client_id, p_redirect: r.redirect_uri, p_scopes: scopes, p_challenge: r.code_challenge, p_resource: r.resource || null });
 export const mcpTokenCreate = (ws: string, label: string, scopes: McpScope[]) => rpcData<{ id: string; prefix: string; token: string }>("mcp_token_create", { ws, p_label: label, p_scopes: scopes });
+/** How long the workspace keeps Odelia's conversations (null: Placetta's default). Everyone reads it; owners set it. */
+export const retentionGet = (ws: string) => rpcData<{ run_days: number | null; set_at: string | null }>("retention_get", { ws });
+export const retentionSet = (ws: string, days: number | null) => rpcData<{ run_days: number | null; set_at: string | null }>("retention_set", { ws, p_days: days });
 export const mcpTokenList = (ws: string) => rpcData<McpToken[]>("mcp_token_list", { ws });
 export const mcpTokenRevoke = (id: string) => rpcVoid("mcp_token_revoke", { p_id: id });
 /** The MCP server's address. */

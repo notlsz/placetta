@@ -45,7 +45,9 @@ export const TOOLS = [
   { name: "filing_status", scope: "filings" as Scope, title: "Filing status",
     description: "The filings Placetta's team submits for the business: status (requested, in progress, submitted, accepted, needs info, rejected), confirmation numbers and dates. open: only filings not yet decided (default); all: every filing.",
     inputSchema: { type: "object", properties: { which: { type: "string", enum: ["open", "all"] }, store_id: store, cursor, lang }, additionalProperties: false } },
-].map(t => ({ ...t, outputSchema: OUT[t.name], annotations: { ...READ, title: t.title } }));
+// securitySchemes: ChatGPT apps read it per tool to show the sign-in and the scope asked for
+// (https://developers.openai.com/apps-sdk/build/auth); every tool needs the OAuth scope of its own name
+].map(t => ({ ...t, outputSchema: OUT[t.name], annotations: { ...READ, title: t.title }, securitySchemes: [{ type: "oauth2" as const, scopes: [t.scope] }] }));
 
 /** A tool or resource error the caller can fix. code is stable for clients (Stripe and Linear style): not_found,
  *  invalid_arguments, invalid_cursor. */

@@ -1,8 +1,9 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type SelectHTMLAttributes } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ReactNode, type SelectHTMLAttributes } from "react";
 import type React from "react";
 import type { Application, Doc, Level, Status } from "./model";
 import { useApp } from "./ctx";
-import { bytes, fmtAgo, money } from "./time";
+import { bytes, fmtAgo, fmtDay, money } from "./time";
+import { citeLines, type Cite } from "./sources";
 import type { Key } from "./i18n";
 
 const sv = { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.7, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
@@ -75,28 +76,57 @@ export const feeText = (a: Pick<Application, "fees" | "currency">, t: (k: Key) =
 };
 
 /** An answer as the agent wrote it: paragraphs, "- " bullets and "1. " steps, line breaks kept. */
-export function Prose({ text }: { text: string }) {
-  const out: ReactNode[] = [];
-  let para: string[] = [], list: { ordered: boolean; items: string[] } | null = null;
-  const flushP = () => { if (para.length) out.push(<p key={out.length}>{para.flatMap((l, i) => (i ? [<br key={i} />, l] : [l]))}</p>); para = []; };
-  const flushL = () => { if (list) { const items = list.items.map((x, i) => <li key={i}>{x}</li>); out.push(list.ordered ? <ol key={out.length} className="prose-l">{items}</ol> : <ul key={out.length} className="prose-l">{items}</ul>); } list = null; };
+export function Prose({ text, cites }: { text: string; cites?: Cite[] }) {
+  type Block = { list: false; lines: string[] } | { list: true; ordered: boolean; lines: string[] };
+  const blocks: Block[] = [];
+  let cur: Block | null = null;
   for (const raw of text.split("\n")) {
     const line = raw.trim(), bullet = /^[-*•]\s+(.*)/.exec(line), num = /^\d+[.)]\s+(.*)/.exec(line);
-    if (!line) { flushP(); flushL(); continue; }
+    if (!line) { cur = null; continue; }
     if (bullet || num) {
-      flushP();
       const ordered = !!num;
-      if (list && list.ordered !== ordered) flushL();
-      list ??= { ordered, items: [] };
-      list.items.push((bullet ?? num)![1]);
+      if (!cur || !cur.list || cur.ordered !== ordered) blocks.push(cur = { list: true, ordered, lines: [] });
+      cur.lines.push((bullet ?? num)![1]);
       continue;
     }
     // a wrapped line right after a bullet belongs to it
-    if (list && /^\s{2,}/.test(raw)) { list.items[list.items.length - 1] += " " + line; continue; }
-    flushL(); para.push(line);
+    if (cur?.list && /^\s{2,}/.test(raw)) { cur.lines[cur.lines.length - 1] += " " + line; continue; }
+    if (!cur || cur.list) blocks.push(cur = { list: false, lines: [] });
+    cur.lines.push(line);
   }
-  flushP(); flushL();
-  return <>{out}</>;
+  // with sources: each sentence carries the numbers of the sources it names (src/sources.ts citeLines), the way
+  // Perplexity, Harvey and Legora number theirs; hovering or focusing a number shows the quote and the day it was read
+  const marked = cites?.length ? citeLines(blocks.flatMap(x => x.lines), cites) : undefined;
+  let k = 0;
+  const show = (s: string): ReactNode => {
+    const m = marked?.[k++];
+    if (!m) return s;
+    return m.map((x, i) => { const body = x.text.trimEnd(); return <Fragment key={i}>{body}{x.marks.map(n => <CiteMark key={n} n={n} c={cites![n - 1]} />)}{x.text.slice(body.length)}</Fragment>; });
+  };
+  return <>{blocks.map((x, i) => x.list
+    ? (x.ordered ? <ol key={i} className="prose-l">{x.lines.map((l, j) => <li key={j}>{show(l)}</li>)}</ol> : <ul key={i} className="prose-l">{x.lines.map((l, j) => <li key={j}>{show(l)}</li>)}</ul>)
+    : <p key={i}>{x.lines.flatMap((l, j) => (j ? [<br key={"b" + j} />, <Fragment key={j}>{show(l)}</Fragment>] : [<Fragment key={j}>{show(l)}</Fragment>]))}</p>)}</>;
+}
+
+/** A source's number in the text: opens the page; on hover or focus, the page, the sentence Placetta read on it and
+ *  the day it was read (Harvey and Perplexity show the passage behind a citation the same way). */
+function CiteMark({ n, c }: { n: number; c?: Cite }) {
+  const { lang } = useApp();
+  if (!c) return null;
+  const zh = lang === "zh";
+  const site = (u: string) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return u; } };
+  const read = c.read ? (zh ? `${fmtDay(c.read, lang, true)}查阅${c.from ? `（${site(c.from)}）` : ""}` : `Read ${fmtDay(c.read, lang, true)}${c.from ? ` on ${site(c.from)}` : ""}`) : "";
+  const label = `${zh ? "来源" : "Source"} ${n}: ${c.title}${c.quote ? ` “${c.quote}”` : ""}${read ? ` ${read}` : ""}`;
+  return (
+    <sup className="cite-n">
+      <a href={c.url} target="_blank" rel="noreferrer" aria-label={label}>{n}</a>
+      <span className="cite-pop" role="tooltip" aria-hidden="true">
+        <b>{c.title}</b><small>{site(c.url)}</small>
+        {c.quote && <q>{c.quote}</q>}
+        {read && <em>{read}</em>}
+      </span>
+    </sup>
+  );
 }
 
 /** Alven-style file card: a type tile, the name, size and where it came from, and a download button.

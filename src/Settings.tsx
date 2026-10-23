@@ -93,6 +93,7 @@ const HOOK_HELP: Record<HookKind, { how: Bi; ph: string }> = {
   wecom: { how: B("In the WeCom group chat: the top-right menu, Add group robot, New. Copy its webhook address.", "在企业微信群聊中：右上角菜单 → 添加群机器人 → 新创建，复制 webhook 地址。"), ph: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=..." },
   dingtalk: { how: B("In the DingTalk group: Group settings, Bots, Add robot, Custom. Copy its webhook address. If you choose signing as its security setting, paste the secret (SEC...) too.", "在钉钉群中：群设置 → 机器人 → 添加机器人 → 自定义，复制 Webhook 地址。如安全设置选择“加签”，请一并填写密钥（SEC 开头）。"), ph: "https://oapi.dingtalk.com/robot/send?access_token=..." },
   teams: { how: B("In the Teams channel: More options, Workflows, then the template that posts to a channel when a webhook request is received. Copy the URL it gives you.", "在 Teams 频道中：更多选项 → 工作流，选择“收到 webhook 请求时发布到频道”模板，复制生成的 URL。"), ph: "https://...logic.azure.com/workflows/..." },
+  webhook: { how: B("In Zapier, start a Zap with the Webhooks by Zapier trigger; in Make, a Custom webhook; in n8n, a Webhook node. Paste the https address it gives you. Add a signing secret if your system checks Standard Webhooks signatures.", "在 Zapier 中用 Webhooks by Zapier 触发器开始一个 Zap；在 Make 中用 Custom webhook；在 n8n 中用 Webhook 节点。粘贴它给出的 https 地址。如果您的系统会校验 Standard Webhooks 签名，请填写签名密钥。"), ph: "https://hooks.zapier.com/hooks/catch/..." },
 };
 /** Which provider's app keys a sign-in connection needs. */
 const PROVIDER_OF: Partial<Record<IntegrationKind, keyof api.Availability>> = { gmail: "google", gcal: "google", gdrive: "google", outlook_mail: "microsoft", outlook_cal: "microsoft", dropbox: "dropbox", quickbooks: "quickbooks", square: "square", toast: "toast" };
@@ -116,6 +117,7 @@ const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
     { kind: "wecom", name: "WeCom", zh: "企业微信", why: CHAT_WHY, hook: true, logo: wecomLogo },
     { kind: "dingtalk", name: "DingTalk", zh: "钉钉", why: CHAT_WHY, hook: true, logo: dingtalkLogo },
     { kind: "teams", name: "Microsoft Teams", why: CHAT_WHY, hook: true, logo: teamsLogo },
+    { kind: "webhook", name: "Webhook (Zapier, Make, n8n)", zh: "Webhook（Zapier、Make、n8n）", why: B("The same updates as data for Zapier, Make, n8n or your own system, signed when you add a secret", "同样的动态以数据形式发给 Zapier、Make、n8n 或您自己的系统，填写密钥后会签名"), hook: true },
   ] },
   { group: B("Give Odelia jobs from chat", "在聊天中给 Odelia 派活"), items: [
     { kind: "wechat_bot", name: "Odelia in WeChat", zh: "微信中的 Odelia", why: B("Teammates message your WeChat Official Account: she does the job as the teammate who asked and answers in the chat. Each teammate links their WeChat once with a code", "同事给您的微信公众号发消息：她以提问的同事身份完成工作，并在聊天中回复。每位同事用验证码关联一次自己的微信"), logo: wechatLogo, bot: true },
@@ -296,7 +298,7 @@ function Integrations() {
           <p>{b(HOOK_HELP[form.kind].how)}</p>
           <form className="sst-form" onSubmit={e => { e.preventDefault(); void submit(); }}>
             <input type="url" required autoFocus value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder={HOOK_HELP[form.kind].ph} aria-label={zh ? "Webhook 链接" : "Webhook link"} spellCheck={false} autoComplete="off" />
-            {form.kind === "lark" && <input type="password" value={form.secret} onChange={e => setForm({ ...form, secret: e.target.value })} placeholder={zh ? "签名密钥（可选）" : "Signing secret (optional)"} aria-label={zh ? "签名密钥" : "Signing secret"} autoComplete="off" />}
+            {(form.kind === "lark" || form.kind === "webhook") && <input type="password" value={form.secret} onChange={e => setForm({ ...form, secret: e.target.value })} placeholder={zh ? "签名密钥（可选）" : "Signing secret (optional)"} aria-label={zh ? "签名密钥" : "Signing secret"} autoComplete="off" />}
             <div className="sst-act">
               <button type="button" className="sbtn quiet" onClick={() => setForm(null)}>{zh ? "取消" : "Cancel"}</button>
               <button type="submit" className="sbtn ink" disabled={form.busy || !form.url.trim()}>{form.busy ? (zh ? "正在发送测试消息…" : "Sending a test message...") : (zh ? "连接并发送测试" : "Connect and test")}</button>
@@ -1030,6 +1032,27 @@ function SkillsGroup() {
 
 /* ------------------------------ language ------------------------------ */
 
+/** How long this workspace keeps Odelia's conversations (migration 20261028110000_workspace_retention), Harvey's
+ *  enterprise retention setting. Everyone sees it; only an owner changes it, and the change is audited. */
+function RetentionControl() {
+  const { lang, cloud, say } = useApp();
+  const zh = lang === "zh";
+  const [days, setDays] = useState<number | null | undefined>(undefined);
+  const [busy, setBusy] = useState(false);
+  const wsId = cloud?.wsId ?? "";
+  useEffect(() => { if (wsId) void api.retentionGet(wsId).then(r => setDays(r.run_days ?? null), () => setDays(null)); }, [wsId]);
+  if (!cloud) return null;
+  const label = (d: number | null) => d === null ? (zh ? "快哉默认" : "Placetta's default") : zh ? `${d} 天` : `${d} days`;
+  if (!cloud.owner) return <em className="lock">{days === undefined ? "" : label(days)}</em>;
+  return (
+    <Select value={days === undefined ? "" : String(days ?? "")} disabled={busy || days === undefined} aria-label={zh ? "对话保留期限" : "How long conversations are kept"}
+      onChange={e => { const v = e.target.value ? Number(e.target.value) : null; setBusy(true);
+        void api.retentionSet(wsId, v).then(r => { setDays(r.run_days ?? null); say(zh ? "已保存" : "Saved"); }, err => say((err as api.ApiError).message)).finally(() => setBusy(false)); }}>
+      {[null, 30, 90, 180, 365].map(d => <option key={String(d)} value={d ?? ""}>{label(d)}</option>)}
+    </Select>
+  );
+}
+
 function LanguageGroup() {
   const { lang, setLang } = useApp();
   const zh = lang === "zh";
@@ -1309,14 +1332,18 @@ function AssistantAccess() {
   const make = (f: { label: string; scopes: api.McpScope[] }) => act(async () => { const r = await api.mcpTokenCreate(wsId, f.label.trim() || (zh ? "AI 助手" : "AI assistant"), f.scopes); setForm(null); setShown(r.token); });
   const live = (list ?? []).filter(t => !t.revoked_at);
   const scopeWords = (sc: api.McpScope[]) => sc.length === MCP_SCOPES.length ? (zh ? "全部只读工具" : "every read-only tool") : MCP_SCOPES.filter(x => sc.includes(x.id)).map(x => x.label[zh ? "zh" : "en"]).join(zh ? "、" : ", ");
-  const rows: Row[] = [
-    ...live.map(t => ({ label: { en: t.label, zh: t.label },
-      sub: <>{`plc_mcp_${t.prefix}_…`}, {scopeWords(t.scopes)}<br />{(zh ? "创建于 " : "Made ") + fmtDay(t.created_at, lang, true)}{t.last_used_at ? (zh ? `，最近使用 ${fmtAgo(t.last_used_at, lang)}` : `, last used ${fmtAgo(t.last_used_at, lang)}`) : (zh ? "，尚未使用" : ", not used yet")}</>,
-      right: <Btn kind="warm" guard disabled={busy} onClick={() => { if (window.confirm(zh ? `撤销“${t.label}”？使用它的助手将立即无法读取。` : `Revoke "${t.label}"? Assistants using it stop reading right away.`)) void act(() => api.mcpTokenRevoke(t.id), zh ? "令牌已撤销" : "Token revoked"); }}>{zh ? "撤销" : "Revoke"}</Btn> })),
-    { label: B("New token", "新令牌"), sub: zh ? "每个助手用一个令牌，方便单独撤销。" : "One token for each assistant, so you can revoke each on its own.",
-      right: <Btn kind="ink" guard disabled={busy || live.length >= 10} onClick={() => setForm({ label: "", scopes: MCP_SCOPES.map(x => x.id) })}>{zh ? "创建" : "Make a token"}</Btn> },
-  ];
   const url = api.mcpUrl();
+  const rows: Row[] = [
+    // OAuth, as Claude's connector directory and ChatGPT apps connect (supabase/functions/mcp/oauth.ts): nothing to paste
+    { label: B("Connect by signing in", "登录即可连接"),
+      sub: <>{zh ? "在 Claude 或 ChatGPT 中添加自定义连接器，地址填这个。助手会请您登录快哉，选择工作区和它可以读取的内容。无需复制令牌，可随时在这里断开。" : "In Claude or ChatGPT, add a custom connector with this address. The assistant asks you to sign in to Placetta and choose the workspace and what it may read. Nothing to paste, and you can disconnect it here at any time."}<br /><code className="sg-code wrap">{url}</code></>,
+      right: <Btn onClick={() => copy(url, say, zh)}>{zh ? "复制地址" : "Copy the address"}</Btn> },
+    ...live.map(t => ({ label: { en: t.label, zh: t.label },
+      sub: <>{t.oauth ? (zh ? "通过登录连接" : "Connected by signing in") : `plc_mcp_${t.prefix}_…`}, {scopeWords(t.scopes)}<br />{(zh ? (t.oauth ? "连接于 " : "创建于 ") : (t.oauth ? "Connected " : "Made ")) + fmtDay(t.created_at, lang, true)}{t.last_used_at ? (zh ? `，最近使用 ${fmtAgo(t.last_used_at, lang)}` : `, last used ${fmtAgo(t.last_used_at, lang)}`) : (zh ? "，尚未使用" : ", not used yet")}</>,
+      right: <Btn kind="warm" guard disabled={busy} onClick={() => { if (window.confirm(zh ? `${t.oauth ? "断开" : "撤销"}“${t.label}”？使用它的助手将立即无法读取。` : `${t.oauth ? "Disconnect" : "Revoke"} "${t.label}"? The assistant stops reading right away.`)) void act(() => api.mcpTokenRevoke(t.id), zh ? (t.oauth ? "已断开" : "令牌已撤销") : (t.oauth ? "Disconnected" : "Token revoked")); }}>{zh ? (t.oauth ? "断开" : "撤销") : (t.oauth ? "Disconnect" : "Revoke")}</Btn> })),
+    { label: B("New token", "新令牌"), sub: zh ? "用于只接受令牌的助手。每个助手用一个令牌，方便单独撤销。" : "For assistants that only take a token. One token for each assistant, so you can revoke each on its own.",
+      right: <Btn kind="ink" guard disabled={busy || live.filter(t => !t.oauth).length >= 10} onClick={() => setForm({ label: "", scopes: MCP_SCOPES.map(x => x.id) })}>{zh ? "创建" : "Make a token"}</Btn> },
+  ];
   const setup = shown ? [
     { who: B("Claude (claude.ai and the desktop app)", "Claude（claude.ai 和桌面应用）"), how: B("Settings, Connectors, Add custom connector. Paste this address; it carries the token, so keep it private.", "设置，连接器，添加自定义连接器。粘贴此地址；地址中含有令牌，请勿外传。"), code: `${url}/${shown}` },
     { who: B("ChatGPT", "ChatGPT"), how: B("Settings, Apps and connectors, Advanced, turn on developer mode, then Create. Paste this address and pick no authentication; the token is in the address.", "设置，应用与连接器，高级，开启开发者模式，然后创建。粘贴此地址并选择无需认证；令牌已包含在地址中。"), code: `${url}/${shown}` },
@@ -1549,6 +1576,7 @@ export function Settings() {
             { label: B("Download your workspace data", "下载工作区数据"), sub: b(B("Applications, facts, deadlines, filings and the audit trail, as JSON", "申请、资料、截止日期、申报和审计记录（JSON）")), right: <Btn guard onClick={() => (cloud ? cloud.exportData() : exportAudit())}>{lang === "zh" ? "下载" : "Download"}</Btn> },
             { label: B("Export the audit trail", "导出审计记录"), sub: cloud ? b(B("Every entry, as CSV. Owners and admins; the export is recorded in the trail too.", "全部记录（CSV）。所有者和管理员可导出，导出本身也会记入审计记录。")) : "CSV",
               right: !cloud || cloud.admin ? <Btn guard onClick={exportAudit}>{lang === "zh" ? "导出" : "Export"}</Btn> : <em className="lock">{lang === "zh" ? "由所有者和管理员导出" : "Owners and admins"}</em> },
+            ...(cloud ? [{ label: B("Keep Odelia's conversations", "Odelia 对话的保留期限"), sub: b(B("After this, a finished conversation's words and your texts and calls with Odelia are deleted. Applications, filings, documents, approved memories and the audit trail stay. Placetta's default keeps conversations while the workspace exists.", "超过期限后，已结束对话的内容以及您与 Odelia 的短信和通话会被删除。申请、申报、文件、已批准的记忆和审计记录会保留。快哉默认在工作区存在期间保留对话。")), right: <RetentionControl /> }] : []),
             { label: B("Trust and security", "信任与安全"), sub: b(B("How we protect your data, and every company that processes it", "我们如何保护您的数据，以及处理数据的每一家公司")), right: <a className="sbtn quiet" href={api.PREVIEW ? "https://placetta.com/trust" : "/trust"} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "打开" : "Open"}</a> },
             ...(cloud ? [{ label: B("Delete your account", "删除账户"), sub: b(B("Deletes your account and the workspaces you own alone, except records the law requires us to keep.", "删除您的账户和您单独拥有的工作区，法律要求保留的记录除外。")), right: <Btn kind="warm" guard onClick={() => setDel(true)}>{b(B("Delete my account", "删除我的账户"))}</Btn> }] : []),
           ]}>

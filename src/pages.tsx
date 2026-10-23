@@ -490,14 +490,19 @@ function PermitTable({ rows: list, empty }: { rows: Application[]; empty: string
                 {rows.map(a => {
                   return (
                     <Working key={a.id} on={a.status === "draft"} size="line">
-                    <button type="button" className={"tr row" + (a.critical ? " crit" : "")} onClick={() => openApp(a.id)} role="row">
+                    {/* a row, not a button, so the agency's own page can be a link inside it (Harvey and Legora link every
+                        cited row to its source): the row opens the application, the link opens the page it rests on */}
+                    <div className={"tr row" + (a.critical ? " crit" : "")} role="row" tabIndex={0} aria-label={b(a.name)} onClick={() => openApp(a.id)}
+                      onKeyDown={e => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openApp(a.id); } }}>
                       <span className="c-name"><b>{b(a.name)}</b><small>{b(a.agency)}</small><small className="c-est2">{b(a.est)}</small>{isPreview(a) && <small className="c-prev">{t("prevTag")}</small>}
+                        {a.source.url && <a className="c-src" href={a.source.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                          title={a.source.quote ? `“${a.source.quote}”${a.source.checked ? ` (${t("src_checked")} ${a.source.checked})` : ""}` : t("source")}>{a.source.label}<I.ext /></a>}
                         <TeamLine id={a.id} /></span>
                       <span className="c-st"><StatusChip s={a.status} /></span>
                       <span className="c-fee">{feeText(a, t)}</span>
                       <span className="c-est">{b(a.est)}</span>
                       <span className="c-next">{a.critical && <em>{t("critical")}</em>}{a.next ? b(a.next) : ""}</span>
-                    </button>
+                    </div>
                     </Working>
                   );
                 })}

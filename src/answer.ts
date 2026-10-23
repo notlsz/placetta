@@ -11,10 +11,11 @@ import { stateAgency, stateOf } from "./plan/preview";
 import { proofCurrent, whoToAsk } from "./plan/ask";
 import { usPlace } from "./forms/usplace";
 import { daysFromNow } from "./time";
+import { formQuote, type Cite } from "./sources";
 
 export type Grounded = {
   text: Bi;
-  sources: { title: string; url: string }[];
+  sources: Cite[];          // numbered in the reply, each with its quote and read date when the registry has them
   forms: string[];          // the library forms the answer comes from, most specific first
   sure: boolean;            // false: the library doesn't have it, and the answer names who to ask instead
 };
@@ -83,7 +84,7 @@ export function groundedAnswer(q: string, o: { home?: string; today?: string } =
   const parts = top.map(f => sayForm(f, q));
   return {
     text: B(parts.map(p => p.en).join(" "), parts.map(p => p.zh).join("")),
-    sources: top.map(f => ({ title: host(f.info || f.url), url: f.info || f.url })),
+    sources: top.map(f => ({ title: host(f.info || f.url), url: f.info || f.url, ...formQuote(f, f.info || f.url), keys: [f.form.split(" (")[0], f.title.en, f.title.zh, f.agency.en, f.agency.zh].filter(k => k.length > 2) })),
     forms: top.map(f => f.id), sure: true,
   };
 }

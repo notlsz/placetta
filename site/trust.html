@@ -48,7 +48,7 @@
 <p><span class="tag t-roll">Rolling out</span>Built and tested, and being switched on in our servers and database.</p>
 <p><span class="tag t-prog">In progress</span>Still being built or prepared.</p>
 </div>
-<nav class="toc" aria-label="On this page"><a href="#approvals">Approvals</a><a href="#audit">Audit trail</a><a href="#data">Your data</a><a href="#ai">AI</a><a href="#email">Email</a><a href="#subprocessors">Subprocessors</a><a href="#roadmap">Roadmap</a><a href="#report">Report an issue</a></nav>
+<nav class="toc" aria-label="On this page"><a href="#approvals">Approvals</a><a href="#audit">Audit trail</a><a href="#access">Team access</a><a href="#data">Your data</a><a href="#ai">AI</a><a href="#email">Email</a><a href="#subprocessors">Subprocessors</a><a href="#roadmap">Roadmap</a><a href="#report">Report an issue</a></nav>
 
 <h2 id="approvals" data-anchor="approvals">Your approval comes first</h2>
 <p>Odelia prepares the work. An owner of your workspace decides. Nothing is filed with an agency, paid or sent to anyone without an owner's approval in the Placetta app.</p>
@@ -67,6 +67,18 @@
 <p><span class="tag t-roll">Rolling out</span>Owners will be able to export the whole trail as a spreadsheet file in Settings, and each export will be recorded in the trail too.</p>
 <p><span class="tag t-on">In place</span>Each time a saved agency login is opened, by our filing software or by someone on our team, the opening goes into the audit trail.</p>
 <p><span class="tag t-roll">Rolling out</span>The database itself will refuse to edit or delete any entry, from anyone, our own servers included, and will stamp each entry with its own clock instead of trusting the writer's.</p>
+
+<h2 id="access" data-anchor="access">Team access and controls</h2>
+<h3>Roles <span class="tag t-roll">Rolling out</span></h3>
+<p>Owner, admin, member and viewer roles, enforced by the database on every request. Only an owner approves filings and payments; a viewer reads and changes nothing. Every role change is recorded in the audit trail.</p>
+<h3>Single sign-on <span class="tag t-roll">Rolling out</span></h3>
+<p>SAML 2.0 single sign-on, plus sign-in with Google Workspace, Microsoft Entra ID or another OpenID Connect provider. Verify your email domain and require SSO for everyone at it. Placetta connects your identity provider for you.</p>
+<h3>SCIM provisioning <span class="tag t-roll">Rolling out</span></h3>
+<p>SCIM 2.0 provisioning for users and groups (Okta, Microsoft Entra ID and other SCIM 2.0 providers), with groups mapped to roles. Deprovisioning removes access and ends the person's sessions.</p>
+<h3>How long conversations are kept <span class="tag t-roll">Rolling out</span></h3>
+<p>An owner chooses how long the workspace keeps Odelia's conversations: 30, 90, 180 or 365 days, or our default. After that, a finished conversation's words and your texts and calls with Odelia are deleted by the daily cleanup. Applications, filings, documents, approved memories and the audit trail stay. Each change is recorded in the audit trail.</p>
+<h3>AI assistants you connect <span class="tag t-roll">Rolling out</span></h3>
+<p>Claude, ChatGPT and other assistants that support MCP can read your workspace once an owner or admin signs in and allows it, choosing the workspace and what it may read. They can only read. Each connection is listed in Settings, can be disconnected at any time, and every call is logged.</p>
 
 <h2 id="data" data-anchor="data">How we handle your data</h2>
 <h3>Encryption <span class="tag t-on">In place</span></h3>
@@ -224,7 +236,7 @@
 <p><span class="tag t-roll">上线中</span>已开发并测试，正在我们的服务器和数据库中启用。</p>
 <p><span class="tag t-prog">进行中</span>仍在开发或准备中。</p>
 </div>
-<nav class="toc" aria-label="本页内容"><a href="#approvals">批准</a><a href="#audit">审计记录</a><a href="#data">您的数据</a><a href="#ai">AI</a><a href="#email">邮件</a><a href="#subprocessors">数据处理方</a><a href="#roadmap">合规路线图</a><a href="#report">报告问题</a></nav>
+<nav class="toc" aria-label="本页内容"><a href="#approvals">批准</a><a href="#audit">审计记录</a><a href="#access">团队权限</a><a href="#data">您的数据</a><a href="#ai">AI</a><a href="#email">邮件</a><a href="#subprocessors">数据处理方</a><a href="#roadmap">合规路线图</a><a href="#report">报告问题</a></nav>
 
 <h2 data-anchor="approvals">一切以您的批准为先</h2>
 <p>Odelia 负责准备，工作区所有者负责决定。未经所有者在快哉应用中批准，不会向任何机构提交申请，不会付款，也不会向任何人发送内容。</p>
@@ -243,6 +255,18 @@
 <p><span class="tag t-roll">上线中</span>所有者将可以在“设置”中把完整的审计记录导出为表格文件，每次导出本身也会记入审计记录。</p>
 <p><span class="tag t-on">已上线</span>我们的申报软件或我们团队中的人每次打开已保存的机构网站登录信息，都会记入审计记录。</p>
 <p><span class="tag t-roll">上线中</span>数据库本身将拒绝任何人编辑或删除任何记录，包括我们自己的服务器；并用数据库自己的时钟为每条记录标注时间，而不采用写入方提供的时间。</p>
+
+<h2 data-anchor="access">团队权限与管控</h2>
+<h3>角色 <span class="tag t-roll">上线中</span></h3>
+<p>所有者、管理员、成员和查看者四种角色，每次请求都由数据库强制执行。只有所有者能批准申报和付款；查看者只能阅读，不能做任何更改。每次角色变更都会记入审计记录。</p>
+<h3>单点登录 <span class="tag t-roll">上线中</span></h3>
+<p>支持 SAML 2.0 单点登录，以及通过 Google Workspace、Microsoft Entra ID 或其他 OpenID Connect 身份提供方登录。验证您的邮箱域名后，可要求该域名下所有人使用单点登录。快哉会为您接入身份提供方。</p>
+<h3>SCIM 用户同步 <span class="tag t-roll">上线中</span></h3>
+<p>支持用户和用户组的 SCIM 2.0 同步（Okta、Microsoft Entra ID 及其他 SCIM 2.0 提供方），用户组可对应到角色。停用某人后，其访问权限会被移除，登录会话也会结束。</p>
+<h3>对话保留期限 <span class="tag t-roll">上线中</span></h3>
+<p>所有者可以选择工作区保留 Odelia 对话的时间：30、90、180 或 365 天，或使用我们的默认设置。超过期限后，每日清理会删除已结束对话的内容以及您与 Odelia 的短信和通话。申请、申报、文件、已批准的记忆和审计记录会保留。每次更改都会记入审计记录。</p>
+<h3>您连接的 AI 助手 <span class="tag t-roll">上线中</span></h3>
+<p>Claude、ChatGPT 及其他支持 MCP 的助手，需由所有者或管理员登录并允许后，才能读取您的工作区，并由其选择工作区和可读取的内容。助手只能读取。每个连接都列在“设置”中，可随时断开，每次调用都有记录。</p>
 
 <h2 data-anchor="data">我们如何处理您的数据</h2>
 <h3>加密 <span class="tag t-on">已上线</span></h3>

@@ -476,6 +476,14 @@ export function navOn(p: Playbook | undefined, s: PageState, buttonText: string)
 /** This page is where the agency takes its fee: the person pays it. */
 export const payOn = (p: Playbook | undefined, s: PageState): boolean => !!p && p.pay.some((w) => headings(s).includes(norm(w)));
 
+/** The pages the guide walks through, once each and in order: the customer's progress list while the filing runs
+ *  ("page 3 of 6"), the way Devin and Claude Code show a plan's steps beside the live work. */
+export function pageOutline(form: FormSteps): string[] {
+  const out: string[] = [];
+  for (const s of form.steps) { const p = s.page.trim(); if (p && !out.some((x) => x.toLowerCase() === p.toLowerCase())) out.push(p); }
+  return out.slice(0, 20);
+}
+
 /** The steps as the model reads them, with the warning that they are unverified. */
 export function guideLines(x: { playbook: Playbook; form: FormSteps }): string[] {
   return [

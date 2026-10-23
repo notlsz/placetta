@@ -8,6 +8,7 @@ import { I, Modal, feeTotal } from "./ui";
 import { fmtStamp, money } from "./time";
 import { FilingHold } from "./SendHold";
 import { ReviewBadges } from "./Specialist";
+import { outlineOf, progressOf } from "./filingProgress";
 
 /*
  * Watch it file. Every filing, live while it runs and replayable after: each page of the agency's site with what was
@@ -25,6 +26,8 @@ type State = "queued" | "running" | "needs_you" | "done" | "team" | "stopped" | 
 export type Run = {
   app: Application; host: string; channel: string; state: State; events: Ev[]; frames: Frame[];
   confirmation?: string; sample: boolean; filing?: Filing; receipt?: string; pdf?: string;
+  /** The agency guide's pages, when the run follows one (src/filingProgress.ts). */
+  outline?: string[];
 };
 
 /* ------------------------------ masking ------------------------------ */
@@ -96,7 +99,7 @@ function fromFiling(f: Filing, app: Application): Run {
     : f.status === "submitted" || f.status === "accepted" || st === "done" ? "done"
     : st === "held" ? "held" : st === "needs_you" ? "needs_you" : st === "running" ? "running" : st === "queued" ? "queued"
     : st === "failed" ? "failed" : "team";
-  return { app, host, channel: f.channel ?? "team", state, events, frames, confirmation: f.confirmation_number ?? undefined, sample: false, filing: f, receipt: f.receipt_path ?? undefined, pdf: f.payload?.pdf_path };
+  return { app, host, channel: f.channel ?? "team", state, events, frames, confirmation: f.confirmation_number ?? undefined, sample: false, filing: f, receipt: f.receipt_path ?? undefined, pdf: f.payload?.pdf_path, outline: outlineOf(f.agent_log) };
 }
 
 const PAGES = [B("About the business", "企业信息"), B("Application details", "申请详情"), B("Owners and contacts", "负责人与联系方式")];
@@ -139,7 +142,8 @@ function sampleRun(w: Workspace, app: Application): Run | null {
   const conf = `${host.split(".")[0].slice(0, 3).toUpperCase()}-${new Date(end).getFullYear()}-${String(seed(app.id)).padStart(6, "0")}`;
   frames.push({ kind: "done", title: B("Application submitted", "申请已提交"), rows: [{ label: B("Confirmation number", "确认号"), value: conf }, { label: B("Submitted", "提交时间"), value: fmtStamp(end).slice(0, 16) }], note: B("Sample", "示例") });
   events.push({ kind: "submitted", at: end, text: { en: `Submitted on ${host}. Confirmation ${conf}`, zh: `已在 ${host} 提交，确认号 ${conf}` }, frame: frames.length - 1 });
-  return { app, host, channel: "portal", state: app.status === "filing" ? "running" : "done", events, frames, confirmation: conf, sample: true, receipt: app.receipt };
+  return { app, host, channel: "portal", state: app.status === "filing" ? "running" : "done", events, frames, confirmation: conf, sample: true, receipt: app.receipt,
+    outline: frames.filter(x => x.kind !== "done").map(x => x.title.en) };
 }
 
 export function useRun(appId: string): Run | null {
@@ -212,6 +216,10 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
     held: B("Approved, waiting before it's sent", "已批准，等待发送"),
   };
   const evIndex = (e: Ev) => run.events.indexOf(e);
+  // the pages reached so far (frames up to what's shown), against the guide's
+  const reached = evs.filter(e => (e.kind === "page" || e.kind === "review") && e.frame !== undefined).map(e => run.frames[e.frame!]);
+  const prog = progressOf(run.outline, reached.map(x => x.title.en), state === "done");
+  const nowFrame = reached.at(-1);
 
   return (
     <section className={"fl st-" + state + (embedded ? " embedded" : "")} aria-label={zh ? `${b(run.app.name)}的提交过程` : `Filing the ${b(run.app.name).toLowerCase()}`}>
@@ -226,6 +234,19 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
       </header>
 
       {f && state === "held" && <FilingHold f={f} />}
+
+      {/* the guide's pages, done, now and next, and while it runs the page it's on as the agency shows it: Devin's and
+          Claude Code's plan beside the live work, for a filing (src/filingProgress.ts) */}
+      {prog && ["running", "needs_you", "queued", "done"].includes(state) && (
+        <div className="fl-prog" aria-live="polite">
+          <p className="fl-prog-h"><b>{state === "done" ? (zh ? `机构指南的 ${prog.of} 个页面已全部完成` : `All ${prog.of} pages of the agency's guide done`)
+            : prog.now ? (zh ? `第 ${prog.steps.findIndex(s => s.state === "now") + 1} 页，共 ${prog.of} 页：${prog.now}` : `Page ${prog.steps.findIndex(s => s.state === "now") + 1} of ${prog.of}: ${prog.now}`)
+            : (zh ? `共 ${prog.of} 个页面` : `${prog.of} pages to go through`)}</b></p>
+          <span className="fl-bar" role="progressbar" aria-valuemin={0} aria-valuemax={prog.of} aria-valuenow={prog.done} aria-label={zh ? "进度" : "Progress"}><i style={{ width: `${Math.round((100 * prog.done) / prog.of)}%` }} /></span>
+          <ol className="fl-steps">{prog.steps.map((s, i) => <li key={i} className={"s-" + s.state}>{s.state === "done" ? <I.check /> : <em>{i + 1}</em>}<span>{s.page}</span></li>)}</ol>
+          {nowFrame && state !== "done" && <button type="button" className="fl-live" onClick={() => setOpen(run.events.length - 1)} aria-label={zh ? "放大查看当前页面" : "See the page it's on"}><Shot frame={nowFrame} host={run.host} /></button>}
+        </div>
+      )}
 
       <ol className="fl-evs">
         {visible.map((g, gi) => {

@@ -1,6 +1,6 @@
 import { supabase, type ApiError } from "./api";
 import { MEMORY_COLS, memoryOf, type BriefRow, type ConflictRow, type MemoryRow, type ProposalRow, type SettingsRow } from "../odeliaMemory/rows";
-import type { AgentMemory, Scope } from "../odeliaMemory/types";
+import type { AgentMemory, Observation, Scope } from "../odeliaMemory/types";
 
 /* Agent memory in an account (migration 20261022211905_agent_memory). Anyone on the workspace reads it; the database's
    own functions decide who may change what (members edit, delete and pin; owners and admins approve, turn memory on and
@@ -37,6 +37,9 @@ export const memorySettings = (ws: string, o: { enabled?: boolean; suggest?: boo
   call("agent_memory_settings_set", { ws, p_enabled: o.enabled ?? null, p_suggest: o.suggest ?? null, p_allow_last4: o.allowLast4 ?? null });
 export const memoryReview = (id: string, approve: boolean) => call("agent_memory_review", { p_id: id, p_approve: approve });
 export const memoryEdit = (id: string, en: string, zh: string) => call("agent_memory_edit", { p_id: id, p_en: en, p_zh: zh });
+/** Lines brought over from another assistant (src/odeliaMemory/import.ts): suggestions only the importer sees. */
+export const memoryImport = (ws: string, items: Observation[]) =>
+  call("agent_memory_import", { ws, p_items: items.map(o => ({ text: o.text.en, topic: o.topic, entity: o.entity })) });
 export const memoryDelete = (id: string) => call("agent_memory_delete", { p_id: id });
 export const memoryPin = (id: string, on: boolean) => call("agent_memory_pin", { p_id: id, p_on: on });
 export const memoryForgetAll = (ws: string, briefs = false) => call("agent_memory_forget_all", { ws, p_briefs: briefs });

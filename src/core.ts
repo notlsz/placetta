@@ -2,6 +2,7 @@ import { DEFAULT_POLICY } from "./spend.ts";
 import type { OrbState } from "thinking-orbs";
 import type { Application, Approval, Audit, Bi, Change, CheckItem, Deadline, Doc, Fact, LicenseHit, Store, Task, Workspace } from "./model";
 import type { Lang } from "./i18n";
+import type { Cite } from "./sources";
 import { nowIso } from "./time";
 import { B, same } from "./bi";
 import { countyOf } from "./counties";
@@ -55,7 +56,7 @@ export type Reply = {
   skills?: Bi[];            // skills learned on this run
   matches?: { what: string; where: string; hits: LicenseHit[] };
   next?: { label: Bi; req: Request };
-  sources?: { title: string; url: string }[];   // official pages the agent read, cited
+  sources?: Cite[];         // official pages the agent read, cited and numbered inline, each with its quote and read date when known
   remembered?: { id: string; text: Bi; suggested?: boolean }[];   // details the person mentioned that this run kept (src/recall.ts)
   recalled?: { id: string; text: Bi; why: Bi }[];   // agent memories that fit this request, each with why (src/odeliaMemory/retrieve.ts usedFor)
   table?: { title: Bi; columns: Bi[]; rows: string[][]; cite?: string[][] };   // a grid the agent built, e.g. reviewed documents; cite: the document's words behind each cell
