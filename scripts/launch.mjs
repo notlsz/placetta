@@ -244,6 +244,9 @@ async function setupLinq(secrets) {
   } catch (e) { console.log(`  ${red("not subscribed")}  ${e.message}. Add a webhook for message.received in Linq and paste its secret below.`); const s = await ask("Webhook signing secret (whsec_...): ", { hidden: true }); if (!s) return; secrets.LINQ_WEBHOOK_SECRET = s; }
   secrets.LINQ_API_KEY = key;
   secrets.LINQ_NUMBERS = use.map((l) => l.number).join(",");
+  // iMessage is behind LINQ_ENABLED (supabase/functions/_shared/linq.ts): the keys alone leave it off
+  if (/^y/i.test(await ask("Turn iMessage on now? Until you do, texts go by SMS. [y/N] ", { fallback: "n" }))) secrets.LINQ_ENABLED = "1";
+  else console.log("  iMessage stays off. Set LINQ_ENABLED=1 in the function secrets when you're ready.");
   const voice = secrets.ODELIA_NUMBER;
   if (voice && /^y/i.test(await ask(`Forward calls to these lines to Odelia's phone number ${voice}, so people save one number? [Y/n] `, { fallback: "y" }))) {
     let all = true;
