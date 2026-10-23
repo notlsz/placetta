@@ -37,7 +37,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { callModel, canConverse, type Role } from "../_shared/llm.ts";
 import { accessRpc, WORKS } from "../_shared/access.ts";
-import { CHAT_JOBS_PER_HOUR, chatRateLimited, chatToOk, NOT_CHARGED_EN, overTaskLimit, refundable, repeatKey, repeatStatuses, REPEAT_MS, taskLimit, tokenLimit, tooLarge } from "./limits.ts";
+import { CHAT_JOBS_PER_HOUR, chatRateLimited, chatToOk, NOT_CHARGED_EN, overTaskLimit, refundable, repeatKey, repeatStatuses, REPEAT_MS, sharedThread, taskLimit, tokenLimit, tooLarge } from "./limits.ts";
 import { gate, record, saverLine, saverNoticeDue } from "../_shared/ai_gate.ts";
 import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/odelia.ts";
 import { linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
@@ -46,7 +46,8 @@ import { mailBody, replySubject, sendMail as sendOdeliaMail } from "../_shared/m
 import { agencyKey, chipsOf, CLASSIFIER_SYSTEM, classifierPrompt, parseClassifier, type ToolLog, DISTILL_SYSTEM, distillPrompt, filingEvidence, type FilingRow, finishWork, keepRecall, type Lesson, lessonKeys, lessonsBrief, type MemoryBook, normalizeState, parseDistill, rank, type Recall, recallFrom, runEvidence, runRounds, startState, stampFilings, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
 import { mayEmail, wantsTexts } from "../_shared/reach.ts";
 import { selftest, SELFTEST_NAMES } from "./selftest.ts";
-import { type Bot, CHAT_KINDS, type ChatTo, chatReply, isChatKind } from "../_shared/bots.ts";
+import { type Bot, CHAT_KINDS, type ChatTo, chatReply, isChatKind, type SlackBot } from "../_shared/bots.ts";
+import { answerBlocks, type ItemRef, slackEphemeral, slackPostBlocks } from "../_shared/slack.ts";
 import { wechatAccount, wechatSender } from "../_shared/wechat_db.ts";
 import { telegramBot, telegramSender } from "../_shared/telegram_db.ts";
 import { teamsServiceOk } from "../_shared/teams.ts";
@@ -505,10 +506,16 @@ async function recallFor(run: Run, w: Workspace, who: Who): Promise<Recall[]> {
 // ends, with the observation step on the cheap extract model. Off until an owner or admin turns it on; a store's bot
 // reads its store's part; a "don't remember this chat" run reads only the records and briefs and saves nothing.
 
+// Who the answer reaches decides what memory may go into it: an admins-only memory only for an owner or admin, and
+// neither that nor the asker's own memory into a thread other people read (sharedThread in limits.ts).
 async function memoryFor(run: Run): Promise<RunMemory | undefined> {
   try {
-    const memory = await loadMemory(memoryDb(admin, run.workspace_id), run.created_by ?? undefined);
-    return { memory, me: run.created_by ?? undefined, temporary: run.no_memory === true, past: () => pastRuns(admin, run.workspace_id, run.id) };
+    const me = run.created_by ?? undefined;
+    const { data: mem } = me ? await admin.from("workspace_members").select("role").eq("workspace_id", run.workspace_id).eq("user_id", me).maybeSingle() : { data: null };
+    const audience = { role: me ? String(mem?.role ?? "viewer") : "system", shared: !!run.chat_to && sharedThread(run.chat_to) };
+    const memory = await loadMemory(memoryDb(admin, run.workspace_id), me, audience);
+    // past chats: the asker's own, and never quoted into a shared thread
+    return { memory, me, temporary: run.no_memory === true, past: () => (audience.shared ? [] : pastRuns(admin, run.workspace_id, run.id, me)) };
   } catch (e) { console.error("memory load", run.id, String((e as Error)?.message ?? e).slice(0, 120)); return undefined; }
 }
 async function saveMemory(run: Run, rm: RunMemory | undefined, state: RunState, w: Workspace, reply: Reply, who: Who, role?: string) {
@@ -929,7 +936,29 @@ async function chatBack(run: Run, text: string, approvals: string[], extra = "")
     await chatReply(acct.bot, run.chat_to, said, { tail: more, save: acct.save });
     return;
   }
-  const bot = await vaultBot(run.workspace_id, run.chat_to.kind === "slack" ? "slack_bot" : "lark_bot");
+  if (run.chat_to.kind === "slack") {
+    const bot = await vaultBot(run.workspace_id, "slack_bot") as SlackBot | null;
+    if (!bot) return;
+    const to = run.chat_to;
+    // the application the answer is about (one approval waiting): buttons to open it, take it on, or be reminded
+    let item: ItemRef | undefined;
+    if (approvals.length === 1) {
+      const { data: w } = await admin.from("workspaces").select("state").eq("id", run.workspace_id).maybeSingle();
+      const app = ((w?.state as { approvals?: { id?: string; app?: string }[] } | null)?.approvals ?? []).find((a) => a.id === approvals[0])?.app;
+      if (app && /^[\w.:-]{1,190}$/.test(app)) item = { kind: "app", id: app };
+    }
+    // Grok Bot keeps approvals out of groups: in a channel, the link goes only to the person who asked
+    const privately = !!link && sharedThread(to) && !!to.user;
+    const words = said + (extra ? `\n\n${extra}` : "") + (link && !privately ? (run.lang === "zh" ? `\n\n等您批准：${link}` : `\n\nWaiting for your approval: ${link}`) : "");
+    const open = link || (origin ? appLink(origin, run.workspace_id) : "");
+    const r = await slackPostBlocks(bot.bot_token, { channel: to.channel, thread_ts: to.thread_ts, text: words, blocks: answerBlocks(words, { lang: run.lang, open: privately ? undefined : open || undefined, item }) });
+    if (!r.ok) await chatReply(bot, to, words);   // blocks refused (an old app without them): the words alone
+    if (privately) await slackEphemeral(bot.bot_token, { channel: to.channel, user: to.user!, thread_ts: to.thread_ts,
+      text: run.lang === "zh" ? `等您批准（只有您能看到）：${link}` : `Waiting for your approval (only you can see this): ${link}`,
+      blocks: answerBlocks(run.lang === "zh" ? "等您批准。只有您能看到这条消息，批准只在快哉中进行。" : "Waiting for your approval. Only you can see this; approving happens in Placetta.", { lang: run.lang, open: link, item }) });
+    return;
+  }
+  const bot = await vaultBot(run.workspace_id, "lark_bot");
   if (bot) await chatReply(bot, run.chat_to, said, { tail: more });
 }
 

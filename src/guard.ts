@@ -62,6 +62,11 @@ export function idNumber(text: string): boolean {
 }
 /** Health, beliefs, politics, money and the like: kept in memory only when "Include sensitive topics" is on. */
 export const SENSITIVE = /\b(health|diagnos|illness|disease|medication|therapy|pregnan|religio|church|mosque|temple|faith|politic|vote|party member|union|salary|income|debt|credit score|sexual|orientation|gender identity|disab|immigration|visa status|criminal|arrest)\w*/i;
+/** The compliance words that only look sensitive: a health permit, the county health department, a store on Union
+ *  Street or in Temple City. They are a food business's daily work, not a person's health or beliefs. */
+const BUSINESS_TERMS = /\b(?:(?:public|environmental|county|city|state|local)\s+health|department\s+of\s+health|health\s+(?:and\s+(?:safety|mental\s+hygiene|human\s+services)|department|dept|permits?|inspections?|inspectors?|codes?|grades?|plan\s+(?:check|review)|district|officers?|authority|services|agency|cards?|certificates?|ratings?|scores?|reviews?|rules?|regulations?))\b|\b(?:union|temple)\s+(?:st|street|ave|avenue|sq|square|city|county|blvd|boulevard|road|rd|station)\b/gi;
+/** Whether a line is about a sensitive topic once the compliance words that only look sensitive are set aside. */
+export const sensitiveTopic = (t: string) => SENSITIVE.test(String(t ?? "").replace(BUSINESS_TERMS, " "));
 
 /** "By hand": the line is answered, and the signer writes it on the printed copy (an SSN, an ITIN, a passport number).
  *  It counts as filled, nothing is printed in that box, and the format checks before approval leave it alone. */

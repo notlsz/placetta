@@ -1,5 +1,6 @@
 import { isLive, norm, scopeKey, TOPIC_INFO, TOPICS, type AgentMemory, type Observation, type Scope, type Topic } from "./types";
 import { B, type Bi } from "../bi";
+import { conceptWord, concepts } from "./glossary";
 
 /* Recall: the memories that matter for this request, within a token budget. Hybrid, the way dedicated memory layers do
    it, with no model in the loop so it costs nothing and gives the same answer twice:
@@ -11,12 +12,15 @@ import { B, type Bi } from "../bi";
      topic      the topic files whose one-line description matches the request get a lift (Claude's memory files)
    Pinned and critical memories are always in, and first. */
 
+/** The words BM25 counts: English words, Chinese character pairs, and one concept token ("~landlord") for each entry of
+ *  the compliance glossary the text mentions, which is what lets "房东" find "landlord" and "COI" find "certificate of
+ *  insurance" (glossary.ts). */
 const tokens = (s: string): string[] => {
   const t = norm(s);
   const en = t.match(/[a-z0-9][a-z0-9'-]*/g) ?? [];
   const cjk = [...t.replace(/[^一-鿿]/g, "")];
   const pairs = cjk.length > 1 ? cjk.slice(1).map((c, i) => cjk[i] + c) : cjk;
-  return [...en.filter(w => w.length > 1 && !STOP.has(w)), ...pairs];
+  return [...en.filter(w => w.length > 1 && !STOP.has(w)), ...pairs, ...concepts(t)];
 };
 const STOP = new Set(["the", "and", "for", "with", "our", "you", "your", "are", "was", "has", "have", "this", "that", "from", "what", "when", "who", "how", "did", "does", "about", "we", "of", "to", "in", "on", "is", "it", "a", "an", "at", "by", "be", "or"]);
 const docText = (o: Observation) => `${o.text.en} ${o.text.zh} ${o.entity} ${o.attr} ${o.value} ${TOPIC_INFO[o.topic].name.en}`;
@@ -97,8 +101,13 @@ export function rank(mem: AgentMemory, query: string, o: RecallOpts): Ranked[] {
   const kw = bm25(docs, query), top = Math.max(1e-9, ...kw);
   const vecs = o.embed ? o.embed([query, ...docs]) : [sketch(query), ...docs.map(d => sketch(d))];
   const qv = vecs[0], now = Date.parse(o.now), topics = topicsFor(query);
+  // the share of the request's concepts a memory covers: a fact kept in Chinese shares no English word with an English
+  // question, only concepts, so BM25 alone ranks it under any English line with one word in common
+  const qc = concepts(norm(query));
   return pool.map((item, i) => {
     const keyword = kw[i] / top, vector = Math.max(0, cosine(qv, vecs[i + 1]));
+    const dc = qc.length ? concepts(norm(docs[i])) : [];
+    const cover = qc.length ? qc.filter(c => dc.includes(c)).length / qc.length : 0;
     const age = Math.max(0, now - Date.parse(item.lastSeen ?? item.at)) / 86_400_000;
     const recency = Math.pow(0.5, age / 90);
     let boost = 0;
@@ -106,6 +115,7 @@ export function rank(mem: AgentMemory, query: string, o: RecallOpts): Ranked[] {
     if (o.scope?.market && item.scope.kind === "market" && item.scope.id === o.scope.market) boost += 0.2;
     if (topics.includes(item.topic)) boost += 0.1;
     if (item.pinned || item.critical) boost += 1;
+    boost += 0.3 * cover;
     const imp = (importance(item).score - 1) / 4;
     return { item, score: w.keyword * keyword + w.vector * vector + w.recency * recency + (w.importance ?? 0) * imp + boost, parts: { keyword, vector, recency, boost, importance: imp } };
   }).sort((a, b) => b.score - a.score || a.item.id.localeCompare(b.item.id));
@@ -118,7 +128,12 @@ export function rank(mem: AgentMemory, query: string, o: RecallOpts): Ranked[] {
 /** The words of the request a memory shares (the BM25 tokens, at most three). */
 export function sharedWords(query: string, o: Observation): string[] {
   const q = new Set(tokens(query)), d = new Set(tokens(docText(o)));
-  return [...q].filter(w => d.has(w)).slice(0, 3);
+  const shared = [...q].filter(w => d.has(w));
+  // the request's own words first; a concept only when no word is shared, named in the request's language
+  const words = shared.filter(w => !w.startsWith("~"));
+  const lang = /[一-鿿]/.test(query) ? "zh" : "en";
+  const named = shared.filter(w => w.startsWith("~")).map(w => conceptWord(w, lang)).filter(w => !words.includes(w));
+  return [...words, ...named].slice(0, 3);
 }
 
 /** Why this memory came up for this request, as one line in each language. */
@@ -178,7 +193,9 @@ export function recall(mem: AgentMemory, query: string, o: RecallOpts): Ranked[]
 /** One memory as the prompt shows it: what, its scope, where it came from and when. The provenance travels with it. */
 export function memoryLine(o: Observation, names: Record<string, string> = {}): string {
   const where = o.scope.kind === "workspace" ? "" : ` [${o.scope.kind}${o.scope.id ? " " + (names[scopeKey(o.scope)] ?? o.scope.id) : ""}]`;
-  return `- ${o.text.en}${where} (source: ${o.source.kind}${o.source.title ? ` "${o.source.title}"` : ""}, ${o.validFrom})`;
+  const rec = o.record ? `, record ${o.record.kind} ${o.record.id}` : "";
+  const check = o.verify === "recheck" ? ` [CHECK AGAIN: ${o.verifyReason?.en ?? "the rule behind it changed"} Confirm it against the record before relying on it.]` : "";
+  return `- ${o.text.en}${where} (source: ${o.source.kind}${o.source.title ? ` "${o.source.title}"` : ""}, ${o.validFrom}${rec})${check}`;
 }
 
 /** The approved memories that always load (pinned, then the rest by topic, newest first), as the stable block of the

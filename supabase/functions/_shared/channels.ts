@@ -121,6 +121,38 @@ export async function postHook(kind: HookKind, url: string, text: string, secret
   return { ok: false, gone: [400, 403, 404, 410].includes(res.status) || (kind === "teams" && res.status === 401), why: `${res.status}: ${answer.slice(0, 120)}` };
 }
 
+/* ------------------------------------------------------------------ when a team chat hears */
+// Each linked group chooses: every update as it comes (the default, as before), or one digest a day at the hour it
+// picks; and quiet hours (9pm to 8am where the business is), during which updates wait and go as one message at 8am.
+// The same quiet hours Odelia's texts already keep (odelia.ts inQuietHours), and the daily digest Claude Tag and Ramp
+// post where a team works (docs/CHANNELS.md). Kept in the integration's meta.
+
+export type HookSchedule = { digest?: "each" | "daily"; hour?: number; tz?: string; quiet?: boolean; last_sent?: string | null; held_since?: string | null };
+/** What to do with one linked chat at this sweep: post now (since: the updates from then on; without it, the fresh
+ *  ones), hold the fresh ones for the morning (held_since to remember), or nothing. */
+export type HookPlan = { act: "post"; since?: string } | { act: "hold"; held_since: string } | { act: "none" };
+
+const localParts = (now: Date, tz: string) => {
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hour12: false }).formatToParts(now).map((x) => [x.type, x.value]));
+  return { day: `${p.year}-${p.month}-${p.day}`, hour: Number(p.hour) % 24 };
+};
+const tzOk = (tz: unknown) => { try { new Intl.DateTimeFormat("en", { timeZone: String(tz) }); return typeof tz === "string" && tz.length > 0; } catch { return false; } };
+const quietNow = (now: Date, tz: string) => { const h = localParts(now, tz).hour; return h >= 21 || h < 8; };
+
+export function hookPlan(s: HookSchedule | null | undefined, now: Date, fresh: number): HookPlan {
+  const tz = tzOk(s?.tz) ? String(s!.tz) : "America/New_York";
+  if (s?.digest === "daily") {
+    const hour = Number.isInteger(s.hour) && s.hour! >= 0 && s.hour! <= 23 ? s.hour! : 9;
+    const here = localParts(now, tz);
+    const sentDay = s.last_sent ? localParts(new Date(s.last_sent), tz).day : "";
+    if (here.hour >= hour && sentDay !== here.day) return { act: "post", since: s.last_sent ?? new Date(now.getTime() - 864e5).toISOString() };
+    return { act: "none" };
+  }
+  if (s?.quiet && quietNow(now, tz)) return fresh > 0 || s.held_since ? { act: "hold", held_since: s.held_since ?? now.toISOString() } : { act: "none" };
+  if (s?.held_since) return { act: "post", since: s.held_since };
+  return fresh > 0 ? { act: "post" } : { act: "none" };
+}
+
 /** The welcome post that proves the link works before it's saved. */
 export const hookHello = (business: string, lang: "en" | "zh") => lang === "zh"
   ? `快哉已连接${business ? `（${business}）` : ""}。截止日期、续期提醒和申报进展会发到这里。`

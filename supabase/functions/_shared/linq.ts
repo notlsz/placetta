@@ -28,7 +28,11 @@ export function linqLines(env: Env): string[] {
   for (const raw of (env("LINQ_NUMBERS") ?? "").split(",")) { const n = normalizePhone(raw.trim()); if (n) seen.add(n); }
   return [...seen];
 }
-export const linqReady = (env: Env) => !!(env("LINQ_API_KEY") && env("LINQ_WEBHOOK_SECRET") && linqLines(env).length);
+/** iMessage is behind a flag: off unless LINQ_ENABLED is "1", whatever keys are set. Linq's pricing isn't public and
+ *  Placetta hasn't signed up, so no live key exists; until the founder turns it on, texts go by Telnyx SMS (or WhatsApp)
+ *  and a Linq webhook is refused. */
+export const linqEnabled = (env: Env) => env("LINQ_ENABLED") === "1";
+export const linqReady = (env: Env) => linqEnabled(env) && !!(env("LINQ_API_KEY") && env("LINQ_WEBHOOK_SECRET") && linqLines(env).length);
 
 /* ------------------------------ webhook signatures ------------------------------ */
 

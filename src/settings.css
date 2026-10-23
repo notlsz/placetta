@@ -39,6 +39,15 @@
 /* ------------------------------------------------------------------ rows */
 .settings .sg-list { margin: 0; padding: 0; list-style: none; }
 .settings .sg-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; min-height: 56px; padding: 12px 0; }
+/* Integrations as a directory: search and a filter above the lists */
+.settings .sg-dir { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 8px 0 4px; }
+.settings .sg-dir .sk-q { flex: 1 1 240px; min-width: 0; }
+.settings .sg-dir-f { display: inline-flex; gap: 4px; }
+.settings .sg-tx .sg-maps { color: var(--ink-2, inherit); opacity: .85; }
+/* a linked chat's schedule, under its row (Settings, HookWhen) */
+.settings .sg-row.sg-sub-row { min-height: 0; padding: 0 0 12px 40px; }
+.settings .sg-inline { display: inline-flex; align-items: center; gap: 8px; margin-left: 12px; }
+@media (max-width: 560px) { .settings .sg-row.sg-sub-row { grid-template-columns: 1fr; padding-left: 0; } .settings .sg-inline { margin: 8px 0 0; } }
 .settings .sg-row + .sg-row, .settings .sg-list > li + .sg-row, .settings .sg-row + li { border-top: 1px solid var(--line); }
 .settings .sg-row:has(> .sg-logo), .settings .sg-list > .sg-row:has(> .sg-logo) { grid-template-columns: 24px minmax(0, 1fr) auto; }
 .settings .sg-ico { display: none; }

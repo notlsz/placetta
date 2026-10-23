@@ -99,8 +99,8 @@ $1 a month for the number.
 
 | A store a month | Voice | With the rest of the month's AI and running cost | Under $50 |
 |---|---:|---:|---|
-| Typical: 10 min of calls, 15 min in the app, 4 agency calls of 12 min, 20 min interpreting | $8.06 | $14.46 | yes |
-| Heavy, uncapped: 60 min, 60 min, 12 agency calls of 25 min, 2 hours interpreting | $43.40 | $57.79 | no |
+| Typical: 10 min of calls, 15 min in the app, 4 agency calls of 12 min, 20 min interpreting | $7.02 | $13.42 | yes |
+| Heavy, uncapped: 60 min, 60 min, 12 agency calls of 25 min, 2 hours interpreting | $35.30 | $49.69 | yes, barely; capped at $22 anyway |
 | Heavy, as the gate holds it: voice at most half the store's $44 AI allowance | $22.00 | $36.39 | yes |
 
 **FOUNDER TO CONFIRM.** Live voice is far past the $1 a store a month line set for voice notes: a typical month is about

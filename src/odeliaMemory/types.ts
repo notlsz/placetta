@@ -91,7 +91,25 @@ export type Observation = {
   /** Who approved or last edited it (a user id), and when. */
   by?: string;
   edited?: string;
+  /** The record it is about, from its entity key ("app:sign" is the application sign): what Claude's and ChatGPT's
+   *  memories never have. */
+  record?: { kind: RecordKind; id: string };
+  /** recheck: the rule or record behind it changed since it was kept (the sweeper found the agency's page changed, or
+   *  the filing reached a decision), with the reason; confirmed: a person checked it after that. */
+  verify?: "current" | "recheck" | "confirmed";
+  verifyReason?: Bi;
+  verifyAt?: string;
+  /** Who reads a team memory: everyone (team, the default) or owners and admins only. A person's own is theirs. */
+  visibility?: "team" | "admins";
 };
+export type RecordKind = "filing" | "application" | "deadline" | "entity" | "store" | "form";
+const RECORD_PREFIX: Record<string, RecordKind> = { app: "application", filing: "filing", deadline: "deadline", entity: "entity", store: "store", form: "form" };
+/** The record an entity key names, the way the database's agent_memories_link trigger reads it. */
+export function recordOf(entity: string): Observation["record"] {
+  const m = /^([a-z]+):(.{1,120})$/.exec(String(entity ?? ""));
+  const kind = m ? RECORD_PREFIX[m[1]] : undefined;
+  return kind ? { kind, id: m![2] } : undefined;
+}
 
 export type MemSettings = {
   /** Memory is used and kept. Off by default: opt-in, as the privacy policy discloses it. */
@@ -102,8 +120,12 @@ export type MemSettings = {
   allowLast4: boolean;
   /** How many approved memories fit. A warning shows at 90%; at the cap nothing new is approved until some are removed. */
   cap: number;
+  /** This person's own switches (ChatGPT's Personalization): their runs read the saved memories, and search their own
+   *  past chats. On unless they turn them off. */
+  referenceMemories?: boolean;
+  referenceChats?: boolean;
 };
-export const DEFAULT_MEM_SETTINGS: MemSettings = { enabled: false, suggest: true, allowLast4: false, cap: 300 };
+export const DEFAULT_MEM_SETTINGS: MemSettings = { enabled: false, suggest: true, allowLast4: false, cap: 300, referenceMemories: true, referenceChats: true };
 
 /** A brief, the way CLAUDE.md works: plain lines an owner can edit, always loaded first for its scope. */
 export type BriefProposal = { id: string; line: string; why: string; source: Source; at: string };

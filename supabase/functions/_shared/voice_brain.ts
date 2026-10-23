@@ -172,18 +172,18 @@ const asTts = (v: string | undefined): TtsId | null => (TTS_IDS as string[]).inc
 
 /**
  * The brain for one conversation. Defaults, per the founder: OpenAI speech to speech everywhere, Mandarin included;
- * the full model where the other side is an agency (it carries the call) and for interpreting, the mini for an owner
- * talking to Odelia. Settings override per surface and language: VOICE_BRAIN_<SURFACE>_<LANG>, VOICE_BRAIN_<LANG>,
+ * the full model for interpreting (Mandarin accuracy is the job) and for an owner talking to Odelia, the mini for an
+ * agency status call (a short fixed script: case number, status, next step; anything with judgment goes to the owner). Settings override per surface and language: VOICE_BRAIN_<SURFACE>_<LANG>, VOICE_BRAIN_<LANG>,
  * VOICE_BRAIN (and VOICE_TTS_<LANG> for the cascaded path's voice). A brain that isn't set up falls back down the list
  * to one that is, ending at Telnyx's engine (what odelia-voice ran before), so a missing key never drops a call.
  */
 export function pickBrain(o: { surface: Surface; lang: Lang; env: Env }): { brain: BrainId; tts?: TtsId; why: string } {
   const S = o.surface.toUpperCase(), L = o.lang.toUpperCase();
   const set = asBrain(o.env(`VOICE_BRAIN_${S}_${L}`)) ?? asBrain(o.env(`VOICE_BRAIN_${L}`)) ?? asBrain(o.env("VOICE_BRAIN"));
-  const preferred: BrainId = set ?? (o.surface === "owner_phone" || o.surface === "app_talk" ? "openai_mini" : "openai");
+  const preferred: BrainId = set ?? (o.surface === "agency_phone" ? "openai_mini" : "openai");
   const phone = o.surface.endsWith("_phone");
   const ok = (id: BrainId) => (phone ? phoneReady(id, o.env) : BRAINS[id].browser && brainReady(id, o.env));
-  const order: BrainId[] = [preferred, ...(phone ? ["openai", "openai_mini", "telnyx"] as BrainId[] : ["openai_mini", "openai"] as BrainId[])];
+  const order: BrainId[] = [preferred, ...(phone ? ["openai", "openai_mini", "telnyx"] as BrainId[] : ["openai", "openai_mini"] as BrainId[])];
   const brain = order.find(ok) ?? (phone ? "telnyx" : preferred);
   const tts = brain === "telnyx" ? pickTts(o.lang, o.env) : undefined;
   const why = brain === preferred ? (set ? "set in VOICE_BRAIN settings" : "default") : `${preferred} isn't set up on this server; using ${brain}`;

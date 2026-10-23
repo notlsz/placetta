@@ -1,8 +1,10 @@
 // Types for tools.js (bundled from src/mcpServer.ts and src/toolArgs.ts by scripts/build-agent.mjs). Kept by hand.
 export type Scope = "status" | "deadlines" | "readiness" | "plan" | "filings";
 export type McpToolDef = { name: string; scope: Scope; title: string; description: string; inputSchema: { type: "object"; properties: Record<string, unknown>; required?: string[]; additionalProperties?: boolean }; outputSchema?: unknown; annotations: Record<string, unknown>; securitySchemes?: { type: "oauth2" | "noauth"; scopes?: string[] }[] };
-export type FilingRow = { app_id: string; title: { en?: string; zh?: string } | null; agency: { en?: string; zh?: string } | null; status: string; confirmation_number: string | null; submitted_at: string | null; decided_at: string | null; updated_at: string };
-export type McpCtx = { workspace: { name: string; state: unknown }; filings: FilingRow[]; today: string };
+export type FilingRow = { id?: string; app_id: string; title: { en?: string; zh?: string } | null; agency: { en?: string; zh?: string } | null; status: string; confirmation_number: string | null; submitted_at: string | null; decided_at: string | null; updated_at: string };
+/** One line of a filing's timeline (filing_events). */
+export type EventRow = { filing_id: string; at: string; kind: string; status: string | null; title: { en?: string; zh?: string } | null; source: string; confidence: number | null; url: string | null };
+export type McpCtx = { workspace: { name: string; state: unknown }; filings: FilingRow[]; events?: EventRow[]; today: string };
 export type McpResource = { uri: string; name: string; title: string; description: string; mimeType: "application/json"; scope: Scope };
 export type McpTemplate = { uriTemplate: string; name: string; title: string; description: string; mimeType: string; scope: Scope };
 export type McpPrompt = { name: string; title: string; description: string; arguments: { name: string; description: string; required?: boolean }[]; scopes: Scope[] };

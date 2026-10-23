@@ -1,16 +1,24 @@
 // Run: deno test supabase/functions/_shared/linq_test.ts
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
-import { hashLine, linqLineHealth, linqLines, linqReady, linqSend, linqTyping, parseLinq, pickLine, signLinq, verifyLinq } from "./linq.ts";
+import { hashLine, linqEnabled, linqLineHealth, linqLines, linqReady, linqSend, linqTyping, parseLinq, pickLine, signLinq, verifyLinq } from "./linq.ts";
 
 const SECRET = "whsec_" + btoa("0123456789abcdef0123456789abcdef");
 const envOf = (o: Record<string, string>) => (k: string) => o[k];
-const ENV = envOf({ LINQ_API_KEY: "lk_test", LINQ_WEBHOOK_SECRET: SECRET, LINQ_NUMBERS: "+14155550100, (415) 555-0101,+14155550100" });
+const KEYS = { LINQ_API_KEY: "lk_test", LINQ_WEBHOOK_SECRET: SECRET, LINQ_NUMBERS: "+14155550100, (415) 555-0101,+14155550100" };
+const ENV = envOf({ ...KEYS, LINQ_ENABLED: "1" });
 
 Deno.test("lines: normalized, de-duplicated, in order; ready needs key, secret and a line", () => {
   assertEquals(linqLines(ENV), ["+14155550100", "+14155550101"]);
   assert(linqReady(ENV));
-  assert(!linqReady(envOf({ LINQ_API_KEY: "k", LINQ_WEBHOOK_SECRET: SECRET })));
-  assert(!linqReady(envOf({ LINQ_WEBHOOK_SECRET: SECRET, LINQ_NUMBERS: "+14155550100" })));
+  assert(!linqReady(envOf({ LINQ_ENABLED: "1", LINQ_API_KEY: "k", LINQ_WEBHOOK_SECRET: SECRET })));
+  assert(!linqReady(envOf({ LINQ_ENABLED: "1", LINQ_WEBHOOK_SECRET: SECRET, LINQ_NUMBERS: "+14155550100" })));
+});
+
+Deno.test("feature flag: iMessage stays off without LINQ_ENABLED=1, even with every key set", () => {
+  assert(!linqEnabled(envOf(KEYS)) && !linqReady(envOf(KEYS)), "keys alone don't turn it on");
+  assert(!linqReady(envOf({ ...KEYS, LINQ_ENABLED: "true" })), "only the exact value 1");
+  assert(!linqReady(envOf({ ...KEYS, LINQ_ENABLED: "0" })));
+  assert(linqEnabled(ENV) && linqReady(ENV));
 });
 
 Deno.test("webhook signature: Standard Webhooks, v1 base64 HMAC of id.timestamp.body", async () => {

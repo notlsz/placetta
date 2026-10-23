@@ -648,7 +648,7 @@ try {
   await scenario("b2. iMessage", async () => {
     // Linq turned on next to Telnyx: two iMessage lines, the webhook secret, the key
     const L1 = "+14155550170", L2 = "+14155550171", STAFF_PHONE = "+16465550144";
-    const LINQ_ENV = { LINQ_API_KEY: "lq_e2e", LINQ_WEBHOOK_SECRET: "whsec_" + btoa("e2e-linq-signing-secret-0123456789"), LINQ_NUMBERS: `${L1},${L2}` };
+    const LINQ_ENV = { LINQ_ENABLED: "1", LINQ_API_KEY: "lq_e2e", LINQ_WEBHOOK_SECRET: "whsec_" + btoa("e2e-linq-signing-secret-0123456789"), LINQ_NUMBERS: `${L1},${L2}` };
     for (const [k, v] of Object.entries(LINQ_ENV)) Deno.env.set(k, v);
     stubs.linqState.lines = new Set([L1, L2]);
     const { signLinq } = await import("../../supabase/functions/_shared/linq.ts");

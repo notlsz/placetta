@@ -10,15 +10,33 @@ server is `supabase/functions/mcp`, read only.
 | `store_readiness` | readiness | Ready-to-open or inspection-ready score per store, with its parts |
 | `plan_preview` | plan | The permits a kind of business needs in a US city, from the registry, each with its source |
 | `filing_status` | filings | Filings the team submits: status, confirmation number, dates |
+| `status_timeline` | filings | Each filing's timeline, newest first: status changes, what the agency's own lookup showed, escalations, appeal deadlines and inspections, each with its source and confidence (`filing_events`) |
+| `appeals` | filings | Denials being appealed: the route, the last day and the safer file-by date, days left, stage, hearing, outcome, and whether an attorney is advised |
+| `inspections` | readiness | Inspections booked or being booked per store: how, status, slot, result with corrections and the reinspection |
+
+The last three were added 2026-10-23 under existing scopes (an appeal and a timeline are about filings; an inspection is
+about readiness), so tokens already given keep working and no table changed. All three only read, like the rest.
 
 **Resources** (an assistant attaches them as context, or a person @-mentions them in Claude), each needing the scope
 shown: `placetta://status` (status), `placetta://stores/<id>/status` (status, one per store, also a template),
-`placetta://stores/<id>/readiness` (readiness, template), `placetta://deadlines` (deadlines, next 60 days) and
-`placetta://filings/open` (filings). They are built from the same tools, so a resource and its tool always agree.
+`placetta://stores/<id>/readiness` (readiness, template), `placetta://deadlines` (deadlines, next 60 days),
+`placetta://filings/open` (filings), `placetta://appeals` (filings), `placetta://inspections` (readiness) and
+`placetta://filings/<application id>/timeline` (filings, template). They are built from the same tools, so a resource
+and its tool always agree.
 
 **Prompts** (Claude shows them as slash commands), each with its data attached so it answers in one turn:
-`renewal_checklist` (days, store_id, lang), `weekly_brief` (lang) and `opening_readiness` (store_id, lang). A prompt
-is listed only for a token with every scope it reads.
+`renewal_checklist` (days, store_id, lang), `weekly_brief` (lang), `opening_readiness` (store_id, lang),
+`appeal_deadlines` (lang) and `inspection_prep` (store_id, lang). A prompt is listed only for a token with every scope it
+reads.
+
+**Tested end to end** (`supabase/functions/mcp/inspector_test.ts`, `deno test -A --node-modules-dir=none`): the official
+MCP TypeScript SDK client (1.32.1, the library the MCP Inspector is built on) over real HTTP against the handler on a
+local port, with an in-memory database holding the migration's rules. It gets the 401, reads both metadata documents,
+registers with a loopback redirect, signs in with PKCE S256 and the resource bound, trades the code (twice: refused),
+then calls all 8 tools (the client checks each answer against its `outputSchema`), lists and reads the resources, gets
+the prompts, and rotates the refresh token (the old one again: refused). The MCP Inspector CLI 2.10.0 was also run
+against the same handler for tools, resources, templates and prompts (2026-10-23). Neither has run against the deployed
+address yet: that is a founder step.
 
 **Pages and errors.** Every list (`tools/list`, `resources/list`, `resources/templates/list`, `prompts/list`) and the
 two long tools (`upcoming_deadlines`, `filing_status`) return 50 at a time with an opaque `nextCursor` /

@@ -1,7 +1,7 @@
 import { B, type Bi } from "./bi";
 import type { MemoryBook, MemorySettings, Recall, RecallKind, ReachBy, Store, Workspace } from "./model";
 import { addDeadline, audit, type P, type Reply } from "./core";
-import { emailsIn, idNumber, secretNumber, SENSITIVE } from "./guard";
+import { emailsIn, idNumber, secretNumber, sensitiveTopic } from "./guard";
 import { daysFromNow, fmtDay, nowIso } from "./time";
 import { reachOf, type Reach } from "../supabase/functions/_shared/reach.ts";
 
@@ -115,7 +115,7 @@ export function parseRecall(raw: unknown, o: { said: string; at?: string; via?: 
     const phone = str(x.phone, 30);
     const words = [en, zh, source, name, role, what].join(" ");
     if (idNumber(words) || secretNumber("", words) || secretNumber("ssn", phone)) continue;
-    if (!(o.settings?.sensitive) && SENSITIVE.test(`${en} ${source}`)) continue;
+    if (!(o.settings?.sensitive) && sensitiveTopic(`${en} ${source}`)) continue;
     if (kind !== "person" && FORM_FACT.test(`${en} ${zh}`)) continue;
     const it: Recall = { id: newId(), kind, text: B(en, zh), source, at: o.at ?? nowIso(), status: o.via ? "suggested" : "saved", ...(o.via ? { via: o.via } : {}) };
     if (kind === "preference") {

@@ -12,14 +12,14 @@
 // carry a stable code in error.data.code or, for a tool, structuredContent.error.code.
 
 // @ts-types="./tools.d.ts"
-import type { FilingRow, McpExtras, McpToolDef, Scope } from "./tools.js";
+import type { EventRow, FilingRow, McpExtras, McpToolDef, Scope } from "./tools.js";
 import { type OAuthDeps, oauthRoute, wwwAuthenticate } from "./oauth.ts";
 
 export const STATELESS = "2026-07-28";
 export const LEGACY = ["2025-11-25", "2025-06-18", "2025-03-26"];
 export const SUPPORTED = [STATELESS, ...LEGACY];
 export const SERVER_INFO = { name: "placetta", title: "Placetta", version: "1.0.0" };
-const INSTRUCTIONS = "Placetta tracks a business's licenses, permits, filings and compliance deadlines per store. Every tool only reads, and only this token's workspace. Start with compliance_status for the store ids. Dates are YYYY-MM-DD. Lists longer than 50 come in pages: pass next_cursor back as cursor.";
+const INSTRUCTIONS = "Placetta tracks a business's licenses, permits, filings, appeals, inspections and compliance deadlines per store. Every tool only reads, and only this token's workspace. Start with compliance_status for the store ids; status_timeline shows how each filing has moved, appeals the deadlines to contest a denial, inspections what is booked. Dates are YYYY-MM-DD. Lists longer than 50 come in pages: pass next_cursor back as cursor.";
 /** Calls per token per minute, and requests per address per minute before a token is checked. */
 export const PER_TOKEN = 60, PER_IP = 120;
 
@@ -30,9 +30,11 @@ export type Deps = {
   limit(key: string, max: number, windowSeconds: number): Promise<boolean>;
   workspace(id: string): Promise<{ name: string; state: unknown } | null>;
   filings(id: string): Promise<FilingRow[]>;
+  /** The workspace's filing timelines (filing_events), newest first; only status_timeline reads them. */
+  events?(id: string): Promise<EventRow[]>;
   audit(a: Audit): Promise<void>;
   tools: McpToolDef[];
-  run(name: string, args: Record<string, unknown>, ctx: { workspace: { name: string; state: unknown }; filings: FilingRow[]; today: string }): unknown;
+  run(name: string, args: Record<string, unknown>, ctx: { workspace: { name: string; state: unknown }; filings: FilingRow[]; events?: EventRow[]; today: string }): unknown;
   isToolError(e: unknown): boolean;
   check(schema: unknown, input: unknown): { ok: boolean; errors: string[] };
   today(): string;
@@ -130,9 +132,11 @@ export async function handle(req: Request, d: Deps): Promise<Response> {
   // one page of a list (opaque cursor; an invalid one is -32602, as the pagination page says)
   const paged = <T,>(list: T[]): { items: T[]; next?: string } | null => { try { return d.x.page(list, params.cursor); } catch { return null; } };
   const badCursor = () => reply({ status: 200, body: rpcError(id, -32602, "That cursor isn't one this server gave out. Start again without a cursor.", { code: "invalid_cursor" }) });
-  const ctx = async (needFilings: boolean) => {
+  const ctx = async (needFilings: boolean, needEvents = false) => {
     const ws = await d.workspace(tok.workspace_id);
-    return ws ? { workspace: ws, filings: needFilings ? await d.filings(tok.workspace_id) : [], today: d.today() } : null;
+    if (!ws) return null;
+    const [filings, events] = await Promise.all([needFilings || needEvents ? d.filings(tok.workspace_id) : [], needEvents && d.events ? d.events(tok.workspace_id) : []]);
+    return { workspace: ws, filings, events, today: d.today() };
   };
   const gone = () => reply({ status: 200, body: rpcError(id, -32603, "This token's workspace no longer exists.", { code: "workspace_gone" }) });
 
@@ -177,7 +181,7 @@ export async function handle(req: Request, d: Deps): Promise<Response> {
       return reply({ status: 200, body: rpcError(id, -32602, `This token doesn't have the ${scope} scope this resource needs.`, { code: "scope_missing", scope }) });
     }
     try {
-      const c = await ctx(scope === "filings");
+      const c = await ctx(scope === "filings", /\/timeline$/.test(name));
       if (!c) return gone();
       const contents = [d.x.readResource(name, c)];
       await log("resources/read", { uri: name }, "allow");
@@ -231,7 +235,7 @@ export async function handle(req: Request, d: Deps): Promise<Response> {
       return toolError("invalid_arguments", why);
     }
     try {
-      const c = await ctx(tool.scope === "filings");
+      const c = await ctx(tool.scope === "filings", name === "status_timeline");
       if (!c) { await log(name, args, "error", "workspace gone"); return toolError("workspace_gone", "This token's workspace no longer exists."); }
       const out = d.run(name, args, c);
       await log(name, args, "allow");

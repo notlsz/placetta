@@ -261,6 +261,8 @@ async function startRun(link: Link, ws: string, prompt: string, logId: number, v
 
 /** Linq: iMessage (and RCS or SMS when the phone can't do iMessage) to one of Odelia's lines. */
 async function linqWebhook(req: Request) {
+  // iMessage is behind LINQ_ENABLED (_shared/linq.ts): with it off, nothing from Linq is taken in
+  if (!linqReady(env)) return fail(503, "not_configured", "iMessage isn't turned on.");
   const raw = await req.text();
   const h = (k: string) => req.headers.get(k) ?? "";
   const ok = await verifyLinq(raw, { id: h("webhook-id"), timestamp: h("webhook-timestamp"), signature: h("webhook-signature") }, env("LINQ_WEBHOOK_SECRET") ?? "");

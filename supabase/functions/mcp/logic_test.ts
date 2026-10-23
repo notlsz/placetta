@@ -62,13 +62,13 @@ const call = (name: string, args: Record<string, unknown>, id = 1) => ({ jsonrpc
 const json = async (r: Response) => await r.json() as { result?: Record<string, unknown>; error?: { code: number; message: string; data?: unknown } };
 const structured = async (r: Response) => (await json(r)).result as { structuredContent: Record<string, unknown>; isError: boolean; content: { text: string }[] };
 
-Deno.test("Placetta's own MCP client connects (initialize, 2025-11-25), lists the five read-only tools and reads its workspace", async () => {
+Deno.test("Placetta's own MCP client connects (initialize, 2025-11-25), lists the eight read-only tools and reads its workspace", async () => {
   const s = server();
   const c = new McpClient({ url: s.URL_, net: s.net, token: () => Promise.resolve(KEY_A) });
   await c.connect();
   assertEquals([c.protocol, c.session, c.stateless, (c.serverInfo as { name: string }).name], ["2025-11-25", null, false, "placetta"]);
   const tools = await c.listTools();
-  assertEquals(tools.map((t) => t.name), ["compliance_status", "filing_status", "plan_preview", "store_readiness", "upcoming_deadlines"]);
+  assertEquals(tools.map((t) => t.name), ["appeals", "compliance_status", "filing_status", "inspections", "plan_preview", "status_timeline", "store_readiness", "upcoming_deadlines"]);
   assert(tools.every((t) => t.read_only), "every tool is annotated read only");
   const r = await c.callTool("compliance_status", {});
   assert(!r.is_error && /Flushing, Main St/.test(r.text) && /Upload the landlord's consent/.test(r.text) && !/Oakland/.test(r.text), r.text);
@@ -163,9 +163,9 @@ Deno.test("resources: each store's status as an address, templates, read, scopes
   assert(caps.resources && caps.prompts && caps.tools, JSON.stringify(caps));
   const list = await json(await s.post(rpc("resources/list"), auth(KEY_A)));
   const uris = (list.result!.resources as { uri: string; mimeType: string }[]).map((r) => r.uri);
-  assertEquals(uris, ["placetta://status", "placetta://deadlines", "placetta://filings/open", "placetta://stores/flushing/status"]);
+  assertEquals(uris, ["placetta://status", "placetta://deadlines", "placetta://filings/open", "placetta://appeals", "placetta://inspections", "placetta://stores/flushing/status"]);
   const tpl = await json(await s.post(rpc("resources/templates/list"), auth(KEY_A)));
-  assertEquals((tpl.result!.resourceTemplates as { uriTemplate: string }[]).map((t) => t.uriTemplate), ["placetta://stores/{store_id}/status", "placetta://stores/{store_id}/readiness"]);
+  assertEquals((tpl.result!.resourceTemplates as { uriTemplate: string }[]).map((t) => t.uriTemplate), ["placetta://stores/{store_id}/status", "placetta://stores/{store_id}/readiness", "placetta://filings/{application_id}/timeline"]);
   const read = await json(await s.post(rpc("resources/read", { uri: "placetta://stores/flushing/status" }), auth(KEY_A)));
   const c = (read.result!.contents as { uri: string; mimeType: string; text: string }[])[0];
   assert(c.mimeType === "application/json" && /Upload the landlord's consent/.test(c.text), c.text.slice(0, 200));
@@ -187,7 +187,7 @@ Deno.test("resources: each store's status as an address, templates, read, scopes
 Deno.test("prompts: the renewal checklist comes with its data attached; scopes and arguments checked", async () => {
   const s = server();
   const list = await json(await s.post(rpc("prompts/list"), auth(KEY_A)));
-  assertEquals((list.result!.prompts as { name: string }[]).map((p) => p.name), ["renewal_checklist", "weekly_brief", "opening_readiness"]);
+  assertEquals((list.result!.prompts as { name: string }[]).map((p) => p.name), ["renewal_checklist", "weekly_brief", "opening_readiness", "appeal_deadlines", "inspection_prep"]);
   const got = await json(await s.post(rpc("prompts/get", { name: "renewal_checklist", arguments: { days: "90" } }), auth(KEY_A)));
   const msgs = got.result!.messages as { role: string; content: { type: string; text?: string; resource?: { uri: string; text: string } } }[];
   assert(msgs[0].content.type === "text" && /renewal checklist for the next 90 days/.test(msgs[0].content.text!), JSON.stringify(msgs[0]));

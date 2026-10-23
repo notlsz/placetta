@@ -232,17 +232,17 @@ Deno.test("the interpreter knows the trade's words, and checks every line for th
 /* ------------------------------ the brain, and what it costs ------------------------------ */
 
 Deno.test("the brain: OpenAI speech to speech by default, Mandarin included, with a fallback that never drops a call", () => {
-  assertEquals(pickBrain({ surface: "owner_phone", lang: "zh", env: ALL }).brain, "openai_mini");
-  assertEquals(pickBrain({ surface: "agency_phone", lang: "zh", env: ALL }).brain, "openai");
+  assertEquals(pickBrain({ surface: "owner_phone", lang: "zh", env: ALL }).brain, "openai");
+  assertEquals(pickBrain({ surface: "agency_phone", lang: "zh", env: ALL }).brain, "openai_mini", "a status call is a short script");
   assertEquals(pickBrain({ surface: "app_interpreter", lang: "zh", env: ALL }).brain, "openai");
   // no SIP project: the phone falls back to Telnyx's engine, the app still talks to OpenAI
   const noSip = envOf({ OPENAI_API_KEY: "k", TELNYX_API_KEY: "k", TELNYX_ASSISTANT_ID: "a" });
   assertEquals(pickBrain({ surface: "agency_phone", lang: "en", env: noSip }).brain, "telnyx");
-  assertEquals(pickBrain({ surface: "app_talk", lang: "en", env: noSip }).brain, "openai_mini");
+  assertEquals(pickBrain({ surface: "app_talk", lang: "en", env: noSip }).brain, "openai");
   // switchable per language: the cascaded path with ElevenLabs for English agency calls
   const eleven = envOf({ OPENAI_API_KEY: "k", OPENAI_SIP_PROJECT: "p", TELNYX_API_KEY: "k", TELNYX_ASSISTANT_ID: "a", VOICE_BRAIN_AGENCY_PHONE_EN: "telnyx", ELEVENLABS_VOICE_EN: "v1" });
   assertEquals(pickBrain({ surface: "agency_phone", lang: "en", env: eleven }), { brain: "telnyx", tts: "elevenlabs_flash", why: "set in VOICE_BRAIN settings" });
-  assertEquals(pickBrain({ surface: "agency_phone", lang: "zh", env: eleven }).brain, "openai", "Mandarin stays on OpenAI");
+  assertEquals(pickBrain({ surface: "agency_phone", lang: "zh", env: eleven }).brain, "openai_mini", "Mandarin stays on OpenAI");
   // Grok and Gemini need the media bridge on the phone
   const grok = envOf({ XAI_API_KEY: "k", VOICE_BRAIN: "grok", OPENAI_API_KEY: "k", OPENAI_SIP_PROJECT: "p" });
   assertEquals(pickBrain({ surface: "agency_phone", lang: "en", env: grok }).brain, "openai");
@@ -263,13 +263,13 @@ Deno.test("cost: all in, a minute and a store-month, inside the $50 ceiling", ()
   assertEquals(perMinute({ brain: "telnyx", tts: "elevenlabs_flash", surface: "agency_phone", recorded: true }), 0.085);
   assertEquals(perMinute({ brain: "openai_mini", surface: "app_talk" }), 0.035);
   const typical = storeMonth(TYPICAL_MONTH), heavy = storeMonth(HEAVY_MONTH);
-  // typical: about $8 a store-month; with the typical month's AI and running cost ($6.40, docs/UNIT-ECONOMICS.md) about $14
-  assertEquals(typical.usd, 8.06);
+  // typical: about $7 a store-month; with the typical month's AI and running cost ($6.40, docs/UNIT-ECONOMICS.md) about $13
+  assertEquals(typical.usd, 7.02);
   assert(typical.usd + 6.40 < 50);
-  // a heavy month, uncapped, would pass the ceiling with the rest of the heavy month ($8.91 AI, $5.48 running cost):
-  // voice_gate holds voice to half the store's $44 AI allowance, $22, which keeps it under
-  assertEquals(heavy.usd, 43.4);
-  assert(heavy.usd + 8.91 + 5.48 > 50, "uncapped, it wouldn't fit");
+  // a heavy month, uncapped, now just fits with the rest of the heavy month ($8.91 AI, $5.48 running cost), because agency
+  // calls run on the mini; voice_gate still holds voice to half the store's $44 AI allowance, $22, for margin
+  assertEquals(heavy.usd, 35.3);
+  assert(heavy.usd + 8.91 + 5.48 < 50, "uncapped, it fits");
   assert(Math.min(heavy.usd, 0.5 * 44) + 8.91 + 5.48 < 50, "capped by voice_gate, it does");
   for (const b of Object.values(BRAINS)) assert(b.sources.length && b.usdPerMin.low <= b.usdPerMin.typical && b.usdPerMin.typical <= b.usdPerMin.high, b.id);
   for (const t of Object.values(TTS)) assert(t.source.length > 10, t.id);

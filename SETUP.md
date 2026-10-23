@@ -234,7 +234,7 @@ Linq (linqapp.com) gives Odelia real iMessage lines, the provider Poke, Lindy an
 2. `npm run launch` asks for the key, lists the lines, subscribes `odelia-sms` to `message.received` (Linq shows the signing secret once; it goes straight to `LINQ_WEBHOOK_SECRET`), sets `LINQ_API_KEY` and `LINQ_NUMBERS`, and can forward each line's calls to `ODELIA_NUMBER` (`LINQ_FORWARDS_CALLS=1`) so people save one number. By hand: webhook `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/odelia-sms?version=2026-02-03`, event `message.received`.
 3. Run the migration `20261016060000_odelia_imessage.sql` and deploy `odelia-sms`, `odelia-voice` and `agent-run`.
 
-With Linq set, every text goes by iMessage (codes, answers, updates); Telnyx keeps calls and is the fallback when no line can send. Settings shows each person their own line.
+iMessage is behind a feature flag: nothing goes by Linq, and a Linq webhook is refused, until `LINQ_ENABLED=1` is set in the function secrets (`npm run launch` asks, and says no unless you answer yes). The keys alone leave it off, so they can be set before the plan is signed. With the flag and the keys set, every text goes by iMessage (codes, answers, updates); Telnyx keeps calls and is the fallback when no line can send. With the flag off, texts go by Telnyx SMS. Settings shows each person their own line.
 
 How the lines stay healthy (Apple banned Lindy's self-run iMessage account after 10,000 messages in 12 hours, so these are its lessons):
 

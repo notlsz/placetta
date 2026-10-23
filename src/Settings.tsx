@@ -103,7 +103,9 @@ const PROVIDER_OF: Partial<Record<IntegrationKind, keyof api.Availability>> = { 
 const PLACES_WHY = B("Your stores' addresses, phones and hours, so Odelia adds stores and fills those lines on forms without asking again", "门店地址、电话和营业时间，Odelia 据此添加门店并填写表格中的这些栏目，无需再问");
 const POS_WHY = B("Monthly sales for sales tax and permit fees, the team's schedules and hours for labor-law and food handler checks", "月度销售额用于销售税和许可费，团队排班和工时用于劳动法和食品从业人员证检查");
 
-type Item = { kind: IntegrationKind | "feed"; name: string; zh?: string; why: Bi; logo?: string; wide?: boolean; hook?: boolean; bot?: boolean };
+/** maps: what Placetta checks the app's data against for licenses (src/connectorFacts.ts), where it does. */
+type Item = { kind: IntegrationKind | "feed"; name: string; zh?: string; why: Bi; maps?: Bi; logo?: string; wide?: boolean; hook?: boolean; bot?: boolean };
+const MAPS_PLACE = B("Each address is checked against its store and every application that names it", "每个地址都会与门店记录和写有该地址的每份申请核对");
 const CHAT_WHY = B("Deadlines, renewals and filing updates in your team's group", "截止日期、续期和申报进展推送到团队群");
 const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
   { group: B("Email", "邮件"), items: [
@@ -135,15 +137,15 @@ const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
     { kind: "dropbox", name: "Dropbox", why: B("Import leases, floor plans and certificates", "导入租约、平面图和证书"), logo: dropboxLogo },
   ] },
   { group: B("Sales, payroll and accounting", "销售、薪资与财务"), items: [
-    { kind: "square", name: "Square", why: POS_WHY, logo: squareLogo },
+    { kind: "square", name: "Square", why: POS_WHY, maps: MAPS_PLACE, logo: squareLogo },
     { kind: "toast", name: "Toast", why: POS_WHY, logo: toastLogo, wide: true },
     { kind: "quickbooks", name: "QuickBooks", why: B("Gross receipts for business tax and renewals", "营业总额用于营业税和续期"), logo: qbLogo },
-    { kind: "xero", name: "Xero", why: B("The company's legal name, addresses and tax number for the forms", "公司法定名称、地址和税号，用于填写表格") },
+    { kind: "xero", name: "Xero", why: B("The company's legal name, addresses and tax number for the forms", "公司法定名称、地址和税号，用于填写表格"), maps: B("Its legal name is checked against the entity your filings use", "其法定名称会与申报所用的实体核对") },
   ] },
   { group: B("Stores and locations", "门店与地点"), items: [
-    { kind: "gbp", name: "Google Business Profile", zh: "Google 商家资料", why: PLACES_WHY },
-    { kind: "clover", name: "Clover", why: PLACES_WHY },
-    { kind: "shopify", name: "Shopify", why: PLACES_WHY },
+    { kind: "gbp", name: "Google Business Profile", zh: "Google 商家资料", why: PLACES_WHY, maps: MAPS_PLACE },
+    { kind: "clover", name: "Clover", why: PLACES_WHY, maps: MAPS_PLACE },
+    { kind: "shopify", name: "Shopify", why: PLACES_WHY, maps: MAPS_PLACE },
   ] },
   { group: B("Signatures", "签署"), items: [
     { kind: "dropbox_sign", name: "Dropbox Sign", why: B("Send the papers a filing needs from someone else, like the landlord's authorization letter, for signature, and see who has signed", "把申报需要他人签署的文件（如房东授权信）发出签署，并查看谁已签署") },
@@ -221,10 +223,44 @@ function ChatLink({ kind, account }: { kind: keyof typeof LINKS; account: string
   );
 }
 
+/** When a linked team chat hears from Placetta: each update as it comes (the default) or one digest a day at an hour,
+ *  and quiet hours, 9pm to 8am where the business is, held and sent as one message in the morning
+ *  (supabase/functions/_shared/channels.ts hookPlan). Owners change it; everyone else sees it. */
+function HookWhen({ kind, meta }: { kind: HookKind; meta: Record<string, unknown> }) {
+  const { lang, cloud } = useApp();
+  const zh = lang === "zh";
+  const pin = usePin();
+  const tz = typeof meta.tz === "string" ? meta.tz : (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York"; } catch { return "America/New_York"; } })();
+  const cur = { digest: meta.digest === "daily" ? "daily" as const : "each" as const, hour: Number.isInteger(meta.hour) ? meta.hour as number : 9, tz, quiet: meta.quiet === true };
+  const [busy, setBusy] = useState(false);
+  const save = (next: Partial<typeof cur>) => {
+    if (!cloud?.owner || busy) return;
+    pin.guard(() => { setBusy(true); void cloud.hookSchedule(kind, { ...cur, ...next }).finally(() => setBusy(false)); });
+  };
+  const hourLabel = (h: number) => zh ? `${h}:00` : `${h % 12 || 12}${h < 12 ? "am" : "pm"}`;
+  const when = cur.digest === "daily" ? (zh ? `每天 ${hourLabel(cur.hour)} 汇总一次` : `Once a day at ${hourLabel(cur.hour)}`) : (zh ? "每条动态即时发送" : "Each update as it comes");
+  if (!cloud?.owner) return <li className="sg-row sg-sub-row"><span className="sg-tx"><small>{when}{cur.quiet ? (zh ? "，晚 9 点至早 8 点免打扰" : ", quiet 9pm to 8am") : ""}</small></span></li>;
+  return (
+    <li className="sg-row sg-sub-row">
+      <span className="sg-tx"><small>{zh ? `何时发送（${tz}）` : `When it posts (${tz})`}</small></span>
+      <span className="sg-r">
+        <Select value={cur.digest === "daily" ? String(cur.hour) : "each"} disabled={busy} aria-label={zh ? "何时发送" : "When it posts"}
+          onChange={e => save(e.target.value === "each" ? { digest: "each" } : { digest: "daily", hour: Number(e.target.value), tz })}>
+          <option value="each">{zh ? "每条即时发送" : "Each update as it comes"}</option>
+          {[7, 8, 9, 10, 12, 17].map(h => <option key={h} value={String(h)}>{zh ? `每天 ${hourLabel(h)} 汇总` : `Daily at ${hourLabel(h)}`}</option>)}
+        </Select>
+        {cur.digest === "each" && <label className="sg-inline"><Toggle on={cur.quiet} set={v => save({ quiet: v, tz })} label={zh ? "晚 9 点至早 8 点免打扰" : "Quiet 9pm to 8am"} disabled={busy} /><small>{zh ? "晚 9 点至早 8 点免打扰" : "Quiet 9pm to 8am"}</small></label>}
+      </span>
+    </li>
+  );
+}
+
 function Integrations() {
   const { b, lang, cloud, say } = useApp();
   const pin = usePin();
   const [feed, setFeed] = useState("");
+  const [q, setQ] = useState("");
+  const [only, setOnly] = useState(false);
   const [avail, setAvail] = useState<api.Availability | null>(null);
   const [form, setForm] = useState<{ kind: HookKind; url: string; secret: string; busy?: boolean } | null>(null);
   // done: WeChat is connected and the form stays to show what goes into WeChat's console (the Token and key aren't shown again)
@@ -278,9 +314,22 @@ function Integrations() {
     const ok = await cloud.connectHook(form.kind, form.url.trim(), form.secret.trim());
     setForm(ok ? null : { ...form, busy: false });
   };
+  // the directory, the way Claude's connector directory works: search by name or use, and see only what's connected
+  const needle = q.trim().toLowerCase();
+  const shown = INTEGRATIONS.map(g => ({ ...g, items: g.items.filter(it => (!only || (it.kind !== "feed" && !!conn(it.kind)))
+    && (!needle || [it.name, it.zh ?? "", it.why.en, it.why.zh, g.group.en, g.group.zh, it.maps?.en ?? "", it.maps?.zh ?? ""].some(s => s.toLowerCase().includes(needle)))) })).filter(g => g.items.length);
+  const linked = (cloud?.integrations ?? []).filter(i => i.status === "connected").length;
   return (
     <Group id="integrations" title={B("Integrations", "集成")} note={B("Only what gets you licensed and keeps you compliant. Placetta reads what a task needs and nothing else; disconnect any time.", "只连接拿证和保持合规所需的服务。快哉只读取任务所需的内容，可随时断开。")}>
-      {INTEGRATIONS.map(g => (
+      <div className="sg-dir" role="search">
+        <input className="sk-q" type="search" value={q} onChange={e => setQ(e.target.value)} placeholder={zh ? "搜索应用，如 Notion、日历、地址" : "Search apps, like Notion, calendar or address"} aria-label={zh ? "搜索应用" : "Search apps"} />
+        <span className="sg-dir-f" role="group" aria-label={zh ? "显示" : "Show"}>
+          <button type="button" className={"sbtn " + (!only ? "line" : "quiet")} aria-pressed={!only} onClick={() => setOnly(false)}>{zh ? "全部" : "All"}</button>
+          <button type="button" className={"sbtn " + (only ? "line" : "quiet")} aria-pressed={only} onClick={() => setOnly(true)}>{zh ? `已连接（${linked}）` : `Connected (${linked})`}</button>
+        </span>
+      </div>
+      {!shown.length && <p className="sg-note">{zh ? "没有匹配的内置应用。下面可以连接任何提供 MCP 服务器的应用。" : "No built-in app matches. Below, connect any app that offers an MCP server."}</p>}
+      {shown.map(g => (
         <div key={g.group.en} className="sg-sub">
           <h3>{b(g.group)}</h3>
           <ul className="sg-list">
@@ -306,10 +355,11 @@ function Integrations() {
               return [
                 <li key={it.kind} className="sg-row">
                   <Tile logo={it.logo} wide={it.wide} chat={it.hook || it.bot} />
-                  <span className="sg-tx"><b>{zh && it.zh ? it.zh : it.name}</b><small>{b(why)}</small>{c?.account && <small className="sg-acct">{c.account}</small>}</span>
+                  <span className="sg-tx"><b>{zh && it.zh ? it.zh : it.name}</b><small>{b(why)}</small>{it.maps && <small className="sg-maps">{b(it.maps)}</small>}{c?.account && <small className="sg-acct">{c.account}</small>}</span>
                   {(status || right) && <span className="sg-r">{status}{right}</span>}
                 </li>,
                 (it.kind === "wechat_bot" || it.kind === "telegram_bot") && c && c.status === "connected" && cloud ? <ChatLink key={it.kind + "-link"} kind={it.kind === "wechat_bot" ? "wechat" : "telegram"} account={c.account} /> : null,
+                it.hook && c && c.status === "connected" && cloud ? <HookWhen key={it.kind + "-when"} kind={it.kind as HookKind} meta={c.meta} /> : null,
               ];
             })}
           </ul>
@@ -372,6 +422,7 @@ function Integrations() {
               <li>{zh ? "在 api.slack.com/apps 选择 Create New App → From a manifest，选好工作区，粘贴下面的清单：" : "At api.slack.com/apps choose Create New App, From a manifest, pick your workspace and paste this:"}</li>
               {bot.setup?.manifest ? <pre className="sg-code"><button type="button" className="lnk" onClick={() => copy(bot.setup!.manifest!)}>{zh ? "复制" : "Copy"}</button>{bot.setup.manifest}</pre> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
               <li>{zh ? "点 Install to Workspace。然后复制 OAuth & Permissions 里的 Bot User OAuth Token（xoxb- 开头），以及 Basic Information 里的 Signing Secret：" : "Click Install to Workspace. Then copy the Bot User OAuth Token (starts with xoxb-) from OAuth & Permissions, and the Signing Secret from Basic Information:"}</li>
+              <li>{zh ? "已经装过？把这个清单粘贴到应用的 App Manifest 页面并重新安装，即可使用 /odelia、“记成任务”快捷方式、按钮、话题上下文和文件。" : "Set it up before? Paste this manifest on the app's App Manifest page and reinstall to get /odelia, the Make it a task shortcut, buttons, thread context and files."}</li>
             </ol>
           ) : bot.kind === "wechat_bot" ? (
             <ol>
@@ -387,7 +438,7 @@ function Integrations() {
               <li>{zh ? "在 Teams 开发者门户（dev.teams.microsoft.com）：工具 → 机器人管理 → 新建机器人，命名为 Odelia。在“配置”中把终结点地址设为：" : "In the Teams Developer Portal (dev.teams.microsoft.com): Tools, Bot management, New bot, named Odelia. Under Configure, set the endpoint address to:"}</li>
               {bot.setup?.events_url ? <CodeBlock text={bot.setup.events_url} copy={copy} zh={zh} /> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
               <li>{zh ? "在“客户端密码”中添加一个密码并复制，再复制机器人 ID。租户 ID 在 Azure 门户的 Microsoft Entra ID 概览页。" : "Under Client secrets, add one and copy it, then copy the bot ID. Your tenant ID is on the Microsoft Entra ID overview page in the Azure portal."}</li>
-              <li>{zh ? "然后在“应用”中新建应用 → 应用功能 → 机器人，选择这个机器人，勾选“个人”和“团队”，发布到您的组织（Teams 管理员批准后即可使用）。" : "Then Apps, New app, App features, Bot: pick this bot, tick Personal and Team, and publish it to your org (a Teams admin approves it)."}</li>
+              <li>{zh ? "然后在“应用”中新建应用 → 应用功能 → 机器人，选择这个机器人，勾选“个人”和“团队”，并开启“上传和下载文件”（同事私聊发来的照片和 PDF 会存入“文件”），发布到您的组织（Teams 管理员批准后即可使用）。" : "Then Apps, New app, App features, Bot: pick this bot, tick Personal and Team, turn on Upload and download files (photos and PDFs sent to Odelia in a personal chat go to Documents), and publish it to your org (a Teams admin approves it)."}</li>
             </ol>
           ) : bot.kind === "telegram_bot" ? (
             <ol>
@@ -430,7 +481,7 @@ function Integrations() {
       )}
       {feed && <p className="sg-note mono">{feed}</p>}
       {/* any app's own MCP server, and the one-click list (src/McpSettings.tsx) */}
-      <McpConnectors pin={pin} />
+      <McpConnectors pin={pin} q={q} connected={only} />
     </Group>
   );
 }

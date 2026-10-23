@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "com.placetta/placetta",
   "title": "Placetta",
-  "description": "Read-only compliance status, deadlines, store readiness, permit plans and filings for your stores.",
-  "version": "1.2.0",
+  "description": "Read-only license status, deadlines, filing timelines, appeals and inspections for your stores.",
+  "version": "1.3.0",
   "websiteUrl": "https://www.placetta.com",
   "remotes": [
     {

@@ -3,7 +3,7 @@ import { flushProposals, type RunMemoryOut } from "./context";
 import { observePrompt, parseObservations, worthObserving, type Material } from "./observe";
 import { consistency, pinnedFacts } from "./pinned";
 import { UNTRUSTED_TOOLS } from "./processors";
-import { memoryOf, toRow, type BriefRow, type ConflictRow, type MemoryRow, type ProposalRow, type SettingsRow } from "./rows";
+import { memoryOf, toRow, type BriefRow, type ConflictRow, type MemoryRow, type PersonRow, type ProposalRow, type SettingsRow } from "./rows";
 import { forgetMatching, update } from "./update";
 import { isLive, type AgentMemory, type Observation } from "./types";
 
@@ -13,6 +13,8 @@ import { isLive, type AgentMemory, type Observation } from "./types";
 
 export type MemoryDb = {
   settings(): Promise<SettingsRow | null>;
+  /** The asker's own switches (Reference saved memories, Reference chat history); null when they never changed them. */
+  person?(userId: string): Promise<PersonRow | null>;
   /** The workspace's memories that are suggested or approved (the history isn't needed to run). */
   items(): Promise<MemoryRow[]>;
   briefs(): Promise<BriefRow[]>;
@@ -28,12 +30,28 @@ export type MemoryDb = {
   conflict(rows: Omit<ConflictRow, "resolved_at">[]): Promise<void>;
 };
 
-/** The workspace's memory for a run. A person-scoped memory is kept only for the person it belongs to. */
-export async function loadMemory(db: MemoryDb, me?: string): Promise<AgentMemory> {
+/** Who a run's answer reaches, for what memory it may read: the asker's role, and whether the answer goes to a thread
+ *  other people read (a Slack or Teams channel, a Lark or Telegram group). */
+export type Audience = { role?: string; shared?: boolean };
+
+/** Whether a memory may be read in a run for this person and audience. A person's own memory only in their own runs and
+ *  never into a shared thread; an admins-only memory only for an owner or admin, and never into a shared thread (the
+ *  thread's other readers may be members or guests of the chat). */
+export function readable(o: Observation, me: string | undefined, a: Audience = {}): boolean {
+  if (o.scope.kind === "person" && (o.scope.id !== me || a.shared)) return false;
+  if (o.visibility === "admins" && (a.shared || !(a.role === "owner" || a.role === "admin" || a.role === undefined))) return false;
+  return true;
+}
+
+/** The workspace's memory for a run, cut to what this person and audience may read. Without an audience (tests, the
+ *  app) the asker is treated as the run's owner in a private chat. */
+export async function loadMemory(db: MemoryDb, me?: string, a: Audience = {}): Promise<AgentMemory> {
   const settings = await db.settings();
-  const [items, briefs, proposals, conflicts] = await Promise.all([db.items(), db.briefs(), db.proposals(), db.conflicts()]);
-  const m = memoryOf({ settings, items, briefs, proposals, conflicts });
-  return { ...m, items: m.items.filter(o => o.scope.kind !== "person" || o.scope.id === me) };
+  const [items, briefs, proposals, conflicts, person] = await Promise.all([db.items(), db.briefs(), db.proposals(), db.conflicts(), me && db.person ? db.person(me).catch(() => null) : Promise.resolve(null)]);
+  const m = memoryOf({ settings, person, items, briefs, proposals, conflicts });
+  const kept = m.items.filter(o => readable(o, me, a));
+  const ids = new Set(kept.map(o => o.id));
+  return { ...m, items: kept, conflicts: m.conflicts.filter(c => ids.has(c.memory)) };
 }
 
 type Msg = { role: string; content: unknown };
@@ -70,7 +88,7 @@ export async function saveRun(db: MemoryDb, o: {
   ask?: (prompt: string) => Promise<string>;
 }): Promise<SaveReport> {
   const rep: SaveReport = { remembered: 0, suggested: 0, merged: 0, forgot: 0, proposed: 0, conflicts: 0, observed: 0 };
-  if (o.run.no_memory || !o.memory.settings.enabled || o.role === "viewer" || o.role === "system") return rep;
+  if (o.run.no_memory || !o.memory.settings.enabled || o.memory.settings.referenceMemories === false || o.role === "viewer" || o.role === "system") return rep;
   const approves = !o.role || o.role === "owner" || o.role === "admin";
   const remote = !!o.run.channel && o.run.channel !== "app";
   const by = o.run.created_by ?? undefined;

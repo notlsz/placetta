@@ -19,7 +19,7 @@
 // goes into saver mode until midnight UTC with a task for the team (ai_throttle_sweep).
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { appLink, noticeText, urgency } from "../_shared/odelia.ts";
-import { HOOK_KINDS, hookData, hookDigest, postHook, type HookKind } from "../_shared/channels.ts";
+import { HOOK_KINDS, hookData, hookDigest, hookPlan, postHook, type HookKind, type HookSchedule } from "../_shared/channels.ts";
 import { deadlineRules } from "../_shared/business_rules.ts";
 // @deno-types="../_shared/opening.d.ts"
 import { appealFor, approvalsLine, daysLeft, deadlineFor, type FilingRow, finishWork, MAX_RESUMES, normalizeState, NOT_A_LAW_FIRM, openingLine, openingPath, resumable, runsOn, type Routine, stampFilings, TIERS } from "../_shared/opening.js";
@@ -749,21 +749,37 @@ Deno.serve(async (req) => {
     }
   }
 
-  // Team chats: each workspace's new updates as one message in every Slack, Lark, WeCom or Teams group it linked.
+  // Team chats: each workspace's new updates as one message in every Slack, Lark, WeCom or Teams group it linked, when
+  // that group wants them (channels.ts hookPlan): as they come, held through its quiet hours, or once a day.
   let chats = 0;
-  if (created.length) {
+  {
     const fresh = new Map<string, Update[]>();
     for (const u of created) fresh.set(u.workspace_id, [...(fresh.get(u.workspace_id) ?? []), u]);
-    const { data: hooks } = await admin.from("integrations").select("id, workspace_id, kind, secret_id, meta").in("workspace_id", [...fresh.keys()]).in("kind", [...HOOK_KINDS]).eq("status", "connected");
-    for (const h of hooks ?? []) {
+    // the groups with something new, and every group on a daily digest or holding updates for the morning
+    const [{ data: freshHooks }, { data: timed }] = await Promise.all([
+      fresh.size ? admin.from("integrations").select("id, workspace_id, kind, secret_id, meta").in("workspace_id", [...fresh.keys()]).in("kind", [...HOOK_KINDS]).eq("status", "connected") : Promise.resolve({ data: [] }),
+      admin.from("integrations").select("id, workspace_id, kind, secret_id, meta").in("kind", [...HOOK_KINDS]).eq("status", "connected").or("meta->>digest.eq.daily,meta->>held_since.not.is.null"),
+    ]);
+    const hooks = new Map<string, Record<string, unknown>>();
+    for (const h of [...(freshHooks ?? []), ...(timed ?? [])] as Record<string, unknown>[]) hooks.set(String(h.id), h);
+    for (const h of hooks.values()) {
+      const ws = h.workspace_id as string, meta = (h.meta ?? {}) as HookSchedule & { lang?: string };
+      const plan = hookPlan(meta, started, (fresh.get(ws) ?? []).length);
+      if (plan.act === "none") continue;
+      if (plan.act === "hold") { if (meta.held_since !== plan.held_since) await admin.from("integrations").update({ meta: { ...meta, held_since: plan.held_since } }).eq("id", h.id); continue; }
+      let items = fresh.get(ws) ?? [];
+      if (plan.since) {
+        const { data: since } = await admin.from("updates").select("workspace_id, kind, title, body, app_id, dedupe").eq("workspace_id", ws).gte("created_at", plan.since).order("created_at", { ascending: false }).limit(50);
+        items = (since ?? []) as Update[];
+      }
+      if (!items.length) { await admin.from("integrations").update({ meta: { ...meta, last_sent: started.toISOString(), held_since: null } }).eq("id", h.id); continue; }
       const { data: raw } = await admin.rpc("vault_get", { p_id: h.secret_id });
       let link = "", secret: string | undefined;
       try { const b = JSON.parse(String(raw ?? "")); link = b.webhook_url ?? ""; secret = b.secret || undefined; } catch { /* no saved link */ }
       if (!link) continue;   // a Slack sign-in without a channel link
-      const lang = (h.meta as { lang?: string } | null)?.lang === "zh" ? "zh" : "en";
-      const items = fresh.get(h.workspace_id as string) ?? [];
-      const r = await postHook(h.kind as HookKind, link, hookDigest(names.get(h.workspace_id as string) ?? "", items, lang, appLink(APP, h.workspace_id as string)), secret, hookData(names.get(h.workspace_id as string) ?? "", items, appLink(APP, h.workspace_id as string)));
-      if (r.ok) { chats++; await admin.from("integrations").update({ last_used_at: new Date().toISOString() }).eq("id", h.id); }
+      const lang = meta.lang === "zh" ? "zh" : "en";
+      const r = await postHook(h.kind as HookKind, link, hookDigest(names.get(ws) ?? "", items, lang, appLink(APP, ws)), secret, hookData(names.get(ws) ?? "", items, appLink(APP, ws)));
+      if (r.ok) { chats++; await admin.from("integrations").update({ last_used_at: started.toISOString(), meta: { ...meta, last_sent: started.toISOString(), held_since: null } }).eq("id", h.id); }
       else {
         console.error("team chat", h.kind, r.why);
         if (r.gone) await admin.from("integrations").update({ status: "error", error: "The group's link stopped working. Connect it again in Settings." }).eq("id", h.id);
