@@ -149,6 +149,8 @@ const sponsors = (l: L) => `<aside class="sponsors" aria-label="${l === "zh" ? "
   return sp.url ? `<a href="${sp.url}" rel="sponsored noopener" target="_blank" data-track="sponsor_${slug(sp.name)}">${inner}</a>` : `<span class="sp">${inner}</span>`;
 }).join("")}</aside>`;
 
+/** Titles stay under search engines' cutoff (the page keeps the full name in its h1): cut at a word, with an ellipsis. */
+const clipTitle = (t: string, max = 118) => { if (t.length <= max) return t; const cut = t.slice(0, max - 1); const at = cut.lastIndexOf(" "); return (at > 60 ? cut.slice(0, at) : cut).replace(/[\s,:;(]+$/, "") + "…"; };
 type Ctx = { place?: Place; biz?: Biz };
 function page(o: { l: L; path: string; alt: string; title: string; desc: string; crumbs: ([string, string] | [string, string, string])[]; body: string; ld: unknown[]; kind: string; ctx?: Ctx; noindex?: boolean }) {
   const url = ORIGIN + o.path, altUrl = ORIGIN + o.alt, l = o.l;
@@ -160,7 +162,7 @@ function page(o: { l: L; path: string; alt: string; title: string; desc: string;
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>${esc(o.title)} | Placetta</title>
+<title>${esc(clipTitle(o.title))} | Placetta</title>
 <meta name="description" content="${esc(o.desc)}">
 <meta name="robots" content="${o.noindex ? "noindex, follow" : "index, follow, max-snippet:-1, max-image-preview:large"}">
 ${l === "zh" ? BAIDU_META + "\n" : ""}<link rel="canonical" href="${url}">
