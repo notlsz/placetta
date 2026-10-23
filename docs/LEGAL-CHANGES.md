@@ -2,7 +2,7 @@
 
 > **Counsel review required before publishing.** Nothing here is live. The new text is in `src/legal.ts`
 > (`UPDATED = "2026-10-22"`) and is built into `legal/*.md` and `site/{terms,privacy,authorization,ai}.html`. Migration
-> `20261028090000_terms_version_2026_10_22.sql` makes `public.current_terms_version()` return `2026-10-22`; once it is
+> `20261029090000_terms_version_2026_10_22.sql` makes `public.current_terms_version()` return `2026-10-22`; once it is
 > applied, every signed-in person must accept again before approving anything new, and the Terms' 30-day notice
 > applies to existing customers. Don't apply it or deploy the pages until counsel has signed off and the notice email is
 > ready. Set `UPDATED` (and the migration) to the real publication date if it isn't 2026-10-22.
