@@ -6,6 +6,23 @@ import { TASKS, useDone, useSwap, type Prop } from "./tasks";
 import { OdeliaProps } from "./OdeliaProps";
 import { CLOUD as CLOUD_PATH, CloudSvg } from "./CloudSvg";
 import "./bot.css";
+import { Guard } from "./SafeBoundary";
+
+/* The plush canvas squashes its face while it animates; at the extreme of a squash a scale can dip below zero, and the
+   browser throws on an ellipse with a negative radius, which took the whole app to a white page. Clamp the radii to zero
+   (the shape simply isn't drawn for that frame) for both the context and Path2D, once, before any bot draws. */
+const clampEllipse = (proto: { ellipse: (...a: number[]) => void } | undefined) => {
+  if (!proto || (proto as { __pcSafe?: boolean }).__pcSafe) return;
+  const draw = proto.ellipse;
+  proto.ellipse = function (this: unknown, x: number, y: number, rx: number, ry: number, ...rest: number[]) {
+    return draw.call(this, x, y, Math.max(0, rx || 0), Math.max(0, ry || 0), ...rest);
+  };
+  (proto as { __pcSafe?: boolean }).__pcSafe = true;
+};
+if (typeof window !== "undefined") {
+  clampEllipse(window.CanvasRenderingContext2D?.prototype as never);
+  clampEllipse(window.Path2D?.prototype as never);
+}
 
 /* Placetta's agent as a small plush character: a soft pastel-blue cloud with blushed cheeks with a smile (bot-avatars).
    It hops while it works and breathes, floats and looks around while it waits. Each background job gets its own little bot.
@@ -140,7 +157,7 @@ function Plush({ stand, onAnim, ...props }: BotAvatarProps & { size: number; "da
     if (hand.current) look();
     return () => cancelAnimationFrame(raf);
   }, []);
-  const bot = <BotAvatar ref={ref} {...SOFT} {...props} style={touch ? SHOWN : { ...SHOWN, filter: `url(#${id})` }} />;
+  const bot = <Guard quiet><BotAvatar ref={ref} {...SOFT} {...props} style={touch ? SHOWN : { ...SHOWN, filter: `url(#${id})` }} /></Guard>;
   return (
     <>
       {!touch && <Edge id={id} size={props.size} dark={dark} />}
