@@ -93,7 +93,7 @@ const HOOK_HELP: Record<HookKind, { how: Bi; ph: string }> = {
   wecom: { how: B("In the WeCom group chat: the top-right menu, Add group robot, New. Copy its webhook address.", "在企业微信群聊中：右上角菜单 → 添加群机器人 → 新创建，复制 webhook 地址。"), ph: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=..." },
   dingtalk: { how: B("In the DingTalk group: Group settings, Bots, Add robot, Custom. Copy its webhook address. If you choose signing as its security setting, paste the secret (SEC...) too.", "在钉钉群中：群设置 → 机器人 → 添加机器人 → 自定义，复制 Webhook 地址。如安全设置选择“加签”，请一并填写密钥（SEC 开头）。"), ph: "https://oapi.dingtalk.com/robot/send?access_token=..." },
   teams: { how: B("In the Teams channel: More options, Workflows, then the template that posts to a channel when a webhook request is received. Copy the URL it gives you.", "在 Teams 频道中：更多选项 → 工作流，选择“收到 webhook 请求时发布到频道”模板，复制生成的 URL。"), ph: "https://...logic.azure.com/workflows/..." },
-  webhook: { how: B("In Zapier, start a Zap with Webhooks by Zapier, Catch Hook; in Make, a Custom webhook; in n8n, a Webhook node. Paste the https address it gives you. Add a signing secret if your system checks Standard Webhooks signatures.", "在 Zapier 中用 Webhooks by Zapier 的 Catch Hook 开始一个 Zap；在 Make 中用 Custom webhook；在 n8n 中用 Webhook 节点。粘贴它给出的 https 地址。如果您的系统会校验 Standard Webhooks 签名，请填写签名密钥。"), ph: "https://hooks.zapier.com/hooks/catch/..." },
+  webhook: { how: B("In Zapier, start a Zap with the Webhooks by Zapier trigger; in Make, a Custom webhook; in n8n, a Webhook node. Paste the https address it gives you. Add a signing secret if your system checks Standard Webhooks signatures.", "在 Zapier 中用 Webhooks by Zapier 触发器开始一个 Zap；在 Make 中用 Custom webhook；在 n8n 中用 Webhook 节点。粘贴它给出的 https 地址。如果您的系统会校验 Standard Webhooks 签名，请填写签名密钥。"), ph: "https://hooks.zapier.com/hooks/catch/..." },
 };
 /** Which provider's app keys a sign-in connection needs. */
 const PROVIDER_OF: Partial<Record<IntegrationKind, keyof api.Availability>> = { gmail: "google", gcal: "google", gdrive: "google", outlook_mail: "microsoft", outlook_cal: "microsoft", dropbox: "dropbox", quickbooks: "quickbooks", square: "square", toast: "toast" };
@@ -1032,6 +1032,27 @@ function SkillsGroup() {
 
 /* ------------------------------ language ------------------------------ */
 
+/** How long this workspace keeps Odelia's conversations (migration 20261028110000_workspace_retention), Harvey's
+ *  enterprise retention setting. Everyone sees it; only an owner changes it, and the change is audited. */
+function RetentionControl() {
+  const { lang, cloud, say } = useApp();
+  const zh = lang === "zh";
+  const [days, setDays] = useState<number | null | undefined>(undefined);
+  const [busy, setBusy] = useState(false);
+  const wsId = cloud?.wsId ?? "";
+  useEffect(() => { if (wsId) void api.retentionGet(wsId).then(r => setDays(r.run_days ?? null), () => setDays(null)); }, [wsId]);
+  if (!cloud) return null;
+  const label = (d: number | null) => d === null ? (zh ? "快哉默认" : "Placetta's default") : zh ? `${d} 天` : `${d} days`;
+  if (!cloud.owner) return <em className="lock">{days === undefined ? "" : label(days)}</em>;
+  return (
+    <Select value={days === undefined ? "" : String(days ?? "")} disabled={busy || days === undefined} aria-label={zh ? "对话保留期限" : "How long conversations are kept"}
+      onChange={e => { const v = e.target.value ? Number(e.target.value) : null; setBusy(true);
+        void api.retentionSet(wsId, v).then(r => { setDays(r.run_days ?? null); say(zh ? "已保存" : "Saved"); }, err => say((err as api.ApiError).message)).finally(() => setBusy(false)); }}>
+      {[null, 30, 90, 180, 365].map(d => <option key={String(d)} value={d ?? ""}>{label(d)}</option>)}
+    </Select>
+  );
+}
+
 function LanguageGroup() {
   const { lang, setLang } = useApp();
   const zh = lang === "zh";
@@ -1555,6 +1576,7 @@ export function Settings() {
             { label: B("Download your workspace data", "下载工作区数据"), sub: b(B("Applications, facts, deadlines, filings and the audit trail, as JSON", "申请、资料、截止日期、申报和审计记录（JSON）")), right: <Btn guard onClick={() => (cloud ? cloud.exportData() : exportAudit())}>{lang === "zh" ? "下载" : "Download"}</Btn> },
             { label: B("Export the audit trail", "导出审计记录"), sub: cloud ? b(B("Every entry, as CSV. Owners and admins; the export is recorded in the trail too.", "全部记录（CSV）。所有者和管理员可导出，导出本身也会记入审计记录。")) : "CSV",
               right: !cloud || cloud.admin ? <Btn guard onClick={exportAudit}>{lang === "zh" ? "导出" : "Export"}</Btn> : <em className="lock">{lang === "zh" ? "由所有者和管理员导出" : "Owners and admins"}</em> },
+            ...(cloud ? [{ label: B("Keep Odelia's conversations", "Odelia 对话的保留期限"), sub: b(B("After this, a finished conversation's words and your texts and calls with Odelia are deleted. Applications, filings, documents, approved memories and the audit trail stay. Placetta's default keeps conversations while the workspace exists.", "超过期限后，已结束对话的内容以及您与 Odelia 的短信和通话会被删除。申请、申报、文件、已批准的记忆和审计记录会保留。快哉默认在工作区存在期间保留对话。")), right: <RetentionControl /> }] : []),
             { label: B("Trust and security", "信任与安全"), sub: b(B("How we protect your data, and every company that processes it", "我们如何保护您的数据，以及处理数据的每一家公司")), right: <a className="sbtn quiet" href={api.PREVIEW ? "https://placetta.com/trust" : "/trust"} target="_blank" rel="noopener noreferrer">{lang === "zh" ? "打开" : "Open"}</a> },
             ...(cloud ? [{ label: B("Delete your account", "删除账户"), sub: b(B("Deletes your account and the workspaces you own alone, except records the law requires us to keep.", "删除您的账户和您单独拥有的工作区，法律要求保留的记录除外。")), right: <Btn kind="warm" guard onClick={() => setDel(true)}>{b(B("Delete my account", "删除我的账户"))}</Btn> }] : []),
           ]}>

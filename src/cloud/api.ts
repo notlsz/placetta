@@ -678,6 +678,9 @@ export type McpAuthRequest = { client_id: string; redirect_uri: string; scope: s
 export const mcpOauthClient = (clientId: string, redirect: string) => rpcData<{ name: string; redirect_ok: boolean } | null>("mcp_oauth_client", { p_client_id: clientId, p_redirect: redirect });
 export const mcpOauthApprove = (ws: string, r: McpAuthRequest, scopes: McpScope[]) => rpcData<string>("mcp_oauth_approve", { ws, p_client_id: r.client_id, p_redirect: r.redirect_uri, p_scopes: scopes, p_challenge: r.code_challenge, p_resource: r.resource || null });
 export const mcpTokenCreate = (ws: string, label: string, scopes: McpScope[]) => rpcData<{ id: string; prefix: string; token: string }>("mcp_token_create", { ws, p_label: label, p_scopes: scopes });
+/** How long the workspace keeps Odelia's conversations (null: Placetta's default). Everyone reads it; owners set it. */
+export const retentionGet = (ws: string) => rpcData<{ run_days: number | null; set_at: string | null }>("retention_get", { ws });
+export const retentionSet = (ws: string, days: number | null) => rpcData<{ run_days: number | null; set_at: string | null }>("retention_set", { ws, p_days: days });
 export const mcpTokenList = (ws: string) => rpcData<McpToken[]>("mcp_token_list", { ws });
 export const mcpTokenRevoke = (id: string) => rpcVoid("mcp_token_revoke", { p_id: id });
 /** The MCP server's address. */
