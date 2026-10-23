@@ -964,6 +964,10 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .terms-band .sbtn { height: 36px; padding: 0 16px; font-size: 13.5px; }
 .ap-hold { display: block; margin: 0 0 6px; font-weight: 550; color: var(--warm); }
 .onb-act { display: flex; justify-content: flex-end; gap: 8px; }
+/* An AI assistant asking to sign in (src/cloud/McpConsent.tsx) */
+.mcp-consent .mcp-scopes { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; border: 0; text-align: left; }
+.mcp-consent .mcp-scopes .check { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink2); cursor: pointer; }
+.mcp-consent .onb-f { display: flex; flex-direction: column; gap: 6px; text-align: left; font-size: 14px; font-weight: 500; }
 .onb-act .sbtn { height: 44px; padding: 0 22px; }
 
 @media (max-width: 1280px) { .page { padding-inline: 40px; } }

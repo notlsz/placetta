@@ -1309,14 +1309,18 @@ function AssistantAccess() {
   const make = (f: { label: string; scopes: api.McpScope[] }) => act(async () => { const r = await api.mcpTokenCreate(wsId, f.label.trim() || (zh ? "AI 助手" : "AI assistant"), f.scopes); setForm(null); setShown(r.token); });
   const live = (list ?? []).filter(t => !t.revoked_at);
   const scopeWords = (sc: api.McpScope[]) => sc.length === MCP_SCOPES.length ? (zh ? "全部只读工具" : "every read-only tool") : MCP_SCOPES.filter(x => sc.includes(x.id)).map(x => x.label[zh ? "zh" : "en"]).join(zh ? "、" : ", ");
-  const rows: Row[] = [
-    ...live.map(t => ({ label: { en: t.label, zh: t.label },
-      sub: <>{`plc_mcp_${t.prefix}_…`}, {scopeWords(t.scopes)}<br />{(zh ? "创建于 " : "Made ") + fmtDay(t.created_at, lang, true)}{t.last_used_at ? (zh ? `，最近使用 ${fmtAgo(t.last_used_at, lang)}` : `, last used ${fmtAgo(t.last_used_at, lang)}`) : (zh ? "，尚未使用" : ", not used yet")}</>,
-      right: <Btn kind="warm" guard disabled={busy} onClick={() => { if (window.confirm(zh ? `撤销“${t.label}”？使用它的助手将立即无法读取。` : `Revoke "${t.label}"? Assistants using it stop reading right away.`)) void act(() => api.mcpTokenRevoke(t.id), zh ? "令牌已撤销" : "Token revoked"); }}>{zh ? "撤销" : "Revoke"}</Btn> })),
-    { label: B("New token", "新令牌"), sub: zh ? "每个助手用一个令牌，方便单独撤销。" : "One token for each assistant, so you can revoke each on its own.",
-      right: <Btn kind="ink" guard disabled={busy || live.length >= 10} onClick={() => setForm({ label: "", scopes: MCP_SCOPES.map(x => x.id) })}>{zh ? "创建" : "Make a token"}</Btn> },
-  ];
   const url = api.mcpUrl();
+  const rows: Row[] = [
+    // OAuth, as Claude's connector directory and ChatGPT apps connect (supabase/functions/mcp/oauth.ts): nothing to paste
+    { label: B("Connect by signing in", "登录即可连接"),
+      sub: <>{zh ? "在 Claude 或 ChatGPT 中添加自定义连接器，地址填这个。助手会请您登录快哉，选择工作区和它可以读取的内容。无需复制令牌，可随时在这里断开。" : "In Claude or ChatGPT, add a custom connector with this address. The assistant asks you to sign in to Placetta and choose the workspace and what it may read. Nothing to paste, and you can disconnect it here at any time."}<br /><code className="sg-code wrap">{url}</code></>,
+      right: <Btn onClick={() => copy(url, say, zh)}>{zh ? "复制地址" : "Copy the address"}</Btn> },
+    ...live.map(t => ({ label: { en: t.label, zh: t.label },
+      sub: <>{t.oauth ? (zh ? "通过登录连接" : "Connected by signing in") : `plc_mcp_${t.prefix}_…`}, {scopeWords(t.scopes)}<br />{(zh ? (t.oauth ? "连接于 " : "创建于 ") : (t.oauth ? "Connected " : "Made ")) + fmtDay(t.created_at, lang, true)}{t.last_used_at ? (zh ? `，最近使用 ${fmtAgo(t.last_used_at, lang)}` : `, last used ${fmtAgo(t.last_used_at, lang)}`) : (zh ? "，尚未使用" : ", not used yet")}</>,
+      right: <Btn kind="warm" guard disabled={busy} onClick={() => { if (window.confirm(zh ? `${t.oauth ? "断开" : "撤销"}“${t.label}”？使用它的助手将立即无法读取。` : `${t.oauth ? "Disconnect" : "Revoke"} "${t.label}"? The assistant stops reading right away.`)) void act(() => api.mcpTokenRevoke(t.id), zh ? (t.oauth ? "已断开" : "令牌已撤销") : (t.oauth ? "Disconnected" : "Token revoked")); }}>{zh ? (t.oauth ? "断开" : "撤销") : (t.oauth ? "Disconnect" : "Revoke")}</Btn> })),
+    { label: B("New token", "新令牌"), sub: zh ? "用于只接受令牌的助手。每个助手用一个令牌，方便单独撤销。" : "For assistants that only take a token. One token for each assistant, so you can revoke each on its own.",
+      right: <Btn kind="ink" guard disabled={busy || live.filter(t => !t.oauth).length >= 10} onClick={() => setForm({ label: "", scopes: MCP_SCOPES.map(x => x.id) })}>{zh ? "创建" : "Make a token"}</Btn> },
+  ];
   const setup = shown ? [
     { who: B("Claude (claude.ai and the desktop app)", "Claude（claude.ai 和桌面应用）"), how: B("Settings, Connectors, Add custom connector. Paste this address; it carries the token, so keep it private.", "设置，连接器，添加自定义连接器。粘贴此地址；地址中含有令牌，请勿外传。"), code: `${url}/${shown}` },
     { who: B("ChatGPT", "ChatGPT"), how: B("Settings, Apps and connectors, Advanced, turn on developer mode, then Create. Paste this address and pick no authentication; the token is in the address.", "设置，应用与连接器，高级，开启开发者模式，然后创建。粘贴此地址并选择无需认证；令牌已包含在地址中。"), code: `${url}/${shown}` },

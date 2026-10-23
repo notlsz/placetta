@@ -13,6 +13,7 @@
 
 // @ts-types="./tools.d.ts"
 import type { FilingRow, McpExtras, McpToolDef, Scope } from "./tools.js";
+import { type OAuthDeps, oauthRoute, wwwAuthenticate } from "./oauth.ts";
 
 export const STATELESS = "2026-07-28";
 export const LEGACY = ["2025-11-25", "2025-06-18", "2025-03-26"];
@@ -39,6 +40,8 @@ export type Deps = {
   origins: string[];
   /** Resources, prompts and pagination (src/mcpServer.ts). */
   x: McpExtras;
+  /** OAuth sign-in (oauth.ts): metadata, registration, authorize and token. Without it only pasted tokens work. */
+  oauth?: OAuthDeps;
 };
 
 const enc = new TextEncoder();
@@ -53,6 +56,8 @@ type Rpc = { jsonrpc?: unknown; id?: unknown; method?: unknown; params?: unknown
 type Answer = { status: number; body?: unknown; headers?: Record<string, string> };
 
 export async function handle(req: Request, d: Deps): Promise<Response> {
+  // OAuth's own addresses first: they answer any origin, hold no cookies and check PKCE instead
+  if (d.oauth) { const r = await oauthRoute(req, d.oauth); if (r) return r; }
   const origin = req.headers.get("origin");
   const cors: Record<string, string> = origin && d.origins.includes(origin)
     ? { "Access-Control-Allow-Origin": origin, "Vary": "Origin", "Access-Control-Expose-Headers": "WWW-Authenticate" } : {};
@@ -76,7 +81,10 @@ export async function handle(req: Request, d: Deps): Promise<Response> {
   const raw = TOKEN.test(bearer) ? bearer : TOKEN.test(tail) ? tail : "";
   const tok = raw ? await d.auth(await sha256(raw)) : null;
   if (!tok) {
-    return reply({ status: 401, headers: { "WWW-Authenticate": `Bearer realm="placetta", error="invalid_token", error_description="Make a token in Placetta, Settings, AI assistants"` },
+    // with OAuth on, the 401 points at the protected resource metadata, which starts sign-in in Claude and ChatGPT
+    const challenge = d.oauth ? wwwAuthenticate(d.oauth.base, !!(bearer || TOKEN.test(tail)))
+      : `Bearer realm="placetta", error="invalid_token", error_description="Make a token in Placetta, Settings, AI assistants"`;
+    return reply({ status: 401, headers: { "WWW-Authenticate": challenge },
       body: rpcError(null, -32001, "Placetta needs a valid workspace token. Make one in Settings, AI assistants; a revoked token, or one whose maker is no longer an owner or admin, stops working.", { code: "unauthorized" }) });
   }
   if (!(await d.limit(`mcp:${tok.token_id}`, PER_TOKEN, 60))) {

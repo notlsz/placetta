@@ -671,7 +671,12 @@ export const scimGroupRole = (ws: string, group: string, role: ScimGroup["role"]
 /** Placetta's own MCP server (supabase/functions/mcp): workspace tokens for Claude, ChatGPT and other assistants. Owners
  *  and admins make, list and revoke them; a new token is in the answer once and never again. */
 export type McpScope = "status" | "deadlines" | "readiness" | "plan" | "filings";
-export type McpToken = { id: string; label: string; prefix: string; scopes: McpScope[]; created_at: string; last_used_at: string | null; revoked_at: string | null };
+export type McpToken = { id: string; label: string; prefix: string; scopes: McpScope[]; created_at: string; last_used_at: string | null; revoked_at: string | null; oauth?: boolean };
+/** OAuth sign-in from an assistant (supabase/functions/mcp/oauth.ts): the request the consent screen gets, the assistant's name
+ *  and whether its redirect is one it registered, and the one-time code once the person allows it. */
+export type McpAuthRequest = { client_id: string; redirect_uri: string; scope: string; state: string; code_challenge: string; resource: string; iss: string };
+export const mcpOauthClient = (clientId: string, redirect: string) => rpcData<{ name: string; redirect_ok: boolean } | null>("mcp_oauth_client", { p_client_id: clientId, p_redirect: redirect });
+export const mcpOauthApprove = (ws: string, r: McpAuthRequest, scopes: McpScope[]) => rpcData<string>("mcp_oauth_approve", { ws, p_client_id: r.client_id, p_redirect: r.redirect_uri, p_scopes: scopes, p_challenge: r.code_challenge, p_resource: r.resource || null });
 export const mcpTokenCreate = (ws: string, label: string, scopes: McpScope[]) => rpcData<{ id: string; prefix: string; token: string }>("mcp_token_create", { ws, p_label: label, p_scopes: scopes });
 export const mcpTokenList = (ws: string) => rpcData<McpToken[]>("mcp_token_list", { ws });
 export const mcpTokenRevoke = (id: string) => rpcVoid("mcp_token_revoke", { p_id: id });
