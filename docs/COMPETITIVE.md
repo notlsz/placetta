@@ -7,7 +7,7 @@ Written 2026-10-22. Each competitor's strength and weakness comes from a cited p
 | Dimension | Odelia | Evidence in the repo |
 |---|---:|---|
 | Finishing the job alone | 7.5 | Maps, fills the agency's own PDFs, puts complete filings up for one-tap approval, then the team or a portal route files them; store bots split a 20-store request (12 a call, 48 a run). Approval is required by design. Since the second lifecycle pass: the portal worker heals drifted selectors, waits out a down portal, runs up to 4 filings side by side, and books inspections on 11 agency sites. No live-model eval has run yet (docs/EVAL.md). |
-| Accuracy with cited sources | 8 | test:accuracy 100% recall and precision on the gold and held-out sets; every plan row carries its agency page and the date it was read; fees agencies don't publish are left open. Weak spot found: Santa Clara County's health permit is proven by a line on San José's business tax page. |
+| Accuracy with cited sources | 8 | test:accuracy 100% recall and precision on the gold and held-out sets; every plan row carries its agency page and the date it was read; fees agencies don't publish are left open. Weak spot found: Santa Clara County's health permit was proven by a line on San José's business tax page (fixed in the 9.5 pass). |
 | Cost transparency | 9 | Every license priced before approval ($299, $999, $99 renewal), cost to open with agency fees, a per-run token cap, and from this pass a failed run isn't charged. No per-run estimate is shown (runs cost about a cent median at the prices re-read 2026-10-22, docs/eval-speed.json and docs/UNIT-ECONOMICS.md). |
 | Speed | 7 | Modeled on 60 fixtures: 2.8 s median to done, 23.7 s p95. A 4-market entry is one call (plan_markets) instead of four. No live latency measured. |
 | Memory | 8 | Owner-approved memory, recalled across sessions (journeys test), pinned facts from the records survive 200 turns, "don't remember this chat". |
@@ -16,6 +16,7 @@ Written 2026-10-22. Each competitor's strength and weakness comes from a cited p
 | Trust and security | 8 | test:redteam 58 of 58 attacks blocked; documents with instructions aimed at an AI quarantined; a policy gate on every tool call; nothing filed, paid or sent without approval; SOC 2 evidence tooling (docs/soc2) but no audit report yet. |
 | Domain depth | 9 | 325 US forms and 156 abroad (docs/FILING_COVERAGE.md), 37 markets each on its own jurisdiction's form (docs/MARKET_COVERAGE.md), EN and ZH. |
 | **Overall** | **7.9** | Unchanged at one decimal by the second lifecycle pass (7.94 with finishing at 7.5): the dimensions below 9 wait on a live run, an audit and connectors, not on code (see "What 9.5 needs" at the end). |
+| **After the 9.5 pass** | **8.4** | 7.5, 8.5, 9, 7.5, 8.5, 8.5, 8.5, 8.5, 9 in the order above (8.39): see "The 9.5 pass" at the end. |
 
 ## The scorecard
 
@@ -23,21 +24,21 @@ Each cell is the competitor's score, then Odelia's, for Odelia's job.
 
 | Competitor | Finish alone | Cited accuracy | Cost transparency | Speed | Memory | Live visibility | Integrations/MCP | Trust and security | Domain depth | Overall (them / Odelia) |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Perplexity Computer | 6 / 7 | 6 / 8 | 3 / 9 | 7 / 7 | 5 / 8 | 3 / 8 | 6 / 7 | 5 / 8 | 3 / 9 | 4.9 / 7.9 |
-| Devin | 5 / 7 | 4 / 8 | 5 / 9 | 5 / 7 | 6 / 8 | 7 / 8 | 6 / 7 | 6 / 8 | 1 / 9 | 5.0 / 7.9 |
-| Alven | 6 / 7 | 4 / 8 | 7 / 9 | 6 / 7 | 7 / 8 | 5 / 8 | 6 / 7 | 7 / 8 | 2 / 9 | 5.6 / 7.9 |
-| ChatGPT agent | 5 / 7 | 6 / 8 | 5 / 9 | 5 / 7 | 6 / 8 | 7 / 8 | 7 / 7 | 6 / 8 | 3 / 9 | 5.6 / 7.9 |
-| OpenAI Dots | 6 / 7 | 5 / 8 | 4 / 9 | 6 / 7 | 7 / 8 | 4 / 8 | 8 / 7 | 4 / 8 | 2 / 9 | 5.1 / 7.9 |
-| Grok Bot | 6 / 7 | 4 / 8 | 3 / 9 | 6 / 7 | 5 / 8 | 6 / 8 | 8 / 7 | 4 / 8 | 2 / 9 | 4.9 / 7.9 |
-| Meta Muse | 5 / 7 | 4 / 8 | 4 / 9 | 6 / 7 | 6 / 8 | 4 / 8 | 5 / 7 | 4 / 8 | 1 / 9 | 4.3 / 7.9 |
-| Instinct | 6 / 7 | 4 / 8 | 4 / 9 | 6 / 7 | 6 / 8 | 4 / 8 | 6 / 7 | 6 / 8 | 1 / 9 | 4.8 / 7.9 |
-| Claude apps (projects, memory, connectors) | 4 / 7 | 7 / 8 | 6 / 9 | 8 / 7 | 7 / 8 | 6 / 8 | 9 / 7 | 8 / 8 | 4 / 9 | 6.6 / 7.9 |
-| Claude Code and the Agent SDK | 6 / 7 | 6 / 8 | 6 / 9 | 7 / 7 | 6 / 8 | 8 / 8 | 9 / 7 | 8 / 8 | 2 / 9 | 6.4 / 7.9 |
-| Claude for Legal | 4 / 7 | 6 / 8 | 6 / 9 | 7 / 7 | 7 / 8 | 6 / 8 | 8 / 7 | 8 / 8 | 5 / 9 | 6.3 / 7.9 |
-| Harvey | 5 / 7 | 7 / 8 | 2 / 9 | 6 / 7 | 7 / 8 | 6 / 8 | 7 / 7 | 9 / 8 | 5 / 9 | 6.0 / 7.9 |
-| Legora | 5 / 7 | 7 / 8 | 3 / 9 | 6 / 7 | 6 / 8 | 6 / 8 | 8 / 7 | 8 / 8 | 5 / 9 | 6.0 / 7.9 |
+| Perplexity Computer | 6 / 7.5 | 6 / 8.5 | 3 / 9 | 7 / 7.5 | 5 / 8.5 | 3 / 8.5 | 6 / 8.5 | 5 / 8.5 | 3 / 9 | 4.9 / 8.4 |
+| Devin | 5 / 7.5 | 4 / 8.5 | 5 / 9 | 5 / 7.5 | 6 / 8.5 | 7 / 8.5 | 6 / 8.5 | 6 / 8.5 | 1 / 9 | 5.0 / 8.4 |
+| Alven | 6 / 7.5 | 4 / 8.5 | 7 / 9 | 6 / 7.5 | 7 / 8.5 | 5 / 8.5 | 6 / 8.5 | 7 / 8.5 | 2 / 9 | 5.6 / 8.4 |
+| ChatGPT agent | 5 / 7.5 | 6 / 8.5 | 5 / 9 | 5 / 7.5 | 6 / 8.5 | 7 / 8.5 | 7 / 8.5 | 6 / 8.5 | 3 / 9 | 5.6 / 8.4 |
+| OpenAI Dots | 6 / 7.5 | 5 / 8.5 | 4 / 9 | 6 / 7.5 | 7 / 8.5 | 4 / 8.5 | 8 / 8.5 | 4 / 8.5 | 2 / 9 | 5.1 / 8.4 |
+| Grok Bot | 6 / 7.5 | 4 / 8.5 | 3 / 9 | 6 / 7.5 | 5 / 8.5 | 6 / 8.5 | 8 / 8.5 | 4 / 8.5 | 2 / 9 | 4.9 / 8.4 |
+| Meta Muse | 5 / 7.5 | 4 / 8.5 | 4 / 9 | 6 / 7.5 | 6 / 8.5 | 4 / 8.5 | 5 / 8.5 | 4 / 8.5 | 1 / 9 | 4.3 / 8.4 |
+| Instinct | 6 / 7.5 | 4 / 8.5 | 4 / 9 | 6 / 7.5 | 6 / 8.5 | 4 / 8.5 | 6 / 8.5 | 6 / 8.5 | 1 / 9 | 4.8 / 8.4 |
+| Claude apps (projects, memory, connectors) | 4 / 7.5 | 7 / 8.5 | 6 / 9 | 8 / 7.5 | 7 / 8.5 | 6 / 8.5 | 9 / 8.5 | 8 / 8.5 | 4 / 9 | 6.6 / 8.4 |
+| Claude Code and the Agent SDK | 6 / 7.5 | 6 / 8.5 | 6 / 9 | 7 / 7.5 | 6 / 8.5 | 8 / 8.5 | 9 / 8.5 | 8 / 8.5 | 2 / 9 | 6.4 / 8.4 |
+| Claude for Legal | 4 / 7.5 | 6 / 8.5 | 6 / 9 | 7 / 7.5 | 7 / 8.5 | 6 / 8.5 | 8 / 8.5 | 8 / 8.5 | 5 / 9 | 6.3 / 8.4 |
+| Harvey | 5 / 7.5 | 7 / 8.5 | 2 / 9 | 6 / 7.5 | 7 / 8.5 | 6 / 8.5 | 7 / 8.5 | 9 / 8.5 | 5 / 9 | 6.0 / 8.4 |
+| Legora | 5 / 7.5 | 7 / 8.5 | 3 / 9 | 6 / 7.5 | 6 / 8.5 | 6 / 8.5 | 8 / 8.5 | 8 / 8.5 | 5 / 9 | 6.0 / 8.4 |
 
-Odelia leads overall against every one. She is behind on integrations against Claude, Claude Code, Dots and Grok, and level or behind on speed against Claude apps. Harvey's enterprise security is the one trust score above hers.
+Odelia's column is after the 9.5 pass (2026-10-22, the section at the end); her baseline column was 7.5, 8, 9, 7, 8, 8, 7, 8, 9 and 7.9 overall. She leads overall against every one. She is still behind Claude apps and Claude Code on integrations (9 against 8.5) and Claude apps on speed (8 against 7.5), and Harvey on trust (9 against 8.5).
 
 ## Competitor by competitor
 
@@ -295,3 +296,53 @@ Built, because each makes filings more reliable or cheaper: selectors healed by 
 | A SOC 2 Type I report | Trust +1 | An auditor |
 
 With all of them: appeals about 9.3 (9.5 once a real denial has gone through a playbook end to end), lifecycle about 8.8 (corrections stays at 8: complex plan review needs a person on the phone), overall about 8.3. Overall 9.5 also needs more connectors (Claude's and Grok's catalogs lead at 9), measured speed and memory and live visibility tested with real owners.
+
+## The 9.5 pass (2026-10-22): each dimension below 9, against its leader
+
+For each dimension below 9: the leader's winning pattern from its own public pages, what was built from it, and an
+honest score. Lifecycle (8.3), appeals (about 8.8) and the filer against browser agents (8.4) weren't touched.
+
+| Dimension | Before | After | Best competitor | Copied from | Built (commit) | Why not 9 yet |
+|---|---:|---:|---|---|---|---|
+| Finish alone | 7.5 | 7.5 | 6 (Perplexity, Alven, Dots, Grok, Instinct, Claude Code) | | Nothing new: the gaps are runs, not code | Unverified portal playbooks wait for their supervised first run; corrections from finished filings don't flow back into the registry; no live pilot |
+| Cited accuracy | 8 | 8.5 | 7 (Claude apps, Harvey, Legora) | Perplexity's inline numbers; Harvey's and Legora's passage behind each citation | A number after each sentence for each source it names, hover or focus shows the page, the quote and the day it was read (only while the read is current); the Sources row numbered to match; every permits row links to its official page; Santa Clara County's health permit proven by the county's rule, read with curl (d2991e4f, 72fb4df2) | No live-model eval: the 100% is on the gold and held-out sets with the registry, not on a live model's sentences |
+| Cost transparency | 9 | 9 | 7 (Alven) | | | |
+| Speed | 7 | 7.5 | 8 (Claude apps) | Perplexity and Claude apps saying what's happening before the first lookup | A fresh run's first step is written and pushed right after the claim, instead of after seven serial reads, the connected apps' tool lists and a 300 ms debounce; those reads now run together; add_store and find_official_forms asked for in the same turn (0d5e319a) | The fixtures don't move: origin/main and this pass both model 1.5 s median and 24.1 s p95 to first token (the scripted model already batched, and the harness has no database round trips). The half point is the first visible step; only a live run measures it |
+| Memory | 8 | 8.5 | 7 (Alven, Dots, Claude apps, Harvey) | Claude's memory import and ChatGPT's Manage memories list | Paste what ChatGPT or Claude remembers: each line filtered like anything from outside (no secrets, ID numbers, credentials, sensitive topics or instructions), a suggestion only the importer sees, approved one by one; the per-workspace, per-store and per-person views with edit, delete and why each was kept were already there (da46a257) | Not used by a real owner yet |
+| Live visibility | 8 | 8.5 | 8 (Claude Code) | Devin's and Claude Code's plan beside the live work | The filing card shows "Page 3 of 6" against the agency's published guide, a progress bar, each page done, now or next, and the page it's on as the agency shows it; "What Odelia is doing now" was already on the panel, the dock, Work and Today (49c37923) | No real portal filing has run with it; the first supervised runs are the founder's |
+| Integrations/MCP | 7 | 8.5 | 9 (Claude apps, Claude Code) | Claude's connector directory and ChatGPT apps' OAuth requirements; Grok's and Dots's catalogs reaching apps through one hub | OAuth 2.1 on Placetta's MCP server (registration, PKCE S256, iss, resource binding, rotating refresh tokens, a consent screen, Settings lists and disconnects each connection) and per-tool securitySchemes, so it can be listed in both; a signed generic webhook for Zapier, Make, n8n or the business's own system; Gusto over its own MCP server for EIN, locations and headcount (3ab39375, 8e1d4723) | Not listed in either directory yet (the founder submits); DocuSign's MCP server needs an Integration Key registered by Placetta, and its production address wasn't confirmed (developers.docusign.com refused this session's fetch) |
+| Trust and security | 8 | 8.5 | 9 (Harvey) | Harvey's enterprise controls | A retention period per workspace for Odelia's conversations, set by an owner and audited; a role matrix from the database rules; the no-training and zero-retention settings in code and what to ask each provider for; data residency as it is (one US region); a Team access section on the trust page, every item Rolling out, no certification claimed (772e31ba). SSO, SCIM, roles and the audit export were already built | No SOC 2 report; zero retention not confirmed in writing by any provider |
+| Domain depth | 9 | 9 | 5 (Claude for Legal, Harvey, Legora) | | | |
+| **Overall** | **7.9** | **8.4** | 6.6 (Claude apps) | | | |
+
+### Checked against what was already there, and skipped
+
+- **Already built, so not rebuilt:** Google Calendar and Outlook Calendar (and a calendar feed any app subscribes to);
+  Slack and Microsoft Teams posts (plus Lark, WeCom, DingTalk); Box, Dropbox and Google Drive over their MCP servers;
+  Zapier over its MCP server; SSO with SAML, SCIM 2.0, the four roles and the audit export; read-only lookups side by
+  side (`READ_ONLY` in `src/live.ts`); a status step before the first model call (`src/serverRun.ts`); the editable
+  memory view with sources, scopes and why; the filing replay with a screenshot of every page.
+- **Not built, and why:** Clover and Lightspeed (no official remote MCP server found, only community ones; Square and
+  Toast already cover the beachhead, and the webhook reaches the rest); SharePoint (Microsoft's own route is a tenant
+  app registration, a contract item, and documents already come in from Drive, Dropbox and Box); ADP (no public MCP
+  server found); DocuSign and Dropbox Sign (DocuSign's server needs Placetta's own Integration Key; filings that the
+  agency signs by DocuSign already say so on the form); client ID metadata documents on Placetta's sign-in (both
+  directories fall back to registration, and fetching a client's document means fetching any address a caller names);
+  speculative prefetch of the plan on store add (the registry is in memory in the same bundle, so there is nothing to
+  fetch; the round it would save is saved by asking for add_store and the forms lookup together); the trust page's model
+  names (left to the founder, as asked).
+
+### What only the founder can do, with the points at stake
+
+| Step | Worth |
+|---|---|
+| Apply migrations 20261028090000 to 20261028120000 and redeploy `mcp`, `integrations`, `monitor`, `chat-events`, `agent-run` and the filer (docs/MCP_SERVER.md, docs/ENTERPRISE.md) | Nothing in this pass is live until then |
+| Submit the MCP server to Claude's connector directory and as a ChatGPT app (docs/mcp/DIRECTORIES.md: listing text, test workspace, auth type) | Integrations +0.5 (to 9) |
+| Register a DocuSign Integration Key and confirm its production MCP address | Integrations, part of the same 9 |
+| A live pilot: real filings through the worker's supervised first runs, owners watching them | Finish alone +1 (to 8.5), live visibility +0.5 (to 9), memory +0.5 once owners use it (to 9) |
+| The live-model eval with production keys (docs/EVAL.md) | Accuracy +0.5 (to 9), speed +0.5 (to 8, measured) |
+| A SOC 2 Type I report, and zero retention confirmed in writing by each AI provider | Trust +0.5 (to 9) |
+
+With every step: 8.5, 9, 9, 8, 9, 9, 9, 9, 9, about 8.8 overall. 9.5 overall also needs finishing alone at 9 and above
+(filings at volume, corrections flowing back into the registry) and speed measured at 9, which no code in this
+repository can show before real runs.
