@@ -105,7 +105,8 @@ export function scheduleAppeals<W extends Workspace>(w: W, today: string): W {
   let n: W = w;
   for (const a of w.apps) {
     const decided = a.filed?.status === "rejected" ? a.filed.decided : undefined;
-    if (!decided) continue;
+    // an appeal that was itself denied: its outcome and next step come from appeal_case (src/appeals/flow.ts)
+    if (!decided || a.id.startsWith("appeal-")) continue;
     const address = (w.stores ?? []).find(s => s.apps?.includes(a.id))?.address ?? [w.meta?.city, w.meta?.region].filter(Boolean).join(", ");
     const ap = appealFor(a, address, a.filed?.note ?? "");
     const dl = ap ? deadlineFor(ap.deadline, decided, ap.tz) : null;

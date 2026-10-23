@@ -4,7 +4,9 @@ import { PUBLIC_BUNDLE } from "./publicBundle";
 import { inspectionsFor } from "./inspections/forStore";
 import { bookingWay, callScript, isWindow, METHOD_WORDS, slotText } from "./inspections/booking";
 import { INSPECTIONS } from "./inspections/index";
-import { appealById, appealFor, choices, counselPacket, daysLeft, deadlineFor, letterOutline, NOT_A_LAW_FIRM, type Served } from "./appeals";
+import { appealById, appealFor, CHANNELS, choices, counselPacket, daysLeft, deadlineFor, letterOutline, NOT_A_LAW_FIRM, ROUTE_NAME, TIERS, type Appeal, type Served } from "./appeals";
+import { appealApplication, appealLetter, attorneyHandoff, checkAnswer, datesFor, evidenceFor, hearingScript, mayFile, nextQuestion, OUTCOMES, PARTNER, prepFor, questionsFor, recordOutcome, SAFETY_DAYS, stageOf,
+  type AppealCase, type Ctx, type Outcome, type Question } from "./appeals/flow";
 import { priceFacts } from "./pricing";
 import { DEFAULT_POLICY, SPEND_CATEGORIES, decide, suggestBudgets, type Budget, type Purchase, type SpendCategory } from "./spend.ts";
 import { canFill } from "./forms/canFill";
@@ -1526,7 +1528,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     },
     {
       name: "appeal_options",
-      description: "When an agency denied or returned an application, or issued a closure or summons: the official way to appeal or ask for a hearing (the body, the deadline counted from the decision date, the form, the fee, the grounds, the evidence checklist, hearing prep, outcomes, whether counsel is advisable), fixing and refiling compared with appealing, and a cited outline for the letter. Read-only: it files nothing. Then add the deadline with add_deadline (if it isn't on Deadlines yet), explain the reason plainly, let the owner choose, draft the letter with draft_document from the outline (every rule with its source), and where counsel is advisable draft a note to their attorney with draft_message. Never file or send an appeal yourself; never predict the result.",
+      description: "When an agency denied or returned an application, or issued a closure or summons: the official way to appeal or ask for a hearing (the body, the deadline counted from the decision date, the form, the fee, the grounds, the evidence checklist, hearing prep, outcomes, whether counsel is advisable), fixing and refiling compared with appealing, who should handle it (route: self_serve, self_serve_review or attorney, with the agency's own words) and a cited outline for the letter. Read-only: it files nothing. Then explain the reason plainly and let the owner choose; to appeal, use appeal_case (start), which asks the questions, writes the letter, calendars the deadline and puts the filing up for the owner's approval. Where an attorney is advised, appeal_case does only what a non-lawyer may and hands counsel the packet. Never file or send an appeal yourself; never predict the result.",
       inputSchema: { type: "object", properties: {
         application_id: { type: "string" },
         decision_date: { type: "string", description: "YYYY-MM-DD on the decision or notice, when the filing record doesn't have it" },
@@ -1554,6 +1556,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const beforeDl = before && decided ? deadlineFor(before.deadline, decided, before.tz, { served }) : null;
         return {
           playbook: ap.id, name: ap.name.en, body: ap.body.en, covers: ap.covers.en,
+          route: { route: TIERS[ap.id].route, says: ROUTE_NAME[TIERS[ap.id].route].en, why: TIERS[ap.id].why.en, agency_says: TIERS[ap.id].says, source: TIERS[ap.id].source },
           deadline: dl ? { last_day: dl.date, legal_last_day: dl.legal, days_left: daysLeft(dl.date, today), trigger: dl.trigger, counted: dl.counted, section: dl.section, rule: dl.rule, confirmed_on_official_page: dl.verified, on_deadlines: onCalendar,
               ...(dl.cutoff ? { by_local_time: dl.cutoff } : {}), ...(dl.atLeast ? { at_the_earliest: true, note: "The shortest period for this kind of decision: if the letter gives a later date, use the letter's." } : {}),
               ...(served === "unknown" && ap.deadline.mail ? { ask: "Ask how the decision was delivered: by mail adds days under this rule." } : {}) }
@@ -1571,11 +1574,13 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           ...(ap.next ? { if_this_is_lost: appealById(ap.next)?.name.en } : {}),
           not_a_law_firm: NOT_A_LAW_FIRM.en,
           do_next: [dl && !onCalendar ? `add_deadline ${dl.date} ("Last day: ${ap.name.en}", kind due, application ${a.id})` : "", "explain the reason in plain words", "show both options and let the owner choose",
-            "draft_document the letter from letter_outline, keeping every [n] citation", ap.counsel.advised ? "draft_message to their attorney from counsel.handoff (subject, body and questions as given; ask who their attorney is if you don't know)" : "",
-            "never file, send or pay anything for the appeal yourself"].filter(Boolean),
+            `to appeal: appeal_case start for application ${a.id} (it calendars a file-by date with room to spare and asks one question at a time)`,
+            ap.counsel.advised ? "an attorney is advised: appeal_case prepares what the owner may do and the counsel packet (appeal_case handoff); ask who their attorney is if you don't know" : "",
+            "never file, send or pay anything for the appeal without the owner's approval card"].filter(Boolean),
         };
       },
     },
+    appealCaseTool(),
     {
       name: "inspection_booking",
       description: "Book a store's inspection and see it through, and run a mock inspection first. action: plan (how this agency takes bookings and what it needs), book (with the one slot the owner picked from the times you offered: for an agency site Placetta can use, it makes the booking request for the owner to approve with request_filing_approval, and the portal worker books it with the owner's own login; by phone or email it returns the call script or the email for draft_message, and the team makes the call), confirm (the date, window and confirmation once the agency confirms: it goes on Deadlines with a reminder), result (passed, failed with the inspector's corrections, or a re-inspection booked), mock (walk the inspector's checklist with the owner one item at a time: pass ok true or false for the item you asked about, and a document_id when they sent a photo; it returns the next item). Never create an account on an agency site, never get past a CAPTCHA (the owner does it in the live view), and never book a time the owner didn't approve.",
@@ -1781,6 +1786,216 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
   // the playbook drives the tools above, so it goes in last, with them in hand
   if (all.some(t => t.name === "prepare_application")) all.push(playbookTool(all));
   return all;
+
+  /* An appeal carried through (src/appeals/flow.ts): the DoNotPay-style self-serve flow where the agency says no lawyer
+     is needed, and everything a non-lawyer may do plus the counsel packet where one is advised. It records the case and
+     prepares; filing goes through request_filing_approval (the owner's card), the fee through request_purchase, a
+     letter to a neighbor or counsel through draft_message. */
+  function appealCaseTool(): Tool {
+    return {
+      name: "appeal_case",
+      description: "Carry a denial through its appeal, one step at a time, after appeal_options. action: start (the denied application: opens the case, puts the last day and a file-by date a few days earlier on Deadlines, says whether the owner can file it themselves and why, and returns the first question), answer (the owner's answer to the question you asked: question_id and value; returns the next question; ask exactly one question per message, in the owner's language), draft (when the questions are done: the cited letter and the appeal's own application for approval), evidence (attach an uploaded document: item_id and document_id), file (checks it's complete and returns what to call: request_filing_approval for the appeal application, then request_purchase for the fee), status (where it stands with the body, from the daily status checks), hearing (the hearing date and a one-page script), prep (liquor and zoning: the hearing request, protest answers, conditions offer, neighbor letter, community board prep, evidence packet; step to draft one), handoff (the packet for counsel; attorney is their attorney's name and email when known), outcome (granted, granted_with_conditions, denied, withdrawn or settled, as the body decided). Never file, send or pay anything without the owner's approval card; never file where an attorney is advised except the request the rule lets an applicant make; never predict the result or claim a success rate.",
+      inputSchema: { type: "object", properties: {
+        action: { type: "string", enum: ["start", "answer", "draft", "evidence", "file", "status", "hearing", "prep", "handoff", "outcome"] },
+        case_id: { type: "string" }, application_id: { type: "string", description: "start: the denied application" }, playbook: { type: "string", description: "start: the next playbook an outcome named, when the appeal itself was lost" },
+        decision_date: { type: "string", description: "start: YYYY-MM-DD on the decision, when the record doesn't have it" }, reason: { type: "string", description: "start: the agency's reason in its words, when the record doesn't have it" },
+        served: { type: "string", enum: ["mail", "hand", "email", "unknown"] },
+        question_id: { type: "string" }, value: { description: "answer: the owner's answer (a string, or a list of option ids for a pick-all question)" },
+        item_id: { type: "string" }, document_id: { type: "string" },
+        step: { type: "string", enum: ["hearing_request", "protest_response", "conditions_offer", "neighbor_letter", "community_board", "evidence_packet", "attorney_handoff"] },
+        date: { type: "string", description: "hearing/outcome: YYYY-MM-DD" }, how: { type: "string", description: "hearing: in person, phone, video or online" },
+        result: { type: "string", enum: ["granted", "granted_with_conditions", "denied", "withdrawn", "settled"] }, note: { type: "string" },
+        attorney: { type: "string", description: "handoff: their attorney's name and email, when they have one" },
+      }, required: ["action"] },
+      execute(i) {
+        const action = str(i.action), today = daysFromNow(0), now = nowIso();
+        const put = (c: AppealCase) => apply(w => ({ ...w, appeals: [...(w.appeals ?? []).filter(x => x.id !== c.id), { ...c, updated: now }] }));
+        const qOut = (q: Question | null) => q ? { question_id: q.id, ask: q.ask[lang], kind: q.kind, ...(q.options ? { options: q.options.map(o => ({ id: o.id, label: o.label[lang] })) } : {}), why: q.why[lang] } : null;
+        const addressOf = (appId: string) => { const w = get(); return (w.stores ?? []).find(s => s.apps?.includes(appId))?.address ?? [w.meta?.city, w.meta?.region].filter(Boolean).join(", "); };
+        const calendar = (ap: Appeal, appId: string, decided: string, served: Served) => {
+          const d = datesFor(ap, decided, today, served);
+          if (!d || d.passed) return d;
+          const name = ap.name;
+          apply(w => {
+            let n = w;
+            const legalId = `appeal-${appId}-${decided}`, earlyId = `appeal-fileby-${appId}-${decided}`;
+            if (!n.deadlines.some(x => x.id === legalId)) n = addDeadline({ id: legalId, date: d.dl.date, kind: "due", app: appId, agency: ap.body, title: B(`Last day: ${name.en}`, `最后期限：${name.zh}`) })(n);
+            if (d.fileBy < d.dl.date && !n.deadlines.some(x => x.id === earlyId)) n = addDeadline({ id: earlyId, date: d.fileBy, kind: "due", app: appId, agency: ap.body, title: B(`File by (${SAFETY_DAYS} days to spare): ${name.en}`, `建议提交日（预留 ${SAFETY_DAYS} 天）：${name.zh}`) })(n);
+            return n;
+          });
+          return d;
+        };
+        if (action === "start") {
+          const a = findApp(i.application_id);
+          const open = (get().appeals ?? []).find(c => c.app === a.id && !c.outcome);
+          if (open) { mark(); return { case_id: open.id, already_open: true, stage: open.stage, next_question: qOut(nextQuestion(appealById(open.playbook)!, open)), do_next: "Carry on with this case." }; }
+          const decided = str(i.decision_date, 10) || a.filed?.decided || "";
+          if (decided && !isDate(decided)) throw new Error(`decision_date must be YYYY-MM-DD (got "${str(i.decision_date, 40)}")`);
+          const reason = str(i.reason, 600) || a.filed?.note || "";
+          // the next step after a lost appeal is named by the outcome (appeal_case outcome's next.playbook)
+          const ap = (str(i.playbook) ? appealById(str(i.playbook)) : undefined) ?? appealFor(a, addressOf(a.id), reason);
+          if (str(i.playbook) && ap?.id !== str(i.playbook)) throw new Error(`No playbook "${str(i.playbook)}".`);
+          if (!ap) { mark(); return { covered: false, not_a_law_firm: NOT_A_LAW_FIRM.en, do_next: "Placetta has no playbook for this decision yet: read the decision letter for who hears an appeal and by when, add that date with add_deadline citing the letter, and offer fixing and refiling." }; }
+          const served = (["mail", "hand", "email", "unknown"].includes(str(i.served)) ? str(i.served) : "unknown") as Served;
+          const tier = TIERS[ap.id], id = freshId(get(), "case");
+          const c: AppealCase = { id, app: a.id, playbook: ap.id, route: tier.route, store: (get().stores ?? []).find(s => s.apps?.includes(a.id))?.id, ...(decided ? { decided } : {}), served, reason, answers: {}, stage: "interview", created: now, updated: now };
+          const d = decided ? calendar(ap, a.id, decided, served) : null;
+          if (d) { c.lastDay = d.dl.date; c.fileBy = d.fileBy; }
+          put(c);
+          apply(audit("agent", L("Opened an appeal", "开启上诉"), ap.name, ROUTE_NAME[tier.route]));
+          mark();
+          return { case_id: id, playbook: ap.id, name: ap.name.en, route: tier.route, route_says: ROUTE_NAME[tier.route][lang], why: tier.why[lang], agency_says: tier.says, source: tier.source,
+            deadline: d ? { last_day_by_rule: d.dl.legal, target: d.dl.date, file_by: d.fileBy, days_left: daysLeft(d.dl.date, today), counted: d.dl.counted, on_deadlines: !d.passed, ...(d.passed ? { passed: "The computed deadline has passed: read the letter for any later date, and say so plainly." } : {}) }
+              : { last_day: null, rule: ap.deadline.says, do_next: decided ? "No count from the rule: read the date from the decision letter and add it with add_deadline." : "Ask for the date on the decision letter first." },
+            ...(tier.route === "attorney" ? { what_you_can_do: prepFor(ap).map(p => p.title[lang]) } : {}),
+            first_question: qOut(nextQuestion(ap, c)), not_a_law_firm: NOT_A_LAW_FIRM[lang],
+            do_next: `Tell the owner in two short sentences: the route (${ROUTE_NAME[tier.route].en}, because ${tier.why.en}) and the file-by date. Then ask first_question, and only that one.` };
+        }
+        const c0 = (get().appeals ?? []).find(x => x.id === str(i.case_id));
+        if (!c0) throw new Error(`No appeal case "${str(i.case_id)}". Start one with action start and the denied application's id.`);
+        let c: AppealCase = { ...c0, answers: { ...c0.answers } };
+        const ap = appealById(c.playbook)!, a = get().apps.find(x => x.id === c.app);
+        const w = get();
+        const x: Ctx & { agencyBi: Bi; appNameBi: Bi } = { business: w.business.en, address: addressOf(c.app) || "[business address]", agency: a?.agency.en ?? ap.body.en, appName: a?.name.en ?? ap.name.en, confirmation: a?.filed?.confirmation, agencyBi: a?.agency ?? ap.body, appNameBi: a?.name ?? ap.name };
+        const filingApp = () => (c.filing ? get().apps.find(y => y.id === c.filing) : undefined);
+        if (action === "answer") {
+          const want = str(i.question_id), qs = questionsFor(ap, {});
+          const q = qs.find(y => y.id === want);
+          if (!q) throw new Error(`No question "${want}". Ask: ${qOut(nextQuestion(ap, c))?.question_id ?? "none left"}.`);
+          const v = checkAnswer(q, i.value);
+          if (q.id === "decided") { c.decided = v as string; const d = calendar(ap, c.app, c.decided, c.served ?? "unknown"); if (d) { c.lastDay = d.dl.date; c.fileBy = d.fileBy; } }
+          if (q.id === "served") { c.served = v as Served; if (c.decided) { const d = calendar(ap, c.app, c.decided, c.served); if (d) { c.lastDay = d.dl.date; c.fileBy = d.fileBy; } } }
+          if (q.id === "reason") c.reason = v as string;
+          c.answers[q.id] = v;
+          put(c); mark();
+          const nq = nextQuestion(ap, c);
+          return nq ? { case_id: c.id, saved: q.id, next_question: qOut(nq), do_next: "Ask next_question, and only that one." }
+            : { case_id: c.id, saved: q.id, interview_done: true, do_next: "Call appeal_case draft." };
+        }
+        if (action === "draft") {
+          const nq = nextQuestion(ap, c);
+          if (nq) throw new Error(`Not every question is answered. Ask next: ${nq.id} (${nq.ask.en}).`);
+          const lt = appealLetter(ap, c, x);
+          c.letter = lt.text; c.stage = "drafted";
+          let appId: string | undefined;
+          if (mayFile(ap)) {
+            const old = c.filing ? get().apps.find(y => y.id === c.filing) : undefined;
+            if (old) notFiled(old);
+            const fa = appealApplication(ap, c, x, lt.text);
+            // a document already attached stays attached
+            const kept = fa.checklist.map(item => old?.checklist.find(o => o.id === item.id && o.state === "done") ?? item);
+            appId = fa.id; c.filing = appId;
+            apply(w => audit("agent", L("Prepared an appeal for approval", "准备了上诉待批准"), fa.name)({ ...w, apps: [...w.apps.filter(y => y.id !== fa.id), { ...fa, checklist: kept }],
+              stores: c.store ? (w.stores ?? []).map(s => (s.id === c.store ? { ...s, apps: [...new Set([...(s.apps ?? []), fa.id])] } : s)) : w.stores }));
+            made.apps.add(appId);
+          }
+          put(c); mark();
+          const fa = appId ? get().apps.find(y => y.id === appId) : undefined;
+          return { case_id: c.id, letter: lt.text, review: lt.review.map(r => r[lang]), sources: lt.sources, ...(appId ? { application_id: appId } : { files: "nothing: an attorney is advised for this step; the letter goes in the counsel packet" }),
+            evidence: evidenceFor(ap).map(e => ({ item_id: e.id, item: e.label[lang], required: e.required, on_file: !!fa?.checklist.find(k => k.id === e.id && k.state === "done") })),
+            not_a_law_firm: NOT_A_LAW_FIRM[lang],
+            do_next: appId ? `Save the letter with draft_document (content: the letter as given; application_id ${appId}, checklist_item letter) for the owner to read and sign. Ask them to upload the decision letter and any evidence they have, then attach each with appeal_case evidence. Then appeal_case file.`
+              : "Save the letter with draft_document for counsel, then appeal_case handoff." };
+        }
+        if (action === "evidence") {
+          const fa = filingApp(); if (!fa) throw new Error("Draft the appeal first (appeal_case draft).");
+          const item = evidenceFor(ap).find(e => e.id === str(i.item_id));
+          if (!item) throw new Error(`No evidence item "${str(i.item_id)}". Items: ${evidenceFor(ap).map(e => e.id).join(", ")}.`);
+          const doc = get().docs.find(d => d.id === str(i.document_id));
+          if (!doc) throw new Error(`No document "${str(i.document_id)}". Ask the owner to upload it first.`);
+          notFiled(fa);
+          apply(w => {
+            const cur = w.apps.find(y => y.id === fa.id)!;
+            const has = cur.checklist.some(k => k.id === item.id);
+            const n = has ? setCheck(fa.id, item.id, { state: "done", doc: doc.id })(w)
+              : setApp(fa.id, { checklist: [...cur.checklist, { id: item.id, label: item.label, state: "done", doc: doc.id }] })(w);
+            return audit("agent", L("Attached evidence to an appeal", "为上诉附上证据"), item.label, same(doc.name))(n);
+          });
+          made.apps.add(fa.id); mark();
+          const now2 = get().apps.find(y => y.id === fa.id)!;
+          return { case_id: c.id, attached: item.label[lang], still_needed: filingBlockers(now2).missing.map(m => m[lang]) };
+        }
+        if (action === "file") {
+          if (!mayFile(ap)) throw new Error(`An attorney is advised for ${ap.name.en} (${TIERS[ap.id].why.en}). Placetta doesn't file it: use appeal_case handoff.`);
+          const fa = filingApp(); if (!fa) throw new Error("Draft the appeal first (appeal_case draft).");
+          const bl = filingBlockers(fa);
+          if (bl.empty.length || bl.missing.length) { mark(); return { ready: false, empty_fields: bl.empty.map(b => b[lang]), missing_documents: bl.missing.map(b => b[lang]), do_next: "Fill or attach what's missing (fill_fields, draft_document, appeal_case evidence), asking the owner in one short list." }; }
+          if (c.lastDay && c.lastDay < today) throw new Error(`The computed last day (${c.lastDay}) has passed. Read the letter for any later date before filing; the SF Board, for one, takes a Jurisdiction Request only when the City caused the lateness.`);
+          c.stage = "awaiting_approval"; put(c); mark();
+          const ch = CHANNELS[ap.id];
+          const fee = ap.fee.verified && ap.fee.usd ? ap.fee.usd : 0;
+          return { case_id: c.id, ready: true, application_id: fa.id, channel: ch.method, how: ch.how[lang], ...(c.fileBy ? { file_by: c.fileBy, last_day: c.lastDay } : {}),
+            ...(fee ? { fee: { usd: fee, says: ap.fee.says[lang], payee: ap.body.en } } : { fee: { usd: null, says: ap.fee.says[lang] } }),
+            do_next: [`request_filing_approval for ${fa.id}: the owner sees the letter, the lines and the attachments and approves; only then does Placetta send it ${ch.dest ? "by the Board's own channel" : "(Placetta's team sends it by the channel the letter or page names)"}.`,
+              fee ? `request_purchase (category gov_fees, payee "${ap.body.en}", amount ${fee}, application_id ${fa.id}, why "Appeal fee: ${ap.name.en}") so the owner approves the fee; they pay the body directly.` : "",
+              "Tell the owner the file-by date and that nothing goes out before they approve."].filter(Boolean) };
+        }
+        if (action === "status") {
+          const fa = filingApp();
+          const stage = stageOf(c, fa?.filed);
+          if (stage !== c.stage) { c.stage = stage; put(c); }
+          mark();
+          return { case_id: c.id, stage, route: c.route, ...(fa?.filed ? { with_the_body: fa.filed.status, confirmation: fa.filed.confirmation, submitted: fa.filed.submitted, note: fa.filed.note } : { with_the_body: fa ? (get().approvals.some(p => p.app === fa.id && p.kind === "file") ? "waiting for the owner's approval" : "not filed yet") : "nothing to file" }),
+            ...(c.lastDay ? { last_day: c.lastDay, file_by: c.fileBy, days_left: daysLeft(c.lastDay, today) } : {}), ...(c.hearing ? { hearing: c.hearing } : {}), ...(c.outcome ? { outcome: c.outcome } : {}),
+            checked: "Placetta's daily status checks read the filing's status with the body and update it here." };
+        }
+        if (action === "hearing") {
+          const date = str(i.date, 10);
+          if (date && !isDate(date)) throw new Error("date must be YYYY-MM-DD as the hearing notice gives it");
+          if (date) {
+            c.hearing = { date, ...(str(i.how, 40) ? { how: str(i.how, 40) } : {}) };
+            const dlId = `appeal-hearing-${c.id}`;
+            apply(w => addDeadline({ id: dlId, date, kind: "milestone", app: c.filing ?? c.app, agency: ap.body, title: B(`Hearing: ${ap.name.en}`, `听证：${ap.name.zh}`),
+              ask: B("Rehearse the hearing", "演练听证"), prompt: B(`My hearing for the ${x.appName} is on ${date}. Walk me through the one-page script (appeal_case hearing) and what to bring.`, `我的${x.appNameBi.zh}听证在 ${date}。请带我过一遍一页发言稿（appeal_case hearing）和要带的材料。`) })({ ...w, deadlines: w.deadlines.filter(d => d.id !== dlId) }));
+            c.stage = "hearing"; put(c);
+          }
+          mark();
+          const script = hearingScript(ap, c, x);
+          return { case_id: c.id, ...(c.hearing ? { hearing: c.hearing, on_deadlines: true } : {}), script: script.map(s => s[lang]), ...(c.route === "attorney" ? { note: "Counsel represents the owner at this hearing; the script is for the owner's part and for counsel's prep." } : {}),
+            do_next: "Give the owner the script as one page. Offer to rehearse it: ask them each point as the body might, one at a time." };
+        }
+        if (action === "prep") {
+          const steps = prepFor(ap);
+          if (!steps.length) throw new Error(`${ap.name.en} has no pre-hearing steps: it's a ${ROUTE_NAME[c.route].en.toLowerCase()} route. Use draft and file.`);
+          const want = str(i.step);
+          if (!want) { mark(); return { case_id: c.id, steps: steps.map(s => ({ step: s.id, title: s.title[lang], does: s.does[lang], done: c.prep?.[s.id] ?? null, ...(s.source ? { source: s.source } : {}) })) }; }
+          const s = steps.find(y => y.id === want);
+          if (!s) throw new Error(`No step "${want}" for ${ap.name.en}. Steps: ${steps.map(y => y.id).join(", ")}.`);
+          if (s.id === "hearing_request") { mark(); return { case_id: c.id, step: s.id, do_next: "The hearing request is the case's own filing: appeal_case draft, then appeal_case file (the owner approves it)." }; }
+          c.prep = { ...(c.prep ?? {}), [s.id]: today }; put(c); mark();
+          return { case_id: c.id, step: s.id, title: s.title[lang], does: s.does[lang], ...(s.says ? { source_says: s.says, source: s.source } : {}), draft: s.draft(ap, c, x),
+            do_next: s.id === "neighbor_letter" || s.id === "protest_response" || s.id === "conditions_offer" ? "Save it with draft_document for the owner to edit, and if it goes to someone, draft_message it for their approval. Nothing is sent before they approve."
+              : s.id === "attorney_handoff" ? "Use appeal_case handoff." : "Save it with draft_document for the owner." };
+        }
+        if (action === "handoff") {
+          const fa = filingApp();
+          const ev = evidenceFor(ap).map(e => ({ item: e.label.en, on_file: !!fa?.checklist.find(k => k.id === e.id && k.state === "done") }));
+          const to = str(i.attorney, 160) || PARTNER;
+          const pk = attorneyHandoff(ap, c, x, ev, to);
+          c.handoff = { at: now, to }; if (!fa?.filed) c.stage = "with_attorney"; put(c);
+          apply(audit("agent", L("Prepared the packet for counsel", "为律师准备了材料"), ap.name, same(to)));
+          mark();
+          return { case_id: c.id, to, subject: pk.subject, body: pk.body, questions: pk.questions,
+            do_next: to === PARTNER ? "Tell the owner Placetta's team can introduce an attorney (no firm is named yet, and Placetta takes no referral fee); ask if they have their own. Save the packet with draft_document meanwhile." : `draft_message to ${to} with the subject, body and questions as given, for the owner's approval.` };
+        }
+        if (action === "outcome") {
+          const result = str(i.result) as Outcome;
+          if (!OUTCOMES[result]) throw new Error("result must be granted, granted_with_conditions, denied, withdrawn or settled, as the body decided");
+          const note = str(i.note, 400);
+          if (!note) throw new Error("note is required: the body's decision in its own words (or the settlement's terms).");
+          const date = str(i.date, 10) || today;
+          if (!isDate(date)) throw new Error("date must be YYYY-MM-DD, the date of the body's decision");
+          const r = recordOutcome(ap, result, date, today);
+          c.outcome = { at: date, result, note, ...(r.next ? { next: r.next.id } : {}) }; c.stage = "decided"; put(c);
+          apply(audit("agent", L("Recorded an appeal's outcome", "记录了上诉结果"), ap.name, OUTCOMES[result]));
+          mark();
+          return { case_id: c.id, outcome: OUTCOMES[result][lang], decided: date, note, ...(r.next ? { next: { playbook: r.next.id, name: r.next.name[lang], route: r.next.route, last_day: r.next.last_day, days_left: r.next.days_left } } : {}),
+            do_next: result === "denied" && r.next ? `Explain plainly what was decided. The next step is ${r.next.name.en}${r.next.last_day ? ` by ${r.next.last_day}` : ""}${r.next.route === "attorney" ? ", and an attorney is advised for it" : ""}: offer to start it with appeal_case start on the original application.` : result.startsWith("granted") ? "Tell the owner plainly, and update the original application's next step (conditions, if any, go on its record)." : "Tell the owner plainly what was recorded." };
+        }
+        throw new Error("action must be start, answer, draft, evidence, file, status, hearing, prep, handoff or outcome");
+      },
+    };
+  }
 
   /* A filing by its playbook (src/playbooks): the store's own form from the registry, every line filled from the
      profile and earlier filings, documents already in the workspace reused, the validators run in code, one list of

@@ -64,8 +64,9 @@ function report(FORMS, D, L) {
   const us = FORMS.filter((f) => !f.currency || f.currency === "USD");
   const ids = new Set(FORMS.map((f) => f.id));
   const problems = [...(D.destinationProblems?.() ?? [])];
-  // inspection bookings (insp-*, src/inspections/booking.ts) are the agencies' scheduling pages, not registry forms
-  for (const id of Object.keys(DEST)) if (!ids.has(id) && !id.startsWith("insp-")) problems.push(`${id}: a destination for a form the registry doesn't have`);
+  // inspection bookings (insp-*, src/inspections/booking.ts) are the agencies' scheduling pages, and appeals (appeal-*,
+  // src/appeals) the deciding bodies' own inboxes, not registry forms
+  for (const id of Object.keys(DEST)) if (!ids.has(id) && !id.startsWith("insp-") && !id.startsWith("appeal-")) problems.push(`${id}: a destination for a form the registry doesn't have`);
   for (const id of Object.keys(TEAM_ONLY)) {
     if (!ids.has(id)) problems.push(`${id}: a team-only note for a form the registry doesn't have`);
     if (DEST[id]) problems.push(`${id}: both a destination and team-only`);

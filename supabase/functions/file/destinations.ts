@@ -167,6 +167,14 @@ export const DEST: Record<string, Dest> = {
   "insp-phx-building-final": { portal: "apps-secure.phoenix.gov", portalUrl: "https://apps-secure.phoenix.gov/PDD/inspections", signature: "none", payment: "none", onBehalf: "unstated", checked: "2026-10-22", source: "https://www.phoenix.gov/administration/departments/pdd/commercial-multifamily-building/commercial-inspections.html" },
   // San Diego: "all building inspections can be scheduled or canceled online" (Accela, its San Diego tenant)
   "insp-sdg-building-final": { portal: "aca-prod.accela.com", portalUrl: "https://aca-prod.accela.com/SANDIEGO/Login.aspx", tenant: "/SANDIEGO", signature: "none", payment: "none", onBehalf: "unstated", checked: "2026-10-22", source: "https://www.sandiego.gov/development-services/forms-publications/information-bulletins/120" },
+  // Appeals the owner can file themselves (src/appeals, appeal_case), each sent only after the owner approves it:
+  // SF Board of Appeals: files by email to boardofappeals@sfgov.org; "After you file, you receive an appeal number", which
+  // the fee is paid online with (or by check by mail), so nothing goes with the email.
+  "appeal-sf-boa": { email: "boardofappeals@sfgov.org", signature: "typed", payment: "invoice", onBehalf: "unstated", checked: "2026-10-22", source: "https://sf.gov/file-appeal-permit-or-decision", also: ["https://www.sf.gov/board-of-appeals-faqs"] },
+  // TABC, 16 TAC §33.60(c): the written request for hearing goes to "Texas Alcoholic Beverage Commission, ATTN: Clerk,
+  // P.O. Box 13127, Austin, Texas 78711" or by email to clerk@tabc.texas.gov; no fee in §33.60.
+  "appeal-tx-tabc-hearing": { email: "clerk@tabc.texas.gov", mail: { name: "Texas Alcoholic Beverage Commission", line1: "ATTN: Clerk", line2: "P.O. Box 13127", city: "Austin", state: "TX", zip: "78711" },
+    signature: "typed", payment: "none", onBehalf: "unstated", checked: "2026-10-22", source: "https://www.tabc.texas.gov/static/f6f628258b7ae843925c2025de0a3ff6/tabc-administrative-rules.pdf" },
   "aus-building": { portal: "abc.austintexas.gov", signature: "typed", payment: "invoice", checked: "2026-10-13", source: "https://www.austintexas.gov/development-services/commercial-plan-review" },
   "la-ladbs": { portal: "eplanla.lacity.org", signature: "typed", checked: "2026-10-13", source: "https://dbs.lacity.gov/" },
 

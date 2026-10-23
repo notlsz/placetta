@@ -233,6 +233,8 @@ export type Workspace = {
   agentMemory?: import("./odeliaMemory/types").AgentMemory;
   /** Inspections booked or being booked, and their results (src/inspections/booking.ts). */
   bookings?: InspectionBooking[];
+  /** Denials being appealed, each from its guided questions to its outcome (src/appeals/flow.ts). */
+  appeals?: import("./appeals/flow").AppealCase[];
   /** Licenses the owner said don't apply (an application removed with their confirmation, or "we don't serve
    *  alcohol"): never suggested again unless they change their mind (find_official_forms marks them, prepare_application
    *  refuses them). */

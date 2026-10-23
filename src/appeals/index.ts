@@ -17,11 +17,16 @@
                           own source by number, and a person checks every citation before anything goes out.
      counsel handoff      Clio's matter intake: the attorney gets one packet (decision, deadline and how it was counted,
                           the grounds, the evidence with what's on file and what's missing, the questions for counsel).
-     the line not crossed DoNotPay's "robot lawyer" claims ended in an FTC order (https://www.ftc.gov/node/87474).
-                          Placetta prepares, calendars and drafts; it never files an appeal, never says it will win, and
-                          gives no legal opinion.
-   Pure: the agent's tool (appeal_options in src/live.ts), finishWork (the deadline on the calendar) and the monitor
-   share it. */
+     self-serve, tiered   DoNotPay's flow (guided questions, the letter with the right legal hook, mailing and faxing
+                          for the user, deadline reminders) is copied in src/appeals/flow.ts; what got it an FTC order
+                          (https://www.ftc.gov/node/87474: "the company did not test whether its 'AI lawyer' operated to
+                          the level of a human lawyer" and "did not hire or retain attorneys to test the quality and
+                          accuracy") is not. Every playbook has a route (TIERS below), each cited: self-serve where the
+                          agency itself says no lawyer is needed or it's a simple administrative review, self-serve with
+                          an optional review, or attorney advised. Placetta files only what the owner approves, never
+                          says it will win, claims no success rate, and gives no legal opinion.
+   Pure: the agent's tools (appeal_options and appeal_case in src/live.ts), finishWork (the deadline on the calendar)
+   and the monitor share it. */
 import { B, type Bi } from "../bi";
 
 export type AppealId =
@@ -120,6 +125,13 @@ const LA_BOR = "https://finance.lacity.gov/tax-education/tax-assessments/board-r
 const CALCODE = "https://ochealthinfo.com/sites/healthcare/files/2026-04/CalCode%20effective%20January%202026%20updated%203-16-26.pdf";
 const DAL_BOARD = "https://dallascityhall.com/departments/sustainabledevelopment/DCH%20documents/APPEALPROCESSOVERVIEWDallas.pdf";
 const NYC_DCWP_AFTER = "https://nyc-business.nyc.gov/nycbusiness/description/commercial-lessor-license/after_apply";
+const SJ_BTC = "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration";
+const HOU_START = "https://www.houstontx.gov/business/start/startup-guide.html";
+const TX_GENERAL = "https://gov.texas.gov/business/page/business-permits-office";
+const OATH_REP = "https://www.nyc.gov/site/oath/hearings/registered-representatives.page";
+const OATH_WHAT = "https://www.nyc.gov/assets/oath/downloads/pdf/en-what-is-oathhd.pdf";
+const LADBS_BBSC = "https://dbs.lacity.gov/our-organization/building-and-safety-comissioners/bbsc-appeals-ordinances";
+const NYC_BSA_RULE = "https://www.nyc.gov/site/bsa/about/1-06-appeals-calendar-a.page";
 const leginfo = (code: string, sec: string) => `https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=${code}&sectionNum=${sec}`;
 
 const COMMON_EVIDENCE: Bi[] = [
@@ -149,7 +161,7 @@ export const APPEALS: Appeal[] = [
       B("The premises and the people meet the requirements ABC's letter names", "场所和人员符合 ABC 来信列出的要求")],
     evidence: [...COMMON_EVIDENCE, B("Floor plan and the posted public notice", "平面图和已张贴的公示"), B("Letters of support from neighbors and the community", "邻居和社区的支持信"),
       B("Proposed operating conditions and a security plan", "拟议的经营条件和安保计划")],
-    hearing: [B("ABC schedules the hearing within 60 days and mails a Notice of Hearing to all parties", "ABC 在 60 天内安排听证，并向各方邮寄听证通知"), B("A public hearing before an administrative law judge; the Attorney General represents ABC; a protestant who doesn't appear abandons the protest", "在行政法法官前公开听证；州检察长代表 ABC；抗议人不出席即视为放弃抗议"),
+    hearing: [B("ABC schedules the hearing within 60 days and mails a Notice of Hearing to all parties", "ABC 在 60 天内安排听证，并向各方邮寄听证通知"), B("A public hearing before an administrative law judge; ABC counsel represents ABC; you may be represented by an attorney or another person; a protestant who doesn't appear abandons the protest", "在行政法法官前公开听证；ABC 由其律师代表；您可由律师或其他人代理；抗议人不出席即视为放弃抗议"),
       B("The judge has 30 days to write a proposed decision for the ABC Director", "法官有 30 天为 ABC 局长起草拟议决定")],
     outcomes: [B("License issued, with or without conditions", "批准发照（可能附条件）"), B("Denial upheld: appeal to the ABC Appeals Board", "维持拒绝：可向 ABC 上诉委员会上诉")],
     counsel: { advised: true, why: B("A contested liquor hearing with protestants as parties", "有抗议人参与的酒牌争议听证") },
@@ -270,7 +282,7 @@ export const APPEALS: Appeal[] = [
     fee: { usd: 600, says: B("Planning Department decisions $600", "规划局决定 $600"), verified: true },
     grounds: [B("The Zoning Administrator's findings aren't supported", "分区管理员的认定缺乏支持")], evidence: [...COMMON_EVIDENCE, B("Plans, photos and neighbor letters", "图纸、照片和邻居来信")],
     hearing: [B("Brief, then a public hearing; 4 of 5 votes to grant", "提交书状后公开听证；需五票中四票通过")], outcomes: [B("Granted, conditioned or denied", "批准、附条件或驳回")],
-    counsel: { advised: true, why: B("A zoning hearing", "分区听证") }, cites: { hearing: SF_FAQ }, sources: [SF_APPEAL, SF_FAQ], read: READ,
+    counsel: { advised: true, why: B("A variance hearing where neighbors are often parties and 4 of 5 votes are needed; the Board lets owners appear without one", "邻居常为当事方且需五票中四票通过的变更听证；委员会允许业主无律师出席") }, cites: { hearing: SF_FAQ }, sources: [SF_APPEAL, SF_FAQ], read: READ,
   },
   {
     id: "sf_board_of_appeals_zoning_admin", name: B("Appeal a Zoning Administrator determination (San Francisco Board of Appeals)", "就分区管理员决定上诉（旧金山上诉委员会）"),
@@ -282,7 +294,7 @@ export const APPEALS: Appeal[] = [
     fee: { usd: 600, says: B("Planning Department decisions $600", "规划局决定 $600"), verified: true },
     grounds: [B("The determination misreads the Planning Code for this use", "该决定误读了规划法规对此用途的规定")], evidence: [...COMMON_EVIDENCE, B("The use as permitted and its history", "已许可用途及其历史")],
     hearing: [B("Brief, then a public hearing", "提交书状后公开听证")], outcomes: [B("Overturned, modified or upheld", "推翻、修改或维持")],
-    counsel: { advised: true, why: B("A zoning hearing", "分区听证") }, cites: { hearing: SF_FAQ }, sources: [SF_APPEAL, SF_FAQ], read: READ,
+    counsel: { advised: false, why: B("\"Parties are not required to be represented by attorneys\"; a review is worth it because the Planning Code reading decides it", "“当事人无需律师代理”；结果取决于对规划法规的解读，值得请人审阅") }, cites: { hearing: SF_FAQ }, sources: [SF_APPEAL, SF_FAQ], read: READ,
   },
   {
     id: "sf_board_of_appeals_za_violation", name: B("Appeal a Zoning Administrator Notice of Violation (San Francisco Board of Appeals)", "就分区管理员违规通知上诉（旧金山上诉委员会）"),
@@ -294,7 +306,7 @@ export const APPEALS: Appeal[] = [
     fee: { usd: 600, says: B("Planning Department decisions $600", "规划局决定 $600"), verified: true },
     grounds: [B("The use or work cited is permitted, or has been corrected", "被指违规的用途或工程已获许可或已整改")], evidence: [...COMMON_EVIDENCE, B("Permits, photos and the history of the use", "许可、照片及用途历史")],
     hearing: [B("Brief, then a public hearing", "提交书状后公开听证")], outcomes: [B("Overturned, modified or upheld", "推翻、修改或维持")],
-    counsel: { advised: true, why: B("A zoning enforcement hearing", "分区执法听证") }, cites: { hearing: SF_FAQ }, sources: [SF_APPEAL, SF_FAQ], read: READ,
+    counsel: { advised: false, why: B("\"Parties are not required to be represented by attorneys\"; a review is worth it for an enforcement case", "“当事人无需律师代理”；执法案件值得请人审阅") }, cites: { hearing: SF_FAQ }, sources: [SF_APPEAL, SF_FAQ], read: READ,
   },
   {
     id: "sf_board_of_appeals_permit", name: B("Appeal another San Francisco permit decision (Board of Appeals)", "就旧金山其他许可决定上诉（上诉委员会）"),
@@ -382,7 +394,7 @@ export const APPEALS: Appeal[] = [
     fee: { usd: null, says: B(`${U}: the rules page doesn't state the fee`, `${U}：规则页面未列明费用`), verified: false },
     grounds: [B("The determination misreads the Zoning Resolution or the Building Code", "决定误读了分区决议或建筑规范")], evidence: [...COMMON_EVIDENCE, B("Plans, the objection sheet and the code sections", "图纸、审查意见单和相关条款")],
     hearing: [B("The BSA sends the hearing notice at least 30 days before; forward it at least 20 days before to the agency and the owner", "BSA 至少提前 30 天发出听证通知；您须至少提前 20 天转送机构和业主")],
-    outcomes: [B("Granted or denied", "批准或驳回")], counsel: { advised: true, why: B("A zoning and code hearing with service rules", "有送达规则的分区及规范听证") },
+    outcomes: [B("Granted or denied", "批准或驳回")], counsel: { advised: false, why: B("The rule sets filing and service steps an owner can follow; a review is worth it because the reading of the Zoning Resolution or the Building Code decides it", "规则规定了业主可自行完成的提交和送达步骤；结果取决于对分区决议或建筑规范的解读，值得请人审阅") },
     sources: ["https://www.nyc.gov/site/bsa/about/1-06-appeals-calendar-a.page"], read: READ,
   },
   {
@@ -457,8 +469,8 @@ export const APPEALS: Appeal[] = [
     evidence: [...COMMON_EVIDENCE, B("The inspection report and the summons", "检查报告和传票"), B("Photos, pest control and repair receipts", "照片、灭虫和维修收据")],
     hearing: [B("Most choose a phone hearing; ask at least three business days ahead", "多数人选择电话听证；须至少提前三个工作日申请")],
     outcomes: [B("Dismissed, reduced or upheld; a default if missed (a higher penalty)", "撤销、减轻或维持；缺席则按缺席处理（罚款更高）")],
-    counsel: { advised: false, why: B("Most settle or appear themselves", "多数人自行和解或出席") },
-    sources: ["https://nyc-business.nyc.gov/nycbusiness/description/settle-a-food-service-establishment-violation", "https://www.nyc.gov/site/oath/hearings/reopen-a-missed-hearing-default-online.page"], read: READ,
+    counsel: { advised: false, why: B("\"OATH hearings do not require a lawyer or representative\"; most settle or appear themselves", "“OATH 听证无需律师或代理人”；多数人自行和解或出席") },
+    sources: ["https://nyc-business.nyc.gov/nycbusiness/description/settle-a-food-service-establishment-violation", "https://www.nyc.gov/site/oath/hearings/reopen-a-missed-hearing-default-online.page", OATH_REP, OATH_WHAT], read: READ,
   },
   {
     id: "dal_building_appeals_board", name: B("Appeal a denied certificate of occupancy or building permit (Dallas Board of Appeals)", "就被拒的入住证或建筑许可上诉（达拉斯上诉委员会）"),
@@ -480,27 +492,32 @@ export const APPEALS: Appeal[] = [
   {
     id: "business_license_denial", name: B("Denied business license or permit (any city)", "营业执照或许可被拒（各城市）"),
     body: B("The body the denial letter names", "拒绝函所列机构"), where: { state: "CA" }, tz: "America/Los_Angeles",
-    covers: B("A city or county license or permit denied where no specific playbook applies (San José's business tax, Houston's permits, other cities)", "无专门流程适用的市县执照或许可被拒（圣何塞营业税、休斯敦各类许可、其他城市）"),
-    deadline: { days: null, unit: "calendar", from: "decision", trigger: B("As the denial letter says", "以拒绝函为准"), section: "Each city's code",
-      says: `${U}: every city sets its own, and the denial letter must say who hears an appeal and by when. San José's code (Municode) and city site, and Houston's code (Municode), can't be opened from Placetta's servers.`,
-      verified: null, check: ["https://library.municode.com/ca/san_jose/codes/code_of_ordinances?nodeId=TIT4REFI_CH4.76BUTA", "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration", "https://library.municode.com/tx/houston/codes/code_of_ordinances"] },
-    form: B("As the denial letter instructs", "按拒绝函说明"), file: B("As the denial letter instructs", "按拒绝函说明"),
-    fee: { usd: null, says: B(`${U}`, `${U}`), verified: false },
+    covers: B("A city or county license or permit denied where no specific playbook applies; San José and Houston have no general business license to deny", "无专门流程适用的市县执照或许可被拒；圣何塞和休斯敦没有可被拒绝的一般营业执照"),
+    deadline: { days: null, unit: "calendar", from: "decision", trigger: B("No appeal period of its own: a general business license denial doesn't exist in San José or Houston, and elsewhere the denial letter states who hears an appeal and by when", "无自身上诉期限：圣何塞和休斯敦不存在一般营业执照被拒的情形，其他城市以拒绝函所列的受理机构和期限为准"),
+      section: "San José: Business Tax Certificate (Finance); Houston and Texas: no general business license",
+      says: "San José: \"After you register and pay, you will receive a Business Tax Certificate, which is an official receipt for payment of the tax\" (a receipt, not a license the City decides on). Houston: the City lists \"four main requirements for a business to legally operate in the City of Houston\" (entity registration, a Texas sales tax permit, an EIN, a property tax rendition), none a general license, and the State says \"The State of Texas does not require a general license.\" A specific Houston permit (food dealer, alcoholic beverage, sign) that's denied follows the process its denial letter states.",
+      verified: ok(SJ_BTC), check: ["https://library.municode.com/ca/san_jose/codes/code_of_ordinances?nodeId=TIT4REFI_CH4.76BUTA"] },
+    form: B("A corrected filing, or the review the denial letter names", "修正后重新提交，或按拒绝函所列程序申请复查"), file: B("As the denial letter instructs", "按拒绝函说明"),
+    fee: { usd: null, says: B("Whatever the letter or the corrected filing charges", "以来函或重新提交的收费为准"), verified: false },
     grounds: [B("The reason given is wrong, or has been fixed", "所给理由有误或已解决")], evidence: COMMON_EVIDENCE,
     hearing: [B("As the letter says", "按来函说明")], outcomes: [B("Issued, or denial upheld", "发照或维持拒绝")],
-    counsel: { advised: false, why: B("Most denials are fixed and refiled", "多数拒绝可修正后重新提交") }, sources: [], read: READ,
+    counsel: { advised: false, why: B("Most denials are fixed and refiled", "多数拒绝可修正后重新提交") }, sources: [SJ_BTC, HOU_START, TX_GENERAL], read: READ,
   },
 ];
 export const appealById = (id: string) => APPEALS.find((a) => a.id === id);
 
 /** What "business license denial" means in each top city, and the playbook that answers it. */
-export const BUSINESS_LICENSE_ROUTES: { city: string; route: AppealId; what: string }[] = [
+export const BUSINESS_LICENSE_ROUTES: { city: string; route: AppealId | null; what: string; source?: string; check?: string }[] = [
   { city: "San Francisco", route: "sf_board_of_appeals_permit", what: "A permit the Board of Appeals hears (the business registration itself is a tax registration)" },
   { city: "Los Angeles", route: "la_tax_assessment_review", what: "The Business Tax Registration Certificate and its assessments (LAMC §21.16)" },
   { city: "New York City", route: "nyc_dcwp_denial", what: "A DCWP license (CPLR article 78 for court review)" },
   { city: "Dallas", route: "dal_building_appeals_board", what: "No general city business license; the certificate of occupancy is the city's gate" },
-  { city: "San José", route: "business_license_denial", what: "The Business Tax Certificate (UNVERIFIED: the code can't be opened from Placetta's servers)" },
-  { city: "Houston", route: "business_license_denial", what: "Houston's permits (UNVERIFIED: the code can't be opened from Placetta's servers)" },
+  // Not applicable: the certificate is "an official receipt for payment of the tax"; a dispute over the tax itself is
+  // in Municipal Code chapter 4.76, which Placetta's servers can't open (the founder confirms it in a browser)
+  { city: "San José", route: null, what: "Not applicable: the Business Tax Certificate is \"an official receipt for payment of the tax\", not a license the City denies; a dispute over the tax amount goes to Business Tax staff and chapter 4.76",
+    source: SJ_BTC, check: "https://library.municode.com/ca/san_jose/codes/code_of_ordinances?nodeId=TIT4REFI_CH4.76BUTA" },
+  { city: "Houston", route: null, what: "Not applicable: no general business license (\"The State of Texas does not require a general license\"; the City's four main requirements name none); a denied Houston permit follows its own letter",
+    source: HOU_START },
 ];
 
 /* ------------------------------ which one applies ------------------------------ */
@@ -663,8 +680,96 @@ export function choices(reason: string, ap: Appeal | null, dl: Deadline | null, 
 }
 
 /** What every appeal output carries, word for word. */
-export const NOT_A_LAW_FIRM = B("Placetta isn't a law firm and this isn't legal advice. Placetta prepares the deadline, the evidence and a draft for you to review; it never files an appeal, and it doesn't predict how one will go.",
-  "快哉不是律师事务所，以上不构成法律意见。快哉为您准备截止日期、证据和草稿供您审阅；快哉从不代为提交上诉，也不预测结果。");
+export const NOT_A_LAW_FIRM = B("Placetta isn't a law firm and this isn't legal advice. Placetta prepares the deadline, the evidence and the papers for you to review; it files only what you approve, never where an attorney is advised, and it doesn't predict how an appeal will go.",
+  "快哉不是律师事务所，以上不构成法律意见。快哉为您准备截止日期、证据和文件供您审阅；只提交您批准的内容，建议聘请律师的事项不代为提交，也不预测上诉结果。");
+
+/* ------------------------------ who should handle it ------------------------------ */
+
+/** Who handles each playbook. self_serve: the owner files it, because the agency itself says no lawyer is needed or it's
+ *  a simple administrative review. self_serve_review: the owner can file it, and a review (an attorney, or the
+ *  engineer or tax adviser who knows the facts) is worth paying for. attorney: a contested hearing, a court, or a step
+ *  that fixes what a court may later review; Placetta does what a non-lawyer may (the hearing request on time, the
+ *  protest response, the conditions offer, the evidence) and hands the packet to counsel. `says` is the source's own
+ *  words, `source` the page they're on. */
+export type Route = "self_serve" | "self_serve_review" | "attorney";
+export type Tier = { route: Route; why: Bi; says: string; source: string };
+export const ROUTE_NAME: Record<Route, Bi> = {
+  self_serve: B("You can file this yourself", "您可以自行提交"),
+  self_serve_review: B("You can file this yourself; a review is worth it", "您可以自行提交；建议请人审阅"),
+  attorney: B("An attorney is advised", "建议聘请律师"),
+};
+const t = (route: Route, en: string, zh: string, says: string, source: string): Tier => ({ route, why: B(en, zh), says, source });
+export const TIERS: Record<AppealId, Tier> = {
+  ca_abc_denial_hearing: t("attorney", "A contested hearing before an administrative law judge, with protestants as parties and ABC represented by its own counsel. You file the hearing request and answer the protests yourself; counsel represents you at the hearing.",
+    "在行政法法官前的争议听证，抗议人为当事方，ABC 由其律师代表。听证申请和抗议答复可自行完成；听证时由律师代理。",
+    "\"The applicant and any protestant(s) may be represented by an attorney or other person\"; \"ABC counsel represents ABC\"", CA_ABC_HEARING),
+  ca_abc_appeals_board: t("attorney", "A record appeal with briefs; the Board itself recommends counsel.", "基于听证记录、需提交书状的上诉；委员会本身建议聘请律师。",
+    "\"highly recommended that you seek legal counsel\"", CA_ABC_BOARD),
+  tx_tabc_denial_hearing: t("attorney", "A contested case at SOAH under Government Code chapter 2001, with protestants as parties. You file the hearing request on time yourself; counsel represents you.",
+    "根据政府法第 2001 章在 SOAH 进行的争议案件，抗议人为当事方。听证申请可自行按时提交；由律师代理出庭。",
+    "16 TAC §33.60(b): \"An applicant may request an administrative hearing ... by filing a written request for hearing with the commission within thirty (30) days\"", TABC_RULES),
+  tx_tabc_rehearing: t("attorney", "It fixes what a court may review: \"A timely motion for rehearing is a prerequisite to an appeal.\"", "它决定法院可审查的范围：“及时的复议动议是上诉的前提。”",
+    "Gov't Code §2001.145(a): \"A timely motion for rehearing is a prerequisite to an appeal\"", TX_GV2001),
+  tx_tabc_court_appeal: t("attorney", "A district court case.", "地区法院诉讼。", "Alcoholic Beverage Code §11.67(b)(1): \"the appeal shall be perfected and filed within 30 days\"", TX_AL11),
+  ny_sla_disapproval: t("attorney", "A discretionary liquor decision; court review is an article 78 petition.", "酒牌裁量决定；法院审查须提交第 78 条程序申请。",
+    "Alcoholic Beverage Control Law §121(1): review \"in the manner provided in article seventy-eight\"", NY_ABC121),
+  sf_board_of_appeals_building: t("self_serve", "The Board says parties needn't have attorneys, and the appeal is a one-page statement and a brief.", "委员会表示当事人无需律师，上诉只需一页陈述和一份书状。",
+    "\"Parties are not required to be represented by attorneys\"", SF_FAQ),
+  sf_board_of_appeals_variance: t("attorney", "A variance hearing where neighbors are often parties and 4 of 5 votes are needed. The Board lets you appear without counsel, so you can file the appeal on time yourself.",
+    "邻居常为当事方且需五票中四票通过的变更听证。委员会允许无律师出席，因此上诉可自行按时提交。", "\"Parties are not required to be represented by attorneys\"", SF_FAQ),
+  sf_board_of_appeals_zoning_admin: t("self_serve_review", "The Board says parties needn't have attorneys; the Planning Code reading decides it, so a review helps.", "委员会表示当事人无需律师；结果取决于规划法规的解读，建议请人审阅。",
+    "\"Parties are not required to be represented by attorneys\"", SF_FAQ),
+  sf_board_of_appeals_za_violation: t("self_serve_review", "The Board says parties needn't have attorneys; an enforcement case is worth a review.", "委员会表示当事人无需律师；执法案件建议请人审阅。",
+    "\"Parties are not required to be represented by attorneys\"", SF_FAQ),
+  sf_board_of_appeals_permit: t("self_serve", "The Board says parties needn't have attorneys.", "委员会表示当事人无需律师。", "\"Parties are not required to be represented by attorneys\"", SF_FAQ),
+  la_planning_appeal: t("attorney", "A zoning hearing before the appellate body, often with neighbors on the other side, and then only a court writ (Code of Civil Procedure §1094.6). You file the appeal on time yourself; counsel argues it.",
+    "在上诉机构前的分区听证，对方常为邻居，此后只能向法院申请令状（民事诉讼法 §1094.6）。上诉可自行按时提交；由律师出庭辩论。",
+    "\"An appeal must be filed within a specified period of time as established by the LAMC\"", LA_APPEALS),
+  la_bbsc_appeal: t("self_serve_review", "A written appeal on the Department's forms, notarized; the engineer or architect who knows the code usually leads it.", "按建筑局表格提交并公证的书面上诉；通常由熟悉规范的工程师或建筑师主导。",
+    "Appeals \"shall be made in writing, upon appropriate forms provided therefore by the Department\"", LADBS_BBSC),
+  la_tax_assessment_review: t("self_serve", "The taxpayer asks in writing for an administrative hearing.", "由纳税人书面申请行政听证。",
+    "\"the taxpayer may appeal the assessment by requesting, in writing, a hearing before the Assessment Review Officer\"", LA_ARO),
+  la_tax_board_of_review: t("self_serve", "The taxpayer asks for the second administrative hearing.", "由纳税人申请第二级行政听证。",
+    "\"the taxpayer may appeal the decision of the Assessment Review Officer by requesting a hearing before the Board of Review\"", LA_BOR),
+  nyc_bsa_appeal: t("self_serve_review", "The rule sets filing and service steps an owner can follow; the reading of the Zoning Resolution or the Building Code decides it, so a review helps.", "规则规定了业主可自行完成的提交和送达步骤；结果取决于分区决议或建筑规范的解读，建议请人审阅。",
+    "2 RCNY §1-06.3(a)(1): an appeal \"must be filed within thirty (30) days from the date of the determination\"", NYC_BSA_RULE),
+  nyc_dcwp_denial: t("self_serve", "DCWP gives the reason; most denials are fixed and refiled. A court petition would need counsel.", "DCWP 会告知原因；多数可修正后重新申请。如向法院申请则需律师。",
+    "\"If your application is denied: DCWP will provide you with the reason\"", NYC_DCWP_AFTER),
+  ca_health_permit_hearing: t("self_serve", "The Code gives the request to the permit holder, and the hearing turns on the corrections.", "法规规定由许可持有人申请，听证取决于整改情况。",
+    "Health & Safety Code §114405(b): \"A written request for a hearing shall be made by the PERMIT HOLDER within 15 calendar days\"", CALCODE),
+  ca_health_closure_hearing: t("self_serve", "The Code gives the request to the permit holder; fixing the hazard reinstates the permit.", "法规规定由许可持有人申请；消除危害即可恢复许可。",
+    "Health & Safety Code §114409(c): \"the PERMIT HOLDER may request in writing a hearing before a HEARING OFFICER\"", CALCODE),
+  ca_health_plan_review: t("self_serve", "A corrections exchange: the applicant resubmits the corrected plan.", "属整改往来：申请人重新提交修正图纸。",
+    "Health & Safety Code §114380(f)(2): the applicant \"may resubmit a corrected plan addressing the deficiencies identified in the initial denial\"", CALCODE),
+  nyc_health_oath: t("self_serve", "OATH says its hearings need no lawyer, and most are by phone or online.", "OATH 表示其听证无需律师，多数通过电话或在线进行。",
+    "\"OATH hearings do not require a lawyer or representative.\" \"Anyone may represent his or her self at all OATH hearings.\"", OATH_REP),
+  dal_building_appeals_board: t("self_serve", "The City says the appellant's agent needn't be a lawyer.", "市政府表示上诉人的代理人不必是律师。",
+    "\"This agent does not have to be a lawyer or other professional\"", DAL_BOARD),
+  business_license_denial: t("self_serve", "Most denials are fixed and refiled; San José and Houston have no general business license to deny.", "多数拒绝可修正后重新提交；圣何塞和休斯敦没有可被拒绝的一般营业执照。",
+    "San José: \"an official receipt for payment of the tax\"; Texas: \"The State of Texas does not require a general license.\"", SJ_BTC),
+};
+export const tierOf = (id: AppealId): Tier => TIERS[id];
+
+/* ------------------------------ how it's filed ------------------------------ */
+
+/** How the owner's approved appeal reaches the deciding body, from the playbook's own filing line. dest: the verified
+ *  destination the filer sends on (supabase/functions/file/destinations.ts, appeal-*); without one the Placetta team
+ *  sends it by the channel the letter or page names, after the same approval. owner: only the business can do it
+ *  (in person, or the hearing itself); Placetta prepares the packet. */
+export type Channel = { method: "email" | "portal" | "in_person" | "online_hearing" | "refile" | "as_letter_says" | "counsel"; dest?: string; how: Bi };
+export const CHANNELS: Record<AppealId, Channel> = Object.fromEntries(APPEALS.map((a): [AppealId, Channel] => {
+  const how = a.file;
+  if (a.id.startsWith("sf_board_of_appeals_")) return [a.id, { method: "email", dest: "appeal-sf-boa", how }];
+  if (a.id === "tx_tabc_denial_hearing") return [a.id, { method: "email", dest: "appeal-tx-tabc-hearing", how }];
+  if (a.id === "dal_building_appeals_board" || a.id === "la_bbsc_appeal") return [a.id, { method: "in_person", how }];
+  if (a.id === "nyc_health_oath") return [a.id, { method: "online_hearing", how: B("Online at nyc.gov/oath/hearingonline on or before the hearing date, by phone through OATH's Remote Hearings Unit (212-436-0777), or in person when the summons says \"Must Appear\"", "在听证日或之前通过 nyc.gov/oath/hearingonline 在线听证，或通过 OATH 远程听证组（212-436-0777）电话听证；传票写明“Must Appear”时须亲自出席") }];
+  if (a.id === "nyc_dcwp_denial") return [a.id, { method: "refile", how }];
+  if (a.id === "la_planning_appeal") return [a.id, { method: "portal", how }];
+  if (["ca_abc_appeals_board", "tx_tabc_rehearing", "tx_tabc_court_appeal", "ny_sla_disapproval"].includes(a.id)) return [a.id, { method: "counsel", how }];
+  return [a.id, { method: "as_letter_says", how }];
+})) as Record<AppealId, Channel>;
+/** The OATH online hearing, as OATH's own guide prints it. */
+export const OATH_SOURCE = OATH_WHAT;
 
 /** Every source a playbook's claims rest on, numbered once, the rule's own first. */
 export function sourcesOf(ap: Appeal): { n: number; url: string }[] {
