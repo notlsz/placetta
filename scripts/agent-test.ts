@@ -21,7 +21,8 @@ import { callModel } from "../supabase/functions/_shared/llm";
 import { median, monthMetrics } from "../src/monthly";
 import { addApproval } from "../src/core";
 import { daysFromNow } from "../src/time";
-import { APPEALS, appealFor as appealForRule, BUSINESS_LICENSE_ROUTES, counselPacket, deadlineFor as appealDeadline, holidaysOf, letterOutline as appealLetter, sourcesOf, type Rule as AppealRule } from "../src/appeals";
+import { APPEALS, appealFor as appealForRule, BUSINESS_LICENSE_ROUTES, counselPacket, deadlineFor as appealDeadline, holidaysOf, letterOutline as appealLetter, sourcesOf, TIERS, type Rule as AppealRule } from "../src/appeals";
+import { appealLetter as caseLetter, checkAnswer, datesFor, hearingScript, mayFile, PARTNER, questionsFor, SAFETY_DAYS, type AppealCase } from "../src/appeals/flow";
 import { emailsIn } from "../src/guard";
 import { BUILTIN } from "../src/skills";
 import { lessonKeys, lessonsBrief, parseDistill, rank, runEvidence, score, scrubLesson, worthLearning, type Lesson } from "../src/learning";
@@ -1584,7 +1585,7 @@ function promptConsistency() {
       const unknown = words.filter(x => !names.has(x) && !props.has(x) && !allowed.has(x));
       eq(unknown, [], `${label}, research ${research ? "on" : "off"}: every tool the prompt names exists`);
     }
-    ok(tools.length <= 48, `${label}: ${tools.length} tools fit under the server's cap of 48`);
+    ok(tools.length <= 52, `${label}: ${tools.length} tools fit under the server's cap of 52`);
   }
   const full = makeTools(() => workspace(), () => undefined, () => undefined, made, "en", () => 0, true, { model, files: new Map(), svc: account().svc, signal: new AbortController().signal });
   const all = new Set([...full.map(t => t.name), ...full.flatMap(t => Object.keys(t.inputSchema.properties))]);
@@ -1633,8 +1634,9 @@ async function spending() {
 function appealRules() {
   console.log("\n# Appeal playbooks: official sources, deadline math, cited drafts, counsel handoff");
   // official hosts only: the statute, the regulation, the city code's publisher or the agency's own pages
-  const OFFICIAL = /^https:\/\/(abcab\.ca\.gov|www\.abc\.ca\.gov|www\.tabc\.texas\.gov|statutes\.capitol\.texas\.gov|www\.nysenate\.gov|(www\.)?sf\.gov|planning\.lacity\.gov|finance\.lacity\.gov|dbs\.lacity\.gov|leginfo\.legislature\.ca\.gov|ochealthinfo\.com|dallascityhall\.com|nyc-business\.nyc\.gov|www\.nyc\.gov)\//;
+  const OFFICIAL = /^https:\/\/(abcab\.ca\.gov|www\.abc\.ca\.gov|www\.tabc\.texas\.gov|statutes\.capitol\.texas\.gov|www\.nysenate\.gov|(www\.)?sf\.gov|planning\.lacity\.gov|finance\.lacity\.gov|dbs\.lacity\.gov|leginfo\.legislature\.ca\.gov|ochealthinfo\.com|dallascityhall\.com|nyc-business\.nyc\.gov|www\.nyc\.gov|www\.sanjoseca\.gov|www\.houstontx\.gov|gov\.texas\.gov)\//;
   const HAN = (s: string) => /[一-鿿]/.test(s);
+  const by0 = (id: string) => APPEALS.find(a => a.id === id)!;
   for (const a of APPEALS) {
     const r = a.deadline;
     ok(!!r.section && !!r.trigger.en && !!r.trigger.zh && !!r.says, `${a.id}: the rule names its section and trigger`);
@@ -1644,8 +1646,14 @@ function appealRules() {
     ok(a.sources.every(u => u.startsWith("https://")) && HAN(a.name.zh) && a.grounds.every(g => HAN(g.zh)) && a.hearing.every(h => HAN(h.zh)), `${a.id}: sources are https and every line has its Chinese`);
     if (a.fee.usd != null) ok(a.fee.verified, `${a.id}: a dollar fee only when confirmed`);
   }
-  eq(APPEALS.filter(a => !a.deadline.verified).map(a => a.id).sort(), ["business_license_denial"], "only the business license route stays unverified (San José and Houston)");
+  eq(APPEALS.filter(a => !a.deadline.verified).map(a => a.id), [], "every playbook's rule is confirmed on an official page (San José and Houston closed as not applicable)");
   eq(BUSINESS_LICENSE_ROUTES.map(r => r.city), ["San Francisco", "Los Angeles", "New York City", "Dallas", "San José", "Houston"], "business license denial is defined city by city");
+  const sj = BUSINESS_LICENSE_ROUTES.find(r => r.city === "San José")!, hou = BUSINESS_LICENSE_ROUTES.find(r => r.city === "Houston")!;
+  ok(sj.route === null && /^Not applicable/.test(sj.what) && sj.source === "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration" && /official receipt for payment of the tax/.test(sj.what) && /municode/.test(sj.check ?? ""),
+    "San José: not applicable, the certificate is a tax receipt (sanjoseca.gov), and the tax chapter the servers can't open is listed for a person", sj);
+  ok(hou.route === null && /^Not applicable/.test(hou.what) && /does not require a general license/.test(hou.what) && hou.source === "https://www.houstontx.gov/business/start/startup-guide.html"
+    && by0("business_license_denial").sources.includes("https://gov.texas.gov/business/page/business-permits-office"), "Houston: not applicable, no general business license (houstontx.gov and gov.texas.gov)", hou);
+  eq(appealDeadline(by0("business_license_denial").deadline, "2026-10-20", "America/Los_Angeles"), null, "no date is ever computed for it: the letter governs elsewhere");
   const by = (id: string) => APPEALS.find(a => a.id === id)!;
   // weekends: Dallas allows the next business day, Placetta's target never moves later
   const dal = appealDeadline(by("dal_building_appeals_board").deadline, "2026-10-23", "America/Chicago")!;
@@ -1725,6 +1733,186 @@ async function appeals() {
   ok(r.w.deadlines.some(d => d.app === "bp" && d.date === daysFromNow(13)), "the deadline is on Deadlines");
   eq(r.w.approvals.length, before, "nothing was put up to file or send by the lookup");
   eq(r.w.apps.find(a => a.id === "bp")?.status, "draft", "the application wasn't touched");
+}
+
+function appealTiers() {
+  console.log("\n# Appeal routes: every playbook tiered, each from the agency's own words or the rule");
+  const OFFICIAL = /^https:\/\/(abcab\.ca\.gov|www\.abc\.ca\.gov|www\.tabc\.texas\.gov|statutes\.capitol\.texas\.gov|www\.nysenate\.gov|(www\.)?sf\.gov|www\.sf\.gov|planning\.lacity\.gov|finance\.lacity\.gov|dbs\.lacity\.gov|ochealthinfo\.com|dallascityhall\.com|nyc-business\.nyc\.gov|www\.nyc\.gov|www\.sanjoseca\.gov)\//;
+  for (const a of APPEALS) {
+    const t = TIERS[a.id];
+    ok(!!t && OFFICIAL.test(t.source) && sourcesOf(a).some(s => s.url === t.source) && t.says.length > 10 && /[一-鿿]/.test(t.why.zh),
+      `${a.id}: ${t?.route}, because ${t?.says.slice(0, 90)} (${t?.source})`, t);
+    eq(a.counsel.advised, t.route === "attorney", `${a.id}: the counsel line agrees with the route`);
+    eq(mayFile(a), t.route !== "attorney" || ["ca_abc_denial_hearing", "tx_tabc_denial_hearing", "sf_board_of_appeals_variance", "la_planning_appeal"].includes(a.id), `${a.id}: Placetta files it only on a self-serve route, or the request the rule lets the applicant make`);
+  }
+  const route = (id: string) => TIERS[id as keyof typeof TIERS].route;
+  // the founder's self-serve examples, each with the words that make it so
+  eq(["business_license_denial", "la_tax_assessment_review", "sf_board_of_appeals_building", "ca_health_permit_hearing", "nyc_health_oath", "nyc_dcwp_denial"].map(route), Array(6).fill("self_serve"),
+    "self-serve: business license and business tax reviews, SF building permits, health permit hearings, NYC OATH, DCWP");
+  ok(/Parties are not required to be represented by attorneys/.test(TIERS.sf_board_of_appeals_building.says) && TIERS.sf_board_of_appeals_building.source === "https://www.sf.gov/board-of-appeals-faqs", "SF Board of Appeals, in its own words (sf.gov FAQs)");
+  ok(/OATH hearings do not require a lawyer or representative/.test(TIERS.nyc_health_oath.says) && TIERS.nyc_health_oath.source === "https://www.nyc.gov/site/oath/hearings/registered-representatives.page", "OATH, in its own words");
+  ok(/does not have to be a lawyer/.test(TIERS.dal_building_appeals_board.says), "Dallas: the appellant's agent needn't be a lawyer");
+  ok(/PERMIT HOLDER/.test(TIERS.ca_health_permit_hearing.says) && /114405\(b\)/.test(TIERS.ca_health_permit_hearing.says), "California health permit: the Code gives the request to the permit holder (H&S 114405(b))");
+  eq(["sf_board_of_appeals_zoning_admin", "sf_board_of_appeals_za_violation", "la_bbsc_appeal", "nyc_bsa_appeal"].map(route), Array(4).fill("self_serve_review"), "self-serve with an optional review: zoning determinations and notices, LADBS and BSA code appeals");
+  eq(["ca_abc_denial_hearing", "ca_abc_appeals_board", "tx_tabc_denial_hearing", "tx_tabc_rehearing", "tx_tabc_court_appeal", "ny_sla_disapproval", "sf_board_of_appeals_variance", "la_planning_appeal"].map(route), Array(8).fill("attorney"),
+    "attorney advised: contested liquor hearings, zoning variances and appeals with neighbors, rehearing motions and court appeals");
+  ok(/highly recommended that you seek legal counsel/.test(TIERS.ca_abc_appeals_board.says), "the ABC Appeals Board recommends counsel itself");
+  ok(/ABC counsel represents ABC/.test(TIERS.ca_abc_denial_hearing.says) && APPEALS.find(a => a.id === "ca_abc_denial_hearing")!.hearing.some(h => /ABC counsel represents ABC/.test(h.en)) && !APPEALS.find(a => a.id === "ca_abc_denial_hearing")!.hearing.some(h => /Attorney General represents ABC/.test(h.en)),
+    "ABC's hearing page: ABC counsel (not the Attorney General) represents ABC at the administrative hearing");
+  // the questions, the dates and the letter: honest, in both languages, with room to spare
+  const sfb = APPEALS.find(a => a.id === "sf_board_of_appeals_building")!;
+  const qs = questionsFor(sfb, {});
+  ok(qs.every(q => /[一-鿿]/.test(q.ask.zh) && q.ask.en.length > 5 && (q.options ?? []).every(o => /[一-鿿]/.test(o.label.zh))) && !qs.some(q => /\b0\d\b/.test(q.ask.en)), "every question in English and Chinese");
+  const d = datesFor(sfb, "2026-10-20", "2026-10-22")!;
+  ok(d.dl.date === "2026-11-04" && d.fileBy === "2026-11-01" && !d.passed, `a file-by date ${SAFETY_DAYS} days before the target`, d);
+  const late = datesFor(sfb, "2026-10-20", "2026-11-03")!;
+  ok(late.fileBy === "2026-11-03" && late.fileBy <= late.dl.date, "too close for the margin: file by today, never after the target", late);
+  let threw = ""; try { checkAnswer(qs.find(q => q.id === "grounds")!, ["g9"]); } catch (e) { threw = String(e); }
+  ok(/Pick one or more of/.test(threw), "an answer that isn't one of the options is refused");
+  const base: AppealCase = { id: "case-x", app: "bp", playbook: "sf_board_of_appeals_building", route: "self_serve", decided: "2026-10-20", reason: "Plans don't show the accessible restroom.", stage: "interview", created: "", updated: "",
+    answers: { number: "202610011234", grounds: ["g1", "g2"], facts: "The corrected plans show it.", ask: "reverse", attend: "either", signer: "Mei Chen, managing member" } };
+  const lt = caseLetter(sfb, base, { business: "Lucky Leaf Tea LLC", address: "760 14th St, San Francisco, CA 94114", agency: "SF DBI", appName: "Building permit" });
+  ok(/SF Board of Appeals filing rules/.test(lt.text) && /on or before 2026-11-04/.test(lt.text) && /The department erred or abused its discretion/.test(lt.text) && /no\. 202610011234/.test(lt.text) && /A brief follows/.test(lt.text) && !/Exhibit/.test(lt.text),
+    "the letter: the legal hook, the grounds the owner picked, the number; the Board's one-page statement carries no exhibits", lt.text);
+  ok(!/\b(win|won|guarantee\w*|success rate|\d+% )/i.test(lt.text + lt.review.map(r => r.en).join(" ")) && lt.review.some(r => /isn't a law firm/.test(r.en) && /不是律师事务所/.test(r.zh)), "no win, guarantee or success rate anywhere; the review copy says Placetta isn't a law firm");
+  ok(!/isn't a law firm|Placetta/.test(lt.text), "the filed letter is the owner's own: no Placetta claims in it");
+  const script = hearingScript(sfb, base, { business: "Lucky Leaf Tea LLC", address: "", agency: "SF DBI", appName: "Building permit" });
+  ok(script.length <= 16 && script.every(s => /[一-鿿]/.test(s.zh)) && script.some(s => /^Open/.test(s.en)) && script.some(s => /^Close/.test(s.en)) && script.some(s => /4 of 5 votes/.test(s.en)), "the hearing script fits a page, in both languages, with how the Board decides", script.map(s => s.en));
+  ok(!mayFile(APPEALS.find(a => a.id === "tx_tabc_court_appeal")!) && !mayFile(APPEALS.find(a => a.id === "ca_abc_appeals_board")!) && !mayFile(APPEALS.find(a => a.id === "ny_sla_disapproval")!), "a court appeal, the ABC Appeals Board and an SLA court petition are never filed by Placetta");
+  ok(!/firm|LLP|P\.C\./i.test(PARTNER.replace(/no firm named yet/, "")) && /partner attorney/.test(PARTNER), "the handoff names a placeholder, never a made-up firm", PARTNER);
+}
+
+async function appealSelfServe() {
+  console.log("\n# A self-serve appeal end to end: denial, deadline, one question at a time, letter, approval, filed, tracked, outcome");
+  const decided = daysFromNow(-2);
+  const ws = workspace({
+    stores: [{ id: "st1", name: same("Mission St"), address: "760 14th St, San Francisco, CA 94114", stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: ["bp"] }],
+    apps: [app("bp", "draft", { name: B("Building permit", "建筑许可"), agency: B("SF Department of Building Inspection", "旧金山建筑检查局"), filed: { status: "rejected", decided, note: "Denied: the plans don't show the accessible restroom." } })],
+    docs: [{ id: "d-dec", name: "dbi-denial.pdf", kind: "pdf", size: 4000, by: "you", at: "2026-10-21T10:00:00Z", app: "bp", tag: same("Decision") }],
+    // the owner has let Odelia ask for agency fees (Settings, Spending); each still waits on their approval
+    spend: { policy: { ...DEFAULT_POLICY, on: true }, purchases: [] },
+  });
+  const ANSWERS: Record<string, unknown> = { number: "202610011234", grounds: ["g1", "g2"], facts: "The corrected plans, sheet A2, show the accessible restroom the denial says is missing.", ask: "reverse", attend: "in_person", signer: "Mei Chen, managing member" };
+  const asked: string[] = [];
+  const answerNext = (c: Ctx) => {
+    const o = c.out("appeal_case") as { case_id: string; first_question?: { question_id: string }; next_question?: { question_id: string } };
+    const q = (o.next_question ?? o.first_question)!.question_id; asked.push(q);
+    return ask(["appeal_case", { action: "answer", case_id: o.case_id, question_id: q, value: ANSWERS[q] }]);
+  };
+  let caseId = "";
+  const r = await agent({
+    ws, prompt: "The city denied our building permit. I want to appeal it myself.",
+    script: [
+      () => ask(["appeal_options", { application_id: "bp" }]),
+      () => ask(["appeal_case", { action: "start", application_id: "bp" }]),
+      c => { caseId = String(c.out("appeal_case").case_id); return answerNext(c); },
+      answerNext, answerNext, answerNext, answerNext, answerNext,
+      () => ask(["appeal_case", { action: "answer", case_id: caseId, question_id: "ask", value: "win it for me" }]),
+      () => ask(["appeal_case", { action: "draft", case_id: caseId }]),
+      c => { const o = c.out("appeal_case") as { letter: string; application_id: string };
+        return ask(["draft_document", { title: "Appeal: building permit", content: o.letter, application_id: o.application_id, checklist_item: "letter", file_name: "appeal-letter.docx" }],
+          ["appeal_case", { action: "file", case_id: caseId }]); },
+      () => ask(["appeal_case", { action: "evidence", case_id: caseId, item_id: "decision", document_id: "d-dec" }]),
+      () => ask(["appeal_case", { action: "file", case_id: caseId }]),
+      c => { const o = c.out("appeal_case") as { application_id: string; fee: { usd: number; payee: string; payee_url?: string } };
+        return ask(["request_filing_approval", { application_id: o.application_id }], ["request_purchase", { category: "gov_fees", payee: o.fee.payee, payee_url: o.fee.payee_url, amount: o.fee.usd, application_id: o.application_id, why: "Appeal fee: building permit" }]); },
+      () => say("The appeal is ready for your approval, with the $175 fee. File by the date on Deadlines. Placetta isn't a law firm."),
+    ],
+  });
+  const calls = callNamed(r, "appeal_case"), outs = calls.map(c => c.parsed as Record<string, any>);
+  const start = outs[0];
+  ok(start?.route === "self_serve" && /not required to be represented by attorneys/.test(start.agency_says) && start.source === "https://www.sf.gov/board-of-appeals-faqs", "start: the owner can file it, in the Board's own words", start);
+  const lastDay = daysFromNow(13);
+  ok(start?.deadline?.target === lastDay && start.deadline.file_by === daysFromNow(10), "start: the target from the rule and a file-by date three days earlier", start?.deadline);
+  ok(r.w.deadlines.some(d => d.id === `appeal-bp-${decided}` && d.date === lastDay) && r.w.deadlines.some(d => d.id === `appeal-fileby-bp-${decided}` && d.date === daysFromNow(10)), "both dates are on Deadlines");
+  eq(asked, ["number", "grounds", "facts", "ask", "attend", "signer"], "one question at a time, skipping what the record already says (the date and the reason)");
+  ok(calls.some(c => !c.ok && /One of: reverse/.test(c.out)), "an answer outside the options goes back to the model, not into the letter");
+  const draft = outs.find(o => o?.letter);
+  ok(!!draft && /appeals the decision of SF Department of Building Inspection/.test(draft.letter) && /SF Board of Appeals filing rules/.test(draft.letter) && /Mei Chen, managing member/.test(draft.letter) && /sheet A2/.test(draft.letter), "draft: a cited letter from the answers", draft?.letter);
+  ok(draft?.review.some((l: string) => /isn't a law firm/.test(l)) && draft.sources[0].url === "https://sf.gov/file-appeal-permit-or-decision", "draft: the review copy cites its sources and says Placetta isn't a law firm");
+  const notReady = calls.find(c => c.ok && (c.parsed as any)?.ready === false)?.parsed as any;
+  ok(!!notReady && notReady.missing_documents.length === 1, "file before the decision letter is attached: not ready, and says what's missing", notReady);
+  const filed = outs.find(o => o?.ready === true);
+  ok(filed?.channel === "email" && filed.fee.usd === 175 && /^https:\/\/sf\.gov\//.test(filed.fee.payee_url) && filed.file_by === daysFromNow(10), "file: by the Board's email, the $175 fee, the file-by date", filed);
+  const appeal = r.w.apps.find(a => a.id === "appeal-bp")!;
+  ok(appeal?.official === "appeal-sf-boa" && DEST["appeal-sf-boa"]?.email === "boardofappeals@sfgov.org" && appeal.checklist.every(k => k.state === "done"), "the appeal application goes to the Board's verified inbox, with the letter and the decision attached", appeal);
+  ok(r.w.approvals.some(p => p.kind === "file" && p.app === "appeal-bp"), "nothing is filed until the owner approves the card");
+  ok(r.w.approvals.some(p => p.kind === "pay" && p.fee === 175) || r.w.spend?.purchases.some(p => p.amount === 175 && p.status === "asked"), "the fee is asked for through request_purchase", callNamed(r, "request_purchase").map(c => c.out.slice(0, 300)));
+  ok(r.w.appeals?.[0]?.stage === "awaiting_approval", "the case waits for the owner's approval");
+  // the owner approves, the filer sends it, the daily status check records the Board's acknowledgment
+  const w2: Workspace = { ...r.w, approvals: r.w.approvals.filter(p => p.app !== "appeal-bp"),
+    apps: r.w.apps.map(a => a.id === "appeal-bp" ? { ...a, status: "review", filed: { status: "submitted", confirmation: "Appeal No. 26-101", submitted: daysFromNow(0), channel: "email" } } : a) };
+  const hearingOn = daysFromNow(40), decidedOn = daysFromNow(41);
+  const r2 = await agent({
+    ws: w2, prompt: "Any news on the appeal? The Board set a hearing.",
+    script: [
+      () => ask(["appeal_case", { action: "status", case_id: caseId }]),
+      () => ask(["appeal_case", { action: "hearing", case_id: caseId, date: hearingOn, how: "in person" }]),
+      () => ask(["appeal_case", { action: "outcome", case_id: caseId, result: "granted", note: "The Board granted the appeal 5-0 and ordered the permit issued.", date: decidedOn }]),
+      () => say("Recorded."),
+    ],
+  });
+  const o2 = callNamed(r2, "appeal_case").map(c => c.parsed as Record<string, any>);
+  ok(o2[0]?.stage === "filed" && o2[0].with_the_body === "submitted" && o2[0].confirmation === "Appeal No. 26-101", "tracked: the status the daily checks recorded", o2[0]);
+  ok(o2[1]?.script?.length > 5 && o2[1].script.some((l: string) => /in person/.test(l)) && r2.w.deadlines.some(d => d.id === `appeal-hearing-${caseId}` && d.date === hearingOn), "hearing: on Deadlines, with a one-page script", o2[1]);
+  const done = r2.w.appeals?.find(c => c.id === caseId);
+  ok(done?.stage === "decided" && done.outcome?.result === "granted" && done.outcome.at === decidedOn && /5-0/.test(done.outcome.note), "outcome: recorded as the Board decided it", done?.outcome);
+  ok(!/\b(guarantee|success rate|will win)\b/i.test(JSON.stringify(calls.map(c => c.out)) + JSON.stringify(o2)), "no outcome promised, no success rate claimed, anywhere in the flow");
+}
+
+async function appealLiquor() {
+  console.log("\n# A protested liquor license end to end, up to the attorney handoff");
+  const decided = daysFromNow(-1);
+  const ws = workspace({
+    stores: [{ id: "sj", name: same("First St"), address: "100 N First St, San Jose, CA 95113", stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: ["abc"], liquor: true }],
+    apps: [app("abc", "draft", { name: B("On-sale beer and wine license (Type 41)", "啤酒和葡萄酒堂食执照（41 类）"), agency: B("California ABC", "加州酒类管制局"), filed: { status: "rejected", decided, note: "Denied after protests: late-night noise and undue concentration." } })],
+    docs: [{ id: "d-abc", name: "abc-denial.pdf", kind: "pdf", size: 4000, by: "you", at: "2026-10-22T10:00:00Z", app: "abc", tag: same("Decision") }],
+  });
+  const ANSWERS: Record<string, unknown> = { served: "mail", number: "ABC 612345", grounds: ["g2"], facts: "We close at 10 p.m. and have no off-sale.", protests: "Two neighbors: late-night noise.", conditions: ["hours", "no_off_sale"],
+    neighbors: "The two residents at 104 N First St", ask: "conditions", attend: "in_person", signer: "Mei Chen, managing member" };
+  const asked: string[] = [];
+  let caseId = "";
+  const answerNext = (c: Ctx) => {
+    const o = c.out("appeal_case") as { case_id: string; first_question?: { question_id: string }; next_question?: { question_id: string } };
+    const q = (o.next_question ?? o.first_question)!.question_id; asked.push(q);
+    return ask(["appeal_case", { action: "answer", case_id: o.case_id, question_id: q, value: ANSWERS[q] }]);
+  };
+  const r = await agent({
+    ws, prompt: "ABC denied our beer and wine license after protests. What can we do?", maxRounds: 30,
+    script: [
+      () => ask(["appeal_case", { action: "start", application_id: "abc" }]),
+      c => { caseId = String(c.out("appeal_case").case_id); return answerNext(c); },
+      ...Array(9).fill(answerNext),
+      () => ask(["appeal_case", { action: "prep", case_id: caseId }]),
+      () => ask(["appeal_case", { action: "prep", case_id: caseId, step: "protest_response" }], ["appeal_case", { action: "prep", case_id: caseId, step: "conditions_offer" }],
+        ["appeal_case", { action: "prep", case_id: caseId, step: "neighbor_letter" }], ["appeal_case", { action: "prep", case_id: caseId, step: "evidence_packet" }]),
+      () => ask(["appeal_case", { action: "draft", case_id: caseId }]),
+      c => { const o = [...c.outs("appeal_case")].reverse().find(x => x.letter) as { letter: string; application_id: string };
+        return ask(["draft_document", { title: "Petition and request for hearing", content: o.letter, application_id: o.application_id, checklist_item: "letter", file_name: "abc-petition.docx" }],
+          ["appeal_case", { action: "evidence", case_id: caseId, item_id: "decision", document_id: "d-abc" }]); },
+      () => ask(["appeal_case", { action: "file", case_id: caseId }]),
+      () => ask(["request_filing_approval", { application_id: "appeal-abc" }], ["appeal_case", { action: "handoff", case_id: caseId }]),
+      () => say("The hearing request is ready for your approval, and the packet is ready for an attorney. Placetta isn't a law firm."),
+    ],
+  });
+  const outs = callNamed(r, "appeal_case").map(c => c.parsed as Record<string, any>);
+  const start = outs[0];
+  ok(start?.route === "attorney" && /ABC counsel represents ABC/.test(start.agency_says) && start.what_you_can_do?.length >= 5, "start: attorney advised, and what the owner may do themselves first", start);
+  eq(asked, ["served", "number", "grounds", "facts", "protests", "conditions", "neighbors", "ask", "attend", "signer"], "liquor questions: how it was served, the protests, the conditions they'd accept, the neighbors");
+  const c0 = r.w.appeals?.find(c => c.id === caseId)!;
+  ok(c0?.served === "mail" && c0.lastDay === daysFromNow(9) && r.w.deadlines.some(d => d.id === `appeal-abc-${decided}`), "the hearing request deadline: 10 days after ABC mails the notice (B&P 24011), on Deadlines", c0);
+  const steps = outs.find(o => Array.isArray(o?.steps))?.steps as { step: string }[];
+  eq(steps?.map(s => s.step), ["hearing_request", "protest_response", "conditions_offer", "neighbor_letter", "evidence_packet", "attorney_handoff"], "everything a non-lawyer may do, in order, then the handoff");
+  const cond = outs.find(o => o?.step === "conditions_offer");
+  ok(/Petition for Conditional License/.test(cond?.source_says ?? "") && cond.source === "https://www.abc.ca.gov/form/abc-510" && /shorter hours for alcohol sales; no sales to take away/.test(cond.draft), "the conditions offer: ABC's own words, and the conditions the owner picked", cond);
+  ok(/104 N First St|neighbor/i.test(outs.find(o => o?.step === "neighbor_letter")?.draft ?? "") && /Exhibit A/.test(outs.find(o => o?.step === "evidence_packet")?.draft ?? ""), "the neighbor letter and the evidence packet are drafted");
+  const filed = outs.find(o => o?.ready === true);
+  ok(filed?.application_id === "appeal-abc" && filed.channel === "as_letter_says" && filed.fee.usd === null, "the petition and hearing request: filed by the channel ABC's letter names, no fee claimed", filed);
+  ok(r.w.approvals.some(p => p.kind === "file" && p.app === "appeal-abc"), "the request waits for the owner's approval", r.calls.slice(-3).map(c => c.out.slice(0, 300)));
+  const hand = outs.find(o => o?.subject);
+  ok(hand?.to === PARTNER && hand.body.some((l: string) => /Conditions offered: shorter hours/.test(l)) && hand.body.some((l: string) => /Protests: Two neighbors/.test(l)) && hand.body.some((l: string) => /Done before the hearing: protest response/.test(l)) && hand.questions.length === 4,
+    "the counsel packet: the protests, the conditions offered, what's done, the deadline, the questions; addressed to the partner placeholder", hand);
+  ok(r.w.appeals?.find(c => c.id === caseId)?.handoff?.to === PARTNER, "the handoff is on the case");
 }
 
 async function planStaysTrue() {
@@ -2599,6 +2787,9 @@ await spending();
 await addresses();
 appealRules();
 await appeals();
+appealTiers();
+await appealSelfServe();
+await appealLiquor();
 inspectionPortals();
 await inspectionBookings();
 await planStaysTrue();

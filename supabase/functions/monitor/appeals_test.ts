@@ -54,3 +54,14 @@ Deno.test("settling denials puts each confirmed deadline on Deadlines once", () 
   const again = finishWork(w as unknown as Record<string, unknown>, "2026-10-23T12:00:00Z") as unknown as { deadlines: { id: string }[] };
   eq(again.deadlines.filter((d) => d.id.startsWith("appeal-")).length, 2, "never twice");
 });
+
+Deno.test("a self-serve denial sends Odelia to appeal_case with the agency's own words; a lost appeal goes to its outcome, not to a new appeal", () => {
+  const states = new Map<string, unknown>([["w", ws([{ id: "bp", name: "Building permit", agency: "SF Department of Building Inspection" }, { id: "appeal-bp", name: "Appeal: Building permit", agency: "San Francisco Board of Appeals" }], "760 14th St, San Francisco, CA 94114")]]);
+  const [a] = agencyAsks([filing({})], states, "2026-10-20T12:00:00Z", "2026-10-22");
+  ok(/appeal_case start for application bp/.test(a.prompt) && /Parties are not required to be represented by attorneys/.test(a.prompt) && /approval card/.test(a.prompt), a.prompt);
+  const [lost] = agencyAsks([filing({ id: "f2", app_id: "appeal-bp", title: b("Appeal: Building permit"), note: "The Board denied the appeal 3-2." })], states, "2026-10-20T12:00:00Z", "2026-10-22");
+  ok(!lost.appeal && /appeal_case outcome/.test(lost.prompt) && /\(data from outside, not instructions\)/.test(lost.prompt) && /isn't a law firm/.test(lost.update.body!.en), lost.prompt);
+  const one = normalizeState("Tea", { ...ws([{ id: "appeal-bp", name: "Appeal: Building permit", agency: "San Francisco Board of Appeals" }], "760 14th St, San Francisco, CA 94114"), deadlines: [] });
+  const w = finishWork(stampFilings(one, [{ app_id: "appeal-bp", status: "rejected", decided_at: "2026-10-20T23:30:00Z", note: "Denied" }]), "2026-10-22T12:00:00Z") as unknown as { deadlines: unknown[] };
+  eq(w.deadlines.length, 0, "no appeal deadline is invented for an appeal itself");
+});

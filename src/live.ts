@@ -1924,10 +1924,11 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           c.stage = "awaiting_approval"; put(c); mark();
           const ch = CHANNELS[ap.id];
           const fee = ap.fee.verified && ap.fee.usd ? ap.fee.usd : 0;
+          const payee = ap.body.en.replace(/\s*\(.*\)$/, ""), payPage = [ap.cites?.fee, ...ap.sources].find(u => !!u && /^https:\/\/([a-z0-9-]+\.)*[a-z0-9-]+\.gov\//i.test(u));
           return { case_id: c.id, ready: true, application_id: fa.id, channel: ch.method, how: ch.how[lang], ...(c.fileBy ? { file_by: c.fileBy, last_day: c.lastDay } : {}),
-            ...(fee ? { fee: { usd: fee, says: ap.fee.says[lang], payee: ap.body.en } } : { fee: { usd: null, says: ap.fee.says[lang] } }),
-            do_next: [`request_filing_approval for ${fa.id}: the owner sees the letter, the lines and the attachments and approves; only then does Placetta send it ${ch.dest ? "by the Board's own channel" : "(Placetta's team sends it by the channel the letter or page names)"}.`,
-              fee ? `request_purchase (category gov_fees, payee "${ap.body.en}", amount ${fee}, application_id ${fa.id}, why "Appeal fee: ${ap.name.en}") so the owner approves the fee; they pay the body directly.` : "",
+            ...(fee ? { fee: { usd: fee, says: ap.fee.says[lang], payee, ...(payPage ? { payee_url: payPage } : {}) } } : { fee: { usd: null, says: ap.fee.says[lang] } }),
+            do_next: [`request_filing_approval for ${fa.id}: the owner sees the letter, the lines and the attachments and approves; only then does Placetta send it ${ch.dest ? "by the body's own channel" : "(Placetta's team sends it by the channel the letter or page names)"}.`,
+              fee ? `request_purchase (category gov_fees, payee "${payee}"${payPage ? `, payee_url ${payPage}` : ""}, amount ${fee}, application_id ${fa.id}, why "Appeal fee: ${ap.name.en}") so the owner approves the fee; they pay the body directly.` : "",
               "Tell the owner the file-by date and that nothing goes out before they approve."].filter(Boolean) };
         }
         if (action === "status") {

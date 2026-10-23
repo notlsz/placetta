@@ -31,3 +31,5 @@ export declare function appealFor(app: { name?: Bi; agency?: Bi }, address: stri
 export declare function deadlineFor(rule: AppealRule, decided: string, tz: string, opts?: { served?: "mail" | "hand" | "email" | "unknown" }): { date: string; legal: string; days: number; unit: string; counted: string; verified: boolean; tz: string; rule: string; section: string; trigger: string; atLeast: boolean; cutoff?: string; mailed?: number } | null;
 export declare function daysLeft(date: string, today: string): number;
 export declare const NOT_A_LAW_FIRM: Bi;
+/** Who handles each playbook (src/appeals TIERS): the route, why, the source's own words and the page. */
+export declare const TIERS: Record<string, { route: "self_serve" | "self_serve_review" | "attorney"; why: Bi; says: string; source: string }>;

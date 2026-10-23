@@ -92,7 +92,9 @@ const RENEW_MS = 30_000;
 /** Tries to save the agent's changes onto a workspace that others keep changing, before the save fails. */
 const SAVE_TRIES = 8;
 const FETCH_BETA = "web-fetch-2025-09-10";
-const MAX_TOOLS = 48;
+/** Placetta's own tools fit under it with room to spare (49 since appeal_case, 2026-10-23); scripts/agent-test.ts
+ *  fails before a new tool would be dropped silently. */
+const MAX_TOOLS = 52;
 /** Some vendor with a key may take a customer's conversation (../_shared/llm.ts). The old list of key names left out
  *  Cerebras, and counted a Gemini key without GEMINI_PAID, which may never see a conversation, so runs started and
  *  every call failed. */

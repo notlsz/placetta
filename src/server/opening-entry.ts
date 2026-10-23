@@ -8,4 +8,4 @@ export { runsOn, overdue } from "../jobs";
 export { finishWork, resumable, stampFilings, MAX_RESUMES } from "../finish";
 export { approvalsLine } from "../today";
 // Appeals (src/appeals): the playbook and the deadline for a denied filing, for the monitor's Update and handoff
-export { appealFor, deadlineFor, daysLeft, NOT_A_LAW_FIRM } from "../appeals";
+export { appealFor, deadlineFor, daysLeft, NOT_A_LAW_FIRM, TIERS } from "../appeals";
