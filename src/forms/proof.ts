@@ -74,7 +74,11 @@ export const PROOF: Record<string, Proof> = {
   "sj-sign": at(SJ_SRP, "Review sign permit info (if you are proposing new signage)."),
   "sj-building-final": p("https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/building-division/inspections/inspection-success", "This final inspection is made after finish grading and the building is completed and ready for occupancy or use."),
   "scc-plan-check": at(SJ_SRP, "Ideally, required County Department of Environmental Health (DEH) plans"),
-  "scc-health-permit": at("https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration/register-for-a-business-tax-certificate", "County Health Permit Number (If applicable)"),
+  // was a field label on San José's business tax page ("County Health Permit Number (If applicable)"), which proves the
+  // permit exists, not that a food facility needs it. The county's own pages answer curl and WebFetch with a Cloudflare
+  // wall, so the proof is the City of Milpitas Building Safety handout on the county's rule (a city inside the county),
+  // read with curl and pdftotext on 2026-10-22
+  "scc-health-permit": { quote: "Any “food facility” that serves food and/or beverage to the public has to be permitted by Santa Clara County Department of Environmental Health.", checked: "2026-10-22", read: "https://www.milpitas.gov/DocumentCenter/View/248", link: "https://www.milpitas.gov/DocumentCenter/View/248" },
   "sf-business-registration": p("https://sftreasurer.org/registration", "In general, businesses must register if any of the below statements are true: Maintain a fixed place of business within San Francisco ."),
   "sf-formula-retail": p("https://sfplanning.org/permit/chain-stores-businesses", "By a voter initiative in 2007 (Proposition G), formula retail use was made subject to a Conditional Use Authorization in any NC district"),
   "sf-dph-plan-check": p("https://sf.gov/guide-building-and-remodeling-food-facility", "Submit your plans The process for getting a building permit includes review by the Department of Public Health."),

@@ -1861,12 +1861,13 @@
  },
  {
   "id": "scc-health-permit",
-  "read": "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration/register-for-a-business-tax-certificate",
-  "quote": "County Health Permit Number (If applicable)",
-  "checked": "2026-10-21",
-  "method": "webfetch",
+  "read": "https://www.milpitas.gov/DocumentCenter/View/248",
+  "quote": "Any “food facility” that serves food and/or beverage to the public has to be permitted by Santa Clara County Department of Environmental Health.",
+  "checked": "2026-10-22",
+  "method": "curl",
   "found": true,
-  "note": "curl got 403; read with WebFetch on 2026-10-21"
+  "sha256": "e0eb5e3042e09e27",
+  "context": "itas, ca 95035 408-586-3240 department of www.milpitas.gov environmental health any \"food facility\" that serves food and/or beverage to the public has to be permitted by santa clara county department of environmental health. food facilities include: 1. any place that sells only prepackaged food (i.e can"
  },
  {
   "id": "sj-sign",
