@@ -2,6 +2,7 @@ import { B, type Bi } from "./bi";
 import { audit } from "./core";
 import { continuePrompt, jobApps, nextAction, proofMet, reconcile, STOPPED_HERE, type DoneFiling, type DoneReport, type Filed, type Job } from "./jobs";
 import type { Application, Deadline, Workspace } from "./model";
+import { appealFor, deadlineFor } from "./appeals";
 
 /* ------------------------------------------------------------------ *
  * Finishing: a job runs until the work is done in the real world, not
@@ -95,6 +96,37 @@ export function scheduleRenewals<W extends Workspace>(w: W, today: string): W {
   return n;
 }
 
+/* ------------------------------------------------------------------ appeals */
+
+/** The last day to appeal or ask for a hearing goes on Deadlines the moment a filing is denied (src/appeals): counted
+ *  from the agency's decision by the playbook's rule, once per decision, and only when the rule's days are confirmed on
+ *  an official page. An unconfirmed one is read from the decision letter instead (the monitor asks Odelia to). */
+export function scheduleAppeals<W extends Workspace>(w: W, today: string): W {
+  let n: W = w;
+  for (const a of w.apps) {
+    const decided = a.filed?.status === "rejected" ? a.filed.decided : undefined;
+    if (!decided) continue;
+    const address = (w.stores ?? []).find(s => s.apps?.includes(a.id))?.address ?? [w.meta?.city, w.meta?.region].filter(Boolean).join(", ");
+    const ap = appealFor(a, address, a.filed?.note ?? "");
+    const dl = ap ? deadlineFor(ap.deadline, decided, ap.tz) : null;
+    if (!ap || !dl || dl.date < today) continue;
+    const id = `appeal-${a.id}-${decided}`;
+    if (n.deadlines.some(d => d.id === id)) continue;
+    const hearing = /hearing/i.test(ap.name.en) && !/appeal/i.test(ap.name.en);
+    const d: Deadline = {
+      id, date: dl.date, kind: "due", app: a.id, agency: ap.body,
+      title: hearing ? B(`Last day to ask for a hearing: ${a.name.en}`, `申请听证截止：${a.name.zh}`) : B(`Last day to appeal: ${a.name.en}`, `上诉截止：${a.name.zh}`),
+      ask: B("Prepare the appeal", "准备上诉"),
+      prompt: B(`The ${lower(a.name.en)} was denied on ${decided}. Use appeal_options for it, explain the reason plainly, show me fixing and refiling against appealing, and prepare whichever I choose for my approval.`,
+        `${a.name.zh}已于 ${decided} 被拒。请用 appeal_options 查看，用简单的话解释原因，对比修正重交和上诉两种做法，并按我的选择准备好交我批准。`),
+    };
+    const withDl: W = { ...n, deadlines: [...n.deadlines, d] };
+    n = { ...withDl, audit: audit("agent", B("Put the appeal deadline on Deadlines", "已把上诉截止日期加入截止日期"), a.name,
+      B(`${dl.date}: ${dl.counted} (${ap.name.en})`, `${dl.date}：${dl.counted}（${ap.name.zh}）`))(withDl).audit };
+  }
+  return n;
+}
+
 /* ------------------------------------------------------------------ the done report */
 
 /** A receipt's file name from its stored path: the file function and the portal worker keep receipts as
@@ -154,7 +186,7 @@ export function reportLines(w: Workspace, job: Job, lang: "en" | "zh", today: st
  *  arrives after a reviewer passed the rest). Returns the same workspace when nothing changed. */
 export function finishWork<W extends Workspace>(w: W, now = new Date().toISOString()): W {
   const today = now.slice(0, 10);
-  const n = reconcile(scheduleRenewals(w, today), now);
+  const n = reconcile(scheduleAppeals(scheduleRenewals(w, today), today), now);
   const jobs = n.jobs ?? [];
   if (!jobs.some(j => j.status === "done" && !j.report && j.updated >= since(now))) return n;
   let changed = false;

@@ -2,6 +2,7 @@ import { answerFits, prefillFromProfile } from "./filingPlaybooks/fill";
 import { entityNeed } from "./entityHome";
 import { PUBLIC_BUNDLE } from "./publicBundle";
 import { inspectionsFor } from "./inspections/forStore";
+import { appealById, appealFor, choices, daysLeft, deadlineFor, letterOutline, NOT_A_LAW_FIRM } from "./appeals";
 import { priceFacts } from "./pricing";
 import { DEFAULT_POLICY, SPEND_CATEGORIES, decide, suggestBudgets, type Budget, type Purchase, type SpendCategory } from "./spend.ts";
 import { canFill } from "./forms/canFill";
@@ -111,7 +112,7 @@ export const API_MODELS = [{ id: "claude-sonnet-5-5", label: "Claude Sonnet 5.5"
 /** Tools that only look things up. When the model asks for several in one round, they run at the same time; anything
  *  that changes the workspace runs on its own, in the order the model asked, so a lookup after a change sees it. */
 export const READ_ONLY = new Set(["find_official_forms", "network_lessons", "skill_read", "memory_search", "search_past_chats", "check_progress", "address_rules",
-  "inspection_guide", "city_records", "search_email", "read_email", "find_files", "get_income", "get_sales", "get_staff", "read_comments", "load_tools", "plan_markets"]);
+  "inspection_guide", "appeal_options", "city_records", "search_email", "read_email", "find_files", "get_income", "get_sales", "get_staff", "read_comments", "load_tools", "plan_markets"]);
 /** Every tool the model asked for in one round, results in its order: a run of lookups together, everything else one by one. */
 export const runAll = <R>(uses: Block[], one: (u: Block) => Promise<R>): Promise<R[]> => runAllWith(READ_ONLY, uses, one);
 /** The Messages API tool loop with Odelia's lookups side by side (src/agentCore.ts). */
@@ -1483,6 +1484,48 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         return { city: g.name.en, read: g.read, inspections: g.inspections.map(ins => ({
           id: ins.id, name: ins.name.en, agency: ins.agency.en, stage: ins.stage, when: ins.when.en, book: ins.book.en, book_url: ins.bookUrl, phone: ins.phone, fee: ins.fee, scoring: ins.scoring?.en, if_it_fails: ins.failNext?.en, source: ins.source,
           still_open: ins.checklist.filter(c => !st.ready?.[`${ins.id}:${c.id}`]).map(c => c.item.en), ready: ins.checklist.filter(c => st.ready?.[`${ins.id}:${c.id}`]).length, of: ins.checklist.length })) };
+      },
+    },
+    {
+      name: "appeal_options",
+      description: "When an agency denied or returned an application, or issued a closure or summons: the official way to appeal or ask for a hearing (the body, the deadline counted from the decision date, the form, the fee, the grounds, the evidence checklist, hearing prep, outcomes, whether counsel is advisable), fixing and refiling compared with appealing, and a cited outline for the letter. Read-only: it files nothing. Then add the deadline with add_deadline (if it isn't on Deadlines yet), explain the reason plainly, let the owner choose, draft the letter with draft_document from the outline (every rule with its source), and where counsel is advisable draft a note to their attorney with draft_message. Never file or send an appeal yourself; never predict the result.",
+      inputSchema: { type: "object", properties: {
+        application_id: { type: "string" },
+        decision_date: { type: "string", description: "YYYY-MM-DD on the decision or notice, when the filing record doesn't have it" },
+        reason: { type: "string", description: "The agency's reason, in its words, when the record doesn't have it" },
+      }, required: ["application_id"] },
+      execute(i) {
+        const a = findApp(i.application_id), w = get();
+        const decided = str(i.decision_date, 10) || a.filed?.decided || "";
+        if (decided && !isDate(decided)) throw new Error(`decision_date must be YYYY-MM-DD (got "${str(i.decision_date, 40)}")`);
+        const reason = str(i.reason, 600) || a.filed?.note || "";
+        const address = (w.stores ?? []).find(s => s.apps?.includes(a.id))?.address ?? [w.meta?.city, w.meta?.region].filter(Boolean).join(", ");
+        const ap = appealFor(a, address, reason);
+        const today = daysFromNow(0);
+        const dl = ap && decided ? deadlineFor(ap.deadline, decided, ap.tz) : null;
+        const short = ap?.shorter && decided ? deadlineFor(ap.shorter.rule, decided, ap.tz) : null;
+        const onCalendar = !!dl && w.deadlines.some(d => d.app === a.id && d.date === dl.date);
+        mark();
+        if (!ap) return { covered: false, not_a_law_firm: NOT_A_LAW_FIRM.en, options: choices(reason, null, null, today).map(c => ({ id: c.id, title: c.title.en, when: c.when.en, cost: c.cost.en, fits_the_reason: c.recommended })),
+          do_next: "Placetta has no appeal playbook for this agency yet. Read the decision letter (it must name who hears an appeal and by when): add that date with add_deadline citing the letter, explain the reason plainly, and offer fixing and refiling. Never file anything yourself." };
+        const lo = letterOutline(ap, { business: w.business.en, name: a.name.en, agency: a.agency.en, decided: decided || "(date on the letter)", reason: reason || "(the reason in the letter)", confirmation: a.filed?.confirmation });
+        return {
+          playbook: ap.id, name: ap.name.en, body: ap.body.en, covers: ap.covers.en,
+          deadline: dl ? { last_day: dl.date, days_left: daysLeft(dl.date, today), counted: dl.counted, rule: dl.rule, confirmed_on_official_page: dl.verified, on_deadlines: onCalendar }
+            : { last_day: null, rule: ap.deadline.says, do_next: decided ? "Not confirmed on an official page: read the date from the decision letter, then add_deadline with the letter as its source." : "No decision date on record: ask for the decision letter (its date and the deadline it states)." },
+          ...(short && ap.shorter ? { shorter_if: { when: ap.shorter.when.en, last_day: short.date, rule: short.rule } } : {}),
+          form: ap.form.en, how_to_file: ap.file.en, fee: { usd: ap.fee.usd, says: ap.fee.says.en, confirmed: ap.fee.verified },
+          grounds: ap.grounds.map(g => g.en), hearing_prep: ap.hearing.map(h => h.en), outcomes: ap.outcomes.map(o => o.en),
+          evidence: ap.evidence.map(e => ({ item: e.en, in_workspace: /application exactly as filed|confirmation number/i.test(e.en) ? !!a.filed : w.docs.some(d => e.en.toLowerCase().split(/\W+/).filter(x => x.length > 5).some(k => d.name.toLowerCase().includes(k))) })),
+          counsel: { advisable: ap.counsel.advised, why: ap.counsel.why.en },
+          options: choices(reason, ap, dl, today).map(c => ({ id: c.id, title: c.title.en, when: c.when.en, cost: c.cost.en, fits_the_reason: c.recommended })),
+          letter_outline: lo.outline, sources: lo.sources, read: ap.read,
+          ...(ap.next ? { if_this_is_lost: appealById(ap.next)?.name.en } : {}),
+          not_a_law_firm: NOT_A_LAW_FIRM.en,
+          do_next: [dl && !onCalendar ? `add_deadline ${dl.date} ("Last day: ${ap.name.en}", kind due, application ${a.id})` : "", "explain the reason in plain words", "show both options and let the owner choose",
+            "draft_document the letter from letter_outline, keeping every [n] citation", ap.counsel.advised ? "draft_message to their attorney with the deadline, the decision and the evidence list (ask who their attorney is if you don't know)" : "",
+            "never file, send or pay anything for the appeal yourself"].filter(Boolean),
+        };
       },
     },
     {

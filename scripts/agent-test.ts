@@ -1597,6 +1597,37 @@ async function spending() {
   ok(ig.ok && (ig.parsed?.covered === false || (Array.isArray(ig.parsed?.inspections) && ig.parsed.inspections.every((x: { still_open: unknown[]; source: string }) => Array.isArray(x.still_open) && /^https?:/.test(x.source)))), "inspection_guide returns the city's inspections with what's still open and the agency's page", ig.out?.slice(0, 200));
 }
 
+async function appeals() {
+  console.log("\n# Appeals: appeal_options, the deadline calendared, nothing filed");
+  const ws = workspace({
+    stores: [{ id: "st1", name: same("Mission St"), address: "760 14th St, San Francisco, CA 94114", stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: ["bp", "abc"] }],
+    apps: [app("bp", "draft", { name: B("Building permit", "建筑许可"), agency: B("SF Department of Building Inspection", "旧金山建筑检查局"), filed: { status: "rejected", decided: daysFromNow(-2), note: "Denied: plans don't show the accessible restroom." } }),
+      app("abc", "draft", { name: B("On-sale beer and wine license", "啤酒和葡萄酒堂食执照"), agency: B("California ABC", "加州酒类管制局"), filed: { status: "rejected", decided: daysFromNow(-1), note: "Denied after protests: undue concentration." } })],
+  });
+  const before = ws.approvals.length;
+  const r = await agent({
+    ws, prompt: "The city denied the building permit and ABC denied the liquor license. What now?",
+    script: [
+      () => ask(["appeal_options", { application_id: "bp" }], ["appeal_options", { application_id: "abc" }], ["appeal_options", { application_id: "bp", decision_date: "20261019" }]),
+      c => { const o = c.out("appeal_options") as { deadline: { last_day: string } }; void o; const bp = c.outs("appeal_options")[0] as { deadline: { last_day: string } };
+        return ask(["add_deadline", { date: bp.deadline.last_day, title: "Last day to appeal the building permit", kind: "due", application_id: "bp" }]); },
+      () => say("The building permit can be fixed and refiled, or appealed by the date on Deadlines. Placetta isn't a law firm."),
+    ],
+  });
+  const [bp, abc] = callNamed(r, "appeal_options").map(c => c.parsed as Record<string, any>);
+  ok(bp?.playbook === "sf_board_of_appeals_building" && bp.deadline.last_day === daysFromNow(13) && bp.deadline.confirmed_on_official_page === true, "SF building permit: 15 days from the day after the decision, confirmed", bp?.deadline);
+  ok(bp?.fee?.usd === 175 && bp.fee.confirmed && /boardofappeals@sfgov\.org/.test(bp.how_to_file), "the fee and where to file, from the Board's page");
+  ok(Array.isArray(bp?.letter_outline) && bp.letter_outline.some((l: string) => /\[1\]/.test(l)) && bp.sources.every((s: { url: string }) => /^https:\/\//.test(s.url)), "the letter outline cites its sources");
+  ok(bp?.options?.find((o: { id: string }) => o.id === "resubmit")?.fits_the_reason === true, "a missing item on the plans fits fixing and refiling");
+  ok(abc?.playbook === "ca_abc_denial_hearing" && abc.deadline.last_day === null && abc.counsel.advisable === true, "liquor: the hearing request's deadline comes from the letter, and counsel is advisable", abc?.deadline);
+  ok(abc?.options?.find((o: { id: string }) => o.id === "appeal")?.fits_the_reason === true, "a protest fits an appeal, not a refile");
+  ok(/isn't a law firm/.test(bp?.not_a_law_firm ?? "") && /never file/i.test((bp?.do_next ?? []).join(" ")), "every answer says Placetta isn't a law firm and never files");
+  ok(!callNamed(r, "appeal_options")[2].ok, "a malformed decision date is refused");
+  ok(r.w.deadlines.some(d => d.app === "bp" && d.date === daysFromNow(13)), "the deadline is on Deadlines");
+  eq(r.w.approvals.length, before, "nothing was put up to file or send by the lookup");
+  eq(r.w.apps.find(a => a.id === "bp")?.status, "draft", "the application wasn't touched");
+}
+
 async function addresses() {
   console.log("\n# Addresses: address_rules, and an address the agency doesn't accept stays off the form");
   const ws = workspace({ stores: [{ id: "st1", name: same("Main St"), address: "1 Main St, Houston, TX 77002", stage: "opening", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }] });
@@ -2348,6 +2379,7 @@ await remote();
 await stores();
 await spending();
 await addresses();
+await appeals();
 await fieldsAndDocs();
 await writing();
 await pointOfSale();

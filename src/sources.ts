@@ -46,6 +46,8 @@ export function usedBy(tool: string, input: Record<string, unknown>, out: unknow
       return appForm(input.application_id);
     case "address_rules":
       return [...formOf(input.official_form_id), ...list(o.lines).flatMap(l => list(obj(l).sources).map(x => obj(x).url).filter(isUrl).map(u => page(u)))];
+    case "appeal_options":
+      return list(o.sources).map(x => obj(x).url).filter(isUrl).map(u => page(u));
     case "inspection_guide":
       return list(o.inspections).map(x => obj(x).source).filter(isUrl).map(u => page(u));
     case "city_records":

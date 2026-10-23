@@ -73,6 +73,7 @@ const WORDS: Record<string, Bi> = {
   review_documents: B("Read documents", "审阅文件"),
   address_rules: B("Read the agency's address rules", "查阅机构的地址规则"),
   inspection_guide: B("Read the inspection checklist", "查阅检查清单"),
+  appeal_options: B("Read the appeal process", "查阅上诉流程"),
   request_purchase: B("Asked to buy something", "申请购买"),
   set_budgets: B("Proposed budgets", "提议预算"),
   search_email: B("Searched email", "搜索邮件"),
@@ -102,7 +103,7 @@ export function toolWords(name: string): Bi {
 }
 const STATE: Record<string, OrbState> = {
   find_official_forms: "searching", plan_markets: "searching", network_lessons: "searching", memory_search: "searching", search_past_chats: "searching", city_records: "searching",
-  check_progress: "searching", search_email: "searching", read_email: "searching", find_files: "searching", address_rules: "searching", inspection_guide: "searching", read_comments: "searching",
+  check_progress: "searching", search_email: "searching", read_email: "searching", find_files: "searching", address_rules: "searching", inspection_guide: "searching", appeal_options: "searching", read_comments: "searching",
   draft_message: "composing", draft_document: "composing", send_email: "composing", request_filing_approval: "composing",
   set_plan: "weaving", split_job: "weaving", hand_off: "shaping", skill_save: "weaving", skill_read: "weaving",
   review_documents: "shaping", fill_fields: "shaping", prepare_application: "shaping",

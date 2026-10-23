@@ -26,7 +26,7 @@ Deno.test("the agency asked for more: Odelia drafts the answer, the agency's wor
   eq(a.title.en, "Answering Santa Clara County DEH: Health permit to operate");
 });
 Deno.test("a return is answered too; a fee to pay, no note, or nothing new isn't hers", () => {
-  ok(/returned the health permit/.test(agencyAsks([filing({ status: "rejected", note: "Wrong parcel number." })], states, since)[0].update.title.en));
+  ok(/denied the health permit/.test(agencyAsks([filing({ status: "rejected", note: "Wrong parcel number." })], states, since)[0].update.title.en));
   eq(agencyAsks([filing({ status: "needs_info", note: "Pay the fee.", payment_url: "https://pay.example.gov/x" })], states, since).length, 0);
   eq(agencyAsks([filing({ status: "needs_info", note: null })], states, since).length, 0);
   eq(agencyAsks([filing({ status: "needs_info", note: "x", updated_at: "2026-10-19T00:00:00Z" })], states, since).length, 0);

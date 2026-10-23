@@ -24,3 +24,10 @@ export declare const MAX_RESUMES: number;
 /** The morning digest's line about the approvals waiting, and how many share one tap. */
 export declare function approvalsLine(w: Ws, today: string, o: { account: boolean; filings: boolean }): { title: Bi; body: Bi } | null;
 export declare function overdue(submittedAt: string | null | undefined, agencyDays: number | null, today: string): { waited: number; usual: number } | null;
+/** Appeals (src/appeals): the playbook for a denied application at an address, and its deadline. */
+export type AppealRule = { days: number | null; unit: "calendar" | "business"; from: "decision" | "day_after"; says: string; verified: { on: string; source: string } | null };
+export type AppealPlaybook = { id: string; name: Bi; body: Bi; tz: string; deadline: AppealRule; counsel: { advised: boolean; why: Bi }; sources: string[] };
+export declare function appealFor(app: { name?: Bi; agency?: Bi }, address: string, said?: string): AppealPlaybook | null;
+export declare function deadlineFor(rule: AppealRule, decided: string, tz: string): { date: string; days: number; unit: string; counted: string; verified: boolean; tz: string; rule: string } | null;
+export declare function daysLeft(date: string, today: string): number;
+export declare const NOT_A_LAW_FIRM: Bi;
