@@ -14,6 +14,7 @@ import * as api from "./cloud/api";
 import { StoreBot } from "./Bot";
 import { storeOf, type Job } from "./jobs";
 import { PlanCard, WatchLink } from "./Work";
+import { firstSentence } from "./phrase";
 import { StaffLangPick } from "./StaffLang";
 import { StoresCheckPanel } from "./StoresCheck";
 import { NoticeEditor, StoreValue, ValueReportSheet } from "./ValueReport";
@@ -124,6 +125,35 @@ function StoreCard({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
         <span>{botLine(bot.open, lang === "zh", bot.done.filter(j => j.status === "done").length)}</span>
       </span>
     </button>
+  );
+}
+
+/** A store's permits beside its card: how many are done, and the next ones with their status and next step. */
+function StoreNext({ s, onOpen }: { s: Store; onOpen: () => void }) {
+  const { b, ws, lang, openApp } = useApp();
+  const zh = lang === "zh";
+  const apps = ws.apps.filter(a => s.apps?.includes(a.id));
+  const done = apps.filter(a => a.status === "approved").length;
+  const order: Record<string, number> = { ready: 0, needs: 1, draft: 2, todo: 3, waiting: 4, review: 5, filing: 6, approved: 9 };
+  const next = [...apps].sort((x, y) => (order[x.status] ?? 7) - (order[y.status] ?? 7)).filter(a => a.status !== "approved").slice(0, 6);
+  if (!apps.length) return null;
+  return (
+    <section className="store-next" aria-label={zh ? "这家店的许可" : "This store's permits"}>
+      <div className="sn-h">
+        <h2>{zh ? "这家店的许可" : "This store's permits"}</h2>
+        <span>{zh ? `已批准 ${done}/${apps.length}` : `${done} of ${apps.length} approved`}</span>
+      </div>
+      <span className="sn-bar" aria-hidden="true"><i style={{ width: `${(done / apps.length) * 100}%` }} /></span>
+      <ul className="sn-list">
+        {next.map(a => (
+          <li key={a.id}><button type="button" onClick={() => openApp(a.id)}>
+            <span className="sn-n"><b>{b(a.name)}</b><small>{a.next ? firstSentence(b(a.next)) : b(a.agency)}</small></span>
+            <StatusChip s={a.status} />
+          </button></li>
+        ))}
+      </ul>
+      <button type="button" className="lnk sn-more" onClick={onOpen}>{zh ? "打开门店" : "Open the store"}<I.chevR /></button>
+    </section>
   );
 }
 
@@ -468,7 +498,7 @@ export function Stores() {
   if (s) return <StoreDetail s={s} onBack={() => setOpen(null)} />;
   return (
     <div className="page">
-      <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p>{b(B("Every store inspection-ready every day, measured on what matters: opening on time, staying open, no fines.", "每家门店每天都做好迎检准备，用三件事衡量：按期开业、持续营业、零罚款。"))}</p></div>
+      <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p className="ph-long">{b(B("Every store inspection-ready every day, measured on what matters: opening on time, staying open, no fines.", "每家门店每天都做好迎检准备，用三件事衡量：按期开业、持续营业、零罚款。"))}</p><p className="ph-short">{b(B("Every store ready for inspection, every day.", "每家门店，每天都做好迎检准备。"))}</p></div>
         {/* one action in view, the rest behind More: four pills in a row read as clutter, and stack four deep on a phone */}
         <div className="ph-acts st-acts">
           {stores.length > 0 && <Pill onClick={() => setReport(true)}>{lang === "zh" ? "价值报告" : "Value report"}</Pill>}
@@ -481,7 +511,13 @@ export function Stores() {
       {report && <ValueReportSheet onClose={() => setReport(false)} />}
       {bulk && <BulkPlan onClose={() => setBulk(false)} />}
       {check && <StoresCheckPanel onClose={() => setCheck(false)} />}
-      {stores.length ? (
+      {stores.length === 1 ? (
+        // one store: its card beside its permits, so the page is the store's own dashboard, not a card in an empty page
+        <div className="stores one">
+          <StoreCard s={stores[0]} onOpen={() => setOpen(stores[0].id)} />
+          <StoreNext s={stores[0]} onOpen={() => setOpen(stores[0].id)} />
+        </div>
+      ) : stores.length ? (
         <div className="stores">{stores.map(x => <StoreCard key={x.id} s={x} onOpen={() => setOpen(x.id)} />)}</div>
       ) : (
         <div className="empty">

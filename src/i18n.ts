@@ -90,6 +90,7 @@ export const S = {
   lv_vault: B("Vault", "保险库"),
   critical: B("Sets your opening date", "决定开业日期"),
 
+  apps_sub_s: B("Every permit you need, what it costs and how long it takes.", "您需要的每项许可，费用多少、需要多久。"),
   apps_sub: B("Every permit from the city up to the national government, what it costs and how long it usually takes. Open one to see its checklist, the filled form and the receipt.", "从市级到国家的每一项许可：费用多少、通常需要多久。打开任意一项可查看清单、已填写的表格和收据。"),
   th_app: B("Permit", "许可"),
   th_status: B("Status", "状态"),

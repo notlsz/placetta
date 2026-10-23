@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { useApp, type PermitsTab, type View } from "./ctx";
-import type { Approval, Application, Fact, FactGroup, Level, LicenseHit, Status } from "./model";
+import type { Approval, Application, Deadline, Fact, FactGroup, Level, LicenseHit, Status } from "./model";
 import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn, fmtMonth, fmtStamp, money } from "./time";
 import { FileCard, Footer, I, Modal, Pill, StatusChip, feeText, feeTotal } from "./ui";
 import { openingPath } from "./smart";
@@ -20,6 +20,7 @@ import { hrefOf, plainClick } from "./route";
 import { HomeMetrics } from "./Metrics";
 import { HeldSends, LocalHold, useApprovalHold } from "./SendHold";
 import { CostLine } from "./CostToOpen";
+import { firstSentence } from "./phrase";
 /* Team review: the review table, comments on documents, and the Mine filter (src/ReviewTable.tsx, src/Comments.tsx) */
 import { hasReview, PermitsReview } from "./ReviewTable";
 import { CommentsButton, MineToggle, useTeam, type Collab } from "./Comments";
@@ -56,10 +57,12 @@ const isPreview = (a: Application) => a.preview === true;
 
 /* ------------------------------ shared bits ------------------------------ */
 
-export function PageHead({ title, sub, children }: { title: string; sub?: string; children?: ReactNode }) {
+/** A page's title and what it's for. short: the same in one short sentence for a phone, where the long one would push
+ *  the work below the first screen (never a long sentence cut off with "…"). */
+export function PageHead({ title, sub, short, children }: { title: string; sub?: string; short?: string; children?: ReactNode }) {
   return (
     <header className="ph">
-      <div className="ph-tx"><h1>{title}</h1>{sub && <p>{sub}</p>}</div>
+      <div className="ph-tx"><h1>{title}</h1>{sub && <p className={short ? "ph-long" : undefined}>{sub}</p>}{sub && short && <p className="ph-short">{short}</p>}</div>
       {children && <div className="ph-act">{children}</div>}
     </header>
   );
@@ -423,7 +426,8 @@ export function Overview() {
   const renewal = nextRenewal(ws, today);
 
   /* behind the tabs: the plan, the dates, the updates, this month, the stores, and what else a business may need */
-  const nextUp = [...ws.apps].filter(a => a.status !== "approved" && (!mine || mineApp(team, a.id))).sort(byPriority).slice(0, 3);
+  const nextAll = [...ws.apps].filter(a => a.status !== "approved" && (!mine || mineApp(team, a.id))).sort(byPriority);
+  const nextUp = nextAll.slice(0, 3);
   const biz = b(ws.business), place = ws.locations[0] ? b(ws.locations[0].name) : "", goal = b(ws.goal);
   const at = (ws.stores ?? []).length === 1 && /^\d/.test(ws.stores![0].address ?? "") ? ws.stores![0].address! : "";
   const base = place ? biz.replace(` in ${place}`, "").replace(place, "").trim() : biz;
@@ -577,8 +581,73 @@ export function Overview() {
         </>
       </section>
       )}
+      <HomeNext next={nextAll.slice(0, 6)} />
+      <HomeSide soon={soon} landing={landing} n={n} approved={approved} agency={agency} />
       <Footer />
     </div>
+  );
+}
+
+/** Home's list on a wide screen, under the one thing to do: the next permits with their status, fee and next step. */
+function HomeNext({ next }: { next: Application[] }) {
+  const { b, lang, go, openApp, t } = useApp();
+  const zh = lang === "zh";
+  if (!next.length) return null;
+  return (
+    <section className="hm-nextwide hs-card" aria-label={zh ? "接下来" : "Next up"}>
+      <div className="hs-h"><h2>{zh ? "接下来" : "Next up"}</h2><button type="button" className="lnk" onClick={() => go("permits")}>{zh ? "全部许可" : "All permits"}<I.chevR /></button></div>
+      <ul className="hs-list hn-list">
+        {next.map(a => (
+          <li key={a.id}>
+            <button type="button" onClick={() => openApp(a.id)}>
+              <span className="hs-n"><b>{b(a.name)}</b><small>{b(a.agency)}</small></span>
+              <span className="hn-next" title={a.next ? b(a.next) : undefined}>{a.next ? firstSentence(b(a.next)) : ""}</span>
+              <span className="hn-fee">{feeText(a, t)}</span>
+              <StatusChip s={a.status} />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** Home's right column on a wide screen (1200px and up): the opening, the cost, the next permits and the next dates,
+ *  all from the workspace, so a laptop's width carries the plan beside the one thing to do (Linear's and Stripe's
+ *  dashboards). Narrower screens keep the single column; the same lists are under More. */
+function HomeSide({ soon, landing, n, approved, agency }: { soon: Deadline[]; landing: string | null; n: number; approved: number; agency: number }) {
+  const { b, lang, go, ws } = useApp();
+  const zh = lang === "zh";
+  const left = n - approved - agency;
+  const recent = ws.audit.slice(0, 4);
+  return (
+    <aside className="hm-side" aria-label={zh ? "计划概览" : "Plan at a glance"}>
+      <section className="hs-card hs-open">
+        <p className="hs-k">{zh ? "预计开业" : "Projected opening"}</p>
+        <p className="hs-date">{landing ? fmtDay(landing, lang, true) : zh ? "待定" : "Not set yet"}</p>
+        <p className="hs-sub">{zh ? `${n} 项许可：已办好 ${approved}，机构审核中 ${agency}，待办 ${left}` : `${n} permits: ${approved} done, ${agency} with the agency, ${left} to do`}</p>
+        <span className="hs-bar" aria-hidden="true"><i style={{ width: `${n ? (approved / n) * 100 : 0}%` }} /><i className="b2" style={{ width: `${n ? (agency / n) * 100 : 0}%` }} /></span>
+        <CostLine />
+      </section>
+      {recent.length > 0 && (
+        <section className="hs-card">
+          <div className="hs-h"><h2>{zh ? "最近" : "Recent"}</h2><button type="button" className="lnk" onClick={() => go("settings", "activity")}>{zh ? "全部记录" : "Activity"}<I.chevR /></button></div>
+          <ul className="hs-list hs-recent">
+            {recent.map(e => <li key={e.id}><span className="hs-t"><b>{b(e.action)}</b>{" "}{b(e.object)}</span><small>{fmtAgo(e.at, lang)}</small></li>)}
+          </ul>
+        </section>
+      )}
+      {soon.length > 0 && (
+        <section className="hs-card">
+          <div className="hs-h"><h2>{zh ? "近期日期" : "Coming up"}</h2><button type="button" className="lnk" onClick={() => go("permits", "deadlines")}>{zh ? "全部日期" : "All dates"}<I.chevR /></button></div>
+          <ul className="hs-list hs-dates">
+            {soon.map(d => { const k = daysUntil(d.date); return (
+              <li key={d.id}><span className="hs-d"><b>{fmtDay(d.date, lang)}</b><small>{fmtIn(k, lang)}</small></span><span className="hs-t">{b(d.title)}</span></li>
+            ); })}
+          </ul>
+        </section>
+      )}
+    </aside>
   );
 }
 
@@ -604,9 +673,14 @@ export function Permits({ tab: asked }: { tab: PermitsTab }) {
   const sub = tab === "documents" ? t("docs_sub") : tab === "deadlines" ? t("dl_sub") : tab === "review"
     ? (lang === "zh" ? "每家门店的每项许可一目了然：状态、下一个日期，点开即可处理。可以多选后一起交给 Odelia、分配或设置提醒。" : "Every permit at every store in one table: its state and next date, one click from the application. Pick several to hand to Odelia, assign or remind.")
     : t("apps_sub");
+  const zh = lang === "zh";
+  const short = tab === "documents" ? (zh ? "您上传的、快哉准备的、机构发回的文件。" : "What you uploaded, what Placetta prepared, what agencies sent.")
+    : tab === "deadlines" ? (zh ? "每个重要日期，按先后排列。" : "Every date that matters, in order.")
+    : tab === "review" ? (zh ? "每家门店的每项许可。" : "Every permit at every store.")
+    : t("apps_sub_s");
   return (
     <div className="page permits">
-      <PageHead title={t("nav_apps")} sub={sub}>
+      <PageHead title={t("nav_apps")} sub={sub} short={short}>
         <button type="button" className="pill quiet" onClick={() => go("find")}><I.find />{t("nav_find")}</button>
       </PageHead>
       <Tabs view="permits" tabs={tabs} current={tab} />
@@ -653,8 +727,9 @@ function PermitTable({ rows: list, empty }: { rows: Application[]; empty: string
                         <TeamLine id={a.id} /></span>
                       <span className="c-st"><StatusChip s={a.status} /></span>
                       <span className="c-fee">{feeText(a, t)}</span>
-                      <span className="c-est">{b(a.est)}</span>
-                      <span className="c-next">{a.critical && <em>{t("critical")}</em>}{a.next ? b(a.next) : ""}</span>
+                      {/* one line a cell: the first sentence, a whole phrase ("Fax: about 4 business days"); all of it on hover and in the sheet */}
+                      <span className="c-est" title={b(a.est)}>{firstSentence(b(a.est))}</span>
+                      <span className="c-next" title={a.next ? b(a.next) : undefined}>{a.critical && <em>{t("critical")}</em>}{a.next ? firstSentence(b(a.next)) : ""}</span>
                     </div>
                     </Working>
                   );

@@ -45,8 +45,6 @@
 .c-prev { color: var(--ink3) !important; }
 @media (max-width: 859px) {
   .apps-t .c-est2 { display: none; }
-  /* a page's explanation in two lines, not five: the screen is for the work */
-  .ph-tx p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 }
 
 /* ---------- a permit's sheet: title, status, one line of why, then underlined sections ---------- */
@@ -57,7 +55,6 @@
 .sh-h .sh-pv { font-size: 13px; color: var(--ink3); }
 @media (max-width: 640px) {
   .sh-h .sh-plain { font-size: 15px; line-height: 1.5; }
-  .sh-h .sh-pv, .sh-h .sh-plain { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .sh-h .sh-next { display: none; }   /* the status chip above and the bar below already say it */
   .sheet .seg.tabs button { padding: 9px 0 10px; }
 }
@@ -75,3 +72,104 @@
   .apps-t div.tr.row[role="row"]:hover { background: var(--mist); }
   .apps-t .tr.th { padding-block: 6px; font-size: 12px; letter-spacing: .01em; color: var(--ink3); }
 }
+
+/* ---------- no dots anywhere (the founder's rule): a step done is a thin check, the step under way a spinner, a step
+   still to come only its words; the sparkle and live dots in front of lines go ---------- */
+.steps li i { left: 0; top: 9px; width: 10px; height: 10px; border-radius: 0; background: none !important; box-shadow: none !important; }
+.steps.live li i { left: 4px; }
+.steps li.done i::before { content: ""; position: absolute; left: 3px; top: -1px; width: 3.5px; height: 7px; border: solid #7E9CC2; border-width: 0 1.6px 1.6px 0; transform: rotate(45deg); }
+.steps li.now i { top: 8px; width: 10px; height: 10px; border-radius: 50%; border: 1.6px solid rgba(115, 153, 198, .3); border-top-color: var(--blue-ink); animation: step-spin .8s linear infinite; }
+.steps li.next i { display: none; }
+@keyframes step-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .steps li.now i { animation: none; } }
+.work-hd > .spark { display: none; }
+.prev-note > svg, .sh-pv > svg, .plan-note > svg { display: none; }
+.pg-live i, .ll-dot { display: none; }
+
+/* a page's explanation: the full sentence on a laptop, its short sentence on a phone; never one cut off with "…" */
+.ph-short { display: none; }
+@media (max-width: 859px) { .ph-tx p.ph-long { display: none; } .ph-tx p.ph-short { display: block; } }
+
+/* ---------- the official form's card: its name, how it's filed in a line, the rest behind Details ---------- */
+.official .off-how { margin: 6px 0 0; font-size: 14px; color: var(--ink2); }
+.off-more { margin: 8px 0 2px; }
+.off-more summary { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; font-size: 13.5px; font-weight: 500; color: var(--blue-ink); cursor: pointer; list-style: none; }
+.off-more summary::-webkit-details-marker { display: none; }
+.off-more[open] summary svg { transform: rotate(180deg); }
+.off-more p { margin: 6px 0 0; font-size: 13.5px; line-height: 1.55; color: var(--ink2); }
+
+/* the table's cells sit on one line each, so rows are even */
+@media (min-width: 860px) { .apps-t .c-est, .apps-t .c-next { line-height: 1.4; } .apps-t .tr.row { align-items: center; } }
+
+/* ---------- Home on a wide screen: the one thing to do on the left, the plan at a glance on the right ---------- */
+.hm-side { display: none; }
+@media (min-width: 1200px) {
+  .page.home { max-width: 1180px; display: grid; grid-template-columns: minmax(0, 1fr) 380px; column-gap: 32px; align-items: start; }
+  .page.home > * { grid-column: 1; min-width: 0; }
+  .page.home > .hm-side { grid-column: 2; grid-row: 1 / span 30; display: flex; flex-direction: column; gap: 14px; position: sticky; top: 24px; }
+  .page.home > footer, .page.home > .foot { grid-column: 1 / -1; }
+}
+.hs-card { padding: 18px 18px 16px; border-radius: 16px; background: var(--card); box-shadow: 0 0 0 1px var(--line), 0 1px 2px rgba(var(--e), .04); }
+.hs-k { margin: 0; font-size: 12.5px; color: var(--ink3); }
+.hs-date { margin: 2px 0 4px; font: 400 26px/1.2 var(--display, inherit); letter-spacing: -.02em; color: var(--ink); }
+.hs-sub { margin: 0 0 10px; font-size: 13.5px; color: var(--ink2); }
+.hs-bar { display: flex; height: 6px; margin-bottom: 12px; border-radius: 99px; background: var(--mist2); overflow: hidden; }
+.hs-bar i { display: block; height: 100%; background: #3F9A62; }
+.hs-bar i.b2 { background: var(--blue-ink); }
+.hs-open .cost-line { margin: 0; padding: 10px 12px; border-radius: 10px; font-size: 13px; }
+.hs-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.hs-h h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.hs-h .lnk { display: inline-flex; align-items: center; gap: 2px; font-size: 13px; }
+.hs-list { margin: 0; padding: 0; list-style: none; }
+.hs-list li + li { box-shadow: inset 0 1px 0 var(--line); }
+.hs-list button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 10px 0; text-align: left; }
+.hs-list button:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.hs-n { display: flex; flex-direction: column; min-width: 0; }
+.hs-n b { font-weight: 500; font-size: 13.5px; line-height: 1.35; }
+.hs-n small { font-size: 12.5px; line-height: 1.35; color: var(--ink3); }
+.hs-r { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex: none; }
+.hs-r small { font-size: 12px; color: var(--ink3); }
+.hs-dates li { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; padding: 9px 0; font-size: 13.5px; }
+.hs-d { display: flex; flex-direction: column; }
+.hs-d b { font-weight: 500; }
+.hs-d small { font-size: 12px; color: var(--ink3); }
+.hs-t { color: var(--ink2); }
+
+/* the registry note above the list says where the rows come from; no row repeats it */
+.apps-t .c-prev { display: none; }
+
+/* ---------- one store: its card beside its permits ---------- */
+.stores.one { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1000px) { .stores.one { grid-template-columns: 400px minmax(0, 1fr); align-items: start; gap: 20px; } }
+.store-next { padding: 18px 20px 14px; border-radius: 22px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+.sn-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.sn-h h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.sn-h span { font-size: 13px; color: var(--ink3); }
+.sn-bar { display: block; height: 6px; margin: 10px 0 6px; border-radius: 99px; background: var(--mist2); overflow: hidden; }
+.sn-bar i { display: block; height: 100%; background: #3F9A62; }
+.sn-list { margin: 0; padding: 0; list-style: none; }
+.sn-list li + li { box-shadow: inset 0 1px 0 var(--line); }
+.sn-list button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 11px 0; text-align: left; }
+.sn-list button:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.sn-n { display: flex; flex-direction: column; min-width: 0; }
+.sn-n b { font-weight: 500; font-size: 14px; }
+.sn-n small { font-size: 12.5px; color: var(--ink3); }
+.sn-more { display: inline-flex; align-items: center; gap: 2px; margin-top: 8px; font-size: 13.5px; }
+
+/* Home's next permits, under the one thing to do, on a wide screen */
+.hm-nextwide { display: none; }
+@media (min-width: 1200px) {
+  .page.home > .hm-nextwide { display: block; margin-top: 20px; }
+  .hn-list button { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) 110px 112px; align-items: center; gap: 16px; padding: 12px 0; }
+  .hn-next { font-size: 13px; color: var(--ink2); }
+  .hn-fee { font-size: 13px; color: var(--ink3); }
+  .hn-list .chip, .hn-list [class*="chip"] { justify-self: end; }
+}
+
+/* a tab row wider than the screen fades at its edge, so a half-shown tab reads as "scroll", not as a cut word */
+@media (max-width: 640px) {
+  .sh-h .seg.tabs { padding-right: 28px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent); }
+}
+.hs-recent li { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 9px 0; font-size: 13px; }
+.hs-recent .hs-t b { font-weight: 500; color: var(--ink); }
+.hs-recent small { flex: none; font-size: 12px; color: var(--ink3); }

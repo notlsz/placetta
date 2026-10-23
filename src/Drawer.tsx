@@ -79,7 +79,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
         <div className="sh-asg"><AssignPicker item={{ kind: "app", id: a.id }} title={a.name} /></div>
         {a.preview && <p className="sh-pv"><I.spark />{a.status === "ready"
           // filled at sign-up (src/plan/prefill.ts) on the registry's own copy of the agency's form
-          ? (zh ? "用快哉登记库里的机构官方表格，根据您的注册信息填好。提交前，快哉会对照机构现行要求逐项核对。" : "Filled from your signup on the agency's own form, from Placetta's registry. Placetta checks it against the agency's current requirements before filing.")
+          ? (zh ? "已根据您的注册信息填好机构官方表格。提交前，快哉会对照机构现行要求核对。" : "Filled from your signup on the agency's own form. Placetta checks it against the agency's current rules before filing.")
           : (zh ? "来自快哉的登记库。开始计划后，Odelia 会向机构核实、填好表格并提交。" : "From Placetta's registry. When you start the plan, Odelia verifies it with the agency, fills it and files it.")}</p>}
         <nav className="seg tabs" role="tablist">
           {tabs.map(x => <button key={x.k} type="button" role="tab" aria-selected={tab === x.k} onClick={() => onTab(x.k)}>{x.l}{x.n && <span>{x.n}</span>}</button>)}
@@ -265,9 +265,16 @@ function FormPreview({ a, startEdit, version }: { a: Application; startEdit: boo
       {off && (
         <div className="official">
           <div className="off-h"><I.form /><div><b>{off.form}</b><span>{b(off.title)}</span></div></div>
-          <p>{lang === "zh" ? `${off.agency.zh}。${METHOD[off.method].zh}。${off.how.zh}` : `${off.agency.en}. ${METHOD[off.method].en}. ${off.how.en}`}</p>
-          {off.foreign && <p className="off-note">{b(off.foreign)}</p>}
-          {onlineOnly(off) && <p className="off-note">{b(ONLINE_ONLY)}</p>}
+          {/* one line up front (how it's filed); who files it how, and the notes for foreign owners, behind Details */}
+          <p className="off-how">{lang === "zh" ? `${off.agency.zh}，${METHOD[off.method].zh}。` : `${off.agency.en}. ${METHOD[off.method].en}.`}</p>
+          {(off.how.en || off.foreign || onlineOnly(off)) && (
+            <details className="off-more">
+              <summary>{lang === "zh" ? "详情" : "Details"}<I.chev /></summary>
+              {off.how.en && <p>{b(off.how)}</p>}
+              {off.foreign && <p className="off-note">{b(off.foreign)}</p>}
+              {onlineOnly(off) && <p className="off-note">{b(ONLINE_ONLY)}</p>}
+            </details>
+          )}
           <div className="off-act">
             {off.pdf && !(canFill(off) && a.fields.some(f => f.value)) && <button type="button" className="pill ink sm" disabled={making} onClick={() => void blank()}><I.download />{making ? "…" : lang === "zh" ? "下载官方表格" : "Download the official form"}</button>}
             <a className="pill quiet sm" href={off.pdf ?? off.url} target="_blank" rel="noopener noreferrer">{off.pdf ? (lang === "zh" ? "官方表格" : "Official form") : (lang === "zh" ? "机构办理入口" : "Agency filing page")}<I.ext /></a>
