@@ -1,7 +1,12 @@
 // Everything the worker reads or writes, behind one interface: Supabase in production, memory in tests.
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { loginMatches } from "../../../supabase/functions/file/destinations.ts";
+import type { Draft } from "./teach.ts";
 import type { Filing, LogEntry, Login, Skill } from "./types.ts";
+
+/** A portal's taught playbook (teach.ts), shared by every workspace: structure only. "draft" runs only in assist mode
+ *  (Odelia fills, a person presses submit); "approved" runs like any playbook. */
+export type Taught = { id: string; status: "draft" | "approved"; body: Draft; runs: number; successes: number };
 
 export interface Store {
   claim(): Promise<Filing | null>;
@@ -27,6 +32,12 @@ export interface Store {
   begin?(f: Filing): Promise<void>;
   /** The run is over: its token stops working. */
   end?(): Promise<void>;
+  /** Teach mode (20261030174100_teach_mode.sql): the portal's taught playbook, a new draft from a recorded run (the
+   *  database refuses one carrying the teaching customer's values), and each run's result (three failures in a row,
+   *  or a success rate under 60% after five runs, sends an approved one back to review; drift goes to the Quality tab). */
+  taught?(host: string, official: string): Promise<Taught | null>;
+  saveTaught?(f: Filing, d: Draft): Promise<{ id: string; status: string } | null>;
+  taughtResult?(id: string, f: Filing, ok: boolean, drift?: string[]): Promise<string | null>;
 }
 
 /** The worker's database access, through the functions in 20261022120000_filer_least_privilege.sql only: no table is
@@ -104,6 +115,18 @@ export class SupabaseStore implements Store {
   }
   async skillFailed(key: string) {
     return { disabled: (await this.call<boolean>("filer_skill_failed", { p_key: key }, "skill update")) === true };
+  }
+  async taught(host: string, official: string) {
+    const rows = await this.call<Taught[] | null>("filer_taught_playbook", { p_host: host, p_official: official }, "taught lookup");
+    return (rows ?? [])[0] ?? null;
+  }
+  async saveTaught(f: Filing, d: Draft) {
+    const rows = await this.call<{ id: string; status: string }[] | null>("filer_save_taught", { p_filing: f.id, p_host: d.host, p_official: d.official,
+      p_name: d.name, p_body: d, p_flags: d.flags }, "taught save");
+    return (rows ?? [])[0] ?? null;
+  }
+  async taughtResult(id: string, f: Filing, ok: boolean, drift?: string[]) {
+    return await this.call<string | null>("filer_taught_result", { p_playbook: id, p_filing: f.id, p_ok: ok, p_drift: drift?.length ? drift.slice(0, 20) : null }, "taught result");
   }
   async selfFiled(official: string) {
     return (await this.call<number | null>("filer_self_filed", { p_official: official }, "count")) ?? 0;

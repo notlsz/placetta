@@ -9,6 +9,7 @@ export type Payload = {
   fields?: { id?: string; label: Bi; value: string }[];
   attachments?: { name: string; path: string }[];
   pdf_path?: string;
+  signature?: { name: string; title?: string };
 };
 
 export type Filing = {
@@ -19,10 +20,12 @@ export type Filing = {
 
 export type Login = { username: string; password: string; host: string };
 
-/** One recorded action. Values are never recorded: only which payload field (by English label) supplied one. */
+/** One recorded action. Values are never recorded: only which payload field (by English label, and for a taught
+ *  playbook its fact key too) supplied one. A step a taught playbook can't fill from what the customer approved says
+ *  why instead: `person` (an SSN, a card, a code: always the person's) or `ask` (nothing approved answers it). */
 export type Act =
-  | { action: "fill"; selector: string; field?: string; login?: "username" | "password" }
-  | { action: "select"; selector: string; field?: string; option?: string }
+  | { action: "fill"; selector: string; field?: string; fact?: string; login?: "username" | "password"; person?: string; ask?: boolean }
+  | { action: "select"; selector: string; field?: string; fact?: string; option?: string; ask?: boolean }
   | { action: "check"; selector: string; on: boolean }
   | { action: "click"; selector: string; submit?: boolean }
   | { action: "upload"; selector: string; attachment: string };

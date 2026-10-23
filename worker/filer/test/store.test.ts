@@ -78,8 +78,13 @@ test("every store operation goes through a filer function or Storage, never a ta
   assert.match(await s.saveProof(filing, "p.png", new Uint8Array([1]), "image/png") ?? "", /^w1\/proof\/f1\//);
   await s.teamTask(filing, "review", "Review it");
   await s.notify(filing, b("Submitted"), b("Confirmation 1"));
+  // teach mode: the taught playbook, a new draft and each run's result, through their own filer functions
+  assert.strictEqual(await s.taught("x.gov", "cdtfa-400"), null);
+  await s.saveTaught(filing, { version: 1, host: "x.gov", official: "cdtfa-400", name: "X", flags: ["signs_in"] } as never);
+  await s.taughtResult("pb-1", filing, false, ["label:A -> label:B"]);
   assert.deepStrictEqual(f.calls.map((c) => c.fn), ["claim_agent_filing", "filer_filing", "filing_agent_step", "filer_skill", "filer_save_skill",
-    "filer_skill_failed", "filer_self_filed", "filer_save_doc", "filer_team_task", "filer_notify"]);
+    "filer_skill_failed", "filer_self_filed", "filer_save_doc", "filer_team_task", "filer_notify", "filer_taught_playbook", "filer_save_taught", "filer_taught_result"]);
+  assert.deepStrictEqual(f.calls.at(-1)!.args, { p_playbook: "pb-1", p_filing: "f1", p_ok: false, p_drift: ["label:A -> label:B"] });
   assert.ok(f.calls.every((c) => c.fn.startsWith("filer_") || ["claim_agent_filing", "filing_agent_step", "take_held_filing"].includes(c.fn)));
 });
 
