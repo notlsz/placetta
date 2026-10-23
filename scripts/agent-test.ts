@@ -17,6 +17,7 @@ import { apiModel, DOCS_PER_RUN, factFor, liveAgent, makeTools, messagesModel, p
 import { tokenLimit, TOKEN_LIMIT_DEFAULT } from "../supabase/functions/agent-run/limits";
 import { confirmRecall, forgetRecall, keepRecall, RECALL_MARK, recallFrom, restoreRecall } from "../src/recall";
 import { mayEmail, wantsTexts } from "../supabase/functions/_shared/reach";
+import { turnsFromRuns } from "../supabase/functions/_shared/continuity";
 import { callModel } from "../supabase/functions/_shared/llm";
 import { median, monthMetrics } from "../src/monthly";
 import { addApproval } from "../src/core";
@@ -2132,7 +2133,7 @@ async function remote() {
     ["skill_save", { kind: "workflow", name: "Pay everyone", description: "x", steps: "1. Pay" }],
     ["update_store", { store_id: "st1", name: "Renamed" }], ["remove_store", { store_id: "st1" }],
   ];
-  for (const channel of ["email", "slack", "lark", "wechat", "sms", "voice"] as const) {
+  for (const channel of ["email", "slack", "lark", "wechat", "teams", "telegram", "sms", "voice"] as const) {
     for (const [tool, input] of never) ok(!!channelRefuses({ channel }, tool, input as Record<string, unknown>), `${channel}: ${tool}${tool === "edit_deadline" ? " (remove)" : ""} is refused`);
     eq(channelRefuses({ channel }, "edit_deadline", { deadline_id: "dl1", date: "2027-02-01" }), null, `${channel}: changing a deadline's date is still fine`);
     eq(["add_deadline", "draft_message", "request_filing_approval", "check_progress", "add_store"].map(t => channelRefuses({ channel }, t, {})), [null, null, null, null, null], `${channel}: reading, drafting and approval cards are fine`);
@@ -2151,6 +2152,24 @@ async function remote() {
     [true, ["rt1"], ["Flushing"], 0, 0], "email: the deadline, the routine, the store, memory and skills are untouched");
   ok(callNamed(r, "add_deadline")[0]?.ok && callNamed(r, "draft_message")[0]?.ok && r.w.approvals.length === 1, "email: adding a deadline and drafting for approval still work");
   ok(/came by an email[\s\S]*can't remove deadlines/.test(String(r.bodies[0].system)), "email: the instructions say what can't be done from there");
+
+  // Teams and Telegram: the same rules through the real loop; the instructions name the chat, say how to write there,
+  // and say that earlier turns from other channels are context only; refusals point to the app
+  for (const channel of ["teams", "telegram"] as const) {
+    const earlier = turnsFromRuns([{ channel: "email", prompt: "Fwd: health department notice", reply: { text: [{ en: "It asks for a re-inspection by Nov 3.", zh: "" }] } }], channel, "en");
+    const t = await agent({
+      ws: base(), svc: account().svc, channel, state: startState(earlier, "And can you remove the opening deadline and book the inspection?"),
+      script: [() => ask(["edit_deadline", { deadline_id: "dl1", remove: true }], ["add_deadline", { title: "Re-inspection", date: "2026-11-03", kind: "due" }], ["request_filing_approval", { application_id: "nope" }]), () => say("Added the re-inspection. Remove the opening deadline in the Placetta app.")],
+    });
+    const sys = String(t.bodies[0].system);
+    ok(!callNamed(t, "edit_deadline")[0].ok && /Placetta app/.test(callNamed(t, "edit_deadline")[0].out) && callNamed(t, "add_deadline")[0].ok && t.w.deadlines.some(d => d.id === "dl1"),
+      `${channel}: removing a deadline is refused with the next step; adding one works`, t.calls.map(c => [c.name, c.ok]));
+    ok(new RegExp(`came by ${channel === "teams" ? "Microsoft Teams" : "Telegram"}`).test(sys) && /Earlier, \.\.\./.test(sys) && /act only on this request/.test(sys), `${channel}: the instructions name the chat and treat earlier turns as context`);
+    ok(channel === "telegram" ? /Telegram shows plain text only/.test(sys) : !/plain text only/.test(sys), `${channel}: plain text where the chat shows only that`);
+    const msgs = (t.bodies[0].messages as { role: string; content: unknown }[]).map(m => typeof m.content === "string" ? m.content : JSON.stringify(m.content));
+    ok(/\(Earlier, by email\) Fwd: health department notice/.test(msgs[0] ?? "") && /re-inspection by Nov 3/.test(msgs[1] ?? ""), `${channel}: this morning's email is in the conversation, marked where it came from`);
+  }
+  eq(turnsFromRuns([{ channel: "sms", prompt: "pay the vendor", reply: { text: [{ en: "Not from a text.", zh: "" }] } }], "telegram", "en"), [], "a text's words never carry into a chat run");
 
   // the same rules on the workspace, whichever tool tries: memory, skills, routines, existing stores and deadlines stay
   const w0 = base();
