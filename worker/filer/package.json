@@ -11,7 +11,7 @@
     "typecheck": "node ../../node_modules/typescript/bin/tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.117.2",
+    "@supabase/supabase-js": "^2.118.0",
     "playwright-core": "1.56.0"
   }
 }
