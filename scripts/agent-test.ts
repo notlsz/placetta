@@ -1628,6 +1628,64 @@ async function appeals() {
   eq(r.w.apps.find(a => a.id === "bp")?.status, "draft", "the application wasn't touched");
 }
 
+async function planStaysTrue() {
+  console.log("\n# The plan reflects each filing's real state: nothing filed, approved, denied or declined is suggested again");
+  const st = { id: "fl", name: same("Flushing"), address: "136-20 Roosevelt Ave, Flushing, NY 11354", stage: "opening" as const, rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: ["sla", "cafe", "fse"] };
+  const ws = workspace({ stores: [st],
+    apps: [app("sla", "draft", { name: B("Liquor license (beer and wine)", "酒牌"), agency: B("New York State Liquor Authority", "纽约州酒类管理局"), level: "state", official: "ny-sla-rw" }),
+      app("cafe", "draft", { name: B("Outdoor dining license", "户外用餐许可"), agency: B("NYC Department of Transportation", "纽约市交通局"), official: "nyc-outdoor-dining" }),
+      app("fse", "approved", { name: B("Food service establishment permit", "食品服务许可"), filed: { status: "accepted", decided: daysFromNow(-20) } })] });
+  // "We don't serve alcohol, and there's no seating outside"
+  const r1 = await agent({ ws, prompt: "We don't serve alcohol, and we have no outdoor seating.",
+    script: [() => ask(["remove_application", { application_id: "sla", reason: "We don't serve alcohol" }], ["remove_application", { application_id: "cafe", reason: "No outdoor seating" }]),
+      () => say("I've asked you to confirm removing both.")] });
+  let w = r1.w;
+  for (const a of w.approvals.filter(x => x.change?.op === "remove_app")) w = confirmChange(a)(w);
+  ok(!w.apps.some(a => a.id === "sla" || a.id === "cafe"), "once confirmed, both are gone");
+  eq((w.declined ?? []).map(d => [d.official, d.reason]).sort(), [["ny-sla-rw", "We don't serve alcohol"], ["nyc-outdoor-dining", "No outdoor seating"]], "and remembered as not applying, with the owner's reason");
+  // a later session, or a routine, maps the permits again: they stay gone
+  const r2 = await agent({ ws: w, prompt: "Map every permit for the Flushing store again.",
+    script: [() => ask(["find_official_forms", { business: "milk tea shop", place: "Flushing, NY", serves_alcohol: true, outdoor_seating: true }]),
+      () => ask(["prepare_application", { official_form_id: "ny-sla-rw", store_id: "fl" }], ["prepare_application", { official_form_id: "nyc-outdoor-dining", store_id: "fl" }]),
+      () => say("Everything's mapped.")] });
+  const forms = (callNamed(r2, "find_official_forms")[0].parsed?.forms ?? []) as { official_form_id: string; owner_said_not_needed?: unknown; in_workspace?: unknown }[];
+  ok(forms.filter(f => ["ny-sla-rw", "nyc-outdoor-dining"].includes(f.official_form_id)).every(f => !!f.owner_said_not_needed), "the library marks what the owner said doesn't apply", forms.map(f => f.official_form_id));
+  const prep = callNamed(r2, "prepare_application").map(c => c.parsed as Record<string, unknown>);
+  ok(prep.every(p => p.not_added === true), "and preparing it again is refused", prep);
+  ok(!r2.w.apps.some(a => a.official === "ny-sla-rw" || a.official === "nyc-outdoor-dining"), "so they stay gone");
+  ok(/owner_said_not_needed/.test(JSON.stringify(r2.bodies[0])), "the workspace Odelia reads says what the owner declined");
+  // the owner changes their mind: it comes back, only then
+  const r3 = await agent({ ws: w, prompt: "We got a beer and wine plan after all.", script: [() => ask(["prepare_application", { official_form_id: "ny-sla-rw", store_id: "fl", owner_changed_mind: true }]), () => say("Added.")] });
+  ok(r3.w.apps.some(a => a.official === "ny-sla-rw"), "with the owner's word it's added back");
+  // approved and filed ones: the record, not a new suggestion
+  const fse = w.apps.find(a => a.id === "fse")!;
+  const withForm = { ...w, apps: w.apps.map(a => (a.id === "fse" ? { ...fse, official: "nyc-fse" } : a)) };
+  const r4 = await agent({ ws: withForm, prompt: "Do we need a food permit?", script: [() => ask(["prepare_application", { official_form_id: "nyc-fse", store_id: "fl" }]), () => say("It's already approved.")] });
+  const again = callNamed(r4, "prepare_application")[0];
+  ok(again.ok && again.parsed?.already_filed === true && again.parsed.application_id === "fse", "an approved permit isn't prepared again", again.out.slice(0, 200));
+  eq(r4.w.apps.filter(a => a.official === "nyc-fse").length, 1, "no second copy");
+  ok(String((r4.bodies[0] as { system?: unknown }).system ?? "").includes('"filed":"accepted"'), "the workspace Odelia reads carries the agency's decision");
+  // nothing out of place: a Flushing milk tea shop's plan has no other state's forms, and no alcohol without the owner saying so
+  const plain = formsForReg({ segment: segmentOfReg("milk tea shop"), where: "Flushing, NY", needs: { food: true } });
+  ok(plain.every(f => !/^(ca|tx|il|wa|fl)-/.test(f.id)), "only New York's and the city's forms", plain.map(f => f.id).filter(id => /^(ca|tx|il|wa|fl)-/.test(id)));
+  ok(!plain.some(f => f.id === "ny-sla-rw" || f.id === "nyc-outdoor-dining"), "no liquor license or outdoor dining unless the business says so");
+}
+
+async function memoryAcrossSessions() {
+  console.log("\n# Context persists across sessions: the job's plan, its handoff and the facts");
+  const ws = workspace({ apps: [app("hp", "draft", { name: B("Health permit", "卫生许可") })] });
+  const r1 = await agent({ ws, prompt: "Get the health permit going; the plan reviewer is Ana Ruiz.",
+    script: [() => ask(["set_plan", { title: "Health permit for Flushing", steps: [{ title: "Fill the application" }, { title: "Book the pre-operating inspection with Ana Ruiz" }, { title: "File" }], done: ["The health permit is filed"] }],
+      ["remember", { label: "DOH plan reviewer", value: "Ana Ruiz", group: "operations" }]),
+      () => say("Started. Next: the inspection with Ana Ruiz.")] });
+  // a new conversation days later, with none of the first one's messages
+  const r2 = await agent({ ws: r1.w, prompt: "Where were we on the health permit?", script: [() => say("We're on booking the inspection with Ana Ruiz.")] });
+  const seen = JSON.stringify(r2.bodies[0]);
+  ok(/Health permit for Flushing/.test(seen) && /Book the pre-operating inspection with Ana Ruiz/.test(seen), "the job and its plan are in front of Odelia in the next session", seen.slice(0, 200));
+  ok(/DOH plan reviewer: Ana Ruiz/.test(seen), "and the fact she was told");
+  ok(!/Get the health permit going/.test(seen), "without replaying the old conversation itself");
+}
+
 async function inspectionBookings() {
   console.log("\n# Inspection booking: plan, pick a slot, approve, confirm, result, and the mock inspection");
   const store = (id: string, address: string) => ({ id, name: same(id), address, stage: "opening" as const, rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] as string[] });
@@ -2428,6 +2486,8 @@ await spending();
 await addresses();
 await appeals();
 await inspectionBookings();
+await planStaysTrue();
+await memoryAcrossSessions();
 await fieldsAndDocs();
 await writing();
 await pointOfSale();

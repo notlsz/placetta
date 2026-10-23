@@ -144,7 +144,7 @@ export function normalizeState(name: string, s: Partial<Workspace>): Workspace {
     business: s.business ?? same(name), goal: s.goal ?? same(""), locations: s.locations ?? [], apps: s.apps ?? [], docs: s.docs ?? [],
     deadlines: s.deadlines ?? [], nudges: s.nudges ?? [], approvals: s.approvals ?? [], closed: s.closed ?? [], audit: [],
     facts: s.facts ?? [], running: s.running ?? [], connections: s.connections ?? [], stores: s.stores, meta: s.meta, memories: s.memories, chats: s.chats, skills: s.skills, skillsAuto: s.skillsAuto, spend: s.spend, jobs: s.jobs, routines: s.routines,
-    firstPlan: s.firstPlan, entities: s.entities, runs: s.runs, controls: s.controls, undo: s.undo, ...(s.runLog ? { runLog: s.runLog } : {}), ...(s.agentMemory ? { agentMemory: s.agentMemory } : {}), ...(s.bookings ? { bookings: s.bookings } : {}),
+    firstPlan: s.firstPlan, entities: s.entities, runs: s.runs, controls: s.controls, undo: s.undo, ...(s.runLog ? { runLog: s.runLog } : {}), ...(s.agentMemory ? { agentMemory: s.agentMemory } : {}), ...(s.bookings ? { bookings: s.bookings } : {}), ...(s.declined ? { declined: s.declined } : {}),
   };
 }
 /** What's saved: everything but the audit trail (that has its own table) and payment cards (made from the filings). */
@@ -217,5 +217,10 @@ export const applyChange = (c: Change): P => w => {
   if (c.op === "mcp_call") return w;
   // held changes and plans are run by the app when an owner approves them (src/held.ts), not here
   if (c.op === "held" || c.op === "plan") return w;
-  return { ...w, apps: w.apps.filter(a => a.id !== c.app), approvals: w.approvals.filter(a => a.app !== c.app) };
+  // removed with the owner's confirmation: it doesn't apply, so it's remembered and never suggested again
+  const gone = w.apps.find(a => a.id === c.app);
+  const store = (w.stores ?? []).find(x => (x.apps ?? []).includes(c.app))?.id;
+  const declined = gone ? [...(w.declined ?? []).filter(d => !(d.official && d.official === gone.official && d.store === store)),
+    { ...(gone.official ? { official: gone.official } : {}), name: gone.name, ...(store ? { store } : {}), ...(c.reason ? { reason: c.reason.slice(0, 200) } : {}), at: new Date().toISOString() }].slice(-100) : w.declined;
+  return { ...w, apps: w.apps.filter(a => a.id !== c.app), approvals: w.approvals.filter(a => a.app !== c.app), ...(declined ? { declined } : {}) };
 };

@@ -154,11 +154,15 @@ function snapshot(w: Workspace, lang: Lang) {
     ...(w.firstPlan ? { first_plan: { at: w.firstPlan.at.slice(0, 10), what: w.firstPlan.what, where: w.firstPlan.where, preview_applications: w.apps.filter(a => a.preview).length, opening: w.firstPlan.opening } } : {}),
     applications: w.apps.map(a => ({
       id: a.id, name: b(a.name), official_form: a.official, agency: b(a.agency), level: a.level, status: a.status, next: a.next ? b(a.next) : undefined, preview: a.preview || undefined,
+      // the filing's real state, so nothing filed, approved or denied is suggested again as if it were new
+      ...(a.filed ? { filed: a.filed.status, ...(a.filed.decided ? { decided: a.filed.decided } : {}) } : {}),
       fee: a.fees.reduce((s, f) => s + f.amount, 0), currency: a.currency ?? "USD", takes: b(a.est), sets_opening_date: a.critical || undefined,
       empty_fields: a.fields.filter(f => isBlank(f.value)).map(f => b(f.label)),
       missing_documents: a.checklist.filter(c => c.state === "missing").map(c => ({ checklist_item: c.id, document: b(c.label) })),
     })),
     stores: (w.stores ?? []).map(st => ({ id: st.id, name: b(st.name), address: st.address, stage: st.stage, planned_open: st.plannedOpen, applications: st.apps })),
+    // what the owner said doesn't apply: never suggest these again unless they bring it up
+    ...(w.declined?.length ? { owner_said_not_needed: w.declined.slice(-30).map(d => ({ name: b(d.name), ...(d.official ? { official_form: d.official } : {}), ...(d.store ? { store: d.store } : {}), ...(d.reason ? { why: d.reason } : {}) })) } : {}),
     ...(staffLanguages(w).length ? { staff_languages: staffLanguages(w).map(p => `${p.name}: ${STAFF_LANGS.find(l => l.id === p.lang)!.en}`) } : {}),
     waiting_for_approval: w.approvals.map(a => ({ id: a.id, title: b(a.title), application: a.app })),
     // with ids, so edit_deadline can name one; the next ones first, then the latest that passed
@@ -493,9 +497,17 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         // a whole plan lists each form's line count, not its lines: prepare_application returns the lines still empty, so the
         // listing doesn't carry every label of every form into every later step (a search for one or a few forms keeps them)
         const lines = list.length <= 3;
+        const planState = (id: string) => {
+          const have = get().apps.filter(a => a.official === id);
+          const no = (get().declined ?? []).filter(d => d.official === id);
+          return { ...(have.length ? { in_workspace: have.map(a => ({ application_id: a.id, status: a.status, ...(a.filed ? { filed: a.filed.status } : {}) })) } : {}),
+            ...(no.length ? { owner_said_not_needed: no.map(d => ({ ...(d.store ? { store: d.store } : {}), ...(d.reason ? { why: d.reason } : {}), on: d.at.slice(0, 10) })) } : {}) };
+        };
         return {
           segment, place, country: info.country ?? "unknown", city: info.city?.en, currency: info.currency,
           forms: list.slice(0, 30).map(f => ({ official_form_id: f.id, form: f.form, title: f.title[lang], agency: f.agency[lang], level: f.level, how_filed: `${METHOD[f.method][lang]}. ${f.how[lang]}`, official_link: f.url, info: f.info,
+            // what the workspace already has of it, or that the owner said it doesn't apply: never suggest it as new
+            ...planState(f.id),
             ...(claimed(f) ? { claim: true, ...(f.proof ? { info_quote: f.proof.quote, ...(f.proof.en ? { info_quote_in_english: f.proof.en } : {}), info_read_on: proofCurrent(f.proof, daysFromNow(0)) ?? f.proof.checked } : {}) }
               : { claim: false, not_claimed: `No current quote from the agency's own page says this applies here${known?.conflicts.length ? ", or two official sources disagree on who issues it" : ""}. Don't tell the person it's required: say you're not sure, and that ${f.agency[lang]} (${f.info || f.url}) decides. Read that page; if it says so, cite its words.` }),
             fee: f.fee, currency: f.currency ?? "USD", fee_note: f.feeNote?.[lang], takes: f.takes?.[lang], renews: f.renews?.[lang], fields: f.fields.length && !lines ? `${f.fields.length} lines: prepare_application returns the ones still empty` : f.fields.length ? f.fields.map(x => `Line ${x.line}: ${x.label[lang]}${x.options ? ` (${x.options.join(" / ")})` : ""}`) : "Not listed yet: prepare_application adds the lines every agency asks; read the official link for the rest",
@@ -543,6 +555,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         checklist: { type: "array", description: "Documents the filing needs beyond the form's own attachments", items: { type: "object", properties: { item: { type: "string" }, have: { type: "boolean" } }, required: ["item"] } },
         next_step: { type: "string" },
         store_id: { type: "string", description: "The store this is for (from add_store or the workspace's stores). Required for a city or county permit when the business has more than one store" },
+        renewal: { type: "boolean", description: "This is the renewal of one already approved" },
+        owner_changed_mind: { type: "boolean", description: "The owner now says a license they said didn't apply does" },
       }, required: [] },
       execute(i) {
         const off = str(i.official_form_id) ? formById(str(i.official_form_id)) : undefined;
@@ -569,7 +583,15 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         // a filed one is the record; preparing the same form again (a renewal) makes a new one
         const twin = get().apps.find(a => (off ? a.official === off.id : !a.official && (a.name.en.toLowerCase() === name.toLowerCase() || (a.preview && sameThing(a))))
           && !["filing", "review", "approved"].includes(a.status) && (target ? (target.apps ?? []).includes(a.id) : !inStore(a.id)));
-        if (twin && !twin.preview) { made.apps.add(twin.id); mark(); return { application_id: twin.id, status: twin.status, already_in_workspace: true, ...gaps(twin) }; }
+        if (twin && !twin.preview) { made.apps.add(twin.id); mark(); return { application_id: twin.id, status: twin.status, already_in_workspace: true, ...(twin.filed ? { filed: twin.filed.status } : {}), ...gaps(twin) }; }
+        // the owner said it doesn't apply (for this store, or the business): not added back unless they changed their mind
+        const no = (get().declined ?? []).find(d => (off ? d.official === off.id : d.name.en.toLowerCase() === name.toLowerCase()) && (!d.store || !target || d.store === target.id));
+        if (no && i.owner_changed_mind !== true) { mark(); return { not_added: true, owner_said_not_needed: { on: no.at.slice(0, 10), ...(no.reason ? { why: no.reason } : {}) },
+          do_next: "Don't add it or suggest it. If the owner now says it does apply, call this again with owner_changed_mind true." }; }
+        // filed, with the agency or approved for this store: that is the record. A renewal says so (renewal: true).
+        const filedTwin = off && i.renewal !== true ? get().apps.find(a => a.official === off.id && ["filing", "review", "approved"].includes(a.status) && (target ? (target.apps ?? []).includes(a.id) : !inStore(a.id))) : undefined;
+        if (filedTwin) { mark(); return { application_id: filedTwin.id, status: filedTwin.status, already_filed: true, ...(filedTwin.filed ? { filed: filedTwin.filed.status } : {}),
+          do_next: "It's already filed or approved: don't prepare it again. For its renewal, call again with renewal true." }; }
         const url = off ? off.url : okUrl(str(i.agency_url, 200)), fee = off && off.fee != null ? off.fee : Math.max(0, Number(i.fee ?? i.fee_usd) || 0), feeGiven = i.fee != null && i.fee !== "" || i.fee_usd != null;
         const currency = (off?.currency ?? (/^[A-Z]{3}$/.test(str(i.currency)) ? str(i.currency) : "USD"));
         // a Social Security number or ITIN is never kept: that line stays empty and the result says to write "By hand"
@@ -1178,7 +1200,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         if (["filing", "review", "approved"].includes(a.status)) throw new Error("It's already with the filing team or the agency; it can't be removed here.");
         const twin = pendingChange(c => c.op === "remove_app" && c.app === a.id);
         if (twin) { made.approvals.push(twin.id); mark(); return { confirmation_requested: true, approval_id: twin.id, note: "Already waiting for the person to confirm." }; }
-        const id = freshId(get(), "ap-chg"), change: Change = { op: "remove_app", app: a.id };
+        const id = freshId(get(), "ap-chg"), change: Change = { op: "remove_app", app: a.id, ...(str(i.reason) ? { reason: str(i.reason, 200) } : {}) };
         S("composing", L(`Asking you to confirm removing the ${nm(a)}`, `请您确认移除${nm(a)}`));
         apply(w => audit("agent", L("Asked to confirm a change", "请求确认更改"), a.name, L("Remove", "移除"))(addApproval({ id, kind: "change", change, title: L(`Remove the ${nm(a)}`, `移除${nm(a)}`), action: B("Confirm removal", "确认移除"),
           does: [L(`Remove the ${nm(a)} and its checklist from Applications`, `从申请中移除${nm(a)}及其清单`)], data: str(i.reason) ? [{ id: "why", label: L("Why", "原因"), value: str(i.reason, 200) }] : [] })(w)));

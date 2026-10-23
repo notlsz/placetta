@@ -128,7 +128,7 @@ export type Approval = {
 export type Change =
   | { op: "move_store"; store: string; name?: string; address?: string; city: string; state: string; planned_open?: string }
   | { op: "remove_store"; store: string }
-  | { op: "remove_app"; app: string }
+  | { op: "remove_app"; app: string; reason?: string }
   | { op: "set_budgets"; budgets: Budget[] }
   /** A business fact (legal name, EIN, address, owners) asked for from outside the app: an owner confirms it in the app
    *  before it fills any form. was: the value it had when asked. via: the channel it came by (email, sms, voice, slack,
@@ -233,6 +233,10 @@ export type Workspace = {
   agentMemory?: import("./odeliaMemory/types").AgentMemory;
   /** Inspections booked or being booked, and their results (src/inspections/booking.ts). */
   bookings?: InspectionBooking[];
+  /** Licenses the owner said don't apply (an application removed with their confirmation, or "we don't serve
+   *  alcohol"): never suggested again unless they change their mind (find_official_forms marks them, prepare_application
+   *  refuses them). */
+  declined?: { official?: string; name: Bi; store?: string; reason?: string; at: string }[];
 };
 /** The plan a new workspace starts with: what and where the person typed, when, and how many permits the registry listed.
  *  filled: the form lines filled from the signup answers (src/plan/prefill.ts); win: the application put up for approval
