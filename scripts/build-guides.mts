@@ -151,8 +151,11 @@ try {
 } catch { /* no proof log: no "Sources checked" line */ }
 for (const f of FORMS) { const d = f.proof?.checked; if (d && /^\d{4}-\d\d-\d\d$/.test(d) && d > (PROOF_DAY.get(f.id) ?? "")) PROOF_DAY.set(f.id, d); }
 const checkedOf = (forms: OfficialForm[]) => forms.map(f => PROOF_DAY.get(f.id) ?? "").sort().pop() || "";
-const REGION = (country: string) => (country === "US" ? "us" : country === "CN" ? "cn" : ["AE", "SA", "QA", "KW", "BH", "OM", "TR", "EG", "JO", "IL"].includes(country) ? "me" : "eu");
-const REGIONS: { id: string; name: Bi }[] = [{ id: "us", name: B("United States", "美国") }, { id: "cn", name: B("China", "中国") }, { id: "eu", name: B("Europe", "欧洲") }, { id: "me", name: B("Middle East", "中东") }];
+const REGION = (country: string) => (country === "US" ? "us" : country === "CN" ? "cn" : ["AE", "SA", "QA", "KW", "BH", "OM", "TR", "EG", "JO", "IL"].includes(country) ? "me"
+  : ["CA", "MX", "BR", "CL", "CO", "AR", "PE"].includes(country) ? "am" : ["HK", "SG", "MY", "TH", "VN", "ID", "PH", "AU", "NZ", "JP", "KR"].includes(country) ? "ap"
+  : ["KE", "NG", "ZA", "MA", "ET"].includes(country) ? "af" : "eu");
+const REGIONS: { id: string; name: Bi }[] = [{ id: "us", name: B("United States", "美国") }, { id: "cn", name: B("China", "中国") }, { id: "eu", name: B("Europe", "欧洲") }, { id: "me", name: B("Middle East", "中东") },
+  { id: "am", name: B("Americas", "美洲") }, { id: "ap", name: B("Asia Pacific", "亚太") }, { id: "af", name: B("Africa", "非洲") }];
 const countryName = (code: string): Bi => { const c = COUNTRIES.find(x => x.code === code); return c ? B(c.en, c.zh) : B(code, code); };
 
 /* ------------------------------------------------------------ the shell */

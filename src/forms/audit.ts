@@ -11,7 +11,7 @@ import type { OfficialForm } from "./registry";
 
 export const AUDIT_READ = "2026-10-22";
 
-type Proof = { quote: string; read: string; en?: string };
+type Proof = { quote: string; read: string; en?: string; checked?: string };   // checked: the day it was read, when not the audit's
 export type Fix = {
   id: string;
   /** new links; null removes one (a PDF the agency took down) */
@@ -108,7 +108,7 @@ export function applyFixes(forms: OfficialForm[], fixes: Fix[] = FIXES): string[
     if (x.proof === null) delete f.proof;
     // the link and the quote always match (src/forms/registry.ts): a new proof moves the agency link to the page it was read on
     else if (x.proof) { if (!x.info) f.info = x.proof.read; }
-    if (x.proof) f.proof = { quote: x.proof.quote, read: x.proof.read, checked: AUDIT_READ, ...(x.proof.en ? { en: x.proof.en } : {}) };
+    if (x.proof) f.proof = { quote: x.proof.quote, read: x.proof.read, checked: x.proof.checked ?? AUDIT_READ, ...(x.proof.en ? { en: x.proof.en } : {}) };
   }
   return missing;
 }

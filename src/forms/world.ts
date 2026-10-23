@@ -65,6 +65,9 @@ export const COUNTRIES: Country[] = [
   { code: "KE", en: "Kenya", zh: "肯尼亚", currency: "KES", names: /\bkenya\b|肯尼亚/i },
   { code: "ZA", en: "South Africa", zh: "南非", currency: "ZAR", names: /south africa|南非/i },
   { code: "MA", en: "Morocco", zh: "摩洛哥", currency: "MAD", names: /\bmorocco\b|\bmaroc\b|摩洛哥/i },
+  // added for the expansion cities of 2026-10-23 (src/forms/expansion.ts): neither code is a US state's
+  { code: "HK", en: "Hong Kong", zh: "中国香港", currency: "HKD", names: /\bhong kong\b|香港/i },
+  { code: "AU", en: "Australia", zh: "澳大利亚", currency: "AUD", names: /\baustralia\b|澳大利亚|澳洲/i },
   { code: "MX", en: "Mexico", zh: "墨西哥", currency: "MXN", names: /(?<!new )\bmexico\b|(?<!新)墨西哥|\bcdmx\b|quintana roo|nuevo leon|\bjalisco\b/i },
 ];
 
@@ -94,7 +97,7 @@ export const CITIES: City[] = [
   c("CO-BOG", "CO", "Bogotá", "波哥大", ["bogota", "波哥大"], false),
   c("AR-BUE", "AR", "Buenos Aires", "布宜诺斯艾利斯", ["buenos aires", "caba", "布宜诺斯艾利斯"], false),
   c("PE-LIM", "PE", "Lima", "利马", ["lima, peru", "lima, perú", "miraflores, lima", "利马"], false),
-  c("SG-SIN", "SG", "Singapore", "新加坡", ["singapore", "新加坡"], false),
+  c("SG-SIN", "SG", "Singapore", "新加坡", ["singapore", "新加坡"], true),
   c("MY-KUL", "MY", "Kuala Lumpur", "吉隆坡", ["kuala lumpur", "吉隆坡", "bukit bintang"], true),
   c("TH-BKK", "TH", "Bangkok", "曼谷", ["bangkok", "曼谷"], false),
   c("VN-SGN", "VN", "Ho Chi Minh City", "胡志明市", ["ho chi minh", "saigon", "胡志明"], false),
@@ -102,6 +105,10 @@ export const CITIES: City[] = [
   c("PH-MNL", "PH", "Manila", "马尼拉", ["manila", "makati", "马尼拉"], false),
   c("NG-LOS", "NG", "Lagos", "拉各斯", ["lagos, nigeria", "ikeja", "victoria island, lagos", "lekki", "拉各斯"], false),
   c("KE-NBO", "KE", "Nairobi", "内罗毕", ["nairobi", "内罗毕"], true),
+  /* Hong Kong and Australia (src/forms/expansion.ts): each Australian city's state is its code ("AU-NSW", "AU-VIC") */
+  c("HK-HKG", "HK", "Hong Kong", "香港", ["hong kong", "香港", "kowloon", "九龙", "tsim sha tsui", "尖沙咀", "causeway bay", "铜锣湾"]),
+  c("AU-SYD", "AU", "Sydney", "悉尼", ["sydney, nsw", "sydney, new south wales", "sydney, australia", "sydney nsw", "sydney", "悉尼"], true, "AU-NSW"),
+  c("AU-MEL", "AU", "Melbourne", "墨尔本", ["melbourne, vic", "melbourne, victoria", "melbourne, australia", "melbourne vic", "melbourne", "墨尔本"], true, "AU-VIC"),
   c("ZA-JNB", "ZA", "Johannesburg", "约翰内斯堡", ["johannesburg", "sandton", "约翰内斯堡"], false),
   c("MA-CAS", "MA", "Casablanca", "卡萨布兰卡", ["casablanca", "卡萨布兰卡"], false),
 

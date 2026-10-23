@@ -6461,5 +6461,115 @@
   "found": true,
   "sha256": "fbb2e5a738d274e1",
   "context": "ise change the container, wrapper, or labeling of the device or device package. the initial importer must have a physical address in the united states staffed by individuals responsible for ensuring the compliance of imported devices with all applicable fda laws and regulations. manufacturer - makes by chemical,"
+ },
+ {
+  "id": "sg-gst",
+  "read": "https://www.iras.gov.sg/taxes/goods-services-tax-%28gst%29/gst-registration-deregistration/do-i-need-to-register-for-gst",
+  "quote": "You must register for GST if your taxable turnover is:",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "af271c0461db1cb6",
+  "context": "n computing your business turnover faqs related content compulsory registration you must register for gst if your taxable turnover is: under the retrospective view, more than $1 million at the end of the calendar y"
+ },
+ {
+  "id": "sg-sfa-food-shop",
+  "read": "https://www.sfa.gov.sg/food-retail/licensing-permits/food-shop-licence",
+  "quote": "The Food Shop Licence costs $195 and is valid for 1 year.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "f69fb11c6aea0e4e",
+  "context": " by sfa final approval follow the steps below to apply for a food shop licence. the food shop licence costs $195 and is valid for 1 year. step 1: ensure you meet the requirements and conditions check the requirements "
+ },
+ {
+  "id": "my-ssm",
+  "read": "https://ssm.com.my/Pages/Register_Business_Company_LLP/Company/Starting_Company.aspx",
+  "quote": "The incorporation of companies under the Companies Act 2016 may be made by individuals who intend to form a company.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "7756817681870a60",
+  "context": " more shares; and one or more directors requirements for company incorporation ​the incorporation of companies under the companies act 2016 may be made by individuals who intend to form a company. the basic requirements are: private company - at least one (1) director who ord"
+ },
+ {
+  "id": "hk-cr-incorporate",
+  "read": "https://www.cr.gov.hk/en/faq/local-company/incorporation.htm",
+  "quote": "The application documents include: Incorporation Form - Form NNC1 (for company limited by shares)",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "1599743b76faf620",
+  "context": " copy form to the shroff on the 14th floor of the queensway government offices. the application documents include: incorporation form - form nnc1 (for company limited by shares) or form nnc1g (for company not limited by shares); a copy of the company's arti"
+ },
+ {
+  "id": "hk-ird-br",
+  "read": "https://www.ird.gov.hk/eng/pdf/pam17.pdf",
+  "quote": "every person carrying on business in Hong Kong must register his business with the Business Registration Office of the Inland Revenue Department.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "c78644801deefa99",
+  "context": " registration ordinance (cap. 310) (\"bro\"), other than those exempt businesses, every person carrying on business in hong kong must register his business with the business registration office of the inland revenue department. scope \"business\" means any form of trade, commerce, craftsmanship, profession, "
+ },
+ {
+  "id": "hk-fehd-restaurant",
+  "read": "https://www.fehd.gov.hk/english/licensing/guide.html",
+  "quote": "General Restaurant Licence and Provisional General Restaurant Licence",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "78485756de611709",
+  "context": "cluding general restaurant, light refreshment restaurant and marine restaurant) general restaurant licence and provisional general restaurant licence how to apply for restaurant licences how to apply for restaurant licences (quic"
+ },
+ {
+  "id": "au-asic-company",
+  "read": "https://ablis.business.gov.au/service/ag/register-a-company/67",
+  "quote": "If you decide to adopt a company as your business structure, you must register it with the Australian Company Register,",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "070f1aab47995905",
+  "context": "our browser to continue. register a company - australian government description if you decide to adopt a company as your business structure, you must register it with the australian company register, managed by the australian securities and investments commission (asic). you wil"
+ },
+ {
+  "id": "au-abn",
+  "read": "https://business.gov.au/registrations/register-for-an-australian-business-number-abn",
+  "quote": "It’s free to register for an ABN through the Australian Government’s Australian Business Register (ABR).",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "d23fccd6fd5ed465",
+  "context": " (gst) credits claim energy grants credits get an australian (.au) domain name. it's free to register for an abn through the australian government's australian business register (abr). find out if you need an abn not everyone needs an abn. to get one you need to b"
+ },
+ {
+  "id": "au-gst",
+  "read": "https://business.gov.au/registrations/register-for-taxes/register-for-goods-and-services-tax-gst",
+  "quote": "You must register for GST if: your business has a GST turnover of $75,000 or more",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "f13b3c54140d630b",
+  "context": "on office (ato) when it's due. check if your business needs to register for gst you must register for gst if: your business has a gst turnover of $75,000 or more your non-profit organisation has a gst turnover of $150,000 or more you provide"
+ },
+ {
+  "id": "syd-food-notification",
+  "read": "https://ablis.business.gov.au/service/nsw/food-business-notification-council-of-the-city-of-sydney/46323",
+  "quote": "You will need to notify either your council or the NSW Food Authority if you intend to operate a food business.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "84d20f564da8c46c",
+  "context": "ness notification - council of the city of sydney - new south wales description you will need to notify either your council or the nsw food authority if you intend to operate a food business. notification must be submitted to council for the following types of businesses"
+ },
+ {
+  "id": "mel-food-registration",
+  "read": "https://ablis.business.gov.au/service/vic/registration-notification-of-fixed-food-premises/28955",
+  "quote": "You will need this registration or notification if you intend to operate a food business from a fixed food premises,",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "906c34c1106597e5",
+  "context": "otification of a fixed food premises - city of melbourne - victoria description you will need this registration or notification if you intend to operate a food business from a fixed food premises, such as a caf????, shop, or factory. local councils classify all food businesse"
  }
 ]
