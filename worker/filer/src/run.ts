@@ -16,9 +16,11 @@ import type { Model } from "./model.ts";
 import { headingOf, locate, pageState } from "./page.ts";
 import { finalOn, type FormSteps, guideLines, navOn, pageOutline, payOn, type Playbook } from "./playbooks.ts";
 import { backoffMinutes, heal, type KeyLock, portalDown, receiptCheck, receiptLine } from "./heal.ts";
-import type { Store } from "./store.ts";
+import type { Store, Taught } from "./store.ts";
 import { harden, linkAllowed, safeConfirm, wipe, withTimeout, type Blocked } from "./sandbox.ts";
 import { scoreText } from "../../../supabase/functions/_shared/injection.ts";
+import { checkValue, confirmationIn, customerData, draftProblems, factKey, factsOf, fileFor, fillFacts, generalize, type Labeler, type RawEvent, record } from "./teach.ts";
+import { startRecorder } from "./recorder.ts";
 import type { Act, Filing, Login, Result, Skill, TraceStep } from "./types.ts";
 
 export type Session = { browser: Browser; page: Page; liveUrl: string | null; close(): Promise<void> };
@@ -37,7 +39,25 @@ export type Config = {
   tmpRoot?: string;                                    // where each run's own folder is made (the system's temp folder)
   runMs?: number;                                      // the whole run's hard limit (default maxMs + holdMs + 5 minutes)
   lock?: KeyLock;                                      // shared by the worker's slots: one run per workspace and portal at a time
+  /** Teach mode: names the recorded pages and maps unmapped fields (teach.ts Labeler); without it, labels are plain. */
+  labeler?: Labeler;
+  teachMs?: number;                                    // how long a person has to file while Odelia watches (default holdMs)
+  teachSettleMs?: number;                              // after the confirmation shows, how long before the recording ends
+  teachWithoutLive?: boolean;                          // tests: the person's browser is the test itself, not a live view
 };
+
+const TEACH = {
+  en: "Show Odelia how: open the live browser and file it yourself, the way you always do. Odelia watches and writes down the steps (never your password or any secret number). When the agency shows its confirmation, she keeps it. Tap \"I've done it\" if you finish another way.",
+  zh: "教 Odelia 一次：打开实时浏览器，像平时一样亲自提交。Odelia 在旁观看并记下步骤（从不记录您的密码或任何保密号码）。机构显示确认信息后，她会保存下来。如果您以其他方式完成，请点击“我已完成”。",
+};
+const ASSIST = {
+  en: "Odelia filled every page from what you approved. These steps for this agency's site are new and the Placetta team hasn't checked them yet, so you press submit: open the live browser, check the page, press the agency's submit button, then tap \"I've done it\".",
+  zh: "Odelia 已按您批准的内容填好每一页。这个机构网站的步骤是新学的，快哉团队尚未核对，所以由您来点提交：打开实时浏览器，检查页面，点击机构的提交按钮，然后点击“我已完成”。",
+};
+/** The filing asked for teach mode ("Show Odelia how", file function action teach) and hasn't been taught yet. */
+export const teachRequested = (f: Filing) => [...f.agent_log].reverse().find((e) => e.kind === "teach" || e.kind === "taught")?.kind === "teach";
+/** The registry's field ids for this form, when the payload carries them (the app builds it from the registry). */
+const registryOf = (f: Filing) => { const ids = (f.payload.fields ?? []).map((x) => x.id).filter((x): x is string => !!x); return ids.length ? ids : undefined; };
 
 const PAY = {
   en: "The agency is asking for its fee. Open the live view and pay it yourself, then tap \"I've done it\". Placetta never pays an agency.",
@@ -83,6 +103,9 @@ type Ctx = {
   dir: string;                                         // this run's own folder, deleted when it ends
   pb: { playbook: Playbook; form: FormSteps } | null; seen?: string; pages?: number;
   drift?: string[];                                    // recorded selectors found again by their words this run
+  taught?: Taught | null;                              // the portal's taught playbook this run follows
+  assist?: boolean;                                    // its draft isn't reviewed: Odelia fills, a person presses submit
+  replayFailed?: boolean;
 };
 /** The URL is on the portal or one of the other hosts its destination names. */
 const onAny = (url: string, hosts: string[]) => hosts.some((h) => onPortal(url, h));
@@ -134,8 +157,18 @@ export class Worker {
       return null;
     }
     // A playbook written from the agency's guide but never run on the live site waits for staff to watch its first run.
-    const pb = this.c.playbookOf?.(host, official) ?? null;
-    if (pb && !pb.playbook.verified && !this.c.allowUnverified) {
+    const teaching = teachRequested(f);
+    let pb = this.c.playbookOf?.(host, official) ?? null;
+    // No playbook from a published guide: one taught on this portal by an earlier customer or the team, if any. A
+    // reviewed one runs like any playbook; a draft runs only in assist mode, where a person presses submit.
+    let taught: Taught | null = null;
+    if (!pb && !teaching) {
+      taught = await store.taught?.(host, official).catch((e) => { console.error("filer: taught lookup", e instanceof Error ? e.message : e); return null; }) ?? null;
+      const form = taught?.body?.playbook?.forms?.[official];
+      if (taught && form) pb = { playbook: { ...taught.body.playbook, verified: taught.status === "approved" ? { on: "reviewed", by: "the Placetta team", filing: "" } : null }, form };
+      else taught = null;
+    }
+    if (pb && !pb.playbook.verified && !this.c.allowUnverified && !taught && !teaching) {
       await this.finish(f, { kind: "handoff", reason: "unverified_playbook", task: "first_run", trace: [],
         message: { en: `Placetta's steps for ${pb.playbook.name} come from the agency's published guide and haven't had their supervised first run. The Placetta team files this one and watches the steps.`, zh: `快哉在${pb.playbook.name}上的操作步骤来自机构公布的指南，尚未经过有人监督的首次运行。这一份由快哉团队提交，并核对这些步骤。` } });
       return null;
@@ -159,20 +192,36 @@ export class Worker {
       await harden(page, hosts, (b) => { blocked.push(b); });
       const login = await store.login(f, host, route?.tenant);
       f = await store.step(f, log(`Opening ${host}`, `打开 ${host}`, "visit"), { provider_ref: null });
-      if (pb) f = await store.step(f, log(`Following the published guide for ${pb.playbook.name}${pb.playbook.verified ? "" : " (first run, watched by the Placetta team)"}`, `按${pb.playbook.name}公布的指南操作${pb.playbook.verified ? "" : "（首次运行，由快哉团队监督）"}`, "playbook", JSON.stringify(pageOutline(pb.form)).slice(0, 800)));
+      if (pb && !teaching) f = await store.step(f, taught
+        ? log(`Following the steps taught on ${host}${taught.status === "approved" ? ", reviewed by the Placetta team" : " (not yet reviewed: you press submit)"}`, `按在 ${host} 上学到的步骤操作${taught.status === "approved" ? "（已经快哉团队核对）" : "（尚未核对：由您点击提交）"}`, "playbook", JSON.stringify(pageOutline(pb.form)).slice(0, 800))
+        : log(`Following the published guide for ${pb.playbook.name}${pb.playbook.verified ? "" : " (first run, watched by the Placetta team)"}`, `按${pb.playbook.name}公布的指南操作${pb.playbook.verified ? "" : "（首次运行，由快哉团队监督）"}`, "playbook", JSON.stringify(pageOutline(pb.form)).slice(0, 800)));
+      // Teach mode: the recorder goes in before the first page, so every page of the portal has it.
+      const events: RawEvent[] = [];
+      if (teaching) await startRecorder(page, (e) => { events.push(e); });
       // The agency's own start page when the destination names one (on a host many agencies share, it's the agency's path).
       const start = pb?.form.start ?? route?.start;
       await page.goto(this.c.startUrl ? this.c.startUrl(host) : start && onAny(start, hosts) ? start : `https://${host}/`);
-      const ctx: Ctx = { f, host, hosts, login, page, session, trace: [], t0: Date.now(), files: new Map(), pb, dir };
+      const ctx: Ctx = { f, host, hosts, login, page, session, trace: [], t0: Date.now(), files: new Map(), pb, dir, taught, assist: !!taught && taught.status !== "approved" };
       const key = portalKey(host, f.payload.official!);
-      const skill = await store.skill(key);
+      if (teaching) {
+        const res = await this.teach(ctx, events, page.url());
+        await this.finish(ctx.f, res, ctx);
+        return res;
+      }
+      // A taught playbook replays its own reviewed steps; the skills recorded from runs are for the guides' portals.
+      const skill: Skill | null = taught
+        ? { key, name: taught.body.name, enabled: true, uses: taught.runs, fails_in_a_row: 0, last_seconds: null, best_seconds: null, body: { version: taught.body.version, steps: taught.body.trace, ...(taught.body.playbook.confirm ? { confirm: { pattern: taught.body.playbook.confirm } } : {}) } }
+        : await store.skill(key);
       let res: Result | null = null;
       if (skill?.enabled) {
         const r = await this.replay(ctx, skill);
         if ("end" in r) res = r.end;
         else if (!r.ok) {
-          const { disabled } = await store.skillFailed(key);
-          if (disabled) await store.teamTask(ctx.f, "skill_broken", `Replay of ${key} failed 3 times in a row; it's switched off. Check the portal.`);
+          ctx.replayFailed = true;
+          if (!taught) {
+            const { disabled } = await store.skillFailed(key);
+            if (disabled) await store.teamTask(ctx.f, "skill_broken", `Replay of ${key} failed 3 times in a row; it's switched off. Check the portal.`);
+          }
         }
       }
       res ??= await this.drive(ctx, skill?.enabled ? "The recorded steps stopped matching this page; carry on from here." : undefined);
@@ -180,7 +229,14 @@ export class Worker {
       await this.finish(ctx.f, res, ctx);
       // selector drift goes to the team once per run, whatever the run's end: the recorded skill needs a look
       if (ctx.drift?.length) await store.teamTask(ctx.f, "selector_drift", `${key}: ${ctx.drift.length} recorded step${ctx.drift.length === 1 ? "" : "s"} found again by their words; check the skill`, { key, drift: ctx.drift });
-      if (res.kind === "submitted") await this.learn(key, ctx.f, res, skill);
+      if (taught) {
+        // each run of a taught playbook counts for it or against it; drift goes to the Quality tab's nightly queue
+        const failed = ctx.replayFailed || (res.kind === "handoff" && ["limit", "left_portal", "review_differs", "page_injection"].includes(res.reason));
+        if (res.kind === "submitted" || failed) {
+          const now = await store.taughtResult?.(taught.id, ctx.f, res.kind === "submitted", ctx.drift).catch(() => null);
+          if (now === "draft" && taught.status === "approved") ctx.f = await store.step(ctx.f, log(`The taught steps for ${host} failed again and went back to the Placetta team for review`, `${host} 的已学步骤再次失败，已退回快哉团队核对`, "quiet"));
+        }
+      } else if (res.kind === "submitted") await this.learn(key, ctx.f, res, skill);
       return res;
     } catch (e) {
       if (alive.on) await this.fail(f, e);   // a run past its limit was already failed by run()
@@ -228,7 +284,9 @@ export class Worker {
     }
     if (a.action === "select") {
       const opt = valueOverride ?? a.option ?? "";
-      const from = optionFor(opt, p);
+      // a fixed choice from the portal's own list that a taught playbook names (the team reviews it with the steps)
+      const fixed = !valueOverride && !!a.option && !!ctx.taught && !a.fact;
+      const from = optionFor(opt, p) ?? (fixed ? { label: "the agency's fixed choice" } : null);
       if (!from) return { ok: false, error: "Refused: that option isn't one of the approved values." };
       const options = await loc.locator("option").allTextContents();
       const match = options.find((o) => o.trim().toLowerCase() === opt.trim().toLowerCase());
@@ -268,6 +326,9 @@ export class Worker {
       // Already submitted in this run: a second "send" is the agency's fee or a confirmation of it, which is the person's.
       return { end: await this.handBack(ctx, "payment", PAY) };
     }
+    // Assist mode: steps nobody at Placetta has reviewed never send anything themselves. Odelia filled the pages; the
+    // review page is still checked against the approval, then a person presses the agency's button.
+    if (final && ctx.assist) return { end: await this.assistSubmit(ctx, st) };
     if (final) {
       const end = await this.beforeSubmit(ctx, st);
       if (end) return { end };
@@ -354,9 +415,22 @@ export class Worker {
   // ---------------------------------------------------------------- replay and drive
 
   private async replay(ctx: Ctx, skill: Skill): Promise<Exec> {
-    for (const s0 of skill.body.steps) {
+    const p = ctx.f.payload;
+    for (const r0 of skill.body.steps) {
       const st = await pageState(ctx.page);
+      // page text is data: a page with instructions aimed at an AI ends the replay for the team, as it ends a drive
+      const inj = pageInjection(st);
+      if (inj) return { end: { kind: "handoff", reason: "page_injection", trace: ctx.trace, message: { en: `The agency's page had text aimed at an AI (${inj}), so Placetta stopped. The team takes this filing from here.`, zh: "机构页面中含有针对 AI 的文字，快哉已停止，由团队接手这份申请。" } } };
+      // a taught step names this customer's own values by placeholder ({fact:legal_name} in a link's words)
+      const s0 = { ...r0, heading: fillFacts(r0.heading, p), selector: fillFacts(r0.selector, p) } as TraceStep;
       if (headingOf(st) !== s0.heading) return { ok: false, error: "page changed" };
+      if (s0.action === "fill" && s0.person) {
+        // an SSN, a card or a code: always the person's, on every run
+        const h = await this.handBack(ctx, "secret_number", { en: "This page asks for a number only you type (an SSN, a card or a code). Open the live browser, fill that line, then tap \"I've done it\".", zh: "此页面要求填写只能由您输入的号码（SSN、银行卡或验证码）。请打开实时浏览器填写后点击“我已完成”。" });
+        if (h.kind === "needs_you" && h.reason === "resumed") continue;
+        return { end: h };
+      }
+      if ((s0.action === "fill" || s0.action === "select") && s0.ask) return { ok: false, error: "no value" };
       let s = s0;
       if (!(await locate(ctx.page, s0.selector).count())) {
         // the step's control moved or was relabelled: found again by its words, only when exactly one matches
@@ -366,9 +440,22 @@ export class Worker {
         ctx.drift = [...(ctx.drift ?? []), `${s0.selector} -> ${healed}`];
         ctx.f = await this.c.store.step(ctx.f, log("The agency's page changed a little; found the same field again by its words", "机构页面略有变化，已按文字重新找到同一字段", "drift", `${s0.selector} -> ${healed}`.slice(0, 200)));
       }
-      const value = s.action === "fill" && s.field ? ctx.f.payload.fields?.find((x) => x.label.en === s.field)?.value
-        : s.action === "select" && s.field ? ctx.f.payload.fields?.find((x) => x.label.en === s.field)?.value : undefined;
-      if ((s.action === "fill" && !s.login && value === undefined) || (s.action === "select" && value === undefined)) return { ok: false, error: "no value" };
+      const own = (x: { fact?: string; field?: string }) => (p.fields ?? []).find((f) => (x.fact && factKey(f) === x.fact) || (!!x.field && f.label.en === x.field));
+      const value = (s.action === "fill" || s.action === "select") && (s.field || s.fact) ? own(s)?.value : undefined;
+      if ((s.action === "fill" && !s.login && value === undefined) || (s.action === "select" && value === undefined && !(s.option && ctx.taught))) return { ok: false, error: "no value" };
+      // a taught playbook's checks run in code before a value is typed (the reviewed validators)
+      const check = s.action === "fill" && s.fact ? ctx.taught?.body.validators?.[s.fact] : undefined;
+      if (s.action === "fill" && check && value !== undefined && !checkValue(check, value)) {
+        const what = s.field ?? "value";
+        const h = await this.handBack(ctx, "question", { en: `The ${what} you approved doesn't fit this agency's form. Open the live browser, fill that line, then tap "I've done it".`, zh: `您批准的${what}不符合该机构表格的格式。请打开实时浏览器填写这一行后点击“我已完成”。` });
+        if (h.kind === "needs_you" && h.reason === "resumed") continue;
+        return { end: h };
+      }
+      if (s.action === "upload" && s.attachment === "{file}") {
+        const name = fileFor(s.selector.replace(/^\w+:/, ""), p);
+        if (!name) return { ok: false, error: "which file" };
+        s = { ...s, attachment: name };
+      }
       const r = await this.exec(ctx, s, value);
       if ("end" in r) { if (r.end.kind === "needs_you" && r.end.reason === "resumed") continue; return r; }
       if (!r.ok) return r;
@@ -429,6 +516,95 @@ export class Worker {
       recent.push(`${call.name} ${x.selector ?? ""}${r.ok ? "" : ` (failed: ${r.error})`}`);
     }
     return { kind: "handoff", reason: "limit", trace: ctx.trace, message: { en: "Placetta couldn't finish on the agency's site. The team takes it from here.", zh: "快哉未能在机构网站上完成，由团队接手。" } };
+  }
+
+  // ---------------------------------------------------------------- teach mode
+
+  /** Assist mode's send: the review page is checked against the approval as always, then the person presses the
+   *  agency's button in the live browser. Odelia never clicks it. submit_clicked_at is written as soon as they say
+   *  they did, so the filing is never sent again. */
+  private async assistSubmit(ctx: Ctx, st: PageState): Promise<Result> {
+    const missing = reviewMismatch(st.text, ctx.f.payload);
+    if (missing.length) {
+      return { kind: "handoff", reason: "review_differs", task: "handoff", trace: ctx.trace,
+        message: { en: `The agency's review page doesn't match what you approved (${missing.join(", ")}). Nothing was submitted; the team is checking.`, zh: `机构的核对页面与您批准的内容不一致（${missing.join("、")}），未提交，团队正在核查。` } };
+    }
+    const shot = await ctx.page.screenshot({ fullPage: true }).catch(() => null);
+    const path = shot ? await this.c.store.saveDoc(ctx.f, "review-page.png", shot, "image/png") : null;
+    ctx.f = await this.c.store.step(ctx.f, log("Checked the review page against what you approved. Your turn to press submit.", "已核对页面与您批准的内容一致，请您点击提交。", "review_page", path ?? undefined));
+    const h = await this.handBack(ctx, "assist_submit", ASSIST);
+    if (!(h.kind === "needs_you" && h.reason === "resumed")) return h;
+    ctx.f = await this.c.store.step(ctx.f, log("You pressed submit on the agency's site", "您已在机构网站上点击提交", "submit"), { submit_clicked_at: new Date().toISOString() });
+    await ctx.page.waitForLoadState("domcontentloaded").catch(() => undefined);
+    const now = await pageState(ctx.page);
+    const pattern = ctx.pb?.playbook.confirm ? safeConfirm(ctx.pb.playbook.confirm)?.exec(now.text)?.[1] : undefined;
+    const conf = pattern ?? confirmationIn(now.text);
+    if (conf && now.text.includes(conf)) return await this.done(ctx, conf, "You pressed submit after Odelia filled every page", false);
+    return { kind: "handoff", reason: "maybe_submitted", task: "check_agency", trace: ctx.trace,
+      message: { en: "You pressed submit, but Placetta didn't see the agency's confirmation. The team checks with the agency.", zh: "您已点击提交，但快哉没有看到机构的确认信息。团队会向机构核实。" } };
+  }
+
+  /** "Show Odelia how": the person files in the live browser while the recorder (recorder.ts) writes down each step.
+   *  Odelia types nothing and clicks nothing. When the agency's confirmation shows (or the person taps "I've done it"),
+   *  the recording becomes a draft playbook (teach.ts) for the team's review, and the confirmation is this filing's. */
+  private async teach(ctx: Ctx, events: RawEvent[], start: string): Promise<Result> {
+    const { store } = this.c;
+    if (!ctx.session.liveUrl && !this.c.teachWithoutLive) {
+      return { kind: "handoff", reason: "no_live_view", trace: [], message: { en: "The live browser isn't available right now, so Odelia can't watch this filing. The Placetta team files it.", zh: "实时浏览器暂时不可用，Odelia 无法观看这次提交，由快哉团队提交。" } };
+    }
+    const official = ctx.f.payload.official ?? "";
+    const span = this.c.teachMs ?? this.c.holdMs, settle = this.c.teachSettleMs ?? 3000;
+    const until = new Date(Date.now() + span).toISOString();
+    ctx.f = await store.step(ctx.f, { ...TEACH, kind: "need_person", ref: "teach" }, { agent_state: "needs_you", handoff_url: ctx.session.liveUrl, provider_ref: `held-until:${until}` });
+    await store.notify(ctx.f, { en: "Show Odelia how", zh: "教 Odelia 一次" }, TEACH);
+    // page events get what the worker reads from the page: its text (for the confirmation, kept in memory only),
+    // whether it reads as instructions to an AI, and whether it takes a card
+    const seen = new Set<RawEvent>();
+    const readPages = async () => {
+      for (const e of events) {
+        if (e.kind !== "page" || seen.has(e)) continue;
+        seen.add(e);
+        const st = await pageState(ctx.page).catch(() => null);
+        if (!st) continue;
+        e.text = st.text; e.injection = pageInjection(st); e.card = mustStop(st)?.reason === "payment";
+        if (e.injection) ctx.f = await store.step(ctx.f, log("A page had text aimed at an AI. Odelia didn't use it, and the team checks those steps.", "某个页面含有针对 AI 的文字。Odelia 没有采用，团队会核对这些步骤。", "refused", e.injection.slice(0, 120)));
+      }
+    };
+    let sawAt = 0;
+    const end = Date.now() + span;
+    while (Date.now() < end) {
+      await sleep(this.c.pollMs);
+      const now = await store.reload(ctx.f.id).catch(() => ctx.f);
+      if (now.status === "canceled") { ctx.f = now; return { ...STOPPED, trace: [] }; }
+      await readPages();
+      const { confirmation } = record(events, { payload: ctx.f.payload, host: ctx.host, official, start });
+      // the person sent it: written at once, so nothing ever sends this filing again
+      if (confirmation && !ctx.f.submit_clicked_at) ctx.f = await store.step(ctx.f, log("You submitted it on the agency's site", "您已在机构网站上提交", "submit"), { submit_clicked_at: new Date().toISOString() });
+      if (confirmation) { sawAt ||= Date.now(); if (Date.now() - sawAt >= settle) break; }
+      if (await this.takeBack(ctx.f.id)) { ctx.f = await store.reload(ctx.f.id); break; }
+    }
+    await readPages();
+    const { recording, confirmation } = record(events, { payload: ctx.f.payload, host: ctx.host, official, start });
+    let learned = false;
+    if (recording.steps.some((s) => s.submit) && recording.steps.length >= 2) {
+      const draft = await generalize(recording, { facts: factsOf(ctx.f.payload), registry: registryOf(ctx.f), name: `${ctx.f.payload.form?.en ?? official} on ${ctx.host}`, label: this.c.labeler });
+      const problems = draftProblems(draft), leaks = customerData(draft, ctx.f.payload);
+      if (leaks.length) {
+        // never shared: a playbook that would carry this customer's data to the next one
+        await store.teamTask(ctx.f, "playbook_review", `Teach run on ${ctx.host} for ${official}: the recording still named the customer's own data (${leaks.join(", ")}); nothing was saved.`);
+      } else {
+        const saved = await store.saveTaught?.(ctx.f, draft).catch((e) => { console.error("filer: taught save", e instanceof Error ? e.message : e); return null; });
+        learned = !!saved && saved.status === "draft";
+        if (saved && saved.status === "approved") ctx.f = await store.step(ctx.f, log(`This agency's site already has reviewed steps; the team compares yours with them.`, `该机构网站已有核对过的步骤，团队会与您的步骤比对。`, "quiet"));
+        if (learned && problems.length) await store.teamTask(ctx.f, "playbook_review", `Taught steps for ${official} on ${ctx.host} need work before approval: ${problems.join(", ")}.`);
+      }
+    }
+    ctx.f = await store.step(ctx.f, learned
+      ? log(`Odelia learned the ${recording.steps.length} steps on ${ctx.host}. The Placetta team checks them; then she files this form there for every business, and you still approve each filing.`, `Odelia 学会了 ${ctx.host} 上的 ${recording.steps.length} 个步骤。快哉团队核对后，她会为每家企业在该网站提交这份表格，每次提交仍需您批准。`, "taught", String(recording.steps.length))
+      : log("Odelia couldn't learn the steps from this run. The Placetta team looks at it.", "Odelia 未能从这次操作中学会步骤，快哉团队会查看。", "taught", "0"), { handoff_url: null });
+    if (confirmation) return await this.done(ctx, confirmation, "You submitted it while Odelia watched", false);
+    if (ctx.f.submit_clicked_at) return { kind: "handoff", reason: "maybe_submitted", task: "check_agency", trace: [], message: { en: "You pressed submit, but Placetta didn't see the agency's confirmation. The team checks with the agency.", zh: "您已点击提交，但快哉没有看到机构的确认信息。团队会向机构核实。" } };
+    return { kind: "handoff", reason: "teach_incomplete", trace: [], message: { en: "Odelia didn't see the filing sent, so the Placetta team takes it from here.", zh: "Odelia 没有看到申请被提交，由快哉团队接手。" } };
   }
 
   private async done(ctx: Ctx, confirmation: string, summary: string, replayed: boolean): Promise<Result> {

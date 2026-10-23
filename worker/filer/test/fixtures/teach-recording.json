@@ -1,0 +1,29 @@
+{
+  "note": "What the recorder (src/recorder.ts) reports while a person files the sample county business tax registration (test/portal/teach.ts) for Acme Noodles LLC. The password and the SSN arrive with no value, as the page script sends them; the username and the other values arrive in plain text, as typed.",
+  "host": "tax.county.example",
+  "official": "cty-business-tax",
+  "start": "https://tax.county.example/",
+  "events": [
+    { "kind": "page", "at": 1, "url": "https://tax.county.example/", "heading": "Sign in", "text": "Sign in\nUsername\nPassword" },
+    { "kind": "fill", "at": 2, "url": "https://tax.county.example/", "heading": "Sign in", "role": "textbox", "name": "Username", "type": "text", "id": "user", "nameAttr": "user", "value": "acme.owner@acmenoodles.com" },
+    { "kind": "fill", "at": 3, "url": "https://tax.county.example/", "heading": "Sign in", "role": "textbox", "name": "Password", "type": "password", "id": "pw", "nameAttr": "pw", "secret": true },
+    { "kind": "click", "at": 4, "url": "https://tax.county.example/", "heading": "Sign in", "role": "button", "name": "Sign in" },
+    { "kind": "page", "at": 5, "url": "https://tax.county.example/details", "heading": "Business details", "text": "Business details\nLegal name\nEIN\nBusiness address\nOwner SSN" },
+    { "kind": "fill", "at": 6, "url": "https://tax.county.example/details", "heading": "Business details", "role": "textbox", "name": "Legal name", "type": "text", "id": "legal", "nameAttr": "legal", "value": "Acme Noodles LLC" },
+    { "kind": "fill", "at": 7, "url": "https://tax.county.example/details", "heading": "Business details", "role": "textbox", "name": "EIN", "type": "text", "id": "ein", "nameAttr": "ein", "value": "12-3456789" },
+    { "kind": "fill", "at": 8, "url": "https://tax.county.example/details", "heading": "Business details", "role": "textbox", "name": "Business address", "type": "text", "id": "addr", "nameAttr": "addr", "value": "1 Main St, San Jose, CA" },
+    { "kind": "fill", "at": 9, "url": "https://tax.county.example/details", "heading": "Business details", "role": "textbox", "name": "Owner SSN", "type": "text", "id": "ssn", "nameAttr": "ssn", "secret": true },
+    { "kind": "click", "at": 10, "url": "https://tax.county.example/details", "heading": "Business details", "role": "button", "name": "Continue" },
+    { "kind": "page", "at": 11, "url": "https://tax.county.example/type", "heading": "Business type", "text": "Business type\nEntity type\nActivity" },
+    { "kind": "select", "at": 12, "url": "https://tax.county.example/type", "heading": "Business type", "role": "combobox", "name": "Entity type", "type": "select", "id": "etype", "nameAttr": "etype", "value": "Limited Liability Company" },
+    { "kind": "select", "at": 13, "url": "https://tax.county.example/type", "heading": "Business type", "role": "combobox", "name": "Activity", "type": "select", "id": "act", "nameAttr": "act", "value": "Restaurant" },
+    { "kind": "click", "at": 14, "url": "https://tax.county.example/type", "heading": "Business type", "role": "button", "name": "Continue" },
+    { "kind": "page", "at": 15, "url": "https://tax.county.example/docs", "heading": "Documents", "text": "Documents\nLease\nI certify the information is true" },
+    { "kind": "upload", "at": 16, "url": "https://tax.county.example/docs", "heading": "Documents", "role": "file", "name": "Lease", "type": "file", "id": "lease", "nameAttr": "lease", "files": 1 },
+    { "kind": "check", "at": 17, "url": "https://tax.county.example/docs", "heading": "Documents", "role": "checkbox", "name": "I certify the information is true", "type": "checkbox", "nameAttr": "cert", "checked": true },
+    { "kind": "click", "at": 18, "url": "https://tax.county.example/docs", "heading": "Documents", "role": "button", "name": "Continue" },
+    { "kind": "page", "at": 19, "url": "https://tax.county.example/review", "heading": "Review", "text": "Review\nLegal name: Acme Noodles LLC\nEIN: 12-3456789\nBusiness address: 1 Main St, San Jose, CA\nEntity type: Limited Liability Company\nActivity: Restaurant\nLease: acme-lease.pdf" },
+    { "kind": "click", "at": 20, "url": "https://tax.county.example/review", "heading": "Review", "role": "button", "name": "File application" },
+    { "kind": "page", "at": 21, "url": "https://tax.county.example/done", "heading": "Application received", "text": "Application received\nThank you. Your application is with the county.\nYour reference number: BTX-10001" }
+  ]
+}

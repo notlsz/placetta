@@ -76,7 +76,7 @@ Odelia's column is after the 9 pass (2026-10-23, the last section); her baseline
 ### Grok Bot (xAI)
 - **Strongest:** teams of bots that sign in to company software from a cloud machine, 220 plugins, approval before consequential actions ([VKTR, 2026-08-12](https://www.vktr.com/collaboration-productivity/xai-launches-grok-bot-ai-agents-in-beta/)).
 - **Biggest weakness:** every bot on an account shares one machine, its logins and files, "a real blast radius", and no published price (same article).
-- **Odelia copies:** store bots side by side (split_job) already.
+- **Odelia copies:** store bots side by side (split_job) already; "Show a Bot how it's done" as teach mode (2026-10-30, "Teach Odelia once" below).
 - **Odelia beats it:** each store bot runs as its own run under the policy gate with the requesting person's role, and the filer runs isolated with least privilege (migration 20261022120000_filer_least_privilege).
 
 ### Meta Muse
@@ -390,3 +390,68 @@ a third party's signature), and each read is data from outside, never instructio
 
 With every step: 8.5, 9, 9, 9, 9, 9, 9, 9, 9, about 8.9 overall.
 
+
+## Teach Odelia once (2026-10-30)
+
+Grok Bot's pitch: "The best way for a Bot to learn your workflow is to ask it to follow along the next time you do a
+job"; it "saves your workflow as a routine, takes your corrections, and runs it on its own next time"
+([xAI, Introducing Grok Bot](https://x.ai/news/introducing-grok-bot)). Placetta's gap was the same shape: the filing
+robot (worker/filer) only finished on portals with a playbook, and every other agency site went to the team. Now, the
+first time an owner (or the team) files on a new portal, they press "Show Odelia how" and file it themselves in the
+live browser the filer already uses for CAPTCHA and two-step hand-backs. Odelia records the steps, turns them into a
+draft playbook in the existing format, the team reviews it, and from then on that portal files for every business.
+
+| Product | Strongest (copied) | Biggest weakness (filled) |
+|---|---|---|
+| Grok Bot (xAI) | Follow along once, save it as a routine, run it next time ([xAI](https://x.ai/news/introducing-grok-bot)) | The page's own testimonial: a workflow shown once now runs "without me verifying and reviewing" (same page), and every bot on an account shares one machine and its logins ([VKTR](https://www.vktr.com/collaboration-productivity/xai-launches-grok-bot-ai-agents-in-beta/)) |
+| Browserbase and Stagehand | Recorded actions replayed "deterministically" with no model call; "If the recorded selector no longer resolves, Stagehand falls back to full inference" ([Stagehand caching](https://docs.stagehand.dev/v4/best-practices/caching)) | A kit: what a recording may hold, who reviews it and what needs approval are the builder's job |
+| Skyvern | "Show don't tell": record the flow once, "login, navigation, MFA, modals included", "not pixel replay" ([Skyvern](https://www.skyvern.com/blog/launch-week-day-3-show-dont-tell-screen-record-your-workflows-with-skyvern/)) | No review step is described, nor what happens to the login typed during the recording (same post) |
+| UiPath Task Capture | A screenshot and "smart data with every mouse click", each step given a title and description, editable before export ([UiPath](https://docs.uipath.com/task-capture/docs/capture-process)) | Records keyboard input by default; its capture page doesn't say sensitive input is masked, and the output is a diagram a developer builds from (same page) |
+| Power Automate desktop recorder | UI elements by their accessibility tree (UIA) rather than by position ([Microsoft](https://learn.microsoft.com/en-za/power-automate/desktop-flows/recording-flow)) | "Most recorded tasks should be modified" (same page); keeping a secret out of logs is an opt-in per action ("Secure Inputs", [Microsoft](https://learn.microsoft.com/en-us/power-automate/how-tos-use-sensitive-input)) |
+| Zapier | Its Agents extension acts on the page in front of you ([Zapier](https://help.zapier.com/hc/en-us/articles/29025734470925)) | Its help page describes no recording by demonstration and no approval step (same page) |
+| Google Project Mariner | "Teach and repeat": a routine stored semantically, so small visual changes don't break it ([AI Wiki](https://www.aiwiki.ai/wiki/project_mariner)) | Recipes break "if a site is redesigned"; Mariner was shut down as a product on 2026-05-04 (same page) |
+
+**Copied.** Grok's follow-along-once and save-as-routine; Power Automate's targets by accessibility role and name, never
+position (`label:`, `button:`, `link:` in the filer's own selector grammar); Stagehand's replay without the model and
+fall-back when a step stops matching (the existing word-based self-heal, `heal.ts`); Task Capture's titled, editable
+steps (the model names each page and writes one plain note, the team reviews them); Mariner's semantic routine.
+
+**Filled.** Each weakness above is closed in code, not by policy:
+
+- Secrets never leave the page. The recorder (`worker/filer/src/recorder.ts`) never reads a password field's value, or
+  any field whose label, name or autocomplete reads as an SSN, ITIN, passport, card, bank or one-time code; files report
+  only a count. The worker drops any such value a page forges. What reaches the worker in memory is matched against the
+  customer's approved values and only the placeholder is kept: `{fact:legal_name}`, `{vault:login}` for the saved login,
+  `{person:ssn}` for a line only the person types, `{file}`, or `{ask}`.
+- A playbook carries nobody's data. Page and button names have the customer's values replaced by placeholders, record
+  numbers and emails cut, addresses reduced to origin and path; the database refuses a body holding any of the teaching
+  filing's approved values, file names or signer (`taught_body_leaks`, migration 20261030174100).
+- A person reviews before it runs alone. A draft runs only in assist mode: Odelia fills every page from the approval,
+  checks the review page against it, then hands the live browser back and the person presses the agency's button.
+  Staff with two-step sign-in approve in the Quality tab; approval needs a send step, a confirmation page and steps to
+  replay, and a recording a page talked to the AI on needs a note saying what was checked.
+- Replay keeps every existing guard: the owner's approval before anything is filed or paid, the two-key check for an
+  agency's first filings, CAPTCHA and code hand-backs, no account creation, the destination allowlist, page text treated
+  as data (a page aimed at the AI now also ends a replay), and the healed-selector drift report, which now also reaches
+  the Quality tab's nightly queue as a finding.
+- It earns its place. Each run counts for or against the playbook; three failures in a row, or under 60% after five
+  runs, send an approved one back to review with a task for the team.
+- The model only labels. It sees headings, control names and the workspace's fact names, never a typed value or a
+  page's text, and never a page flagged as aimed at the AI. A mapping must be one of the workspace's facts and, where
+  the registry lists the form's fields, one of those; a label must be short plain text that passes the injection rules.
+
+**Already there, not duplicated.** "Bots keep context and learn from each other" is Odelia's memory and the network's
+lessons (`src/learning.ts`, `odelia_lessons`); a taught playbook is the same network effect for portals: one business
+teaches it, every business after files there automatically. "Multiple bots in a thread pass work" is the store bots and
+`split_job`.
+
+**Stays limited on purpose: "you watch instead of approving every step."** Grok's endpoint is a routine that runs without
+anyone reviewing it. Odelia acts freely on reads and prep (looking things up, filling forms, checking a review page
+against the approval, replaying a reviewed portal), so a person watches rather than approves each of those steps. But
+anything filed, paid or sent to an agency still needs the owner's approval, and the first filings on an agency still
+get the team's check, because those can't be undone. Teach mode changes who knows the steps, not who approves the send.
+
+Tests: `worker/filer/test/teach.test.ts` (a real browser on a sample county portal: the recording strips secrets, the
+fixture recording generalizes to a valid playbook, a draft can't run unattended, replay fills and stops at the approval,
+a playbook carries no customer data across workspaces, and a page saying "ignore your instructions" during recording or
+replay), `supabase/tests/teach_mode.sql`, red team T7 and T8, and `teachRefusal` in `supabase/functions/file/logic_test.ts`.

@@ -3,7 +3,7 @@ import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
 import { DEST, destinationProblems, staleDestinations, TO_VERIFY, type Dest } from "./destinations.ts";
 import {
   afterHold, askedToResubmit, canFaxSigned, canFaxSignedFor, check, emailFor, envFrom, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holdMinutes,
-  fallback, holds, isForeign, killSwitchOn, mailOutcome, mailTo, ownerPacket, pick, PORTAL_FAILED, refusalOf, rerouteDue, signedCopy, teamApproved,
+  fallback, holds, isForeign, killSwitchOn, mailOutcome, mailTo, ownerPacket, pick, PORTAL_FAILED, refusalOf, rerouteDue, signedCopy, teachRefusal, teamApproved,
 } from "./logic.ts";
 
 const WS = "11111111-1111-1111-1111-111111111111";
@@ -22,6 +22,17 @@ const dest = (d: Partial<Dest> = {}): Dest => ({
 const ENV = envFrom((k) => ({ FILER_AGENCIES: "test-form", FILER_CHANNELS: "email,fax,mail,portal", FILER_ENABLED: "1", TELNYX_API_KEY: "k", TELNYX_FAX_CONNECTION_ID: "c", TELNYX_FAX_FROM: "+1", LOB_API_KEY: "test_x", LOB_FROM: "{}" } as Record<string, string>)[k]);
 const docs = new Set([`${WS}/filings/f1.pdf`]);
 
+Deno.test("Show Odelia how: only for a form filed on an agency site, with the worker on, before it's sent or while it's free", () => {
+  const site = dest({ portal: "tax.county.example" });
+  assertEquals(teachRefusal(filing({}, { agent_state: "handoff", channel: "team" }), site, ENV), null);
+  assertEquals(teachRefusal(filing({}, { agent_state: "needs_you" }), site, ENV), null);
+  assertEquals(teachRefusal(filing(), dest(), ENV), "no_portal");
+  assertEquals(teachRefusal(filing(), undefined, ENV), "no_portal");
+  assertEquals(teachRefusal(filing(), site, envFrom((k) => (k === "FILER_ENABLED" ? "0" : undefined))), "worker_off");
+  assertEquals(teachRefusal(filing({}, { submit_clicked_at: "2026-10-30T00:00:00Z" }), site, ENV), "finished");
+  assertEquals(teachRefusal(filing({}, { status: "submitted" }), site, ENV), "finished");
+  for (const s of ["queued", "running", "held"]) assertEquals(teachRefusal(filing({}, { agent_state: s }), site, ENV), "busy");
+});
 Deno.test("every shipped destination has its checked date and source", () => {
   assertEquals(destinationProblems(), []);
 });

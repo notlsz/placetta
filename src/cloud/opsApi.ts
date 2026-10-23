@@ -88,4 +88,19 @@ export type QaFinding = {
 };
 export const qaQueue = () => rpc<QaFinding[]>("qa_queue");
 export const qaDecide = (id: string, status: "approved" | "dismissed" | "fixed", note?: string) => rpc<QaFinding>("qa_decide", { p_id: id, p_status: status, p_note: note ?? null });
+/** Teach mode's taught playbooks (migration 20261030174100_teach_mode): a draft from a recorded run waits here for the
+ *  team; approved ones show their record. The body is structure only (worker/filer/src/teach.ts Draft). */
+export type TaughtStep = { action: string; selector: string; heading?: string; login?: string; person?: string; ask?: boolean; option?: string; fact?: string; field?: string; submit?: boolean };
+export type TaughtPlaybook = {
+  id: string; host: string; official: string; name: string; status: "draft" | "approved"; flags: string[]; version: number;
+  runs: number; successes: number; failures: number; fails_in_a_row: number; taught_at: string; last_run_at: string | null;
+  demoted_at: string | null; demoted_reason: string | null; reviewed_at: string | null;
+  body: {
+    playbook?: { final?: { page: string; button?: string }[]; receipt?: string[]; forms?: Record<string, { start: string; steps: { page: string; do: string; note: string }[] }> };
+    fields?: { selector: string; page: string; fact: string; label: string; validator?: string }[];
+    trace?: TaughtStep[];
+  };
+};
+export const playbookQueue = () => rpc<TaughtPlaybook[]>("playbook_queue");
+export const playbookDecide = (id: string, status: "approved" | "rejected" | "draft", note?: string) => rpc<{ id: string; status: string }[]>("playbook_decide", { p_id: id, p_status: status, p_note: note ?? null });
 export const governanceReports = () => rpc<GovernanceReport[]>("governance_reports_list");

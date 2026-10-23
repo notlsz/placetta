@@ -2,7 +2,7 @@
 // Hosted browser (Browserbase) when BROWSERBASE_API_KEY is set, local Chromium otherwise (CHROMIUM_PATH for a custom binary).
 import { chromium } from "playwright-core";
 import { DEST } from "../../../supabase/functions/file/destinations.ts";
-import { AnthropicModel } from "./model.ts";
+import { AnthropicLabeler, AnthropicModel } from "./model.ts";
 import { playbookFor } from "./playbooks.ts";
 import { type Route, Worker, type Session } from "./run.ts";
 import { dbKey, SupabaseStore } from "./store.ts";
@@ -39,6 +39,8 @@ export async function openBrowser(): Promise<Session> {
 export const settings = () => ({
   dryRun: process.env.FILER_DRY_RUN === "1", twoKey: Number(process.env.FILER_TWO_KEY ?? "10"),
   maxSteps: 80, maxMs: 15 * 60_000, holdMs: 20 * 60_000, pollMs: 5000,
+  // "Show Odelia how": the person has 30 minutes to file while Odelia watches (the run's limit is maxMs + holdMs + 5)
+  teachMs: 30 * 60_000,
   // Off unless staff turn it on to watch a playbook's first run on the live site.
   allowUnverified: process.env.FILER_ALLOW_UNVERIFIED === "1",
 });
@@ -55,7 +57,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const loop = async () => {
     const store = new SupabaseStore(process.env.SUPABASE_URL!, dbKey(process.env));
     const w = new Worker({ store, model: new AnthropicModel(process.env.ANTHROPIC_API_KEY!), open: openBrowser, portalOf: (id) => DEST[id]?.portal ?? null,
-      routeOf, playbookOf: playbookFor, lock, ...settings() });
+      routeOf, playbookOf: playbookFor, lock, labeler: new AnthropicLabeler(process.env.ANTHROPIC_API_KEY!).label, ...settings() });
     for (;;) {
       try { if (!(await w.once())) await new Promise((r) => setTimeout(r, 5000)); }
       catch (e) { console.error("worker:", e instanceof Error ? e.message : e); await new Promise((r) => setTimeout(r, 5000)); }

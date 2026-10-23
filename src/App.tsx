@@ -1210,6 +1210,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       feedUrl: async rotate => (await api.integration<{ url: string }>(cloud.wsId, "feed_url", { rotate: !!rotate })).url,
       markPaid: async id => { if (!ownerOk()) return; try { await api.markPaid(id); await refresh(); say(lang === "zh" ? "已告知团队，他们会继续提交。" : "Thanks. The team will finish the submission."); } catch (e) { fail(e); } },
       resumeFiling: async (id, resubmit) => { try { await api.resumeFiling(cloud.wsId, id, !!resubmit); await refresh(); say(lang === "zh" ? "好的，快哉继续办理。" : "Thanks. Placetta carries on."); } catch (e) { fail(e); } },
+      teachFiling: async id => { if (!ownerOk()) return; try { await api.teachFiling(cloud.wsId, id); await refresh(); say(lang === "zh" ? "好的。实时浏览器打开后，请像平时一样提交，Odelia 会在旁记下步骤。" : "Got it. When the live browser opens, file it the way you always do. Odelia watches and writes down the steps."); } catch (e) { fail(e); } },
       uploadSigned: async (id, appId, file) => {
         try {
           const row = await api.uploadDoc(cloud.wsId, file, appId);
