@@ -50,7 +50,7 @@ const ABROAD = new RegExp("(^|\\.)(" + [
   // Germany's federal law site (the Federal Ministry of Justice's gesetze-im-internet.de)
   "gesetze-im-internet\\.de",
   "gov\\.pl", "warszawa19115\\.pl", "um\\.warszawa\\.pl", "socialsecurity\\.be", "seg-social\\.pt",
-  "gov\\.br", "sii\\.cl", "registrodeempresasysociedades\\.cl", "dian\\.gov\\.co", "ccb\\.org\\.co", "argentina\\.gob\\.ar", "arca\\.gob\\.ar", "sunat\\.gob\\.pe",
+  "gov\\.br", "sii\\.cl", "registrodeempresasysociedades\\.cl", "dian\\.gov\\.co", "ccb\\.org\\.co", "argentina\\.gob\\.ar", "arca\\.gob\\.ar", "sunat\\.gob\\.pe", "gob\\.pe",
   "gov\\.sg", "ssm\\.com\\.my", "gov\\.my", "go\\.th", "gov\\.vn", "go\\.id", "gov\\.ph", "gov\\.ng", "go\\.ke", "cipc\\.co\\.za", "gov\\.za", "gov\\.ma", "gov\\.eg",
 ].join("|") + ")$");
 const OFFICIAL_PATHS: [RegExp, RegExp][] = [[/^content\.civicplus\.com$/, /^\/api\/assets\//], [/^cms2\.revize\.com$/, /^\/revize\/edisonnj\//]];

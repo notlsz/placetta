@@ -18,6 +18,7 @@ import { MEXICO_GAPS } from "../src/forms/mexico";
 import { FINISH_FIXES, FINISH_FORMS } from "../src/forms/finish";
 import { LIFECYCLE, READ_LIFE, type LifeItem } from "../src/forms/lifecycle";
 import { KIND_FACTS } from "../src/forms/kinds";
+import { READ_VER, VERIFY_BLOCKED, VERIFY_FIXES, VERIFY_FORMS, VERIFY_REFERENCE } from "../src/forms/verify";
 import { previewPlan } from "../src/plan/preview";
 import { proofCurrent } from "../src/plan/ask";
 
@@ -249,6 +250,19 @@ function main() {
   p();
   p("## What this audit changed");
   p();
+  // the verification pass of 2026-10-23 (src/forms/verify.ts): before it the registry held 683 entries, 568 verified and
+  // 115 unverified (54 of them in the United States)
+  const usd = (f: OfficialForm) => (f.currency ?? "USD") === "USD";
+  p(`### Verification pass (${READ_VER}): proofs added and links fixed (${VERIFY_FIXES.length})`);
+  p();
+  p(`Every UNVERIFIED row taken back to the government's own page, the beachhead metros first. Before: 683 entries, 568 verified, 115 unverified (United States: 54 unverified). After: ${total} entries, ${proved} verified, ${total - proved} unverified (United States: ${FORMS.filter(f => usd(f) && !f.proof).length} unverified of ${FORMS.filter(usd).length}). Each quote was matched on the page as fetched that day (scripts/eval/proof-log.json). Made library references, no longer added to plans: ${VERIFY_REFERENCE.map(id => `\`${id}\``).join(", ")}.`);
+  p();
+  for (const x of VERIFY_FIXES) p(`- \`${x.id}\`: ${x.why}`);
+  p();
+  p(`### Verification pass: added (${VERIFY_FORMS.length}, ${VERIFY_FORMS.filter(f => f.proof).length} verified)`);
+  p();
+  for (const f of VERIFY_FORMS) p(`- \`${f.id}\` (${f.where}, ${f.level}) ${f.title.en}: ${f.agency.en}${f.proof ? "" : " **UNVERIFIED**"}`);
+  p();
   p(`### Finishing pass: proofs added to entries already in the registry (${FINISH_FIXES.length})`);
   p();
   for (const x of FINISH_FIXES) p(`- \`${x.id}\`: ${x.why}`);
@@ -287,6 +301,10 @@ function main() {
     byCountry.set(c, [...(byCountry.get(c) ?? []), f]);
   }
   for (const [c, fs] of [...byCountry].sort((a, b) => b[1].length - a[1].length)) p(`- ${c} (${fs.length}): ${fs.map(f => `\`${f.id}\``).join(", ")}`);
+  p();
+  p(`What blocked each one when it was read again on ${READ_VER} (src/forms/verify.ts):`);
+  p();
+  for (const f of FORMS.filter(f => !f.proof)) p(`- \`${f.id}\`: ${VERIFY_BLOCKED[f.id] ?? "not read again"}`);
   p();
   p(readFileSync("scripts/coverage-missing.md", "utf8").trim());
   p();

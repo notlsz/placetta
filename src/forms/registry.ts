@@ -19,6 +19,7 @@ import { INTL_FORMS } from "./intl";
 import { FINISH_FIXES, FINISH_FORMS } from "./finish";
 import { SECTOR_FORMS } from "./sectors";
 import { EXPANSION_FIXES, EXPANSION_FORMS } from "./expansion";
+import { VERIFY_FIXES, VERIFY_FORMS, VERIFY_REFERENCE } from "./verify";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -677,7 +678,7 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
-FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES, ...FURNITURE_FORMS, ...US_GAPS, ...INTL_FORMS, ...FINISH_FORMS, ...SECTOR_FORMS, ...EXPANSION_FORMS);
+FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES, ...FURNITURE_FORMS, ...US_GAPS, ...INTL_FORMS, ...FINISH_FORMS, ...SECTOR_FORMS, ...EXPANSION_FORMS, ...VERIFY_FORMS);
 
 /* County steps are filed under the county (src/forms/usplace.ts), not the city they were first researched for, so every
    city in the county gets them: Alameda County's food permits apply in Fremont as in Oakland, King County's in Bellevue
@@ -734,7 +735,10 @@ for (const f of FORMS) { const p = PROOF[f.id]; if (p && !f.proof) { f.proof = p
 // The source audit (src/forms/audit.ts): links moved to the pages the agencies use now, proofs whose page is gone replaced
 // or taken away. Last, so it wins over every layer above.
 // then the finishing pass's proofs for entries already in the library (src/forms/finish.ts)
-export const AUDIT_MISSING = [...applyFixes(FORMS), ...applyFixes(FORMS, FINISH_FIXES), ...applyFixes(FORMS, EXPANSION_FIXES)];
+// and last the verification pass of 2026-10-23 (src/forms/verify.ts): proofs for rows that had none, and links that
+// pointed at another city's page; a filing that applies only to some businesses becomes a library reference
+export const AUDIT_MISSING = [...applyFixes(FORMS), ...applyFixes(FORMS, FINISH_FIXES), ...applyFixes(FORMS, EXPANSION_FIXES), ...applyFixes(FORMS, VERIFY_FIXES),
+  ...VERIFY_REFERENCE.filter(id => { const f = FORMS.find(x => x.id === id); if (f) f.needs = { ...f.needs, reference: true }; return !f; })];
 
 export const formById = (id: string) => FORMS.find(f => f.id === id);
 

@@ -6629,5 +6629,701 @@
   "found": true,
   "sha256": "49bd2fb32d0dfec8",
   "context": "obtaining a seller’s permit who must get a seller’s permit? you must get a seller’s permit if you: • are engaged in business in california, and • intend to sell or lease tangible personal property"
+ },
+ {
+  "id": "sj-fire-systems",
+  "read": "https://www.sjeconomy.com/how-we-help/programs-and-services/streamlined-restaurant-program",
+  "quote": "Projects proposing individual carbon dioxide (CO2) tanks over 100 pounds",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "sj-sign",
+  "read": "https://www.sjeconomy.com/how-we-help/programs-and-services/streamlined-restaurant-program",
+  "quote": "Review sign permit info (if you are proposing new signage).",
+  "checked": "2026-10-18",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-18"
+ },
+ {
+  "id": "irs-5472",
+  "read": "https://www.irs.gov/forms-pubs/about-form-5472",
+  "quote": "Corporations file Form 5472 to provide information required under sections 6038A and 6038C when reportable transactions occur with a foreign or domestic related party.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "30a9c42da6e7db81",
+  "context": "ications help with forms and instructions comment on tax forms and publications corporations file form 5472 to provide information required under sections 6038a and 6038c when reportable transactions occur with a foreign or domestic related party. current revision form 5472 pdf instructions for form 5472 ( print version pdf) "
+ },
+ {
+  "id": "irs-w7",
+  "read": "https://www.irs.gov/forms-pubs/about-form-w-7",
+  "quote": "Use Form W-7 to apply for an IRS individual taxpayer identification number (ITIN).",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "93c1367b2feed756",
+  "context": "ications help with forms and instructions comment on tax forms and publications use form w-7 to apply for an irs individual taxpayer identification number (itin). you can also use this form to renew an existing itin that is expiring or that h"
+ },
+ {
+  "id": "fda-prior-notice",
+  "read": "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/guidance-industry-what-you-need-know-about-prior-notice-imported-food-shipments",
+  "quote": "FDA must be notified in advance of any shipments of food for humans and other animals that are imported into the U.S.,",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "a58167aea0892437",
+  "context": "d imports. about prior notice prior notice requirement as of december 12, 2003, fda must be notified in advance of any shipments of food for humans and other animals that are imported into the u.s., unless the food is exempt from prior notice. why prior notice is required prior"
+ },
+ {
+  "id": "cpsc-cert",
+  "read": "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification",
+  "quote": "Certificates are required to accompany the applicable product or shipment of products covered by the certificate,",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "742f425c8be27967",
+  "context": "le consumer product safety requirements in a written or electronic certificate. certificates are required to accompany the applicable product or shipment of products covered by the certificate, and a copy must be provided to retailers, distributors and, upon request, to th"
+ },
+ {
+  "id": "fmc-18",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title46-vol9/pdf/CFR-2025-title46-vol9-sec515-3.pdf",
+  "quote": "may advertise, hold oneself out, or act as an ocean transportation intermediary unless that person holds a valid license issued by the Commission.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "0532f3885d1fc2ba",
+  "context": ". (a) except as otherwise provided in this part, no person in the united states may advertise, hold oneself out, or act as an ocean transportation intermediary unless that person holds a valid license issued by the commission. (b) for purposes of this part, a person is considered to be ''in the united sta"
+ },
+ {
+  "id": "phmsa-5800",
+  "read": "https://www.ecfr.gov/api/renderer/v1/content/enhanced/current/title-49?part=107&section=107.601",
+  "quote": "The registration and fee requirements of this subpart apply to any person who offers for transportation, or transports, in foreign, interstate or intrastate commerce",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "878c76853ee29333",
+  "context": "9, sept. 23, 2005, and 70 fr 73159, dec. 9, 2005. § 107.601 applicability. ( a) the registration and fee requirements of this subpart apply to any person who offers for transportation, or transports, in foreign, interstate or intrastate commerce— ( 1) a highway route-controlled quantity of a class 7 (radioactive) material, "
+ },
+ {
+  "id": "ca-cdtfa",
+  "read": "https://www.cdtfa.ca.gov/services/permits-licenses.htm",
+  "quote": "you are required to have a seller's permit and prominently display it at your place of business.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "ff1794c21f8e20bd",
+  "context": "o sell or lease tangible personal property subject to sales tax sold at retail, you are required to have a seller's permit and prominently display it at your place of business. read our seller's permit faq for more information. certificate of registration,"
+ },
+ {
+  "id": "la-alcohol-cup",
+  "read": "https://planning.lacity.gov/project-review/alcohol-sales",
+  "quote": "In addition to a CUB or RBP authorization, applicants must obtain a license from the California Department of Alcohol and Beverage Control",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "87b66996e1a84f71",
+  "context": "ay be submitted via email to the best unit at planning dsc best unit. reminder: in addition to a cub or rbp authorization, applicants must obtain a license from the california department of alcohol and beverage control in order to sell alcoholic beverages. online submissions for administrative rev"
+ },
+ {
+  "id": "la-lafd-ops",
+  "read": "https://lafd.org/operational-fire-permits",
+  "quote": "With a valid BTRC, customers can apply for a Fire Permit.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "912dbeb617ab293f",
+  "context": "usiness is sold or transferred, a new tax registration certificate is required. with a valid btrc, customers can apply for a fire permit. the steps are: schedule an appointment with the office of finance here their pu"
+ },
+ {
+  "id": "la-cupa-hmbp",
+  "read": "https://lafd.org/hmbp-threshold-reporting-guidance",
+  "quote": "you will be required to submit a Hazardous Materials Business Plan (HMBP) through CERS",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "c27d0ca65d2af775",
+  "context": "ssion. if your facility meets the reporting thresholds and is not yet enrolled, you will be required to submit a hazardous materials business plan (hmbp) through cers. submission of your hmbp in cers constitutes your official application to the l"
+ },
+ {
+  "id": "tx-franchise",
+  "read": "https://comptroller.texas.gov/taxes/franchise/",
+  "quote": "The Texas franchise tax is a privilege tax imposed on each taxable entity formed or organized in Texas or doing business in Texas.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "7b5fcc848b28f40a",
+  "context": "nformation, see our call tips and peak schedule. close ⊠ what is franchise tax? the texas franchise tax is a privilege tax imposed on each taxable entity formed or organized in texas or doing business in texas. for general information, see the franchise tax overview. file and pay franchise"
+ },
+ {
+  "id": "hou-fire",
+  "read": "https://www.houstontx.gov/fire/formsandpermits/",
+  "quote": "If the permit is for a hazardous material or activity an additional form must be completed.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "5ef343123826ab09",
+  "context": "2 washington, houston, tx 77007 or call 832.394.8811 hazardous material permits if the permit is for a hazardous material or activity an additional form must be completed. affidavit must be notarized. forms for application purposes: hazardous material"
+ },
+ {
+  "id": "fr-eori",
+  "read": "https://www.douane.gouv.fr/",
+  "quote": "Faire une demande d'immatriculation EORI Pour échanger des marchandises hors de l’UE",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "0a8dbacb8563e2bd",
+  "context": "ouane 2026-2027 consultez le calendrier prévisionnel des concours de la douane. faire une demande d'immatriculation eori pour échanger des marchandises hors de l'ue ou déposer, modifier et renouveler une demande d'intervention. mon colis est bl"
+ },
+ {
+  "id": "de-eori",
+  "read": "https://www.zoll.de/DE/Fachthemen/Zoelle/EORI-Nummer/eori-nummer_node.html",
+  "quote": "Die EORI-Nummer ist insbesondere in Zollanmeldungen und summarischen Ein- und Ausgangsanmeldungen für die Identifizierung der Beteiligten anzugeben.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "dd804a6d0cf4f526",
+  "context": "ion 0870 wird nur noch in ausnahmefällen akzeptiert. verwendung der eori-nummer die eori-nummer ist insbesondere in zollanmeldungen und summarischen ein- und ausgangsanmeldungen für die identifizierung der beteiligten anzugeben. beantragung einer eori-nummer und änderung der beteiligtendaten die eori-nummer"
+ },
+ {
+  "id": "qa-moci",
+  "read": "https://www.moci.gov.qa/en/",
+  "quote": "Register your business and obtain official commercial registration.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "e734450543f7a343",
+  "context": " for your new enterprise. access service access service commercial registration register your business and obtain official commercial registration. access service register your business and obtain official commercial registrati"
+ },
+ {
+  "id": "dc-dlcp",
+  "read": "https://dlcp.dc.gov/service/business-licensing-division",
+  "quote": "Anyone engaging in business activity within the District is required to be licensed in accordance with the specific activity conducted",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "be251d69b938a17a",
+  "context": "on of the general public, for hire or compensation in the district of columbia. anyone engaging in business activity within the district is required to be licensed in accordance with the specific activity conducted (e.g., convenience stores, home improvement contractors, residential rentals, r"
+ },
+ {
+  "id": "nv-silverflume",
+  "read": "https://www.leg.state.nv.us/nrs/nrs-076.html",
+  "quote": "the person must obtain the state business license at the time of filing the initial or annual list",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "8cfe16f7dfb381f5",
+  "context": "e an initial or annual list with the secretary of state pursuant to this title, the person must obtain the state business license at the time of filing the initial or annual list. (b) not an entity required to file an initial or annual list with the secretar"
+ },
+ {
+  "id": "scc-plan-check",
+  "read": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and",
+  "quote": "Submit your complete plan check application, plans, and supporting documents in a digital accessible format",
+  "checked": "2026-10-23",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-23"
+ },
+ {
+  "id": "scc-health-permit",
+  "read": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and",
+  "quote": "Complete the permit to operate application",
+  "checked": "2026-10-23",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-23"
+ },
+ {
+  "id": "dal-building",
+  "read": "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/commercial_overview.aspx",
+  "quote": "A commercial building permit is an official authorization required before constructing, altering, or renovating a commercial property.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "dea20aa0b8a22cf4",
+  "context": "mitting & inspections commercial maintitleheader ​​commercial permits dch body ​a commercial building permit is an official authorization required before constructing, altering, or renovating a commercial property. it ensures that all work complies with local building codes, zoning regulations"
+ },
+ {
+  "id": "aus-building",
+  "read": "https://www.austintexas.gov/development-services/small-business-permitting",
+  "quote": "Required to erect, construct, enlarge, alter, repair, improve, or convert any building or structure within the City's zoning jurisdiction",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "25ef6e8670485b6e",
+  "context": "ortal commercial building permits name description how to apply building permit required to erect, construct, enlarge, alter, repair, improve, or convert any building or structure within the city's zoning jurisdiction or in a municipal utility district (mud) if the consent agreement between the m"
+ },
+ {
+  "id": "aus-hazmat",
+  "read": "https://www.austintexas.gov/development-services/small-business-permitting",
+  "quote": "Required for all businesses that are storing or using hazardous materials above-ground.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "25ef6e8670485b6e",
+  "context": "permit name description how to apply hazardous materials storage (above ground) required for all businesses that are storing or using hazardous materials above-ground. ab+c portal austin water permits name description how to apply on-site sewage f"
+ },
+ {
+  "id": "sat-food",
+  "read": "https://www.sa.gov/Directory/Departments/SAMHD/Licenses-Food-Permits/Food-Establishment-License",
+  "quote": "before a food establishment license is issued and the establishment may open for business.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "c0f6ad019f313073",
+  "context": " certificate of occupancy (cofo) section of the development services department before a food establishment license is issued and the establishment may open for business. food establishments must meet the texas accessibility standards (tas) for physi"
+ },
+ {
+  "id": "hc-business-tax",
+  "read": "https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/",
+  "quote": "New businesses must apply for a new business tax account and obtain a local business tax receipt prior to engaging in their enterprise.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "53f0b6005d1ddb35",
+  "context": " a state or county regulated business access business resources open a business new businesses must apply for a new business tax account and obtain a local business tax receipt prior to engaging in their enterprise. the tax period is from october 1 to september 30 of the next year. businesses s"
+ },
+ {
+  "id": "ocfl-business-tax",
+  "read": "https://www.octaxcol.com/taxes/business-taxes/obtain-new-business-tax-receipt/",
+  "quote": "you must first obtain a municipal Business Tax Receipt prior to obtaining an Orange County Business Tax Receipt.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "f3c503c981acd00a",
+  "context": ", maitland, oakland, ocoee, orlando, windermere, winter garden, or winter park, you must first obtain a municipal business tax receipt prior to obtaining an orange county business tax receipt. get your city/town business tax receipt to obtain a municipal business tax rece"
+ },
+ {
+  "id": "ftw-food-permit",
+  "read": "https://www.fortworthtexas.gov/files/assets/public/v/2/environmental-services/health/documents/fw-food-ordinance-chpt-16.pdf",
+  "quote": "No person shall operate a food establishment without a current, valid food establishment permit issued by the health department.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "d7c3ae876928b674",
+  "context": " and plans review § 16-111 food establishment permits-general requirements. (a) no person shall operate a food establishment without a current, valid food establishment permit issued by the health department. (b) a separate permit shall be required for every food establishment with separ"
+ },
+ {
+  "id": "mn-tax",
+  "read": "https://www.revenue.state.mn.us/so/node/9571",
+  "quote": "Before you make any taxable sales in Minnesota, you must register for a Minnesota Tax ID Number and a Sales and Use Tax account.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "c85813458eeb07b1",
+  "context": "ld_block:node:guide:title registering your business field_block:node:guide:body before you make any taxable sales in minnesota, you must register for a minnesota tax id number and a sales and use tax account. if you need a minnesota tax id number, you can apply: online – go to business t"
+ },
+ {
+  "id": "mn-ui",
+  "read": "https://ui.mn.gov/employers/help-and-support/emp-hbook/new-registration.jsp",
+  "quote": "every individual or organization that pays covered wages in Minnesota must register with the Minnesota Unemployment Insurance (UI) Program.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "a05b45f8276b39f0",
+  "context": "nce: minnesota law, §268.042 subd.1 under minnesota unemployment insurance law, every individual or organization that pays covered wages in minnesota must register with the minnesota unemployment insurance (ui) program. registration should be done as soon as possible after the first wages are paid "
+ },
+ {
+  "id": "mpls-food-license",
+  "read": "https://minneapolismn.gov/business-services/licenses-permits-inspections/business-licenses/food-restaurants/restaurant-coffee-cafe/restaurant/",
+  "quote": "A license is needed for food or beverages made for on-site dining, carryout, or delivery.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "0231aa3850262f58",
+  "context": "rant, coffee shop or sidewalk cafe restaurant search the city search restaurant a license is needed for food or beverages made for on-site dining, carryout, or delivery. about a restaurant prepares food and beverages to customers for on-site dining,"
+ },
+ {
+  "id": "oh-pic",
+  "read": "https://odh.ohio.gov/know-our-programs/food-safety-program/food-safety-certification/",
+  "quote": "must have at least one person on site at all times during operation who has obtained an Ohio PIC certification in food protection.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "d59bd8846d56aa84",
+  "context": "cation fsos or rfes that are subject to the ohio pic certification requirements must have at least one person on site at all times during operation who has obtained an ohio pic certification in food protection. the only exception is that if a manager-certified person is on site at a given "
+ },
+ {
+  "id": "pdx-tax",
+  "read": "https://www.portland.gov/revenue/business-tax",
+  "quote": "must register for a Revenue Division tax account within 60 days.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "0b662f9571f0a731",
+  "context": "thin the city of portland and/or multnomah county (including rideshare drivers) must register for a revenue division tax account within 60 days. to see if your work location is located within portland and/or multnomah county"
+ },
+ {
+  "id": "irs-8821",
+  "read": "https://www.irs.gov/forms-pubs/about-form-8821",
+  "quote": "File Form 8821 to: Authorize any individual, corporation, firm, organization, or partnership you designate to inspect and/or receive your confidential information",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "4a7e3ceb90c44170",
+  "context": "ications help with forms and instructions comment on tax forms and publications file form 8821 to: authorize any individual, corporation, firm, organization, or partnership you designate to inspect and/or receive your confidential information verbally or in writing for the type of tax and the years or periods listed on t"
+ },
+ {
+  "id": "irs-2848",
+  "read": "https://www.irs.gov/forms-pubs/about-form-2848",
+  "quote": "Use Form 2848 to authorize an individual to represent you before the IRS.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "65375fade24b18ac",
+  "context": "ications help with forms and instructions comment on tax forms and publications use form 2848 to authorize an individual to represent you before the irs. the individual you authorize must be a person eligible to practice before the i"
+ },
+ {
+  "id": "irs-8832",
+  "read": "https://www.irs.gov/forms-pubs/about-form-8832",
+  "quote": "An eligible entity uses Form 8832 to elect how it will be classified for federal tax purposes,",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "f60d7c46d9c60f83",
+  "context": "ications help with forms and instructions comment on tax forms and publications an eligible entity uses form 8832 to elect how it will be classified for federal tax purposes, as: a corporation. a partnership. an entity disregarded as separate from its ow"
+ },
+ {
+  "id": "irs-8822b",
+  "read": "https://www.irs.gov/forms-pubs/about-form-8822-b",
+  "quote": "Use Form 8822-B to notify the Internal Revenue Service if you changed: Business mailing address.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "89a7b65c5d8c88b2",
+  "context": " and other entities with an employer identification number application on file. use form 8822-b to notify the internal revenue service if you changed: business mailing address. business location. identity of your responsible party. note: changes in respons"
+ },
+ {
+  "id": "irs-2553",
+  "read": "https://www.irs.gov/forms-pubs/about-form-2553",
+  "quote": "files this form to make an election under section 1362(a) to be an S corporation.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "c9ad0a15f6ff1ac5",
+  "context": "lications a corporation or other entity eligible to be treated as a corporation files this form to make an election under section 1362(a) to be an s corporation. current revision form 2553 pdf instructions for form 2553 ( print version pdf) "
+ },
+ {
+  "id": "irs-7004",
+  "read": "https://www.irs.gov/forms-pubs/about-form-7004",
+  "quote": "Use Form 7004 to request an automatic 6-month extension of time to file certain business income tax, information, and other returns.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "8ad7f0f92c2ec825",
+  "context": "ications help with forms and instructions comment on tax forms and publications use form 7004 to request an automatic 6-month extension of time to file certain business income tax, information, and other returns. information on e-filing form 7004. current revision form 7004 pdf instructions "
+ },
+ {
+  "id": "irs-1120",
+  "read": "https://www.irs.gov/instructions/i5472",
+  "quote": "it will now be required to file a pro forma Form 1120, U.S. Corporation Income Tax Return, with Form 5472 attached",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "4d6d7aca7a09b9a8",
+  "context": "eturn filing requirement, as a result of final regulations under section 6038a, it will now be required to file a pro forma form 1120, u.s. corporation income tax return, with form 5472 attached by the due date (including extensions) of that form 1120. the only information "
+ },
+ {
+  "id": "fl-fictitious",
+  "read": "https://www.flsenate.gov/Laws/Statutes/2025/865.09",
+  "quote": "A person may not engage in business under a fictitious name unless the person first registers the name with the division",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "ff4322dd42ca48bc",
+  "context": "rson who registers a fictitious name with the division. (3) registration. — (a) a person may not engage in business under a fictitious name unless the person first registers the name with the division by filing a registration listing: 1. the name to be registered. 2. the mailing "
+ },
+ {
+  "id": "cook-food-license",
+  "read": "https://cookcountypublichealth.org/contact-us/permits-and-licenses/retail-food-establishment-application/",
+  "quote": "CCDPH inspects retail food establishments, issues licenses and permits for unincorporated areas,",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "dc5d6c73f8bc3ec1",
+  "context": "lications to ensure the safety of food for consumption in suburban cook county, ccdph inspects retail food establishments, issues licenses and permits for unincorporated areas, responds to complaints, investigates foodborne illnesses and registers cottage "
+ },
+ {
+  "id": "nyc-dcwp-license",
+  "read": "https://www.nyc.gov/site/dca/businesses/licenses.page",
+  "quote": "Through licensing more than 45,000 businesses in over 45 industries, DCWP ensures fair competition",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "bec37cab7bed8304",
+  "context": " be unavailable every tuesday and thursday from 6:00 p.m. to 7:00 p.m. licenses through licensing more than 45,000 businesses in over 45 industries, dcwp ensures fair competition and a level playing field for responsible small businesses that are integral to"
+ },
+ {
+  "id": "ca-abc-217",
+  "read": "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+  "quote": "ABC-217 Required Required Application Questionnaire – Signatures must be notarized or witnessed by an ABC Employee.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "17728af0f25c1733",
+  "context": "rict office to sign the application form abc-211. signatures must be notarized. abc-217 required required application questionnaire – signatures must be notarized or witnessed by an abc employee. see form instructions. abc-247 required not required statement re: residences ("
+ },
+ {
+  "id": "ca-abc-258",
+  "read": "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+  "quote": "ABC-258 Required Not required, unless applying for the Type 75 or Type 85 Planned Operations Retail.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "17728af0f25c1733",
+  "context": "ll dimensions and patios to be licensed, and description of proposed operation. abc-258 required not required, unless applying for the type 75 or type 85 planned operations retail. abc-259 not required, unless applying for the type 75 or type 85 required plann"
+ },
+ {
+  "id": "ca-abc-255",
+  "read": "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+  "quote": "ABC-255 Required Not required, unless applying for the Type 17/20 combo license Zoning Affidavit",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "17728af0f25c1733",
+  "context": "an exterior view of the premises and surrounding area, including cross streets. abc-255 required not required, unless applying for the type 17/20 combo license zoning affidavit – contact your city or county planning department for information to complete t"
+ },
+ {
+  "id": "ca-abc-140",
+  "read": "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+  "quote": "ABC-140 Required Required Certificate re Chapter 15 Tied-House Restrictions – Required for corporations, limited partnerships and limited liability companies.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "17728af0f25c1733",
+  "context": "e fees and surcharges. forms form retail license non-retail license description abc-140 required required certificate re chapter 15 tied-house restrictions – required for corporations, limited partnerships and limited liability companies. for applicant entity only (not its parents, related entities, or individuals). "
+ },
+ {
+  "id": "ca-abc-247",
+  "read": "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+  "quote": "ABC-247 Required Not Required Statement re: Residences (Rule 61.4, Residences Within 100 feet).",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "17728af0f25c1733",
+  "context": "tures must be notarized or witnessed by an abc employee. see form instructions. abc-247 required not required statement re: residences (rule 61.4, residences within 100 feet). abc-251 required not required statement re: consideration points (schools, hosp"
+ },
+ {
+  "id": "ca-abc-257",
+  "read": "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+  "quote": "ABC-257 Required Required Licensed Premises Diagram/Planned Operation – Drawing of your floor plan,",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "17728af0f25c1733",
+  "context": "t your city or county planning department for information to complete the form. abc-257 required required licensed premises diagram/planned operation – drawing of your floor plan, including overall dimensions and patios to be licensed, and description of prop"
+ },
+ {
+  "id": "ca-abc-211",
+  "read": "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+  "quote": "ABC-211-SIG Required Required Application Signature Sheet (“Sign On”) – Signature page for applicants who are unable to appear at the ABC district office",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "17728af0f25c1733",
+  "context": " and (d) spouses. signatures must be notarized or witnessed by an abc employee. abc-211-sig required required application signature sheet (\"sign on\") – signature page for applicants who are unable to appear at the abc district office to sign the application form abc-211. signatures must be notarized. abc-217 req"
+ },
+ {
+  "id": "ca-abc-243",
+  "read": "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+  "quote": "ABC-243 Required Required Corporate Questionnaire",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "17728af0f25c1733",
+  "context": "pe 75 or type 85 required planned operations non-retail. see form instructions. abc-243 required required corporate questionnaire other documents state-issued identification, driver's license or passport for p"
+ },
+ {
+  "id": "ca-abc-256",
+  "read": "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+  "quote": "ABC-256-LLC Required Required Limited Liability Company Questionnaire.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "17728af0f25c1733",
+  "context": "pe 75 or type 85 required planned operations non-retail. see form instructions. abc-256-llc required required limited liability company questionnaire. other documents state-issued identification, driver's license or passport for p"
+ },
+ {
+  "id": "ca-abc-244",
+  "read": "https://www.abc.ca.gov/licensing/license-forms/",
+  "quote": "ABC-244 Mar-25 Change in Licensee Information or Licensed Premises",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "878ab2a01cc70518",
+  "context": "mit for private warehouse - instructions abc-243 oct-24 corporate questionnaire abc-244 mar-25 change in licensee information or licensed premises abc-244 instructions mar-25 change in licensee information or licensed premises"
+ },
+ {
+  "id": "nv-sbl",
+  "read": "https://www.leg.state.nv.us/nrs/nrs-076.html",
+  "quote": "A person shall not conduct a business in this State unless and until the person obtains a state business license",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "8cfe16f7dfb381f5",
+  "context": "pplication and fee for license; activities constituting conduct of business. 1. a person shall not conduct a business in this state unless and until the person obtains a state business license issued by the secretary of state. if the person is: (a) an entity required to f"
+ },
+ {
+  "id": "nv-workers-comp",
+  "read": "https://www.leg.state.nv.us/nrs/nrs-616b.html",
+  "quote": "NRS 616B.633 Applicability to all employers who employ at least one employee.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "2f9511c8146c8d04",
+  "context": " board and administrator if contractor no longer provides industrial insurance. nrs 616b.633 applicability to all employers who employ at least one employee. nrs 616b.636 actions at law by employees. nrs 616b.639 limitation of liability "
+ },
+ {
+  "id": "oh-workers-comp",
+  "read": "https://codes.ohio.gov/ohio-revised-code/section-4123.35",
+  "quote": "every private employer and every publicly owned utility shall pay annually in the month of June immediately preceding the policy year",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "9634073f06f88dcc",
+  "context": "rovided in this section, for a policy year commencing on or after july 1, 2015, every private employer and every publicly owned utility shall pay annually in the month of june immediately preceding the policy year into the state insurance fund the amount of estimated annual premium the admini"
+ },
+ {
+  "id": "dc-workers-comp",
+  "read": "https://code.dccouncil.gov/us/dc/council/code/sections/32-1534",
+  "quote": "Every employer shall secure the payment of compensation under this chapter:",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "60b6fa2a58f4b10a",
+  "context": "f the district of columbia § 32–1534. security for payment of compensation. (a) every employer shall secure the payment of compensation under this chapter: (1) by insuring and keeping insured the payment of such compensation with any s"
+ },
+ {
+  "id": "fl-sunbiz-foreign-llc",
+  "read": "https://www.flsenate.gov/Laws/Statutes/2025/605.0902",
+  "quote": "A foreign limited liability company may not transact business in this state until it obtains a certificate of authority from the department.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "d1e412b2e7224554",
+  "context": "0000000 0605.0902 0902 605.0902 application for certificate of authority. — (1) a foreign limited liability company may not transact business in this state until it obtains a certificate of authority from the department. a foreign limited liability company may apply for a certificate of authority to"
+ },
+ {
+  "id": "ga-sos-foreign",
+  "read": "https://georgia.gov/register-llc-georgia-secretary-state",
+  "quote": "Foreign entities must follow a different procedure to do business in Georgia",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "ed0b662fe3c6e1e3",
+  "context": "tate of georgia — whether that is another country or simply another u.s. state. foreign entities must follow a different procedure to do business in georgia select a registered agent for your company. the registered agent is the person "
+ },
+ {
+  "id": "ca-bc-liquor",
+  "read": "https://www2.gov.bc.ca/gov/content/employment-business/business/liquor-regulation-licensing/liquor-licence-permits",
+  "quote": "If you want to sell liquor in B.C., you need a liquor licence or permit.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "9d8d1ed84f37bd34",
+  "context": "cences and permits liquor licences and permits last updated on january 30, 2026 if you want to sell liquor in b.c., you need a liquor licence or permit. find information about liquor licences and permits, including: how to apply or "
+ },
+ {
+  "id": "br-redesim-cnpj",
+  "read": "https://www.gov.br/empresas-e-negocios/pt-br/redesim",
+  "quote": "Inscreva seu negócio no CNPJ.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "1102df88103adf54",
+  "context": " navegação ir para a busca ir para o rodapé redesim redesim serviços abrir cnpj inscreva seu negócio no cnpj. meu cnpj abra filiais, atualize ou dê baixa. meus clientes para o profissional "
+ },
+ {
+  "id": "br-anvisa",
+  "read": "https://www.gov.br/anvisa/pt-br/assuntos/alimentos",
+  "quote": "Na área de alimentos, a Anvisa coordena, supervisiona e controla as atividades de registro, inspeção, fiscalização e controle de riscos,",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "bb3e459035ee524a",
+  "context": "para a busca ir para o rodapé botão menu assuntos alimentos alimentos alimentos na área de alimentos, a anvisa coordena, supervisiona e controla as atividades de registro, inspeção, fiscalização e controle de riscos, sendo responsável por estabelecer normas e padrões de qualidade e identidade a "
+ },
+ {
+  "id": "ar-cuit",
+  "read": "https://www.argentina.gob.ar/obtener-el-cuit",
+  "quote": "La CUIT (clave única de identificación tributaria) es un código con el que ARCA identifica a trabajadores autónomos, comercios y empresas.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "54fb350321502921",
+  "context": "ministerio de economía arca obtener cuit por internet obtener cuit por internet la cuit (clave única de identificación tributaria) es un código con el que arca identifica a trabajadores autónomos, comercios y empresas. aquí te guiamos, paso a paso, para que puedas obtenerla. gratuito en línea trab"
+ },
+ {
+  "id": "pe-ruc",
+  "read": "https://www.gob.pe/284-inscripcion-en-el-ruc",
+  "quote": "debes inscribirte al Registro Único de Contribuyente (RUC) de la Sunat.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "fa8b8923f249c25b",
+  "context": "y otros bienes, o pagar impuestos por venta de acciones, inmuebles y similares, debes inscribirte al registro único de contribuyente (ruc) de la sunat. ten presente que el número de ruc, de once dígitos y único, te identifica como "
+ },
+ {
+  "id": "ng-cac",
+  "read": "https://www.cac.gov.ng/",
+  "quote": "Official Nigerian Corporate Registry, Register, Search or Verify a Business in Minutes.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "91377850ef3a56af",
+  "context": "e about us services resources contact us foi portal reportgov.ng open main menu official nigerian corporate registry, register, search or verify a business in minutes. fast, transparent and secure business registration and records. search search b"
+ },
+ {
+  "id": "ke-kra-pin",
+  "read": "https://www.kra.go.ke/business/companies-partnerships/companies-partnerships-pin-taxes/companies-partnerships-pin-registration",
+  "quote": "made within thirty days of the applicant becoming liable for that tax.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "928b5a59d83c9cd8",
+  "context": "cuments that the commissioner may require, including documents of identity; and made within thirty days of the applicant becoming liable for that tax. transactions for which a pin is required registration of titles and stamping of"
+ },
+ {
+  "id": "lv-building",
+  "read": "https://www.lasvegasnevada.gov/Business/Permits-Licenses/Building-Permits",
+  "quote": "Only a Nevada licensed contractor may obtain a building permit for commercial construction.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "3be9479331bd5fab",
+  "context": "d a representative will assist you in filling out required permit applications. only a nevada licensed contractor may obtain a building permit for commercial construction. amnesty program we have a year-round amnesty program that allows homeowners to "
+ },
+ {
+  "id": "az-workers-comp",
+  "read": "https://www.azleg.gov/ars/23/00961.htm",
+  "quote": "Employers shall secure workers' compensation to their employees in one of the following ways:",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "20adb053fbab5c42",
+  "context": "ethods of securing compensation by employers; deficit premium; civil penalty a. employers shall secure workers' compensation to their employees in one of the following ways: 1. by insuring and keeping insured the payment of such compensation with an ins"
+ },
+ {
+  "id": "ca-tor-building",
+  "read": "https://www.toronto.ca/services-payments/building-construction/apply-for-a-building-permit/",
+  "quote": "A building permit is required under the Building Code Act for most construction, demolition, additions, or major renovations.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "d5a58fb7ad59da35",
+  "context": "pens in a new window) print translate check the status of your building permit. a building permit is required under the building code act for most construction, demolition, additions, or major renovations. it gives you formal permission to begin work, and your plans must be reviewed f"
+ },
+ {
+  "id": "ca-van-food-permit",
+  "read": "https://www.vch.ca/en/health-topics/food-safety",
+  "quote": "We facilitate the process of issuing permits and granting health approvals required for operating food premises.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "42bd92ea8e06f76c",
+  "context": " of food safety and sanitation, as well as to protect the health of the public. we facilitate the process of issuing permits and granting health approvals required for operating food premises. this includes reviewing documentation, conducting assessments, and ensuring com"
  }
 ]
