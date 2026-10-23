@@ -42,7 +42,7 @@ export type ProcessorConfig = {
   budget: { on: boolean; maxTokens: number };
 };
 /** Tools whose output is data from outside Placetta: what an email, a web page, a file or another company's app says. */
-export const UNTRUSTED_TOOLS = /^(read_email|search_email|web_fetch|web_search|find_files|import_file|review_documents|read_comments|city_records|mcp__.*)$/;
+export const UNTRUSTED_TOOLS = /^(read_email|search_email|web_fetch|web_search|find_files|import_file|review_documents|read_comments|city_records|connected_locations|company_profile|mcp__.*)$/;
 export const DEFAULT_PROCESSORS: ProcessorConfig = {
   provenance: { on: true, untrusted: UNTRUSTED_TOOLS },
   redact: { on: true },

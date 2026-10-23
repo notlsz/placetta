@@ -41,14 +41,28 @@
 <main class="lw">
 <article data-block="en" lang="en" data-title="Trust and security | Placetta" class="trust">
 <h1>Trust and security</h1>
-<p class="upd">Last updated: October 22, 2026</p>
+<p class="upd">Last updated: October 23, 2026</p>
 <p class="lead">How Placetta protects your business's information, which companies process it, and what isn't finished yet. Placetta doesn't hold a security certification today. The roadmap below says where we are.</p>
 <div class="legend">
 <p><span class="tag t-on">In place</span>Works in production today.</p>
 <p><span class="tag t-roll">Rolling out</span>Built and tested, and being switched on in our servers and database.</p>
 <p><span class="tag t-prog">In progress</span>Still being built or prepared.</p>
 </div>
-<nav class="toc" aria-label="On this page"><a href="#approvals">Approvals</a><a href="#audit">Audit trail</a><a href="#access">Team access</a><a href="#data">Your data</a><a href="#ai">AI</a><a href="#email">Email</a><a href="#subprocessors">Subprocessors</a><a href="#roadmap">Roadmap</a><a href="#report">Report an issue</a></nav>
+<nav class="toc" aria-label="On this page"><a href="#glance">At a glance</a><a href="#approvals">Approvals</a><a href="#audit">Audit trail</a><a href="#access">Team access</a><a href="#data">Your data</a><a href="#ai">AI</a><a href="#email">Email</a><a href="#subprocessors">Subprocessors</a><a href="#roadmap">Roadmap</a><a href="#status">Service status</a><a href="#report">Report an issue</a></nav>
+
+<h2 id="glance" data-anchor="glance">At a glance</h2>
+<p>Each control below is described further down this page, with its status. Nothing here is a certification.</p>
+<div class="sp">
+<div class="sp-row"><div class="sp-h"><b>Owner approval</b><span class="tag t-on">In place</span></div><p>Nothing is filed, paid or sent without an owner's approval in the app. <a href="#approvals">Approvals</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>Audit trail</b><span class="tag t-on">In place</span></div><p>Every action by Odelia, your team, our team and agencies is recorded, and nobody using the app can edit or delete an entry. Export as a spreadsheet: rolling out. <a href="#audit">Audit trail</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>Encryption</b><span class="tag t-on">In place</span></div><p>HTTPS with TLS 1.2 or newer in transit, encrypted at rest; saved logins and connected accounts' tokens in Supabase Vault. <a href="#data">Your data</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>Our team's access</b><span class="tag t-on">In place</span></div><p>Only after two-step verification. <a href="#data">Your data</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>Roles, SSO and SCIM</b><span class="tag t-roll">Rolling out</span></div><p>Owner, admin, member and viewer, enforced by the database; SAML 2.0 and SCIM 2.0. <a href="#access">Team access</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>Subprocessors</b><span class="tag t-on">In place</span></div><p>Every company that processes customer information, taken from our code. <a href="#subprocessors">Subprocessors</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>Database backups</b><span class="tag t-prog">In progress</span></div><p>Not kept yet. <a href="#roadmap">Roadmap</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>SOC 2</b><span class="tag t-prog">In preparation</span></div><p>No report yet; Type I is being prepared ahead of an independent audit. <a href="#roadmap">Roadmap</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>Security contact</b><span class="tag t-on">In place</span></div><p><a href="mailto:security@placetta.com">security@placetta.com</a>, our disclosure policy below, and <a href="/.well-known/security.txt">security.txt</a>. <a href="#report">Report an issue</a></p></div>
+</div>
 
 <h2 id="approvals" data-anchor="approvals">Your approval comes first</h2>
 <p>Odelia prepares the work. An owner of your workspace decides. Nothing is filed with an agency, paid or sent to anyone without an owner's approval in the Placetta app.</p>
@@ -152,6 +166,7 @@
 <h3>Services you connect</h3>
 <div class="sp">
 <div class="sp-row"><div class="sp-h"><b>Google</b><span class="tag t-prog">If you connect it</span></div><p>Sign-in with Google, Gmail, Google Calendar and Google Drive.</p></div>
+<div class="sp-row"><div class="sp-h"><b>Google Business Profile</b><span class="tag t-roll">Rolling out</span></div><p>If you connect it, we read your locations' addresses, phones and opening hours, read only, to add your stores and fill those lines on forms.</p></div>
 <div class="sp-row"><div class="sp-h"><b>Microsoft</b><span class="tag t-prog">If you connect it</span></div><p>Sign-in with Microsoft, Outlook Mail, Outlook Calendar and Microsoft Teams.</p></div>
 <div class="sp-row"><div class="sp-h"><b>Dropbox</b><span class="tag t-prog">If you connect it</span></div><p>Importing documents.</p></div>
 <div class="sp-row"><div class="sp-h"><b>Intuit (QuickBooks)</b><span class="tag t-prog">If you connect it</span></div><p>Reading gross receipts for tax registrations.</p></div>
@@ -162,6 +177,9 @@
 <div class="sp-row"><div class="sp-h"><b>Toast</b><span class="tag t-roll">Rolling out</span></div><p>If you connect it, we read your sales by location and your team's schedules and hours worked, read only, for sales tax returns, permits whose fee depends on sales, and work-hour rules. Toast receives only our requests for that data.</p></div>
 <div class="sp-row"><div class="sp-h"><b>Square</b><span class="tag t-roll">Rolling out</span></div><p>If you connect it, we read your sales by location and your team's schedules and hours worked, read only, for the same filings. Square receives only our requests for that data.</p></div>
 <div class="sp-row"><div class="sp-h"><b>Tencent (WeChat)</b><span class="tag t-roll">Rolling out</span></div><p>If you point your business's own WeChat Official Account at Placetta, Tencent carries your teammates' messages to Odelia and her replies.</p></div>
+<div class="sp-row"><div class="sp-h"><b>Clover and Shopify</b><span class="tag t-roll">Rolling out</span></div><p>If you connect one, we read your locations' names, addresses and phones, read only. Clover and Shopify receive only the requests for them.</p></div>
+<div class="sp-row"><div class="sp-h"><b>Xero</b><span class="tag t-roll">Rolling out</span></div><p>If you connect it, we read your organisation's legal name, addresses, phone and tax and registration numbers, read only, to fill the company lines on forms.</p></div>
+<div class="sp-row"><div class="sp-h"><b>Dropbox Sign</b><span class="tag t-roll">Rolling out</span></div><p>If you connect your own Dropbox Sign account, an owner can send a document for signature. Dropbox Sign receives that document and the signers' names and email addresses.</p></div>
 <div class="sp-row"><div class="sp-h"><b>Apps connected through MCP</b><span class="tag t-roll">Rolling out</span></div><p>Notion, Airtable, Google Drive, Gmail, Dropbox, Box, Slack, HubSpot, Linear, Asana, Zapier, Square, Stripe, and any other app an owner adds by its address. If you connect one, it receives the requests Odelia sends it, which can include details from your workspace. Looking things up runs on its own. Anything that would change data in that app waits for an owner's approval.</p></div>
 </div>
 
@@ -218,6 +236,16 @@
 <ul class="steps" data-incidents-list></ul>
 </div>
 
+<h2 id="status" data-anchor="status">Service status</h2>
+<p>Placetta doesn't run its own status page yet. Incidents that affected customers are in the incident log above. The services Placetta runs on publish their own:</p>
+<ul class="steps">
+<li><a href="https://status.supabase.com" rel="noopener">Supabase status</a>: database, file storage, sign-in and server functions</li>
+<li><a href="https://www.vercel-status.com" rel="noopener">Vercel status</a>: placetta.com and the app</li>
+<li><a href="https://status.claude.com" rel="noopener">Anthropic status</a>: Claude models</li>
+<li><a href="https://status.stripe.com" rel="noopener">Stripe status</a>: payments</li>
+<li><a href="https://resend-status.com" rel="noopener">Resend status</a>: our email</li>
+</ul>
+
 <h2 id="report" data-anchor="report">Report a security issue</h2>
 <p>If you think you've found a security problem in Placetta, please tell us. Write in English or Chinese.</p>
 <ol class="steps">
@@ -229,14 +257,28 @@
 </article>
 <article data-block="zh" lang="zh-CN" data-title="信任与安全 | 快哉" class="trust" hidden>
 <h1>信任与安全</h1>
-<p class="upd">最后更新：2026年10月22日</p>
+<p class="upd">最后更新：2026年10月23日</p>
 <p class="lead">快哉如何保护您企业的信息、哪些公司会处理这些信息，以及哪些工作尚未完成。快哉目前没有任何安全认证，进展见下文的合规路线图。</p>
 <div class="legend">
 <p><span class="tag t-on">已上线</span>已在生产环境中运行。</p>
 <p><span class="tag t-roll">上线中</span>已开发并测试，正在我们的服务器和数据库中启用。</p>
 <p><span class="tag t-prog">进行中</span>仍在开发或准备中。</p>
 </div>
-<nav class="toc" aria-label="本页内容"><a href="#approvals">批准</a><a href="#audit">审计记录</a><a href="#access">团队权限</a><a href="#data">您的数据</a><a href="#ai">AI</a><a href="#email">邮件</a><a href="#subprocessors">数据处理方</a><a href="#roadmap">合规路线图</a><a href="#report">报告问题</a></nav>
+<nav class="toc" aria-label="本页内容"><a href="#glance">概览</a><a href="#approvals">批准</a><a href="#audit">审计记录</a><a href="#access">团队权限</a><a href="#data">您的数据</a><a href="#ai">AI</a><a href="#email">邮件</a><a href="#subprocessors">数据处理方</a><a href="#roadmap">合规路线图</a><a href="#status">服务状态</a><a href="#report">报告问题</a></nav>
+
+<h2 data-anchor="glance">概览</h2>
+<p>下列每项措施在本页下文都有详细说明和状态。这里没有任何一项是认证。</p>
+<div class="sp">
+<div class="sp-row"><div class="sp-h"><b>所有者批准</b><span class="tag t-on">已上线</span></div><p>未经所有者在应用中批准，不会提交、付款或发送任何内容。<a href="#approvals">批准</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>审计记录</b><span class="tag t-on">已上线</span></div><p>Odelia、您的团队、我们的团队和机构的每项操作都有记录，使用应用的任何人都无法修改或删除。导出为表格文件：上线中。<a href="#audit">审计记录</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>加密</b><span class="tag t-on">已上线</span></div><p>传输中使用 TLS 1.2 或更高版本的 HTTPS，存储时加密；保存的登录信息和已连接账户的令牌存放在 Supabase Vault 中。<a href="#data">您的数据</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>我们团队的访问</b><span class="tag t-on">已上线</span></div><p>须先通过两步验证。<a href="#data">您的数据</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>角色、单点登录和 SCIM</b><span class="tag t-roll">上线中</span></div><p>所有者、管理员、成员和查看者，由数据库强制执行；SAML 2.0 和 SCIM 2.0。<a href="#access">团队权限</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>数据处理方</b><span class="tag t-on">已上线</span></div><p>处理客户信息的每家公司，名单取自我们的代码。<a href="#subprocessors">数据处理方</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>数据库备份</b><span class="tag t-prog">进行中</span></div><p>目前还没有备份。<a href="#roadmap">合规路线图</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>SOC 2</b><span class="tag t-prog">准备中</span></div><p>尚无报告；Type I 正在为独立审计做准备。<a href="#roadmap">合规路线图</a></p></div>
+<div class="sp-row"><div class="sp-h"><b>安全联系方式</b><span class="tag t-on">已上线</span></div><p><a href="mailto:security@placetta.com">security@placetta.com</a>、下文的漏洞披露政策，以及 <a href="/.well-known/security.txt">security.txt</a>。<a href="#report">报告问题</a></p></div>
+</div>
 
 <h2 data-anchor="approvals">一切以您的批准为先</h2>
 <p>Odelia 负责准备，工作区所有者负责决定。未经所有者在快哉应用中批准，不会向任何机构提交申请，不会付款，也不会向任何人发送内容。</p>
@@ -340,6 +382,7 @@
 <h3>您连接的服务</h3>
 <div class="sp">
 <div class="sp-row"><div class="sp-h"><b>Google</b><span class="tag t-prog">您连接后</span></div><p>使用 Google 登录、Gmail、Google Calendar 和 Google Drive。</p></div>
+<div class="sp-row"><div class="sp-h"><b>Google 商家资料</b><span class="tag t-roll">上线中</span></div><p>您连接后，我们以只读方式读取各门店的地址、电话和营业时间，用于添加门店并填写表格中的这些栏目。</p></div>
 <div class="sp-row"><div class="sp-h"><b>Microsoft</b><span class="tag t-prog">您连接后</span></div><p>使用 Microsoft 登录、Outlook 邮件、Outlook 日历和 Microsoft Teams。</p></div>
 <div class="sp-row"><div class="sp-h"><b>Dropbox</b><span class="tag t-prog">您连接后</span></div><p>导入文件。</p></div>
 <div class="sp-row"><div class="sp-h"><b>Intuit（QuickBooks）</b><span class="tag t-prog">您连接后</span></div><p>读取营业总收入，用于税务登记。</p></div>
@@ -350,6 +393,9 @@
 <div class="sp-row"><div class="sp-h"><b>Toast</b><span class="tag t-roll">上线中</span></div><p>您连接后，我们以只读方式读取各门店的销售额，以及团队的排班和实际工时，用于销售税申报、按销售额计费的许可证和工时规定。Toast 只会收到我们读取这些数据的请求。</p></div>
 <div class="sp-row"><div class="sp-h"><b>Square</b><span class="tag t-roll">上线中</span></div><p>您连接后，我们以只读方式读取各门店的销售额，以及团队的排班和实际工时，用途同上。Square 只会收到我们读取这些数据的请求。</p></div>
 <div class="sp-row"><div class="sp-h"><b>腾讯（微信）</b><span class="tag t-roll">上线中</span></div><p>如您把企业自己的微信服务号接入快哉，腾讯会传递团队成员发给 Odelia 的消息和她的回复。</p></div>
+<div class="sp-row"><div class="sp-h"><b>Clover 和 Shopify</b><span class="tag t-roll">上线中</span></div><p>您连接后，我们以只读方式读取各门店的名称、地址和电话。Clover 和 Shopify 只会收到发给它们的请求。</p></div>
+<div class="sp-row"><div class="sp-h"><b>Xero</b><span class="tag t-roll">上线中</span></div><p>您连接后，我们以只读方式读取组织的法定名称、地址、电话以及税号和注册号，用于填写表格中的公司栏目。</p></div>
+<div class="sp-row"><div class="sp-h"><b>Dropbox Sign</b><span class="tag t-roll">上线中</span></div><p>连接您自己的 Dropbox Sign 账户后，所有者可以发出文件签署。Dropbox Sign 会收到该文件以及签署人的姓名和邮箱。</p></div>
 <div class="sp-row"><div class="sp-h"><b>通过 MCP 连接的应用</b><span class="tag t-roll">上线中</span></div><p>Notion、Airtable、Google Drive、Gmail、Dropbox、Box、Slack、HubSpot、Linear、Asana、Zapier、Square、Stripe，以及所有者按地址添加的其他应用。您连接后，该应用会收到 Odelia 发给它的请求，其中可能包含您工作区中的信息。查询会自动进行；任何会更改该应用中数据的操作，都须等所有者批准。</p></div>
 </div>
 
@@ -405,6 +451,16 @@
 <p>我们保留事件记录：发生了什么、影响和修复。事件记录自 <span data-incidents-since></span> 起保存。影响到客户的事件列在这里。</p>
 <ul class="steps" data-incidents-list></ul>
 </div>
+
+<h2 data-anchor="status">服务状态</h2>
+<p>快哉目前还没有自己的状态页面。影响到客户的事件列在上文的事件记录中。快哉所依托的服务各自公布状态：</p>
+<ul class="steps">
+<li><a href="https://status.supabase.com" rel="noopener">Supabase 状态</a>：数据库、文件存储、登录和服务器函数</li>
+<li><a href="https://www.vercel-status.com" rel="noopener">Vercel 状态</a>：placetta.com 和应用</li>
+<li><a href="https://status.claude.com" rel="noopener">Anthropic 状态</a>：Claude 模型</li>
+<li><a href="https://status.stripe.com" rel="noopener">Stripe 状态</a>：付款</li>
+<li><a href="https://resend-status.com" rel="noopener">Resend 状态</a>：我们的邮件</li>
+</ul>
 
 <h2 data-anchor="report">报告安全问题</h2>
 <p>如您认为发现了快哉的安全问题，请告诉我们。中文或英文均可。</p>

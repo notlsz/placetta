@@ -10,8 +10,8 @@ import type { Tool } from "./live";
 export type Group = "stores" | "inspections" | "documents" | "mail" | "routines" | "spending";
 export const GROUPS: Record<Group, { tools: string[]; about: string; words: RegExp }> = {
   stores: {
-    tools: ["add_store", "update_store", "remove_store", "split_job", "plan_markets"],
-    about: "add, change or remove stores, split a job across stores, plan several markets at once",
+    tools: ["add_store", "update_store", "remove_store", "split_job", "plan_markets", "connected_locations", "company_profile"],
+    about: "add, change or remove stores, split a job across stores, plan several markets at once, the stores and company details the business's own apps keep",
     words: /\b(stores?|locations?|markets|cities|expan(d|ding|sion)|branch(es)?|outlets?|franchis\w*|each store|every store|all stores)\b|门店|分店|店铺|加盟/i,
   },
   // its own group since 2026-10-22: a question about an inspection doesn't pay for the store and market tools, and back
@@ -56,8 +56,10 @@ const wordsOf = (t: string) => new Set((t.toLowerCase().match(/[a-z]{5,}/g) ?? [
 
 /** The groups a request is about: its words, files sent with it, a store's bot, and each connected app it names or
  *  whose tools share a distinctive word with it (apps: the app's id and its tools' names and descriptions). */
-export function groupsFor(text: string, o: { files?: number; child?: boolean; apps?: { id: string; text: string }[] } = {}): string[] {
-  const out = new Set<string>();
+export function groupsFor(text: string, o: { files?: number; child?: boolean; apps?: { id: string; text: string }[]; own?: string[] } = {}): string[] {
+  // Placetta's own groups offered from the start, in a fixed order, so the tool list (the first thing the prompt cache
+  // reads) is the same run after run; then the ones this request's words, files or store add
+  const out = new Set<string>(o.own ?? []);
   for (const [g, x] of Object.entries(GROUPS)) if (x.words.test(text)) out.add(g);
   if (o.files) out.add("documents");
   if (o.child) { out.add("stores"); out.add("inspections"); }

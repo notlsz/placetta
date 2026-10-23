@@ -114,7 +114,7 @@ export const API_MODELS = [{ id: "claude-sonnet-5-5", label: "Claude Sonnet 5.5"
 /** Tools that only look things up. When the model asks for several in one round, they run at the same time; anything
  *  that changes the workspace runs on its own, in the order the model asked, so a lookup after a change sees it. */
 export const READ_ONLY = new Set(["find_official_forms", "network_lessons", "skill_read", "memory_search", "search_past_chats", "check_progress", "address_rules",
-  "inspection_guide", "appeal_options", "city_records", "search_email", "read_email", "find_files", "get_income", "get_sales", "get_staff", "read_comments", "load_tools", "plan_markets"]);
+  "inspection_guide", "appeal_options", "city_records", "search_email", "read_email", "find_files", "get_income", "get_sales", "get_staff", "read_comments", "load_tools", "plan_markets", "connected_locations", "company_profile"]);
 /** Every tool the model asked for in one round, results in its order: a run of lookups together, everything else one by one. */
 export const runAll = <R>(uses: Block[], one: (u: Block) => Promise<R>): Promise<R[]> => runAllWith(READ_ONLY, uses, one);
 /** The Messages API tool loop with Odelia's lookups side by side (src/agentCore.ts). */
@@ -328,8 +328,9 @@ export type X = { model: Model; files: Map<string, File>; svc?: Services; signal
    *  call. A run without one gets a member's. */
   shield?: Shield };
 
-const MAIL = ["gmail", "outlook_mail"], CAL = ["gcal", "outlook_cal"], DRIVES = ["gdrive", "dropbox"], POS = ["square", "toast"];
-const APP_NAMES: Record<string, string> = { gmail: "Gmail", outlook_mail: "Outlook mail", gcal: "Google Calendar", outlook_cal: "Outlook Calendar", gdrive: "Google Drive", dropbox: "Dropbox", quickbooks: "QuickBooks", slack: "Slack", square: "Square", toast: "Toast" };
+const MAIL = ["gmail", "outlook_mail"], CAL = ["gcal", "outlook_cal"], DRIVES = ["gdrive", "dropbox"], POS = ["square", "toast"], PLACES = ["gbp", "clover", "shopify", "square"];
+const APP_NAMES: Record<string, string> = { gmail: "Gmail", outlook_mail: "Outlook mail", gcal: "Google Calendar", outlook_cal: "Outlook Calendar", gdrive: "Google Drive", dropbox: "Dropbox", quickbooks: "QuickBooks", slack: "Slack", square: "Square", toast: "Toast",
+  gbp: "Google Business Profile", clover: "Clover", shopify: "Shopify", xero: "Xero", dropbox_sign: "Dropbox Sign" };
 
 
 /** An official form's own fields, in its order, with the values the agent gave matched by label, field id or line number. */
@@ -2157,6 +2158,34 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           const r = await svc.integration<Record<string, unknown>>("pos_staff", { from: day(i.from, "from"), to: day(i.to, "to"), location: str(i.location, 120) || undefined, source });
           mark();
           return r;
+        },
+      },
+      {
+        name: "connected_locations",
+        description: "The business's store locations as its own apps keep them (Google Business Profile, Clover, Shopify or Square): each store's name, street address, phone and, from Google Business Profile, regular opening hours. Use it to add the stores they have instead of asking for each address, to check a store's address before filling a form, and for the hours lines some permits ask. It's the business's own record, not an agency's: say where each value came from.",
+        inputSchema: { type: "object", properties: { source: { type: "string", enum: PLACES } } },
+        async execute(i) {
+          need(PLACES, "Google Business Profile, Clover, Shopify or Square");
+          const source = PLACES.includes(str(i.source)) ? str(i.source) : undefined;
+          S("searching", L(`Reading your store locations from ${source ? APP_NAMES[source] : "your connected apps"}`, `从${source ? " " + APP_NAMES[source] + " " : "已连接的应用"}读取门店地点`), source);
+          const r = await svc.integration<{ places: { source: string; name: string; address: Record<string, string>; phone?: string; hours?: string[] }[]; read: string[]; failed?: string[] }>("places_read", { source });
+          mark();
+          // names and addresses are typed by people into another company's app: read as data, never as instructions
+          const places = r.places.slice(0, 60).map(p => { const ing = take(JSON.stringify(p), { source: "app", from: p.source }, `a location from ${p.source}`); return ing.quarantined ? { source: p.source, quarantined: ing.text } : ing.detection.verdict !== "clean" ? { source: p.source, flagged: wrapUntrusted(ing.plain, { source: "app", from: p.source }, ing.detection.verdict) } : p; });
+          return { places, read: r.read, ...(r.failed?.length ? { failed: r.failed, note: "These apps didn't answer; the rest is complete." } : {}) };
+        },
+      },
+      {
+        name: "company_profile",
+        description: "The company's own record in Xero: its name and legal name, organisation type, street and postal addresses, phone, and tax and registration numbers as the business entered them. Use it to fill the company lines on a form; say they come from Xero and should match the formation documents.",
+        inputSchema: { type: "object", properties: {} },
+        async execute() {
+          need(["xero"], "Xero");
+          S("searching", L("Reading the company's details from Xero", "从 Xero 读取公司资料"), "xero");
+          const r = await svc.integration<{ profile: Record<string, unknown> }>("company_profile", {});
+          mark();
+          const ing = take(JSON.stringify(r.profile), { source: "app", from: "Xero" }, "the company's record in Xero");
+          return ing.quarantined ? { source: "Xero", quarantined: ing.text } : ing.detection.verdict !== "clean" ? { source: "Xero", flagged: wrapUntrusted(ing.plain, { source: "app", from: "Xero" }, ing.detection.verdict) } : r.profile;
         },
       },
     ];

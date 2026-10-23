@@ -86,6 +86,8 @@ const WORDS: Record<string, Bi> = {
   get_income: B("Read the books", "查阅账目"),
   get_sales: B("Read the sales", "查阅销售"),
   get_staff: B("Read the staff schedule", "查阅员工排班"),
+  connected_locations: B("Read the store locations", "查阅门店地点"),
+  company_profile: B("Read the company record", "查阅公司资料"),
   split_job: B("Split the job across stores", "把工作分给各门店"),
   read_comments: B("Read the comments", "阅读评论"),
   web_search: B("Searched official sites", "搜索官方网站"),
@@ -104,7 +106,7 @@ export function toolWords(name: string): Bi {
 }
 const STATE: Record<string, OrbState> = {
   find_official_forms: "searching", plan_markets: "searching", network_lessons: "searching", memory_search: "searching", search_past_chats: "searching", city_records: "searching",
-  check_progress: "searching", search_email: "searching", read_email: "searching", find_files: "searching", address_rules: "searching", inspection_guide: "searching", appeal_options: "searching", read_comments: "searching",
+  check_progress: "searching", search_email: "searching", read_email: "searching", find_files: "searching", address_rules: "searching", inspection_guide: "searching", appeal_options: "searching", read_comments: "searching", connected_locations: "searching", company_profile: "searching",
   draft_message: "composing", draft_document: "composing", send_email: "composing", request_filing_approval: "composing",
   set_plan: "weaving", split_job: "weaving", hand_off: "shaping", skill_save: "weaving", skill_read: "weaving",
   review_documents: "shaping", fill_fields: "shaping", prepare_application: "shaping",

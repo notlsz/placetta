@@ -1,39 +1,42 @@
 {
-  "date": "2026-10-23T03:20:14.830Z",
+  "date": "2026-10-23T04:54:33.156Z",
   "commit": "",
-  "label": "speed pass 2026-10-22; origin/main 23fa53e4 measured the same day: ttft 1514/24111 ms, done 2857/24575 ms (p50/p95)",
+  "label": "9 pass 2026-10-23: own tool groups always offered, the registry's first answer; origin/main 50cbb58c on the same fixtures: ttft 1511/24109 ms, first words the same as ttft (no line of its own), done 2858/24573 ms, 76.1% cache, mean 0.0128 USD",
   "model": "modeled (scripts/eval/speed.ts)",
   "summary": {
     "runs": 60,
-    "ttft_p50_ms": 1511,
+    "ttft_p50_ms": 1429,
     "ttft_p95_ms": 24115,
-    "done_p50_ms": 2858,
+    "first_words_p50_ms": 1297,
+    "first_words_p95_ms": 2582,
+    "done_p50_ms": 2749,
     "done_p95_ms": 24580,
-    "usd_p50": 0.010648,
-    "usd_p95": 0.026481,
-    "usd_mean": 0.012814,
-    "prompt_tokens_p50": 38487,
-    "cache_hit_pct": 76.1,
+    "usd_p50": 0.009128,
+    "usd_p95": 0.025385,
+    "usd_mean": 0.011846,
+    "prompt_tokens_p50": 49820,
+    "cache_hit_pct": 85.3,
     "cross_run_breaks": {
-      "tools": 32,
-      "system": 9,
-      "messages": 18,
+      "tools": 0,
+      "system": 34,
+      "messages": 25,
       "none": 0
     },
     "cache_breaks": {
-      "tools": 13,
-      "system": 8,
+      "tools": 10,
+      "system": 9,
       "messages": 21,
-      "none": 103
+      "none": 105
     }
   },
   "by_scenario": {
     "map-1-flushing": {
-      "ttft_ms": 15249,
-      "done_ms": 15741,
-      "usd": 0.022048,
-      "input": 19279,
-      "cache_read": 48885,
+      "ttft_ms": 15373,
+      "first_words_ms": 1889,
+      "done_ms": 15871,
+      "usd": 0.025385,
+      "input": 22457,
+      "cache_read": 61594,
       "output": 1046,
       "calls": 5,
       "breaks": {
@@ -43,14 +46,15 @@
         "none": 3
       },
       "cross_run_break": null,
-      "hit": 71.7
+      "hit": 73.3
     },
     "map-2-san-jose": {
-      "ttft_ms": 13766,
-      "done_ms": 14231,
-      "usd": 0.01437,
+      "ttft_ms": 13768,
+      "first_words_ms": 1327,
+      "done_ms": 14237,
+      "usd": 0.015561,
       "input": 8343,
-      "cache_read": 59721,
+      "cache_read": 75607,
       "output": 969,
       "calls": 5,
       "breaks": {
@@ -60,14 +64,15 @@
         "none": 3
       },
       "cross_run_break": "messages",
-      "hit": 87.7
+      "hit": 90.1
     },
     "map-3-irvine": {
-      "ttft_ms": 14870,
-      "done_ms": 15336,
-      "usd": 0.014957,
-      "input": 8691,
-      "cache_read": 59729,
+      "ttft_ms": 14864,
+      "first_words_ms": 1286,
+      "done_ms": 15329,
+      "usd": 0.016148,
+      "input": 8689,
+      "cache_read": 75616,
       "output": 1056,
       "calls": 5,
       "breaks": {
@@ -77,14 +82,15 @@
         "none": 3
       },
       "cross_run_break": "messages",
-      "hit": 87.3
+      "hit": 89.7
     },
     "map-4-houston": {
-      "ttft_ms": 35060,
-      "done_ms": 35526,
-      "usd": 0.026881,
+      "ttft_ms": 35069,
+      "first_words_ms": 1309,
+      "done_ms": 35536,
+      "usd": 0.028072,
       "input": 16198,
-      "cache_read": 64127,
+      "cache_read": 80014,
       "output": 2646,
       "calls": 5,
       "breaks": {
@@ -94,14 +100,15 @@
         "none": 3
       },
       "cross_run_break": "messages",
-      "hit": 79.8
+      "hit": 83.2
     },
     "map-5-phoenix": {
-      "ttft_ms": 17861,
-      "done_ms": 18326,
-      "usd": 0.016894,
-      "input": 10014,
-      "cache_read": 60516,
+      "ttft_ms": 17864,
+      "first_words_ms": 1271,
+      "done_ms": 18329,
+      "usd": 0.018086,
+      "input": 10015,
+      "cache_read": 76401,
       "output": 1292,
       "calls": 5,
       "breaks": {
@@ -111,14 +118,15 @@
         "none": 3
       },
       "cross_run_break": "messages",
-      "hit": 85.8
+      "hit": 88.4
     },
     "map-6-chicago": {
-      "ttft_ms": 18210,
-      "done_ms": 18676,
-      "usd": 0.015508,
+      "ttft_ms": 18212,
+      "first_words_ms": 1295,
+      "done_ms": 18678,
+      "usd": 0.016701,
       "input": 8091,
-      "cache_read": 59571,
+      "cache_read": 75456,
       "output": 1326,
       "calls": 5,
       "breaks": {
@@ -128,14 +136,15 @@
         "none": 3
       },
       "cross_run_break": "messages",
-      "hit": 88
+      "hit": 90.3
     },
     "map-7-seattle": {
-      "ttft_ms": 20125,
-      "done_ms": 20591,
-      "usd": 0.018096,
-      "input": 10672,
-      "cache_read": 61053,
+      "ttft_ms": 20121,
+      "first_words_ms": 1285,
+      "done_ms": 20586,
+      "usd": 0.019288,
+      "input": 10673,
+      "cache_read": 76939,
       "output": 1470,
       "calls": 5,
       "breaks": {
@@ -145,14 +154,15 @@
         "none": 3
       },
       "cross_run_break": "messages",
-      "hit": 85.1
+      "hit": 87.8
     },
     "map-8-miami": {
       "ttft_ms": 24115,
+      "first_words_ms": 1273,
       "done_ms": 24580,
-      "usd": 0.02188,
-      "input": 13972,
-      "cache_read": 63041,
+      "usd": 0.023071,
+      "input": 13973,
+      "cache_read": 78926,
       "output": 1779,
       "calls": 5,
       "breaks": {
@@ -162,14 +172,15 @@
         "none": 3
       },
       "cross_run_break": "messages",
-      "hit": 81.9
+      "hit": 85
     },
     "map-9-boston": {
-      "ttft_ms": 21721,
-      "done_ms": 22198,
-      "usd": 0.022464,
-      "input": 15663,
-      "cache_read": 63741,
+      "ttft_ms": 21723,
+      "first_words_ms": 1285,
+      "done_ms": 22200,
+      "usd": 0.023656,
+      "input": 15662,
+      "cache_read": 79627,
       "output": 1583,
       "calls": 5,
       "breaks": {
@@ -179,14 +190,15 @@
         "none": 3
       },
       "cross_run_break": "messages",
-      "hit": 80.3
+      "hit": 83.6
     },
     "map-10-atlanta": {
-      "ttft_ms": 11046,
-      "done_ms": 11511,
-      "usd": 0.012997,
+      "ttft_ms": 11050,
+      "first_words_ms": 1284,
+      "done_ms": 11515,
+      "usd": 0.01419,
       "input": 7636,
-      "cache_read": 59193,
+      "cache_read": 75080,
       "output": 755,
       "calls": 5,
       "breaks": {
@@ -196,14 +208,15 @@
         "none": 3
       },
       "cross_run_break": "messages",
-      "hit": 88.6
+      "hit": 90.8
     },
     "map-zh-1-flushing": {
-      "ttft_ms": 15143,
-      "done_ms": 15686,
-      "usd": 0.017109,
-      "input": 11364,
-      "cache_read": 60674,
+      "ttft_ms": 15145,
+      "first_words_ms": 1500,
+      "done_ms": 15689,
+      "usd": 0.018299,
+      "input": 11363,
+      "cache_read": 76560,
       "output": 1076,
       "calls": 5,
       "breaks": {
@@ -213,14 +226,15 @@
         "none": 4
       },
       "cross_run_break": "system",
-      "hit": 84.2
+      "hit": 87.1
     },
     "map-zh-2-san-jose": {
-      "ttft_ms": 13875,
-      "done_ms": 14415,
-      "usd": 0.014573,
+      "ttft_ms": 13873,
+      "first_words_ms": 1334,
+      "done_ms": 14413,
+      "usd": 0.015765,
       "input": 8517,
-      "cache_read": 59941,
+      "cache_read": 75827,
       "output": 984,
       "calls": 5,
       "breaks": {
@@ -230,14 +244,15 @@
         "none": 3
       },
       "cross_run_break": "messages",
-      "hit": 87.6
+      "hit": 89.9
     },
     "map-zh-3-irvine": {
-      "ttft_ms": 14977,
-      "done_ms": 15504,
-      "usd": 0.014064,
-      "input": 6827,
-      "cache_read": 65441,
+      "ttft_ms": 14971,
+      "first_words_ms": 1297,
+      "done_ms": 15498,
+      "usd": 0.015253,
+      "input": 6824,
+      "cache_read": 81329,
       "output": 1076,
       "calls": 5,
       "breaks": {
@@ -247,14 +262,15 @@
         "none": 4
       },
       "cross_run_break": "messages",
-      "hit": 90.6
+      "hit": 92.3
     },
     "map-zh-4-houston": {
-      "ttft_ms": 35316,
-      "done_ms": 35857,
-      "usd": 0.027225,
-      "input": 16505,
-      "cache_read": 64410,
+      "ttft_ms": 35309,
+      "first_words_ms": 1309,
+      "done_ms": 35850,
+      "usd": 0.028419,
+      "input": 16507,
+      "cache_read": 80295,
       "output": 2671,
       "calls": 5,
       "breaks": {
@@ -264,14 +280,15 @@
         "none": 3
       },
       "cross_run_break": "messages",
-      "hit": 79.6
+      "hit": 82.9
     },
     "map-zh-7-seattle": {
-      "ttft_ms": 20157,
-      "done_ms": 20696,
-      "usd": 0.016847,
-      "input": 8312,
-      "cache_read": 67207,
+      "ttft_ms": 20148,
+      "first_words_ms": 1284,
+      "done_ms": 20687,
+      "usd": 0.018038,
+      "input": 8311,
+      "cache_read": 83094,
       "output": 1486,
       "calls": 5,
       "breaks": {
@@ -281,14 +298,15 @@
         "none": 4
       },
       "cross_run_break": "messages",
-      "hit": 89
+      "hit": 90.9
     },
     "docs-1-review-and-fill": {
-      "ttft_ms": 1360,
-      "done_ms": 9541,
-      "usd": 0.019734,
-      "input": 26726,
-      "cache_read": 4815,
+      "ttft_ms": 1258,
+      "first_words_ms": 1258,
+      "done_ms": 9510,
+      "usd": 0.019579,
+      "input": 26083,
+      "cache_read": 9190,
       "output": 508,
       "calls": 6,
       "breaks": {
@@ -297,15 +315,16 @@
         "messages": 3,
         "none": 0
       },
-      "cross_run_break": "tools",
-      "hit": 15.3
+      "cross_run_break": "system",
+      "hit": 26.1
     },
     "docs-2-ein-from-letter": {
-      "ttft_ms": 1168,
-      "done_ms": 6004,
-      "usd": 0.013953,
-      "input": 17222,
-      "cache_read": 15833,
+      "ttft_ms": 965,
+      "first_words_ms": 965,
+      "done_ms": 5941,
+      "usd": 0.013764,
+      "input": 15747,
+      "cache_read": 28061,
       "output": 284,
       "calls": 5,
       "breaks": {
@@ -314,15 +333,16 @@
         "messages": 1,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 47.9
+      "cross_run_break": "system",
+      "hit": 64.1
     },
     "docs-3-zh-food-handler": {
-      "ttft_ms": 1301,
-      "done_ms": 3841,
-      "usd": 0.017616,
-      "input": 23018,
-      "cache_read": 5137,
+      "ttft_ms": 1254,
+      "first_words_ms": 1254,
+      "done_ms": 3908,
+      "usd": 0.019161,
+      "input": 24672,
+      "cache_read": 9190,
       "output": 149,
       "calls": 3,
       "breaks": {
@@ -331,15 +351,16 @@
         "messages": 0,
         "none": 0
       },
-      "cross_run_break": "tools",
-      "hit": 18.2
+      "cross_run_break": "system",
+      "hit": 27.1
     },
     "status-1-blocking": {
-      "ttft_ms": 1334,
-      "done_ms": 1762,
-      "usd": 0.008813,
-      "input": 9740,
-      "cache_read": 17459,
+      "ttft_ms": 1316,
+      "first_words_ms": 1316,
+      "done_ms": 1745,
+      "usd": 0.009057,
+      "input": 9241,
+      "cache_read": 25708,
       "output": 53,
       "calls": 2,
       "breaks": {
@@ -348,15 +369,16 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 64.2
+      "cross_run_break": "system",
+      "hit": 73.6
     },
     "status-2-due-this-week": {
-      "ttft_ms": 1019,
-      "done_ms": 1359,
-      "usd": 0.003505,
-      "input": 1915,
-      "cache_read": 25276,
+      "ttft_ms": 1021,
+      "first_words_ms": 1021,
+      "done_ms": 1361,
+      "usd": 0.004087,
+      "input": 1917,
+      "cache_read": 33024,
       "output": 46,
       "calls": 2,
       "breaks": {
@@ -366,14 +388,15 @@
         "none": 1
       },
       "cross_run_break": "messages",
-      "hit": 93
+      "hit": 94.5
     },
     "status-3-zh": {
-      "ttft_ms": 1322,
-      "done_ms": 1775,
-      "usd": 0.008636,
-      "input": 9432,
-      "cache_read": 18077,
+      "ttft_ms": 1323,
+      "first_words_ms": 1323,
+      "done_ms": 1777,
+      "usd": 0.009217,
+      "input": 9431,
+      "cache_read": 25827,
       "output": 55,
       "calls": 2,
       "breaks": {
@@ -383,14 +406,15 @@
         "none": 1
       },
       "cross_run_break": "system",
-      "hit": 65.7
+      "hit": 73.3
     },
     "remote-1-sms-due": {
       "ttft_ms": 658,
+      "first_words_ms": 658,
       "done_ms": 997,
-      "usd": 0.006218,
-      "input": 7624,
-      "cache_read": 5315,
+      "usd": 0.006508,
+      "input": 7623,
+      "cache_read": 9190,
       "output": 27,
       "calls": 1,
       "breaks": {
@@ -400,14 +424,15 @@
         "none": 0
       },
       "cross_run_break": "system",
-      "hit": 41.1
+      "hit": 54.7
     },
     "inquiry-1-btc": {
-      "ttft_ms": 2903,
-      "done_ms": 3255,
-      "usd": 0.010648,
-      "input": 10218,
-      "cache_read": 32644,
+      "ttft_ms": 2582,
+      "first_words_ms": 2582,
+      "done_ms": 2933,
+      "usd": 0.005985,
+      "input": 2115,
+      "cache_read": 51500,
       "output": 143,
       "calls": 3,
       "breaks": {
@@ -416,15 +441,16 @@
         "messages": 0,
         "none": 2
       },
-      "cross_run_break": "tools",
-      "hit": 76.2
+      "cross_run_break": "messages",
+      "hit": 96.1
     },
     "renewal-1-btc": {
-      "ttft_ms": 2328,
-      "done_ms": 2804,
-      "usd": 0.005588,
-      "input": 2661,
-      "cache_read": 41339,
+      "ttft_ms": 2330,
+      "first_words_ms": 2330,
+      "done_ms": 2807,
+      "usd": 0.006392,
+      "input": 2659,
+      "cache_read": 52093,
       "output": 131,
       "calls": 3,
       "breaks": {
@@ -434,14 +460,15 @@
         "none": 2
       },
       "cross_run_break": "messages",
-      "hit": 94
+      "hit": 95.1
     },
     "renewal-2-zh-insurance": {
-      "ttft_ms": 1303,
-      "done_ms": 4182,
-      "usd": 0.017659,
-      "input": 23097,
-      "cache_read": 5137,
+      "ttft_ms": 1256,
+      "first_words_ms": 1256,
+      "done_ms": 4249,
+      "usd": 0.019205,
+      "input": 24752,
+      "cache_read": 9190,
       "output": 176,
       "calls": 3,
       "breaks": {
@@ -450,15 +477,16 @@
         "messages": 0,
         "none": 0
       },
-      "cross_run_break": "tools",
-      "hit": 18.2
+      "cross_run_break": "system",
+      "hit": 27.1
     },
     "inspection-1-sj-checklist": {
-      "ttft_ms": 1497,
-      "done_ms": 3649,
-      "usd": 0.011155,
-      "input": 12015,
-      "cache_read": 18775,
+      "ttft_ms": 1429,
+      "first_words_ms": 1429,
+      "done_ms": 3580,
+      "usd": 0.010325,
+      "input": 10214,
+      "cache_read": 25725,
       "output": 196,
       "calls": 2,
       "breaks": {
@@ -467,15 +495,16 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 61
+      "cross_run_break": "system",
+      "hit": 71.6
     },
     "inspection-2-flushing-prep": {
-      "ttft_ms": 2063,
-      "done_ms": 2427,
-      "usd": 0.004902,
+      "ttft_ms": 2065,
+      "first_words_ms": 2065,
+      "done_ms": 2429,
+      "usd": 0.005288,
       "input": 3112,
-      "cache_read": 27884,
+      "cache_read": 33033,
       "output": 127,
       "calls": 2,
       "breaks": {
@@ -485,14 +514,15 @@
         "none": 1
       },
       "cross_run_break": "messages",
-      "hit": 90
+      "hit": 91.4
     },
     "multistore-1-three-cities": {
-      "ttft_ms": 16579,
-      "done_ms": 17043,
-      "usd": 0.02332,
-      "input": 19293,
-      "cache_read": 60044,
+      "ttft_ms": 16376,
+      "first_words_ms": 3140,
+      "done_ms": 16840,
+      "usd": 0.0211,
+      "input": 14239,
+      "cache_read": 80983,
       "output": 1159,
       "calls": 5,
       "breaks": {
@@ -501,15 +531,16 @@
         "messages": 1,
         "none": 3
       },
-      "cross_run_break": "tools",
-      "hit": 75.7
+      "cross_run_break": "system",
+      "hit": 85
     },
     "multistore-2-hq-report": {
-      "ttft_ms": 2506,
-      "done_ms": 2745,
-      "usd": 0.006996,
+      "ttft_ms": 2510,
+      "first_words_ms": 2510,
+      "done_ms": 2749,
+      "usd": 0.00771,
       "input": 4811,
-      "cache_read": 39211,
+      "cache_read": 48742,
       "output": 119,
       "calls": 3,
       "breaks": {
@@ -519,14 +550,15 @@
         "none": 2
       },
       "cross_run_break": "system",
-      "hit": 89.1
+      "hit": 91
     },
     "routine-1-weekly": {
-      "ttft_ms": 1778,
-      "done_ms": 2143,
-      "usd": 0.008225,
-      "input": 8711,
-      "cache_read": 18205,
+      "ttft_ms": 1438,
+      "first_words_ms": 1438,
+      "done_ms": 1802,
+      "usd": 0.002925,
+      "input": 161,
+      "cache_read": 33043,
       "output": 87,
       "calls": 2,
       "breaks": {
@@ -535,15 +567,16 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 67.6
+      "cross_run_break": "messages",
+      "hit": 99.5
     },
     "routine-2-zh-monthly": {
-      "ttft_ms": 1856,
-      "done_ms": 2107,
-      "usd": 0.009039,
-      "input": 9726,
-      "cache_read": 19216,
+      "ttft_ms": 1772,
+      "first_words_ms": 1772,
+      "done_ms": 2023,
+      "usd": 0.007944,
+      "input": 7602,
+      "cache_read": 25842,
       "output": 81,
       "calls": 2,
       "breaks": {
@@ -552,15 +585,16 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 66.4
+      "cross_run_break": "system",
+      "hit": 77.3
     },
     "vague-1-open-a-shop": {
-      "ttft_ms": 563,
-      "done_ms": 763,
-      "usd": 0.004362,
-      "input": 5254,
-      "cache_read": 4815,
+      "ttft_ms": 543,
+      "first_words_ms": 543,
+      "done_ms": 744,
+      "usd": 0.004315,
+      "input": 4754,
+      "cache_read": 9190,
       "output": 16,
       "calls": 1,
       "breaks": {
@@ -569,15 +603,16 @@
         "messages": 0,
         "none": 0
       },
-      "cross_run_break": "tools",
-      "hit": 47.8
+      "cross_run_break": "system",
+      "hit": 65.9
     },
     "vague-2-zh": {
       "ttft_ms": 543,
+      "first_words_ms": 543,
       "done_ms": 793,
-      "usd": 0.004044,
-      "input": 4761,
-      "cache_read": 5315,
+      "usd": 0.004334,
+      "input": 4760,
+      "cache_read": 9190,
       "output": 20,
       "calls": 1,
       "breaks": {
@@ -587,14 +622,15 @@
         "none": 0
       },
       "cross_run_break": "system",
-      "hit": 52.7
+      "hit": 65.9
     },
     "hostile-1-skip-approval": {
-      "ttft_ms": 1388,
-      "done_ms": 1827,
-      "usd": 0.007817,
-      "input": 8331,
-      "cache_read": 17760,
+      "ttft_ms": 1359,
+      "first_words_ms": 1359,
+      "done_ms": 1797,
+      "usd": 0.007821,
+      "input": 7540,
+      "cache_read": 25719,
       "output": 63,
       "calls": 2,
       "breaks": {
@@ -603,15 +639,16 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 68.1
+      "cross_run_break": "system",
+      "hit": 77.3
     },
     "hostile-2-ssn-card": {
-      "ttft_ms": 1372,
-      "done_ms": 2036,
-      "usd": 0.009714,
-      "input": 10745,
-      "cache_read": 18466,
+      "ttft_ms": 1022,
+      "first_words_ms": 1022,
+      "done_ms": 1686,
+      "usd": 0.004202,
+      "input": 1939,
+      "cache_read": 33046,
       "output": 72,
       "calls": 2,
       "breaks": {
@@ -620,15 +657,16 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 63.2
+      "cross_run_break": "messages",
+      "hit": 94.5
     },
     "injection-1-document": {
-      "ttft_ms": 1277,
-      "done_ms": 1943,
-      "usd": 0.007871,
-      "input": 8358,
-      "cache_read": 17759,
+      "ttft_ms": 977,
+      "first_words_ms": 977,
+      "done_ms": 1643,
+      "usd": 0.003332,
+      "input": 837,
+      "cache_read": 32448,
       "output": 72,
       "calls": 2,
       "breaks": {
@@ -637,15 +675,16 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 68
+      "cross_run_break": "system",
+      "hit": 97.5
     },
     "injection-2-email": {
-      "ttft_ms": 2019,
-      "done_ms": 2583,
-      "usd": 0.009226,
-      "input": 8717,
-      "cache_read": 31141,
+      "ttft_ms": 1714,
+      "first_words_ms": 1714,
+      "done_ms": 2278,
+      "usd": 0.004819,
+      "input": 1043,
+      "cache_read": 49115,
       "output": 94,
       "calls": 3,
       "breaks": {
@@ -654,15 +693,16 @@
         "messages": 0,
         "none": 2
       },
-      "cross_run_break": "tools",
-      "hit": 78.1
+      "cross_run_break": "system",
+      "hit": 97.9
     },
     "outofscope-1-poem": {
-      "ttft_ms": 667,
-      "done_ms": 908,
-      "usd": 0.006303,
-      "input": 7828,
-      "cache_read": 4815,
+      "ttft_ms": 354,
+      "first_words_ms": 354,
+      "done_ms": 594,
+      "usd": 0.001315,
+      "input": 8,
+      "cache_read": 16509,
       "output": 19,
       "calls": 1,
       "breaks": {
@@ -671,15 +711,16 @@
         "messages": 0,
         "none": 0
       },
-      "cross_run_break": "tools",
-      "hit": 38.1
+      "cross_run_break": "messages",
+      "hit": 100
     },
     "outofscope-2-code": {
-      "ttft_ms": 354,
-      "done_ms": 593,
-      "usd": 0.001031,
+      "ttft_ms": 356,
+      "first_words_ms": 356,
+      "done_ms": 594,
+      "usd": 0.001322,
       "input": 16,
-      "cache_read": 12636,
+      "cache_read": 16510,
       "output": 19,
       "calls": 1,
       "breaks": {
@@ -692,11 +733,12 @@
       "hit": 99.9
     },
     "long-1-chicago-end-to-end": {
-      "ttft_ms": 22017,
-      "done_ms": 23215,
-      "usd": 0.024216,
-      "input": 15689,
-      "cache_read": 65302,
+      "ttft_ms": 21791,
+      "first_words_ms": 2924,
+      "done_ms": 22988,
+      "usd": 0.021739,
+      "input": 9900,
+      "cache_read": 90153,
       "output": 1608,
       "calls": 7,
       "breaks": {
@@ -705,15 +747,16 @@
         "messages": 1,
         "none": 4
       },
-      "cross_run_break": "tools",
-      "hit": 80.6
+      "cross_run_break": "system",
+      "hit": 90.1
     },
     "long-2-zh-houston": {
-      "ttft_ms": 39059,
-      "done_ms": 40373,
-      "usd": 0.037196,
+      "ttft_ms": 39069,
+      "first_words_ms": 3071,
+      "done_ms": 40382,
+      "usd": 0.038626,
       "input": 23936,
-      "cache_read": 71296,
+      "cache_read": 90359,
       "output": 2953,
       "calls": 7,
       "breaks": {
@@ -723,14 +766,15 @@
         "none": 4
       },
       "cross_run_break": "system",
-      "hit": 74.9
+      "hit": 79.1
     },
     "change-1-move-store": {
-      "ttft_ms": 1554,
-      "done_ms": 1842,
-      "usd": 0.007305,
+      "ttft_ms": 1555,
+      "first_words_ms": 1555,
+      "done_ms": 1843,
+      "usd": 0.007782,
       "input": 7469,
-      "cache_read": 19361,
+      "cache_read": 25715,
       "output": 67,
       "calls": 2,
       "breaks": {
@@ -740,14 +784,15 @@
         "none": 1
       },
       "cross_run_break": "system",
-      "hit": 72.2
+      "hit": 77.5
     },
     "change-2-remove-sign": {
-      "ttft_ms": 1422,
-      "done_ms": 1673,
-      "usd": 0.007474,
-      "input": 7959,
-      "cache_read": 17465,
+      "ttft_ms": 1112,
+      "first_words_ms": 1112,
+      "done_ms": 1363,
+      "usd": 0.002777,
+      "input": 139,
+      "cache_read": 33034,
       "output": 52,
       "calls": 2,
       "breaks": {
@@ -756,32 +801,16 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 68.7
+      "cross_run_break": "messages",
+      "hit": 99.6
     },
     "change-3-zh-opening-date": {
-      "ttft_ms": 1726,
-      "done_ms": 2064,
-      "usd": 0.013119,
-      "input": 16195,
-      "cache_read": 10130,
-      "output": 57,
-      "calls": 2,
-      "breaks": {
-        "tools": 1,
-        "system": 0,
-        "messages": 0,
-        "none": 0
-      },
-      "cross_run_break": "system",
-      "hit": 38.5
-    },
-    "tools-1-add-deadline": {
-      "ttft_ms": 1500,
-      "done_ms": 1764,
-      "usd": 0.008055,
-      "input": 8638,
-      "cache_read": 18167,
+      "ttft_ms": 1383,
+      "first_words_ms": 1383,
+      "done_ms": 1721,
+      "usd": 0.007811,
+      "input": 7546,
+      "cache_read": 25831,
       "output": 57,
       "calls": 2,
       "breaks": {
@@ -790,15 +819,34 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 67.8
+      "cross_run_break": "system",
+      "hit": 77.4
+    },
+    "tools-1-add-deadline": {
+      "ttft_ms": 1454,
+      "first_words_ms": 1454,
+      "done_ms": 1718,
+      "usd": 0.007723,
+      "input": 7440,
+      "cache_read": 25719,
+      "output": 57,
+      "calls": 2,
+      "breaks": {
+        "tools": 0,
+        "system": 0,
+        "messages": 0,
+        "none": 1
+      },
+      "cross_run_break": "system",
+      "hit": 77.6
     },
     "tools-2-routine-args": {
-      "ttft_ms": 1829,
-      "done_ms": 2171,
-      "usd": 0.008476,
-      "input": 9011,
-      "cache_read": 18499,
+      "ttft_ms": 1475,
+      "first_words_ms": 1475,
+      "done_ms": 1814,
+      "usd": 0.002937,
+      "input": 171,
+      "cache_read": 33047,
       "output": 88,
       "calls": 2,
       "breaks": {
@@ -807,15 +855,16 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 67.2
+      "cross_run_break": "messages",
+      "hit": 99.5
     },
     "tools-3-lookup-only": {
-      "ttft_ms": 1403,
-      "done_ms": 1966,
-      "usd": 0.007004,
-      "input": 7469,
-      "cache_read": 14902,
+      "ttft_ms": 1190,
+      "first_words_ms": 751,
+      "done_ms": 1753,
+      "usd": 0.004149,
+      "input": 2377,
+      "cache_read": 27743,
       "output": 76,
       "calls": 2,
       "breaks": {
@@ -824,15 +873,16 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 66.6
+      "cross_run_break": "system",
+      "hit": 92.1
     },
     "tools-4-rename-store": {
-      "ttft_ms": 1425,
-      "done_ms": 1663,
-      "usd": 0.008013,
-      "input": 8624,
-      "cache_read": 18159,
+      "ttft_ms": 1194,
+      "first_words_ms": 1194,
+      "done_ms": 1434,
+      "usd": 0.004583,
+      "input": 2836,
+      "cache_read": 30302,
       "output": 49,
       "calls": 2,
       "breaks": {
@@ -841,15 +891,16 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 67.8
+      "cross_run_break": "system",
+      "hit": 91.4
     },
     "tools-5-zh-deadline": {
-      "ttft_ms": 1513,
-      "done_ms": 1827,
-      "usd": 0.008094,
-      "input": 8663,
-      "cache_read": 18191,
+      "ttft_ms": 1470,
+      "first_words_ms": 1470,
+      "done_ms": 1783,
+      "usd": 0.00784,
+      "input": 7559,
+      "cache_read": 25838,
       "output": 62,
       "calls": 2,
       "breaks": {
@@ -858,15 +909,16 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 67.7
+      "cross_run_break": "system",
+      "hit": 77.4
     },
     "tools-6-inspection": {
-      "ttft_ms": 1490,
-      "done_ms": 2668,
-      "usd": 0.010935,
-      "input": 12113,
-      "cache_read": 18769,
+      "ttft_ms": 1420,
+      "first_words_ms": 1420,
+      "done_ms": 2597,
+      "usd": 0.010106,
+      "input": 10313,
+      "cache_read": 25718,
       "output": 118,
       "calls": 2,
       "breaks": {
@@ -875,15 +927,16 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 60.8
+      "cross_run_break": "system",
+      "hit": 71.4
     },
     "mt-1-followup": {
-      "ttft_ms": 666,
-      "done_ms": 1934,
-      "usd": 0.007615,
-      "input": 8065,
-      "cache_read": 17286,
+      "ttft_ms": 354,
+      "first_words_ms": 354,
+      "done_ms": 1624,
+      "usd": 0.002917,
+      "input": 244,
+      "cache_read": 32856,
       "output": 72,
       "calls": 2,
       "breaks": {
@@ -892,15 +945,16 @@
         "messages": 0,
         "none": 0
       },
-      "cross_run_break": "tools",
-      "hit": 68.2
+      "cross_run_break": "messages",
+      "hit": 99.3
     },
     "mt-2-correct-address": {
-      "ttft_ms": 1486,
-      "done_ms": 3258,
-      "usd": 0.008137,
-      "input": 6500,
-      "cache_read": 37137,
+      "ttft_ms": 1257,
+      "first_words_ms": 1257,
+      "done_ms": 3029,
+      "usd": 0.005181,
+      "input": 710,
+      "cache_read": 55635,
       "output": 127,
       "calls": 4,
       "breaks": {
@@ -909,15 +963,16 @@
         "messages": 0,
         "none": 2
       },
-      "cross_run_break": "tools",
-      "hit": 85.1
+      "cross_run_break": "system",
+      "hit": 98.7
     },
     "mt-3-continue": {
-      "ttft_ms": 1249,
-      "done_ms": 20142,
-      "usd": 0.017592,
+      "ttft_ms": 1251,
+      "first_words_ms": 1251,
+      "done_ms": 20147,
+      "usd": 0.019261,
       "input": 8417,
-      "cache_read": 81098,
+      "cache_read": 103339,
       "output": 1386,
       "calls": 7,
       "breaks": {
@@ -927,14 +982,15 @@
         "none": 4
       },
       "cross_run_break": "messages",
-      "hit": 90.6
+      "hit": 92.5
     },
     "mt-4-zh-next": {
-      "ttft_ms": 1340,
-      "done_ms": 2469,
-      "usd": 0.010192,
-      "input": 10174,
-      "cache_read": 30147,
+      "ttft_ms": 1322,
+      "first_words_ms": 1322,
+      "done_ms": 2451,
+      "usd": 0.010726,
+      "input": 9675,
+      "cache_read": 42270,
       "output": 80,
       "calls": 3,
       "breaks": {
@@ -943,32 +999,34 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 74.8
+      "cross_run_break": "system",
+      "hit": 81.4
     },
     "mt-5-pushback": {
-      "ttft_ms": 1356,
-      "done_ms": 2863,
-      "usd": 0.013845,
-      "input": 15713,
-      "cache_read": 22774,
+      "ttft_ms": 1358,
+      "first_words_ms": 1358,
+      "done_ms": 2548,
+      "usd": 0.00933,
+      "input": 7765,
+      "cache_read": 42055,
       "output": 94,
       "calls": 3,
       "breaks": {
-        "tools": 1,
-        "system": 0,
+        "tools": 0,
+        "system": 1,
         "messages": 0,
         "none": 1
       },
       "cross_run_break": "system",
-      "hit": 59.2
+      "hit": 84.4
     },
     "mt-6-injection-followup": {
-      "ttft_ms": 1277,
-      "done_ms": 2858,
-      "usd": 0.009192,
-      "input": 8625,
-      "cache_read": 30525,
+      "ttft_ms": 977,
+      "first_words_ms": 977,
+      "done_ms": 2558,
+      "usd": 0.004922,
+      "input": 1103,
+      "cache_read": 48799,
       "output": 116,
       "calls": 3,
       "breaks": {
@@ -977,15 +1035,16 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 78
+      "cross_run_break": "system",
+      "hit": 97.8
     },
     "mt-7-routine-change": {
-      "ttft_ms": 1777,
-      "done_ms": 3614,
-      "usd": 0.010747,
-      "input": 9107,
-      "cache_read": 44863,
+      "ttft_ms": 1461,
+      "first_words_ms": 1461,
+      "done_ms": 3299,
+      "usd": 0.006315,
+      "input": 1145,
+      "cache_read": 65401,
       "output": 147,
       "calls": 4,
       "breaks": {
@@ -994,32 +1053,34 @@
         "messages": 0,
         "none": 2
       },
-      "cross_run_break": "tools",
-      "hit": 83.1
+      "cross_run_break": "system",
+      "hit": 98.3
     },
     "mt-8-vague-then-detail": {
-      "ttft_ms": 562,
-      "done_ms": 21608,
-      "usd": 0.026481,
-      "input": 21948,
-      "cache_read": 59210,
+      "ttft_ms": 360,
+      "first_words_ms": 360,
+      "done_ms": 21169,
+      "usd": 0.020527,
+      "input": 10853,
+      "cache_read": 90763,
       "output": 1488,
       "calls": 6,
       "breaks": {
-        "tools": 1,
+        "tools": 0,
         "system": 0,
         "messages": 1,
-        "none": 3
+        "none": 4
       },
-      "cross_run_break": "tools",
-      "hit": 73
+      "cross_run_break": "system",
+      "hit": 89.3
     },
     "mt-9-deadline-fix": {
-      "ttft_ms": 1511,
-      "done_ms": 3116,
-      "usd": 0.012671,
-      "input": 11982,
-      "cache_read": 44221,
+      "ttft_ms": 1257,
+      "first_words_ms": 1257,
+      "done_ms": 2866,
+      "usd": 0.009128,
+      "input": 5590,
+      "cache_read": 60912,
       "output": 98,
       "calls": 4,
       "breaks": {
@@ -1028,15 +1089,16 @@
         "messages": 0,
         "none": 2
       },
-      "cross_run_break": "tools",
-      "hit": 78.7
+      "cross_run_break": "system",
+      "hit": 91.6
     },
     "mt-10-switch-language": {
-      "ttft_ms": 1340,
-      "done_ms": 2442,
-      "usd": 0.010184,
-      "input": 10173,
-      "cache_read": 30148,
+      "ttft_ms": 1322,
+      "first_words_ms": 1322,
+      "done_ms": 2425,
+      "usd": 0.010718,
+      "input": 9674,
+      "cache_read": 42271,
       "output": 78,
       "calls": 3,
       "breaks": {
@@ -1045,8 +1107,8 @@
         "messages": 0,
         "none": 1
       },
-      "cross_run_break": "tools",
-      "hit": 74.8
+      "cross_run_break": "system",
+      "hit": 81.4
     }
   }
 }

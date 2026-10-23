@@ -96,7 +96,9 @@ const HOOK_HELP: Record<HookKind, { how: Bi; ph: string }> = {
   webhook: { how: B("In Zapier, start a Zap with the Webhooks by Zapier trigger; in Make, a Custom webhook; in n8n, a Webhook node. Paste the https address it gives you. Add a signing secret if your system checks Standard Webhooks signatures.", "在 Zapier 中用 Webhooks by Zapier 触发器开始一个 Zap；在 Make 中用 Custom webhook；在 n8n 中用 Webhook 节点。粘贴它给出的 https 地址。如果您的系统会校验 Standard Webhooks 签名，请填写签名密钥。"), ph: "https://hooks.zapier.com/hooks/catch/..." },
 };
 /** Which provider's app keys a sign-in connection needs. */
-const PROVIDER_OF: Partial<Record<IntegrationKind, keyof api.Availability>> = { gmail: "google", gcal: "google", gdrive: "google", outlook_mail: "microsoft", outlook_cal: "microsoft", dropbox: "dropbox", quickbooks: "quickbooks", square: "square", toast: "toast" };
+const PROVIDER_OF: Partial<Record<IntegrationKind, keyof api.Availability>> = { gmail: "google", gcal: "google", gdrive: "google", outlook_mail: "microsoft", outlook_cal: "microsoft", dropbox: "dropbox", quickbooks: "quickbooks", square: "square", toast: "toast",
+  gbp: "gbp", clover: "clover", shopify: "shopify", xero: "xero", dropbox_sign: "dropbox_sign" };
+const PLACES_WHY = B("Your stores' addresses, phones and hours, so Odelia adds stores and fills those lines on forms without asking again", "门店地址、电话和营业时间，Odelia 据此添加门店并填写表格中的这些栏目，无需再问");
 const POS_WHY = B("Monthly sales for sales tax and permit fees, the team's schedules and hours for labor-law and food handler checks", "月度销售额用于销售税和许可费，团队排班和工时用于劳动法和食品从业人员证检查");
 
 type Item = { kind: IntegrationKind | "feed"; name: string; zh?: string; why: Bi; logo?: string; wide?: boolean; hook?: boolean; bot?: boolean };
@@ -132,6 +134,15 @@ const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
     { kind: "square", name: "Square", why: POS_WHY, logo: squareLogo },
     { kind: "toast", name: "Toast", why: POS_WHY, logo: toastLogo, wide: true },
     { kind: "quickbooks", name: "QuickBooks", why: B("Gross receipts for business tax and renewals", "营业总额用于营业税和续期"), logo: qbLogo },
+    { kind: "xero", name: "Xero", why: B("The company's legal name, addresses and tax number for the forms", "公司法定名称、地址和税号，用于填写表格") },
+  ] },
+  { group: B("Stores and locations", "门店与地点"), items: [
+    { kind: "gbp", name: "Google Business Profile", zh: "Google 商家资料", why: PLACES_WHY },
+    { kind: "clover", name: "Clover", why: PLACES_WHY },
+    { kind: "shopify", name: "Shopify", why: PLACES_WHY },
+  ] },
+  { group: B("Signatures", "签署"), items: [
+    { kind: "dropbox_sign", name: "Dropbox Sign", why: B("Send the papers a filing needs from someone else, like the landlord's authorization letter, for signature, and see who has signed", "把申报需要他人签署的文件（如房东授权信）发出签署，并查看谁已签署") },
   ] },
 ];
 
@@ -203,6 +214,15 @@ function Integrations() {
   // done: WeChat is connected and the form stays to show what goes into WeChat's console (the Token and key aren't shown again)
   const [bot, setBot] = useState<{ kind: api.BotKind; setup: api.BotSetup | null; v: Record<string, string>; busy?: boolean; done?: boolean } | null>(null);
   const [toast, setToast] = useState<{ code: string | null; busy?: boolean } | null>(null);
+  // Shopify's store address, or Dropbox Sign's API key: one line typed before connecting
+  const [ask, setAsk] = useState<{ kind: "shopify" | "dropbox_sign"; v: string; busy?: boolean } | null>(null);
+  const submitAsk = async () => {
+    if (!ask || !cloud) return;
+    if (ask.kind === "shopify") { await cloud.connect("shopify", { shop: ask.v.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "") }); return; }
+    setAsk({ ...ask, busy: true });
+    const ok = await cloud.connectSign(ask.v.trim());
+    setAsk(ok ? null : { ...ask, busy: false });
+  };
   const openBot = async (kind: api.BotKind) => {
     if (bot?.kind === kind) { setBot(null); return; }
     setForm(null); setToast(null); setBot({ kind, setup: null, v: kind === "lark_bot" ? { domain: zh ? "feishu" : "lark" } : {} });
@@ -260,6 +280,7 @@ function Integrations() {
               else if (c) right = <Btn kind="warm" guard onClick={() => void cloud!.disconnect(it.kind as IntegrationKind)}>{zh ? "断开" : "Disconnect"}</Btn>;
               else if (soon) right = <em className="lock">{zh ? "即将开放" : "Opens soon"}</em>;
               else if (it.kind === "toast") right = <Btn guard kind="line" onClick={() => (cloud ? void openToast() : demo())}>{zh ? "连接" : "Connect"}</Btn>;
+              else if (it.kind === "shopify" || it.kind === "dropbox_sign") right = <Btn guard kind="line" onClick={() => (cloud ? setAsk(a => (a?.kind === it.kind ? null : { kind: it.kind as "shopify" | "dropbox_sign", v: "" })) : demo())}>{zh ? "连接" : "Connect"}</Btn>;
               else if (it.bot) right = <Btn guard kind="line" onClick={() => (cloud ? void openBot(it.kind as api.BotKind) : demo())}>{zh ? "设置" : "Set up"}</Btn>;
               else if (viaLink) right = <Btn guard kind="line" onClick={() => (cloud ? openForm(it.kind as HookKind) : demo())}>{zh ? "连接" : "Connect"}</Btn>;
               else right = <Btn guard kind="line" onClick={() => (cloud ? void cloud.connect(it.kind as IntegrationKind) : demo())}>{zh ? "连接" : "Connect"}</Btn>;
@@ -290,6 +311,17 @@ function Integrations() {
           <form className="sst-act" onSubmit={e => { e.preventDefault(); void checkToast(); }}>
             {toast.code && <button type="button" className="sbtn quiet" onClick={() => copy(toast.code!)}><I.copy />{zh ? "复制代码" : "Copy code"}</button>}
             <button type="submit" className="sbtn ink" disabled={toast.busy || !toast.code}>{toast.busy ? (zh ? "正在检查…" : "Checking...") : (zh ? "检查并连接" : "Check and connect")}</button>
+          </form>
+        </SetSheet>
+      )}
+      {ask && !conn(ask.kind) && (
+        <SetSheet title={(zh ? "连接" : "Connect ") + nameOf(ask.kind)} sub={b(ask.kind === "shopify" ? PLACES_WHY : B("Papers a filing needs from someone else, sent for signature from your own Dropbox Sign account", "申报需要他人签署的文件，从您自己的 Dropbox Sign 账户发出签署"))} onClose={() => setAsk(null)}>
+          <p>{ask.kind === "shopify"
+            ? (zh ? "输入您的 Shopify 店铺地址（如 your-store.myshopify.com），然后在 Shopify 中批准。快哉只读取门店地点，不会更改 Shopify 中的任何内容。" : "Type your store's Shopify address, like your-store.myshopify.com, then approve in Shopify. Placetta reads your locations only and changes nothing in Shopify.")
+            : (zh ? "在 Dropbox Sign 中：设置 → API，复制 API 密钥并粘贴到这里。密钥加密保存，只有所有者能用它发送文件，每次发送都记入审计日志。" : "In Dropbox Sign: Settings, API. Copy the API key and paste it here. It's kept encrypted, only an owner can send with it, and every send is in the audit log.")}</p>
+          <form className="sst-form" onSubmit={e => { e.preventDefault(); void submitAsk(); }}>
+            <input type={ask.kind === "shopify" ? "text" : "password"} required autoFocus value={ask.v} onChange={e => setAsk({ ...ask, v: e.target.value })} placeholder={ask.kind === "shopify" ? "your-store.myshopify.com" : (zh ? "API 密钥" : "API key")} aria-label={ask.kind === "shopify" ? (zh ? "Shopify 店铺地址" : "Shopify store address") : (zh ? "Dropbox Sign API 密钥" : "Dropbox Sign API key")} spellCheck={false} autoComplete="off" />
+            <div className="sst-act"><button type="submit" className="sbtn ink" disabled={ask.busy || !ask.v.trim()}>{ask.busy ? (zh ? "正在检查…" : "Checking...") : (zh ? "连接" : "Connect")}</button></div>
           </form>
         </SetSheet>
       )}

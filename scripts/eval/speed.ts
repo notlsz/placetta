@@ -8,7 +8,9 @@
                 vendor's cached rate
      time       Placetta's own time is measured; each model call adds a modeled latency: time to first token 350 ms
                 plus 0.04 ms per uncached input token, then 80 output tokens a second (a Flash or Sonnet class model)
-   Time to first token is when the first call that writes words to the person starts streaming them. Pure, tested in
+   Time to first token is when the first call that writes words to the person starts streaming them. First words is
+   when the person first sees an answer: that, or Placetta's own first line from the registry (src/plan/instant.ts) if
+   it comes sooner, counted when the run puts it in the draft. Pure, tested in
    scripts/eval/harness-test.ts. The numbers compare one build with another; only a live run gives real ones. */
 import { tokenCount } from "../../src/odeliaMemory/retrieve";
 import { costOf } from "../../supabase/functions/_shared/ai_cost";
@@ -57,6 +59,9 @@ export class SimClock {
     return this.add(simCall(this.prev, req, out, model), req);
   }
   coldBreak: Break | null = null;
+  /** When Placetta itself first put words in the draft (src/plan/instant.ts), on the same clock as the model's. */
+  wordsMs: number | null = null;
+  words(): void { if (this.wordsMs === null) this.wordsMs = this.now() - this.start + this.modelMs; }
   private add(c: SimCall, req: string): SimCall {
     if (c.text && this.firstTokenMs === null) this.firstTokenMs = this.now() - this.start + this.modelMs + c.ttftMs;
     this.prev = req; this.modelMs += c.ms; this.usd += c.usd; this.input += c.input; this.read += c.read; this.output += c.output; this.calls++;
@@ -64,7 +69,8 @@ export class SimClock {
   }
   done() {
     const total = this.now() - this.start + this.modelMs;
-    return { ttft_ms: Math.round(this.firstTokenMs ?? total), done_ms: Math.round(total), usd: Math.round(this.usd * 1e6) / 1e6, input: this.input, cache_read: this.read, output: this.output, calls: this.calls, breaks: { ...this.breaks }, cross_run_break: this.coldBreak,
+    const ttft = this.firstTokenMs ?? total;
+    return { ttft_ms: Math.round(ttft), first_words_ms: Math.round(Math.min(ttft, this.wordsMs ?? Infinity)), done_ms: Math.round(total), usd: Math.round(this.usd * 1e6) / 1e6, input: this.input, cache_read: this.read, output: this.output, calls: this.calls, breaks: { ...this.breaks }, cross_run_break: this.coldBreak,
       hit: this.input + this.read ? Math.round((1000 * this.read) / (this.input + this.read)) / 10 : 0 };
   }
 }
@@ -75,7 +81,8 @@ const pct = (xs: number[], p: number) => { const s = [...xs].sort((a, b) => a - 
 export function speedSummary(sims: Sim[]) {
   const m = (f: (s: Sim) => number) => pct(sims.map(f), 50), p = (f: (s: Sim) => number) => pct(sims.map(f), 95);
   const read = sims.reduce((a, s) => a + s.cache_read, 0), input = sims.reduce((a, s) => a + s.input, 0);
-  return { runs: sims.length, ttft_p50_ms: m(s => s.ttft_ms), ttft_p95_ms: p(s => s.ttft_ms), done_p50_ms: m(s => s.done_ms), done_p95_ms: p(s => s.done_ms),
+  return { runs: sims.length, ttft_p50_ms: m(s => s.ttft_ms), ttft_p95_ms: p(s => s.ttft_ms),
+    first_words_p50_ms: m(s => s.first_words_ms ?? s.ttft_ms), first_words_p95_ms: p(s => s.first_words_ms ?? s.ttft_ms), done_p50_ms: m(s => s.done_ms), done_p95_ms: p(s => s.done_ms),
     usd_p50: m(s => s.usd), usd_p95: p(s => s.usd), usd_mean: sims.length ? Math.round((sims.reduce((a, s) => a + s.usd, 0) / sims.length) * 1e6) / 1e6 : 0,
     prompt_tokens_p50: m(s => s.input + s.cache_read), cache_hit_pct: input + read ? Math.round((1000 * read) / (input + read)) / 10 : 0,
     cross_run_breaks: sims.reduce((a, s) => { if (s.cross_run_break) a[s.cross_run_break]++; return a; }, { tools: 0, system: 0, messages: 0, none: 0 } as Record<Break, number>),
