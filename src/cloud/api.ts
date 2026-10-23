@@ -871,6 +871,18 @@ export async function ttsAudio(ws: string, text: string, lang: string): Promise<
   return res.arrayBuffer();
 }
 
+/** A recorded clip to text, for browsers with no speech recognition of their own (supabase/functions/tts, multipart:
+ *  Whisper on Groq). null when it can't be done here; the caller says so. */
+export async function transcribe(ws: string, clip: Blob, lang: "en" | "zh"): Promise<string | null> {
+  const s = await getSession(); if (!s) return null;
+  const form = new FormData();
+  form.set("workspace_id", ws); form.set("lang", lang); form.set("audio", clip, "clip." + (/mp4/.test(clip.type) ? "mp4" : /ogg/.test(clip.type) ? "ogg" : "webm"));
+  const res = await net(`${URL_}/functions/v1/tts`, { method: "POST", headers: { apikey: KEY, Authorization: `Bearer ${s.access_token}` }, body: form }).catch(() => null);
+  if (!res?.ok) return null;
+  const j = await res.json().catch(() => null) as { text?: string } | null;
+  return typeof j?.text === "string" ? j.text : null;
+}
+
 /* ------------------------------ integrations ------------------------------ */
 
 export async function listIntegrations(ws: string): Promise<Integration[]> {

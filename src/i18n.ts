@@ -222,7 +222,10 @@ export const S = {
   foot_sample: B("This is a sample workspace with made-up data. Nothing you enter leaves this page.", "这是使用虚构数据的示例工作区，您输入的任何内容都不会离开此页面。"),
 
   listening: B("Listening", "正在听"),
-  tapDone: B("Speak naturally. Tap Done when you've finished.", "自然地说，说完点“完成”。"),
+  tapDone: B("Speak naturally. Tap Done to check it before it goes, or Send.", "自然地说。点“完成”先看一眼再发，或直接点“发送”。"),
+  recording: B("Recording a voice note. Tap Done and it turns into text you can check.", "正在录语音。点“完成”即转成文字，您可以先看一眼。"),
+  transcribing: B("Turning your voice note into text", "正在把语音转成文字"),
+  sttFailed: B("That voice note couldn't be turned into text. Try again, or type it.", "这段语音没能转成文字。请再试一次，或改为打字。"),
   done: B("Done", "完成"),
   close: B("Close", "关闭"),
   simNote: B("This shared preview can't use your microphone, so the glow is following a simulated voice. Open the Placetta Agent file on your computer to talk to it yourself.", "此共享预览无法使用麦克风，因此光效跟随的是模拟语音。在电脑上打开 Placetta Agent 文件即可亲自对话。"),

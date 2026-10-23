@@ -429,6 +429,8 @@ em.ok i { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-in
 .ic { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: var(--ink2); transition: background .15s, color .15s; }
 .ic:hover:not(:disabled) { background: var(--mist2); color: var(--ink); }
 .ic.mic { color: var(--blue-ink); }
+/* on a phone the mic is the easy way in: a bigger target and a bigger icon, no background behind it */
+@media (max-width: 559px) { .c-dock .composer .ic.mic { width: 48px; height: 48px; } .c-dock .composer .ic.mic svg { width: 24px; height: 24px; } .vbar { gap: 8px; } .vbtn { padding: 0 16px; } }
 .ic:disabled { opacity: .4; }
 .sendb { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: var(--on-ink); transition: background .15s; }
 .sendb:disabled { background: var(--mist2); color: var(--ink3); }

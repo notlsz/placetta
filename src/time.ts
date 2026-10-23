@@ -45,7 +45,8 @@ export const fmtIn = (n: number, lang: Lang) => {
 };
 
 export const money = (n: number, currency = "USD") => {
-  if (currency === "USD") return "$" + n.toLocaleString("en-US");
+  // whole dollars as they are; cents always as two digits ($6,032.60, never $6,032.6 or a float's $6,032.600000001)
+  if (currency === "USD") { const c = Math.round(n * 100) / 100; return "$" + c.toLocaleString("en-US", c % 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : undefined); }
   try { return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: n % 1 ? 2 : 0 }).format(n); } catch { return `${n.toLocaleString("en-US")} ${currency}`; }
 };
 export const bytes = (n: number) => (n >= 1_000_000 ? (n / 1_000_000).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1000)) + " KB");
