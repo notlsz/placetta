@@ -211,7 +211,7 @@ async function phone(req: Request, body: Record<string, unknown>, action: "agenc
   const f = await filingOf(a.ws, body.filing_id);
   if (!f) return fail(404, "not_found", "That filing wasn't found.");
   const r = await viaOdeliaVoice(action, { workspace_id: a.ws, filing_id: f.id, user_id: a.user.id, lang: body.lang === "zh" ? "zh" : "en" });
-  return json(r.ok ? 200 : 409, r);
+  return json(200, r);   // a refusal is an answer: it says what happens instead
 }
 
 async function list(req: Request, body: Record<string, unknown>) {

@@ -398,7 +398,30 @@ export async function markPaid(id: string) {
 
 /** One filing's timeline (migration 20261026120000_status_tracking): every event with its source, time and confidence,
     newest first, and when the daily status check last looked. Null before the migration is applied. */
-export type TimelineEvent = { at: string; kind: string; status: string | null; title: Bi; source: string; confidence: number | null; url: string | null };
+export type TimelineEvent = { at: string; kind: string; status: string | null; title: Bi; source: string; confidence: number | null; url: string | null; call_id?: string | null };
+
+/* ------------------------------ voice: talking with Odelia, agency calls, listening back ------------------------------ */
+
+export type VoiceMode = "talk" | "interpreter" | "rehearse";
+/** What the browser gets to talk to the voice brain: a short-lived key and where to connect, never the instructions. */
+export type VoiceSession = { call_id: string; secret: string; connect: { kind: "webrtc" | "websocket"; url: string }; max_minutes: number };
+export type CallLine = { who: string; at: number; text?: string; said?: string; translated?: string; lang?: "en" | "zh"; missing_terms?: string[] };
+export type CallAction = { kind?: string; at?: string; title?: Bi };
+export type VoiceCall = {
+  id: string; kind: string; direction: string; filing_id: string | null; lang: "en" | "zh"; status: string; consent: string; recorded: boolean;
+  transcript: CallLine[]; summary: Bi | null; actions: CallAction[]; flags: string[]; started_at: string; ended_at: string | null; seconds: number; agency_key: string | null;
+};
+export type Said = { en: string; zh: string };
+export const voiceSession = (ws: string, mode: VoiceMode, lang: "en" | "zh", filingId?: string) => fn<VoiceSession>("voice", { action: "session", workspace_id: ws, mode, lang, ...(filingId ? { filing_id: filingId } : {}) });
+export const voiceEnd = (ws: string, callId: string, seconds: number, transcript: CallLine[]) => fn<{ ok: boolean; summary: Bi }>("voice", { action: "end", workspace_id: ws, call_id: callId, seconds, transcript });
+export const voiceTool = (ws: string, callId: string, name: string, args: Record<string, unknown>) => fn<{ ok: boolean; result: string; start?: string }>("voice", { action: "tool", workspace_id: ws, call_id: callId, name, args });
+export const voiceCalls = (ws: string, filingId?: string) => fn<{ calls: VoiceCall[] }>("voice", { action: "list", workspace_id: ws, ...(filingId ? { filing_id: filingId } : {}) });
+export const callMedia = (ws: string, callId: string) => fn<{ url: string; expires_in: number }>("voice", { action: "media", workspace_id: ws, call_id: callId });
+/** Odelia phones the agency (or brings it into a three-way interpreted call). A refusal says what happens instead. */
+export async function agencyCall(ws: string, filingId: string, lang: "en" | "zh", action: "agency_call" | "interpret_call" = "agency_call"): Promise<{ ok: boolean; say?: Said }> {
+  try { return await fn<{ ok: boolean; say?: Said }>("voice", { action, workspace_id: ws, filing_id: filingId, lang }); }
+  catch (e) { const x = e as ApiError; return { ok: false, say: { en: x.message, zh: x.message_zh ?? x.message } }; }
+}
 export type Timeline = { events: TimelineEvent[]; tracking: { last_checked_at: string | null; next_check_at: string | null; agency_status: string | null; agency_norm: string | null; last_movement_at: string | null; escalated_at: string | null } | null };
 export async function filingTimeline(filingId: string): Promise<Timeline | null> {
   const { data, error } = await supabase().rpc("filing_timeline", { p_filing: filingId });
