@@ -199,7 +199,8 @@ const cell = (c?: Cell) => !c ? "·" : c.u ? `${c.v}✓ ${c.u}?` : `${c.v}✓`;
 function main() {
   const data = JSON.parse(readFileSync("site/guides/data.json", "utf8")) as { cities: { city: string | { en: string }; country: string }[]; coverage: { cities: number; countries: number } };
   const guideCities = data.cities.map(c => ({ city: typeof c.city === "string" ? c.city : c.city.en, country: c.country }));
-  const added = CITIES.filter(c => NEW_COUNTRIES.includes(c.country) || (c.guide && !guideCities.some(g => g.city === c.en) && !["US", "CN"].includes(c.country)))
+  // a city that is already a guide city is listed once, with the guide cities
+  const added = CITIES.filter(c => !guideCities.some(g => g.city === c.en) && (NEW_COUNTRIES.includes(c.country) || (c.guide && !["US", "CN"].includes(c.country))))
     .map(c => ({ city: c.en, country: COUNTRIES.find(k => k.code === c.country)!.en }));
   const rows = [...guideCities, ...added].map(c => rowFor(c.city, c.country));
   const bad = rows.filter(r => r.status === "no jurisdiction");
@@ -213,7 +214,7 @@ function main() {
   p();
   p("## The claim");
   p();
-  p(`The landing page says "Licenses and permits in 92 cities worldwide" and the about page "92 cities in 22 countries, 12 kinds of business and 481 official forms". The guides data (site/guides/data.json) lists ${data.coverage.cities} cities in ${data.coverage.countries} countries, so the number matches what the guides publish. It does not mean every city is fully covered: below, ${rows.filter(r => guideCities.some(g => g.city === r.city) && r.status === "covered").length} of the 92 have a verified filing for every core step, ${rows.filter(r => guideCities.some(g => g.city === r.city) && r.status === "partial").length} are partial and ${rows.filter(r => guideCities.some(g => g.city === r.city) && r.status === "unverified").length} rest mostly on unverified rows. The registry now holds ${total} entries (${proved} with a proof read from the official page, ${total - proved} unverified), up from 481. The landing copy was not changed.`);
+  p(`The landing page says "Licenses and permits in 92 cities worldwide" and the about page "92 cities in 22 countries, 12 kinds of business and 481 official forms". The guides data (site/guides/data.json) lists ${data.coverage.cities} cities in ${data.coverage.countries} countries, so the number matches what the guides publish. It does not mean every city is fully covered: below, ${rows.filter(r => guideCities.some(g => g.city === r.city) && r.status === "covered").length} of the ${guideCities.length} have a verified filing for every core step, ${rows.filter(r => guideCities.some(g => g.city === r.city) && r.status === "partial").length} are partial and ${rows.filter(r => guideCities.some(g => g.city === r.city) && r.status === "unverified").length} rest mostly on unverified rows. The registry now holds ${total} entries (${proved} with a proof read from the official page, ${total - proved} unverified), up from 481. The landing copy was not changed.`);
   p();
   p("Each row comes from what the registry returns for a new restaurant (staff, a build-out, a sign, a new company, alcohol) and a new shop at the city. A cell is `n✓ m?`: n filings with a proof (an official quote, URL and read date), m without (UNVERIFIED: the plan row abstains and names the office). `·` means nothing in the registry at that level for that topic. Topics: company, tax, employer, food, building (plan review, occupancy, zoning, signs, fire), licence (local business licence or registration), alcohol.");
   p();
@@ -227,7 +228,7 @@ function main() {
     p("|---|---|---|---|---|---|---|");
     for (const r of rs) {
       const lv = LEVELS.map(l => TOPICS.map(t => r.cells[`${l}:${t}`] ? `${t} ${cell(r.cells[`${l}:${t}`])}` : "").filter(Boolean).join("; ") || "·");
-      p(`| ${r.city}${guideCities.some(g => g.city === r.city) ? "" : NEW_COUNTRIES.includes(r.code?.slice(0, 2) ?? "") ? " (added)" : " (listed, not in the 92)"} | ${r.status} | ${lv.join(" | ")} | ${r.gaps.join("; ") || "none"} |`);
+      p(`| ${r.city}${guideCities.some(g => g.city === r.city) ? "" : NEW_COUNTRIES.includes(r.code?.slice(0, 2) ?? "") ? " (added)" : " (listed, not a guide city)"} | ${r.status} | ${lv.join(" | ")} | ${r.gaps.join("; ") || "none"} |`);
     }
     p();
   }

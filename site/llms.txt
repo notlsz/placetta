@@ -4,7 +4,7 @@
 
 Odelia, Placetta's AI agent, prepares each application from your documents. You review and approve it, then Odelia files it and follows up until the agency decides. When an agency needs a person, in person or on the phone, our team steps in.
 
-Free license guides: 97 cities in 24 countries (41 in the US), 12 kinds of business, 651 official forms, in English and Chinese. Every guide lists the filings in the order they are made, with the agency, how each is filed, the government fee and a link to the agency's own page. Agencies change requirements; check the agency's page before filing. Placetta is not a law firm and does not give legal advice.
+Free license guides: 103 cities in 29 countries (41 in the US), 24 kinds of business, 683 official forms, in English and Chinese. Every guide lists the filings in the order they are made, with the agency, how each is filed, the government fee and a link to the agency's own page. Agencies change requirements; check the agency's page before filing. Placetta is not a law firm and does not give legal advice.
 
 ## 中文简介
 快哉为进入新市场的企业办理执照、许可和登记，并保持有效。快哉为每个门店地址梳理所需的全部执照、许可和登记，填写政府官方表格，经客户批准后提交，并跟踪续期、检查和规则变化。中英文服务。
@@ -46,6 +46,18 @@ Every page has a Markdown copy at the same address ending in .md: [https://www.p
 - [Hot pot restaurants](https://www.placetta.com/guides/business/hot-pot-restaurant.html)
 - [Bakeries](https://www.placetta.com/guides/business/bakery.html)
 - [Dessert shops](https://www.placetta.com/guides/business/dessert-shop.html)
+- [Tech offices and startups](https://www.placetta.com/guides/business/tech-office.html)
+- [Game studios](https://www.placetta.com/guides/business/game-studio.html)
+- [Consumer products brands](https://www.placetta.com/guides/business/consumer-products-brand.html)
+- [Cosmetics and skincare brands](https://www.placetta.com/guides/business/cosmetics-brand.html)
+- [Hair salons and barbershops](https://www.placetta.com/guides/business/hair-salon.html)
+- [Nail salons](https://www.placetta.com/guides/business/nail-salon.html)
+- [Medical device importers and distributors](https://www.placetta.com/guides/business/medical-device-importer.html)
+- [Auto repair shops](https://www.placetta.com/guides/business/auto-repair-shop.html)
+- [Light manufacturing facilities](https://www.placetta.com/guides/business/light-manufacturing.html)
+- [Furniture showrooms and stores](https://www.placetta.com/guides/business/furniture-showroom.html)
+- [Furniture importers and brands](https://www.placetta.com/guides/business/furniture-importer.html)
+- [Furniture makers](https://www.placetta.com/guides/business/furniture-maker.html)
 
 ## Guides by kind of permit
 - [How much permits cost to open in each city](https://www.placetta.com/guides/permits/permit-costs.html)
@@ -123,7 +135,13 @@ Every page has a Markdown copy at the same address ending in .md: [https://www.p
 - [Toronto, Canada](https://www.placetta.com/guides/toronto/)
 - [Vancouver, Canada](https://www.placetta.com/guides/vancouver/)
 - [Montréal, Canada](https://www.placetta.com/guides/montreal/)
+- [Singapore, Singapore](https://www.placetta.com/guides/singapore/)
 - [Nairobi, Kenya](https://www.placetta.com/guides/nairobi/)
+- [Hong Kong, Hong Kong](https://www.placetta.com/guides/hong-kong/)
+- [Sydney, Australia](https://www.placetta.com/guides/sydney/)
+- [Melbourne, Australia](https://www.placetta.com/guides/melbourne/)
+- [Auckland, New Zealand](https://www.placetta.com/guides/auckland/)
+- [Tokyo, Japan](https://www.placetta.com/guides/tokyo/)
 - [Beijing, China](https://www.placetta.com/guides/beijing/)
 - [Shanghai, China](https://www.placetta.com/guides/shanghai/)
 - [Shenzhen, China](https://www.placetta.com/guides/shenzhen/)

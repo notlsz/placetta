@@ -6571,5 +6571,64 @@
   "found": true,
   "sha256": "906c34c1106597e5",
   "context": "otification of a fixed food premises - city of melbourne - victoria description you will need this registration or notification if you intend to operate a food business from a fixed food premises, such as a caf????, shop, or factory. local councils classify all food businesse"
+ },
+ {
+  "id": "nz-company",
+  "read": "https://companies-register.companiesoffice.govt.nz/help-centre/starting-a-company/incorporating-a-company/",
+  "quote": "Before you start an application to incorporate a New Zealand company with the Companies Office, you must create an online account and reserve a company name",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "d1eea0cbd1a32f65",
+  "context": "pany incorporating a company registering your company with the companies office before you start an application to incorporate a new zealand company with the companies office, you must create an online account and reserve a company name. once you have reserved a company name, you have 20 working days to complete th"
+ },
+ {
+  "id": "nz-gst",
+  "read": "https://www.ird.govt.nz/gst/registering-for-gst",
+  "quote": "You must register if you are an entity and either of these apply to you:",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "6c2c85ff96f23cbd",
+  "context": " do not have to register gst just because you start a business or organisation. you must register if you are an entity and either of these apply to you: you carry out a taxable activity and your turnover was at least $60,000 in the "
+ },
+ {
+  "id": "akl-food-registration",
+  "read": "https://aucklandcouncil.govt.nz/en/licences-regulations/business-licences/food-businesses-quality-grading/open-food-business/apply-food-registration.html",
+  "quote": "You have to register your food business with a registration authority.",
+  "checked": "2026-10-23",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 406; read with WebFetch on 2026-10-23"
+ },
+ {
+  "id": "jp-company-registration",
+  "read": "https://www.moj.go.jp/EN/MINJI/m_minji06_00003.html",
+  "quote": "must prepare an application form for registration, attach the prescribed documents to it and submit them to the registry office",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "e0cf288e683f0e17",
+  "context": "rporation, the person who is to perform the duty) or the agent of the applicant must prepare an application form for registration, attach the prescribed documents to it and submit them to the registry office with jurisdiction over the location of the head office of the limited liability"
+ },
+ {
+  "id": "jp-nta-establishment",
+  "read": "https://www.nta.go.jp/english/Guidelines_pdf/01.pdf",
+  "quote": "I hereby give notification on the establishment of a new domestic corporation",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "775b98a8a68e5698",
+  "context": "ncipal office tel day 電話() ―) ― to 〒 令和 年 月 日 納 税 法 税務署長殿 新たに内国法人を設立した ので届け出ます。 i hereby give notification on the establishment of a new domestic corporation. 設 立 年 月 日 番 （フリガナ） representative's name 代 表 者 氏 名 〒 representative's address "
+ },
+ {
+  "id": "tyo-food-business-permit",
+  "read": "https://www.hokeniryo1.metro.tokyo.lg.jp/shokuhin/eng/shoukai/gyoumu.html",
+  "quote": "The Public Health Centers license business facilities such as restaurants, food stores, and manufacturers",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "46afa75082381583",
+  "context": " of public health offices duties of public health offices public health centers the public health centers license business facilities such as restaurants, food stores, and manufacturers; supervise and provide instructional guidance for these facilities; and hold se"
  }
 ]

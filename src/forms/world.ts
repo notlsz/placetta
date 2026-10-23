@@ -68,6 +68,8 @@ export const COUNTRIES: Country[] = [
   // added for the expansion cities of 2026-10-23 (src/forms/expansion.ts): neither code is a US state's
   { code: "HK", en: "Hong Kong", zh: "中国香港", currency: "HKD", names: /\bhong kong\b|香港/i },
   { code: "AU", en: "Australia", zh: "澳大利亚", currency: "AUD", names: /\baustralia\b|澳大利亚|澳洲/i },
+  { code: "NZ", en: "New Zealand", zh: "新西兰", currency: "NZD", names: /new zealand|新西兰/i },
+  { code: "JP", en: "Japan", zh: "日本", currency: "JPY", names: /\bjapan\b|日本/i },
   { code: "MX", en: "Mexico", zh: "墨西哥", currency: "MXN", names: /(?<!new )\bmexico\b|(?<!新)墨西哥|\bcdmx\b|quintana roo|nuevo leon|\bjalisco\b/i },
 ];
 
@@ -109,6 +111,8 @@ export const CITIES: City[] = [
   c("HK-HKG", "HK", "Hong Kong", "香港", ["hong kong", "香港", "kowloon", "九龙", "tsim sha tsui", "尖沙咀", "causeway bay", "铜锣湾"]),
   c("AU-SYD", "AU", "Sydney", "悉尼", ["sydney, nsw", "sydney, new south wales", "sydney, australia", "sydney nsw", "sydney", "悉尼"], true, "AU-NSW"),
   c("AU-MEL", "AU", "Melbourne", "墨尔本", ["melbourne, vic", "melbourne, victoria", "melbourne, australia", "melbourne vic", "melbourne", "墨尔本"], true, "AU-VIC"),
+  c("NZ-AKL", "NZ", "Auckland", "奥克兰", ["auckland", "奥克兰"]),
+  c("JP-TYO", "JP", "Tokyo", "东京", ["tokyo", "東京", "东京", "shinjuku", "新宿", "shibuya", "涩谷", "ginza", "银座"]),
   c("ZA-JNB", "ZA", "Johannesburg", "约翰内斯堡", ["johannesburg", "sandton", "约翰内斯堡"], false),
   c("MA-CAS", "MA", "Casablanca", "卡萨布兰卡", ["casablanca", "卡萨布兰卡"], false),
 
