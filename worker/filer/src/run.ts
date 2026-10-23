@@ -4,9 +4,9 @@
 // Isolation between runs (and so between customers): every run opens its own browser session (open(): a new Chromium
 // process with a new, empty browser context, or a new Browserbase session) and gets its own temporary folder for the
 // files it uploads. The session must start empty (no cookies, one blank page) or the run is refused before it visits
-// anything. When the run ends, however it ends, the browser is closed and the folder deleted. Runs go one at a time in
-// one worker container: this is per-run browser and file isolation inside that container, not a separate virtual
-// machine per run.
+// anything. When the run ends, however it ends, the browser is closed and the folder deleted. Up to FILER_CONCURRENCY
+// runs go side by side in one worker container (main.ts), never two for one workspace on one portal: this is per-run
+// browser and file isolation inside that container, not a separate virtual machine per run.
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -15,6 +15,7 @@ import { confirmPattern, fieldFor, isFinal, mustStop, onPortal, optionFor, revie
 import type { Model } from "./model.ts";
 import { headingOf, locate, pageState } from "./page.ts";
 import { finalOn, type FormSteps, guideLines, payOn, type Playbook } from "./playbooks.ts";
+import { backoffMinutes, heal, type KeyLock, portalDown, receiptCheck, receiptLine } from "./heal.ts";
 import type { Store } from "./store.ts";
 import { harden, linkAllowed, safeConfirm, wipe, withTimeout, type Blocked } from "./sandbox.ts";
 import { scoreText } from "../../../supabase/functions/_shared/injection.ts";
@@ -35,6 +36,7 @@ export type Config = {
   beforeSubmitClick?(f: Filing): Promise<void>;        // tests: kill the run right after submit_clicked_at
   tmpRoot?: string;                                    // where each run's own folder is made (the system's temp folder)
   runMs?: number;                                      // the whole run's hard limit (default maxMs + holdMs + 5 minutes)
+  lock?: KeyLock;                                      // shared by the worker's slots: one run per workspace and portal at a time
 };
 
 const PAY = {
@@ -80,6 +82,7 @@ type Ctx = {
   f: Filing; host: string; hosts: string[]; login: Login | null; page: Page; session: Session; trace: TraceStep[]; t0: number; files: Map<string, string>;
   dir: string;                                         // this run's own folder, deleted when it ends
   pb: { playbook: Playbook; form: FormSteps } | null; seen?: string; pages?: number;
+  drift?: string[];                                    // recorded selectors found again by their words this run
 };
 /** The URL is on the portal or one of the other hosts its destination names. */
 const onAny = (url: string, hosts: string[]) => hosts.some((h) => onPortal(url, h));
@@ -93,7 +96,9 @@ export class Worker {
   async once(): Promise<boolean> {
     const f = await this.c.store.claim();
     if (!f) return false;
-    await this.run(f);
+    // two slots never run one workspace's filings on the same portal at once (one saved login, one session)
+    const host = this.c.portalOf(f.payload.official ?? "") ?? "";
+    await (this.c.lock ? this.c.lock.run(`${f.workspace_id}|${host}`, () => this.run(f)) : this.run(f));
     return true;
   }
 
@@ -173,6 +178,8 @@ export class Worker {
       res ??= await this.drive(ctx, skill?.enabled ? "The recorded steps stopped matching this page; carry on from here." : undefined);
       for (const b of blocked.slice(0, 10)) ctx.f = await store.step(ctx.f, log(`Refused ${b.kind === "navigation" ? "to leave the agency's site" : b.kind === "scheme" ? "a local or script address" : b.kind === "download" ? "a download" : b.kind === "dialog" ? "a pop-up dialog" : "a new window"}`, `已拒绝${b.kind === "download" ? "下载" : b.kind === "dialog" ? "弹出对话框" : b.kind === "popup" ? "新窗口" : "离开机构网站或打开本地地址"}`, "refused", b.detail));
       await this.finish(ctx.f, res, ctx);
+      // selector drift goes to the team once per run, whatever the run's end: the recorded skill needs a look
+      if (ctx.drift?.length) await store.teamTask(ctx.f, "selector_drift", `${key}: ${ctx.drift.length} recorded step${ctx.drift.length === 1 ? "" : "s"} found again by their words; check the skill`, { key, drift: ctx.drift });
       if (res.kind === "submitted") await this.learn(key, ctx.f, res, skill);
       return res;
     } catch (e) {
@@ -345,9 +352,18 @@ export class Worker {
   // ---------------------------------------------------------------- replay and drive
 
   private async replay(ctx: Ctx, skill: Skill): Promise<Exec> {
-    for (const s of skill.body.steps) {
+    for (const s0 of skill.body.steps) {
       const st = await pageState(ctx.page);
-      if (headingOf(st) !== s.heading || !(await locate(ctx.page, s.selector).count())) return { ok: false, error: "page changed" };
+      if (headingOf(st) !== s0.heading) return { ok: false, error: "page changed" };
+      let s = s0;
+      if (!(await locate(ctx.page, s0.selector).count())) {
+        // the step's control moved or was relabelled: found again by its words, only when exactly one matches
+        const healed = heal(s0.selector, st, s0.action);
+        if (!healed || !(await locate(ctx.page, healed).count())) return { ok: false, error: "page changed" };
+        s = { ...s0, selector: healed };
+        ctx.drift = [...(ctx.drift ?? []), `${s0.selector} -> ${healed}`];
+        ctx.f = await this.c.store.step(ctx.f, log("The agency's page changed a little; found the same field again by its words", "机构页面略有变化，已按文字重新找到同一字段", "drift", `${s0.selector} -> ${healed}`.slice(0, 200)));
+      }
       const value = s.action === "fill" && s.field ? ctx.f.payload.fields?.find((x) => x.label.en === s.field)?.value
         : s.action === "select" && s.field ? ctx.f.payload.fields?.find((x) => x.label.en === s.field)?.value : undefined;
       if ((s.action === "fill" && !s.login && value === undefined) || (s.action === "select" && value === undefined)) return { ok: false, error: "no value" };
@@ -416,9 +432,13 @@ export class Worker {
   private async done(ctx: Ctx, confirmation: string, summary: string, replayed: boolean): Promise<Result> {
     const st = await pageState(ctx.page);
     const png = await ctx.page.screenshot({ fullPage: true });
-    let path = await this.c.store.saveDoc(ctx.f, "confirmation.png", png, "image/png");
-    try { const pdf = await ctx.page.pdf(); path = (await this.c.store.saveDoc(ctx.f, "confirmation.pdf", pdf, "application/pdf")) ?? path; } catch { /* not headless */ }
-    (ctx as Ctx & { receipt?: string | null; pattern?: string | null }).receipt = path;
+    const shot = await this.c.store.saveDoc(ctx.f, "confirmation.png", png, "image/png");
+    let pdfPath: string | null = null;
+    try { const pdf = await ctx.page.pdf(); pdfPath = await this.c.store.saveDoc(ctx.f, "confirmation.pdf", pdf, "application/pdf"); } catch { /* not headless */ }
+    (ctx as Ctx & { receipt?: string | null; pattern?: string | null }).receipt = pdfPath ?? shot;
+    // the receipt checklist: what Placetta kept as proof, ticked or missing, in the filing's log for the owner and team
+    const check = receiptCheck({ text: st.text, heading: headingOf(st), confirmation, screenshot: shot, pdf: pdfPath, receiptWords: ctx.pb?.playbook.receipt });
+    ctx.f = await this.c.store.step(ctx.f, { ...receiptLine(check), kind: "receipt_check", ref: JSON.stringify(check).slice(0, 300) });
     const pattern = confirmPattern(st.text, confirmation);
     return { kind: "submitted", confirmation, summary, trace: ctx.trace, seconds: Math.round((Date.now() - ctx.t0) / 1000), replayed, pattern } as Result;
   }
@@ -467,6 +487,10 @@ export class Worker {
       // the owner's packet) before the team files it by hand (supabase/functions/file reroute); the error is in the task
       const g = await this.c.store.step(cur, log("The agency's site failed 3 times. Placetta tries another way the agency takes, or the team files it.", "机构网站 3 次未能完成。快哉会改用机构接受的其他方式，否则由团队提交。", "handoff", "portal_failed"), { agent_state: "handoff", channel: "team" });
       await this.c.store.teamTask(g, "handoff", `Portal run failed 3 times: ${msg}`);
+    } else if (portalDown(msg)) {
+      // the agency's site is down or slow: wait before the next try (2, 10, 30 minutes), not straight back into it
+      const mins = backoffMinutes(cur.attempts), at = new Date(Date.now() + mins * 60_000).toISOString();
+      await this.c.store.step(cur, log(`The agency's site isn't answering. Trying again in ${mins} minutes.`, `机构网站暂时无法访问，${mins} 分钟后重试。`, "retry", msg), { agent_state: "queued", provider_ref: `retry-after:${at}` });
     } else {
       await this.c.store.step(cur, log("Something went wrong on the agency's site. Trying again.", "机构网站出现问题，正在重试。", "retry", msg), { agent_state: "queued" });
     }

@@ -7,6 +7,7 @@ import { playbookFor } from "./playbooks.ts";
 import { type Route, Worker, type Session } from "./run.ts";
 import { dbKey, SupabaseStore } from "./store.ts";
 import { assertNotRoot } from "./sandbox.ts";
+import { KeyLock } from "./heal.ts";
 
 /** The destination's tenant path, other hosts and start page, from destinations.ts like its host. */
 export const routeOf = (id: string): Route | null => {
@@ -42,14 +43,23 @@ export const settings = () => ({
   allowUnverified: process.env.FILER_ALLOW_UNVERIFIED === "1",
 });
 
+/** How many filings run side by side in this container (FILER_CONCURRENCY, 1 to 4, default 1). Each slot has its own
+ *  store (its own run token) and opens its own browser per run; the slots share one lock so a workspace's runs on the
+ *  same portal still go one at a time (heal.ts KeyLock). */
+export const slots = (env: Record<string, string | undefined>) => Math.min(4, Math.max(1, Math.floor(Number(env.FILER_CONCURRENCY ?? "1")) || 1));
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   if (process.env.FILER_ENABLED !== "1") { console.log("FILER_ENABLED is not 1; the portal worker is off."); process.exit(0); }
   assertNotRoot();
-  const store = new SupabaseStore(process.env.SUPABASE_URL!, dbKey(process.env));
-  const w = new Worker({ store, model: new AnthropicModel(process.env.ANTHROPIC_API_KEY!), open: openBrowser, portalOf: (id) => DEST[id]?.portal ?? null,
-    routeOf, playbookOf: playbookFor, ...settings() });
-  for (;;) {
-    try { if (!(await w.once())) await new Promise((r) => setTimeout(r, 5000)); }
-    catch (e) { console.error("worker:", e instanceof Error ? e.message : e); await new Promise((r) => setTimeout(r, 5000)); }
-  }
+  const lock = new KeyLock();
+  const loop = async () => {
+    const store = new SupabaseStore(process.env.SUPABASE_URL!, dbKey(process.env));
+    const w = new Worker({ store, model: new AnthropicModel(process.env.ANTHROPIC_API_KEY!), open: openBrowser, portalOf: (id) => DEST[id]?.portal ?? null,
+      routeOf, playbookOf: playbookFor, lock, ...settings() });
+    for (;;) {
+      try { if (!(await w.once())) await new Promise((r) => setTimeout(r, 5000)); }
+      catch (e) { console.error("worker:", e instanceof Error ? e.message : e); await new Promise((r) => setTimeout(r, 5000)); }
+    }
+  };
+  await Promise.all(Array.from({ length: slots(process.env) }, loop));
 }

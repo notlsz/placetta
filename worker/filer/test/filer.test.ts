@@ -88,6 +88,23 @@ test("fills and submits, saves the confirmation, then replays from the skill wit
   assert.equal(p.submissions, 2);
 });
 
+test("a recorded step whose selector drifted is found again by its words: still no model calls, drift goes to the team, the skill learns the new selector", async () => {
+  const p = await portal(), store = new Mem();
+  assert.equal((await worker(store, new Scripted(), p.url).run(store.f))?.kind, "submitted");
+  const key = portalKey("127.0.0.1", "test-llc"), skill = store.skills.get(key)!;
+  const i = skill.body.steps.findIndex((s) => s.selector === "label:Legal name");
+  assert.ok(i >= 0, "the recording has the Legal name step");
+  skill.body.steps[i] = { ...skill.body.steps[i], selector: "label:LEGAL NAME:" };   // what an old recording of a relabelled page looks like
+  const again = new Mem(); again.skills = store.skills; const m2 = new Scripted();
+  const r = await worker(again, m2, p.url).run(again.f);
+  assert.equal(r?.kind, "submitted");
+  assert.equal(m2.calls, 0, "healed without asking the model");
+  assert.ok(again.f.agent_log.some((e) => e.kind === "drift" && /LEGAL NAME: -> label:Legal name/.test(e.ref ?? "")));
+  assert.ok(again.tasks.includes("selector_drift"), "the team is told the recording drifted");
+  assert.ok(again.skills.get(key)!.body.steps.some((s) => s.selector === "label:Legal name"), "the saved skill has the selector that worked");
+  assert.ok(again.f.agent_log.some((e) => e.kind === "receipt_check" && /confirmation number shown by the agency yes/.test(e.en)), "the receipt checklist is in the log");
+});
+
 test("stops at a CAPTCHA with needs_you and never solves it", async () => {
   const p = await portal({ captcha: true }), store = new Mem();
   const r = await worker(store, new Scripted(), p.url).run(store.f);
