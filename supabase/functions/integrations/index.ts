@@ -55,6 +55,9 @@ import { HOOK_KINDS, HOOK_NAMES, hookHello, hookUrl, isHookKind, postHook, type 
 import { type LarkBot, larkWorks, slackManifest, slackWho } from "../_shared/bots.ts";
 import { type WechatBot, wxCredsWork, wxKeyBytes, wxNewSecrets, type WxTokenProblem } from "../_shared/wechat.ts";
 import { wechatBundle } from "../_shared/wechat_db.ts";
+import { teamsIdsOk, teamsWorks } from "../_shared/teams.ts";
+import { tgBotId, tgDeepLink, tgDeleteWebhook, tgGetMe, tgNewSecret, tgSetWebhook, tgTokenOk } from "../_shared/telegram.ts";
+import { telegramBot } from "../_shared/telegram_db.ts";
 import { type Call, lastFullMonth, monthsBetween, PosError, type SavedToken, squareSales, squareStaff, type ToastCtx, toastMatches, toastPlace, type ToastPlace, toastSales, toastStaff, toastTokens } from "./pos.ts";
 import { mayRead, READ_REFUSED } from "./access.ts";
 import { cloverPlaces, gbpPlaces, type Place, shopifyPlaces, squarePlaces, xeroProfile } from "./places.ts";
@@ -918,12 +921,18 @@ const BOT_NAMES = {
   slack_bot: { en: "Odelia in Slack", zh: "Slack 中的 Odelia" },
   lark_bot: { en: "Odelia in Lark", zh: "飞书中的 Odelia" },
   wechat_bot: { en: "Odelia in WeChat", zh: "微信中的 Odelia" },
+  teams_bot: { en: "Odelia in Microsoft Teams", zh: "Microsoft Teams 中的 Odelia" },
+  telegram_bot: { en: "Odelia in Telegram", zh: "Telegram 中的 Odelia" },
 } as const;
 type BotKind = keyof typeof BOT_NAMES;
-const isBotKind = (v: unknown): v is BotKind => v === "slack_bot" || v === "lark_bot" || v === "wechat_bot";
-/** Where the bot's events go. WeChat's server address is a path, so WeChat's own query string can't collide with ours. */
+const isBotKind = (v: unknown): v is BotKind => typeof v === "string" && Object.hasOwn(BOT_NAMES, v);
+const BOT_KINDS_SAY = "kind must be slack_bot, lark_bot, wechat_bot, teams_bot or telegram_bot.";
+/** Where the bot's events go. WeChat's and Telegram's addresses are paths, so their own query strings can't collide
+ *  with ours. */
 const eventsUrl = (ws: string, kind: BotKind) =>
-  kind === "wechat_bot" ? `${SUPABASE_URL}/functions/v1/chat-events/wechat/${ws}` : `${SUPABASE_URL}/functions/v1/chat-events?${kind === "slack_bot" ? "slack" : "lark"}=${ws}`;
+  kind === "wechat_bot" ? `${SUPABASE_URL}/functions/v1/chat-events/wechat/${ws}`
+  : kind === "telegram_bot" ? `${SUPABASE_URL}/functions/v1/chat-events/telegram/${ws}`
+  : `${SUPABASE_URL}/functions/v1/chat-events?${kind === "slack_bot" ? "slack" : kind === "lark_bot" ? "lark" : "teams"}=${ws}`;
 /** The addresses Placetta calls WeChat from, when they're fixed (WECHAT_EGRESS_IPS, with WECHAT_API_BASE pointing at a
  *  relay on those addresses): what the account's API IP whitelist needs. Empty when calls go straight to WeChat. */
 const egressIps = () => (Deno.env.get("WECHAT_EGRESS_IPS") ?? "").split(/[\s,]+/).filter((ip) => /^[0-9a-fA-F.:]{3,45}$/.test(ip)).slice(0, 10);
@@ -932,7 +941,7 @@ const egressIps = () => (Deno.env.get("WECHAT_EGRESS_IPS") ?? "").split(/[\s,]+/
  *  fresh Token and EncodingAESKey to use (or replace with the account's own) and any addresses to whitelist. */
 const botSetup: Action = async (c) => {
   const kind = c.body.kind;
-  if (!isBotKind(kind)) throw new HttpError("bad_request", "kind must be slack_bot, lark_bot or wechat_bot.");
+  if (!isBotKind(kind)) throw new HttpError("bad_request", BOT_KINDS_SAY);
   return ok({
     events_url: eventsUrl(c.ws, kind),
     ...(kind === "slack_bot" ? { manifest: JSON.stringify(slackManifest(eventsUrl(c.ws, kind)), null, 2) } : {}),
@@ -964,10 +973,28 @@ const WX_PROBLEM: Record<WxTokenProblem, L10n> = {
 /** Save the business's own bot after checking its credentials work. */
 const botConnect: Action = async (c) => {
   const kind = c.body.kind;
-  if (!isBotKind(kind)) throw new HttpError("bad_request", "kind must be slack_bot, lark_bot or wechat_bot.");
+  if (!isBotKind(kind)) throw new HttpError("bad_request", BOT_KINDS_SAY);
   let bundle: Record<string, unknown>, account: string;
   const meta: Record<string, unknown> = { via: "bot" };
-  if (kind === "slack_bot") {
+  // Telegram: the webhook is set (with a fresh secret) once the bot is saved, and undone if saving fails
+  let telegram: { token: string; secret: string } | null = null;
+  if (kind === "teams_bot") {
+    // the bot's ID and a client secret from the Teams Developer Portal (Tools, Bot management), and the Microsoft Entra
+    // tenant it lives in: checked by getting a Bot Framework token with them
+    const app_id = text(c.body.app_id, "app_id", 36, 36).toLowerCase(), app_secret = text(c.body.app_secret, "app_secret", 8, 200), tenant_id = text(c.body.tenant_id, "tenant_id", 36, 36).toLowerCase();
+    if (!teamsIdsOk(app_id, tenant_id)) throw new HttpError("bad_request", "The bot ID and the tenant ID each look like 8c3e5d2a-1b4f-4e6a-9c7d-2f1e0a9b8c7d. Copy them from the Teams Developer Portal and Microsoft Entra.", "机器人 ID 和租户 ID 的格式都类似 8c3e5d2a-1b4f-4e6a-9c7d-2f1e0a9b8c7d。请从 Teams 开发者门户和 Microsoft Entra 复制。");
+    if (!(await teamsWorks({ kind, app_id, app_secret, tenant_id }))) throw new HttpError("bad_request", "Microsoft didn't accept that bot ID, client secret and tenant ID. Check the secret hasn't expired and the tenant is the one the bot was made in.", "Microsoft 不接受这个机器人 ID、客户端密钥和租户 ID。请确认密钥未过期，且租户就是创建机器人的那个。");
+    bundle = { app_id, app_secret, tenant_id }; account = "Microsoft Teams"; meta.app_id = app_id;
+  } else if (kind === "telegram_bot") {
+    const bot_token = text(c.body.bot_token, "bot_token", 30, 80);
+    if (!tgTokenOk(bot_token)) throw new HttpError("bad_request", "That isn't a bot token. @BotFather gives one like 7012345678:AAH9f3kq...", "这不是机器人令牌。@BotFather 给的令牌类似 7012345678:AAH9f3kq...");
+    const me = await tgGetMe(bot_token);
+    if (!me) throw new HttpError("bad_request", "Telegram didn't accept that token. Copy it again from @BotFather (/mybots, your bot, API Token).", "Telegram 不接受这个令牌。请在 @BotFather 中重新复制（/mybots → 您的机器人 → API Token）。");
+    const secret = tgNewSecret();
+    bundle = { bot_token, secret, bot_id: tgBotId(bot_token), username: me.username }; account = `@${me.username}`;
+    meta.bot_id = tgBotId(bot_token); meta.username = me.username;
+    telegram = { token: bot_token, secret };
+  } else if (kind === "slack_bot") {
     const bot_token = text(c.body.bot_token, "bot_token", 20, 200), signing_secret = text(c.body.signing_secret, "signing_secret", 16, 100);
     if (!/^xoxb-/.test(bot_token)) throw new HttpError("bad_request", "That isn't a bot token. Copy the Bot User OAuth Token, which starts with xoxb-.");
     const who = await slackWho(bot_token);
@@ -997,6 +1024,15 @@ const botConnect: Action = async (c) => {
   const secretId = await writeBundle({ access_token: "", refresh_token: null, expires_at: null, token_type: "bot", ...bundle } as never, `integration:${kind}`, null);
   const { error } = await admin.from("integrations").insert({ workspace_id: c.ws, kind, account, scopes: "bot", status: "connected", secret_id: secretId, meta, connected_by: c.user.id });
   if (error) { await dropSecret(secretId); throw new Error(`integration insert failed: ${error.code ?? ""}`); }
+  if (telegram) {
+    // the bot's messages come to this workspace's address, each carrying the secret only Telegram and Placetta know
+    const hook = await tgSetWebhook(telegram.token, eventsUrl(c.ws, kind), telegram.secret);
+    if (!hook.ok) {
+      await admin.from("integrations").delete().eq("workspace_id", c.ws).eq("kind", kind);
+      await dropSecret(secretId);
+      throw new HttpError("bad_request", `Telegram didn't take the webhook (${hook.why}). Try again in a minute.`, `Telegram 没有接受 webhook（${hook.why}）。请一分钟后再试。`);
+    }
+  }
   await audit({ ...you(c), action: { en: `Connected ${BOT_NAMES[kind].en}`, zh: `已连接${BOT_NAMES[kind].zh}` }, object: BOT_NAMES[kind], detail: same(account) });
   return ok({ kind, account, events_url: eventsUrl(c.ws, kind) });
 };
@@ -1035,6 +1071,43 @@ const wechatUnlink: Action = async (c) => {
   const { error } = await admin.from("wechat_links").delete().eq("workspace_id", c.ws).eq("user_id", c.user.id);
   if (error) throw new Error(`wechat unlink failed: ${error.code ?? ""}`);
   await audit({ ...you(c), action: { en: "Unlinked their WeChat", zh: "取消关联了微信" }, object: BOT_NAMES.wechat_bot });
+  return ok({ linked: false });
+};
+
+/* A teammate's own Telegram, the same way: a code to send the workspace's bot (or a t.me link that carries it), whether
+   they're linked, and unlinking. Any member, for themselves only; the settings PIN when it's on. */
+
+const telegramRow = async (ws: string) => {
+  const row = await findIntegration(ws, "telegram_bot" as unknown as Kind);
+  return row && row.status === "connected" ? row : null;
+};
+
+const telegramLink: Action = async (c) => {
+  const row = await telegramRow(c.ws);
+  if (!row) throw new HttpError("not_connected", "An owner needs to connect the Telegram bot first.", "需要所有者先连接 Telegram 机器人。");
+  const { data: pinOk } = await userClient(c.jwt).rpc("pin_ok");
+  if (pinOk === false) throw new HttpError("forbidden", "Unlock settings with your PIN first.", "请先用设置 PIN 解锁。");
+  const { data, error } = await admin.rpc("telegram_link_start", { p_ws: c.ws, p_uid: c.user.id });
+  if (error) {
+    if (/rate_limited/.test(error.message ?? "")) throw new HttpError("rate_limited", "That's 5 codes this hour. Try again later.", "本小时已获取 5 次验证码，请稍后再试。");
+    throw new Error(`telegram link failed: ${error.code ?? ""}`);
+  }
+  const d = data as { code: string; expires_at: string };
+  const username = typeof row.meta?.username === "string" ? row.meta.username : "";
+  return ok({ code: d.code, expires_at: d.expires_at, account: row.account, link: username ? tgDeepLink(username, d.code) : null });
+};
+
+const telegramLinkStatus: Action = async (c) => {
+  const row = await telegramRow(c.ws);
+  const { data } = await admin.from("telegram_links").select("bot_id, linked_at, code_expires_at").eq("workspace_id", c.ws).eq("user_id", c.user.id).maybeSingle();
+  const linked = !!row && !!data?.linked_at && data.bot_id === row.meta?.bot_id;
+  return ok({ connected: !!row, linked, linked_at: linked ? data!.linked_at : null, waiting: !!data?.code_expires_at && Date.parse(data.code_expires_at) > Date.now() });
+};
+
+const telegramUnlink: Action = async (c) => {
+  const { error } = await admin.from("telegram_links").delete().eq("workspace_id", c.ws).eq("user_id", c.user.id);
+  if (error) throw new Error(`telegram unlink failed: ${error.code ?? ""}`);
+  await audit({ ...you(c), action: { en: "Unlinked their Telegram", zh: "取消关联了 Telegram" }, object: BOT_NAMES.telegram_bot });
   return ok({ linked: false });
 };
 
@@ -1325,11 +1398,14 @@ const disconnect: Action = async (c) => {
   const row = await findIntegration(c.ws, kind);
   if (!row) throw new HttpError("not_found", `${name.en} is not connected.`);
   if (row.meta?.via !== "link" && row.meta?.via !== "bot") await revoke(row);
+  // Telegram: stop the bot sending here before its token is dropped (best effort: the secret goes with it anyway)
+  if ((kind as string) === "telegram_bot") { const tg = await telegramBot(admin, c.ws).catch(() => null); if (tg) await tgDeleteWebhook(tg.bot_token).catch(() => false); }
   const { error } = await admin.from("integrations").delete().eq("id", row.id);
   if (error) throw new Error(`integration delete failed: ${error.code ?? ""}`);
   await dropSecret(row.secret_id);
   // the teammates' WeChat links go with the account (a new account means new OpenIDs anyway)
   if ((kind as string) === "wechat_bot") await admin.from("wechat_links").delete().eq("workspace_id", c.ws);
+  if ((kind as string) === "telegram_bot") await admin.from("telegram_links").delete().eq("workspace_id", c.ws);
   await audit({
     ...you(c),
     action: { en: `Disconnected ${name.en}`, zh: `已断开 ${name.zh}` },
@@ -1464,6 +1540,9 @@ const ACTIONS: Record<string, Action> = {
   wechat_link: wechatLink,
   wechat_link_status: wechatLinkStatus,
   wechat_unlink: wechatUnlink,
+  telegram_link: telegramLink,
+  telegram_link_status: telegramLinkStatus,
+  telegram_unlink: telegramUnlink,
   toast_setup: toastSetup,
   toast_connect: toastConnect,
   pos_sales: posSales,

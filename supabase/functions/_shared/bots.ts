@@ -1,17 +1,26 @@
-// Talk to Odelia from Slack, Lark (Feishu) or WeChat. The business creates its own bot in its own Slack or Lark (a few
-// clicks, no app review), or points its own WeChat Official Account at Placetta, pastes the credentials into Placetta,
-// and points the events at chat-events. Mention the bot in a channel, or message it directly, and Odelia takes the job
-// and answers in the same thread (in WeChat, the same chat). The credentials live in the vault; only the server reads
-// them. WeChat's side of it is in wechat.ts.
+// Talk to Odelia from Slack, Lark (Feishu), WeChat, Microsoft Teams or Telegram. The business creates its own bot in its
+// own Slack, Lark, Teams or Telegram (a few clicks, no app review), or points its own WeChat Official Account at
+// Placetta, pastes the credentials into Placetta, and points the events at chat-events. Mention the bot in a channel, or
+// message it directly, and Odelia takes the job and answers in the same thread (in WeChat, the same chat). The
+// credentials live in the vault; only the server reads them. WeChat's side is in wechat.ts, Teams' in teams.ts and
+// Telegram's in telegram.ts; docs/CHANNELS.md compares them all.
 import { type WechatBot, wxSendText } from "./wechat.ts";
+import { type TeamsBot, teamsReply, type TeamsTo } from "./teams.ts";
+import { type TelegramBot, tgSend, type TelegramTo } from "./telegram.ts";
 export type { WechatBot } from "./wechat.ts";
+export type { TeamsBot, TeamsTo } from "./teams.ts";
+export type { TelegramBot, TelegramTo } from "./telegram.ts";
 
 export type SlackBot = { kind: "slack_bot"; bot_token: string; signing_secret: string };
 export type LarkBot = { kind: "lark_bot"; app_id: string; app_secret: string; verification_token: string; encrypt_key?: string; domain: "feishu" | "lark" };
-export type Bot = SlackBot | LarkBot | WechatBot;
-/** Where an answer goes back: the Slack channel and thread, the Lark message to reply to, or the WeChat follower (by
- *  their OpenID for this account). */
-export type ChatTo = { kind: "slack"; channel: string; thread_ts: string } | { kind: "lark"; message_id: string } | { kind: "wechat"; openid: string };
+export type Bot = SlackBot | LarkBot | WechatBot | TeamsBot | TelegramBot;
+/** Where an answer goes back: the Slack channel and thread, the Lark message to reply to, the WeChat follower (by
+ *  their OpenID for this account), the Teams message to reply to (in its thread), or the Telegram message to reply to. */
+export type ChatTo = { kind: "slack"; channel: string; thread_ts: string } | { kind: "lark"; message_id: string } | { kind: "wechat"; openid: string } | TeamsTo | TelegramTo;
+/** The chats a job can come from, each with its bot's integration kind. */
+export const CHAT_KINDS = { slack: "slack_bot", lark: "lark_bot", wechat: "wechat_bot", teams: "teams_bot", telegram: "telegram_bot" } as const;
+export type ChatKind = keyof typeof CHAT_KINDS;
+export const isChatKind = (v: unknown): v is ChatKind => typeof v === "string" && Object.hasOwn(CHAT_KINDS, v);
 
 const enc = new TextEncoder();
 const hex = (b: ArrayBuffer) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
@@ -175,8 +184,13 @@ export async function larkReply(bot: LarkBot, messageId: string, text: string): 
 }
 
 /** Answer in the chat a job came from. tail (the link to an approval) ends the answer; WeChat keeps it whole when a long
- *  answer is cut. save: where a WeChat account's fresh API token goes (the vault), so every instance shares it. */
-export async function chatReply(bot: Bot, to: ChatTo, text: string, o: { tail?: string; save?: (bot: WechatBot) => Promise<void> } = {}): Promise<boolean> {
+ *  answer is cut. button: the approval as a button that opens the app, where the chat has link buttons (Teams,
+ *  Telegram); elsewhere it becomes a line with the link. Never a button that approves anything in the chat itself.
+ *  save: where a WeChat account's fresh API token goes (the vault), so every instance shares it. */
+export async function chatReply(bot: Bot, to: ChatTo, text: string, o: { tail?: string; save?: (bot: WechatBot) => Promise<void>; button?: { label: string; url: string } } = {}): Promise<boolean> {
+  if (bot.kind === "teams_bot" && to.kind === "teams") return await teamsReply(bot, to, text + (o.tail ?? ""), { button: o.button });
+  if (bot.kind === "telegram_bot" && to.kind === "telegram") return (await tgSend(bot, to, text + (o.tail ?? ""), { button: o.button })).ok;
+  if (o.button) o = { ...o, tail: `${o.tail ?? ""}\n\n${o.button.label}: ${o.button.url}` };
   if (bot.kind === "slack_bot" && to.kind === "slack") return await slackPost(bot, { channel: to.channel, thread_ts: to.thread_ts }, text + (o.tail ?? ""));
   if (bot.kind === "lark_bot" && to.kind === "lark") return await larkReply(bot, to.message_id, text + (o.tail ?? ""));
   if (bot.kind === "wechat_bot" && to.kind === "wechat") {

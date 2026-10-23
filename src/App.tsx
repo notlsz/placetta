@@ -1192,6 +1192,10 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
           await api.integration(cloud.wsId, "bot_connect", { kind, ...creds }); setIntegrations(await api.listIntegrations(cloud.wsId));
           say(kind === "wechat_bot"
             ? (lang === "zh" ? "已连接。现在到微信“消息推送”中填写服务器地址、Token 和 EncodingAESKey 并提交，然后每位同事在下方关联自己的微信。" : "Connected. Now save the server address, Token and EncodingAESKey under Message push in WeChat, then each teammate links their WeChat below.")
+            : kind === "telegram_bot"
+            ? (lang === "zh" ? "已连接。每位同事在下方关联一次自己的 Telegram，然后私信机器人，或在群里 @ 它即可派活。" : "Connected. Each teammate links their Telegram once below, then messages the bot, or @mentions it in a group, to give Odelia a job.")
+            : kind === "teams_bot"
+            ? (lang === "zh" ? "已连接。在 Teams 开发者门户把应用发布到您的组织后，私信 Odelia 或在频道里 @Odelia 即可派活。" : "Connected. Once the app is published to your org from the Teams Developer Portal, message Odelia or @mention her in a channel to give her a job.")
             : (lang === "zh" ? "已连接。在频道里 @Odelia 或私信她即可派活。" : "Connected. Mention @Odelia in a channel or message her directly to give her a job."));
           return true;
         } catch (e) { fail(e); return false; }

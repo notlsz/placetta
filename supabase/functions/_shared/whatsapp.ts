@@ -3,10 +3,11 @@
 //
 //   Send     POST https://graph.facebook.com/{v}/{WHATSAPP_PHONE_NUMBER_ID}/messages, Authorization: Bearer WHATSAPP_TOKEN
 //            {messaging_product: "whatsapp", to, type: "text", text: {body, preview_url}}
-//   Window   Free-form replies only within 24 hours of their last message (since Oct 1 2026 the first 1,000 a month per
-//            number are free, then about $0.0034 each in the US). Outside it, only an approved template: Odelia's
-//            updates use one utility template (WHATSAPP_TEMPLATE, "Placetta: {{1}}"). Marketing templates don't deliver
-//            to US numbers at all. Error 131047: the window closed.
+//   Window   Free-form replies only within 24 hours of their last message (each number's first 1,000 service messages a
+//            month are free). Outside it, only an approved template: Odelia's updates (a renewal due, an agency asking
+//            for something) use one utility template (WHATSAPP_TEMPLATE, "Placetta: {{1}}"), $0.0034 each to a US
+//            number; since Oct 1 2026 a utility template costs that inside the window too. Marketing templates don't
+//            deliver to US numbers at all. Error 131047: the window closed. Prices and sources: docs/CHANNELS.md.
 //   Typing   {messaging_product, status: "read", message_id, typing_indicator: {type: "text"}}: marks theirs read and
 //            shows typing for up to 25 seconds
 //   Media    GET /{media id} gives a URL good for 5 minutes, fetched with the same token

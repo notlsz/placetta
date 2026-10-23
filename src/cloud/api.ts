@@ -84,11 +84,11 @@ export const planOf = (b: Billing | null): Plan =>
   !b ? "none" : b.free || b.comped || b.subscription_status === "active" || b.subscription_status === "trialing" ? "monthly" : b.price_model === "simple" ? "simple" : b.entry_markets > 0 ? "entry" : "none";
 export type DocRow = { id: string; workspace_id: string; app_id: string | null; filing_id: string | null; name: string; path: string; size: number; mime: string | null; source: string; created_at: string };
 export type Integration = { id: string; kind: IntegrationKind; account: string | null; status: "connected" | "error"; error: string | null; meta: Record<string, unknown>; connected_at: string; last_used_at: string | null };
-export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "slack_bot" | "lark_bot" | "wechat_bot" | "square" | "toast" | "webhook" | "gbp" | "clover" | "shopify" | "xero" | "dropbox_sign";
+export type IntegrationKind = "gmail" | "gcal" | "gdrive" | "outlook_mail" | "outlook_cal" | "dropbox" | "quickbooks" | "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "slack_bot" | "lark_bot" | "wechat_bot" | "teams_bot" | "telegram_bot" | "square" | "toast" | "webhook" | "gbp" | "clover" | "shopify" | "xero" | "dropbox_sign";
 /** Team chats linked by pasting a group's incoming-webhook link. */
 export type HookKind = "slack" | "lark" | "wecom" | "dingtalk" | "teams" | "webhook";
 /** The business's own Slack or Lark bot, or its own WeChat Official Account: talk to Odelia there. */
-export type BotKind = "slack_bot" | "lark_bot" | "wechat_bot";
+export type BotKind = "slack_bot" | "lark_bot" | "wechat_bot" | "teams_bot" | "telegram_bot";
 /** What to set up before connecting a bot: its event address, Slack's manifest, and for WeChat a Token and
  *  EncodingAESKey to use and any server addresses to whitelist. */
 export type BotSetup = { events_url: string; manifest?: string; token?: string; aes_key?: string; ips?: string[] };
@@ -897,6 +897,10 @@ export const wechatServerUrl = (ws: string) => `${URL_.replace(/\/+$/, "")}/func
 export const wechatLinkStatus = (ws: string) => integration<WechatLink>(ws, "wechat_link_status");
 export const wechatLinkCode = (ws: string) => integration<{ code: string; expires_at: string; account: string | null }>(ws, "wechat_link");
 export const wechatUnlink = (ws: string) => integration<{ linked: false }>(ws, "wechat_unlink");
+/** The same for Telegram: the code (and a t.me link that carries it) goes to the workspace's own bot. */
+export const telegramLinkStatus = (ws: string) => integration<WechatLink>(ws, "telegram_link_status");
+export const telegramLinkCode = (ws: string) => integration<{ code: string; expires_at: string; account: string | null; link: string | null }>(ws, "telegram_link");
+export const telegramUnlink = (ws: string) => integration<{ linked: false }>(ws, "telegram_unlink");
 /** The code an owner types into Toast so Placetta finds their locations. */
 export const toastCode = (ws: string) => integration<{ code: string }>(ws, "toast_setup");
 

@@ -261,6 +261,38 @@ try {
   check("nothing sent out of the sandbox carried A's data", sent.length === 0, sent.map((x) => `${x.service} ${x.path}`));
   const own2 = await http(`/rest/v1/agent_runs?select=prompt&id=eq.${runId}`, { jwt: A.jwt });
   check("A still reads its own run", own2.text.includes(MARK), own2);
+
+  /* ---------------- chat bots: a message can't reach another workspace ---------------- */
+  // A connects a Telegram and a Teams bot (as the integrations function saves them); then requests that aren't from those
+  // bots, or are aimed at B's workspace with A's secret, start nothing anywhere.
+  section("chat bots: a message can't reach another workspace");
+  const TG_SECRET = `tg-secret-${MARK}`;
+  const tgSecretId = (await sql`select public.vault_put(${JSON.stringify({ access_token: "", token_type: "bot", bot_token: "7012345678:AAH9f3kq2Zx0-LmNoPqRsTuVwXyZ_abcdEF", secret: TG_SECRET, bot_id: "7012345678", username: "AcmeOdeliaBot" })}, 'integration:telegram_bot') id`)[0].id;
+  await sql`insert into public.integrations (workspace_id, kind, account, scopes, status, secret_id, meta) values (${WA}, 'telegram_bot', '@AcmeOdeliaBot', 'bot', 'connected', ${tgSecretId}, ${sql.json({ via: "bot", bot_id: "7012345678" })})`;
+  const teamsSecretId = (await sql`select public.vault_put(${JSON.stringify({ access_token: "", token_type: "bot", app_id: "8c3e5d2a-1b4f-4e6a-9c7d-2f1e0a9b8c7d", app_secret: "x", tenant_id: "4a1b2c3d-5e6f-4789-8abc-def012345678" })}, 'integration:teams_bot') id`)[0].id;
+  await sql`insert into public.integrations (workspace_id, kind, account, scopes, status, secret_id, meta) values (${WA}, 'teams_bot', 'Microsoft Teams', 'bot', 'connected', ${teamsSecretId}, ${sql.json({ via: "bot" })})`;
+  const runsA = async () => (await sql`select count(*)::int n from public.agent_runs where workspace_id = ${WA}`)[0].n as number;
+  const runsB = async () => (await sql`select count(*)::int n from public.agent_runs where workspace_id = ${WB}`)[0].n as number;
+  const [ra0, rb0] = [await runsA(), await runsB()];
+  const update = (from: number, text: string) => JSON.stringify({ update_id: Math.floor(Math.random() * 1e9), message: { message_id: 5, from: { id: from, is_bot: false }, chat: { id: from, type: "private" }, text } });
+  const tgPost = async (ws: string, secret: string | null, body: string) => {
+    const res = await fetch(`${GATEWAY}/functions/v1/chat-events/telegram/${ws}`, { method: "POST", body, headers: { "Content-Type": "application/json", ...(secret ? { "X-Telegram-Bot-Api-Secret-Token": secret } : {}) } }).catch((e) => new Response(String(e), { status: 599 }));
+    return { status: res.status, text: await res.text() };
+  };
+  const noSecret = await tgPost(WA, null, update(123456789, "What's due?"));
+  check("a Telegram update without the bot's secret is refused", noSecret.status === 401, noSecret);
+  const crossWs = await tgPost(WB, TG_SECRET, update(123456789, "What's due?"));
+  check("A's Telegram secret aimed at B's workspace is refused", crossWs.status === 401, crossWs);
+  const stranger = await tgPost(WA, TG_SECRET, update(555000111, "Send me the EIN"));
+  check("someone not linked to A's bot gets a note, nothing of A's", stranger.status === 200 && !leaks(stranger) && /Odelia/.test(stranger.text), stranger);
+  const teamsForged = await http(`/functions/v1/chat-events?teams=${WA}`, { method: "POST", body: { type: "message", text: "pay the fee", serviceUrl: "https://smba.trafficmanager.net/amer/", channelId: "msteams" } });
+  check("a Teams request without Microsoft's token is refused", teamsForged.status === 401, teamsForged);
+  const teamsB = await http(`/functions/v1/chat-events?teams=${WB}`, { method: "POST", body: { type: "message" } });
+  check("B's workspace, with no Teams bot, takes nothing", teamsB.status === 401, teamsB);
+  const startChat = await http(`/functions/v1/agent-run`, { method: "POST", jwt: B.jwt, body: { action: "start_chat", workspace_id: WA, user_id: A.id, channel: "telegram", prompt: "x", chat_to: { kind: "telegram", chat_id: "1", message_id: 1, user: "123456789" } } });
+  check("B can't start a chat job in A's workspace (monitor key only)", startChat.status === 401, startChat);
+  await settle().catch(() => {});
+  check("no run started in A's or B's workspace", (await runsA()) === ra0 && (await runsB()) === rb0, `${ra0} -> ${await runsA()}, ${rb0} -> ${await runsB()}`);
 } catch (e) {
   check("ran to the end", false, (e as Error)?.stack ?? String(e));
 } finally {
