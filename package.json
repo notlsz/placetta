@@ -41,6 +41,7 @@
     "test:registry": "esbuild scripts/registry-test.ts --bundle --platform=node --format=esm --outfile=.registry-test.mjs '--external:*.pdf?inline' --log-level=error && node .registry-test.mjs; s=$?; rm -f .registry-test.mjs; exit $s",
     "verify:sources": "esbuild scripts/verify-sources.ts --bundle --platform=node --format=esm --outfile=.verify-sources.mjs '--external:*.pdf?inline' --log-level=error && NODE_USE_ENV_PROXY=1 node --no-warnings .verify-sources.mjs; s=$?; rm -f .verify-sources.mjs; exit $s",
     "test:leak": "node scripts/leak-test.mjs",
+    "landing:cities": "esbuild scripts/landing-city-prices.ts --bundle --platform=node --format=esm --outfile=.landing-cities.mjs '--external:*.pdf?inline' --log-level=error && node .landing-cities.mjs; s=$?; rm -f .landing-cities.mjs; exit $s",
     "test:demo": "esbuild scripts/demo-quality.ts --bundle --platform=node --format=esm --outfile=.demo-quality.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .demo-quality.mjs; s=$?; rm -f .demo-quality.mjs; exit $s",
     "test:stores": "esbuild scripts/stores-check-test.ts --bundle --platform=node --format=esm --outfile=.stores-check-test.mjs '--external:*.pdf?inline' --log-level=error && node .stores-check-test.mjs; s=$?; rm -f .stores-check-test.mjs; exit $s",
     "site:check": "esbuild src/site/stores-check.ts --bundle --minify --format=iife --target=es2020 --outfile=site/stores-check.js --log-level=warning",
