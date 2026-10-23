@@ -1331,7 +1331,7 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 /* approval sheet: what's left before a filing can go */
 .ap-left { border: 1px solid color-mix(in oklab, #c2410c 30%, transparent); background: color-mix(in oklab, #c2410c 6%, var(--bg, #fff)); border-radius: 12px; padding: 12px 14px; }
 .ap-left h3 { color: #9a3412; margin: 0 0 6px; }
-.ap-left ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.ap-left ul { margin: 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
 .ap-left small { color: var(--muted, #6b7280); font-size: 12.5px; margin-left: 2px; }
 .ap-check { border-radius: 12px; padding: 10px 14px; border: 1px solid color-mix(in oklab, #15803d 25%, transparent); background: color-mix(in oklab, #15803d 5%, var(--bg, #fff)); }
 .ap-check h3 { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 14px; color: #166534; }
@@ -1340,7 +1340,7 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .ap-check.warn h3 { color: #92400e; }
 .ap-check.bad { border-color: color-mix(in oklab, #b91c1c 30%, transparent); background: color-mix(in oklab, #b91c1c 6%, var(--bg, #fff)); }
 .ap-check.bad h3 { color: #991b1b; }
-.ap-check ul { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.ap-check ul { margin: 8px 0 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
 .ap-check li.error b { color: #991b1b; }
 .ap-check li.warn b { color: #92400e; }
 .opening-line { display: block; font-size: 12.5px; margin-top: 2px; }
