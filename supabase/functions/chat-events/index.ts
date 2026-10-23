@@ -15,8 +15,17 @@
 // waits for an approval in the app. The one exception is Placetta's own public account (the workspace named by
 // ODELIA_PUBLIC_WECHAT_WS): a follower who isn't on the team can text to start ("奶茶店，纽约法拉盛") and gets the plan
 // and its claim link as the reply (_shared/text_start.ts), with no run and no model.
+//
+// Microsoft Teams (?teams=<workspace id>, the bot's messaging endpoint): every request carries a Bot Framework token,
+// checked against Microsoft's published keys, this bot's ID and the service address (teams.ts); the sender is matched by
+// work email like Slack, and only people in the bot's own tenant count. Telegram (/chat-events/telegram/<workspace id>,
+// set as the bot's webhook when it's connected): every request carries the secret Placetta set with the webhook; a
+// teammate links their Telegram once with a 6-digit code, like WeChat (telegram.ts).
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { type Bot, type ChatSender, type ChatTo, chatReply, type LarkBot, larkOpen, larkSender, larkText, larkWorks, NEEDS_EMAIL_SCOPE, NOT_TEAMMATE, type SlackBot, slackSender, slackSigned, slackText, slackWho } from "../_shared/bots.ts";
+import { TEAMS_SETUP, type TeamsBot, teamsHandle, teamsSender } from "../_shared/teams.ts";
+import { tgHandle } from "../_shared/telegram.ts";
+import { telegramBot, telegramSender } from "../_shared/telegram_db.ts";
 import { HOOK_KINDS, postHook } from "../_shared/channels.ts";
 import { type WechatBot, WX_SAY, wxCredsWork, wxHandle, wxUrlCheck } from "../_shared/wechat.ts";
 import { wechatAccount, wechatSender } from "../_shared/wechat_db.ts";
@@ -36,7 +45,7 @@ async function monitorKey() {
 }
 
 /** The workspace's bot credentials from the vault. */
-async function botOf(ws: string, kind: "slack_bot" | "lark_bot"): Promise<Bot | null> {
+async function botOf(ws: string, kind: "slack_bot" | "lark_bot" | "teams_bot"): Promise<Bot | null> {
   const { data: row } = await admin.from("integrations").select("secret_id, status").eq("workspace_id", ws).eq("kind", kind).maybeSingle();
   if (!row?.secret_id || row.status !== "connected") return null;
   const { data: raw } = await admin.rpc("vault_get", { p_id: row.secret_id });
@@ -82,7 +91,7 @@ async function takeJob(ws: string, bot: Bot, to: ChatTo, prompt: string, who: ()
   const uid = sender.ok ? await teammate(ws, sender.email) : null;
   if (!uid) {
     if (!sender.ok) console.warn("chat sender refused", to.kind, sender.why);
-    await chatReply(bot, to, !sender.ok && sender.why === "setup" ? NEEDS_EMAIL_SCOPE : NOT_TEAMMATE);
+    await chatReply(bot, to, !sender.ok && sender.why === "setup" ? (to.kind === "teams" ? TEAMS_SETUP : NEEDS_EMAIL_SCOPE) : NOT_TEAMMATE);
     return;
   }
   const why = await startChat(ws, uid, to, prompt, zh(prompt) ? "zh" : "en");
@@ -123,6 +132,48 @@ async function lark(req: Request, ws: string, body: string) {
   if (!text) return json({});
   later(takeJob(ws, bot, { kind: "lark", message_id: m.message_id }, text, () => larkSender(bot, ev.sender, header.tenant_key)));
   return json({});
+}
+
+/* ------------------------------------------------------------------ Microsoft Teams */
+
+/** A message to the workspace's Teams bot: checked and read (teamsHandle), then the sender looked up and the job started
+ *  in the background, so Teams gets its answer at once. */
+async function teams(req: Request, ws: string, body: string) {
+  const bot = await botOf(ws, "teams_bot") as TeamsBot | null;
+  if (!bot) return json({ error: "unauthorized" }, 401);
+  const r = await teamsHandle(bot, req.headers.get("authorization"), body);
+  if (r.status === 401) return json({ error: "unauthorized" }, 401);
+  const job = r.job;
+  if (!job || !(await firstTime(job.id))) return okEmpty();
+  later(takeJob(ws, bot, job.to, job.text, () => teamsSender(bot, job.to, job.from)));
+  return okEmpty();
+}
+
+/* ------------------------------------------------------------------ Telegram */
+
+/** The workspace a Telegram webhook is for: /chat-events/telegram/<id>, the address Placetta sets on the bot. */
+function telegramWs(url: URL): string | null {
+  const id = /\/telegram\/([0-9a-f-]{36})\/?$/i.exec(url.pathname)?.[1];
+  return id && UUID.test(id) ? id.toLowerCase() : null;
+}
+
+/** An update for the workspace's Telegram bot (tgHandle in telegram.ts has the steps). Quick answers go back in the
+ *  webhook's own response; a teammate's job starts in the background and its answer comes as a reply. */
+async function telegram(req: Request, ws: string, body: string) {
+  const bot = await telegramBot(admin, ws);
+  if (!bot) return json({ error: "unauthorized" }, 401);
+  const r = await tgHandle(bot, req.headers.get("x-telegram-bot-api-secret-token"), body, {
+    firstTime,
+    claim: async (tgUser, code) => {
+      const { data, error } = await admin.rpc("telegram_link_claim", { p_ws: ws, p_bot: bot.bot_id, p_tg_user: tgUser, p_code: code });
+      if (error) console.error("telegram link", error.code ?? "");
+      return (data as { result?: string } | null)?.result;
+    },
+    sender: (tgUser) => telegramSender(admin, ws, bot.bot_id, tgUser),
+    start: (uid, to, text, lang) => later((async () => { const why = await startChat(ws, uid, to, text, lang); if (why) await chatReply(bot, to, why); })()),
+    notTeammate: NOT_TEAMMATE,
+  });
+  return r.body ? new Response(r.body, { status: r.status, headers: { "Content-Type": "application/json" } }) : new Response("", { status: r.status });
 }
 
 /* ------------------------------------------------------------------ WeChat */
@@ -207,10 +258,12 @@ Deno.serve(async (req) => {
     const wx = await wxCredsWork("wx0000000000000000", "0".repeat(32));
     return json({ hooks: Object.fromEntries(hooks), slack_bot_accepts_fake: !!slackBot, lark_bot_accepts_fake: larkBot, wechat_accepts_fake: wx.ok, wechat_says: wx.ok ? null : wx.problem });
   }
-  const s = url.searchParams.get("slack"), l = url.searchParams.get("lark"), wx = wechatWs(url);
+  const s = url.searchParams.get("slack"), l = url.searchParams.get("lark"), t = url.searchParams.get("teams"), tg = telegramWs(url), wx = wechatWs(url);
   try {
     if (s && UUID.test(s)) return await slack(req, s, body);
     if (l && UUID.test(l)) return await lark(req, l, body);
+    if (t && UUID.test(t)) return await teams(req, t.toLowerCase(), body);
+    if (tg) return await telegram(req, tg, body);
     if (wx) return await wechat(url, wx, body);
   } catch (e) { console.error("chat event", String((e as Error)?.message ?? e).slice(0, 160)); return json({ error: "bad request" }, 400); }
   return json({ error: "not found" }, 404);

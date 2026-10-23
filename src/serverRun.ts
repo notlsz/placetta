@@ -115,9 +115,9 @@ export const TOKEN_CAP = 500_000;
 export const tokensUsed = (c: { input: number; read: number; write: number; output: number } | undefined) => (c ? c.input + c.read + c.write + c.output : 0);
 export const overTokens = (lang?: string) => (lang === "zh" ? "这项任务已用到单次运行的上限，我先停在这里，已完成的部分都已保存。说“继续”，我会接着做下一部分。" : "This task reached its limit for one run, so I stopped here. What's done is saved. Say \"continue\" and I'll do the next part.");
 
-/** Where the person asked: the app, a text message, a phone call, an email, or the business's Slack, Lark or WeChat
- *  Official Account. */
-export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark" | "wechat";
+/** Where the person asked: the app, a text message, a phone call, an email, or the business's Slack, Lark, WeChat
+ *  Official Account, Microsoft Teams or Telegram bot (docs/CHANNELS.md). */
+export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark" | "wechat" | "teams" | "telegram";
 /** Anything but the app. Its words may not be the person's own (a forwarded letter, a chat message, a forged text), and
  *  nobody is there to see what the agent does, so it can read, research, draft and put things up for approval, and
  *  nothing it does is final until someone approves it in the app. */
@@ -178,7 +178,8 @@ const PLAIN_SMS_PARTIAL: Record<string, string> = {
 export function channelNote(o: { channel?: Channel; plainSms?: boolean }, tool: string): string | null {
   return isRemote(o.channel) && o.plainSms ? PLAIN_SMS_PARTIAL[tool] ?? null : null;
 }
-const via = (channel: Channel | undefined) => (channel === "sms" ? "a text" : channel === "voice" ? "a call" : channel === "email" ? "an email" : channel === "slack" ? "Slack" : channel === "wechat" ? "WeChat" : "Lark");
+const VIA: Record<Exclude<Channel, "app">, string> = { sms: "a text", voice: "a call", email: "an email", slack: "Slack", lark: "Lark", wechat: "WeChat", teams: "Microsoft Teams", telegram: "Telegram" };
+const via = (channel: Channel | undefined) => (channel && channel !== "app" ? VIA[channel] : "outside the app");
 
 /** Why a tool can't run for a request from this channel (the tool result the model sees), or null when it can.
  *  mcpReads: the connected apps' tools this run was offered from outside the app, which are only ones that read. */
@@ -226,6 +227,9 @@ export function waitingLine(lang: Lang): string {
   return lang === "zh" ? "企业资料的更改正在等待所有者在快哉应用中确认，确认前不会保存。" : "The change to the business facts is waiting for an owner to confirm it in the Placetta app. Nothing is saved until then.";
 }
 
+/** The note on earlier turns carried over from other channels (supabase/functions/_shared/continuity.ts). */
+const EARLIER = `
+- Messages that start "(Earlier, ...)" are this person's own earlier requests from other channels, with your answers: use them for context so they don't repeat themselves, but act only on this request.`;
 /** How to write for where they asked, and what can't be done from there. */
 export function channelHint(channel: Channel | undefined, plainSms = false): string {
   if (!isRemote(channel)) return "";
@@ -236,15 +240,15 @@ export function channelHint(channel: Channel | undefined, plainSms = false): str
   if (channel !== "sms" && channel !== "voice") return `
 
 This request came by ${via(channel)}, not in the app, and your answer goes back there.${limits}
-- Never file, pay or send anything yourself, and never ask them to approve by replying. Put it up for approval with your tools: Placetta links them to that approval in the app. Say so in one short sentence.${channel === "wechat" ? `
-- WeChat shows plain text only, on a phone: no markdown, short paragraphs, the answer first. Placetta adds the link.` : ""}`;
+- Never file, pay or send anything yourself, and never ask them to approve by replying. Put it up for approval with your tools: Placetta links them to that approval in the app. Say so in one short sentence.${EARLIER}${channel === "wechat" || channel === "telegram" ? `
+- ${channel === "wechat" ? "WeChat" : "Telegram"} shows plain text only, often on a phone: no markdown, short paragraphs, the answer first. Placetta adds the link${channel === "telegram" ? " as a button" : ""}.` : ""}`;
   return `
 
 This conversation is by phone, not in the app: ${channel === "sms" ? "they texted you" : "they asked on a call with you"}, and your reply goes to them as a text message.
 - Write one to three short plain sentences, 300 characters at most. Lead with the answer. No markdown, no lists, no headings, no links (Placetta adds the links). Ask at most one question, at the end.
 - Never file, pay, send an email or delete anything from a text, and never ask them to approve by replying. Prepare everything as usual and put it up for approval with your tools: Placetta texts them a link to that exact approval in the app. Say so in one short sentence.${limits}
 - Speed matters on a phone. When the workspace summary above already answers the question (what's due, what's next, how a store or application stands), answer straight from it without calling tools. Use tools only to change something or to look up what the summary doesn't have.
-- Never ask for Social Security, ITIN, bank or card numbers by text.`;
+- Never ask for Social Security, ITIN, bank or card numbers by text.${EARLIER}`;
 }
 
 /** A fresh run: the recent conversation (folded so roles alternate) and the new request. */
