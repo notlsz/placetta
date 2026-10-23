@@ -148,6 +148,25 @@ export const DEST: Record<string, Dest> = {
   // FDNY Business needs an NYC.ID account: the owner's own
   "insp-nyc-fire-hood": { portal: "fires.fdnycloud.org", portalUrl: "https://fires.fdnycloud.org/CitizenAccess/", signature: "none", payment: "portal", onBehalf: "unstated", checked: "2026-10-15", source: "https://www.nyc.gov/assets/fdny/downloads/pdf/business/restaurant-fire-safety-guide.pdf" },
   "insp-sj-building-final": { portal: "sjpermits.org", portalUrl: "https://www.sjpermits.org/", signature: "none", payment: "none", onBehalf: "unstated", checked: "2026-10-15", source: "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/building-division/inspections/inspection-success" },
+  // Added 2026-10-22, each from the agency's own scheduling page, its start page opened live (200):
+  // SF: "Once your permit is issued in PermitSF, you will be able to request inspections online from your PermitSF
+  // dashboard" (permits that start with letters: BLDG, ELEC, PLMB; numeric permits are booked by phone)
+  "insp-sf-building-final": { portal: "sanfranciscoca.portal.opengov.com", portalUrl: "https://sanfranciscoca.portal.opengov.com/dashboard", signature: "none", payment: "none", onBehalf: "unstated", checked: "2026-10-22", source: "https://www.sf.gov/schedule-and-pay-your-inspection" },
+  // Austin: "You can schedule a building inspection online with the AB+C Portal"; "only ... if your AB+C account is
+  // linked to the permit, the permit is in "Active" status, and fees have been paid"
+  "insp-aus-building-final": { portal: "abc.austintexas.gov", portalUrl: "https://abc.austintexas.gov/", signature: "none", payment: "none", onBehalf: "authorization", authorization: "Inspection agent letter of authorization (Austin), when the owner isn't listed on the permit", checked: "2026-10-22", source: "https://www.austintexas.gov/development-services/schedule-building-inspection", also: ["https://austin.widen.net/s/sx2b8jvtff/sc_inspectionagentletterofauthorization"] },
+  // Dallas: "Inspections can be scheduled via DallasNow" (Accela, the same tenant as its permits)
+  "insp-dal-building-final": { portal: "aca-prod.accela.com", portalUrl: "https://aca-prod.accela.com/dallastx", tenant: "/dallastx", signature: "none", payment: "none", onBehalf: "unstated", checked: "2026-10-22", source: "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/inspections.aspx" },
+  // Fort Worth: "You can schedule it online or through the IVR system"; the inspection contact must be set in the ACA profile
+  "insp-ftw-building-final": { portal: "aca-prod.accela.com", portalUrl: "https://aca-prod.accela.com/CFW", tenant: "/CFW", signature: "none", payment: "none", onBehalf: "unstated", checked: "2026-10-22", source: "https://www.fortworthtexas.gov/departments/development-services/inspections" },
+  // Irvine: "Inspections may be scheduled ... using the City of Irvine's Online Inspection Request System" (the city links
+  // it over http; the same host answers on https)
+  "insp-irv-building-final": { portal: "permits.cityofirvine.org", portalUrl: "https://permits.cityofirvine.org/irvinepermits/", signature: "none", payment: "none", onBehalf: "unstated", checked: "2026-10-22", source: "https://cityofirvine.gov/node/2176", also: ["https://irvineca.seamlessdocs.com/f/InspectionSystemGuide"] },
+  // Phoenix: "Enter permit number and web inspection key found on receipt and permit": the key is kept in the vault
+  // like a login (permit number and key), never typed from the approved values
+  "insp-phx-building-final": { portal: "apps-secure.phoenix.gov", portalUrl: "https://apps-secure.phoenix.gov/PDD/inspections", signature: "none", payment: "none", onBehalf: "unstated", checked: "2026-10-22", source: "https://www.phoenix.gov/administration/departments/pdd/commercial-multifamily-building/commercial-inspections.html" },
+  // San Diego: "all building inspections can be scheduled or canceled online" (Accela, its San Diego tenant)
+  "insp-sdg-building-final": { portal: "aca-prod.accela.com", portalUrl: "https://aca-prod.accela.com/SANDIEGO/Login.aspx", tenant: "/SANDIEGO", signature: "none", payment: "none", onBehalf: "unstated", checked: "2026-10-22", source: "https://www.sandiego.gov/development-services/forms-publications/information-bulletins/120" },
   "aus-building": { portal: "abc.austintexas.gov", signature: "typed", payment: "invoice", checked: "2026-10-13", source: "https://www.austintexas.gov/development-services/commercial-plan-review" },
   "la-ladbs": { portal: "eplanla.lacity.org", signature: "typed", checked: "2026-10-13", source: "https://dbs.lacity.gov/" },
 
@@ -1543,6 +1562,8 @@ export function destinationProblems(dest: Record<string, Dest> = DEST): string[]
   const byHost = new Map<string, [string, Dest][]>();
   for (const [id, d] of Object.entries(dest)) if (d.portal) byHost.set(d.portal, [...(byHost.get(d.portal) ?? []), [id, d]]);
   for (const [host, list] of byHost) {
+    // OpenGov gives each agency its own subdomain (sanfranciscoca.portal.opengov.com): its paths are pages of one agency
+    if (/\.portal\.opengov\.com$/i.test(host)) continue;
     const segments = new Set(list.map(([, d]) => firstSegment(d.portalUrl)));
     if (segments.size > 1) for (const [id, d] of list) if (!d.tenant) out.push(`${id}: ${host} serves several agencies, so this entry needs its tenant path`);
   }

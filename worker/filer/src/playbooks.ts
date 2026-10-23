@@ -3,6 +3,7 @@
 // (3), Denver's portals at denvergov.org (3) and California's bizfile Online (3). Fairfax County's PLUS also has 3
 // forms, but its only published guides are videos. Then the formation portals of the states whose Secretary publishes
 // a written walkthrough: Washington's CCFS, Georgia's eCorp and Virginia's Clerk's Information System (one form each).
+// And Austin's AB+C Portal (3 forms since its building final is booked online), from the city's scheduling steps.
 //
 // test/replay.test.ts walks each playbook through a static copy of the pages its guide documents (test/mocks), so a
 // guide's page names, buttons and fee pages stay consistent with what the guards key on.
@@ -32,6 +33,9 @@ export type Playbook = {
   verified: null | { on: string; by: string; filing: string };
   forms: Record<string, FormSteps>;                       // official form id → its steps
   final: Final[];
+  /** Buttons the guide shows only opening the next form, on the page it names ("Schedule Inspection" on AB+C's My
+      Inspections opens the request; "Request Inspection" sends it). Never a button `final` names. */
+  nav?: { page: string; button: string }[];
   pay: string[];                                          // words in the heading of a page where the agency takes its fee
   receipt: string[];                                      // words in the heading of the page that confirms it
   confirm?: string;                                       // a pattern whose first group is the confirmation number, when the guide shows one
@@ -412,6 +416,32 @@ export const PLAYBOOKS: Playbook[] = [
       },
     },
   },
+  {
+    // Austin's AB+C Portal (abc.austintexas.gov): 3 forms since the building final's online booking (2026-10-22). The
+    // steps are the city's own "How to Schedule an Inspection Online"; the permit applications there stay with the team.
+    host: "abc.austintexas.gov",
+    name: "Austin Build + Connect (AB+C) Portal",
+    guides: ["https://www.austintexas.gov/development-services/schedule-building-inspection"],
+    read: "2026-10-22",
+    verified: null,
+    // "Check the box to the left of the inspection you wish to schedule, select a date ... click Request Inspection."
+    final: [{ page: "Schedule Inspection", button: "Request Inspection" }],
+    // "Click Schedule Inspection" only opens the request form on My Inspections
+    nav: [{ page: "My Inspections", button: "Schedule Inspection" }],
+    pay: ["Pay Fees", "Payment"],
+    receipt: ["My Inspections"],
+    forms: {
+      "insp-aus-building-final": {
+        start: "https://abc.austintexas.gov/",
+        steps: [
+          { page: "Login", do: "sign_in", note: "\"You must be a registered AB+C Portal user\": the owner's saved login. Never register one: if there's no saved login, stop for the team (step 1)." },
+          { page: "My Inspections", do: "open", selector: "button:Schedule Inspection", note: "\"Clicking My Inspections will display permits with available inspections\"; tick \"the small check box to the left of the permit number\" for the approved permit, then \"Click Schedule Inspection\" (steps 2 to 4). It is only offered if the account is linked to the permit, the permit is Active and its fees are paid." },
+          { page: "Schedule Inspection", do: "submit", selector: "button:Request Inspection", note: "\"Check the box to the left of the inspection you wish to schedule, select a date, and leave any comments for the inspector\": only the approved inspection and date. The worker compares the page with them before \"Request Inspection\" (step 4)." },
+          { page: "My Inspections", do: "receipt", note: "\"a confirmation note will appear at the top of the page\": it either confirms the inspection was scheduled or shows an error code (step 5). Record it as the booking's confirmation." },
+        ],
+      },
+    },
+  },
 ];
 
 const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
@@ -433,6 +463,14 @@ export function finalOn(p: Playbook | undefined, s: PageState, buttonText: strin
   const on = headings(s);
   return p.final.some((f) => (!f.page || on.includes(norm(f.page)))
     && (f.button ? norm(buttonText) === norm(f.button) : !NOT_FORWARD.test(buttonText)));
+}
+
+/** This button, on this page, only opens the next form, as the guide shows: the generic send words ("Schedule") don't
+ *  make it a send. A button the guide's `final` names is always a send. */
+export function navOn(p: Playbook | undefined, s: PageState, buttonText: string): boolean {
+  if (!p?.nav?.length || !buttonText.trim() || finalOn(p, s, buttonText)) return false;
+  const on = headings(s);
+  return p.nav.some((n) => on.includes(norm(n.page)) && norm(buttonText) === norm(n.button));
 }
 
 /** This page is where the agency takes its fee: the person pays it. */

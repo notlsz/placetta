@@ -1586,7 +1586,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         if (!ins) throw new Error(`No inspection "${insId}" for this store. Ids: ${guide.inspections.map(x => x.id).join(", ")}.`);
         const base = ins.id.replace(/^[a-z]+-(?=(building|fire|health)-)/, "");
         const where = placesOf(st.address).find(c => INSPECTIONS[c]?.inspections.some(x => x.id === base && x.agency.en === ins.agency.en)) ?? placesOf(st.address)[0] ?? "";
-        const way = bookingWay(where, { ...ins, id: base });
+        const way = bookingWay(where, { ...ins, id: base }, str(i.permit_number, 40) || booking?.permit || "");
         const setBooking = (bk: InspectionBooking) => apply(w => ({ ...w, bookings: [...(w.bookings ?? []).filter(x => x.id !== bk.id), bk] }));
         const open = ins.checklist.filter(c => !st.ready?.[`${ins.id}:${c.id}`]);
         const slots = arr(i.slots).map(s => str(s, 60)).filter(Boolean).slice(0, 3);

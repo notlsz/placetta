@@ -31,6 +31,9 @@ import { AUDIT_EXPORT_HEADER, auditExportCsv, csvCell, type AuditExportRow } fro
 import type { Application, Workspace } from "../src/model";
 import { continuePrompt, nextAction, reconcile, settleJobs, STOPPED_HERE, type Job } from "../src/jobs";
 import { finishWork, nextRenewal, receiptName, renewalCycle, reportLines, resumable, scheduleRenewals, stampFilings } from "../src/finish";
+import { BOOKING, bookingWay } from "../src/inspections/booking";
+import { INSPECTIONS } from "../src/inspections";
+import { DEST } from "../supabase/functions/file/destinations";
 import { approvalsLine, oneTap } from "../src/today";
 import { preflight } from "../src/smart";
 import type { Approval } from "../src/model";
@@ -1754,6 +1757,20 @@ async function memoryAcrossSessions() {
   ok(!/Get the health permit going/.test(seen), "without replaying the old conversation itself");
 }
 
+function inspectionPortals() {
+  console.log("\n# Inspection portals added 2026-10-22: each route has a verified destination; SF's numeric permits go by phone");
+  for (const k of ["SF", "AUS", "DAL", "FTW", "IRV", "PHX", "SDG"]) {
+    const way = BOOKING[`${k}:building-final`];
+    const d = way?.dest ? DEST[way.dest] : undefined;
+    ok(way?.method === "portal" && way.account === true && !!d?.portal && /^https:\/\//.test(d.portalUrl ?? "") && d.checked === "2026-10-22" && /^https:\/\//.test(d.source), `${k}: the building final is booked on the agency's own site with the owner's existing login`, { way, d });
+    ok(!d?.noLogin, `${k}: never without the owner's login`);
+  }
+  for (const k of ["HOU", "SAT"]) ok(!BOOKING[`${k}:building-final`]?.dest, `${k}: no verified start page, so the team books it`);
+  const sf = INSPECTIONS.SF.inspections.find(i => i.id === "building-final")!;
+  eq([bookingWay("SF", sf, "BLDG-2026-001234").method, bookingWay("SF", sf, "202610011234").method, bookingWay("SF", sf).method], ["portal", "phone", "portal"], "PermitSF permits online; a numeric permit by phone; no permit number yet, the usual way");
+  ok(/628-652-3401/.test(bookingWay("SF", sf, "202610011234").needs.en) && /628-652-3401/.test(bookingWay("SF", sf, "202610011234").needs.zh), "the phone line, in English and Chinese");
+}
+
 async function inspectionBookings() {
   console.log("\n# Inspection booking: plan, pick a slot, approve, confirm, result, and the mock inspection");
   const store = (id: string, address: string) => ({ id, name: same(id), address, stage: "opening" as const, rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] as string[] });
@@ -2554,6 +2571,7 @@ await spending();
 await addresses();
 appealRules();
 await appeals();
+inspectionPortals();
 await inspectionBookings();
 await planStaysTrue();
 await memoryAcrossSessions();

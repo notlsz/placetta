@@ -14,7 +14,7 @@ import type { Browser, Page } from "playwright-core";
 import { confirmPattern, fieldFor, isFinal, mustStop, onPortal, optionFor, reviewMismatch, type PageState } from "./guards.ts";
 import type { Model } from "./model.ts";
 import { headingOf, locate, pageState } from "./page.ts";
-import { finalOn, type FormSteps, guideLines, payOn, type Playbook } from "./playbooks.ts";
+import { finalOn, type FormSteps, guideLines, navOn, payOn, type Playbook } from "./playbooks.ts";
 import { backoffMinutes, heal, type KeyLock, portalDown, receiptCheck, receiptLine } from "./heal.ts";
 import type { Store } from "./store.ts";
 import { harden, linkAllowed, safeConfirm, wipe, withTimeout, type Blocked } from "./sandbox.ts";
@@ -261,7 +261,9 @@ export class Worker {
     // a "Submit" link or an element chosen by its id gets the same final-submit guard as a "Submit" button.
     const text = a.selector.startsWith("button:") ? a.selector.slice(7) : a.selector.startsWith("link:") ? a.selector.slice(5)
       : await loc.evaluate((el) => (el.textContent || (el as HTMLInputElement).value || el.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim()).catch(() => "");
-    const final = !!text && (isFinal(text) || finalOn(ctx.pb?.playbook, st, text));
+    // a button the guide shows only opening the next form ("Schedule Inspection" on AB+C's list) isn't a send; the
+    // guide's own send button always is
+    const final = !!text && !navOn(ctx.pb?.playbook, st, text) && (isFinal(text) || finalOn(ctx.pb?.playbook, st, text));
     if (final && ctx.f.submit_clicked_at) {
       // Already submitted in this run: a second "send" is the agency's fee or a confirmation of it, which is the person's.
       return { end: await this.handBack(ctx, "payment", PAY) };

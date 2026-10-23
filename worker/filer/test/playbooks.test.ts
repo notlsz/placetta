@@ -5,7 +5,7 @@ import assert from "node:assert";
 import { DEST } from "../../../supabase/functions/file/destinations.ts";
 import type { PageState } from "../src/guards.ts";
 import { routeOf } from "../src/main.ts";
-import { finalOn, guideLines, payOn, playbookFor, PLAYBOOKS } from "../src/playbooks.ts";
+import { finalOn, guideLines, navOn, payOn, playbookFor, PLAYBOOKS } from "../src/playbooks.ts";
 
 const onHost = (url: string, host: string) => { const h = new URL(url).hostname; return h === host || h.endsWith("." + host); };
 const state = (heading: string): PageState => ({ url: "https://x.gov/", title: heading, headings: [heading], controls: [], buttons: [], links: [], text: "", frames: [], markers: [] });
@@ -14,7 +14,7 @@ const state = (heading: string): PageState => ({ url: "https://x.gov/", title: h
 const VIDEO_ONLY = new Set(["plus.fairfaxcounty.gov"]);
 
 test("every portal three or more forms use has a playbook, and the state formation portals with written guides too", () => {
-  assert.equal(PLAYBOOKS.length, 9);
+  assert.equal(PLAYBOOKS.length, 10);
   assert.equal(new Set(PLAYBOOKS.map((p) => p.host)).size, PLAYBOOKS.length, "one playbook per portal");
   const count = new Map<string, number>();
   for (const d of Object.values(DEST)) if (d.portal) count.set(d.portal, (count.get(d.portal) ?? 0) + 1);
@@ -22,6 +22,14 @@ test("every portal three or more forms use has a playbook, and the state formati
     if (n >= 3 && !VIDEO_ONLY.has(host)) assert.ok(PLAYBOOKS.some((p) => p.host === host), `${host} has ${n} forms and no playbook`);
   }
   for (const p of PLAYBOOKS) assert.ok(Object.keys(p.forms).length >= 1 && (count.get(p.host) ?? 0) >= Object.keys(p.forms).length, p.host);
+});
+
+test("a guide's open-the-form button isn't a send, and a send button can never be listed as one", () => {
+  const abc = PLAYBOOKS.find((p) => p.host === "abc.austintexas.gov")!;
+  assert.equal(navOn(abc, state("My Inspections"), "Schedule Inspection"), true);
+  assert.equal(navOn(abc, state("Schedule Inspection"), "Request Inspection"), false, "the guide's send button");
+  assert.equal(navOn(abc, state("Schedule Inspection"), "Schedule Inspection"), false, "only on the page the guide names");
+  for (const p of PLAYBOOKS) for (const n of p.nav ?? []) assert.ok(!p.final.some((f) => f.button && f.button.toLowerCase() === n.button.toLowerCase()), `${p.host}: ${n.button} is a send`);
 });
 
 test("every playbook is unverified until a supervised first run, and cites the guides it was written from", () => {
