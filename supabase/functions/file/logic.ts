@@ -148,6 +148,24 @@ export const feeDue = (f: Filing): boolean => Number(f.fee_estimate ?? 0) > 0;
 export const feeBlocks = (f: Filing, d: Dest | undefined): boolean =>
   feeDue(f) || d?.payment === "with_filing" || d?.payment === "in_person";
 
+/** "Show Odelia how" (teach mode, worker/filer/src/teach.ts): why it can't start on this filing, or null. The form's
+    destination is an agency site, the portal worker is on, and the filing isn't sent, finished or already running.
+    The person files it themselves in the live browser; nothing is typed or clicked for them. */
+export type TeachRefusal = "no_portal" | "worker_off" | "finished" | "busy";
+export function teachRefusal(f: Filing, d: Dest | undefined, env: Env): TeachRefusal | null {
+  if (!d?.portal) return "no_portal";
+  if (!env.portalWorker) return "worker_off";
+  if (f.submit_clicked_at || ["submitted", "accepted", "rejected", "canceled"].includes(f.status)) return "finished";
+  if (f.agent_state && !["handoff", "needs_you"].includes(f.agent_state)) return "busy";
+  return null;
+}
+export const TEACH_REFUSED: Record<TeachRefusal, Bi> = {
+  no_portal: { en: "This form isn't filed on an agency website, so there's nothing to show Odelia.", zh: "这份表格不在机构网站上提交，无需向 Odelia 演示。" },
+  worker_off: { en: "Filing on agency websites isn't switched on yet. The Placetta team files this one.", zh: "机构网站提交功能尚未开启，这一份由快哉团队提交。" },
+  finished: { en: "This filing has already gone to the agency.", zh: "这份申请已提交给机构。" },
+  busy: { en: "Odelia is already working on this filing. Wait for it to finish or stop it first.", zh: "Odelia 正在办理这份申请，请等待完成或先停止。" },
+};
+
 /** An email carries the filled form and at most four attachments (integrations' mail_send takes five files). */
 export const EMAIL_ATTACHMENTS = 4;
 const extraFiles = (f: Filing) => (f.payload.attachments ?? []).length;

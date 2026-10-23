@@ -9,6 +9,8 @@
 //   undo    the customer takes it back during the undo window (SEND_HOLD_MINUTES, 10 by default), while it's held
 //   send_now  the customer ends the undo window early and it goes now
 //   team_approve, take_over   the Placetta team (two-step) in the two-key period, or taking a run over
+//   teach   "Show Odelia how": the owner (or the team, two-step) files it in the live browser while the worker records
+//           the steps as a draft playbook for the team's review (worker/filer/src/teach.ts)
 // POST { action: "sweep" } with x-monitor-key: the monitor's run, and every minute while a held send is due or a portal
 //   run failed (held sends whose time is up, filings whose agency site failed sent another way, stuck runs, fax and mail
 //   status, stale destinations)
@@ -26,7 +28,7 @@ import {
 import { DEST, staleDestinations, type Dest } from "./destinations.ts";
 import {
   afterHold, askedToResubmit, canFaxSignedFor, CHANNEL_SAID, check, DUPLICATE_REF, emailFor, envFrom, fallback, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holds,
-  isForeign, killSwitchOn, type LogEntry, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, type Refusal, refusalOf, rerouteDue, signedCopy, teamApproved,
+  isForeign, killSwitchOn, type LogEntry, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, type Refusal, refusalOf, rerouteDue, signedCopy, TEACH_REFUSED, teachRefusal, teamApproved,
 } from "./logic.ts";
 
 const env = () => envFrom((k) => Deno.env.get(k));
@@ -643,6 +645,17 @@ async function teamApprove(f: Filing, by: string) {
   }
 }
 
+/** "Show Odelia how" (teach mode): the portal worker opens the agency's site in the live browser and records while the
+ *  person (the owner, or the Placetta team) files it themselves. Nothing is typed or clicked for them; passwords and
+ *  secret numbers are never recorded. The recording becomes a draft for the team's review (worker/filer/src/teach.ts).
+ *  Compare-and-set on the agent state, so two taps start one run. */
+async function teach(f: Filing, by: string) {
+  const why = teachRefusal(f, DEST[f.payload.official ?? ""], env());
+  if (why) throw new HttpError("bad_request", TEACH_REFUSED[why].en, TEACH_REFUSED[why].zh);
+  return view(await step(f, log("You're showing Odelia how to file this on the agency's site. The live browser opens in a moment.", "您正在教 Odelia 如何在机构网站上提交。实时浏览器即将打开。", "teach", by),
+    { expect_agent_state: f.agent_state, channel: "portal", agent_state: "queued", handoff_url: null, provider_ref: null }));
+}
+
 async function takeOver(f: Filing, by: string) {
   return view(await step(f, log("The Placetta team took over this filing", "快哉团队已接手此申请", "take_over", by), { agent_state: "handoff", channel: "team" }));
 }
@@ -812,8 +825,14 @@ serve(async (req) => {
     const f = await loadFiling(ws, filingId);
     return await settled(() => action === "team_approve" ? teamApprove(f, by) : takeOver(f, by));
   }
+  // "Show Odelia how": the owner, or the Placetta team with two-step sign-in filing on a new portal for a customer
+  if (action === "teach") {
+    if (!((await isStaff(user)) && aalOf(jwt) === "aal2")) await requireAccess(ws, user, jwt, "owner");
+    const f = await loadFiling(ws, filingId);
+    return await settled(() => teach(f, by));
+  }
   if (!["start", "resume", "signed", "stop", "status", "undo", "send_now"].includes(action)) {
-    throw new HttpError("bad_request", "action must be start, resume, signed, stop, undo, send_now or status.");
+    throw new HttpError("bad_request", "action must be start, resume, signed, stop, undo, send_now, teach or status.");
   }
   // Sending, carrying on, and stopping are an owner's, as in the database (only owners approve or cancel filings);
   // any member can check on one.
