@@ -62,7 +62,7 @@ export async function voiceJourneys(ok: Ok, eq: Eq) {
     const plan = planAgencyCall({ filing, business: "Lucky Leaf Tea", lang: "en", now: at, env });
     ok(plan.ok, "a filed application, an official line, inside its hours: the call may be placed", plan);
     if (!plan.ok) return;
-    eq([plan.line.number, plan.brain, plan.menu], ["+14085357055", "openai", "2"], "the registry's number, the speech-to-speech brain, the menu option the city's page gives");
+    eq([plan.line.number, plan.brain, plan.menu], ["+14085357055", "openai_mini", "2"], "the registry's number, the speech-to-speech brain (mini for a status call), the menu option the city's page gives");
     eq(plan.spec.greeting, "Hi, this is Odelia, an AI assistant calling for Lucky Leaf Tea about application BT-778812. This call is recorded and transcribed; if you'd rather it isn't, just say so.", "the disclosure first, with the recording announced");
     const cfg = sessionConfig("openai", { ...plan.spec, toolUrl: "https://placetta.test/functions/v1/odelia-voice?mcp=1", token: "tok" }, env) as { instructions: string; tools: { allowed_tools: string[] }[] };
     ok(cfg.instructions.startsWith("Start the conversation by saying exactly this") && /B T - 7 7 8 8 1 2/.test(cfg.instructions), "the playbook's script, with the confirmation number spelled out", cfg.instructions.slice(0, 400));
