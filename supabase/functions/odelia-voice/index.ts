@@ -17,6 +17,17 @@
 // background run (agent-run, channel "voice") whose answer is texted. Nothing is filed, paid, sent or deleted by voice.
 // English or Mandarin, by the language they use in the app. Silence, hangups and errors end with a short apology and,
 // when it helps, a text.
+//
+// The voice brain is swappable (_shared/voice_brain.ts). Telnyx stays the carrier for every call; with OpenAI set up
+// (OPENAI_API_KEY, OPENAI_SIP_PROJECT, OPENAI_WEBHOOK_SECRET) Placetta answers or dials on Telnyx, checks who it is,
+// then bridges the call to OpenAI's SIP endpoint with a signed X-Placetta-Call header; OpenAI's webhook
+// (realtime.call.incoming) is accepted here with the session Placetta decides, and its tools come back to ?mcp=1.
+// Without OpenAI the Telnyx AI Assistant talks, as before. Agency status calls, phone interpreting, recordings and
+// their transcripts live in ./calls.ts.
+//
+// POST, Standard Webhooks signed by OpenAI   realtime.call.incoming: accept with the call's session, or reject
+// POST ?mcp=1, x-odelia-call: <token>         the brain's tools over MCP (JSON-RPC)
+// POST {action: "agency_call" | "interpret_call" | "purge_recordings"} (monitor key): see ./calls.ts
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import {
   appLink, appOrigin, callerAttested, clientState, type Lang, normalizePhone, odeliaNumber, randomCode, readClientState, SAY, signCallToken, splitSms, spokenDigits, telnyx,
@@ -24,6 +35,11 @@ import {
 } from "../_shared/odelia.ts";
 import { currentWorkspace, type Link, linkByNumber, linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
 import { priceFacts } from "../../../src/pricing.ts";
+import { verifyLinq as verifyStandardWebhook } from "../_shared/linq.ts";
+import { OWNER_TOOLS, SEND_TEXT_TOOL, VERIFY_TOOL, mcpAnswer, sipToken } from "../_shared/voice_calls.ts";
+import { pickBrain, sessionConfig, type SessionSpec } from "../_shared/voice_brain.ts";
+import { redactForVoice } from "../_shared/voice_rules.ts";
+import { agencyCall, agencyToolCall, bridgeToBrain, callsEvent, interpretCall, ownerCallStarted, purgeRecordings, setupCalls, specForToken, type SpecWithBrain } from "./calls.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
@@ -72,12 +88,12 @@ const LINES = {
 
 function greeting(lang: Lang, name: string | null, mode: "verified" | "code" | "outbound", business: string) {
   if (lang === "zh") {
-    // Every call opens by saying Odelia is an AI and the call is transcribed (California's bot and recording rules, the FCC's AI-voice ruling).
-    const hi = `您好${name ? `，${name}` : ""}，我是快哉的 AI 助理 Odelia。本次通话会被转录，以便为您办理。`;
+    // Every call opens by saying Odelia is an AI and the call is recorded and transcribed (California's bot and recording rules, the FCC's AI-voice ruling).
+    const hi = `您好${name ? `，${name}` : ""}，我是快哉的 AI 助理 Odelia。本次通话会录音和转录，以便为您办理；如您不同意录音请直接说。`;
     return mode === "code" ? `${hi}为了保护您的账户，我刚把 4 位验证码发到了您账户上的手机号。请告诉我验证码。`
       : mode === "outbound" ? `${hi}我打电话是为了${business}的一件急事。现在方便说两句吗？` : `${hi}有什么可以帮您？`;
   }
-  const hi = `Hi${name ? ` ${name}` : ""}, it's Odelia, Placetta's AI assistant. This call is transcribed so I can help.`;
+  const hi = `Hi${name ? ` ${name}` : ""}, it's Odelia, Placetta's AI assistant. This call is recorded and transcribed so I can help; say so if you'd rather it isn't.`;
   return mode === "code" ? `${hi} To keep your account safe, I just texted a 4-digit code to the phone number on your account. What's the code?`
     : mode === "outbound" ? `${hi} I'm calling about something urgent at ${business}. Is now a good time?` : `${hi} What can I do for you?`;
 }
@@ -93,6 +109,7 @@ function instructions(o: { lang: Lang; name: string | null; business: string; ve
     "On a call you never file, pay, send an email, delete or approve anything, and you never take Social Security, ITIN, bank or card numbers. Those happen in the Placetta app with their approval: offer to text them the link with send_text.",
     `If asked what Placetta costs: ${priceFacts("simple")} ${priceFacts("legacy")} Say the numbers plainly, one or two at a time.`,
     "If they want something in writing (an address, a date, a confirmation number, a link to the app), use send_text.",
+    "If they want the agency asked about a filing's status by phone, call call_agency with the filing as they named it; you call only the agency's official line, in its hours. If they'd rather talk to a person, or something is beyond you, call hand_to_team. If they say not to record the call, call recording_refused and carry on.",
     "If you hear nothing for a while, ask once whether they're still there. When they're done, say a short goodbye and call hangup. If a tool fails, apologize in one sentence and offer to text instead.",
     o.outbound ? `You called them about this: ${o.outbound} Tell them in one or two sentences, answer their questions, and offer to start on it with start_task.` : "",
     o.verified ? `Workspace (read only, JSON):\n${o.brief}` : "",
@@ -135,9 +152,14 @@ async function assistantFor(o: { ccid: string; lang: Lang; name: string | null; 
     tool("workspace_details", "Read the business's current workspace summary again: stores, applications and their status, deadlines, filings, approvals waiting and recent updates.", {}, []),
     tool("start_task", "Start real work in the background (mapping a store, drafting a letter, preparing an application, researching a rule). The result is texted to them.", { request: { type: "string", description: "What they want done, in their words, with every detail they gave" } }, ["request"]),
     tool("send_text", "Text the caller on their verified number: something in writing they asked for, or a link to the Placetta app.", { message: { type: "string", description: "The text to send, plain, under 300 characters" }, app_link: { type: "boolean", description: "Add a link to their workspace in the app" } }, ["message"]),
+    ...(o.verified ? [
+      tool("call_agency", "Ask the agency by phone about one filing's status (Odelia calls the agency's official line during its hours).", { filing: { type: "string", description: "The filing's name as the caller said it" } }, ["filing"]),
+      tool("hand_to_team", "Hand the conversation to a person on the Placetta team.", { reason: { type: "string" } }, ["reason"]),
+    ] : []),
+    tool("recording_refused", "The caller doesn't want the call recorded.", {}, []),
     { type: "hangup", hangup: { description: "Hang up the call, after saying goodbye." } },
   ];
-  const brief = o.verified ? await briefFor(o.ws.id, o.lang) : "";
+  const brief = o.verified ? redactForVoice(await briefFor(o.ws.id, o.lang)) : "";
   const model = env("ODELIA_VOICE_MODEL");
   return {
     id: env("TELNYX_ASSISTANT_ID"),
@@ -149,6 +171,23 @@ async function assistantFor(o: { ccid: string; lang: Lang; name: string | null; 
     tools,
   };
 }
+
+/** The same conversation for a speech-to-speech brain (OpenAI over SIP): the same instructions, greeting and tools,
+ *  served over MCP with the same per-call token. */
+async function ownerSpec(o: { ccid: string; lang: Lang; name: string | null; ws: { id: string; name: string }; verified: boolean; outbound?: string }): Promise<SessionSpec> {
+  const brief = o.verified ? redactForVoice(await briefFor(o.ws.id, o.lang)) : "";
+  const rec = OWNER_TOOLS_REC;
+  return {
+    lang: o.lang,
+    instructions: instructions({ lang: o.lang, name: o.name, business: o.ws.name, verified: o.verified, brief, outbound: o.outbound, today: new Date().toISOString().slice(0, 10) }),
+    greeting: greeting(o.lang, o.name, o.outbound ? "outbound" : o.verified ? "verified" : "code", o.ws.name),
+    tools: o.verified ? [...OWNER_TOOLS, SEND_TEXT_TOOL, rec] : [VERIFY_TOOL, rec],
+    toolUrl: `${SELF}?mcp=1`,
+    token: await signCallToken(await monitorKey(), o.ccid, Math.floor(Date.now() / 1000) + 2 * 3600),
+    terms: [o.ws.name, "Placetta", "Odelia", "permit", "license", "health inspection", "certificate of occupancy", "EIN", "DBA", "sales tax"],
+  };
+}
+const OWNER_TOOLS_REC = { name: "recording_refused", description: "The caller doesn't want the call recorded.", properties: {}, required: [] as string[] };
 
 /**
  * Speech recognition for one call. Owners mix the two languages ("我的 health permit 什么时候到期"), so Mandarin calls use
@@ -200,6 +239,14 @@ async function incoming(p: CallPayload) {
     const sent = !error && (await textUser(admin, env, { link, workspace_id: ws.id, segments: [SAY.callCode[lang](code)], kind: "code", logBody: lang === "zh" ? "已发送通话验证码" : "Sent a call code" })).ok;
     if (!sent) { await answerThen("unverifiable"); return; }
   }
+  const pick = pickBrain({ surface: "owner_phone", lang, env });
+  await ownerCallStarted({ ccid, workspace_id: ws.id, user_id: link.user_id, number: from, brain: pick.brain, lang, direction: "in" });
+  if (pick.brain !== "telnyx") {
+    // answered on Telnyx, then bridged to the speech-to-speech brain once the line is up (call.answered, k "bridge")
+    const b = await cmd(ccid, "answer", { client_state: clientState({ k: "bridge", l: lang }), command_id: `answer-${ccid}`.slice(0, 120) });
+    if (b.ok) return;
+    console.error("answer for bridge", b.status, b.code, b.detail);
+  }
   const assistant = await assistantFor({ ccid, lang, name: await firstName(link.user_id, ws?.id), ws, verified });
   const r = await cmd(ccid, "answer", { assistant, client_state: clientState({ k: "talk", l: lang }), command_id: `answer-${ccid}`.slice(0, 120) });
   if (!r.ok) {
@@ -226,12 +273,19 @@ async function event(type: string, p: CallPayload) {
   const lang: Lang = cs.l === "zh" ? "zh" : "en";
 
   if (type === "call.initiated" && p.direction === "incoming") return await incoming(p);
+  // agency calls, the legs bridged to a brain, interpreter legs, recordings: ./calls.ts
+  if (await callsEvent(type, p, cs)) return;
 
   if (type === "call.answered") {
     await admin.from("odelia_calls").update({ answered_at: new Date().toISOString() }).eq("call_control_id", ccid).is("answered_at", null);
     if (cs.k === "stranger") await sayAndHangUp(ccid, "en", LINES.stranger.en);
     else if (cs.k === "noaccess") await sayAndHangUp(ccid, lang, LINES.noAccess[lang]);
     else if (cs.k === "unverifiable") await sayAndHangUp(ccid, lang, LINES.unverifiable[lang]);
+    else if (cs.k === "bridge") {
+      const call = await callOf(ccid);
+      if (call) await bridgeToBrain({ peer: ccid, token: ccid, lang: call.lang, record: true });
+    }
+    else if (cs.k === "talk") await cmd(ccid, "record_start", { format: "wav", channels: "dual", play_beep: false, client_state: clientState({ k: "rec", l: lang }) });
     else if (cs.k === "sorry") {
       await sayAndHangUp(ccid, lang, LINES.sorry[lang]);
       const from = normalizePhone(p.from), link = cs.t && from ? await linkByNumber(admin, from) : null;
@@ -251,8 +305,12 @@ async function event(type: string, p: CallPayload) {
       admin.from("workspaces").select("id, name").eq("id", call.workspace_id).maybeSingle(),
     ]);
     if (!w) { await cmd(ccid, "hangup", {}); return; }
+    const pick = pickBrain({ surface: "owner_phone", lang: call.lang, env });
+    await ownerCallStarted({ ccid, workspace_id: w.id, user_id: call.user_id, number: call.number, brain: pick.brain, lang: call.lang, direction: "out" });
+    if (pick.brain !== "telnyx" && (await bridgeToBrain({ peer: ccid, token: ccid, lang: call.lang, record: true })).ok) return;
     const assistant = await assistantFor({ ccid, lang: call.lang, name: await firstName(call.user_id, w.id), ws: { id: w.id, name: String(w.name ?? "") }, verified: true, outbound: String(o?.body ?? "") });
     const r = await cmd(ccid, "ai_assistant_start", { assistant, client_state: clientState({ k: "talk", l: call.lang }) });
+    if (r.ok) await cmd(ccid, "record_start", { format: "wav", channels: "dual", play_beep: false, client_state: clientState({ k: "rec", l: call.lang }) });
     if (!r.ok) { console.error("assistant start", r.status, r.code, r.detail); await sayAndHangUp(ccid, call.lang, LINES.sorry[call.lang]); await textInstead(call); }
     return;
   }
@@ -323,12 +381,36 @@ async function runTool(name: string, call: Call, body: Record<string, unknown>):
     await admin.from("odelia_calls").update({ texts: call.texts + 1 }).eq("call_control_id", call.call_control_id);
     return r.ok ? { ok: true, result: "Texted." } : { ok: false, result: r.code === "opted_out" ? "They turned off texts from you (STOP). They can text START to turn them back on." : "The text didn't go through. Apologize." };
   }
+  if (name === "call_agency") return await agencyCallFromOwner(call, String(body.filing ?? ""));
+  if (name === "hand_to_team") {
+    await admin.from("team_tasks").upsert({ kind: "handoff", workspace_id: call.workspace_id, title: `Odelia handed a phone call to the team: ${String(body.reason ?? "").slice(0, 200)}`,
+      detail: { call: call.call_control_id, reason: String(body.reason ?? "").slice(0, 500) }, dedupe: `voice-handoff:${call.call_control_id}` }, { onConflict: "dedupe", ignoreDuplicates: true });
+    return { ok: true, result: "The Placetta team has it and will call or text them back within one business day. Tell them so." };
+  }
+  if (name === "recording_refused") {
+    await cmd(call.call_control_id, "record_stop", {});
+    await admin.from("voice_calls").update({ consent: "refused" }).eq("call_control_id", call.call_control_id);
+    return { ok: true, result: "Recording stopped. Tell them that's fine and carry on." };
+  }
   return { ok: false, result: "Unknown tool." };
+}
+
+/** "Can you call the city about my building permit?": the filing they mean, then the agency call (./calls.ts). */
+async function agencyCallFromOwner(call: Call, named: string): Promise<Record<string, unknown>> {
+  const { data } = await admin.from("filings").select("id, title, status").eq("workspace_id", call.workspace_id!).in("status", ["submitted", "needs_info", "in_progress"]).order("updated_at", { ascending: false }).limit(20);
+  const list = (data ?? []) as { id: string; title: { en?: string; zh?: string } | null }[];
+  const words = named.toLowerCase().split(/[\s,]+/).filter((w) => w.length > 2);
+  const hits = list.filter((f) => { const t = `${f.title?.en ?? ""} ${f.title?.zh ?? ""}`.toLowerCase(); return words.some((w) => t.includes(w)) || (!!named.trim() && t.includes(named.trim().toLowerCase())); });
+  const one = hits.length === 1 ? hits[0] : list.length === 1 ? list[0] : null;
+  if (!one) return { ok: false, result: list.length ? `Ask which one: ${list.slice(0, 5).map((f) => f.title?.[call.lang] || f.title?.en).join("; ")}.` : "Nothing is with an agency right now, so there's nothing to ask them. Tell them so." };
+  const r = await agencyCall({ filing_id: one.id, user_id: call.user_id!, lang: call.lang });
+  return r.ok ? { ok: true, result: "Odelia is calling the agency now. Tell them the answer will be on the filing's timeline and you'll text them." } : { ok: false, result: `Tell them: ${r.say[call.lang]}` };
 }
 
 async function tool(req: Request, name: string) {
   const ccid = await verifyCallToken(await monitorKey(), req.headers.get("x-odelia-call") ?? "");
   if (!ccid) return fail(401, "unauthorized", "unauthorized");
+  if (ccid.startsWith("agency:")) return json(200, await agencyToolCall(ccid.slice(7), name, await req.json().catch(() => ({}))));
   const call = await callOf(ccid);
   if (!call || call.ended_at) return json(200, { ok: false, result: "The call has ended." });
   if (call.tool_calls >= MAX_TOOL_CALLS) return json(200, { ok: false, result: "That's a lot on one call. Offer to text them instead." });
@@ -370,12 +452,66 @@ async function dial(outboxId: string) {
   return json(200, { ok: true });
 }
 
+/* ------------------------------ the brain's tools over MCP, and OpenAI's call webhook ------------------------------ */
+
+async function mcp(req: Request): Promise<Response> {
+  const id = await verifyCallToken(await monitorKey(), req.headers.get("x-odelia-call") ?? "");
+  if (!id) return fail(401, "unauthorized", "unauthorized");
+  const msg = await req.json().catch(() => null) as Parameters<typeof mcpAnswer>[0] | null;
+  if (!msg || typeof msg !== "object") return json(400, { jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } });
+  const spec = await specForToken(id);
+  if (!spec) return json(200, { jsonrpc: "2.0", id: msg.id ?? null, error: { code: -32001, message: "The call has ended." } });
+  const out = await mcpAnswer(msg, spec.tools, async (name, args) => {
+    if (id.startsWith("agency:")) return await agencyToolCall(id.slice(7), name, args);
+    const call = await callOf(id);
+    if (!call || call.ended_at) return { ok: false, result: "The call has ended." };
+    if (call.tool_calls >= MAX_TOOL_CALLS) return { ok: false, result: "That's a lot on one call. Offer to text them instead." };
+    await admin.from("odelia_calls").update({ tool_calls: call.tool_calls + 1 }).eq("call_control_id", id);
+    try { return await runTool(name, call, args); } catch (e) { console.error("tool", name, String(e).slice(0, 200)); return { ok: false, result: "Something went wrong. Apologize briefly and offer to text instead." }; }
+  });
+  return out ? json(200, out) : new Response(null, { status: 202 });
+}
+
+/** Accept the call at OpenAI with the session Placetta decided for it, or turn it away when the token was not ours. */
+async function acceptOrReject(callId: string, spec: SpecWithBrain | null) {
+  const key = env("OPENAI_API_KEY") ?? "";
+  const url = `https://api.openai.com/v1/realtime/calls/${encodeURIComponent(callId)}`;
+  const post = (path: string, body: unknown) => fetch(`${url}/${path}`, { method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify(body), signal: AbortSignal.timeout(8000) });
+  if (!spec) { await post("reject", { status_code: 603 }); return; }
+  const r = await post("accept", sessionConfig(spec.brain, spec, env));
+  if (!r.ok) console.error("openai accept", r.status, (await r.text()).slice(0, 200));
+}
+
+setupCalls({ admin, env, self: SELF, monitorKey, cmd, ownerSpec: async (ccid) => {
+  const call = await callOf(ccid);
+  if (!call || call.ended_at || !call.workspace_id || !call.user_id) return null;
+  const { data: w } = await admin.from("workspaces").select("id, name").eq("id", call.workspace_id).maybeSingle();
+  if (!w) return null;
+  const o = call.outbox_id ? (await admin.from("odelia_outbox").select("body").eq("id", call.outbox_id).maybeSingle()).data : null;
+  return { ...(await ownerSpec({ ccid, lang: call.lang, name: await firstName(call.user_id, w.id), ws: { id: w.id, name: String(w.name ?? "") }, verified: !!call.verified_at, outbound: o ? String(o.body ?? "") : undefined })), brain: pickBrain({ surface: "owner_phone", lang: call.lang, env }).brain };
+} });
+
 /* ------------------------------ requests ------------------------------ */
 
 export async function handle(req: Request): Promise<Response> {
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
   const toolName = new URL(req.url).searchParams.get("tool");
   if (toolName) return await tool(req, toolName);
+  if (new URL(req.url).searchParams.get("mcp")) return await mcp(req);
+  if (req.headers.get("webhook-signature")) {
+    // OpenAI's Realtime webhook (Standard Webhooks): a call bridged by Placetta is ringing at OpenAI
+    const raw = await req.text();
+    const ok = await verifyStandardWebhook(raw, { id: req.headers.get("webhook-id") ?? "", timestamp: req.headers.get("webhook-timestamp") ?? "", signature: req.headers.get("webhook-signature") ?? "" }, env("OPENAI_WEBHOOK_SECRET") ?? "");
+    if (!ok) return fail(401, "unauthorized", "Bad webhook signature.");
+    let ev: Parameters<typeof sipToken>[0];
+    try { ev = JSON.parse(raw); } catch { return fail(400, "bad_request", "Send JSON."); }
+    const got = sipToken(ev);
+    if (!got) return json(200, { ok: true });
+    const id = await verifyCallToken(await monitorKey(), got.token);
+    const spec = id ? await specForToken(id) : null;
+    bg(acceptOrReject(got.callId, spec).catch((e) => console.error("openai accept", String(e).slice(0, 200))));
+    return json(200, { ok: true });
+  }
   if (req.headers.get("telnyx-signature-ed25519")) {
     const raw = await req.text();
     const ok = await verifyTelnyx(raw, req.headers.get("telnyx-signature-ed25519") ?? "", req.headers.get("telnyx-timestamp") ?? "", env("TELNYX_PUBLIC_KEY") ?? "");
@@ -390,6 +526,15 @@ export async function handle(req: Request): Promise<Response> {
   try { body = await req.json(); } catch { return fail(400, "bad_request", "Send JSON."); }
   if (!(await monitorKeyOk(req.headers.get("x-monitor-key")))) return fail(401, "unauthorized", "unauthorized");
   if (body.action === "dial") return await dial(String(body.outbox_id ?? ""));
+  if (body.action === "agency_call") {
+    const r = await agencyCall({ filing_id: String(body.filing_id ?? ""), user_id: String(body.user_id ?? ""), lang: body.lang === "zh" ? "zh" : "en" });
+    return json(r.ok ? 200 : 409, r);
+  }
+  if (body.action === "interpret_call") {
+    const r = await interpretCall({ filing_id: String(body.filing_id ?? ""), user_id: String(body.user_id ?? "") });
+    return json(r.ok ? 200 : 409, r);
+  }
+  if (body.action === "purge_recordings") return json(200, await purgeRecordings());
   return fail(400, "bad_request", "Unknown action.");
 }
 
