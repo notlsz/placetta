@@ -584,7 +584,7 @@ function upload(u: { app: string; item: string; files: { name: string; size: num
 
 function match(what: string, where: string): Plan {
   const isSJ = /san jos|圣何塞/i.test(where), isFr = /fremont|弗里蒙特/i.test(where);
-  const food = /tea|coffee|caf|restaurant|bak|food|truck|bar|kitchen|juice|boba|奶茶|餐|咖啡|面包|食|饮/i.test(what);
+  const food = /tea|coffee|caf|restaurant|bak|food|truck|bar|kitchen(?!ware|\s*supply)|juice|boba|奶茶|餐|咖啡|面包|食|饮/i.test(what);
   const w = where.trim() || "your city";
   const steps: Step[] = [
     S("weaving", `Working out what a ${what.trim().toLowerCase() || "business"} does`, `分析“${what.trim() || "企业"}”的经营内容`),

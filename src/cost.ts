@@ -46,7 +46,7 @@ export type Cost = {
 };
 
 const usd = (cents: number) => Math.round(cents) / 100;
-const FOOD = /tea|coffee|caf[eé]|restaurant|food|kitchen|bakery|hot ?pot|noodle|dessert|ice cream|boba|bubble|juice|\bbar\b|grill|pizza|sushi|dumpling|奶茶|茶|咖啡|餐|火锅|面|甜品|烘焙|食/i;
+const FOOD = /tea|coffee|caf[eé]|restaurant|food|kitchen(?!ware|\s*supply)|bakery|hot ?pot|noodle|dessert|ice cream|boba|bubble|juice|\bbar\b|grill|pizza|sushi|dumpling|奶茶|茶|咖啡|餐|火锅|面|甜品|烘焙|食/i;
 
 /** What a store is billed as, the way the database decides it (store_kind_fallback): its own kind, else food when the
  *  business sells food, else retail. */

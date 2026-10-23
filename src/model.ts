@@ -763,7 +763,7 @@ export const MATCH_FREMONT: LicenseHit[] = [
 
 /** A first pass for anywhere else, by kind of business. Every row says it still needs checking. */
 export function genericMatch(what: string, where: string): LicenseHit[] {
-  const food = /tea|coffee|caf|restaurant|bak|food|truck|bar|kitchen|juice|boba|奶茶|餐|咖啡|面包|食|饮/i.test(what);
+  const food = /tea|coffee|caf|restaurant|bak|food|truck|bar|kitchen(?!ware|\s*supply)|juice|boba|奶茶|餐|咖啡|面包|食|饮/i.test(what);
   const salon = /salon|hair|nail|barber|spa|beauty|美发|美甲|理发|美容/i.test(what);
   const place = same(where.trim() || "your city");
   const ca = /\b(ca|california)\b|加州|加利福尼亚/i.test(where) || /san jose|fremont|oakland|san francisco|los angeles|san diego|sacramento|圣何塞|旧金山|洛杉矶/i.test(where);
