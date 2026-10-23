@@ -3419,6 +3419,57 @@ html[lang="zh-CN"] .c96ch b{font-family:var(--zhserif);font-weight:500;font-size
 #tsSec:not(.near) .tsbg,#tsSec:not(.near) .tsav{background-image:none!important}
 /* the phone film is its own portrait crop of the store front (media/hero-open-m.mp4) */
 @media (max-width:767px){.hvid{object-position:50% 55%}}
+/* phones: the live demo is the product card itself, full width, one surface. No phone drawn inside the phone, no
+   browser dots, no blurred photo behind it, no grey band under it: the plan fills in where you read it, and the
+   replay and pause controls sit small in the card's own top corner. */
+@media (max-width:639px){
+  .vdemo .sample{max-width:none}
+  #vcard.vcard{height:auto;border:0;border-radius:18px;clip-path:none;box-shadow:none;background:none;padding:0;overflow:visible}
+  #vcard::after,#vcard::before,#vcard .vph,#vcard .vprog{display:none}
+  #vcard .astage{position:relative;left:auto;right:auto;top:auto;width:100%}
+  #vcard .app{padding-top:4px;border:1px solid rgba(15,27,51,.08);border-radius:18px;box-shadow:0 1px 2px rgba(15,27,51,.04),0 24px 48px -24px rgba(15,27,51,.22)}
+  #vcard .app::before{display:none}
+  #vcard .atop{padding-right:76px}
+  #vcard .vctl{top:12px;right:10px;bottom:auto;gap:0}
+  #vcard .vctl button{min-width:36px;min-height:36px;width:36px;height:36px;color:rgba(15,27,51,.32)}
+  #vcard .vctl svg{filter:none}
+}
+/* hero 9.5 (Oct 23), taking what the best do best.
+   Phone: Alven's one block over the film (the store front shows at the top, the headline, line and action sit together
+   at the bottom, nothing split by an empty middle); Vanta's field and button in one bar; Devin's quiet second action, a
+   text link; Stripe's logos big enough to read.
+   Laptop: x.ai's small pill above the headline; Devin's two-line subhead; logos that fade at the edges, never cut. */
+@media (max-width:767px){
+  .hero::after{background:linear-gradient(180deg,rgba(9,19,36,.42) 0%,rgba(9,19,36,.08) 26%,rgba(9,19,36,.38) 48%,rgba(9,19,36,.86) 72%,rgba(9,19,36,.96) 100%)}
+  .hero .hstack{justify-content:flex-end;gap:14px!important}
+  .hero .hst{margin-top:6px!important;padding-top:0!important;gap:4px}
+  .hero h1{font-size:42px!important}
+  .hero .starter,.hero .starter:focus-within{flex-direction:row!important;align-items:center;gap:6px;padding:5px!important;border:1px solid rgba(255,255,255,.38);border-radius:14px;background:rgba(255,255,255,.12)!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+  .hero .starter:focus-within{border-color:#fff}
+  .hero .starter input{flex:1;min-width:0;height:48px!important;min-height:48px!important;padding:0 10px!important;border:0!important;background:none!important;-webkit-backdrop-filter:none;backdrop-filter:none;text-align:left;font-size:16px}
+  .hero .starter input:focus{background:none!important}
+  .hero .starter .btn{flex:none;height:48px!important;min-height:48px!important;padding:0 18px;border-radius:10px;font-size:16px;box-shadow:none}
+  .hero .stalt a{height:44px!important;min-height:44px!important;width:auto;margin-inline:auto;padding:0 8px;border:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;font-size:15px;font-weight:500;color:rgba(255,255,255,.88)}
+  .hero .stalt a:hover{background:none;text-decoration:underline;text-underline-offset:3px}
+  .hero .stalt i{display:inline;margin-left:4px}
+  .hero .hbot{padding-top:10px!important;gap:6px}
+  .hero .hbot p{font-size:12px;letter-spacing:.02em;color:rgba(255,255,255,.6)}
+  .hero .mqt span{padding-right:30px}
+  .hero .mqt span.lg img{height:26px}
+  .hero .mqt span.lg.tall img{height:32px}
+  .hero .mqt span.lg.mid img{height:19px}
+  .hero .mqt span.lg.thin img{height:13px}
+  .hero .mqt span.lg.mq img{height:21px}
+  .hero .mqt span:not(.lg){font-size:16px}
+}
+.hero .mq{-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+@media (max-width:767px) and (max-height:740px){.hero h1{font-size:38px!important}.hero .mqt span.lg img{height:22px}.hero .mqt span.lg.tall img{height:27px}}
+@media (min-width:1024px){
+  .hero .badge{display:inline-flex;align-self:flex-start;width:auto;gap:8px;padding:6px 14px 6px 10px;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(255,255,255,.08);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+  .hero .badge p{font-size:14px;text-shadow:none}
+  .hero .hsub{max-width:620px!important}
+  .mq{-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
