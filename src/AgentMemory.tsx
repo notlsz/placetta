@@ -8,6 +8,7 @@ import { settle } from "./odeliaMemory/pinned";
 import { emptyAgentMemory, isLive, scopeKey, TOPIC_INFO, TOPICS, type AgentMemory, type Observation, type Scope, type SourceKind } from "./odeliaMemory/types";
 import { onTempChat, setTempChat, tempChat } from "./odeliaMemory/tempChat";
 import { whyKept } from "./odeliaMemory/retrieve";
+import { importMemories } from "./odeliaMemory/import";
 
 /* Settings, Agent memory: what Odelia keeps about the business between conversations, and every control over it.
      the switch            off by default (opt-in, as the privacy policy discloses); owners and admins turn it on
@@ -40,6 +41,7 @@ export function AgentMemoryGroup({ db, preload }: { db: () => Promise<MemoryApi>
   const [temp, setTemp] = useState(tempChat());
   const [editing, setEditing] = useState<{ id: string; en: string; zh: string } | null>(null);
   const [briefDraft, setBriefDraft] = useState<Record<string, string>>({});
+  const [paste, setPaste] = useState<string | null>(null);   // memories pasted from another assistant (src/odeliaMemory/import.ts)
   useEffect(() => onTempChat(setTemp), []);
   const reload = useCallback(async () => { if (live) setRemote(await (await db()).loadAgentMemory(cloud!.wsId).catch(() => emptyAgentMemory())); }, [live, cloud, db]);
   useEffect(() => { void reload(); }, [reload]);
@@ -133,6 +135,30 @@ export function AgentMemoryGroup({ db, preload }: { db: () => Promise<MemoryApi>
         {st.enabled && <li className="sg-row"><span className="sg-tx"><b>{zh ? "保存执照号的后 4 位" : "Keep the last 4 digits of license numbers"}</b>
           <small>{zh ? "从不保存完整号码。" : "Never the whole number."}</small></span>
           <span className="sg-r">{canAdmin ? toggle(st.allowLast4, v => void setSetting("allowLast4")(v), zh ? "保存执照号后 4 位" : "Keep last 4 digits") : <em className="lock">{st.allowLast4 ? (zh ? "开启" : "On") : (zh ? "关闭" : "Off")}</em>}</span></li>}
+        {st.enabled && canAdmin && <li className="sg-row"><span className="sg-tx"><b>{zh ? "从 ChatGPT 或 Claude 导入" : "Bring memories from ChatGPT or Claude"}</b>
+          <small>{zh ? "粘贴它们记住的关于您的内容。每一条都会成为只有您能看到的建议，由您逐条批准。" : "Paste what they remember about you. Each line becomes a suggestion only you see, and you approve them one by one."}</small></span>
+          <span className="sg-r">{btn(zh ? "导入" : "Import", () => setPaste(""))}</span></li>}
+        {paste !== null && (() => {
+          const r = importMemories(paste, { at: now(), by: "you", allowLast4: st.allowLast4, existing: mem.items });
+          const left = r.dropped.filter(d => d.why !== "duplicate").length;
+          return (
+            <li className="sg-row am-import">
+              <span className="sg-tx">
+                <small>{zh ? "ChatGPT：设置，个性化，管理记忆，复制列表。Claude：请它列出关于您记住的内容，或粘贴数据导出中的记忆。一行一条。" : "ChatGPT: Settings, Personalization, Manage memories, then copy the list. Claude: ask it to list what it remembers about you, or paste the memory from your data export. One per line."}</small>
+                <textarea value={paste} onChange={e => setPaste(e.target.value)} rows={6} aria-label={zh ? "粘贴记忆" : "Paste memories"} />
+                {paste.trim() && <small>{zh ? `将添加 ${r.items.length} 条建议${left ? `，省略 ${left} 条（含号码、密码、敏感信息或指令）` : ""}。` : `${r.items.length} suggestion${r.items.length === 1 ? "" : "s"} to add${left ? `; ${left} left out (numbers, passwords, sensitive details or instructions)` : ""}.`}</small>}
+              </span>
+              <span className="sg-r am-row-acts">
+                {btn(zh ? "添加为建议" : "Add as suggestions", () => {
+                  if (!r.items.length) return;
+                  setPaste(null);
+                  void act(m => ({ ...m, items: [...m.items, ...r.items] }), rpc(x => x.memoryImport(cloud!.wsId, r.items)), B("Added as suggestions. Approve the ones you want.", "已添加为建议。请批准您需要的条目。"));
+                }, "ink")}
+                {btn(zh ? "取消" : "Cancel", () => setPaste(null))}
+              </span>
+            </li>
+          );
+        })()}
         <li className="sg-row"><span className="sg-tx"><b>{zh ? "不记住这次对话" : "Don't remember this chat"}</b>
           <small>{zh ? "在您关闭它或关闭此标签页之前，Odelia 不读取记忆（您的记录和简报除外），也不从这次对话中保存任何内容。" : "Until you turn it off or close this tab, Odelia reads no memories (beyond your records and briefs) and saves nothing from this chat."}</small></span>
           <span className="sg-r">{toggle(temp, v => { setTempChat(v); setTemp(v); }, zh ? "不记住这次对话" : "Don't remember this chat")}</span></li>
