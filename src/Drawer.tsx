@@ -169,6 +169,7 @@ function Progress({ a }: { a: Application }) {
       </ol>
       {f && f.status !== "requested" && <StatusTimeline a={a} filing={f} />}
       {f?.agent_state === "needs_you" && <FinishStep f={f} />}
+      {f && cloud?.owner && f.channel === "team" && f.agent_state === "handoff" && !!f.portal_url && !f.submit_clicked_at && ["requested", "in_progress"].includes(f.status) && <TeachStep f={f} />}
       <FilingLive app={a.id} embedded />
       <AskSpecialist app={a} />
       {f?.note && f.status !== "needs_info" && <p className="note">{zh ? "团队备注：" : "From the team: "}{f.note}</p>}
@@ -529,6 +530,23 @@ function FinishStep({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>[
           ? <button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.resumeFiling(f.id, true)}>{zh ? "再次提交" : "Send it again"}</button>
           : <button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.resumeFiling(f.id)}>{zh ? "我已完成，继续" : "I've done it, carry on"}</button>}
       </div>
+    </div>
+  );
+}
+
+/** "Show Odelia how" (teach mode): a filing the team takes because Odelia has no steps for its agency's site yet. The
+ *  owner can file it once in the live browser while she watches; the steps go to the team's review, then help every
+ *  business filing there. While she watches, FinishStep shows the live browser and "I've done it". */
+function TeachStep({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>["filings"][number] }) {
+  const { lang, cloud, busy } = useApp();
+  const zh = lang === "zh";
+  return (
+    <div className="finish-step teach-step" role="note">
+      <b>{zh ? "教 Odelia 一次" : "Show Odelia how"}</b>
+      <p>{zh
+        ? "Odelia 还没学过这个机构网站，所以由团队提交。您也可以在实时浏览器中亲自提交一次，Odelia 会在旁记下步骤，从不记录密码或保密号码。团队核对后，她会为每家在该网站办理的企业提交这份表格，每次提交仍需批准。"
+        : "Odelia hasn't learned this agency's site yet, so the team files it. Or file it once yourself in the live browser while she watches. She writes down the steps, never your password or any secret number. Once the team checks them, she files this form there for every business, and each filing still needs its approval."}</p>
+      <div className="m-btns"><button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.teachFiling(f.id)}>{zh ? "教 Odelia 一次" : "Show Odelia how"}</button></div>
     </div>
   );
 }

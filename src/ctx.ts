@@ -66,6 +66,8 @@ export type CloudCtx = {
   markPaid(filingId: string): Promise<void>;
   /** resubmit: send again a filing the same as one already sent (the person tapped "Send it again"). */
   resumeFiling(filingId: string, resubmit?: boolean): Promise<void>;
+  /** "Show Odelia how": file it once yourself in the live browser while Odelia records the steps (teach mode). */
+  teachFiling(filingId: string): Promise<void>;
   uploadSigned(filingId: string, appId: string, file: File): Promise<void>;
   cancelFiling(filingId: string): Promise<void>;
   /** Stop a filing that's on its way, before anything reaches the agency; it comes back to you to approve again. */

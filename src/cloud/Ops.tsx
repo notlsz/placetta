@@ -33,6 +33,7 @@ const KIND: Record<string, Bi> = {
   ask_person: B("A customer asks for a person", "客户请求真人协助"),
   margin: B("AI cost is high against this customer's revenue", "AI 成本相对该客户收入偏高"),
   team_time: B("This filing took longer than its budget", "此项申报用时超出预算"),
+  playbook_review: B("Check the steps Odelia learned on a new agency site (Quality tab)", "核对 Odelia 在新机构网站上学会的步骤（质量页）"),
 };
 
 /** What Odelia's models cost this month against what the plans pay, with the ten workspaces that cost the most. */

@@ -124,7 +124,77 @@ function QualityQueue() {
           </article>
         ))}</div>
       )}
+      <TaughtQueue />
     </Frame>
+  );
+}
+
+/* ------------------------------ steps Odelia learned (teach mode) ------------------------------ */
+
+const TAUGHT_FLAG: Record<string, Bi> = {
+  page_injection: B("A page had text aimed at the AI: check those steps by hand", "某个页面含有针对 AI 的文字：请人工核对这些步骤"),
+  unmapped_fields: B("Some lines match nothing the customer approved: the person is asked for them", "有些栏目与客户批准的内容都不对应：会请客户填写"),
+  not_in_registry: B("A line matched something the registry doesn't list for this form: it's asked instead", "某栏目对应的内容不在该表格的登记字段中：改为询问"),
+  model_mapping_refused: B("A suggested match wasn't one of the business's facts and was refused", "有一项建议的对应不是企业资料，已拒绝"),
+  no_confirmation: B("No confirmation number was seen at the end", "结尾没有看到确认号"),
+  no_submit: B("No send step was seen", "没有看到提交步骤"),
+  signs_in: B("Signs in with the business's saved login", "使用企业保存的登录信息登录"),
+  names_scrubbed: B("Customer details in page or button names were replaced with placeholders", "页面或按钮名称中的客户信息已替换为占位符"),
+  no_accessible_name: B("A control has no name and is found by its id", "有控件没有名称，按其编号定位"),
+  labels_unavailable: B("Page names are plain: the AI labels weren't available", "页面名称为原文：未能生成 AI 标注"),
+  confirm_pattern_refused: B("The confirmation number's pattern was refused", "确认号的格式规则被拒绝"),
+};
+const DO: Record<string, Bi> = {
+  sign_in: B("Sign in", "登录"), open: B("Open", "打开"), choose: B("Choose", "选择"), fill: B("Fill", "填写"), upload: B("Attach", "上传"),
+  agree: B("Agree", "同意"), review: B("Check", "核对"), submit: B("Send", "提交"), pay: B("The person pays", "由客户付款"), receipt: B("Confirmation", "确认"),
+};
+
+/** Drafts from "Show Odelia how" runs, then the approved ones with their record. A draft runs only with a person
+ *  pressing submit; approving it lets it run for every business on that site, still under every check and approval. */
+function TaughtQueue() {
+  const { b, lang, say } = useApp();
+  const zh = lang === "zh";
+  const [rows, setRows] = useState<ops.TaughtPlaybook[] | null>(null);
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const load = useCallback(async () => { try { setRows(await ops.playbookQueue()); } catch (e) { say((e as api.ApiError).message); setRows([]); } }, [say]);
+  useEffect(() => { void load(); }, [load]);
+  const decide = async (p: ops.TaughtPlaybook, status: "approved" | "rejected" | "draft") => {
+    try { await ops.playbookDecide(p.id, status, notes[p.id]); say(zh ? "已记录" : "Recorded"); await load(); } catch (e) { say((e as api.ApiError).message); }
+  };
+  if (!rows?.length) return null;
+  const line = (s: ops.TaughtStep) => s.login ? (zh ? "保存的登录信息" : "the saved login") : s.person ? (zh ? "客户每次亲自填写" : "the person types it, every time")
+    : s.ask ? (zh ? "询问客户" : "asked") : s.option ? (zh ? `固定选项：${s.option}` : `fixed choice: ${s.option}`) : s.field ?? s.fact ?? "";
+  return (
+    <section className="sec taught">
+      <div className="sec-h"><h2>{zh ? "Odelia 学会的步骤" : "Steps Odelia learned"}</h2></div>
+      <p className="note">{zh ? "来自“教 Odelia 一次”的记录。未核对的步骤只在有人点击提交时运行；批准后，Odelia 会为每家在该网站办理的企业提交，仍需每次批准。记录中没有任何客户的资料。" : "From \"Show Odelia how\" runs. Until you approve them, these steps run only with a person pressing submit. Once approved, Odelia files this form on that site for every business, each filing still approved. Nothing in them is any customer's."}</p>
+      <div className="rq-list">{rows.map(p => {
+        const steps = Object.values(p.body.playbook?.forms ?? {})[0]?.steps ?? [];
+        const special = (p.body.trace ?? []).filter(s => s.login || s.person || s.ask || s.option);
+        return (
+          <article key={p.id} className="rq">
+            <header><span><b>{p.name}</b><small>{[p.host, p.official, p.status === "approved" ? (zh ? "已批准" : "approved") : p.demoted_at ? (zh ? `已退回核对：${p.demoted_reason ?? ""}` : `sent back: ${p.demoted_reason ?? ""}`) : (zh ? "待核对" : "to review"),
+              p.runs ? (zh ? `${p.runs} 次中成功 ${p.successes} 次` : `${p.successes} of ${p.runs} runs filed`) : (zh ? "尚未运行" : "not run yet"), `v${p.version}`].join(zh ? "，" : ", ")}</small></span>
+              <small>{fmtAgo(p.taught_at, lang)}</small></header>
+            <ol className="taught-steps">{steps.map((s, i) => <li key={i}><b>{s.page}</b><small>{b(DO[s.do] ?? B(s.do, s.do))}{zh ? "：" : ": "}{s.note}</small></li>)}</ol>
+            {(p.body.fields?.length ?? 0) > 0 && (
+              <table className="q-margin-t"><thead><tr><th>{zh ? "页面上的栏目" : "Line on the page"}</th><th>{zh ? "填入的企业资料" : "Filled with"}</th><th>{zh ? "格式检查" : "Check"}</th></tr></thead>
+                <tbody>{p.body.fields!.map((f, i) => <tr key={i}><td>{f.selector.replace(/^\w+:/, "")}</td><td>{f.label}</td><td>{f.validator ?? "-"}</td></tr>)}</tbody></table>
+            )}
+            {special.length > 0 && <p className="rq-meta">{special.map(s => `${s.selector.replace(/^\w+:/, "")} (${line(s)})`).join(zh ? "；" : "; ")}</p>}
+            {p.body.playbook?.final?.[0] && <p className="rq-meta">{zh ? `提交按钮：${p.body.playbook.final[0].page} 页的“${p.body.playbook.final[0].button ?? ""}”` : `Sends with "${p.body.playbook.final[0].button ?? ""}" on ${p.body.playbook.final[0].page}`}</p>}
+            {p.flags.filter(f => TAUGHT_FLAG[f]).map(f => <q key={f} className="rq-note">{b(TAUGHT_FLAG[f])}</q>)}
+            <form className="rq-form" onSubmit={e => { e.preventDefault(); void decide(p, "approved"); }}>
+              <input value={notes[p.id] ?? ""} onChange={e => setNotes(x => ({ ...x, [p.id]: e.target.value }))} maxLength={2000} placeholder={zh ? "备注（拒绝时必填）" : "A note (needed to reject)"} aria-label={zh ? "备注" : "Note"} />
+              {p.status === "approved"
+                ? <button type="button" className="sbtn" onClick={() => void decide(p, "draft")}>{zh ? "退回核对" : "Send back to review"}</button>
+                : <button type="button" className="sbtn" onClick={() => void decide(p, "rejected")}>{zh ? "拒绝" : "Reject"}</button>}
+              {p.status !== "approved" && <button type="submit" className="sbtn ink">{zh ? "批准" : "Approve"}</button>}
+            </form>
+          </article>
+        );
+      })}</div>
+    </section>
   );
 }
 

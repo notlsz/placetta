@@ -607,6 +607,8 @@ export const fileNow = (ws: string, filingId: string) => fn<FileView>("file", { 
 /** Carry on after a hand-back. resubmit: the person confirmed sending again a filing the same as one they already sent. */
 export const resumeFiling = (ws: string, filingId: string, resubmit = false) =>
   fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "resume", ...(resubmit ? { resubmit: true } : {}) });
+/** "Show Odelia how": the person files it in the live browser while the portal worker records the steps (teach mode). */
+export const teachFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "teach" });
 /** The hand-signed copy of a wet-signature form, already in Documents: Placetta faxes it. */
 export const signedCopy = (ws: string, filingId: string, path: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "signed", path });
 /** Stop a filing before anything has left for the agency. Refused once Placetta has pressed submit or sent it. */
