@@ -31,6 +31,13 @@ jobs:
       # the agent loop against a scripted model that misbehaves on purpose: approvals, made-up ids, planted
       # instructions, SSNs, remote channels, limits, racing runs, Chinese, every tool, model failover
       - run: npm run test:extreme
+      # the plush bot's animation math through its extremes: no negative scale or radius ever reaches the canvas
+      - run: npm run test:bot
+      # what talking leaves in the message box (um and uh out, everything else as said) and what voice notes cost
+      - run: npm run test:speech
+      # a refusal never ends at "no": every refusal the server's tools throw gets the next step and who takes it, and
+      # the safety refusals (no CAPTCHA bypass, nothing filed or paid without approval) stay refusals
+      - run: npm run test:next-path
       # the prompt-injection red team: hostile emails, PDFs, pages, chats, lessons and form fields, each against a
       # model that obeys them; every one must be stopped by Placetta's own code
       - run: npm run test:redteam
@@ -74,6 +81,11 @@ jobs:
           npm ci --prefix worker/filer
           npm run typecheck --prefix worker/filer
           cd worker/filer && node node_modules/playwright-core/cli.js install --with-deps chromium && node --experimental-strip-types --test test/store.test.ts test/docker.test.ts test/reroute.test.ts test/replay.test.ts
+      # the built app (sample mode) in Chromium at 1440 and 390: Odelia is sent several messages and watched for 20
+      # seconds through working, done and idle; any uncaught error or a blank page fails (scripts/crash-smoke.mjs,
+      # docs/LESSONS.md). It uses the filer's Playwright and the Chromium the step above installed.
+      - name: No crash and no blank page in a real browser
+        run: npm run test:crash
   functions:
     runs-on: ubuntu-latest
     steps:

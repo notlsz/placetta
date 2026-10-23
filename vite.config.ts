@@ -97,7 +97,7 @@ const pdfjsAssets = (): Plugin => ({
  *  They are bundled into the server (scripts/build-agent.mjs: agent-run, the monitor, the MCP server) and never into
  *  what a browser loads. Listed in docs/SECURITY.md; a new server-only module goes here too. */
 export const SERVER_ONLY = [
-  /\/src\/live\.ts$/, /\/src\/harness\.ts$/, /\/src\/serverRun\.ts$/, /\/src\/held\.ts$/, /\/src\/localAgent\.ts$/,
+  /\/src\/live\.ts$/, /\/src\/harness\.ts$/, /\/src\/serverRun\.ts$/, /\/src\/held\.ts$/, /\/src\/localAgent\.ts$/, /\/src\/nextPath\.ts$/,
   /\/src\/filingPlaybooks\//, /\/src\/server\//, /\/supabase\/functions\//,
 ];
 /** Fails the build when the app's module graph reaches a server-only module (unless this is a local agent build). A

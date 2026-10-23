@@ -15,7 +15,7 @@ import { HqHome } from "../Headquarters";
 import { applyTheme, readTheme } from "../hooks";
 import type { HqRow } from "../hq";
 import { firstPlanClock } from "../plan/prefill";
-import { CITIES, ownWords, parsePlace, readLine, SELLS, STATES } from "../plan/line";
+import { CITIES, ownWords, parsePlace, readLine, SELLS, STATES, streetIn, zipIn } from "../plan/line";
 import { firstWorkspace } from "../plan/start";
 import { intakeQuestions, type Intake } from "../plan/intake";
 import { phoneConsent } from "../consent";
@@ -415,16 +415,38 @@ function ClaimStart({ lang, email, token, peek, onDone, onSkip }: { lang: Lang; 
   );
 }
 
-/* One line instead of a form: "Milk tea shop in Flushing, NY" or "奶茶店，法拉盛". What it sells and the city are read
-   from the words (src/plan/line.ts, the same reading a first text to Odelia gets); anything missing is asked right
-   there, one field at a time. */
-function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: string; onCreated: (id: string) => void; onCancel?: () => void }) {
+/* Onboarding's answers so far, kept in this browser so leaving halfway and coming back resumes where it stopped (the
+   way Stripe Atlas and Gusto keep a half-done application). Cleared once the workspace exists. */
+type OnbDraft = { line?: string; f?: Record<string, unknown>; more?: Record<string, unknown>; step?: "line" | "more"; agreed?: boolean };
+const DRAFT = "placetta-onb-draft";
+const draft = {
+  get: (): OnbDraft => { try { return JSON.parse(localStorage.getItem(DRAFT) ?? "{}") as OnbDraft; } catch { return {}; } },
+  set: (d: OnbDraft) => { try { localStorage.setItem(DRAFT, JSON.stringify(d)); } catch { /* storage off */ } },
+  clear: () => { try { localStorage.removeItem(DRAFT); } catch { /* storage off */ } },
+};
+
+/** Where onboarding stands: two steps, the second optional, so nobody wonders how long this takes. */
+function OnbProgress({ lang, step }: { lang: Lang; step: 1 | 2 }) {
+  return (
+    <div className="onb-prog" role="progressbar" aria-valuemin={1} aria-valuemax={2} aria-valuenow={step} aria-label={lang === "zh" ? `第 ${step} 步，共 2 步` : `Step ${step} of 2`}>
+      <span className="on" /><span className={step === 2 ? "on" : ""} />
+      <small>{lang === "zh" ? `第 ${step} 步，共 2 步` : `Step ${step} of 2`}</small>
+    </div>
+  );
+}
+
+/* One line instead of a form: "Milk tea shop at 150 N First St, San Jose, CA" or "奶茶店，法拉盛". What it sells, the city
+   and the street are read from the words (src/plan/line.ts, the same reading a first text to Odelia gets); anything
+   missing is asked right there, one field at a time. Someone who ticked the Terms when they created their account isn't
+   asked again. */
+function Onboard({ lang, email, agreedAtSignup = false, onCreated, onCancel }: { lang: Lang; email: string; agreedAtSignup?: boolean; onCreated: (id: string) => void; onCancel?: () => void }) {
   const L = (x: Bi) => x[lang];
-  // answers from the website's questionnaire, if they came that way
+  // answers from the website's questionnaire, if they came that way; otherwise a draft from an earlier visit
   const [hand] = useState(readHandoff);
-  const [f, setF] = useState({ brand: hand?.brand ?? "", sell: hand?.sell ?? "", other: hand?.other ?? "", place: hand?.place ?? "", state: "", when: hand?.when ?? -1, entity: "", street: "", more: false });
+  const [saved] = useState(() => (hand ? {} as OnbDraft : draft.get()));
+  const [f, setF] = useState({ brand: hand?.brand ?? "", sell: hand?.sell ?? "", other: hand?.other ?? "", place: hand?.place ?? "", state: "", when: hand?.when ?? -1, entity: "", street: "", more: false, ...(saved.f as object) });
   // the one line; what it says fills the answers above unless they were set by hand
-  const [line, setLine] = useState(() => (hand ? "" : embedLine()));
+  const [line, setLine] = useState(() => (hand ? "" : saved.line ?? embedLine()));
   // a business that came through a partner answers once whether the partner sees its progress (off unless ticked)
   const [share, setShare] = useState(false);
   // "I already have stores": the free check instead of the one line (src/StoresCheck.tsx)
@@ -438,19 +460,25 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
   const whenNow = f.when >= 0 ? f.when : read.open ? 3 : 4;
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const [agree, setAgree] = useState(false);
+  // ticked once, at sign-up, is enough: the box comes back only for someone who never ticked it (a code sign-in)
+  const signedUpAgreed = agreedAtSignup || !!saved.agreed;
+  const [agree, setAgree] = useState(signedUpAgreed);
   const [doc, setDoc] = useState<string | null>(null);
   const d = LEGAL.find(x => x.id === doc);
   const parsed = parsePlace(placeNow);
   const needState = !!placeNow.trim() && !parsed && !placeNow.includes(",");
   const what = sellNow === "other" ? otherNow.trim() : f.sell ? SELLS.find(x => x.en === sellNow)?.[lang === "zh" ? "zh" : "en"] ?? "" : own && own.length <= 60 ? own : SELLS.find(x => x.en === sellNow)?.[lang === "zh" ? "zh" : "en"] ?? "";
-  // The second screen: three optional answers that let Placetta fill a real application before the plan appears.
-  const [step, setStep] = useState<"line" | "about" | "more">("line");
-  const [more, setMore] = useState({ legal: "", notFormed: false, owner: "", address: "" });
+  // the street, when the line names one: it carries into the address, so nobody types it twice
+  const streetNow = f.street.trim() || streetIn(line);
+  // The second screen: optional answers that let Placetta fill a real application before the plan appears.
+  const [step, setStep] = useState<"line" | "about" | "more">(saved.step === "more" ? "more" : "line");
+  const [more, setMore] = useState({ legal: "", notFormed: false, owner: "", address: "", ...(saved.more as object) });
   // the intake (src/plan/intake.ts): yes-or-no questions one at a time, only those that apply to what they're opening
   const [intake, setIntake] = useState<Intake>({});
   const [qi, setQi] = useState(0);
   const questions = intakeQuestions(what);
+  // every answer is kept as it's typed, so a closed tab resumes here
+  useEffect(() => { if (!hand) draft.set({ line, f, more, step: step === "about" ? "line" : step, agreed: signedUpAgreed }); }, [hand, line, f, more, step, signedUpAgreed]);
   /** What the first screen settled (the city and state), or why it can't go on yet. */
   const settle = () => {
     const city = parsed?.city ?? placeNow.replace(/,.*$/, "").trim();
@@ -462,9 +490,11 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
   };
   // Start on the first screen goes to the three questions, with anything already typed in the details box carried over
   const toMore = () => {
-    if (!settle()) return;
+    const at = settle();
+    if (!at) return;
     setErr("");
-    setMore(m => ({ ...m, legal: m.legal || f.entity.trim(), address: m.address || f.street.trim() }));
+    const zip = zipIn(line);
+    setMore(m => ({ ...m, legal: m.legal || f.entity.trim(), address: m.address || (streetNow ? `${streetNow}, ${at.city}, ${at.state}${zip ? " " + zip : ""}` : "") }));
     setQi(0);
     setStep(questions.length ? "about" : "more");
   };
@@ -487,7 +517,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
     const { name: brand, state: ws } = firstWorkspace({
       what, city, state, lang, brand: f.brand.trim(), months: WHEN[whenNow]?.months ?? null, notFormed,
       legal: notFormed ? "" : (skip ? "" : more.legal.trim()) || f.entity.trim(), owner: skip ? "" : more.owner.trim(),
-      address: (skip ? "" : more.address.trim()) || f.street.trim(),
+      address: (skip ? "" : more.address.trim()) || (streetNow ? `${streetNow}, ${city}, ${state}` : ""),
       intake: Object.fromEntries(Object.entries(intake).filter(([k]) => questions.some(q => q.key === k))),
     });
     try {
@@ -496,6 +526,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
       await api.acceptTerms(UPDATED, id).catch(() => null);
       await claimReferral(id, share);
       if (hand) consumeHandoff();
+      draft.clear();
       onCreated(id);
     } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
   };
@@ -512,13 +543,16 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
       await api.acceptTerms(UPDATED, id).catch(() => null);
       await claimReferral(id, share);
       if (hand) consumeHandoff();
+      draft.clear();
       onCreated(id);
     } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
   };
   const legal = (
     <div className="onb-legal">
       <ReferralConsent lang={lang} checked={share} onChange={setShare} />
-      <TermsCheck id="onb-agree" lang={lang} checked={agree} onChange={v => { setAgree(v); if (v) setErr(""); }} onDoc={setDoc} />
+      {signedUpAgreed
+        ? <p>{L(B("You agreed to the ", "您在创建账户时已同意"))}<button type="button" className="lnk" onClick={() => setDoc("terms")}>{L(B("Terms of Service", "《服务条款》"))}</button>{L(B(" and ", "和"))}<button type="button" className="lnk" onClick={() => setDoc("privacy")}>{L(B("Privacy Policy", "隐私政策"))}</button>{L(B(" when you created your account.", "。"))}</p>
+        : <TermsCheck id="onb-agree" lang={lang} checked={agree} onChange={v => { setAgree(v); if (v) setErr(""); }} onDoc={setDoc} />}
       <FilingAuthNote lang={lang} onDoc={setDoc} />
     </div>
   );
@@ -563,8 +597,9 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
     const ex = parsed ?? { city: placeNow.replace(/,.*$/, "").trim() || "Flushing", state: f.state || "NY" };
     return (
       <div className="gate-card wide">
-        <h1>{L(B("Three answers fill your first application.", "回答三个问题，第一份申请就填好了。"))}</h1>
-        <p className="gate-sub">{L(B("Each one is optional. Skip any you don't have yet; Odelia asks when she needs it.", "都是选填。还没有的可以跳过，Odelia 需要时会再问您。"))}</p>
+        <OnbProgress lang={lang} step={2} />
+        <h1>{more.address ? L(B("Two answers fill your first application.", "再答两个问题，第一份申请就填好了。")) : L(B("Three answers fill your first application.", "回答三个问题，第一份申请就填好了。"))}</h1>
+        <p className="gate-sub">{L(B("All optional. Skip any; Odelia asks when she needs it.", "都是选填。可以跳过，Odelia 需要时再问。"))}</p>
         <form className="onb" onSubmit={e => { e.preventDefault(); void create(); }}>
           <div className="q">
             <span id="onb-legal-t">{L(B("Legal business name", "企业法定名称"))}</span>
@@ -597,12 +632,13 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
   }
   return (
     <div className="gate-card wide">
+      <OnbProgress lang={lang} step={1} />
       <h1>{L(B("What are you opening, and where?", "您要开什么店？开在哪里？"))}</h1>
-      <p className="gate-sub">{L(B("One line is enough. Your plan appears right away: every license and permit, in order, with fees and timelines. Odelia then fills the forms and files them with your approval.", "一句话就够。计划立刻出现：全部执照和许可，按顺序列出费用与时间。之后 Odelia 填好表格，经您批准后提交。"))}</p>
+      <p className="gate-sub">{L(B("One line, with the street if you have it. Your plan for that address appears right away: every license, in order, with fees and timelines.", "一句话就够，有街道地址更好。该地址的计划立刻出现：全部执照按顺序列出，附费用和时间。"))}</p>
       <form className="onb" onSubmit={e => { e.preventDefault(); toMore(); }}>
         <label className="q">
           <span className="sr">{L(B("What and where", "开什么店、在哪里"))}</span>
-          <input id="onb-line" className="onb-line" value={line} onChange={e => { setLine(e.target.value); setErr(""); }} placeholder={L(B("Milk tea shop in Flushing, NY", "奶茶店，纽约法拉盛"))} autoFocus autoComplete="off" />
+          <input id="onb-line" className="onb-line" value={line} onChange={e => { setLine(e.target.value); setErr(""); }} placeholder={L(B("Milk tea shop at 38 Main St, Flushing, NY", "奶茶店，纽约法拉盛 38 Main St"))} autoFocus autoComplete="off" />
         </label>
         {!line && (
           <div className="chips ex">
@@ -615,6 +651,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
           <p className="onb-read" aria-live="polite">
             {what ? <span><I.check />{what}</span> : <span className="miss">{L(B("What kind of business?", "什么类型的店？"))}</span>}
             {parsed || (placeNow && f.state) ? <span><I.check />{placeNow}{!parsed && f.state ? `, ${f.state}` : ""}</span> : <span className="miss">{L(B("Which city and state?", "哪个城市和州？"))}</span>}
+            {streetNow && <span><I.check />{streetNow}</span>}
             {whenNow === 3 && <span><I.check />{L(B("Already open", "已开业"))}</span>}
           </p>
         )}
@@ -711,7 +748,7 @@ function SetPassword({ lang, onDone, onCancel }: { lang: Lang; onDone: () => voi
   );
 }
 
-type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "sso"; email: string; method: string } | { k: "onboard"; email: string; back?: string } | { k: "claim"; email: string; token: string; peek: StartPeek } | { k: "hq"; email: string; rows: HqRow[] } | { k: "partner"; email: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string }
+type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "sso"; email: string; method: string } | { k: "onboard"; email: string; back?: string; agreed?: boolean } | { k: "claim"; email: string; token: string; peek: StartPeek } | { k: "hq"; email: string; rows: HqRow[] } | { k: "partner"; email: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string }
   | { k: "mcp"; email: string; req: api.McpAuthRequest; rows: { id: string; name: string }[]; start: string };
 
 export function CloudRoot() {
@@ -776,7 +813,7 @@ export function CloudRoot() {
       if (!row) {
         // a partner (or someone opening /app/partner to become one) with no workspace of their own gets the partner page
         const partner = hq.length ? null : await partnerMe().catch(() => null);
-        setPhase(hq.length ? { k: "hq", email: me.email, rows: hq } : partner || /\/partner\/?$/.test(location.pathname) ? { k: "partner", email: me.email } : { k: "onboard", email: me.email });
+        setPhase(hq.length ? { k: "hq", email: me.email, rows: hq } : partner || /\/partner\/?$/.test(location.pathname) ? { k: "partner", email: me.email } : { k: "onboard", email: me.email, agreed: agreed === UPDATED });
         return;
       }
       // an AI assistant signing in to Placetta (src/cloud/McpConsent.tsx): the person decides, then goes back to it
@@ -861,7 +898,7 @@ export function CloudRoot() {
       )}
       {phase.k === "twostep" && <TwoStepCode lang={lang} factorId={phase.factorId} onDone={() => void open(lastWs.get())} onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
       {phase.k === "mcp" && <McpConsent lang={lang} email={phase.email} req={phase.req} rows={phase.rows} start={phase.start} onDone={() => void open(phase.start)} />}
-      {phase.k === "onboard" && <Onboard lang={lang} email={phase.email} onCreated={id => void open(id)} onCancel={phase.back !== undefined ? () => void open(phase.back!) : undefined} />}
+      {phase.k === "onboard" && <Onboard lang={lang} email={phase.email} agreedAtSignup={!!phase.agreed} onCreated={id => void open(id)} onCancel={phase.back !== undefined ? () => void open(phase.back!) : undefined} />}
       {phase.k === "error" && <div className="gate-card"><h1>{L(B("Something went wrong.", "出了点问题。"))}</h1><p className="gate-sub">{phase.msg}</p><button type="button" className="sbtn ink" onClick={() => void open(lastWs.get())}>{L(B("Try again", "重试"))}</button></div>}
     </Frame>
   );

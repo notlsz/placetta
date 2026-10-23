@@ -74,6 +74,22 @@ the month's AI. Real numbers: `select public.status_check_costs(30)` (staff) rep
 check and per store-month from `filing_checks`. A model check's own cost is on its run in `agent_runs.cost_usd`
 (`filing_checks.run_id`).
 
+## Talking and voice notes (added 2026-10-23)
+
+Talking into the message box uses the browser's own speech recognition first (Chrome, Edge, Safari; English and
+Mandarin): free. Where a browser has none, the clip is recorded as a voice note and transcribed on the server by Whisper
+large v3 turbo on Groq at $0.04 an hour of audio, billed at least 10 seconds a clip (`src/speech.ts`, `supabase/functions/tts`).
+
+| Use, all on the paid path | A store a month |
+|---|---|
+| A minute of audio | $0.00067 |
+| Heavy: 10 voice notes of 30 seconds every day | $0.10 |
+| Absurd: two hours of talking every day | $2.40 |
+
+Heavy use is a fifth of one percent of the $50 ceiling, under the founder's $1 a store a month line for voice, so voice
+notes stay. Clips share the read-aloud daily budget (a clip counts as 250 characters of `tts_chars`), which caps one
+workspace at about 80 clips a day. `npm run test:speech` checks these numbers.
+
 ## What was measured, and how
 
 **AI per journey.** Each journey runs through `runRounds` (`src/serverRun.ts`, what agent-run runs) with a scripted

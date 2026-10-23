@@ -1,4 +1,5 @@
 import { same, type Bi } from "./bi";
+import { withNextPath } from "./nextPath";
 import type { FilledNote, Reply, Step } from "./core";
 import { loaderWith } from "./forms/fill";
 import { answersHash, refreshForms, type FilledCopy } from "./forms/versions";
@@ -536,8 +537,10 @@ export async function runRounds(o: {
         let out: Record<string, unknown>, content: string, error: boolean;
         const t0 = Date.now(), at = since();
         if (refused) {
-          out = { type: "tool_result", tool_use_id: String(u.id ?? ""), content: refused, is_error: true };
-          content = refused; error = true;
+          // a refusal never ends at "no": it names the one next step past it and who takes it (src/nextPath.ts)
+          const said = withNextPath(name, refused);
+          out = { type: "tool_result", tool_use_id: String(u.id ?? ""), content: said, is_error: true };
+          content = said; error = true;
         } else {
           const r = await runTool(loader.all, u);
           loader.used(name); st.toolGroups = loader.loaded();
@@ -549,8 +552,9 @@ export async function runRounds(o: {
           }
           if (!r.is_error) addUsed(st.used ??= [], usedBy(name, input, r.content, o.ws()));
           const note = r.is_error ? null : channelNote(from, name);
-          out = (note ? { ...r, content: `${r.content}\n\nNote: ${note}` } : r) as unknown as Record<string, unknown>;
-          content = r.content; error = !!r.is_error;
+          const said = r.is_error ? withNextPath(name, String(r.content ?? "")) : r.content;
+          out = (note ? { ...r, content: `${said}\n\nNote: ${note}` } : { ...r, content: said }) as unknown as Record<string, unknown>;
+          content = said; error = !!r.is_error;
         }
         if (error) st.toolErrors = (st.toolErrors ?? 0) + 1;
         addSpan(st.trace ??= [], { k: "tool", n: name.slice(0, 80), at, ms: Date.now() - t0, ...(error ? { ok: false } : {}), r: st.rounds });

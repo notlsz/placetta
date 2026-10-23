@@ -49,11 +49,13 @@ export function Walkthrough() {
   // the tour waits, so the first tap is Approve. It opens on a later visit, or from Help.
   const firstWin = !!ws.firstPlan?.win && ws.approvals.some(a => a.app === ws.firstPlan?.win);
   const [open, setOpen] = useState(() => !tourSeen() && !/[?&]notour\b/.test(location.search) && !firstWin);
-  const [i, setI] = useState(0);
+  // where it was left: closing the tab mid-tour comes back to the same card
+  const [i, setIRaw] = useState(() => { try { return Math.min(CARDS.length - 1, Number(localStorage.getItem(KEY + "-at")) || 0); } catch { return 0; } });
+  const setI = (n: number) => { setIRaw(n); try { localStorage.setItem(KEY + "-at", String(n)); } catch { /* storage blocked */ } };
   const zh = lang === "zh";
   useEffect(() => { const on = () => { setI(0); setOpen(true); }; window.addEventListener("placetta-tour", on); return () => window.removeEventListener("placetta-tour", on); }, []);
   if (!open) return null;
-  const done = () => { try { localStorage.setItem(KEY, "1"); } catch { /* storage blocked */ } setOpen(false); };
+  const done = () => { try { localStorage.setItem(KEY, "1"); localStorage.removeItem(KEY + "-at"); } catch { /* storage blocked */ } setOpen(false); };
   const c = CARDS[i], last = i === CARDS.length - 1;
   return (
     <div className="scrim tour-scrim" role="dialog" aria-modal="true" aria-label={zh ? "使用导览" : "Quick tour"}>

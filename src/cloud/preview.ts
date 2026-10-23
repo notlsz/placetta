@@ -407,6 +407,12 @@ async function rest(req: Request, url: URL, c: { sub: string; aal: string } | nu
 
 async function functions(name: string, req: Request, c: { sub: string; aal: string } | null): Promise<Response> {
   if (!c) return fnErr("unauthorized", "Sign in again.", 401);
+  // a voice note (multipart): no speech service here, so it comes back as a fixed line, filler and all, the way Whisper
+  // returns speech, for the app to clean up
+  if (name === "tts" && /multipart\/form-data/i.test(req.headers.get("content-type") ?? "")) {
+    const f = await req.formData().catch(() => null);
+    return json({ text: f?.get("lang") === "zh" ? "嗯，帮我看看这周有什么到期" : "um what's due this week" });
+  }
   const body = await req.json().catch(() => ({})) as Record<string, unknown>;
   const ws = String(body.workspace_id ?? "");
   if (twoStepOn(c.sub) && c.aal !== "aal2") return fnErr("mfa_required", "Finish two-step sign-in to continue.", 401);

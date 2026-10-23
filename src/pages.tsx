@@ -26,6 +26,7 @@ import { CommentsButton, MineToggle, useTeam, type Collab } from "./Comments";
 import { SignButton } from "./SignDoc";
 import { shortName } from "./collab";
 import { AlsoNeed } from "./AlsoNeed";
+import { StillNeeded } from "./StillNeeded";
 
 /** What the Mine filter keeps: an application or job assigned to this person, or a job about one that is. */
 const mineApp = (team: Collab, id?: string) => !!id && team.isMine({ kind: "app", id });
@@ -297,7 +298,10 @@ export function Overview() {
 
   /* the line under the title: the business, its place (unless the name already says it) and the goal, whichever exist */
   const biz = b(ws.business), place = ws.locations[0] ? b(ws.locations[0].name) : "", goal = b(ws.goal);
-  const ctxParts = [place && !biz.includes(place) ? t("ov_in", { biz, place }) : biz, goal].filter(Boolean);
+  // with one store and a street address, the plan is that address's plan, and says so
+  const at = (ws.stores ?? []).length === 1 && /^\d/.test(ws.stores![0].address ?? "") ? ws.stores![0].address! : "";
+  const base = place ? biz.replace(` in ${place}`, "").replace(place, "").trim() : biz;
+  const ctxParts = [at ? (!base ? at : zh ? `${base}，${at}` : `${base} at ${at}`) : place && !biz.includes(place) ? t("ov_in", { biz, place }) : biz, goal].filter(Boolean);
   const ctxLine = ctxParts.length ? ctxParts.join(zh ? "。" : ". ") + (zh ? "。" : ".") : "";
 
   /* 4 and 5. Coming up, and the latest updates */
@@ -336,6 +340,7 @@ export function Overview() {
           </div>
         </section>
       )}
+      {!mine && <StillNeeded />}
 
       {working && (
         <section className="sec hm-work">

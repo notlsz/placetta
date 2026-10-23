@@ -39,9 +39,57 @@ const DAILY_CHARS = Number(Deno.env.get("TTS_DAILY_CHARS") ?? "20000");
 
 const xml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 
+/* Speech to text, the other direction: a clip recorded in a browser with no speech recognition of its own (Firefox,
+   some phones), sent as multipart (workspace_id, lang, audio). Whisper large v3 turbo on Groq, about $0.04 an hour of
+   audio (billed at least 10 seconds a clip): a minute costs $0.0007. Members only, two minutes and 4 MB a clip at most,
+   and the same daily voice budget as reading aloud (agent_usage.tts_chars), a clip counting as 250 characters: about
+   80 clips a day on their own, so one runaway browser can't run up a bill. */
+const STT_MODEL = Deno.env.get("STT_MODEL") ?? "whisper-large-v3-turbo";
+const STT_CLIP_CHARS = 250;
+const STT_MAX_BYTES = 4 * 1024 * 1024;
+async function transcribe(req: Request): Promise<Response> {
+  const key = Deno.env.get("GROQ_API_KEY");
+  if (!key) return (console.error("not configured: set GROQ_API_KEY in the Edge Function secrets"), fail(503, "not_configured", "Voice notes aren't set up on the server yet."));
+  if (!zdrAllows((k) => Deno.env.get(k), "groq", STT_MODEL)) return fail(503, "not_configured", "Voice notes are off: zero data retention is required and groq isn't on AI_ZDR_PROVIDERS.");
+  const jwt = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
+  const { data: auth } = await admin.auth.getUser(jwt);
+  const user = auth?.user;
+  if (!user) return fail(401, "unauthorized", "Sign in again.");
+  if (Number(req.headers.get("content-length") ?? "0") > STT_MAX_BYTES + 65536) return fail(413, "too_large", "That clip is too long. Keep it under two minutes.");
+  let form: FormData;
+  try { form = await req.formData(); } catch { return fail(400, "bad_request", "Send the clip as multipart form data."); }
+  const ws = String(form.get("workspace_id") ?? "");
+  const lang = form.get("lang") === "zh" ? "zh" : "en";
+  const audio = form.get("audio");
+  if (!(audio instanceof File) || !audio.size) return fail(400, "bad_request", "No audio.");
+  if (audio.size > STT_MAX_BYTES) return fail(413, "too_large", "That clip is too long. Keep it under two minutes.");
+  if (!/^audio\/(webm|mp4|ogg|mpeg|wav|x-m4a|m4a)/.test(audio.type || "audio/webm")) return fail(415, "bad_request", "That isn't an audio clip.");
+  const access = await accessFor(ws, user, jwt);
+  if (access === "mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
+  if (access === "sso_required") return fail(401, "sso_required", "Your company requires single sign-on. Sign in with SSO to continue.");
+  if (!WORKS.has(access)) return fail(403, "forbidden", "This isn't your workspace.");
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: usage } = await admin.from("agent_usage").select("tts_chars").eq("workspace_id", ws).eq("day", today).maybeSingle();
+  if ((usage?.tts_chars ?? 0) + STT_CLIP_CHARS > DAILY_CHARS) return fail(429, "rate_limited", "Today's voice limit is reached.");
+  const up = new FormData();
+  up.set("model", STT_MODEL); up.set("language", lang); up.set("response_format", "json"); up.set("temperature", "0");
+  // a short hint in the business's words keeps permit names spelled right
+  up.set("prompt", lang === "zh" ? "许可证，执照，营业执照，卫生许可，申报，批准。" : "Permits, licenses, health permit, seller's permit, EIN, LLC, filing, approve.");
+  up.set("file", audio, audio.name || "clip.webm");
+  const res = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", { method: "POST", headers: { Authorization: `Bearer ${key}` }, body: up });
+  if (!res.ok) {
+    console.error("groq stt", res.status, (await res.text()).slice(0, 200));
+    return fail(res.status === 429 ? 429 : 502, res.status === 429 ? "rate_limited" : "upstream_error", "The voice service didn't answer. Try again.");
+  }
+  const j = await res.json().catch(() => ({})) as { text?: string };
+  await admin.rpc("track_usage", { ws, p_calls: 0, p_in: 0, p_out: 0, p_tts: STT_CLIP_CHARS });
+  return new Response(JSON.stringify({ text: String(j.text ?? "").trim().slice(0, 4000) }), { status: 200, headers: { ...CORS, "Content-Type": "application/json" } });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
+  if (/^multipart\/form-data/i.test(req.headers.get("content-type") ?? "")) return transcribe(req);
   const key = Deno.env.get("AZURE_SPEECH_KEY"), region = Deno.env.get("AZURE_SPEECH_REGION");
   if (!key || !region) return (console.error("not configured: set the speech key and region in the Edge Function secrets"), fail(503, "not_configured", "Voice isn't set up on the server yet."));
   // the reply text goes to Microsoft's speech service: only when it's on the zero-retention list, if one is required

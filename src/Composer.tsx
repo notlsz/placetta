@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { speakTag } from "./langs";
 import { VoiceBeam, useMicrophone } from "voice-glow";
 import { useApp } from "./ctx";
@@ -11,6 +12,8 @@ import { BorderBeam } from "border-beam";
 import { AgentBot, LiveBot } from "./Bot";
 import { taskVerb } from "./tasks";
 import { useSlash } from "./SlashMenu";
+import { cleanSpeech, recordClip } from "./speech";
+import { transcribe } from "./cloud/api";
 
 const BEAM = ["#7399C6", "#9DB8DA", "#5F88BA", "#B9CFE8", "#8FAED3", "#C9D8EC", "#A7BFE0"];
 const BAND = { core: "#FFFFFF", above: "#8FAED3", mid: "#C9D8EC", below: "#B9CFE8" };
@@ -61,18 +64,21 @@ const STARTERS = [B("Map my permits", "梳理我的许可"), B("What's due this 
 const isUploadChip = (s: Bi) => s.en === STARTERS[2].en;
 
 export function Composer({ variant, tts, asked, showLive = true, starters = false }: { variant: "dock" | "panel"; tts: Speaker; asked: string[]; showLive?: boolean; starters?: boolean }) {
-  const { t, b, lang, busy, live, ask, upload, stop, mode, ws } = useApp();
+  const { t, b, lang, busy, live, ask, upload, stop, mode, ws, cloud } = useApp();
   const [draft, setDraft] = useState("");
 
   const mic = useMicrophone();
   const sim = useSimulatedVoice();
   const [voice, setVoice] = useState<"off" | "mic" | "sim">("off");
   const [heard, setHeard] = useState("");
-  const [note, setNote] = useState<"" | "simNote" | "deniedNote" | "noSttNote" | "frameNote">("");
+  const [note, setNote] = useState<"" | "simNote" | "deniedNote" | "noSttNote" | "frameNote" | "sttFailed">("");
+  // a voice note for the server to transcribe, where the browser has no speech recognition: recording, then turning to text
+  const clip = useRef<ReturnType<typeof recordClip>>(null);
+  const [noteState, setNoteState] = useState<"" | "rec" | "busy">("");
   const stt = useSpeechToText(useCallback((s: string) => setHeard(s), []));
   const typer = useRef<number[]>([]);
   const clearTyper = () => { typer.current.forEach(clearTimeout); typer.current = []; };
-  const listening = (voice === "mic" && mic.state === "live") || voice === "sim";
+  const listening = (voice === "mic" && (mic.state === "live" || noteState === "busy")) || voice === "sim";
   // the sample's scripted demo answers its own suggestions; a live agent gets tasks it does end to end
   // a live agent's come from the workspace as it is now: a store slipping, filings waiting, a permit about to lapse
   const open = useMemo(() => (mode === "demo" ? SUGGESTIONS : suggestions(ws, daysFromNow(0), LIVE_SUGGESTIONS)).filter(s => !asked.some(q => near(q, s.en) || near(q, s.zh))).slice(0, 2), [asked, mode, ws]);
@@ -81,8 +87,11 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
   // (the application filled at sign-up and waiting for approval, src/plan/prefill.ts, doesn't make it any less new)
   const firstWin = ws.firstPlan?.win;
   const nearlyEmpty = !ws.approvals.some(a => !(firstWin && a.app === firstWin)) && !ws.docs.length && (ws.apps.length < 3 || ws.apps.every(a => a.preview || a.id === firstWin));
+  // the first win waiting for Approve is the one next step: on a phone the floating chips would cover it, so they wait
+  const winWaiting = !!firstWin && ws.approvals.some(a => a.app === firstWin);
+  const narrow = useNarrow(560);
   const chips = useMemo(() => {
-    if (!starters || !nearlyEmpty) return [] as Bi[];
+    if (!starters || !nearlyEmpty || (winWaiting && narrow)) return [] as Bi[];
     const out: Bi[] = [];
     for (const s of suggestions(ws, daysFromNow(0), STARTERS)) {
       if (asked.some(q => near(q, s.en) || near(q, s.zh)) || out.some(x => near(x.en, s.en) || near(s.en, x.en))) continue;
@@ -90,14 +99,34 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
       if (out.length === 3) break;
     }
     return out;
-  }, [starters, nearlyEmpty, ws, asked]);
-  const narrow = useNarrow(560);
+  }, [starters, nearlyEmpty, ws, asked, winWaiting, narrow]);
 
-  const endVoice = useCallback((send: boolean, text?: string) => {
-    clearTyper(); mic.stop(); stt.stop(); sim.stop(); setVoice("off");
-    const said = (text ?? heard).trim(); setHeard("");
-    if (send && said) ask(said, true);
-  }, [mic, stt, sim, ask, heard]);
+  /* Done puts what was said, cleaned of um and uh, in the box to check before it goes (Wispr Flow, ChatGPT dictation);
+     Send sends it as is; Cancel drops it. A voice note is transcribed on the server first. */
+  const ta = useRef<HTMLTextAreaElement>(null);
+  const place = useCallback((said: string, how: "edit" | "send") => {
+    if (!said) return;
+    if (how === "send") { ask(said, true); return; }
+    setDraft(d => (d.trim() ? d.trim() + " " : "") + said);
+    setTimeout(() => ta.current?.focus(), 0);
+  }, [ask]);
+  const endVoice = useCallback(async (how: "cancel" | "edit" | "send", text?: string) => {
+    clearTyper(); stt.stop(); sim.stop();
+    const c = clip.current; clip.current = null;
+    const said = cleanSpeech(text ?? heard, lang === "zh" ? "zh" : "en"); setHeard("");
+    if (c) {
+      if (how === "cancel") { c.cancel(); mic.stop(); setNoteState(""); setVoice("off"); return; }
+      setNoteState("busy");
+      const blob = await c.stop(); mic.stop();
+      const got = blob && cloud ? await transcribe(cloud.wsId, blob, lang === "zh" ? "zh" : "en") : null;
+      setNoteState(""); setVoice("off");
+      if (got == null) { setNote("sttFailed"); return; }
+      place(cleanSpeech(got, lang === "zh" ? "zh" : "en"), how);
+      return;
+    }
+    mic.stop(); setVoice("off");
+    if (how !== "cancel") place(said, how);
+  }, [mic, stt, sim, heard, lang, cloud, place]);
 
   // No microphone here: a speech-shaped level drives the glow while the next suggestion is "heard", then it sends like a real turn.
   const simulate = useCallback(() => {
@@ -105,7 +134,7 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
     setVoice("sim"); setNote("simNote"); sim.start(); setHeard("");
     const per = lang === "zh" ? 210 : 62;
     for (let i = 1; i <= line.length; i++) typer.current.push(window.setTimeout(() => setHeard(line.slice(0, i)), 700 + i * per));
-    typer.current.push(window.setTimeout(() => endVoice(true, line), 700 + line.length * per + 1000));
+    typer.current.push(window.setTimeout(() => void endVoice("send", line), 700 + line.length * per + 1000));
   }, [open, b, lang, sim, endVoice]);
 
   const startVoice = useCallback(async () => {
@@ -114,12 +143,18 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
     // the sample demo shows what talking looks like; a real workspace never pretends to hear you
     if (!mic.supported || !micAllowedHere()) { if (mode === "demo") simulate(); else setNote("frameNote"); return; }
     const s = await mic.start();
-    if (s) { setVoice("mic"); if (!stt.start(speakTag(lang))) setNote("noSttNote"); return; }
+    if (s) {
+      setVoice("mic");
+      if (stt.start(speakTag(lang))) return;
+      // no speech recognition in this browser: record a voice note and let the server turn it into text
+      const r = cloud ? recordClip(s) : null;
+      if (r) { clip.current = r; setNoteState("rec"); } else setNote("noSttNote");
+      return;
+    }
     if (inFrame && mode === "demo") simulate(); else setNote(inFrame ? "frameNote" : "deniedNote");
   }, [busy, tts, mic, simulate, stt, lang, mode]);
   useEffect(() => () => clearTyper(), []);
 
-  const ta = useRef<HTMLTextAreaElement>(null);
   useEffect(() => { const el = ta.current; if (!el) return; el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 128) + "px"; }, [draft]);
   const attach = useRef<HTMLInputElement>(null);
   const pickFile = useCallback(() => attach.current?.click(), []);
@@ -177,13 +212,14 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
       </VoiceBeam>
       {note && !listening && <p className="c-note">{t(note)}</p>}
 
-      {listening && (
+      {/* on the page itself, so no bar that makes its own layer (the phone's tab bar) can sit over its buttons */}
+      {listening && createPortal(
         <div className="voice" role="dialog" aria-modal="true" aria-label={t("listening")}>
-          <button type="button" className="vclose" aria-label={t("close")} onClick={() => endVoice(false)}><I.x /></button>
+          <button type="button" className="vclose" aria-label={t("close")} onClick={() => void endVoice("cancel")}><I.x /></button>
           <div className="vmid">
             <div className="vbot" style={{ width: botSize, height: botSize }}><AgentBot size={botSize} busy task="listening" label={t("listening")} /></div>
             <p className="vlabel">{t("listening")}</p>
-            <p className={"vtext" + (heard ? "" : " hint")} aria-live="polite">{heard || t("tapDone")}</p>
+            <p className={"vtext" + (heard ? "" : " hint")} aria-live="polite">{noteState === "busy" ? t("transcribing") + "…" : heard ? cleanSpeech(heard, lang === "zh" ? "zh" : "en") : noteState === "rec" ? t("recording") : t("tapDone")}</p>
             {note && <p className="vnote">{t(note)}</p>}
           </div>
           <div className="vfoot">
@@ -193,11 +229,13 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
               <div className="vbeam-fill" />
             </VoiceBeam>
             <div className="vbar">
-              <button type="button" className="vbtn" onClick={() => endVoice(false)}>{t("cancel")}</button>
-              <button type="button" className="vbtn primary" onClick={() => endVoice(true)}><I.check />{t("done")}</button>
+              <button type="button" className="vbtn" disabled={noteState === "busy"} onClick={() => void endVoice("cancel")}>{t("cancel")}</button>
+              <button type="button" className="vbtn" disabled={noteState === "busy"} onClick={() => void endVoice("send")}>{t("send")}</button>
+              <button type="button" className="vbtn primary" disabled={noteState === "busy"} onClick={() => void endVoice("edit")}><I.check />{t("done")}</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

@@ -50,7 +50,7 @@ function prose(src) {
 /** Prose the app or the website shows the person itself (an approval card's text, a plan's note): written in a
  *  browser-side module or a site page too, so it's interface copy, not instructions. */
 const shown = new Set();
-const SERVER_ONLY_PATH = /^src\/(live|harness|serverRun|held|localAgent)\.ts$|^src\/(filingPlaybooks|server)\//;
+const SERVER_ONLY_PATH = /^src\/(live|harness|serverRun|held|localAgent|nextPath)\.ts$|^src\/(filingPlaybooks|server)\//;
 const each = (d, f) => { if (!existsSync(d)) return; for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) each(p, f); else f(p); } };
 each("src", p => { if (/\.(ts|tsx)$/.test(p) && !SERVER_ONLY_PATH.test(p.replace(/\\/g, "/"))) for (const x of literals(readFileSync(p, "utf8"))) if (x.length >= 40) shown.add(x); });
 each("site", p => { if (/\.html$/.test(p)) { const html = readFileSync(p, "utf8"); shown.add(html); } });

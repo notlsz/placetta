@@ -1,8 +1,10 @@
 import type { OrbState } from "thinking-orbs";
 import { nextAction, progress, reconcile } from "./jobs";
 import { B, MATCH_FREMONT, MATCH_SJ, SRC, genericMatch, same, type Application, type Approval, type Bi, type Doc, type Fact, type Workspace } from "./model";
-import { inDays, money, nowIso } from "./time";
+import { fmtDay, inDays, money, nowIso } from "./time";
 import { groundedAnswer } from "./answer";
+import { ownWords, readLine } from "./plan/line";
+import { appealFor } from "./appeals";
 
 /* ------------------------------------------------------------------ *
  * The contract between the workspace and whatever runs the agent.
@@ -358,6 +360,183 @@ function question(ctx: Context, text: string): Plan | null {
   };
 }
 
+/* -------------------- the landing page's promises, one each -------------------- *
+ * Each request a person makes about a promise (mapping, forming the entity, filling a form, paying, corrections,
+ * renewals, inspections, appeals) gets an answer from the workspace itself: what's there, what she did, the one next
+ * step. Never "which city?" when the workspace already says. Checked by the competence audit (scripts/journeys-test.ts). */
+
+/** The application a request names: the one whose name shares the most words with it. */
+function appNamed(ctx: Context, text: string): Application | undefined {
+  const words = (s: string) => new Set(s.toLowerCase().replace(/[^a-z0-9一-鿿 ]/g, " ").split(/\s+/).filter(w => w.length > 2 && !/^(the|and|for|our|with|application|permit|license)$/.test(w)));
+  const asked = words(text);
+  let best: Application | undefined, score = 0;
+  for (const a of ctx.current.apps) {
+    const n = [...words(a.name.en)].filter(w => asked.has(w)).length + [...new Set(a.name.zh)].filter(ch => /[一-鿿]/.test(ch) && !"许可证申请表执照登记".includes(ch) && text.includes(ch)).length / 2;
+    if (n > score) { score = n; best = a; }
+  }
+  return score >= 1 ? best : undefined;
+}
+const storeAddress = (ctx: Context) => { const s = (ctx.current.stores ?? []).find(x => x.stage === "opening") ?? ctx.current.stores?.[0]; return s?.address ?? ""; };
+/** "the City of San José" in a sentence, "Santa Clara County" as it is. */
+const theAgency = (name: string) => (/^(City|County|State|Department|Office|Bureau|Board|Division)\b/.test(name) ? "the " + name : name);
+
+function mapLicenses(ctx: Context, text: string): Plan {
+  const read = readLine(text);
+  const where = read.place || (ctx.current.locations[0] ? `${ctx.current.locations[0].name.en}, CA` : "");
+  return match(ownWords(text.replace(/^(map|find|list|what are)\s+(every|all|the)?\s*(licen[cs]es?|permits?)\s+(i|we)\s+need\s+(for\s+)?/i, "")) || "business", where);
+}
+
+function formEntity(ctx: Context): Plan {
+  const llc = ctx.current.facts.find(f => /\bLLC\b|\bInc\b|Corp/i.test(f.value.en) && /entity|legal|name/i.test(f.label.en));
+  const soi = ctx.current.apps.find(a => a.id === "soi") ?? ctx.current.deadlines.find(d => /statement of information/i.test(d.title.en));
+  if (llc) return {
+    steps: [S("searching", "Checking your business facts", "查看企业资料"), S("searching", "Checking the Secretary of State's record", "查看州务卿记录", "bizfile.sos.ca.gov")],
+    reply: { text: [B(`${llc.value.en} is already formed: the articles of organization are on file. ${soi ? "The next entity filing is the Statement of Information, due in 21 days. Say the word and I'll prepare it." : "Nothing else is due on the entity now."}`,
+      `${llc.value.zh}已经成立，组织章程已存档。${soi ? "下一项公司申报是信息声明，21 天后到期。您说一声，我就准备。" : "目前公司层面没有其他到期事项。"}`)], sources: cite(ctx, "soi") },
+  };
+  return {
+    steps: [S("searching", "Finding the state's formation form", "查找州政府的公司注册表格", "sos.ca.gov"), S("shaping", "Filling it from your business facts", "根据企业资料填写")],
+    reply: { text: [B("Formation goes to the Secretary of State on its own form. I'll fill it from your business facts and bring it to you to approve; the state's fee is paid by you on its page.", "公司注册向州务卿提交官方表格。我会根据企业资料填好，交给您批准；州政府费用由您在其官网支付。")] },
+  };
+}
+
+function fillForm(ctx: Context, text: string): Plan {
+  const a = appNamed(ctx, text);
+  if (!a) return FALLBACK();
+  const filled = a.fields.filter(f => String(f.value ?? "").trim()).length, total = a.fields.length;
+  const need = a.checklist.filter(c => c.state === "missing" && !c.dep);
+  const askUpload = ctx.current.approvals.find(x => x.kind === "upload" && x.app === a.id);
+  return {
+    steps: [S("shaping", `Filling the ${a.name.en.toLowerCase()} from your business facts`, `根据企业资料填写${a.name.zh}`), S("solving", "Checking every line against the agency's form", "对照机构表格逐行核对")],
+    reply: { text: [need.length
+      ? B(`Filled ${filled} of ${total} lines on the ${a.name.en.toLowerCase()}. It still needs the ${need.slice(0, 3).map(c => c.label.en.charAt(0).toLowerCase() + c.label.en.slice(1)).join(" and the ")} from you; upload ${need.length === 1 ? "it" : "them"} and it goes up for your approval.`,
+        `${a.name.zh}已填 ${filled}/${total} 行。还需要您提供${need.slice(0, 3).map(c => c.label.zh).join("和")}，上传后即提交给您批准。`)
+      : B(`The ${a.name.en.toLowerCase()} is filled, all ${total} lines. It's up for your approval.`, `${a.name.zh}已全部填好，共 ${total} 行，等您批准。`)],
+      apps: [a.id], approvals: askUpload ? [askUpload.id] : ctx.current.approvals.filter(x => x.app === a.id).map(x => x.id), sources: cite(ctx, a.id) },
+  };
+}
+
+function payFee(ctx: Context, text: string): Plan {
+  const a = appNamed(ctx, text) ?? ctx.current.apps.find(x => ctx.current.approvals.some(ap => ap.kind === "file" && ap.app === x.id && x.fees.length));
+  if (!a) return FALLBACK();
+  const fee = a.fees.reduce((s, f) => s + f.amount, 0), ap = ctx.current.approvals.find(x => x.kind === "file" && x.app === a.id);
+  return {
+    steps: [S("searching", "Checking how the agency takes its fee", "查看机构的收费方式")],
+    reply: { text: [B(`The ${a.name.en.toLowerCase()}'s ${money(fee)} goes to ${theAgency(a.agency.en)} directly, on its own page. ${ap ? "Approve the filing and I'll submit it and send you the payment link." : "I'll send the payment link when it's filed."}`,
+      `${a.name.zh}的 ${money(fee)} 直接支付给${a.agency.zh}，在其官网付款。${ap ? "您批准提交后，我会提交并发给您付款链接。" : "提交后我会把付款链接发给您。"}`)], approvals: ap ? [ap.id] : [], sources: cite(ctx, a.id) },
+  };
+}
+
+function corrections(ctx: Context, text: string): Plan {
+  const a = appNamed(ctx, text) ?? ctx.current.apps.find(x => x.id === "plancheck");
+  if (!a) return FALLBACK();
+  const rid = `d-corr-${a.id}-${seq++}`;
+  const what = /grease/i.test(text) ? B("the grease interceptor detail", "隔油池详图") : B("each item the agency asked for", "机构要求的每一项");
+  return {
+    steps: [S("shaping", "Reading the agency's corrections", "阅读机构的修改意见"), S("composing", "Drafting the response, item by item", "逐项起草回复"), S("solving", "Checking it against your documents", "对照您的文件核对")],
+    updates: [all(
+      addDoc(doc(rid, `${a.id}-corrections-response.docx`, 42_000, "agent", a.id, B("Drafted", "已起草"))),
+      audit("agent", B("Drafted a response to corrections", "起草修改意见回复"), a.name, what),
+    )],
+    reply: { text: [B(`Drafted the response to ${theAgency(a.agency.en)} with ${what.en}, from your equipment list. It's in Documents for a look; it goes back with the ${a.name.en.toLowerCase()} once you approve.`,
+      `已根据设备清单起草给${a.agency.zh}的回复，含${what.zh}。草稿在文件中，您批准后随${a.name.zh}一起提交。`)], files: [rid], apps: [a.id] },
+  };
+}
+
+function renewals(ctx: Context): Plan {
+  const list = [...ctx.current.deadlines].filter(d => /renew|expire|due|到期|续/i.test(d.title.en + d.title.zh) || d.kind === "renewal").sort((x, y) => x.date.localeCompare(y.date)).slice(0, 4);
+  return {
+    steps: [S("searching", "Checking every renewal date", "查看每个续期日期")],
+    reply: { text: [list.length
+      ? B(`${list.length} coming up: ${list.map(d => `${d.title.en.replace(/:.*$/, "")} (${fmtDay(d.date, "en", true)})`).join("; ")}. I file each one ahead of time, with your approval.`, `即将到期 ${list.length} 项：${list.map(d => `${d.title.zh.replace(/：.*$/, "")}（${fmtDay(d.date, "zh", true)}）`).join("；")}。我会提前办理，经您批准后提交。`)
+      : B("Nothing renews in the next months. I'm watching every date.", "近几个月没有需要续期的，每个日期我都在跟进。")] },
+  };
+}
+
+function inspections(ctx: Context): Plan {
+  const plan = ctx.current.apps.find(a => a.id === "plancheck");
+  const ap = ctx.current.approvals.find(x => x.app === "plancheck");
+  return {
+    steps: [S("searching", "Checking how the county books inspections", "查看县政府如何预约检查", "sccgov.org")],
+    reply: { text: [plan && plan.status !== "approved"
+      ? B("The county books the health inspection after it approves the plan check, and the plan check is next. Once it's approved I ask the county for times and bring you the slots to pick; a mock inspection with you comes first.", "县政府批准图纸审查后才预约卫生检查，图纸审查是下一步。批准后我向县政府要时间，请您挑选；正式检查前先和您做一次模拟检查。")
+      : B("I'll ask the county for inspection times and bring you the slots to pick. A mock inspection with you comes first.", "我会向县政府要检查时间，请您挑选。正式检查前先和您做一次模拟检查。")],
+      approvals: ap ? [ap.id] : [], sources: cite(ctx, "plancheck") },
+  };
+}
+
+function appeal(ctx: Context, text: string): Plan {
+  const a = appNamed(ctx, text);
+  // the appeal routes read the state from "CA 95112"; a sample address without a ZIP still names its state
+  const addr = storeAddress(ctx), at = /\b[A-Z]{2}\s*\d{5}/.test(addr) ? addr : addr.replace(/,\s*(CA|NY|TX)\b.*$/, ", $1 00000");
+  const route = a ? appealFor(a, at, text) : null;
+  if (!a || !route) return {
+    steps: [S("searching", "Looking up the appeal route", "查找申诉途径")],
+    reply: { text: [B("Send me the denial letter: the appeal deadline runs from its date, and I'll find the route and draft the appeal from it.", "请把驳回信发给我：申诉期限从信上的日期算起，我会据此找到途径并起草申诉。")] },
+  };
+  const d = route.deadline, days = d.days != null ? `${d.days} ${d.unit === "business" ? "business days" : d.unit === "months" ? "months" : "days"}` : "";
+  const daysZh = d.days != null ? `${d.days} ${d.unit === "business" ? "个工作日" : d.unit === "months" ? "个月" : "天"}` : "";
+  return {
+    steps: [S("searching", "Finding who hears the appeal", "查找申诉受理机构"), S("solving", "Working out the deadline from the rule", "根据规定计算期限")],
+    reply: { text: [route.id === "business_license_denial"
+      ? B("A denied permit is appealed to the office the denial letter names, by the deadline it gives. Send me the letter and I'll draft the appeal from it.", "被驳回的许可，向驳回信上写明的部门申诉，期限以信为准。请把信发给我，我据此起草申诉。")
+      : B(`${route.name.en}, heard by ${route.body.en}.${days ? ` The deadline is ${days} from the decision${d.verified ? "" : " (unconfirmed: check the denial letter)"}.` : " The deadline is on the denial letter."} Send me the letter and I'll draft the appeal.`,
+      `${route.name.zh}，由${route.body.zh}受理。${daysZh ? `期限为决定后 ${daysZh}${d.verified ? "" : "（未确认：以驳回信为准）"}。` : "期限以驳回信为准。"}请把信发给我，我来起草申诉。`)],
+      sources: route.sources.slice(0, 2).map(u => ({ title: route.body.en, url: u })) },
+  };
+}
+
+const STATUS_SAY: Record<string, Bi> = { approved: B("approved", "已批准"), review: B("with the agency", "在机构审核中"), filing: B("being filed", "正在提交"), ready: B("ready, waiting for your approval", "已就绪，等您批准"),
+  needs: B("waiting on something from you", "等您提供资料"), draft: B("being prepared", "正在准备"), waiting: B("waiting on another step first", "等前一步完成"), todo: B("not started", "尚未开始") };
+function where(ctx: Context, text: string): Plan {
+  const a = appNamed(ctx, text);
+  if (!a) return FALLBACK();
+  const st = STATUS_SAY[a.status] ?? same(a.status);
+  return {
+    steps: [S("searching", `Checking the ${a.name.en.toLowerCase()}`, `查看${a.name.zh}`)],
+    reply: { text: [B(`The ${a.name.en.split(/\s+/).filter(w => /^[A-Z]/.test(w)).length > 1 ? a.name.en : a.name.en.charAt(0).toLowerCase() + a.name.en.slice(1)} is ${st.en}.${a.next ? ` ${a.next.en}.` : ""}`, `${a.name.zh}${st.zh}。${a.next ? a.next.zh + "。" : ""}`)], apps: [a.id] },
+  };
+}
+
+function waiting(ctx: Context): Plan {
+  const aps = ctx.current.approvals;
+  const fee = (id?: string) => { const a = ctx.current.apps.find(x => x.id === id); const n = a ? a.fees.reduce((s, f) => s + f.amount, 0) : 0; return n ? `, ${money(n)}` : ""; };
+  return {
+    steps: [S("searching", "Checking what's waiting on you", "查看等您处理的事项")],
+    reply: { text: [aps.length
+      ? B(`${aps.length} waiting on you: ${aps.slice(0, 4).map(a => `${a.title.en.charAt(0).toLowerCase() + a.title.en.slice(1)}${fee(a.app)}`).join("; ")}. Each one is a tap below.`, `${aps.length} 项等您处理：${aps.slice(0, 4).map(a => `${a.title.zh}${fee(a.app)}`).join("；")}。下方点一下即可。`)
+      : B("Nothing is waiting on you. I'm on the rest.", "目前没有等您处理的事项，其余的我在办。")], approvals: aps.map(a => a.id) },
+  };
+}
+
+/** Promise requests, checked before the lookup of a requirement so "our permit was denied" isn't answered as a lookup. */
+/** "Find it for me" (src/StillNeeded.tsx): she looks where it can be found and asks only when a person must give it. */
+function findIt(_ctx: Context, text: string): Plan {
+  const what = /: (.+?)\. Get /.exec(text)?.[1] ?? /：(.+?)。/.exec(text)?.[1] ?? "";
+  const personal = /\b(ID|passport|signature|social security|SSN|driver)\b|证件|签名|护照/i.test(what);
+  return {
+    steps: [S("searching", "Looking in your documents and email", "查找您的文件和邮件"), S("connecting", "Checking connected apps and public records", "查看已连接的应用和公开记录"), S("shaping", "Filling in what I found", "填入找到的内容")],
+    reply: { text: [personal
+      ? B(`${what} has to come from you: it's yours to give, not on any record I can reach. A photo of it is enough.`, `${what}必须由您本人提供，我能查到的记录里没有。拍张照片就行。`)
+      : B(`Looking for it in your documents, email, connected apps and public records${what ? `: ${what}` : ""}. I'll fill in what I find and come back only if it truly needs you.`, `正在您的文件、邮件、已连接的应用和公开记录中查找${what ? `：${what}` : ""}。找到就直接填好，只有确实需要您时才会再问。`)] },
+  };
+}
+
+const PROMISES: { match: RegExp; plan: (ctx: Context, text: string) => Plan }[] = [
+  { match: /^Find (this|these) for the |^为.+找到(这些|这一项)/, plan: findIt },
+  { match: /\bwhere (does|do|is|are)\b.*\bstand|\bstatus of\b|\bhow is\b.*\bgoing|进展|进度|怎么样了/i, plan: where },
+  { match: /waiting (for|on) (my|me)\b|needs? (my )?approval|what (do|does) .*need from me|等我(批准|处理)|待(我)?批准|需要我(批准|做)/i, plan: (ctx) => waiting(ctx) },
+  { match: /\bappeal|\bdenied\b|\breject(ed|ion)\b|申诉|驳回|被拒/i, plan: appeal },
+  { match: /\bcorrections?\b|\bcomments? on\b|\bresubmit|\bdeficien|修改意见|补正|退回/i, plan: corrections },
+  { match: /\bpay\b|\bpayment\b|付款|缴费|交费|支付/i, plan: payFee },
+  { match: /\b(form|set up|register|start)\s+(an?\s+)?(llc|corporation|company|entity)\b|\bincorporat|articles of organization|成立公司|注册公司|成立.*有限/i, plan: (ctx) => formEntity(ctx) },
+  { match: /\b(what|which|any|list|show|upcoming|coming up)\b.*\brenew|\brenewals?\b.*\b(coming|due|soon|next)\b|哪些.*(续期|到期)|(续期|到期).*(哪些|有什么)/i, plan: (ctx) => renewals(ctx) },
+  { match: /\b(book|schedule)\b.*\binspection|预约.*(检查|验收)/i, plan: (ctx) => inspections(ctx) },
+  { match: /^(fill|complete)\b|^填写|^填好/i, plan: fillForm },
+  // a request to map them, not a question about one ("Do I need a seller's permit?" is the lookup's)
+  { match: /^(?!.*[?？]\s*$)(?:.*\bmap\b.*\b(licen[cs]es?|permits?)\b|.*\b(every|all)\b.*\b(licen[cs]es?|permits?)\b.*\b(i|we)\s+need\b|.*梳理.*(执照|许可)|.*需要的(全部|所有)(执照|许可))/i, plan: mapLicenses },
+];
+
 const SCRIPTS: { match: RegExp; plan: (ctx: Context, text: string) => Plan }[] = [
   { match: /^prepare these applications|^准备这些申请/i, plan: preparePicked },
   { match: /asked you in a comment on|的评论中请你处理/i, plan: fromComment },
@@ -622,7 +801,7 @@ function plan(req: Request, ctx: Context): Plan {
   if ("upload" in req) return upload(req.upload, ctx);
   if ("match" in req) return match(req.match.what, req.match.where);
   // the scripted jobs that start with their own words first, then a question about a requirement, then the rest
-  const own = SCRIPTS.slice(0, 6).find(s => s.match.test(req.text));
+  const own = SCRIPTS.slice(0, 6).find(s => s.match.test(req.text)) ?? PROMISES.find(s => s.match.test(req.text));
   if (own) return own.plan(ctx, req.text);
   return question(ctx, req.text) ?? SCRIPTS.find(s => s.match.test(req.text))?.plan(ctx, req.text) ?? FALLBACK();
 }

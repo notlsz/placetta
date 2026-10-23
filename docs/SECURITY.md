@@ -2,11 +2,13 @@
 
 Everything in `dist/` is public: anyone can press F12 and read it. Read this before you add code the app imports.
 
+Mistakes that reached production, and the guards and rules that came from them, are in [LESSONS.md](LESSONS.md).
+
 ## The boundary
 
 Server-only modules hold Odelia's instructions, her tool definitions, the filing playbooks and the server's run loop:
 
-- `src/live.ts` (the system prompt `rules()`, `makeTools()`), `src/harness.ts`, `src/serverRun.ts`, `src/held.ts`
+- `src/live.ts` (the system prompt `rules()`, `makeTools()`), `src/harness.ts`, `src/serverRun.ts`, `src/held.ts`, `src/nextPath.ts`
 - `src/filingPlaybooks/`, `src/server/`, `src/localAgent.ts`
 - everything in `supabase/functions/` except the shared parsers listed in `vite.config.ts`
 

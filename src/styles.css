@@ -429,6 +429,8 @@ em.ok i { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-in
 .ic { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: var(--ink2); transition: background .15s, color .15s; }
 .ic:hover:not(:disabled) { background: var(--mist2); color: var(--ink); }
 .ic.mic { color: var(--blue-ink); }
+/* on a phone the mic is the easy way in: a bigger target and a bigger icon, no background behind it */
+@media (max-width: 559px) { .c-dock .composer .ic.mic { width: 48px; height: 48px; } .c-dock .composer .ic.mic svg { width: 24px; height: 24px; } .vbar { gap: 8px; } .vbtn { padding: 0 16px; } }
 .ic:disabled { opacity: .4; }
 .sendb { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: var(--on-ink); transition: background .15s; }
 .sendb:disabled { background: var(--mist2); color: var(--ink3); }
@@ -1332,7 +1334,7 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 /* approval sheet: what's left before a filing can go */
 .ap-left { border: 1px solid color-mix(in oklab, #c2410c 30%, transparent); background: color-mix(in oklab, #c2410c 6%, var(--bg, #fff)); border-radius: 12px; padding: 12px 14px; }
 .ap-left h3 { color: #9a3412; margin: 0 0 6px; }
-.ap-left ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.ap-left ul { margin: 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
 .ap-left small { color: var(--muted, #6b7280); font-size: 12.5px; margin-left: 2px; }
 .ap-check { border-radius: 12px; padding: 10px 14px; border: 1px solid color-mix(in oklab, #15803d 25%, transparent); background: color-mix(in oklab, #15803d 5%, var(--bg, #fff)); }
 .ap-check h3 { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 14px; color: #166534; }
@@ -1341,7 +1343,7 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .ap-check.warn h3 { color: #92400e; }
 .ap-check.bad { border-color: color-mix(in oklab, #b91c1c 30%, transparent); background: color-mix(in oklab, #b91c1c 6%, var(--bg, #fff)); }
 .ap-check.bad h3 { color: #991b1b; }
-.ap-check ul { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.ap-check ul { margin: 8px 0 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
 .ap-check li.error b { color: #991b1b; }
 .ap-check li.warn b { color: #92400e; }
 .opening-line { display: block; font-size: 12.5px; margin-top: 2px; }
@@ -1782,6 +1784,22 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .onb input.onb-line { height: 58px; font-size: 18px; padding: 0 18px; border-radius: 16px; }
 .onb .chips.ex { margin-top: -8px; }
 .onb .chips.ex .chip { font-size: 13px; color: var(--ink2); }
+/* Still needed: every missing line and document in one list, any order, each one Odelia can be asked to find */
+.still .sec-h { align-items: center; }
+.still-sub { margin: -6px 0 10px; font-size: 13px; color: var(--ink3); }
+.still-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.still-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--card); box-shadow: var(--frost); }
+.still-what { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.still-what b { font-size: 14px; font-weight: 500; }
+.still-what small { font-size: 12.5px; color: var(--ink3); }
+.still-act { flex: none; display: flex; align-items: center; gap: 6px; }
+.still-ans input { width: 150px; height: 32px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); font: inherit; font-size: 13.5px; }
+@media (max-width: 559px) { .still-row { flex-direction: column; align-items: stretch; } .still-act { flex-wrap: wrap; } .still-ans { flex: 1; } .still-ans input { width: 100%; } .still .sec-h { flex-wrap: wrap; } }
+/* onboarding's two steps, as two short bars and "Step 1 of 2" (the second is optional) */
+.onb-prog { display: flex; align-items: center; gap: 6px; margin: 0 0 14px; }
+.onb-prog span { width: 28px; height: 4px; border-radius: 2px; background: var(--line, rgba(19, 42, 85, .12)); }
+.onb-prog span.on { background: var(--blue-ink); }
+.onb-prog small { margin-left: 6px; font-size: 12.5px; color: var(--ink3); }
 .onb-read { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: -6px 0 0; font-size: 14px; color: var(--ink); }
 .onb-read span { display: inline-flex; align-items: center; gap: 6px; }
 .onb-read svg { width: 15px; height: 15px; color: var(--blue-ink); }
