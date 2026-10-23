@@ -3418,6 +3418,21 @@ html[lang="zh-CN"] .c96ch b{font-family:var(--zhserif);font-weight:500;font-size
 #tsSec:not(.near) .tsbg,#tsSec:not(.near) .tsav{background-image:none!important}
 /* the phone film is its own portrait crop of the store front (media/hero-open-m.mp4) */
 @media (max-width:767px){.hvid{object-position:50% 55%}}
+/* phones: the live demo is the product card itself, full width, one surface. No phone drawn inside the phone, no
+   browser dots, no blurred photo behind it, no grey band under it: the plan fills in where you read it, and the
+   replay and pause controls sit small in the card's own top corner. */
+@media (max-width:639px){
+  .vdemo .sample{max-width:none}
+  #vcard.vcard{height:auto;border:0;border-radius:18px;clip-path:none;box-shadow:none;background:none;padding:0;overflow:visible}
+  #vcard::after,#vcard::before,#vcard .vph,#vcard .vprog{display:none}
+  #vcard .astage{position:relative;left:auto;right:auto;top:auto;width:100%}
+  #vcard .app{padding-top:4px;border:1px solid rgba(15,27,51,.08);border-radius:18px;box-shadow:0 1px 2px rgba(15,27,51,.04),0 24px 48px -24px rgba(15,27,51,.22)}
+  #vcard .app::before{display:none}
+  #vcard .atop{padding-right:76px}
+  #vcard .vctl{top:12px;right:10px;bottom:auto;gap:0}
+  #vcard .vctl button{min-width:36px;min-height:36px;width:36px;height:36px;color:rgba(15,27,51,.32)}
+  #vcard .vctl svg{filter:none}
+}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
