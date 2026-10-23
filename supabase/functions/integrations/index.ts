@@ -1000,6 +1000,9 @@ const botConnect: Action = async (c) => {
     const who = await slackWho(bot_token);
     if (!who) throw new HttpError("bad_request", "Slack didn't accept that bot token. Install the app to your workspace first, then copy its Bot User OAuth Token.");
     bundle = { bot_token, signing_secret }; account = `${who.team} (@${who.bot})`;
+    // the bot's own Slack user and team: who "Odelia" is in a thread, and the team whose members may give her jobs
+    if (who.user_id) meta.bot_user = who.user_id;
+    if (who.team_id) meta.team_id = who.team_id;
   } else if (kind === "wechat_bot") {
     // a verified service account's AppID (wx and 16 letters or digits), AppSecret, the Token for signatures and, for
     // safe mode, the EncodingAESKey, all as set under Message push in the WeChat developer platform
@@ -1522,10 +1525,31 @@ const esignStatus: Action = async (c) => {
 
 // ------------------------------------------------------------------ router
 
+/* When a linked team chat hears (_shared/channels.ts hookPlan): every update as it comes, or a daily digest at an hour;
+   quiet hours on or off; the business's time zone. Owners, like connecting it. */
+const hookSchedule: Action = async (c) => {
+  if (!isHookKind(c.body.kind)) throw new HttpError("bad_request", "kind must be a linked team chat.");
+  const kind = c.body.kind as HookKind;
+  const row = await findIntegration(c.ws, kind as unknown as Kind);
+  if (!row) throw new HttpError("not_found", `${HOOK_NAMES[kind].en} is not connected.`);
+  const digest = c.body.digest === "daily" ? "daily" : "each";
+  const hour = Number.isInteger(c.body.hour) && (c.body.hour as number) >= 0 && (c.body.hour as number) <= 23 ? c.body.hour as number : 9;
+  const tz = typeof c.body.tz === "string" && c.body.tz.length <= 64 && (() => { try { new Intl.DateTimeFormat("en", { timeZone: c.body.tz as string }); return true; } catch { return false; } })() ? c.body.tz as string : "America/New_York";
+  const quiet = c.body.quiet === true;
+  const meta = { ...(row.meta ?? {}), digest, hour, tz, quiet };
+  const { error } = await admin.from("integrations").update({ meta }).eq("id", row.id);
+  if (error) throw new Error(`integration update failed: ${error.code ?? ""}`);
+  const en = `${digest === "daily" ? `Once a day at ${hour}:00` : "Each update as it comes"}${quiet ? ", quiet 9pm to 8am" : ""}`;
+  const zh = `${digest === "daily" ? `每天 ${hour}:00 一次` : "每条动态即时发送"}${quiet ? "，晚 9 点至早 8 点免打扰" : ""}`;
+  await audit({ ...you(c), action: { en: `Changed when ${HOOK_NAMES[kind].en} hears`, zh: `修改了${HOOK_NAMES[kind].zh}的通知时间` }, object: HOOK_NAMES[kind], detail: { en, zh } });
+  return ok({ kind, digest, hour, tz, quiet });
+};
+
 const ACTIONS: Record<string, Action> = {
   connect,
   finish,
   disconnect,
+  hook_schedule: hookSchedule,
   calendar_add: calendarAdd,
   mail_search: mailSearch,
   mail_read: mailRead,
@@ -1559,7 +1583,7 @@ const ACTIONS: Record<string, Action> = {
 
 /** What only an owner can do: connect or disconnect an account, send mail or Slack posts as the business, and read
  *  sales and staff from Square or Toast. */
-const OWNER_ONLY = new Set<Action>([connect, disconnect, mailSend, slackPost, hookConnect, botSetup, botConnect, toastSetup, toastConnect, posSales, posStaff, esignConnect, esignSend,
+const OWNER_ONLY = new Set<Action>([connect, disconnect, hookSchedule, mailSend, slackPost, hookConnect, botSetup, botConnect, toastSetup, toastConnect, posSales, posStaff, esignConnect, esignSend,
   // and for an app's own MCP server: connecting, refreshing, switching tools, disconnecting, approving and declining
   ...MCP_OWNER_ACTIONS.map((a) => MCP_ACTIONS[a])]);
 

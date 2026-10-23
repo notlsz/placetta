@@ -71,7 +71,7 @@ export function sharedThread(to: { kind?: string } & Record<string, unknown>): b
 export function chatToOk(to: { kind?: string } & Record<string, unknown>): boolean {
   const s = (k: string, re: RegExp) => typeof to[k] === "string" && re.test(to[k] as string);
   switch (to.kind) {
-    case "slack": return s("channel", /^[A-Z0-9]{6,24}$/) && s("thread_ts", /^\d{6,12}\.\d{1,8}$/);
+    case "slack": return s("channel", /^[A-Z0-9]{6,24}$/) && s("thread_ts", /^\d{6,12}\.\d{1,8}$/) && (to.user === undefined || s("user", /^[UW][A-Z0-9]{6,20}$/));
     case "lark": return s("message_id", /^om_[\w-]{6,80}$/) && (to.group === undefined || typeof to.group === "boolean");
     case "wechat": return s("openid", /^[A-Za-z0-9_-]{6,64}$/);
     case "telegram": return s("chat_id", /^-?\d{1,20}$/) && s("user", /^\d{3,20}$/) && Number.isInteger(to.message_id) && (to.message_id as number) > 0

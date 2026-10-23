@@ -1201,6 +1201,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
           return true;
         } catch (e) { fail(e); return false; }
       },
+      hookSchedule: async (kind, s) => { if (!ownerOk()) return false; try { await api.integration(cloud.wsId, "hook_schedule", { kind, ...s }); setIntegrations(await api.listIntegrations(cloud.wsId)); say(lang === "zh" ? "已保存。" : "Saved."); return true; } catch (e) { fail(e); return false; } },
       connectSign: async key => { if (!ownerOk()) return false; try { await api.esignConnect(cloud.wsId, key); setIntegrations(await api.listIntegrations(cloud.wsId)); say(lang === "zh" ? "已连接 Dropbox Sign。现在可以从文件中发送文件签署。" : "Dropbox Sign is connected. Send a document for signature from Documents."); return true; } catch (e) { fail(e); return false; } },
       connectToast: async () => { if (!ownerOk()) return false; try { await api.integration(cloud.wsId, "toast_connect"); setIntegrations(await api.listIntegrations(cloud.wsId)); say(lang === "zh" ? "已连接 Toast。Odelia 现在可以读取销售额和排班。" : "Toast is connected. Odelia can read sales and schedules now."); return true; } catch (e) { fail(e); return false; } },
       availability: async () => { try { return await api.integration<api.Availability>(cloud.wsId, "available"); } catch { return { google: false, microsoft: false, dropbox: false, quickbooks: false, slack: false, square: false, toast: false, gbp: false, clover: false, shopify: false, xero: false, dropbox_sign: false }; } },

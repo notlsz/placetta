@@ -157,7 +157,30 @@ export type TeamsActivity = {
   type?: string; id?: string; serviceUrl?: string; channelId?: string; text?: string;
   from?: Account; recipient?: Account; conversation?: { id?: string; conversationType?: string; tenantId?: string };
   entities?: { type?: string; mentioned?: { id?: string } }[]; channelData?: { tenant?: { id?: string } };
+  attachments?: { contentType?: string; contentUrl?: string; name?: string; content?: { downloadUrl?: string; fileType?: string } }[];
 };
+
+/** A file sent with a message: where to read it and whether that takes the bot's token. */
+export type TeamsFile = { url: string; name?: string; mime: string; bot: boolean };
+const FILE_TYPE: Record<string, string> = { pdf: "application/pdf", jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif" };
+/** Microsoft's own file service hosts, where a personal chat's downloadUrl points (OneDrive for Business). */
+const fileHostOk = (raw: string) => { try { const u = new URL(raw); return u.protocol === "https:" && !u.port && /(^|\.)(sharepoint\.com|sharepoint\.cn|sharepoint-df\.com|sharepoint\.us)$/i.test(u.hostname); } catch { return false; } };
+/** The photos and PDFs on a Teams message: a personal chat's file (file.download.info, a short-lived OneDrive link that
+ *  takes no token) or an inline image (on the Bot Framework service, read with the bot's token). A file shared in a
+ *  channel is a SharePoint link that needs Microsoft Graph and the tenant's consent, so it isn't read here. */
+export function teamsFiles(a: TeamsActivity): TeamsFile[] {
+  const out: TeamsFile[] = [];
+  for (const x of a.attachments ?? []) {
+    const ct = String(x.contentType ?? "").toLowerCase();
+    if (ct === "application/vnd.microsoft.teams.file.download.info") {
+      const url = String(x.content?.downloadUrl ?? ""), mime = FILE_TYPE[String(x.content?.fileType ?? "").toLowerCase()];
+      if (mime && fileHostOk(url)) out.push({ url, name: x.name, mime, bot: false });
+    } else if (/^image\/(jpeg|jpg|png|webp|gif)$/.test(ct) && x.contentUrl && teamsServiceOk(x.contentUrl)) {
+      out.push({ url: x.contentUrl, name: x.name, mime: ct === "image/jpg" ? "image/jpeg" : ct, bot: true });
+    }
+  }
+  return out.slice(0, 5);
+}
 
 /** The words of a message, without the <at>Odelia</at> mention and Teams' HTML. */
 export function teamsText(t: string): string {
@@ -168,7 +191,7 @@ export function teamsText(t: string): string {
 
 /** What a request from Teams comes to: refused (401), nothing to do, or a job to hand to Odelia (after the sender is
  *  looked up, in the background) with its event id for taking it once. */
-export type TeamsAnswer = { status: number; job?: { id: string; to: TeamsTo; text: string; from: string } };
+export type TeamsAnswer = { status: number; job?: { id: string; to: TeamsTo; text: string; from: string; files: TeamsFile[] } };
 
 /**
  * Checks and reads one request. In a personal chat any message is for Odelia; in a channel or group chat only one that
@@ -185,10 +208,11 @@ export async function teamsHandle(bot: TeamsBot, auth: string | null, body: stri
   const personal = a.conversation.conversationType === "personal";
   if (!personal && !(a.entities ?? []).some((e) => e.type === "mention" && e.mentioned?.id && e.mentioned.id === a.recipient?.id)) return { status: 200 };
   const text = teamsText(a.text ?? "");
-  if (!text) return { status: 200 };
+  const files = teamsFiles(a);
+  if (!text && !files.length) return { status: 200 };
   const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${a.conversation.id}\n${a.id}`)));
   const id = "teams:" + [...digest.slice(0, 20)].map((b) => b.toString(16).padStart(2, "0")).join("");
-  return { status: 200, job: { id, to: { kind: "teams", service_url: base(a.serviceUrl), conversation_id: a.conversation.id, activity_id: a.id }, text, from: a.from.id } };
+  return { status: 200, job: { id, to: { kind: "teams", service_url: base(a.serviceUrl), conversation_id: a.conversation.id, activity_id: a.id }, text, from: a.from.id, files } };
 }
 
 export const TEAMS_SETUP = "I can't tell who's asking yet. The Placetta owner needs to check the bot's ID, client secret and tenant ID in Placetta (Settings, Integrations, Odelia in Teams), and that the Teams app is installed for your team.\n我还无法确认是谁在提问。快哉负责人需要在快哉中检查机器人的 ID、客户端密钥和租户 ID（设置 → 集成 → Teams 中的 Odelia），并确认 Teams 应用已为团队安装。";

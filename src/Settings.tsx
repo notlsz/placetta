@@ -220,6 +220,38 @@ function ChatLink({ kind, account }: { kind: keyof typeof LINKS; account: string
   );
 }
 
+/** When a linked team chat hears from Placetta: each update as it comes (the default) or one digest a day at an hour,
+ *  and quiet hours, 9pm to 8am where the business is, held and sent as one message in the morning
+ *  (supabase/functions/_shared/channels.ts hookPlan). Owners change it; everyone else sees it. */
+function HookWhen({ kind, meta }: { kind: HookKind; meta: Record<string, unknown> }) {
+  const { lang, cloud } = useApp();
+  const zh = lang === "zh";
+  const pin = usePin();
+  const tz = typeof meta.tz === "string" ? meta.tz : (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York"; } catch { return "America/New_York"; } })();
+  const cur = { digest: meta.digest === "daily" ? "daily" as const : "each" as const, hour: Number.isInteger(meta.hour) ? meta.hour as number : 9, tz, quiet: meta.quiet === true };
+  const [busy, setBusy] = useState(false);
+  const save = (next: Partial<typeof cur>) => {
+    if (!cloud?.owner || busy) return;
+    pin.guard(() => { setBusy(true); void cloud.hookSchedule(kind, { ...cur, ...next }).finally(() => setBusy(false)); });
+  };
+  const hourLabel = (h: number) => zh ? `${h}:00` : `${h % 12 || 12}${h < 12 ? "am" : "pm"}`;
+  const when = cur.digest === "daily" ? (zh ? `每天 ${hourLabel(cur.hour)} 汇总一次` : `Once a day at ${hourLabel(cur.hour)}`) : (zh ? "每条动态即时发送" : "Each update as it comes");
+  if (!cloud?.owner) return <li className="sg-row sg-sub-row"><span className="sg-tx"><small>{when}{cur.quiet ? (zh ? "，晚 9 点至早 8 点免打扰" : ", quiet 9pm to 8am") : ""}</small></span></li>;
+  return (
+    <li className="sg-row sg-sub-row">
+      <span className="sg-tx"><small>{zh ? `何时发送（${tz}）` : `When it posts (${tz})`}</small></span>
+      <span className="sg-r">
+        <Select value={cur.digest === "daily" ? String(cur.hour) : "each"} disabled={busy} aria-label={zh ? "何时发送" : "When it posts"}
+          onChange={e => save(e.target.value === "each" ? { digest: "each" } : { digest: "daily", hour: Number(e.target.value), tz })}>
+          <option value="each">{zh ? "每条即时发送" : "Each update as it comes"}</option>
+          {[7, 8, 9, 10, 12, 17].map(h => <option key={h} value={String(h)}>{zh ? `每天 ${hourLabel(h)} 汇总` : `Daily at ${hourLabel(h)}`}</option>)}
+        </Select>
+        {cur.digest === "each" && <label className="sg-inline"><Toggle on={cur.quiet} set={v => save({ quiet: v, tz })} label={zh ? "晚 9 点至早 8 点免打扰" : "Quiet 9pm to 8am"} disabled={busy} /><small>{zh ? "晚 9 点至早 8 点免打扰" : "Quiet 9pm to 8am"}</small></label>}
+      </span>
+    </li>
+  );
+}
+
 function Integrations() {
   const { b, lang, cloud, say } = useApp();
   const pin = usePin();
@@ -309,6 +341,7 @@ function Integrations() {
                   {(status || right) && <span className="sg-r">{status}{right}</span>}
                 </li>,
                 (it.kind === "wechat_bot" || it.kind === "telegram_bot") && c && c.status === "connected" && cloud ? <ChatLink key={it.kind + "-link"} kind={it.kind === "wechat_bot" ? "wechat" : "telegram"} account={c.account} /> : null,
+                it.hook && c && c.status === "connected" && cloud ? <HookWhen key={it.kind + "-when"} kind={it.kind as HookKind} meta={c.meta} /> : null,
               ];
             })}
           </ul>
@@ -371,6 +404,7 @@ function Integrations() {
               <li>{zh ? "在 api.slack.com/apps 选择 Create New App → From a manifest，选好工作区，粘贴下面的清单：" : "At api.slack.com/apps choose Create New App, From a manifest, pick your workspace and paste this:"}</li>
               {bot.setup?.manifest ? <pre className="sg-code"><button type="button" className="lnk" onClick={() => copy(bot.setup!.manifest!)}>{zh ? "复制" : "Copy"}</button>{bot.setup.manifest}</pre> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
               <li>{zh ? "点 Install to Workspace。然后复制 OAuth & Permissions 里的 Bot User OAuth Token（xoxb- 开头），以及 Basic Information 里的 Signing Secret：" : "Click Install to Workspace. Then copy the Bot User OAuth Token (starts with xoxb-) from OAuth & Permissions, and the Signing Secret from Basic Information:"}</li>
+              <li>{zh ? "已经装过？把这个清单粘贴到应用的 App Manifest 页面并重新安装，即可使用 /odelia、“记成任务”快捷方式、按钮、话题上下文和文件。" : "Set it up before? Paste this manifest on the app's App Manifest page and reinstall to get /odelia, the Make it a task shortcut, buttons, thread context and files."}</li>
             </ol>
           ) : bot.kind === "wechat_bot" ? (
             <ol>
@@ -386,7 +420,7 @@ function Integrations() {
               <li>{zh ? "在 Teams 开发者门户（dev.teams.microsoft.com）：工具 → 机器人管理 → 新建机器人，命名为 Odelia。在“配置”中把终结点地址设为：" : "In the Teams Developer Portal (dev.teams.microsoft.com): Tools, Bot management, New bot, named Odelia. Under Configure, set the endpoint address to:"}</li>
               {bot.setup?.events_url ? <CodeBlock text={bot.setup.events_url} copy={copy} zh={zh} /> : <p className="quiet">{zh ? "正在准备…" : "Getting it ready..."}</p>}
               <li>{zh ? "在“客户端密码”中添加一个密码并复制，再复制机器人 ID。租户 ID 在 Azure 门户的 Microsoft Entra ID 概览页。" : "Under Client secrets, add one and copy it, then copy the bot ID. Your tenant ID is on the Microsoft Entra ID overview page in the Azure portal."}</li>
-              <li>{zh ? "然后在“应用”中新建应用 → 应用功能 → 机器人，选择这个机器人，勾选“个人”和“团队”，发布到您的组织（Teams 管理员批准后即可使用）。" : "Then Apps, New app, App features, Bot: pick this bot, tick Personal and Team, and publish it to your org (a Teams admin approves it)."}</li>
+              <li>{zh ? "然后在“应用”中新建应用 → 应用功能 → 机器人，选择这个机器人，勾选“个人”和“团队”，并开启“上传和下载文件”（同事私聊发来的照片和 PDF 会存入“文件”），发布到您的组织（Teams 管理员批准后即可使用）。" : "Then Apps, New app, App features, Bot: pick this bot, tick Personal and Team, turn on Upload and download files (photos and PDFs sent to Odelia in a personal chat go to Documents), and publish it to your org (a Teams admin approves it)."}</li>
             </ol>
           ) : bot.kind === "telegram_bot" ? (
             <ol>

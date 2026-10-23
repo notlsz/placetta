@@ -3,19 +3,19 @@
 // approval as a link button, and the token never in anything logged or returned.
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
 import { NOT_TEAMMATE } from "./bots.ts";
-import { TG_SAY, tgDeepLink, type TgDeps, tgGetMe, tgHandle, tgLinkCode, tgNewSecret, tgSend, tgSetWebhook, tgSplit, tgTokenOk, type TelegramBot, type TelegramTo, tgWords } from "./telegram.ts";
+import { TG_SAY, tgDeepLink, type TgDeps, tgDownload, type TgFile, tgGetMe, tgHandle, tgLinkCode, tgNewSecret, tgSend, tgSetWebhook, tgSplit, tgTokenOk, type TelegramBot, type TelegramTo, tgWords } from "./telegram.ts";
 
 const TOKEN = "7012345678:AAH9f3kq2Zx0-LmNoPqRsTuVwXyZ_abcdEF";
 const bot: TelegramBot = { kind: "telegram_bot", bot_token: TOKEN, secret: "s3cret-Value_123", bot_id: "7012345678", username: "LuckyLeafOdeliaBot" };
 const MEI = "123456789", STRANGER = "555000111";
 
 function deps(o: Partial<TgDeps> = {}) {
-  const seen = new Set<string>(), started: { uid: string; to: TelegramTo; text: string; lang: string }[] = [], claims: [string, string][] = [];
+  const seen = new Set<string>(), started: { uid: string; to: TelegramTo; text: string; lang: string; files: TgFile[] }[] = [], claims: [string, string][] = [];
   const d: TgDeps = {
     firstTime: async (id) => (seen.has(id) ? false : (seen.add(id), true)),
     claim: async (u, c) => (claims.push([u, c]), c === "424242" ? "ok" : "wrong"),
     sender: async (u) => (u === MEI ? { user_id: "uid-mei", member: true } : u === "222333444" ? { user_id: "uid-left", member: false } : null),
-    start: (uid, to, text, lang) => { started.push({ uid, to, text, lang }); },
+    start: (uid, to, text, lang, files) => { started.push({ uid, to, text, lang, files }); },
     notTeammate: NOT_TEAMMATE,
     ...o,
   };
@@ -100,9 +100,41 @@ Deno.test("bots, channels, photos without words and malformed updates start noth
   const fromBot = update({ from: { id: 999, is_bot: true }, chat: { id: 999, type: "private" }, text: "hi" });
   const channel = update({ from: { id: Number(MEI) }, chat: { id: -100555, type: "channel" }, text: "@LuckyLeafOdeliaBot hi" });
   for (const b of [fromBot, channel, "not json", JSON.stringify({ update_id: 1 }), JSON.stringify({ message: { text: "x" } })]) assertEquals((await tgHandle(bot, bot.secret, b, d)).body, "");
-  const photo = update({ from: { id: Number(MEI) }, chat: { id: Number(MEI), type: "private" }, photo: [{}] });
-  assertEquals(said((await tgHandle(bot, bot.secret, photo, d)).body)?.text, TG_SAY.textOnly);
+  const voice = update({ from: { id: Number(MEI) }, chat: { id: Number(MEI), type: "private" }, voice: { file_id: "v1" } });
+  assertEquals(said((await tgHandle(bot, bot.secret, voice, d)).body)?.text, TG_SAY.textOnly, "a voice note isn't a document: it says what it can read");
+  const broken = update({ from: { id: Number(MEI) }, chat: { id: Number(MEI), type: "private" }, photo: [{}] });
+  assertEquals((await tgHandle(bot, bot.secret, broken, d)).body, "", "a photo with no file id is nothing to read");
   assertEquals(started.length, 0);
+});
+
+Deno.test("photos and PDFs: a teammate's become documents with the job, a stranger's are never fetched", async () => {
+  const { d, started } = deps();
+  const pdf = update({ from: { id: Number(MEI), language_code: "zh-hans" }, chat: { id: Number(MEI), type: "private" }, document: { file_id: "BQAD1", file_name: "inspection report.pdf", mime_type: "application/pdf", file_size: 81234 } });
+  await tgHandle(bot, bot.secret, pdf, d);
+  assertEquals(started[0].files, [{ file_id: "BQAD1", name: "inspection report.pdf", mime: "application/pdf", size: 81234 }]);
+  assertEquals([started[0].text, started[0].lang], ["", "zh"], "only a file: no words, in the language their Telegram is set to");
+  const photo = update({ from: { id: Number(MEI) }, chat: { id: Number(MEI), type: "private" }, caption: "Is this violation serious?",
+    photo: [{ file_id: "small", width: 90, height: 90, file_size: 1000 }, { file_id: "big", width: 1280, height: 960, file_size: 180000 }] });
+  await tgHandle(bot, bot.secret, photo, d);
+  assertEquals([started[1].text, started[1].files.map((f) => f.file_id)], ["Is this violation serious?", ["big"]], "the caption is the question, the largest size the file");
+  const groupPhoto = group("", { caption: "", photo: [{ file_id: "g", width: 10, height: 10 }] });
+  await tgHandle(bot, bot.secret, groupPhoto, d);
+  assertEquals(started.length, 2, "a photo in a group that doesn't address her is ignored");
+  const stranger = update({ from: { id: Number(STRANGER) }, chat: { id: Number(STRANGER), type: "private" }, document: { file_id: "x", mime_type: "application/pdf" } });
+  assertEquals(said((await tgHandle(bot, bot.secret, stranger, d)).body)?.text, TG_SAY.unknown);
+  assertEquals(started.length, 2);
+});
+
+Deno.test("a file: getFile, then the file address, refused over the limit", async () => {
+  const calls: string[] = [];
+  const f = ((url: string) => {
+    calls.push(String(url).replace(TOKEN, "<token>"));
+    if (String(url).endsWith("/getFile")) return Promise.resolve(new Response(JSON.stringify({ ok: true, result: { file_path: "documents/file_7.pdf", file_size: 5 } })));
+    return Promise.resolve(new Response(new Uint8Array([37, 80, 68, 70, 45])));
+  }) as typeof fetch;
+  assertEquals(await tgDownload(bot, "BQAD1", 1000, f), new Uint8Array([37, 80, 68, 70, 45]));
+  assertEquals(calls, ["https://api.telegram.org/bot<token>/getFile", "https://api.telegram.org/file/bot<token>/documents/file_7.pdf"]);
+  assertEquals(await tgDownload(bot, "BQAD1", 4, f), null, "over the limit");
 });
 
 Deno.test("the words: commands and mentions come out", () => {

@@ -3,7 +3,7 @@
 // address, endorsement), other tenants and guests turned away, a mention or a personal message becomes a job, answers
 // reply in the thread with the approval as an Open URL button, and the bot's token goes only to Microsoft.
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
-import { teamsForgetKeys, teamsForgetToken, teamsHandle, teamsReply, teamsSender, teamsServiceOk, teamsText, type TeamsBot, type TeamsTo, teamsVerify, teamsWorks } from "./teams.ts";
+import { teamsFiles, teamsForgetKeys, teamsForgetToken, teamsHandle, teamsReply, teamsSender, teamsServiceOk, teamsText, type TeamsBot, type TeamsTo, teamsVerify, teamsWorks } from "./teams.ts";
 
 const APP = "8c3e5d2a-1b4f-4e6a-9c7d-2f1e0a9b8c7d", TENANT = "4a1b2c3d-5e6f-4789-8abc-def012345678", OTHER_TENANT = "99999999-9999-4999-8999-999999999999";
 const bot: TeamsBot = { kind: "teams_bot", app_id: APP, app_secret: "client~secret.value", tenant_id: TENANT };
@@ -134,4 +134,19 @@ Deno.test("answers: a reply to the message, the approval as an Open URL button, 
 Deno.test("the words, without Teams' mention and HTML", () => {
   assertEquals(teamsText("<at>Odelia</at>&nbsp;what&#39;s due &amp; when?<br>Thanks"), "what's due & when?\nThanks");
   assertEquals(teamsText("<p>Renew the <b>sign</b> permit</p>"), "Renew the sign permit");
+});
+
+Deno.test("files: a personal chat's PDF from OneDrive, an inline photo with the bot's token, nothing from anywhere else", () => {
+  const files = teamsFiles({ attachments: [
+    { contentType: "application/vnd.microsoft.teams.file.download.info", name: "Health inspection.pdf", content: { downloadUrl: "https://contoso-my.sharepoint.com/personal/mei/_layouts/15/download.aspx?UniqueId=1&Translate=false&tempauth=x", fileType: "pdf" } },
+    { contentType: "image/png", contentUrl: "https://smba.trafficmanager.net/amer/v3/attachments/0-wus-d1/views/original", name: "violation.png" },
+    { contentType: "text/html", content: {} },
+    { contentType: "application/vnd.microsoft.teams.file.download.info", name: "notes.docx", content: { downloadUrl: "https://contoso-my.sharepoint.com/x", fileType: "docx" } },
+    { contentType: "application/vnd.microsoft.teams.file.download.info", name: "evil.pdf", content: { downloadUrl: "https://evil.example/download.pdf", fileType: "pdf" } },
+    { contentType: "image/png", contentUrl: "https://evil.example/a.png" },
+  ] });
+  assertEquals(files, [
+    { url: "https://contoso-my.sharepoint.com/personal/mei/_layouts/15/download.aspx?UniqueId=1&Translate=false&tempauth=x", name: "Health inspection.pdf", mime: "application/pdf", bot: false },
+    { url: "https://smba.trafficmanager.net/amer/v3/attachments/0-wus-d1/views/original", name: "violation.png", mime: "image/png", bot: true },
+  ]);
 });

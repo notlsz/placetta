@@ -16,7 +16,7 @@ export type LarkBot = { kind: "lark_bot"; app_id: string; app_secret: string; ve
 export type Bot = SlackBot | LarkBot | WechatBot | TeamsBot | TelegramBot;
 /** Where an answer goes back: the Slack channel and thread, the Lark message to reply to, the WeChat follower (by
  *  their OpenID for this account), the Teams message to reply to (in its thread), or the Telegram message to reply to. */
-export type ChatTo = { kind: "slack"; channel: string; thread_ts: string } | { kind: "lark"; message_id: string; group?: boolean } | { kind: "wechat"; openid: string } | TeamsTo | TelegramTo;
+export type ChatTo = { kind: "slack"; channel: string; thread_ts: string; user?: string } | { kind: "lark"; message_id: string; group?: boolean } | { kind: "wechat"; openid: string } | TeamsTo | TelegramTo;
 /** The chats a job can come from, each with its bot's integration kind. */
 export const CHAT_KINDS = { slack: "slack_bot", lark: "lark_bot", wechat: "wechat_bot", teams: "teams_bot", telegram: "telegram_bot" } as const;
 export type ChatKind = keyof typeof CHAT_KINDS;
@@ -110,10 +110,10 @@ export async function slackPost(bot: SlackBot, to: { channel: string; thread_ts?
 }
 
 /** Checks a pasted bot token: which Slack team and bot it is. */
-export async function slackWho(token: string): Promise<{ team: string; bot: string } | null> {
+export async function slackWho(token: string): Promise<{ team: string; bot: string; team_id?: string; user_id?: string } | null> {
   const res = await fetch("https://slack.com/api/auth.test", { method: "POST", headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(10000) }).catch(() => null);
-  const j = (res ? await res.json().catch(() => ({})) : {}) as { ok?: boolean; team?: string; user?: string };
-  return j.ok ? { team: j.team ?? "Slack", bot: j.user ?? "odelia" } : null;
+  const j = (res ? await res.json().catch(() => ({})) : {}) as { ok?: boolean; team?: string; user?: string; team_id?: string; user_id?: string };
+  return j.ok ? { team: j.team ?? "Slack", bot: j.user ?? "odelia", ...(j.team_id ? { team_id: j.team_id } : {}), ...(j.user_id ? { user_id: j.user_id } : {}) } : null;
 }
 
 /* ------------------------------------------------------------------ Lark (Feishu) */
@@ -206,9 +206,20 @@ export async function chatReply(bot: Bot, to: ChatTo, text: string, o: { tail?: 
 export function slackManifest(eventsUrl: string) {
   return {
     display_information: { name: "Odelia", description: "Placetta's compliance agent: licenses, permits, filings and deadlines.", background_color: "#4d73a3" },
-    features: { bot_user: { display_name: "Odelia", always_online: true }, app_home: { messages_tab_enabled: true, messages_tab_read_only_enabled: false } },
-    // users:read and users:read.email: who's asking, so the job runs as that Placetta teammate (and nobody else's runs)
-    oauth_config: { scopes: { bot: ["app_mentions:read", "chat:write", "im:history", "im:read", "im:write", "users:read", "users:read.email"] } },
-    settings: { event_subscriptions: { request_url: eventsUrl, bot_events: ["app_mention", "message.im"] }, org_deploy_enabled: false, socket_mode_enabled: false, token_rotation_enabled: false },
+    features: {
+      bot_user: { display_name: "Odelia", always_online: true }, app_home: { messages_tab_enabled: true, messages_tab_read_only_enabled: false },
+      // /odelia and the "Make it a task" shortcut (_shared/slack.ts): Slack signs both with the same secret, at the same address
+      slash_commands: [{ command: "/odelia", url: eventsUrl, description: "Ask Odelia about licenses, permits and deadlines", usage_hint: "[question] | status | ambient on|off", should_escape: false }],
+      shortcuts: [{ name: "Make it a task", type: "message", callback_id: "odelia_task", description: "Odelia turns this thread into a task in Placetta" }],
+    },
+    // users:read and users:read.email: who's asking, so the job runs as that Placetta teammate (and nobody else's runs).
+    // channels:history and groups:history: the thread before a mention (Claude in Slack reads it too) and the opt-in
+    // ambient check; files:read: photos and PDFs sent to Odelia; commands: /odelia.
+    oauth_config: { scopes: { bot: ["app_mentions:read", "chat:write", "commands", "channels:history", "groups:history", "files:read", "im:history", "im:read", "im:write", "users:read", "users:read.email"] } },
+    settings: {
+      event_subscriptions: { request_url: eventsUrl, bot_events: ["app_mention", "message.im", "message.channels", "message.groups"] },
+      interactivity: { is_enabled: true, request_url: eventsUrl },
+      org_deploy_enabled: false, socket_mode_enabled: false, token_rotation_enabled: false,
+    },
   };
 }

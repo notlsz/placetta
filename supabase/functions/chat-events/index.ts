@@ -23,8 +23,11 @@
 // teammate links their Telegram once with a 6-digit code, like WeChat (telegram.ts).
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { type Bot, type ChatSender, type ChatTo, chatReply, type LarkBot, larkOpen, larkSender, larkText, larkWorks, NEEDS_EMAIL_SCOPE, NOT_TEAMMATE, type SlackBot, slackSender, slackSigned, slackText, slackWho } from "../_shared/bots.ts";
-import { TEAMS_SETUP, type TeamsBot, teamsHandle, teamsSender } from "../_shared/teams.ts";
-import { tgHandle } from "../_shared/telegram.ts";
+import { TEAMS_SETUP, type TeamsBot, type TeamsFile, teamsHandle, teamsSender, teamsToken } from "../_shared/teams.ts";
+import { tgDownload, type TgFile, tgHandle } from "../_shared/telegram.ts";
+import { type ChatFile, fetchBytes, FILE_ONLY, fileName, fileOk, FILES_UNREAD, filesNote, mimeOf } from "../_shared/chat_files.ts";
+import { DOC_MAX, storeDocs } from "../_shared/odelia_db.ts";
+import { ambientBlocks, ambientWorth, actionSaid, ephemeral, type Form, interactionOf, itemOf, SLASH_HELP, type SlackFile, slackEphemeral, slackFiles, slackForm, slackPostBlocks, slashOf, TASK_PROMPT, threadContext, threadOf } from "../_shared/slack.ts";
 import { telegramBot, telegramSender } from "../_shared/telegram_db.ts";
 import { HOOK_KINDS, postHook } from "../_shared/channels.ts";
 import { type WechatBot, WX_SAY, wxCredsWork, wxHandle, wxUrlCheck } from "../_shared/wechat.ts";
@@ -46,10 +49,15 @@ async function monitorKey() {
 
 /** The workspace's bot credentials from the vault. */
 async function botOf(ws: string, kind: "slack_bot" | "lark_bot" | "teams_bot"): Promise<Bot | null> {
-  const { data: row } = await admin.from("integrations").select("secret_id, status").eq("workspace_id", ws).eq("kind", kind).maybeSingle();
+  return (await botRow(ws, kind))?.bot ?? null;
+}
+/** The bot and its integration row's settings (Slack: its own user, its team, the channels with the ambient check on). */
+type BotMeta = { bot_user?: string; team_id?: string; ambient_channels?: string[] };
+async function botRow(ws: string, kind: "slack_bot" | "lark_bot" | "teams_bot"): Promise<{ id: string; bot: Bot; meta: BotMeta } | null> {
+  const { data: row } = await admin.from("integrations").select("id, secret_id, status, meta").eq("workspace_id", ws).eq("kind", kind).maybeSingle();
   if (!row?.secret_id || row.status !== "connected") return null;
   const { data: raw } = await admin.rpc("vault_get", { p_id: row.secret_id });
-  try { return { ...JSON.parse(String(raw ?? "")), kind } as Bot; } catch { return null; }
+  try { return { id: String(row.id), bot: { ...JSON.parse(String(raw ?? "")), kind } as Bot, meta: (row.meta ?? {}) as BotMeta }; } catch { return null; }
 }
 
 /** An event id seen for the first time (Slack and Lark retry until they get a 200 in time). */
@@ -85,8 +93,24 @@ async function startChat(ws: string, uid: string, to: ChatTo, prompt: string, la
   return j.error?.message ?? (lang === "zh" ? "暂时无法开始，请稍后再试。" : "I couldn't start that just now. Try again in a moment.");
 }
 
-/** Works out who asked and, for a teammate, hands the job to Odelia as them; anyone else gets a note and no run. */
-async function takeJob(ws: string, bot: Bot, to: ChatTo, prompt: string, who: () => Promise<ChatSender>) {
+/** A chat's photos and PDFs, fetched once the sender is known to be a teammate and saved to Documents as them. */
+type Files = { chat: string; list: ChatFile[]; read: (f: ChatFile, i: number) => Promise<Uint8Array | null> };
+async function saveChatFiles(ws: string, uid: string, files: Files | undefined): Promise<{ saved: string[]; skipped: number }> {
+  if (!files?.list.length) return { saved: [], skipped: 0 };
+  const got: { name: string; mime: string; bytes: Uint8Array }[] = [];
+  let skipped = 0;
+  for (const [i, f] of files.list.slice(0, 5).entries()) {
+    const bytes = fileOk(f) ? await files.read(f, i).catch(() => null) : null;
+    if (bytes) got.push({ name: fileName(files.chat, i, f), mime: mimeOf(f.mime), bytes }); else skipped++;
+  }
+  const saved = got.length ? await storeDocs(admin, ws, uid, got, { folder: files.chat.toLowerCase(), tag: { en: `Sent in ${files.chat}`, zh: `${files.chat} 发送` } }) : [];
+  return { saved: saved.map((s) => s.name), skipped: skipped + (got.length - saved.length) + Math.max(0, files.list.length - 5) };
+}
+
+/** Works out who asked and, for a teammate, hands the job to Odelia as them, with the photos and PDFs they sent saved to
+ *  Documents and, in a Slack thread, the thread before they asked as context; anyone else gets a note and no run, and
+ *  nothing of theirs is fetched. */
+async function takeJob(ws: string, bot: Bot, to: ChatTo, prompt: string, who: () => Promise<ChatSender>, o: { files?: Files; context?: (lang: "en" | "zh") => Promise<string> } = {}) {
   const sender = await who().catch(() => ({ ok: false, why: "unknown" }) as ChatSender);
   const uid = sender.ok ? await teammate(ws, sender.email) : null;
   if (!uid) {
@@ -94,24 +118,154 @@ async function takeJob(ws: string, bot: Bot, to: ChatTo, prompt: string, who: ()
     await chatReply(bot, to, !sender.ok && sender.why === "setup" ? (to.kind === "teams" ? TEAMS_SETUP : NEEDS_EMAIL_SCOPE) : NOT_TEAMMATE);
     return;
   }
-  const why = await startChat(ws, uid, to, prompt, zh(prompt) ? "zh" : "en");
+  await startAs(ws, bot, uid, to, prompt, zh(prompt) ? "zh" : "en", o);
+}
+/** Starts the job for a teammate already known: files saved first, the context added, refusals said back in the chat. */
+async function startAs(ws: string, bot: Bot, uid: string, to: ChatTo, prompt: string, lang: "en" | "zh", o: { files?: Files; context?: (lang: "en" | "zh") => Promise<string> } = {}) {
+  const got = await saveChatFiles(ws, uid, o.files);
+  if (!prompt && !got.saved.length) { if (got.skipped) await chatReply(bot, to, FILES_UNREAD[lang]); return; }
+  const context = o.context ? await o.context(lang).catch(() => "") : "";
+  const ask = (prompt || FILE_ONLY[lang]) + context + filesNote({ saved: got.saved, skipped: got.skipped, asked: !!prompt, chat: o.files?.chat ?? "chat", lang });
+  const why = await startChat(ws, uid, to, ask, lang);
   if (why) await chatReply(bot, to, why);
 }
 
+/* ------------------------------------------------------------------ Slack */
+
+/** The Slack user's teammate account, or null (a guest, someone from another company, no email). */
+async function slackTeammate(ws: string, bot: SlackBot, user: string, team: string): Promise<string | null> {
+  const s = await slackSender(bot, { user }, team).catch(() => ({ ok: false }) as ChatSender);
+  return s.ok ? await teammate(ws, s.email) : null;
+}
+/** Says something to the person through Slack's response_url (only they see it). */
+async function respond(url: string, body: Record<string, unknown>) {
+  if (!/^https:\/\/hooks\.slack\.com\//.test(url)) return;
+  await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: AbortSignal.timeout(10000) }).catch(() => null);
+}
+const slackLang = (t: string): "en" | "zh" => (zh(t) ? "zh" : "en");
+/** Files on a Slack message, read with the bot token from files.slack.com. */
+const slackFilesOf = (bot: SlackBot, list: SlackFile[] | undefined): Files | undefined => {
+  const fs = slackFiles(list);
+  return fs.length ? { chat: "Slack", list: fs, read: (f) => fetchBytes(f.url ?? "", { Authorization: `Bearer ${bot.bot_token}` }) } : undefined;
+};
+
 async function slack(req: Request, ws: string, body: string) {
-  const bot = await botOf(ws, "slack_bot") as SlackBot | null;
-  if (!bot || !(await slackSigned(bot.signing_secret, req.headers.get("x-slack-request-timestamp"), req.headers.get("x-slack-signature"), body))) return json({ error: "unauthorized" }, 401);
-  const e = JSON.parse(body) as { type?: string; challenge?: string; event_id?: string; team_id?: string; event?: Record<string, string> };
+  const row = await botRow(ws, "slack_bot");
+  const bot = row?.bot as SlackBot | undefined;
+  if (!row || !bot || !(await slackSigned(bot.signing_secret, req.headers.get("x-slack-request-timestamp"), req.headers.get("x-slack-signature"), body))) return json({ error: "unauthorized" }, 401);
+  // slash commands and interactions come form-encoded to the same address; events come as JSON
+  if (!body.trimStart().startsWith("{")) return slackForm_(ws, row.id, bot, row.meta, slackForm(body));
+  const e = JSON.parse(body) as { type?: string; challenge?: string; event_id?: string; team_id?: string; event?: Record<string, unknown> };
   if (e.type === "url_verification") return json({ challenge: e.challenge });
   // Retries (x-slack-retry-num) come through like any event; the event id makes sure each is taken only once.
-  const ev = e.event ?? {};
-  const mention = ev.type === "app_mention", dm = ev.type === "message" && ev.channel_type === "im" && !ev.subtype;
-  if ((!mention && !dm) || ev.bot_id || !e.event_id || !(await firstTime("slack:" + e.event_id))) return okEmpty();
+  const ev = (e.event ?? {}) as { type?: string; channel_type?: string; subtype?: string; bot_id?: string; user?: string; text?: string; channel?: string; ts?: string; thread_ts?: string; files?: SlackFile[] };
+  const mention = ev.type === "app_mention";
+  const dm = ev.type === "message" && ev.channel_type === "im" && (!ev.subtype || ev.subtype === "file_share");
+  const chan = ev.type === "message" && (ev.channel_type === "channel" || ev.channel_type === "group") && (!ev.subtype || ev.subtype === "file_share");
+  if ((!mention && !dm && !chan) || ev.bot_id || !e.event_id || !ev.channel || !ev.ts) return okEmpty();
+  const team = row.meta.team_id ?? e.team_id ?? "";
+  if (chan) {
+    // the opt-in check (Claude Tag's ambient behavior): only in a channel an owner or admin turned it on for, only for
+    // a message about an inspection, a permit or a deadline, once a thread, and only the person who wrote it sees it
+    if (!(row.meta.ambient_channels ?? []).includes(ev.channel) || !ambientWorth(ev, row.meta.bot_user)) return okEmpty();
+    const thread = ev.thread_ts ?? ev.ts;
+    if (!(await firstTime("slack:" + e.event_id)) || !(await firstTime(`slack-ambient:${ev.channel}:${thread}`))) return okEmpty();
+    later((async () => {
+      const uid = ev.user ? await slackTeammate(ws, bot, ev.user, team) : null;
+      if (!uid || !ev.user) return;
+      await slackEphemeral(bot.bot_token, { channel: ev.channel!, user: ev.user, thread_ts: thread, text: "Want me to make this a task?", blocks: ambientBlocks(slackLang(ev.text ?? ""), thread) }).catch(() => false);
+    })());
+    return okEmpty();
+  }
+  if (!(await firstTime("slack:" + e.event_id))) return okEmpty();
   const text = slackText(ev.text ?? "");
-  if (!text) return okEmpty();
-  const to: ChatTo = { kind: "slack", channel: ev.channel, thread_ts: ev.thread_ts ?? ev.ts };
+  const files = slackFilesOf(bot, ev.files);
+  if (!text && !files) return okEmpty();
+  const to: ChatTo = { kind: "slack", channel: ev.channel, thread_ts: ev.thread_ts ?? ev.ts, ...(ev.user && /^[UW][A-Z0-9]{6,20}$/.test(ev.user) ? { user: ev.user } : {}) };
+  // asked inside a thread: the thread before the mention comes along, as Claude in Slack reads it
+  const context = mention && ev.thread_ts && ev.thread_ts !== ev.ts
+    ? async (lang: "en" | "zh") => threadContext((await threadOf(bot.bot_token, ev.channel!, ev.thread_ts!)) ?? [], { before: ev.ts!, botUser: row.meta.bot_user, lang }) : undefined;
   // answer Slack within its 3 seconds; looking up the sender and starting the job happen in the background
-  later(takeJob(ws, bot, to, text, () => slackSender(bot, ev, e.team_id)));
+  later(takeJob(ws, bot, to, text, () => slackSender(bot, ev, team || undefined), { files, context }));
+  return okEmpty();
+}
+
+/** /odelia and the interactions (buttons, the "Make it a task" shortcut). Slack wants an answer within 3 seconds, so
+ *  the HTTP answer says what's happening and the work goes on in the background, its outcome through response_url. */
+async function slackForm_(ws: string, rowId: string, bot: SlackBot, meta: BotMeta, form: Form): Promise<Response> {
+  const team = meta.team_id ?? form.team_id ?? "";
+  if (form.command) {
+    const cmd = slashOf(form.text ?? ""), lang = slackLang(form.text ?? "");
+    const user = form.user_id ?? "", channel = form.channel_id ?? "", url = form.response_url ?? "";
+    if (cmd.kind === "help") return json(ephemeral(SLASH_HELP));
+    if (!/^[UW][A-Z0-9]{6,20}$/.test(user) || !/^[CGD][A-Z0-9]{6,24}$/.test(channel)) return json(ephemeral(NOT_TEAMMATE));
+    if (cmd.kind === "ambient") {
+      later((async () => {
+        const uid = await slackTeammate(ws, bot, user, team);
+        const { data: m } = uid ? await admin.from("workspace_members").select("role").eq("workspace_id", ws).eq("user_id", uid).maybeSingle() : { data: null };
+        if (!m || !["owner", "admin"].includes(String(m.role))) { await respond(url, ephemeral(lang === "zh" ? "只有快哉的所有者或管理员可以开启或关闭主动提示。" : "Only a Placetta owner or admin can turn the ambient check on or off.")); return; }
+        if (channel.startsWith("D")) { await respond(url, ephemeral(lang === "zh" ? "主动提示只在频道中使用。" : "The ambient check is for channels, not direct messages.")); return; }
+        const list = new Set(meta.ambient_channels ?? []);
+        if (cmd.on) list.add(channel); else list.delete(channel);
+        await admin.from("integrations").update({ meta: { ...meta, ambient_channels: [...list].slice(0, 50) } }).eq("id", rowId);
+        await admin.from("audit_log").insert({ workspace_id: ws, actor: "you", actor_id: uid, action: cmd.on ? { en: "Turned on Odelia's ambient check in a Slack channel", zh: "在 Slack 频道开启了 Odelia 的主动提示" } : { en: "Turned off Odelia's ambient check in a Slack channel", zh: "在 Slack 频道关闭了 Odelia 的主动提示" }, object: { en: "Odelia in Slack", zh: "Slack 中的 Odelia" } });
+        await respond(url, ephemeral(cmd.on
+          ? (lang === "zh" ? "已开启。有人在这里提到检查、许可或截止日期时，Odelia 只会向那个人提出一次跟进建议，每个话题一次。" : "On. When someone here mentions an inspection, a permit or a deadline, Odelia offers once, only to them, to make it a task. One offer a thread.")
+          : (lang === "zh" ? "已关闭。只有 @Odelia 时她才会回应。" : "Off. She answers only when someone mentions @Odelia.")));
+      })());
+      return json(ephemeral(lang === "zh" ? "正在处理…" : "One moment..."));
+    }
+    // a question: posted in the channel as theirs, answered in its thread, as them
+    later((async () => {
+      const uid = await slackTeammate(ws, bot, user, team);
+      if (!uid) { await respond(url, ephemeral(NOT_TEAMMATE)); return; }
+      const posted = await slackPostBlocks(bot.bot_token, { channel, text: `<@${user}> asked Odelia: ${cmd.prompt.slice(0, 2800)}` });
+      if (!posted.ok || !posted.ts) {
+        await respond(url, ephemeral(posted.error === "not_in_channel" || posted.error === "channel_not_found"
+          ? (lang === "zh" ? "请先把 Odelia 加入这个频道（/invite @Odelia），或在私信中问她。" : "Add Odelia to this channel first (/invite @Odelia), or ask her in a direct message.")
+          : (lang === "zh" ? "暂时无法发帖，请稍后再试。" : "I couldn't post here just now. Try again in a moment.")));
+        return;
+      }
+      await startAs(ws, bot, uid, { kind: "slack", channel, thread_ts: posted.ts, user }, cmd.prompt, lang);
+    })());
+    return json(ephemeral(lang === "zh" ? "收到，我会在频道的话题中回答。" : "On it. I'll answer in a thread in this channel."));
+  }
+
+  const it = interactionOf(form);
+  if (it.kind === "ignore") return okEmpty();
+  later((async () => {
+    const uid = await slackTeammate(ws, bot, it.user, team);
+    if (!uid) { await respond(it.response_url, ephemeral(NOT_TEAMMATE)); return; }
+    if (it.kind === "thread_task") {
+      const msgs = (await threadOf(bot.bot_token, it.channel, it.thread_ts)) ?? [{ ts: it.ts, text: it.text }];
+      const lang = slackLang(msgs.map((m) => m.text ?? "").join(" "));
+      // the whole thread, fenced: "before" is just past the last message
+      const context = async (l: "en" | "zh") => threadContext(msgs, { before: "9999999999.999999", botUser: meta.bot_user, lang: l });
+      await respond(it.response_url, ephemeral(lang === "zh" ? "收到，我会把这个话题整理成任务，并在话题中回复。" : "On it: I'll make this thread a task and answer in the thread."));
+      await startAs(ws, bot, uid, { kind: "slack", channel: it.channel, thread_ts: it.thread_ts, user: it.user }, TASK_PROMPT[lang], lang, { context });
+      return;
+    }
+    // a button: only the safe actions
+    if (it.action === "open_app") return;   // a link button: Slack opens it, there's nothing to do here
+    if (it.action === "ambient_no") { await respond(it.response_url, { delete_original: true }); return; }
+    if (it.action === "ambient_task") {
+      if (!it.channel || !it.thread_ts) return;
+      const msgs = (await threadOf(bot.bot_token, it.channel, it.thread_ts)) ?? [];
+      const lang = slackLang(msgs.map((m) => m.text ?? "").join(" "));
+      await respond(it.response_url, { delete_original: true });
+      await startAs(ws, bot, uid, { kind: "slack", channel: it.channel, thread_ts: it.thread_ts, user: it.user }, TASK_PROMPT[lang], lang,
+        { context: async (l) => threadContext(msgs, { before: "9999999999.999999", botUser: meta.bot_user, lang: l }) });
+      return;
+    }
+    const item = itemOf(it.value);
+    if (!item) return;
+    const days = it.action === "remind_1d" ? 1 : it.action === "remind_7d" ? 7 : null;
+    const { data, error } = await admin.rpc("chat_item_action", { ws, p_user: uid, p_action: days ? "remind" : "assign_me", p_kind: item.kind, p_item: item.id, p_days: days });
+    const d = (data ?? {}) as { title?: { en?: string; zh?: string }; remind_on?: string };
+    // Slack doesn't say which language the person reads: both, as the bot's other notes do
+    const said = (lang: "en" | "zh") => actionSaid({ action: it.action, title: d.title?.[lang] || d.title?.en, remind_on: d.remind_on, ...(error ? { error: (error.message ?? "").replace(/^.*?:\s/, "").slice(0, 120) || "try again" } : {}) }, lang);
+    await respond(it.response_url, ephemeral(`${said("en")}\n${said("zh")}`));
+  })());
   return okEmpty();
 }
 
@@ -145,7 +299,13 @@ async function teams(req: Request, ws: string, body: string) {
   if (r.status === 401) return json({ error: "unauthorized" }, 401);
   const job = r.job;
   if (!job || !(await firstTime(job.id))) return okEmpty();
-  later(takeJob(ws, bot, job.to, job.text, () => teamsSender(bot, job.to, job.from)));
+  // a personal chat's file is a short-lived OneDrive link; an inline photo is read with the bot's own token
+  const files: Files | undefined = job.files.length ? { chat: "Teams", list: job.files, read: async (f) => {
+    const t = f as TeamsFile;
+    const tok = t.bot ? await teamsToken(bot) : null;
+    return t.bot && !tok ? null : await fetchBytes(t.url, tok ? { Authorization: `Bearer ${tok}` } : {});
+  } } : undefined;
+  later(takeJob(ws, bot, job.to, job.text, () => teamsSender(bot, job.to, job.from), { files }));
   return okEmpty();
 }
 
@@ -170,7 +330,8 @@ async function telegram(req: Request, ws: string, body: string) {
       return (data as { result?: string } | null)?.result;
     },
     sender: (tgUser) => telegramSender(admin, ws, bot.bot_id, tgUser),
-    start: (uid, to, text, lang) => later((async () => { const why = await startChat(ws, uid, to, text, lang); if (why) await chatReply(bot, to, why); })()),
+    // photos and PDFs: getFile, then the file, with the bot's own token
+    start: (uid, to, text, lang, list) => later(startAs(ws, bot, uid, to, text, lang, list.length ? { files: { chat: "Telegram", list, read: (f) => tgDownload(bot, (f as TgFile).file_id, DOC_MAX) } } : {})),
     notTeammate: NOT_TEAMMATE,
   });
   return r.body ? new Response(r.body, { status: r.status, headers: { "Content-Type": "application/json" } }) : new Response("", { status: r.status });

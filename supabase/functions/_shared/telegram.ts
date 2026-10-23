@@ -113,6 +113,31 @@ export type TgMessage = {
 };
 export type TgUpdate = { update_id?: number; message?: TgMessage };
 
+/** A photo or a document on the message, as Telegram describes it (file_id to fetch with getFile). */
+export type TgFile = { file_id: string; name?: string; mime: string; size?: number };
+/** The files on a message worth reading: a document's PDF or image, and a photo's largest size (Telegram sends every
+ *  size; photos are JPEG). Anything else (voice, video, stickers) isn't a document. */
+export function tgFiles(m: TgMessage): TgFile[] {
+  const out: TgFile[] = [];
+  const d = m.document as { file_id?: unknown; file_name?: unknown; mime_type?: unknown; file_size?: unknown } | undefined;
+  if (d && typeof d.file_id === "string") out.push({ file_id: d.file_id, name: typeof d.file_name === "string" ? d.file_name : undefined, mime: String(d.mime_type ?? ""), size: Number(d.file_size) || undefined });
+  const sizes = (Array.isArray(m.photo) ? m.photo : []) as { file_id?: unknown; file_size?: unknown; width?: unknown; height?: unknown }[];
+  const big = sizes.filter((p) => typeof p?.file_id === "string").sort((a, b) => (Number(b.width) * Number(b.height) || 0) - (Number(a.width) * Number(a.height) || 0))[0];
+  if (big) out.push({ file_id: String(big.file_id), mime: "image/jpeg", size: Number(big.file_size) || undefined });
+  return out;
+}
+
+/** A file's bytes: getFile gives its path, then the file address (the token is in both addresses, so nothing about a
+ *  failure is logged). Null when Telegram won't give it or it's over the limit. */
+export async function tgDownload(bot: Pick<TelegramBot, "bot_token">, fileId: string, max: number, f: Fetch = fetch): Promise<Uint8Array | null> {
+  const r = await call<{ file_path?: string; file_size?: number }>(bot.bot_token, "getFile", { file_id: fileId }, f);
+  if (!r.ok || !r.result.file_path || (r.result.file_size ?? 0) > max) return null;
+  const res = await f(`${TG_API}/file/bot${bot.bot_token}/${r.result.file_path.split("/").map(encodeURIComponent).join("/")}`, { signal: AbortSignal.timeout(20000) }).catch(() => null);
+  if (!res?.ok) return null;
+  const bytes = new Uint8Array(await res.arrayBuffer().catch(() => new ArrayBuffer(0)));
+  return bytes.length && bytes.length <= max ? bytes : null;
+}
+
 /** A message that is only a link code: "123456", "/start 123456", "link 123456" or "关联 123456". */
 export function tgLinkCode(text: string): string | null {
   const m = /^(?:\/start(?:@\w+)?\s+|(?:link|关联|绑定)\s*[:：]?\s*)?(\d{6})$/i.exec(text.trim());
@@ -144,7 +169,7 @@ export const TG_SAY = {
   wrongCode: "That code didn't match. Get a new one in Placetta (Settings, Integrations) and send it here within 30 minutes.\n验证码不对。请在快哉中获取新的验证码（设置 → 集成），并在 30 分钟内发到这里。",
   locked: "Too many tries. Wait an hour, then get a new code in Placetta.\n尝试次数过多。请一小时后在快哉中获取新的验证码。",
   privateCode: "For your safety, send link codes to me in a private chat, not in a group. Get a new code in Placetta, since this one was seen here.\n为了安全，请在私聊中把验证码发给我，不要发在群里。这个验证码已在群里出现，请在快哉中获取新的验证码。",
-  textOnly: "I can read text here. Send your question as a message; photos and PDFs go in Placetta's Documents.\n我在这里只能读文字，请用文字发送问题；照片和 PDF 请上传到快哉的“文件”。",
+  textOnly: "I can read text, photos and PDFs here, but not voice messages. Send your question as a message.\n我在这里可以读文字、照片和 PDF，但不能听语音。请用文字发送问题。",
 };
 
 /** What handling an update needs from the database and the agent (chat-events passes the real ones; tests pass
@@ -156,8 +181,9 @@ export type TgDeps = {
   claim: (tgUser: string, code: string) => Promise<string | undefined>;
   /** the member this Telegram user is linked to here, and whether they're still a member (telegram_sender) */
   sender: (tgUser: string) => Promise<{ user_id: string; member: boolean } | null>;
-  /** hand the job to Odelia as that member, in the background; the answer comes later as a reply */
-  start: (uid: string, to: TelegramTo, text: string, lang: "en" | "zh") => void;
+  /** hand the job to Odelia as that member, in the background, with the photos and PDFs they sent (saved to Documents
+   *  first); the answer comes later as a reply */
+  start: (uid: string, to: TelegramTo, text: string, lang: "en" | "zh", files: TgFile[]) => void;
   /** what someone who isn't a teammate any more is told, in both languages */
   notTeammate: string;
 };
@@ -193,12 +219,14 @@ export async function tgHandle(bot: Pick<TelegramBot, "bot_id" | "username" | "s
     const who = await deps.sender(userId);
     return say(who?.member ? TG_SAY.linked : TG_SAY.welcome);
   }
-  if (!words) return (m.photo || m.document || m.voice) && priv ? say(TG_SAY.textOnly) : { status: 200, body: "" };
+  // photos and PDFs become documents; voice and video aren't documents
+  const files = tgFiles(m);
+  if (!words && !files.length) return m.voice && priv ? say(TG_SAY.textOnly) : { status: 200, body: "" };
   const who = await deps.sender(userId);
   if (!who) return say(TG_SAY.unknown);
   if (!who.member) return say(deps.notTeammate);
-  const lang = /[一-鿿]/.test(words) ? "zh" : "en";
-  deps.start(who.user_id, { kind: "telegram", chat_id: chatId, message_id: m.message_id, ...(thread.message_thread_id ? { thread_id: thread.message_thread_id } : {}), user: userId }, words, lang);
+  const lang = /[一-鿿]/.test(words) || (!words && /^zh/i.test(m.from.language_code ?? "")) ? "zh" : "en";
+  deps.start(who.user_id, { kind: "telegram", chat_id: chatId, message_id: m.message_id, ...(thread.message_thread_id ? { thread_id: thread.message_thread_id } : {}), user: userId }, words, lang, files);
   // the typing indicator while she starts; her answer comes as a reply to this message
   return { status: 200, body: JSON.stringify({ method: "sendChatAction", chat_id: m.chat.id, action: "typing", ...thread }) };
 }

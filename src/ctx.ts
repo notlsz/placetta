@@ -52,6 +52,8 @@ export type CloudCtx = {
   disconnect(kind: IntegrationKind): Promise<void>;
   /** Link a team chat by its webhook link; true once the test message went through. */
   connectHook(kind: import("./cloud/api").HookKind, url: string, secret?: string): Promise<boolean>;
+  /** When a linked team chat hears: each update as it comes or once a day at an hour, and quiet hours (owners). */
+  hookSchedule(kind: import("./cloud/api").HookKind, s: { digest: "each" | "daily"; hour: number; tz: string; quiet: boolean }): Promise<boolean>;
   /** The bot's event address (and Slack's app manifest, or WeChat's Token and EncodingAESKey) to set up before connecting it. */
   botSetup(kind: import("./cloud/api").BotKind): Promise<import("./cloud/api").BotSetup | null>;
   /** Connect the business's own Slack or Lark bot, or WeChat Official Account; true once its credentials work. */
