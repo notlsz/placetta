@@ -1,5 +1,5 @@
 import { supabase, type ApiError } from "./api";
-import { MEMORY_COLS, memoryOf, type BriefRow, type ConflictRow, type MemoryRow, type ProposalRow, type SettingsRow } from "../odeliaMemory/rows";
+import { MEMORY_COLS, MEMORY_COLS_V2, memoryOf, type BriefRow, type ConflictRow, type MemoryRow, type PersonRow, type ProposalRow, type SettingsRow } from "../odeliaMemory/rows";
 import type { AgentMemory, Observation, Scope } from "../odeliaMemory/types";
 
 /* Agent memory in an account (migration 20261022211905_agent_memory). Anyone on the workspace reads it; the database's
@@ -23,15 +23,32 @@ async function call(fn: string, args: Record<string, unknown>): Promise<unknown>
 /** The workspace's memory: settings, every memory (the history too), briefs, proposals and open conflicts. */
 export async function loadAgentMemory(ws: string): Promise<AgentMemory> {
   const db = supabase();
-  const [settings, items, briefs, proposals, conflicts] = await Promise.all([
+  // the record link, the re-check and who reads it (20261031151700), or the columns before it on an older database
+  const items = async () => {
+    const q = (cols: string) => db.from("agent_memories").select(cols).eq("workspace_id", ws).neq("status", "rejected").order("updated_at", { ascending: false }).limit(2000);
+    const { data, error } = await q(MEMORY_COLS_V2);
+    if (!error) return (data ?? []) as unknown as MemoryRow[];
+    if (String(error.code) !== "42703") throw fail(error);
+    return rows<MemoryRow>(q(MEMORY_COLS));
+  };
+  const [settings, person, list, briefs, proposals, conflicts] = await Promise.all([
     rows<SettingsRow>(db.from("agent_memory_settings").select("enabled, suggest, allow_last4, cap").eq("workspace_id", ws)),
-    rows<MemoryRow>(db.from("agent_memories").select(MEMORY_COLS).eq("workspace_id", ws).neq("status", "rejected").order("updated_at", { ascending: false }).limit(2000)),
+    // RLS gives each person only their own row
+    rows<PersonRow>(db.from("agent_memory_person").select("reference_memories, reference_chats").eq("workspace_id", ws)),
+    items(),
     rows<BriefRow>(db.from("agent_memory_briefs").select("scope_kind, scope_id, body, updated_at, updated_by").eq("workspace_id", ws)),
     rows<ProposalRow>(db.from("agent_memory_proposals").select("id, scope_kind, scope_id, line, why, source_kind, source_ref, created_at").eq("workspace_id", ws).order("created_at")),
     rows<ConflictRow>(db.from("agent_memory_conflicts").select("id, memory_id, record, memory_value, record_value, found_at, resolved_at").eq("workspace_id", ws).is("resolved_at", null)),
   ]);
-  return memoryOf({ settings: settings[0] ?? null, items, briefs, proposals, conflicts });
+  return memoryOf({ settings: settings[0] ?? null, person: person[0] ?? null, items: list, briefs, proposals, conflicts });
 }
+
+/** Who reads a team memory: the whole team, or owners and admins only (owners and admins choose). */
+export const memoryVisibility = (id: string, visibility: "team" | "admins") => call("agent_memory_visibility_set", { p_id: id, p_visibility: visibility });
+/** A memory marked to check again after a rule or record changed: still true, or retire it. */
+export const memoryReverify = (id: string, stillTrue: boolean) => call("agent_memory_reverify", { p_id: id, p_still_true: stillTrue });
+/** This person's own switches: Reference saved memories, Reference chat history. */
+export const memoryPerson = (ws: string, o: { memories?: boolean; chats?: boolean }) => call("agent_memory_person_set", { ws, p_memories: o.memories ?? null, p_chats: o.chats ?? null });
 
 export const memorySettings = (ws: string, o: { enabled?: boolean; suggest?: boolean; allowLast4?: boolean }) =>
   call("agent_memory_settings_set", { ws, p_enabled: o.enabled ?? null, p_suggest: o.suggest ?? null, p_allow_last4: o.allowLast4 ?? null });

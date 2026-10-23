@@ -6,7 +6,7 @@
 
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
 // @ts-types="./agent.d.ts"
-import { MEMORY_COLS, type MemoryDb, type PastRun } from "./agent.js";
+import { MEMORY_COLS, MEMORY_COLS_V2, type MemoryDb, type PastRun } from "./agent.js";
 
 const gone = (e: { code?: string } | null) => !!e && ["PGRST202", "PGRST205", "42883", "42P01", "42703"].includes(String(e.code));
 const rows = async <T>(q: PromiseLike<{ data: unknown; error: { code?: string; message?: string } | null }>, what: string): Promise<T[]> => {
@@ -23,7 +23,19 @@ export function memoryDb(admin: SupabaseClient, ws: string): MemoryDb {
       if (error) { check("settings")({ error }); return null; }
       return data as { enabled: boolean; suggest: boolean; allow_last4: boolean; cap: number } | null;
     },
-    items: () => rows(admin.from("agent_memories").select(MEMORY_COLS).eq("workspace_id", ws).in("status", ["suggested", "approved"]).order("updated_at", { ascending: false }).limit(1000), "items"),
+    // with the record link, the re-check and who reads it (20261031151700); without that migration, the columns before it
+    async items() {
+      const q = (cols: string) => admin.from("agent_memories").select(cols).eq("workspace_id", ws).in("status", ["suggested", "approved"]).order("updated_at", { ascending: false }).limit(1000);
+      const { data, error } = await q(MEMORY_COLS_V2);
+      if (!error) return (data ?? []) as never[];
+      if (String(error.code) !== "42703") { check("items")({ error }); return []; }
+      return rows(q(MEMORY_COLS), "items");
+    },
+    async person(userId) {
+      const { data, error } = await admin.from("agent_memory_person").select("reference_memories, reference_chats").eq("workspace_id", ws).eq("user_id", userId).maybeSingle();
+      if (error) { check("person")({ error }); return null; }
+      return data as { reference_memories: boolean; reference_chats: boolean } | null;
+    },
     briefs: () => rows(admin.from("agent_memory_briefs").select("scope_kind, scope_id, body, updated_at, updated_by").eq("workspace_id", ws), "briefs"),
     proposals: () => rows(admin.from("agent_memory_proposals").select("id, scope_kind, scope_id, line, why, source_kind, source_ref, created_at").eq("workspace_id", ws).order("created_at").limit(200), "proposals"),
     conflicts: () => rows(admin.from("agent_memory_conflicts").select("id, memory_id, record, memory_value, record_value, found_at, resolved_at").eq("workspace_id", ws).is("resolved_at", null), "conflicts"),
@@ -36,9 +48,12 @@ export function memoryDb(admin: SupabaseClient, ws: string): MemoryDb {
   };
 }
 
-/** Past conversations in this workspace, newest first, for memory_recall (src/odeliaMemory/retrieve.ts searches them). */
-export async function pastRuns(admin: SupabaseClient, ws: string, exclude?: string): Promise<PastRun[]> {
+/** The asker's own past conversations in this workspace, newest first, for memory_recall (src/odeliaMemory/retrieve.ts
+ *  searches them). Claude's conversation search covers your own chats: a teammate's chat is theirs, so a run never
+ *  searches anyone else's, and without an asker (a scheduled watch) it searches none. */
+export async function pastRuns(admin: SupabaseClient, ws: string, exclude?: string, me?: string | null): Promise<PastRun[]> {
+  if (!me) return [];
   const list = await rows<{ id: string; prompt: string; reply: { text?: { en?: string }[] } | null; created_at: string }>(
-    admin.from("agent_runs").select("id, prompt, reply, created_at").eq("workspace_id", ws).eq("kind", "task").eq("status", "done").eq("no_memory", false).order("created_at", { ascending: false }).limit(300), "past");
+    admin.from("agent_runs").select("id, prompt, reply, created_at").eq("workspace_id", ws).eq("created_by", me).eq("kind", "task").eq("status", "done").eq("no_memory", false).order("created_at", { ascending: false }).limit(300), "past");
   return list.filter((r) => r.id !== exclude).map((r) => ({ id: r.id, prompt: r.prompt, reply: (r.reply?.text ?? []).map((t) => t?.en ?? "").join(" ").slice(0, 2000), at: r.created_at }));
 }

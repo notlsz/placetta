@@ -130,7 +130,7 @@ async function lark(req: Request, ws: string, body: string) {
   if (m.chat_type === "group" && !(m.mentions ?? []).length) return json({});
   const text = larkText(m.content ?? "");
   if (!text) return json({});
-  later(takeJob(ws, bot, { kind: "lark", message_id: m.message_id }, text, () => larkSender(bot, ev.sender, header.tenant_key)));
+  later(takeJob(ws, bot, { kind: "lark", message_id: m.message_id, group: m.chat_type !== "p2p" }, text, () => larkSender(bot, ev.sender, header.tenant_key)));
   return json({});
 }
 

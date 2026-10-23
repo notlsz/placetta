@@ -1,4 +1,4 @@
-import { idNumber, injected, redact, secretNumber, SENSITIVE } from "../guard";
+import { idNumber, injected, redact, secretNumber, sensitiveTopic } from "../guard";
 
 /* What memory never keeps, as plain checks with no model in them, so they hold whatever a model does. Placetta's
    privacy policy: no Social Security number or ITIN is ever stored, no card numbers, no saved passwords, and content is
@@ -24,7 +24,7 @@ export function blocked(text: string, o: { allowLast4?: boolean; untrusted?: boo
   if (!t) return "empty";
   if (redactKeepDates(t) !== t || secretNumber("", t)) return "secret";
   if (CREDENTIAL.test(t)) return "credential";
-  if (SENSITIVE.test(t)) return "sensitive";
+  if (sensitiveTopic(t)) return "sensitive";
   // instructions hidden in data: never a memory, from anywhere (a person who wants a rule says it in the app)
   if (injected(t)) return "instruction";
   if (o.untrusted && /\b(ignore|disregard|you (must|should) (now )?(always|never)|from now on|new instructions?|system prompt|odelia,? (always|never|must))\b|忽略|从现在起|新的指令/i.test(t)) return "instruction";

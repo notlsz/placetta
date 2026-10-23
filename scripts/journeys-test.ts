@@ -20,6 +20,7 @@ import { MAX_CHILDREN, MAX_RUN_CHILDREN } from "../src/jobs";
 import { loadMemory, saveRun, type MemoryDb } from "../src/odeliaMemory/server";
 import type { MemoryRow } from "../src/odeliaMemory/rows";
 import { emptyAgentMemory } from "../src/odeliaMemory/types";
+import { HELD_OUT, QUERIES, runBench } from "./memory-recall-bench";
 
 type Ok = (cond: unknown, m: string, detail?: unknown) => void;
 type Eq = (a: unknown, b: unknown, m: string) => void;
@@ -318,6 +319,53 @@ export async function journeyTests(ok: Ok, eq: Eq) {
     ok(!String(off.bodies.find(b => b.tools)?.system ?? "").includes("Bayou Realty"), "with memory off, nothing is read back");
   }
 
+  /* ---------------------------------------------------------------- 10b. memory tied to records, by role, in a group thread */
+  console.log("\n# Journey: memory tied to records, by role, in a group thread");
+  {
+    const db = memDb();
+    db.settingsRow = { enabled: true, suggest: true, allow_last4: false, cap: 300 };
+    const row = (id: string, text: string, o: Partial<MemoryRow> = {}): MemoryRow => ({ id, workspace_id: "ws1", scope_kind: "workspace", scope_id: "", topic: "stores", entity: "note", attr: "noted", value: text,
+      text_en: text, text_zh: text, source_kind: "chat", source_ref: "run-0", source_title: null, source_url: null, source_quote: text, observed_at: `${TODAY}T10:00:00.000Z`, valid_from: "2026-09-01", valid_to: null,
+      status: "approved", trust: "owner", pinned: false, critical: null, supersedes: null, superseded_by: null, seen: 1, last_seen: null, ttl_days: null, ...o });
+    db.rows.push(
+      row("team", "Bayou Realty requires a certificate of insurance naming them"),
+      row("rent", "Houston rent is 9,000 a month until 2028", { visibility: "admins" }),
+      row("mine", "I prefer replies in Chinese", { scope_kind: "person", scope_id: "u-owner", topic: "preferences" }),
+      row("seller", "The seller's permit needs a security deposit", { entity: "app:seller", verify: "recheck", verify_reason: { en: "The agency changed the page for this application's form.", zh: "机构更新了该申请表格的网页。" } }),
+    );
+    const sysOf = (r: Run) => String(r.bodies.find(b => b.tools)?.system ?? "");
+    const owner = await loadMemory(db, "u-owner", { role: "owner" });
+    const s1 = await run({ ws: workspace(), prompt: "What do we owe the Houston landlord?", memory: { memory: owner, me: "u-owner", past: () => [] }, script: [() => say("Rent and a COI.")] });
+    ok(["Bayou Realty", "9,000", "replies in Chinese"].every(x => sysOf(s1).includes(x)), "the owner in the app: team, admins-only and their own memory are all in", sysOf(s1).slice(0, 0));
+    ok(/The seller's permit needs a security deposit .*record application seller\)/.test(sysOf(s1)), "a memory about an application names the record it's tied to");
+    ok(/CHECK AGAIN: The agency changed the page for this application's form\. Confirm it against the record/.test(sysOf(s1)), "and one whose rule changed says to check it against the record first");
+    const member = await loadMemory(db, "u-member", { role: "member" });
+    ok(member.items.some(o => o.id === "team") && !member.items.some(o => o.id === "rent" || o.id === "mine"), "a member's run reads the team's memory, never the admins-only one or someone else's own", member.items.map(o => o.id));
+    const thread = await loadMemory(db, "u-owner", { role: "owner", shared: true });
+    const s2 = await run({ ws: workspace(), prompt: "What do we owe the Houston landlord?", memory: { memory: thread, me: "u-owner", past: () => [] }, script: [() => say("A COI.")] });
+    ok(sysOf(s2).includes("Bayou Realty") && !sysOf(s2).includes("9,000") && !sysOf(s2).includes("replies in Chinese"), "even the owner, asking in a Slack channel: the team's memory only, nothing admins-only or personal goes to the thread");
+    // ChatGPT's switches, per person
+    const offDb = memDb(); offDb.settingsRow = db.settingsRow; offDb.rows = db.rows;
+    offDb.person = async () => ({ reference_memories: true, reference_chats: false });
+    const noChats = await loadMemory(offDb, "u-owner", { role: "owner" });
+    let searched = 0;
+    const s3 = await run({ ws: workspace(), prompt: "What did we decide about the Houston lease?", memory: { memory: noChats, me: "u-owner", past: () => { searched++; return [{ id: "r1", prompt: "Houston lease", reply: "We decided to sign.", at: "2026-10-01" }]; } },
+      script: [() => ask(["memory_recall", { query: "Houston lease decided" }]), () => say("I don't see it.")] });
+    const rc = s3.calls.find(c => c.name === "memory_recall")?.parsed as { conversations?: unknown[]; chats_off?: string } | undefined;
+    ok(searched === 0 && rc?.conversations?.length === 0 && /Reference chat history/.test(rc?.chats_off ?? ""), "Reference chat history off: memory_recall searches no past chats and says why", rc);
+    offDb.person = async () => ({ reference_memories: false, reference_chats: true });
+    const noMem = await loadMemory(offDb, "u-owner", { role: "owner" });
+    const s4 = await run({ ws: workspace(), prompt: "Remember that Houston closes at 9pm.", memory: { memory: noMem, me: "u-owner", past: () => [] }, script: [() => say("I won't keep that.")] });
+    ok(!sysOf(s4).includes("Bayou Realty") && /turned off "Reference saved memories"/.test(sysOf(s4)), "Reference saved memories off: none read, and Odelia is told why");
+    const saved = await saveRun(offDb, { ws: "ws1", memory: noMem, out: s4.state.mem!, w: s4.w, now: `${TODAY}T12:00:00.000Z`, run: { id: "run-4", prompt: "Remember that Houston closes at 9pm.", channel: "app", created_by: "11111111-1111-4111-8111-111111111111" }, reply: s4.text, messages: s4.state.messages as never });
+    ok(saved.remembered === 0 && !offDb.rows.some(r => /9pm/.test(r.text_en)), "and nothing is saved");
+    // recall measured on 48 facts and 60 questions (scripts/memory-recall-bench.ts)
+    const tuned = runBench(undefined, QUERIES), held = runBench(undefined, HELD_OUT);
+    console.log(`  recall@5: tuned ${(tuned.recallAt5 * 100).toFixed(1)}%, held out ${(held.recallAt5 * 100).toFixed(1)}% (MRR ${held.mrr.toFixed(3)}); origin/main was 75.0% and 65.0% (MRR 0.539)`);
+    ok(held.refused.length === 0, "a health permit, the county health department and a health grade are kept: they're compliance, not a person's health", held.refused);
+    ok(held.recallAt5 >= 0.9 && held.byKind["other language"].hit >= 8, "held-out recall at 5 stays at 90% or more, the other language included", held.misses);
+  }
+
   /* ---------------------------------------------------------------- 11. an MCP client reads store status */
   console.log("\n# Journey: an MCP client reads store status");
   {
@@ -339,7 +387,7 @@ export async function journeyTests(ok: Ok, eq: Eq) {
 }
 
 function memDb(): MemoryDb & { rows: MemoryRow[]; settingsRow: { enabled: boolean; suggest: boolean; allow_last4: boolean; cap: number } | null } {
-  const self = {
+  const self: MemoryDb & { rows: MemoryRow[]; settingsRow: { enabled: boolean; suggest: boolean; allow_last4: boolean; cap: number } | null } = {
     rows: [] as MemoryRow[], settingsRow: null as { enabled: boolean; suggest: boolean; allow_last4: boolean; cap: number } | null,
     settings: async () => self.settingsRow,
     items: async () => self.rows.filter(r => r.status === "approved" || r.status === "suggested"),

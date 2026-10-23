@@ -1,5 +1,5 @@
 import type { ChatLine, MemoryBook, MemoryFile, MemoryKind, MemorySettings } from "./model";
-import { SENSITIVE } from "./guard";
+import { SENSITIVE, sensitiveTopic } from "./guard";
 import { recallBrief } from "./recall";
 
 /* Memory, the way Claude does it: a few small files about you (Profile, Preferences), the topics you care about and
@@ -34,7 +34,7 @@ export function fileLabel(f: MemoryFile, lang: "en" | "zh"): { name: string; sum
 export function remember(book: MemoryBook, o: { kind: MemoryKind; file: string; summary?: string; fact: string; sensitive?: boolean }): MemoryBook | null {
   const fact = o.fact.trim().slice(0, 400);
   if (!fact) return book;
-  const sensitive = !!o.sensitive || SENSITIVE.test(fact);
+  const sensitive = !!o.sensitive || sensitiveTopic(fact);
   if (sensitive && !book.settings.sensitive) return null;
   const id = o.kind === "you" ? slugOf(o.file) : `${o.kind}-${slugOf(o.file)}`;
   const files = [...book.files];

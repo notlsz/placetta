@@ -16,7 +16,7 @@ export type LarkBot = { kind: "lark_bot"; app_id: string; app_secret: string; ve
 export type Bot = SlackBot | LarkBot | WechatBot | TeamsBot | TelegramBot;
 /** Where an answer goes back: the Slack channel and thread, the Lark message to reply to, the WeChat follower (by
  *  their OpenID for this account), the Teams message to reply to (in its thread), or the Telegram message to reply to. */
-export type ChatTo = { kind: "slack"; channel: string; thread_ts: string } | { kind: "lark"; message_id: string } | { kind: "wechat"; openid: string } | TeamsTo | TelegramTo;
+export type ChatTo = { kind: "slack"; channel: string; thread_ts: string } | { kind: "lark"; message_id: string; group?: boolean } | { kind: "wechat"; openid: string } | TeamsTo | TelegramTo;
 /** The chats a job can come from, each with its bot's integration kind. */
 export const CHAT_KINDS = { slack: "slack_bot", lark: "lark_bot", wechat: "wechat_bot", teams: "teams_bot", telegram: "telegram_bot" } as const;
 export type ChatKind = keyof typeof CHAT_KINDS;

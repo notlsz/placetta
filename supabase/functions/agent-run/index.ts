@@ -37,7 +37,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { callModel, canConverse, type Role } from "../_shared/llm.ts";
 import { accessRpc, WORKS } from "../_shared/access.ts";
-import { CHAT_JOBS_PER_HOUR, chatRateLimited, chatToOk, NOT_CHARGED_EN, overTaskLimit, refundable, repeatKey, repeatStatuses, REPEAT_MS, taskLimit, tokenLimit, tooLarge } from "./limits.ts";
+import { CHAT_JOBS_PER_HOUR, chatRateLimited, chatToOk, NOT_CHARGED_EN, overTaskLimit, refundable, repeatKey, repeatStatuses, REPEAT_MS, sharedThread, taskLimit, tokenLimit, tooLarge } from "./limits.ts";
 import { gate, record, saverLine, saverNoticeDue } from "../_shared/ai_gate.ts";
 import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/odelia.ts";
 import { linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
@@ -505,10 +505,16 @@ async function recallFor(run: Run, w: Workspace, who: Who): Promise<Recall[]> {
 // ends, with the observation step on the cheap extract model. Off until an owner or admin turns it on; a store's bot
 // reads its store's part; a "don't remember this chat" run reads only the records and briefs and saves nothing.
 
+// Who the answer reaches decides what memory may go into it: an admins-only memory only for an owner or admin, and
+// neither that nor the asker's own memory into a thread other people read (sharedThread in limits.ts).
 async function memoryFor(run: Run): Promise<RunMemory | undefined> {
   try {
-    const memory = await loadMemory(memoryDb(admin, run.workspace_id), run.created_by ?? undefined);
-    return { memory, me: run.created_by ?? undefined, temporary: run.no_memory === true, past: () => pastRuns(admin, run.workspace_id, run.id) };
+    const me = run.created_by ?? undefined;
+    const { data: mem } = me ? await admin.from("workspace_members").select("role").eq("workspace_id", run.workspace_id).eq("user_id", me).maybeSingle() : { data: null };
+    const audience = { role: me ? String(mem?.role ?? "viewer") : "system", shared: !!run.chat_to && sharedThread(run.chat_to) };
+    const memory = await loadMemory(memoryDb(admin, run.workspace_id), me, audience);
+    // past chats: the asker's own, and never quoted into a shared thread
+    return { memory, me, temporary: run.no_memory === true, past: () => (audience.shared ? [] : pastRuns(admin, run.workspace_id, run.id, me)) };
   } catch (e) { console.error("memory load", run.id, String((e as Error)?.message ?? e).slice(0, 120)); return undefined; }
 }
 async function saveMemory(run: Run, rm: RunMemory | undefined, state: RunState, w: Workspace, reply: Reply, who: Who, role?: string) {

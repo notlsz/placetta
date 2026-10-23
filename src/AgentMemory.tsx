@@ -70,11 +70,24 @@ export function AgentMemoryGroup({ db, preload }: { db: () => Promise<MemoryApi>
   const scopeWords = (s: Scope): string => s.kind === "workspace" ? (zh ? "整个企业" : "Whole business") : s.kind === "brand" ? (zh ? "品牌" : "Brand")
     : s.kind === "person" ? (zh ? "仅您本人" : "Only you") : s.kind === "store" ? `${zh ? "门店：" : "Store: "}${names[scopeKey(s)] ?? s.id}` : `${zh ? "市场：" : "Market: "}${s.id}`;
   const day = (iso: string) => fmtDay(iso.slice(0, 10), lang, true);
+  /** The record a memory is tied to, by the name the workspace gives it: what Claude's and ChatGPT's memories can't show. */
+  const recordWords = (r: NonNullable<Observation["record"]>): string => {
+    const app = r.kind === "application" ? ws.apps.find(a => a.id === r.id) : undefined;
+    const dl = r.kind === "deadline" ? ws.deadlines.find(d => d.id === r.id) : undefined;
+    const st = r.kind === "store" ? (ws.stores ?? []).find(s => s.id === r.id) : undefined;
+    const en = (ws.entities ?? []).find(e => r.kind === "entity" && e.id === r.id);
+    const name = app ? b(app.name) : dl ? b(dl.title) : st ? b(st.name) : en ? en.name : r.id;
+    const kind: Record<string, Bi> = { application: B("Application", "申请"), filing: B("Filing", "申报"), deadline: B("Deadline", "截止日期"), entity: B("Entity", "实体"), store: B("Store", "门店"), form: B("Official form", "官方表格") };
+    return zh ? `关联记录：${b(kind[r.kind])}，${name}` : `Tied to ${b(kind[r.kind]).toLowerCase()}: ${name}`;
+  };
   const meta = (o: Observation) => (
     <small className="am-meta">
       <span className={OUTSIDE.includes(o.source.kind) ? "out" : undefined}>{b(SOURCE[o.source.kind])}{o.source.title ? `: ${o.source.title}` : ""}</span>
       <span>{zh ? `${day(o.validFrom)}起` : `Since ${day(o.validFrom)}`}</span>
       <span>{scopeWords(o.scope)}</span>
+      {o.record && <span className="am-rec">{recordWords(o.record)}</span>}
+      {o.visibility === "admins" && <span>{zh ? "仅所有者和管理员" : "Owners and admins only"}</span>}
+      {o.verify === "confirmed" && o.verifyAt && <span>{zh ? `${day(o.verifyAt)}已复核` : `Checked again ${day(o.verifyAt)}`}</span>}
       {o.pinned && <span>{zh ? "已置顶" : "Pinned"}</span>}
       {o.critical && <span>{zh ? "关键" : "Critical"}</span>}
       <span title={b(whyKept(o).text)}>{zh ? `重要性 ${whyKept(o).score}/5` : `Importance ${whyKept(o).score} of 5`}</span>
@@ -89,6 +102,14 @@ export function AgentMemoryGroup({ db, preload }: { db: () => Promise<MemoryApi>
 
   const suggestions = mem.items.filter(o => o.status === "suggested");
   const saved = mem.items.filter(isLive);
+  const recheck = saved.filter(o => o.verify === "recheck");
+  /** Still true after the rule changed, or retire it (kept in the history). */
+  const reverify = (o: Observation, still: boolean) => act(m => ({ ...m, items: m.items.map(x => x.id !== o.id ? x : still ? { ...x, verify: "confirmed" as const, verifyAt: now() } : { ...x, status: "expired" as const, validTo: now().slice(0, 10), verify: "confirmed" as const, verifyAt: now() }) }),
+    rpc(x => x.memoryReverify(o.id, still)), still ? B("Kept, and marked as checked.", "已保留并标记为已复核。") : B("Retired. It stays in the history.", "已停用，保留在历史记录中。"));
+  const setVisibility = (o: Observation, v: "team" | "admins") => act(m => ({ ...m, items: m.items.map(x => x.id === o.id ? { ...x, visibility: v } : x) }),
+    rpc(x => x.memoryVisibility(o.id, v)), v === "admins" ? B("Only owners and admins see it now.", "现在只有所有者和管理员可见。") : B("The whole team sees it now.", "现在整个团队可见。"));
+  const setPerson = (k: "referenceMemories" | "referenceChats") => (v: boolean) => act(m => ({ ...m, settings: { ...m.settings, [k]: v } }),
+    rpc(x => x.memoryPerson(cloud!.wsId, k === "referenceMemories" ? { memories: v } : { chats: v })));
   const history = mem.items.filter(o => o.status === "superseded" || o.status === "expired");
   const conflicts = mem.conflicts.filter(c => !c.resolved);
   const replaced = (o: Observation) => o.supersedes ? mem.items.find(x => x.id === o.supersedes) : undefined;
@@ -162,6 +183,12 @@ export function AgentMemoryGroup({ db, preload }: { db: () => Promise<MemoryApi>
         <li className="sg-row"><span className="sg-tx"><b>{zh ? "不记住这次对话" : "Don't remember this chat"}</b>
           <small>{zh ? "在您关闭它或关闭此标签页之前，Odelia 不读取记忆（您的记录和简报除外），也不从这次对话中保存任何内容。" : "Until you turn it off or close this tab, Odelia reads no memories (beyond your records and briefs) and saves nothing from this chat."}</small></span>
           <span className="sg-r">{toggle(temp, v => { setTempChat(v); setTemp(v); }, zh ? "不记住这次对话" : "Don't remember this chat")}</span></li>
+        {st.enabled && <li className="sg-row"><span className="sg-tx"><b>{zh ? "参考已保存的记忆" : "Reference saved memories"}</b>
+          <small>{zh ? "只影响您本人：关闭后，Odelia 在您的对话中不使用、也不保存记忆。团队其他人不受影响。" : "Just for you: while it's off, Odelia neither uses nor saves memories in your chats. Nobody else on the team is affected."}</small></span>
+          <span className="sg-r">{toggle(st.referenceMemories !== false, v => void setPerson("referenceMemories")(v), zh ? "参考已保存的记忆" : "Reference saved memories")}</span></li>}
+        {st.enabled && <li className="sg-row"><span className="sg-tx"><b>{zh ? "参考聊天记录" : "Reference chat history"}</b>
+          <small>{zh ? "只搜索您自己以往的对话，从不搜索同事的对话，也从不在群聊或频道中引用。" : "Searches only your own earlier chats, never a teammate's, and never quotes them into a group chat or channel."}</small></span>
+          <span className="sg-r">{toggle(st.referenceChats !== false && st.referenceMemories !== false, v => void setPerson("referenceChats")(v), zh ? "参考聊天记录" : "Reference chat history", st.referenceMemories === false)}</span></li>}
         <li className="sg-row"><span className="sg-tx"><b>{zh ? "已用空间" : "Space used"}</b>
           <small className={`am-cap${cap.warn ? " warn" : ""}`}>{zh ? `已保存 ${cap.used} 条，上限 ${cap.cap} 条` : `${cap.used} of ${cap.cap} memories saved`}</small></span>
           <span className="sg-r">{canAdmin && (mem.items.length > 0 || mem.briefs.some(x => x.proposals.length)) ? btn(zh ? "全部忘记" : "Forget all", () => {
@@ -172,6 +199,22 @@ export function AgentMemoryGroup({ db, preload }: { db: () => Promise<MemoryApi>
       {cap.full ? <p className="am-banner warn" role="status">{zh ? "记忆已满。删除一些记忆之前，新的记忆只会作为建议保留，不会使用。不会自动删除任何记忆。" : "Memory is full. Until some are removed, new memories wait as suggestions and aren't used. Nothing is removed on its own."}</p>
         : cap.warn ? <p className="am-banner warn" role="status">{zh ? `记忆快满了（${cap.pct}%）。满了之后，新的记忆会等待，直到您删除一些。` : `Memory is almost full (${cap.pct}%). When it's full, new memories wait until you remove some.`}</p> : null}
       {cloud?.viewer && <p className="am-banner">{zh ? "您是只读成员：可以查看记忆，但不能更改。" : "You're a viewer: you can see memory but not change it."}</p>}
+
+      {recheck.length > 0 && (
+        <div className="sg-sub">
+          <h3>{zh ? `规定有变化，请核对（${recheck.length}）` : `A rule changed: check these (${recheck.length})`}</h3>
+          <p className="sg-note">{zh ? "这些记忆所依据的机构网页或申请记录有了变化。在您核对之前，Odelia 用到它们时会先对照记录，并告诉您。" : "The agency page or the filing behind these changed. Until you check them, Odelia confirms each against the record before relying on it, and tells you so."}</p>
+          <ul className="rmb-rows">{recheck.map(o => (
+            <li key={o.id} className="rmb-row">
+              <span className="rmb-tx"><b>{b(o.text)}</b>{o.verifyReason && <small className="am-why">{b(o.verifyReason)}</small>}{meta(o)}</span>
+              {canEdit && <span className="rmb-acts">
+                {btn(zh ? "仍然正确" : "Still true", () => void reverify(o, true), "ink", zh ? `仍然正确：${b(o.text)}` : `Still true: ${b(o.text)}`)}
+                {btn(zh ? "停用" : "Retire it", () => void reverify(o, false), "quiet", zh ? `停用：${b(o.text)}` : `Retire: ${b(o.text)}`)}
+              </span>}
+            </li>
+          ))}</ul>
+        </div>
+      )}
 
       {conflicts.length > 0 && (
         <div className="sg-sub">
@@ -214,6 +257,8 @@ export function AgentMemoryGroup({ db, preload }: { db: () => Promise<MemoryApi>
             <ul className="rmb-rows">{saved.filter(o => o.topic === t).map(o => row(o, canEdit ? <>
               {btn(zh ? "编辑" : "Edit", () => setEditing({ id: o.id, en: o.text.en, zh: o.text.zh }), "quiet", zh ? `编辑：${b(o.text)}` : `Edit: ${b(o.text)}`)}
               {btn(o.pinned ? (zh ? "取消置顶" : "Unpin") : (zh ? "置顶" : "Pin"), () => void act(m => pin(m, o.id, !o.pinned), rpc(x => x.memoryPin(o.id, !o.pinned))))}
+              {canAdmin && o.scope.kind !== "person" && btn(o.visibility === "admins" ? (zh ? "共享给团队" : "Share with team") : (zh ? "仅管理员可见" : "Admins only"), () => void setVisibility(o, o.visibility === "admins" ? "team" : "admins"), "quiet",
+                o.visibility === "admins" ? (zh ? `共享给团队：${b(o.text)}` : `Share with team: ${b(o.text)}`) : (zh ? `仅所有者和管理员可见：${b(o.text)}` : `Owners and admins only: ${b(o.text)}`))}
               {btn(zh ? "删除" : "Delete", () => void act(m => remove(m, o.id), rpc(x => x.memoryDelete(o.id)), B("Deleted.", "已删除。")), "warm", zh ? `删除：${b(o.text)}` : `Delete: ${b(o.text)}`)}
             </> : null))}</ul>
           </div>

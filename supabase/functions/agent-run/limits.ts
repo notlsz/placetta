@@ -54,11 +54,25 @@ export const chatRateLimited = (lang: "en" | "zh") => lang === "zh"
 
 /** Where a chat job's answer may go, checked before a run is made: the right shape for its chat, and for Teams one of
  *  Microsoft's own service addresses (the bot's token is sent there). */
+/** Whether an answer goes to a thread other people read: a Slack channel (a DM's id starts with D), a Teams channel or
+ *  group chat (a 19: conversation; a personal chat is a:), a Lark group, a Telegram group (a negative chat id). WeChat
+ *  is always one person. Unsure counts as shared: a personal or admins-only memory never goes there. */
+export function sharedThread(to: { kind?: string } & Record<string, unknown>): boolean {
+  switch (to.kind) {
+    case "slack": return !/^D[A-Z0-9]+$/.test(String(to.channel ?? ""));
+    case "teams": return !/^a:/.test(String(to.conversation_id ?? ""));
+    case "lark": return to.group !== false;
+    case "telegram": return !/^\d+$/.test(String(to.chat_id ?? ""));
+    case "wechat": return false;
+    default: return true;
+  }
+}
+
 export function chatToOk(to: { kind?: string } & Record<string, unknown>): boolean {
   const s = (k: string, re: RegExp) => typeof to[k] === "string" && re.test(to[k] as string);
   switch (to.kind) {
     case "slack": return s("channel", /^[A-Z0-9]{6,24}$/) && s("thread_ts", /^\d{6,12}\.\d{1,8}$/);
-    case "lark": return s("message_id", /^om_[\w-]{6,80}$/);
+    case "lark": return s("message_id", /^om_[\w-]{6,80}$/) && (to.group === undefined || typeof to.group === "boolean");
     case "wechat": return s("openid", /^[A-Za-z0-9_-]{6,64}$/);
     case "telegram": return s("chat_id", /^-?\d{1,20}$/) && s("user", /^\d{3,20}$/) && Number.isInteger(to.message_id) && (to.message_id as number) > 0
       && (to.thread_id === undefined || (Number.isInteger(to.thread_id) && (to.thread_id as number) > 0));
