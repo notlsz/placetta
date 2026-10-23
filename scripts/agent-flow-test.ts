@@ -1,6 +1,7 @@
 /* The agent's tools end to end, for every kind of business and several kinds of place: add a store, find its forms,
    prepare each one, check nothing is filed with an empty field or a missing document, fill once and see it reused,
    and read progress for that store only. Run: npm run test:flow */
+import { formById } from "../src/forms/registry";
 import { makeTools, coreFields, type Made, type X } from "../src/live";
 import { FORMS } from "../src/forms/registry";
 import { applyChange, blockersSay, isBlank, normalizeState } from "../src/core";
@@ -98,7 +99,9 @@ for (const c of CASES) {
 
   // fill the rest, then: apps without missing documents go for approval; apps with them don't
   for (const a of w.apps.filter(a => ids.includes(a.id))) {
-    const empty = a.fields.filter(f => !f.value).map(f => ({ label: f.label.en, value: plausible(f.label.en) }));
+    // a line with set choices takes one of them (fill_fields refuses an answer no box on the form takes)
+    const line = (label: string) => (a.official ? formById(a.official)?.fields.find(o => o.options?.length && [o.label.en, `${o.line}: ${o.label.en}`, `Line ${o.line}: ${o.label.en}`].includes(label)) : undefined);
+    const empty = a.fields.filter(f => !f.value).map(f => ({ label: f.label.en, value: line(f.label.en)?.options?.[0] ?? plausible(f.label.en) }));
     if (empty.length) await run(T("fill_fields"), { application_id: a.id, fields: empty });
   }
   let asked = 0, held = 0;

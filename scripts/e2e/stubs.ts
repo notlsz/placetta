@@ -4,7 +4,7 @@
 // sandbox. Each stub checks requests the way the real API would (shapes, required fields, the documented rules the
 // functions rely on) and answers with realistic bodies.
 
-export type Rec = { service: "anthropic" | "telnyx" | "linq" | "whatsapp" | "postmark" | "stripe" | "resend" | "dns"; method: string; path: string; headers: Record<string, string>; body: any; raw: string; status: number; at: number };
+export type Rec = { service: "anthropic" | "telnyx" | "linq" | "whatsapp" | "postmark" | "stripe" | "resend" | "dns" | "telegram"; method: string; path: string; headers: Record<string, string>; body: any; raw: string; status: number; at: number };
 export const recorded: Rec[] = [];
 export const blockedHosts: string[] = [];
 export const stubErrors: string[] = [];
@@ -273,6 +273,39 @@ function postmark(req: Request, path: string, body: any): Response {
   return json(200, { To: body.To, SubmittedAt: new Date().toISOString(), MessageID: crypto.randomUUID(), ErrorCode: 0, Message: "OK" });
 }
 
+/* ------------------------------ Telegram Bot API ------------------------------ */
+
+/** The Bot API as Odelia uses it: getMe for the token, setWebhook with a secret, sendMessage (as a reply, with a link
+ *  button) and sendChatAction. A token that isn't the bot's gets 401; setWebhook needs https (a loopback address is let
+ *  through, since the test stack's functions are served over http); a button must open a link. */
+export const telegramState = { token: "7012345678:AAH9f3kq2Zx0-LmNoPqRsTuVwXyZ_abcdEF", webhook: null as { url: string; secret: string } | null, sent: [] as any[] };
+function telegram(req: Request, path: string, body: any): Response {
+  const m = /^\/bot([^/]+)\/(\w+)$/.exec(path);
+  if (!m) return json(404, { ok: false, error_code: 404, description: "Not Found" });
+  if (decodeURIComponent(m[1]) !== telegramState.token) return json(401, { ok: false, error_code: 401, description: "Unauthorized" });
+  switch (m[2]) {
+    case "getMe": return json(200, { ok: true, result: { id: 7012345678, is_bot: true, first_name: "Golden Ox Odelia", username: "GoldenOxOdeliaBot", can_join_groups: true } });
+    case "setWebhook": {
+      let u: URL;
+      try { u = new URL(String(body?.url ?? "")); } catch { return json(400, { ok: false, error_code: 400, description: "Bad Request: bad webhook: Failed to resolve host" }); }
+      if (u.protocol !== "https:" && u.hostname !== "127.0.0.1") return json(400, { ok: false, error_code: 400, description: "Bad Request: bad webhook: An HTTPS URL must be provided for webhook" });
+      if (body?.secret_token !== undefined && !/^[A-Za-z0-9_-]{1,256}$/.test(String(body.secret_token))) return json(400, { ok: false, error_code: 400, description: "Bad Request: secret token contains unallowed characters" });
+      telegramState.webhook = { url: u.href, secret: String(body?.secret_token ?? "") };
+      return json(200, { ok: true, result: true, description: "Webhook was set" });
+    }
+    case "deleteWebhook": telegramState.webhook = null; return json(200, { ok: true, result: true });
+    case "sendChatAction": return json(200, { ok: true, result: true });
+    case "sendMessage": {
+      if (!body?.chat_id || typeof body.text !== "string" || !body.text.trim()) return json(400, { ok: false, error_code: 400, description: "Bad Request: message text is empty" });
+      if (body.text.length > 4096) return json(400, { ok: false, error_code: 400, description: "Bad Request: message is too long" });
+      for (const row of body.reply_markup?.inline_keyboard ?? []) for (const b of row) if (!b.url && !b.callback_data) return json(400, { ok: false, error_code: 400, description: "Bad Request: inline keyboard button must have a url or callback_data" });
+      telegramState.sent.push(body);
+      return json(200, { ok: true, result: { message_id: telegramState.sent.length + 1000, chat: { id: Number(body.chat_id) }, text: body.text } });
+    }
+    default: return json(404, { ok: false, error_code: 404, description: "Not Found: method not found" });
+  }
+}
+
 /* ------------------------------ Anthropic: a scripted model ------------------------------ */
 
 type Block = Record<string, any>;
@@ -419,7 +452,7 @@ function dns(_req: Request, u: URL): Response {
   return json(200, { Status: 0, Answer: [{ name, type: 16, TTL: 300, data }] });
 }
 
-const HOSTS: Record<string, Rec["service"]> = { "cloudflare-dns.com": "dns", "dns.google": "dns", "api.anthropic.com": "anthropic", "api.telnyx.com": "telnyx", "media.telnyx.com": "telnyx", "api.linqapp.com": "linq", "cdn.linqapp.com": "linq", "graph.facebook.com": "whatsapp", "lookaside.fbsbx.com": "whatsapp", "api.postmarkapp.com": "postmark", "files.resend.test": "resend", "api.stripe.com": "stripe", "api.resend.com": "resend" };
+const HOSTS: Record<string, Rec["service"]> = { "cloudflare-dns.com": "dns", "dns.google": "dns", "api.anthropic.com": "anthropic", "api.telnyx.com": "telnyx", "media.telnyx.com": "telnyx", "api.linqapp.com": "linq", "cdn.linqapp.com": "linq", "graph.facebook.com": "whatsapp", "lookaside.fbsbx.com": "whatsapp", "api.postmarkapp.com": "postmark", "files.resend.test": "resend", "api.stripe.com": "stripe", "api.resend.com": "resend", "api.telegram.org": "telegram" };
 
 export function patchFetch(local: (u: URL) => boolean) {
   const realFetch = globalThis.fetch.bind(globalThis);
@@ -431,7 +464,7 @@ export function patchFetch(local: (u: URL) => boolean) {
       const raw = req.method === "GET" || req.method === "HEAD" ? "" : await req.text();
       let body: any = raw;
       try { body = raw && (req.headers.get("content-type") ?? "").includes("json") ? JSON.parse(raw) : raw; } catch { /* left as text */ }
-      const res = service === "dns" ? dns(req, u) : service === "telnyx" ? telnyx(req, u.pathname, body) : service === "linq" ? linq(req, u.pathname, body) : service === "whatsapp" ? whatsapp(req, u.pathname, body) : service === "postmark" ? postmark(req, u.pathname, body) : service === "stripe" ? stripe(req, u.pathname, raw) : service === "resend" ? resend(req, u.pathname, body) : await anthropic(req, u.pathname, body);
+      const res = service === "dns" ? dns(req, u) : service === "telnyx" ? telnyx(req, u.pathname, body) : service === "linq" ? linq(req, u.pathname, body) : service === "whatsapp" ? whatsapp(req, u.pathname, body) : service === "postmark" ? postmark(req, u.pathname, body) : service === "stripe" ? stripe(req, u.pathname, raw) : service === "resend" ? resend(req, u.pathname, body) : service === "telegram" ? telegram(req, u.pathname, body) : await anthropic(req, u.pathname, body);
       recorded.push({ service, method: req.method, path: u.pathname + u.search, headers: Object.fromEntries(req.headers), body: service === "stripe" ? formObject(raw) : body, raw, status: res.status, at: Date.now() });
       return res;
     }

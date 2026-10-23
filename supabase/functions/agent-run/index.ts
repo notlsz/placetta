@@ -19,9 +19,11 @@
 //      odelia-sms, odelia-voice and odelia-mail (monitor key), for a person who texted or called from their verified
 //      number, or emailed from their sign-in address. The same member and plan checks as "start"; the answer goes back
 //      the same way when the run finishes. A run from plain SMS only reads and drafts (src/serverRun.ts).
-// POST {action: "start_chat", user_id, workspace_id, prompt, channel: "slack"|"lark"|"wechat", chat_to, lang?}
-//      chat-events (monitor key), for the Placetta teammate who asked in the business's Slack or Lark, or who linked
-//      their WeChat to the business's WeChat Official Account.
+// POST {action: "start_chat", user_id, workspace_id, prompt, channel: "slack"|"lark"|"wechat"|"teams"|"telegram", chat_to, lang?}
+//      chat-events (monitor key), for the Placetta teammate who asked in the business's Slack, Lark or Teams, or who
+//      linked their WeChat or Telegram to the business's own account or bot. At most CHAT_JOBS_PER_HOUR a person a chat.
+// A run from outside the app starts with the same person's recent requests and answers from the other channels
+// (_shared/continuity.ts), so Odelia remembers wherever they write.
 // Every run from outside the app carries its channel, and can't remove deadlines, set up routines, save memory or
 // skills, or change stores; a business fact or the business's name goes up as a change card (with who asked) for an
 // owner to confirm; anything it prepares still needs an approval in the app.
@@ -35,7 +37,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { callModel, canConverse, type Role } from "../_shared/llm.ts";
 import { accessRpc, WORKS } from "../_shared/access.ts";
-import { NOT_CHARGED_EN, overTaskLimit, refundable, repeatKey, repeatStatuses, REPEAT_MS, taskLimit, tokenLimit, tooLarge } from "./limits.ts";
+import { CHAT_JOBS_PER_HOUR, chatRateLimited, chatToOk, NOT_CHARGED_EN, overTaskLimit, refundable, repeatKey, repeatStatuses, REPEAT_MS, taskLimit, tokenLimit, tooLarge } from "./limits.ts";
 import { gate, record, saverLine, saverNoticeDue } from "../_shared/ai_gate.ts";
 import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/odelia.ts";
 import { linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
@@ -44,8 +46,11 @@ import { mailBody, replySubject, sendMail as sendOdeliaMail } from "../_shared/m
 import { agencyKey, chipsOf, CLASSIFIER_SYSTEM, classifierPrompt, parseClassifier, type ToolLog, DISTILL_SYSTEM, distillPrompt, filingEvidence, type FilingRow, finishWork, keepRecall, type Lesson, lessonKeys, lessonsBrief, type MemoryBook, normalizeState, parseDistill, rank, type Recall, recallFrom, runEvidence, runRounds, startState, stampFilings, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
 import { mayEmail, wantsTexts } from "../_shared/reach.ts";
 import { selftest, SELFTEST_NAMES } from "./selftest.ts";
-import { type Bot, type ChatTo, chatReply } from "../_shared/bots.ts";
+import { type Bot, CHAT_KINDS, type ChatTo, chatReply, isChatKind } from "../_shared/bots.ts";
 import { wechatAccount, wechatSender } from "../_shared/wechat_db.ts";
+import { telegramBot, telegramSender } from "../_shared/telegram_db.ts";
+import { teamsServiceOk } from "../_shared/teams.ts";
+import { recentTurns } from "../_shared/continuity.ts";
 import { claim, type Lease, type RunsTable, saveOnto, stamp } from "./lease.ts";
 import { deliverNotice } from "../_shared/business_rules.ts";
 import { filledLines, formAttachments, linkForms, type FilledForm } from "../_shared/form_links.ts";
@@ -63,13 +68,13 @@ import { memoryDb, pastRuns } from "./memory.ts";
 type Workspace = ReturnType<typeof normalizeState>;
 type Patch = (w: Workspace) => Workspace;
 type Block = Record<string, unknown>;
-type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; title?: { en: string; zh: string } | null; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string; channel?: "app" | "sms" | "voice" | "slack" | "lark" | "wechat" | "email"; reply_to?: string | null; chat_to?: ChatTo | null;
+type Run = { id: string; workspace_id: string; created_by: string | null; kind: "task" | "watch"; title?: { en: string; zh: string } | null; prompt: string; lang: "en" | "zh"; deep: boolean; status: string; steps: Step[]; state: RunState | null; attempts: number; seen_at: string | null; heartbeat_at: string; channel?: "app" | "sms" | "voice" | "slack" | "lark" | "wechat" | "teams" | "telegram" | "email"; reply_to?: string | null; chat_to?: ChatTo | null;
   /** A store's bot: the run that split the work, the store's job and the store. */
   parent_run?: string | null; job_id?: string | null; store_id?: string | null;
   /** "Don't remember this chat": no memory read beyond the records and briefs, none saved. */
   no_memory?: boolean };
-/** The channels a chat bot answers in: Slack, Lark and WeChat. */
-const CHATS = new Set(["slack", "lark", "wechat"]);
+/** The channels a chat bot answers in: Slack, Lark, WeChat, Teams and Telegram. */
+const CHATS = new Set(Object.keys(CHAT_KINDS));
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -352,7 +357,10 @@ async function servicesFor(ws: string, run: Run, token: string | null): Promise<
 /** The agencies' PDFs this instance already fetched, by file name (they're the same for everyone). */
 const PDFS = new Map<string, Uint8Array>();
 async function sitePdf(file: string): Promise<Uint8Array | null> {
-  if (file.startsWith("pdf/") || !/^[\w.-]+\.pdf$/.test(file)) return null;
+  // the two the app keeps with its code (src/forms/pdf: the SS-4 and CBP 5106) are on the site as /app/forms/<name>.pdf
+  // too; the server fetches them like the rest rather than carrying them in its bundle (the 5 MB deploy limit)
+  if (file.startsWith("pdf/")) file = file.slice(4);
+  if (!/^[\w.-]+\.pdf$/.test(file)) return null;
   const had = PDFS.get(file);
   if (had) return had;
   let bytes: Uint8Array | null = null;
@@ -417,6 +425,12 @@ export async function gradeOnline(run: Run, w: Workspace, st: RunState, reply: R
     const found = gradeRun({ runId: run.id, reply: reply.text.map((t) => t.en).join("\n"), calls, ws: w, apps: [...apps], today: new Date().toISOString().slice(0, 10) });
     if (found.length) { const { error } = await admin.rpc("qa_report", { p_findings: found }); if (error) console.error("qa_report", error.code); }
   } catch (e) { console.error("grade run", run.id, String((e as Error)?.message ?? e).slice(0, 160)); }
+}
+
+/** A production probe workspace: checked like a customer's, but nothing it does is learned from. */
+async function synthetic(ws: string): Promise<boolean> {
+  const { data, error } = await admin.from("workspaces").select("synthetic").eq("id", ws).maybeSingle();
+  return !error && !!(data as { synthetic?: boolean } | null)?.synthetic;
 }
 
 export async function learnFromRun(run: Run, w: Workspace, st: RunState, reply: Reply) {
@@ -825,8 +839,8 @@ export async function work(runId: string, token: string | null, ticket: string |
     bg(toolCounts(runId, state));
     bg(cacheLog(runId, state));
     bg(saveMemory(run, memory, state, cur, out.reply, who, who0.actor.role));
-    bg(learnFromRun(run, cur, state, out.reply));
-    bg(gradeOnline(run, cur, state, out.reply));
+    // a production probe workspace (migration 20261030090000) teaches the network nothing and files no QA findings
+    bg(synthetic(run.workspace_id).then((probe) => probe ? undefined : Promise.all([learnFromRun(run, cur, state, out.reply), gradeOnline(run, cur, state, out.reply)])));
   } catch (e) {
     clearTimeout(flushT);
     // An instance that lost the run says and saves nothing: the one holding it does.
@@ -880,14 +894,32 @@ async function mailBack(run: Run, text: string, approvals: string[], attachments
   else console.error("odelia mail", r.status, r.detail);
 }
 
-/** The answer to a job asked in Slack, Lark or WeChat, in the same thread (in WeChat, the same chat). Approvals stay in
- *  the app: the reply links to them. */
+/** The answer to a job asked in Slack, Lark, WeChat, Teams or Telegram, in the same thread (in WeChat, the same chat).
+ *  Approvals stay in the app: the reply links to them, as a button that opens the app where the chat has link buttons
+ *  (Teams, Telegram), never one that approves in the chat. */
 async function chatBack(run: Run, text: string, approvals: string[], extra = "") {
   if (!run.chat_to) return;
   const origin = appOrigin(env);
   const link = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") : "";
-  const more = (extra ? `\n\n${extra}` : "") + (link ? (run.lang === "zh" ? `\n\n等您批准：${link}` : `\n\nWaiting for your approval: ${link}`) : "");
   const said = text || (run.lang === "zh" ? "完成了。" : "Done.");
+  if (run.chat_to.kind === "teams" || run.chat_to.kind === "telegram") {
+    const button = link ? { label: run.lang === "zh" ? "在快哉中查看并批准" : "Review and approve in Placetta", url: link } : undefined;
+    const tail = extra ? `\n\n${extra}` : "";
+    if (run.chat_to.kind === "telegram") {
+      const bot = await telegramBot(admin, run.workspace_id);
+      if (!bot) return;
+      // only to the Telegram still linked to the member who asked, while they're still a member
+      const who = await telegramSender(admin, run.workspace_id, bot.bot_id, run.chat_to.user);
+      if (!who?.member || who.user_id !== run.created_by) return;
+      await chatReply(bot, run.chat_to, said, { tail, button });
+      return;
+    }
+    if (!teamsServiceOk(run.chat_to.service_url)) return;
+    const bot = await vaultBot(run.workspace_id, "teams_bot");
+    if (bot) await chatReply(bot, run.chat_to, said, { tail, button });
+    return;
+  }
+  const more = (extra ? `\n\n${extra}` : "") + (link ? (run.lang === "zh" ? `\n\n等您批准：${link}` : `\n\nWaiting for your approval: ${link}`) : "");
   if (run.chat_to.kind === "wechat") {
     const acct = await wechatAccount(admin, run.workspace_id);
     if (!acct) return;
@@ -897,12 +929,16 @@ async function chatBack(run: Run, text: string, approvals: string[], extra = "")
     await chatReply(acct.bot, run.chat_to, said, { tail: more, save: acct.save });
     return;
   }
-  const kind = run.chat_to.kind === "slack" ? "slack_bot" : "lark_bot";
-  const { data: row } = await admin.from("integrations").select("secret_id, status").eq("workspace_id", run.workspace_id).eq("kind", kind).maybeSingle();
-  if (!row?.secret_id || row.status !== "connected") return;
+  const bot = await vaultBot(run.workspace_id, run.chat_to.kind === "slack" ? "slack_bot" : "lark_bot");
+  if (bot) await chatReply(bot, run.chat_to, said, { tail: more });
+}
+
+/** A workspace's connected Slack, Lark or Teams bot, from the vault. */
+async function vaultBot(ws: string, kind: "slack_bot" | "lark_bot" | "teams_bot"): Promise<Bot | null> {
+  const { data: row } = await admin.from("integrations").select("secret_id, status").eq("workspace_id", ws).eq("kind", kind).maybeSingle();
+  if (!row?.secret_id || row.status !== "connected") return null;
   const { data: raw } = await admin.rpc("vault_get", { p_id: row.secret_id });
-  let bot: Bot; try { bot = { ...JSON.parse(String(raw ?? "")), kind } as Bot; } catch { return; }
-  await chatReply(bot, run.chat_to, said, { tail: more });
+  try { return { ...JSON.parse(String(raw ?? "")), kind } as Bot; } catch { return null; }
 }
 
 /**
@@ -1098,11 +1134,11 @@ export async function handle(req: Request): Promise<Response> {
   if (action === "start_chat") {
     if (!(await monitorKeyOk(req))) return fail(401, "unauthorized", "unauthorized");
     const uid = String(body.user_id ?? ""), ws = String(body.workspace_id ?? "");
-    const channel = body.channel === "slack" ? "slack" : body.channel === "lark" ? "lark" : body.channel === "wechat" ? "wechat" : null;
+    const channel = isChatKind(body.channel) ? body.channel : null;
     const to = body.chat_to as ChatTo | undefined;
     const zh = body.lang === "zh";
     if (!UUID.test(uid) || !UUID.test(ws) || !channel || !to || to.kind !== channel) return fail(400, "bad_request", "user_id, workspace_id, channel and chat_to are required.");
-    if (to.kind === "wechat" && !/^[A-Za-z0-9_-]{6,64}$/.test(String(to.openid ?? ""))) return fail(400, "bad_request", "chat_to.openid is required.");
+    if (!chatToOk(to)) return fail(400, "bad_request", "chat_to isn't a place this chat can answer.");
     const may = await mayUseAgent(admin, ws, uid);
     if (may === "not_member") return fail(403, "forbidden", zh ? "您不是这个快哉工作区的成员。负责人可以在快哉中邀请您。" : "You're not a member of this Placetta workspace. The owner can invite you in Placetta.");
     if (may === "no_plan") return fail(402, "payment_required", zh ? "Odelia 需要先开通入门套餐。请在快哉中选择套餐。" : "Odelia starts with the entry plan. Choose a plan in Placetta.");
@@ -1113,13 +1149,18 @@ export async function handle(req: Request): Promise<Response> {
     const key = await repeatKey(prompt, []);
     const again = await repeated(ws, key, channel);
     if (again) return json(202, { id: again, repeated: true });
+    // a person's jobs from one chat, at most CHAT_JOBS_PER_HOUR (a stuck script or a loop between two bots stops here)
+    const { data: allowed } = await admin.rpc("rate_hit", { p_key: `chat_job:${channel}:${ws}:${uid}`, p_limit: CHAT_JOBS_PER_HOUR, p_window_seconds: 3600 });
+    if (allowed === false) return fail(429, "rate_limited", chatRateLimited(zh ? "zh" : "en"));
     const tg = await gate(admin, (k) => Deno.env.get(k), ws, uid, "task");
     if (!tg.ok) return fail(tg.status, tg.code, tg.message);
     if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
     const ticket = stamp();
+    // the same person's recent requests from the other channels come along (_shared/continuity.ts)
+    const history = await recentTurns(admin, ws, uid, channel, zh ? "zh" : "en").catch(() => []);
     const { data: run, error } = await admin.from("agent_runs").insert({
       workspace_id: ws, created_by: uid, kind: "task", prompt, lang: zh ? "zh" : "en", deep: false,
-      state: startState([], prompt), channel, chat_to: to, heartbeat_at: ticket, dedupe: key,
+      state: startState(history, prompt), channel, chat_to: to, heartbeat_at: ticket, dedupe: key,
     }).select("id").single();
     if (error) return fail(500, "upstream_error", "Couldn't start the agent.");
     bg(work(run.id, null, ticket));
@@ -1162,9 +1203,12 @@ export async function handle(req: Request): Promise<Response> {
     if (!tg.ok) return fail(tg.status, tg.code, tg.message);
     if (await atCapacity(ws)) return fail(409, "busy", BUSY_MSG);
     const ticket = stamp();
+    // one conversation across channels: their recent requests and answers from anywhere they may carry from
+    // (_shared/continuity.ts); a text's own thread (odelia-sms) when there are none
+    const carried = await recentTurns(admin, ws, uid, channel, body.lang === "zh" ? "zh" : "en").catch(() => []);
     const { data: run, error } = await admin.from("agent_runs").insert({
       workspace_id: ws, created_by: uid, kind: "task", prompt, lang: body.lang === "zh" ? "zh" : "en", deep: false,
-      state: { ...startState(history, prompt), ...(plainSms ? { plainSms: true } : {}) }, channel, reply_to: replyTo, heartbeat_at: ticket, dedupe: key,
+      state: { ...startState(carried.length ? carried : history, prompt), ...(plainSms ? { plainSms: true } : {}) }, channel, reply_to: replyTo, heartbeat_at: ticket, dedupe: key,
     }).select("id").single();
     if (error) return fail(500, "upstream_error", "Couldn't start the agent.");
     await admin.from("phone_links").update({ last_workspace_id: ws }).eq("user_id", uid);

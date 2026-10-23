@@ -96,6 +96,9 @@ jobs:
       - run: npm run build:agent
       - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with: { deno-version: v2.x }
+      # Supabase refuses a function over 5 MB and the old code stays live (agent-run, 2026-10-23): fail well before that
+      - name: Every server function fits the deploy limit
+        run: node scripts/function-size.mjs deno
       - name: Type-check every server function
         run: for f in supabase/functions/*/index.ts; do deno check "$f" || exit 1; done
       # the functions' own tests (every *_test.ts and *.test.ts): among them the MCP client against a fake MCP server and

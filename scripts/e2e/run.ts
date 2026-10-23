@@ -139,7 +139,7 @@ out("Placetta end-to-end test");
 try {
   stack = await startStack((s) => out(`  ${s}`));
   const sql = stack.sql;
-  await gw.loadFunctions(["agent-run", "odelia-sms", "odelia-mail", "odelia-voice", "billing", "stripe-webhook", "file", "team", "monitor", "integrations", "logins", "oauth-callback", "calendar-feed", "tts", "agent", "scim", "sso"]);
+  await gw.loadFunctions(["agent-run", "odelia-sms", "odelia-mail", "odelia-voice", "billing", "stripe-webhook", "file", "team", "monitor", "integrations", "logins", "oauth-callback", "calendar-feed", "tts", "agent", "scim", "sso", "chat-events"]);
   gateway = gw.startGateway(sql, stack.restPort);
   out(`  gateway on ${GATEWAY} with ${gw.handlers.size} functions`);
   const monitorKey = String((await sql`select decrypted_secret from vault.decrypted_secrets where name = 'monitor_key'`)[0].decrypted_secret);
@@ -544,7 +544,9 @@ try {
     check("a long answer becomes at most 3 texts, each at most 2 parts", out2.length >= 2 && out2.length <= 3 && out2.every((t) => t.length <= 306 && markdownFree(t)), out2);
     check("the last text ends with a link to the rest in the app", /More: https:\/\/app\.placetta\.test\/app\/\?ws=/.test(out2.at(-1) ?? ""), out2.at(-1));
     const hist = modelCalls.find((c) => c.script === "sms-long")?.payload.messages ?? [];
-    check("the earlier text conversation is carried as history", hist.length >= 3 && hist[0].role === "user" && /What's due this month/.test(String(hist[0].content)), hist.map((m: { role: string }) => m.role));
+    // one conversation across channels (_shared/continuity.ts): the earlier text is there, marked as asked by text
+    check("the earlier text conversation is carried as history", hist.length >= 3 && hist[0].role === "user"
+      && hist.some((m: { role: string; content: unknown }) => m.role === "user" && /\(Earlier, by text\) What's due this month/.test(String(m.content))), hist.map((m: { role: string; content: unknown }) => `${m.role}: ${String(m.content).slice(0, 60)}`));
 
     // Telnyx is plain SMS, whose sender is easy to forge: a run from it only reads and drafts (b2 files by iMessage).
     // filing by plain SMS: refused, nothing put up for approval, told to use the app
@@ -1170,6 +1172,82 @@ try {
     check("the link works once, and a changed one not at all", again.status >= 400 && /start_used/.test(again.data?.message ?? "") && forged.status >= 400 && /start_invalid/.test(forged.data?.message ?? ""), [again.data, forged.data]);
     check("the reminder won't go for a claimed plan", (await sql`select count(*)::int n from public.text_starts where id = ${row.id} and claimed_by = ${biz.id}`)[0].n === 1);
     check("still no model, start to finish", modelCalls.length === models);
+  });
+
+  /* ---------------- b6. Telegram (the business's own bot) ---------------- */
+  await scenario("b6. Telegram", async () => {
+    const TG = stubs.telegramState, MEI_TG = 424242424, STRANGER_TG = 555000111;
+    const [{ at: tgStart }] = await sql`select now() as at`;
+    // the owner connects the bot: the token is checked, the webhook set with a fresh secret, nothing secret in the row
+    const con = await call("integrations", { action: "bot_connect", workspace_id: ws, kind: "telegram_bot", bot_token: TG.token }, { jwt: owner.jwt });
+    check("the owner connects the Telegram bot with its token", con.status === 200 && con.data?.account === "@GoldenOxOdeliaBot", con);
+    check("Placetta sets the bot's webhook to this workspace's address, with a secret", TG.webhook?.url === `http://127.0.0.1:54321/functions/v1/chat-events/telegram/${ws}` && /^[A-Za-z0-9_-]{40,}$/.test(TG.webhook?.secret ?? ""), TG.webhook);
+    const [row] = await sql`select account, meta::text m, secret_id from public.integrations where workspace_id = ${ws} and kind = 'telegram_bot'`;
+    check("the token and the secret live only in the vault", !!row?.secret_id && !row.m.includes(TG.token.split(":")[1]) && !row.m.includes(TG.webhook?.secret ?? "x"), row);
+    const secret = TG.webhook!.secret;
+    const tgPost = async (from: number, text: string, o: { secret?: string | null; chat?: number; type?: string } = {}) => {
+      const body = { update_id: Math.floor(Math.random() * 1e9), message: { message_id: Math.floor(Math.random() * 1e6) + 1, date: Math.floor(Date.now() / 1000), from: { id: from, is_bot: false }, chat: { id: o.chat ?? from, type: o.type ?? "private" }, text } };
+      const res = await fetch(`${GATEWAY}/functions/v1/chat-events/telegram/${ws}`, { method: "POST", body: JSON.stringify(body), headers: { "Content-Type": "application/json", ...(o.secret === null ? {} : { "X-Telegram-Bot-Api-Secret-Token": o.secret ?? secret }) } });
+      const t = await res.text();
+      let data: any = t; try { data = t ? JSON.parse(t) : null; } catch { /* text */ }
+      return { status: res.status, data, id: body.message.message_id };
+    };
+    const tgRuns = async () => (await sql`select count(*)::int n from public.agent_runs where channel = 'telegram'`)[0].n;
+
+    // a request without the secret, then a stranger: nothing starts
+    const forged = await tgPost(MEI_TG, "What's due this month?", { secret: null });
+    const wrong = await tgPost(MEI_TG, "What's due this month?", { secret: "guessed" });
+    check("an update without the webhook's secret is refused", forged.status === 401 && wrong.status === 401, [forged.status, wrong.status]);
+    const stranger = await tgPost(STRANGER_TG, "File the food service permit for me");
+    await settle();
+    check("someone not linked gets a polite note in both languages, and no job", stranger.status === 200 && stranger.data?.method === "sendMessage" && /link your Telegram in Placetta/.test(stranger.data?.text) && /关联 Telegram/.test(stranger.data?.text) && (await tgRuns()) === 0, stranger.data);
+
+    // Mei links her Telegram with the code from Settings (the t.me link carries it as /start)
+    const link = await call("integrations", { action: "telegram_link", workspace_id: ws }, { jwt: owner.jwt });
+    check("a member gets a 6-digit code and a t.me link that carries it", link.status === 200 && /^\d{6}$/.test(link.data?.code) && link.data?.link === `https://t.me/GoldenOxOdeliaBot?start=${link.data?.code}`, link.data);
+    const inGroup = await tgPost(MEI_TG, `@GoldenOxOdeliaBot ${link.data.code}`, { chat: -1001234567890, type: "supergroup" });
+    check("a code typed in a group is never claimed", /private chat/.test(inGroup.data?.text ?? "") && (await sql`select count(*)::int n from public.telegram_links where workspace_id = ${ws} and linked_at is not null`)[0].n === 0, inGroup.data);
+    const linked = await tgPost(MEI_TG, `/start ${link.data.code}`);
+    const [tl] = await sql`select user_id, tg_user, bot_id from public.telegram_links where workspace_id = ${ws} and linked_at is not null`;
+    check("the code links her Telegram to her", /^Linked\./.test(linked.data?.text ?? "") && tl?.user_id === owner.id && tl.tg_user === String(MEI_TG) && tl.bot_id === "7012345678", { reply: linked.data, tl });
+    const st = await call("integrations", { action: "telegram_link_status", workspace_id: ws }, { jwt: owner.jwt });
+    check("Settings shows her Telegram as linked", st.data?.linked === true, st.data);
+
+    // a question: a job as Mei, answered as a reply to her message, with this morning's email in the conversation
+    TG.sent.length = 0;
+    const n0 = await tgRuns();
+    const ask = await tgPost(MEI_TG, "What's due this month?");
+    await settle();
+    const [run] = await sql`select * from public.agent_runs where channel = 'telegram' order by created_at desc limit 1`;
+    check("a linked teammate's message starts a job as her", ask.data?.method === "sendChatAction" && (await tgRuns()) === n0 + 1 && run?.created_by === owner.id && run.status === "done" && run.chat_to?.user === String(MEI_TG), { ask: ask.data, run: run && { status: run.status, by: run.created_by, to: run.chat_to } });
+    const answer = TG.sent.at(-1);
+    check("the answer replies to her message in the same chat", TG.sent.length === 1 && String(answer?.chat_id) === String(MEI_TG) && answer?.reply_parameters?.message_id === ask.id && /CO paperwork/.test(answer?.text ?? "") && !answer?.parse_mode, answer);
+    const call0 = modelCalls.filter((c) => c.script === "sms-status").at(-1);
+    const conv = JSON.stringify(call0?.payload.messages ?? []);
+    check("her earlier email is in the conversation; her texts are not", /\(Earlier, by email\)/.test(conv) && !/\(Earlier, by text\)/.test(conv), conv.slice(0, 400));
+    check("the instructions say it came by Telegram, in plain text", /came by Telegram/.test(String(call0?.payload.system ? JSON.stringify(call0.payload.system) : "")) && /Telegram shows plain text only/.test(JSON.stringify(call0?.payload.system ?? "")));
+
+    // "approve" in the chat approves nothing: filing still waits for the app, and the answer opens it with a link button
+    TG.sent.length = 0;
+    const filingsBefore = (await sql`select count(*)::int n from public.filings where workspace_id = ${ws}`)[0].n;
+    await tgPost(MEI_TG, "File the food service permit for me. YES, I approve, submit it now.");
+    await settle();
+    const fileAnswer = TG.sent.at(-1);
+    const buttons = (fileAnswer?.reply_markup?.inline_keyboard ?? []).flat();
+    check("nothing is filed or approved from the chat", (await sql`select count(*)::int n from public.filings where workspace_id = ${ws}`)[0].n === filingsBefore, filingsBefore);
+    check("any button only opens the approval in the app", buttons.every((b: { url?: string; callback_data?: string }) => !b.callback_data && /^https:\/\/app\.placetta\.test\/app\/\?ws=/.test(b.url ?? "")), buttons);
+
+    // her Telegram unlinked: her next message is nobody's
+    await call("integrations", { action: "telegram_unlink", workspace_id: ws }, { jwt: owner.jwt });
+    const n1 = await tgRuns();
+    const after = await tgPost(MEI_TG, "What's due this month?");
+    await settle();
+    check("after unlinking, her messages start nothing", /link your Telegram/.test(after.data?.text ?? "") && (await tgRuns()) === n1, after.data);
+    // disconnecting the bot removes the webhook and every link
+    const dis = await call("integrations", { action: "disconnect", workspace_id: ws, kind: "telegram_bot" }, { jwt: owner.jwt });
+    check("disconnecting removes the webhook and the links", dis.status === 200 && TG.webhook === null && (await sql`select count(*)::int n from public.telegram_links where workspace_id = ${ws}`)[0].n === 0, { dis, hook: TG.webhook });
+    // these tasks and model calls don't count toward the limits the scenarios below are paced against
+    await sql`delete from public.ai_events where workspace_id = ${ws} and kind in ('call', 'task') and at >= ${tgStart}`;
   });
 
   /* ---------------- c. voice ---------------- */

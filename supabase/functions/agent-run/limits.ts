@@ -1,5 +1,6 @@
 // What one request to agent-run may hold and cost, as plain functions with no database, so the extreme test
 // (scripts/extreme-test.ts) checks the same code the server runs. index.ts uses every one of these.
+import { teamsServiceOk } from "../_shared/teams.ts";
 
 /** The most a request body may hold. Messages are text; files go through Documents (storage), never inline. */
 export const BODY_MAX = 400_000;
@@ -41,3 +42,27 @@ const KEEP_CHARGED = new Set(["cancelled", "task_limit", "over_budget", "plan_re
 export const refundable = (code: string | undefined) => !KEEP_CHARGED.has(code ?? "");
 /** Said with a failed run whose calls were given back. */
 export const NOT_CHARGED_EN = "This run wasn't counted against your allowance.";
+
+/** The most jobs one person may give Odelia from one chat app in an hour (Slack, Lark, WeChat, Teams, Telegram): far
+ *  above what a person types, low enough that a stuck script or two bots answering each other stop quickly. The app,
+ *  texts and email have their own limits (the allowance, inbound flood control). */
+export const CHAT_JOBS_PER_HOUR = 30;
+/** What they're told when they reach it, with what to do next. */
+export const chatRateLimited = (lang: "en" | "zh") => lang === "zh"
+  ? `这一小时您已在这里给 Odelia 派了 ${CHAT_JOBS_PER_HOUR} 项任务。请稍后再试，或在快哉应用中继续。`
+  : `That's ${CHAT_JOBS_PER_HOUR} jobs from you here this hour. Try again in a little while, or carry on in the Placetta app.`;
+
+/** Where a chat job's answer may go, checked before a run is made: the right shape for its chat, and for Teams one of
+ *  Microsoft's own service addresses (the bot's token is sent there). */
+export function chatToOk(to: { kind?: string } & Record<string, unknown>): boolean {
+  const s = (k: string, re: RegExp) => typeof to[k] === "string" && re.test(to[k] as string);
+  switch (to.kind) {
+    case "slack": return s("channel", /^[A-Z0-9]{6,24}$/) && s("thread_ts", /^\d{6,12}\.\d{1,8}$/);
+    case "lark": return s("message_id", /^om_[\w-]{6,80}$/);
+    case "wechat": return s("openid", /^[A-Za-z0-9_-]{6,64}$/);
+    case "telegram": return s("chat_id", /^-?\d{1,20}$/) && s("user", /^\d{3,20}$/) && Number.isInteger(to.message_id) && (to.message_id as number) > 0
+      && (to.thread_id === undefined || (Number.isInteger(to.thread_id) && (to.thread_id as number) > 0));
+    case "teams": return s("service_url", /^https:\/\//) && teamsServiceOk(to.service_url as string) && s("conversation_id", /^[^\s]{3,400}$/) && s("activity_id", /^[^\s/]{1,200}$/);
+    default: return false;
+  }
+}

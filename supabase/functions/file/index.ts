@@ -95,7 +95,18 @@ async function alertTeam(f: Filing, kind: string, title: string) {
   } catch (e) { console.error("team alert failed:", (e as Error).message); }
 }
 
+/** A production probe workspace (migration 20261030090000): checked like any other, never sent, no team tasks. */
+const synthCache = new Map<string, boolean>();
+async function isSynthetic(ws: string): Promise<boolean> {
+  if (!synthCache.has(ws)) {
+    const { data, error } = await admin.from("workspaces").select("synthetic").eq("id", ws).maybeSingle();
+    synthCache.set(ws, !error && !!(data as { synthetic?: boolean } | null)?.synthetic);
+  }
+  return synthCache.get(ws)!;
+}
+
 async function teamTask(f: Filing, kind: string, title: string, detail?: unknown) {
+  if (await isSynthetic(f.workspace_id)) return;   // a probe never puts work on the team
   const { data, error } = await admin.from("team_tasks").upsert(
     { kind, filing_id: f.id, workspace_id: f.workspace_id, title, detail: detail ?? null, dedupe: `${kind}:${f.id}:${f.attempts}` },
     { onConflict: "dedupe", ignoreDuplicates: true },
@@ -441,13 +452,22 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
     }
   }
 
-  if (!killSwitchOn(f, e)) return await toTeam(f, "Self-filing isn't on for this agency yet. The Placetta team submits it.", "该机构尚未开通自动提交，由快哉团队提交。");
+  // A probe workspace goes through every check as if self-filing were on for every channel, then stops: nothing leaves.
+  const synth = await isSynthetic(f.workspace_id);
+  if (!synth && !killSwitchOn(f, e)) return await toTeam(f, "Self-filing isn't on for this agency yet. The Placetta team submits it.", "该机构尚未开通自动提交，由快哉团队提交。");
   const d = DEST[f.payload.official ?? ""];
+  const ePick = synth ? { ...e, channels: ["email", "fax", "mail", "portal"] as typeof e.channels, portalWorker: true, fax: true, mail: true } : e;
   // Where it would go decides what is checked: the filled form and its signature only travel by email, fax and mail.
-  const channel = pick(f, d, e, await facts(f, d));
+  const channel = pick(f, d, ePick, await facts(f, d));
   const problems = check(f, d, { docPaths: await docPaths(f) }, channel);
   if (problems.length) {
     return await needsYou(f, problems.map((p) => p.en).join(". ").slice(0, 900), problems.map((p) => p.zh).join("；").slice(0, 900), null, "needs_you");
+  }
+  if (synth) {
+    const to = !d ? "the Placetta team (no destination on file)" : channel === "fax" ? `fax ${faxTo(d, f.payload) ?? "?"}` : channel === "mail" ? `mail to ${mailTo(d, f.payload)?.name ?? "?"}`
+      : channel === "email" ? `email ${d.email}` : channel === "portal" ? `the agency's site ${d.portal ?? ""}`.trim() : channel === "owner" ? "the owner's packet" : "the Placetta team";
+    return view(await step(f, log(`Test run: checked and ready to go by ${to}. Nothing was sent.`, `测试运行：已核对，可通过${to}提交。未实际发送。`, "dry_run", channel),
+      { channel: channel === "owner" ? "team" : channel, requirements_checked: true, agent_state: "done" }));
   }
   if (channel === "owner") return await toOwner(f, d!);
   if (channel === "team" && d?.signature === "wet" && !d.portal) {

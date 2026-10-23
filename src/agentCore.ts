@@ -1,4 +1,5 @@
 import { addDoc, audit, setCheck, type AgentBackend, type AgentEvent, type Request } from "./core";
+import { pairServerTools } from "./serverTools";
 import { B, same, type Bi } from "./bi";
 import type { Application, Doc, Level, LicenseHit, Workspace } from "./model";
 import { nowIso } from "./time";
@@ -123,7 +124,7 @@ export function messagesModel(kind: "api" | "server", send: Transport, readOnly:
       for (let round = 0; round < 12; round++) {
         // room for a drafted document in one tool call; streamed when someone is watching the words arrive
         const before = all;
-        const data = await send({ messages, max_tokens: 3500, ...(o.system ? { system: o.system } : {}), ...(tools.length ? { tools } : {}) }, o.signal, !!o.deep, o.role,
+        const data = await send({ messages: pairServerTools(messages), max_tokens: 3500, ...(o.system ? { system: o.system } : {}), ...(tools.length ? { tools } : {}) }, o.signal, !!o.deep, o.role,
           o.onText ? t => { if (t) o.onText!(before ? before + "\n\n" + t : t); } : undefined);
         for (const c of data.content) for (const ci of c.citations ?? []) if (ci.url && !sources.has(ci.url)) sources.set(ci.url, { url: ci.url, title: ci.title || ci.url });
         if (sources.size) o.onSources?.([...sources.values()]);
@@ -150,7 +151,7 @@ export function messagesModel(kind: "api" | "server", send: Transport, readOnly:
       const messages: { role: string; content: unknown }[] = [{ role: "user", content }];
       let text = "";
       for (let round = 0; round < 4; round++) {
-        const data = await send({ messages, max_tokens: 3000 }, o.signal, !!o.deep, o.role);
+        const data = await send({ messages: pairServerTools(messages), max_tokens: 3000 }, o.signal, !!o.deep, o.role);
         text += data.content.filter(c => c.type === "text").map(c => c.text).join("");
         if (data.stop_reason !== "pause_turn") break;   // a long research step: let it carry on
         messages.push({ role: "assistant", content: data.content });

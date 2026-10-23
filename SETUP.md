@@ -179,7 +179,14 @@ Chinese store owners live in WeChat. A business points its own WeChat service ac
 
 Server addresses: WeChat only gives an API token to calls from addresses on the account's API IP whitelist when the whitelist is on, and otherwise may ask the account's admin to allow a new address (error 89503, a WeChat message the admin taps). Supabase functions don't call from fixed addresses, so either keep the whitelist off and allow Placetta when WeChat asks, or run a relay on fixed addresses and set `WECHAT_API_BASE` (the relay's URL, in place of `https://api.weixin.qq.com`) and `WECHAT_EGRESS_IPS` (its addresses, which Settings then tells owners to whitelist). The token is shared through the vault, so WeChat sees about one token request every two hours per account.
 
-`chat-events` must be deployed with JWT verification off (it's in `supabase/config.toml`): WeChat, Slack and Lark call it without a Supabase session, and it checks each one's own signature. Run the migration `20261017120000_wechat_pos.sql` and deploy `chat-events`, `agent-run`, `integrations` and `oauth-callback`.
+`chat-events` must be deployed with JWT verification off (it's in `supabase/config.toml`): WeChat, Slack, Lark, Teams and Telegram call it without a Supabase session, and it checks each one's own signature. Run the migration `20261017120000_wechat_pos.sql` and deploy `chat-events`, `agent-run`, `integrations` and `oauth-callback`.
+
+## Odelia in Microsoft Teams and Telegram (a business's own bot)
+
+Nothing for Placetta to set up: run the migration `20261029143000_chat_channels.sql` and deploy `chat-events`, `agent-run` and `integrations`. Each business connects its own bot in Settings, Integrations, which walks them through it. docs/CHANNELS.md compares every channel.
+
+- **Teams**: in the Teams Developer Portal, Tools, Bot management, a new bot whose endpoint is the address Settings shows (`.../chat-events?teams=<workspace id>`); its ID, a client secret and the Microsoft Entra tenant ID go into Settings, which checks them by getting a Bot Framework token; then an app with that bot, published to the org. Teammates are matched by work email, people from other tenants and guests are refused. Every request's Bot Framework token is checked against Microsoft's keys. Free: Teams is a standard channel.
+- **Telegram**: /newbot in @BotFather, then the token into Settings. Placetta checks it (getMe) and sets the bot's webhook to `.../chat-events/telegram/<workspace id>` with a secret only Telegram and Placetta know. Each teammate links their Telegram once with the 6-digit code or t.me link Settings gives (private chats only). Free.
 
 ## Text and call Odelia (Telnyx)
 
@@ -220,7 +227,7 @@ Webhooks are checked against the signing secret (Standard Webhooks, five minutes
 
 ## Odelia on WhatsApp (Meta Cloud API)
 
-Owners who live on WhatsApp text Odelia there and hear back there. It's Meta's own Cloud API, with no reseller in between: since October 1, 2026 the first 1,000 replies a month per number are free, then about $0.0034 each in the US; updates outside the 24-hour window go out as one utility template at about $0.0034. Meta doesn't deliver marketing templates to US numbers at all, so Odelia's template is utility only: account notices, never promotion. Meta's January 2026 rule bars general-purpose AI assistants; Odelia is a business's own service for its own customers, which Meta says the rule doesn't touch. Keep her on compliance.
+Owners who live on WhatsApp text Odelia there and hear back there. It's Meta's own Cloud API, with no reseller in between: the first 1,000 replies a month per number are free; updates outside the 24-hour window go out as one utility template at $0.0034 to a US number, and since October 1, 2026 a utility template is charged inside the window too (docs/CHANNELS.md has the rates abroad). Meta doesn't deliver marketing templates to US numbers at all, so Odelia's template is utility only: account notices, never promotion. Meta's January 2026 rule bars general-purpose AI assistants; Odelia is a business's own service for its own customers, which Meta says the rule doesn't touch. Keep her on compliance.
 
 1. Meta for Developers: create an app, add WhatsApp, add the business phone number, and make a System User with a permanent token (`whatsapp_business_messaging`, `whatsapp_business_management`).
 2. `npm run launch` asks for the token, phone number ID, WhatsApp Business Account ID, app secret and number; submits the `odelia_update` template in English and Chinese for review; subscribes the app; and prints the webhook to paste in the app's WhatsApp configuration: `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/odelia-sms`, with its verify token, field `messages`.

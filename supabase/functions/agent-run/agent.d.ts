@@ -105,7 +105,7 @@ export declare function saveRun(db: MemoryDb, o: { ws: string; memory: AgentMemo
   reply: string; messages: { role: string; content: unknown }[]; role?: string; ask?: (prompt: string) => Promise<string> }): Promise<Record<string, number>>;
 /** What a business rule asks the server to tell someone (src/businessRules.ts). */
 export type Notice = { rule: string; key: string; via: "email" | "text" | "slack" | "lark" | "wechat"; to?: string; text: Bi };
-export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark" | "wechat";
+export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark" | "wechat" | "teams" | "telegram";
 export declare function channelHint(channel: Channel | undefined, plainSms?: boolean): string;
 
 // The network (src/learning.ts)
