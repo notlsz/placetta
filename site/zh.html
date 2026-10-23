@@ -3169,6 +3169,68 @@ html[lang="zh-CN"] .c96calc b{font-family:var(--zhserif);font-weight:500;font-si
 }
 .c96src{margin:0;font-size:12px;line-height:1.5;color:var(--muted)}
 .c96src a{color:inherit;text-underline-offset:2px}
+/* c96v (Oct 23): the value calculator. The visitor's rent, sales and weeks sooner on the left, the live result and its
+   Stripe-style breakdown on the right; the chain math under it. Every number is the visitor's input or a published price. */
+.c96calc>p.c96fair{display:block;grid-column:1/-1;margin:-4px 0 0;padding:0 4px;font-size:15px;line-height:1.5;color:var(--ink2)}
+#cmpCalc .c96fair b{display:inline;font:inherit;font-weight:600;letter-spacing:0;color:var(--ink)}
+.c96v{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);border-radius:20px;background:#fff;box-shadow:0 0 0 1px #ebebeb,0 28px 70px rgba(15,27,51,.06);overflow:hidden}
+.c96vin{display:flex;flex-direction:column;gap:18px;padding:32px}
+.c96vh{margin:0 0 4px;font-size:22px;line-height:1.3;font-weight:500;letter-spacing:-.3px;color:var(--ink)}
+.c96f label i{font-style:normal;color:var(--muted);margin-left:6px}
+.c96m{position:relative}
+.c96m>span{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:17px;color:var(--ink2);pointer-events:none}
+.c96m input{padding-left:30px}
+.c96f input::placeholder{color:var(--faint)}
+.c96w{flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px}
+.c96w label,.c96w>span{font-size:17px;line-height:1.3;color:var(--ink)}
+.c96f select{height:48px;min-width:132px;padding:0 40px 0 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235B6378' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;-webkit-appearance:none;appearance:none;font:inherit;font-size:17px;font-weight:500;color:var(--ink)}
+.c96f select:focus{outline:2px solid var(--gs-d);outline-offset:1px}
+.c96note{margin:0;font-size:13px;line-height:1.5;color:var(--ink2)}
+.c96vout{display:flex;flex-direction:column;padding:32px 36px;background:var(--gs-ll)}
+.c96lede{margin:0;font-size:17px;line-height:1.4;color:var(--ink2)}
+.c96big{display:block;margin-top:6px;font-family:var(--serif);font-weight:300;font-size:72px;line-height:1;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums}
+.c96big small{font-family:inherit;font-size:22px;letter-spacing:0;color:var(--ink2);margin-left:8px}
+html[lang="zh-CN"] .c96big{font-family:var(--zhserif);font-weight:500;font-size:56px;letter-spacing:0}
+.c96pay{align-self:flex-start;margin-top:14px;padding:5px 12px;border-radius:8px;background:#fff;font-size:14px;font-weight:500;color:var(--gs-ink)}
+.c96bd{display:flex;flex-direction:column;margin:22px 0 0}
+.c96bd>div{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:3px 20px;padding:14px 0;border-top:1px solid #D6E2F0}
+.c96bd dt{font-size:15px;line-height:1.35;color:var(--ink)}
+.c96bd dd{margin:0;font-size:18px;font-weight:500;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.c96bd small{grid-column:1/-1;font-size:13px;line-height:1.45;color:var(--ink2)}
+.c96bd .net{border-top:1.5px solid var(--ink)}
+.c96bd .net dt{font-weight:600}
+.c96bd .net dd{font-size:22px;font-weight:600}
+.c96chg{grid-column:1/-1;justify-self:start;min-height:44px;margin:0 0 -10px;padding:0;border:0;background:none;font:inherit;font-size:14px;font-weight:500;color:var(--gs-ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.c96sl{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+.c96sl[hidden]{display:none}
+.c96sl input{background:#fff}
+.c96ch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 24px;padding:28px 32px;border-radius:20px;background:#fff;box-shadow:0 0 0 1px #ebebeb}
+.c96ch h3{grid-column:1/-1;margin:0;font-size:22px;line-height:1.3;font-weight:500;letter-spacing:-.3px;color:var(--ink)}
+.c96ch p{display:flex;flex-direction:column;gap:6px;margin:0;padding:18px 20px;border-radius:14px;background:var(--card)}
+.c96ch p.us{background:var(--gs-ll)}
+.c96ch p.sv{background:var(--ink)}
+.c96ch small{font-size:14px;line-height:1.35;color:var(--ink2)}
+.c96ch b{font-family:var(--serif);font-weight:300;font-size:34px;line-height:1.1;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+html[lang="zh-CN"] .c96ch b{font-family:var(--zhserif);font-weight:500;font-size:26px;letter-spacing:0}
+.c96ch span{font-size:13px;line-height:1.45;color:var(--ink2)}
+.c96ch p.sv small,.c96ch p.sv span{color:#C9D3E3}
+.c96ch p.sv b{color:#fff}
+.c96ch .c96chg{margin:-6px 0 -8px}
+@media (max-width:767px){
+  .c96v{grid-template-columns:minmax(0,1fr)}
+  .c96vin{padding:20px 16px;gap:16px}
+  .c96vout{padding:20px 16px}
+  .c96vh,.c96ch h3{font-size:19px}
+  .c96big{font-size:52px}
+  html[lang="zh-CN"] .c96big{font-size:42px}
+  .c96bd dt{font-size:14px}
+  .c96bd dd{font-size:16px}
+  .c96bd .net dd{font-size:19px}
+  .c96ch{grid-template-columns:minmax(0,1fr);padding:20px 16px;gap:12px}
+  .c96ch p{padding:16px}
+  .c96ch b{font-size:28px}
+  .c96calc>p.c96fair{font-size:14px;margin:0}
+}
 @media (max-width:767px){
   .c96t,.c96t thead,.c96t tbody{display:block}
   .c96t thead tr,.c96t tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -3818,15 +3880,42 @@ html[lang="zh-CN"] .c96calc b{font-family:var(--zhserif);font-weight:500;font-si
       <div class="c96calc" id="cmpCalc">
         <p class="c96p" id="c96You" aria-live="polite"><small id="c96YouL" data-i18n="c96.typl">圣何塞一家餐厅的典型开业</small><b id="c96YouV" data-i18n="c96.typv">11 项执照，快哉 4,689 美元</b><span id="c96YouS" data-i18n="c96.typs">9 项每项 299 美元，2 项每项 999 美元，依据快哉为当地一家餐厅制定的计划。机构规费按实际金额。</span></p>
         <p class="c96x"><small data-i18n="c96.b">许可代办公司</small><b data-i18n="c96.b2">2,000 至 7,500 美元</b><span data-i18n="c96.xs">一家餐厅开业，不含政府规费，通常只做一个城市</span></p>
-        <div class="c96f"><label for="cmpS" data-i18n="c96.cs">门店数</label><input id="cmpS" type="number" inputmode="numeric" min="1" max="999" step="1" value="1"></div>
-        <div class="c96f"><label for="cmpL" data-i18n="c96.cl">今年新办执照数</label><input id="cmpL" type="number" inputmode="numeric" min="0" max="9999" step="1" value="11"></div>
-        <p class="c96o" aria-live="polite"><small data-i18n="c96.yr">快哉，今年</small><b id="cmpOut">$6,477</b><span id="cmpOutS" data-i18n="c96.outs0">1 家门店 × 149 美元 × 12 个月，另加 9 项执照每项 299 美元、2 项每项 999 美元</span></p>
+        <p class="c96fair" data-i18n="c96.fair"><b>代办公司：</b>只管开业，通常一个城市。<b>快哉：</b>开业加一整年持续跟进，任何城市。</p>
       </div>
-      <p class="c96src" data-i18n="c96.src">代办费用区间：<a href="https://permitplace.com/permit-expediter-cost-guide/" target="_blank" rel="noopener">PermitPlace</a>，一家餐厅开业，不含政府规费。小时数为快哉的估算，并非实测。酒类执照、建筑图纸审查或进口许可每项 999 美元。</p>
+      <div class="c96v" id="c96v">
+        <div class="c96vin">
+          <h3 class="c96vh" data-i18n="c96.vh">提前开业，对您值多少</h3>
+          <div class="c96f"><label for="vRent" data-i18n="c96.vrl">月租金</label><div class="c96m"><span aria-hidden="true">$</span><input id="vRent" type="text" inputmode="numeric" autocomplete="off" placeholder="12,000" data-i18n-ph="c96.vrph"></div></div>
+          <div class="c96f"><label for="vSales" data-i18n="c96.vsl">开业后每周销售额 <i>选填</i></label><div class="c96m"><span aria-hidden="true">$</span><input id="vSales" type="text" inputmode="numeric" autocomplete="off" placeholder="15,000" data-i18n-ph="c96.vsph"></div></div>
+          <div class="c96f c96w"><label for="vW" data-i18n="c96.vwl">如果提前</label><select id="vW" aria-describedby="vNote"><option value="1" data-i18n="c96.w1">1 周</option><option value="2" selected data-i18n="c96.w2">2 周</option><option value="3" data-i18n="c96.w3">3 周</option><option value="4" data-i18n="c96.w4">4 周</option><option value="5" data-i18n="c96.w5">5 周</option><option value="6" data-i18n="c96.w6">6 周</option><option value="7" data-i18n="c96.w7">7 周</option><option value="8" data-i18n="c96.w8">8 周</option></select><span data-i18n="c96.vwr">开业</span></div>
+          <p class="c96note" id="vNote" data-i18n="c96.vnote">提前几周由您自己假设，并非快哉的承诺。快哉目前还没有可引用的客户平均数据。</p>
+        </div>
+        <div class="c96vout" aria-live="polite">
+          <p class="c96lede" id="vLede" data-i18n="c96.vemp">输入您的租金，看看每提前一周对您值多少。</p>
+          <b class="c96big" id="vBig" hidden></b>
+          <span class="c96pay" id="vPay" hidden></span>
+          <dl class="c96bd">
+            <div><dt data-i18n="c96.vr">空店少付的房租</dt><dd id="vRv">$0</dd><small id="vRs" data-i18n="c96.vrs0">月租金 ÷ 每月 4.33 周 × 提前周数</small></div>
+            <div><dt data-i18n="c96.vs">提前赚到的销售额</dt><dd id="vSv">$0</dd><small id="vSs" data-i18n="c96.vss0">每周销售额 × 提前周数（如您填写）</small></div>
+            <div><dt data-i18n="c96.vp">快哉，开业加一年</dt><dd id="vPv" data-i18n="c96.vpv0">−6,477 美元</dd><small id="cmpOutS" data-i18n="c96.outs0">1 家门店 × 149 美元 × 12 个月，另加 9 项执照每项 299 美元、2 项每项 999 美元</small>
+              <button type="button" class="c96chg" id="vChg" aria-expanded="false" aria-controls="c96sl" data-i18n="c96.vchg">修改门店数或执照数</button>
+              <span class="c96sl" id="c96sl" hidden><span class="c96f"><label for="cmpS" data-i18n="c96.cs">门店数</label><input id="cmpS" type="number" inputmode="numeric" min="1" max="999" step="1" value="1"></span><span class="c96f"><label for="cmpL" data-i18n="c96.cl">今年新办执照数</label><input id="cmpL" type="number" inputmode="numeric" min="0" max="9999" step="1" value="11"></span></span></div>
+            <div class="net" id="vNet" hidden><dt id="vNl"></dt><dd id="vNv"></dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="c96ch" id="c96ch" aria-live="polite">
+        <h3 id="chH" data-i18n="c96.chex">以 10 家门店的连锁品牌为例</h3>
+        <p><small data-i18n="c96.chxl">许可代办公司</small><b id="chX" data-i18n="c96.chx0">20,000 至 75,000 美元</b><span id="chXs" data-i18n="c96.chxs0">10 次开店 × 2,000 至 7,500 美元。只管开业，通常每次一个城市。</span></p>
+        <p class="us"><small data-i18n="c96.chpl">快哉</small><b id="chP" data-i18n="c96.chp0">17,880 美元</b><span id="chPs" data-i18n="c96.chps0">10 家门店 × 149 美元 × 12 个月，所有新执照全部包含。开业加一整年持续跟进，任何城市。</span></p>
+        <p class="sv"><small id="chSl" data-i18n="c96.chsl">您省下</small><b id="chS" data-i18n="c96.chs0">2,120 至 57,120 美元</b><span id="chSs" data-i18n="c96.chss">与代办费用区间相比，不含政府规费（两种方式都要支付）。</span></p>
+        <button type="button" class="c96chg" id="chMine" data-i18n="c96.chmine">用我的门店数计算</button>
+      </div>
+      <p class="c96src" data-i18n="c96.src">代办费用区间：<a href="https://permitplace.com/permit-expediter-cost-guide/" target="_blank" rel="noopener">PermitPlace</a>，一家餐厅开业，不含政府规费。小时数为快哉的估算，并非实测。酒类执照、建筑图纸审查或进口许可每项 999 美元。每月按 4.33 周计算。</p>
     </div>
     <div class="plans two95" id="tiers2"></div>
     <details class="prmore prdet" id="prDet">
-      <summary><span><b data-i18n="price.det">查看详情</b><small data-i18n="price.detsub">等待的成本，以及租金计算器。</small></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+      <summary><span><b data-i18n="price.det">查看详情</b><small data-i18n="price.detsub">等待的成本。</small></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
       <div class="prmb">
     <div class="p95" id="p95a">
     <div class="pmath">
@@ -3838,7 +3927,6 @@ html[lang="zh-CN"] .c96calc b{font-family:var(--zhserif);font-weight:500;font-si
         <div class="pmc us"><p class="pml"><span class="orb" aria-hidden="true"></span><span data-i18n="price.m.good">有 Odelia</span></p>
           <div class="pms pmain"><b data-i18n="price.an.v2">6,477 美元</b><i class="pmbar good" aria-hidden="true"><i></i></i><span data-i18n="price.m.s2">一家餐厅开业：9 项执照每项 299 美元，2 项图纸审查每项 999 美元（4,689 美元），加上首年门店方案（1,788 美元）。</span></div>
         </div>
-        <div class="wcalc white pmcalc" id="pmCalc"></div>
         <p class="pmnote" data-i18n="price.m.note">示意计算，并非报价或承诺。您的房租、时间和政府规费会有所不同。</p>
       </div>
     </div>
@@ -4284,9 +4372,13 @@ Object.assign(T.zh, {"h95.aria": "Odelia 的工作", "h95.t1": "梳理与申报"
 Object.assign(T.en, {"hero.subm": "Odelia, our AI agent, gets every license you need to open. You approve.", "p95.aria": "Why it pays", "p95.t2": "Three ways to open", "f95.all": "Show all {n} questions", "f95.less": "Show fewer", "m95.more": "Show deadlines and all markets", "m95.less": "Hide deadlines and markets", "in95.all": "Show all {n} industries", "in95.less": "Show fewer"});
 Object.assign(T.zh, {"p95.aria": "为什么划算", "p95.t2": "三种开店方式", "f95.all": "显示全部 {n} 个问题", "f95.less": "收起", "m95.more": "查看截止日期和全部市场", "m95.less": "收起截止日期和市场", "in95.all": "显示全部 {n} 个行业", "in95.less": "收起"});
 /* land96 (Oct 23): the comparison table above the price cards, and the folds that shorten the page */
-Object.assign(T.en, {"c96.h": "Three ways to open a store. <em>Only one gets you open sooner.</em>", "c96.sub": "Every opening needs the same licenses. What changes is your team's time, the cost, who files them and who keeps them current.", "c96.cap": "Doing it yourself, a permit expediter and Placetta, compared", "c96.a": "Do it yourself", "c96.b": "A permit expediter", "c96.c": "Placetta", "c96.r1": "Your team's time", "c96.r2": "Cost", "c96.r3": "Who files", "c96.r4": "After opening", "c96.a1": "40 to 120 hours", "c96.est": "Estimate", "c96.b1": "Calls and emails", "c96.c1": "About 1 hour of approvals", "c96.a2": "Your time, plus fines", "c96.b2": "$2,000 to $7,500", "c96.b2s": "Usually one city", "c96.c2": "$149 a store a month", "c96.c2s": "plus $299 a license", "c96.a3": "You do", "c96.b3": "The expediter", "c96.c3": "Odelia files it for you", "c96.a4": "Renewals are on you", "c96.b4": "Ends on opening day", "c96.c4": "Renewals and inspections handled for as long as you're open", "c96.xs": "For one restaurant opening, before agency fees, usually one city", "c96.typl": "A typical restaurant opening in San José", "c96.typv": "11 licenses, Placetta $4,689", "c96.typs": "9 at $299 and 2 at $999, from Placetta's own plan for a restaurant there. Agency fees at cost.", "c96.yr": "Placetta, this year", "c96.cs": "Stores", "c96.cl": "New licenses this year", "c96.outs0": "1 store × $149 × 12 months, plus 9 licenses at $299 and 2 at $999", "c96.vs": "For each opening, before agency fees, usually in one city", "c96.src": "Expediter range: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>, for a restaurant opening, before agency fees. Hours are Placetta's estimates, not measured. A liquor license, building plan review or import permit is $999.", "wt96.sub": "WhatsApp, iMessage, email, a phone call, Slack or Lark with Odelia, and WeChat with our team.", "ag96.sub": "50 US states, 170+ countries and every agency Placetta files with, on one map.", "price.detsub": "The math on waiting, and the rent calculator."});
-Object.assign(T.zh, {"c96.h": "开一家店，三种方式。<em>只有一种让您更早开业。</em>", "c96.sub": "每次开店需要的执照都一样。不同的是团队花的时间、费用、由谁提交，以及由谁持续跟进。", "c96.cap": "自己办理、许可代办公司与快哉的对比", "c96.a": "自己办理", "c96.b": "许可代办公司", "c96.c": "快哉", "c96.r1": "团队花的时间", "c96.r2": "费用", "c96.r3": "由谁提交", "c96.r4": "开业之后", "c96.a1": "40 至 120 小时", "c96.est": "估算", "c96.b1": "电话和邮件往来", "c96.c1": "约 1 小时，用于审批", "c96.a2": "您的时间，外加罚款", "c96.b2": "2,000 至 7,500 美元", "c96.b2s": "通常只做一个城市", "c96.c2": "每家门店每月 149 美元", "c96.c2s": "另加每项执照 299 美元", "c96.a3": "您自己", "c96.b3": "代办公司", "c96.c3": "Odelia 替您提交", "c96.a4": "续期全靠自己", "c96.b4": "开业当天就结束", "c96.c4": "只要门店在营业，续期和检查都替您处理", "c96.xs": "一家餐厅开业，不含政府规费，通常只做一个城市", "c96.typl": "圣何塞一家餐厅的典型开业", "c96.typv": "11 项执照，快哉 4,689 美元", "c96.typs": "9 项每项 299 美元，2 项每项 999 美元，依据快哉为当地一家餐厅制定的计划。机构规费按实际金额。", "c96.yr": "快哉，今年", "c96.cs": "门店数", "c96.cl": "今年新办执照数", "c96.outs0": "1 家门店 × 149 美元 × 12 个月，另加 9 项执照每项 299 美元、2 项每项 999 美元", "c96.vs": "每次开店，不含政府规费，通常只做一个城市", "c96.src": "代办费用区间：<a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>，一家餐厅开业，不含政府规费。小时数为快哉的估算，并非实测。酒类执照、建筑图纸审查或进口许可每项 999 美元。", "wt96.sub": "通过 WhatsApp、iMessage、邮件、电话、Slack 或飞书联系 Odelia，通过微信联系我们的团队。", "ag96.sub": "美国 50 个州、170 多个国家和地区，以及快哉经手的每一个机构，尽在一张地图上。", "price.detsub": "等待的成本，以及租金计算器。"});
+Object.assign(T.en, {"c96.h": "Three ways to open a store. <em>Only one gets you open sooner.</em>", "c96.sub": "Every opening needs the same licenses. What changes is your team's time, the cost, who files them and who keeps them current.", "c96.cap": "Doing it yourself, a permit expediter and Placetta, compared", "c96.a": "Do it yourself", "c96.b": "A permit expediter", "c96.c": "Placetta", "c96.r1": "Your team's time", "c96.r2": "Cost", "c96.r3": "Who files", "c96.r4": "After opening", "c96.a1": "40 to 120 hours", "c96.est": "Estimate", "c96.b1": "Calls and emails", "c96.c1": "About 1 hour of approvals", "c96.a2": "Your time, plus fines", "c96.b2": "$2,000 to $7,500", "c96.b2s": "Usually one city", "c96.c2": "$149 a store a month", "c96.c2s": "plus $299 a license", "c96.a3": "You do", "c96.b3": "The expediter", "c96.c3": "Odelia files it for you", "c96.a4": "Renewals are on you", "c96.b4": "Ends on opening day", "c96.c4": "Renewals and inspections handled for as long as you're open", "c96.xs": "For one restaurant opening, before agency fees, usually one city", "c96.typl": "A typical restaurant opening in San José", "c96.typv": "11 licenses, Placetta $4,689", "c96.typs": "9 at $299 and 2 at $999, from Placetta's own plan for a restaurant there. Agency fees at cost.", "c96.yr": "Placetta, this year", "c96.cs": "Stores", "c96.cl": "New licenses this year", "c96.outs0": "1 store × $149 × 12 months, plus 9 licenses at $299 and 2 at $999", "c96.vs": "For each opening, before agency fees, usually in one city", "c96.src": "Expediter range: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>, for a restaurant opening, before agency fees. Hours are Placetta's estimates, not measured. A liquor license, building plan review or import permit is $999. A month counts as 4.33 weeks.", "wt96.sub": "WhatsApp, iMessage, email, a phone call, Slack or Lark with Odelia, and WeChat with our team.", "ag96.sub": "50 US states, 170+ countries and every agency Placetta files with, on one map.", "price.detsub": "The math on waiting."});
+Object.assign(T.zh, {"c96.h": "开一家店，三种方式。<em>只有一种让您更早开业。</em>", "c96.sub": "每次开店需要的执照都一样。不同的是团队花的时间、费用、由谁提交，以及由谁持续跟进。", "c96.cap": "自己办理、许可代办公司与快哉的对比", "c96.a": "自己办理", "c96.b": "许可代办公司", "c96.c": "快哉", "c96.r1": "团队花的时间", "c96.r2": "费用", "c96.r3": "由谁提交", "c96.r4": "开业之后", "c96.a1": "40 至 120 小时", "c96.est": "估算", "c96.b1": "电话和邮件往来", "c96.c1": "约 1 小时，用于审批", "c96.a2": "您的时间，外加罚款", "c96.b2": "2,000 至 7,500 美元", "c96.b2s": "通常只做一个城市", "c96.c2": "每家门店每月 149 美元", "c96.c2s": "另加每项执照 299 美元", "c96.a3": "您自己", "c96.b3": "代办公司", "c96.c3": "Odelia 替您提交", "c96.a4": "续期全靠自己", "c96.b4": "开业当天就结束", "c96.c4": "只要门店在营业，续期和检查都替您处理", "c96.xs": "一家餐厅开业，不含政府规费，通常只做一个城市", "c96.typl": "圣何塞一家餐厅的典型开业", "c96.typv": "11 项执照，快哉 4,689 美元", "c96.typs": "9 项每项 299 美元，2 项每项 999 美元，依据快哉为当地一家餐厅制定的计划。机构规费按实际金额。", "c96.yr": "快哉，今年", "c96.cs": "门店数", "c96.cl": "今年新办执照数", "c96.outs0": "1 家门店 × 149 美元 × 12 个月，另加 9 项执照每项 299 美元、2 项每项 999 美元", "c96.vs": "每次开店，不含政府规费，通常只做一个城市", "c96.src": "代办费用区间：<a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>，一家餐厅开业，不含政府规费。小时数为快哉的估算，并非实测。酒类执照、建筑图纸审查或进口许可每项 999 美元。每月按 4.33 周计算。", "wt96.sub": "通过 WhatsApp、iMessage、邮件、电话、Slack 或飞书联系 Odelia，通过微信联系我们的团队。", "ag96.sub": "美国 50 个州、170 多个国家和地区，以及快哉经手的每一个机构，尽在一张地图上。", "price.detsub": "等待的成本。"});
 /* land96: lines built from the city a visitor typed; T["en"] keeps them out of the crawler copy */
+Object.assign(T.en, {"c96.fair": "<b>Expediter:</b> opening only, one city. <b>Placetta:</b> opening plus a full year kept current, any city.", "c96.vh": "What opening sooner is worth to you", "c96.vrl": "Monthly rent", "c96.vrph": "12,000", "c96.vsl": "Weekly sales once open <i>Optional</i>", "c96.vsph": "15,000", "c96.vwl": "If you open", "c96.vwr": "sooner", "c96.vnote": "Weeks sooner is your own assumption, not a Placetta promise. Placetta has no customer averages to quote yet.", "c96.vemp": "Type your rent to see what every week sooner is worth to you.", "c96.vr": "Rent you stop paying on an empty store", "c96.vs": "Sales you start earning sooner", "c96.vp": "Placetta, opening plus a year", "c96.vrs0": "Rent ÷ 4.33 weeks a month × weeks sooner", "c96.vss0": "Weekly sales × weeks sooner, if you add them", "c96.vpv0": "−$6,477", "c96.vchg": "Change stores or licenses", "c96.chex": "A chain of 10 stores, for example", "c96.chxl": "Permit expediters", "c96.chx0": "$20,000 to $75,000", "c96.chxs0": "10 openings × $2,000 to $7,500. Openings only, usually one city each.", "c96.chpl": "Placetta", "c96.chp0": "$17,880", "c96.chps0": "10 stores × $149 × 12 months, every new license included. Openings plus a year kept current, any city.", "c96.chsl": "You keep", "c96.chs0": "$2,120 to $57,120", "c96.chss": "Against the expediter range, before agency fees, which you pay either way.", "c96.chmine": "Use my number of stores", "c96.w1": "1 week", "c96.w2": "2 weeks", "c96.w3": "3 weeks", "c96.w4": "4 weeks", "c96.w5": "5 weeks", "c96.w6": "6 weeks", "c96.w7": "7 weeks", "c96.w8": "8 weeks"});
+Object.assign(T.zh, {"c96.fair": "<b>代办公司：</b>只管开业，通常一个城市。<b>快哉：</b>开业加一整年持续跟进，任何城市。", "c96.vh": "提前开业，对您值多少", "c96.vrl": "月租金", "c96.vrph": "12,000", "c96.vsl": "开业后每周销售额 <i>选填</i>", "c96.vsph": "15,000", "c96.vwl": "如果提前", "c96.vwr": "开业", "c96.vnote": "提前几周由您自己假设，并非快哉的承诺。快哉目前还没有可引用的客户平均数据。", "c96.vemp": "输入您的租金，看看每提前一周对您值多少。", "c96.vr": "空店少付的房租", "c96.vs": "提前赚到的销售额", "c96.vp": "快哉，开业加一年", "c96.vrs0": "月租金 ÷ 每月 4.33 周 × 提前周数", "c96.vss0": "每周销售额 × 提前周数（如您填写）", "c96.vpv0": "−6,477 美元", "c96.vchg": "修改门店数或执照数", "c96.chex": "以 10 家门店的连锁品牌为例", "c96.chxl": "许可代办公司", "c96.chx0": "20,000 至 75,000 美元", "c96.chxs0": "10 次开店 × 2,000 至 7,500 美元。只管开业，通常每次一个城市。", "c96.chpl": "快哉", "c96.chp0": "17,880 美元", "c96.chps0": "10 家门店 × 149 美元 × 12 个月，所有新执照全部包含。开业加一整年持续跟进，任何城市。", "c96.chsl": "您省下", "c96.chs0": "2,120 至 57,120 美元", "c96.chss": "与代办费用区间相比，不含政府规费（两种方式都要支付）。", "c96.chmine": "用我的门店数计算", "c96.w1": "1 周", "c96.w2": "2 周", "c96.w3": "3 周", "c96.w4": "4 周", "c96.w5": "5 周", "c96.w6": "6 周", "c96.w7": "7 周", "c96.w8": "8 周"});
+Object.assign(T["en"], {"c96.vlede": "Every week sooner is worth", "c96.vto": "to you", "c96.vpay": "Pays for itself in {d} days", "c96.vpay1": "Pays for itself in 1 day", "c96.vrs": "{rent} ÷ 4.33 × {w}", "c96.vss": "{sales} × {w}", "c96.xst": " × {s} stores", "c96.vnet": "Net, if you open {w} sooner", "c96.chh": "Opening {n} stores", "c96.chxs": "{n} openings × $2,000 to $7,500. Openings only, usually one city each.", "c96.chps10": "{n} stores × $149 × 12 months, every new license included. Openings plus a year kept current, any city.", "c96.chps": "{n} openings with their licenses, plus a year kept current, any city.", "c96.chup": "Up to", "c96.chupss": "Less than the expediter's high end, before agency fees.", "c96.chmore": "More than an expediter's high end", "c96.chmoress": "For openings plus a year kept current at every store. An expediter stops on opening day."});
+Object.assign(T["zh"], {"c96.vlede": "每提前一周开业，对您值", "c96.vto": "", "c96.vpay": "{d} 天就回本", "c96.vpay1": "1 天就回本", "c96.vrs": "{rent} ÷ 4.33 × {w}", "c96.vss": "{sales} × {w}", "c96.xst": " × {s} 家门店", "c96.vnet": "提前 {w}开业的净收益", "c96.chh": "开 {n} 家门店", "c96.chxs": "{n} 次开店 × 2,000 至 7,500 美元。只管开业，通常每次一个城市。", "c96.chps10": "{n} 家门店 × 149 美元 × 12 个月，所有新执照全部包含。开业加一整年持续跟进，任何城市。", "c96.chps": "{n} 次开店及所需执照，加一整年持续跟进，任何城市。", "c96.chup": "最多省下", "c96.chupss": "低于代办费用区间上限，不含政府规费。", "c96.chmore": "高于代办费用区间上限", "c96.chmoress": "包含每家门店开业及一整年持续跟进；代办公司在开业当天就结束。"});
 Object.assign(T["en"], {"c96.you": "For your store in {city}", "c96.youv": "{n} licenses, Placetta {usd}", "c96.yous": "{a} at $299 and {b} at $999, from Placetta's own plan for a restaurant in {city}. Agency fees at cost.", "c96.none": "Your free plan preview counts every license and prices each one", "c96.nones": "Placetta's plan for {city} is mapped when you start, and each license shows its price before you approve it.", "c96.outs": "{s} × $149 × 12 months, plus {l} licenses from $299", "c96.outc": "{s} stores × $149 × 12 months. With 10 or more stores, new licenses are included.", "c96.outx": "{s} × $149 × 12 months, plus {a} licenses at $299 and {b} at $999", "c96.st1": "1 store", "c96.stn": "{n} stores", "c96.from": "From {usd}"});
 Object.assign(T["zh"], {"c96.you": "您在 {city} 的门店", "c96.youv": "{n} 项执照，快哉 {usd}", "c96.yous": "{a} 项每项 299 美元，{b} 项每项 999 美元，依据快哉为 {city} 一家餐厅制定的计划。机构规费按实际金额。", "c96.none": "免费计划预览会列出每一项执照并逐项报价", "c96.nones": "开始后，快哉会为 {city} 梳理完整计划，每项执照在您批准前显示价格。", "c96.outs": "{s} × 149 美元 × 12 个月，另加 {l} 项执照，每项 299 美元起", "c96.outc": "{s} 家门店 × 149 美元 × 12 个月。门店达 10 家及以上，新执照全部包含。", "c96.outx": "{s} × 149 美元 × 12 个月，另加 {a} 项执照每项 299 美元、{b} 项每项 999 美元", "c96.st1": "1 家门店", "c96.stn": "{n} 家门店", "c96.from": "{usd}起"});
 Object.assign(T.en, {"h95.t5": "Tracks rule changes"});
@@ -4509,12 +4601,13 @@ function renderCost(){
       <input type="range" id="rent" min="3000" max="80000" step="1000" value="${rent}">
       <div class="wres"><span id="rentLbl"></span><b id="rentRes"></b><small>${t("calc.n")}</small></div>`;
   document.querySelectorAll("[data-s]").forEach(b => b.addEventListener("click", () => setStoryIdx(+b.dataset.s)));
-  document.getElementById("rent").addEventListener("input", e => { rent = +e.target.value; paintCalc(); });
-  document.getElementById("rent").addEventListener("change", () => track("rent_calculator", {rent}));
+  const rIn = document.getElementById("rent");
+  if (rIn) { rIn.addEventListener("input", e => { rent = +e.target.value; paintCalc(); }); rIn.addEventListener("change", () => track("rent_calculator", {rent})); }
   document.querySelectorAll("[data-story]").forEach(b => b.classList.toggle("on", +b.dataset.story === sIdx));
   paintCalc();
 }
 function paintCalc(){
+  if (!document.getElementById("rentOut")) return; // the rent calculator moved into the pricing value calculator (c96v)
   const s = STORIES[sIdx], a = s.mo[0], b = s.mo[1];
   document.getElementById("rentOut").textContent = money(rent);
   document.getElementById("rentLbl").textContent = L() ? `${t("calc.r")}，共 ${a===b?a:a+"–"+b} ${t("calc.mo")}` : `${t("calc.r")} for ${a===b?a:a+"–"+b} ${t("calc.mo")}`;
@@ -6264,7 +6357,8 @@ applyAll(); fitTable(); bindCounters(); setPlay(vPlaying); onScroll(); requestAn
 /* land96:js (Oct 23): the comparison above the price cards. When a visitor has typed a city (the hero box, or the plan
    request they started), the expediter's range sits next to Placetta's price for a restaurant there, from Placetta's own
    registry plan (npm run landing:cities writes CITY_PRICES). A city we haven't counted gets no number, only the promise
-   of the free preview. The calculator is the store plan and $299 licenses; it never claims a date or a saving. */
+   of the free preview. The calculator is the store plan and $299 licenses. The value calculator (c96v) uses only the
+   visitor's own rent, sales and weeks sooner, and the chain math only the PermitPlace range: no averages, no promised dates. */
 /* city-prices */
 const CITY_PRICES = {"New York City":{"n":7,"c":1,"usd":3092},"Los Angeles":{"n":7,"c":2,"usd":4091},"Houston":{"n":9,"c":2,"usd":4689},"San Francisco":{"n":10,"c":2,"usd":4988},"San Jose":{"n":9,"c":2,"usd":4689},"Chicago":{"n":5,"c":2,"usd":3493},"Seattle":{"n":6,"c":2,"usd":3792},"Boston":{"n":9,"c":2,"usd":4689},"Miami":{"n":9,"c":1,"usd":3690},"Dallas":{"n":10,"c":2,"usd":4988},"Austin":{"n":9,"c":2,"usd":4689},"Washington, DC":{"n":5,"c":2,"usd":3493},"Atlanta":{"n":6,"c":2,"usd":3792},"Philadelphia":{"n":7,"c":2,"usd":4091},"Irvine":{"n":7,"c":2,"usd":4091},"Phoenix":{"n":4,"c":2,"usd":3194},"Jersey City":{"n":6,"c":1,"usd":2793},"Cupertino":{"n":7,"c":2,"usd":4091},"Milpitas":{"n":7,"c":2,"usd":4091},"Daly City":{"n":7,"c":2,"usd":4091}};
 /* /city-prices */
@@ -6301,30 +6395,90 @@ const CITY_PRICES = {"New York City":{"n":7,"c":1,"usd":3092},"Los Angeles":{"n"
     you.classList.add("mine");
     if (c !== lastCity){ lastCity = c; track("compare_city", {matched: !!c}); }
   }
-  const sIn = document.getElementById("cmpS"), lIn = document.getElementById("cmpL"), out = document.getElementById("cmpOut"), outS = document.getElementById("cmpOutS");
+  const sIn = document.getElementById("cmpS"), lIn = document.getElementById("cmpL"), outS = document.getElementById("cmpOutS");
   const num = (el, lo, hi, d) => { const n = Math.floor(+el.value); return Number.isFinite(n) && el.value !== "" ? Math.min(hi, Math.max(lo, n)) : d; };
+  const $ = id => document.getElementById(id);
+  const signed = n => (n < 0 ? "−" : "") + usd(Math.abs(n));
+  const range = (lo, hi) => lang === "zh" ? Math.round(lo).toLocaleString("en-US") + " 至 " + Math.round(hi).toLocaleString("en-US") + " 美元" : usd(lo) + " to " + usd(hi);
   // the plan the license field was filled from: the visitor's city, or the typical San José restaurant (9 at $299, 2 at $999)
   const TYPICAL = {n: 9, c: 2};
-  let mix = TYPICAL;
-  function paintCalc(){
+  let mix = TYPICAL, lTouched = false;
+  /* Placetta's price for the year: stores on the plan, plus the licenses (each store's counted mix while the field holds it) */
+  function price(){
     const s = num(sIn, 1, 999, 1), l = num(lIn, 0, 9999, 0), chain = s >= 10;
-    // while the field still holds the counted plan, its two $999 licenses are priced as such; a typed number is "from $299"
-    const exact = !lTouched && mix && l === mix.n + mix.c;
-    const lic = chain ? 0 : exact ? mix.n * 299 + mix.c * 999 : l * 299;
-    const total = s * 149 * 12 + lic;
-    out.textContent = chain || !l || exact ? usd(total) : fill("c96.from", {usd: usd(total)});
+    const exact = !lTouched && mix && l === (mix.n + mix.c) * s;
+    const lic = chain ? 0 : exact ? s * (mix.n * 299 + mix.c * 999) : l * 299;
     const st = s === 1 ? t("c96.st1") : fill("c96.stn", {n: s});
-    outS.textContent = chain ? fill("c96.outc", {s}) : exact ? fill("c96.outx", {s: st, a: mix.n, b: mix.c}) : fill("c96.outs", {s: st, l});
+    const note = chain ? fill("c96.outc", {s}) : exact ? fill("c96.outx", {s: st, a: mix.n * s, b: mix.c * s}) : fill("c96.outs", {s: st, l});
+    return {s, total: s * 149 * 12 + lic, from: !chain && !!l && !exact, note};
   }
-  // a city with a counted plan fills in its own license count, once, until the visitor changes the field
-  let lTouched = false;
+  /* the value calculator: the visitor's own rent, sales and weeks sooner. Nothing here is a Placetta claim or an average. */
+  const vR = $("vRent"), vS = $("vSales"), vW = $("vW");
+  const amt = el => { const d = String(el.value).replace(/[^\d]/g, "").slice(0, 9); return d ? +d : 0; };
+  const weeks = w => t("c96.w" + w);
+  function paintValue(P){
+    const s = P.s, rentM = amt(vR), sales = amt(vS), w = Math.min(8, Math.max(1, +vW.value || 2));
+    const rentWk = rentM / 4.33 * s, perWeek = rentWk + sales * s;
+    const rPart = Math.round(rentWk * w), sPart = sales * s * w, net = rPart + sPart - P.total;
+    const many = s > 1 ? fill("c96.xst", {s}) : "";
+    $("vRv").textContent = usd(rPart);
+    $("vRs").textContent = rentM ? fill("c96.vrs", {rent: usd(rentM), w: weeks(w)}) + many : t("c96.vrs0");
+    $("vSv").textContent = usd(sPart);
+    $("vSs").textContent = sales ? fill("c96.vss", {sales: usd(sales), w: weeks(w)}) + many : t("c96.vss0");
+    $("vPv").textContent = (P.from ? fill("c96.from", {usd: "−" + usd(P.total)}) : "−" + usd(P.total));
+    outS.textContent = P.note;
+    const lede = $("vLede"), big = $("vBig"), pay = $("vPay"), netRow = $("vNet");
+    if (perWeek > 0){
+      lede.textContent = t("c96.vlede");
+      big.innerHTML = usd(perWeek) + (t("c96.vto") ? "<small>" + t("c96.vto") + "</small>" : "");
+      big.hidden = false;
+      const d = Math.max(1, Math.ceil(P.total / (perWeek / 7)));
+      pay.hidden = !(d <= w * 7);
+      if (!pay.hidden) pay.textContent = d === 1 ? t("c96.vpay1") : fill("c96.vpay", {d});
+      $("vNl").textContent = fill("c96.vnet", {w: weeks(w)});
+      $("vNv").textContent = signed(net);
+      netRow.hidden = false;
+    } else { lede.textContent = t("c96.vemp"); big.hidden = true; pay.hidden = true; netRow.hidden = true; }
+  }
+  /* the chain math: the expediter's published range for the same number of openings, against Placetta for those stores */
+  function paintChain(P){
+    const mine = P.s >= 2, n = mine ? P.s : 10, pz = mine ? P.total : n * 149 * 12;
+    const lo = n * 2000, hi = n * 7500;
+    $("chH").textContent = mine ? fill("c96.chh", {n}) : t("c96.chex");
+    $("chX").textContent = range(lo, hi);
+    $("chXs").textContent = fill("c96.chxs", {n});
+    $("chP").textContent = mine && P.from ? fill("c96.from", {usd: usd(pz)}) : usd(pz);
+    $("chPs").textContent = n >= 10 ? fill("c96.chps10", {n}) : fill("c96.chps", {n});
+    const L = $("chSl"), V = $("chS"), S = $("chSs");
+    if (lo > pz){ L.textContent = t("c96.chsl"); V.textContent = range(lo - pz, hi - pz); S.textContent = t("c96.chss"); }
+    else if (hi > pz){ L.textContent = t("c96.chup"); V.textContent = usd(hi - pz); S.textContent = t("c96.chupss"); }
+    else { L.textContent = t("c96.chmore"); V.textContent = usd(pz - hi); S.textContent = t("c96.chmoress"); }
+    $("chMine").hidden = mine;
+  }
+  function paintCalc(){ const P = price(); paintValue(P); paintChain(P); }
+  // money fields keep their thousands separators as you type (only while the cursor is at the end, so editing mid-number works)
+  [vR, vS].forEach(el => {
+    const tidy = force => { const d = String(el.value).replace(/[^\d]/g, "").slice(0, 9), f = d ? (+d).toLocaleString("en-US") : "";
+      if (el.value !== f && (force || el.selectionStart === el.value.length)) el.value = f; };
+    el.addEventListener("input", () => { tidy(false); paintCalc(); });
+    el.addEventListener("blur", () => tidy(true));
+    el.addEventListener("change", () => track("value_calc", {rent: amt(vR) > 0, sales: amt(vS) > 0, weeks: +vW.value}));
+  });
+  vW.addEventListener("change", () => { paintCalc(); track("value_calc", {rent: amt(vR) > 0, sales: amt(vS) > 0, weeks: +vW.value}); });
+  // stores and licenses sit behind one button, so three inputs show at a time
+  const sl = $("c96sl"), chg = $("vChg");
+  const openSl = open => { sl.hidden = !open; chg.setAttribute("aria-expanded", String(open)); };
+  chg.addEventListener("click", () => { openSl(sl.hidden); track("fold_stores", {open: !sl.hidden}); });
+  $("chMine").addEventListener("click", () => { openSl(true); sIn.focus(); sIn.select(); });
+  // a city with a counted plan fills in its own license count, once per store, until the visitor changes the field
+  const fillL = () => { if (!lTouched) lIn.value = (mix ? mix.n + mix.c : 11) * num(sIn, 1, 999, 1); };
   lIn.addEventListener("input", () => { lTouched = true; paintCalc(); });
-  sIn.addEventListener("input", paintCalc);
+  sIn.addEventListener("input", () => { fillL(); paintCalc(); });
   [sIn, lIn].forEach(el => el.addEventListener("change", () => track("compare_calc", {stores: num(sIn, 1, 999, 1), licenses: num(lIn, 0, 9999, 0)})));
   function paint(){
     paintYou();
     const c = cityOf(typed());
-    if (!lTouched){ const p = c ? CITY_PRICES[c] : null; mix = p || (typed() ? null : TYPICAL); lIn.value = mix ? mix.n + mix.c : 11; }
+    if (!lTouched){ const p = c ? CITY_PRICES[c] : null; mix = p || (typed() ? null : TYPICAL); fillL(); }
     paintCalc();
   }
   if (hero) { let tm = 0; hero.addEventListener("input", () => { clearTimeout(tm); tm = setTimeout(paint, 250); }); }
@@ -6376,7 +6530,6 @@ const CITY_PRICES = {"New York City":{"n":7,"c":1,"usd":3092},"Los Angeles":{"n"
   if (mns) { mns.id = mns.id || "mnSide"; fold(mns, {keep: 0, items: ".mnsc", all: "m95.more", less: "m95.less", before: true}); }
   // phones only (the CSS folds these below 768px or 1024px, and hides the buttons above)
   fold(document.querySelector("#pricing .prlist"), {keep: 3, items: "li", all: "g95.all", less: "g95.less", name: "included"});
-  fold(document.getElementById("pmCalc"), {keep: -1, items: ":scope", all: "calc95.open", less: "calc95.less"});
   fold(document.getElementById("agTabs"), {keep: 4, items: ".agb", all: "ag95.all", less: "g95.less"});
   const relabel = () => folds.forEach(f => f());
   const orig = applyAll; applyAll = function(){ orig.apply(this, arguments); relabel(); };
