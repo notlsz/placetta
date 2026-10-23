@@ -3236,6 +3236,23 @@ html[lang="zh-CN"] .c96calc b{font-family:var(--zhserif);font-weight:500;font-si
   #faq a,.c96src a{display:inline-block;padding-block:13px;margin-block:-13px}
   .c96t tbody tr:nth-child(-n+2) td b{font-size:17px}
 }
+
+/* the phone, Tesla and SpaceX style: one image, one headline, one line, one action. Headline centered in the upper
+   third with room to breathe, the city box and "Get my plan" at the bottom, nothing else on the first screen */
+.hsubm{display:none}
+@media (max-width:767px){
+  .hero .badge,.hero .hsub,.hero .hnote{display:none!important}
+  .hero .hsubm{display:block;margin:0;font-size:17px;line-height:1.45;color:rgba(255,255,255,.88);max-width:30ch;margin-inline:auto}
+  .hero .hin{padding:112px 0 22px!important}
+  .hero .hl{text-align:center;gap:0!important;padding:0 24px!important}
+  .hero .hstack{gap:16px!important}
+  .hero h1{font-size:44px!important;line-height:1.04!important;letter-spacing:-.01em;max-width:none!important;margin-inline:auto}
+  .hero .hst{margin-top:auto;padding-top:40px}
+  .hero .starter{background:rgba(255,255,255,.1)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .hero .stalt{display:flex;justify-content:center;margin-top:10px}
+  .hero .hbot{padding:22px 24px 0!important;text-align:center}
+  .hero .hbot p{margin-bottom:6px;text-align:center;width:100%}
+}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -3280,6 +3297,7 @@ html[lang="zh-CN"] .c96calc b{font-family:var(--zhserif);font-weight:500;font-si
       <div class="hstack">
         <h1 data-i18n="hero.h1">Your store is built.<br><em>Your permits aren't.</em></h1>
         <p class="hsub" data-i18n="hero.sub">Placetta's AI agent, Odelia, gets every federal, state and city license you need to open in a new market, so you stop paying rent on an empty store.</p>
+        <p class="hsubm" data-i18n="hero.subm">Odelia, our AI agent, gets every license you need to open. You approve.</p>
         <div class="stwrap hst">
           <form class="starter" data-src="hero" method="post" novalidate>
             <label class="sr" for="st-hero" data-i18n="st.label">Where are you opening?</label>
@@ -4243,6 +4261,7 @@ zh:{
 }};
 /* named proof strip */
 Object.assign(T.en, {"np.aria":"Customer results","np.1n":"5 months","np.1s":"saved in approval time","np.2n":"3 filings","np.2s":"handled end to end for a store GM","np.3l":"Wakimasu Wagyu","np.3n":"10 requirements","np.3s":"mapped from Japan to a New York dining room"});
+Object.assign(T.zh, {"hero.subm":"快哉的 AI 代理 Odelia 办好开店所需的每一项执照。您只需确认。"});
 Object.assign(T.zh, {"np.aria":"客户成果","np.1n":"5 个月","np.1s":"节省的审批时间","np.2n":"3 项申报","np.2s":"为门店总经理全程代办","np.3l":"Wakimasu 和牛","np.3n":"10 项要求","np.3s":"从日本工厂到纽约餐厅，逐项梳理"});
 /* hero and before and after, from the Oct 17 redesign */
 Object.assign(T.en, {"dv.h1":"Enterprise security","dv.h2":"with fine-grained controls","dv.tc":"Trust Center","dv.b1":"SOC 2","dv.b1s":"Type I in progress","dv.b2":"ISO 27001","dv.b2s":"In progress","dv.b3":"SCIM","dv.b3s":"Rolling out","dv.b4s":"In progress","dv.b5s":"In progress","dv.b6s":"In progress","dv.l1":"Your filings and documents are always yours","dv.l2":"Nothing filed or paid without your approval","dv.l3":"Comprehensive audit logs","dv.l4":"Agency logins kept in an encrypted vault","dv.l5":"Two-step sign-in for your whole team","dv.l6":"Encrypted in transit and at rest"});
@@ -4261,7 +4280,7 @@ Object.assign(T.en, {"sc.h1": "Enterprise security", "sc.h2": "with every step o
 Object.assign(T.zh, {"sc.h1": "企业级安全", "sc.h2": "每一步都有据可查", "sc.b1": "SOC 2 Type I", "sc.b1s": "进行中", "sc.b2": "SAML 2.0 单点登录", "sc.b2s": "陆续上线", "sc.b3": "SCIM 2.0", "sc.b3s": "陆续上线", "sc.l1": "所有者、管理员、成员和查看者四种角色，由数据库强制执行", "sc.l2": "SAML 2.0 单点登录，并支持 Google Workspace、Microsoft Entra ID 和 OpenID Connect 登录", "sc.l3": "可要求您已验证邮箱域名下的所有人使用单点登录", "sc.l4": "通过 SCIM 2.0 开通和停用用户与用户组", "sc.r1": "只增不改的审计记录，可导出为 CSV", "sc.r2": "每次在政府网站上的申报都在全新的浏览器会话中进行，临时文件随后删除", "sc.r3": "未经您批准，不提交、不付款", "sc.r4": "每项要求都附官方来源链接", "sc.note": "角色、单点登录、SCIM 和审计记录正在陆续上线。信任中心列出每项控制的进展。"});
 Object.assign(T.en, {"h95.aria": "What Odelia does", "h95.t1": "Maps and files", "h95.t2": "Joins your team", "h95.t3": "Works in portals", "h95.t4": "Asks first"});
 Object.assign(T.zh, {"h95.aria": "Odelia 的工作", "h95.t1": "梳理与申报", "h95.t2": "加入您的团队", "h95.t3": "在政府网站上办理", "h95.t4": "先问再办"});
-Object.assign(T.en, {"p95.aria": "Why it pays", "p95.t2": "Three ways to open", "f95.all": "Show all {n} questions", "f95.less": "Show fewer", "m95.more": "Show deadlines and all markets", "m95.less": "Hide deadlines and markets", "in95.all": "Show all {n} industries", "in95.less": "Show fewer"});
+Object.assign(T.en, {"hero.subm": "Odelia, our AI agent, gets every license you need to open. You approve.", "p95.aria": "Why it pays", "p95.t2": "Three ways to open", "f95.all": "Show all {n} questions", "f95.less": "Show fewer", "m95.more": "Show deadlines and all markets", "m95.less": "Hide deadlines and markets", "in95.all": "Show all {n} industries", "in95.less": "Show fewer"});
 Object.assign(T.zh, {"p95.aria": "为什么划算", "p95.t2": "三种开店方式", "f95.all": "显示全部 {n} 个问题", "f95.less": "收起", "m95.more": "查看截止日期和全部市场", "m95.less": "收起截止日期和市场", "in95.all": "显示全部 {n} 个行业", "in95.less": "收起"});
 /* land96 (Oct 23): the comparison table above the price cards, and the folds that shorten the page */
 Object.assign(T.en, {"c96.h": "Three ways to open a store. <em>Only one gets you open sooner.</em>", "c96.sub": "Every opening needs the same licenses. What changes is your team's time, the cost, who files them and who keeps them current.", "c96.cap": "Doing it yourself, a permit expediter and Placetta, compared", "c96.a": "Do it yourself", "c96.b": "A permit expediter", "c96.c": "Placetta", "c96.r1": "Your team's time", "c96.r2": "Cost", "c96.r3": "Who files", "c96.r4": "After opening", "c96.a1": "40 to 120 hours", "c96.est": "Estimate", "c96.b1": "Calls and emails", "c96.c1": "About 1 hour of approvals", "c96.a2": "Your time, plus fines", "c96.b2": "$2,000 to $7,500", "c96.b2s": "Usually one city", "c96.c2": "$149 a store a month", "c96.c2s": "plus $299 a license", "c96.a3": "You do", "c96.b3": "The expediter", "c96.c3": "Odelia files it for you", "c96.a4": "Renewals are on you", "c96.b4": "Ends on opening day", "c96.c4": "Renewals and inspections handled for as long as you're open", "c96.xs": "For one restaurant opening, before agency fees, usually one city", "c96.typl": "A typical restaurant opening in San José", "c96.typv": "11 licenses, Placetta $4,689", "c96.typs": "9 at $299 and 2 at $999, from Placetta's own plan for a restaurant there. Agency fees at cost.", "c96.yr": "Placetta, this year", "c96.cs": "Stores", "c96.cl": "New licenses this year", "c96.outs0": "1 store × $149 × 12 months, plus 9 licenses at $299 and 2 at $999", "c96.vs": "For each opening, before agency fees, usually in one city", "c96.src": "Expediter range: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>, for a restaurant opening, before agency fees. Hours are Placetta's estimates, not measured. A liquor license, building plan review or import permit is $999.", "wt96.sub": "WhatsApp, iMessage, email, a phone call, Slack or Lark with Odelia, and WeChat with our team.", "ag96.sub": "50 US states, 170+ countries and every agency Placetta files with, on one map.", "price.detsub": "The math on waiting, and the rent calculator."});
