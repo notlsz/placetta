@@ -30,6 +30,7 @@ import { undoRun } from "../src/rewind";
 import { fire, type Notice } from "../src/businessRules";
 import { buildGrid, cellOf, columnOf, filterGrid, gridCsv, itemStatus, preparePrompt, regionOf, sortRows, storesOfHq, storesOfWorkspace, toPrepare, type HqReviewRow, type ReviewItem } from "../src/review";
 import { initials, mentionsIn, odeliaAsk, segments, typing, SAMPLE_PEOPLE } from "../src/collab";
+let xeroReads: number | undefined;
 
 /* ------------------------------------------------------------------ checks, grouped by what's being attacked */
 
@@ -152,7 +153,7 @@ function account(o: { filings?: ReturnType<Services["filings"]>; mail?: string }
   const stored = new Map<string, Blob>(), integrations: [string, Record<string, unknown>][] = [], settings: Record<string, string> = {};
   const svc: Services = {
     filings: () => o.filings ?? [],
-    connected: () => ["gmail", "gcal", "gdrive", "quickbooks", "square"],
+    connected: () => ["gmail", "gcal", "gdrive", "quickbooks", "square", "gbp", "xero"],
     async integration<T>(action: string, body: Record<string, unknown>) {
       integrations.push([action, body]);
       if (action === "mail_search") return { messages: [{ id: "m1", kind: "gmail", from: "permits@health.nyc.gov", subject: "Pre-permit inspection", date: "2026-11-02", snippet: "Your inspection is scheduled." }] } as T;
@@ -162,6 +163,10 @@ function account(o: { filings?: ReturnType<Services["filings"]>; mail?: string }
       if (action === "files_import") { if (body.file_id !== "drv1") throw new Error("That file wasn't found in the drive."); const path = "ws/drive/lease.txt"; stored.set(path, new Blob(["LEASE. Tenant: Lucky Leaf Tea LLC. Premises: 136-20 Roosevelt Ave, Flushing, NY 11354. Term ends 2031-08-31."])); return { document: { id: "imp1", name: "lease.txt", path, size: 120, mime: "text/plain" } } as T; }
       if (action === "books_income") return { year: body.year, total_income: 512000, currency: "USD" } as T;
       if (action === "pos_sales") return { source: "Square", months: [body.from_month ?? "2026-09"], rows: [{ month: "2026-09", location: "Flushing", orders: 2140, net_sales: 61234.5, tax: 5434.57 }], complete: true, how: "Square completed orders." } as T;
+      if (action === "places_read") return { places: [{ source: "Google Business Profile", name: "Lucky Leaf Flushing", address: { line1: "136-20 38th Ave", city: "Flushing", region: "NY", postal: "11354" }, phone: "+17185550100", hours: ["Mon 10:00-22:00"] }], read: ["google_business"] } as T;
+      // the second read finds Xero down: the tool must say so clearly, not crash the run
+      if (action === "company_profile" && (xeroReads = (xeroReads ?? 0) + 1) > 1) throw { code: "upstream_error", message: "Xero didn't answer" };
+      if (action === "company_profile") return { profile: { name: "Lucky Leaf", legal_name: "Lucky Leaf Tea LLC", organisation_type: "COMPANY" } } as T;
       if (action === "pos_staff") return { source: "Square", from: body.from ?? "2026-10-01", to: body.to ?? "2026-10-14", people: [{ id: "T1", name: "Jun Li", jobs: ["Line cook"] }], scheduled: [], worked: [], totals: [], notes: [], complete: true } as T;
       throw new Error(`unexpected integration ${action}`);
     },
@@ -819,6 +824,8 @@ async function toolMatrix() {
         ["get_income", { year: 2025 }], bad("get_income", { year: 1999 }),
         ["get_sales", { from_month: "2026-09" }], bad("get_sales", { from_month: "September" }),
         ["get_staff", { from: "2026-10-01", to: "2026-10-14" }], bad("get_staff", { from: "2026-02-30" }),
+        ["connected_locations", {}], bad("connected_locations", { source: "myspace" }),
+        ["company_profile", {}], bad("company_profile", {}),
         ["appeal_options", { application_id: "a1", decision_date: "2026-10-20", reason: "Denied: the plans are missing the grease interceptor." }], bad("appeal_options", { application_id: "a1", decision_date: "20261020" }),
       ),
       c => askAll(
@@ -1491,10 +1498,12 @@ async function connectedApps() {
     // by intent (the default): only the app whose tools are about the request, and far fewer tokens a round
     const lean = await agent({ ws: workspace(), svc: m.svc, prompt: "When does our health permit renew, and add an inspection task.", script: [() => say("Checking.")] });
     const leanNames = offered(lean).map(t => t.name);
-    const full = JSON.stringify(r.bodies[0].tools).length, cut = JSON.stringify(lean.bodies[0].tools).length;
+    // Placetta's own tools are always offered now (one stable, cached list); intent decides only the connected apps' tools
+    const mcpOnly = (b: { tools?: unknown }) => JSON.stringify(((b.tools as { name: string }[]) ?? []).filter(t => t.name.startsWith("mcp__"))).length;
+    const full = mcpOnly(r.bodies[0]), cut = mcpOnly(lean.bodies[0]);
     console.log(`     with 40 connected tools: ${Math.round(cut / 4)} tokens of tool definitions a round instead of ${Math.round(full / 4)} (${Math.round((1 - cut / full) * 100)}% fewer)`);
     eq(leanNames.sort(), ["mcp__notion__create_inspection_task", "mcp__notion__find_health_permit"], "by intent, only the app whose tools match the request is offered");
-    ok(cut / full < 0.5, "by intent, a round's tool definitions cost under half", cut / full);
+    ok(cut / full < 0.5, "by intent, a round's connected-app tool definitions cost under half", cut / full);
     ok(names.length === MCP_CAP && MCP_CAP === 40, `120 connected tools, ${names.length} offered (the cap is 40)`, names.length);
     ok(names.includes("mcp__notion__find_health_permit") && names.includes("mcp__notion__create_inspection_task"), "the ones that match the request are among them", names.slice(0, 5));
     eq(pickTools(many, "health permit inspection task", 2).map(t => t.name), ["find_health_permit", "create_inspection_task"], "picked by name, title and description overlap with the request");
