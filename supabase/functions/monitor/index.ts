@@ -536,6 +536,8 @@ function stageOut(key: string) {
     },
     async flush() {
       await fetch(`${SUPABASE_URL}/functions/v1/odelia-sms`, { method: "POST", headers: { "Content-Type": "application/json", "x-monitor-key": key }, body: JSON.stringify({ action: "flush" }) }).catch(() => null);
+      // call recordings past their workspace's retention (queued by purge_expired) are deleted from storage
+      await fetch(`${SUPABASE_URL}/functions/v1/odelia-voice`, { method: "POST", headers: { "Content-Type": "application/json", "x-monitor-key": key }, body: JSON.stringify({ action: "purge_recordings" }) }).catch(() => null);
     },
   };
 }

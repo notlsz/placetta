@@ -205,6 +205,27 @@ Then run the migration (`20261013000000_odelia_phone.sql`) and deploy `odelia-sm
 
 How it stays safe: Telnyx webhooks are checked against the public key and refused if older than five minutes. A number is linked to one person only, and linking needs the settings PIN when it's on. Texts start the agent as that person, with the same member and plan checks as the app, and answers only ever go to the verified number. A call whose caller ID isn't fully attested (STIR/SHAKEN "A") gets a 4-digit code texted to the number on file, and Odelia says nothing about the account until the caller says it.
 
+## Voice: talking live, agency calls, interpreting, listening back (OpenAI over Telnyx SIP)
+
+What it is and what it costs: docs/CHANNELS.md, Voice. Telnyx stays the carrier (the same number as texts); OpenAI's
+gpt-realtime does the talking; Placetta keeps identity, tools, approvals and the handoff. Without the OpenAI keys every
+call keeps using the Telnyx AI Assistant above, so nothing breaks while this is set up. Never put a key in the code:
+each goes in Supabase, Edge Functions, Secrets.
+
+1. **OpenAI** (platform.openai.com): a project for Placetta. Its API key is `OPENAI_API_KEY` (this alone turns on Talk and Interpreter in the app). Its project ID (Settings, Project, General, starts with `proj_`) is `OPENAI_SIP_PROJECT`. If zero data retention is required (`AI_ZDR_PROVIDERS`), add `openai` there only once OpenAI has granted it for the project.
+2. **OpenAI webhook**: in the project's Webhooks, add `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/odelia-voice` for the event `realtime.call.incoming`. Its signing secret (`whsec_...`) is `OPENAI_WEBHOOK_SECRET`.
+3. **Telnyx, a SIP connection to OpenAI**: in Voice, SIP Trunking, an outbound connection (FQDN `sip.api.openai.com`, port 5061, TLS) that the Call Control application may dial. Its ID is `TELNYX_SIP_CONNECTION_ID` (or leave it unset if the Call Control application's outbound profile already allows SIP URIs).
+4. **Telnyx, the Call Control application** (step 4 above): allow outbound calls to US landlines and toll-free numbers (agencies), and turn on call recording. Recordings are fetched once by `odelia-voice` into the private `call-recordings` bucket and nowhere else.
+5. **Telnyx caller ID**: set the number's CNAM to "Placetta" so agencies see who's calling.
+6. **Transcripts**: `GROQ_API_KEY` (already set for voice notes) transcribes each side of a recorded call.
+7. **Optional, the cascaded path** (a more human voice for English agency calls): in Telnyx, add your ElevenLabs API key under integration secrets; its reference is `TELNYX_ELEVENLABS_KEY_REF`. Your ElevenLabs voice IDs are `ELEVENLABS_VOICE_EN` and `ELEVENLABS_VOICE_ZH`. Then `VOICE_BRAIN_AGENCY_PHONE_EN=telnyx` (and `VOICE_TTS_EN=elevenlabs_flash` or `elevenlabs_multilingual`). MiniMax: `VOICE_TTS_ZH=minimax` and `MINIMAX_VOICE_ZH`.
+8. **Optional, Grok or Gemini**: `XAI_API_KEY` or `GEMINI_API_KEY`, then `VOICE_BRAIN_APP_TALK_EN=grok` (say). On the phone they also need a media bridge (`VOICE_BRIDGE_URL`), which isn't built; until then a phone call falls back to OpenAI.
+9. **Before switching Mandarin away from OpenAI**: run the Mandarin quality check (docs/CHANNELS.md) and record the scores.
+
+Then run the migration (`20261030120000_voice_calls.sql`) and deploy `odelia-voice`, `voice` and `monitor`. Agency
+numbers live in `supabase/functions/_shared/agency_phones.ts`; staff add others with `agency_phone_add`, only from a
+government page.
+
 ## Odelia on iMessage (Linq)
 
 Linq (linqapp.com) gives Odelia real iMessage lines, the provider Poke, Lindy and Instinct use. Messages go as blue bubbles to iPhones and fall back to RCS or SMS for Android, and none of it waits on 10DLC. Plans: free for up to 20 contacts (enough to test), Pro from $260 a month with a 7-day trial, zero data retention and SOC 2. Don't turn zero data retention on for Odelia's lines: Linq then leaves the words out of the webhook, and Odelia has nothing to read.

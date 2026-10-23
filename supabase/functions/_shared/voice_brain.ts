@@ -133,7 +133,7 @@ export const HEAVY_MONTH: VoiceMonth = { ownerPhoneMin: 60, appTalkMin: 60, agen
 export function storeMonth(m: VoiceMonth, pick: (s: Surface) => { brain: BrainId; tts?: TtsId } = defaultPick): { usd: number; lines: Record<string, number> } {
   const line = (s: Surface, min: number, recorded = false) => min * perMinute({ ...pick(s), surface: s, recorded });
   const lines = {
-    owner_phone: line("owner_phone", m.ownerPhoneMin),
+    owner_phone: line("owner_phone", m.ownerPhoneMin, true),
     app_talk: line("app_talk", m.appTalkMin),
     agency_phone: line("agency_phone", m.agencyCalls * m.agencyCallMin, true) + m.agencyCalls * TELNYX.amdPerCall,
     interpreter: line("app_interpreter", m.interpreterMin),
