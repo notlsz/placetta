@@ -34,7 +34,7 @@ import { proofCurrent } from "../../src/plan/ask";
 import { FORMS, formsFor, segmentOf } from "../../src/forms/registry";
 import { furnitureNeeds } from "../../src/forms/furniture";
 import { sectorNeeds } from "../../src/forms/sectors";
-import { FURNITURE_KINDS } from "../../src/forms/kinds";
+import { FURNITURE_KINDS, SECTOR_KINDS } from "../../src/forms/kinds";
 import type { Application, Level } from "../../src/model";
 import { answerChecks } from "./answers";
 import { officialSource } from "./official";
@@ -62,7 +62,10 @@ const load = (name: string): Gold[] => { const d = setDir(name); if (!d) return 
 // into New Jersey), scored on the filings (src/forms/furniture.ts) and on what the plan states beyond them.
 // lifecycle: five openings scored on their permits and on what the plan says beyond them (scripts/eval/lifecycle,
 // src/forms/lifecycle.ts, src/plan/also.ts), with the intake's answers.
-const SETS = (process.env.SET ? [process.env.SET] : process.env.GENERAL_ONLY ? ["heldout"] : ["gold", "heldout", "strict", "kinds", "furniture", "world", "lifecycle"]).map(name => ({ name, cases: load(name) }));
+// sectors: the landing page's other sectors (scripts/eval/sectors, src/forms/sectors.ts): a nail salon in Los Angeles,
+// an import warehouse in Houston, an auto repair shop in San José, a medical device importer in New York City and a tech
+// office in San Francisco.
+const SETS = (process.env.SET ? [process.env.SET] : process.env.GENERAL_ONLY ? ["heldout"] : ["gold", "heldout", "strict", "kinds", "furniture", "world", "lifecycle", "sectors"]).map(name => ({ name, cases: load(name) }));
 // npm passes its own arguments after the script's "exit", so the quiet mode is an environment variable: QUIET=1
 const showMisses = !process.env.QUIET;
 /** A row that hedges whether the requirement applies ("if the city requires one", "We'll confirm with ...") asserts
@@ -310,7 +313,7 @@ for (const { name: set, cases } of SETS) for (const g of cases.filter(x => x.fac
       if (proof.length || !officialSource(f.source.url)) { bad.push(`${f.id}: ${proof.join("; ") || "not an official page"}`); continue; }
       factTotals.right++;
     }
-    const food = facts.filter(f => !f.kinds.some(k => FURNITURE_KINDS.includes(k)));
+    const food = facts.filter(f => !f.kinds.some(k => FURNITURE_KINDS.includes(k) || SECTOR_KINDS.includes(k)));
     if (segment !== "restaurant" && food.length) bad.push(`${food.length} food facts for a ${segment} business`);
     if (miss.length || bad.length) { fails.push(`${set} ${g.id} ${path} facts: ${[...miss, ...bad].join("; ")}`); console.log(`  ${set} ${g.id} (${path}): ${[...miss, ...bad].join("; ")}`); }
   }

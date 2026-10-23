@@ -1,0 +1,181 @@
+{
+ "id": "houston-warehouse",
+ "title": "3PL warehouse for imported goods in Houston",
+ "read": "2026-10-23",
+ "input": {
+  "what": "Import 3PL warehouse",
+  "where": "Houston, TX",
+  "lang": "en"
+ },
+ "assumptions": "A new Texas LLC leases a warehouse in Houston, builds it out, hires staff and is importer of record for the goods it stores. No hazardous materials above fire code amounts.",
+ "items": [
+  {
+   "key": "tx-205",
+   "name": "Certificate of Formation (Texas LLC)",
+   "agency": "Texas Secretary of State",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 300,
+   "source": "https://www.sos.state.tx.us/corp/instructions/205.shtml",
+   "quote": "Title 1, chapter 3, subchapter A of the BOC governs the formation of an LLC",
+   "read": "2026-10-22",
+   "match": "\\btx-205\\b|certificate of formation \\(texas llc\\)",
+   "agencyMatch": "Texas Secretary of State"
+  },
+  {
+   "key": "irs-ss4",
+   "name": "Application for Employer Identification Number (EIN)",
+   "agency": "Internal Revenue Service",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+   "quote": "You never have to pay a fee for an EIN.",
+   "read": "2026-10-22",
+   "match": "\\birs-ss4\\b|application for employer identification number \\(ein\\)",
+   "agencyMatch": "Internal Revenue Service"
+  },
+  {
+   "key": "tx-503",
+   "name": "Assumed Name Certificate (DBA)",
+   "agency": "Texas Secretary of State",
+   "level": "state",
+   "required": false,
+   "verified": true,
+   "fee": 25,
+   "condition": "Only when trading under a name other than the legal name.",
+   "source": "https://www.sos.state.tx.us/corp/instructions/503.shtml",
+   "quote": "a separate assumed name certificate must be filed for each assumed name.",
+   "read": "2026-10-22",
+   "match": "\\btx-503\\b|assumed name certificate \\(dba\\)",
+   "agencyMatch": "Texas Secretary of State"
+  },
+  {
+   "key": "cbp-5106",
+   "name": "Create/Update Importer Identity Form",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf",
+   "quote": "shall file CBP Form 5106 with the first formal entry.",
+   "read": "2026-10-18",
+   "match": "\\bcbp-5106\\b|create/update importer identity form",
+   "agencyMatch": "U\\.S\\. Customs and Border Protection"
+  },
+  {
+   "key": "cbp-301",
+   "name": "Customs Bond",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part142.pdf",
+   "quote": "unless a single entry or continuous bond on Customs Form 301, containing the bond conditions set forth in § 113.62 of this chapter,",
+   "read": "2026-10-22",
+   "match": "\\bcbp-301\\b|customs bond",
+   "agencyMatch": "U\\.S\\. Customs and Border Protection"
+  },
+  {
+   "key": "cbp-ace",
+   "name": "ACE Secure Data Portal account for importers",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf",
+   "quote": "register an entity as an Importer of Record (IOR) in the Automated Commercial Environment (ACE)",
+   "read": "2026-10-22",
+   "match": "\\bcbp-ace\\b|ace secure data portal account for importers",
+   "agencyMatch": "U\\.S\\. Customs and Border Protection"
+  },
+  {
+   "key": "tx-ap201",
+   "name": "Texas Sales and Use Tax Permit Application",
+   "agency": "Texas Comptroller of Public Accounts",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://comptroller.texas.gov/taxes/permit/",
+   "quote": "You will need to apply using form AP-201, Texas Application (PDF) .",
+   "read": "2026-10-22",
+   "match": "\\btx-ap201\\b|texas sales and use tax permit application",
+   "agencyMatch": "Texas Comptroller of Public Accounts"
+  },
+  {
+   "key": "hou-co",
+   "name": "Certificate of Occupancy",
+   "agency": "City of Houston, Houston Permitting Center",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.houstonpermittingcenter.org/hpwcode1106",
+   "quote": "The certificate is normally issued at the time of construction or when a remodel or change of use occurs.",
+   "read": "2026-10-22",
+   "match": "\\bhou-co\\b|certificate of occupancy",
+   "agencyMatch": "City of Houston"
+  },
+  {
+   "key": "hou-buildout",
+   "name": "Buildout permit (building permit for the space)",
+   "agency": "City of Houston, Houston Permitting Center",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.houstonpermittingcenter.org/hpwcode1148",
+   "quote": "Buildout permits must be on-site for inspection.",
+   "read": "2026-10-22",
+   "match": "\\bhou-buildout\\b|buildout permit \\(building permit for the space\\)",
+   "agencyMatch": "City of Houston"
+  },
+  {
+   "key": "tx-twc",
+   "name": "Unemployment tax account",
+   "agency": "Texas Workforce Commission",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.twc.texas.gov/services/register-tax",
+   "quote": "register with the Texas Workforce Commission (TWC) within 10 days of becoming liable.",
+   "read": "2026-10-22",
+   "match": "\\btx-twc\\b|unemployment tax account",
+   "agencyMatch": "Texas Workforce Commission"
+  },
+  {
+   "key": "tx-workers-comp",
+   "name": "Workers' compensation, or the yearly non-subscriber notice",
+   "agency": "Texas Department of Insurance, Division of Workers' Compensation",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://Www.Tdi.Texas.Gov/forms/dwc/dwc005nocovst.pdf",
+   "quote": "Annual filing, between February 1 and April 30 each year.",
+   "read": "2026-10-22",
+   "match": "\\btx-workers-comp\\b|workers' compensation, or the yearly non-subscriber notice",
+   "agencyMatch": "Texas Department of Insurance"
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "Any food permit, food handler or plan review",
+   "why": "The business sells no food.",
+   "match": "food (service|establishment|facility|dealer|handler|worker|manager|safety|protection|preparation)|plan (check|review)|retail food|sanitation|victualler|allergen"
+  },
+  {
+   "name": "A salon or repair license",
+   "why": "A warehouse holds neither.",
+   "match": "cosmetology|establishment license|automotive repair"
+  }
+ ]
+}

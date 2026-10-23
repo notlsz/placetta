@@ -1,0 +1,154 @@
+{
+ "id": "sf-tech-office",
+ "title": "Tech office in San Francisco",
+ "read": "2026-10-23",
+ "input": {
+  "what": "Tech office",
+  "where": "San Francisco, CA",
+  "lang": "en"
+ },
+ "assumptions": "A new LLC opens a software company's office in San Francisco, builds out the floor and hires staff.",
+ "items": [
+  {
+   "key": "ca-llc-1",
+   "name": "Articles of Organization (California LLC)",
+   "agency": "California Secretary of State",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 70,
+   "source": "https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf",
+   "quote": "Articles of Organization Limited Liability Company (LLC) Filing Fee - $70.00",
+   "read": "2026-10-22",
+   "match": "\\bca-llc-1\\b|articles of organization \\(california llc\\)",
+   "agencyMatch": "California Secretary of State"
+  },
+  {
+   "key": "ca-llc-12",
+   "name": "Statement of Information (California LLC)",
+   "agency": "California Secretary of State",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 20,
+   "source": "https://www.sos.ca.gov/business-programs/business-entities/statements",
+   "quote": "Failure to file the required Statement of Information with the Secretary of State as outlined in statute may result in penalties",
+   "read": "2026-10-22",
+   "match": "\\bca-llc-12\\b|statement of information \\(california llc\\)",
+   "agencyMatch": "California Secretary of State"
+  },
+  {
+   "key": "irs-ss4",
+   "name": "Application for Employer Identification Number (EIN)",
+   "agency": "Internal Revenue Service",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+   "quote": "You never have to pay a fee for an EIN.",
+   "read": "2026-10-22",
+   "match": "\\birs-ss4\\b|application for employer identification number \\(ein\\)",
+   "agencyMatch": "Internal Revenue Service"
+  },
+  {
+   "key": "ca-cdtfa",
+   "name": "Seller's permit",
+   "agency": "California Department of Tax and Fee Administration",
+   "level": "state",
+   "required": false,
+   "verified": true,
+   "fee": 0,
+   "condition": "Only when the business sells taxable goods (retail products, parts) from the location.",
+   "source": "https://www.sf.gov/guide-opening-restaurant",
+   "quote": "Every location must have this permit to sell taxable goods.",
+   "read": "2026-10-22",
+   "match": "\\bca-cdtfa\\b|seller's permit",
+   "agencyMatch": "California Department of Tax and Fee Administration"
+  },
+  {
+   "key": "sf-business-registration",
+   "name": "San Francisco Business Registration Certificate",
+   "agency": "San Francisco Office of the Treasurer and Tax Collector",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": 55,
+   "source": "https://sftreasurer.org/registration",
+   "quote": "In general, businesses must register if any of the below statements are true: Maintain a fixed place of business within San Francisco .",
+   "read": "2026-10-22",
+   "match": "\\bsf-business-registration\\b|san francisco business registration certificate",
+   "agencyMatch": "San Francisco Office of the Treasurer and Tax Collector"
+  },
+  {
+   "key": "ca-edd-de1",
+   "name": "Registration Form for Commercial Employers",
+   "agency": "California Employment Development Department",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer",
+   "quote": "If you operate a business and hire employees or household workers, you must register as an employer within 15 days when:",
+   "read": "2026-10-21",
+   "match": "\\bca-edd-de1\\b|registration form for commercial employers",
+   "agencyMatch": "California Employment Development Department"
+  },
+  {
+   "key": "ca-workers-comp",
+   "name": "Workers' compensation insurance",
+   "agency": "California Department of Industrial Relations, Division of Workers' Compensation",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://dir.ca.gov/DWC/Employer.htm",
+   "quote": "California employers are required by law to have workers' compensation insurance, even if they have only one employee.",
+   "read": "2026-10-22",
+   "match": "\\bca-workers-comp\\b|workers' compensation insurance",
+   "agencyMatch": "California Department of Industrial Relations"
+  },
+  {
+   "key": "sf-dbi-building",
+   "name": "Building permit for a tenant improvement",
+   "agency": "San Francisco Department of Building Inspection",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.sf.gov/learn-about-our-building-permit-review-processes",
+   "quote": "Building permit projects must be sent to the required permitting agencies.",
+   "read": "2026-10-22",
+   "match": "\\bsf-dbi-building\\b|building permit for a tenant improvement",
+   "agencyMatch": "San Francisco Department of Building Inspection"
+  },
+  {
+   "key": "sf-sign",
+   "name": "Sign and awning permit",
+   "agency": "San Francisco Department of Building Inspection",
+   "level": "city",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "condition": "Only with an exterior sign or awning.",
+   "source": "https://sf.gov/step-by-step/get-permit-install-sign-or-awning",
+   "quote": "Most exterior business signs and all awnings require a permit.",
+   "read": "2026-10-22",
+   "match": "\\bsf-sign\\b|sign and awning permit",
+   "agencyMatch": "San Francisco Department of Building Inspection"
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "Any food permit, food handler or plan review",
+   "why": "The business sells no food.",
+   "match": "food (service|establishment|facility|dealer|handler|worker|manager|safety|protection|preparation)|plan (check|review)|retail food|sanitation|victualler|allergen"
+  },
+  {
+   "name": "Formula retail affidavit",
+   "why": "San Francisco's formula retail controls are for retail sales and service uses, not an office.",
+   "match": "formula retail"
+  }
+ ]
+}

@@ -1,0 +1,153 @@
+{
+ "id": "la-nail-salon",
+ "title": "Nail salon in Los Angeles",
+ "read": "2026-10-23",
+ "input": {
+  "what": "Nail salon",
+  "where": "Los Angeles, CA",
+  "lang": "en"
+ },
+ "assumptions": "A new LLC opens a nail salon in the City of Los Angeles, builds out the space, hires technicians and puts up a sign.",
+ "items": [
+  {
+   "key": "ca-llc-1",
+   "name": "Articles of Organization (California LLC)",
+   "agency": "California Secretary of State",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 70,
+   "source": "https://bpd.cdn.sos.ca.gov/llc/forms/llc-1.pdf",
+   "quote": "Articles of Organization Limited Liability Company (LLC) Filing Fee - $70.00",
+   "read": "2026-10-22",
+   "match": "\\bca-llc-1\\b|articles of organization \\(california llc\\)",
+   "agencyMatch": "California Secretary of State"
+  },
+  {
+   "key": "ca-llc-12",
+   "name": "Statement of Information (California LLC)",
+   "agency": "California Secretary of State",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 20,
+   "source": "https://www.sos.ca.gov/business-programs/business-entities/statements",
+   "quote": "Failure to file the required Statement of Information with the Secretary of State as outlined in statute may result in penalties",
+   "read": "2026-10-22",
+   "match": "\\bca-llc-12\\b|statement of information \\(california llc\\)",
+   "agencyMatch": "California Secretary of State"
+  },
+  {
+   "key": "irs-ss4",
+   "name": "Application for Employer Identification Number (EIN)",
+   "agency": "Internal Revenue Service",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+   "quote": "You never have to pay a fee for an EIN.",
+   "read": "2026-10-22",
+   "match": "\\birs-ss4\\b|application for employer identification number \\(ein\\)",
+   "agencyMatch": "Internal Revenue Service"
+  },
+  {
+   "key": "ca-cdtfa",
+   "name": "Seller's permit",
+   "agency": "California Department of Tax and Fee Administration",
+   "level": "state",
+   "required": false,
+   "verified": true,
+   "fee": 0,
+   "condition": "Only when the business sells taxable goods (retail products, parts) from the location.",
+   "source": "https://www.sf.gov/guide-opening-restaurant",
+   "quote": "Every location must have this permit to sell taxable goods.",
+   "read": "2026-10-22",
+   "match": "\\bca-cdtfa\\b|seller's permit",
+   "agencyMatch": "California Department of Tax and Fee Administration"
+  },
+  {
+   "key": "la-btrc",
+   "name": "City of Los Angeles business tax registration",
+   "agency": "City of Los Angeles Office of Finance",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc",
+   "quote": "Once you completed the registration process, you will receive a temporary Business Tax Registration Certificate or Registration Number.",
+   "read": "2026-10-22",
+   "match": "\\bla-btrc\\b|city of los angeles business tax registration",
+   "agencyMatch": "City of Los Angeles Office of Finance"
+  },
+  {
+   "key": "la-ladbs",
+   "name": "Building permit and Certificate of Occupancy",
+   "agency": "Los Angeles Department of Building and Safety",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://dbs.lacity.gov/services/plan-review-permitting/building-permits",
+   "quote": "Building Permits are required for new constructions, additions, alterations, and demolition/removal of a building or structure.",
+   "read": "2026-10-22",
+   "match": "\\bla-ladbs\\b|building permit and certificate of occupancy",
+   "agencyMatch": "Los Angeles Department of Building and Safety"
+  },
+  {
+   "key": "ca-edd-de1",
+   "name": "Registration Form for Commercial Employers",
+   "agency": "California Employment Development Department",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer",
+   "quote": "If you operate a business and hire employees or household workers, you must register as an employer within 15 days when:",
+   "read": "2026-10-21",
+   "match": "\\bca-edd-de1\\b|registration form for commercial employers",
+   "agencyMatch": "California Employment Development Department"
+  },
+  {
+   "key": "ca-workers-comp",
+   "name": "Workers' compensation insurance",
+   "agency": "California Department of Industrial Relations, Division of Workers' Compensation",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://dir.ca.gov/DWC/Employer.htm",
+   "quote": "California employers are required by law to have workers' compensation insurance, even if they have only one employee.",
+   "read": "2026-10-22",
+   "match": "\\bca-workers-comp\\b|workers' compensation insurance",
+   "agencyMatch": "California Department of Industrial Relations"
+  },
+  {
+   "key": "ca-bbc-establishment",
+   "name": "Barbering and cosmetology establishment license",
+   "agency": "California Board of Barbering and Cosmetology",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 50,
+   "source": "https://www.barbercosmo.ca.gov/forms_pubs/forms/estab_app.pdf",
+   "quote": "The non-refundable application fee of $50 must accompany this application.",
+   "read": "2026-10-23",
+   "match": "\\bca-bbc-establishment\\b|barbering and cosmetology establishment license",
+   "agencyMatch": "California Board of Barbering and Cosmetology"
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "Any food permit, food handler or plan review",
+   "why": "The business sells no food.",
+   "match": "food (service|establishment|facility|dealer|handler|worker|manager|safety|protection|preparation)|plan (check|review)|retail food|sanitation|victualler|allergen"
+  },
+  {
+   "name": "Auto repair registration",
+   "why": "Not an auto repair business.",
+   "match": "automotive repair|repair shop"
+  }
+ ]
+}

@@ -1,0 +1,18 @@
+{
+ "what": "The sectors set: openings in the landing page's sectors beyond food, retail and furniture (src/forms/sectors.ts), scored on the filings and, for the device importer, on what the plan states beyond them. A nail salon in Los Angeles (California's establishment license), an import 3PL warehouse in Houston, an auto repair shop in San José (California's automotive repair dealer registration), a medical device importer in New York City (FDA's establishment registration as initial importer) and a tech office in San Francisco (no formula retail affidavit).",
+ "researched": "2026-10-23, from official pages only, each quote re-read with curl: the Board of Barbering and Cosmetology's establishment application, the Bureau of Automotive Repair's licensing page, FDA's device registration pages and its FY 2027 MDUFA fee page; the other rows' quotes are the library's, each in scripts/eval/proof-log.json.",
+ "left_out": [
+  {
+   "what": "Each salon worker's and mechanic's own license",
+   "why": "Held by the person, not filed by the business; the plans list the business's filings."
+  },
+  {
+   "what": "Hazardous waste and used oil rules for an auto repair shop",
+   "why": "Not read on an official page in this pass."
+  },
+  {
+   "what": "The foreign manufacturer's device listing and US agent",
+   "why": "Filed by the manufacturer abroad, not the importer; the plan states the importer's own duties."
+  }
+ ]
+}

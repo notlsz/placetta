@@ -1,0 +1,181 @@
+{
+ "id": "nyc-device-importer",
+ "title": "Medical device importer in New York City",
+ "read": "2026-10-23",
+ "input": {
+  "what": "Medical device importer",
+  "where": "Flushing, New York City, NY",
+  "lang": "en"
+ },
+ "assumptions": "A new New York LLC imports medical devices from its parent's factory abroad as initial importer, from an office in Flushing, and hires staff.",
+ "items": [
+  {
+   "key": "ny-dos-1336",
+   "name": "Articles of Organization (New York LLC)",
+   "agency": "New York Department of State, Division of Corporations",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 200,
+   "source": "https://dos.ny.gov/node/16156",
+   "quote": "Organizers form an LLC by filing the Articles of Organization",
+   "read": "2026-10-22",
+   "match": "\\bny-dos-1336\\b|articles of organization \\(new york llc\\)",
+   "agencyMatch": "New York Department of State"
+  },
+  {
+   "key": "irs-ss4",
+   "name": "Application for Employer Identification Number (EIN)",
+   "agency": "Internal Revenue Service",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+   "quote": "You never have to pay a fee for an EIN.",
+   "read": "2026-10-22",
+   "match": "\\birs-ss4\\b|application for employer identification number \\(ein\\)",
+   "agencyMatch": "Internal Revenue Service"
+  },
+  {
+   "key": "ny-dos-pub",
+   "name": "LLC publication within 120 days",
+   "agency": "New York Department of State, Division of Corporations",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 50,
+   "source": "https://dos.ny.gov/node/16156",
+   "quote": "Failure to publish and file the Certificate of Publication with the Department of State within 120 days",
+   "read": "2026-10-22",
+   "match": "\\bny-dos-pub\\b|llc publication within 120 days",
+   "agencyMatch": "New York Department of State"
+  },
+  {
+   "key": "cbp-5106",
+   "name": "Create/Update Importer Identity Form",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf",
+   "quote": "shall file CBP Form 5106 with the first formal entry.",
+   "read": "2026-10-18",
+   "match": "\\bcbp-5106\\b|create/update importer identity form",
+   "agencyMatch": "U\\.S\\. Customs and Border Protection"
+  },
+  {
+   "key": "cbp-301",
+   "name": "Customs Bond",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part142.pdf",
+   "quote": "unless a single entry or continuous bond on Customs Form 301, containing the bond conditions set forth in § 113.62 of this chapter,",
+   "read": "2026-10-22",
+   "match": "\\bcbp-301\\b|customs bond",
+   "agencyMatch": "U\\.S\\. Customs and Border Protection"
+  },
+  {
+   "key": "cbp-ace",
+   "name": "ACE Secure Data Portal account for importers",
+   "agency": "U.S. Customs and Border Protection",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://govinfo.gov/content/pkg/FR-2024-05-24/pdf/2024-11495.pdf",
+   "quote": "register an entity as an Importer of Record (IOR) in the Automated Commercial Environment (ACE)",
+   "read": "2026-10-22",
+   "match": "\\bcbp-ace\\b|ace secure data portal account for importers",
+   "agencyMatch": "U\\.S\\. Customs and Border Protection"
+  },
+  {
+   "key": "ny-dtf-17",
+   "name": "Application for Registration as a Sales Tax Vendor (Certificate of Authority)",
+   "agency": "New York State Department of Taxation and Finance",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://www.tax.ny.gov/bus/st/register.htm",
+   "quote": "If you must register to collect sales tax and need information about how to register, see Tax Bulletin",
+   "read": "2026-10-22",
+   "match": "\\bny-dtf-17\\b|application for registration as a sales tax vendor \\(certificate of authority\\)",
+   "agencyMatch": "New York State Department of Taxation and Finance"
+  },
+  {
+   "key": "fda-device-reg",
+   "name": "Medical device establishment registration (initial importer)",
+   "agency": "U.S. Food and Drug Administration, Center for Devices and Radiological Health",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 13785,
+   "source": "https://www.fda.gov/medical-devices/how-study-and-market-your-device/device-registration-and-listing",
+   "quote": "intended for use in the U.S. are required to register annually with the FDA.",
+   "read": "2026-10-23",
+   "match": "\\bfda-device-reg\\b|medical device establishment registration \\(initial importer\\)",
+   "agencyMatch": "U\\.S\\. Food and Drug Administration"
+  },
+  {
+   "key": "ny-dol-100",
+   "name": "New employer registration for unemployment insurance and withholding",
+   "agency": "New York State Department of Labor",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://dol.ny.gov/register-unemployment-insurance-0",
+   "quote": "You must complete an employer registration form for us to decide if you are liable under the New York State Unemployment Insurance Law.",
+   "read": "2026-10-22",
+   "match": "\\bny-dol-100\\b|new employer registration for unemployment insurance and withholding",
+   "agencyMatch": "New York State Department of Labor"
+  },
+  {
+   "key": "ny-wcb",
+   "name": "Proof of workers' comp and disability/paid family leave insurance",
+   "agency": "New York State Workers' Compensation Board",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.wcb.ny.gov/content/main/coverage-requirements.jsp",
+   "quote": "Disability and Paid Family Leave benefits coverage is required for sole proprietorships with employees, including part-time employees",
+   "read": "2026-10-22",
+   "match": "\\bny-wcb\\b|proof of workers' comp and disability/paid family leave insurance",
+   "agencyMatch": "New York State Workers' Compensation Board"
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "Any food permit, food handler or plan review",
+   "why": "The business sells no food.",
+   "match": "food (service|establishment|facility|dealer|handler|worker|manager|safety|protection|preparation)|plan (check|review)|retail food|sanitation|victualler|allergen"
+  },
+  {
+   "name": "CPSC product certificate",
+   "why": "The Consumer Product Safety Act's \"consumer product\" excludes devices as the FD&C Act defines them (15 U.S.C. 2052(a)(5)(H)).",
+   "match": "cpsc-cert|product safety certificate"
+  },
+  {
+   "name": "FDA food facility registration",
+   "why": "Devices, not food.",
+   "match": "food facility registration|fda-ffr"
+  }
+ ],
+ "facts": [
+  {
+   "key": "us-device-importer-address",
+   "match": "\\bus-device-importer-address\\b",
+   "source": "https://www.fda.gov/medical-devices/device-registration-and-listing/who-must-register-list-and-pay-fee",
+   "quote": "The initial importer must have a physical address in the United States staffed by individuals responsible for ensuring the compliance of imported devices",
+   "read": "2026-10-23",
+   "required": true
+  }
+ ]
+}
