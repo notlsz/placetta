@@ -1275,7 +1275,7 @@ try {
     const a = ans?.body.assistant;
     check("the call is answered with the AI assistant", a?.id === "assistant-e2e" && decodeState(ans?.body.client_state).k === "talk", ans?.body);
     const toolNames = (a?.tools ?? []).map((t: { webhook?: { name: string }; type: string }) => t.webhook?.name ?? t.type);
-    check("its tools are the call's webhooks (no code step when attested)", JSON.stringify(toolNames) === JSON.stringify(["workspace_details", "start_task", "send_text", "hangup"]), toolNames);
+    check("its tools are the call's webhooks (no code step when attested)", JSON.stringify(toolNames) === JSON.stringify(["workspace_details", "start_task", "send_text", "call_agency", "hand_to_team", "recording_refused", "hangup"]), toolNames);
     const hook = a?.tools?.[0]?.webhook;
     check("each tool posts back to odelia-voice with a per-call token", hook?.url === `${GATEWAY}/functions/v1/odelia-voice?tool=workspace_details` && hook?.headers?.[0]?.name === "x-odelia-call" && hook?.headers?.[0]?.value?.length > 40, hook);
     check("instructions carry the workspace, greeting uses the first name", /Workspace \(read only, JSON\)/.test(a?.instructions ?? "") && /Flushing, Roosevelt Ave/.test(a?.instructions ?? "") && /^Hi Mei/.test(a?.greeting ?? ""), a?.greeting);
