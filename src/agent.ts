@@ -1,10 +1,12 @@
 import type { OrbState } from "thinking-orbs";
 import { nextAction, progress, reconcile } from "./jobs";
-import { B, MATCH_FREMONT, MATCH_SJ, SRC, genericMatch, same, type Application, type Approval, type Bi, type Doc, type Fact, type Workspace } from "./model";
+import { B, MATCH_FREMONT, MATCH_SJ, SRC, genericMatch, same, type Application, type Approval, type Bi, type Doc, type Fact, type Store, type Workspace } from "./model";
 import { fmtDay, inDays, money, nowIso } from "./time";
 import { groundedAnswer } from "./answer";
 import { ownWords, readLine } from "./plan/line";
-import { appealFor } from "./appeals";
+import { appealFor, appealSay } from "./appeals";
+import { openingOf } from "./smart";
+import { headline, todos } from "./doNext";
 
 /* ------------------------------------------------------------------ *
  * The contract between the workspace and whatever runs the agent.
@@ -213,7 +215,7 @@ function ruleChange(ctx: Context): Plan {
   const done = ctx.current.apps.find(a => a.id === "plancheck")?.checklist.some(c => c.id === "grease");
   return {
     steps: [
-      S("searching", "Reading the county's notice", "阅读县政府的通知", "sccgov.org"),
+      S("searching", "Reading the county's notice", "阅读县政府的通知", "deh.santaclaracounty.gov"),
       S("solving", "Checking whether it applies to your shop", "判断是否适用于您的门店"),
       ...(done ? [] : [S("shaping", "Starting the worksheet from your plans", "根据您的图纸开始填写计算表")]),
     ],
@@ -346,6 +348,95 @@ function fromComment(ctx: Context, text: string): Plan {
   };
 }
 
+/* -------------------- questions about the workspace itself -------------------- *
+ * "What permits do I still need for San Jose and when will we open?", "what's left", "when do we open", "what do I need
+ * to do", "还需要哪些许可": the answer is in the workspace (its permits, stores, opening path and what's waiting on the
+ * owner), so it's answered from there first. The forms library answers what a place requires in general; sending it a
+ * question about this business's own permits made Odelia say "I'm not sure" with ten San Jose permits on file
+ * (docs/LESSONS.md). Checked by scripts/agent-test.ts. */
+const OWN_LEFT = /\b(still (need|have to|to do|missing|waiting)|what'?s (left|next|missing|outstanding)|what is (left|next|missing)|left to (do|get|file)|remaining|outstanding|what (do|should|must) (i|we) (still )?(need to |have to )?do|what do (i|we) (still )?need( to do)?\??$|where (do|are) (we|things|my permits|our permits) stand)\b|还需要|还差|剩下|还有哪些|还要(做|办)|需要做什么|该做什么|要做什么|下一步做什么/i;
+const OWN_OPEN = /\bwhen (do|will|can|are|should|could|would|might) (we|i|the (shop|store))\b[^?？]*\bopen|\bopening (date|day)\b|\bopen on time\b|什么时候(能|可以)?开业|何时开业|开业(日期|时间)|哪天开业|几时开业/i;
+const OWN_MINE = /\b(my|our) (permits?|licen[cs]es?|applications?)\b.*\?|我(们)?的(许可|执照|申请)/i;
+
+/** The stores a question is about: the ones it names, else the ones still opening, else all. undefined: it names a
+ *  place that isn't this business's (the library's question then). */
+function storesAsked(ctx: Context, text: string) {
+  const stores = ctx.current.stores ?? [];
+  const words = (s: string) => s.toLowerCase().replace(/\(sample\)/g, "").split(/[^a-z一-鿿]+/).filter(w => w.length > 3 && !/^(street|north|south|east|west|main|first|road|avenue)$/.test(w));
+  const t = text.toLowerCase();
+  const zhKey = (s: Store) => s.name.zh.split(/\s/)[0].replace(/[A-Za-z0-9,.]/g, "");
+  const named = stores.filter(s => [...words(s.name.en), ...words(s.address)].some(w => t.includes(w)) || (zhKey(s).length >= 2 && text.includes(zhKey(s))));
+  if (named.length) return named;
+  // "in Austin", "for Texas": a place, and none of the business's
+  const place = /\b(?:in|for|at|near)\s+([A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)?)/.exec(text)?.[1];
+  const notPlace = /^(The|My|Our|Me|Us|January|February|March|April|May|June|July|August|September|October|November|December|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/;
+  if (place && !notPlace.test(place) && !(ctx.current.locations ?? []).some(l => l.name.en.toLowerCase().includes(place.toLowerCase()))) return undefined;
+  const opening = stores.filter(s => s.stage === "opening");
+  return opening.length ? opening : stores;
+}
+
+function fromWorkspace(ctx: Context, text: string): Plan | null {
+  const left = OWN_LEFT.test(text), open = OWN_OPEN.test(text), mine = OWN_MINE.test(text);
+  if (!left && !open && !mine) return null;
+  const w = ctx.current, stores = storesAsked(ctx, text);
+  if (stores === undefined || (!w.apps.length && !(w.stores ?? []).length)) return null;
+  const today = inDays(0);
+  const lower = (s: string) => (/^[A-Z][a-z]/.test(s) && !/^(Placetta|Odelia|San|Santa|California|County|City|Moonleaf)\b/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
+  const appsOf = (s?: Store) => (!s || (w.stores ?? []).length <= 1 ? w.apps : w.apps.filter(a => (s.apps ?? []).includes(a.id)));
+  const text_: Bi[] = [], ids: string[] = [];
+  // what a permit waits on, in a few words: "needs your floor plan and equipment list", "waits on the plan check"
+  const waitsOn = (a: Application): Bi => {
+    const missing = a.checklist.filter(c => c.state === "missing" && !c.dep);
+    const dep = a.checklist.map(c => (c.state !== "done" && c.dep ? w.apps.find(x => x.id === c.dep && x.status !== "approved") : undefined)).find(Boolean);
+    const first = (b: Bi) => B(b.en.split(/\.\s+/)[0].replace(/\.$/, ""), b.zh.split("。")[0].split("，")[0]);
+    if (a.status === "ready") return w.approvals.some(x => x.app === a.id) ? B("ready, waiting for your approval", "已就绪，等您批准") : B("ready to file", "可以提交");
+    if (missing.length) {
+      // a document by its plain name ("Floor plan, to scale" is the floor plan); more than fits in a few words is a count
+      const en = missing.map(c => c.label.en.split(/,| with | \(/)[0].trim().toLowerCase()), zh = missing.map(c => c.label.zh.split(/[，（]|及/)[0].replace(/^.*的/, ""));
+      if (missing.length <= 2 && en.join(" and ").length <= 36) return B(`needs your ${en.join(" and ")}`, `需要您的${zh.join("和")}`);
+      // many of one kind ("2 of 6 cards in") says it better than a count of documents
+      if (missing.length > 2 && a.next) return B(lower(first(a.next).en), first(a.next).zh);
+      return B(`needs ${missing.length} documents from you`, `需要您提供 ${missing.length} 份文件`);
+    }
+    if (dep) return B(`waits on the ${lower(dep.name.en)}`, `等${dep.name.zh}`);
+    if (a.status === "draft") return B("Odelia is preparing it", "Odelia 正在准备");
+    return a.next ? B(lower(first(a.next).en), first(a.next).zh) : B("not started", "尚未开始");
+  };
+  const one = (s: Store | undefined) => {
+    const apps = appsOf(s), done = apps.filter(a => a.status === "approved"), agency = apps.filter(a => a.status === "review" || a.status === "filing");
+    const todo = apps.filter(a => !["approved", "review", "filing"].includes(a.status)).sort((x, y) => Number(!!y.critical) - Number(!!x.critical));
+    const who = s ? B(`${s.name.en}: `, `${s.name.zh}：`) : B("Your permits: ", "您的许可：");
+    // one line that scans, then one line per permit still to get (no bullets: each is its own line)
+    const head = B(`${who.en}${done.length} of ${apps.length} done${agency.length ? `, ${agency.length} with the agency` : ""}, ${todo.length ? `${todo.length} to go` : "nothing else to get"}.`,
+      `${who.zh}${apps.length} 项中已办好 ${done.length} 项${agency.length ? `，${agency.length} 项在机构审核` : ""}，${todo.length ? `还有 ${todo.length} 项` : "其余都已办好"}。`);
+    const rows = todo.map(a => { const why = waitsOn(a); return B(`${a.name.en}: ${why.en}`, `${a.name.zh}：${why.zh}`); });
+    if (left || mine || !open) text_.push(B([head.en, ...rows.map(r => r.en)].join("\n"), [head.zh, ...rows.map(r => r.zh)].join("\n")));
+    ids.push(...todo.filter(a => a.critical).map(a => a.id));
+    if (s && s.stage === "opening" && (open || left)) {
+      const d = openingOf(s, w, today);
+      if (d) {
+        const opens = B(`${open && !left ? `${s.name.en} opens` : "Opens"} around ${fmtDay(d, "en", true)}`, `${open && !left ? s.name.zh : ""}约 ${fmtDay(d, "zh", true)} 开业`);
+        const p = s.plannedOpen, gap = p ? Math.round((Date.parse(p + "T12:00:00Z") - Date.parse(d + "T12:00:00Z")) / 864e5) : null;
+        const target = p ? B(fmtDay(p, "en", p.slice(0, 4) !== d.slice(0, 4)), fmtDay(p, "zh", p.slice(0, 4) !== d.slice(0, 4))) : null;
+        const vs = gap == null || !target ? B(".", "。")
+          : gap > 0 ? B(`, ${gap} day${gap === 1 ? "" : "s"} before your ${target.en} target.`, `，比您定的 ${target.zh} 早 ${gap} 天。`)
+          : gap < 0 ? B(`, ${-gap} day${gap === -1 ? "" : "s"} after your ${target.en} target.`, `，比您定的 ${target.zh} 晚 ${-gap} 天。`)
+          : B(`, right on your ${target.en} target.`, `，正好是您定的 ${target.zh}。`);
+        text_.push(B(opens.en + vs.en, opens.zh + vs.zh));
+      } else text_.push(B("Opening: no date yet. The permits aren't mapped for it.", "开业：尚无日期，还没有梳理它的许可。"));
+    } else if (s && s.stage === "open" && open) text_.push(B(`${s.name.en} is already open${s.opened ? `, since ${fmtDay(s.opened, "en", true)}` : ""}.`, `${s.name.zh}已开业${s.opened ? `，自 ${fmtDay(s.opened, "zh", true)} 起` : ""}。`));
+  };
+  if (!stores.length) one(undefined); else stores.slice(0, 2).forEach(one);
+  // the one thing to do first: the same as Home's "Do this next" (src/doNext.ts)
+  const list = todos(w, today), first = list[0];
+  if (first) text_.push(B(`Next for you: ${lower(headline(first).en)}. ${list.length === 1 ? "It's the one thing waiting on you." : `It's 1 of ${list.length} things waiting on you; the rest are on Home.`}`,
+    `您的下一步：${headline(first).zh}。${list.length === 1 ? "这是唯一等您处理的事项。" : `共 ${list.length} 项等您处理，其余在首页。`}`));
+  return {
+    steps: [S("searching", "Reading your permits and stores", "读取您的许可和门店"), S("connecting", "Tracing the chain to opening day", "梳理通往开业日的环节"), S("composing", "Putting what needs you first", "先列出需要您处理的事项")],
+    reply: { text: text_, apps: [...new Set(ids)].slice(0, 3), approvals: first?.kind === "approval" ? [first.a.id] : [], sources: cite(ctx, ...[...new Set(ids)].slice(0, 2)) },
+  };
+}
+
 /** A question about a requirement, answered from the official forms library with the agency's page as the source,
  *  or "I'm not sure, here's who to ask" when the library doesn't have it (src/answer.ts). Null: not such a question. */
 function question(ctx: Context, text: string): Plan | null {
@@ -457,7 +548,7 @@ function inspections(ctx: Context): Plan {
   const plan = ctx.current.apps.find(a => a.id === "plancheck");
   const ap = ctx.current.approvals.find(x => x.app === "plancheck");
   return {
-    steps: [S("searching", "Checking how the county books inspections", "查看县政府如何预约检查", "sccgov.org")],
+    steps: [S("searching", "Checking how the county books inspections", "查看县政府如何预约检查", "deh.santaclaracounty.gov")],
     reply: { text: [plan && plan.status !== "approved"
       ? B("The county books the health inspection after it approves the plan check, and the plan check is next. Once it's approved I ask the county for times and bring you the slots to pick; a mock inspection with you comes first.", "县政府批准图纸审查后才预约卫生检查，图纸审查是下一步。批准后我向县政府要时间，请您挑选；正式检查前先和您做一次模拟检查。")
       : B("I'll ask the county for inspection times and bring you the slots to pick. A mock inspection with you comes first.", "我会向县政府要检查时间，请您挑选。正式检查前先和您做一次模拟检查。")],
@@ -474,14 +565,13 @@ function appeal(ctx: Context, text: string): Plan {
     steps: [S("searching", "Looking up the appeal route", "查找申诉途径")],
     reply: { text: [B("Send me the denial letter: the appeal deadline runs from its date, and I'll find the route and draft the appeal from it.", "请把驳回信发给我：申诉期限从信上的日期算起，我会据此找到途径并起草申诉。")] },
   };
-  const d = route.deadline, days = d.days != null ? `${d.days} ${d.unit === "business" ? "business days" : d.unit === "months" ? "months" : "days"}` : "";
-  const daysZh = d.days != null ? `${d.days} ${d.unit === "business" ? "个工作日" : d.unit === "months" ? "个月" : "天"}` : "";
+  // said in sentences (src/appeals appealSay): a route's name and body are labels, never pasted into one clause
+  const say = appealSay(route);
   return {
     steps: [S("searching", "Finding who hears the appeal", "查找申诉受理机构"), S("solving", "Working out the deadline from the rule", "根据规定计算期限")],
     reply: { text: [route.id === "business_license_denial"
       ? B("A denied permit is appealed to the office the denial letter names, by the deadline it gives. Send me the letter and I'll draft the appeal from it.", "被驳回的许可，向驳回信上写明的部门申诉，期限以信为准。请把信发给我，我据此起草申诉。")
-      : B(`${route.name.en}, heard by ${route.body.en}.${days ? ` The deadline is ${days} from the decision${d.verified ? "" : " (unconfirmed: check the denial letter)"}.` : " The deadline is on the denial letter."} Send me the letter and I'll draft the appeal.`,
-      `${route.name.zh}，由${route.body.zh}受理。${daysZh ? `期限为决定后 ${daysZh}${d.verified ? "" : "（未确认：以驳回信为准）"}。` : "期限以驳回信为准。"}请把信发给我，我来起草申诉。`)],
+      : B(`${say.route.en} ${say.deadline.en} Send me the letter and I'll draft it.`, `${say.route.zh}${say.deadline.zh}请把信发给我，我来起草。`)],
       sources: route.sources.slice(0, 2).map(u => ({ title: route.body.en, url: u })) },
   };
 }
@@ -499,13 +589,18 @@ function where(ctx: Context, text: string): Plan {
 }
 
 function waiting(ctx: Context): Plan {
-  const aps = ctx.current.approvals;
+  // the same list, in the same order, as Home's "Do this next" and "Waiting on you" and its badge (src/doNext.ts)
+  const list = todos(ctx.current, inDays(0)), aps = ctx.current.approvals;
   const fee = (id?: string) => { const a = ctx.current.apps.find(x => x.id === id); const n = a ? a.fees.reduce((s, f) => s + f.amount, 0) : 0; return n ? `, ${money(n)}` : ""; };
+  const say = (x: (typeof list)[number]) => { const h = headline(x), f = x.kind === "approval" ? fee(x.a.app) : ""; return B(`${h.en.charAt(0).toLowerCase() + h.en.slice(1)}${f}`, `${h.zh}${f}`); };
+  const shown = list.slice(0, 5).map(say), more = list.length - shown.length;
   return {
     steps: [S("searching", "Checking what's waiting on you", "查看等您处理的事项")],
-    reply: { text: [aps.length
-      ? B(`${aps.length} waiting on you: ${aps.slice(0, 4).map(a => `${a.title.en.charAt(0).toLowerCase() + a.title.en.slice(1)}${fee(a.app)}`).join("; ")}. Each one is a tap below.`, `${aps.length} 项等您处理：${aps.slice(0, 4).map(a => `${a.title.zh}${fee(a.app)}`).join("；")}。下方点一下即可。`)
-      : B("Nothing is waiting on you. I'm on the rest.", "目前没有等您处理的事项，其余的我在办。")], approvals: aps.map(a => a.id) },
+    reply: { text: [list.length
+      ? B(`${list.length} waiting on you, most urgent first: ${shown.map(s => s.en).join("; ")}${more ? `; and ${more} more on Home` : ""}. The approvals are a tap below.`,
+        `${list.length} 项等您处理，按紧急程度排列：${shown.map(s => s.zh).join("；")}${more ? `；其余 ${more} 项在首页` : ""}。需要批准的，下方点一下即可。`)
+      : B("Nothing is waiting on you. I'm on the rest.", "目前没有等您处理的事项，其余的我在办。")],
+      approvals: list.flatMap(x => (x.kind === "approval" ? [x.a.id] : [])).filter(id => aps.some(a => a.id === id)) },
   };
 }
 
@@ -571,7 +666,7 @@ const FILE: Record<string, FileCfg> = {
     next: B("Filed just now. Account number in about 2 weeks", "刚刚提交，约 2 周内获得账号"), watch: B("Watching the EDD for your employer account number", "跟进加州就业发展局的雇主账号"),
     reply: [B("Filed your employer registration with the EDD. There was no fee. I'll watch for your employer account number, usually about two weeks.", "已向加州就业发展局提交雇主登记，无需费用。我会跟进您的雇主账号，通常约两周。")],
     also: [dropDeadline("dl-wages")] },
-  "a-plan": { app: "plancheck", portal: PORTAL.scc, tool: "sccgov.org", fee: 1385, receipt: "plan-check-receipt.pdf", est: B("Plan check comments or approval expected", "预计收到图纸审查意见或批准"), days: 26,
+  "a-plan": { app: "plancheck", portal: PORTAL.scc, tool: "deh.santaclaracounty.gov", fee: 1385, receipt: "plan-check-receipt.pdf", est: B("Plan check comments or approval expected", "预计收到图纸审查意见或批准"), days: 26,
     next: B("Filed just now. The county usually replies in 15 to 20 business days", "刚刚提交，县政府通常 15 至 20 个工作日内回复"), watch: B("Watching the county for plan check comments", "跟进县政府的图纸审查意见"),
     reply: [B("Filed the plan check with Santa Clara County. The county invoices its review fee, and the payment link is in Updates. If the county sends comments, I'll draft the changes and bring them to you.", "已向圣克拉拉县提交图纸审查。县政府会开具审查费账单，付款链接在更新中。如果县政府提出意见，我会起草修改并交给您确认。")],
     also: [dropDeadline("dl-plan"), setApp("building", { next: B("Starts when the county approves the plans", "县政府批准图纸后开始") })] },
@@ -736,7 +831,7 @@ function upload(u: { app: string; item: string; files: { name: string; size: num
   let reply: Reply = { text: [B("Added it to the checklist.", "已加入清单。")], apps: [u.app], memory };
   if (u.app === "plancheck") {
     if (!stillMissing.length) {
-      steps.push(S("solving", "Checking the plan check against the county's list", "对照县政府清单核对图纸审查", "sccgov.org"));
+      steps.push(S("solving", "Checking the plan check against the county's list", "对照县政府清单核对图纸审查", "deh.santaclaracounty.gov"));
       updates.push(
         setCheck("plancheck", "grease", { state: "done", note: B("Finished by Placetta from the equipment list", "快哉根据设备清单完成") }),
         setApp("plancheck", { status: "ready", next: B("Ready to file. Waiting for your approval", "可以提交，等待您批准") }),
@@ -772,7 +867,7 @@ function match(what: string, where: string): Plan {
       : S("weaving", "Working out what this business needs", "分析这家企业需要哪些许可"),
     S("searching", "Checking federal requirements on irs.gov", "查阅 irs.gov 的联邦要求", "irs.gov"),
     S("searching", "Checking state requirements", "查阅州级要求", isSJ || isFr ? "cdtfa.ca.gov" : undefined),
-    isSJ ? S("searching", "Checking Santa Clara County Environmental Health rules", "查阅圣克拉拉县环境卫生局规定", "sccgov.org")
+    isSJ ? S("searching", "Checking Santa Clara County Environmental Health rules", "查阅圣克拉拉县环境卫生局规定", "deh.santaclaracounty.gov")
       : isFr ? S("searching", "Checking Alameda County Environmental Health rules", "查阅阿拉米达县环境卫生局规定", "acgov.org")
         : S("searching", `Checking county rules for ${w}`, `查阅 ${w} 的县级规定`),
     isSJ ? S("searching", "Checking sanjoseca.gov requirements", "查阅 sanjoseca.gov 的要求", "sanjoseca.gov")
@@ -806,7 +901,8 @@ function plan(req: Request, ctx: Context): Plan {
   // the scripted jobs that start with their own words first, then a question about a requirement, then the rest
   const own = SCRIPTS.slice(0, 6).find(s => s.match.test(req.text)) ?? PROMISES.find(s => s.match.test(req.text));
   if (own) return own.plan(ctx, req.text);
-  return question(ctx, req.text) ?? SCRIPTS.find(s => s.match.test(req.text))?.plan(ctx, req.text) ?? FALLBACK();
+  // a question about this business's own permits, stores and dates: the workspace answers it before the forms library
+  return fromWorkspace(ctx, req.text) ?? question(ctx, req.text) ?? SCRIPTS.find(s => s.match.test(req.text))?.plan(ctx, req.text) ?? FALLBACK();
 }
 
 /** Scripted stand-in for the real agent, so the product can be designed and tested end to end. */

@@ -27,11 +27,11 @@ export function citeTests(ok: Ok, eq: Eq) {
   const used = usedBy("find_official_forms", {}, { forms: [{ official_form_id: "scc-health-permit" }] });
   const reply = "Santa Clara County requires a health permit for the shop; the operating fee is invoiced after the final inspection.";
   const [c] = sourceLinks(reply, used, "2026-10-23");
-  ok(c && /permitted by Santa Clara County Department of Environmental Health/.test(c.quote ?? "") && c.read === "2026-10-22", "hovering the county's number shows the sentence read on the page and the day", c);
-  ok(c && c.url === "https://www.milpitas.gov/DocumentCenter/View/248" && !c.from, "the link is the page the quote was read on, so no second page is named", c);
+  ok(c && /you can file for an operating permit/.test(c.quote ?? "") && c.read === "2026-10-23", "hovering the county's number shows the sentence read on the page and the day", c);
+  ok(c && c.url === "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/restaurant-grocery-store-or-other-fixed-food" && !c.from, "the link is the page the quote was read on, so no second page is named", c);
   ok(c && (c.keys ?? []).includes("County of Santa Clara Department of Environmental Health") && !(c.keys ?? []).some(k => k.length <= 2), "its keys are the words a sentence uses for it", c?.keys);
   const away = sourceLinks("The fee is $50.", [{ kind: "form", label: "X", url: "https://example.gov/other", form: "scc-health-permit" }], "2026-10-23")[0];
-  ok(away?.from === "https://www.milpitas.gov/DocumentCenter/View/248", "a quote read on another page names that page", away);
+  ok(away?.from === "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/restaurant-grocery-store-or-other-fixed-food", "a quote read on another page names that page", away);
   const [stale] = sourceLinks(reply, used, "2027-06-01");
   ok(stale && !stale.quote && !stale.read, "a quote not seen within 90 days is never shown as current", stale);
   const pages = sourceLinks("The fee is $50.", [{ kind: "page", label: "sfgov.org", url: "https://sfgov.org/a" }], "2026-10-23");

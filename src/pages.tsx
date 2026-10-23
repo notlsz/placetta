@@ -4,7 +4,11 @@ import { useApp, type PermitsTab, type View } from "./ctx";
 import type { Approval, Application, Deadline, Fact, FactGroup, Level, LicenseHit, Status } from "./model";
 import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn, fmtMonth, fmtStamp, money } from "./time";
 import { FileCard, Footer, I, Modal, Pill, StatusChip, feeText, feeTotal } from "./ui";
-import { openingPath } from "./smart";
+import { withOpenings, workspaceOpening, type Evidence } from "./smart";
+import { scheduleAppeals } from "./finish";
+import type { Workspace } from "./model";
+import { useEvidence } from "./evidence";
+import { approvalRoute } from "./approvalRoute";
 import { oneTap } from "./today";
 import { audit } from "./core";
 import { firstPlanClock, secondsSay } from "./plan/prefill";
@@ -140,6 +144,15 @@ function BatchApprove() {
   );
 }
 
+/** Who files it and how long the agency takes (src/approvalRoute.ts): a line on every approval card. The time shows only
+ *  when the registry or the application states one. */
+export function RouteLine({ a, app }: { a: Approval; app?: Application }) {
+  const { b } = useApp();
+  const r = approvalRoute(a, app);
+  if (!r) return null;
+  return <span className="appr-route"><em>{b(r.who)}</em>{r.time && <span className="appr-time"><I.clock />{b(r.time)}</span>}</span>;
+}
+
 /** One thing only you can do, with its one tap: Approve opens the approval (you confirm there), Upload opens the file
  *  picker on the first missing document, Pay opens the agency's page. */
 export function NeedRow({ a, compact }: { a: Approval; compact?: boolean }) {
@@ -155,7 +168,7 @@ export function NeedRow({ a, compact }: { a: Approval; compact?: boolean }) {
   if (a.kind === "pay") return (
     <div className={"appr k-pay" + (compact ? " compact" : "")}>
       <span className={"appr-ico k-" + a.kind}><Icon /></span>
-      <span className="appr-tx"><b>{b(a.title)}</b>{sub && <span>{sub}</span>}</span>
+      <span className="appr-tx"><b>{b(a.title)}</b>{sub && <span>{sub}</span>}<RouteLine a={a} app={app} /></span>
       <span className="appr-btns">
         <button type="button" className="pill quiet sm" disabled={busy} onClick={() => a.filing && void cloud?.markPaid(a.filing)}>{b(B("I've paid", "我已付款"))}</button>
         <Pill onClick={() => approve(a.id)} sm={compact}>{b(B("Pay the agency", "去付款"))}</Pill>
@@ -165,7 +178,7 @@ export function NeedRow({ a, compact }: { a: Approval; compact?: boolean }) {
   return (
     <div className={"appr" + (compact ? " compact" : "")}>
       <span className={"appr-ico k-" + a.kind}><Icon /></span>
-      <span className="appr-tx"><b>{b(a.title)}</b>{sub && <span>{sub}</span>}</span>
+      <span className="appr-tx"><b>{b(a.title)}</b>{sub && <span>{sub}</span>}<RouteLine a={a} app={app} /></span>
       {a.kind === "upload" ? (
         <>
           <input ref={pick} type="file" hidden multiple onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (app && missing && f.length) upload(app.id, missing.id, f); }} />
@@ -320,7 +333,7 @@ function DoNextCard({ x, n, onLater, docs, title }: { x: Todo; n: number; onLate
     <section className="dtn" data-do-next={x.key} aria-labelledby="dtn-h">
       <h1 className="vh">{title}</h1>
       {phone && <div className="dtn-bot" aria-hidden="true"><AgentBot size={64} busy={busy} task={busy ? live?.state : undefined} gaze={[0, 2.4]} interactive={false} /></div>}
-      <p className="dtn-k">{zh ? "下一步" : "Do this next"}{docs && docs.of > 1 ? <span>{zh ? `文件 ${docs.i}/${docs.of}` : `${docs.i} of ${docs.of}`}</span> : null}</p>
+      <p className="dtn-k">{zh ? "下一步" : "Do this next"}{docs && docs.of > 1 ? <span>{zh ? `文件 ${docs.i}/${docs.of}` : `${docs.i} of ${docs.of}`}</span> : n > 1 ? <span>{zh ? `第 1 项，共 ${n} 项` : `1 of ${n}`}</span> : null}</p>
       <h2 id="dtn-h">{b(headline(x))}</h2>
       <p className="dtn-why">{whyLine(x, lang, t)}</p>
       <div className="dtn-act">
@@ -384,6 +397,7 @@ export function Overview() {
   const setTab = (v: HomeTab) => { setTabState(v); try { localStorage.setItem(HOME_TAB, v); } catch { /* storage blocked */ } };
   const [more, setMoreState] = useState(readMore);
   const setMore = (v: boolean) => { setMoreState(v); try { localStorage.setItem(HOME_MORE, v ? "1" : "0"); } catch { /* storage blocked */ } };
+  const ev = useEvidence();
   if (!n) return <Welcome />;
   const zh = lang === "zh";
   const today = daysFromNow(0);
@@ -421,8 +435,7 @@ export function Overview() {
   /* the opening date, only where the plan or a store's path gives one */
   const fp = ws.firstPlan;
   const previews = ws.apps.filter(isPreview).length;
-  const landing = fp?.projectedOpen
-    ?? (ws.stores ?? []).filter(s => s.stage === "opening").map(s => openingPath(s, ws, today).landing).filter((d): d is string => !!d).sort().at(-1) ?? null;
+  const landing = workspaceOpening(ws, today, ev)?.date ?? null;
   const renewal = nextRenewal(ws, today);
 
   /* behind the tabs: the plan, the dates, the updates, this month, the stores, and what else a business may need */
@@ -433,7 +446,7 @@ export function Overview() {
   const base = place ? biz.replace(` in ${place}`, "").replace(place, "").trim() : biz;
   const ctxParts = [at ? (!base ? at : zh ? `${base}，${at}` : `${base} at ${at}`) : place && !biz.includes(place) ? t("ov_in", { biz, place }) : biz, goal].filter(Boolean);
   const ctxLine = ctxParts.length ? ctxParts.join(zh ? "。" : ". ") + (zh ? "。" : ".") : "";
-  const soon = [...ws.deadlines].filter(d => daysUntil(d.date) >= 0).sort((x, y) => x.date.localeCompare(y.date)).slice(0, 5);
+  const soon = [...calendar(ws, today, ev)].filter(d => daysUntil(d.date) >= 0).sort((x, y) => x.date.localeCompare(y.date)).slice(0, 5);
   const latest = updates.slice(0, 3);
   const tabs: { id: HomeTab; label: string; on: boolean }[] = ([
     { id: "work", label: "Odelia", on: working },
@@ -476,13 +489,13 @@ export function Overview() {
       {rest.length > 0 && (
         <section className="sec hm-needs">
           <div className="sec-h">
-            <h2>{zh ? "等您处理" : "Waiting on you"}<em>{rest.length}</em></h2>
+            <h2>{zh ? "等您处理" : "Waiting on you"}<em>{ordered.length}</em></h2>
             {mineCtl}
           </div>
           {all && !mine && <BatchApprove />}
           <div className="stack">{shown.map(x => <TodoRow key={x.key} x={x} />)}</div>
           {all && docsAll.length > 1 && <button type="button" className="lnk more" disabled={busy} onClick={() => ask(b(findItAsk(B(docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.en} (${x.app.name.en})` : "").join("; "), docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.zh}（${x.app.name.zh}）` : "").join("；")), B("open applications", "进行中的申请"), true)))}><I.spark />{zh ? `让 Odelia 找齐 ${docsAll.length} 份文件` : `Have Odelia find all ${docsAll.length}`}</button>}
-          {rest.length > 3 && <button type="button" className="lnk more" onClick={() => setAll(!all)}>{all ? (zh ? "收起" : "Show fewer") : (zh ? `全部 ${rest.length} 项` : `All ${rest.length}`)}</button>}
+          {rest.length > 3 && <button type="button" className="lnk more" onClick={() => setAll(!all)}>{all ? (zh ? "收起" : "Show fewer") : (zh ? `全部 ${ordered.length} 项` : `All ${ordered.length}`)}</button>}
         </section>
       )}
 
@@ -772,10 +785,16 @@ export function Documents() {
 
 /* -------------------------------- deadlines -------------------------------- */
 
+/** The calendar as Deadlines and Home's Dates show it: the stored deadlines, the last day to appeal each denial (counted
+ *  by its rule, src/finish.ts scheduleAppeals) and each opening store's opening where its permits put it (src/smart.ts). */
+export const calendar = (ws: Workspace, today: string, ev: Evidence) => withOpenings(scheduleAppeals(ws, today), today, ev);
+
 /** The Deadlines tab of Permits. */
 export function Deadlines() {
   const { t, b, ws, lang, ask, openApp, busy } = useApp();
-  const list = [...ws.deadlines].sort((x, y) => x.date.localeCompare(y.date));
+  // the opening is the one the store card shows, worked out from the permits (src/smart.ts withOpenings)
+  const ev = useEvidence();
+  const list = calendar(ws, daysFromNow(0), ev).sort((x, y) => x.date.localeCompare(y.date));
   const months = useMemo(() => {
     const m = new Map<string, typeof list>();
     for (const d of list) { const k = d.date.slice(0, 7); m.set(k, [...(m.get(k) ?? []), d]); }

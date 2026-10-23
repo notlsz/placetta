@@ -45,3 +45,46 @@ the browser throws. The body's squash scales (`pose.sx`, `pose.sy`) had no floor
    pass `npm run test:bot` and `npm run test:crash` before it ships.
 4. A patch to a third-party library keeps its new math in a plain module the tests import, so what is tested is exactly
    what is drawn.
+
+## 2026-10: the sample contradicted itself and cited the wrong agencies
+
+**What happened.** An independent review of the sample (2026-10-23) asked Odelia "What permits do I still need for San
+Jose and when will we open?" and got "I'm not sure… Placetta's library doesn't have it", with ten San Jose permits in
+the workspace. One store showed three opening dates (Feb 9, 2027 on its card, a target of Mar 1, 2027 on Deadlines,
+"about 16 weeks" on Permits). Home's badge said 3, "Waiting on you" and the bell 4, and the greeting "3 need you" with the
+sign permit first while Home put the staff text first. A San José store's county health permit cited milpitas.gov, two
+San José permits cited sjeconomy.com, and the state seller's permit cited San Francisco's guide. An appeal reply read
+"Health plan check rejected (California Retail Food Code), heard by The county environmental health agency."
+
+**The causes.**
+
+- Routing order: `question()` sent anything with "permit" and a question mark to the forms library before anything
+  looked at the workspace. The library answers what a place requires in general, so it said "not sure".
+- Copies of a derived fact: the opening date was computed on the store card, typed by hand into the sample's deadlines
+  (`dl-open`) and stored again as a static `projectedOpen`; the count of what needs the owner was `approvals.length` in
+  one place, `todos()` in another and a fixed sentence in the greeting.
+- A source picked for its sentence, not its agency: a proof's `link` replaced the row's source with whichever page held
+  a quotable sentence, even a neighboring city's handout or an economic-development site.
+- Labels pasted into a sentence: an appeal route's name and body are labels ("The county …"), spliced mid-clause.
+
+**The guards that now prevent it.**
+
+| Layer | Guard | Where |
+|---|---|---|
+| Agent | Questions about the business's own permits, stores, dates and what's waiting are answered from the workspace before the library (demo and live rules) | `fromWorkspace` in `src/agent.ts`, `src/live.ts` rules |
+| Data | One opening per store: `openingOf`, `workspaceOpening`, `withOpenings`; the store card, the cost line, Deadlines, Home and Odelia all call them; no hand-written opening in the sample | `src/smart.ts` |
+| Data | One count of what needs the owner: `todos()` for the badge, "Waiting on you", "Do this next" and the greeting (`standing()`); the bell shows a mark, not a second number | `src/doNext.ts`, `src/feed.ts`, `src/App.tsx` |
+| Sources | San José and Santa Clara County rows cite sanjoseca.gov, sjpermits.org and deh.santaclaracounty.gov; the seller's permit cites the CDTFA | `src/forms/proof.ts`, `scripts/eval/proof-log.json` |
+| Words | Appeal routes are said by one sentence builder, tested on every route in English and Chinese | `appealSay` in `src/appeals/index.ts` |
+| Test | `npm run test:agent` runs the review's checks: phrasings in English and Chinese, one date, one count, the agencies' hosts, every appeal sentence, the denied permit's panel and its deadline, the approval route line, channels | `scripts/review-fixes-test.ts` |
+
+**Rules for the future.**
+
+1. A question about this business is answered from its workspace first; the library is for what a place requires.
+2. A fact derived from the workspace (an opening date, a count, a status) has one function, and every screen and answer
+   calls it. Never store a copy of it in sample data or a second formula on a page.
+3. A source is the issuing agency's own site (the state's for a state permit). Never a neighboring city, an
+   economic-development or chamber site, or another city's guide, however good its sentence.
+4. Never splice a data label into the middle of a sentence. Write a sentence builder and test it on every value.
+5. A button for a channel (voice, the interpreter, calls, texts, iMessage) shows only when the server says it is set up
+   (`src/channels.ts`); otherwise it is hidden or says "Coming soon" with nothing to press.

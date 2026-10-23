@@ -53,7 +53,9 @@ function homeNextTests(ok: Ok) {
   const list = todos(SAMPLE_WS, today);
   ok(list[1]?.key === "a:a-docs" && list.slice(1).findIndex(x => !x.blocks) > list.slice(1).findIndex(x => x.blocks), "then what blocks the opening (the plan check's floor plan)", list.map(x => x.key));
   ok(list.at(-1)?.key === "a:a-sign", "then what only waits on the owner (the sign permit)", list.map(x => x.key));
-  ok(render(SAMPLE_WS, "en").match(/Waiting on you.*?<em>(\d+)<\/em>/)?.[1] === String(list.length - 1), "Waiting on you counts the rest");
+  // one count everywhere (the 2026-10-23 review): Waiting on you counts everything waiting, the card above included, the
+  // same number as the Home badge and the greeting
+  ok(render(SAMPLE_WS, "en").match(/Waiting on you.*?<em>(\d+)<\/em>/)?.[1] === String(list.length), "Waiting on you counts everything waiting on the owner, like the badge");
 
   // only a missing document: still exactly one primary button, the upload
   const docOnly: Workspace = { ...SAMPLE_WS, approvals: [], jobs: [], deadlines: [] };

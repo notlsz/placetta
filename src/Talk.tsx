@@ -5,6 +5,7 @@ import { useApp } from "./ctx";
 import * as api from "./cloud/api";
 import { Guard } from "./SafeBoundary";
 import { I } from "./ui";
+import { useChannels } from "./channels";
 import "./voice.css";
 import { answerTool, type Heard, type Live, type LiveState, pairLines, startLive } from "./voice/realtime";
 
@@ -133,7 +134,9 @@ export function TalkSheet({ mode, filingId, onClose }: { mode: api.VoiceMode; fi
 export function TalkButton() {
   const { lang, cloud, busy } = useApp();
   const [open, setOpen] = useState(false);
-  if (!cloud || cloud.viewer) return null;
+  // only once the server says talking can start here (src/channels.ts): never a button that opens onto "isn't set up"
+  const ch = useChannels();
+  if (!cloud || cloud.viewer || !ch?.talk) return null;
   const label = lang === "zh" ? "与 Odelia 通话" : "Talk with Odelia";
   return (
     <>

@@ -14,9 +14,11 @@ import { saveFile } from "./files";
 import * as api from "./cloud/api";
 import { fmtDay } from "./time";
 import { daysFromNow, fmtStamp } from "./time";
+import { denialAppeal } from "./finish";
+import { NOT_A_LAW_FIRM, ROUTE_NAME } from "./appeals";
 import { preflight } from "./smart";
 import { FileCard, I, LevelTag, Modal, Pill, Sheet, StatusChip, feeText, feeTotal } from "./ui";
-import { INK } from "./pages";
+import { INK, RouteLine } from "./pages";
 import { filingBlockers } from "./core";
 import { findItAsk } from "./StillNeeded";
 import { B } from "./bi";
@@ -76,6 +78,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
           </div>
         ))}
         {a.next &&<p className="sh-next">{a.critical && <em>{t("critical")}</em>}{b(a.next)}</p>}
+        <AppealPanel a={a} onClose={onClose} />
         <div className="sh-asg"><AssignPicker item={{ kind: "app", id: a.id }} title={a.name} /></div>
         {a.preview && <p className="sh-pv"><I.spark />{a.status === "ready"
           // filled at sign-up (src/plan/prefill.ts) on the registry's own copy of the agency's form
@@ -105,6 +108,44 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
         </footer>
       ) : null}
     </Sheet>
+  );
+}
+
+/* ------------------------------- denied? appeal ------------------------------- */
+
+/** When the agency says no: the playbook for this permit here (src/appeals), its deadline counted from the decision with
+ *  the rule's citation, the file-by date, who should handle it and the next step. The deadline is on Deadlines too
+ *  (src/finish.ts scheduleAppeals). Nothing is filed from here: Prepare it hands the case to Odelia, who puts the
+ *  appeal up for approval. */
+function AppealPanel({ a, onClose }: { a: Application; onClose: () => void }) {
+  const { b, lang, ws, cloud, ask, busy, go } = useApp();
+  const zh = lang === "zh", today = daysFromNow(0);
+  const f = cloud?.filings.find(x => x.app_id === a.id && x.status === "rejected");
+  const v = denialAppeal(ws, a, today, f ? { decided: f.decided_at ?? f.updated_at, reason: f.note } : undefined);
+  if (!v) return null;
+  const src = v.ap.deadline.verified?.source ?? v.ap.sources[0];
+  const host = (() => { try { return new URL(src).hostname.replace(/^www\./, ""); } catch { return src; } })();
+  const prompt = B(`The ${a.name.en.charAt(0).toLowerCase() + a.name.en.slice(1)} was denied on ${v.decided}. Appeal it: explain the reason plainly, show me fixing and refiling against appealing, and prepare whichever I choose for my approval.`,
+    `${a.name.zh}已于 ${v.decided} 被拒，我要申诉：用简单的话解释原因，对比修正重交和上诉两种做法，并按我的选择准备好交我批准。`);
+  return (
+    <section className="appeal" aria-labelledby={`appeal-${a.id}`}>
+      <h3 id={`appeal-${a.id}`}><I.scale />{zh ? "被拒？申诉" : "Denied? Appeal"}</h3>
+      <p className="appeal-why">{zh ? `机构于 ${fmtDay(v.decided, lang, true)} 驳回。` : `The agency said no on ${fmtDay(v.decided, lang, true)}.`}{v.reason ? (zh ? `理由：${v.reason}` : ` Its reason: ${v.reason.replace(/^./, c => c.toLowerCase())}`) : ""}</p>
+      <dl>
+        <div><dt>{zh ? "途径" : "Route"}</dt><dd>{b(v.say.route).replace(/^(The route: |申诉途径：)/, "")}</dd></div>
+        <div className={"appeal-dl" + (v.passed ? " passed" : "")}><dt>{zh ? "期限" : "Deadline"}</dt>
+          <dd>{v.dl
+            ? <><b>{zh ? `${fmtDay(v.dl.date, lang, true)} 前` : `By ${fmtDay(v.dl.date, lang, true)}`}</b>{v.fileBy && v.fileBy !== v.dl.date && !v.passed ? (zh ? `，建议 ${fmtDay(v.fileBy, lang, true)} 前提交` : `, file by ${fmtDay(v.fileBy, lang, true)} to be safe`) : ""}{v.passed ? (zh ? "。按规定推算的期限已过，请核对决定函。" : ". The counted deadline has passed: check the decision letter.") : ""}
+              <small>{b(v.say.deadline)} <a href={src} target="_blank" rel="noopener noreferrer">{host}<I.ext /></a></small></>
+            : <>{b(v.say.deadline)} <a href={src} target="_blank" rel="noopener noreferrer">{host}<I.ext /></a></>}</dd></div>
+        <div><dt>{zh ? "下一步" : "Next step"}</dt><dd>{b(v.say.next).replace(/^(Next: |下一步：)/, "").replace(/^./, c => c.toUpperCase())}<small>{b(ROUTE_NAME[v.tier.route])}</small></dd></div>
+      </dl>
+      <div className="appeal-act">
+        <Pill kind="ink" disabled={busy} onClick={() => { onClose(); ask(b(prompt)); }}>{zh ? "准备申诉" : "Prepare the appeal"}</Pill>
+        {v.dl && !v.passed && <button type="button" className="lnk" onClick={() => { onClose(); go("permits", "deadlines"); }}>{zh ? "已列入截止日期" : "On Deadlines"}<I.chevR /></button>}
+      </div>
+      <p className="appeal-note">{b(NOT_A_LAW_FIRM)}</p>
+    </section>
   );
 }
 
@@ -395,6 +436,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
         <span className="m-eyebrow"><I.lock />{t("ap_title")}</span>
         <h2>{b(a.title)}</h2>
         <p>{[a.agency && b(a.agency), app?.form && b(app.form)].filter(Boolean).join(lang === "zh" ? "。" : ". ")}</p>
+        <p className="appr-tx ap-route"><RouteLine a={a} app={app} /></p>
         <button type="button" className="icbtn close" onClick={onClose} aria-label={t("close")}><I.x /></button>
       </header>
       <div className="m-body">

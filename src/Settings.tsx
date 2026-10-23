@@ -816,7 +816,8 @@ function PhoneGroup() {
         right: <Toggle on={link!.texts_on} set={v => prefs({ texts: v })} label={zh ? "重要更新短信" : "Texts about important updates"} /> },
       { label: B("Calls for urgent items", "紧急事项来电"),
         sub: line.voice ? (zh ? "可能被停业、检查未通过，或逾期事项影响开业时致电。每天最多 1 通。" : "A closure risk, a failed inspection, or something overdue that blocks opening. At most 1 a day.") : (zh ? "来电功能还没有设置好，紧急事项会改为短信通知。" : "Calls aren't set up yet, so urgent items come by text."),
-        right: <Toggle on={link!.calls_on} set={v => prefs({ calls: v })} label={zh ? "紧急事项来电" : "Calls for urgent items"} /> },
+        // a switch for calls that can't be placed would be a broken action: until calls are set up it says so instead
+        right: line.voice ? <Toggle on={link!.calls_on} set={v => prefs({ calls: v })} label={zh ? "紧急事项来电" : "Calls for urgent items"} /> : <span className="ch-soon">{zh ? "即将推出" : "Coming soon"}</span> },
       { label: B("Quiet hours", "免打扰时段"),
         sub: zh ? `这段时间不发短信也不打电话，按${link!.tz === deviceTz() ? "这台设备的" : ` ${link!.tz} `}时间。您主动联系时，Odelia 随时回复。` : `No texts or calls from Odelia then, in ${link!.tz === deviceTz() ? "this device's time zone" : link!.tz}. She always answers when you reach out.`,
         right: <>

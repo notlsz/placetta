@@ -1,6 +1,8 @@
 import { B, type Bi } from "./bi";
 import type { HqRow } from "./hq";
 import type { Level, Status, Workspace } from "./model";
+import { openingOf } from "./smart";
+import { daysFromNow } from "./time";
 
 /* The review table (Legora's Tabular Review, for a chain): stores as rows, permits and requirements as columns grouped
    formation, tax, health, building, staff certificates and renewals, each cell the state of that requirement at that
@@ -176,7 +178,7 @@ export function storesOfWorkspace(w: Workspace, o: { comments?: (appId: string) 
     const apps = (stores.length === 1 ? w.apps.map(a => a.id) : s.apps ?? []).map(appItem).filter((x): x is ReviewItem => !!x);
     const permits: ReviewItem[] = (s.permits ?? []).map((p, k) => ({ kind: "permit", id: `${s.id}:permit:${k}`, name: p.name, expires: p.expires }));
     const certs: ReviewItem[] = s.certs.map(c => ({ kind: "cert", id: `${s.id}:cert:${c.id}`, name: c.kind, expires: c.expires }));
-    return { key: s.id, id: s.id, name: s.name, stage: s.stage, address: s.address, region: regionOf(s.address), opens: s.stage === "opening" ? s.projectedOpen ?? s.plannedOpen ?? null : null, items: [...apps, ...permits, ...certs] };
+    return { key: s.id, id: s.id, name: s.name, stage: s.stage, address: s.address, region: regionOf(s.address), opens: s.stage === "opening" ? openingOf(s, w, daysFromNow(0)) ?? s.plannedOpen ?? null : null, items: [...apps, ...permits, ...certs] };
   });
   const loose = stores.length >= 2 ? w.apps.filter(a => !listed.has(a.id)).map(a => appItem(a.id)!).filter(Boolean) : [];
   if (loose.length) out.push({ key: "_business", id: "_business", name: B("Whole business", "整个企业"), stage: "business", address: "", region: "", items: loose });

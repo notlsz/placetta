@@ -59,7 +59,7 @@ export const LOCAL_US: OfficialForm[] = [
     id: "sj-fire-systems", form: "Fire Protection Systems permit", title: B("Fire protection system permit", "消防系统许可证"),
     agency: B("San José Fire Department, Bureau of Fire Prevention", "圣何塞市消防局防火处"), level: "city", where: "SJ", segments: [R, T, W], needs: { buildout: true }, method: "portal", order: 68,
     how: B("When plan check calls for it, apply on SJPermits.org under Fire Prevention, pay, then upload documents in SJePlans.", "图纸审查要求时，在 SJPermits.org 的防火类别下申请并缴费，然后通过 SJePlans 上传文件。"),
-    url: "https://www.sjpermits.org", info: "https://www.sanjoseca.gov/your-government/departments-offices/fire-department/fire-prevention-permits/development-services",
+    url: "https://www.sjpermits.org", info: "https://www.sanjoseca.gov/your-government/departments-offices/fire-department/fire-prevention-permits/fire-development-construction-permit-appointments/fire-development-express-permit-appointments",
     fee: null, checked: "page", fields: [],
   },
   {
@@ -73,8 +73,8 @@ export const LOCAL_US: OfficialForm[] = [
     id: "scc-health-permit", form: "Permit Application & Certification Statement", title: B("Health permit to operate a food facility", "食品设施卫生营业许可证"),
     agency: B("County of Santa Clara Department of Environmental Health", "圣克拉拉县环境卫生局"), level: "county", where: "SCC", segments: [R, T], needs: { food: true }, method: "pdf_mail", order: 76,
     how: B("Submit the permit application by email or in person at or before the final inspection; the operating fee is invoiced after the final.", "在竣工检查时或之前通过电子邮件或现场提交许可申请；营业许可费在竣工检查后开具账单。"),
-    url: "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and",
-    info: "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and",
+    url: "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/restaurant-grocery-store-or-other-fixed-food",
+    info: "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/restaurant-grocery-store-or-other-fixed-food",
     fee: null, feeNote: B("Invoiced under the county fee schedule.", "依县收费表开具账单。"), renews: B("Every year.", "每年。"), checked: "page", fields: [],
   },
   {

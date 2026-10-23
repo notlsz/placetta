@@ -4,6 +4,7 @@ import { B, type Bi } from "./bi";
 import { costToOpen, type Billed, type Cost } from "./cost";
 import { daysFromNow, daysUntil, fmtDay, money } from "./time";
 import { I, Modal } from "./ui";
+import { useEvidence } from "./evidence";
 
 /* Cost to open (src/cost.ts) on Home's plan card and the Permits page: one line, and the breakdown behind it. */
 
@@ -12,11 +13,12 @@ const host = (u: string) => { try { return new URL(u).hostname.replace(/^www\./,
 /** The cost for this workspace and this account's plan (list prices in the sample). */
 function useCost(): Cost {
   const { ws, cloud } = useApp();
+  const ev = useEvidence();
   return useMemo(() => {
     const bl = cloud?.billing;
     const billing: Billed | undefined = cloud ? { plan: cloud.plan, tier: bl?.subscription_plan === "pro" ? "pro" : "essentials", comped: !!bl?.comped, free: !!bl?.free, entryMarkets: bl?.entry_markets ?? 0, model: bl?.price_model === "simple" ? "simple" : "legacy", paidLocations: (bl as { paid_locations?: number } | undefined)?.paid_locations ?? 0 } : undefined;
-    return costToOpen(ws, { today: daysFromNow(0), billing });
-  }, [ws, cloud]);
+    return costToOpen(ws, { today: daysFromNow(0), billing, ev });
+  }, [ws, cloud, ev]);
 }
 
 /** "about 14 weeks" from today to a date, or days when it's close. */
@@ -37,7 +39,8 @@ export function CostLine({ page }: { page?: boolean }) {
   const parts: Bi[] = [B(`${known}${c.unpublished || c.quoted ? " known" : ""}`, `${c.unpublished || c.quoted ? "已知 " : ""}${known}`)];
   if (c.unpublished) parts.push(B(`${c.unpublished} agency fee${c.unpublished === 1 ? "" : "s"} not published`, `${c.unpublished} 项机构费用未公布`));
   if (c.quoted) parts.push(B("plus a quote from the team", "另需团队报价"));
-  if (c.landing) parts.push(B(`opens in ${until(c.landing).en}`, `${until(c.landing).zh}后开业`));
+  // the date itself, the same one the store card and Deadlines show (src/smart.ts workspaceOpening), then how far off
+  if (c.landing) parts.push(B(`opens around ${fmtDay(c.landing, "en", true)} (${until(c.landing).en})`, `预计 ${fmtDay(c.landing, "zh", true)} 前后开业（${until(c.landing).zh}后）`));
   return (
     <>
       <p className={"cost-line" + (page ? " on-page" : "")}>

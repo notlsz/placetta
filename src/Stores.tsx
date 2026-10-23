@@ -7,6 +7,7 @@ import { countyOf, stateCode, cityName } from "./counties";
 import { FWW_SOURCE, FWW_THRESHOLD, GRADES_SOURCE, readiness, todayLogs, usLocations, valueOf, type Readiness } from "./stores";
 import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn, inDays } from "./time";
 import { basisLine, openingLine, openingPath, type Evidence } from "./smart";
+import { useEvidence } from "./evidence";
 import { I, Menu, Pill, StatusChip } from "./ui";
 import { saveFile } from "./files";
 import { parseStoreList, permitsOnOpening, planCsv, planStores, toWorkspace, type FormStat } from "./plan";
@@ -73,19 +74,6 @@ function Value({ s, big }: { s: Store; big?: boolean }) {
       {rows.map((r, i) => <div key={i} className={r.ok ? "ok" : "warn"}><dt>{b(r.k)}</dt><dd>{b(r.v)}</dd></div>)}
     </dl>
   );
-}
-
-/** Placetta's own filing times (once per page load) and when each application went to the agency. */
-let statsOnce: Promise<FormStat[]> | null = null;
-function useEvidence(): Evidence {
-  const { cloud } = useApp();
-  const [stats, setStats] = useState<FormStat[]>([]);
-  useEffect(() => { if (!cloud) return; statsOnce ??= api.filingStats().catch(() => []); void statsOnce.then(setStats); }, [cloud]);
-  return useMemo(() => {
-    const submitted: Record<string, string> = {};
-    for (const f of cloud?.filings ?? []) if (f.submitted_at && f.status !== "canceled" && !submitted[f.app_id]) submitted[f.app_id] = f.submitted_at;
-    return { submitted, stats };
-  }, [cloud?.filings, stats]);
 }
 
 /** A store still opening, with its projected opening where its permits put it today. */

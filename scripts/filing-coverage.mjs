@@ -17,6 +17,9 @@ const check = args.includes("--check");
 const at = args.indexOf("--dest-dir");
 const destDir = at >= 0 ? args[at + 1] : join(root, "supabase/functions/file");
 const OUT = join(root, "docs/FILING_COVERAGE.md");
+// The same first-try routes as data the app can read (src/approvalRoute.ts): form id to route kind and nothing else (no
+// addresses, numbers or logins), so an approval card can say who files it without the browser reaching destinations.ts
+const ROUTES_OUT = join(root, "src/forms/filingRoutes.json");
 
 // Counted with --dest-dir on the destinations.ts and logic.ts of commit 8c8599b2 (2026-10-17), before the research of
 // 2026-10-18. The same registry of US forms is counted both times (recounted when forms batch 3, the target markets and the accuracy fixes added 58 US forms:
@@ -48,11 +51,13 @@ try {
     const problems = [...result.problems];
     const now = existsSync(OUT) ? readFileSync(OUT, "utf8") : "";
     if (now !== result.markdown) problems.push("docs/FILING_COVERAGE.md is out of date: run node scripts/filing-coverage.mjs and commit it");
+    if ((existsSync(ROUTES_OUT) ? readFileSync(ROUTES_OUT, "utf8") : "") !== result.routesJson) problems.push("src/forms/filingRoutes.json is out of date: run node scripts/filing-coverage.mjs and commit it");
     if (problems.length) { console.error(problems.join("\n")); process.exit(1); }
     console.log(`filing coverage: ${result.counts.forms} US forms, ${result.counts.selfFilable} self-filable, every destination cited`);
   } else {
     if (result.problems.length) { console.error(result.problems.join("\n")); process.exit(1); }
     writeFileSync(OUT, result.markdown);
+    writeFileSync(ROUTES_OUT, result.routesJson);
     console.log(`wrote docs/FILING_COVERAGE.md: ${JSON.stringify(result.counts.channels)}`);
   }
 } finally {
@@ -157,5 +162,7 @@ function report(FORMS, D, L) {
     md.push(`| ${place(r.f.where)} | ${cell(r.f.title.en)} (\`${r.f.id}\`) | ${cell(why)} | ${src} |`);
   }
   md.push("");
-  return { problems, counts, markdown: md.join("\n") };
+  const byId = rows.map((r) => [r.f.id, r.route]).sort(([a], [b]) => a.localeCompare(b));
+  const routesJson = "{\n" + byId.map(([id, r]) => `${JSON.stringify(id)}: ${JSON.stringify(r)}`).join(",\n") + "\n}\n";
+  return { problems, counts, markdown: md.join("\n"), routesJson };
 }
