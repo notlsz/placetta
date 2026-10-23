@@ -157,7 +157,7 @@ function Plush({ stand, onAnim, ...props }: BotAvatarProps & { size: number; "da
     if (hand.current) look();
     return () => cancelAnimationFrame(raf);
   }, []);
-  const bot = <Guard quiet><BotAvatar ref={ref} {...SOFT} {...props} style={touch ? SHOWN : { ...SHOWN, filter: `url(#${id})` }} /></Guard>;
+  const bot = <Guard quiet fallback={<CloudSvg size={props.size ?? 64} />}><BotAvatar ref={ref} {...SOFT} {...props} style={touch ? SHOWN : { ...SHOWN, filter: `url(#${id})` }} /></Guard>;
   return (
     <>
       {!touch && <Edge id={id} size={props.size} dark={dark} />}
