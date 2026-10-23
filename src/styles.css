@@ -221,7 +221,11 @@ html[lang="zh-CN"] .hero h1 { word-break: keep-all; max-width: 13em; letter-spac
 .tray, .card { margin: 0; padding: 6px; list-style: none; border-radius: 18px; background: var(--mist); display: flex; flex-direction: column; gap: 2px; }
 .row { border-radius: 12px; padding: 12px 14px; transition: background .15s; }
 button.row { width: 100%; }
-button.row:hover { background: rgba(var(--w), .9); }
+button.row:hover, div.tr.row[role="row"]:hover { background: rgba(var(--w), .9); }
+div.tr.row[role="row"] { cursor: pointer; }
+.c-name .c-src { align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; font-size: 12.5px; color: var(--blue-ink); overflow-wrap: anywhere; }
+.c-name .c-src svg { width: 12px; height: 12px; flex: none; }
+.c-name .c-src:hover { color: var(--blue-deep); text-decoration: underline; }
 .arow { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; }
 .arow-n { display: flex; flex-direction: column; min-width: 0; line-height: 1.4; }
 .arow-n b { font-weight: 500; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -2022,6 +2026,17 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 .sources em { font-style: normal; padding: 2px 9px; border-radius: 99px; background: var(--mist); color: var(--ink2); }
 .sources.unchecked { color: var(--warm); }
 .sources a small { margin-left: 6px; font-size: 11.5px; color: var(--ink3); }
+.sources a .sn { margin-right: 6px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--blue-ink); }
+/* Inline citations (src/ui.tsx CiteMark): a number after each sentence, the passage and read date on hover or focus */
+.cite-n { position: relative; font-size: 10.5px; line-height: 0; vertical-align: super; margin-left: 2px; }
+.cite-n a { display: inline-block; min-width: 15px; padding: 0 4px; border-radius: 99px; background: var(--sky-wash); color: var(--blue-ink); font-weight: 600; text-align: center; line-height: 15px; font-variant-numeric: tabular-nums; }
+.cite-n a:hover, .cite-n a:focus-visible { background: var(--sky); color: var(--blue-deep); }
+.cite-pop { position: absolute; z-index: 30; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); width: min(300px, 76vw); padding: 10px 12px; border-radius: 12px; background: var(--card); box-shadow: var(--lift); color: var(--ink); font-size: 12.5px; line-height: 1.45; text-align: left; white-space: normal; visibility: hidden; opacity: 0; transition: opacity .12s; pointer-events: none; }
+.cite-n:hover .cite-pop, .cite-n:focus-within .cite-pop { visibility: visible; opacity: 1; }
+.cite-pop b { display: block; font-weight: 600; }
+.cite-pop small { display: block; color: var(--ink3); font-size: 11.5px; }
+.cite-pop q { display: block; margin: 6px 0 0; color: var(--ink2); }
+.cite-pop em { display: block; margin-top: 6px; font-style: normal; color: var(--ink3); font-size: 11.5px; }
 
 /* The undo window (src/SendHold.tsx): the countdown, Undo and Send now. */
 .hold { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin: 10px 0 0; padding: 10px 12px 10px 14px; border-radius: 16px; background: var(--warm-soft); }

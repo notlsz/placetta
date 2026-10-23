@@ -68,6 +68,7 @@ import type { Bi } from "../src/bi";
 import { growthTests } from "./growth-test";
 import { memoryTests } from "./memory-test";
 import { journeyTests } from "./journeys-test";
+import { citeTests } from "./cite-test";
 
 /* ------------------------------------------------------------------ checks */
 
@@ -2832,6 +2833,7 @@ await memoryTests(ok, eq);
 await journeyTests(ok, eq);
 econTests(ok, eq);
 edgeTests(ok, eq);
+citeTests(ok, eq);
 
 console.log("\n# Every declared tool is exercised");
 const missed = declared.filter(n => !covered.has(n));
