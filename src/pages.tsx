@@ -239,11 +239,16 @@ function firstLine(n: number, ms: number, won: boolean, lines: number): Bi {
    (one line each, the timeline a tap away), and what's done (folded). Everything else (the plan, dates, updates, this
    month's numbers, stores, what else a business may need) sits behind tabs below. Nothing needed: a calm "You're all
    set" with the next renewal (Superhuman's inbox zero). Progress is one line and a bar until it's done (Stripe's
-   "Get started" checklist). The order of what to do is src/doNext.ts. */
+   "Get started" checklist). The order of what to do is src/doNext.ts.
+   Calm: the first screen holds at most three things, the card, Waiting on you and one status line ("Odelia is working on
+   5 things. 2 of 10 permits done", the bar only once something is filed). Odelia's work, the plan, dates, updates,
+   numbers, stores and what's done sit behind More. On a phone the card fills the first screen with its button at the
+   bottom, and Waiting on you swipes sideways in its own row. */
 
-type HomeTab = "plan" | "dates" | "updates" | "month" | "stores" | "also";
-const HOME_TAB = "placetta-home-tab";
-const readTab = (): HomeTab => { try { const v = localStorage.getItem(HOME_TAB); if (v && ["plan", "dates", "updates", "month", "stores", "also"].includes(v)) return v as HomeTab; } catch { /* storage blocked */ } return "plan"; };
+type HomeTab = "work" | "plan" | "dates" | "updates" | "month" | "stores" | "also" | "done";
+const HOME_TAB = "placetta-home-tab", HOME_MORE = "placetta-home-more";
+const readTab = (): HomeTab => { try { const v = localStorage.getItem(HOME_TAB); if (v && ["work", "plan", "dates", "updates", "month", "stores", "also", "done"].includes(v)) return v as HomeTab; } catch { /* storage blocked */ } return "work"; };
+const readMore = (): boolean => { try { return localStorage.getItem(HOME_MORE) === "1"; } catch { return false; } };
 
 /** The one primary button a to-do needs: Approve opens the approval (you confirm there), Upload opens the file picker on
  *  the document it's for, Pay opens the agency's page. big: the "Do this next" card's. */
@@ -254,7 +259,7 @@ function TodoButton({ x, big }: { x: Todo; big?: boolean }) {
   const cls = "pill " + (big ? "ink dtn-go" : "primary sm");
   const btn = (label: string, on: () => void) => <button type="button" className={cls} disabled={busy} onClick={on}><span>{label}</span><i aria-hidden="true"><I.arrow /></i></button>;
   const picker = (app: string, item: string) => <input ref={pick} type="file" hidden multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx" onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) upload(app, item, f); }} />;
-  if (x.kind === "doc") return <>{btn(b(B("Photo or file", "拍照或上传")), () => pick.current?.click())}{picker(x.app.id, x.item)}</>;
+  if (x.kind === "doc") return <>{btn(big ? b(B("Photo or file", "拍照或上传")) : t("upload"), () => pick.current?.click())}{picker(x.app.id, x.item)}</>;
   if (x.kind === "job") {
     const app = x.app;
     return btn(b(B("Open", "打开")), () => (app ? openApp(app.id, "check") : go("odelia", "work")));
@@ -269,62 +274,73 @@ function TodoButton({ x, big }: { x: Todo; big?: boolean }) {
   return btn(big ? b(B("Review and approve", "查看并批准")) : t("approve"), () => openApproval(a.id));
 }
 
-/** Why it's first, in one line: its date, that the opening waits on it, or what happens once you act. */
+/** Why it's first, in one short line: its date, that the opening waits on it, or what happens once you act. Nothing
+ *  that repeats the button. */
 function whyLine(x: Todo, lang: "en" | "zh", t: (k: Key) => string): string {
   const zh = lang === "zh";
   const parts: string[] = [];
-  if (x.due && x.days != null) parts.push(x.days < 0 ? (zh ? `已过期 ${-x.days} 天。` : `${-x.days} day${x.days === -1 ? "" : "s"} late.`) : zh ? `${fmtDay(x.due.date, lang)}到期，${fmtIn(x.days, lang)}。` : `Due ${fmtDay(x.due.date, lang)}, ${fmtIn(x.days, lang).toLowerCase()}.`);
-  if (x.blocks) parts.push(zh ? "开业日期取决于这一项。" : "Your opening date waits on this.");
+  if (x.due && x.days != null) parts.push(x.days < 0 ? (zh ? `已过期 ${-x.days} 天。` : `${-x.days} day${x.days === -1 ? "" : "s"} late.`) : zh ? `${fmtIn(x.days, lang)}到期。` : `Due ${fmtIn(x.days, lang).toLowerCase()}.`);
+  if (x.blocks) parts.push(zh ? "开业日期取决于它。" : "Your opening waits on this.");
   if (x.kind === "approval") {
     const a = x.a, fee = a.kind === "pay" ? a.fee ?? 0 : x.app && a.kind === "file" ? feeTotal(x.app) : 0;
     const say = {
-      file: zh ? "Odelia 已填好，您批准后她就提交。" : "Odelia filled it in. She files it once you approve.",
-      send: zh ? "Odelia 已写好，您批准后才会发出。" : "Odelia wrote it. Nothing goes out until you approve.",
-      upload: zh ? "缺少这些文件，申请就交不了。" : "The application can't go in without it.",
-      pay: zh ? "机构收到付款后才会继续办理。" : "The agency moves on once it's paid.",
-      change: zh ? "您确认之前，Odelia 不会做任何更改。" : "Odelia changes nothing until you confirm.",
+      file: zh ? "已填好，批准后提交。" : "Filled in. Filed once you approve.",
+      send: zh ? "批准后才会发出。" : "Sent once you approve.",
+      upload: zh ? "缺少它就交不了申请。" : "The application needs it.",
+      pay: zh ? "付款后机构才会继续。" : "The agency waits on payment.",
+      change: zh ? "您确认前不会更改。" : "Nothing changes until you confirm.",
     }[a.kind];
     if (!x.blocks || a.kind !== "upload") parts.push(say);
     if (fee && x.app) parts.push(zh ? `费用 ${feeText(x.app, t)}，直接付给机构。` : `Fee ${feeText(x.app, t)}, paid to the agency.`);
     else if (fee) parts.push(zh ? `费用 ${money(fee)}。` : `Fee ${money(fee)}.`);
   } else if (x.kind === "doc") {
-    if (!x.blocks) parts.push(zh ? `${x.app.name.zh}需要它才能提交。` : `The ${x.app.name.en.charAt(0).toLowerCase() + x.app.name.en.slice(1)} needs it to go in.`);
+    if (!x.blocks) parts.push(zh ? `用于${x.app.name.zh}。` : `For the ${x.app.name.en.charAt(0).toLowerCase() + x.app.name.en.slice(1)}.`);
   } else if (x.job.waiting) parts.push(zh ? x.job.waiting.zh : x.job.waiting.en);
-  return parts.join(" ");
+  return parts.join(zh ? "" : " ");
+}
+
+/** A phone (the bottom tab bar's width): the "Do this next" card fills the first screen there. Safe without a window. */
+function usePhone() {
+  const q = "(max-width: 859px)";
+  const has = () => typeof window !== "undefined" && typeof window.matchMedia === "function";
+  const [n, setN] = useState(() => has() && window.matchMedia(q).matches);
+  useEffect(() => { if (!has()) return; const mq = window.matchMedia(q); const on = () => setN(mq.matches); mq.addEventListener("change", on); return () => mq.removeEventListener("change", on); }, []);
+  return n;
 }
 
 /** The single most important thing, with one big button and a why line. Not now moves it to the end for this visit. */
-function DoNextCard({ x, n, onLater, docs }: { x: Todo; n: number; onLater?: () => void; docs?: { i: number; of: number } }) {
-  const { b, t, lang, busy, ask } = useApp();
+function DoNextCard({ x, n, onLater, docs, title }: { x: Todo; n: number; onLater?: () => void; docs?: { i: number; of: number }; title: string }) {
+  const { b, t, lang, busy, live, ask } = useApp();
   const zh = lang === "zh";
+  const phone = usePhone();
   return (
     <section className="dtn" data-do-next={x.key} aria-labelledby="dtn-h">
-      <p className="dtn-k">{zh ? "下一步" : "Do this next"}{docs && docs.of > 1 ? <span>{zh ? `还需要的文件，第 ${docs.i} 项，共 ${docs.of} 项` : `Document ${docs.i} of ${docs.of}`}</span> : null}</p>
+      <h1 className="vh">{title}</h1>
+      {phone && <div className="dtn-bot" aria-hidden="true"><AgentBot size={64} busy={busy} task={busy ? live?.state : undefined} gaze={[0, 2.4]} interactive={false} /></div>}
+      <p className="dtn-k">{zh ? "下一步" : "Do this next"}{docs && docs.of > 1 ? <span>{zh ? `文件 ${docs.i}/${docs.of}` : `${docs.i} of ${docs.of}`}</span> : null}</p>
       <h2 id="dtn-h">{b(headline(x))}</h2>
       <p className="dtn-why">{whyLine(x, lang, t)}</p>
       <div className="dtn-act">
         <TodoButton x={x} big />
         {x.kind === "doc" && <button type="button" className="lnk" disabled={busy} onClick={() => ask(b(findItAsk(x.label, x.app.name)))}>{zh ? "帮我找" : "Find it for me"}</button>}
-        {onLater && n > 1 && <button type="button" className="lnk quiet" onClick={onLater}>{x.kind === "doc" ? (zh ? "跳过" : "Skip") : (zh ? "稍后再说" : "Not now")}</button>}
+        {onLater && n > 1 && <button type="button" className="lnk quiet" onClick={onLater}>{x.kind === "doc" ? (zh ? "跳过" : "Skip") : (zh ? "稍后" : "Later")}</button>}
       </div>
     </section>
   );
 }
 
-/** One row of "Waiting on you": what it is, and its one button. */
+/** One row of "Waiting on you": what it is, and its one quiet button. A missing document is named by itself (the
+ *  button already says Upload); Find it for me waits on the "Do this next" card. */
 function TodoRow({ x }: { x: Todo }) {
-  const { b, lang, busy, ask } = useApp();
+  const { b } = useApp();
   if (x.kind === "approval") return <NeedRow a={x.a} compact />;
   if (x.kind === "job") return <PlanCard job={x.job} compact actions />;
-  const zh = lang === "zh";
+  const label = b(x.label);
   return (
     <div className="appr compact k-doc">
       <span className="appr-ico k-upload"><I.clip /></span>
-      <span className="appr-tx"><b>{b(headline(x))}</b><span>{b(x.app.name)}</span></span>
-      <span className="appr-btns">
-        <button type="button" className="lnk" disabled={busy} onClick={() => ask(b(findItAsk(x.label, x.app.name)))}>{zh ? "帮我找" : "Find it for me"}</button>
-        <TodoButton x={x} />
-      </span>
+      <span className="appr-tx"><b>{label.charAt(0).toUpperCase() + label.slice(1)}</b><span>{b(x.app.name)}</span></span>
+      <span className="appr-btns"><TodoButton x={x} /></span>
     </div>
   );
 }
@@ -363,6 +379,8 @@ export function Overview() {
   const [all, setAll] = useState(false);
   const [tab, setTabState] = useState<HomeTab>(readTab);
   const setTab = (v: HomeTab) => { setTabState(v); try { localStorage.setItem(HOME_TAB, v); } catch { /* storage blocked */ } };
+  const [more, setMoreState] = useState(readMore);
+  const setMore = (v: boolean) => { setMoreState(v); try { localStorage.setItem(HOME_MORE, v ? "1" : "0"); } catch { /* storage blocked */ } };
   if (!n) return <Welcome />;
   const zh = lang === "zh";
   const today = daysFromNow(0);
@@ -414,82 +432,87 @@ export function Overview() {
   const soon = [...ws.deadlines].filter(d => daysUntil(d.date) >= 0).sort((x, y) => x.date.localeCompare(y.date)).slice(0, 5);
   const latest = updates.slice(0, 3);
   const tabs: { id: HomeTab; label: string; on: boolean }[] = ([
-    { id: "plan", label: zh ? "开店计划" : "Your plan", on: true },
+    { id: "work", label: "Odelia", on: working },
+    { id: "plan", label: zh ? "计划" : "Plan", on: true },
     { id: "dates", label: zh ? "日期" : "Dates", on: soon.length > 0 },
     { id: "updates", label: zh ? "动态" : "Updates", on: latest.length > 0 || ws.nudges.length > 0 },
-    { id: "month", label: zh ? "本月" : "This month", on: true },
+    { id: "month", label: zh ? "数字" : "Numbers", on: true },
     { id: "stores", label: t("nav_stores"), on: (ws.stores ?? []).length > 0 },
-    { id: "also", label: zh ? "其他事项" : "Also check", on: !!fp?.also?.length },
+    { id: "also", label: zh ? "其他" : "Also check", on: !!fp?.also?.length },
+    { id: "done", label: zh ? "已办好" : "Done", on: done.length > 0 },
   ] as { id: HomeTab; label: string; on: boolean }[]).filter(x => x.on);
-  const cur = tabs.some(x => x.id === tab) ? tab : "plan";
+  const cur = tabs.some(x => x.id === tab) ? tab : tabs[0].id;
+  const openMore = (v?: HomeTab) => { if (v) setTab(v); setMore(true); setTimeout(() => document.getElementById("hm-more")?.scrollIntoView({ behavior: "smooth", block: "start" }), 30); };
+
+  /* the one quiet status line: what Odelia is doing, and progress once anything is filed (Linear's restraint) */
+  const workN = chiefs.length + running.length + ws.running.length + withAgency.length + queued.length;
+  const filed = approved + agency;
+  const say: string[] = [];
+  if (workN > 0) say.push(zh ? `Odelia 正在处理 ${workN} 件事` : `Odelia is working on ${workN} thing${workN === 1 ? "" : "s"}`);
+  else if (busy && live) say.push(`${b(taskVerb(live.state))}…`);
+  if (filed > 0) say.push(zh ? `已办好 ${approved}/${n} 项许可` : `${approved} of ${n} permits done`);
+  if (!say.length) say.push(zh ? `计划中有 ${n} 项许可` : `${n} permit${n === 1 ? "" : "s"} in your plan`);
+  if (landing && !filed) say.push(zh ? `预计 ${fmtDay(landing, lang, true)} 前后开业` : `Opening around ${fmtDay(landing, lang, true)}`);
+  const status = say.join(zh ? "，" : ". ");
+  const mineCtl = teamOf(team) ? <MineToggle count={mineN} /> : null;
 
   return (
     <div className="page home">
-      <header className="hm-top">
-        <div className="hm-bot"><AgentBot size={64} busy={busy} task={busy ? live?.state : undefined} gaze={[0, 2.4]} /></div>
-        <div className="hm-tx">
-          <h1>{biz}</h1>
-          <div className="progress" aria-label={zh ? `${n} 项许可已办好 ${approved} 项` : `${approved} of ${n} permits done`}>
-            <span className="bar"><i style={{ width: `${(approved / n) * 100}%` }} /><i className="b2" style={{ width: `${(agency / n) * 100}%` }} /></span>
-            <span className="pl">{zh ? `已办好 ${approved}/${n} 项许可` : `${approved} of ${n} permits done`}{agency > 0 && <small>{zh ? `，${agency} 项在机构审核` : `, ${agency} with the agency`}</small>}</span>
-          </div>
-          {landing && <p className="hm-open"><I.deadlines />{zh ? `预计 ${fmtDay(landing, lang, true)} 前后开业` : `Likely opening ${fmtDay(landing, lang, true)}`}</p>}
-        </div>
-      </header>
-
-      {teamOf(team) && (
-        <div className="mine-row">
-          <MineToggle count={mineN} />
-          {mine && <p className="mine-note">{zh ? "只显示分配给您的申请和工作。" : "Showing only the applications and jobs assigned to you."}</p>}
-        </div>
-      )}
-
-      {top ? <DoNextCard x={top} n={ordered.length} docs={docAt} onLater={() => setLater(l => [...l.filter(k => k !== top.key), top.key])} /> : (
+      {top ? <DoNextCard x={top} n={ordered.length} docs={docAt} title={biz} onLater={() => setLater(l => [...l.filter(k => k !== top.key), top.key])} /> : (
         <section className="hm-calm" aria-live="polite">
+          <h1 className="vh">{biz}</h1>
           <span className="hm-calm-i" aria-hidden="true"><I.check /></span>
           <h2>{mine ? (zh ? "没有分配给您、需要处理的事项。" : "Nothing assigned to you needs you.") : zh ? "都办好了。" : "You're all set."}</h2>
           <p>{zh ? "有需要您处理的事，Odelia 会告诉您。" : "Odelia will tell you when something needs you."}</p>
           {renewal && <p className="hm-calm-r">{zh ? `下次续期：${b(renewal.title)}，${fmtDay(renewal.date, lang, true)}` : `Next renewal: ${b(renewal.title)}, ${fmtDay(renewal.date, lang, true)}`}</p>}
+          {mineCtl && !rest.length && <div className="hm-calm-mine">{mineCtl}</div>}
         </section>
       )}
 
       {rest.length > 0 && (
         <section className="sec hm-needs">
-          <SecHead title={zh ? "等您处理" : "Waiting on you"} count={rest.length} />
+          <div className="sec-h">
+            <h2>{zh ? "等您处理" : "Waiting on you"}<em>{rest.length}</em></h2>
+            {mineCtl}
+          </div>
           {all && !mine && <BatchApprove />}
           <div className="stack">{shown.map(x => <TodoRow key={x.key} x={x} />)}</div>
-          {all && docsAll.length > 1 && <button type="button" className="lnk more" disabled={busy} onClick={() => ask(b(findItAsk(B(docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.en} (${x.app.name.en})` : "").join("; "), docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.zh}（${x.app.name.zh}）` : "").join("；")), B("open applications", "进行中的申请"), true)))}><I.spark />{zh ? `把 ${docsAll.length} 份文件都交给 Odelia 找` : `Have Odelia find all ${docsAll.length} documents`}</button>}
-          {rest.length > 3 && <button type="button" className="lnk more" onClick={() => setAll(!all)}>{all ? (zh ? "收起" : "Show fewer") : (zh ? `查看全部 ${rest.length} 项` : `See all ${rest.length}`)}</button>}
+          {all && docsAll.length > 1 && <button type="button" className="lnk more" disabled={busy} onClick={() => ask(b(findItAsk(B(docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.en} (${x.app.name.en})` : "").join("; "), docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.zh}（${x.app.name.zh}）` : "").join("；")), B("open applications", "进行中的申请"), true)))}><I.spark />{zh ? `让 Odelia 找齐 ${docsAll.length} 份文件` : `Have Odelia find all ${docsAll.length}`}</button>}
+          {rest.length > 3 && <button type="button" className="lnk more" onClick={() => setAll(!all)}>{all ? (zh ? "收起" : "Show fewer") : (zh ? `全部 ${rest.length} 项` : `All ${rest.length}`)}</button>}
         </section>
       )}
 
-      {working && (
-        <section className="sec hm-work">
-          <SecHead title={t("hm_working")} more={unread ? (zh ? `动态 ${unread}` : `Updates ${unread}`) : zh ? "动态" : "Updates"} onMore={() => go("odelia", "updates")} />
-          <LiveLine />
-          <ul className="wls">
-            {chiefs.map(j => <WorkLine key={j.id} title={b(j.title)} status={zh ? "多家门店同时进行" : "Across your stores"}><ChiefRow job={j} compact /></WorkLine>)}
-            {running.map(j => <WorkLine key={j.id} title={b(j.title)} status={steps(j)}><PlanCard job={j} compact /></WorkLine>)}
-            {withAgency.map(a => { const d = decision(a.id); return <WorkLine key={a.id} title={b(a.name)} status={d ? (zh ? `机构审核中，预计 ${fmtDay(d.date, lang)} 出结果` : `With the agency, decision ${fmtDay(d.date, lang)}`) : zh ? "机构审核中" : "With the agency"} onOpen={() => openApp(a.id, "progress")} />; })}
-            {ws.running.map(r => <li key={r.id}><div className="wl"><TaskBot id={r.id} label={b(r.label)} /><b>{b(r.label)}</b>{r.detail && <span>{b(r.detail)}</span>}</div></li>)}
-            {queued.length > 0 && <li><div className="wl"><b>{zh ? `${queued.length} 项排队中` : `${queued.length} waiting in line`}</b><span>{zh ? "当前任务完成后开始" : "Next when she finishes"}</span></div></li>}
-            {routineLine && <WorkLine title={routineLine} status={zh ? "例行任务" : "Routines"} onOpen={() => go("odelia", "work")} />}
-          </ul>
-        </section>
-      )}
+      <div className={"hm-status" + (more ? " open" : "")}>
+        <button type="button" className="hm-status-b" onClick={() => openMore(working ? "work" : "plan")} aria-controls="hm-more">
+          <span className="hm-status-bot" aria-hidden="true"><AgentBot size={40} busy={busy} task={busy ? live?.state : undefined} gaze={[0, 2.4]} interactive={false} /></span>
+          <span className="hm-status-tx">{status}</span>
+          {filed > 0 && <span className="bar" aria-hidden="true"><i style={{ width: `${(approved / n) * 100}%` }} /><i className="b2" style={{ width: `${(agency / n) * 100}%` }} /></span>}
+        </button>
+        <button type="button" className="hm-more-b" aria-expanded={more} aria-controls="hm-more" onClick={() => (more ? setMore(false) : openMore())}>{zh ? "更多" : "More"}<I.chevR /></button>
+      </div>
 
-      {done.length > 0 && (
-        <details className="sec hm-done">
-          <summary><span>{zh ? "已办好" : "All set"}</span><em>{done.length}</em><I.chevR /></summary>
-          <div className="tray">{done.map(a => <AppRow key={a.id} a={a} />)}</div>
-        </details>
-      )}
-
-      <section className="sec hm-more" aria-label={zh ? "更多" : "More"}>
+      {more && (
+      <section className="sec hm-more" id="hm-more" aria-label={zh ? "更多" : "More"}>
+        <>
         <nav className="ptabs hm-tabs" role="tablist">
           {tabs.map(x => <button key={x.id} type="button" role="tab" aria-selected={x.id === cur} onClick={() => setTab(x.id)}>{x.label}</button>)}
         </nav>
         <div role="tabpanel" className="hm-panel">
+          {cur === "work" && (
+            <div className="hm-work">
+              <LiveLine />
+              <ul className="wls">
+                {chiefs.map(j => <WorkLine key={j.id} title={b(j.title)} status={zh ? "多家门店同时进行" : "Across your stores"}><ChiefRow job={j} compact /></WorkLine>)}
+                {running.map(j => <WorkLine key={j.id} title={b(j.title)} status={steps(j)}><PlanCard job={j} compact /></WorkLine>)}
+                {withAgency.map(a => { const d = decision(a.id); return <WorkLine key={a.id} title={b(a.name)} status={d ? (zh ? `机构审核中，预计 ${fmtDay(d.date, lang)} 出结果` : `With the agency, decision ${fmtDay(d.date, lang)}`) : zh ? "机构审核中" : "With the agency"} onOpen={() => openApp(a.id, "progress")} />; })}
+                {ws.running.map(r => <li key={r.id}><div className="wl"><TaskBot id={r.id} label={b(r.label)} /><b>{b(r.label)}</b>{r.detail && <span>{b(r.detail)}</span>}</div></li>)}
+                {queued.length > 0 && <li><div className="wl"><b>{zh ? `${queued.length} 项排队中` : `${queued.length} waiting in line`}</b><span>{zh ? "当前任务完成后开始" : "Next when she finishes"}</span></div></li>}
+                {routineLine && <WorkLine title={routineLine} status={zh ? "例行任务" : "Routines"} onOpen={() => go("odelia", "work")} />}
+              </ul>
+              <button type="button" className="lnk more" onClick={() => go("odelia", "updates")}>{unread ? (zh ? `动态 ${unread}` : `Updates ${unread}`) : zh ? "全部动态" : "All updates"}<I.chevR /></button>
+            </div>
+          )}
+          {cur === "done" && <div className="tray">{done.map(a => <AppRow key={a.id} a={a} />)}</div>}
           {cur === "plan" && (
             <div className="hm-plan">
               <div className="plan-card">
@@ -551,7 +574,9 @@ export function Overview() {
           {cur === "stores" && <StoresStrip onOpen={() => go("stores")} />}
           {cur === "also" && fp?.also?.length ? <AlsoNeed fp={fp} zh={zh} /> : null}
         </div>
+        </>
       </section>
+      )}
       <Footer />
     </div>
   );
