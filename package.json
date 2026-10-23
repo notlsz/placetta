@@ -34,6 +34,7 @@
     "test:words": "node scripts/plain-words.mjs",
     "test:bot": "esbuild scripts/bot-crash-test.ts --bundle --platform=node --format=esm --outfile=.bot-crash-test.mjs --external:bot-avatars --log-level=error && node .bot-crash-test.mjs; s=$?; rm -f .bot-crash-test.mjs; exit $s",
     "test:crash": "node scripts/crash-smoke.mjs",
+    "test:next-path": "esbuild scripts/next-path-test.ts --bundle --platform=node --format=esm --outfile=.next-path-test.mjs --log-level=error && node .next-path-test.mjs; s=$?; rm -f .next-path-test.mjs; exit $s",
     "test:speech": "esbuild scripts/speech-test.ts --bundle --platform=node --format=esm --outfile=.speech-test.mjs --log-level=error && node .speech-test.mjs; s=$?; rm -f .speech-test.mjs; exit $s",
     "coverage": "esbuild scripts/coverage.ts --bundle --platform=node --format=esm --outfile=.coverage-test.mjs '--external:*.pdf?inline' --log-level=error && node .coverage-test.mjs; s=$?; rm -f .coverage-test.mjs; exit $s",
     "coverage:write": "esbuild scripts/coverage.ts --bundle --platform=node --format=esm --outfile=.coverage-test.mjs '--external:*.pdf?inline' --log-level=error && node .coverage-test.mjs --write; s=$?; rm -f .coverage-test.mjs; exit $s",

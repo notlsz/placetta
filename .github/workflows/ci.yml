@@ -35,6 +35,9 @@ jobs:
       - run: npm run test:bot
       # what talking leaves in the message box (um and uh out, everything else as said) and what voice notes cost
       - run: npm run test:speech
+      # a refusal never ends at "no": every refusal the server's tools throw gets the next step and who takes it, and
+      # the safety refusals (no CAPTCHA bypass, nothing filed or paid without approval) stay refusals
+      - run: npm run test:next-path
       # the prompt-injection red team: hostile emails, PDFs, pages, chats, lessons and form fields, each against a
       # model that obeys them; every one must be stopped by Placetta's own code
       - run: npm run test:redteam
