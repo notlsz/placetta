@@ -13,7 +13,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { appLink, appOrigin, type Lang, SAY } from "../_shared/odelia.ts";
 import { currentWorkspace, DOC_TYPES, type Link, logMessage, storeDocs } from "../_shared/odelia_db.ts";
-import { fetchResend, type InMail, isForward, mailBody, mailReady, odeliaEmail, parsePostmark, postmarkAuthOk, replySubject, sendMail, senderVerified, verifyStandardWebhook } from "../_shared/mail.ts";
+import { fetchResend, type InMail, mailAsk, mailBody, mailReady, odeliaEmail, parsePostmark, postmarkAuthOk, replySubject, sendMail, senderVerified, verifyStandardWebhook } from "../_shared/mail.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
@@ -101,8 +101,10 @@ export async function received(m: InMail) {
   const saved = files.length ? await storeDocs(admin, ws.id, user, files, { folder: "email", tag: MAIL_SAY.files }) : [];
   const other = m.files.length - saved.length;
   const names = saved.map((f) => f.name).join(", ");
-  const words = m.text || (lang === "zh" ? "（邮件正文为空）" : "(no message)");
-  const ask = (isForward(m.subject) ? (lang === "zh" ? `我转发了一封邮件给你（主题：${m.subject}）：\n\n` : `I forwarded you an email (subject: ${m.subject}):\n\n`) : m.subject ? (lang === "zh" ? `主题：${m.subject}\n\n` : `Subject: ${m.subject}\n\n`) : "") + words
+  // their own words as theirs; a forwarded letter fenced as someone else's, or held back when it's aimed at an AI
+  const asked = mailAsk(m, lang);
+  if (asked.held) console.warn("odelia mail: forwarded text held back", asked.held);
+  const ask = asked.prompt
     + (saved.length ? (lang === "zh" ? `\n\n（对方通过邮件发来 ${saved.length} 个附件，已存入“文件”：${names}。请用 review_documents 读取，只说文件里写明的内容。）` : `\n\n(They emailed ${saved.length} attachment${saved.length === 1 ? "" : "s"}, now saved in Documents: ${names}. Read ${saved.length === 1 ? "it" : "them"} with review_documents using those names. Only say what the documents themselves say.)`) : "")
     + (other > 0 ? (lang === "zh" ? `\n\n（另有 ${other} 个附件未保存，只支持照片和 PDF。）` : `\n\n(${other} other attachment${other === 1 ? "" : "s"} weren't saved; only photos and PDFs are.)`) : "");
 
