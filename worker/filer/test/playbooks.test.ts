@@ -5,7 +5,7 @@ import assert from "node:assert";
 import { DEST } from "../../../supabase/functions/file/destinations.ts";
 import type { PageState } from "../src/guards.ts";
 import { routeOf } from "../src/main.ts";
-import { finalOn, guideLines, navOn, payOn, playbookFor, PLAYBOOKS } from "../src/playbooks.ts";
+import { finalOn, guideLines, navOn, pageOutline, payOn, playbookFor, PLAYBOOKS } from "../src/playbooks.ts";
 
 const onHost = (url: string, host: string) => { const h = new URL(url).hostname; return h === host || h.endsWith("." + host); };
 const state = (heading: string): PageState => ({ url: "https://x.gov/", title: heading, headings: [heading], controls: [], buttons: [], links: [], text: "", frames: [], markers: [] });
@@ -87,4 +87,13 @@ test("the worker gets each destination's tenant path, other hosts and start page
   assert.deepEqual(routeOf("dal-co"), { tenant: "/dallastx", alsoOn: undefined, start: "https://aca-prod.accela.com/dallastx" });
   assert.deepEqual(routeOf("hc-business-tax")?.alsoOn, ["hillsborough.county-taxes.com"]);
   assert.equal(routeOf("irs-ss4"), null, "no portal, no route");
+});
+
+test("each guide's pages, once each and in order, are the customer's progress list", () => {
+  for (const p of PLAYBOOKS) for (const [id, form] of Object.entries(p.forms)) {
+    const o = pageOutline(form);
+    assert.ok(o.length >= 1 && o.length <= 20, `${p.host} ${id}`);
+    assert.equal(new Set(o.map((x) => x.toLowerCase())).size, o.length, `${p.host} ${id}: a page once`);
+    assert.deepEqual(o, form.steps.map((s) => s.page.trim()).filter((x, i, a) => a.findIndex((y) => y.toLowerCase() === x.toLowerCase()) === i).slice(0, 20), `${p.host} ${id}: in the guide's order`);
+  }
 });

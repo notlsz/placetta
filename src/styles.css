@@ -1407,6 +1407,21 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .fl-t small { font-size: 12.5px; color: var(--ink3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fl .tag { flex: none; padding: 1px 8px; border-radius: 99px; background: var(--mist2); color: var(--ink2); font-size: 11.5px; }
 .fl-stop { flex: none; gap: 6px; }
+/* The agency guide's pages, done, now and next (src/filingProgress.ts), and the page the filer is on */
+.fl-prog { margin: 0 14px 6px; padding: 10px 12px; border-radius: 14px; background: var(--mist); }
+.fl-prog-h { margin: 0 0 6px; font-size: 13px; color: var(--ink); }
+.fl-prog-h b { font-weight: 600; }
+.fl-bar { display: block; height: 4px; border-radius: 99px; background: rgba(var(--e), .08); overflow: hidden; }
+.fl-bar i { display: block; height: 100%; border-radius: 99px; background: #3F9A62; transition: width .4s ease-out; }
+.fl-steps { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 8px 0 0; padding: 0; font-size: 12.5px; color: var(--ink3); }
+.fl-steps li { display: inline-flex; align-items: center; gap: 5px; min-width: 0; }
+.fl-steps li svg { width: 12px; height: 12px; color: #3F9A62; }
+.fl-steps li em { font-style: normal; font-variant-numeric: tabular-nums; font-size: 11.5px; color: var(--ink3); }
+.fl-steps li.s-done { color: var(--ink2); }
+.fl-steps li.s-now { color: var(--ink); font-weight: 600; }
+.fl-steps li.s-now em { color: var(--blue-ink); }
+.fl-live { display: block; width: 100%; margin-top: 10px; padding: 0; border-radius: 12px; overflow: hidden; max-height: 260px; }
+.fl-live .shot { display: block; max-height: 260px; overflow: hidden; }
 .fl-evs { list-style: none; margin: 0; padding: 2px 14px 6px; }
 .fl-evs > li { position: relative; display: grid; grid-template-columns: 18px minmax(0, 1fr) auto auto; align-items: start; gap: 10px; padding: 6px 0; font-size: 13.5px; line-height: 1.45; color: var(--ink2); animation: stepin .3s ease-out; }
 .fl-evs > li::before { content: ""; position: absolute; left: 8.5px; top: 22px; bottom: -6px; width: 1px; background: rgba(var(--e), .09); }
