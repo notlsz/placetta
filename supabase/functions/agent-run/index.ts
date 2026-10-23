@@ -616,7 +616,25 @@ export async function work(runId: string, token: string | null, ticket: string |
   const until = Date.now() + CHUNK_MS;
   const lostLease = () => err("lease_lost", "Another instance took the run over.");
 
-  const { data: row } = await admin.from("workspaces").select("name, state").eq("id", ws).maybeSingle();
+  // Speed (Perplexity's and Claude's pattern: say what's happening before the first lookup): the reads a run needs before
+  // its first model call go out together, not one after another, and a fresh run shows its first step at once instead
+  // of after them and the connected apps' tool lists. Each read's failure is still met where it was before.
+  const rowP = admin.from("workspaces").select("name, state").eq("id", ws).maybeSingle();
+  const who0P = actorOf(admin as never, run);
+  const svcP = servicesFor(ws, run, token);
+  const memP = memoryFor(run);
+  for (const p of [who0P, svcP, memP] as Promise<unknown>[]) p.catch(() => undefined);   // met below; never unhandled if the run ends first
+  const fresh = !run.state?.rounds && !(Array.isArray(run.steps) && run.steps.length);
+  let firstP: Promise<unknown> = Promise.resolve();
+  if (fresh && run.kind === "task") {
+    // whose step it is, as every step says (a store's bot, or Odelia herself: src/jobs.ts MAIN_BOT)
+    const bot = run.parent_run && run.store_id ? run.store_id : "odelia";
+    const first = [{ state: "searching", at: new Date().toISOString(), bot, label: { en: "Reading your request", zh: "正在读取您的请求" } }];
+    firstP = Promise.resolve(lease.write({ steps: first, updated_at: first[0].at })).then((ok) => { if (ok) pusher(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", run.id, 0).progress(first as never, null, first[0].at); }).catch(() => undefined);
+    run.steps = first as never;
+  }
+  const { data: row } = await rowP;
+  await firstP;   // it lands before any later write of the steps, which always carries it
   if (!row) { await lease.write({ status: "failed", error: "The workspace is gone." }, { running: true }); await afterRun(run); return; }
   let cur: Workspace = normalizeState(row.name, row.state ?? {});
   const pending: Patch[] = [];
@@ -698,9 +716,9 @@ export async function work(runId: string, token: string | null, ticket: string |
   try {
     // Who the run acts for, as of now: the person's role in this workspace (or the system for a background check).
     // Someone who left, or only views it, stops the run; every tool call is checked against this role.
-    const who0 = await actorOf(admin as never, run);
+    const who0 = await who0P;
     if ("refused" in who0) throw err("not_allowed", who0.refused);
-    const svc = await servicesFor(ws, run, token);
+    const svc = await svcP;
     if (!child && (run.channel ?? "app") === "app") {
       svc.split = async ({ children }) => {
         await save();   // the store jobs are in the workspace before their runs start
@@ -724,7 +742,7 @@ export async function work(runId: string, token: string | null, ticket: string |
     const location = cur.meta?.city ? { city: cur.meta.city, region: cur.meta.region } : undefined;
     // memory: read alongside the work on a fresh run (a resumed one reads it when it ends), so it adds no wait
     const recalling = !state.rounds && !state.recalled ? recallFor(run, cur, who) : null;
-    const memory = await memoryFor(run);
+    const memory = await memP;
     const out = await runRounds({
       state, ws: () => cur, lang: run.lang, deep: run.deep, account: true, svc, signal: ctl.signal, until, maxTokens: TASK_TOKENS,
       apply: (p) => { cur = p(cur); pending.push(p); },
