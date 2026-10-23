@@ -18,6 +18,7 @@ Written 2026-10-22. Each competitor's strength and weakness comes from a cited p
 | **Overall** | **7.9** | Unchanged at one decimal by the second lifecycle pass (7.94 with finishing at 7.5): the dimensions below 9 wait on a live run, an audit and connectors, not on code (see "What 9.5 needs" at the end). |
 | **After the 9.5 pass** | **8.4** | 7.5, 8.5, 9, 7.5, 8.5, 8.5, 8.5, 8.5, 9 in the order above (8.39): see "The 9.5 pass" at the end. |
 | **After the 9 pass** | **8.4** | 7.5, 8.5, 9, 8, 8.5, 8.5, 8.5, 8.5, 9 (8.44): speed to 8; the rest wait on steps only the founder can take. See "The 9 pass" at the end. |
+| **After the memory, channels and integrations pass** | **8.6** | 7.5, 8.5, 9, 8, 9, 8.5, 9, 8.5, 9 (8.56): memory and integrations to 9; channels (not a column here) 8.5 to 9. See the last section. |
 
 ## The scorecard
 
@@ -389,4 +390,97 @@ a third party's signature), and each read is data from outside, never instructio
 | A SOC 2 Type I report, and zero retention confirmed in writing by each AI provider | Trust +0.5 (to 9) |
 
 With every step: 8.5, 9, 9, 9, 9, 9, 9, 9, 9, about 8.9 overall.
+
+## The memory, channels and integrations pass (2026-10-23)
+
+The brief: memory, channels and integrations each to 9 by copying what works in the best competitor, then filling the
+gaps in those competitors that hurt Placetta's customers; build only what helps them. Each table is the competitor's
+score for its own job in that area (the brief's: Claude 9 for memory and integrations, Claude and Grok Bot 9 for
+channels), then where Odelia stood before and after. The columns above score competitors for Odelia's job instead,
+which is why Claude apps shows 7 on memory there.
+
+### Memory: 8.5 to 9
+
+| | Claude (projects, memory) | ChatGPT (memory) | Alven, OpenAI Dots | Odelia before | Odelia after |
+|---|---:|---:|---:|---:|---:|
+| Score | 9 | 8.5 | 7 | 8.5 | 9 |
+| Scoped memory (a project; here a store or market) | yes | projects | partly | yes | yes |
+| See, edit, delete, why it's kept | yes | yes | partly | yes | yes, plus the record it's tied to |
+| "Remember this" / "forget this" | yes | yes | no | yes | yes |
+| Search past chats | yes, your own | yes, your own | no | every teammate's (a leak) | the asker's own only, never into a shared thread |
+| Reference saved memories / chat history switches | partly | yes ([Memory FAQ](https://help.openai.com/en/articles/8590148-memory-faq)) | no | one workspace switch | per person, both |
+| Import from another assistant | yes | no | no | yes (verified) | yes |
+| One history across channels | no | no | no | yes (verified, `continuity.ts`) | yes |
+| A memory tied to the record it states | no | no | no | conflicts only | every memory with a record key (`agent_memories_link`) |
+| Re-checked when the rule or record changes | no | no | no | no | the sweeper's drift or fee finding, or a filing's decision, marks it; the prompt says to confirm it; a person settles it |
+| Team sharing by role | per project | no | no | personal or everyone | team, admins only, or personal; conflicts on a personal memory were readable by teammates (fixed) |
+| Recall on held-out questions (recall at 5) | | | | 65.0% (MRR 0.539) | 100% (MRR 0.863) |
+
+Measured with `scripts/memory-recall-bench.ts`: 48 facts saved the way "remember this" saves them, 40 tuned questions
+and 20 held out (written after the glossary was tuned and never tuned on), the same file run on origin/main's source
+and on this branch. Origin/main refused to keep "health permit" and "health inspection" facts at all (the sensitive-topic
+filter read "health" as a person's health), and missed 6 of 9 held-out questions asked in the other language. This
+pass adds a bilingual compliance glossary (COI, DOHMH, 房东, TABC and the journeys' places) to the free, deterministic
+retrieval, and the compliance exemption. Caveat: one author wrote the facts, both question sets and the glossary, so the
+held-out 100% is optimistic; a real owner's questions will miss sometimes.
+
+Copied: ChatGPT's two personal switches; Claude's conversation search over your own chats. Already there and verified:
+store and market scopes, the editable view with why, remember and forget commands, import, cross-channel continuity.
+Commit 97532134; migration `20261031151700_memory_records_roles` (40 DB checks).
+
+### Channels: 8.5 to 9
+
+| | Grok Bot | Claude in Slack and Claude Tag | Devin (Slack) | Odelia before | Odelia after |
+|---|---:|---:|---:|---:|---:|
+| Score | 9 | 9 | 8 | 8.5 | 9 |
+| Chats reached | Slack, Teams, its app | Slack | Slack | email, SMS, iMessage, WhatsApp, Slack, Lark, WeChat, Teams, Telegram | same (iMessage now behind `LINQ_ENABLED`) |
+| Reads the thread before a mention | yes | yes, 50 replies | yes | no | yes, 50, fenced; held back if it carries AI instructions |
+| Slash command | `/` skills | no | yes | no | `/odelia` |
+| Thread into a task | | stages work, answers in thread | yes | no | "Make it a task" shortcut |
+| Buttons | send, discard, reply | | Apply | link only | open, assign to me, remind me (never file, pay or approve) |
+| Proactive in channels | | ambient, opt-in | no | no | opt-in per channel, one private offer a thread |
+| Files in chat | yes | yes | yes | email, texts, WhatsApp | plus Slack, Teams, Telegram |
+| Daily digest, quiet hours | | | | each update; quiet hours for texts only | daily digest at an hour, quiet hours, per group |
+| Approvals out of the group | yes, one to one | no | no | link in the thread | link only to the asker |
+| Regulated approvals and tenancy per sender | approvals, one shared machine | one identity per channel | per Devin account | yes | yes, and buttons and files under the same rules |
+
+Copied: Claude in Slack's thread context and files
+([Slack help](https://slack.com/help/articles/53532192117267-Use-Claude-in-Slack)); Claude Tag's opt-in ambient
+behavior ([Anthropic](https://www.anthropic.com/news/introducing-claude-tag)); Grok Bot's approvals kept one to one
+([xAI](https://docs.x.ai/grok-bot/chat-and-collaboration)); Slack's own slash commands, shortcuts and interactivity,
+with the signing secret checked on every request. Their gap Odelia keeps: every job runs as the teammate who asked
+(matched by email, guests and other companies refused), nothing regulated is approved in chat, and a teammate's
+personal or admins-only memory never reaches a shared thread. Commit 688e00f0; migration
+`20261031151800_chat_actions` (12 DB checks); red team K1 to K5.
+
+### Integrations and MCP: 8.5 to 9
+
+| | Claude (connectors) | Grok Bot (plugins) | ChatGPT apps, OpenAI Dots | Odelia before | Odelia after |
+|---|---:|---:|---:|---:|---:|
+| Score | 9 | 8 | 8 | 8.5 | 9 |
+| A directory with search | yes | catalog | yes | grouped list | search and a Connected filter over built-in apps and the MCP catalog |
+| One-click OAuth per connector | yes | yes | yes | yes | yes |
+| Own MCP server, OAuth, directory fields | n/a | n/a | n/a | built; fields partly filled | all ten portal steps filled (`docs/mcp/DIRECTORIES.md`) |
+| Verified end to end against the spec | | | | unit tests | the official SDK client over HTTP, OAuth to every tool; MCP Inspector CLI |
+| MCP tools for the newest features | | | | 5 tools | 8: plus status timeline, appeals, inspections (read only) |
+| Calendar, Notion, Airtable, HubSpot, e-signature | yes | yes | yes | yes (verified) | yes |
+| What a connector's data means for a license | no | no | no | raw records | each location matched to its store and its applications' address lines, Xero's legal name to the entity, with the app's own words |
+
+Copied: Claude's connector directory (search, one place to connect)
+([connectors overview](https://claude.com/docs/connectors/overview)) and every field of its submission portal
+([submission](https://claude.com/docs/connectors/building/submission)). Verified, not rebuilt: Google Calendar and
+Outlook Calendar (events written), Notion, Airtable and HubSpot over their own MCP servers, Dropbox Sign. Not built:
+DocuSign (its MCP server still needs an Integration Key Placetta registers). The SDK test found a real bug:
+`plan_preview` returned a count where its output schema says boolean, which a strict client rejects. Commit 29eb52c6.
+
+### Is 9.5 feasible?
+
+| Area | What 9.5 needs | Code alone? |
+|---|---|---|
+| Memory | Owners using it on real work: recall measured on their own questions (not one author's), re-checks raised by real sweeper findings and settled, admins-only memories chosen by real owners | No: live usage |
+| Channels | The Slack app published in the Slack Marketplace (Slack's review) and the Teams app through Microsoft's store validation, so a customer installs in one click instead of pasting a manifest; real teams using /odelia and the buttons | No: marketplace review and live usage |
+| Integrations | The MCP server listed in Claude's directory (submission lists it as Community by default) and as a ChatGPT app, run against the deployed address with the Inspector; the Google Business Profile, Clover, Shopify and Xero apps registered; a DocuSign Integration Key | No: directory submission and app registrations |
+
+Every copyable gap in these three areas is closed in code. 9.5 in each waits on steps only the founder can take, and on
+customers using what's built; nothing in the repository can show it before then.
 
