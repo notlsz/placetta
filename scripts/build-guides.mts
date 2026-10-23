@@ -139,6 +139,8 @@ const faqHtml = (l: L, qa: [string, string][]) => `<section class="faqs"><h2>${l
    carry rel="sponsored", as search engines require. */
 const SPONSORS: { name: string; url: string | null; logo?: string }[] = [
   { name: "DeepSeek", url: "https://www.deepseek.com" },
+  { name: "ByteDance", url: "https://www.bytedance.com" },
+  { name: "Alibaba", url: "https://www.alibabagroup.com" },
 ];
 const LOGOS = SPONSORS.flatMap(sp => ["svg", "png"].flatMap(ext => { try { return [{ name: sp.name, file: `${slug(sp.name)}.${ext}`, bytes: readFileSync(`scripts/sponsors/${slug(sp.name)}.${ext}`) }]; } catch { return []; } }));
 const sponsorLogo = (s: (typeof SPONSORS)[number]) => { const x = LOGOS.find(y => y.name === s.name); return x ? `/guides/sponsors/${x.file}` : undefined; };

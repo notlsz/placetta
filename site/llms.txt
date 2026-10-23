@@ -4,7 +4,7 @@
 
 Odelia, Placetta's AI agent, prepares each application from your documents. You review and approve it, then Odelia files it and follows up until the agency decides. When an agency needs a person, in person or on the phone, our team steps in.
 
-Free license guides: 92 cities in 22 countries (41 in the US), 12 kinds of business, 481 official forms, in English and Chinese. Every guide lists the filings in the order they are made, with the agency, how each is filed, the government fee and a link to the agency's own page. Agencies change requirements; check the agency's page before filing. Placetta is not a law firm and does not give legal advice.
+Free license guides: 97 cities in 24 countries (41 in the US), 12 kinds of business, 651 official forms, in English and Chinese. Every guide lists the filings in the order they are made, with the agency, how each is filed, the government fee and a link to the agency's own page. Agencies change requirements; check the agency's page before filing. Placetta is not a law firm and does not give legal advice.
 
 ## 中文简介
 快哉为进入新市场的企业办理执照、许可和登记，并保持有效。快哉为每个门店地址梳理所需的全部执照、许可和登记，填写政府官方表格，经客户批准后提交，并跟踪续期、检查和规则变化。中英文服务。
@@ -60,6 +60,7 @@ Every page has a Markdown copy at the same address ending in .md: [https://www.p
 - [Arizona](https://www.placetta.com/guides/states/arizona.html)
 - [California](https://www.placetta.com/guides/states/california.html)
 - [Colorado](https://www.placetta.com/guides/states/colorado.html)
+- [District of Columbia](https://www.placetta.com/guides/states/district-of-columbia.html)
 - [Florida](https://www.placetta.com/guides/states/florida.html)
 - [Georgia](https://www.placetta.com/guides/states/georgia.html)
 - [Illinois](https://www.placetta.com/guides/states/illinois.html)
@@ -119,6 +120,10 @@ Every page has a Markdown copy at the same address ending in .md: [https://www.p
 - [Monterrey, Mexico](https://www.placetta.com/guides/monterrey/)
 - [Guadalajara, Mexico](https://www.placetta.com/guides/guadalajara/)
 - [Cancún, Mexico](https://www.placetta.com/guides/cancun/)
+- [Toronto, Canada](https://www.placetta.com/guides/toronto/)
+- [Vancouver, Canada](https://www.placetta.com/guides/vancouver/)
+- [Montréal, Canada](https://www.placetta.com/guides/montreal/)
+- [Nairobi, Kenya](https://www.placetta.com/guides/nairobi/)
 - [Beijing, China](https://www.placetta.com/guides/beijing/)
 - [Shanghai, China](https://www.placetta.com/guides/shanghai/)
 - [Shenzhen, China](https://www.placetta.com/guides/shenzhen/)
@@ -166,6 +171,7 @@ Every page has a Markdown copy at the same address ending in .md: [https://www.p
 - [Dammam, Saudi Arabia](https://www.placetta.com/guides/dammam/)
 - [Doha, Qatar](https://www.placetta.com/guides/doha/)
 - [Istanbul, Türkiye](https://www.placetta.com/guides/istanbul/)
+- [Ankara, Türkiye](https://www.placetta.com/guides/ankara/)
 - [San Francisco, United States](https://www.placetta.com/guides/san-francisco/)
 - [San Jose, United States](https://www.placetta.com/guides/san-jose/)
 - [Chicago, United States](https://www.placetta.com/guides/chicago/)
