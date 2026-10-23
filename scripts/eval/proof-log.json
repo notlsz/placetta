@@ -5861,5 +5861,395 @@
   "found": true,
   "sha256": "9be0d74aeeebfe17",
   "context": "icans federal, state, territory, county, and municipal courts local governments find contact information for local governments by state. select or type your state or territory: alabama (al) alaska (ak) arizona (az) a"
+ },
+ {
+  "id": "life:ca-agent",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/service-process",
+  "quote": "Corporations, limited liability companies, limited partnerships, and limited liability partnerships are required by statute to designate an agent for service of process.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "ea1f7667a4ce21b8",
+  "context": " home business programs business entities service of process service of process corporations, limited liability companies, limited partnerships, and limited liability partnerships are required by statute to designate an agent for service of process. the business entity's listed agent for service of process is available through "
+ },
+ {
+  "id": "life:life-boi",
+  "read": "https://www.fincen.gov/boi",
+  "quote": "U.S. companies are exempt from BOI reporting requirements and therefore, are no longer required to file BOI reports.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "156cefacacef2a51",
+  "context": " 26, 2025. the rule also expands relief for u.s. persons. under the final rule: u.s. companies are exempt from boi reporting requirements and therefore, are no longer required to file boi reports. reporting companies do not need to report boi for u.s. person beneficial owners"
+ },
+ {
+  "id": "life:uspto-trademark",
+  "read": "https://www.uspto.gov/learning-and-resources/fees-and-payment/uspto-fee-schedule",
+  "quote": "Base application, per class 350.00",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "5e7557fd05c57498",
+  "context": "e filed with wipo (section 66(a)), per class 600.00 7933 n/a n/a 2.6(a)(1)(iii) base application, per class 350.00 7017 n/a n/a 2.6(a)(1)(iv) insufficient information (sections 1 and 44), per cl"
+ },
+ {
+  "id": "life:uspto-attorney",
+  "read": "https://www.uspto.gov/trademarks/basics/do-i-need-attorney",
+  "quote": "If you are a foreign-domiciled trademark applicant or registrant, you must have a U.S.-licensed attorney represent you.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "3803c7680f2e21e4",
+  "context": "ted by a u.s.-licensed attorney to file documents with us in trademark matters. if you are a foreign-domiciled trademark applicant or registrant, you must have a u.s.-licensed attorney represent you. if you're domiciled in the united states, you're not required to have an attorn"
+ },
+ {
+  "id": "life:bank-account",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title31-vol3/pdf/CFR-2025-title31-vol3-sec1010-230.pdf",
+  "quote": "Identify the beneficial owner(s) of each legal entity customer at the time a new account is opened",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "2aa5a9d3af51382e",
+  "context": "tution's customer due diligence procedures shall enable the institution to: (1) identify the beneficial owner(s) of each legal entity customer at the time a new account is opened, unless the customer is otherwise excluded pursuant to paragraph (e) of this se"
+ },
+ {
+  "id": "life:music-license",
+  "read": "https://www.copyright.gov/title17/92chap1.html",
+  "quote": "in the case of literary, musical, dramatic, and choreographic works, pantomimes, and motion pictures and other audiovisual works, to perform the copyrighted work publicly;",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "2cef53c90e9443fe",
+  "context": "ic by sale or other transfer of ownership, or by rental, lease, or lending; (4) in the case of literary, musical, dramatic, and choreographic works, pantomimes, and motion pictures and other audiovisual works, to perform the copyrighted work publicly; (5) in the case of literary, musical, dramatic, and choreographic works, pantom"
+ },
+ {
+  "id": "life:ada-access",
+  "read": "https://www.ada.gov/resources/title-iii-primer/",
+  "quote": "must remove architectural barriers to elements subject to the new requirements in the 2010 Standards when it is readily achievable to do so.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "e6c101abfba2109b",
+  "context": "o the safe harbor. therefore, on or after march 15, 2012, public accommodations must remove architectural barriers to elements subject to the new requirements in the 2010 standards when it is readily achievable to do so. for example, a hotel must determine whether it is readily achievable to make it"
+ },
+ {
+  "id": "life:new-hire-report",
+  "read": "https://www.acf.hhs.gov/css/employers/employer-responsibilities/new-hire-reporting",
+  "quote": "Federal law requires employers to report basic information on new and rehired employees within 20 days of hire",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "7701d10cd14d85f5",
+  "context": "ew tab) share on linkedin (opens in new tab) print this page new hire reporting federal law requires employers to report basic information on new and rehired employees within 20 days of hire to the state where the new employees work. federal law requires employers to re"
+ },
+ {
+  "id": "life:ca-new-hire",
+  "read": "https://edd.ca.gov/en/payroll_taxes/new_hire_reporting",
+  "quote": "Use e-Services for Business to submit a Report of New Employee(s) (DE 34).",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "d903ff2572d99bd4",
+  "context": "l security number (ssn). home address. start-of-work date. how to report online use e-services for business to submit a report of new employee(s) (de 34). it's fast, easy, and secure. mail or fax submit a paper report of new employees"
+ },
+ {
+  "id": "life:ny-new-hire",
+  "read": "https://www.tax.ny.gov/bus/wt/newhire.htm",
+  "quote": "You must report newly hired or rehired employees who will be employed in New York State within 20 calendar days from the hiring date.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "b670dbaf8b7904ad",
+  "context": "employee and if so, the date the employee qualifies for the benefits. due dates you must report newly hired or rehired employees who will be employed in new york state within 20 calendar days from the hiring date. the hiring date is the first day the employee: performs any services for which "
+ },
+ {
+  "id": "life:us-posters",
+  "read": "https://www.dol.gov/general/topics/posters",
+  "quote": "require that notices be provided to employees and/or posted in the workplace.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "b5a57f2253fd667d",
+  "context": " of the statutes and regulations enforced by the u.s. department of labor (dol) require that notices be provided to employees and/or posted in the workplace. dol provides free electronic copies of the required posters and some of the pos"
+ },
+ {
+  "id": "life:ca-posters",
+  "read": "https://www.dir.ca.gov/wpnodb.html",
+  "quote": "On or before February 1, 2026, and each year after that, an employer must provide employees a required workplace rights notice.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "77549e67cd61e1be",
+  "context": "ng additional information who must post california workplace - know your rights on or before february 1, 2026, and each year after that, an employer must provide employees a required workplace rights notice. the labor commissioner provides these templates that can be used and meet the r"
+ },
+ {
+  "id": "life:i9",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title8-vol1/pdf/CFR-2025-title8-vol1-sec274a-2.pdf",
+  "quote": "must examine documents that evidence the identity and employment authorization of the individual",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "89f398542d69df33",
+  "context": "on with completing the form i–9, an employer or recruiter or referrer for a fee must examine documents that evidence the identity and employment authorization of the individual. the employer or recruiter or referrer for a fee and the individual must each c"
+ },
+ {
+  "id": "life:fl-everify",
+  "read": "https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0400-0499/0448/Sections/0448.095.html",
+  "quote": "Beginning on July 1, 2023, a private employer with 25 or more employees shall use the E-Verify system",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "c8dc274daa1ba445",
+  "context": "ify a new employee's employment eligibility as required under paragraph (a). 2. beginning on july 1, 2023, a private employer with 25 or more employees shall use the e-verify system to verify a new employee's employment eligibility as required under paragraph ("
+ },
+ {
+  "id": "life:sf-minimum-wage",
+  "read": "https://www.sf.gov/information--minimum-wage-ordinance",
+  "quote": "Employers are required to pay no less than the San Francisco minimum wage to employees performing work in San Francisco",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "5ca89646e5ee393e",
+  "context": "visit us city hall permit center find contacts info page minimum wage ordinance employers are required to pay no less than the san francisco minimum wage to employees performing work in san francisco, including part-time and temporary employees. office of labor standards enforce"
+ },
+ {
+  "id": "life:sf-sick-leave",
+  "read": "https://www.sf.gov/information--paid-sick-leave-ordinance",
+  "quote": "Employees earn 1 hour of paid sick leave for every 30 hours worked.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "d740a4c308e28ee0",
+  "context": "including temporary and part-time employees) who perform work in san francisco. employees earn 1 hour of paid sick leave for every 30 hours worked. employers with 10 or more employees may cap an employee's sick time balance at "
+ },
+ {
+  "id": "life:ca-sick-leave",
+  "read": "https://www.dir.ca.gov/dlse/paid_sick_leave.htm",
+  "quote": "Starting on January 1, 2024, employers must generally provide 5 days or 40 hours of paid sick leave to their employees in California.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "7d673e21c1d3a5b2",
+  "context": "or commissioner's office california paid sick leave: frequently asked questions starting on january 1, 2024, employers must generally provide 5 days or 40 hours of paid sick leave to their employees in california. the labor commissioner has updated the paid sick leave poster ( spanish) ( kore"
+ },
+ {
+  "id": "life:ca-bhgs-manufacturer",
+  "read": "https://bhgs.dca.ca.gov/forms_pubs/19-012_statelicflyer.pdf",
+  "quote": "Furniture and Bedding Manufacturer—A company that produces upholstered furniture or bedding in whole or in part",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "21e94563da08c3ee",
+  "context": " of upholstered furniture, using either new materials or the owner's materials. furniture and bedding manufacturer—a company that produces upholstered furniture or bedding in whole or in part, or who uses new or secondhand materials to upholster any product. sanitizer—a "
+ },
+ {
+  "id": "life:cpsc-sturdy",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title16-vol2/pdf/CFR-2025-title16-vol2-part1261.pdf",
+  "quote": "All clothing storage units that are manufactured after September 1, 2023, are subject to the requirements of this part.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "0d78092c00316952",
+  "context": "tes that is intended for the storage of clothing, typical of bedroom furniture. all clothing storage units that are manufactured after september 1, 2023, are subject to the requirements of this part. § 1261.2 requirements for clothing storage units. each clothing storage unit th"
+ },
+ {
+  "id": "life:nutrition-facts",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title21-vol2/pdf/CFR-2025-title21-vol2-sec101-9.pdf",
+  "quote": "Nutrition information relating to food shall be provided for all products intended for human consumption and offered for sale unless an exemption is provided",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "cb64b359b8ea1670",
+  "context": " amended at 84 fr 57610, oct. 28, 2019] § 101.9 nutrition labeling of food. (a) nutrition information relating to food shall be provided for all products intended for human consumption and offered for sale unless an exemption is provided for the product in paragraph (j) of this section. (1) when food is in package f"
+ },
+ {
+  "id": "life:allergen-label",
+  "read": "https://www.fda.gov/food/nutrition-food-labeling-and-critical-foods/food-allergies",
+  "quote": "declaring sesame as the 9th major food allergen recognized by the United States.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "c45383bba1d9ded7",
+  "context": "gy safety, treatment, education, and research (faster) act was signed into law, declaring sesame as the 9th major food allergen recognized by the united states. the change was effective on january 1, 2023. all fda requirements applicable to"
+ },
+ {
+  "id": "life:fda-prior-notice",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title21-vol1/pdf/CFR-2025-title21-vol1-sec1-279.pdf",
+  "quote": "you must submit the prior notice to FDA and the prior notice submission must be confirmed by FDA for review",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "01ad9138080b6f85",
+  "context": "e be submitted to fda? (a) except as provided in paragraph (c) of this section, you must submit the prior notice to fda and the prior notice submission must be confirmed by fda for review as follows: (1) if the article of food is arriving by land by road, no less tha"
+ },
+ {
+  "id": "life:life-mocra-facility",
+  "read": "https://www.fda.gov/cosmetics/cosmetics-laws-regulations/modernization-cosmetics-regulation-act-2022-mocra",
+  "quote": "Manufacturers and processors must register their facilities with FDA and renew their registration every two years.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "defd8fac42a1c66b",
+  "context": "adverse event reports associated with cosmetic products. facility registration: manufacturers and processors must register their facilities with fda and renew their registration every two years. fda has the authority to suspend a facility's registration if the agency determ"
+ },
+ {
+  "id": "life:cosmetic-ingredients",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title21-vol7/pdf/CFR-2025-title21-vol7-sec701-3.pdf",
+  "quote": "The label on each package of a cosmetic shall bear a declaration of the name of each ingredient in descending order of predominance",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "1dab4821752f488a",
+  "context": "n the labeling in the foreign language. § 701.3 designation of ingredients. (a) the label on each package of a cosmetic shall bear a declaration of the name of each ingredient in descending order of predominance, except that fragrance or flavor may be listed as fragrance or flavor. an ingre"
+ },
+ {
+  "id": "life:gb-cosmetics-rp",
+  "read": "https://www.gov.uk/guidance/making-cosmetic-products-available-to-consumers-in-great-britain",
+  "quote": "A Responsible Person must have a UK established address to make cosmetic products available in GB.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "63a4f457f5fe2fe0",
+  "context": "responsible person can be a business or an individual (including sole traders). a responsible person must have a uk established address to make cosmetic products available in gb. a uk established address does not include mail forwarding or po box addresses. "
+ },
+ {
+  "id": "life:gb-cosmetics-scpn",
+  "read": "https://www.gov.uk/guidance/making-cosmetic-products-available-to-consumers-in-great-britain",
+  "quote": "know about the cosmetic product (called notification) before it is made available to consumers",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "63a4f457f5fe2fe0",
+  "context": " product clearly visible let the office for product safety and standards (opss) know about the cosmetic product (called notification) before it is made available to consumers tell opss about any serious harmful effects which are reported about the cosmet"
+ },
+ {
+  "id": "life:cpsc-gcc",
+  "read": "https://www.cpsc.gov/Business--Manufacturing/Testing-Certification/General-Certificate-of-Conformity",
+  "quote": "requires domestic manufacturers and importers of certain general-use products (i.e., non-children’s products)",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "d6b5c29f4852ed6e",
+  "context": " specific standard, section 14(a) of the cpsa, as codified in 16 cfr part 1110, requires domestic manufacturers and importers of certain general-use products (i.e., non-children's products) that are subject to a consumer product safety rules, or a similar rule, ban, st"
+ },
+ {
+  "id": "life:textile-label",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title16-vol1/pdf/CFR-2025-title16-vol1-part303.pdf",
+  "quote": "Each textile fiber product, except those exempted or excluded under section 12 of the Act, shall be labeled or invoiced",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "dca1f2ba875ce94c",
+  "context": "17, feb. 13, 1998; 79 fr 18770, apr. 4, 2014] § 303.2 general requirements. (a) each textile fiber product, except those exempted or excluded under section 12 of the act, shall be labeled or invoiced in conformity with the requirements of the act and regulations. (b) any adverti"
+ },
+ {
+  "id": "life:care-label",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title16-vol1/pdf/CFR-2025-title16-vol1-part423.pdf",
+  "quote": "Manufacturers and importers must attach care labels so that they can be seen or easily found",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "a7085ea7b0ca95c6",
+  "context": "6 textile wearing apparel. this section applies to textile wearing apparel. (a) manufacturers and importers must attach care labels so that they can be seen or easily found when the product is offered for sale to consumers. if the product is packaged, "
+ },
+ {
+  "id": "life:origin-marking",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-part134.pdf",
+  "quote": "shall be marked in a conspicuous place as legibly, indelibly, and permanently as the nature of the article (or container) will permit",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "afa7e791f6021467",
+  "context": "ry article of foreign origin (or its container) imported into the united states shall be marked in a conspicuous place as legibly, indelibly, and permanently as the nature of the article (or container) will permit, in such manner as to indicate to an ultimate purchaser in the united states th"
+ },
+ {
+  "id": "life:hts-ruling",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol2/pdf/CFR-2025-title19-vol2-part177.pdf",
+  "quote": "binding tariff classification ruling letter (including pre-entry classification decisions)",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "c859b5f01ad06c80",
+  "context": "d offices. any person engaging in a customs transaction with respect to which a binding tariff classification ruling letter (including pre-entry classification decisions) has been issued under this part shall ascertain that a copy of the ruling lette"
+ },
+ {
+  "id": "life:ca-economic-nexus",
+  "read": "https://www.cdtfa.ca.gov/industry/wayfair.htm",
+  "quote": "by the retailer and all persons related to the retailer exceed $500,000.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "4c1e62845eba7df8",
+  "context": "e total combined sales of tangible personal property for delivery in california by the retailer and all persons related to the retailer exceed $500,000. a person is related to a retailer if they have a relationship with the retailer"
+ },
+ {
+  "id": "life:tx-economic-nexus",
+  "read": "https://comptroller.texas.gov/taxes/sales/remote-sellers.php",
+  "quote": "Remote sellers with total Texas revenue of less than $500,000 in the preceding twelve calendar months are not required to obtain a tax permit",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "a4334c9f935395bf",
+  "context": " radio or television catalogs or flyers use tax the law provides a safe harbor: remote sellers with total texas revenue of less than $500,000 in the preceding twelve calendar months are not required to obtain a tax permit or collect, report and remit state and local use tax. your total texas revenue "
+ },
+ {
+  "id": "life:fl-economic-nexus",
+  "read": "https://floridarevenue.com/taxes/eservices/Pages/registration.aspx",
+  "quote": "if the retailer has made taxable remote Florida sales in excess of $100,000 over the previous calendar year.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "36644fefe42ca601",
+  "context": "uding any applicable discretionary sales surtax, on remote sales into the state if the retailer has made taxable remote florida sales in excess of $100,000 over the previous calendar year. taxation of marketplace sales marketplace providers having a physical presence "
+ },
+ {
+  "id": "life:ca-marketplace",
+  "read": "https://cdtfa.ca.gov/industry/MPFAct.htm",
+  "quote": "A marketplace facilitator is generally responsible for collecting, reporting, and paying the tax on retail sales made through their marketplace",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "c401ba13436ca13e",
+  "context": "34) and ab 1402 (stats, 2021, ch. 421) provides that beginning october 1, 2019, a marketplace facilitator is generally responsible for collecting, reporting, and paying the tax on retail sales made through their marketplace for delivery to california customers. additionally, starting january 1, 2022, a"
+ },
+ {
+  "id": "life:tx-marketplace",
+  "read": "https://comptroller.texas.gov/taxes/sales/remote-sellers.php",
+  "quote": "who only sells through a marketplace provider that certifies they are collecting and reporting sales and use tax on the remote seller’s behalf",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "a4334c9f935395bf",
+  "context": "ecting use tax. you must keep records of your sales into texas. a remote seller who only sells through a marketplace provider that certifies they are collecting and reporting sales and use tax on the remote seller's behalf is not required to hold a texas tax permit. however, all sellers must keep requ"
+ },
+ {
+  "id": "life:fl-marketplace",
+  "read": "https://floridarevenue.com/taxes/eservices/Pages/registration.aspx",
+  "quote": "are required to register online to collect and must electronically report and remit Florida sales tax",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "36644fefe42ca601",
+  "context": " previous calendar year in which the sum of the sales prices exceeded $100,000, are required to register online to collect and must electronically report and remit florida sales tax and discretionary sales surtax on taxable florida retail sales made through the"
+ },
+ {
+  "id": "life:retailer-certificates",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title16-vol2/pdf/CFR-2025-title16-vol2-part1110.pdf",
+  "quote": "to each distributor and retailer of the product in question.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "1d3d4bd8ebc20748",
+  "context": "ction 14(a) ''accompany'' each product or product shipment and be ''furnished'' to each distributor and retailer of the product in question. (1) an electronic certificate satisfies the ''accompany'' requirement if the ce"
+ },
+ {
+  "id": "life:cosmetics-no-certificate",
+  "read": "https://www.fda.gov/cosmetics/registration-listing-cosmetic-product-facilities-and-products",
+  "quote": "it does not provide certificates or other documents to verify compliance for cosmetic product facility registration.",
+  "checked": "2026-10-23",
+  "method": "curl",
+  "found": true,
+  "sha256": "6ae8b7fe3c010d52",
+  "context": "g cosmetic product facilities, retailers, and industry responsible persons that it does not provide certificates or other documents to verify compliance for cosmetic product facility registration. february 11, 2026 today, the u.s. food and drug administration announced update"
  }
 ]

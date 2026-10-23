@@ -15,6 +15,8 @@ import { publishedDays } from "../plan";
 import { openingPath } from "../smart";
 import { daysFromNow } from "../time";
 import { nextRenewal, PROJECTED_RENEWAL, renewalCycle } from "../renewal";
+import { alsoFor, haveOf, type AlsoRow } from "./also";
+import type { Have } from "../forms/lifecycle";
 
 export type PreviewOptions = {
   entity?: string;          // the legal entity, if it exists already (then no formation step)
@@ -24,6 +26,11 @@ export type PreviewOptions = {
   imports?: boolean;        // imports the goods it sells (default: read from what it is, "importer", "进口")
   alcohol?: boolean;        // sells beer, wine or spirits (default: read from what it is)
   terrace?: boolean;        // puts tables outside (default: read from what it is)
+  // the intake's answers (src/plan/intake.ts), each one only when asked; otherwise read from what it is
+  manufactures?: boolean;   // makes what it sells
+  online?: boolean;         // sells online
+  upholstered?: boolean;    // furniture: sells upholstered pieces
+  children?: boolean;       // makes or sells products for children 12 or younger
   today?: string;           // YYYY-MM-DD, for tests
   storeId?: string;         // the store the rows belong to, for the projected opening
 };
@@ -46,6 +53,8 @@ export type PreviewPlan = {
   kinds: StoreKind[];                    // the kinds of business the words name: food, or furniture (src/forms/kinds.ts)
   facts: PlanFact[];                     // what an official page says differs for those kinds here, each quoted and current
   withheld: string[];                    // facts for this place and kind whose quote isn't current: not stated (fail closed)
+  have: Have;                            // what the business does, for the lifecycle's triggers (src/forms/lifecycle.ts)
+  also: AlsoRow[];                       // beyond the permits: conditional filings, labels, workplace rules, what an agency decides (src/plan/also.ts)
 };
 /** A fact about this kind of business here, as the plan states it: only with a current quote from its official page. */
 export type PlanFact = { id: string; kinds: StoreKind[]; title: Bi; text: Bi; agency: Bi; level: Level; app?: string; source: { label: string; url: string; quote: string; checked: string } };
@@ -295,7 +304,9 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
   const employees = o.employees ?? true, buildout = o.buildout ?? !mobile;
   const alcohol = o.alcohol ?? sellsAlcohol(what);
   // a furniture brand: wood goods, upholstered furniture and clothing storage units, read from what it is (src/forms/furniture.ts)
-  const needs = { food, employees, signage: o.signage ?? !mobile, buildout, newEntity: !(o.entity ?? "").trim(), imports: o.imports ?? imports(what), alcohol, terrace: o.terrace ?? terrace(what), ...furnitureNeeds(what) };
+  const needs = { food, employees, signage: o.signage ?? !mobile, buildout, newEntity: !(o.entity ?? "").trim(), imports: o.imports ?? imports(what), alcohol, terrace: o.terrace ?? terrace(what), ...furnitureNeeds(what),
+    // the intake's answers win over what the words suggest
+    ...(o.upholstered !== undefined && FURNITURE.test(what) ? { upholstered: o.upholstered } : {}), ...(o.children !== undefined ? { children: o.children } : {}) };
   const info = placeInfo(where), places = placesOf(where);
   const country = info.country ?? "US";
   const us = country === "US";
@@ -560,11 +571,14 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
 
   const layers: Record<Level, number> = { federal: 0, state: 0, county: 0, city: 0 };
   for (const a of apps) layers[a.level]++;
+  // beyond the permits to open: the conditional filings, the labels, the workplace rules and what an agency decides
+  const have = haveOf(what, segment, needs, { manufactures: o.manufactures, online: o.online, mobile });
+  const also = alsoFor({ places, segment, have, today });
   return {
     apps, deadlines, projectedOpen, segment, food, country, places, local: info.local,
     fromRegistry: rows.filter(r => r.f).length, generic: rows.filter(r => !r.f).length, layers, abstained: apps.filter(a => a.abstain).length, conflicts,
     fees: apps.reduce((s, a) => s + a.fees.reduce((t, f) => t + f.amount, 0), 0), varies: apps.filter(a => a.fees.some(f => f.tbd)).length,
-    kinds, facts, withheld,
+    kinds, facts, withheld, have, also,
   };
 }
 
@@ -572,8 +586,9 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
     model passes: for each library form whether Odelia may claim it (a current quote from its page, and no conflict), and
     the steps the library has no form for, as the instant plan lists them (claims with their quote, or abstentions that
     name who to ask with that office's own link). One source of truth with the instant plan. */
-export function libraryAnswer(what: string, where: string, needs: { employees?: boolean; buildout?: boolean; signage?: boolean; newEntity?: boolean; imports?: boolean; alcohol?: boolean }, today = daysFromNow(0)) {
-  const p = previewPlan(what, where, undefined, { entity: needs.newEntity ? undefined : "existing", employees: !!needs.employees, buildout: !!needs.buildout, signage: !!needs.signage, imports: !!needs.imports, alcohol: !!needs.alcohol, today });
+export function libraryAnswer(what: string, where: string, needs: { employees?: boolean; buildout?: boolean; signage?: boolean; newEntity?: boolean; imports?: boolean; alcohol?: boolean; manufactures?: boolean; online?: boolean; upholstered?: boolean; children?: boolean }, today = daysFromNow(0)) {
+  const p = previewPlan(what, where, undefined, { entity: needs.newEntity ? undefined : "existing", employees: !!needs.employees, buildout: !!needs.buildout, signage: !!needs.signage, imports: !!needs.imports, alcohol: !!needs.alcohol,
+    manufactures: needs.manufactures, online: needs.online, upholstered: needs.upholstered, children: needs.children, today });
   const byForm = new Map(p.apps.filter(a => a.official).map(a => [a.official!, a]));
   return {
     claim: (f: OfficialForm) => { const a = byForm.get(f.id); return a ? !a.abstain : !!(f.proof && proofCurrent(f.proof, today)); },
@@ -581,6 +596,8 @@ export function libraryAnswer(what: string, where: string, needs: { employees?: 
     steps: p.apps.filter(a => !a.official), conflicts: p.conflicts,
     // what differs for this kind of business here, each with its official quote (only current ones)
     facts: p.facts,
+    // beyond the permits: conditional filings, labels, workplace rules and what an agency decides (src/plan/also.ts)
+    also: p.also, have: p.have,
   };
 }
 

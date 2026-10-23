@@ -9,6 +9,7 @@ import { nowIso } from "../time";
 import { NYC, STATES, ZH_CITIES } from "./line";
 import { FROM_SIGNUP, parseAddress, prefill, type Prefilled } from "./prefill";
 import { previewPlan, type PreviewPlan } from "./preview";
+import { intakeAnswers, type Intake } from "./intake";
 
 export type FirstInput = {
   what: string;              // what it is, in their words ("Milk tea shop", "奶茶店")
@@ -21,6 +22,7 @@ export type FirstInput = {
   notFormed?: boolean;       // they said the company isn't formed yet
   owner?: string;            // the owner's full name
   address?: string;          // the store's address as typed
+  intake?: Intake;           // the intake's yes-or-no answers (src/plan/intake.ts), only the ones asked
   now?: Date;                // for tests
 };
 export type First = { name: string; state: Workspace; plan: PreviewPlan; filled: Prefilled };
@@ -52,7 +54,8 @@ export function firstWorkspace(o: FirstInput): First {
   // The instant plan, from Placetta's registry and before any model call: every permit for this kind of business in
   // this place, in order, with fees and times, so the first screen already shows the work. Odelia verifies each one
   // against the agency when the plan starts; the rows stay, marked preview until then.
-  const plan = previewPlan(what, place, store.plannedOpen, { entity: legal, storeId: store.id });
+  const ans = o.intake ? intakeAnswers(what, o.intake) : {};
+  const plan = previewPlan(what, place, store.plannedOpen, { entity: legal, storeId: store.id, ...ans });
   // Then every line the answers settle, on every form, and the first win put up for approval (src/plan/prefill.ts).
   const filled = prefill(plan.apps, { what, where: place, legal, owner, address: addressText, brand: o.brand?.trim() ?? "", open });
   store.apps = filled.apps.map(a => a.id);
@@ -61,7 +64,8 @@ export function firstWorkspace(o: FirstInput): First {
     business: same(brand), goal: month ? B(`Open by ${monthEn}`, `${monthZh}开业`) : same(""),
     locations: [{ id: slug(city), name: same(city), county: same(st), state: "active" }],
     apps: filled.apps, deadlines: plan.deadlines, approvals: filled.approvals,
-    firstPlan: { at: nowIso(), what, where: place, whereZh: ZH_CITIES.find(([, en]) => en === place)?.[2], apps: plan.apps.length, opening: store.plannedOpen, projectedOpen: plan.projectedOpen ?? undefined, filled: filled.filled, win: filled.win?.app },
+    firstPlan: { at: nowIso(), what, where: place, whereZh: ZH_CITIES.find(([, en]) => en === place)?.[2], apps: plan.apps.length, opening: store.plannedOpen, projectedOpen: plan.projectedOpen ?? undefined, filled: filled.filled, win: filled.win?.app,
+      also: plan.also.map(r => ({ id: r.id, group: r.group, line: r.line, verified: r.verified, sources: r.sources })), why: plan.have.manufactures ? "manufactures" : plan.have.imports ? "imports" : "sells" },
     facts: [
       ...(legal ? [{ id: "f-name", group: "business" as const, label: B("Legal name", "法定名称"), value: same(legal), source: FROM_SIGNUP }] : []),
       ...(o.notFormed ? [{ id: "f-formed", group: "business" as const, label: B("Company formed", "公司是否已成立"), value: B("Not yet", "尚未成立"), source: FROM_SIGNUP }] : []),

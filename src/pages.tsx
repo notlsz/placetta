@@ -25,6 +25,7 @@ import { hasReview, PermitsReview } from "./ReviewTable";
 import { CommentsButton, MineToggle, useTeam, type Collab } from "./Comments";
 import { SignButton } from "./SignDoc";
 import { shortName } from "./collab";
+import { AlsoNeed } from "./AlsoNeed";
 
 /** What the Mine filter keeps: an application or job assigned to this person, or a job about one that is. */
 const mineApp = (team: Collab, id?: string) => !!id && team.isMine({ kind: "app", id });
@@ -381,6 +382,8 @@ export function Overview() {
         </div>
         {fp?.ms != null && previews > 0 && <p className="plan-time" data-indent><I.check />{b(firstLine(fp.apps, fp.ms, !!fp.win && ws.apps.some(a => a.id === fp.win), fp.filled ?? 0))}</p>}
       </section>
+
+      {fp?.also?.length ? <AlsoNeed fp={fp} zh={zh} /> : null}
 
       <HomeMetrics />
 

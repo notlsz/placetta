@@ -241,7 +241,11 @@ export type Workspace = {
 /** The plan a new workspace starts with: what and where the person typed, when, and how many permits the registry listed.
  *  filled: the form lines filled from the signup answers (src/plan/prefill.ts); win: the application put up for approval
  *  at sign-up, if one was; ms: from the signup press to the plan on Home, recorded once by Home. */
-export type FirstPlan = { at: string; what: string; where: string; whereZh?: string; apps: number; opening?: string; projectedOpen?: string; filled?: number; win?: string; ms?: number };
+export type FirstPlan = { at: string; what: string; where: string; whereZh?: string; apps: number; opening?: string; projectedOpen?: string; filled?: number; win?: string; ms?: number;
+  /** Beyond the permits (src/plan/also.ts): conditional filings, labels, workplace rules and what an agency decides, each
+   *  line with its sources; `why` says whether the labels are because the business makes, imports or sells its products. */
+  also?: AlsoLine[]; why?: "manufactures" | "imports" | "sells" };
+export type AlsoLine = { id: string; group: "also" | "labels" | "workplace" | "decides"; line: Bi; verified: boolean; sources: { agency: Bi; url: string; quote?: string; read?: string }[] };
 /** A skill: instructions Placetta follows for one kind of job. "auto" ones it wrote itself from a job it finished;
  *  "form" skills also carry where each line of an official form came from, so the next filing of it fills itself. */
 export type SkillSource = "placetta" | "auto" | "you";

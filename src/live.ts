@@ -48,6 +48,7 @@ import { FORMS, METHOD, formById, formsFor, placeInfo, placesOf, searchForms, se
 /** The US state of an address or place ("Flushing, NY" is NY), or "" outside the US. */
 const placeState = (where: string) => (placesOf(where.split(";")[0]).find((c, k, all) => all[0] === "US" && k > 0 && /^[A-Z]{2}$/.test(c)) ?? "");
 import { dealsInFood, libraryAnswer } from "./plan/preview";
+import { alsoText, heading } from "./plan/also";
 import { entryPacket, packetForModel } from "./plan/packet";
 import { PLAYBOOKS, playbookById } from "./filingPlaybooks";
 import { proofCurrent } from "./plan/ask";
@@ -236,6 +237,7 @@ Rules:
 - Never invent the person's facts. If something is missing, leave the field empty (never "TBD", "unknown" or a placeholder, which count as empty) and ask for it at the end; in a drafted document use [brackets].
 - Never invent a license or permit name, form number, agency, fee, processing time, rule or date. Take them from find_official_forms${research ? " or an official page you read and cite" : ""}; anything you couldn't confirm there, call an estimate to confirm with the agency, or leave out.
 - A question about a requirement ("Do I need a seller's permit?", "When does the business tax renew?") is answered from find_official_forms${research ? " or an official page you read" : ""}: say what the agency states, name the agency and give its official link. When neither confirms the answer, say you're not sure and who to ask: the agency that decides it and its official site. Never fill the gap with a guess.
+- After a plan's permits, give find_official_forms' beyond_permits the way its also_text has them: under "You may also need these" the filings that turn on a condition (each with its form, fee and condition in one line), under "Because you manufacture (or import, or sell), your products may also need labels" the label and product rules, then the store and staff rules and what an agency decides, each line with its numbered source footnote (agency, official link, the page's words and the day read). Labels and product rules are a checklist with where to verify them: never say Placetta certifies a product. For an item an agency decides (Proposition 65, a tariff classification, a wage ordinance), name the agency and the rule, and don't advise. A line whose source isn't confirmed says so.
 - Claim only what an official page says, in its words. find_official_forms marks each form and local step claim true (with the page's quote and the day it was read) or claim false (no current quote on record, or two official sources disagree): a claim-false step is never stated as required, only as something to confirm with the office it names, at the link it gives, until you read that page and can cite its words. Before saying a plan or an answer is done, check every requirement in it against its quote: drop or reword any you can't back.
 - You are not a lawyer, and Placetta is not a law firm. Say what an agency, statute or rule requires and cite it; don't give legal opinions or tell them what they legally should do. For questions of legal judgment (lease terms, choosing or structuring an entity, contracts, disputes, immigration, liability, what a law means for their situation), say it's a question for a licensed attorney, offer to prepare a short list of questions for one, and keep helping with the filings. Never say Placetta's lawyers will handle something.
 - Never ask for a Social Security number, ITIN, driver's license or passport number, or bank account or card numbers in chat. The team collects those on the agency's own site. A form line that asks for one (like line 7b of Form SS-4) is answered "By hand": fill_fields it with exactly that, and the signer writes the number on the signed copy (or "Foreign" when there is none). A line that asks for one together with other details ("name, title, SSN, address") gets the other details and "SSN: By hand".${research ? `
@@ -478,6 +480,10 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         hazmat_or_batteries: { type: "boolean" }, sells_cosmetics: { type: "boolean" }, food_warehouse: { type: "boolean" }, manhattan_below_96th: { type: "boolean" },
         serves_alcohol: { type: "boolean", description: "Sells or serves beer, wine or spirits" },
         outdoor_seating: { type: "boolean", description: "Puts tables and chairs outside on the street or pavement (a terrace)" },
+        manufactures: { type: "boolean", description: "Makes the products it sells (a furniture maker, a cosmetics or food manufacturer)" },
+        sells_online: { type: "boolean", description: "Sells online (its own site or a marketplace like Amazon or Walmart)" },
+        sells_upholstered: { type: "boolean", description: "Furniture: sells upholstered pieces (sofas, upholstered chairs)" },
+        childrens_products: { type: "boolean", description: "Makes or sells products designed mainly for children 12 or younger" },
       } },
       execute(i) {
         const segment = segmentOf(str(i.business) || get().business.en);
@@ -493,7 +499,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const info = placeInfo(place);
         // fail closed: a form is claimed only with a current quote from its page and no conflicting source; the steps the
         // library has no form for come with who to ask (src/plan/ask.ts, the same rows the instant plan lists)
-        const known = !str(i.search) && info.country === "US" ? libraryAnswer(str(i.business) || get().business.en, place, needs) : undefined;
+        const known = !str(i.search) && info.country === "US" ? libraryAnswer(str(i.business) || get().business.en, place, { ...needs,
+          ...(typeof i.manufactures === "boolean" ? { manufactures: i.manufactures } : {}), ...(typeof i.sells_online === "boolean" ? { online: i.sells_online } : {}),
+          ...(typeof i.sells_upholstered === "boolean" ? { upholstered: i.sells_upholstered } : {}), ...(typeof i.childrens_products === "boolean" ? { children: i.childrens_products } : {}) }) : undefined;
         const claimed = (f: OfficialForm) => known ? known.claim(f) : !!(f.proof && proofCurrent(f.proof, daysFromNow(0)));
         // a whole plan lists each form's line count, not its lines: prepare_application returns the lines still empty, so the
         // listing doesn't carry every label of every form into every later step (a search for one or a few forms keeps them)
@@ -518,6 +526,11 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           // what an official page says differs for this kind of business here (a milk tea shop, a coffee shop, a bakery):
           // only facts whose quote is current; tell the person in these words, citing the page
           ...(known?.facts.length ? { store_type_facts: known.facts.map(k => ({ fact: k.text[lang], agency: k.agency[lang], link: k.source.url, quote: k.source.quote, read_on: k.source.checked })) } : {}),
+          // beyond the permits to open (src/plan/also.ts): give these after the plan, in these groups and words, each with its
+          // numbered source footnote, exactly as also_text has them
+          ...(known?.also.length ? { beyond_permits: { also_text: alsoText(known.also, known.have, lang), lines: known.also.map(a => ({ group: heading(a.group, known.have)[lang], line: a.line[lang], kind: a.kind,
+            claim: a.verified, ...(a.decides ? { decides: a.decides[lang] } : {}), ...(a.verify ? { where_to_verify: a.verify[lang] } : {}),
+            sources: a.sources.map(x => ({ agency: x.agency[lang], link: x.url, ...(x.quote ? { quote: x.quote, read_on: x.read } : { not_confirmed: true }) })) })) } } : {}),
           not_in_library: !info.country ? "This place isn't in the library yet. Research its national and local requirements on the government's own sites, prepare each one, then skill_save what you learned so the next business there goes faster."
             : !info.local ? `The national${info.country === "US" ? ", state" : ""} steps are here; ${info.city ? info.city.en + "'s" : "the city's"} own local permits aren't. Research the city's official pages for them, then skill_save the local steps you found.`
             : list.length ? "Check the agency pages for anything local not listed (signage, alcohol, outdoor seating)." : "Nothing in the library for this. Research the agency's official page.",

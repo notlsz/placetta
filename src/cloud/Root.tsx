@@ -17,6 +17,7 @@ import type { HqRow } from "../hq";
 import { firstPlanClock } from "../plan/prefill";
 import { CITIES, ownWords, parsePlace, readLine, SELLS, STATES } from "../plan/line";
 import { firstWorkspace } from "../plan/start";
+import { intakeQuestions, type Intake } from "../plan/intake";
 import { phoneConsent } from "../consent";
 import { captureStart, claimStart, clearStart, peekStart, pendingStart, type StartClaim, type StartPeek } from "./textStart";
 // Partners and the store check (src/Partner.tsx, src/StoresCheck.tsx): the referral a new workspace came through, and
@@ -444,8 +445,12 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
   const needState = !!placeNow.trim() && !parsed && !placeNow.includes(",");
   const what = sellNow === "other" ? otherNow.trim() : f.sell ? SELLS.find(x => x.en === sellNow)?.[lang === "zh" ? "zh" : "en"] ?? "" : own && own.length <= 60 ? own : SELLS.find(x => x.en === sellNow)?.[lang === "zh" ? "zh" : "en"] ?? "";
   // The second screen: three optional answers that let Placetta fill a real application before the plan appears.
-  const [step, setStep] = useState<"line" | "more">("line");
+  const [step, setStep] = useState<"line" | "about" | "more">("line");
   const [more, setMore] = useState({ legal: "", notFormed: false, owner: "", address: "" });
+  // the intake (src/plan/intake.ts): yes-or-no questions one at a time, only those that apply to what they're opening
+  const [intake, setIntake] = useState<Intake>({});
+  const [qi, setQi] = useState(0);
+  const questions = intakeQuestions(what);
   /** What the first screen settled (the city and state), or why it can't go on yet. */
   const settle = () => {
     const city = parsed?.city ?? placeNow.replace(/,.*$/, "").trim();
@@ -460,7 +465,14 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
     if (!settle()) return;
     setErr("");
     setMore(m => ({ ...m, legal: m.legal || f.entity.trim(), address: m.address || f.street.trim() }));
-    setStep("more");
+    setQi(0);
+    setStep(questions.length ? "about" : "more");
+  };
+  /** One answer, then the next question that applies, then the three answers. */
+  const answer = (v: boolean | undefined) => {
+    const q = questions[qi];
+    if (q) setIntake(x => { const n = { ...x }; if (v === undefined) delete n[q.key]; else n[q.key] = v; return n; });
+    if (qi + 1 < questions.length) setQi(qi + 1); else setStep("more");
   };
   const create = async (skip = false) => {
     const at = settle();
@@ -476,6 +488,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
       what, city, state, lang, brand: f.brand.trim(), months: WHEN[whenNow]?.months ?? null, notFormed,
       legal: notFormed ? "" : (skip ? "" : more.legal.trim()) || f.entity.trim(), owner: skip ? "" : more.owner.trim(),
       address: (skip ? "" : more.address.trim()) || f.street.trim(),
+      intake: Object.fromEntries(Object.entries(intake).filter(([k]) => questions.some(q => q.key === k))),
     });
     try {
       const id = await api.createWorkspace(brand, ws);
@@ -527,6 +540,25 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
       </div>
     );
   }
+  if (step === "about" && questions[qi]) {
+    const q = questions[qi], had = intake[q.key];
+    return (
+      <div className="gate-card wide">
+        <p className="gate-sub onb-count">{L(B(`Question ${qi + 1} of ${questions.length}`, `第 ${qi + 1} 题，共 ${questions.length} 题`))}</p>
+        <h1 id="onb-q">{L(q.q)}</h1>
+        <p className="gate-sub">{L(q.hint)}</p>
+        <div className="chips onb-yn" role="radiogroup" aria-labelledby="onb-q">
+          <button type="button" role="radio" aria-checked={had === true} className="chip" autoFocus onClick={() => answer(true)}>{L(B("Yes", "是"))}</button>
+          <button type="button" role="radio" aria-checked={had === false} className="chip" onClick={() => answer(false)}>{L(B("No", "否"))}</button>
+        </div>
+        <div className="onb-act onb-act3">
+          <button type="button" className="sbtn quiet" onClick={() => { setErr(""); if (qi > 0) setQi(qi - 1); else setStep("line"); }}>{L(B("Back", "返回"))}</button>
+          <button type="button" className="sbtn line" onClick={() => answer(undefined)}>{L(B("Not sure", "不确定"))}</button>
+        </div>
+        <p className="onb-who">{L(B(`Signed in as ${email}`, `已登录 ${email}`))}</p>
+      </div>
+    );
+  }
   if (step === "more") {
     const ex = parsed ?? { city: placeNow.replace(/,.*$/, "").trim() || "Flushing", state: f.state || "NY" };
     return (
@@ -553,7 +585,7 @@ function Onboard({ lang, email, onCreated, onCancel }: { lang: Lang; email: stri
             <small className="onb-hint">{L(B("Street, city, state and ZIP code.", "街道、城市、州和邮编，请用英文。"))}</small>
           </label>
           <div className="onb-act onb-act3">
-            <button type="button" className="sbtn quiet" disabled={busy} onClick={() => { setErr(""); setStep("line"); }}>{L(B("Back", "返回"))}</button>
+            <button type="button" className="sbtn quiet" disabled={busy} onClick={() => { setErr(""); if (questions.length) { setQi(questions.length - 1); setStep("about"); } else setStep("line"); }}>{L(B("Back", "返回"))}</button>
             <button type="button" className="sbtn line" disabled={busy} onClick={() => void create(true)}>{L(B("Skip", "跳过"))}</button>
             <button type="submit" className="sbtn ink big" disabled={busy}>{busy ? "…" : L(B("Fill my application", "填好申请"))}</button>
           </div>

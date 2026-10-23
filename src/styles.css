@@ -964,6 +964,9 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .terms-band .sbtn { height: 36px; padding: 0 16px; font-size: 13.5px; }
 .ap-hold { display: block; margin: 0 0 6px; font-weight: 550; color: var(--warm); }
 .onb-act { display: flex; justify-content: flex-end; gap: 8px; }
+.onb-yn { display: flex; gap: 10px; margin: 18px 0 22px; }
+.onb-yn .chip { height: 46px; min-width: 96px; justify-content: center; }
+.onb-count { margin-bottom: 4px; }
 /* An AI assistant asking to sign in (src/cloud/McpConsent.tsx) */
 .mcp-consent .mcp-scopes { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; border: 0; text-align: left; }
 .mcp-consent .mcp-scopes .check { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink2); cursor: pointer; }
@@ -2277,3 +2280,17 @@ html[lang="zh-CN"] .sel { font-family: var(--zh); }
 .hq-plan-form .check { grid-column: auto; }
 .hq-link { grid-column: 1 / -1; display: block; padding: 10px 12px; border-radius: 12px; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .1); font: 12.5px/1.5 ui-monospace, "SF Mono", Menlo, monospace; overflow-wrap: anywhere; user-select: all; }
 @media (max-width: 640px) { .hq-plan-form { grid-template-columns: minmax(0, 1fr); } }
+
+/* Beyond the permits to open (src/AlsoNeed.tsx): grouped lines with numbered sources, no bullets */
+.hm-also { padding: 18px 20px 16px; border-radius: 22px; background: var(--card); box-shadow: var(--frost); }
+.hm-also .also-g + .also-g { margin-top: 16px; }
+.hm-also h3 { margin: 0 0 6px; font-size: 14.5px; font-weight: 600; letter-spacing: -.01em; }
+.also-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.also-list li { font-size: 14px; line-height: 1.45; color: var(--ink); }
+.also-list li.unv { color: var(--ink2); }
+.also-fn { display: inline-block; margin-left: 4px; font-size: 11px; vertical-align: super; line-height: 1; color: var(--blue-ink); text-decoration: none; }
+.also-fn + .also-fn { margin-left: 3px; }
+.also-src { list-style: none; margin: 18px 0 0; padding: 12px 0 0; border-top: 1px solid var(--mist); display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; line-height: 1.45; color: var(--ink3); overflow-wrap: anywhere; }
+.also-src li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 4px; }
+.also-src .also-n { font-variant-numeric: tabular-nums; text-align: right; padding-right: 4px; }
+@media (max-width: 480px) { .hm-also { padding: 16px; } }
