@@ -46,5 +46,5 @@ jobs:
             -t http/exposures -t http/misconfiguration -t http/technologies -t ssl \
             -etags intrusive,dos,fuzz,bruteforce,oast -ni -rl 10 -c 5 -timeout 10 \
             -jsonl -o nuclei-production.jsonl -stats -si 60 || true
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with: { name: nuclei-production, path: nuclei-production.jsonl, if-no-files-found: warn }
