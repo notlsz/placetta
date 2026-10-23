@@ -43,6 +43,14 @@ export function parsePlace(v: string): { city: string; state: string } | null {
   return hit ? { city: m[1].trim(), state: hit[0] } : null;
 }
 
+/** The street a line names, if it names one ("150 N First St" from "Milk tea shop at 150 N First St, San Jose, CA"),
+ *  with its ZIP code when the line has one, so the address is never typed twice. "" when there is none. */
+export function streetIn(t: string): string {
+  const m = /\b(\d{1,6}[A-Za-z]?(?:\s+[A-Za-z0-9.'-]+){1,5}?\s+(?:St|Street|Ave|Avenue|Blvd|Boulevard|Rd|Road|Dr|Drive|Way|Ln|Lane|Pl|Place|Ct|Court|Pkwy|Parkway|Hwy|Highway|Ter|Terrace|Sq|Square|Cir|Circle|Broadway)\.?)(?=[\s,]|$)/i.exec(t);
+  return m ? m[1].replace(/\s+/g, " ").trim() : "";
+}
+export const zipIn = (t: string) => /\b(\d{5})(?:-\d{4})?\s*$/.exec(t.trim())?.[1] ?? "";
+
 /** What a line says: the city and state ("Flushing, NY", or the words as typed after "in"), what it sells (one of the
  *  chips' English names, or "" when it names none) and whether it's already open. */
 export function readLine(t: string): { place: string; sell: string; open: boolean } {
@@ -50,6 +58,8 @@ export function readLine(t: string): { place: string; sell: string; open: boolea
   let place = ZH_CITIES.find(([re]) => re.test(t))?.[1] ?? "";
   if (!place) place = CITIES.find(c => low.includes(c.toLowerCase())) ?? CITIES.find(c => new RegExp(`\\b${c.split(",")[0].toLowerCase()}\\b`).test(low)) ?? "";
   if (!place) { const m = /\b(?:in|at)\s+([A-Za-z .'-]+,\s*[A-Za-z .]+)\s*$/i.exec(t); if (m && parsePlace(m[1])) place = m[1].trim(); }
+  // a full address: "at 12 Elm St, Dayton, OH 45402" names the city and state in its last two parts
+  if (!place) { const m = /,\s*([A-Za-z .'-]+,\s*[A-Za-z .]+?)(?:\s+\d{5}(?:-\d{4})?)?\s*$/.exec(t); if (m && parsePlace(m[1])) place = m[1].trim(); }
   const sell = KINDS.find(([re]) => re.test(t))?.[1] ?? "";
   return { place, sell, open: /already open|we'?re open|已开业|已经开业|已营业/i.test(t) };
 }

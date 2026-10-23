@@ -81,8 +81,11 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
   // (the application filled at sign-up and waiting for approval, src/plan/prefill.ts, doesn't make it any less new)
   const firstWin = ws.firstPlan?.win;
   const nearlyEmpty = !ws.approvals.some(a => !(firstWin && a.app === firstWin)) && !ws.docs.length && (ws.apps.length < 3 || ws.apps.every(a => a.preview || a.id === firstWin));
+  // the first win waiting for Approve is the one next step: on a phone the floating chips would cover it, so they wait
+  const winWaiting = !!firstWin && ws.approvals.some(a => a.app === firstWin);
+  const narrow = useNarrow(560);
   const chips = useMemo(() => {
-    if (!starters || !nearlyEmpty) return [] as Bi[];
+    if (!starters || !nearlyEmpty || (winWaiting && narrow)) return [] as Bi[];
     const out: Bi[] = [];
     for (const s of suggestions(ws, daysFromNow(0), STARTERS)) {
       if (asked.some(q => near(q, s.en) || near(q, s.zh)) || out.some(x => near(x.en, s.en) || near(s.en, x.en))) continue;
@@ -90,8 +93,7 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
       if (out.length === 3) break;
     }
     return out;
-  }, [starters, nearlyEmpty, ws, asked]);
-  const narrow = useNarrow(560);
+  }, [starters, nearlyEmpty, ws, asked, winWaiting, narrow]);
 
   const endVoice = useCallback((send: boolean, text?: string) => {
     clearTyper(); mic.stop(); stt.stop(); sim.stop(); setVoice("off");
