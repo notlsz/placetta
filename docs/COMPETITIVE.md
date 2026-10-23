@@ -6,7 +6,7 @@ Written 2026-10-22. Each competitor's strength and weakness comes from a cited p
 
 | Dimension | Odelia | Evidence in the repo |
 |---|---:|---|
-| Finishing the job alone | 7 | Maps, fills the agency's own PDFs, puts complete filings up for one-tap approval, then the team or a portal route files them; store bots split a 20-store request (12 a call, 48 a run). Approval is required by design. No live-model eval has run yet (docs/EVAL.md). |
+| Finishing the job alone | 7.5 | Maps, fills the agency's own PDFs, puts complete filings up for one-tap approval, then the team or a portal route files them; store bots split a 20-store request (12 a call, 48 a run). Approval is required by design. Since the second lifecycle pass: the portal worker heals drifted selectors, waits out a down portal, runs up to 4 filings side by side, and books inspections on 11 agency sites. No live-model eval has run yet (docs/EVAL.md). |
 | Accuracy with cited sources | 8 | test:accuracy 100% recall and precision on the gold and held-out sets; every plan row carries its agency page and the date it was read; fees agencies don't publish are left open. Weak spot found: Santa Clara County's health permit is proven by a line on San José's business tax page. |
 | Cost transparency | 9 | Every license priced before approval ($299, $999, $99 renewal), cost to open with agency fees, a per-run token cap, and from this pass a failed run isn't charged. No per-run estimate is shown (runs cost about a cent median at the prices re-read 2026-10-22, docs/eval-speed.json and docs/UNIT-ECONOMICS.md). |
 | Speed | 7 | Modeled on 60 fixtures: 2.8 s median to done, 23.7 s p95. A 4-market entry is one call (plan_markets) instead of four. No live latency measured. |
@@ -15,7 +15,7 @@ Written 2026-10-22. Each competitor's strength and weakness comes from a cited p
 | Integrations and MCP | 7 | Connected apps over MCP (client), Placetta's own read-only MCP server (compliance status, deadlines, readiness, plan, filings), Gmail, Outlook, Drive, QuickBooks, Square, Toast, WeChat. Fewer connectors than Claude's or Grok's catalogs. |
 | Trust and security | 8 | test:redteam 58 of 58 attacks blocked; documents with instructions aimed at an AI quarantined; a policy gate on every tool call; nothing filed, paid or sent without approval; SOC 2 evidence tooling (docs/soc2) but no audit report yet. |
 | Domain depth | 9 | 325 US forms and 156 abroad (docs/FILING_COVERAGE.md), 37 markets each on its own jurisdiction's form (docs/MARKET_COVERAGE.md), EN and ZH. |
-| **Overall** | **7.9** | |
+| **Overall** | **7.9** | Unchanged at one decimal by the second lifecycle pass (7.94 with finishing at 7.5): the dimensions below 9 wait on a live run, an audit and connectors, not on code (see "What 9.5 needs" at the end). |
 
 ## The scorecard
 
@@ -164,6 +164,8 @@ something, it scores 1.
 |---|---:|---:|---:|---:|---:|
 | **Odelia, before** | 4 | 6 | 1 | 3 | 3.5 |
 | **Odelia, after** | 8 | 8 | 7 | 7 | 7.5 |
+| **Odelia, second pass (2026-10-22)** | 8.5 | 8 | 8.5 | 8 | 8.3 |
+| CompuLaw and Clio court-rules calendaring (deadline engines) | 1 | 1 | 5 | 1 | 2.0 |
 | Harbor Compliance | 6 | 5 | 1 | 1 | 3.3 |
 | LicenseLogix (CT Corporation since 2021) | 5 | 6 | 1 | 1 | 3.3 |
 | Wolters Kluwer CT Corporation | 5 | 6 | 1 | 1 | 3.3 |
@@ -218,3 +220,78 @@ From the founder's notes on a jobright.ai review (a competitor's article) and Tr
 - **Document-first onboarding.** Not built, because it exists: "Upload my lease" is a starter in the composer and the agent panel, and an upload is read into facts the plan fills from.
 - **"Forgets context."** Impossible by design, now tested: a job's plan, its handoff notes and the facts are in front of Odelia in a later session without the old conversation (`scripts/agent-test.ts`, "Context persists across sessions").
 - **Pay on hire.** Jack & Jill charges employers 10% only on a hire, with a 3-month refund. Placetta's equivalent would be charging a license only once the agency issues it. Not built: pricing is the founder's decision.
+
+## Second lifecycle pass (2026-10-22): every point lost to the best competitor
+
+| Dimension | Best competitor, and the points Odelia lost | Closed in code | Still open |
+|---|---|---|---|
+| Tracking (8 to 8.5) | Harbor and Avalara (6) lead on nothing; the point lost was Odelia's own: checks needed a model key, and only 3 cities were read in code | Deterministic checks run without any key; 8 new open-data feeds (below) | Most agencies still publish no feed: those checks are the model's. No live pilot has measured the feeds on real filings |
+| Corrections (8) | Permit expediters (8) on complex plan review | California plan check: §114380's 20-working-day deemed approval and the rule that a resubmission is reviewed only on the first deficiencies | A person on the phone with a plan checker: the team, as before |
+| Appeals (7 to 8.5) | Harvey and Legora (7) on drafting; CompuLaw and Clio on deadline engines | 20 of 23 deadline rules confirmed on official sources with section, trigger and day type; weekend and verified-holiday roll, months, 4:30 cutoffs, a mailing extension only where a rule provides one, time zones; per-claim citations; one counsel packet; 9 new playbooks | 3 rules behind bot checks (below); no attorney has reviewed the playbooks; counsel handoff is a team task until partner attorneys are signed |
+| Inspections (7 to 8) | Expediters (4) | Online booking on 11 agency sites (was 4), PermitSF confirmed, AB+C playbook | Every new site's first booking is supervised (unverified until then); Houston and San Antonio stay with the team |
+
+### Appeal deadlines, verified on 2026-10-22
+
+| Playbook | Deadline | Trigger | Days | Section | Status |
+|---|---|---|---|---|---|
+| CA ABC denial hearing | from the letter | service of the notice of denial | calendar | B&P §§24011, 24012, Gov. §11506 | UNVERIFIED: leginfo.legislature.ca.gov bot check ([24011](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=BPC&sectionNum=24011), [24012](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=BPC&sectionNum=24012), [11506](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=GOV&sectionNum=11506)) |
+| CA ABC Appeals Board | 40 (10 if effective immediately) | date of the Department's decision | calendar | B&P §23081 (Board FAQ) | verified |
+| TX TABC hearing request | 30 | date on the notice of the denial recommendation | calendar | 16 TAC §33.60(b) (TABC's rules PDF) | verified |
+| TX TABC rehearing (new) | 25 | the order is signed | calendar, rolls (Gov't §311.014) | Gov't §§2001.145(a), 2001.146(a) | verified |
+| TX TABC court appeal | 30 | order final and appealable | calendar, rolls | AL §11.67(b)(1); §11.43(i) Travis County for permits | verified |
+| NY SLA | 4 months | determination final and binding | months, rolls (GCL §§25-a, 30) | CPLR §217(1); ABC Law §121 | verified |
+| SF Board of Appeals: building | 15 | day after effective | calendar, by 4:30 p.m. | Board's filing page | verified |
+| SF: variance | 10 | day after effective | calendar | Board's filing page | verified |
+| SF: ZA determination | 15 (was 30: the page now lists Letters of Determination at 15) | day after effective | calendar | Board's filing page | verified |
+| SF: ZA Notice of Violation (new) | 30 | issued | calendar | Board's filing page | verified |
+| SF: other permits (new) | 10 at the earliest (10 or 15) | issued | calendar | Board's filing page | verified as a floor |
+| LA Planning | 10 at the earliest (10 to 15 by entitlement) | Letter of Determination issued | calendar, 4:30 p.m., weekend roll | LAMC ch. 1A art. 13B, as City Planning states it | verified as a floor |
+| LA Building and Safety Commissioners | from the letter | LADBS determination | calendar | LAMC §98.0403.2 | UNVERIFIED: [codelibrary.amlegal.com](https://codelibrary.amlegal.com/codes/los_angeles/latest/lamc/0-0-0-1) bot check; fees verified (P/BC 2026-149) |
+| LA business tax: Assessment Review (new) | 45 | service of the assessment | calendar | LAMC §21.16 (Office of Finance) | verified |
+| LA business tax: Board of Review (new) | 45 | service of the ARO decision | calendar | LAMC §21.16 (Office of Finance) | verified |
+| NYC BSA | 30 | date of the determination | calendar | 2 RCNY §1-06.3(a)(1) | verified |
+| NYC DCWP denial (new) | 4 months | final and binding | months, rolls | CPLR §217(1) | verified |
+| CA health suspension or revocation | 15 | receipt of the notice | calendar | H&S §114405(b) | verified (Orange County's published code) |
+| CA health immediate closure (new) | 15 | service of the notice | calendar | H&S §114409(c) | verified (same) |
+| CA health plan check (new) | no appeal clock | resubmit any time | working days for the agency | H&S §114380(e), (f) | verified (same) |
+| NYC Health summons (OATH) | hearing date on the summons | the summons | calendar | Health and OATH pages | verified |
+| Dallas Board of Appeals (new) | 15 | Notice of Disapproval | calendar, weekend roll, $714 | Dallas City Code ch. 52 §208.1 | verified |
+| Business license denial | by city: SF 10 to 15, LA 45, NYC 4 months, Dallas 15 (the routes above); San José and Houston from the letter | | | | UNVERIFIED for San José ([Municode](https://library.municode.com/ca/san_jose/codes/code_of_ordinances?nodeId=TIT4REFI_CH4.76BUTA), [city page](https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration)) and Houston ([Municode](https://library.municode.com/tx/houston/codes/code_of_ordinances)): bot checks |
+
+Copied, and from whom: rule-by-trigger deadlines with the counting shown (CompuLaw, Clio); two dates, the rule's last day and a target that never moves later (Placetta's own rule, kept from the first pass); each claim cited to its own numbered source (Harvey, Legora); one intake packet for the attorney with the evidence on file and missing (Clio). Not copied: CCP §1013's five mailing days, because no rule here was confirmed to take it; the mechanism is in place and tested for a rule that does.
+
+### Status feeds and booking sites added
+
+Open data, each queried live by a real record's number: Chicago building permits and business licenses, Austin permits, Seattle permits, Boston approved permits, Philadelphia permits and business licenses, NYC DCWP license applications. Not used: Dallas (no status column, ends 2018), Denver (residential construction only), NYC DOHMH (inspections, not permit status).
+
+Inspection booking on the agency's own site with the owner's existing login: San Francisco (PermitSF; numeric permits by phone), Austin (AB+C, with a playbook), Dallas, Fort Worth and San Diego (Accela), Irvine, Phoenix (the web inspection key held like a login), alongside LADBS, LAFD, FDNY and SJPermits.
+
+## The filing robot against browser and computer-use agents
+
+Scores out of 10 for filing on agency portals, Placetta's judgment from the cited pages. Odelia's filer: before and after this pass.
+
+| Agent | Strongest (copy it) | Biggest weakness (beat it) | Them | Odelia's filer before / after |
+|---|---|---|---|---|
+| Perplexity Comet | Acts across the user's own open tabs | Hidden page text ran as instructions; Brave exfiltrated a one-time password, and "We also cannot guarantee that Comet has completely fixed all possible prompt injection attacks" ([The Register](https://www.theregister.com/2025/08/20/perplexity_comet_browser_prompt_injection/)) | 4.6 | 7.7 / 8.4 |
+| Claude in Chrome | Site-level permissions and "Claude asks users before taking high-risk actions like publishing, purchasing" ([Anthropic](https://claude.com/resources/articles/claude-for-chrome)) | Attack success 23.6%, 11.2% with mitigations; a Chrome extension on paid plans (same page) | 5.9 | 7.7 / 8.4 |
+| Claude computer use | Any desktop app, not just a browser | "Each Computer Use action captures a screenshot, which consumes tokens" ([BestHub, secondary](https://www.besthub.dev/articles/anthropic-makes-four-agent-tools-ga-computer-use-browser-tool-skills-api-and-files-api-83a383f330bf)) | 5.4 | 7.7 / 8.4 |
+| Claude Code with Playwright MCP | The accessibility tree, "no vision models required", a ref per element ([Playwright](https://playwright.dev/mcp/introduction)) | A developer's tool: no owner takeover or approval flow of its own | 5.7 | 7.7 / 8.4 |
+| ChatGPT agent (now ChatGPT Work) | Takeover of the virtual browser with "screenshots are not captured" while the person types; confirmations for high-impact actions ([OpenAI](https://help.openai.com/en/articles/11752874-chatgpt-agent)) | 40 or 400 runs a month, concurrency limits, and "may need to re-establish the run" after a takeover (same page) | 5.7 | 7.7 / 8.4 |
+| Browser Use, Browserbase and Stagehand | DOM first, screenshots "only when visual context is actually necessary" ([Browser Use](https://browser-use.com/posts/speed-matters)); cached actions replayed "with no further LLM calls" and an opt-in self-heal ([Stagehand](https://docs.stagehand.dev/v2/best-practices/caching)) | A kit: confirm-before-submit, payment hand-off and injection rules are the builder's job | 7.1 | 7.7 / 8.4 |
+| Google Project Mariner | Cloud VMs, "up to 10 tasks simultaneously" ([TechCrunch](https://techcrunch.com/2025/05/20/google-rolls-out-project-mariner-its-web-browsing-ai-agent/)) | "slow and prone to mistakes"; $249.99 a month, US only (same article) | 5.0 | 7.7 / 8.4 |
+
+Odelia's filer by part, before / after: finishing on the portal 7 / 8, cost per filing 8 / 8.5, safety 9 / 9, takeover 8 / 8, proof 7 / 8, parallel runs 6 / 8, availability 9 / 9.
+
+Built, because each makes filings more reliable or cheaper: selectors healed by their words (Stagehand, Browser Use), only on one exact match and flagged to the team as drift; a down portal retried after 2, 10 and 30 minutes; up to 4 filings side by side with one run per workspace and portal (Mariner); a receipt checklist on every submitted filing. Already there: the DOM read before any screenshot (labels, ARIA labels, roles), the live view with hand-back for CAPTCHAs, codes and payments, per-run host allowlists, confirm before submit and pay, page text scored for injection before the model reads it. Not built: a video of each run (a screenshot per page and the step log already prove it, and video costs storage on every filing) and saved sessions per agency login (each run starts empty by design; a saved session would keep a live agency login in storage).
+
+## What 9.5 needs that only the founder can do
+
+| Step | Worth | Why code can't |
+|---|---|---|
+| Open the 6 blocked official pages in a browser (leginfo §§24011, 24012, 11506; LAMC §98.0403.2; San José ch. 4.76; Houston) and send the text | Appeals +0.3 | Their hosts answer Placetta's servers with a bot check; it isn't bypassed |
+| An attorney reviews the 23 appeal playbooks once, and partner attorneys are signed for the handoff | Appeals +0.5, lifecycle +0.2 | A legal review and a contract |
+| A live pilot: real filings through the worker's supervised first runs on the 11 booking sites and the new playbook, and real denials | Finishing alone +1, inspections +1, tracking +0.5 | Needs customers' filings and the owners' logins |
+| The live-model eval in docs/EVAL.md (keys) | Accuracy +0.5, speed +1 | Needs production model keys and spend |
+| A SOC 2 Type I report | Trust +1 | An auditor |
+
+With all of them: appeals about 9.3 (9.5 once a real denial has gone through a playbook end to end), lifecycle about 8.8 (corrections stays at 8: complex plan review needs a person on the phone), overall about 8.3. Overall 9.5 also needs more connectors (Claude's and Grok's catalogs lead at 9), measured speed and memory and live visibility tested with real owners.
