@@ -15,7 +15,7 @@ import { standing } from "../src/feed";
 import { FORMS } from "../src/forms/registry";
 import { PROOF } from "../src/forms/proof";
 import { SAMPLE_WS } from "../src/sample";
-import { APPEALS, appealSay } from "../src/appeals";
+import { APPEALS, appealSay, namesBody } from "../src/appeals";
 import { denialAppeal, scheduleAppeals } from "../src/finish";
 import { approvalRoute } from "../src/approvalRoute";
 import ROUTES from "../src/forms/filingRoutes.json";
@@ -39,8 +39,19 @@ export function reviewFixTests(ok: Ok, eq: Eq) {
   for (const q of ["What permits do I still need for San Jose and when will we open?", "What's left?", "what's left to do", "What do I need to do?", "What do we still need?", "还需要哪些许可？", "我还需要做什么？"]) {
     const r = reply(w, q);
     ok(!/not sure|library doesn't have|登记库里还没有/.test(r.en + r.zh), `"${q}" is not answered with "I'm not sure"`, r.en.slice(0, 200));
-    ok(/7/.test(r.en) && /plan check/.test(r.en) && /sign permit/.test(r.en), `"${q}" lists the 7 permits still to get, by name`, r.en.slice(0, 300));
-    ok(/图纸审查/.test(r.zh) && /还需办理 7 项/.test(r.zh), `"${q}" says it in Chinese too`, r.zh.slice(0, 200));
+    // it scans: one summary line, then one short line per permit still to get, then the opening, then the next step
+    const first = r.p.reply.text[0], lines = first.en.split("\n"), zl = first.zh.split("\n");
+    eq(lines[0], "San Jose, North First St: 2 of 10 done, 1 with the agency, 7 to go.", `"${q}" opens with one summary line`);
+    ok(lines.length === 8 && lines.slice(1).every(l => /^[A-Z][^:]+: [a-zO0-9].{0,45}$/.test(l)), `"${q}" then lists the 7, one short line each`, lines);
+    ok(lines.includes("Food facility plan check: needs your floor plan and equipment list") && lines.includes("Sign permit: ready, waiting for your approval"), `"${q}" says what each waits on`, lines);
+    ok(zl[0] === "圣何塞 North First St 店：10 项中已办好 2 项，1 项在机构审核，还有 7 项。" && zl.length === 8 && zl.includes("食品设施图纸审查：需要您的平面图和设备清单"), `"${q}" the same in Chinese`, zl);
+  }
+  {
+    const r = reply(w, "What's left?"), gap = Math.round((Date.parse(sj.plannedOpen! + "T12:00:00Z") - Date.parse(open + "T12:00:00Z")) / 864e5);
+    const fmt = (iso: string, y: boolean) => new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", ...(y ? { year: "numeric" } : {}) });
+    eq(r.p.reply.text[1].en, `Opens around ${fmt(open, true)}, ${gap} days before your ${fmt(sj.plannedOpen!, false)} target.`, "the opening says the date and how it sits against the target, plainly");
+    ok(/^约 .+ 开业，比您定的 .+ 早 \d+ 天。$/.test(r.p.reply.text[1].zh), "and in Chinese", r.p.reply.text[1].zh);
+    ok(!/where the permits put it|planned:/.test(r.en), "no 'where the permits put it today (planned: …)'");
   }
   for (const q of ["When do we open?", "When will we open?", "什么时候开业？", "What permits do I still need for San Jose and when will we open?"]) {
     const r = reply(w, q);
@@ -93,14 +104,20 @@ export function reviewFixTests(ok: Ok, eq: Eq) {
   for (const ap of APPEALS) {
     const s = appealSay(ap);
     ok(!/, heard by/.test(s.route.en) && !/[a-z,] The [a-z]/.test(s.route.en), `${ap.id}: no capitalized "The" mid-sentence`, s.route.en);
-    ok(/^The route: .+\. [A-Z].+ decides it\.$/.test(s.route.en), `${ap.id}: "The route: <name>. <Who> decides it."`, s.route.en);
-    ok(/^申诉途径：.+。由.+受理。$/.test(s.route.zh) && /。$/.test(s.deadline.zh) && /。$/.test(s.next.zh), `${ap.id}: the Chinese reads as sentences`, s.route.zh);
+    ok(/^The route: [^]+?\.( Who decides: [a-zA-Z][^]+\.)?$/.test(s.route.en), `${ap.id}: "The route: <name>." and, when the name doesn't say it, "Who decides: <body>."`, s.route.en);
+    ok(/^申诉途径：.+。(受理机构：[^：]+。)?$/.test(s.route.zh) && /。$/.test(s.deadline.zh) && /。$/.test(s.next.zh), `${ap.id}: the Chinese reads as sentences`, s.route.zh);
     ok(/\.$/.test(s.deadline.en) && !/\.\./.test(s.deadline.en + s.next.en), `${ap.id}: the deadline and next step end cleanly`, s.deadline.en);
+    // who decides is said once: never the body again when the name already names it ("Board of Standards and Appeals")
+    const said = namesBody(ap);
+    ok(said.en === !/Who decides/.test(s.route.en) && said.zh === !/受理机构/.test(s.route.zh), `${ap.id}: the body is said once`, s.route);
+    const core = ap.body.en.split(",")[0].replace(/\s*\([^)]*\)/g, "").replace(/^the\s+/i, "").toLowerCase();
+    ok(s.route.en.toLowerCase().split(core).length <= 2, `${ap.id}: no name repeated in the route`, s.route.en);
   }
+  eq(appealSay(APPEALS.find(a => a.id === "nyc_bsa_appeal")!).route.en, "The route: Appeal to the NYC Board of Standards and Appeals.", "the BSA route names the Board once");
   const plan = appealSay(APPEALS.find(a => a.id === "ca_health_plan_review")!);
-  eq(plan.route.en, "The route: Health plan check rejected (California Retail Food Code). The county environmental health agency decides it.", "the reviewed sentence, fixed");
+  eq(plan.route.en, "The route: Health plan check rejected (California Retail Food Code). Who decides: the county environmental health agency.", "the reviewed sentence, fixed");
   const r = reply(w, "Our plan check was rejected. Can we appeal?");
-  ok(!/heard by The/.test(r.en) && /decides it\./.test(r.en) && /由县环境卫生机构受理/.test(r.zh), "the agent's appeal reply uses it", r.en);
+  ok(!/heard by The/.test(r.en) && /Who decides: the county environmental health agency\./.test(r.en) && /受理机构：县环境卫生机构。/.test(r.zh), "the agent's appeal reply uses it", r.en);
 
   console.log("\n# Gap: a denied permit shows its appeal, with the deadline on Deadlines");
   const ws = structuredClone(SAMPLE_WS), denied = ws.apps.find(a => a.filed?.status === "rejected")!;
@@ -109,6 +126,7 @@ export function reviewFixTests(ok: Ok, eq: Eq) {
   ok(v && v.ap.id === "nyc_bsa_appeal" && !!v.dl && v.dl.verified, "it routes to its appeal, with a confirmed deadline", v && { ap: v.ap.id, dl: v.dl });
   eq(v.dl!.date, inDaysFrom(denied.filed!.decided!, 30), "the deadline is counted by the rule: 30 days from the determination");
   ok(/2 RCNY §1-06\.3\(a\)\(1\)/.test(v.say.deadline.en) && /2 RCNY/.test(v.say.deadline.zh), "it carries the rule's citation, in both languages", v.say.deadline);
+  ok(!/\d{4}-\d{2}-\d{2}/.test(v.say.deadline.en + v.say.deadline.zh), "no ISO date in the sentence: the panel's deadline line says the date", v.say.deadline);
   ok(/^Next: /.test(v.say.next.en) && /^下一步：/.test(v.say.next.zh), "and the next step");
   const onCal = scheduleAppeals(ws, today).deadlines.find(d => d.id === v.deadlineId);
   ok(onCal && onCal.date === v.dl!.date && onCal.kind === "due", "the appeal deadline is on Deadlines", onCal);

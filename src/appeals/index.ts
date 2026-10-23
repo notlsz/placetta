@@ -681,10 +681,23 @@ export function choices(reason: string, ap: Appeal | null, dl: Deadline | null, 
 
 /* ------------------------------ saying it ------------------------------ */
 
-const lowerThe = (s: string) => s.replace(/^The\b/, "the");
 /** A label's first letter lowered to sit mid-sentence, unless it starts an acronym or a name. */
 const low = (s: string) => (/^[A-Z][a-z]/.test(s) && !/^(DCWP|OATH|NYC|SF|LA|Office|Board|Supreme)\b/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
 const firstUp = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+/** The route's name already names who decides it ("Appeal to the NYC Board of Standards and Appeals" and "Board of
+ *  Standards and Appeals (BSA)"), in each language: then the body isn't said a second time. */
+export function namesBody(ap: Pick<Appeal, "name" | "body">): { en: boolean; zh: boolean } {
+  const core = (t: string) => t.split(/[,，]/)[0].replace(/\s*[(（][^)）]*[)）]/g, "").replace(/^the\s+/i, "").replace(/^(NYC|纽约市)\s*/, "").trim();
+  const name = ap.name.en.toLowerCase(), en = core(ap.body.en).toLowerCase(), words = en.split(/\s+/);
+  // the body's own name, its last words ("Appeals Board", "Board of Review") or its acronym ("OATH") already in the name
+  const tail2 = words.length > 2 ? words.slice(-2).join(" ") : "", tail3 = words.length > 3 ? words.slice(-3).join(" ") : "";
+  const acronym = /\(([A-Z]{3,})\)/.exec(ap.body.en)?.[1];
+  const enNamed = (en.length > 3 && name.includes(en)) || (!!tail3 && name.includes(tail3)) || (!!tail2 && /board|commission|council/.test(tail2) && name.includes(tail2)) || (!!acronym && ap.name.en.includes(acronym));
+  const zh = core(ap.body.zh).replace(/^(旧金山|洛杉矶|纽约州|达拉斯|加州|德州)/, ""), zhAcr = /（([A-Z]{3,})）/.exec(ap.body.zh)?.[1];
+  // a body that goes on to a second step ("…, then the Supreme Court") says something the name doesn't: keep it
+  if (/\bthen\b|之后/.test(ap.body.en + ap.body.zh)) return { en: false, zh: false };
+  return { en: enNamed, zh: (zh.length > 1 && ap.name.zh.includes(zh)) || (!!zhAcr && ap.name.zh.includes(zhAcr)) };
+}
 const unitSay = (r: Rule) => ({ en: r.unit === "business" ? "business days" : r.unit === "months" ? "months" : "days", zh: r.unit === "business" ? "个工作日" : r.unit === "months" ? "个月" : "天" });
 
 /** The route in plain sentences: what it is, who decides it, the deadline (or that there is none) and the next step. A
@@ -693,10 +706,17 @@ const unitSay = (r: Rule) => ({ en: r.unit === "business" ? "business days" : r.
  *  is placed where it reads as written. The agent's reply and the permit drawer's appeal panel both say it this way. */
 export function appealSay(ap: Appeal, dl: Deadline | null = null): { route: Bi; deadline: Bi; next: Bi } {
   const r = ap.deadline, u = unitSay(r);
-  const route = B(`The route: ${ap.name.en}. ${firstUp(lowerThe(ap.body.en))} decides it.`, `申诉途径：${ap.name.zh}。由${ap.body.zh}受理。`);
+  // who decides it, said once: "Appeal to the NYC Board of Standards and Appeals" already names the Board
+  const named = namesBody(ap);
+  // "Who decides:" takes any body as written ("An administrative law judge, then the ABC Director"), where "X decides
+  // it" broke on the long ones
+  const who = B(ap.body.en.replace(/^(The|An|A)\b/, m => m.toLowerCase()), ap.body.zh.replace(/：/g, "，"));
+  const route = B(named.en ? `The route: ${ap.name.en}.` : `The route: ${ap.name.en}. Who decides: ${who.en}.`,
+    named.zh ? `申诉途径：${ap.name.zh}。` : `申诉途径：${ap.name.zh}。受理机构：${who.zh}。`);
+  // with a counted deadline the date is said where it's shown (the panel's deadline line); here only the rule
   const deadline = dl
-    ? B(`The rule: ${dl.days} ${u.en} from ${low(r.trigger.en)}, counted to ${dl.date} (${r.section}).${dl.verified ? "" : " Not confirmed on an official source: check the decision letter."}`,
-      `规定：${r.trigger.zh}起 ${dl.days} ${u.zh}，算至 ${dl.date}（${r.section}）。${dl.verified ? "" : "未经官方来源确认，请以决定函为准。"}`)
+    ? B(`The rule: ${dl.days} ${u.en} from ${low(r.trigger.en)} (${r.section}).${dl.verified ? "" : " Not confirmed on an official source: check the decision letter."}`,
+      `规定：${r.trigger.zh}起 ${dl.days} ${u.zh}（${r.section}）。${dl.verified ? "" : "未经官方来源确认，请以决定函为准。"}`)
     : r.days != null
       ? B(`The deadline is ${r.days} ${u.en} from ${low(r.trigger.en)} (${r.section}).${r.verified ? "" : " Not confirmed on an official source: check the decision letter."}`,
         `期限：${r.trigger.zh}起 ${r.days} ${u.zh}（${r.section}）。${r.verified ? "" : "未经官方来源确认，请以决定函为准。"}`)

@@ -5,7 +5,7 @@ import { fmtDay, inDays, money, nowIso } from "./time";
 import { groundedAnswer } from "./answer";
 import { ownWords, readLine } from "./plan/line";
 import { appealFor, appealSay } from "./appeals";
-import { openingLine, openingOf, openingPath } from "./smart";
+import { openingOf } from "./smart";
 import { headline, todos } from "./doNext";
 
 /* ------------------------------------------------------------------ *
@@ -384,24 +384,45 @@ function fromWorkspace(ctx: Context, text: string): Plan | null {
   const lower = (s: string) => (/^[A-Z][a-z]/.test(s) && !/^(Placetta|Odelia|San|Santa|California|County|City|Moonleaf)\b/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
   const appsOf = (s?: Store) => (!s || (w.stores ?? []).length <= 1 ? w.apps : w.apps.filter(a => (s.apps ?? []).includes(a.id)));
   const text_: Bi[] = [], ids: string[] = [];
+  // what a permit waits on, in a few words: "needs your floor plan and equipment list", "waits on the plan check"
+  const waitsOn = (a: Application): Bi => {
+    const missing = a.checklist.filter(c => c.state === "missing" && !c.dep);
+    const dep = a.checklist.map(c => (c.state !== "done" && c.dep ? w.apps.find(x => x.id === c.dep && x.status !== "approved") : undefined)).find(Boolean);
+    const first = (b: Bi) => B(b.en.split(/\.\s+/)[0].replace(/\.$/, ""), b.zh.split("。")[0].split("，")[0]);
+    if (a.status === "ready") return w.approvals.some(x => x.app === a.id) ? B("ready, waiting for your approval", "已就绪，等您批准") : B("ready to file", "可以提交");
+    if (missing.length) {
+      // a document by its plain name ("Floor plan, to scale" is the floor plan); more than fits in a few words is a count
+      const en = missing.map(c => c.label.en.split(/,| with | \(/)[0].trim().toLowerCase()), zh = missing.map(c => c.label.zh.split(/[，（]|及/)[0].replace(/^.*的/, ""));
+      if (missing.length <= 2 && en.join(" and ").length <= 36) return B(`needs your ${en.join(" and ")}`, `需要您的${zh.join("和")}`);
+      // many of one kind ("2 of 6 cards in") says it better than a count of documents
+      if (missing.length > 2 && a.next) return B(lower(first(a.next).en), first(a.next).zh);
+      return B(`needs ${missing.length} documents from you`, `需要您提供 ${missing.length} 份文件`);
+    }
+    if (dep) return B(`waits on the ${lower(dep.name.en)}`, `等${dep.name.zh}`);
+    if (a.status === "draft") return B("Odelia is preparing it", "Odelia 正在准备");
+    return a.next ? B(lower(first(a.next).en), first(a.next).zh) : B("not started", "尚未开始");
+  };
   const one = (s: Store | undefined) => {
     const apps = appsOf(s), done = apps.filter(a => a.status === "approved"), agency = apps.filter(a => a.status === "review" || a.status === "filing");
     const todo = apps.filter(a => !["approved", "review", "filing"].includes(a.status)).sort((x, y) => Number(!!y.critical) - Number(!!x.critical));
-    const who = s ? B(`${s.name.en}: `, `${s.name.zh}：`) : B("", "");
-    const head = B(`${who.en}${done.length} of ${apps.length} permits are done${agency.length ? ` and ${agency.length} ${agency.length === 1 ? "is" : "are"} with the agency` : ""}.`,
-      `${who.zh}${apps.length} 项许可中已办好 ${done.length} 项${agency.length ? `，${agency.length} 项在机构审核中` : ""}。`);
-    const still = todo.length
-      ? B(` Still to get, ${todo.length}: ${todo.map(a => `the ${lower(a.name.en)}${a.next ? `, ${lower(a.next.en).replace(/\.\s+/g, ", ").replace(/,\s+([A-Z][a-z])/g, (_, c: string) => ", " + lower(c))}` : ""}`).join("; ")}.`,
-        `还需办理 ${todo.length} 项：${todo.map(a => `${a.name.zh}${a.next ? (a.name.zh.endsWith("）") ? `，${a.next.zh}` : `（${a.next.zh}）`) : ""}`).join("；")}。`)
-      : B(" Nothing else to get.", "其余都已办好。");
-    if (left || mine || !open) text_.push(B(head.en + still.en, head.zh + still.zh));
+    const who = s ? B(`${s.name.en}: `, `${s.name.zh}：`) : B("Your permits: ", "您的许可：");
+    // one line that scans, then one line per permit still to get (no bullets: each is its own line)
+    const head = B(`${who.en}${done.length} of ${apps.length} done${agency.length ? `, ${agency.length} with the agency` : ""}, ${todo.length ? `${todo.length} to go` : "nothing else to get"}.`,
+      `${who.zh}${apps.length} 项中已办好 ${done.length} 项${agency.length ? `，${agency.length} 项在机构审核` : ""}，${todo.length ? `还有 ${todo.length} 项` : "其余都已办好"}。`);
+    const rows = todo.map(a => { const why = waitsOn(a); return B(`${a.name.en}: ${why.en}`, `${a.name.zh}：${why.zh}`); });
+    if (left || mine || !open) text_.push(B([head.en, ...rows.map(r => r.en)].join("\n"), [head.zh, ...rows.map(r => r.zh)].join("\n")));
     ids.push(...todo.filter(a => a.critical).map(a => a.id));
     if (s && s.stage === "opening" && (open || left)) {
-      const p = openingPath(s, w, today), d = openingOf(s, w, today);
+      const d = openingOf(s, w, today);
       if (d) {
-        const line = openingLine(p);
-        text_.push(B(`${open && !left ? s.name.en : "It"} opens around ${fmtDay(d, "en", true)}, where the permits put it today${s.plannedOpen ? ` (planned: ${fmtDay(s.plannedOpen, "en", true)})` : ""}.${line ? ` ${line.en}.` : ""}`,
-          `${open && !left ? s.name.zh : "这家店"}按目前的许可进度约 ${fmtDay(d, "zh", true)} 开业${s.plannedOpen ? `（原计划 ${fmtDay(s.plannedOpen, "zh", true)}）` : ""}。${line ? `${line.zh}。` : ""}`));
+        const opens = B(`${open && !left ? `${s.name.en} opens` : "Opens"} around ${fmtDay(d, "en", true)}`, `${open && !left ? s.name.zh : ""}约 ${fmtDay(d, "zh", true)} 开业`);
+        const p = s.plannedOpen, gap = p ? Math.round((Date.parse(p + "T12:00:00Z") - Date.parse(d + "T12:00:00Z")) / 864e5) : null;
+        const target = p ? B(fmtDay(p, "en", p.slice(0, 4) !== d.slice(0, 4)), fmtDay(p, "zh", p.slice(0, 4) !== d.slice(0, 4))) : null;
+        const vs = gap == null || !target ? B(".", "。")
+          : gap > 0 ? B(`, ${gap} day${gap === 1 ? "" : "s"} before your ${target.en} target.`, `，比您定的 ${target.zh} 早 ${gap} 天。`)
+          : gap < 0 ? B(`, ${-gap} day${gap === -1 ? "" : "s"} after your ${target.en} target.`, `，比您定的 ${target.zh} 晚 ${-gap} 天。`)
+          : B(`, right on your ${target.en} target.`, `，正好是您定的 ${target.zh}。`);
+        text_.push(B(opens.en + vs.en, opens.zh + vs.zh));
       } else text_.push(B("Opening: no date yet. The permits aren't mapped for it.", "开业：尚无日期，还没有梳理它的许可。"));
     } else if (s && s.stage === "open" && open) text_.push(B(`${s.name.en} is already open${s.opened ? `, since ${fmtDay(s.opened, "en", true)}` : ""}.`, `${s.name.zh}已开业${s.opened ? `，自 ${fmtDay(s.opened, "zh", true)} 起` : ""}。`));
   };
