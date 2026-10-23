@@ -18,7 +18,9 @@ import type { Bi } from "../bi";
 
 /** What a status means, whatever the agency calls it. */
 export type Norm = "received" | "in_review" | "needs_info" | "approved" | "issued" | "denied" | "withdrawn" | "expired" | "unknown";
-export type LookupId = "sf_dbi_permits" | "la_ladbs_permits" | "nyc_dob_now_jobs" | "ca_abc_license" | "ny_sla_license" | "tx_tabc_license";
+export type LookupId = "sf_dbi_permits" | "la_ladbs_permits" | "nyc_dob_now_jobs" | "ca_abc_license" | "ny_sla_license" | "tx_tabc_license"
+  | "chicago_building_permits" | "chicago_business_licenses" | "austin_permits" | "seattle_permits" | "boston_permits" | "philly_permits" | "philly_business_licenses"
+  | "nyc_dcwp_applications";
 export type Parsed = { status: string; norm: Norm; date: string | null; detail?: string; confidence: number };
 
 export type Lookup = {
@@ -28,7 +30,7 @@ export type Lookup = {
   /** The city the lookup covers ("sf", "la", "nyc"), or the state ("CA", "NY", "TX"). */
   where: string;
   /** What on the filing it searches by. */
-  key: "permit number" | "job filing number" | "license number";
+  key: "permit number" | "job filing number" | "license number" | "application number";
   /** The request, from a cleaned key; null when it can't be built in code. */
   url: (key: string) => string | null;
   /** Where a person sees it. */
@@ -42,7 +44,17 @@ export type Lookup = {
 const day = (v: unknown) => (typeof v === "string" && /^\d{4}-\d{2}-\d{2}/.test(v) ? v.slice(0, 10) : null);
 /** A permit, job or license number as typed: letters, digits and dashes only, so it can't change the query. */
 export const cleanKey = (s: unknown) => String(s ?? "").trim().toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 32);
+/** The same, keeping one space between parts, for a city whose numbers have one ("2025-133771 PP" in Austin). */
+export const cleanSpacedKey = (s: unknown) => String(s ?? "").trim().toUpperCase().replace(/[^A-Z0-9 -]/g, "").replace(/\s+/g, " ").trim().slice(0, 32);
 const soql = (s: string) => encodeURIComponent(s);
+/** A record that is in the feed only once the agency issued it (Chicago's building permits): present means issued. */
+const issuedIfPresent = (rows: unknown, dateKey: string): Parsed | null => {
+  if (!Array.isArray(rows) || !rows.length) return null;
+  const r = rows[0] as Record<string, unknown>;
+  return { status: "Issued", norm: "issued", date: day(r[dateKey]), confidence: 0.95 };
+};
+/** Chicago's license status codes, as the dataset's own description defines them. */
+const CHICAGO_CODES: Record<string, string> = { AAI: "Issued (AAI)", AAC: "Cancelled during its term (AAC)", REV: "Revoked (REV)", REA: "Revocation appealed (REA)" };
 
 /** The agency's words to a status that means the same everywhere. Unknown words keep the agency's text, at lower
  *  confidence, so a new status still shows (and is still a change) without a model guessing what it means. */
@@ -50,9 +62,12 @@ export function normStatus(raw: string): { norm: Norm; confidence: number } {
   const s = raw.trim().toLowerCase();
   const rules: [RegExp, Norm][] = [
     [/withdr|cancel+ed|void/, "withdrawn"],
-    [/disapprov|denied|deny|reject|disallow|refus/, "denied"],
-    [/expired|lapsed/, "expired"],
-    [/incomplete|objection|correction|deficien|on hold|hold|need|pending (info|document|applicant)|resubmi/, "needs_info"],
+    [/disapprov|denied|deny|reject|disallow|refus|\brevoked\b/, "denied"],
+    [/expired|lapsed|\binactive\b/, "expired"],
+    [/incomplete|objection|correction|deficien|on hold|hold|need|pending (info|document|applicant)|resubmi|info(rmation)? requested|\bair requested/, "needs_info"],
+    // NYC DCWP's temporary operating letter: allowed to operate while the license is decided, not the license
+    [/\btol\b|temporary operating/, "in_review"],
+    [/^active$/, "issued"],
     [/issued|signed[- ]?off|complete(d)?$|finaled|final|loc issued|c of o issued|permit entire/, "issued"],
     [/approved|granted|plan approved|ready to issue/, "approved"],
     [/review|plan ?check|in process|processing|assigned|examin|under/, "in_review"],
@@ -98,6 +113,89 @@ export const LOOKUPS: Lookup[] = [
     verified: { on: "2026-10-22", how: "queried live; fields job_filing_number, filing_status, current_status_date read from a returned row" },
     source: "https://data.cityofnewyork.us/resource/w9ak-ipjd.json",
   },
+  // Added 2026-10-22: each queried live by a real record's own number, and its fields read from the row it returned.
+  {
+    // the feed holds issued permits only: a row for the number means the city issued it
+    id: "chicago_building_permits", agency: { en: "Chicago Department of Buildings", zh: "芝加哥建筑局" }, kind: "open_data", where: "chicago", key: "permit number",
+    url: (raw) => ((k) => k ? `https://data.cityofchicago.org/resource/ydr8-5enu.json?$limit=5&$where=${soql(`permit_='${k}'`)}` : null)(cleanKey(raw)),
+    see: "https://data.cityofchicago.org/Buildings/Building-Permits/ydr8-5enu",
+    parse: (b) => issuedIfPresent(b, "issue_date"),
+    verified: { on: "2026-10-22", how: "queried live by permit_ 101089151; issue_date and application_start_date read from the returned row; the feed has no status column (issued permits only)" },
+    source: "https://data.cityofchicago.org/resource/ydr8-5enu.json",
+  },
+  {
+    id: "chicago_business_licenses", agency: { en: "Chicago Department of Business Affairs and Consumer Protection", zh: "芝加哥商业事务与消费者保护局" }, kind: "open_data", where: "chicago", key: "license number",
+    url: (raw) => ((k) => k ? `https://data.cityofchicago.org/resource/r5kz-chrr.json?$limit=5&$where=${soql(`license_number='${k}'`)}` : null)(cleanKey(raw)),
+    see: "https://data.cityofchicago.org/Community-Economic-Development/Business-Licenses/r5kz-chrr",
+    // "'AAI' means the license was issued. 'AAC' means the license was cancelled during its term. 'REV' means the
+    // license was revoked. 'REA' means the license revocation has been appealed." (the dataset's description)
+    parse: (b) => {
+      const p = pick(Array.isArray(b) ? (b as Record<string, unknown>[]).map((r) => ({ ...r, license_status: CHICAGO_CODES[String(r.license_status ?? "")] ?? r.license_status })) : b,
+        "license_status", ["license_status_change_date", "date_issued", "license_approved_for_issuance"], "application_type");
+      return p;
+    },
+    verified: { on: "2026-10-22", how: "queried live by license_number 2757733 (4 rows); license_status AAI, date_issued, application_type read; status codes from the dataset's description" },
+    source: "https://data.cityofchicago.org/resource/r5kz-chrr.json",
+  },
+  {
+    id: "austin_permits", agency: { en: "City of Austin Development Services", zh: "奥斯汀市发展服务部" }, kind: "open_data", where: "austin", key: "permit number",
+    // Austin's numbers have a space ("2025-133771 PP"), so the key keeps one
+    url: (raw) => ((k) => k ? `https://data.austintexas.gov/resource/3syk-w9eu.json?$limit=5&$where=${soql(`permit_number='${k}'`)}` : null)(cleanSpacedKey(raw)),
+    see: "https://data.austintexas.gov/d/3syk-w9eu",
+    parse: (b) => pick(b, "status_current", ["statusdate", "issue_date", "applieddate"], "permit_type_desc"),
+    verified: { on: "2026-10-22", how: "queried live by permit_number '2025-133771 PP'; status_current Active, statusdate read from the returned row" },
+    source: "https://data.austintexas.gov/resource/3syk-w9eu.json",
+  },
+  {
+    id: "seattle_permits", agency: { en: "Seattle Department of Construction and Inspections", zh: "西雅图建筑与检查局" }, kind: "open_data", where: "seattle", key: "permit number",
+    url: (raw) => ((k) => k ? `https://data.seattle.gov/resource/76t5-zqzr.json?$limit=5&$where=${soql(`permitnum='${k}'`)}` : null)(cleanKey(raw)),
+    see: "https://services.seattle.gov/portal/",
+    parse: (b) => pick(b, "statuscurrent", ["issueddate", "applieddate"], "permittypedesc"),
+    verified: { on: "2026-10-22", how: "queried live by permitnum 7163750-CN; statuscurrent \"Additional Info Requested\" read from the returned row (the row carried no dates)" },
+    source: "https://data.seattle.gov/resource/76t5-zqzr.json",
+  },
+  {
+    // CKAN, not Socrata: the approved building permits table, searched by permit number with a filter
+    id: "boston_permits", agency: { en: "Boston Inspectional Services", zh: "波士顿检查服务局" }, kind: "open_data", where: "boston", key: "permit number",
+    url: (raw) => ((k) => k ? `https://data.boston.gov/api/3/action/datastore_search?resource_id=6ddcd912-32a0-43df-9908-63574f8c7e77&limit=5&filters=${encodeURIComponent(JSON.stringify({ permitnumber: k }))}` : null)(cleanKey(raw)),
+    see: "https://data.boston.gov/dataset/approved-building-permits",
+    // every row is an approved permit; its status says whether the work is still open or closed out
+    parse: (b) => {
+      const rows = (b as { result?: { records?: Record<string, unknown>[] } })?.result?.records;
+      if (!Array.isArray(rows) || !rows.length) return null;
+      const r = rows[0], st = String(r.status ?? "").trim();
+      return { status: `Issued${st ? ` (${st})` : ""}`, norm: "issued", date: day(r.issued_date), confidence: 0.95 };
+    },
+    verified: { on: "2026-10-22", how: "queried live with filters {permitnumber: A1000569}; status Closed, issued_date read from the returned record" },
+    source: "https://data.boston.gov/api/3/action/datastore_search?resource_id=6ddcd912-32a0-43df-9908-63574f8c7e77",
+  },
+  {
+    // Carto SQL: the key is cleaned to letters, digits and dashes before it's quoted, so it can't change the query
+    id: "philly_permits", agency: { en: "Philadelphia Department of Licenses and Inspections", zh: "费城执照与检查局" }, kind: "open_data", where: "philadelphia", key: "permit number",
+    url: (raw) => ((k) => k ? `https://phl.carto.com/api/v2/sql?q=${soql(`SELECT permitnumber, status, permitissuedate, permitcompleteddate, permitdescription FROM permits WHERE permitnumber = '${k}' LIMIT 5`)}` : null)(cleanKey(raw)),
+    see: "https://li.phila.gov/",
+    parse: (b) => pick((b as { rows?: unknown })?.rows, "status", ["permitcompleteddate", "permitissuedate"], "permitdescription"),
+    verified: { on: "2026-10-22", how: "queried live by permitnumber ZP-2023-004901; status Refused, permitcompleteddate read from the returned row" },
+    source: "https://phl.carto.com/api/v2/sql?q=SELECT%20*%20FROM%20permits%20LIMIT%201",
+  },
+  {
+    id: "philly_business_licenses", agency: { en: "Philadelphia Department of Licenses and Inspections", zh: "费城执照与检查局" }, kind: "open_data", where: "philadelphia", key: "license number",
+    url: (raw) => ((k) => k ? `https://phl.carto.com/api/v2/sql?q=${soql(`SELECT licensenum, licensestatus, licensetype, mostrecentissuedate, inactivedate FROM business_licenses WHERE licensenum = '${k}' LIMIT 5`)}` : null)(cleanKey(raw)),
+    see: "https://li.phila.gov/",
+    parse: (b) => pick((b as { rows?: unknown })?.rows, "licensestatus", ["inactivedate", "mostrecentissuedate"], "licensetype"),
+    verified: { on: "2026-10-22", how: "queried live by licensenum 246211; licensestatus Inactive, inactivedate read from the returned row" },
+    source: "https://phl.carto.com/api/v2/sql?q=SELECT%20*%20FROM%20business_licenses%20LIMIT%201",
+  },
+  {
+    // "all license applications submitted to the NYC Department of Consumer and Worker Protection ... issued or
+    // renewed, denied, withdrawn, or remains in pending status" (the dataset's description)
+    id: "nyc_dcwp_applications", agency: { en: "NYC Department of Consumer and Worker Protection", zh: "纽约市消费者与劳工保护局" }, kind: "open_data", where: "nyc", key: "application number",
+    url: (raw) => ((k) => k ? `https://data.cityofnewyork.us/resource/ptev-4hud.json?$limit=5&$where=${soql(`application_id='${k}'`)}` : null)(cleanKey(raw)),
+    see: "https://data.cityofnewyork.us/Business/License-Applications/ptev-4hud",
+    parse: (b) => pick(b, "status", ["date_closed", "submission_date"], "license_number"),
+    verified: { on: "2026-10-22", how: "queried live by application_id 16848-2026-RTTD; status Submitted, submission_date read; statuses seen across the feed: Submitted, Additional Info Requested, Approved, Denied, Withdrawn, TOL Issued, Closed" },
+    source: "https://data.cityofnewyork.us/resource/ptev-4hud.json",
+  },
   {
     // the License Query System searches by license number through a form with a WordPress nonce, so code can't fetch it
     id: "ca_abc_license", agency: { en: "California Department of Alcoholic Beverage Control", zh: "加州酒类管制局" }, kind: "page", where: "CA", key: "license number",
@@ -122,10 +220,15 @@ export const lookupById = (id: string) => LOOKUPS.find((l) => l.id === id);
 
 const NYC = /new york|nyc|manhattan|brooklyn|queens|bronx|staten island|flushing|astoria|long island city|\bNY\s*1[01]\d{3}\b/i;
 /** The city of an address, as the lookups name it. */
-export function cityKey(address: string): "sf" | "la" | "nyc" | null {
+export function cityKey(address: string): "sf" | "la" | "nyc" | "chicago" | "austin" | "seattle" | "boston" | "philadelphia" | null {
   if (NYC.test(address)) return "nyc";
   if (/san francisco|,\s*CA\s*941\d{2}/i.test(address)) return "sf";
   if (/los angeles|,\s*CA\s*900\d{2}/i.test(address)) return "la";
+  if (/\bchicago\b|,\s*IL\s*606\d{2}/i.test(address)) return "chicago";
+  if (/\baustin\b,?\s*(TX|texas)|,\s*TX\s*787\d{2}/i.test(address)) return "austin";
+  if (/\bseattle\b|,\s*WA\s*981[0-9]{2}/i.test(address)) return "seattle";
+  if (/\bboston\b,?\s*(MA|massachusetts)|,\s*MA\s*021[0-9]{2}/i.test(address)) return "boston";
+  if (/\bphiladelphia\b|,\s*PA\s*191\d{2}/i.test(address)) return "philadelphia";
   return null;
 }
 const stateOf = (address: string) => /\b(CA|NY|TX)\b\s*\d{5}/.exec(address)?.[1] ?? (/california/i.test(address) ? "CA" : /new york/i.test(address) ? "NY" : /texas/i.test(address) ? "TX" : null);
@@ -138,9 +241,12 @@ export function lookupFor(app: { name?: Bi; agency?: Bi }, address: string): Loo
     const st = stateOf(address);
     return LOOKUPS.find((l) => l.kind === "page" && l.where === st) ?? null;
   }
+  const c = cityKey(address);
   if (/building|alteration|tenant improvement|build-?out|construction|\bDOB\b|LADBS|\bDBI\b/i.test(what)) {
-    const c = cityKey(address);
-    return LOOKUPS.find((l) => l.kind === "open_data" && l.where === c) ?? null;
+    return LOOKUPS.find((l) => l.kind === "open_data" && l.where === c && l.key !== "license number" && l.key !== "application number") ?? null;
   }
+  // a city license the city publishes: New York's DCWP applications, Chicago's and Philadelphia's business licenses
+  if (/\bDCWP\b|consumer (and worker )?protection|consumer affairs/i.test(what) && c === "nyc") return lookupById("nyc_dcwp_applications") ?? null;
+  if (/business license|business licence|license|licence/i.test(what) && (c === "chicago" || c === "philadelphia")) return LOOKUPS.find((l) => l.where === c && l.key === "license number") ?? null;
   return null;
 }

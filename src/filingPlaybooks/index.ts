@@ -84,6 +84,7 @@ export const PLAYBOOKS: Playbook[] = [
     documents: [{ key: "lease", label: B("Signed lease", "签署的租约"), reuse: /lease|租约/i }],
     steps: COMMON_STEPS, rejections: [R.jurisdiction, R.legal, R.premises, R.ein, R.latin, R.twice, R.readback],
     judgment: [B("A business description in the agency's own categories when the form asks for one", "表格要求时，按机构的分类描述业务")], fallback: TEAM,
+    lookups: ["chicago_business_licenses", "philly_business_licenses", "nyc_dcwp_applications"],
   },
   {
     id: "health_permit", name: B("Health permit (food facility)", "卫生许可（食品设施）"), perStore: true,
@@ -120,7 +121,7 @@ export const PLAYBOOKS: Playbook[] = [
       { key: "landlord", label: B("Landlord's consent", "房东同意书"), reuse: /landlord|consent|房东/i }],
     steps: [...COMMON_STEPS, "book_inspection"], rejections: [R.jurisdiction, R.attach, R.premises, R.fee, R.twice],
     judgment: [B("Answers to the plan checker's comments, which the team reviews", "回复图纸审查意见，由团队审核")], fallback: TEAM,
-    lookups: ["sf_dbi_permits", "la_ladbs_permits", "nyc_dob_now_jobs"],
+    lookups: ["sf_dbi_permits", "la_ladbs_permits", "nyc_dob_now_jobs", "chicago_building_permits", "austin_permits", "seattle_permits", "boston_permits", "philly_permits"],
   },
   {
     id: "liquor", name: B("Liquor license", "酒类执照"), perStore: true,

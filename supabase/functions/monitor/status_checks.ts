@@ -50,7 +50,9 @@ export function modelCheckPrompt(f: StatusFiling, app: App | undefined, lk: Look
   return `Status check, one filing only. The ${lower(name)} (application ${f.app_id}) is with ${agency}${f.confirmation_number ? `, ${lk?.key ?? "confirmation"} ${f.confirmation_number}` : ""}, submitted ${String(f.submitted_at ?? "").slice(0, 10) || "recently"}.${where}${data} Find its current status on the agency's own public lookup or records page and compare it with the workspace. If it changed, say the new status in one line with the page as its source, and add any new due date with add_deadline. Don't search for anything else. If nothing changed, reply exactly: No changes.`;
 }
 
-export async function runStatusChecks(o: { filings: StatusFiling[]; states: Map<string, WsState>; today: string; now: number; io: StatusIO; max?: number; maxModel?: number; app?: string }): Promise<StatusRun> {
+/** model false: no model key on this server (or Odelia's jobs are off). Open data and hashed pages still run; a filing
+ *  with neither waits, and a changed page goes to the team to read instead of to a model. */
+export async function runStatusChecks(o: { filings: StatusFiling[]; states: Map<string, WsState>; today: string; now: number; io: StatusIO; max?: number; maxModel?: number; app?: string; model?: boolean }): Promise<StatusRun> {
   const r: StatusRun = { checked: 0, code: 0, pages: 0, model: 0, changed: 0, notified: 0, escalated: 0, errors: 0, skipped: 0 };
   const candidates = o.filings.map((f) => {
     const st = o.states.get(f.workspace_id) ?? null;
@@ -71,8 +73,11 @@ export async function runStatusChecks(o: { filings: StatusFiling[]; states: Map<
       const dedupe = `sla:${f.id}:${o.today}`;
       if (await o.io.update({ workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, dedupe,
         title: { en: `Past due at ${agency.en}: ${name.en}`, zh: `${agency.zh}已逾期：${name.zh}` },
-        body: { en: `With the agency ${s!.waited} days; it publishes about ${s!.usual}. Nothing has moved in ${s!.stalled} days. Odelia is drafting a status inquiry for you to approve, and the team is following up.`,
-          zh: `已在机构 ${s!.waited} 天，公布的办理时间约 ${s!.usual} 天，已有 ${s!.stalled} 天没有进展。Odelia 正在起草查询函供您批准，团队也在跟进。` } })) {
+        body: o.model === false
+          ? { en: `With the agency ${s!.waited} days; it publishes about ${s!.usual}. Nothing has moved in ${s!.stalled} days. Placetta's team is following up with the agency.`,
+            zh: `已在机构 ${s!.waited} 天，公布的办理时间约 ${s!.usual} 天，已有 ${s!.stalled} 天没有进展。快哉团队正在向机构跟进。` }
+          : { en: `With the agency ${s!.waited} days; it publishes about ${s!.usual}. Nothing has moved in ${s!.stalled} days. Odelia is drafting a status inquiry for you to approve, and the team is following up.`,
+            zh: `已在机构 ${s!.waited} 天，公布的办理时间约 ${s!.usual} 天，已有 ${s!.stalled} 天没有进展。Odelia 正在起草查询函供您批准，团队也在跟进。` } })) {
         await o.io.event({ workspace_id: f.workspace_id, filing_id: f.id, kind: "escalated", status: null, source: "placetta", confidence: 1, url: null, dedupe,
           title: { en: `Escalated: ${s!.waited} days with the agency, about ${s!.usual} published`, zh: `已升级：在机构 ${s!.waited} 天，公布约 ${s!.usual} 天` } });
         await o.io.teamTask(f.id, f.workspace_id, `SLA breached: ${name.en} with ${agency.en} ${s!.waited} days (published ${s!.usual}), no movement in ${s!.stalled}. Call or email the agency.`, dedupe);
@@ -98,7 +103,7 @@ export async function runStatusChecks(o: { filings: StatusFiling[]; states: Map<
     });
     r.checked++;
     if (kind === "model") {
-      if (modelLeft <= 0) { r.checked--; r.skipped++; budget++; continue; }
+      if (o.model === false || modelLeft <= 0) { r.checked--; r.skipped++; budget++; continue; }
       const run = await o.io.start(f.workspace_id, modelCheckPrompt(f, app, lk), { en: `Status check: ${(app?.name ?? f.title).en}`, zh: `状态查询：${(app?.name ?? f.title).zh}` });
       if (!run) { r.checked--; r.skipped++; continue; }
       modelLeft--; r.model++;
@@ -147,13 +152,16 @@ export async function runStatusChecks(o: { filings: StatusFiling[]; states: Map<
       if (run) { modelLeft--; r.model++; }
     }
     await o.io.check({ workspace_id: f.workspace_id, filing_id: f.id, source: "agency_page", url: lookupUrl!, content_hash: hash, status_seen: null, changed, confidence: null, model_used: !!run, run_id: run, cost_usd: 0, error: null });
+    const noModel = o.model === false;
     if (changed) {
       r.changed++;
       await o.io.event({ workspace_id: f.workspace_id, filing_id: f.id, kind: "agency", status: null, source: "agency_page", confidence: 0.5, url: lookupUrl, dedupe: `page:${hash.slice(0, 16)}`,
-        title: { en: "The agency's status page changed. Odelia is reading it", zh: "机构状态页面有变化，Odelia 正在查看" } });
+        title: noModel ? { en: "The agency's status page changed. Placetta's team is reading it", zh: "机构状态页面有变化，快哉团队正在查看" } : { en: "The agency's status page changed. Odelia is reading it", zh: "机构状态页面有变化，Odelia 正在查看" } });
+      if (noModel) await o.io.teamTask(f.id, f.workspace_id, `The agency's status page changed for ${(app?.name ?? f.title).en}: read it and record the status (${lookupUrl})`, `page:${f.id}:${hash.slice(0, 16)}`);
     }
-    // a changed page the model couldn't read today is read tomorrow: the hash is kept only once it was read
-    await save({ changed, error: false, last_hash: !changed || run ? hash : t.last_hash ?? null });
+    // a changed page the model couldn't read today is read tomorrow: the hash is kept only once it was read (or, with
+    // no model on this server, once the team has it)
+    await save({ changed, error: false, last_hash: !changed || run || noModel ? hash : t.last_hash ?? null });
   }
   return r;
 }

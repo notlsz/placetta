@@ -129,3 +129,53 @@ Deno.test("cost: a store-month of daily checks stays far inside the $50 ceiling"
   const worst = checksPerStoreMonth({ inFlight: 9, codeShare: 0, changesPerMonth: 4, hotShare: 1, route: "anthropic" });
   ok(worst.usd < 15, JSON.stringify(worst));
 });
+
+// Rows in the shape each feed returned when it was queried live on 2026-10-22 (trimmed to the fields read).
+const LIVE: Record<string, { key: string; body: unknown; status: string; norm: string; date: string | null }> = {
+  chicago_building_permits: { key: "101089151", body: [{ permit_: "101089151", issue_date: "2026-10-21T00:00:00.000", application_start_date: "2026-09-30T00:00:00.000" }], status: "Issued", norm: "issued", date: "2026-10-21" },
+  chicago_business_licenses: { key: "2757733", body: [{ license_number: "2757733", license_status: "AAI", application_type: "RENEW", date_issued: "2026-10-21T00:00:00.000", license_status_change_date: null }], status: "Issued (AAI)", norm: "issued", date: "2026-10-21" },
+  austin_permits: { key: "2025-133771 PP", body: [{ permit_number: "2025-133771 PP", status_current: "Active", statusdate: "2026-10-22T00:00:00.000", permit_type_desc: "Plumbing Permit" }], status: "Active", norm: "issued", date: "2026-10-22" },
+  seattle_permits: { key: "7163750-CN", body: [{ permitnum: "7163750-CN", statuscurrent: "Additional Info Requested", permittypedesc: "New" }], status: "Additional Info Requested", norm: "needs_info", date: null },
+  boston_permits: { key: "A1000569", body: { success: true, result: { records: [{ permitnumber: "A1000569", status: "Closed", issued_date: "2021-01-28T16:29:26" }] } }, status: "Issued (Closed)", norm: "issued", date: "2021-01-28" },
+  philly_permits: { key: "ZP-2023-004901", body: { rows: [{ permitnumber: "ZP-2023-004901", status: "Refused", permitissuedate: null, permitcompleteddate: "2024-07-22T16:11:03Z" }] }, status: "Refused", norm: "denied", date: "2024-07-22" },
+  philly_business_licenses: { key: "246211", body: { rows: [{ licensenum: "246211", licensestatus: "Inactive", licensetype: "Rental", inactivedate: "2009-02-18T17:23:00Z" }] }, status: "Inactive", norm: "expired", date: "2009-02-18" },
+  nyc_dcwp_applications: { key: "16848-2026-RTTD", body: [{ application_id: "16848-2026-RTTD", status: "Submitted", submission_date: "2026-10-16T00:00:00.000" }], status: "Submitted", norm: "received", date: "2026-10-16" },
+};
+
+Deno.test("new open-data lookups: each parses the row its feed returned live, by the record's own number", () => {
+  for (const [id, x] of Object.entries(LIVE)) {
+    const l = LOOKUPS.find((y) => y.id === id)!;
+    ok(l && l.kind === "open_data" && l.verified?.on === "2026-10-22" && /^https:\/\//.test(l.source) && /^https:\/\//.test(l.see), id);
+    const p = l.parse!(x.body)!;
+    eq([p.status, p.norm, p.date], [x.status, x.norm, x.date], id);
+    ok(decodeURIComponent(l.url(x.key)!).includes(x.key), `${id}: the url carries the key`);
+    ok(!decodeURIComponent(l.url("1' OR '1'='1")!).includes("'1'='1"), `${id}: the key can't change the query`);
+    eq(l.parse!(id.startsWith("philly") ? { rows: [] } : id === "boston_permits" ? { result: { records: [] } } : []), null, `${id}: no record yet is no status`);
+  }
+  eq(["Additional Info Requested", "TOL Issued", "Active", "Inactive", "Revoked (REV)", "Approved", "Denied"].map((s) => normStatus(s).norm), ["needs_info", "in_review", "issued", "expired", "denied", "approved", "denied"]);
+});
+
+Deno.test("the new cities route to their own feeds", () => {
+  const b = (en: string) => ({ en, zh: en });
+  eq([lookupFor({ name: b("Building permit") }, "100 N State St, Chicago, IL 60602")?.id, lookupFor({ name: b("Retail Food Establishment License"), agency: b("BACP") }, "100 N State St, Chicago, IL 60602")?.id,
+    lookupFor({ name: b("Building permit") }, "500 E 7th St, Austin, TX 78701")?.id, lookupFor({ name: b("Tenant improvement permit") }, "400 Pine St, Seattle, WA 98101")?.id,
+    lookupFor({ name: b("Building permit") }, "1 Court St, Boston, MA 02108")?.id, lookupFor({ name: b("Building permit") }, "1400 JFK Blvd, Philadelphia, PA 19107")?.id,
+    lookupFor({ name: b("Commercial Activity License") }, "1400 JFK Blvd, Philadelphia, PA 19107")?.id, lookupFor({ name: b("Tobacco retail dealer license"), agency: b("NYC DCWP") }, "136-20 Roosevelt Ave, Flushing, NY 11354")?.id,
+    lookupFor({ name: b("Building permit") }, "1500 Main St, Dallas, TX 75201")?.id],
+    ["chicago_building_permits", "chicago_business_licenses", "austin_permits", "seattle_permits", "boston_permits", "philly_permits", "philly_business_licenses", "nyc_dcwp_applications", undefined]);
+});
+
+Deno.test("no model key: open data and hashed pages still run; a changed page goes to the team; nothing starts a model run", async () => {
+  const chi: WsState = { apps: [{ id: "bp", name: { en: "Building permit", zh: "建筑许可" }, agency: { en: "Chicago DOB", zh: "芝加哥建筑局" }, est: { en: "30 days", zh: "30 天" } },
+    { id: "hp", name: { en: "Health permit", zh: "卫生许可" }, agency: { en: "CDPH", zh: "芝加哥卫生局" } }, { id: "sp", name: { en: "Sign permit", zh: "招牌许可" }, agency: { en: "Chicago DOB", zh: "芝加哥建筑局" } }],
+    stores: [{ address: "100 N State St, Chicago, IL 60602", apps: ["bp", "hp", "sp"] }] };
+  const a = io({ json: LIVE.chicago_building_permits.body, page: "<p>Status: Approved</p>", tracking: { f3: { lookup_url: "https://agency.example.gov/s?id=3", last_hash: "old" } as Tracking & { lookup_url: string } } });
+  const r = await runStatusChecks({ filings: [filing("f1", "bp", "submitted", { confirmation_number: "101089151" }), filing("f2", "hp", "submitted"), filing("f3", "sp", "submitted")],
+    states: new Map([["w1", chi]]), today, now, io: a.x, maxModel: 0, model: false });
+  eq([r.code, r.pages, r.model], [1, 1, 0], "the feed read in code, the page hashed, no model");
+  eq(a.log.runs.length, 0, "no background run started");
+  ok(a.log.updates.some((u) => /Issued/.test(u.title.en)), "issued reaches the owner");
+  ok(a.log.tasks.some((t) => /status page changed/.test(t)) && a.log.events.some((e) => /team is reading it/.test(e.title.en) && /团队正在查看/.test(e.title.zh)), "the changed page goes to the team, said in both languages");
+  ok(a.log.saved.get("f3")!.last_hash !== "old", "and isn't flagged again tomorrow");
+  ok(!a.log.saved.has("f2"), "the one only a model could check waits, untouched");
+});

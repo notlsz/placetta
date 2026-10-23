@@ -7,7 +7,8 @@
 // Mondays, with email on, each headquarters email a workspace shares with (hq_links) gets one page across every
 // franchisee that shared with it: totals, then one line per store at risk. hq_reports keeps it to once a week.
 // Every day it checks each filing with an agency (status_checks.ts): in code from the city's open data where it can,
-// by the agency page's hash where the team set one, by Odelia otherwise. Once a week per workspace (on a weekday picked
+// by the agency page's hash where the team set one, by Odelia otherwise. The first two need no model key and run without
+// one (a changed page then goes to the team to read). Once a week per workspace (on a weekday picked
 // from its id, so the load spreads), it also starts the agent's background check (agent-run, kind "watch") for new or
 // changed rules for that business and city. That needs ANTHROPIC_API_KEY or GEMINI_API_KEY; WEEKLY_CHECKS=off turns it off.
 // Owners who linked a phone (Settings, Text and call Odelia) also hear about what matters most there: a call for
@@ -956,6 +957,14 @@ Deno.serve(async (req) => {
         else await admin.from("routine_runs").delete().eq("workspace_id", ws).eq("routine_id", key).eq("day", today);
       }
     }
+  }
+  // Without a model key (or with ODELIA_JOBS off) the status checks that need no model still run: the cities' open data
+  // and the agency pages the team set, hashed. A changed page goes to the team to read; nothing is sent to a model.
+  if (!status && Deno.env.get("STATUS_CHECKS") !== "off") {
+    try {
+      status = await runStatusChecks({ filings: (filings ?? []) as StatusFiling[], states: states as Map<string, WsState>, today, now, app: APP, io: statusIO(async () => null),
+        max: Number(Deno.env.get("STATUS_CHECKS_PER_RUN") ?? "300") || 300, maxModel: 0, model: false });
+    } catch (e) { console.error("status checks", String(e).slice(0, 160)); }
   }
 
   // Self-filing: requeue stuck runs, refresh faxes and letters on their way, flag destinations older than 90 days.
