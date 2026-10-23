@@ -58,7 +58,8 @@
     "test:accuracy": "esbuild scripts/eval/accuracy.ts --bundle --platform=node --format=esm --outfile=.accuracy-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .accuracy-test.mjs; s=$?; rm -f .accuracy-test.mjs; exit $s",
     "qa": "node scripts/qa.mjs",
     "econ": "esbuild scripts/econ/measure.ts --bundle --platform=node --format=esm --outfile=.econ.mjs '--external:*.pdf?inline' --external:thinking-orbs --external:playwright-core --log-level=error && node .econ.mjs; s=$?; rm -f .econ.mjs; exit $s",
-    "test:reply-leak": "esbuild scripts/leak-test.ts --bundle --platform=node --format=esm --outfile=.leak-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .leak-test.mjs; s=$?; rm -f .leak-test.mjs; exit $s"
+    "test:reply-leak": "esbuild scripts/leak-test.ts --bundle --platform=node --format=esm --outfile=.leak-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .leak-test.mjs; s=$?; rm -f .leak-test.mjs; exit $s",
+    "probe": "node scripts/probe.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

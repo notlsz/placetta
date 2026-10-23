@@ -1,0 +1,135 @@
+# The production probe (scripts/probe/run.ts): real licenses through the live stack, from asking Odelia to the agency's
+# approval, with every stage alert checked, plus the edge cases. Its workspaces are synthetic (migration
+# 20261030090000): nothing reaches an agency, nothing lands on the Placetta team, nothing is learned, and everything it
+# makes is deleted when it finishes.
+#   nightly   6 of the 30 licenses (a different 6 each night) and every edge case
+#   Sundays   all 30 licenses and every edge case
+#   by hand   any slice, or named licenses
+# When it fails: the "Production probe" issue is opened (or updated) with what failed, and Claude reads the failures,
+# finds the cause in the code and opens a pull request with the fix and a test. Nothing is merged or deployed by it:
+# CI and a person review every pull request.
+# The keys come from the Supabase management API with the SUPABASE_ACCESS_TOKEN the deploy already uses, and are masked.
+# Every action is pinned to a full commit SHA (the tag it was taken from is in the comment).
+name: Production probe
+on:
+  schedule:
+    - cron: "41 10 * * *"   # 10:41 UTC daily (US night), after the quality sweep
+  workflow_dispatch:
+    inputs:
+      only: { description: "License ids or form ids, comma separated (empty: by slice)", required: false, default: "" }
+      slice: { description: "k/n: every n-th license from k (empty: all 30)", required: false, default: "" }
+      edges: { description: "Run the edge cases", type: boolean, default: true }
+      fix: { description: "Open a fix pull request when it fails", type: boolean, default: true }
+concurrency:
+  group: probe
+  cancel-in-progress: false
+permissions: { contents: read }
+env:
+  PROJECT_REF: esquxzcfsylffuijvzec
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    outputs:
+      failed: ${{ steps.run.outcome == 'failure' }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Production keys (masked)
+        env: { SUPABASE_ACCESS_TOKEN: "${{ secrets.SUPABASE_ACCESS_TOKEN }}" }
+        run: |
+          api="https://api.supabase.com/v1/projects/$PROJECT_REF"
+          keys=$(curl -fsS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" "$api/api-keys?reveal=true")
+          service=$(echo "$keys" | jq -r '[.[] | select(.name == "service_role")][0].api_key')
+          anon=$(echo "$keys" | jq -r '[.[] | select(.name == "anon")][0].api_key')
+          monitor=$(curl -fsS -X POST -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" "$api/database/query" \
+            -d '{"query": "select decrypted_secret as k from vault.decrypted_secrets where name = '"'"'monitor_key'"'"' limit 1"}' | jq -r '.[0].k')
+          for v in "$service" "$anon" "$monitor"; do
+            if [ -z "$v" ] || [ "$v" = "null" ]; then echo "a production key is missing"; exit 1; fi
+            echo "::add-mask::$v"
+          done
+          { echo "SUPABASE_SERVICE_ROLE_KEY=$service"; echo "SUPABASE_ANON_KEY=$anon"; echo "MONITOR_KEY=$monitor"; echo "SUPABASE_URL=https://$PROJECT_REF.supabase.co"; } >> "$GITHUB_ENV"
+      - name: Which licenses
+        id: pick
+        run: |
+          args=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            [ -n "${{ inputs.only }}" ] && args="--only ${{ inputs.only }}"
+            [ -z "${{ inputs.only }}" ] && [ -n "${{ inputs.slice }}" ] && args="--slice ${{ inputs.slice }}"
+            [ "${{ inputs.edges }}" = "false" ] && args="$args --no-edges"
+          elif [ "$(date -u +%u)" != "7" ]; then
+            args="--slice $(( $(date -u +%j | sed 's/^0*//') % 5 ))/5"
+          fi
+          echo "args=$args" >> "$GITHUB_OUTPUT"
+      - name: Probe production
+        id: run
+        run: npm run probe -- ${{ steps.pick.outputs.args }} --json probe.json --md probe.md
+        continue-on-error: true
+      - name: Summary
+        if: always()
+        run: '[ -f probe.md ] && cat probe.md >> "$GITHUB_STEP_SUMMARY" || true'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with: { name: probe, path: "probe.json\nprobe.md", retention-days: 30, if-no-files-found: ignore }
+      - name: Fail when the probe failed
+        if: steps.run.outcome == 'failure'
+        run: exit 1
+
+  # One open issue tracks the probe: opened or updated on a failure, closed when it passes again.
+  issue:
+    needs: probe
+    if: always() && needs.probe.result != 'cancelled'
+    runs-on: ubuntu-latest
+    permissions: { issues: write }
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with: { name: probe }
+        continue-on-error: true
+      - env: { GH_TOKEN: "${{ github.token }}", RESULT: "${{ needs.probe.result }}", RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" }
+        run: |
+          n=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search "Production probe in:title" --json number -q '.[0].number')
+          if [ "$RESULT" = "success" ]; then
+            [ -n "$n" ] && gh issue close "$n" -R "$GITHUB_REPOSITORY" -c "Passing again: $RUN_URL"
+            exit 0
+          fi
+          body=$(printf "The production probe failed: %s\n\n%s" "$RUN_URL" "$(cat probe.md 2>/dev/null | head -c 60000)")
+          if [ -n "$n" ]; then gh issue comment "$n" -R "$GITHUB_REPOSITORY" -b "$body"; else gh issue create -R "$GITHUB_REPOSITORY" -t "Production probe failing" -b "$body"; fi
+
+  # Claude reads the failures, finds the cause and opens a pull request with the fix and a test. Never merges.
+  fix:
+    needs: probe
+    if: always() && needs.probe.result == 'failure' && (github.event_name == 'schedule' || inputs.fix)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions: { contents: write, pull-requests: write, issues: read, id-token: write }
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with: { name: probe, path: .probe }
+      - uses: anthropics/claude-code-action@ae68417a745a5df4b2124873632bd73a2255e6f6 # v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ github.token }}
+          claude_args: --max-turns 80 --allowedTools "Bash,Read,Edit,Write,Glob,Grep"
+          prompt: |
+            The production probe failed. .probe/probe.json lists every license and edge case it ran, each check, and for the
+            failures the detail and the run id. scripts/probe/run.ts is the probe; read CLAUDE.md and docs/LESSONS.md first.
+
+            For each failed check:
+            1. Decide whether it is a bug in Placetta (the agent's tools or prompt in src/, the filing code in
+               supabase/functions/file, the stage alerts in supabase/functions/monitor, the forms in src/forms), a probe
+               mistake (scripts/probe), or the model being wrong once (a reply that ran long, one missed fact).
+            2. Fix real bugs at their cause, not by loosening the probe. Add or extend the nearest existing test
+               (npm run test:agent, test:extreme, test:forms, the deno tests under supabase/functions, supabase/tests) so it
+               would have caught it.
+            3. Run npm run build:agent if src/ changed, then npx tsc -b and the tests you touched. Everything must pass.
+            4. Commit as Claude <noreply@anthropic.com> on a new branch named probe-fix/<date>, push it, and open a pull
+               request titled "Probe fix: <what broke>" that says, per failure, what broke, why, and what changed, and
+               lists any failure you judged to be the model being wrong once (with why) without changing code for it.
+            Never merge, never push to main, never deploy, never touch production data or secrets.

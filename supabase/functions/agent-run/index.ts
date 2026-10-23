@@ -419,6 +419,12 @@ export async function gradeOnline(run: Run, w: Workspace, st: RunState, reply: R
   } catch (e) { console.error("grade run", run.id, String((e as Error)?.message ?? e).slice(0, 160)); }
 }
 
+/** A production probe workspace: checked like a customer's, but nothing it does is learned from. */
+async function synthetic(ws: string): Promise<boolean> {
+  const { data, error } = await admin.from("workspaces").select("synthetic").eq("id", ws).maybeSingle();
+  return !error && !!(data as { synthetic?: boolean } | null)?.synthetic;
+}
+
 export async function learnFromRun(run: Run, w: Workspace, st: RunState, reply: Reply) {
   try {
     const checks = (st.firstChecks ?? []) as { job: string; passed: number; of: number }[];
@@ -825,8 +831,8 @@ export async function work(runId: string, token: string | null, ticket: string |
     bg(toolCounts(runId, state));
     bg(cacheLog(runId, state));
     bg(saveMemory(run, memory, state, cur, out.reply, who, who0.actor.role));
-    bg(learnFromRun(run, cur, state, out.reply));
-    bg(gradeOnline(run, cur, state, out.reply));
+    // a production probe workspace (migration 20261030090000) teaches the network nothing and files no QA findings
+    bg(synthetic(run.workspace_id).then((probe) => probe ? undefined : Promise.all([learnFromRun(run, cur, state, out.reply), gradeOnline(run, cur, state, out.reply)])));
   } catch (e) {
     clearTimeout(flushT);
     // An instance that lost the run says and saves nothing: the one holding it does.
