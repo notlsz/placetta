@@ -533,7 +533,8 @@ const PROMISES: { match: RegExp; plan: (ctx: Context, text: string) => Plan }[] 
   { match: /\b(what|which|any|list|show|upcoming|coming up)\b.*\brenew|\brenewals?\b.*\b(coming|due|soon|next)\b|哪些.*(续期|到期)|(续期|到期).*(哪些|有什么)/i, plan: (ctx) => renewals(ctx) },
   { match: /\b(book|schedule)\b.*\binspection|预约.*(检查|验收)/i, plan: (ctx) => inspections(ctx) },
   { match: /^(fill|complete)\b|^填写|^填好/i, plan: fillForm },
-  { match: /\bmap\b.*\b(licen[cs]es?|permits?)\b|\b(licen[cs]es?|permits?)\b.*\b(i|we)\s+need\b|梳理.*(执照|许可)|需要.*(执照|许可)/i, plan: mapLicenses },
+  // a request to map them, not a question about one ("Do I need a seller's permit?" is the lookup's)
+  { match: /^(?!.*[?？]\s*$)(?:.*\bmap\b.*\b(licen[cs]es?|permits?)\b|.*\b(every|all)\b.*\b(licen[cs]es?|permits?)\b.*\b(i|we)\s+need\b|.*梳理.*(执照|许可)|.*需要的(全部|所有)(执照|许可))/i, plan: mapLicenses },
 ];
 
 const SCRIPTS: { match: RegExp; plan: (ctx: Context, text: string) => Plan }[] = [
