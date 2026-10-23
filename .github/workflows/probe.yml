@@ -41,7 +41,9 @@ jobs:
         env: { SUPABASE_ACCESS_TOKEN: "${{ secrets.SUPABASE_ACCESS_TOKEN }}" }
         run: |
           api="https://api.supabase.com/v1/projects/$PROJECT_REF"
-          keys=$(curl -fsS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" "$api/api-keys?reveal=true")
+          # the legacy keys come unredacted; with a token that may reveal secret keys, ?reveal=true also works
+          keys=$(curl -fsS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" "$api/api-keys" || curl -fsS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" "$api/api-keys?reveal=true")
+          echo "$keys" | jq -r '.[] | "\(.name) \(.type // "legacy") \((.api_key // "") | length)"' 
           service=$(echo "$keys" | jq -r '[.[] | select(.name == "service_role")][0].api_key')
           anon=$(echo "$keys" | jq -r '[.[] | select(.name == "anon")][0].api_key')
           monitor=$(curl -fsS -X POST -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" "$api/database/query" \
