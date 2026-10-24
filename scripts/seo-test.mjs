@@ -191,7 +191,7 @@ group("help and trust pages readable without JavaScript", () => {
   const arts = [...pages.keys()].filter(f => /^site\/help\/.+\/index\.html$/.test(f));
   check("a static page per help article", arts.length >= 10, arts.length);
   for (const f of arts) { const b = bodyOf(visible(pages.get(f))); if (!/<article class="art" id="art"><h1>/.test(b) || strip(b).length < 400) check(`help article rendered ${f}`, false); }
-  const tr = pages.get("site/trust.html"); check("trust page text is in the HTML", strip(bodyOf(visible(tr))).length > 3000);
+  const tr = pages.get("site/trust.html"); check("trust page text is in the HTML", strip(bodyOf(visible(tr))).length > 1500 && /<table class="subs">/.test(tr) && /id="report"/.test(tr));
 });
 
 group("guides: answer first, quotable, tables, FAQ, hreflang, no thin duplicates", () => {
