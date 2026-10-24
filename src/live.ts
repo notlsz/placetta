@@ -775,7 +775,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
       description: "Put a complete application in front of the person to approve: they see the exact data, attachments and fee, and only their approval in the app sends it to Placetta's filing team. You never file, pay or submit anything yourself. Only works once every field is filled and every checklist document is in; otherwise it returns what's left: fill what you can, then ask the person for the rest in one short list.",
       inputSchema: { type: "object", properties: { application_id: { type: "string" }, what_happens: { type: "array", items: { type: "string" }, description: "The exact steps that follow approval, in order (used outside a signed-in workspace)" } }, required: ["application_id"] },
       async execute(i) {
-        const a = findApp(i.application_id); notFiled(a);
+        let a = findApp(i.application_id); notFiled(a);
         const bl = filingBlockers(a);
         if (bl.empty.length || bl.missing.length) {
           // an approval asked for earlier, before a line was emptied, goes away
@@ -803,6 +803,29 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         // a card for answers that have since changed is taken back; the fresh one below is for these answers
         if (existing) made.approvals = made.approvals.filter(id => id !== existing.id);
         if (existing) apply(w => audit("agent", L("Took back an approval card", "撤回了一张批准卡片"), existing.title, L("The answers changed after it was put up", "卡片提交后答案有改动"))({ ...w, approvals: w.approvals.filter(x => x.id !== existing.id), closed: [...w.closed, { ...existing, withdrawn: { at: nowIso(), why: L("The answers changed after this was put up. Review the new version, then approve it.", "这张卡片提交后答案有改动。请先查看新版本，再批准。") } }] }));
+        // A form with no line list of its own (most of the library, and anything added without an official form) with
+        // fewer than three answers is filed on Placetta's core business lines: legal name, owner, address and a way to
+        // reach them at the least. A card with one generic line never goes up (2026-10-22: one filled line made a
+        // near-empty filing approvable).
+        const off0 = a.official ? formById(a.official) : undefined;
+        if (!off0?.fields.length && a.fields.filter(f => !isBlank(f.value)).length < 3) {
+          const core = coreFields(get(), (get().stores ?? []).find(st => (st.apps ?? []).includes(a.id)), !!a.currency && a.currency !== "USD");
+          // no store address yet: the business's own address from Context (a mailing address) still identifies it
+          const anyAddr = get().facts.find(f => /address/i.test(f.label.en) && !isBlank(f.value.en));
+          const addr = core.find(c => c.id === "core-address");
+          if (addr && isBlank(addr.value) && anyAddr) { addr.value = anyAddr.value.en; addr.from = anyAddr.source; }
+          const need = ["core-legal-name", "core-owner", "core-address"].map(id => core.find(c => c.id === id)!).filter(Boolean);
+          const has = (c: Field) => a.fields.some(f => f.id === c.id || f.label.en.toLowerCase() === c.label.en.toLowerCase() || (c.id === "core-address" && /address/i.test(f.label.en) && !isBlank(f.value)) || (c.id === "core-legal-name" && /business name|legal name/i.test(f.label.en) && !isBlank(f.value)));
+          const reach = a.fields.some(f => /phone|e-?mail/i.test(f.label.en) && !isBlank(f.value));
+          const add = [...need.filter(c => !has(c)), ...(reach || a.fields.some(f => f.id === "core-phone") ? [] : [core.find(c => c.id === "core-phone")!])].filter(Boolean);
+          if (add.length) {
+            apply(w => setApp(a.id, { fields: [...(w.apps.find(x => x.id === a.id)?.fields ?? []), ...add], status: add.some(c => isBlank(c.value)) ? "draft" : a.status })(w));
+            const still = add.filter(c => isBlank(c.value));
+            if (still.length) { mark(); return { approval_requested: false, why: "This form has no line list of its own, so it's filed on the business's core lines, and some are empty.", empty_fields: still.map(c => c.label.en),
+              do_next: "Fill these with fill_fields from Context or the person, then call this again." }; }
+            a = get().apps.find(x => x.id === a.id) ?? a;
+          }
+        }
         const g = gaps(a);
         if (!a.fields.length) throw new Error(`The ${a.name.en} has no form lines yet. Add the official form's lines with fill_fields (from the agency's own form) before asking for approval.`);
         if (g.empty_fields.length || g.missing_documents.length) throw new Error(`Not ready to file. ${g.empty_fields.length ? `Empty fields: ${g.empty_fields.join("; ")}. ` : ""}${g.missing_documents.length ? `Missing documents: ${g.missing_documents.join("; ")}. ` : ""}Fill what you can from the workspace, then ask the person for the rest in one question.`);

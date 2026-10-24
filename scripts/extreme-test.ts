@@ -1146,7 +1146,7 @@ async function storeBots() {
 async function controlsAttack() {
   begin("16. Owner controls: Plan first, Ask me first, rules, house rules, Undo and business rules under attack");
   const { svc } = account();
-  const full = (id: string, over: Partial<Application> = {}) => app(id, "draft", { fields: [{ id: "a", label: same("Business name"), value: "Lucky Leaf" }], ...over });
+  const full = (id: string, over: Partial<Application> = {}) => app(id, "draft", { fields: [{ id: "a", label: same("Business name"), value: "Lucky Leaf" }, { id: "core-owner", label: same("Owner or responsible person"), value: "Mei Chen" }, { id: "core-phone", label: same("Business phone"), value: "718-555-0100" }], ...over });
   const WRITES: [string, unknown][] = [
     ["prepare_application", { official_form_id: "nyc-fse" }], ["fill_fields", { application_id: "a1", fields: [{ label: "Business name", value: "Shell Co" }] }], ["update_application", { application_id: "a1", status: "needs" }],
     ["add_deadline", { date: "2027-03-01", title: "Opening" }], ["edit_deadline", { deadline_id: "dl1", remove: true }], ["remember", { label: "Legal name", value: "Shell LLC" }], ["edit_workspace", { business_name: "Shell" }],

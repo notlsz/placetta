@@ -184,7 +184,8 @@ function workspace(over: Partial<Workspace> = {}): Workspace {
 }
 const app = (id: string, status: Application["status"], over: Partial<Application> = {}): Application => ({
   id, name: B(`Permit ${id}`, `许可 ${id}`), agency: B("NYC Department of Health", "纽约市卫生局"), level: "city", status, fees: [{ label: same("Fee"), amount: 100 }], est: same("2 weeks"),
-  source: { label: "nyc.gov", url: "https://www.nyc.gov" }, fields: [{ id: "a", label: same("Business name"), value: "Lucky Leaf" }], checklist: [], ...over,
+  source: { label: "nyc.gov", url: "https://www.nyc.gov" }, fields: [{ id: "a", label: same("Business name"), value: "Lucky Leaf" }, { id: "core-owner", label: same("Owner or responsible person"), value: "Mei Chen" },
+    { id: "core-address", label: same("Business location address"), value: "136-20 Roosevelt Ave, Flushing, NY 11354" }], checklist: [], ...over,
 });
 
 function account(o: { filings?: ReturnType<Services["filings"]>; failFilingsOnce?: boolean } = {}) {
@@ -943,7 +944,7 @@ async function finishing() {
 
   // end to end on the server's loop: a run that files something and says it's done leaves the job open on the approval;
   // the next run reads the agency's record and finishes it, with the report and the renewal
-  const ws0 = workspace({ apps: [app("a1", "draft", { renews: B("Every year", "每年"), fields: [{ id: "n", label: same("Business name"), value: "Lucky Leaf Tea LLC" }] })] });
+  const ws0 = workspace({ apps: [app("a1", "draft", { renews: B("Every year", "每年"), fields: [{ id: "n", label: same("Business name"), value: "Lucky Leaf Tea LLC" }, { id: "core-owner", label: same("Owner or responsible person"), value: "Mei Chen" }, { id: "core-address", label: same("Business location address"), value: "136-20 Roosevelt Ave, Flushing, NY 11354" }] })] });
   const run1 = await agent({
     ws: ws0, prompt: "File permit a1.", json: () => ({ items: [{ ok: true, why: "every line is filled" }, { ok: true, why: "the reply says it's filed" }] }),
     script: [
@@ -3103,6 +3104,17 @@ console.log("\n# Filing playbooks: one call per kind, every store, one question"
   ok(answerFits("Tax ID (Houston, Bellaire Blvd)", "Tax ID", "Houston, Bellaire Blvd", ["Houston, Bellaire Blvd", "Chicago, China Pl"]), "a store's answer fits that store");
   ok(!answerFits("Tax ID (Houston, Bellaire Blvd)", "Tax ID", "Chicago, China Pl", ["Houston, Bellaire Blvd", "Chicago, China Pl"]), "and not another store");
   ok(answerFits("Trade name of business (if different from line 1)", "Line 2: Trade name of business (if different from line 1)", "Irvine"), "a label's own note in parentheses isn't taken for a store");
+}
+
+console.log("\n# A card with one generic line never goes up for approval (request_filing_approval)");
+{
+  // 2026-10-22: a form with no listed lines became "ready" after one generic field and could be approved nearly empty
+  const thin = workspace({ apps: [app("thin", "draft", { fields: [{ id: "n", label: same("Business name"), value: "Lucky Leaf Tea LLC" }] })] });
+  const r = await agent({ ws: thin, prompt: "File it", script: [() => ask(["request_filing_approval", { application_id: "thin" }]), () => say("Needs a few lines first.")] });
+  const out = callNamed(r, "request_filing_approval")[0].out;
+  ok(/"approval_requested":false/.test(out) && /Business phone|Business location address/.test(out), "refused, naming the core lines it still needs", out.slice(0, 300));
+  ok(!r.w.approvals.some(x => x.app === "thin"), "no card");
+  ok(r.w.apps.find(x => x.id === "thin")!.fields.some(f => f.id === "core-owner" && /^Mei Chen/.test(f.value)), "the core lines are added, filled from Context where it knows them");
 }
 
 console.log("\n# A line with set choices takes one of them (fill_fields)");
