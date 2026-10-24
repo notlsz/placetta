@@ -43,10 +43,10 @@ test("the third failure on the agency's site hands it back marked for another wa
   const last = s.f.agent_log.at(-1)!;
   assert.equal(last.kind, "handoff");
   assert.equal(last.ref, "portal_failed");
-  assert.match(last.en, /Placetta tries another way the agency takes, or the team files it/);
+  assert.match(last.en, /Odelia tries another way the agency takes, or gives it to you to send/);
   assert.equal(s.f.channel, "team");
   assert.equal(s.f.agent_state, "handoff");
-  assert.deepEqual(s.tasks, ["handoff: Portal run failed 3 times: the agency's site is down"]);
+  assert.deepEqual(s.tasks, []);
 });
 
 test("before the third, it tries the site again", async () => {
@@ -57,7 +57,7 @@ test("before the third, it tries the site again", async () => {
   assert.equal(s.f.agent_state, "queued");
 });
 
-test("after a submit was pressed, never another way: the team checks the agency first", async () => {
+test("after a submit was pressed, never another way: it is checked with the agency first", async () => {
   const s = new Mem();
   // pressed submit, then the run died: the reload sees it
   s.reload = async () => ({ ...s.f, submit_clicked_at: "2026-10-21T00:00:00Z" });

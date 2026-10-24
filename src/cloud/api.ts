@@ -634,8 +634,11 @@ export async function getBilling(ws: string): Promise<Billing | null> {
 type FileView = { filing: Pick<Filing, "id" | "status" | "channel" | "agent_state" | "agent_log" | "handoff_url" | "confirmation_number" | "submit_clicked_at"> };
 export const fileNow = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "start" });
 /** Carry on after a hand-back. resubmit: the person confirmed sending again a filing the same as one they already sent. */
-export const resumeFiling = (ws: string, filingId: string, resubmit = false) =>
-  fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "resume", ...(resubmit ? { resubmit: true } : {}) });
+export const resumeFiling = (ws: string, filingId: string, resubmit = false, confirmation = "") =>
+  fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "resume", ...(resubmit ? { resubmit: true } : {}), ...(confirmation.trim() ? { confirmation: confirmation.trim() } : {}) });
+/** The agency's confirmation number for a filing the business sent itself, added after "I've sent it". */
+export const addConfirmation = (ws: string, filingId: string, confirmation: string) =>
+  fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "confirmation", confirmation: confirmation.trim() });
 /** "Show Odelia how": the person files it in the live browser while the portal worker records the steps (teach mode). */
 export const teachFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "teach" });
 /** The hand-signed copy of a wet-signature form, already in Documents: Placetta faxes it. */
