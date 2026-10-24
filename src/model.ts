@@ -239,6 +239,8 @@ export type Workspace = {
    *  alcohol"): never suggested again unless they change their mind (find_official_forms marks them, prepare_application
    *  refuses them). */
   declined?: { official?: string; name: Bi; store?: string; reason?: string; at: string }[];
+  /** Plan review comments an agency sent back, each round to its resubmittal (src/corrections.ts). */
+  corrections?: import("./corrections").CorrectionRound[];
 };
 /** The plan a new workspace starts with: what and where the person typed, when, and how many permits the registry listed.
  *  filled: the form lines filled from the signup answers (src/plan/prefill.ts); win: the application put up for approval

@@ -27,6 +27,7 @@ import { Working } from "./Bot";
 import { AllowRule } from "./AllowRule";
 import { FilledStatus, OnlineAnswers } from "./FilledForm";
 import { fileable } from "./forms/versions";
+import { Corrections } from "./PlanCorrections";
 /* Team review: the permit's comment thread and who it's assigned to (src/Comments.tsx) */
 import { AssignPicker, CommentThread, useItemThread, useTeam } from "./Comments";
 
@@ -220,8 +221,9 @@ function Progress({ a }: { a: Application }) {
 
 function Checklist({ a }: { a: Application }) {
   const { lang } = useApp();
-  if (!a.checklist.length) return <p className="quiet">{lang === "zh" ? "这一项不需要附加文件。" : "Nothing to attach for this one."}</p>;
-  return <ul className="checklist">{a.checklist.map(c => <CheckRow key={c.id} a={a} c={c} />)}</ul>;
+  // the agency's plan review comments, each to its response (src/PlanCorrections.tsx), above what's attached
+  if (!a.checklist.length) return <><Corrections a={a} /><p className="quiet">{lang === "zh" ? "这一项不需要附加文件。" : "Nothing to attach for this one."}</p></>;
+  return <><Corrections a={a} /><ul className="checklist">{a.checklist.map(c => <CheckRow key={c.id} a={a} c={c} />)}</ul></>;
 }
 
 function CheckRow({ a, c }: { a: Application; c: CheckItem }) {

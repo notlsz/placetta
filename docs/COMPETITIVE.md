@@ -550,3 +550,87 @@ DocuSign (its MCP server still needs an Integration Key Placetta registers). The
 Every copyable gap in these three areas is closed in code. 9.5 in each waits on steps only the founder can take, and on
 customers using what's built; nothing in the repository can show it before then.
 
+## The incumbents (2026-10-23)
+
+The sections above compare Odelia with AI agents. This one compares her with what customers pay for today: compliance
+services, research kits, expediters and consultants. The founder's rule: copy what each does well, find its biggest
+weakness, fill the gap. Every claim below comes from a cited page, read on 2026-10-23. Reviews from competitors are
+marked. Two pages didn't answer this session's fetch: CT Corporation's Business License Solutions page and
+licenselogix.com. CT's side comes from its CLiC brochure and its LicenseLogix page on wolterskluwer.com.
+
+### What each does best and worst
+
+| Product | Strongest (copied, with source) | Biggest weakness (filled, with source) |
+|---|---|---|
+| Harbor Compliance (License Manager, Business Licensing Service, Compliance Core) | One view of "your entire license portfolio", status and renewals for "firm and individual licenses", a view of "licensing events due within 90 days", "Structured Storage" of documents and time-stamped notes per license ([License Manager](https://harborcompliance.com/license-manager-software)); managed service that will "prepare and file", "track their progress and send confirmation when they are approved", from "$500 plus state fees" a year ([Business Licensing Service](https://www.harborcompliance.com/business-licensing-service)) | Trustpilot 3.1 from 53 reviews: "Harbor routinely dropped the ball on completing work for which we had paid them" (2026-08-20), "I cannot reach a human being on the phone, only an AI bot" (2026-03-04) ([Trustpilot](https://ca.trustpilot.com/review/harborcompliance.com)). Fees are set by "your specialist", who "may invoice additional fees". Contracts auto-renew unless notice is given 90 days before expiry, and fees are generally non-refundable ([Discern](https://www.discern.com/resources/harbor-compliance-reviews), a competitor) |
+| Avalara License Guidance, Filing and License Management | "One clear, actionable report" of the licenses a business needs, "in just minutes" ([Avalara Guidance and Filing](https://www.avalara.com/us/en/products/business-licenses/license-guidance-and-preparation/business-license-guidance-and-filing-services-avalara-godaddy.html)); "Share license status updates with external stakeholders"; "Build, customize, and schedule reports"; jurisdictions found by geocoding across "23,000+ U.S. jurisdictions" ([License Management](https://www.avalara.com/us/en/products/business-licenses/license-management.html)); managed service with "Government fees remitted directly to authorities" ([Business Licenses](https://www.avalara.com/us/en/products/business-licenses.html)) | No published price for any license product; the platform is "designed for businesses that manage 100+ licenses" (License Management page); company-wide BBB complaints about auto-renewal: "renewed for another annual term totaling $11,663.19 without explicit approval" (2026-05-22) ([BBB](https://www.bbb.org/us/wa/seattle/profile/computer-software-developers/avalara-inc-1296-22018273/complaints)) |
+| CT Corporation, BizFilings, LicenseLogix (Wolters Kluwer) | BizFilings' package: "an overview of relevant state and local licenses, permits, and tax registrations", "contact information for each licensing authority", the applications and "filing instructions" ([BizFilings](https://www.wolterskluwer.com/en/solutions/bizfilings/business-licenses)); CLiC: "View all licenses, including renewal and issue dates, jurisdiction fees and application status", "Run Excel reports", notifications of expirations so clients don't depend on the agencies ([CLiC brochure](https://assets.contenthub.wolterskluwer.com/api/public/content/215844f6f7254781bb4c0c63c7463ec9?v=e86b347f)); a "Dedicated account manager" ([LicenseLogix](https://www.wolterskluwer.com/en/solutions/ct-corporation/licenselogix)) | The package is a kit the owner fills in and files: "$149" for "one city in one county in one state", "$66" for each added location, "5-7 business days", by email (BizFilings page). Reviews: "i ahve not received an update on my order" (2026-10-06), "I called and got a recorded message i would be called back. I wasn't called back." (2026-09-10) ([Trustpilot, 4.4 from 334](https://ca.trustpilot.com/review/wolterskluwer.com/en/solutions/ct-corporation)) |
+| MyCorporation | "A complete list of associated fees and where you need to send them", "Licensing authority details and contact information", every application to complete ([MyCorporation](https://www.mycorporation.com/business-formations/business-license.jsp)) | "$149*+ state fees", no turnaround, no renewal information in the package (same page); Trustpilot 3.2 from 281: "Lousy response time. Very impersonal." and a customer charged for closed companies' filings in 2024 to 2026 ([Trustpilot](https://dk.trustpilot.com/review/mycorporation.com?page=3)) |
+| Gamut (license and permit renewal agent templates) | Agents that "track licenses, file permits, and alert you before deadlines", "tiered renewal alerts", and "nudge the right owner", free to import ([Gamut templates](https://www.gamut.so/agent-templates/license-permit-renewals)); reachable in Slack, email, Telegram and iMessage ([Gamut](https://www.gamut.so/)) | A generic agent builder: the template page doesn't define the tiers or say what "file permits" means, and there is no license data behind it (same pages) |
+| Permit expediters (Permit Place; SF, LA and NYC expediters) | Corrections: "When reviewers send back correction comments, we coordinate with your architect or engineer to address them and resubmit", "within 24-48 hours"; a "Client portal with live status"; government fees at cost, "no markup" ([Permit Place](https://permitplace.com/permit-expediting-services/)) | Price: "$7,500 to $12,500" for restaurants, "$2,500 to $7,000 per location" for rollouts (same page); in San Francisco "$50 to $150 per hour" or "$2,500 to $10,000" flat ([PermitFlow](https://www.permitflow.com/blog/san-francisco-permit-expediter), a competitor). No guarantee is stated |
+| Restaurant permit consultants | A single point of contact who "ensure[s] every application packet is clean and complete" ([Permit Place](https://permitplace.com/apply-restaurant-health-permit/)) | Prep is left to the owner: the same page says to "conduct your own mock inspection using the local health department's checklist". Language: "4 out of 5 business owners did not know they have the right to language access", and the confusion "led to accruing fines and bars on new permits" ([Asian American Federation testimony](https://citymeetings.nyc/meetings/new-york-city-council/2024-09-24-0100-pm-committee-on-immigration/chapter/testimony-by-riva-shang-senior-coordinator-of-small-business-programs-at-asian-american-federation-aaf/)). A forgotten renewal closes a café: a health permit that "expired (Doh)!" kept Joey Bats Café closed "until Monday when the fine can be paid" ([EV Grieve](https://evgrieve.com/2023/04/expired-health-permit-temporarily.html)) |
+
+### What Odelia already did, did partly, or didn't do
+
+| Incumbent strength | Before this pass | Where |
+|---|---|---|
+| A research report per location: agency, form, fee, renewal cycle, citation, as a document to keep or send | Partly: the Permits table and drawer had every field, but there was no document to download, print or send | now `src/report.ts`, `src/LicenseReport.tsx` |
+| A spreadsheet of every license field (CT's Excel reports) | Partly: the review table's CSV (states and dates only) | now the report's spreadsheet |
+| "Fees and where you need to send them", filing instructions | Partly: fees and the registry's filing method were in the drawer, not together in one list | now in each report row |
+| Compliance calendar export (iCal) | Did: `supabase/functions/calendar-feed`, Settings | |
+| Entity and license document vault | Did: Documents tab, receipts per application | |
+| Renewal alerts 90, 60 and 30 days out | Partly: 60, 30, 14, 7 and 1 | now 90 too (monitor), and the 90-day runway |
+| Multi-entity, multi-state portfolio view | Did: the review table (stores against permits, CSV), Headquarters, entity compliance (`src/entity.ts`) | |
+| Audit-ready history export | Did: Activity, CSV export | |
+| Corrections and resubmittals after plan check comments | Partly: Odelia drafted a response document on request; no comment-by-comment tracking or letter | now `src/corrections.ts`, `src/PlanCorrections.tsx` |
+| Inspection prep checklists | Did: mock inspection, the city's checklists per store | |
+| Dedicated specialist | Partly: a Placetta specialist reviews on request within one business day (`src/Specialist.tsx`); not a named person | founder decision |
+| Price guarantee or penalty reimbursement | Didn't: none of the incumbents publishes one either | founder decision |
+
+### Built, ranked by what it does for a customer
+
+1. **The license report** (`src/report.ts`, `src/LicenseReport.tsx`; Permits, "License report"). It copies BizFilings', MyCorporation's and Avalara's package: each license by level, with its agency, form, fee, how and where it's filed, how long it takes, who files it, how often it renews, the next renewal, what's still needed, approval proof, and what's different for an owner in China. It also copies CLiC's status and dates. The gaps it fills: it's ready the moment it's asked for, not in 5 to 7 business days. It's in English, Chinese, or both side by side for an English-speaking landlord. It's included in the $149 store plan, with no $66 per added location. Every row carries the agency's page, its own words and the day Placetta read them, or says plainly that it's linked but not quoted, or not confirmed and who to ask. A fee the agency sets is never estimated. "Save as PDF" prints the paper alone (Letter or A4, Chinese included); one location or all.
+2. **The spreadsheet** (CT's "Run Excel reports"): every field of every row, with a byte-order mark so Excel opens the Chinese, and a column saying whether each row is quoted, linked or open.
+3. **Plan review corrections** (`src/corrections.ts`, `src/PlanCorrections.tsx`; a permit's checklist tab). This copies the expediter's best work at none of the expediter's price. Paste the reviewer's comments, numbered, unnumbered or in Chinese numbering, and each becomes a line. Each line gets its sheet, who fixes it (architect or engineer, the owner, Odelia), a response, and done. The default target is two business days, the expediter's 24 to 48 hours, and the owner can change it. The response letter comes in the form reviewers expect, and lines without a response are marked, not left blank. A response written in Chinese is flagged before it goes to the agency. "Explain and draft the responses" has Odelia explain every comment in Chinese and draft each response without inventing facts. "Send drawing items to the architect" drafts the email for the owner's approval. Rounds are numbered, and resubmitting is recorded in Activity.
+4. **The 90-day renewal runway** (`src/runway.ts`, `src/RenewalRunway.tsx`; Deadlines, and the report). It copies Harbor's 90-day view and Gamut's tiered alerts, covering licenses and people's certificates. The gap it fills is the next step: each line says who does what. Odelia starts a license 60 days out (the monitor's `RENEW_AHEAD`), a certificate is its holder's to renew, and lapsed items say so.
+5. **The 90-day alert** (`supabase/functions/monitor/index.ts`, `RENEWAL_ALERTS`). Alerts now go out at 90, 60, 30, 14, 7 and 1 days. The 90-day one says the day Placetta starts the renewal, and that an inspection the agency wants first can start now.
+6. **Proof on file in each report row**: approval date, confirmation number and the document, the "copies of filings and approved licenses" Harbor sends, in the document the owner hands over.
+
+Tests: `npm run test:incumbents` (72 checks: lanes at their edges, a person's certificate shown once, a store's report keeping company-wide rows, fees set by the agency never summed, quoted, linked and open rows, the spreadsheet in three languages, five numbering styles, sheets, routing, business days over a weekend, the letter); `supabase/functions/monitor/stores_test.ts` (the 90-day notice and its start date).
+
+### Scores, before and after
+
+Out of 10, Placetta's judgment for the job a Chinese food and beverage brand opening US stores pays for, from the
+pages above (incumbents) and this repository (Odelia). Tracking includes renewals and appeals.
+
+| | Coverage | Done for the owner | Speed | Tracking, renewals, appeals | UI | Trust | Price | Overall |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Harbor Compliance | 8 | 7 | 4 | 6 | 6 | 4 | 4 | 5.6 |
+| Avalara | 8 | 6 | 6 | 6 | 6 | 5 | 3 | 5.7 |
+| CT Corporation, BizFilings, LicenseLogix | 7 | 5 | 4 | 6 | 5 | 7 | 6 | 5.7 |
+| MyCorporation | 5 | 3 | 4 | 1 | 4 | 5 | 6 | 4.0 |
+| Gamut | 2 | 3 | 6 | 5 | 6 | 4 | 8 | 4.9 |
+| Permit expediters | 6 | 8 | 7 | 6 | 5 | 7 | 2 | 5.9 |
+| Restaurant permit consultants | 6 | 7 | 5 | 4 | 3 | 6 | 3 | 4.9 |
+| **Odelia, before** | 7 | 8 | 8 | 8.3 | 8 | 8.5 | 9 | 8.1 |
+| **Odelia, after** | 7 | 8.5 | 8.5 | 8.7 | 8.5 | 8.5 | 9 | 8.4 |
+
+Why each moved, or didn't:
+- **Coverage stays 7.** It covers 481 forms across 37 markets, deep where the beachhead is. Harbor's library (150,000+ agencies) and Avalara's 23,000+ jurisdictions are broader. Breadth comes from the registry, not this pass.
+- **Done for the owner, 8 to 8.5.** Corrections are now worked comment by comment to a letter. Before, the owner got a draft document.
+- **Speed, 8 to 8.5.** The report is instant where the kit takes 5 to 7 business days, and corrections run on a two-day clock. Agency review times don't change.
+- **Tracking, 8.3 to 8.7.** The 90-day alert and runway are new, and correction rounds are tracked.
+- **UI, 8 to 8.5.** There is now a document an owner can send, in either language or both.
+- **Trust stays 8.5.** Citations were already on every row; the report only shows them. An audit report is still the gap.
+- **Price stays 9.** Nothing changed in billing. Incumbents charge per location or per project; the report and corrections come with the store plan.
+
+### Founder decisions (not built as promises)
+
+| Decision | What the incumbents do | The choice |
+|---|---|---|
+| A penalty reimbursement if Placetta misses a renewal it was tracking | None publishes one. MyCompanyWorks offers a 90-day satisfaction refund ([Startup Savant](https://www.startupsavant.com/mycorporation-business-license-service-review)). Harbor's fees are "generally non-refundable" | A real differentiator against Harbor's "dropped the ball" reviews; needs a cap, terms and insurance |
+| A named specialist per account | CT promises a "Dedicated account manager"; Harbor's named rep is its most praised feature on Trustpilot | Today a Placetta specialist reviews on request within one business day; a named person is a staffing decision |
+| Corrections turned around in 24 to 48 hours | Permit Place promises it | The app sets a two-business-day target for the owner's team; a Placetta promise needs staff behind it |
+| Pricing per location vs per license | BizFilings $149 plus $66 a location; Harbor from $500 a year plus fees; expediters $2,500 to $12,500 a project | The store plan is $149 a store a month with the report included; whether the per-license filing charges stay is the founder's call |
+| Auto-renewal terms | Harbor needs notice 90 days before expiry; Avalara's auto-renewals draw BBB complaints | Placetta already sends the renewal notice the law asks for (`supabase/functions/monitor/renewal_notice.ts`); keep cancellation one click |
+

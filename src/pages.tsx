@@ -34,6 +34,9 @@ import { AlsoNeed } from "./AlsoNeed";
 import { findItAsk } from "./StillNeeded";
 import { headline, nextRenewal, todos, type Todo } from "./doNext";
 import { readPasted, type Read } from "./intakeParse";
+/* The incumbents' deliverables, filled (docs/COMPETITIVE.md, "The incumbents"): the license report and the renewal runway */
+import { ReportButton } from "./LicenseReport";
+import { RenewalRunway } from "./RenewalRunway";
 
 /** What the Mine filter keeps: an application or job assigned to this person, or a job about one that is. */
 const mineApp = (team: Collab, id?: string) => !!id && team.isMine({ kind: "app", id });
@@ -694,6 +697,7 @@ export function Permits({ tab: asked }: { tab: PermitsTab }) {
   return (
     <div className="page permits">
       <PageHead title={t("nav_apps")} sub={sub} short={short}>
+        {ws.apps.length > 0 && <ReportButton />}
         <button type="button" className="pill quiet" onClick={() => go("find")}><I.find />{t("nav_find")}</button>
       </PageHead>
       <Tabs view="permits" tabs={tabs} current={tab} />
@@ -800,9 +804,10 @@ export function Deadlines() {
     for (const d of list) { const k = d.date.slice(0, 7); m.set(k, [...(m.get(k) ?? []), d]); }
     return [...m.entries()];
   }, [list]);
-  if (!months.length) return <p className="quiet tab-empty">{t("empty")}</p>;
+  if (!months.length) return <div className="tabbed"><RenewalRunway /><p className="quiet tab-empty">{t("empty")}</p></div>;
   return (
     <div className="tabbed">
+      <RenewalRunway />
       {months.map(([k, ds]) => (
         <section key={k} className="sec tl-m">
           <SecHead title={fmtMonth(k + "-01", lang)} />

@@ -1,0 +1,62 @@
+/* Plan review corrections (src/PlanCorrections.tsx), at the top of a permit's checklist tab. */
+
+.cr { margin: 0 0 18px; padding: 16px; border-radius: 14px; background: var(--card2); box-shadow: 0 0 0 1px var(--line); }
+.cr h3 { margin: 0; font-size: 15px; font-weight: 600; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.cr h3 small { font-size: 12.5px; font-weight: 500; color: var(--ink3); font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+.cr-ask { display: flex; gap: 14px; align-items: center; justify-content: space-between; }
+.cr-ask b { font-size: 14.5px; }
+.cr-ask p { margin: 4px 0 0; font-size: 13px; color: var(--ink2); line-height: 1.5; }
+.cr-ask .pill { flex: none; }
+.cr-l { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; font-size: 13px; font-weight: 500; color: var(--ink2); }
+.cr-l textarea, .cr-l input, .cr-resp { width: 100%; padding: 9px 11px; border-radius: 10px; border: 1px solid rgba(var(--e), .12); background: var(--card); color: var(--ink); font: inherit; font-size: 14px; line-height: 1.5; resize: vertical; }
+.cr-l textarea:focus, .cr-l input:focus, .cr-resp:focus { outline: 2px solid var(--blue); outline-offset: 1px; border-color: transparent; }
+.cr-err { margin: 10px 0 0; font-size: 13px; color: var(--warm); }
+.cr-act { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+.cr-h { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.cr-clock { margin: 4px 0 0; font-size: 13px; color: var(--blue-deep); font-weight: 500; }
+.cr-clock.late { color: var(--warm); }
+.cr-n { flex: none; font-size: 13px; color: var(--ink3); font-variant-numeric: tabular-nums; text-align: right; }
+.cr-n b { font-size: 22px; color: var(--ink); font-weight: 600; }
+.cr-n small { display: block; font-size: 11.5px; }
+.cr-bar { height: 4px; margin-top: 12px; border-radius: 4px; background: var(--mist2); overflow: hidden; }
+.cr-bar i { display: block; height: 100%; background: var(--blue); border-radius: 4px; transition: width .3s; }
+.cr-wait { margin: 10px 0 0; font-size: 12.5px; color: var(--ink2); }
+
+.cr-list { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.cr-list li { padding: 12px; border-radius: 12px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+.cr-list li.done { background: var(--card3); }
+.cr-list li.done .cr-text { color: var(--ink3); }
+.cr-top { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: baseline; }
+.cr-num { font-weight: 600; font-size: 13px; color: var(--ink3); font-variant-numeric: tabular-nums; min-width: 1.4em; }
+.cr-text { margin: 0; font-size: 14px; line-height: 1.5; }
+.cr-sheet { font-size: 12px; font-weight: 600; padding: 2px 7px; border-radius: 6px; background: var(--sky-wash); color: var(--blue-deep); white-space: nowrap; }
+.cr-row { display: flex; align-items: center; gap: 12px; margin: 10px 0 8px; flex-wrap: wrap; }
+.cr-done { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink2); cursor: pointer; }
+.cr-done input { width: 16px; height: 16px; accent-color: var(--blue-ink); }
+.cr-resp { font-size: 13.5px; }
+.cr-note { margin: 12px 0 0; padding: 9px 11px; border-radius: 10px; background: var(--warm-soft); color: var(--warm); font-size: 13px; line-height: 1.5; }
+
+@media (max-width: 560px) {
+  .cr-ask { flex-direction: column; align-items: flex-start; }
+  .cr-top { grid-template-columns: auto minmax(0, 1fr); }
+  .cr-sheet { grid-column: 2; justify-self: start; }
+}
+
+/* The renewal runway (src/RenewalRunway.tsx), at the top of Deadlines. */
+.rw { margin: 0 0 26px; padding: 18px; border-radius: 16px; background: var(--card2); box-shadow: 0 0 0 1px var(--line); }
+.rw-h h2 { margin: 0; font-size: 16px; font-weight: 600; display: flex; align-items: baseline; gap: 8px; }
+.rw-h h2 span { font-size: 13px; font-weight: 500; color: var(--ink3); }
+.rw-h p { margin: 4px 0 0; font-size: 13px; color: var(--ink2); line-height: 1.5; }
+.rw-lanes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 14px; }
+.rw-lane h3 { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink3); display: flex; gap: 6px; }
+.rw-lane.ln-lapsed h3, .rw-lane.ln-30 h3 { color: var(--warm); }
+.rw-lane ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.rw-lane li { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+.rw-tx b { font-size: 14px; display: block; }
+.rw-tx small { display: block; font-size: 12.5px; color: var(--ink3); }
+.rw-tx p { margin: 6px 0 0; font-size: 12.5px; color: var(--ink2); line-height: 1.45; }
+.rw-act { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rw-act em { font-style: normal; font-weight: 600; font-size: 13px; font-variant-numeric: tabular-nums; }
+.rw-act small { font-size: 12.5px; color: var(--ink3); }
+.rw-act .pill { margin-left: auto; }
