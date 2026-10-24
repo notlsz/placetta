@@ -10,7 +10,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Placetta">
 <meta property="og:title" content="Trust and security | Placetta">
-<meta property="og:description" content="How Placetta protects your business's data, which companies process it, and what isn't finished yet.">
+<meta property="og:description" content="How Placetta protects your business's data, and which companies process it.">
 <meta property="og:url" content="https://www.placetta.com/trust">
 <meta property="og:image" content="https://www.placetta.com/media/og-home.png">
 <meta property="og:image:width" content="1200">
@@ -19,12 +19,12 @@
 <meta property="og:locale:alternate" content="zh_CN">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Trust and security | Placetta">
-<meta name="twitter:description" content="How Placetta protects your business's data, which companies process it, and what isn't finished yet.">
+<meta name="twitter:description" content="How Placetta protects your business's data, and which companies process it.">
 <meta name="twitter:image" content="https://www.placetta.com/media/og-home.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://www.placetta.com/trust#page","url":"https://www.placetta.com/trust","name":"Trust and security | Placetta","description":"How Placetta protects your business's data, which companies process it, and what isn't finished yet.","inLanguage":"en","isPartOf":{"@id":"https://www.placetta.com/#website"},"publisher":{"@type":"Organization","@id":"https://www.placetta.com/#organization","name":"Placetta","url":"https://www.placetta.com/"},"about":{"@id":"https://www.placetta.com/#organization"},"datePublished":"2026-10-21","dateModified":"2026-10-23"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://www.placetta.com/trust#page","url":"https://www.placetta.com/trust","name":"Trust and security | Placetta","description":"How Placetta protects your business's data, and which companies process it.","inLanguage":"en","isPartOf":{"@id":"https://www.placetta.com/#website"},"publisher":{"@type":"Organization","@id":"https://www.placetta.com/#organization","name":"Placetta","url":"https://www.placetta.com/"},"about":{"@id":"https://www.placetta.com/#organization"},"datePublished":"2026-10-21","dateModified":"2026-10-24"}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Placetta","item":"https://www.placetta.com/"},{"@type":"ListItem","position":2,"name":"Trust and security","item":"https://www.placetta.com/trust"}]}</script>
 <!-- /seo:head -->
-<meta name="description" content="How Placetta protects your business's data, which companies process it, and what isn't finished yet.">
+<meta name="description" content="How Placetta protects your business's data, and which companies process it.">
 <link rel="icon" href="/favicon.ico" sizes="any" /><link rel="icon" type="image/svg+xml" id="favicon" href="/favicon.svg" /><link rel="apple-touch-icon" href="/apple-touch-icon.png" /><link rel="manifest" href="/site.webmanifest" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,435 +41,109 @@
 <main class="lw">
 <article data-block="en" lang="en" data-title="Trust and security | Placetta" class="trust">
 <h1>Trust and security</h1>
-<p class="upd">Last updated: October 23, 2026</p>
-<p class="lead">How Placetta protects your business's information, which companies process it, and what isn't finished yet. Placetta doesn't hold a security certification today. The roadmap below says where we are.</p>
-<div class="legend">
-<p><span class="tag t-on">In place</span>Works in production today.</p>
-<p><span class="tag t-roll">Rolling out</span>Built and tested, and being switched on in our servers and database.</p>
-<p><span class="tag t-prog">In progress</span>Still being built or prepared.</p>
-</div>
-<nav class="toc" aria-label="On this page"><a href="#glance">At a glance</a><a href="#approvals">Approvals</a><a href="#audit">Audit trail</a><a href="#access">Team access</a><a href="#data">Your data</a><a href="#ai">AI</a><a href="#email">Email</a><a href="#subprocessors">Subprocessors</a><a href="#roadmap">Roadmap</a><a href="#status">Service status</a><a href="#report">Report an issue</a></nav>
+<p class="upd">Last updated: October 24, 2026</p>
+<p class="lead">How Placetta protects your business's information, and which companies process it for us.</p>
 
-<h2 id="glance" data-anchor="glance">At a glance</h2>
-<p>Each control below is described further down this page, with its status. Nothing here is a certification.</p>
-<div class="sp">
-<div class="sp-row"><div class="sp-h"><b>Owner approval</b><span class="tag t-on">In place</span></div><p>Nothing is filed, paid or sent without an owner's approval in the app. <a href="#approvals">Approvals</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>Audit trail</b><span class="tag t-on">In place</span></div><p>Every action by Odelia, your team, our team and agencies is recorded, and nobody using the app can edit or delete an entry. Export as a spreadsheet: rolling out. <a href="#audit">Audit trail</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>Encryption</b><span class="tag t-on">In place</span></div><p>HTTPS with TLS 1.2 or newer in transit, encrypted at rest; saved logins and connected accounts' tokens in Supabase Vault. <a href="#data">Your data</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>Our team's access</b><span class="tag t-on">In place</span></div><p>Only after two-step verification. <a href="#data">Your data</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>Roles, SSO and SCIM</b><span class="tag t-roll">Rolling out</span></div><p>Owner, admin, member and viewer, enforced by the database; SAML 2.0 and SCIM 2.0. <a href="#access">Team access</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>Subprocessors</b><span class="tag t-on">In place</span></div><p>Every company that processes customer information, taken from our code. <a href="#subprocessors">Subprocessors</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>Database backups</b><span class="tag t-prog">In progress</span></div><p>Not kept yet. <a href="#roadmap">Roadmap</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>SOC 2</b><span class="tag t-prog">In preparation</span></div><p>No report yet; Type I is being prepared ahead of an independent audit. <a href="#roadmap">Roadmap</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>Security contact</b><span class="tag t-on">In place</span></div><p><a href="mailto:security@placetta.com">security@placetta.com</a>, our disclosure policy below, and <a href="/.well-known/security.txt">security.txt</a>. <a href="#report">Report an issue</a></p></div>
-</div>
+<h2 id="security" data-anchor="security">Security</h2>
+<p>Your information is encrypted in transit and at rest. Only authorized Placetta staff can reach customer data, and only after signing in with multi-factor authentication. Nothing is filed, paid or sent for your business without an owner's approval in the app.</p>
 
-<h2 id="approvals" data-anchor="approvals">Your approval comes first</h2>
-<p>Odelia prepares the work. An owner of your workspace decides. Nothing is filed with an agency, paid or sent to anyone without an owner's approval in the Placetta app.</p>
-<h3>Filings <span class="tag t-on">In place</span></h3>
-<p>Only an owner can approve a filing, and our database refuses a filing request from anyone else. Before the approve button works, every line is checked again: a blank line, a placeholder left in, a Social Security number, or a form that belongs to another city's agency stops it.</p>
-<h3>Payments <span class="tag t-on">In place</span></h3>
-<p>Spending is off until an owner turns it on and sets the rules: what Odelia may ask to buy, from whom, and up to how much. An owner approves every purchase, and above an amount the owners choose, a second owner approves too. Placetta never holds or moves your money. Someone on your team pays on the agency's or seller's own page.</p>
-<h3>Messages <span class="tag t-on">In place</span></h3>
-<p>Emails Odelia drafts to an agency, a landlord or anyone else go out only after an owner approves them, from your own connected mailbox.</p>
-<h3>Requests from outside the app</h3>
-<p>If you set them up, you can also reach Odelia by text message, iMessage, WhatsApp, phone call, Slack or Lark. Whatever arrives that way, she can't file, pay or send anything from there. She puts it up for approval and sends you a link to it in the app. Team chats in WeCom, DingTalk and Microsoft Teams only receive updates; they can't give Odelia instructions.</p>
-<p><span class="tag t-roll">Rolling out</span>A message from outside the app could be a forwarded letter or a forgery, so it can't change your business's facts or name either. Odelia puts the change on a card that shows the old value, the new one, and who asked from where, and nothing changes until an owner confirms it in the app. From outside the app she also can't save to her memory, set up or stop routines, change or remove stores, or remove deadlines. A plain SMS, the easiest message to forge, can only look things up and draft.</p>
-
-<h2 id="audit" data-anchor="audit">Audit trail</h2>
-<p><span class="tag t-on">In place</span>Every action by Odelia, by you and your team, by our team and by agencies is recorded in your workspace's audit trail: what happened, to what, who did it and when. Everyone on your team can read it in the app. Nobody using the app can edit or delete an entry.</p>
-<p><span class="tag t-roll">Rolling out</span>Owners will be able to export the whole trail as a spreadsheet file in Settings, and each export will be recorded in the trail too.</p>
-<p><span class="tag t-on">In place</span>Each time a saved agency login is opened, by our filing software or by someone on our team, the opening goes into the audit trail.</p>
-<p><span class="tag t-roll">Rolling out</span>The database itself will refuse to edit or delete any entry, from anyone, our own servers included, and will stamp each entry with its own clock instead of trusting the writer's.</p>
-
-<h2 id="access" data-anchor="access">Team access and controls</h2>
-<h3>Roles <span class="tag t-roll">Rolling out</span></h3>
-<p>Owner, admin, member and viewer roles, enforced by the database on every request. Only an owner approves filings and payments; a viewer reads and changes nothing. Every role change is recorded in the audit trail.</p>
-<h3>Single sign-on <span class="tag t-roll">Rolling out</span></h3>
-<p>SAML 2.0 single sign-on, plus sign-in with Google Workspace, Microsoft Entra ID or another OpenID Connect provider. Verify your email domain and require SSO for everyone at it. Placetta connects your identity provider for you.</p>
-<h3>SCIM provisioning <span class="tag t-roll">Rolling out</span></h3>
-<p>SCIM 2.0 provisioning for users and groups (Okta, Microsoft Entra ID and other SCIM 2.0 providers), with groups mapped to roles. Deprovisioning removes access and ends the person's sessions.</p>
-<h3>How long conversations are kept <span class="tag t-roll">Rolling out</span></h3>
-<p>An owner chooses how long the workspace keeps Odelia's conversations: 30, 90, 180 or 365 days, or our default. After that, a finished conversation's words and your texts and calls with Odelia are deleted by the daily cleanup. Applications, filings, documents, approved memories and the audit trail stay. Each change is recorded in the audit trail.</p>
-<h3>AI assistants you connect <span class="tag t-roll">Rolling out</span></h3>
-<p>Claude, ChatGPT and other assistants that support MCP can read your workspace once an owner or admin signs in and allows it, choosing the workspace and what it may read. They can only read. Each connection is listed in Settings, can be disconnected at any time, and every call is logged.</p>
-
-<h2 id="data" data-anchor="data">How we handle your data</h2>
-<h3>Encryption <span class="tag t-on">In place</span></h3>
-<p>Everything between your browser, our servers and our database travels encrypted, over HTTPS with TLS 1.2 or newer. Your workspace, documents and audit trail are stored by Supabase in its US East region and encrypted at rest.</p>
-<h3>Passwords and keys <span class="tag t-on">In place</span></h3>
-<p>Saved agency logins, the access tokens for accounts you connect, and the links to your team chats are kept in Supabase Vault, encrypted with a key held outside the database, and only our server can read them. Our own service keys stay in server settings, never in the app or the website.</p>
-<h3>Our team's access <span class="tag t-on">In place</span></h3>
-<p>In the app, someone on our team can open customer records or a saved login only after signing in with two-step verification. You can turn on two-step sign-in, and a PIN for sensitive settings, in Settings.</p>
-<h3>Social Security numbers and ITINs</h3>
-<p><span class="tag t-on">In place</span>Our filing software never sends a Social Security number or ITIN to an agency. The signer writes it by hand on the signed copy, or the agency collects it on its own site.</p>
-<p><span class="tag t-roll">Rolling out</span>Odelia's tools refuse to save one in an application or in your business facts, and an application that holds one can't be approved. If a document you upload shows one, it's stored as you uploaded it, so cover the number first if you can.</p>
-<h3>Deleting your data</h3>
-<p><span class="tag t-on">In place</span>Deleting your account in Settings deletes the workspaces you own alone, with every file stored in them, except records the law requires us to keep. You can also email <a href="mailto:support@placetta.com">support@placetta.com</a> to have any document or workspace deleted.</p>
-<p><span class="tag t-roll">Rolling out</span>Owners can delete a single document in the app, the stored file and its record together, unless a filing in progress still uses it. Each deletion leaves a line in the audit trail.</p>
-<h3>How long we keep things</h3>
-<p><span class="tag t-roll">Rolling out</span>A daily cleanup removes records we no longer need: chat bot event records after 30 days, unfinished account connections after a day, records of scheduled checks after 180 days, and page view counts left untouched for 400 days. A year after an Odelia task finishes, its working notes are cleared; your request and her answer stay. Our <a href="privacy.html" data-legal="privacy.html">Privacy Policy</a> says how long everything else is kept.</p>
-<h3>Backups <span class="tag t-prog">In progress</span></h3>
-<p>We don't keep database backups yet. See the roadmap below.</p>
-
-<h2 id="ai" data-anchor="ai">AI and your data</h2>
-<p><span class="tag t-on">In place</span>Placetta doesn't use your content to train AI models, and doesn't sell it. Here is which model providers may process it, and when.</p>
-<h3>Anthropic</h3>
-<p>Claude models from Anthropic do the independent review of finished work, web research, and the work of our software that files on agency websites, and they take over Odelia's work whenever no other model is set up or one can't answer. Anthropic may see everything in a request, including your files. Its commercial terms don't allow it to train models on what we send.</p>
-<h3>Google (Gemini) <span class="tag t-roll">Rolling out</span></h3>
-<p>When our paid Google account is switched on, Gemini models do most of Odelia's day-to-day work, including reading your files. We use Gemini only on Google's paid tier, whose terms say prompts aren't used to improve Google's products. Google's free tier may use them, so without the paid account, Gemini receives nothing of yours.</p>
-<h3>Backups: Groq, Cerebras and OpenRouter <span class="tag t-roll">Rolling out</span></h3>
-<p>If Gemini and Anthropic both can't answer, an open model on Groq, Cerebras or OpenRouter answers instead. These backups never receive your files, only the text of the request.</p>
-<h3>OpenAI and DeepSeek <span class="tag t-prog">Off by default</span></h3>
-<p>Our software can also use models from OpenAI or DeepSeek, but both stay off unless we switch them on. DeepSeek, which is based in China, would never receive your files.</p>
-<h3>Calls and spoken replies</h3>
-<p>On phone calls, Telnyx runs Odelia's voice: the speech recognition, the AI model that talks with you, and the voice you hear. Every call opens with Odelia saying she's an AI and that the call is transcribed. Placetta doesn't record call audio. In the app, Microsoft Azure turns her replies into speech when you have them read aloud.</p>
-
-<h3>Agent memory <span class="tag t-prog">Off by default</span></h3>
-<p>If an owner or admin turns it on in Settings, Odelia keeps short notes about your business between conversations, each with its source and date. She only suggests them; an owner or admin approves each one, and what an email, upload or web page says can only become a suggestion. Memory never keeps ID numbers, card or bank numbers, or passwords, and stays inside your workspace. Your team can see, edit and delete every note, clear it all, or keep a conversation out of memory. To cut cost, the model providers above may hold the unchanging start of a request in their prompt cache for a short time (from minutes to an hour); it isn't used for training.</p>
-
-<h2 id="email" data-anchor="email">Email to Odelia <span class="tag t-roll">Rolling out</span></h2>
-<p>You'll be able to email Odelia, or forward her an agency's letter, from the address you sign in with. Anyone can fake the sender of an email, so she acts only when the message proves where it came from: a valid DKIM signature from your email domain that covers the sender line and the whole message. We check that signature ourselves on the raw message, or use our email provider's own DMARC or DKIM verdict, never headers the sender can write. Signing keys are looked up in public DNS, through Cloudflare and Google.</p>
-<p>If a message can't be verified, nothing starts, and you get a short note saying why. Email from an address that isn't a Placetta account gets no reply at all. Nothing is filed, paid, sent or deleted by email. Odelia answers with a link to the approval in the app.</p>
+<h2 id="ai" data-anchor="ai">AI</h2>
+<p>Placetta doesn't use your content to train AI models, and doesn't sell it. On phone calls, Odelia says she is an AI. The AI providers that process content for us are listed among the subprocessors below.</p>
 
 <h2 id="subprocessors" data-anchor="subprocessors">Subprocessors</h2>
-<p>These companies process customer information on our behalf. The list is taken from our code: a service that isn't wired in there isn't here. "When used" and "If you connect it" mean the company receives nothing until that feature is on or you connect it. "Rolling out" means the connection is built but not switched on yet, so that company receives nothing today.</p>
-<h3>Running the service</h3>
-<div class="sp">
-<div class="sp-row"><div class="sp-h"><b>Supabase</b><span class="tag t-on">Always on</span></div><p>Database, file storage, sign-in and server functions, in its US East region. Stores your workspace, documents, texts and audit trail.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Vercel</b><span class="tag t-on">Always on</span></div><p>Hosts placetta.com and the app.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Google (Fonts)</b><span class="tag t-on">Always on</span></div><p>Serves the typefaces on placetta.com and in the app. It sees your IP address and browser, nothing else.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Stripe</b><span class="tag t-on">Always on</span></div><p>Processes payments for your plan. We never see full card numbers.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Resend</b><span class="tag t-on">Always on</span></div><p>Sends our email: sign-in links, reminders, filing updates and headquarters summaries. It can also receive email sent to Odelia.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Anthropic</b><span class="tag t-on">Always on</span></div><p>Claude models: Odelia's work when no other model is set up or can answer, the review of finished work, web research, and filing on agency websites.</p></div>
-</div>
-<h3>AI models</h3>
-<div class="sp">
-<div class="sp-row"><div class="sp-h"><b>Google (Gemini)</b><span class="tag t-prog">When used</span></div><p>Gemini models for Odelia's work, only on Google's paid tier.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Groq</b><span class="tag t-prog">When used</span></div><p>A backup open model. Never receives your files.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Cerebras</b><span class="tag t-prog">When used</span></div><p>A backup open model. Never receives your files.</p></div>
-<div class="sp-row"><div class="sp-h"><b>OpenRouter</b><span class="tag t-prog">When used</span></div><p>A backup open model. Never receives your files.</p></div>
-<div class="sp-row"><div class="sp-h"><b>OpenAI</b><span class="tag t-prog">Off by default</span></div><p>Models our software can use. Off unless we switch them on.</p></div>
-<div class="sp-row"><div class="sp-h"><b>DeepSeek</b><span class="tag t-prog">Off by default</span></div><p>Models our software can use. Off unless we switch them on, and never receives your files. Based in China.</p></div>
-</div>
-<h3>Messages, calls and filing</h3>
-<div class="sp">
-<div class="sp-row"><div class="sp-h"><b>Telnyx</b><span class="tag t-prog">When used</span></div><p>Texts and calls with Odelia, including the voice, speech recognition and AI model on calls. Sends filings by fax.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Linq</b><span class="tag t-prog">When used</span></div><p>Texts with Odelia over iMessage, with RCS and SMS as fallback.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Meta (WhatsApp)</b><span class="tag t-prog">When used</span></div><p>Messages with Odelia on WhatsApp.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Postmark</b><span class="tag t-prog">When used</span></div><p>Email to and from Odelia, when we use it instead of Resend.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Lob</b><span class="tag t-prog">When used</span></div><p>Prints and mails filings sent by certified mail.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Microsoft (Azure Speech)</b><span class="tag t-prog">When used</span></div><p>Reads Odelia's replies aloud in the app.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Render</b><span class="tag t-prog">When used</span></div><p>Runs our software that files on agency websites, in the US (Oregon).</p></div>
-<div class="sp-row"><div class="sp-h"><b>Browserbase</b><span class="tag t-prog">When used</span></div><p>Provides the web browser that software can use.</p></div>
-</div>
-<h3>Services you connect</h3>
-<div class="sp">
-<div class="sp-row"><div class="sp-h"><b>Google</b><span class="tag t-prog">If you connect it</span></div><p>Sign-in with Google, Gmail, Google Calendar and Google Drive.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Google Business Profile</b><span class="tag t-roll">Rolling out</span></div><p>If you connect it, we read your locations' addresses, phones and opening hours, read only, to add your stores and fill those lines on forms.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Microsoft</b><span class="tag t-prog">If you connect it</span></div><p>Sign-in with Microsoft, Outlook Mail, Outlook Calendar and Microsoft Teams.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Dropbox</b><span class="tag t-prog">If you connect it</span></div><p>Importing documents.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Intuit (QuickBooks)</b><span class="tag t-prog">If you connect it</span></div><p>Reading gross receipts for tax registrations.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Slack</b><span class="tag t-prog">If you connect it</span></div><p>Status updates, and asking Odelia in Slack.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Lark (Feishu)</b><span class="tag t-prog">If you connect it</span></div><p>Status updates, and asking Odelia in Lark.</p></div>
-<div class="sp-row"><div class="sp-h"><b>WeCom</b><span class="tag t-prog">If you connect it</span></div><p>Status updates to a group you choose.</p></div>
-<div class="sp-row"><div class="sp-h"><b>DingTalk</b><span class="tag t-prog">If you connect it</span></div><p>Status updates to a group you choose.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Toast</b><span class="tag t-roll">Rolling out</span></div><p>If you connect it, we read your sales by location and your team's schedules and hours worked, read only, for sales tax returns, permits whose fee depends on sales, and work-hour rules. Toast receives only our requests for that data.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Square</b><span class="tag t-roll">Rolling out</span></div><p>If you connect it, we read your sales by location and your team's schedules and hours worked, read only, for the same filings. Square receives only our requests for that data.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Tencent (WeChat)</b><span class="tag t-roll">Rolling out</span></div><p>If you point your business's own WeChat Official Account at Placetta, Tencent carries your teammates' messages to Odelia and her replies.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Clover and Shopify</b><span class="tag t-roll">Rolling out</span></div><p>If you connect one, we read your locations' names, addresses and phones, read only. Clover and Shopify receive only the requests for them.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Xero</b><span class="tag t-roll">Rolling out</span></div><p>If you connect it, we read your organisation's legal name, addresses, phone and tax and registration numbers, read only, to fill the company lines on forms.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Dropbox Sign</b><span class="tag t-roll">Rolling out</span></div><p>If you connect your own Dropbox Sign account, an owner can send a document for signature. Dropbox Sign receives that document and the signers' names and email addresses.</p></div>
-<div class="sp-row"><div class="sp-h"><b>Apps connected through MCP</b><span class="tag t-roll">Rolling out</span></div><p>Notion, Airtable, Google Drive, Gmail, Dropbox, Box, Slack, HubSpot, Linear, Asana, Zapier, Square, Stripe, and any other app an owner adds by its address. If you connect one, it receives the requests Odelia sends it, which can include details from your workspace. Looking things up runs on its own. Anything that would change data in that app waits for an owner's approval.</p></div>
-</div>
+<p>These companies process customer information on our behalf. Some receive data only when you turn on or connect the related feature.</p>
+<table class="subs">
+<thead><tr><th scope="col">Company</th><th scope="col">Purpose</th><th scope="col">Location</th></tr></thead>
+<tbody>
+<tr><th scope="row">Supabase</th><td>Database, file storage and sign-in</td><td>United States</td></tr>
+<tr><th scope="row">Vercel</th><td>Website and app hosting</td><td>Global</td></tr>
+<tr><th scope="row">Stripe</th><td>Plan payments</td><td>United States</td></tr>
+<tr><th scope="row">Resend</th><td>Email delivery</td><td>United States</td></tr>
+<tr><th scope="row">Postmark</th><td>Email delivery, as an alternative</td><td>United States</td></tr>
+<tr><th scope="row">Anthropic</th><td>AI models</td><td>United States</td></tr>
+<tr><th scope="row">Google</th><td>AI models, typefaces and connected Google apps</td><td>Global</td></tr>
+<tr><th scope="row">Groq, Cerebras and OpenRouter</th><td>Backup AI models</td><td>United States</td></tr>
+<tr><th scope="row">OpenAI</th><td>AI models, off by default</td><td>United States</td></tr>
+<tr><th scope="row">DeepSeek</th><td>AI models, off by default</td><td>China</td></tr>
+<tr><th scope="row">Telnyx</th><td>Texts, calls and fax</td><td>United States</td></tr>
+<tr><th scope="row">Linq</th><td>iMessage and text messages</td><td>United States</td></tr>
+<tr><th scope="row">Meta</th><td>WhatsApp messages</td><td>United States</td></tr>
+<tr><th scope="row">Lob</th><td>Printing and mailing filings</td><td>United States</td></tr>
+<tr><th scope="row">Render</th><td>Hosting our filing software</td><td>United States</td></tr>
+<tr><th scope="row">Browserbase</th><td>Web browser for filing</td><td>United States</td></tr>
+<tr><th scope="row">Microsoft</th><td>Speech, and connected Microsoft apps</td><td>Global</td></tr>
+<tr><th scope="row">Dropbox</th><td>Document import and e-signature</td><td>United States</td></tr>
+<tr><th scope="row">Intuit (QuickBooks)</th><td>Sales figures for tax registrations</td><td>United States</td></tr>
+<tr><th scope="row">Xero</th><td>Company details for forms</td><td>Global</td></tr>
+<tr><th scope="row">Toast, Square and Clover</th><td>Sales, locations and work hours</td><td>United States</td></tr>
+<tr><th scope="row">Shopify</th><td>Store locations</td><td>Global</td></tr>
+<tr><th scope="row">Slack</th><td>Team chat updates</td><td>United States</td></tr>
+<tr><th scope="row">Lark (Feishu)</th><td>Team chat updates</td><td>Global</td></tr>
+<tr><th scope="row">Tencent (WeCom, WeChat)</th><td>Team chat and WeChat messages</td><td>China</td></tr>
+<tr><th scope="row">DingTalk</th><td>Team chat updates</td><td>China</td></tr>
+<tr><th scope="row">Apps connected through MCP</th><td>Requests Odelia sends that app</td><td>Varies by app</td></tr>
+</tbody>
+</table>
+<p>Apps connected through MCP include Notion, Airtable, Box, HubSpot, Linear, Asana and Zapier, and any other app an owner adds.</p>
 
-<h2 id="roadmap" data-anchor="roadmap">Compliance roadmap</h2>
-<p>Placetta doesn't hold SOC 2 or any other security certification today. Here is where each piece stands.</p>
-<h3>SOC 2 Type I <span class="tag t-prog">In preparation</span></h3>
-<p>We're writing down our controls and the risks they answer, starting with an inventory of every AI model we use and what it can see, ahead of an independent audit.</p>
-<h3>Daily database backups <span class="tag t-prog">In progress</span></h3>
-<p>We don't keep database backups yet. Turning on daily backups is under way.</p>
-<h3>PIPL, for people in China <span class="tag t-prog">In preparation</span></h3>
-<p>Our Privacy Policy already says who receives information about people in China outside China, why, and how they can use their rights. Next is a separate notice and consent in the app for people in China, as PIPL requires before personal information leaves the country.</p>
-<h3>Texting rules: TCPA and 10DLC</h3>
-<p><span class="tag t-on">In place</span>We text and call only a number you confirm with a code, keep a record of that consent for 5 years, stop texting when you reply STOP, and hold updates during your quiet hours.</p>
-<p><span class="tag t-prog">In progress</span>Carrier registration (10DLC) for our US texting number.</p>
-<h3>California privacy rights (CCPA) <span class="tag t-on">In place</span></h3>
-<p>You can download your workspace data and delete your account in Settings, and we answer privacy requests within 45 days. We don't sell or share personal information.</p>
-<h3>AI backup providers <span class="tag t-prog">In progress</span></h3>
-<p>Written confirmation from each AI backup provider that it doesn't train on or keep what we send.</p>
-<h3>SOC 2 Type II <span class="tag t-prog">Planned</span></h3>
-<p>An independent audit of how our controls hold up over months of real use, after our Type I report.</p>
-<h3>ISO/IEC 27001 <span class="tag t-prog">Planned</span></h3>
-<p>An information security management system certified by an accredited body.</p>
-<h3>ISO/IEC 42001 <span class="tag t-prog">Planned</span></h3>
-<p>The international standard for managing AI systems: how Odelia is built, tested, monitored and kept from training on your data.</p>
-<h3>New York SHIELD Act <span class="tag t-prog">In progress</span></h3>
-<p>A written security program for the private information we hold, including Social Security numbers and agency logins: a named security owner, risk assessments, staff training, vetted vendors and regular testing.</p>
-<h3>GDPR and UK GDPR <span class="tag t-prog">Planned</span></h3>
-<p>A data processing agreement with the EU Standard Contractual Clauses and the UK addendum, and a named representative in the EU and the UK.</p>
-<h3>EU AI Act <span class="tag t-prog">Planned</span></h3>
-<p>Odelia tells people they are talking with an AI, and anything she writes for you is marked as AI made.</p>
-<h3>Brazil LGPD <span class="tag t-prog">Planned</span></h3>
-<p>Brazil's official standard contractual clauses, unchanged, for any personal information that leaves Brazil.</p>
-<h3>Mexico personal data law <span class="tag t-prog">Planned</span></h3>
-<p>A privacy notice that meets Mexico's 2025 law, and a person reviews any decision that affects you before it takes effect.</p>
-<h3>Canada: PIPEDA and Quebec Law 25 <span class="tag t-prog">Planned</span></h3>
-<p>A privacy impact assessment before personal information about people in Quebec leaves the province.</p>
-<h3>Vietnam PDPL <span class="tag t-prog">Planned</span></h3>
-<p>A transfer impact assessment filed before we process personal information about people in Vietnam.</p>
-<h3>India DPDP Act <span class="tag t-prog">Planned</span></h3>
-<p>Notice, consent, security and breach reporting ready before the rules take effect on May 13, 2027.</p>
-<h3>Japan, South Korea and Singapore <span class="tag t-prog">Planned</span></h3>
-<p>Our data processing agreement covers APPI, PIPA and PDPA, with a local representative where the law asks for one.</p>
-<h3>Nigeria, South Africa and Kenya <span class="tag t-prog">Planned</span></h3>
-<p>Registration with each country's data protection regulator once we serve customers there.</p>
-<h3>Card payments (PCI DSS) <span class="tag t-on">In place</span></h3>
-<p>Card details go straight to Stripe and never touch our servers.</p>
-<h3>Regulated customers (NYDFS Part 500) <span class="tag t-prog">Planned</span></h3>
-<p>Contract terms banks, money transmitters and insurers need from their vendors: multi-factor sign-in, encryption, breach notice within 72 hours and audit rights.</p>
-<h3>Customs brokerage <span class="tag t-prog">Planned</span></h3>
-<p>Customs entries for your freight are filed through a licensed US customs broker.</p>
-<div data-incidents hidden>
-<h3>Incident log <span class="tag t-on">In place</span></h3>
-<p>We keep an incident log: what happened, the impact and the fix. Incident log kept since <span data-incidents-since></span>. Incidents that affected customers are listed here.</p>
-<ul class="steps" data-incidents-list></ul>
-</div>
-
-<h2 id="status" data-anchor="status">Service status</h2>
-<p>Placetta doesn't run its own status page yet. Incidents that affected customers are in the incident log above. The services Placetta runs on publish their own:</p>
-<ul class="steps">
-<li><a href="https://status.supabase.com" rel="noopener">Supabase status</a>: database, file storage, sign-in and server functions</li>
-<li><a href="https://www.vercel-status.com" rel="noopener">Vercel status</a>: placetta.com and the app</li>
-<li><a href="https://status.claude.com" rel="noopener">Anthropic status</a>: Claude models</li>
-<li><a href="https://status.stripe.com" rel="noopener">Stripe status</a>: payments</li>
-<li><a href="https://resend-status.com" rel="noopener">Resend status</a>: our email</li>
-</ul>
+<h2 id="rights" data-anchor="rights">Your rights and data</h2>
+<p>Our <a href="privacy.html" data-legal="privacy.html">Privacy Policy</a> explains how to access or delete your information, how long we keep it, and how it is transferred between countries.</p>
 
 <h2 id="report" data-anchor="report">Report a security issue</h2>
-<p>If you think you've found a security problem in Placetta, please tell us. Write in English or Chinese.</p>
-<ol class="steps">
-<li>Email <a href="mailto:security@placetta.com">security@placetta.com</a> with what you found and the steps to reproduce it.</li>
-<li>Use only your own account and test data. Don't access, change or delete other people's information, don't disrupt the service, and don't try to trick our team or our customers.</li>
-<li>Give us reasonable time to fix it before you tell anyone else.</li>
-</ol>
-<p>We'll confirm we got your report, keep you posted until it's fixed, and credit you if you'd like. We won't take legal action against anyone who reports a problem in good faith under these rules. Our security contact is also published at <a href="/.well-known/security.txt">/.well-known/security.txt</a>.</p>
+<p>Email <a href="mailto:security@placetta.com">security@placetta.com</a>, in English or Chinese, with what you found and how to reproduce it. Test only with your own account and data, don't access other people's information or disrupt the service, and give us reasonable time to fix it before telling anyone; we won't take legal action against good-faith reports that follow these rules. Our contact is also at <a href="/.well-known/security.txt">/.well-known/security.txt</a>.</p>
 </article>
 <article data-block="zh" lang="zh-CN" data-title="信任与安全 | 快哉" class="trust" hidden>
 <h1>信任与安全</h1>
-<p class="upd">最后更新：2026年10月23日</p>
-<p class="lead">快哉如何保护您企业的信息、哪些公司会处理这些信息，以及哪些工作尚未完成。快哉目前没有任何安全认证，进展见下文的合规路线图。</p>
-<div class="legend">
-<p><span class="tag t-on">已上线</span>已在生产环境中运行。</p>
-<p><span class="tag t-roll">上线中</span>已开发并测试，正在我们的服务器和数据库中启用。</p>
-<p><span class="tag t-prog">进行中</span>仍在开发或准备中。</p>
-</div>
-<nav class="toc" aria-label="本页内容"><a href="#glance">概览</a><a href="#approvals">批准</a><a href="#audit">审计记录</a><a href="#access">团队权限</a><a href="#data">您的数据</a><a href="#ai">AI</a><a href="#email">邮件</a><a href="#subprocessors">数据处理方</a><a href="#roadmap">合规路线图</a><a href="#status">服务状态</a><a href="#report">报告问题</a></nav>
+<p class="upd">最后更新：2026年10月24日</p>
+<p class="lead">快哉如何保护您企业的信息，以及哪些公司代我们处理这些信息。</p>
 
-<h2 data-anchor="glance">概览</h2>
-<p>下列每项措施在本页下文都有详细说明和状态。这里没有任何一项是认证。</p>
-<div class="sp">
-<div class="sp-row"><div class="sp-h"><b>所有者批准</b><span class="tag t-on">已上线</span></div><p>未经所有者在应用中批准，不会提交、付款或发送任何内容。<a href="#approvals">批准</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>审计记录</b><span class="tag t-on">已上线</span></div><p>Odelia、您的团队、我们的团队和机构的每项操作都有记录，使用应用的任何人都无法修改或删除。导出为表格文件：上线中。<a href="#audit">审计记录</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>加密</b><span class="tag t-on">已上线</span></div><p>传输中使用 TLS 1.2 或更高版本的 HTTPS，存储时加密；保存的登录信息和已连接账户的令牌存放在 Supabase Vault 中。<a href="#data">您的数据</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>我们团队的访问</b><span class="tag t-on">已上线</span></div><p>须先通过两步验证。<a href="#data">您的数据</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>角色、单点登录和 SCIM</b><span class="tag t-roll">上线中</span></div><p>所有者、管理员、成员和查看者，由数据库强制执行；SAML 2.0 和 SCIM 2.0。<a href="#access">团队权限</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>数据处理方</b><span class="tag t-on">已上线</span></div><p>处理客户信息的每家公司，名单取自我们的代码。<a href="#subprocessors">数据处理方</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>数据库备份</b><span class="tag t-prog">进行中</span></div><p>目前还没有备份。<a href="#roadmap">合规路线图</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>SOC 2</b><span class="tag t-prog">准备中</span></div><p>尚无报告；Type I 正在为独立审计做准备。<a href="#roadmap">合规路线图</a></p></div>
-<div class="sp-row"><div class="sp-h"><b>安全联系方式</b><span class="tag t-on">已上线</span></div><p><a href="mailto:security@placetta.com">security@placetta.com</a>、下文的漏洞披露政策，以及 <a href="/.well-known/security.txt">security.txt</a>。<a href="#report">报告问题</a></p></div>
-</div>
+<h2 data-anchor="security">安全</h2>
+<p>您的信息在传输和存储时均经过加密。只有获得授权的快哉员工才能接触客户数据，且必须先通过多重身份验证登录。未经工作区所有者在应用中批准，我们不会为您的企业提交申报、付款或发送任何内容。</p>
 
-<h2 data-anchor="approvals">一切以您的批准为先</h2>
-<p>Odelia 负责准备，工作区所有者负责决定。未经所有者在快哉应用中批准，不会向任何机构提交申请，不会付款，也不会向任何人发送内容。</p>
-<h3>申报 <span class="tag t-on">已上线</span></h3>
-<p>只有所有者可以批准申报，数据库本身也会拒绝其他任何人提出的申报请求。批准按钮生效前，每一栏都会再核对一遍：有空栏、留有占位文字、填有社会安全号，或表格属于其他城市的机构，都无法批准。</p>
-<h3>付款 <span class="tag t-on">已上线</span></h3>
-<p>付款功能默认关闭，须由所有者开启并设定规则：Odelia 可以申请购买什么、向谁购买、金额上限多少。每笔购买都须由所有者批准；超过所有者设定的金额，还须另一位所有者批准。快哉从不持有或转移您的资金，由您团队中的人在机构或卖方自己的页面上付款。</p>
-<h3>消息 <span class="tag t-on">已上线</span></h3>
-<p>Odelia 起草给机构、房东或其他任何人的邮件，只有在所有者批准后，才会从您自己连接的邮箱发出。</p>
-<h3>来自应用之外的请求</h3>
-<p>如您已设置，也可以通过短信、iMessage、WhatsApp、电话、Slack 或飞书联系 Odelia。无论通过哪种方式，她都不会在那里提交、付款或发送任何内容，而是把事项提交审批，并把应用中审批页面的链接发给您。企业微信、钉钉和 Microsoft Teams 群只接收进度更新，无法向 Odelia 下达指令。</p>
-<p><span class="tag t-roll">上线中</span>来自应用之外的消息可能是转发的信件，也可能是伪造的，因此也不能更改您企业的资料或名称。Odelia 会把更改做成一张卡片，显示原值、新值，以及由谁从何处提出；所有者在应用中确认之前，不会有任何更改。在应用之外，她也不能保存记忆、设置或停止例行任务、更改或移除门店，或删除截止日期。普通短信最容易伪造，只能用来查询和起草。</p>
-
-<h2 data-anchor="audit">审计记录</h2>
-<p><span class="tag t-on">已上线</span>Odelia、您和您的团队、我们的团队以及各机构的每一项操作，都会记入您工作区的审计记录：发生了什么、涉及什么、由谁操作、何时操作。团队中的每个人都可以在应用中查看。任何人都无法在应用中编辑或删除记录。</p>
-<p><span class="tag t-roll">上线中</span>所有者将可以在“设置”中把完整的审计记录导出为表格文件，每次导出本身也会记入审计记录。</p>
-<p><span class="tag t-on">已上线</span>我们的申报软件或我们团队中的人每次打开已保存的机构网站登录信息，都会记入审计记录。</p>
-<p><span class="tag t-roll">上线中</span>数据库本身将拒绝任何人编辑或删除任何记录，包括我们自己的服务器；并用数据库自己的时钟为每条记录标注时间，而不采用写入方提供的时间。</p>
-
-<h2 data-anchor="access">团队权限与管控</h2>
-<h3>角色 <span class="tag t-roll">上线中</span></h3>
-<p>所有者、管理员、成员和查看者四种角色，每次请求都由数据库强制执行。只有所有者能批准申报和付款；查看者只能阅读，不能做任何更改。每次角色变更都会记入审计记录。</p>
-<h3>单点登录 <span class="tag t-roll">上线中</span></h3>
-<p>支持 SAML 2.0 单点登录，以及通过 Google Workspace、Microsoft Entra ID 或其他 OpenID Connect 身份提供方登录。验证您的邮箱域名后，可要求该域名下所有人使用单点登录。快哉会为您接入身份提供方。</p>
-<h3>SCIM 用户同步 <span class="tag t-roll">上线中</span></h3>
-<p>支持用户和用户组的 SCIM 2.0 同步（Okta、Microsoft Entra ID 及其他 SCIM 2.0 提供方），用户组可对应到角色。停用某人后，其访问权限会被移除，登录会话也会结束。</p>
-<h3>对话保留期限 <span class="tag t-roll">上线中</span></h3>
-<p>所有者可以选择工作区保留 Odelia 对话的时间：30、90、180 或 365 天，或使用我们的默认设置。超过期限后，每日清理会删除已结束对话的内容以及您与 Odelia 的短信和通话。申请、申报、文件、已批准的记忆和审计记录会保留。每次更改都会记入审计记录。</p>
-<h3>您连接的 AI 助手 <span class="tag t-roll">上线中</span></h3>
-<p>Claude、ChatGPT 及其他支持 MCP 的助手，需由所有者或管理员登录并允许后，才能读取您的工作区，并由其选择工作区和可读取的内容。助手只能读取。每个连接都列在“设置”中，可随时断开，每次调用都有记录。</p>
-
-<h2 data-anchor="data">我们如何处理您的数据</h2>
-<h3>加密 <span class="tag t-on">已上线</span></h3>
-<p>您的浏览器、我们的服务器和数据库之间传输的一切内容均经过加密（HTTPS，TLS 1.2 或更高版本）。您的工作区、文件和审计记录由 Supabase 存储在其美国东部区域，并进行静态加密。</p>
-<h3>密码与密钥 <span class="tag t-on">已上线</span></h3>
-<p>已保存的机构网站登录信息、您所连接账户的访问令牌，以及团队群的链接，都加密存放在 Supabase Vault 中，加密密钥保存在数据库之外，只有我们的服务器可以读取。我们自己的服务密钥保存在服务器设置中，从不出现在应用或网站中。</p>
-<h3>我们团队的访问权限 <span class="tag t-on">已上线</span></h3>
-<p>在应用中，我们团队的人员必须先通过两步验证登录，才能打开客户记录或已保存的登录信息。您也可以在“设置”中开启两步登录，以及用于敏感设置的 PIN。</p>
-<h3>社会安全号和 ITIN</h3>
-<p><span class="tag t-on">已上线</span>我们的申报软件从不向机构发送社会安全号或 ITIN。该栏由签署人在签字件上手写，或由机构在其自己的网站上收集。</p>
-<p><span class="tag t-roll">上线中</span>Odelia 的工具会拒绝把社会安全号或 ITIN 保存到申请或企业资料中，含有这类号码的申请也无法批准。如您上传的文件上显示了这类号码，文件会按原样保存，因此请尽量先遮住号码再上传。</p>
-<h3>删除数据</h3>
-<p><span class="tag t-on">已上线</span>在“设置”中删除账户，会删除您单独拥有的工作区及其中存储的所有文件，法律要求保留的记录除外。您也可以发邮件至 <a href="mailto:support@placetta.com">support@placetta.com</a>，要求删除任何文件或工作区。</p>
-<p><span class="tag t-roll">上线中</span>所有者可以在应用中删除单个文件，存储的文件和对应记录会一并删除，除非仍有进行中的申报在使用它。每次删除都会在审计记录中留下一行。</p>
-<h3>保存期限</h3>
-<p><span class="tag t-roll">上线中</span>每日清理会删除不再需要的记录：聊天机器人事件记录保存 30 天，未完成的账户连接保存 1 天，定期检查的记录保存 180 天，400 天内未更新的页面浏览计数也会删除。Odelia 的任务完成一年后，其工作过程记录会被清除，您的请求和她的回复会保留。其他信息的保存期限，请见我们的<a href="privacy.html" data-legal="privacy.html">隐私政策</a>。</p>
-<h3>备份 <span class="tag t-prog">进行中</span></h3>
-<p>我们目前尚未保留数据库备份，进展见下文路线图。</p>
-
-<h2 data-anchor="ai">AI 与您的数据</h2>
-<p><span class="tag t-on">已上线</span>快哉不会用您的内容训练 AI 模型，也不会出售您的内容。以下说明哪些模型服务商可能处理您的内容，以及在什么情况下处理。</p>
-<h3>Anthropic</h3>
-<p>Anthropic 的 Claude 模型负责对已完成工作的独立复核、网络调研，以及我们在机构网站上代为申报的软件；在没有设置其他模型或其他模型无法回答时，也由它承担 Odelia 的工作。Anthropic 可能看到请求中的全部内容，包括您的文件。其商业条款不允许 Anthropic 用我们发送的内容训练模型。</p>
-<h3>Google（Gemini） <span class="tag t-roll">上线中</span></h3>
-<p>我们的 Google 付费账户开启时，Odelia 的大部分日常工作由 Gemini 模型完成，包括读取您的文件。我们只使用 Google 付费层级的 Gemini，其条款规定不会用提示内容改进 Google 的产品。Google 的免费层级可能会这样使用，因此在付费账户未开启时，Gemini 不会收到您的任何内容。</p>
-<h3>备用模型：Groq、Cerebras 和 OpenRouter <span class="tag t-roll">上线中</span></h3>
-<p>如果 Gemini 和 Anthropic 都无法回答，会改由 Groq、Cerebras 或 OpenRouter 上的开源模型回答。这些备用服务从不接收您的文件，只接收请求的文字内容。</p>
-<h3>OpenAI 和 DeepSeek <span class="tag t-prog">默认关闭</span></h3>
-<p>我们的软件也可以使用 OpenAI 或 DeepSeek 的模型，但两者都保持关闭，除非我们主动开启。DeepSeek 总部位于中国，绝不会收到您的文件。</p>
-<h3>电话与语音朗读</h3>
-<p>通话中，Odelia 的语音由 Telnyx 运行，包括语音识别、与您对话的 AI 模型以及您听到的声音。每次通话开始时，Odelia 都会说明她是 AI，并告知通话会被转录。快哉不录制通话音频。在应用中，当您让 Odelia 朗读回复时，由 Microsoft Azure 将回复转换为语音。</p>
-
-<h3>助理记忆 <span class="tag t-prog">默认关闭</span></h3>
-<p>所有者或管理员在“设置”中开启后，Odelia 会在对话之间记住关于您企业的简短记录，每条都注明来源和日期。她只提出建议，每条都由所有者或管理员批准；邮件、上传文件或网页中的内容只能成为建议。记忆不会保存证件号、卡号、银行账号或密码，也不会离开您的工作区。您的团队可以查看、编辑和删除每一条记录，全部清空，或让某次对话不被记住。为降低成本，上述模型服务商可能会把请求中固定不变的开头部分在其提示缓存中短暂保存（几分钟到一小时），不会用于训练。</p>
-
-<h2 data-anchor="email">给 Odelia 发邮件 <span class="tag t-roll">上线中</span></h2>
-<p>您将可以用登录快哉的邮箱给 Odelia 发邮件，或把机构的来信转发给她。任何人都可以伪造邮件的发件人，所以只有当邮件能证明自己的来源时，她才会处理：邮件须带有来自您邮箱域名的有效 DKIM 签名，且签名覆盖发件人一栏和整封邮件。我们会在原始邮件上自行验证签名，或采用邮件服务商自己的 DMARC 或 DKIM 验证结果，绝不依赖发件人自己能写的邮件头。签名公钥通过 Cloudflare 和 Google 的公共 DNS 查询。</p>
-<p>无法验证的邮件不会触发任何操作，您会收到一条简短说明。来自非快哉账户邮箱的邮件不会得到任何回复。通过邮件不会提交、付款、发送或删除任何内容，Odelia 会回复一个指向应用中审批页面的链接。</p>
+<h2 data-anchor="ai">AI</h2>
+<p>快哉不会用您的内容训练 AI 模型，也不会出售您的内容。在电话中，Odelia 会说明自己是 AI。代我们处理内容的 AI 服务商列在下方的数据处理方中。</p>
 
 <h2 data-anchor="subprocessors">数据处理方</h2>
-<p>以下公司代表我们处理客户信息。这份名单取自我们的代码：代码中没有接入的服务，不会出现在这里。“按需使用”和“您连接后”表示在该功能开启或您连接之前，该公司不会收到任何内容。“上线中”表示该连接已开发完成但尚未开启，因此该公司目前不会收到任何内容。</p>
-<h3>运行服务</h3>
-<div class="sp">
-<div class="sp-row"><div class="sp-h"><b>Supabase</b><span class="tag t-on">始终启用</span></div><p>数据库、文件存储、登录和服务器功能，位于其美国东部区域。存储您的工作区、文件、短信和审计记录。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Vercel</b><span class="tag t-on">始终启用</span></div><p>托管 placetta.com 和快哉应用。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Google（Fonts）</b><span class="tag t-on">始终启用</span></div><p>为 placetta.com 和快哉应用提供字体。它只能看到您的 IP 地址和浏览器信息。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Stripe</b><span class="tag t-on">始终启用</span></div><p>处理套餐付款。我们看不到完整卡号。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Resend</b><span class="tag t-on">始终启用</span></div><p>发送我们的邮件：登录链接、提醒、申报进展和总部摘要；也可以接收发给 Odelia 的邮件。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Anthropic</b><span class="tag t-on">始终启用</span></div><p>Claude 模型：在没有设置其他模型或其他模型无法回答时承担 Odelia 的工作，复核已完成的工作，进行网络调研，以及在机构网站上代为申报。</p></div>
-</div>
-<h3>AI 模型</h3>
-<div class="sp">
-<div class="sp-row"><div class="sp-h"><b>Google（Gemini）</b><span class="tag t-prog">按需使用</span></div><p>为 Odelia 的工作提供 Gemini 模型，仅限 Google 付费层级。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Groq</b><span class="tag t-prog">按需使用</span></div><p>备用开源模型，从不接收您的文件。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Cerebras</b><span class="tag t-prog">按需使用</span></div><p>备用开源模型，从不接收您的文件。</p></div>
-<div class="sp-row"><div class="sp-h"><b>OpenRouter</b><span class="tag t-prog">按需使用</span></div><p>备用开源模型，从不接收您的文件。</p></div>
-<div class="sp-row"><div class="sp-h"><b>OpenAI</b><span class="tag t-prog">默认关闭</span></div><p>我们的软件可以使用其模型，除非我们开启，否则保持关闭。</p></div>
-<div class="sp-row"><div class="sp-h"><b>DeepSeek</b><span class="tag t-prog">默认关闭</span></div><p>我们的软件可以使用其模型，除非我们开启，否则保持关闭，且绝不接收您的文件。总部位于中国。</p></div>
-</div>
-<h3>消息、电话与申报</h3>
-<div class="sp">
-<div class="sp-row"><div class="sp-h"><b>Telnyx</b><span class="tag t-prog">按需使用</span></div><p>您与 Odelia 之间的短信和通话，包括通话中的语音、语音识别和 AI 模型；以传真方式发送申报。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Linq</b><span class="tag t-prog">按需使用</span></div><p>通过 iMessage 与 Odelia 收发消息，必要时改用 RCS 或短信。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Meta（WhatsApp）</b><span class="tag t-prog">按需使用</span></div><p>在 WhatsApp 上与 Odelia 收发消息。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Postmark</b><span class="tag t-prog">按需使用</span></div><p>在我们用它代替 Resend 时，收发 Odelia 的邮件。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Lob</b><span class="tag t-prog">按需使用</span></div><p>打印申报材料并以挂号信寄出。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Microsoft（Azure Speech）</b><span class="tag t-prog">按需使用</span></div><p>在应用中朗读 Odelia 的回复。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Render</b><span class="tag t-prog">按需使用</span></div><p>运行我们在机构网站上代为申报的软件，位于美国（俄勒冈州）。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Browserbase</b><span class="tag t-prog">按需使用</span></div><p>为该软件提供可用的网页浏览器。</p></div>
-</div>
-<h3>您连接的服务</h3>
-<div class="sp">
-<div class="sp-row"><div class="sp-h"><b>Google</b><span class="tag t-prog">您连接后</span></div><p>使用 Google 登录、Gmail、Google Calendar 和 Google Drive。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Google 商家资料</b><span class="tag t-roll">上线中</span></div><p>您连接后，我们以只读方式读取各门店的地址、电话和营业时间，用于添加门店并填写表格中的这些栏目。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Microsoft</b><span class="tag t-prog">您连接后</span></div><p>使用 Microsoft 登录、Outlook 邮件、Outlook 日历和 Microsoft Teams。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Dropbox</b><span class="tag t-prog">您连接后</span></div><p>导入文件。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Intuit（QuickBooks）</b><span class="tag t-prog">您连接后</span></div><p>读取营业总收入，用于税务登记。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Slack</b><span class="tag t-prog">您连接后</span></div><p>进度更新，以及在 Slack 中向 Odelia 提问。</p></div>
-<div class="sp-row"><div class="sp-h"><b>飞书（Lark）</b><span class="tag t-prog">您连接后</span></div><p>进度更新，以及在飞书中向 Odelia 提问。</p></div>
-<div class="sp-row"><div class="sp-h"><b>企业微信</b><span class="tag t-prog">您连接后</span></div><p>向您选择的群发送进度更新。</p></div>
-<div class="sp-row"><div class="sp-h"><b>钉钉</b><span class="tag t-prog">您连接后</span></div><p>向您选择的群发送进度更新。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Toast</b><span class="tag t-roll">上线中</span></div><p>您连接后，我们以只读方式读取各门店的销售额，以及团队的排班和实际工时，用于销售税申报、按销售额计费的许可证和工时规定。Toast 只会收到我们读取这些数据的请求。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Square</b><span class="tag t-roll">上线中</span></div><p>您连接后，我们以只读方式读取各门店的销售额，以及团队的排班和实际工时，用途同上。Square 只会收到我们读取这些数据的请求。</p></div>
-<div class="sp-row"><div class="sp-h"><b>腾讯（微信）</b><span class="tag t-roll">上线中</span></div><p>如您把企业自己的微信服务号接入快哉，腾讯会传递团队成员发给 Odelia 的消息和她的回复。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Clover 和 Shopify</b><span class="tag t-roll">上线中</span></div><p>您连接后，我们以只读方式读取各门店的名称、地址和电话。Clover 和 Shopify 只会收到发给它们的请求。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Xero</b><span class="tag t-roll">上线中</span></div><p>您连接后，我们以只读方式读取组织的法定名称、地址、电话以及税号和注册号，用于填写表格中的公司栏目。</p></div>
-<div class="sp-row"><div class="sp-h"><b>Dropbox Sign</b><span class="tag t-roll">上线中</span></div><p>连接您自己的 Dropbox Sign 账户后，所有者可以发出文件签署。Dropbox Sign 会收到该文件以及签署人的姓名和邮箱。</p></div>
-<div class="sp-row"><div class="sp-h"><b>通过 MCP 连接的应用</b><span class="tag t-roll">上线中</span></div><p>Notion、Airtable、Google Drive、Gmail、Dropbox、Box、Slack、HubSpot、Linear、Asana、Zapier、Square、Stripe，以及所有者按地址添加的其他应用。您连接后，该应用会收到 Odelia 发给它的请求，其中可能包含您工作区中的信息。查询会自动进行；任何会更改该应用中数据的操作，都须等所有者批准。</p></div>
-</div>
+<p>以下公司代我们处理客户信息。其中部分公司只有在您开启或连接相关功能后才会收到数据。</p>
+<table class="subs">
+<thead><tr><th scope="col">公司</th><th scope="col">用途</th><th scope="col">所在地</th></tr></thead>
+<tbody>
+<tr><th scope="row">Supabase</th><td>数据库、文件存储与登录</td><td>美国</td></tr>
+<tr><th scope="row">Vercel</th><td>网站与应用托管</td><td>全球</td></tr>
+<tr><th scope="row">Stripe</th><td>套餐付款</td><td>美国</td></tr>
+<tr><th scope="row">Resend</th><td>发送邮件</td><td>美国</td></tr>
+<tr><th scope="row">Postmark</th><td>发送邮件（备选）</td><td>美国</td></tr>
+<tr><th scope="row">Anthropic</th><td>AI 模型</td><td>美国</td></tr>
+<tr><th scope="row">Google</th><td>AI 模型、字体与您连接的 Google 应用</td><td>全球</td></tr>
+<tr><th scope="row">Groq、Cerebras 和 OpenRouter</th><td>备用 AI 模型</td><td>美国</td></tr>
+<tr><th scope="row">OpenAI</th><td>AI 模型，默认关闭</td><td>美国</td></tr>
+<tr><th scope="row">DeepSeek</th><td>AI 模型，默认关闭</td><td>中国</td></tr>
+<tr><th scope="row">Telnyx</th><td>短信、电话与传真</td><td>美国</td></tr>
+<tr><th scope="row">Linq</th><td>iMessage 与短信</td><td>美国</td></tr>
+<tr><th scope="row">Meta</th><td>WhatsApp 消息</td><td>美国</td></tr>
+<tr><th scope="row">Lob</th><td>打印并邮寄申报材料</td><td>美国</td></tr>
+<tr><th scope="row">Render</th><td>托管我们的申报软件</td><td>美国</td></tr>
+<tr><th scope="row">Browserbase</th><td>申报所用的网页浏览器</td><td>美国</td></tr>
+<tr><th scope="row">Microsoft</th><td>语音朗读与您连接的 Microsoft 应用</td><td>全球</td></tr>
+<tr><th scope="row">Dropbox</th><td>导入文件与电子签名</td><td>美国</td></tr>
+<tr><th scope="row">Intuit（QuickBooks）</th><td>税务登记所需的销售数据</td><td>美国</td></tr>
+<tr><th scope="row">Xero</th><td>填写表格所需的公司信息</td><td>全球</td></tr>
+<tr><th scope="row">Toast、Square 和 Clover</th><td>销售额、门店与工时</td><td>美国</td></tr>
+<tr><th scope="row">Shopify</th><td>门店地址</td><td>全球</td></tr>
+<tr><th scope="row">Slack</th><td>团队群聊通知</td><td>美国</td></tr>
+<tr><th scope="row">飞书（Lark）</th><td>团队群聊通知</td><td>全球</td></tr>
+<tr><th scope="row">腾讯（企业微信、微信）</th><td>团队群聊与微信消息</td><td>中国</td></tr>
+<tr><th scope="row">钉钉</th><td>团队群聊通知</td><td>中国</td></tr>
+<tr><th scope="row">通过 MCP 连接的应用</th><td>Odelia 向该应用发送的请求</td><td>各不相同</td></tr>
+</tbody>
+</table>
+<p>通过 MCP 连接的应用包括 Notion、Airtable、Box、HubSpot、Linear、Asana 和 Zapier，以及所有者添加的其他应用。</p>
 
-<h2 data-anchor="roadmap">合规路线图</h2>
-<p>快哉目前没有 SOC 2 或任何其他安全认证。以下是各项工作的进展。</p>
-<h3>SOC 2 Type I <span class="tag t-prog">准备中</span></h3>
-<p>我们正在记录各项控制措施及其应对的风险，首先盘点我们使用的每个 AI 模型及其能看到的内容，为独立审计做准备。</p>
-<h3>每日数据库备份 <span class="tag t-prog">进行中</span></h3>
-<p>我们目前尚未保留数据库备份，正在着手开启每日备份。</p>
-<h3>中国《个人信息保护法》 <span class="tag t-prog">准备中</span></h3>
-<p>我们的隐私政策已说明：中国境内人员的信息由谁在境外接收、用于什么目的，以及他们如何行使权利。下一步是在应用中为中国境内的用户提供单独的告知和同意，以满足个人信息出境前的要求。</p>
-<h3>短信规定：TCPA 与 10DLC</h3>
-<p><span class="tag t-on">已上线</span>我们只向您用验证码确认过的号码发短信和打电话，同意记录保存 5 年；您回复 STOP 即停止发送短信；免打扰时段内的更新会暂缓发送。</p>
-<p><span class="tag t-prog">进行中</span>为我们的美国短信号码完成运营商注册（10DLC）。</p>
-<h3>加州隐私权利（CCPA） <span class="tag t-on">已上线</span></h3>
-<p>您可以在“设置”中下载工作区数据、删除账户，我们在 45 天内答复隐私请求。我们不会出售或共享个人信息。</p>
-<h3>AI 备用服务商 <span class="tag t-prog">进行中</span></h3>
-<p>取得每家 AI 备用服务商的书面确认：不用我们发送的内容训练模型，也不保留这些内容。</p>
-<h3>SOC 2 Type II <span class="tag t-prog">计划中</span></h3>
-<p>在 Type I 报告之后，由独立审计师检验我们的控制措施在数月实际运行中的表现。</p>
-<h3>ISO/IEC 27001 <span class="tag t-prog">计划中</span></h3>
-<p>由认可机构认证的信息安全管理体系。</p>
-<h3>ISO/IEC 42001 <span class="tag t-prog">计划中</span></h3>
-<p>AI 管理体系国际标准：Odelia 如何构建、测试、监控，以及如何确保不用您的数据训练模型。</p>
-<h3>纽约州 SHIELD 法案 <span class="tag t-prog">进行中</span></h3>
-<p>针对我们保存的私人信息（包括社会安全号和机构登录信息）的书面安全制度：指定安全负责人、风险评估、员工培训、供应商审查和定期测试。</p>
-<h3>欧盟 GDPR 与英国 GDPR <span class="tag t-prog">计划中</span></h3>
-<p>含欧盟标准合同条款和英国附录的数据处理协议，并在欧盟和英国指定代表。</p>
-<h3>欧盟《人工智能法》 <span class="tag t-prog">计划中</span></h3>
-<p>Odelia 会告知对方正在与 AI 交流，她为您撰写的内容会标注为 AI 生成。</p>
-<h3>巴西 LGPD <span class="tag t-prog">计划中</span></h3>
-<p>个人信息离开巴西时，使用巴西官方标准合同条款，不作修改。</p>
-<h3>墨西哥个人数据法 <span class="tag t-prog">计划中</span></h3>
-<p>符合墨西哥 2025 年新法的隐私声明；任何影响您的决定在生效前都由人工审核。</p>
-<h3>加拿大 PIPEDA 与魁北克第 25 号法 <span class="tag t-prog">计划中</span></h3>
-<p>魁北克居民的个人信息离开该省前，先完成隐私影响评估。</p>
-<h3>越南 PDPL <span class="tag t-prog">计划中</span></h3>
-<p>处理越南居民个人信息前，提交跨境传输影响评估。</p>
-<h3>印度 DPDP 法 <span class="tag t-prog">计划中</span></h3>
-<p>在 2027 年 5 月 13 日规则生效前，完成告知、同意、安全和泄露报告的准备。</p>
-<h3>日本、韩国与新加坡 <span class="tag t-prog">计划中</span></h3>
-<p>我们的数据处理协议涵盖 APPI、PIPA 和 PDPA，法律要求时设立当地代表。</p>
-<h3>尼日利亚、南非与肯尼亚 <span class="tag t-prog">计划中</span></h3>
-<p>开始服务当地客户后，向各国数据保护监管机构登记。</p>
-<h3>银行卡支付（PCI DSS） <span class="tag t-on">已上线</span></h3>
-<p>银行卡信息直接交给 Stripe 处理，不经过我们的服务器。</p>
-<h3>受监管客户（NYDFS Part 500） <span class="tag t-prog">计划中</span></h3>
-<p>银行、汇款机构和保险公司要求供应商提供的合同条款：多因素登录、加密、72 小时内通报泄露以及审计权。</p>
-<h3>报关 <span class="tag t-prog">计划中</span></h3>
-<p>您货物的报关通过持牌美国报关行办理。</p>
-<div data-incidents hidden>
-<h3>事件记录 <span class="tag t-on">已上线</span></h3>
-<p>我们保留事件记录：发生了什么、影响和修复。事件记录自 <span data-incidents-since></span> 起保存。影响到客户的事件列在这里。</p>
-<ul class="steps" data-incidents-list></ul>
-</div>
-
-<h2 data-anchor="status">服务状态</h2>
-<p>快哉目前还没有自己的状态页面。影响到客户的事件列在上文的事件记录中。快哉所依托的服务各自公布状态：</p>
-<ul class="steps">
-<li><a href="https://status.supabase.com" rel="noopener">Supabase 状态</a>：数据库、文件存储、登录和服务器函数</li>
-<li><a href="https://www.vercel-status.com" rel="noopener">Vercel 状态</a>：placetta.com 和应用</li>
-<li><a href="https://status.claude.com" rel="noopener">Anthropic 状态</a>：Claude 模型</li>
-<li><a href="https://status.stripe.com" rel="noopener">Stripe 状态</a>：付款</li>
-<li><a href="https://resend-status.com" rel="noopener">Resend 状态</a>：我们的邮件</li>
-</ul>
+<h2 data-anchor="rights">您的权利与数据</h2>
+<p>如何查阅或删除您的信息、我们保存多久，以及信息如何跨境传输，请见我们的<a href="privacy.html" data-legal="privacy.html">隐私政策</a>。</p>
 
 <h2 data-anchor="report">报告安全问题</h2>
-<p>如您认为发现了快哉的安全问题，请告诉我们。中文或英文均可。</p>
-<ol class="steps">
-<li>发邮件至 <a href="mailto:security@placetta.com">security@placetta.com</a>，说明您发现的问题和复现步骤。</li>
-<li>只使用您自己的账户和测试数据。不要访问、更改或删除他人的信息，不要干扰服务，也不要试图欺骗我们的团队或客户。</li>
-<li>在告诉其他人之前，请给我们合理的时间修复。</li>
-</ol>
-<p>我们会确认收到您的报告，持续告知进展直至修复，并在您愿意时公开致谢。对于遵守上述规则、善意报告问题的人，我们不会采取法律行动。我们的安全联系方式也发布在 <a href="/.well-known/security.txt">/.well-known/security.txt</a>。</p>
+<p>请发送邮件至 <a href="mailto:security@placetta.com">security@placetta.com</a>，中英文均可，说明您发现的问题和复现步骤。请只使用您自己的账户和数据测试，不要访问他人的信息或干扰服务，并在告诉其他人之前给我们合理的时间修复；对于遵守上述规则、善意报告问题的人，我们不会采取法律行动。我们的联系方式也发布在 <a href="/.well-known/security.txt">/.well-known/security.txt</a>。</p>
 </article>
 </main>
 <footer class="lf"><div class="lw">
@@ -482,6 +156,5 @@
   <span class="cp" data-ui="copy">© 2026 Placetta</span>
 </div></footer>
 <script src="legal.js"></script>
-<script src="incidents.js" defer></script>
 </body>
 </html>
