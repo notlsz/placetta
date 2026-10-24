@@ -17,7 +17,7 @@ import { US_GAPS } from "../src/forms/us-gaps";
 import { INTL_FORMS } from "../src/forms/intl";
 import { MEXICO_GAPS } from "../src/forms/mexico";
 import { FINISH_FORMS } from "../src/forms/finish";
-import { VERIFY_BLOCKED, VERIFY_FIXES, VERIFY_FORMS } from "../src/forms/verify";
+import { BROWSER_READ, READ_VER, VERIFY_BLOCKED, VERIFY_FIXES, VERIFY_FORMS } from "../src/forms/verify";
 
 let failed = 0;
 const fail = (m: string) => { failed++; console.error("FAIL", m); };
@@ -75,11 +75,12 @@ for (const f of [...US_GAPS, ...INTL_FORMS, ...MEXICO_GAPS, ...FINISH_FORMS, ...
   }
 }
 
-// the verification pass (src/forms/verify.ts): every proof it adds was read on the day of the pass, is under 25 words
-// and comes from an official page; every entry still unverified names what blocked it; no blocked entry has a proof
+// the verification pass (src/forms/verify.ts): every proof it adds was read on the day of the pass (or, for the pages
+// read in a browser, on BROWSER_READ), is under 25 words and comes from an official page; every entry still unverified
+// names what blocked it; no blocked entry has a proof
 for (const x of VERIFY_FIXES) {
   if (!x.proof) continue;
-  if (x.proof.checked !== "2026-10-23") fail(`${x.id}: verification proof read date ${x.proof.checked}`);
+  if (x.proof.checked !== READ_VER && x.proof.checked !== BROWSER_READ) fail(`${x.id}: verification proof read date ${x.proof.checked}`);
   if (x.proof.quote.trim().split(/\s+/).length >= 25) fail(`${x.id}: verification quote has 25 words or more`);
 }
 for (const f of FORMS.filter(f => !f.proof)) if (!VERIFY_BLOCKED[f.id]) fail(`${f.id} is unverified but src/forms/verify.ts VERIFY_BLOCKED doesn't say what blocked it`);

@@ -8,7 +8,9 @@ Each page is fetched with curl through the session's proxy (with a browser's use
 sites wall off one and not the other); the quote must appear in the page's text after whitespace, quotes and spacing
 before punctuation are normalized. A quote found today is logged with today's date. Pages that refuse automated requests
 (403 or a bot wall) were read through a browser-grade fetch (WebFetch) instead: they are logged as method "webfetch"
-with the day they were last read that way, which this script can't advance.
+with the day they were last read that way, which this script can't advance. Pages that refused even that were read by a
+person in a real browser and the sentence copied as it appears: they are logged as method "browser" (BROWSER_SEEN), with
+that day.
 
 The checks file is what keeps the app's claims current: for each (page, quote) found, the day it was last seen. A plan
 row claims a requirement only while its quote was seen within the last 90 days (src/plan/ask.ts); after that, or when a
@@ -42,6 +44,17 @@ WEBFETCH_SEEN = {
     "https://aucklandcouncil.govt.nz/en/licences-regulations/business-licences/food-businesses-quality-grading/open-food-business/apply-food-registration.html": "2026-10-23",
     # the verification pass (src/forms/verify.ts): Santa Clara County's DEH answers curl with 403
     "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and": "2026-10-23",
+}
+# pages that refused curl and WebFetch alike (a 403, a Cloudflare wall, a page built in script), read by a person in a
+# real browser and the sentence copied as it appears there, by day
+BROWSER_SEEN = {
+    # the verification pass (src/forms/verify.ts, PB): the county clerks' fictitious business name pages, the Illinois
+    # LLC Act on ilga.gov, and the California Health and Safety Code on leginfo
+    "https://www.lavote.gov/home/county-clerk/fictitious-business-names/general-info": "2026-10-24",
+    "https://clerkrecorder.santaclaracounty.gov/business-services/apply-renew-or-refile-fictitious-business-name-fbn-statement": "2026-10-24",
+    "https://www.ilga.gov/Documents/legislation/ilcs/documents/080501800K45-5.htm": "2026-10-24",
+    "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=113948": "2026-10-24",
+    "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=113947.1": "2026-10-24",
 }
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128 Safari/537.36"
 
@@ -102,6 +115,9 @@ def main():
         if text is not None and norm(p["quote"]) in norm(text):
             n = norm(text); k = n.index(norm(p["quote"]))
             entry.update(method="curl", found=True, sha256=hashlib.sha256(n.encode()).hexdigest()[:16], context=n[max(0, k - 80):k + len(norm(p["quote"])) + 80])
+        elif url in BROWSER_SEEN:
+            on = BROWSER_SEEN[url]
+            entry.update(checked=on, method="browser", found=True, note=f"curl got {status if text is None else 'the page without the sentence'}; read in a browser on {on}")
         elif url in WEBFETCH_SEEN or p["id"] in WEBFETCH or p["id"].split(":")[0] in WEBFETCH:
             prev = before.get((url, p["quote"]), {})
             on = WEBFETCH_SEEN.get(url) or (prev.get("checked", "2026-10-18") if prev.get("method") == "webfetch" else "2026-10-18")
@@ -123,7 +139,7 @@ def main():
             checks[k] = max(checks.get(k, ""), e["checked"])
     json.dump(dict(sorted(checks.items())), open(checks_path, "w"), indent=0, ensure_ascii=False)
     carried = [e["id"] for e in log if "last seen" in e.get("note", "")]
-    print(f"{len(log)} proofs: {sum(1 for e in log if e['method'] == 'curl' and e['found']) - len(carried)} found today with curl, {sum(1 for e in log if e['method'] == 'webfetch')} read with WebFetch, "
+    print(f"{len(log)} proofs: {sum(1 for e in log if e['method'] == 'curl' and e['found']) - len(carried)} found today with curl, {sum(1 for e in log if e['method'] == 'webfetch')} read with WebFetch, {sum(1 for e in log if e['method'] == 'browser')} read in a browser, "
           f"{len(carried)} unreadable today (last-seen day kept: {carried}), {len(bad)} not found: {bad}")
 
 

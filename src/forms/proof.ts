@@ -15,7 +15,6 @@ const at = (read: string, quote: string): Proof => ({ quote, checked: D, read, l
 const BOS_GUIDE = "https://www.boston.gov/sites/default/files/file/2025/11/Eng%20resturant%20guide-.pdf";
 const LAC_HOWTO = "https://admin.publichealth.lacounty.gov/eh/inspection/how-to-obtain-restaurant-food-facility-permit.htm";
 const LAC_CONSTRUCT = "https://admin.publichealth.lacounty.gov/eh/inspection/construction-requirements-retail-food-facilities.htm";
-const VENTURA = "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf";
 const SNHD_PACKET = "https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf";
 const KC_FOOD = "https://kingcounty.gov/en/dept/dph/certificates-permits-licenses/food-business-permits/permanent-food-business-permit";
 const FFX_HEALTH = "https://www.fairfaxcounty.gov/health/permits/new-food-establishment";
@@ -66,8 +65,8 @@ export const PROOF: Record<string, Proof> = {
   // a state permit on every California store's plan, San José's and LA's included
   "ca-cdtfa": { quote: "You must get a seller’s permit if you:", checked: "2026-10-23", read: CDTFA_PUB73, link: CDTFA_PUB73 },
   "ca-edd-de1": at("https://edd.ca.gov/en/payroll_taxes/am_i_required_to_register_as_an_employer", "If you operate a business and hire employees or household workers, you must register as an employer within 15 days when:"),
-  "ca-food-manager": at(VENTURA, "food facilities that prepare, handle, or serve non-prepackaged potentially hazardous food (PHF), except temporary food facilities, to have at least one owner or employee"),
-  "ca-food-handler": at(VENTURA, "A food handler shall obtain a food hander card within 30 days after the date of hire."),
+  // ca-food-manager and ca-food-handler: proved from the Health and Safety Code on leginfo (src/forms/verify.ts, 2026-10-24),
+  // no longer from a Ventura County publication
   "ca-cdph-pfr": p("https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/FDBPrograms/FoodSafetyProgram/ProcessedFoodRegistration.aspx", "PFR certificates are also required for general food warehouses."),
   "lac-plan-check": at(LAC_CONSTRUCT, "shall receive plan approval before starting any new construction or remodeling of any facility for use as a retail food"),
   "lac-health-permit": at(LAC_HOWTO, "After payment of the Public Health Permit fee is made, the permit will be issued."),
