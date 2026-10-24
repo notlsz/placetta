@@ -2410,6 +2410,8 @@ div.wl { cursor: default; }
 .mbar { padding: 2px 4px; }
 .mbar .brand { padding: 2px; }
 .slim .side-top { gap: 4px; }
+/* collapsed, the bell and the expand button stack: side by side they are 88px in a 68px rail and the bell fell off the left edge */
+.slim .side-tools { flex-direction: column; gap: 4px; }
 
 /* Onboarding's last screen (src/cloud/MoreStep.tsx): paste or drop to fill, then one question at a time with chips to
    confirm what was found. */

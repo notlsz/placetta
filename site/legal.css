@@ -99,6 +99,13 @@ ol.steps{margin:12px 0 0;padding:0;list-style:none;counter-reset:step;display:fl
 ol.steps li,html[lang="zh-CN"] ol.steps li{counter-increment:step;padding-left:28px}
 ol.steps li::before{content:counter(step) ".";position:absolute;left:0;top:0;color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
 .trust a{color:var(--gs-ink)}
+table.subs{width:100%;margin-top:12px;border-collapse:collapse;font-size:14px;line-height:1.45}
+.subs th,.subs td{padding:8px 12px 8px 0;border-top:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink2)}
+.subs th:last-child,.subs td:last-child{padding-right:0}
+.subs tbody tr:last-child>*{border-bottom:1px solid var(--line)}
+.subs thead th{border-top:0;padding-top:0;font-size:13px;font-weight:500;color:var(--muted)}
+.subs tbody th{font-weight:500;color:var(--ink)}
+@media (min-width:640px){.subs tbody th{width:240px}}
 
 /* footer */
 .lf{padding:28px 0 40px;font-size:13px;color:var(--muted)}

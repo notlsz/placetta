@@ -59,9 +59,12 @@ function setLang(l){
 
 /* Section links (/trust#report): both languages have the heading, marked data-anchor, but only the English one can
    carry the id, so a link scrolls to the copy in the language on screen. */
+/* Sections the trust page no longer has: an old link lands on the nearest one that's left. */
+const OLD_ANCHOR = {glance: "security", approvals: "security", audit: "security", access: "security", data: "security", email: "ai", roadmap: "security", status: "report"};
 function toAnchor(){
-  const h = decodeURIComponent(location.hash.slice(1));
+  let h = decodeURIComponent(location.hash.slice(1));
   if (!h) return;
+  if (!document.querySelector(`[data-anchor="${CSS.escape(h)}"]`) && OLD_ANCHOR[h]) h = OLD_ANCHOR[h];
   const el = document.querySelector(`[data-block="${lang}"] [data-anchor="${CSS.escape(h)}"]`);
   if (el) el.scrollIntoView();
 }

@@ -93,7 +93,7 @@ const ta = trustSrc.indexOf('<main class="lw">'), tb = trustSrc.indexOf("</main>
 if (ta < 0 || tb < 0) { console.error("site/trust.html: no <main class=\"lw\"> ... </main> to keep"); process.exit(1); }
 writeFileSync("site/trust.html", head
   .replace(/<title>[^<]*<\/title>/, "<title>Trust and security | Placetta</title>")
-  .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${esc("How Placetta protects your business's data, which companies process it, and what isn't finished yet.")}">`)
+  .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${esc("How Placetta protects your business's data, and which companies process it.")}">`)
   + trustSrc.slice(ta, tb + "</main>".length) + tail);
 
 console.log(`legal: ${LEGAL.length} documents, updated ${LEGAL[0].updated}, written to legal/*.md and site/*.html (and the trust page's shell)`);
