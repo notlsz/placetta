@@ -680,6 +680,17 @@ export const FORMS: OfficialForm[] = [
 
 FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES, ...FURNITURE_FORMS, ...US_GAPS, ...INTL_FORMS, ...FINISH_FORMS, ...SECTOR_FORMS, ...EXPANSION_FORMS, ...VERIFY_FORMS);
 
+/** A step that isn't a filing Placetta makes for the business: insurance bought from an insurer (workers' compensation)
+ *  or a certificate a person earns with a course or an exam (food handler cards, the food protection or food safety
+ *  manager certificate, allergen awareness training). It stays in the plan as the owner's step. */
+const STAFF_CERT = /food handler|food (protection|safety|service)? ?manager|manager (food|certification)|food protection certificate|allergen awareness|食品处理员|食品(保护|安全)?经理|过敏原/i;
+export function selfStep(f: Pick<OfficialForm, "method" | "title" | "form"> | undefined): "certificate" | "insurance" | undefined {
+  if (!f) return undefined;
+  if (f.method === "insurer" || /workers'? comp/i.test(`${f.title.en} ${f.form}`)) return "insurance";
+  if (STAFF_CERT.test(`${f.title.en} ${f.form}`)) return "certificate";
+  return undefined;
+}
+
 /* County steps are filed under the county (src/forms/usplace.ts), not the city they were first researched for, so every
    city in the county gets them: Alameda County's food permits apply in Fremont as in Oakland, King County's in Bellevue
    as in Seattle, the Southern Nevada Health District's in Henderson as in Las Vegas. */
@@ -786,12 +797,15 @@ export function placesOf(place: string): Where[] {
     if (up?.state === "TX" || (!up?.state && /texas|德州|houston|休斯顿|dallas|达拉斯|austin|奥斯汀/.test(loc))) out.push("TX");
     if (city ? city === "houston" : /houston|休斯顿/.test(loc)) out.push("HOU");
   }
-  for (const code of world.codes) if (!out.includes(code) && code !== "US") out.push(code);
+  // an address whose ZIP lies outside the city it's mailed as (30341 "Atlanta" is Chamblee) doesn't take that city's own
+  // steps (src/forms/usplace.ts, ZIP)
+  const outside = up?.postal && world.city && world.city.en.toLowerCase() === up.postal ? world.city.code : undefined;
+  for (const code of world.codes) if (!out.includes(code) && code !== "US" && code !== outside) out.push(code);
   if (!abroad) {
     // the county whose health department, business tax or building office applies (src/forms/usplace.ts); a city that
     // runs its own health department (Pasadena, Long Beach, Berkeley) doesn't take the county's food steps
     const st = up?.state ?? world.city?.state;
-    const c = up?.county ? up : world.city?.state ? countyFor(world.city.en, world.city.state) : undefined;
+    const c = up?.county ? up : world.city?.state && !outside ? countyFor(world.city.en, world.city.state) : undefined;
     if (c?.county && !c.ownHealth && !out.includes(c.county.code)) out.push(c.county.code);
     if (c?.county?.code === "LAC" && c.unincorporated) out.push("LACU");
     if (st && /^[A-Z]{2}$/.test(st) && !out.includes(st)) out.push(st);

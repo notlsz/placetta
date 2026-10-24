@@ -25,7 +25,7 @@ import type { OrbState } from "thinking-orbs";
 import {
   addApp, addApproval, addDeadline, addDoc, audit, feedFact, feeds, filingBlockers, isBlank, setApp, setCheck, setFact,
   type AgentBackend, type AgentEvent, type Reply, type Request, type Step,
-  uid, viaWords,
+  resolveDeps, uid, viaWords, YOURS,
 } from "./core";
 import { B, same, type Bi } from "./bi";
 import type { Application, Approval, Change, CheckItem, Doc, Field, FactGroup, InspectionBooking, Level, MemoryKind, Status, Store, Workspace } from "./model";
@@ -48,7 +48,7 @@ import { furnitureNeeds } from "./forms/furniture";
 import { sectorNeeds } from "./forms/sectors";
 import type { Lang } from "./i18n";
 import { anthropicMessage } from "../supabase/functions/_shared/stream.ts";
-import { FORMS, METHOD, formById, formsFor, placeInfo, placesOf, searchForms, segmentOf, type OfficialForm } from "./forms/registry";
+import { FORMS, METHOD, formById, formsFor, placeInfo, placesOf, searchForms, segmentOf, selfStep, type OfficialForm } from "./forms/registry";
 /** The US state of an address or place ("Flushing, NY" is NY), or "" outside the US. */
 const placeState = (where: string) => (placesOf(where.split(";")[0]).find((c, k, all) => all[0] === "US" && k > 0 && /^[A-Z]{2}$/.test(c)) ?? "");
 import { dealsInFood, libraryAnswer } from "./plan/preview";
@@ -405,6 +405,30 @@ function withCore(core: Field[], given: Field[]): Field[] {
   return [...out, ...given.filter(g => !used.has(g))];
 }
 
+/** Links a prepared application to the steps its agency says come before it (OfficialForm.after) and the open steps
+ *  that wait on it, in the same store: each gets a checklist row naming what it waits on (resolveDeps marks it done
+ *  once that filing is approved), and a ready application with a step still open waits instead of going up for approval. */
+const linkAfter = (id: string, storeId?: string) => (w: Workspace): Workspace => {
+  const me = w.apps.find(a => a.id === id);
+  if (!me?.official) return w;
+  const stores = w.stores ?? [], mine = storeId ? stores.find(t => t.id === storeId) : undefined;
+  const sameStore = (x: Application) => !mine || (mine.apps ?? []).includes(x.id) || !stores.some(t => (t.apps ?? []).includes(x.id));
+  const link = (a: Application, d: Application, key: string, label: Bi): Application =>
+    a.checklist.some(c => c.dep === d.id) ? a : { ...a, checklist: [{ id: "dep-" + key, label, state: "missing", dep: d.id }, ...a.checklist] };
+  const apps = w.apps.map(a => {
+    if (a.id === id) {
+      let x = a;
+      for (const af of formById(a.official!)?.after ?? []) { const d = w.apps.find(y => y.official === af.form && y.id !== id && sameStore(y)); if (d) x = link(x, d, af.form, af.label); }
+      return x;
+    }
+    if (!a.official || ["filing", "review", "approved"].includes(a.status) || !sameStore(a)) return a;
+    const af = (formById(a.official)?.after ?? []).find(t => t.form === me.official);
+    return af ? link(a, me, af.form, af.label) : a;
+  });
+  const resolved = resolveDeps(apps).map(a => (a.status === "ready" && a.checklist.some(c => c.dep && c.state === "missing") ? { ...a, status: "waiting" as Status } : a));
+  return { ...w, apps: resolved };
+};
+
 export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Workspace) => void, step: (s: Step) => void, made: Made, lang: Lang, textLen: () => number, account: boolean, x: X): Tool[] {
   const L = (en: string, zh: string) => B(en, zh);
   const findApp = (id: unknown) => { const a = get().apps.find(x => x.id === str(id)); if (!a) throw new Error(`No application with id "${str(id)}". Use an id from the workspace.`); return a; };
@@ -643,6 +667,8 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         // an official form whose lines aren't in the library yet stays with Placetta until its fields are filled
         const status: Status = checklist.some(c => c.state === "missing") ? "needs" : fields.some(f => isBlank(f.value)) || (off && !fields.length) ? "draft" : "ready";
         const id = twin ? twin.id : freshId(get(), "x-" + slug(name));
+        // a certificate staff earn or insurance from an insurer: kept in the plan as the owner's step, nothing to file
+        const yours = off ? selfStep(off) : undefined;
         S("shaping", L(`${twin ? "Verifying" : "Preparing"} the ${/^[A-Z][a-z]/.test(name) ? name.charAt(0).toLowerCase() + name.slice(1) : name}`, `${twin ? "核实" : "准备"}${name}`), domainOf(url) || undefined);
         const app: Application = off ? {
           id, name: off.title, agency: off.agency, level, status, next: str(i.next_step) ? same(str(i.next_step, 200)) : undefined, official: off.id, ...(currency !== "USD" ? { currency } : {}),
@@ -658,11 +684,14 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           est: str(i.processing_time) ? same(str(i.processing_time, 120)) : B("To be confirmed", "待确认"),
           source: { label: domainOf(url), url }, form: str(i.form) ? same(str(i.form, 120)) : undefined, fields, checklist,
         };
+        if (yours) { app.yours = yours; app.fields = []; app.status = "todo"; app.next = YOURS[yours]; }
         apply(w => audit("agent", twin ? L("Verified application", "核实申请") : L("Prepared application", "准备申请"), app.name, same(`${fields.filter(f => !isBlank(f.value)).length}/${fields.length}`))(twin ? setApp(id, { ...app, preview: false })(w) : addApp(app)(w)));
         // file it under its store: the one named, or the only one
         if (target) apply(w => ({ ...w, stores: (w.stores ?? []).map(x => (x.id === target.id ? { ...x, apps: [...new Set([...(x.apps ?? []), id])] } : x)) }));
+        // what the agency's own page says comes first, both ways: Miami's business tax receipt waits on its Certificate of Use
+        if (off) apply(linkAfter(id, target?.id));
         made.apps.add(id); touch(id); mark();
-        return { application_id: id, status, ...(twin ? { refined_preview: true, note: "This was a preview row from the instant plan; it's the same application, now verified and filled, not a new one." } : {}), ...(target ? { store_id: target.id, store: target.name.en } : stores.length > 1 ? { note: "Not filed under a store. Pass store_id when it's for one store." } : {}),
+        return { application_id: id, status: yours ? "todo" : status, ...(yours ? { not_a_filing: yours === "insurance" ? "Workers' compensation is insurance bought from an insurer, not a filing: don't put it up for approval. Tell the owner to buy it before the first employee starts and upload the policy." : "Staff earn this certificate themselves with an approved course or exam, not a filing: don't put it up for approval. Tell the owner who needs it and by when." } : {}), ...(twin ? { refined_preview: true, note: "This was a preview row from the instant plan; it's the same application, now verified and filled, not a new one." } : {}), ...(target ? { store_id: target.id, store: target.name.en } : stores.length > 1 ? { note: "Not filed under a store. Pass store_id when it's for one store." } : {}),
           fee: off?.fee ?? (off || !feeGiven ? null : fee), fee_note: app.feeNote?.en,
           ...(blocked.length ? { address_not_filled: blocked.map(p => addrOut(off!.id, p.field, p.value, p.check)), do_next: ADDR_NEXT } : {}),
           ...(secret.length ? { not_stored: secret, why_not_stored: SECRET_WHY } : {}),

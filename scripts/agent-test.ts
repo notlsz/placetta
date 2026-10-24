@@ -6,7 +6,8 @@
 import { pairServerTools } from "../src/serverTools";
 import { entityNeed, homeStateOf } from "../src/entityHome";
 import { answerFits, prefillFromProfile } from "../src/filingPlaybooks/fill";
-import { formsFor as formsForReg, segmentOf as segmentOfReg } from "../src/forms/registry";
+import { formsFor as formsForReg, segmentOf as segmentOfReg, selfStep } from "../src/forms/registry";
+import { licenseTierOf } from "../src/pricing";
 import { DEFAULT_POLICY } from "../src/spend.ts";
 import { channelHint, channelNote, channelRefuses, guardPatch, runRounds, startState, TOKEN_CAP, tokensUsed, type Channel, type ChildResult, type RunState, type Send } from "../src/serverRun";
 import { fill, spawn, stillOpen, wake, type FamilyDb } from "../supabase/functions/agent-run/family";
@@ -3115,6 +3116,45 @@ console.log("\n# A card with one generic line never goes up for approval (reques
   ok(/"approval_requested":false/.test(out) && /Business phone|Business location address/.test(out), "refused, naming the core lines it still needs", out.slice(0, 300));
   ok(!r.w.approvals.some(x => x.app === "thin"), "no card");
   ok(r.w.apps.find(x => x.id === "thin")!.fields.some(f => f.id === "core-owner" && /^Mei Chen/.test(f.value)), "the core lines are added, filled from Context where it knows them");
+}
+
+console.log("\n# Planning: the county from the ZIP, Miami's order, and the owner's own steps");
+{
+  const ids = (where: string) => formsForReg({ segment: "restaurant", where, needs: { food: true, buildout: true, employees: true } }).map(f => f.id);
+  // 30341 is mailed as Atlanta but lies in Chamblee, DeKalb County
+  const chamblee = ids("5145 Buford Hwy NE, Atlanta, GA 30341");
+  ok(chamblee.includes("dekalb-plan-review") && !chamblee.includes("fulton-plan-review"), "an 'Atlanta' address in 30341 gets DeKalb County's plan review, not Fulton's", chamblee);
+  ok(!chamblee.includes("atl-license"), "and not the City of Atlanta's business license (Chamblee isn't in the city)");
+  const buckhead = ids("3330 Piedmont Rd NE, Atlanta, GA 30305");
+  ok(buckhead.includes("fulton-plan-review") && buckhead.includes("atl-license"), "an address inside Atlanta keeps Fulton County and the city's license", buckhead);
+  const cedarMill = ids("1 Main St, Portland, OR 97229");
+  ok(!cedarMill.includes("mult-plan-review"), "a 'Portland' address in 97229 (Washington County) doesn't get Multnomah County's plan review", cedarMill);
+  ok(ids("3300 SE Division St, Portland, OR 97202").includes("mult-plan-review"), "while one in Portland proper does");
+
+  // Miami: the business tax receipt waits on the Certificate of Use
+  const r = await agent({ ws: workspace({ apps: [] }), prompt: "Prepare Miami's CU and BTR", script: [
+    () => ask(["prepare_application", { official_form_id: "mia-btr", fields: [{ label: "Business name", value: "Lucky Leaf Tea LLC" }] }]),
+    () => ask(["prepare_application", { official_form_id: "mia-cu" }]),
+    c => ask(["request_filing_approval", { application_id: c.outs("prepare_application")[0].application_id as string }]),
+    () => say("Prepared both."),
+  ] });
+  const btr = r.w.apps.find(a => a.official === "mia-btr")!, cu = r.w.apps.find(a => a.official === "mia-cu")!;
+  ok(btr.checklist.some(c => c.dep === cu.id && c.state === "missing"), "the BTR names the Certificate of Use it waits on, even when it was prepared first", btr.checklist);
+  ok(!r.w.approvals.some(a => a.app === btr.id), "and can't go up for approval before the CU is approved");
+  const later = normalizeState("Lucky Leaf", { ...r.w, apps: r.w.apps.map(a => (a.id === cu.id ? { ...a, status: "approved" as const } : a)) });
+  ok(later.apps.find(a => a.id === btr.id)!.checklist.find(c => c.dep === cu.id)?.state === "done", "once the agency approves the CU, the BTR's wait is done by itself");
+
+  // a certificate staff earn, or insurance from an insurer, isn't a filing
+  eq([formById("ca-food-handler"), formById("ga-food-manager"), formById("ca-workers-comp"), formById("mia-btr")].map(f => selfStep(f)), ["certificate", "certificate", "insurance", undefined], "food handler cards and the manager's certificate are certificates, workers' comp is insurance, a tax receipt is a filing");
+  ok(licenseTierOf("Workers' compensation insurance") === "free" && licenseTierOf("Certified food safety manager") === "free", "neither is billed as a license");
+  const s = await agent({ ws: workspace({ apps: [] }), prompt: "Prepare the food handler cards", script: [
+    () => ask(["prepare_application", { official_form_id: "ca-food-handler" }]),
+    c => ask(["request_filing_approval", { application_id: c.out("prepare_application").application_id as string }]),
+    () => say("Your staff take the course."),
+  ] });
+  const fh = s.w.apps.find(a => a.official === "ca-food-handler")!;
+  ok(fh.yours === "certificate" && !["ready", "filing"].includes(fh.status) && !fh.fields.length, "it stays in the plan as the owner's step, with nothing to fill", fh);
+  ok(/not a filing/.test(callNamed(s, "prepare_application")[0].out) && !s.w.approvals.some(a => a.app === fh.id), "Odelia is told it isn't a filing, and no approval card goes up");
 }
 
 console.log("\n# A line with set choices takes one of them (fill_fields)");

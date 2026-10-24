@@ -16,6 +16,10 @@ export const COUNTIES: Record<string, County> = {
   SACC: { code: "SACC", en: "Sacramento County", zh: "萨克拉门托县", state: "CA", health: { en: "Sacramento County Environmental Management Department", zh: "萨克拉门托县环境管理局" } },
   KC: { code: "KC", en: "King County", zh: "金县", state: "WA", health: { en: "Public Health, Seattle and King County", zh: "西雅图与金县公共卫生局" } },
   SNHD: { code: "SNHD", en: "Clark County", zh: "克拉克县", state: "NV", health: { en: "Southern Nevada Health District", zh: "南内华达卫生区" } },
+  DEKALB: { code: "DEKALB", en: "DeKalb County", zh: "迪卡尔布县", state: "GA", health: { en: "DeKalb County Board of Health, Environmental Health", zh: "迪卡尔布县卫生委员会环境卫生处" } },
+  COBB: { code: "COBB", en: "Cobb County", zh: "科布县", state: "GA" },
+  WASHOR: { code: "WASHOR", en: "Washington County", zh: "华盛顿县", state: "OR" },
+  CLACK: { code: "CLACK", en: "Clackamas County", zh: "克拉克默斯县", state: "OR" },
   FULC: { code: "FULC", en: "Fulton County", zh: "富尔顿县", state: "GA", health: { en: "Fulton County Board of Health, Environmental Health Services", zh: "富尔顿县卫生委员会环境卫生服务处" } },
   GWIN: { code: "GWIN", en: "Gwinnett County", zh: "格威内特县", state: "GA", health: { en: "Gwinnett County Environmental Health (GNR Public Health)", zh: "格威内特县环境卫生处（GNR 公共卫生）" } },
   MOCO: { code: "MOCO", en: "Montgomery County", zh: "蒙哥马利县", state: "MD", health: { en: "Montgomery County Department of Health and Human Services, Licensure and Regulatory Services", zh: "蒙哥马利县卫生与公众服务局许可与监管服务处" } },
@@ -70,11 +74,19 @@ add("WA", "KC", "seattle,bellevue,redmond,kirkland,renton,kent,federal way,issaq
 add("NV", "SNHD", "las vegas,henderson,north las vegas,boulder city,mesquite");
 add("NV", "SNHD", "paradise,spring valley,enterprise,winchester,sunrise manor,whitney,summerlin south", { uninc: true });
 add("GA", "FULC", "atlanta,sandy springs,roswell,alpharetta,johns creek,milton,college park,east point,union city,fairburn,palmetto,south fulton,chattahoochee hills,mountain park");
+add("GA", "DEKALB", "decatur,chamblee,doraville,dunwoody,brookhaven,tucker,stonecrest,lithonia,stone mountain,clarkston,avondale estates,pine lake");
+add("GA", "DEKALB", "north druid hills,north decatur,candler-mcafee,belvedere park,scottdale,redan,panthersville", { uninc: true });
+add("GA", "COBB", "marietta,smyrna,kennesaw,acworth,austell,powder springs");
+add("GA", "COBB", "vinings,mableton", { uninc: true });
 add("GA", "GWIN", "duluth,lawrenceville,suwanee,norcross,lilburn,snellville,buford,peachtree corners,berkeley lake,sugar hill,dacula,grayson,loganville,auburn,braselton,rest haven");
 add("MD", "MOCO", "rockville,gaithersburg,takoma park");
 add("MD", "MOCO", "bethesda,silver spring,germantown,potomac,wheaton,olney,north bethesda,clarksburg,montgomery village,aspen hill,colesville,burtonsville", { uninc: true });
 add("AZ", "MARI", "phoenix,mesa,chandler,tempe,scottsdale,gilbert,glendale,peoria,surprise,goodyear,avondale");
 add("OR", "MULT", "portland,gresham,troutdale,fairview,wood village");
+add("OR", "WASHOR", "beaverton,hillsboro,tigard,tualatin,sherwood,forest grove");
+add("OR", "WASHOR", "cedar mill,bethany,aloha,raleigh hills", { uninc: true });
+add("OR", "CLACK", "lake oswego,milwaukie,happy valley,oregon city,west linn,wilsonville");
+add("OR", "CLACK", "oak grove,clackamas", { uninc: true });
 add("FL", "HILL", "tampa,plant city,temple terrace");
 add("FL", "ORFL", "orlando,winter park,apopka,ocoee,winter garden,maitland");
 add("FL", "MDC", "miami,miami beach,hialeah,doral,coral gables,north miami,homestead,aventura,sweetwater");
@@ -93,6 +105,32 @@ add("IL", "COOK", "chicago,evanston,skokie,oak park,schaumburg,naperville");
 add("PA", "PHILA", "philadelphia");
 add("CO", "DENVERC", "denver");
 add("UT", "SLCO", "salt lake city,west valley city,sandy,west jordan,south jordan,murray,midvale,draper,taylorsville,millcreek,holladay,cottonwood heights,riverton,herriman");
+
+/* ZIP codes whose mailing name is a big city the place isn't in. USPS names a ZIP after its post office, not the city
+   or county that licenses the address: "5145 Buford Hwy NE, Atlanta, GA 30341" is in Chamblee, DeKalb County, so the
+   City of Atlanta's license and Fulton County's health permits don't apply there. Only ZIPs that lie wholly (or all
+   but a sliver) outside the named city are listed; a ZIP split by the city line keeps the city it's mailed as, and the
+   form's own instructions name the other county. */
+type ZipRow = { postal: string; city?: string; county: string; uninc?: boolean };
+const ZIP: Record<string, ZipRow> = {
+  // Atlanta's mailing ZIPs outside the City of Atlanta
+  "30319": { postal: "atlanta", city: "brookhaven", county: "DEKALB" },
+  "30338": { postal: "atlanta", city: "dunwoody", county: "DEKALB" },
+  "30340": { postal: "atlanta", city: "doraville", county: "DEKALB" },
+  "30341": { postal: "atlanta", city: "chamblee", county: "DEKALB" },
+  "30345": { postal: "atlanta", county: "DEKALB", uninc: true },
+  "30360": { postal: "atlanta", city: "doraville", county: "DEKALB" },
+  "30328": { postal: "atlanta", city: "sandy springs", county: "FULC" },
+  "30350": { postal: "atlanta", city: "sandy springs", county: "FULC" },
+  "30339": { postal: "atlanta", county: "COBB", uninc: true },
+  // Portland's mailing ZIPs in Washington and Clackamas counties
+  "97229": { postal: "portland", county: "WASHOR", uninc: true },
+  "97223": { postal: "portland", city: "tigard", county: "WASHOR" },
+  "97222": { postal: "portland", city: "milwaukie", county: "CLACK" },
+  "97267": { postal: "portland", county: "CLACK", uninc: true },
+  "97086": { postal: "portland", city: "happy valley", county: "CLACK" },
+};
+const ZIP_STATE: Record<string, string> = { "30": "GA", "31": "GA", "97": "OR" };
 
 /** Chinese names for the places in the table (and the states they're in), so "加州罗兰岗" reads as Rowland Heights, CA. */
 const ZH_CITY: Record<string, string> = {
@@ -122,7 +160,9 @@ export function countyFor(city: string, state: string): { county?: County; uninc
   return { county: row ? COUNTIES[row.county] : undefined, unincorporated: !!row?.uninc, ownHealth: row?.ownHealth };
 }
 
-export type UsPlace = { city?: string; state?: string; county?: County; unincorporated: boolean; ownHealth?: { en: string; zh: string }; locality: string };
+export type UsPlace = { city?: string; state?: string; county?: County; unincorporated: boolean; ownHealth?: { en: string; zh: string }; locality: string;
+  /** The city the address is mailed as when its ZIP lies outside it ("atlanta" for 30341): that city's own steps don't apply. */
+  postal?: string; zip?: string };
 
 /** The city, state and county of a US place: "100 W Main St, Alhambra, CA 91801", "Alhambra, CA", "加州阿罕布拉". */
 export function usPlace(where: string): UsPlace {
@@ -138,8 +178,15 @@ export function usPlace(where: string): UsPlace {
     const named = /,\s*(california|texas|new jersey|washington|nevada|massachusetts|georgia|maryland|virginia|new york|illinois|pennsylvania|florida|hawaii|utah|arizona)\s*(\d{5})?\s*$/i.exec(locality);
     if (named) { state = { california: "CA", texas: "TX", "new jersey": "NJ", washington: "WA", nevada: "NV", massachusetts: "MA", georgia: "GA", maryland: "MD", virginia: "VA", "new york": "NY", illinois: "IL", pennsylvania: "PA", florida: "FL", hawaii: "HI", utah: "UT", arizona: "AZ" }[named[1].toLowerCase()]; city = parts.length >= 2 ? parts[parts.length - 2] : undefined; }
   }
+  const zip = /\b(\d{5})(-\d{4})?\s*$/.exec(locality)?.[1];
   if (city) city = city.replace(/\d{5}(-\d{4})?/g, "").trim();
   if (city && /^\d/.test(city)) city = undefined;
+  // the ZIP decides where an address mailed as a big city really is (ZIP above)
+  const z = zip ? ZIP[zip] : undefined;
+  if (z && (!state || state === ZIP_STATE[zip!.slice(0, 2)]) && (!city || city.toLowerCase() === z.postal)) {
+    const cityName = z.city ? z.city.replace(/\b\w/g, ch => ch.toUpperCase()) : undefined;
+    return { city: cityName, state: state ?? ZIP_STATE[zip!.slice(0, 2)], county: COUNTIES[z.county], unincorporated: !!z.uninc, locality, postal: z.postal, zip };
+  }
   const row = city && state ? CITY[`${city.toLowerCase().replace(/\s+/g, " ")}|${state}`] : undefined;
   // an address that names the county instead of a town ("..., Santa Clara County, CA") is in the county's unincorporated
   // area: the county's steps apply, and no city's
@@ -147,5 +194,5 @@ export function usPlace(where: string): UsPlace {
     const county = Object.values(COUNTIES).find(c => c.state === state && c.en.toLowerCase() === city!.toLowerCase());
     if (county) return { city: undefined, state, county, unincorporated: true, locality };
   }
-  return { city, state, county: row ? COUNTIES[row.county] : undefined, unincorporated: !!row?.uninc, ownHealth: row?.ownHealth, locality };
+  return { city, state, county: row ? COUNTIES[row.county] : undefined, unincorporated: !!row?.uninc, ownHealth: row?.ownHealth, locality, ...(zip ? { zip } : {}) };
 }

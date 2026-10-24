@@ -5,7 +5,8 @@
 // against the agency's current source when the plan starts (src/live.ts), keeping the ids.
 // Pure functions: Root.tsx writes the result into the new workspace; the tests call it directly.
 import { B, same, type Bi } from "../bi";
-import { formsEntity as formsEntityFor, formsFor, placeInfo, placesOf, segmentOf, type OfficialForm, type Segment, type Where } from "../forms/registry";
+import { YOURS } from "../core";
+import { formsEntity as formsEntityFor, formsFor, placeInfo, placesOf, segmentOf, selfStep, type OfficialForm, type Segment, type Where } from "../forms/registry";
 import { usPlace } from "../forms/usplace";
 import { FURNITURE_KINDS, SECTOR_KINDS, kindFactsAt, kindsOf, type KindFact, type StoreKind } from "../forms/kinds";
 import { FURNITURE, furnitureNeeds } from "../forms/furniture";
@@ -267,6 +268,9 @@ function fromForm(f: OfficialForm, today: string): Application {
     source: { label: host(f.info || f.url), url: f.info || f.url, ...(f.proof && seen ? { quote: f.proof.quote, checked: seen, ...(f.proof.en ? { quoteEn: f.proof.en } : {}) } : {}) }, form: same(f.form), fields, checklist,
     ...(f.specialist ? { specialist: f.specialist } : {}),
   };
+  // a certificate staff earn or insurance from an insurer: the owner's step, with nothing for Placetta to fill
+  const yours = selfStep(f);
+  if (yours) { a.yours = yours; a.fields = []; a.next = YOURS[yours]; }
   return seen ? a : abstain(a, theAgency(f.agency));
 }
 

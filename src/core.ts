@@ -126,10 +126,17 @@ export const feedFact = (was: string | undefined, now: string): P => w => {
     "N/A" and "None" are real answers and count. The database's filings check uses the same rule. */
 export const BLANK = /^(?:|tbd|tbc|to be (?:confirmed|determined|added)|unknown|pending|placeholder|xxx+|\?+|-+|_+|\.{3}|…|\[[^\]]*\]|<[^>]*>|\{[^}]*\}|待定|未知|待确认|待补充)$/i;
 export const isBlank = (v: string | undefined | null) => BLANK.test((v ?? "").trim());
-export function filingBlockers(a: Pick<Application, "fields" | "checklist">): { empty: Bi[]; missing: Bi[] } {
+/** What the owner does for a step that isn't a filing (Application.yours). */
+export const YOURS: Record<"certificate" | "insurance", Bi> = {
+  certificate: B("Your staff earn this themselves with an approved course or exam; Placetta doesn't file it. Keep the certificates on site for the inspector.", "由员工自行通过认可的课程或考试取得，快哉不代为申请。请把证书留在店内备查。"),
+  insurance: B("Bought from an insurer before your first employee starts; Placetta doesn't file it. Upload the policy and Odelia keeps it on record.", "在首位员工入职前向保险公司购买，快哉不代为申请。上传保单后 Odelia 会存档。"),
+};
+export function filingBlockers(a: Pick<Application, "fields" | "checklist"> & { yours?: Application["yours"] }): { empty: Bi[]; missing: Bi[] } {
+  // a certificate staff earn or insurance from an insurer never goes up for filing approval
+  if (a.yours) return { empty: [], missing: [YOURS[a.yours]] };
   return { empty: a.fields.filter(f => isBlank(f.value)).map(f => f.label), missing: a.checklist.filter(c => c.state === "missing").map(c => c.label) };
 }
-export const readyToFile = (a: Pick<Application, "fields" | "checklist">) => { const b = filingBlockers(a); return !b.empty.length && !b.missing.length; };
+export const readyToFile = (a: Pick<Application, "fields" | "checklist"> & { yours?: Application["yours"] }) => { const b = filingBlockers(a); return !b.empty.length && !b.missing.length; };
 /** One sentence naming what's left, for the person. */
 export function blockersSay(a: Pick<Application, "fields" | "checklist">): Bi {
   const { empty, missing } = filingBlockers(a);
@@ -140,9 +147,30 @@ export function blockersSay(a: Pick<Application, "fields" | "checklist">): Bi {
 }
 
 /** A saved state may be missing lists (older saves, a fresh workspace): fill them in. */
+/** What a filing waits on (a checklist row with dep: the Certificate of Use before Miami's business tax receipt, the
+ *  EIN before a tax registration) is done once that filing is approved by its agency, or no longer in the plan, and open
+ *  again if it isn't: the row decides itself from the record, so a later step can't go up for approval first. */
+export function resolveDeps(apps: Application[]): Application[] {
+  if (!apps.some(a => a.checklist?.some(c => c.dep))) return apps;
+  const by = new Map(apps.map(a => [a.id, a]));
+  return apps.map(a => {
+    if (!a.checklist?.some(c => c.dep)) return a;
+    let changed = false;
+    const checklist = a.checklist.map(c => {
+      if (!c.dep) return c;
+      const d = by.get(c.dep);
+      const state: CheckItem["state"] = !d || d.status === "approved" || d.filed?.status === "accepted" ? "done" : "missing";
+      if (state === c.state) return c;
+      changed = true;
+      return { ...c, state };
+    });
+    return changed ? { ...a, checklist } : a;
+  });
+}
+
 export function normalizeState(name: string, s: Partial<Workspace>): Workspace {
   return {
-    business: s.business ?? same(name), goal: s.goal ?? same(""), locations: s.locations ?? [], apps: s.apps ?? [], docs: s.docs ?? [],
+    business: s.business ?? same(name), goal: s.goal ?? same(""), locations: s.locations ?? [], apps: resolveDeps(s.apps ?? []), docs: s.docs ?? [],
     deadlines: s.deadlines ?? [], nudges: s.nudges ?? [], approvals: s.approvals ?? [], closed: s.closed ?? [], audit: [],
     facts: s.facts ?? [], running: s.running ?? [], connections: s.connections ?? [], stores: s.stores, meta: s.meta, memories: s.memories, chats: s.chats, skills: s.skills, skillsAuto: s.skillsAuto, spend: s.spend, jobs: s.jobs, routines: s.routines,
     firstPlan: s.firstPlan, entities: s.entities, runs: s.runs, controls: s.controls, undo: s.undo, ...(s.runLog ? { runLog: s.runLog } : {}), ...(s.agentMemory ? { agentMemory: s.agentMemory } : {}), ...(s.bookings ? { bookings: s.bookings } : {}), ...(s.appeals ? { appeals: s.appeals } : {}), ...(s.declined ? { declined: s.declined } : {}),

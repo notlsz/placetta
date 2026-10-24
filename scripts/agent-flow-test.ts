@@ -80,7 +80,8 @@ for (const c of CASES) {
     ids.push(String(p.r!.application_id));
   }
   const apps = w.apps.filter(a => ids.includes(a.id));
-  ok(apps.every(a => a.fields.length > 0), `${tag}: every application has fields to fill (none are "0 of 0")`);
+  // a certificate staff earn or insurance from an insurer is the owner's step: nothing to fill, never filed
+  ok(apps.every(a => a.fields.length > 0 || a.yours), `${tag}: every application has fields to fill (none are "0 of 0"), unless it's the owner's own step`);
   ok(apps.every(a => a.fees.length && (a.fees[0].amount > 0 || a.fees[0].tbd || forms.find(f => a.official === f.official_form_id)?.fee === 0)), `${tag}: a fee is never shown as free when the agency sets it`);
   ok(apps.every(a => a.fields.find(f => f.id === "core-legal-name")?.value !== "" || a.fields.every(f => !f.id.startsWith("core-"))), `${tag}: Context fills the legal name`);
 
@@ -110,6 +111,7 @@ for (const c of CASES) {
     const r = (await run(T("request_filing_approval"), { application_id: id })).r!;
     const missing = a.checklist.some(c => c.state === "missing");
     if (missing) { held++; ok(r.approval_requested === false && (r.missing_documents as string[]).length > 0, `${tag}: ${a.name.en} held for its documents`); }
+    else if (a.yours) ok(r.approval_requested === false && !r.approval_id && !w.approvals.some(x => x.app === id), `${tag}: ${a.name.en} is the owner's own step, never put up for filing`, r);
     else { asked++; ok(!!r.approval_id, `${tag}: ${a.name.en} goes for approval once complete`, r); }
   }
   console.log(`     ${tag}: ${asked} ready for approval, ${held} waiting on documents`);

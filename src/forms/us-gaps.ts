@@ -151,6 +151,21 @@ export const US_GAPS: OfficialForm[] = [
     url: "https://dos.ny.gov/certificate-assumed-name-domestic-and-foreign-business-corporations",
     feeNote: ["The fee depends on the counties named; see the Department's instructions.", "费用取决于所列县份，见州务院说明。"],
     proof: ["https://dos.ny.gov/certificate-assumed-name-domestic-and-foreign-business-corporations", "Indicate the county or counties in which the entity does business or intends to do business in this State."] }),
+  /* ------------------------------------------------------------------ DeKalb County, Georgia (food service) */
+  // UNVERIFIED: dekalbpublichealth.com couldn't be read on 2026-10-23 (the read was refused). Georgia's food service rules
+  // (Chapter 511-6-1) make the county board of health issue the plan approval and the permit, as Fulton County's entries
+  // cite; no fee or form number is stated until the Board's own page is read.
+  E({ id: "dekalb-plan-review", where: "DEKALB", level: "county", segs: ["restaurant"], needs: { food: true, buildout: true }, method: "pdf_mail", order: 60, cur: "USD",
+    form: "Food service plan review (Georgia Rule 511-6-1-.03)", title: ["Food service plan review", "餐饮服务场所图纸审查"],
+    agency: ["DeKalb County Board of Health, Environmental Health", "迪卡尔布县卫生委员会环境卫生处"],
+    how: ["Before building or extensively remodeling, the plans, equipment specifications and menu go to the DeKalb County Board of Health for approval. Georgia's food service rules ask for them at least 14 business days before construction starts.", "在新建或大规模改建前，须将图纸、设备规格和菜单提交迪卡尔布县卫生委员会审批。佐治亚州食品服务法规要求至少在开工前 14 个工作日提交。"],
+    url: "https://dekalbpublichealth.com/" }),
+  E({ id: "dekalb-food-permit", where: "DEKALB", level: "county", segs: ["restaurant"], needs: { food: true }, method: "pdf_mail", order: 76, cur: "USD",
+    form: "Food Service Permit (Georgia Rule 511-6-1-.02)", title: ["Food service permit", "餐饮服务许可证"],
+    agency: ["DeKalb County Board of Health, Environmental Health", "迪卡尔布县卫生委员会环境卫生处"],
+    how: ["Issued by the DeKalb County Board of Health once the plans are approved and the place passes its pre-opening inspection. Georgia's food service rules ask for the permit application at least 10 business days before opening.", "迪卡尔布县卫生委员会在图纸获批且开业前检查合格后发放。佐治亚州食品服务法规要求至少在开业前 10 个工作日提交许可申请。"],
+    url: "https://dekalbpublichealth.com/" }),
+
   // UNVERIFIED: both county pages answer automated reads with a 403 (Cloudflare); fees aren't stated
   E({ id: "lac-fbn", where: "LAC", level: "county", needs: { reference: true }, method: "online", order: 14, cur: "USD",
     form: "Fictitious Business Name Statement", title: ["Fictitious business name (DBA)", "虚拟商业名称（DBA）登记"],

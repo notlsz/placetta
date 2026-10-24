@@ -210,6 +210,8 @@ export const VERIFY_BLOCKED: Record<string, string> = {
   "ca-prop65": "OEHHA's and p65warnings.ca.gov's pages build their text in script (curl gets an empty shell) and leginfo.legislature.ca.gov answered 403; the 10-employee threshold also isn't asked by the intake",
   "lac-fbn": "lavote.gov answered 403 (Cloudflare) to every read",
   "scc-fbn": "santaclaracounty.gov and the clerk-recorder's site answered 403 to every read",
+  "dekalb-plan-review": "dekalbpublichealth.com refused the read on 2026-10-23; Georgia's food rules (dph.georgia.gov) say the county board of health reviews the plans",
+  "dekalb-food-permit": "dekalbpublichealth.com refused the read on 2026-10-23; Georgia's food rules (dph.georgia.gov) say the county board of health issues the permit",
   "il-sos-foreign-llc": "ilsos.gov and ilga.gov refused the connection; the DCEO handbook doesn't name the admission filing",
   "ca-on-food-handler": "ontario.ca/laws builds the regulation's text in script",
   "ca-van-business-licence": "vancouver.ca answered 403",

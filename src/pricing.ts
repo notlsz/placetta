@@ -150,9 +150,9 @@ export const COMPLEX_LIST: { id: ComplexId; name: { en: string; zh: string }; ma
 
 /** Never charged: an inspection that is part of a permit already paid for, a notice that is a step of a license already
  *  priced (New York's 30-day community board notice is part of the liquor license), a certificate or training staff
- *  earn themselves (a course and an exam), and rules with nothing to file (the EU's food hygiene regulation). Placetta
- *  tracks them for free. */
-export const NOT_CHARGED = /\b(final|pre-?opening|routine) inspection\b|\binspection$|food handler (cards?|certificates?)|food (protection )?manager|food protection certificate|food hygiene (training|rules)|community board notice|食品经理|食品处理员|食品卫生培训|社区委员会通知/i;
+ *  earn themselves (a course and an exam), insurance bought from an insurer (workers' compensation), and rules with
+ *  nothing to file (the EU's food hygiene regulation). Placetta tracks them for free. */
+export const NOT_CHARGED = /\b(final|pre-?opening|routine) inspection\b|\binspection$|food handler (cards?|certificates?)|food (protection |safety )?manager|food protection certificate|allergen awareness|workers'? comp(ensation)?|工伤保险|食品安全经理|food hygiene (training|rules)|community board notice|食品经理|食品处理员|食品卫生培训|社区委员会通知/i;
 
 export type LicenseTier = "license" | "complex" | "renewal" | "free";
 /** What a quote can be: a priced tier, or included (in the store plan: a renewal Odelia files on her own; in the chain
