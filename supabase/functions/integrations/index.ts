@@ -64,6 +64,10 @@ import { cloverPlaces, gbpPlaces, type Place, shopifyPlaces, squarePlaces, xeroP
 import { checkSend, dsAccount, dsSend, dsStatus, SignError } from "./esign.ts";
 import { MCP_ACTIONS, mcpFinish, mcpRemote } from "./mcp.ts";
 import { MCP_OWNER_ACTIONS } from "./mcp_rules.ts";
+import {
+  answers, type Attachment, base64Lines, buildMessage, type Dial, decodeWords, encodeHeader, hintOf, Imap, imapVerify, isMailboxProvider, MailboxError,
+  type MailboxProvider, newMessageId, parseMessage, providerFor, providerName, serversFor, smtpSend, smtpVerify, tlsDial, type Host,
+} from "./mailbox.ts";
 
 /** access: the caller's role in the workspace ("owner" or "member"), or "" for finish, which checks it itself. */
 type Ctx = { user: User; jwt: string; ws: string; body: Record<string, unknown>; access: string };
@@ -244,15 +248,15 @@ async function graphSearch(c: Conn, days: number, query: string | null): Promise
 const mailSearch: Action = async (c) => {
   const days = intParam(c.body.days, "days", 1, 365, 60);
   const query = optText(c.body.query, "query", 200);
-  const connected = await listIntegrations(c.ws, ["gmail", "outlook_mail"]);
-  if (!connected.length) throw new HttpError("not_connected", "Connect Gmail or Outlook in Settings.", "请在设置中连接 Gmail 或 Outlook。");
+  const connected = await listIntegrations(c.ws, MAIL_KINDS);
+  if (!connected.length) throw new HttpError("not_connected", "Connect Gmail, Outlook or your mailbox in Settings.", "请在设置中连接 Gmail、Outlook 或您的邮箱。");
   // Only the mailboxes this caller may read: all of them for an owner, a member's own for a member.
   const rows = connected.filter((r) => mayRead(c.access, r, c.user.id));
   if (!rows.length) throw new HttpError("forbidden", READ_REFUSED.en, READ_REFUSED.zh);
   const results = await Promise.allSettled(
     rows.map(async (row) => {
       const conn = await Conn.fromRow(row);
-      return row.kind === "gmail" ? gmailSearch(conn, days, query) : graphSearch(conn, days, query);
+      return row.kind === "gmail" ? gmailSearch(conn, days, query) : row.kind === "mailbox" ? mailboxSearch(conn, days, query) : graphSearch(conn, days, query);
     }),
   );
   const messages = results.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
@@ -269,9 +273,10 @@ const mailSearch: Action = async (c) => {
 const TEXT_LIMIT = 20000;
 
 const mailRead: Action = async (c) => {
-  const kind = kindParam(c.body.kind, ["gmail", "outlook_mail"]);
+  const kind = kindParam(c.body.kind, MAIL_KINDS);
   const id = idParam(c.body.id, "id");
   const conn = await openToRead(c, kind);
+  if (kind === "mailbox") return ok(await mailboxRead(conn, id));
 
   if (kind === "gmail") {
     const m = await conn.callJson<GMessage>(`${GMAIL}/messages/${enc(id)}?format=full`);
@@ -347,29 +352,8 @@ function recipients(v: unknown): string[] {
   return list;
 }
 
-/** RFC 2047 encoded-words for a header value, split so each word stays short. */
-function encodeHeader(s: string): string {
-  if (/^[\x20-\x7e]*$/.test(s)) return s;
-  const words: string[] = [];
-  let chunk = "";
-  for (const ch of s) {
-    if (utf8(chunk + ch).length > 45) {
-      words.push(chunk);
-      chunk = "";
-    }
-    chunk += ch;
-  }
-  if (chunk) words.push(chunk);
-  return words.map((w) => `=?UTF-8?B?${btoa(String.fromCharCode(...utf8(w)))}?=`).join("\r\n ");
-}
-
-function base64Lines(bytes: Uint8Array): string {
-  let bin = "";
-  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  return (btoa(bin).match(/.{1,76}/g) ?? []).join("\r\n");
-}
-
-type Attachment = { name: string; mime: string; bytes: Uint8Array };
+/** The mailboxes Placetta sends from and reads, in the order it picks one when none is named. */
+const MAIL_KINDS: Kind[] = ["gmail", "outlook_mail", "mailbox"];
 const MAX_ATTACHMENTS = 5, MAX_ATTACH_BYTES = 15 * 1024 * 1024, GRAPH_INLINE_BYTES = 3 * 1024 * 1024;
 
 /** Attachments by documents path: at most 5 files and 15 MB, each in this workspace's folder and in its documents. */
@@ -414,12 +398,14 @@ export function gmailMime(to: string[], subject: string, content: string, files:
   return [...head, `Content-Type: multipart/mixed; boundary="${boundary}"`, "", ...parts].join("\r\n");
 }
 
-/** Send from the workspace's own Gmail or Outlook. Returns the provider's message id and the account it went from. */
+/** Send from the workspace's own Gmail, Outlook or mailbox (QQ, 163, company mail...). Returns the provider's message id
+ *  and the account it went from. */
 async function sendFrom(ws: string, kindParamValue: unknown, to: string[], subject: string, content: string, files: Attachment[]) {
-  const kind = await pickKind(ws, kindParamValue, ["gmail", "outlook_mail"], "Connect Gmail or Outlook in Settings.");
+  const kind = await pickKind(ws, kindParamValue, MAIL_KINDS, "Connect Gmail, Outlook or your mailbox in Settings.");
   const conn = await Conn.open(ws, kind);
   let id = "", thread = "";
-  if (kind === "gmail") {
+  if (kind === "mailbox") ({ id, thread } = await mailboxSend(conn, to, subject, content, files));
+  else if (kind === "gmail") {
     const r = await conn.callJson<{ id?: string; threadId?: string }>(`${GMAIL}/messages/send`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -444,6 +430,146 @@ async function sendFrom(ws: string, kindParamValue: unknown, to: string[], subje
     id = draft.id; thread = draft.conversationId ?? "";
   }
   return { kind, id, thread, account: conn.row.account ?? "" };
+}
+
+// ------------------------------------------------------------------ a mailbox signed in with its authorization code
+
+/** What the integration row keeps about a mailbox (the code itself is in the vault). */
+type MailboxMeta = { via: "app_password"; provider: MailboxProvider; user: string; smtp: Host; imap: Host };
+const mailboxMeta = (m: Record<string, unknown> | null | undefined): MailboxMeta | null => {
+  const x = (m ?? {}) as Partial<MailboxMeta>;
+  return x.via === "app_password" && isMailboxProvider(x.provider) && typeof x.user === "string" && x.smtp?.host && x.imap?.host ? x as MailboxMeta : null;
+};
+
+/** For a host the business typed: refuse a name that points at a private, loopback or link-local address. */
+const PRIVATE_IP = /^(10\.|127\.|0\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)|^(::1?$|f[cd]|fe80)/i;
+const guardedDial: Dial = async (host, port) => {
+  const addrs: string[] = [];
+  for (const t of ["A", "AAAA"] as const) {
+    try { addrs.push(...await Deno.resolveDns(host, t)); } catch { /* no such record; the connect decides */ }
+  }
+  if (addrs.some((a) => PRIVATE_IP.test(a))) throw new MailboxError("connect", `${host} isn't a public mail server.`, `${host} 不是公网邮件服务器。`);
+  return await tlsDial(host, port);
+};
+const dialFor = (p: MailboxProvider): Dial => (p === "custom" ? guardedDial : tlsDial);
+
+/** A mailbox failure as the app shows it: a refused code comes with that provider's own steps. */
+function mailboxFail(e: unknown, provider: MailboxProvider): never {
+  if (e instanceof MailboxError) {
+    const hint = hintOf(provider);
+    if (e.code === "auth") throw new HttpError("bad_request", `${e.message} ${hint.en}`, `${e.zh}${hint.zh}`);
+    throw new HttpError("upstream_error", e.message, e.zh);
+  }
+  throw e;
+}
+
+/** Connect a mailbox with its address and authorization code: signs in to SMTP and IMAP first and keeps the code only
+ *  if both work. One per workspace (connecting another replaces it). Owners. */
+const mailboxConnect: Action = async (c) => {
+  const user = String(c.body.address ?? "").trim().toLowerCase();
+  if (user.length > 254 || !EMAIL.test(user)) throw new HttpError("bad_request", "Type the full email address.", "请填写完整的邮箱地址。");
+  const pass = typeof c.body.code === "string" ? c.body.code.replace(/\s+/g, "") : "";
+  if (pass.length < 4 || pass.length > 200 || !/^[\x21-\x7e]+$/.test(pass)) throw new HttpError("bad_request", "Paste the mailbox's authorization code or app password.", "请粘贴邮箱的授权码或客户端专用密码。");
+  const asked = c.body.provider === undefined || c.body.provider === null || c.body.provider === "" ? providerFor(user) ?? "custom" : c.body.provider;
+  if (!isMailboxProvider(asked)) throw new HttpError("bad_request", "Pick your mail provider.", "请选择邮箱服务商。");
+  const provider: MailboxProvider = asked;
+  const servers = serversFor(provider, c.body as Record<string, unknown>);
+  if (!servers) throw new HttpError("bad_request", "Type the SMTP and IMAP server names your company's mail uses, like smtp.yourcompany.com and imap.yourcompany.com (SSL ports 465 and 993).", "请填写公司邮箱的 SMTP 和 IMAP 服务器，如 smtp.yourcompany.com 和 imap.yourcompany.com（SSL 端口 465 和 993）。");
+  const login = { user, pass }, dial = dialFor(provider);
+  try {
+    await smtpVerify(dial, servers.smtp, login);
+    await imapVerify(dial, servers.imap, login);
+  } catch (e) { mailboxFail(e, provider); }
+  const old = await findIntegration(c.ws, "mailbox");
+  const secret = await writeBundle({ access_token: pass, refresh_token: null, expires_at: null, token_type: "app_password" }, `integration:mailbox:${c.ws}`, old?.secret_id ?? null);
+  const meta: MailboxMeta = { via: "app_password", provider, user, smtp: servers.smtp, imap: servers.imap };
+  const { error } = await admin.from("integrations").upsert({ workspace_id: c.ws, kind: "mailbox", account: user, scopes: "smtp imap", status: "connected", error: null, secret_id: secret, meta, connected_by: c.user.id, connected_at: new Date().toISOString() }, { onConflict: "workspace_id,kind" });
+  if (error) throw new Error(`integration upsert failed: ${error.code ?? ""}`);
+  const name = providerName(provider);
+  await audit({ ...you(c), action: { en: `Connected ${name.en}`, zh: `已连接${name.zh}` }, object: NAMES.mailbox, detail: same(user) });
+  return ok({ kind: "mailbox", account: user, provider });
+};
+
+/** The connected mailbox's sign-in, from the vault. Marks the row for reconnecting when the code is gone. */
+async function mailboxLogin(conn: Conn): Promise<{ meta: MailboxMeta; login: { user: string; pass: string }; dial: Dial }> {
+  const meta = mailboxMeta(conn.row.meta);
+  const pass = conn.bundle.access_token;
+  if (!meta || !pass) {
+    await conn.markError("The saved mailbox sign-in is missing. Reconnect in Settings.");
+    throw new HttpError("not_connected", "Reconnect your mailbox in Settings.", "请在设置中重新连接邮箱。");
+  }
+  return { meta, login: { user: meta.user, pass }, dial: dialFor(meta.provider) };
+}
+
+/** A refused code after connecting (changed or revoked): the row says reconnect, and the error says how. */
+async function mailboxRefused(conn: Conn, e: unknown, provider: MailboxProvider): Promise<never> {
+  if (e instanceof MailboxError && e.code === "auth") await conn.markError("The mailbox refused its authorization code. Reconnect in Settings.");
+  mailboxFail(e, provider);
+}
+
+async function mailboxSend(conn: Conn, to: string[], subject: string, content: string, files: Attachment[]): Promise<{ id: string; thread: string }> {
+  const { meta, login, dial } = await mailboxLogin(conn);
+  const messageId = newMessageId(meta.user);
+  const raw = buildMessage({ from: meta.user, to, subject, text: content, files, messageId });
+  try { await smtpSend(dial, meta.smtp, login, { from: meta.user, to, raw }); } catch (e) { await mailboxRefused(conn, e, meta.provider); }
+  // the Message-ID is both: an agency's reply quotes it in In-Reply-To, which is how mail_watch finds it
+  return { id: messageId, thread: messageId };
+}
+
+/** Recent mail in the inbox: newest first, at most 25, optionally only what mentions the query. */
+async function mailboxSearch(conn: Conn, days: number, query: string | null): Promise<Msg[]> {
+  const { meta, login, dial } = await mailboxLogin(conn);
+  let m: Imap | null = null;
+  try {
+    m = await Imap.open(dial, meta.imap, login);
+    const validity = await m.inbox();
+    // IMAP's TEXT search takes ASCII reliably everywhere; a Chinese query is matched here instead
+    const ascii = query && /^[\x20-\x7e]+$/.test(query) ? `TEXT "${query.replace(/[\\"]/g, "")}"` : "";
+    const uids = (await m.since(new Date(Date.now() - days * 864e5), ascii)).slice(-60);
+    const heads = await m.heads(uids);
+    const needle = query && !ascii ? query.toLowerCase() : null;
+    return heads
+      .filter((h) => !needle || `${h.subject} ${h.from} ${h.snippet}`.toLowerCase().includes(needle))
+      .map((h) => ({ kind: "mailbox" as Kind, id: `${validity}:${h.uid}`, from: h.from, subject: h.subject, date: isoDate(h.date), snippet: h.snippet }))
+      .sort((a, b) => b.date.localeCompare(a.date)).slice(0, 25);
+  } catch (e) { return await mailboxRefused(conn, e, meta.provider); } finally { await m?.close(); }
+}
+
+/** One message from the inbox by the id mailboxSearch gave (UIDVALIDITY:UID). */
+async function mailboxRead(conn: Conn, id: string) {
+  const [validity, uidText] = id.split(":");
+  const uid = Number(uidText);
+  if (!/^\d+$/.test(validity ?? "") || !Number.isInteger(uid) || uid <= 0) throw new HttpError("bad_request", "id is not a message from this mailbox.");
+  const { meta, login, dial } = await mailboxLogin(conn);
+  let m: Imap | null = null;
+  try {
+    m = await Imap.open(dial, meta.imap, login);
+    if ((await m.inbox()) !== validity) throw new HttpError("not_found", "That email moved. Search again.", "这封邮件已移动，请重新搜索。");
+    const raw = await m.full(uid);
+    if (!raw) throw new HttpError("not_found", "That email is gone.", "这封邮件已不存在。");
+    const p = parseMessage(raw), h = p.headers;
+    return {
+      from: decodeWords(h.get("from") ?? ""), to: decodeWords(h.get("to") ?? ""), subject: decodeWords(h.get("subject") ?? ""),
+      date: isoDate(h.get("date") ?? ""), text: (p.text ? tidy(p.text) : p.html ? htmlToText(p.html) : "").slice(0, TEXT_LIMIT),
+      attachments: p.attachments.map((a, i) => ({ id: `${i}`, ...a })),
+    };
+  } catch (e) {
+    if (e instanceof HttpError) throw e;
+    return await mailboxRefused(conn, e, meta.provider);
+  } finally { await m?.close(); }
+}
+
+/** Replies to one message sent from the mailbox: it quotes our Message-ID, or comes back from someone we wrote to with
+ *  our subject. One IMAP session serves every thread of a workspace in a mail_watch round. */
+async function mailboxReplies(m: Imap, me: string, t: ThreadRow): Promise<Reply[]> {
+  const sent = Date.parse(t.sent_at);
+  const uids = (await m.since(new Date(sent - 864e5))).slice(-80);
+  const to = t.to_addrs.split(",").map((a) => a.trim()).filter(Boolean);
+  return (await m.heads(uids)).flatMap((h) => {
+    const at = Date.parse(h.date);
+    if (!at || at <= sent || !answers(h, { messageId: t.message_id, to, subject: t.subject, me })) return [];
+    return [{ from: h.from, at: new Date(at).toISOString(), snippet: h.snippet.slice(0, 280) }];
+  });
 }
 
 function mailInput(body: Record<string, unknown>) {
@@ -548,14 +674,40 @@ async function mailWatch(): Promise<Response> {
     .is("closed_at", null).order("checked_at", { ascending: true, nullsFirst: true }).limit(80);
   if (error) throw new Error(`mail_threads: ${error.code ?? ""}`);
   const conns = new Map<string, Conn | null>();
+  // a mailbox signed in with its code: one IMAP session per workspace for the whole round, logged out at the end
+  const imaps = new Map<string, Imap | null>();
+  const imapFor = async (conn: Conn): Promise<Imap | null> => {
+    const key = conn.row.workspace_id;
+    if (!imaps.has(key)) {
+      try {
+        const { meta, login, dial } = await mailboxLogin(conn);
+        const m = await Imap.open(dial, meta.imap, login);
+        await m.inbox();
+        imaps.set(key, m);
+      } catch (e) {
+        if (e instanceof MailboxError && e.code === "auth") await conn.markError("The mailbox refused its authorization code. Reconnect in Settings.");
+        console.error("mail_watch mailbox", e instanceof MailboxError ? e.code : e instanceof Error ? e.message.slice(0, 120) : "");
+        imaps.set(key, null);
+      }
+    }
+    return imaps.get(key) ?? null;
+  };
   let checked = 0, replied = 0;
+  try {
   for (const t of (data ?? []) as ThreadRow[]) {
     const key = `${t.workspace_id}:${t.kind}`;
     if (!conns.has(key)) conns.set(key, await Conn.open(t.workspace_id, t.kind).catch(() => null));
     const conn = conns.get(key);
     if (!conn) { await admin.from("mail_threads").update({ checked_at: now, closed_at: now }).eq("id", t.id); continue; }   // the mailbox was disconnected
     let found: Reply[] = [];
-    try { found = t.kind === "gmail" ? await gmailReplies(conn, t) : await graphReplies(conn, t); checked++; }
+    try {
+      if (t.kind === "mailbox") {
+        const m = await imapFor(conn);
+        if (!m) { await admin.from("mail_threads").update({ checked_at: now }).eq("id", t.id); continue; }
+        found = await mailboxReplies(m, (t.account ?? conn.row.account ?? "").toLowerCase(), t);
+      } else found = t.kind === "gmail" ? await gmailReplies(conn, t) : await graphReplies(conn, t);
+      checked++;
+    }
     catch (e) { console.error("mail_watch", t.kind, e instanceof Error ? e.message.slice(0, 160) : e); }
     const fresh = found.filter((r) => !t.last_reply_at || r.at > t.last_reply_at).sort((a, b) => a.at.localeCompare(b.at));
     if (!fresh.length) { await admin.from("mail_threads").update({ checked_at: now }).eq("id", t.id); continue; }
@@ -563,6 +715,9 @@ async function mailWatch(): Promise<Response> {
     await admin.from("mail_threads").update({ checked_at: now, replies: t.replies + fresh.length, last_reply_at: last.at, last_reply_from: last.from.slice(0, 300), last_reply_snippet: last.snippet }).eq("id", t.id);
     await notifyReply(t, who, last);
     replied++;
+  }
+  } finally {
+    for (const m of imaps.values()) await m?.close();
   }
   return ok({ checked, replied });
 }
@@ -1286,6 +1441,8 @@ const available: Action = async () => {
     xero: oauth && has("XERO_CLIENT_ID", "XERO_CLIENT_SECRET"),
     // the business's own API key: nothing of Placetta's to register
     dropbox_sign: true,
+    // QQ, 163, Yahoo, company mail...: the business's own authorization code, nothing of Placetta's to register
+    mailbox: true,
   });
 };
 
@@ -1396,7 +1553,7 @@ const finish: Action = async (c) => {
 };
 
 const disconnect: Action = async (c) => {
-  const kind = (isHookKind(c.body.kind) || isBotKind(c.body.kind) ? c.body.kind : kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack", "square", "toast", "gbp", "clover", "shopify", "xero", "dropbox_sign"])) as Kind;
+  const kind = (isHookKind(c.body.kind) || isBotKind(c.body.kind) ? c.body.kind : kindParam(c.body.kind, ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack", "square", "toast", "gbp", "clover", "shopify", "xero", "dropbox_sign", "mailbox"])) as Kind;
   const name = isBotKind(kind) ? BOT_NAMES[kind as BotKind] : isHookKind(kind) ? HOOK_NAMES[kind as HookKind] : NAMES[kind];
   const row = await findIntegration(c.ws, kind);
   if (!row) throw new HttpError("not_found", `${name.en} is not connected.`);
@@ -1574,6 +1731,7 @@ const ACTIONS: Record<string, Action> = {
   places_read: placesRead,
   company_profile: companyProfile,
   esign_connect: esignConnect,
+  mailbox_connect: mailboxConnect,
   esign_send: esignSend,
   esign_status: esignStatus,
   available,
@@ -1583,7 +1741,7 @@ const ACTIONS: Record<string, Action> = {
 
 /** What only an owner can do: connect or disconnect an account, send mail or Slack posts as the business, and read
  *  sales and staff from Square or Toast. */
-const OWNER_ONLY = new Set<Action>([connect, disconnect, hookSchedule, mailSend, slackPost, hookConnect, botSetup, botConnect, toastSetup, toastConnect, posSales, posStaff, esignConnect, esignSend,
+const OWNER_ONLY = new Set<Action>([connect, disconnect, hookSchedule, mailSend, slackPost, hookConnect, botSetup, botConnect, toastSetup, toastConnect, posSales, posStaff, esignConnect, esignSend, mailboxConnect,
   // and for an app's own MCP server: connecting, refreshing, switching tools, disconnecting, approving and declining
   ...MCP_OWNER_ACTIONS.map((a) => MCP_ACTIONS[a])]);
 

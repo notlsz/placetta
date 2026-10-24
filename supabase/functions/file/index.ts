@@ -153,7 +153,7 @@ async function docPaths(f: Filing): Promise<Set<string>> {
 async function facts(f: Filing, d: Dest | undefined) {
   const [logins, mail] = await Promise.all([
     d?.portal ? admin.from("agency_logins").select("url").eq("workspace_id", f.workspace_id) : Promise.resolve({ data: [], error: null }),
-    admin.from("integrations").select("kind").eq("workspace_id", f.workspace_id).in("kind", ["gmail", "outlook_mail"]).eq("status", "connected"),
+    admin.from("integrations").select("kind").eq("workspace_id", f.workspace_id).in("kind", ["gmail", "outlook_mail", "mailbox"]).eq("status", "connected"),
   ]);
   if (logins.error || mail.error) throw new Error("workspace lookup failed");
   return {

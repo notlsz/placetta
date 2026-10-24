@@ -3,13 +3,13 @@
 import { admin, describe, HttpError, type L10n, SUPABASE_URL } from "./shared.ts";
 
 export const KINDS = ["gmail", "gcal", "gdrive", "outlook_mail", "outlook_cal", "dropbox", "quickbooks", "slack", "square", "toast",
-  "gbp", "clover", "shopify", "xero", "dropbox_sign"] as const;
+  "gbp", "clover", "shopify", "xero", "dropbox_sign", "mailbox"] as const;
 export type Kind = (typeof KINDS)[number];
 export const isKind = (v: unknown): v is Kind => typeof v === "string" && (KINDS as readonly string[]).includes(v);
 
 /** square signs in with OAuth like the rest. toast never does: Toast gives Placetta one set of partner credentials for
  *  every restaurant that adds Placetta in Toast, so it has no redirect and no per-workspace token (see pos.ts). */
-export type Provider = "google" | "microsoft" | "dropbox" | "quickbooks" | "slack" | "square" | "toast" | "clover" | "shopify" | "xero" | "dropbox_sign";
+export type Provider = "google" | "microsoft" | "dropbox" | "quickbooks" | "slack" | "square" | "toast" | "clover" | "shopify" | "xero" | "dropbox_sign" | "mailbox";
 
 export const PROVIDER: Record<Kind, Provider> = {
   gmail: "google",
@@ -27,6 +27,7 @@ export const PROVIDER: Record<Kind, Provider> = {
   shopify: "shopify",
   xero: "xero",
   dropbox_sign: "dropbox_sign",
+  mailbox: "mailbox",
 };
 
 export const NAMES: Record<Kind, L10n> = {
@@ -45,6 +46,8 @@ export const NAMES: Record<Kind, L10n> = {
   shopify: { en: "Shopify", zh: "Shopify" },
   xero: { en: "Xero", zh: "Xero" },
   dropbox_sign: { en: "Dropbox Sign", zh: "Dropbox Sign" },
+  // QQ, 163, 126, Sina, Aliyun, Yahoo or company mail, signed in with its authorization code (mailbox.ts)
+  mailbox: { en: "Mailbox", zh: "邮箱" },
 };
 
 /** Requested scopes. Dropbox uses the scopes enabled in its app console; Toast's are set on Placetta's partner
@@ -71,6 +74,8 @@ export const SCOPES: Record<Kind, string> = {
   xero: "openid profile email accounting.settings.read offline_access",
   // Dropbox Sign connects with the business's own API key, pasted in Settings
   dropbox_sign: "",
+  // a mailbox signs in to SMTP and IMAP with its authorization code
+  mailbox: "",
 };
 
 export const REDIRECT_URI = `${SUPABASE_URL}/functions/v1/oauth-callback`;
@@ -100,6 +105,7 @@ const PROVIDER_NAME: Record<Provider, string> = {
   shopify: "Shopify",
   xero: "Xero",
   dropbox_sign: "Dropbox Sign",
+  mailbox: "Mailbox",
 };
 
 /** Square's production site, or its Sandbox with SQUARE_ENV=sandbox (https://developer.squareup.com/docs/oauth-api/overview). */
@@ -155,6 +161,7 @@ export function authorizeUrl(kind: Kind, state: string, o: { shop?: string } = {
   const p = PROVIDER[kind];
   if (p === "toast") throw new HttpError("bad_request", "Toast connects with a code in Settings, not a sign-in.");
   if (p === "dropbox_sign") throw new HttpError("bad_request", "Dropbox Sign connects with an API key in Settings, not a sign-in.");
+  if (p === "mailbox") throw new HttpError("bad_request", "This mailbox connects with its authorization code in Settings, not a sign-in.");
   if (p === "shopify" && !isShop(o.shop)) throw new HttpError("bad_request", "Type the store's address, like your-store.myshopify.com.");
   const { id } = creds(p);
   const q = new URLSearchParams({ client_id: id, redirect_uri: REDIRECT_URI, state });
@@ -244,7 +251,7 @@ const str = (v: unknown): string | null => (typeof v === "string" && v ? v : nul
 const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : typeof v === "string" && v && Number.isFinite(Number(v)) ? Number(v) : null);
 
 async function tokenRequest(p: Provider, params: Record<string, string>, o: { shop?: string } = {}): Promise<TokenReply> {
-  if (p === "toast" || p === "dropbox_sign") throw new HttpError("bad_request", `${PROVIDER_NAME[p]} has no sign-in to exchange.`);
+  if (p === "toast" || p === "dropbox_sign" || p === "mailbox") throw new HttpError("bad_request", `${PROVIDER_NAME[p]} has no sign-in to exchange.`);
   const { id, secret } = creds(p);
   let url = TOKEN_URL[p]!(o.shop);
   const headers: Record<string, string> = { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" };
@@ -436,6 +443,7 @@ export async function exchangeCode(kind: Kind, code: string, realmId: string | n
     }
     case "toast":
     case "dropbox_sign":
+    case "mailbox":
       throw new HttpError("bad_request", "This connection has no sign-in to exchange.");
   }
   return { bundle, account, scopes, meta };
@@ -698,7 +706,7 @@ async function grantShared(row: IntegrationRow): Promise<boolean> {
 export async function revoke(row: IntegrationRow): Promise<void> {
   try {
     const p = PROVIDER[row.kind];
-    if (p === "microsoft" || p === "toast" || p === "clover" || p === "shopify" || p === "xero" || p === "dropbox_sign") return;
+    if (p === "microsoft" || p === "toast" || p === "clover" || p === "shopify" || p === "xero" || p === "dropbox_sign" || p === "mailbox") return;
     const b = await readBundle(row.secret_id);
     if (!b) return;
     if (await grantShared(row)) return;

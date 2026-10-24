@@ -489,7 +489,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
             const mail = cloud.integrations.find(i => (i.kind === "gmail" || i.kind === "outlook_mail") && i.status === "connected");
             return mail
               ? <p className="note">{zh ? `批准后从 ${mail.account ?? (mail.kind === "gmail" ? "Gmail" : "Outlook")} 发出。对方回复时，Odelia 会第一时间告诉您。` : `Approving sends it from ${mail.account ?? (mail.kind === "gmail" ? "your Gmail" : "your Outlook")}. Odelia tells you as soon as they reply.`}</p>
-              : <p className="note">{zh ? "连接 Gmail 或 Outlook 后，批准即可直接发送并跟踪回复。" : "Connect Gmail or Outlook and approving sends it for you and tracks the reply."} <button type="button" className="linkbtn" onClick={() => { onClose(); openSettings(go, "integrations"); }}>{zh ? "去连接" : "Connect now"}</button></p>;
+              : <p className="note">{zh ? "连接 Gmail、Outlook、QQ 邮箱、163 邮箱或企业邮箱后，批准即可直接发送并跟踪回复。" : "Connect Gmail, Outlook, or a QQ, 163 or company mailbox, and approving sends it for you and tracks the reply."} <button type="button" className="linkbtn" onClick={() => { onClose(); openSettings(go, "integrations"); }}>{zh ? "去连接" : "Connect now"}</button></p>;
           })()}
         </section>
         {atts.length > 0 && (
