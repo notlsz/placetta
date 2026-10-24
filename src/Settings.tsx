@@ -13,6 +13,7 @@ import { LANGUAGES, readSpeak, saveSpeak, speakOf, uiLangOf } from "./langs";
 import * as api from "./cloud/api";
 import { DEFAULT_POLICY, SPEND_CATEGORIES, policyProblems, spentIn, suggestBudgets, type Budget, type Purchase, type SpendCategory, type SpendPolicy } from "./spend.ts";
 import type { IntegrationKind } from "./cloud/api";
+import { hintOf, MAILBOX_PROVIDERS, PRESETS, providerFor, providerName, type MailboxProvider } from "./mailboxPresets";
 import type { HqLink } from "./hq";
 import { TwoStepSetup } from "./cloud/TwoStep";
 import { phoneConsent } from "./consent";
@@ -99,7 +100,7 @@ const HOOK_HELP: Record<HookKind, { how: Bi; ph: string }> = {
 };
 /** Which provider's app keys a sign-in connection needs. */
 const PROVIDER_OF: Partial<Record<IntegrationKind, keyof api.Availability>> = { gmail: "google", gcal: "google", gdrive: "google", outlook_mail: "microsoft", outlook_cal: "microsoft", dropbox: "dropbox", quickbooks: "quickbooks", square: "square", toast: "toast",
-  gbp: "gbp", clover: "clover", shopify: "shopify", xero: "xero", dropbox_sign: "dropbox_sign" };
+  gbp: "gbp", clover: "clover", shopify: "shopify", xero: "xero", dropbox_sign: "dropbox_sign", mailbox: "mailbox" };
 const PLACES_WHY = B("Your stores' addresses, phones and hours, so Odelia adds stores and fills those lines on forms without asking again", "门店地址、电话和营业时间，Odelia 据此添加门店并填写表格中的这些栏目，无需再问");
 const POS_WHY = B("Monthly sales for sales tax and permit fees, the team's schedules and hours for labor-law and food handler checks", "月度销售额用于销售税和许可费，团队排班和工时用于劳动法和食品从业人员证检查");
 
@@ -111,6 +112,7 @@ const INTEGRATIONS: { group: Bi; items: Item[] }[] = [
   { group: B("Email", "邮件"), items: [
     { kind: "gmail", name: "Gmail", why: B("Find agency emails, send messages you approve", "查找机构来信，发送您批准的消息"), logo: gmailLogo },
     { kind: "outlook_mail", name: "Outlook Mail", why: B("Find agency emails, send messages you approve", "查找机构来信，发送您批准的消息"), logo: outlookLogo },
+    { kind: "mailbox", name: "QQ, 163, Yahoo or company mail", zh: "QQ、163、Yahoo 或企业邮箱", why: B("Send filings and messages you approve from your own address and catch the agency's reply. Connects with the mailbox's authorization code", "从您自己的邮箱发送您批准的申报和消息，并接收机构回复。用邮箱授权码连接") },
   ] },
   { group: B("Calendar", "日历"), items: [
     { kind: "gcal", name: "Google Calendar", why: B("Deadlines, renewals and inspections on your calendar", "截止日期、续期和检查自动进日历"), logo: gcalLogo },
@@ -268,6 +270,14 @@ function Integrations() {
   const [toast, setToast] = useState<{ code: string | null; busy?: boolean } | null>(null);
   // Shopify's store address, or Dropbox Sign's API key: one line typed before connecting
   const [ask, setAsk] = useState<{ kind: "shopify" | "dropbox_sign"; v: string; busy?: boolean } | null>(null);
+  // a mailbox by its authorization code: the provider (picked from the address when it can be), the address, the code
+  const [mb, setMb] = useState<{ provider: MailboxProvider; address: string; code: string; smtp: string; imap: string; busy?: boolean } | null>(null);
+  const submitMb = async () => {
+    if (!mb || !cloud) return;
+    setMb({ ...mb, busy: true });
+    const ok = await cloud.connectMailbox({ provider: mb.provider, address: mb.address.trim(), code: mb.code, ...(mb.provider === "custom" ? { smtp_host: mb.smtp.trim(), imap_host: mb.imap.trim() } : {}) });
+    setMb(ok ? null : { ...mb, busy: false, code: "" });
+  };
   const submitAsk = async () => {
     if (!ask || !cloud) return;
     if (ask.kind === "shopify") { await cloud.connect("shopify", { shop: ask.v.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "") }); return; }
@@ -344,6 +354,7 @@ function Integrations() {
               else if (cloud && !cloud.owner) right = c ? undefined : <em className="lock">{zh ? "由所有者连接" : "Owners connect"}</em>;
               else if (c) right = <Btn kind="warm" guard onClick={() => void cloud!.disconnect(it.kind as IntegrationKind)}>{zh ? "断开" : "Disconnect"}</Btn>;
               else if (soon) right = <em className="lock">{zh ? "即将开放" : "Opens soon"}</em>;
+              else if (it.kind === "mailbox") right = <Btn guard kind="line" onClick={() => (cloud ? setMb(m => (m ? null : { provider: "qq", address: "", code: "", smtp: "", imap: "" })) : demo())}>{zh ? "连接" : "Connect"}</Btn>;
               else if (it.kind === "toast") right = <Btn guard kind="line" onClick={() => (cloud ? void openToast() : demo())}>{zh ? "连接" : "Connect"}</Btn>;
               else if (it.kind === "shopify" || it.kind === "dropbox_sign") right = <Btn guard kind="line" onClick={() => (cloud ? setAsk(a => (a?.kind === it.kind ? null : { kind: it.kind as "shopify" | "dropbox_sign", v: "" })) : demo())}>{zh ? "连接" : "Connect"}</Btn>;
               else if (it.bot) right = <Btn guard kind="line" onClick={() => (cloud ? void openBot(it.kind as api.BotKind) : demo())}>{zh ? "设置" : "Set up"}</Btn>;
@@ -377,6 +388,40 @@ function Integrations() {
           <form className="sst-act" onSubmit={e => { e.preventDefault(); void checkToast(); }}>
             {toast.code && <button type="button" className="sbtn quiet" onClick={() => copy(toast.code!)}><I.copy />{zh ? "复制代码" : "Copy code"}</button>}
             <button type="submit" className="sbtn ink" disabled={toast.busy || !toast.code}>{toast.busy ? (zh ? "正在检查…" : "Checking...") : (zh ? "检查并连接" : "Check and connect")}</button>
+          </form>
+        </SetSheet>
+      )}
+      {mb && !conn("mailbox") && (
+        <SetSheet title={zh ? "连接邮箱" : "Connect a mailbox"} sub={zh ? "从您自己的邮箱发送您批准的申报和消息，并接收机构回复" : "Filings and messages you approve go out from your own address, and the agency's reply comes back to Odelia"} onClose={() => setMb(null)}>
+          <p>{zh ? "QQ、163、126、新浪、阿里和 Yahoo 邮箱，以及腾讯企业邮箱、网易企业邮箱、阿里企业邮箱或贵公司自己的邮件服务器。Google Workspace 和 Microsoft 365 企业邮箱请用上面的 Gmail 或 Outlook 连接。" : "QQ, 163, 126, Sina, Aliyun and Yahoo mail, and company mail on Tencent Exmail, NetEase Qiye, Aliyun Qiye or your company's own server. For Google Workspace or Microsoft 365, connect Gmail or Outlook above."}</p>
+          <form className="sst-form" onSubmit={e => { e.preventDefault(); void submitMb(); }}>
+            <p className="sst-label">{zh ? "邮箱地址" : "Email address"}</p>
+            <input type="email" required autoFocus value={mb.address} onChange={e => { const address = e.target.value; const known = providerFor(address); setMb({ ...mb, address, provider: known ?? mb.provider }); }} placeholder="name@qq.com" aria-label={zh ? "邮箱地址" : "Email address"} spellCheck={false} autoComplete="email" />
+            <p className="sst-label">{zh ? "邮箱服务商" : "Provider"}</p>
+            <Select value={mb.provider} onChange={e => setMb({ ...mb, provider: e.target.value as MailboxProvider })} aria-label={zh ? "邮箱服务商" : "Provider"}>
+              <optgroup label={zh ? "个人邮箱" : "Personal mail"}>
+                {MAILBOX_PROVIDERS.filter(p => p !== "custom" && !PRESETS[p].company).map(p => <option key={p} value={p}>{b(providerName(p))}</option>)}
+              </optgroup>
+              <optgroup label={zh ? "企业邮箱" : "Company mail"}>
+                {MAILBOX_PROVIDERS.filter(p => p !== "custom" && PRESETS[p].company).map(p => <option key={p} value={p}>{b(providerName(p))}</option>)}
+                <option value="custom">{zh ? "其他企业邮箱（自己的服务器）" : "Other company mail (your own server)"}</option>
+              </optgroup>
+            </Select>
+            {mb.provider === "custom" && <>
+              <p className="sst-label">{zh ? "服务器（SSL：SMTP 465，IMAP 993）" : "Servers (SSL: SMTP 465, IMAP 993)"}</p>
+              <span className="sst-pair">
+                <input type="text" required value={mb.smtp} onChange={e => setMb({ ...mb, smtp: e.target.value })} placeholder="smtp.yourcompany.com" aria-label={zh ? "SMTP 服务器" : "SMTP server"} spellCheck={false} autoComplete="off" />
+                <input type="text" required value={mb.imap} onChange={e => setMb({ ...mb, imap: e.target.value })} placeholder="imap.yourcompany.com" aria-label={zh ? "IMAP 服务器" : "IMAP server"} spellCheck={false} autoComplete="off" />
+              </span>
+            </>}
+            <p className="sst-label">{zh ? "授权码或客户端专用密码" : "Authorization code or app password"}</p>
+            <input type="password" required value={mb.code} onChange={e => setMb({ ...mb, code: e.target.value })} placeholder={zh ? "授权码" : "Authorization code"} aria-label={zh ? "授权码" : "Authorization code"} spellCheck={false} autoComplete="off" />
+            <p className="sg-fine">{b(hintOf(mb.provider))}{mb.provider !== "custom" && <> <a href={PRESETS[mb.provider].help} target="_blank" rel="noopener noreferrer">{zh ? "官方说明" : "The provider's steps"}</a></>}</p>
+            <p className="sg-fine">{zh ? "保存前，快哉会先登录检查。授权码加密保存，只用于发送您批准的邮件和读取机构回复，之后不会再显示。断开即删除。" : "Placetta signs in to check it before saving. The code is kept encrypted, used only to send what you approve and read the agency's replies, and never shown again. Disconnecting deletes it."}</p>
+            <div className="sst-act">
+              <button type="button" className="sbtn quiet" onClick={() => setMb(null)}>{zh ? "取消" : "Cancel"}</button>
+              <button type="submit" className="sbtn ink" disabled={mb.busy || !mb.address.trim() || !mb.code.trim() || (mb.provider === "custom" && (!mb.smtp.trim() || !mb.imap.trim()))}>{mb.busy ? (zh ? "正在登录检查…" : "Signing in to check...") : (zh ? "检查并连接" : "Check and connect")}</button>
+            </div>
           </form>
         </SetSheet>
       )}

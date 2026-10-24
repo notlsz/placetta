@@ -50,6 +50,8 @@ export type CloudCtx = {
   connect(kind: IntegrationKind, extra?: { shop?: string }): Promise<void>;
   /** Dropbox Sign: the business's own API key, checked before it's kept. */
   connectSign(apiKey: string): Promise<boolean>;
+  /** A mailbox by its address and authorization code; true once the server signed in to it. */
+  connectMailbox(m: import("./cloud/api").MailboxInput): Promise<boolean>;
   disconnect(kind: IntegrationKind): Promise<void>;
   /** Link a team chat by its webhook link; true once the test message went through. */
   connectHook(kind: import("./cloud/api").HookKind, url: string, secret?: string): Promise<boolean>;
