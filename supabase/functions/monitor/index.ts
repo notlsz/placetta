@@ -71,6 +71,17 @@ export const permitOf = (title: string) => title
 const bucket = (n: number, steps: number[]) => steps.find((s) => n <= s);
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
+/** Renewal alerts: 90, 60, 30, 14, 7 and 1 days out. The 90-day one is early notice (Harbor Compliance's License
+ *  Manager shows "licensing events due within 90 days"): Odelia starts the renewal itself at RENEW_AHEAD (60), and
+ *  anything the agency wants first, an inspection or a fresh certificate, has a month to start. */
+export const RENEWAL_ALERTS = [1, 7, 14, 30, 60, 90];
+/** The early notice's words: what happens at 60 days, and what can start now. */
+const early = (date: string): Bi => {
+  const start = day(new Date(Date.parse(date + "T00:00:00Z") - 60 * 864e5));
+  return { en: `Expires ${date}. Placetta starts the renewal on ${start}; anything the agency wants first, such as an inspection, can start now.`,
+    zh: `${date} 到期。快哉将于 ${start} 开始续办；机构要求先做的事（如检查）现在就可以开始。` };
+};
+
 export function deadlineUpdates(ws: string, list: unknown, today: string): Update[] {
   const out: Update[] = [];
   for (const raw of Array.isArray(list) ? list : []) {
@@ -78,10 +89,10 @@ export function deadlineUpdates(ws: string, list: unknown, today: string): Updat
     if (!d || typeof d.id !== "string" || !isDate(d.date)) continue;
     const n = daysUntil(today, d.date), title = bi(d.title);
     if (d.kind === "renewal") {
-      const b = n >= 0 ? bucket(n, [1, 7, 14, 30, 60]) : undefined;
+      const b = n >= 0 ? bucket(n, RENEWAL_ALERTS) : undefined;
       if (b !== undefined) out.push({ workspace_id: ws, kind: "renewal", app_id: d.app ?? null, dedupe: `renewal:${d.id}:${d.date}:${b}`,
         title: { en: `${title.en}: ${when(n, "expires", "到期").en}`, zh: `${title.zh}：${when(n, "expires", "到期").zh}` },
-        body: { en: `Expires ${d.date}. Ask Placetta to start the renewal.`, zh: `${d.date} 到期。可以让快哉开始续办。` } });
+        body: b === 90 ? early(d.date) : { en: `Expires ${d.date}. Ask Placetta to start the renewal.`, zh: `${d.date} 到期。可以让快哉开始续办。` } });
     } else if (n >= 0) {
       const b = bucket(n, [0, 1, 3, 7, 14]);
       if (b !== undefined) out.push({ workspace_id: ws, kind: "deadline", app_id: d.app ?? null, dedupe: `deadline:${d.id}:${d.date}:${b}`,
@@ -98,7 +109,7 @@ export function deadlineUpdates(ws: string, list: unknown, today: string): Updat
 type StorePermit = { name?: unknown; expires?: unknown };
 type StoreRow = { id?: unknown; name?: unknown; stage?: unknown; permits?: unknown };
 
-/** Every open store's permits: a renewal update at 60, 30, 14, 7 and 1 days out, and when one has lapsed. */
+/** Every open store's permits: a renewal update at 90, 60, 30, 14, 7 and 1 days out, and when one has lapsed. */
 export function storeUpdates(ws: string, stores: unknown, today: string): Update[] {
   const out: Update[] = [];
   for (const raw of Array.isArray(stores) ? stores : []) {
@@ -108,10 +119,10 @@ export function storeUpdates(ws: string, stores: unknown, today: string): Update
     for (const p of Array.isArray(s.permits) ? (s.permits as StorePermit[]) : []) {
       if (!p || !isDate(p.expires)) continue;
       const n = daysUntil(today, p.expires), name = bi(p.name);
-      const b = n >= 0 ? bucket(n, [1, 7, 14, 30, 60]) : undefined;
+      const b = n >= 0 ? bucket(n, RENEWAL_ALERTS) : undefined;
       if (b !== undefined) out.push({ workspace_id: ws, kind: "renewal", dedupe: `permit:${s.id}:${name.en}:${p.expires}:${b}`,
         title: { en: `${store.en}: ${name.en} ${when(n, "expires", "到期").en}`, zh: `${store.zh}：${name.zh}${when(n, "expires", "到期").zh}` },
-        body: { en: `Expires ${p.expires}. Placetta can start the renewal now.`, zh: `${p.expires} 到期。快哉现在就可以开始续办。` } });
+        body: b === 90 ? early(p.expires) : { en: `Expires ${p.expires}. Placetta can start the renewal now.`, zh: `${p.expires} 到期。快哉现在就可以开始续办。` } });
       else if (n < 0 && n >= -30) out.push({ workspace_id: ws, kind: "renewal", dedupe: `lapsed:${s.id}:${name.en}:${p.expires}`,
         title: { en: `Lapsed: ${store.en}, ${name.en}`, zh: `已过期：${store.zh}，${name.zh}` },
         body: { en: `It expired ${p.expires}. Operating without it risks a fine or a closure.`, zh: `已于 ${p.expires} 过期。无证经营可能被罚款或停业。` } });

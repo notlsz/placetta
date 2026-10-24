@@ -23,6 +23,20 @@ Deno.test("permits renew at 60, 30, 14, 7 and 1 days and flag lapses", () => {
   ok(u[0].dedupe.endsWith(":14") && u[0].kind === "renewal");
   ok(u[1].dedupe.startsWith("lapsed:"));
 });
+Deno.test("a renewal 61 to 90 days out gets one early notice that says when Placetta starts it", async () => {
+  const { deadlineUpdates, RENEWAL_ALERTS } = await import("./index.ts");
+  eq(RENEWAL_ALERTS, [1, 7, 14, 30, 60, 90]);
+  const far = [{ id: "st-2", name: { en: "Irvine", zh: "尔湾" }, stage: "open", permits: [{ name: { en: "Health permit", zh: "卫生许可" }, expires: "2027-01-01" }] }];
+  const u = storeUpdates("w", far, "2026-10-09");   // 84 days out
+  eq(u.length, 1);
+  ok(u[0].dedupe.endsWith(":90"));
+  ok(u[0].body!.en.includes("starts the renewal on 2026-11-02") && u[0].body!.zh.includes("2026-11-02"));
+  // 91 days out: nothing yet; 60 days out: the usual notice
+  eq(storeUpdates("w", far, "2026-10-02").length, 0);
+  ok(storeUpdates("w", far, "2026-11-02")[0].dedupe.endsWith(":60"));
+  const d = deadlineUpdates("w", [{ id: "r1", date: "2027-01-01", kind: "renewal", title: { en: "Health permit renewal", zh: "卫生许可续期" } }], "2026-10-09");
+  ok(d.length === 1 && d[0].dedupe === "renewal:r1:2027-01-01:90" && d[0].body!.en.includes("2026-11-02"));
+});
 Deno.test("nothing to say for an empty workspace", () => {
   eq(weekAhead("w", { deadlines: [], stores: [] }, 0, "2026-10-12"), null);
 });
