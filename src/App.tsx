@@ -64,6 +64,7 @@ import { withDemoPlan } from "./demoPlan";
 import { ownerApprove } from "./cloud/owners";
 /* Team review: comments, @mentions, Assigned to and the Mine filter (src/Comments.tsx, src/collab.ts) */
 import { CollabCtx, useCollab } from "./Comments";
+import { TrustSync } from "./TrustShare";
 
 const KEY = "placetta-api-key", KEY_MODEL = "placetta-api-model";
 const readKey = () => { try { return { key: localStorage.getItem(KEY) ?? "", model: localStorage.getItem(KEY_MODEL) ?? "" }; } catch { return { key: "", model: "" }; } };
@@ -1446,6 +1447,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
 
   return (
     <AppCtx.Provider value={ctx}><CollabCtx.Provider value={collab}>
+      {cloud && <TrustSync />}
       <div className={"shell" + (dock ? " docked" : "") + (phone ? " phone" : "") + (slim ? " slim" : "")}>
         {side}
         {phone && navOpen && <div className="navscrim" onClick={() => setNavOpen(false)} />}

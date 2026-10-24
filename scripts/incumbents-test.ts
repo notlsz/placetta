@@ -13,6 +13,7 @@ import { SAMPLE } from "../src/model";
 import type { Application, Workspace } from "../src/model";
 import { buildReport, reportCsv, reportName, say } from "../src/report";
 import { addDays, laneOf, runway } from "../src/runway";
+import { runCompliance } from "./compliance-test";
 import { addBusinessDays, businessDaysBetween, designerPrompt, explainPrompt, newRound, notEnglish, parseComments, progress, responseLetter, sheetOf, waitingOn, whoFor } from "../src/corrections";
 
 let failed = 0, passed = 0;
@@ -166,6 +167,9 @@ Item 4: Grease interceptor sizing worksheet required. See P-1.`);
   r1.items[1].done = true;
   eq(designerPrompt(r1, "plan check", "DEH", "en"), null, "nothing for the architect once their items are done");
 }
+
+/* ------------------------------- Vanta, Drata, Delve: status pages, checks, questionnaires ------------------------------- */
+runCompliance(ok, eq, section);
 
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed) process.exit(1);

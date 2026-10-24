@@ -19,6 +19,10 @@ import { firstSentence } from "./phrase";
 import { StaffLangPick } from "./StaffLang";
 import { StoresCheckPanel } from "./StoresCheck";
 import { NoticeEditor, StoreValue, ValueReportSheet } from "./ValueReport";
+import { TrustShare } from "./TrustShare";
+import { ChecksSheet, CheckList } from "./Checks";
+import { QuestionnaireSheet } from "./Questionnaire";
+import { checksFor, tally } from "./controls";
 
 /* Stores: every store inspection-ready every day. A score per store, today's logs, staff certificates, schedules,
    a mock inspection, and the three numbers that show the value: opened on time, stayed open, no fines. Each store has
@@ -185,6 +189,29 @@ function StoreBotSection({ s }: { s: Store }) {
   );
 }
 
+/** A store's checks on its page: the failing ones first with their fix, then a link to all of them, the status page
+ *  and the questionnaire (src/controls.ts, src/TrustShare.tsx, src/Questionnaire.tsx). */
+function StoreChecks({ s }: { s: Store }) {
+  const { b, ws, lang } = useApp();
+  const zh = lang === "zh";
+  const [sheet, setSheet] = useState<"checks" | "trust" | "q" | null>(null);
+  const cs = useMemo(() => checksFor(ws, daysFromNow(0), { store: s.id }), [ws, s.id]);
+  const n = tally(cs), open = cs.filter(c => c.state !== "pass");
+  return (
+    <Section title={b(B("Checks", "合规检查"))} sub={zh ? `${n.total} 项中 ${n.pass} 项通过，${n.fail} 项未通过。只有存档记录才算通过。` : `${n.pass} of ${n.total} passing, ${n.fail} failing. A check passes only on a record.`}
+      side={<span className="ts-acts">
+        <button type="button" className="pill quiet sm" onClick={() => setSheet("trust")}>{zh ? "共享状态页" : "Share status page"}</button>
+        <button type="button" className="pill quiet sm" onClick={() => setSheet("q")}>{zh ? "回答问卷" : "Answer a questionnaire"}</button>
+      </span>}>
+      {open.length ? <CheckList checks={open.slice(0, 5)} compact /> : <p className="quiet">{zh ? "全部通过。" : "All passing."}</p>}
+      {cs.length > 5 && <button type="button" className="pill quiet sm ck-all" onClick={() => setSheet("checks")}>{zh ? `查看全部 ${cs.length} 项` : `See all ${cs.length}`}</button>}
+      {sheet === "checks" && <ChecksSheet store={s.id} onClose={() => setSheet(null)} />}
+      {sheet === "trust" && <TrustShare store={s.id} onClose={() => setSheet(null)} />}
+      {sheet === "q" && <QuestionnaireSheet store={s.id} onClose={() => setSheet(null)} />}
+    </Section>
+  );
+}
+
 function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
   const { b, t, lang, ws, ask, busy, updateStore, openApp } = useApp();
   const r = readiness(s, ws);
@@ -232,6 +259,8 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
           </div>
         ))}
       </div>
+
+      <StoreChecks s={s} />
 
       <StoreBotSection s={s} />
 
@@ -481,6 +510,7 @@ export function Stores() {
   const [bulk, setBulk] = useState(false);
   const [check, setCheck] = useState(false);
   const [report, setReport] = useState(false);
+  const [sheet, setSheet] = useState<"checks" | "trust" | "q" | null>(null);
   const stores = ws.stores ?? [];
   const s = stores.find(x => x.id === open);
   if (s) return <StoreDetail s={s} onBack={() => setOpen(null)} />;
@@ -493,12 +523,18 @@ export function Stores() {
           <Menu className="st-more" buttonClass="pill" label={lang === "zh" ? "更多" : "More"} button={<>{lang === "zh" ? "更多" : "More"}<I.chev /></>} items={[
             ...(!bulk ? [{ key: "bulk", label: lang === "zh" ? "规划多家门店" : "Plan many stores", onPick: () => setBulk(true) }] : []),
             ...(!check ? [{ key: "check", label: lang === "zh" ? "检查已开业门店" : "Check stores already open", onPick: () => setCheck(true) }] : []),
+            ...(stores.length > 0 ? [{ key: "checks", label: lang === "zh" ? "合规检查" : "Checks", onPick: () => setSheet("checks") },
+              { key: "trust", label: lang === "zh" ? "状态页" : "Status pages", onPick: () => setSheet("trust") },
+              { key: "q", label: lang === "zh" ? "回答合规问卷" : "Answer a questionnaire", onPick: () => setSheet("q") }] : []),
             ...(cloud?.owner && stores.length > 0 ? [{ key: "hq", label: lang === "zh" ? "与总部共享" : "Share with headquarters", onPick: () => openSettings(go, "hq") }] : []),
           ]} />
         </div></header>
       {report && <ValueReportSheet onClose={() => setReport(false)} />}
       {bulk && <BulkPlan onClose={() => setBulk(false)} />}
       {check && <StoresCheckPanel onClose={() => setCheck(false)} />}
+      {sheet === "checks" && <ChecksSheet onClose={() => setSheet(null)} />}
+      {sheet === "trust" && <TrustShare onClose={() => setSheet(null)} />}
+      {sheet === "q" && <QuestionnaireSheet onClose={() => setSheet(null)} />}
       {stores.length === 1 ? (
         // one store: its card beside its permits, so the page is the store's own dashboard, not a card in an empty page
         <div className="stores one">

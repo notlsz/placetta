@@ -89,6 +89,10 @@ begin
     format('public.sso_set_enforced(%L, true, %L)', w, 'saml'),
     format('public.team_list(%L)', w),
     format('public.hq_sees(%L)', w),
+    format('public.trust_link_create(%L, %L, %L, null, 90, %L)', w, 'x', 'x', '{}'),
+    format('(select count(*) from public.trust_link_list(%L))', w),
+    format('public.trust_refresh(%L, %L, %L)', w, 'x', '{}'),
+    format('(select count(*) from public.trust_requests_for(%L))', w),
     -- record ids from Olivia's workspace
     format('public.poll_agent_run(%L)', r1), format('public.stop_agent_run(%L)', r1), format('public.agent_run_replay(%L)', r1),
     format('public.comment_resolve(%L, true)', c1), format('public.mcp_token_revoke(%L)', t1), format('public.hq_unshare(%L)', h1),
@@ -110,7 +114,8 @@ begin
   -- and nothing from any table that holds a workspace's data
   leaks := '{}';
   foreach x in array array['workspaces', 'workspace_members', 'workspace_invites', 'documents', 'filings', 'comments', 'agent_memories', 'agent_runs',
-                           'purchases', 'updates', 'audit_log', 'mention_notices', 'odelia_messages', 'mail_threads', 'integrations', 'agency_logins', 'billing'] loop
+                           'purchases', 'updates', 'audit_log', 'mention_notices', 'odelia_messages', 'mail_threads', 'integrations', 'agency_logins', 'billing',
+                           'trust_links', 'trust_requests'] loop
     begin
       execute format('select count(*) from public.%I where %s = %L', x, case when x = 'workspaces' then 'id' else 'workspace_id' end, w) into n;
       if n > 0 then leaks := leaks || x; end if;
@@ -194,10 +199,11 @@ begin
   if e is not null then raise notice 'no search_path: %', e; end if;
 
   -- anon may run only the website's own functions (the public incident log, guide page counts, a partner's name for a
-  -- referral link, whether an email's domain needs SSO, and a text-to-start link)
+  -- referral link, whether an email's domain needs SSO, a text-to-start link, and a store's shared status page with its
+  -- document request, both by a token only the owner was shown: supabase/tests/trust_pages.sql)
   select string_agg(p.proname, ', ') into e from pg_proc p join pg_namespace s on s.oid = p.pronamespace
    where s.nspname = 'public' and p.prosecdef and has_function_privilege('anon', p.oid, 'execute')
-     and p.proname not in ('incident_log_public', 'page_hit', 'partner_lookup', 'sso_for_email', 'text_start_peek');
+     and p.proname not in ('incident_log_public', 'page_hit', 'partner_lookup', 'sso_for_email', 'text_start_peek', 'trust_page', 'trust_request');
   res := res || jsonb_build_object('anon runs only the website''s functions', e is null);
   if e is not null then raise notice 'anon can run: %', e; end if;
 

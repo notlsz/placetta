@@ -634,3 +634,87 @@ Why each moved, or didn't:
 | Pricing per location vs per license | BizFilings $149 plus $66 a location; Harbor from $500 a year plus fees; expediters $2,500 to $12,500 a project | The store plan is $149 a store a month with the report included; whether the per-license filing charges stay is the founder's call |
 | Auto-renewal terms | Harbor needs notice 90 days before expiry; Avalara's auto-renewals draw BBB complaints | Placetta already sends the renewal notice the law asks for (`supabase/functions/monitor/renewal_notice.ts`); keep cancellation one click |
 
+## Vanta, Drata, Delve (2026-10-23)
+
+Vanta, Drata and Delve automate SOC 2, ISO 27001 and HIPAA. They don't do licenses or permits, so none competes for a
+store's filings. They set what a buyer expects compliance software to do, though: continuous tests, a page to prove it
+to others, a readiness view, questionnaires answered for you. The founder's rule: copy what each does well, fill its
+biggest weakness. Every claim below comes from a page read on 2026-10-23. Pages by competitors of theirs are marked.
+Two things weren't reachable this session: G2's review text (the page served only the aggregate) and ians.com's write-up
+of the Delve allegations (a redirect this session couldn't follow). Delve's side comes from Captain Compliance's summary
+and Delve's own site.
+
+### What each does best and worst
+
+| Product | Strongest (copied, with source) | Biggest weakness (filled, with source) |
+|---|---|---|
+| Vanta | Tests that keep running: "Real-time monitoring of controls via automated tests to quickly see which controls are passing or failing", with "Remediation detail includes the when, where, why, and how to fix" ([features](https://www.vanta.com/features)). A Trust Center to "showcase real-time proof of your security and compliance posture" through "a public page or private link" ([features](https://www.vanta.com/features)), where "Only "OK" controls display a green check" and "All access requests require manual approval by default" ([help: Managing your Trust Center](https://help.vanta.com/en/articles/11345469-managing-your-trust-center)). Questionnaire Automation ([pricing](https://vanta.com/pricing)) | Price you can't see and limits you pay to lift: no prices, only "Get personalized pricing"; "AI-powered Questionnaire Automation (25 questionnaires per year)" on one plan and "(144 questionnaires per year)" on the next; the "Advanced Trust Center" is a higher tier ([pricing](https://vanta.com/pricing)). Reviewers: "I get a lot of notifications about failing automated tests in my email and in my Slack" (2022-10-07) and "They lost documents, and weren't able to explain to me satisfactorily where they went" (2024-03-07) ([GetApp](https://www.getapp.co.uk/reviews/2036075/vanta)); "issues with renewal and price jumps" ([ComplyJet](https://www.complyjet.com/blog/vanta-reviews), a competitor, summarizing Capterra) |
+| Drata | "continuous monitoring and guided remediation", "stay continuously audit-ready across multiple frameworks", "build and manage your Trust Center", "AI-POWERED QUESTIONNAIRE AUTOMATION" ([drata.com](https://drata.com)). Document requests the owner approves, behind an NDA: requests go to "the Access request approver email", "Approvals will last a full year by default", and "If the box is not checked, the request cannot be submitted" ([help: Submitting and approving requests](https://help.drata.com/en/articles/8067477-submitting-and-approving-requests)) | Cost and time: G2 shows "$$$$$" perceived cost and 2 months to implement ([G2](https://g2.com/products/drata/reviews?page=5)); Vendr's reported contracts run "$9,415 to $68,250, with a median of $25,000", and "Renewal-price growth is a recurring complaint" ([soc2auditors.org](https://soc2auditors.org/software/drata/)). No price on drata.com |
+| Delve | Speed and agents doing the work: "Compliance in days", "Get compliant in days, not months", "Autonomous AI agents to take screenshots, write reports", "1:1 Slack support with security experts", a free "trust report" ([delve.co](https://delve.co)) | Checkbox compliance. An anonymous investigator ("DeepDelver", March 2026) alleged that "Auditor reports and test results were reportedly populated before clients submitted their evidence", "493 of 494 SOC 2 reports reportedly used the same boilerplate text", and that the "AI" "relied on manual screenshot uploads and one-click default policies"; Y Combinator reportedly asked Delve to leave in April 2026. Delve answered that it "does not conduct audits or issue reports" and that its templates are "a starting point" ([Captain Compliance](https://captaincompliance.com/news/the-delve-scandal-fake-soc-2-audits-open-source-code-theft-and-exit-from-y-combinator/), allegations, not findings). No price on delve.co |
+
+### Mapped to licenses and permits: what Odelia already did
+
+| Their strength | In licensing | Before this pass | Where |
+|---|---|---|---|
+| Continuous monitoring, automated tests | Each license checked against the agency's own record, with drift alerts | Partly: every filing with an agency checked daily (open data, a hashed page or Odelia), escalated past the published time; renewal alerts at 90, 60, 30, 14, 7 and 1 days. Once approved, a license was never read again | now `src/tracking/index.ts` (`inStanding`), `supabase/functions/monitor/status_checks.ts` |
+| Trust Center | A live "permits in good standing" page per store for a landlord, franchisor, insurer, lender or delivery platform | Didn't: the license report was a document to send, and headquarters sharing is for the brand's own HQ | now `src/trust.ts`, `src/TrustPage.tsx`, `src/TrustShare.tsx`, migration `20261031160000_trust_pages.sql` |
+| Pass/fail controls dashboard, remediation | Every license, renewal, proof and certificate per store as a check, failing first, each with its fix | Partly: `readiness()` gave a score and its parts; no list of what fails and why | now `src/controls.ts`, `src/Checks.tsx`, each store's page |
+| Audit readiness percentage | "% ready to open" per store | Did: `readiness()` in `src/stores.ts` (ready to open, inspection ready), the MCP `store_readiness` tool | unchanged: the checks are the list behind it, not a second number |
+| Questionnaire automation | Answer a landlord's, franchisor's or insurer's compliance questions from the workspace | Didn't: only by asking Odelia in chat | now `src/questions.ts`, `src/Questionnaire.tsx` |
+| Integrations-first evidence | Facts and documents from connected apps | Did: Gmail, Outlook, Drive, QuickBooks, Square, Toast, WeChat, MCP servers | |
+| Evidence and documents with expiry | One place, expiry tracked | Did: Documents, receipts per application, the 90-day runway; proof on file per report row | the checks now fail an approval with no copy on file |
+| Policy templates | Agency forms, filled | Did: 481 forms (docs/FILING_COVERAGE.md), filled from the workspace | |
+| Auditor or partner network | Expediters, attorneys, a specialist | Partly: a Placetta specialist on request; counsel introduced for appeals | founder decision |
+| AI agents doing the work | Odelia | Did | |
+| Onboarding to value in days | A plan in minutes | Did: the registry plan at sign-up, before any model call | |
+
+### Built, ranked by what it does for a customer
+
+1. **Status pages** (Stores, "Status pages", or a store's "Share status page"; the public page at `/app/trust/<token>`). It copies Vanta's and Drata's Trust Center: a link anyone can open, only passing items marked good, documents only on request and only with the owner's yes. It fills their gaps. It's included in the $149 store plan, not a higher tier. It's in English and Chinese, switchable on the page. It works out "expired" and "renewal due within 30 days" on the day it's read, so a page left open can't call a lapsed license current. When the agency's own record says expired, revoked or withdrawn, the row says "Agency record needs attention". Each row shows the day Placetta last read the agency's record, where the agency publishes one. The owner picks who it's for, what shows and for how long (30, 90 or 365 days). Address, agency, dates and the last agency check show unless turned off; license numbers and document requests stay off unless turned on. The owner sees views, changes what shows (the page follows at once) and revokes in one tap. Security (docs/SECURITY.md): the token is 48 random hex characters shown once, kept only as SHA-256; only an owner shares, changes or revokes; the tables are closed to every client role; what a page holds is cut to the owner's choices when written and again when read, so fees, form answers, people, tax IDs and file paths never get in; a revoked, expired or made-up token gets the same "gone"; reads are rate-limited per address; a document request lands in Updates, sends nothing, and reaches Odelia only as outside data, with the reply addressed to the requester alone; the page sets no-referrer and noindex.
+2. **Checks** (Stores, "Checks", and the top five on each store's page). This copies Vanta's pass/fail controls and their "when, where, why, and how to fix". The gap it fills is Delve's: a check passes only on a record (an approval, an expiry on file, a copy in Documents, the agency's record), nothing passes by default, and with no record it says "not on file". Each failing check carries one action ("Fix with Odelia") instead of a stream of alerts.
+3. **Good standing after approval** (`inStanding`, `standingChange`). Vanta's tests keep running after the audit; a license here was checked until issued, then never again. Now an approved license whose agency publishes its record by number in open data (Chicago and Philadelphia business licenses, the permit feeds in SF, LA, NYC, Chicago, Austin, Seattle, Boston, Philadelphia and Dallas) is read once a week. The owner hears only when it leaves good standing, or comes back. The status page shows it at once.
+4. **Questionnaires** (Stores, "Answer a questionnaire"; each store's page). Vanta's and Drata's questionnaire automation, with no annual cap. Paste the questions (numbered, bulleted or Chinese-numbered); each is answered from one record and names it. The licenses come from the same rows the status page shows. Staff certificates, the store's grade, the opening date (`openingOf`, the one opening function), agency notices, the address and the legal name come from their own records. A question with no record is left open, never guessed. A question about violations with no notice on file says to check your own records, not "none". Tax IDs, bank details and passwords are never answered. Answers in English, Chinese or both, copy or spreadsheet (formula cells are written as text). "Send the rest to Odelia" passes the open questions as outside data.
+
+Tests: `npm run test:incumbents` (now 109 checks, with `scripts/compliance-test.ts`: what a page holds, the switches, hostile snapshots, the standing rules at their edges, the path parser, checks pass only on records, the question splitter, every answer's state and source, secrets withheld, CSV formulas); `supabase/tests/trust_pages.sql` (47 checks: owner-only sharing, store in the workspace, hash-only tokens, closed tables, cross-tenant refusals, what anon sees, expiry and agency drift worked out when read, approval followed live, switches, document requests and their rate limit, revoke, expiry, audit log, cascade); `supabase/tests/security_audit.sql` (the two public functions named in the anon list, the owner functions in the cross-tenant sweep, the two tables in the cross-tenant read); `npm run test:tenancy` (A shares a status page; B and anon get nothing); `npm run test:redteam` T1 to T4; `supabase/functions/monitor/status_checks_test.ts` (good standing: weekly, quiet on "issued", news on revoked and on return).
+
+### Scores, before and after
+
+Out of 10, for the job a Chinese food and beverage brand opening US stores pays for. Vanta, Drata and Delve score low
+where they don't do licenses at all; the columns are what their customers value most and complain about most.
+
+| | Continuous monitoring | Shareable proof | Pass/fail dashboard | Questionnaires | Evidence on file | Agents doing the work | Time to value | Price you can see | Real, not checkbox | Languages | Overall |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Vanta | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | 7 | 2 | 2.7 |
+| Drata | 2 | 2 | 2 | 2 | 3 | 2 | 2 | 2 | 7 | 2 | 2.6 |
+| Delve | 1 | 2 | 1 | 1 | 2 | 2 | 4 | 2 | 2 | 2 | 1.9 |
+| **Odelia, before** | 6.5 | 5 | 6 | 3 | 7 | 8 | 9 | 9 | 8.5 | 9 | 7.1 |
+| **Odelia, after** | 7.5 | 8.5 | 8 | 7.5 | 7.5 | 8 | 9 | 9 | 9 | 9 | 8.3 |
+
+Why each moved, or didn't:
+- **Continuous monitoring, 6.5 to 7.5.** Approved licenses are read weekly where the agency publishes its record in open data. Licenses the agency shows only on a search page (California ABC, New York SLA, Texas TABC) still need the team to set the page on the filing; health permits rarely have a public record at all.
+- **Shareable proof, 5 to 8.5.** A live link per store, included, bilingual, revocable. Not 9: no NDA gate, no custom domain or branding, and the page's content refreshes while the team has the workspace open (expiry, agency drift and approvals are live at every read).
+- **Dashboard, 6 to 8.** The checks are the list behind the readiness score, with a fix each.
+- **Questionnaires, 3 to 7.5.** Common questions answered with sources, in both languages, uncapped. Not higher: a question outside the rules goes to Odelia rather than being answered on the spot, and there is no answer library the owner edits yet.
+- **Evidence, 7 to 7.5.** An approval with no copy on file now fails a check.
+- **Real, not checkbox, 8.5 to 9.** Nothing passes without a record, and a status page can't outlive an expiry.
+- **Agents, time to value, price and languages stay.** Odelia already did the work, the plan is instant, $149 a store a month is published, and everything is in English and Chinese.
+
+### Odelia before and after
+
+| | Before | After |
+|---|---|---|
+| A landlord asks "are your permits current?" | The owner downloads the license report and emails a PDF that is out of date the day a permit lapses | The owner sends a link; the landlord sees each license's standing on the day they open it, in English or Chinese; the owner revokes it when the lease is signed |
+| A license is revoked or cancelled after approval | Nobody hears until the next renewal or an inspector | The monitor reads the agency's record weekly; the owner gets an Update and the status page says it needs attention |
+| "What's wrong at this store?" | A score and five bars | A list of failing checks, each with why, from which record, and one tap to have Odelia fix it |
+| A franchisor's 30-question compliance form | Retyped by hand, or pasted into chat | Answered from the workspace with sources; the rest sent to Odelia as data |
+
+### Founder decisions (not built as promises)
+
+| Decision | What they do | The choice |
+|---|---|---|
+| A partner network of expediters and attorneys | Vanta lists "Access to Vanta's auditor network" and "Ability to bring your own auditor" ([pricing](https://vanta.com/pricing)) | Who's in it, whether Placetta takes a referral fee (today: none for counsel), and who's liable for their work |
+| An NDA before documents | Vanta's DocuSign and Clickwrap NDAs; Drata's NDA checkbox | Needs NDA text from counsel; until then every document request needs the owner's yes, which is stricter |
+| Branding and a custom domain on status pages | Vanta's "Advanced Trust Center" on a higher tier | Keep it in the store plan or make it an add-on |
+| The monitor refreshing every page daily | Vanta's tests run on a schedule | Today the page's rows refresh whenever the team has the workspace open, and expiry, agency drift and approvals are live at read. A daily refresh needs the report builder in the monitor's bundle (`npm run build:agent`, function size) |
+| Reading search-page-only agency records weekly | Vanta's integrations pull data on their own | A page lookup per license (California ABC, New York SLA, Texas TABC) needs the team to set it, or Odelia to read it at model cost |
+| The words "in good standing" on a public page | Vanta shows a green check only for passing controls | The page says where its status comes from and that it isn't legal advice; counsel should review that wording before it goes to lenders |

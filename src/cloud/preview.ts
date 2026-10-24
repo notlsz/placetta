@@ -10,6 +10,7 @@
 
 import { UPDATED } from "../legal";
 import { moreRest, moreRpc, type PreviewKit } from "./previewMore";
+import { trustRpc } from "./previewTrust";
 import { licenseQuoteLine, licenseTierOf, SIMPLE, tierUsd } from "../pricing";
 
 export const PREVIEW_CODE = "123456";
@@ -306,7 +307,7 @@ async function rpc(fn: string, body: Record<string, unknown>, c: { sub: string; 
         return w ? [{ workspace_id: w.id, name: w.name, brand: l.brand ?? null, stores: hqSummary((w.state ?? {}) as Row) }] : [];
       }));
     }
-    default: return (await moreRpc(fn, body, c, kit())) ?? pgErr(`Not in the preview: ${fn}`, "PGRST202", 404);
+    default: return (await moreRpc(fn, body, c, kit())) ?? (await trustRpc(fn, body, c, kit())) ?? pgErr(`Not in the preview: ${fn}`, "PGRST202", 404);
   }
 }
 
