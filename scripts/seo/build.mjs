@@ -88,6 +88,11 @@ const webPageLd = ({ path, title, desc, type = "WebPage", d, extra = {} }) => ({
 const LANDING = "site/index.html";
 let landing = read(LANDING);
 const { T, FAQ, TIERS } = landingData(landing);
+{ // the proof band reads its form count and latest read day from the proof log, so the number on the page is the number on file
+  const log = JSON.parse(readFileSync("scripts/eval/proof-log.json", "utf8"));
+  const forms = new Set(log.filter(r => r.found !== false && r.checked).map(r => r.id)).size, day = log.map(r => r.checked || "").sort().pop() || "";
+  landing = landing.replace(/<div class="pfrow" id="pfRow"[^>]*>/, tag => setAttr(setAttr(tag, "data-forms", String(forms)), "data-read", day));
+}
 const en = k => T.en[k];
 {
   const bodyAt = landing.indexOf('<div class="hwrap">') >= 0 ? landing.indexOf("</style>") : 0;
