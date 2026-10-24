@@ -14,6 +14,7 @@ each number is in `docs/PRICING-RESEARCH.md`; how the team quotes it is in `docs
 | Item | Price | When it's charged |
 | --- | --- | --- |
 | Store plan | $149 a store a month, billed yearly ($1,788 a store) | At checkout, for every store in the workspace, after the owner agrees to the renewal terms next to the button. Renews yearly at the same price; auto-renew off in Settings, Billing |
+| Store plan, monthly | $179 a store a month, month to month, cancel anytime (founder, 2026-10-23) | The same plan and inclusions. Charged monthly for every store, after the owner agrees to the renewal terms next to the button. Renews monthly at the same price; cancel anytime in Settings, Billing. Yearly saves $360 a store a year. No yearly renewal notice (the subscription is named `store_monthly`) |
 | What the store plan covers | Tracking every license and renewal date, renewal monitoring, rule-change alerts, the document vault, Odelia's chat, and every renewal Odelia files on her own | Included |
 | A new license, permit or registration | $299, filed and tracked to approval | When the owner approves that filing, at the price its card showed |
 | A complex license | $999 | The same. Only for the fixed list: liquor licenses, building plan review, import permits (`COMPLEX_LIST`) |
@@ -53,13 +54,15 @@ webhook. Names are what the invoice shows.
 | Env var | Product name | Amount | Interval |
 | --- | --- | --- | --- |
 | `STRIPE_PRICE_STORE_PLAN` | Placetta store plan, a store | $1,788.00 | yearly (interval count 1) |
+| `STRIPE_PRICE_STORE_MONTHLY` | Placetta store plan, monthly, a store | $179.00 | monthly (interval count 1) |
 | `STRIPE_PRICE_LICENSE` | Placetta license, filed | $299.00 | one time |
 | `STRIPE_PRICE_LICENSE_COMPLEX` | Placetta complex license, filed | $999.00 | one time |
 | `STRIPE_PRICE_RENEWAL` | Placetta renewal | $99.00 | one time |
 
 Until each exists, its item falls back to a team quote. The webhook needs no new event: license payments come in on
 `checkout.session.completed` (metadata `kind=license`) and the store plan on the subscription events (metadata
-`plan=store`).
+`plan=store`, or `plan=store_monthly` for the monthly plan). The code never creates these prices: the billing function
+checks each one against src/pricing.ts (amount, USD, interval) and quotes through the team when it's missing or different.
 
 ## Grandfathering
 
@@ -82,6 +85,7 @@ Inputs, as for the legacy plans below: team time $60 an hour loaded; Stripe 3.6%
 | Item | Price (est.) | AI (est.) | Hosting (est.) | Team hours (est.) | Other (est.) | Stripe (est.) | Cost (est.) | Gross margin (est.) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Store plan, a store a year | $1,788 | $60 | $24 | 1.5 ($90) support and renewal review | $18, about 6 renewals Odelia files on her own at $3 each | $64.37 | $256 | 86% |
+| Store plan monthly, a store for 12 months | $2,148 | $60 | $24 | 1.5 ($90) support and renewal review | $18, about 6 renewals Odelia files on her own at $3 each | $77.33 | $269 | 87% |
 | New license, each | $299 | $1 | $0.50 | 0.5 ($30), a mix of filings Odelia sends and ones the team sends | $3 printing and postage | $10.76 | $45 | 85% |
 | Complex license, each | $999 | $5 | $1 | 5 ($300), plan check corrections, hearings, follow-ups | | $35.96 | $342 | 66% |
 | Renewal outside the plan, each | $99 | $0.50 | $0.50 | 0.5 ($30) | $3 | $3.56 | $38 | 62% |

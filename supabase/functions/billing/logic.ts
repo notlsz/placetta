@@ -5,7 +5,7 @@ import { allowanceOf, approvalMatches, filingKindOf, filingModeOf, IN_PLAN, quot
 import { moduleById, moduleFactsOf, moduleQuantity, moduleQuote, type ModuleId, type ModuleQuote } from "../../../src/modules.ts";
 import { hqQuote, type BillTo } from "../../../src/hqPlan.ts";
 import { validTerm } from "../../../src/contract.ts";
-import { licenseQuoteLine, licenseTierOf, MODULE_PRICES, moduleStripeCents, moduleStripeInterval, OWNER_PRICE_ENV, SIMPLE, SIMPLE_PRICE_ENV, stripePriceMatches, TERM_PRICE_ENV, termYearCents, tierUsd,
+import { planNameOf, planTerms, type PlanInterval, licenseQuoteLine, licenseTierOf, MODULE_PRICES, moduleStripeCents, moduleStripeInterval, OWNER_PRICE_ENV, SIMPLE, SIMPLE_PRICE_ENV, stripePriceMatches, TERM_PRICE_ENV, termYearCents, tierUsd,
   type LicenseQuote, type LicenseTier, type SimpleItem } from "../../../src/pricing.ts";
 import { DEST } from "../file/destinations.ts";
 
@@ -197,3 +197,23 @@ export const STRIPE_FAILED = {
   en: "The payment service couldn't do that just now. Try again in a minute, or email support@placetta.com.",
   zh: "支付服务暂时无法完成该操作。请稍后再试，或发邮件至 support@placetta.com。",
 };
+
+/** The store plan's billing interval from the request: yearly when it isn't said (the plans sheet before monthly
+ *  existed), monthly when asked; anything else is refused. */
+export function planIntervalOf(v: unknown): PlanInterval | null {
+  if (v === undefined || v === null || v === "year") return "year";
+  return v === "month" ? "month" : null;
+}
+
+/** The Stripe Checkout for the store plan: one price for every store, the plan named by its interval, and the renewal
+ *  terms the person agreed to kept on the session and the subscription. */
+export function planCheckoutParams(o: { ws: string; back: string; price: string; qty: number; interval: PlanInterval; consentAt: string }): Record<string, string> {
+  const plan = planNameOf(o.interval), terms = planTerms(o.interval, o.qty).en;
+  return {
+    mode: "subscription", success_url: `${o.back}?billing=success`, cancel_url: `${o.back}?billing=canceled`, client_reference_id: o.ws,
+    "metadata[workspace_id]": o.ws, "metadata[plan]": plan, "metadata[interval]": o.interval, "metadata[renewal_consent]": o.consentAt,
+    ...(o.interval === "year" ? { "metadata[term_years]": "1" } : {}), "metadata[renewal_terms]": terms,
+    "subscription_data[metadata][workspace_id]": o.ws, "subscription_data[metadata][plan]": plan, "subscription_data[metadata][interval]": o.interval,
+    "line_items[0][price]": o.price, "line_items[0][quantity]": String(o.qty),
+  };
+}

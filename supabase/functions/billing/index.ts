@@ -15,7 +15,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { accessRpc, WORKS } from "../_shared/access.ts";
 import { ensureWebhook, priceId, type Item } from "../_shared/stripe_catalog.ts";
-import { chargeStep, isChain, planQuantity, filingFactsOf, filingQuote, hqCheckout, licenseFactsOf, moduleApproval, moduleOf, QUOTE_TTL_S, modulePriceOk, moduleQuote, moduleUnits, openingCounts, ownerPriceOk, prorationCents,
+import { chargeStep, isChain, planQuantity, filingFactsOf, filingQuote, hqCheckout, licenseFactsOf, moduleApproval, moduleOf, QUOTE_TTL_S, modulePriceOk, moduleQuote, moduleUnits, openingCounts, ownerPriceOk, planCheckoutParams, planIntervalOf, prorationCents,
   returnOrigins, safeReturn, simpleApproval, simplePriceOk, simpleQuote, type Store, storesFrom, STRIPE_FAILED, termOf, termPriceEnv, termPriceOk } from "./logic.ts";
 import { moduleById } from "../../../src/modules.ts";
 import { MODULE_PRICES, OWNER_PRICE_ENV, priceModelOf, SIMPLE, SIMPLE_PRICE_ENV, type SimpleItem } from "../../../src/pricing.ts";
@@ -451,19 +451,17 @@ Deno.serve(async (req) => {
       const all = await stores(ws);
       const qty = planQuantity(all.length);
       if (Number(body.shown_stores) !== qty) return fail(409, "price_changed", "The number of stores changed since it was shown. Look at the price again. Nothing was charged.", "门店数量已与显示时不同，请重新查看价格。未收取任何费用。");
-      const chain = await simplePrice("plan");
+      // yearly ($149 a store a month, billed yearly) or month to month ($179, cancel anytime); each from its own approved price
+      const interval = planIntervalOf(body.interval);
+      if (!interval) return fail(400, "bad_interval", "Choose yearly or monthly.", "请选择按年或按月。");
+      const chain = await simplePrice(interval === "month" ? "planMonthly" : "plan");
       if (!chain) {
-        await teamQuote(ws, `Quote the store plan for ${qty} store${qty === 1 ? "" : "s"}`, { stores: qty, by: user.id }, `quote:${ws}:plan:${qty}`);
+        await teamQuote(ws, `Quote the store plan, ${interval === "month" ? "monthly" : "yearly"}, for ${qty} store${qty === 1 ? "" : "s"}`, { stores: qty, interval, by: user.id }, `quote:${ws}:plan:${interval}:${qty}`);
         return fail(409, "quoted", "The team sends you a quote for the store plan. Nothing was charged.", "团队会就门店方案向您报价。未收取任何费用。");
       }
       const notReady = await webhookReady();
       if (notReady) return notReady;
-      const p: Record<string, string> = {
-        mode: "subscription", success_url: `${back}?billing=success`, cancel_url: `${back}?billing=canceled`, client_reference_id: ws,
-        "metadata[workspace_id]": ws, "metadata[plan]": "store", "metadata[renewal_consent]": new Date().toISOString(), "metadata[term_years]": "1",
-        "subscription_data[metadata][workspace_id]": ws, "subscription_data[metadata][plan]": "store",
-        "line_items[0][price]": chain, "line_items[0][quantity]": String(qty),
-      };
+      const p = planCheckoutParams({ ws, back, price: chain, qty, interval, consentAt: new Date().toISOString() });
       if (customer) p.customer = customer; else if (user.email) p.customer_email = user.email;
       const s = await stripe("checkout/sessions", p);
       await admin.from("billing").update({ checkout_store_ids: all.map((x) => x.id) }).eq("workspace_id", ws);
@@ -532,9 +530,9 @@ Deno.serve(async (req) => {
       const sub = await stripeGet(`subscriptions/${encodeURIComponent(subId)}`);
       if (!["active", "trialing", "past_due"].includes(sub.status)) return json(200, { ok: true, synced: false });
       // the store plan: every store, prorated; no opening fees (new licenses are priced one by one, or included at 10+)
-      if (sub?.metadata?.plan === "store") {
-        const planId = env(SIMPLE_PRICE_ENV.plan.env);
-        const item = (sub.items?.data ?? []).find((i: { price?: { id?: string } }) => !!planId && i.price?.id === planId);
+      if (sub?.metadata?.plan === "store" || sub?.metadata?.plan === "store_monthly") {
+        const planIds = [env(SIMPLE_PRICE_ENV.plan.env), env(SIMPLE_PRICE_ENV.planMonthly.env)].filter(Boolean);
+        const item = (sub.items?.data ?? []).find((i: { price?: { id?: string } }) => !!i.price?.id && planIds.includes(i.price.id));
         const n = planQuantity((await stores(ws)).length);
         if (item && item.quantity !== n) await stripe(`subscription_items/${item.id}`, { quantity: String(n), proration_behavior: "create_prorations" });
         return json(200, { ok: true, synced: true, stores: n, new_openings: 0 });

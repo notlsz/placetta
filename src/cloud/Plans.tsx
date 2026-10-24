@@ -6,7 +6,7 @@ import { filledName } from "../plan/prefill";
 import { I, Modal, Pill, Select } from "../ui";
 import { consentLine, disclosure, NOTICE_MAX, termDiscountLine } from "../contract.ts";
 import { MODULES, priceLabel } from "../modules.ts";
-import { APPROVED, COMPLEX_LIST, EXPEDITER_RESTAURANT_USD, PLAN_STORE_YEAR_USD, SIMPLE, TYPICAL_OPENING, typicalOpeningUsd } from "../pricing.ts";
+import { APPROVED, COMPLEX_LIST, EXPEDITER_RESTAURANT_USD, PLAN_STORE_YEAR_SAVES_USD, PLAN_STORE_YEAR_USD, planChargeUsd, planItemOf, planTerms, SIMPLE, type PlanInterval, TYPICAL_OPENING, typicalOpeningUsd } from "../pricing.ts";
 import { daysUntil } from "../time";
 import { RenewalValue } from "../ValueReport";
 
@@ -22,13 +22,16 @@ function SimplePlans({ reason, prices, onClose }: { reason: "start" | "file"; pr
   const zh = lang === "zh";
   const [busy, setBusy] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const [interval, setPlanInterval] = useState<PlanInterval>("year");
   if (!cloud) return null;
   const n = Math.max(1, (ws.stores ?? []).length);
   const online = prices?.simple?.online;
   const onPlan = cloud.plan === "monthly";
   const chain = n >= SIMPLE.chainMinStores;
-  const year = PLAN_STORE_YEAR_USD * n;
-  const start = async () => { setBusy(true); await cloud.startPlan(n); setBusy(false); };
+  const monthly = interval === "month";
+  const charge = planChargeUsd(interval, n);
+  const quoted = !!online && !online[planItemOf(interval)];
+  const start = async () => { setBusy(true); await cloud.startPlan(n, interval); setBusy(false); };
   const rows: [string, string, string, string][] = [
     [`${money(SIMPLE.licenseUsd)}`, `${SIMPLE.licenseUsd} 美元`, "Each new license, permit or registration, filed and tracked to approval", "每一项新执照、许可或登记，提交并跟踪至获批"],
     [`${money(SIMPLE.complexUsd)}`, `${SIMPLE.complexUsd} 美元`, `A complex license: ${COMPLEX_LIST.map(c => c.name.en.toLowerCase()).join(", ")}`, `复杂执照：${COMPLEX_LIST.map(c => c.name.zh).join("、")}`],
@@ -48,14 +51,21 @@ function SimplePlans({ reason, prices, onClose }: { reason: "start" | "file"; pr
         <div className="tiers two">
           <section className="plan perloc hl">
             <div className="plan-h"><b>{b(B("Store plan", "门店方案"))}</b><em>{b(B("Most popular for chains", "连锁品牌首选"))}</em></div>
-            <span className="price">{money(SIMPLE.planStoreMonthUsd)}<small>{zh ? " /店/月，按年计费" : " a store a month, billed yearly"}</small></span>
+            <div className="seg sm plan-int" role="group" aria-label={b(B("Billing", "计费方式"))}>
+              <button type="button" aria-pressed={!monthly} onClick={() => setPlanInterval("year")}>{b(B("Yearly", "按年"))}</button>
+              <button type="button" aria-pressed={monthly} onClick={() => setPlanInterval("month")}>{b(B("Monthly", "按月"))}</button>
+            </div>
+            {monthly
+              ? <span className="price">{money(SIMPLE.planStoreMonthlyUsd)}<small>{zh ? " /店/月，可随时取消" : " a store a month, cancel anytime"}</small></span>
+              : <span className="price">{money(SIMPLE.planStoreMonthUsd)}<small>{zh ? ` /店/月，按年计费（${PLAN_STORE_YEAR_USD.toLocaleString("en-US")} 美元）` : ` a store a month, billed yearly (${money(PLAN_STORE_YEAR_USD)})`}</small></span>}
+            {!monthly && <p className="note plan-save">{b(B(`Save ${money(PLAN_STORE_YEAR_SAVES_USD)} a store a year`, `每家门店每年节省 ${PLAN_STORE_YEAR_SAVES_USD} 美元`))}</p>}
             <ul>{([["Every license and renewal date tracked", "跟踪每一项执照与续期日期"], ["Renewal monitoring and rule-change alerts", "续期监控与规则变化提醒"], ["Your document vault", "文件库"], ["Odelia, in chat, for your whole team", "Odelia 聊天，全团队可用"], ["Every renewal Odelia files on her own, included", "Odelia 自行提交的续期全部包含"], [`${SIMPLE.chainMinStores} or more stores: every new license included too`, `${SIMPLE.chainMinStores} 家及以上门店：每项新执照也全部包含`]] as [string, string][]).map(([en, z], i) => <li key={i}><I.check />{zh ? z : en}</li>)}</ul>
             {onPlan ? <p className="note">{b(B("You're on the store plan.", "您已开通门店方案。"))}</p> : <>
-              <p className="note">{b(B(`${n} store${n === 1 ? "" : "s"}: ${money(year)} a year. Renews every year at the same price until you turn auto-renew off in Settings, Billing.${chain ? " Every new license is included." : ""}`, `${n} 家门店：每年 ${year.toLocaleString("en-US")} 美元。每年按同一价格自动续费，可随时在“设置 > 账单”中关闭。${chain ? "每项新执照均包含在内。" : ""}`))}{online && !online.plan ? b(B(" Online payment isn't set up for it yet, so the team sends a quote. Nothing is charged.", "该方案暂不能在线支付，团队会向您报价，不会收取任何费用。")) : ""}</p>
+              <p className="note">{b(((t) => B(t.en + (chain ? " Every new license is included." : ""), t.zh + (chain ? "每项新执照均包含在内。" : "")))(planTerms(interval, n)))}{quoted ? b(B(" Online payment isn't set up for it yet, so the team sends a quote. Nothing is charged.", "该方案暂不能在线支付，团队会向您报价，不会收取任何费用。")) : ""}</p>
               <label className="guar"><input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} /><span>{b(consentLine)}</span></label>
               <div className="plan-act">
                 <span className="mk">{zh ? `${n} 家门店` : `${n} store${n === 1 ? "" : "s"}`}</span>
-                <Pill kind="ink" disabled={busy || !agreed} onClick={() => void start()}>{busy ? "…" : online && !online.plan ? b(B("Ask for a quote", "获取报价")) : b(B(`Start, ${money(year)} a year`, `开通，每年 ${year.toLocaleString("en-US")} 美元`))}</Pill>
+                <Pill kind="ink" disabled={busy || !agreed} onClick={() => void start()}>{busy ? "…" : quoted ? b(B("Ask for a quote", "获取报价")) : monthly ? b(B(`Start, ${money(charge)} a month`, `开通，每月 ${charge.toLocaleString("en-US")} 美元`)) : b(B(`Start, ${money(charge)} a year`, `开通，每年 ${charge.toLocaleString("en-US")} 美元`))}</Pill>
               </div></>}
           </section>
           <section className="plan perloc">

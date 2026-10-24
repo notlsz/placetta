@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 import type { MemoryBook } from "./model";
 import type { Request, Step } from "./agent";
+import type { PlanInterval } from "./pricing";
 import type { Bf, Lang, T } from "./i18n";
 import type { Bi, Store, UpdateItem, Workspace } from "./model";
 import type { HqRow } from "./hq";
@@ -44,7 +45,7 @@ export type CloudCtx = {
   checkout(plan: "entry" | "starter" | "growth" | "locations", o?: { markets?: number; extra_locations?: number; tier?: "essentials" | "pro"; guarantee?: boolean; term_years?: number; renewal_consent?: boolean }): Promise<void>;
   portal(): Promise<void>;
   /** The simple model's store plan for every store, billed yearly (the renewal terms agreed to next to the button). */
-  startPlan(stores: number): Promise<void>;
+  startPlan(stores: number, interval?: PlanInterval): Promise<void>;
   buyPack(): Promise<void>;
   connect(kind: IntegrationKind, extra?: { shop?: string }): Promise<void>;
   /** Dropbox Sign: the business's own API key, checked before it's kept. */

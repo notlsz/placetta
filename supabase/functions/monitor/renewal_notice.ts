@@ -19,7 +19,8 @@ type FilingRow = { workspace_id: string; app_id: string; status: string; submitt
 
 /** The workspaces whose renewal notice goes out today. */
 export function dueNotices(rows: RenewalRow[], today: string): RenewalRow[] {
-  return rows.filter((r) => r.subscription_id && !r.hq_paid_by && (r.subscription_status === "active" || r.subscription_status === "trialing")
+  // a store plan billed month to month renews every month and is cancelled any time: no yearly notice
+  return rows.filter((r) => r.subscription_id && !r.hq_paid_by && r.subscription_plan !== "store_monthly" && (r.subscription_status === "active" || r.subscription_status === "trialing")
     && noticeDue(r.current_period_end, today, r.renewal_notice_for, r.auto_renew !== false));
 }
 

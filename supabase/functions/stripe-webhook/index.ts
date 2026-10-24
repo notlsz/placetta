@@ -114,8 +114,8 @@ Deno.serve(async (req) => {
         const tierOf = (p: { id?: string; lookup_key?: string | null } | undefined) => {
           const it = itemOf(p, env);
           if (it === "essentials" || it === "pro") return it;
-          // the simple model's store plan: a store a month, billed yearly (src/pricing.ts SIMPLE_PRICE_ENV)
-          if (p?.id && env(SIMPLE_PRICE_ENV.plan.env) === p.id) return "store" as const;
+          // the simple model's store plan: billed yearly, or month to month (src/pricing.ts SIMPLE_PRICE_ENV)
+          if (p?.id && (env(SIMPLE_PRICE_ENV.plan.env) === p.id || env(SIMPLE_PRICE_ENV.planMonthly.env) === p.id)) return "store" as const;
           return (["essentials", "pro"] as const).find((t) => Object.values(TERM_PRICE_ENV[t]).some((k) => !!p?.id && env(k) === p.id));
         };
         const located = items.filter((i) => !!tierOf(i.price));

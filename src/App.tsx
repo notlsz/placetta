@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { filingKindOf, IN_PLAN } from "./overage.ts";
+import type { PlanInterval } from "./pricing";
 import { shownCharges, shownLicense } from "./FilingCharge";
 import { speakTag } from "./langs";
 import { audit, demoAgent, dropApproval, setApp, setFact, setField, type AgentBackend, type AgentEvent, type Reply, type Request, type Step } from "./agent";
@@ -147,6 +148,7 @@ const askFor = (u: { kind: UpdateItem["kind"]; title: Bi }): Bi => ({
 
 const PLAN_LABEL: Record<string, Bi> = {
   starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版"), locations: B("Essentials, per location", "基础版（按门店）"), pro: B("Pro, per location", "专业版（按门店）"),
+  store: B("Store plan, billed yearly", "门店方案（按年计费）"), store_monthly: B("Store plan, monthly", "门店方案（按月）"),
 };
 
 export default function App({ cloud }: { cloud?: CloudSession }) {
@@ -1184,7 +1186,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       openPlans: r => { if (!ownerOk()) return; setPlans(r ?? "start"); },
       checkout: async (p, o) => { if (!ownerOk()) return; try { goTo((await api.checkout(cloud.wsId, p, o)).url); } catch (e) { fail(e); } },
       portal: async () => { if (!ownerOk()) return; try { goTo((await api.billingPortal(cloud.wsId)).url); } catch (e) { fail(e); } },
-      startPlan: async (stores: number) => { if (!ownerOk()) return; try { goTo((await api.planCheckout(cloud.wsId, stores)).url); } catch (e) { fail(e); } },
+      startPlan: async (stores: number, interval: PlanInterval = "year") => { if (!ownerOk()) return; try { goTo((await api.planCheckout(cloud.wsId, stores, interval)).url); } catch (e) { fail(e); } },
       buyPack: async () => { if (!ownerOk()) return; try { goTo((await api.buyPack(cloud.wsId)).url); } catch (e) { if ((e as api.ApiError).code === "plan_required") setPlans("start"); else fail(e); } },
       connect: async (kind, extra) => { if (!ownerOk()) return; try { goTo((await api.connectUrl(cloud.wsId, kind, extra)).url); } catch (e) { if ((e as api.ApiError).code === "not_configured") say(lang === "zh" ? "这个连接即将开放。在此之前，可把机构来信转发到 support@placetta.com，团队会帮您添加。" : "This connection opens soon. Until then, forward agency emails to support@placetta.com and the team adds them for you."); else fail(e); } },
       connectHook: async (kind, url, secret) => { if (!ownerOk()) return false; try { await api.integration(cloud.wsId, "hook_connect", { kind, url, secret: secret || undefined, lang }); setIntegrations(await api.listIntegrations(cloud.wsId)); say(lang === "zh" ? "已连接，测试消息已发到群里。" : "Connected. A test message is in the group."); return true; } catch (e) { fail(e); return false; } },

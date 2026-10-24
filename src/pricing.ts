@@ -103,7 +103,7 @@ export const OWNER_PRICE_ENV = {
 /** Whether a Stripe price is exactly the one this list expects: amount, currency and interval. A price that differs
  *  by a cent is never charged; the team quotes instead. */
 export function stripePriceMatches(p: { unit_amount?: number | null; currency?: string | null; recurring?: { interval?: string | null; interval_count?: number | null } | null; active?: boolean } | null | undefined,
-  want: { cents: number; interval: "year" | null }): boolean {
+  want: { cents: number; interval: "year" | "month" | null }): boolean {
   if (!p || p.active === false || p.unit_amount !== want.cents || String(p.currency ?? "").toLowerCase() !== "usd") return false;
   if (want.interval === null) return !p.recurring;
   return p.recurring?.interval === want.interval && (p.recurring?.interval_count ?? 1) === 1;
@@ -127,6 +127,7 @@ export function stripePriceMatches(p: { unit_amount?: number | null; currency?: 
 export const SIMPLE = {
   planStoreMonthUsd: 149,   // the store plan, a store a month, billed yearly: tracking, renewal monitoring, alerts, the
                             // document vault, Odelia's chat, and every renewal Odelia files on her own
+  planStoreMonthlyUsd: 179, // the same plan month to month, cancel anytime (founder, 2026-10-23)
   licenseUsd: 299,          // a new license, permit or registration, filed and tracked to approval
   complexUsd: 999,          // a new license on COMPLEX_LIST
   renewalUsd: 99,           // a renewal the plan doesn't include (it needs Placetta's team, or the store has no plan), after a one-tap approval
@@ -136,6 +137,27 @@ export const SIMPLE = {
 
 /** A store plan year, the amount its Stripe price must have: $149 × 12. */
 export const PLAN_STORE_YEAR_USD = SIMPLE.planStoreMonthUsd * 12;
+/** What yearly saves against month to month, a store a year: ($179 − $149) × 12. */
+export const PLAN_STORE_YEAR_SAVES_USD = (SIMPLE.planStoreMonthlyUsd - SIMPLE.planStoreMonthUsd) * 12;
+/** How a store plan is billed: yearly ($149 a month, $1,788 at checkout) or monthly ($179, cancel anytime). */
+export type PlanInterval = "year" | "month";
+export const planItemOf = (interval: PlanInterval) => (interval === "month" ? "planMonthly" as const : "plan" as const);
+/** The subscription's plan name: the yearly store plan keeps "store"; month to month is "store_monthly", so the yearly
+ *  renewal notice (supabase/functions/monitor/renewal_notice.ts) never goes to a plan that renews every month. */
+export const planNameOf = (interval: PlanInterval) => (interval === "month" ? "store_monthly" as const : "store" as const);
+export const intervalOfPlanName = (name: string | null | undefined): PlanInterval | null => (name === "store_monthly" ? "month" : name === "store" ? "year" : null);
+/** What the store plan charges for n stores, at checkout and on each renewal, in dollars. */
+export const planChargeUsd = (interval: PlanInterval, n: number) => (interval === "month" ? SIMPLE.planStoreMonthlyUsd : PLAN_STORE_YEAR_USD) * Math.max(1, n);
+/** The renewal terms shown next to the button and kept on the Stripe checkout, by interval (California's Automatic
+ *  Renewal Law: what renews, how often, at what price, and how to cancel online). */
+export function planTerms(interval: PlanInterval, n: number): { en: string; zh: string } {
+  const k = Math.max(1, n), usd = planChargeUsd(interval, k), s = `${k} store${k === 1 ? "" : "s"}`, $ = "$" + usd.toLocaleString("en-US");
+  return interval === "month"
+    ? { en: `${s}: ${$} a month. Renews every month at the same price until you cancel. Cancel anytime in Settings, Billing.`,
+        zh: `${k} 家门店：每月 ${usd.toLocaleString("en-US")} 美元。每月按同一价格自动续费，直到您取消。可随时在“设置 > 账单”中取消。` }
+    : { en: `${s}: ${$} a year. Renews every year at the same price until you turn auto-renew off in Settings, Billing.`,
+        zh: `${k} 家门店：每年 ${usd.toLocaleString("en-US")} 美元。每年按同一价格自动续费，可随时在“设置 > 账单”中关闭。` };
+}
 
 export type ComplexId = "liquor" | "plan_review" | "import";
 /** The complex list, fixed: a license is complex only when its name matches one of these. Nothing else costs $999. */
@@ -175,6 +197,7 @@ export const SIMPLE_PRICE_ENV = {
   complex: { env: "STRIPE_PRICE_LICENSE_COMPLEX", cents: SIMPLE.complexUsd * 100, interval: null },
   renewal: { env: "STRIPE_PRICE_RENEWAL", cents: SIMPLE.renewalUsd * 100, interval: null },
   plan: { env: "STRIPE_PRICE_STORE_PLAN", cents: PLAN_STORE_YEAR_USD * 100, interval: "year" },
+  planMonthly: { env: "STRIPE_PRICE_STORE_MONTHLY", cents: SIMPLE.planStoreMonthlyUsd * 100, interval: "month" },
 } as const;
 export type SimpleItem = keyof typeof SIMPLE_PRICE_ENV;
 
@@ -227,5 +250,5 @@ export function priceFacts(model: PriceModel = "simple"): string {
   const s = SIMPLE;
   return model === "legacy"
     ? "This workspace is on a plan it bought before October 2026 and keeps it unchanged; for its price, point the person to Settings, Billing. New customers pay per license."
-    : `Placetta's prices (new customers): the store plan, $${s.planStoreMonthUsd} a store a month billed yearly, covers tracking, renewal monitoring, alerts, the document vault, chat with you and every renewal you file on your own; each new license, permit or registration filed and tracked to approval $${s.licenseUsd}; complex licenses $${s.complexUsd}, only for ${COMPLEX_LIST.map(c => c.name.en.toLowerCase()).join(", ")}; a renewal that needs Placetta's team, or for a store without the plan, $${s.renewalUsd} after the owner's one-tap approval; ${s.chainMinStores} or more stores on the plan: every new license included too; the plan preview is free; government fees passed through at cost, never marked up. Every charge is shown to an owner before approval and nothing is charged without it. No discounts. Never quote any other number.`;
+    : `Placetta's prices (new customers): the store plan, $${s.planStoreMonthUsd} a store a month billed yearly (or $${s.planStoreMonthlyUsd} a store month to month, cancel anytime), covers tracking, renewal monitoring, alerts, the document vault, chat with you and every renewal you file on your own; each new license, permit or registration filed and tracked to approval $${s.licenseUsd}; complex licenses $${s.complexUsd}, only for ${COMPLEX_LIST.map(c => c.name.en.toLowerCase()).join(", ")}; a renewal that needs Placetta's team, or for a store without the plan, $${s.renewalUsd} after the owner's one-tap approval; ${s.chainMinStores} or more stores on the plan: every new license included too; the plan preview is free; government fees passed through at cost, never marked up. Every charge is shown to an owner before approval and nothing is charged without it. No discounts. Never quote any other number.`;
 }

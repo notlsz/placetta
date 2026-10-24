@@ -792,8 +792,8 @@ export const licenseQuote = (ws: string, ref: string) => fn<{ ok: true; quote: L
  *  Checkout to pay by card; the filing goes in once it's paid. */
 export const licensePay = (ws: string, ref: string, shown: { tier: string; cents: number }) =>
   fn<{ ok: true; paid: boolean; included?: boolean; url?: string; cents?: number }>("billing", { action: "license_pay", workspace_id: ws, ref, shown_tier: shown.tier, shown_cents: shown.cents, return_url: appHome() });
-/** The store plan for every store, billed yearly, after the renewal terms were agreed to next to the button. */
-export const planCheckout = (ws: string, stores: number) => fn<{ url: string; stores: number }>("billing", { action: "plan_checkout", workspace_id: ws, shown_stores: stores, renewal_consent: true, return_url: appHome() });
+/** The store plan for every store, billed yearly or month to month, after the renewal terms were agreed to next to the button. */
+export const planCheckout = (ws: string, stores: number, interval: "year" | "month" = "year") => fn<{ url: string; stores: number }>("billing", { action: "plan_checkout", workspace_id: ws, shown_stores: stores, interval, renewal_consent: true, return_url: appHome() });
 export const syncLocations = (ws: string) => fn<{ synced: boolean }>("billing", { action: "sync_locations", workspace_id: ws, return_url: appHome() });
 export const checkout = (ws: string, plan: "entry" | "starter" | "growth" | "locations", o: { markets?: number; extra_locations?: number; tier?: "essentials" | "pro"; guarantee?: boolean; term_years?: number; renewal_consent?: boolean } = {}) =>
   fn<{ url: string }>("billing", { action: "checkout", workspace_id: ws, plan, ...o, return_url: appHome() });

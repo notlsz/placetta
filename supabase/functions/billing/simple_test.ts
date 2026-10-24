@@ -82,3 +82,39 @@ Deno.test("a filing's facts: its name and the agency's fee, from the saved works
   assertEquals(licenseFactsOf(apps, "z"), null);
   assertEquals(licenseFactsOf("nope", "a"), null);
 });
+
+Deno.test("the store plan, yearly or month to month: each from its own exact Stripe price", async () => {
+  const { planCheckoutParams, planIntervalOf } = await import("./logic.ts");
+  const { PLAN_STORE_YEAR_SAVES_USD, planChargeUsd, planItemOf, planNameOf, planTerms } = await import("../../../src/pricing.ts");
+  assertEquals([SIMPLE.planStoreMonthUsd, SIMPLE.planStoreMonthlyUsd, PLAN_STORE_YEAR_SAVES_USD], [149, 179, 360]);
+  assertEquals(SIMPLE_PRICE_ENV.planMonthly, { env: "STRIPE_PRICE_STORE_MONTHLY", cents: 17900, interval: "month" });
+  // the yearly price never passes for monthly, nor the other way round, nor a $179 yearly or a $1,788 monthly price
+  const price = (unit_amount: number, interval: string) => ({ unit_amount, currency: "usd", active: true, type: "recurring", recurring: { interval, interval_count: 1, usage_type: "licensed" }, billing_scheme: "per_unit" });
+  assert(simplePriceOk("planMonthly", price(17900, "month")));
+  assert(simplePriceOk("plan", price(178800, "year")));
+  assert(!simplePriceOk("planMonthly", price(178800, "year")));
+  assert(!simplePriceOk("planMonthly", price(17900, "year")));
+  assert(!simplePriceOk("plan", price(17900, "month")));
+  assert(!simplePriceOk("plan", price(178800, "month")));
+  // the interval asked for: yearly when unsaid (an older app), monthly when asked, anything else refused
+  assertEquals([planIntervalOf(undefined), planIntervalOf("year"), planIntervalOf("month"), planIntervalOf("week"), planIntervalOf(12)], ["year", "year", "month", null, null]);
+  assertEquals([planItemOf("year"), planItemOf("month"), planNameOf("year"), planNameOf("month")], ["plan", "planMonthly", "store", "store_monthly"]);
+  assertEquals([planChargeUsd("year", 3), planChargeUsd("month", 3), planChargeUsd("month", 0)], [5364, 537, 179]);
+  // the renewal terms match the interval
+  const m = planTerms("month", 2), y = planTerms("year", 2);
+  assert(m.en.includes("$358 a month") && m.en.includes("Renews every month") && m.en.includes("Cancel anytime in Settings, Billing"), m.en);
+  assert(!/year/i.test(m.en), m.en);
+  assert(y.en.includes("$3,576 a year") && y.en.includes("Renews every year"), y.en);
+  assert(m.zh.includes("每月") && y.zh.includes("每年"));
+  const pm = planCheckoutParams({ ws: "w1", back: "https://app.placetta.com/app", price: "price_m", qty: 2, interval: "month", consentAt: "2026-10-23T00:00:00Z" });
+  assertEquals([pm["metadata[plan]"], pm["subscription_data[metadata][plan]"], pm["metadata[interval]"], pm["line_items[0][price]"], pm["line_items[0][quantity]"], pm["metadata[term_years]"]], ["store_monthly", "store_monthly", "month", "price_m", "2", undefined]);
+  assertEquals(pm["metadata[renewal_terms]"], m.en);
+  const py = planCheckoutParams({ ws: "w1", back: "https://app.placetta.com/app", price: "price_y", qty: 2, interval: "year", consentAt: "2026-10-23T00:00:00Z" });
+  assertEquals([py["metadata[plan]"], py["metadata[term_years]"], py["metadata[renewal_terms]"]], ["store", "1", y.en]);
+});
+
+Deno.test("a store plan billed monthly gets no yearly renewal notice", async () => {
+  const { dueNotices } = await import("../monitor/renewal_notice.ts");
+  const row = (plan: string) => ({ workspace_id: plan, current_period_end: "2026-11-15", subscription_status: "active", subscription_plan: plan, paid_locations: 1, auto_renew: true, renewal_notice_for: null, hq_paid_by: null, subscription_id: "sub" });
+  assertEquals(dueNotices([row("store"), row("store_monthly")], "2026-10-23").map((r) => r.workspace_id), ["store"]);
+});

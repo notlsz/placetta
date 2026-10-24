@@ -424,7 +424,7 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
       const bl = t("billing").find(x => x.workspace_id === ws);
       // the simple model, as the billing function prices it; the preview never charges, so a paid filing is marked paid
       if (bl?.price_model === "simple") {
-        if (body.action === "prices") return json({ ok: true, model: "simple", simple: { prices: SIMPLE, online: { license: true, complex: true, renewal: true, plan: true } } });
+        if (body.action === "prices") return json({ ok: true, model: "simple", simple: { prices: SIMPLE, online: { license: true, complex: true, renewal: true, plan: true, planMonthly: true } } });
         if (body.action === "license_quote" || body.action === "license_pay") {
           const app = ((t("workspaces").find(x => x.id === ws)?.state as { apps?: { id: string; name: { en: string } }[] } | undefined)?.apps ?? []).find(a => a.id === body.ref);
           if (!app) return fnErr("not_found", "That filing isn't in this workspace. Nothing was charged.", 404);
@@ -445,7 +445,7 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
         }
         if (body.action === "plan_checkout") {
           const no = needOwner(); if (no) return no;
-          Object.assign(bl, { subscription_status: "active", subscription_plan: "store", paid_locations: Number(body.shown_stores) || 1, stripe_customer_id: "cus_preview" });
+          Object.assign(bl, { subscription_status: "active", subscription_plan: body.interval === "month" ? "store_monthly" : "store", paid_locations: Number(body.shown_stores) || 1, stripe_customer_id: "cus_preview" });
           save(); return json({ ok: true, url: "preview:billing" });
         }
       }
