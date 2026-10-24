@@ -23,7 +23,7 @@ concurrency: { group: db-backup, cancel-in-progress: false }
 permissions: { contents: read }
 jobs:
   backup:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 60
     env:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}

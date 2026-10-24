@@ -17,7 +17,7 @@ concurrency:
 permissions: { contents: read }
 jobs:
   app:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -87,7 +87,7 @@ jobs:
       - name: No crash and no blank page in a real browser
         run: npm run test:crash
   functions:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -106,7 +106,7 @@ jobs:
       - name: Server function tests
         run: deno test -A supabase/functions
   database:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     services:
       # The same major and minor version as production (Supabase reports Postgres 17.11)
       postgres:
@@ -134,7 +134,7 @@ jobs:
   # account A's records through PostgREST, every RPC, every edge function action and storage, on a throwaway local
   # Postgres with every migration, PostgREST and the real functions; nothing of A's may come back or change
   tenancy:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
@@ -143,7 +143,7 @@ jobs:
         run: PG_BIN=/usr/lib/postgresql/16/bin deno run -A --no-check --no-lock --node-modules-dir=none scripts/tenancy/run.ts
   # docs/soc2/policies/secure-development.md and vulnerability-management.md
   security:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with: { fetch-depth: 0 }
