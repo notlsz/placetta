@@ -179,3 +179,28 @@ Deno.test("no model key: open data and hashed pages still run; a changed page go
   ok(a.log.saved.get("f3")!.last_hash !== "old", "and isn't flagged again tomorrow");
   ok(!a.log.saved.has("f2"), "the one only a model could check waits, untouched");
 });
+
+Deno.test("good standing: an approved license read weekly from open data; news only when it leaves good standing", async () => {
+  const chi: WsState = { apps: [{ id: "bl", name: { en: "Retail Food Establishment License", zh: "零售食品经营执照" }, agency: { en: "BACP", zh: "芝加哥商业事务局" } },
+    { id: "hp", name: { en: "Health permit", zh: "卫生许可" }, agency: { en: "CDPH", zh: "芝加哥卫生局" } }],
+    stores: [{ address: "100 N State St, Chicago, IL 60602", apps: ["bl", "hp"] }] };
+  const go = (x: StatusIO, f: StatusFiling[]) => runStatusChecks({ filings: f, states: new Map([["w1", chi]]), today, now, io: x });
+  const issued = [{ license_number: "2757733", license_status: "AAI", license_status_change_date: "2026-09-01T00:00:00.000", date_issued: "2026-09-01T00:00:00.000" }];
+  const a = io({ json: issued });
+  const r = await go(a.x, [filing("f1", "bl", "accepted", { confirmation_number: "2757733" }), filing("f2", "hp", "accepted", { confirmation_number: "77" }), filing("f3", "bl", "accepted")]);
+  eq(r.checked, 1, "only the license with its number on file and its agency's record in open data");
+  eq(a.log.updates.length, 0, "already approved: issued on the record is not news");
+  const t = a.log.saved.get("f1")!;
+  eq(Math.round((Date.parse(t.next_check_at!) - now) / 864e5), 7, "read again in a week");
+  const revoked = [{ ...issued[0], license_status: "REV", license_status_change_date: "2026-10-20T00:00:00.000" }];
+  const b = io({ json: revoked, tracking: { f1: { ...t, next_check_at: "2026-10-22T00:00:00Z" } } });
+  await go(b.x, [filing("f1", "bl", "accepted", { confirmation_number: "2757733" })]);
+  eq(b.log.updates.length, 1, "revoked on the agency's record: the owner hears");
+  ok(/no longer active/.test(b.log.updates[0].title.en) && /不再有效/.test(b.log.updates[0].title.zh) && /status pages/.test(b.log.updates[0].body!.en), JSON.stringify(b.log.updates[0]));
+  eq(b.log.saved.get("f1")!.agency_norm, "denied", "kept, so the status page shows it needs attention");
+  const c = io({ json: issued, tracking: { f1: { ...b.log.saved.get("f1")!, next_check_at: "2026-10-22T00:00:00Z" } } });
+  await go(c.x, [filing("f1", "bl", "accepted", { confirmation_number: "2757733" })]);
+  ok(c.log.updates.length === 1 && /active again/.test(c.log.updates[0].title.en), "back in good standing says so once");
+  const d = io({ json: issued, tracking: { f1: { ...t, next_check_at: "2026-10-30T00:00:00Z" } } });
+  eq((await go(d.x, [filing("f1", "bl", "accepted", { confirmation_number: "2757733" })])).checked, 0, "not due before the week is out");
+});

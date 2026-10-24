@@ -50,12 +50,32 @@ export function hotReason(appId: string, state: unknown, today: string): "openin
 /** Whether a filing is tracked at all: with the agency or the business, or hot and not finished. */
 export const inScope = (status: string, hot: boolean) => TRACKED.has(status) || (hot && !FINAL.has(status));
 
+/* Good standing after approval. Vanta's tests keep running after the audit ("Real-time monitoring of controls via
+   automated tests", vanta.com/features); an approved license here was checked until it was issued, then never again.
+   Now a license the agency publishes by number in open data is read once a week after approval, so a revocation, a
+   cancellation or a lapse on the agency's own record reaches the owner (and the status page) without anyone looking. */
+/** Days between good-standing checks of an approved license. */
+export const STANDING_EVERY = 7;
+/** An approved filing watched for good standing: approved, its number on file, and its agency's record readable in code. */
+export const inStanding = (status: string, number: string | null | undefined, lookupKind: string | null | undefined) =>
+  status === "accepted" && !!String(number ?? "").trim() && lookupKind === "open_data";
+/** What the agency's record says that takes a license out of good standing. */
+export const OUT_OF_STANDING = new Set(["expired", "denied", "withdrawn"]);
+/** A good-standing check notifies only when the record leaves good standing, or comes back to it. */
+export function standingChange(prevNorm: string | null | undefined, next: { norm: string }): "lost" | "back" | null {
+  const bad = OUT_OF_STANDING.has(next.norm), wasBad = !!prevNorm && OUT_OF_STANDING.has(prevNorm);
+  if (bad && !wasBad) return "lost";
+  if (!bad && wasBad && (next.norm === "issued" || next.norm === "approved")) return "back";
+  return null;
+}
+
 /** Whether its check is due now. */
 export const due = (t: Tracking | null | undefined, now: number) => !t?.next_check_at || Date.parse(t.next_check_at) <= now;
 
 /** When the next check runs, after this one. */
-export function nextCheckAt(now: number, o: { kind: CheckKind; hot: boolean; changed: boolean; error: boolean; unchanged: number; errors: number }): string {
+export function nextCheckAt(now: number, o: { kind: CheckKind; hot: boolean; changed: boolean; error: boolean; unchanged: number; errors: number; standing?: boolean }): string {
   const n = o.error ? ERROR_BACKOFF[Math.min(Math.max(o.errors - 1, 0), ERROR_BACKOFF.length - 1)]
+    : o.standing ? STANDING_EVERY
     : o.changed || o.kind !== "model" || o.hot ? 1
     : BACKOFF[Math.min(o.unchanged, BACKOFF.length - 1)];
   // a few minutes early, so tomorrow's daily run (which starts at the same time) always finds it due

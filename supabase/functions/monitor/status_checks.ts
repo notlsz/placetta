@@ -12,7 +12,7 @@ import type { Bi } from "../../../src/bi.ts";
 import { lookupFor, cleanKey, type Lookup, type Parsed } from "../../../src/filingPlaybooks/status.ts";
 // @deno-types="../_shared/opening.d.ts"
 import { publishedDays } from "../_shared/opening.js";
-import { due, escalate, hashOf, hotReason, inScope, nextCheckAt, NORM_WORDS, pageText, realChange, sla, type CheckKind, type Tracking } from "../../../src/tracking/index.ts";
+import { due, escalate, hashOf, hotReason, inScope, inStanding, nextCheckAt, NORM_WORDS, pageText, realChange, sla, standingChange, type CheckKind, type Tracking } from "../../../src/tracking/index.ts";
 
 export type StatusFiling = { id: string; workspace_id: string; app_id: string; title: Bi; status: string; submitted_at?: string | null; updated_at: string; confirmation_number?: string | null };
 type App = { id: string; name?: Bi; agency?: Bi; est?: Bi };
@@ -56,14 +56,17 @@ export async function runStatusChecks(o: { filings: StatusFiling[]; states: Map<
   const r: StatusRun = { checked: 0, code: 0, pages: 0, model: 0, changed: 0, notified: 0, escalated: 0, errors: 0, skipped: 0 };
   const candidates = o.filings.map((f) => {
     const st = o.states.get(f.workspace_id) ?? null;
-    return { f, st, hot: hotReason(f.app_id, st, o.today) };
-  }).filter((x) => inScope(x.f.status, !!x.hot));
+    const app = (st?.apps ?? []).find((a) => a?.id === f.app_id);
+    // an approved license whose agency publishes its record by number: watched weekly for good standing
+    const standing = !inScope(f.status, false) && inStanding(f.status, f.confirmation_number, lookupFor(app ?? { name: f.title }, addressOf(st, f.app_id))?.kind);
+    return { f, st, hot: standing ? null : hotReason(f.app_id, st, o.today), standing };
+  }).filter((x) => x.standing || inScope(x.f.status, !!x.hot));
   if (!candidates.length) return r;
   const tr = await o.io.tracking(candidates.map((x) => x.f.id));
   let budget = o.max ?? 300, modelLeft = o.maxModel ?? 30;
   // hot first, then the ones waited on longest
   candidates.sort((a, b) => Number(!!b.hot) - Number(!!a.hot) || String(a.f.submitted_at ?? "9").localeCompare(String(b.f.submitted_at ?? "9")));
-  for (const { f, st, hot } of candidates) {
+  for (const { f, st, hot, standing } of candidates) {
     const t = tr.get(f.id) ?? {};
     const app = (st?.apps ?? []).find((a) => a?.id === f.app_id);
     // escalation runs on the published time whether or not a check is due today
@@ -99,7 +102,7 @@ export async function runStatusChecks(o: { filings: StatusFiling[]; states: Map<
     const save = (x: Partial<Tracking> & { changed: boolean; error: boolean }) => o.io.saveTracking(f.id, f.workspace_id, {
       ...t, ...x, last_checked_at: new Date(o.now).toISOString(),
       unchanged_checks: x.error ? unchanged : x.changed ? 0 : unchanged + 1, check_errors: x.error ? errors + 1 : 0,
-      next_check_at: nextCheckAt(o.now, { kind, hot: !!hot, changed: x.changed, error: x.error, unchanged: x.changed ? 0 : unchanged + 1, errors: errors + 1 }),
+      next_check_at: nextCheckAt(o.now, { kind, hot: !!hot, changed: x.changed, error: x.error, unchanged: x.changed ? 0 : unchanged + 1, errors: errors + 1, standing }),
     });
     r.checked++;
     if (kind === "model") {
@@ -129,11 +132,22 @@ export async function runStatusChecks(o: { filings: StatusFiling[]; states: Map<
       await o.io.check({ workspace_id: f.workspace_id, filing_id: f.id, source: "open_data", url: url!, content_hash: hash, status_seen: p?.status ?? null, changed, confidence: p?.confidence ?? null, model_used: false, run_id: null, cost_usd: 0, error: null });
       if (!changed || !p) { await save({ changed: false, error: false, last_hash: hash }); continue; }
       r.changed++;
-      const news = realChange(t.agency_norm, t.agency_status, p);
+      // an approved license: news only when it leaves good standing on the agency's record, or comes back
+      const drift = standing ? standingChange(t.agency_norm, p) : null;
+      const news = standing ? !!drift : realChange(t.agency_norm, t.agency_status, p);
       const word = NORM_WORDS[p.norm] ?? NORM_WORDS.unknown;
       await o.io.event({ workspace_id: f.workspace_id, filing_id: f.id, kind: "agency", status: p.status, source: "open_data", confidence: p.confidence, url: lk!.see, dedupe: `agency:${hash.slice(0, 16)}`,
         title: { en: `${lk!.agency.en} shows: ${p.status}${p.date ? ` (${p.date})` : ""}`, zh: `${lk!.agency.zh}显示：${p.status}${p.date ? `（${p.date}）` : ""}` } });
-      if (news) {
+      if (news && drift) {
+        const name = app?.name ?? f.title;
+        if (await o.io.update({ workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, dedupe: `agency-standing:${f.id}:${hash.slice(0, 16)}`,
+          title: drift === "lost" ? { en: `${name.en} is no longer active on the agency's record`, zh: `${name.zh}在机构记录中已不再有效` }
+            : { en: `${name.en} is active again on the agency's record`, zh: `${name.zh}在机构记录中已恢复有效` },
+          body: drift === "lost"
+            ? { en: `${lk!.agency.en}'s own record now says "${p.status}"${p.date ? ` as of ${p.date}` : ""}. Your status pages show it as needing attention until it's resolved. Check it: ${lk!.see}`,
+                zh: `${lk!.agency.zh}的官方记录现在显示“${p.status}”${p.date ? `（${p.date}）` : ""}。在解决之前，您的状态页会显示为需处理。查看：${lk!.see}` }
+            : { en: `${lk!.agency.en}'s own record says "${p.status}" again. See it: ${lk!.see}`, zh: `${lk!.agency.zh}的官方记录重新显示“${p.status}”。查看：${lk!.see}` } })) r.notified++;
+      } else if (news) {
         const name = app?.name ?? f.title;
         if (await o.io.update({ workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, dedupe: `agency-status:${f.id}:${hash.slice(0, 16)}`,
           title: { en: `${name.en}: ${word.en} on the agency's record`, zh: `${name.zh}：机构记录显示${word.zh}` },

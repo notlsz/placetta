@@ -123,6 +123,11 @@ try {
   check("A makes an MCP token", tokJ.id && tokJ.token, tok);
   const com = await rpcAs("comment_post", { ws: WA, p_kind: "app", p_item: "app-1", p_body: `Comment ${MARK}`, p_mentions: [], p_share: false }, A.jwt);
   check("A posts a comment", com.status < 300, com);
+  // a shared status page (20261031160000_trust_pages.sql): public only by its token, which nobody else has
+  const tp = await rpcAs("trust_link_create", { ws: WA, p_store: "store-1", p_label: `Landlord ${MARK}`, p_days: 30,
+    p_snapshot: { store: { en: `Store ${MARK}`, zh: "x" }, rows: [{ id: "app-1", name: { en: `Business license ${MARK}`, zh: "x" }, status: "draft" }] } }, A.jwt);
+  const tpJ = (() => { try { return JSON.parse(tp.text); } catch { return {}; } })();
+  check("A shares a status page", tpJ.id && /^[0-9a-f]{48}$/.test(tpJ.token ?? ""), tp);
   // what only the server writes: a chat run and its messages, a memory, a filing (as agent-run, the monitor and file do)
   const runId = crypto.randomUUID(), filingId = crypto.randomUUID(), memId = `mem-${crypto.randomUUID().slice(0, 8)}`;
   await sql`insert into public.agent_runs (id, workspace_id, prompt, created_by, reply) values (${runId}, ${WA}, ${"Plan my opening " + MARK}, ${A.id}, ${"Reply " + MARK})`;
