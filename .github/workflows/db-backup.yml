@@ -42,7 +42,7 @@ jobs:
           else
             echo "::warning::Off-site backup is not set up yet (docs/soc2/runbooks/backup-restore.md, step 3). Nothing was copied."
           fi
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: steps.cfg.outputs.ok
       - name: Postgres 17 client and age
         if: steps.cfg.outputs.ok
