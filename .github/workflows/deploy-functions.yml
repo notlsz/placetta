@@ -15,7 +15,9 @@ permissions: { contents: read }
 jobs:
   deploy:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
-    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    # DEPLOY_RUNNER=self-hosted sends this job to the founder's own machine (Windows with Git Bash works) when GitHub's minutes run out
+    runs-on: ${{ vars.DEPLOY_RUNNER || 'ubuntu-latest' }}
+    defaults: { run: { shell: bash } }
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
     steps:
