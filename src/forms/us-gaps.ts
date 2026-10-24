@@ -136,7 +136,8 @@ export const US_GAPS: OfficialForm[] = [
     url: "https://azcc.gov/corporations/forms",
     feeNote: ["$150; $35 more for expedited processing.", "150 美元；加急另付 35 美元。"],
     proof: ["https://azcc.gov/docs/default-source/corps-files/instructions/l025i-instructions-application-for-registration7123c29d942a43c2810255de1f40cd19.pdf?sfvrsn=e87d3b27_12", "Filing fee. The filing fee is $150.00. For Expedited processing, add $35.00."] }),
-  // UNVERIFIED: ilsos.gov refused every automated read; the form's number and name are from its own index, the fee isn't stated
+  // ilsos.gov refused every automated read; the form's number and name are from its own index, the fee isn't stated. The
+  // proof is 805 ILCS 180/45-5 on ilga.gov, read in a browser on 2026-10-24 (src/forms/verify.ts)
   E({ id: "il-sos-foreign-llc", where: "IL", level: "state", needs: { foreignEntity: true }, method: "online", order: 12, cur: "USD",
     form: "Form LLC-45.5, Application for Admission to Transact Business", title: ["Registration of an out-of-state LLC", "外州 LLC 在伊利诺伊州注册"],
     agency: ["Illinois Secretary of State, Department of Business Services", "伊利诺伊州州务卿商业服务处"],
@@ -166,15 +167,17 @@ export const US_GAPS: OfficialForm[] = [
     how: ["Issued by the DeKalb County Board of Health once the plans are approved and the place passes its pre-opening inspection. Georgia's food service rules ask for the permit application at least 10 business days before opening.", "迪卡尔布县卫生委员会在图纸获批且开业前检查合格后发放。佐治亚州食品服务法规要求至少在开业前 10 个工作日提交许可申请。"],
     url: "https://dph.georgia.gov/document/document/short-district-office-directory-and-map/download" }),
 
-  // UNVERIFIED: both county pages answer automated reads with a 403 (Cloudflare); fees aren't stated
+  // Both county pages answer automated reads with a 403 (Cloudflare); each was read in a browser on 2026-10-24 and its proof
+  // is in src/forms/verify.ts. Neither page states the fee, so none is stated
   E({ id: "lac-fbn", where: "LAC", level: "county", needs: { reference: true }, method: "online", order: 14, cur: "USD",
     form: "Fictitious Business Name Statement", title: ["Fictitious business name (DBA)", "虚拟商业名称（DBA）登记"],
     agency: ["Los Angeles County Registrar-Recorder/County Clerk", "洛杉矶县登记官/书记官办公室"],
     how: ["A business trading under a name other than its legal name files a Fictitious Business Name Statement with the county clerk and publishes it in a local newspaper.", "以法定名称以外的名称经营的企业，须向县书记官提交虚拟商业名称声明，并在当地报纸刊登。"],
-    url: "https://lavote.gov/home/county-clerk/fictitious-business-names/frequently-asked-questions" }),
-  E({ id: "scc-fbn", where: "SCC", level: "county", needs: { reference: true }, method: "in_person", order: 14, cur: "USD",
+    url: "https://www.lavote.gov/home/county-clerk/fictitious-business-names/general-info" }),
+  E({ id: "scc-fbn", where: "SCC", level: "county", needs: { reference: true }, method: "online", order: 14, cur: "USD",
     form: "Fictitious Business Name Statement", title: ["Fictitious business name (DBA)", "虚拟商业名称（DBA）登记"],
     agency: ["Santa Clara County Clerk-Recorder", "圣克拉拉县书记官/登记官办公室"],
-    how: ["A business trading under a name other than its legal name files a Fictitious Business Name Statement with the County Clerk-Recorder and publishes it in a local newspaper.", "以法定名称以外的名称经营的企业，须向县书记官/登记官提交虚拟商业名称声明，并在当地报纸刊登。"],
-    url: "https://www.santaclaracounty.gov/node/286" }),
+    how: ["A business trading under a name other than its legal name files a Fictitious Business Name Statement with the County Clerk-Recorder (online through the Self-Service portal, in person, by mail or by email) and publishes it in a local newspaper.", "以法定名称以外的名称经营的企业，须向县书记官/登记官提交虚拟商业名称声明（可通过自助服务门户在线、现场、邮寄或电子邮件提交），并在当地报纸刊登。"],
+    url: "https://clerkrecorder.santaclaracounty.gov/business-services/apply-renew-or-refile-fictitious-business-name-fbn-statement",
+    takes: ["Up to 5 workdays to process the application.", "申请处理最多需 5 个工作日。"] }),
 ];

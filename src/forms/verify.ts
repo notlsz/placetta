@@ -17,6 +17,13 @@ export const READ_VER = "2026-10-23";
 const P = (id: string, read: string, quote: string, en: string | undefined, why: string): Fix =>
   ({ id, info: read, proof: { read, quote, checked: READ_VER, ...(en ? { en } : {}) }, why });
 const V = (o: EuEntry): OfficialForm => { const f = E(o); if (f.proof) f.proof.checked = READ_VER; return f; };
+/** Pages that refused every automated read (a 403, a Cloudflare wall, a page built in script), read by a person in a
+    browser on 2026-10-24 and the sentence copied as it appears there; scripts/eval/proof-read.py logs them as method
+    "browser" (BROWSER_SEEN), with that day, which no automated run can advance. */
+export const BROWSER_READ = "2026-10-24";
+const PB = (id: string, read: string, quote: string, why: string, extra: Partial<Fix> = {}): Fix => {
+  const f = P(id, read, quote, undefined, why); f.proof!.checked = BROWSER_READ; return { ...f, ...extra };
+};
 
 /* ------------------------------------------------------------------ pages read for more than one entry */
 const ABC_NEW = "https://www.abc.ca.gov/licensing/license-forms/new-license-application/";
@@ -29,6 +36,10 @@ const LV_BUILDING = "https://www.lasvegasnevada.gov/Business/Permits-Licenses/Bu
 const AZ_WC = "https://www.azleg.gov/ars/23/00961.htm";
 const TOR_BUILDING = "https://www.toronto.ca/services-payments/building-construction/apply-for-a-building-permit/";
 const VCH_FOOD = "https://www.vch.ca/en/health-topics/food-safety";
+const LAC_FBN = "https://www.lavote.gov/home/county-clerk/fictitious-business-names/general-info";
+const SCC_FBN = "https://clerkrecorder.santaclaracounty.gov/business-services/apply-renew-or-refile-fictitious-business-name-fbn-statement";
+const ILCS_45_5 = "https://www.ilga.gov/Documents/legislation/ilcs/documents/080501800K45-5.htm";
+const HSC = (n: string) => `https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=${n}`;
 
 /** California ABC's new license application page lists each form with whether a retail applicant files it. */
 const abc = (id: string, quote: string): Fix => P(id, ABC_NEW, quote, undefined, "Proof added from ABC's New License Application page, which lists the form and when a retail applicant files it.");
@@ -146,6 +157,19 @@ export const VERIFY_FIXES: Fix[] = [
   { id: "bos-cv", url: "https://www.boston.gov/departments/licensing-board/how-get-common-victualler-license",
     why: "Link fixed: the filing link was a Google Forms address (docs.google.com), not an official site; it now opens the Licensing Board's own page, which links the current application." },
 
+  /* ---------------------------------------------------------------- read in a browser on 2026-10-24 (each site refused every automated read) */
+  PB("lac-fbn", LAC_FBN, "Persons doing business for profit under a fictitious name (does not include surname in company name).",
+    "Proof added from the Registrar-Recorder/County Clerk's Fictitious Business Names general information page (lavote.gov answers automated reads with a 403, so it was read in a browser). The page also says \"The statement must be filed in county of principal place of business\". The link moves from the FAQ to this page, which states who files. No fee is claimed."),
+  PB("scc-fbn", SCC_FBN, "Online services are now available through our Self-Service portal.",
+    "Link fixed and proof added: santaclaracounty.gov/node/286 is a 404; the Clerk-Recorder's own FBN page (read in a browser: the site answers automated reads with a 403) offers filing online, in person, by mail and by email to bus-rdc@rec.sccgov.org, so the method is now online. It says \"Up to 5 workdays to process your application.\" No fee is stated on the page, so none is claimed.",
+    { takesSource: `${SCC_FBN} (${BROWSER_READ})` }),
+  PB("il-sos-foreign-llc", ILCS_45_5, "before transacting business in this State, a foreign limited liability company shall be admitted to do so by the Secretary of State.",
+    "Proof added from 805 ILCS 180/45-5 on the Illinois General Assembly's site (read in a browser: ilga.gov and ilsos.gov refused every automated read). The filing link stays on the Secretary of State's LLC page. No fee is claimed."),
+  PB("ca-food-handler", HSC("113948"), "handler who is hired on or after June 1, 2011, shall obtain a food handler card within 30 days after the date of hire.",
+    "Source fixed: the statewide rule was proved from a Ventura County publication (rmadocs.venturacounty.gov), one county's page shown in every California plan; it now cites Health and Safety Code section 113948 on leginfo.legislature.ca.gov (read in a browser: the site answers automated reads with a 403), which also says \"Food handler cards shall be valid for three years from the date of issuance\"."),
+  PB("ca-food-manager", HSC("113947.1"), "There shall be at least one food safety certified owner or employee at each food facility.",
+    "Source fixed: the statewide rule was proved from a Ventura County publication (rmadocs.venturacounty.gov); it now cites Health and Safety Code section 113947.1 on leginfo.legislature.ca.gov (read in a browser: the site answers automated reads with a 403)."),
+
   /* ---------------------------------------------------------------- Canada */
   P("ca-bc-liquor", "https://www2.gov.bc.ca/gov/content/employment-business/business/liquor-regulation-licensing/liquor-licence-permits", "If you want to sell liquor in B.C., you need a liquor licence or permit.", undefined,
     "Proof added from the Province of British Columbia's liquor licences page, the page the entry already linked."),
@@ -205,14 +229,12 @@ export const VERIFY_FORMS: OfficialForm[] = [
     proof: [VCH_FOOD, "We facilitate the process of issuing permits and granting health approvals required for operating food premises."] }),
 ];
 
-/** What still blocks each entry that stays UNVERIFIED after this pass (read 2026-10-23). */
+/** What still blocks each entry that stays UNVERIFIED after this pass (read 2026-10-23; Los Angeles's and Santa Clara's
+    fictitious business names and Illinois's foreign LLC admission left on 2026-10-24, read in a browser). */
 export const VERIFY_BLOCKED: Record<string, string> = {
   "ca-prop65": "OEHHA's and p65warnings.ca.gov's pages build their text in script (curl gets an empty shell) and leginfo.legislature.ca.gov answered 403; the 10-employee threshold also isn't asked by the intake",
-  "lac-fbn": "lavote.gov answered 403 (Cloudflare) to every read",
-  "scc-fbn": "santaclaracounty.gov and the clerk-recorder's site answered 403 to every read",
   "dekalb-plan-review": "dekalbpublichealth.com refused the read on 2026-10-23; Georgia's food rules (dph.georgia.gov) say the county board of health reviews the plans",
   "dekalb-food-permit": "dekalbpublichealth.com refused the read on 2026-10-23; Georgia's food rules (dph.georgia.gov) say the county board of health issues the permit",
-  "il-sos-foreign-llc": "ilsos.gov and ilga.gov refused the connection; the DCEO handbook doesn't name the admission filing",
   "ca-on-food-handler": "ontario.ca/laws builds the regulation's text in script",
   "ca-van-business-licence": "vancouver.ca answered 403",
   "ca-qc-qst": "revenuquebec.ca answered 403",

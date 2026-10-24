@@ -233,7 +233,7 @@ const fails: string[] = [];
     for (const r of library(g)) { rowsChecked++; const f = FORMS.find(x => x.id === r.id); if (f && !r.abstain) for (const x of formProof(f)) problems.add(`${g.id} (library): ${x}`); }
   }
   const st = logStats();
-  console.log(`\nPassage-level proof: ${rowsChecked} rows checked (instant plan: ${claims} claims, each quoted from its page and seen within ${MAX_PROOF_AGE} days; ${abstentions} abstentions naming who to ask); read log ${st.total} entries (${st.curl} read with curl, ${st.webfetch} read with WebFetch, ${st.missing} not found); unread: ${Object.keys(UNREAD).join(", ") || "none"}`);
+  console.log(`\nPassage-level proof: ${rowsChecked} rows checked (instant plan: ${claims} claims, each quoted from its page and seen within ${MAX_PROOF_AGE} days; ${abstentions} abstentions naming who to ask); read log ${st.total} entries (${st.curl} read with curl, ${st.webfetch} read with WebFetch, ${st.browser} read in a browser, ${st.missing} not found); unread: ${Object.keys(UNREAD).join(", ") || "none"}`);
   if (problems.size) { console.log(`  ${[...problems].slice(0, 40).join("\n  ")}`); fails.push(`proof: ${problems.size} row problems`); }
 }
 

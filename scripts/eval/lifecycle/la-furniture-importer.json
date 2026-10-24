@@ -297,8 +297,9 @@
    {
     "id": "life-dba",
     "group": "also",
-    "verified": false,
-    "source": "https://lavote.gov/home/county-clerk/fictitious-business-names/frequently-asked-questions"
+    "verified": true,
+    "source": "https://www.lavote.gov/home/county-clerk/fictitious-business-names/general-info",
+    "quote": "Persons doing business for profit under a fictitious name (does not include surname in company name)."
    },
    {
     "id": "uspto-trademark",
