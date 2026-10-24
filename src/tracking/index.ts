@@ -60,7 +60,7 @@ export const STANDING_EVERY = 7;
 export const inStanding = (status: string, number: string | null | undefined, lookupKind: string | null | undefined) =>
   status === "accepted" && !!String(number ?? "").trim() && lookupKind === "open_data";
 /** What the agency's record says that takes a license out of good standing. */
-export const OUT_OF_STANDING = new Set(["expired", "denied", "withdrawn"]);
+export const OUT_OF_STANDING = new Set(["expired", "denied", "withdrawn", "suspended"]);
 /** A good-standing check notifies only when the record leaves good standing, or comes back to it. */
 export function standingChange(prevNorm: string | null | undefined, next: { norm: string }): "lost" | "back" | null {
   const bad = OUT_OF_STANDING.has(next.norm), wasBad = !!prevNorm && OUT_OF_STANDING.has(prevNorm);
@@ -122,7 +122,7 @@ export async function hashOf(s: string): Promise<string> {
 /** What notifies the owner: a status that means something different from the last one seen. The first sighting sets
  *  the baseline and notifies only when it is news on its own (approved, issued, denied, a request, expired). */
 export function realChange(prevNorm: string | null | undefined, prevStatus: string | null | undefined, next: { status: string; norm: string }): boolean {
-  if (!prevStatus) return ["approved", "issued", "denied", "needs_info", "expired"].includes(next.norm);
+  if (!prevStatus) return ["approved", "issued", "denied", "needs_info", "expired", "suspended"].includes(next.norm);
   return next.norm !== prevNorm || (next.norm === "unknown" && next.status.trim().toLowerCase() !== prevStatus.trim().toLowerCase());
 }
 
@@ -131,8 +131,21 @@ export function realChange(prevNorm: string | null | undefined, prevStatus: stri
 export const NORM_WORDS: Record<string, Bi> = {
   received: { en: "Received", zh: "已受理" }, in_review: { en: "In review", zh: "审核中" }, needs_info: { en: "Needs something from you", zh: "需要补充材料" },
   approved: { en: "Approved", zh: "已批准" }, issued: { en: "Issued", zh: "已发证" }, denied: { en: "Denied", zh: "被拒" },
-  withdrawn: { en: "Withdrawn", zh: "已撤回" }, expired: { en: "Expired", zh: "已过期" }, unknown: { en: "Status changed", zh: "状态有变化" },
+  withdrawn: { en: "Withdrawn", zh: "已撤回" }, expired: { en: "Expired", zh: "已过期" }, suspended: { en: "Suspended", zh: "已暂停" }, unknown: { en: "Status changed", zh: "状态有变化" },
 };
+
+/* ------------------------------ the agency's expiration date ------------------------------ */
+
+/** What the agency's own record says about when a license expires, against the renewal on the workspace's calendar.
+ *  The agency's date governs: a calendar counted from a published cycle can be off by the agency's own term (Texas
+ *  aligns a new license to the owner's existing ones; New York issues for set terms). Returns what to tell the owner,
+ *  or null when they agree or the record has no date. */
+export function expiryDrift(agencyExpires: string | null | undefined, calendar: string | null | undefined, today: string):
+  { kind: "none_on_calendar" | "differs"; agency: string; calendar: string | null } | null {
+  if (!agencyExpires || !/^\d{4}-\d{2}-\d{2}$/.test(agencyExpires) || agencyExpires < today) return null;
+  if (!calendar) return { kind: "none_on_calendar", agency: agencyExpires, calendar: null };
+  return calendar === agencyExpires ? null : { kind: "differs", agency: agencyExpires, calendar };
+}
 
 /** "2 hours ago" / "2 小时前", for "last checked". */
 export function ago(iso: string | null | undefined, now: number, lang: "en" | "zh"): string {

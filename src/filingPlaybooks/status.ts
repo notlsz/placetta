@@ -17,11 +17,14 @@
 import type { Bi } from "../bi";
 
 /** What a status means, whatever the agency calls it. */
-export type Norm = "received" | "in_review" | "needs_info" | "approved" | "issued" | "denied" | "withdrawn" | "expired" | "unknown";
+export type Norm = "received" | "in_review" | "needs_info" | "approved" | "issued" | "denied" | "withdrawn" | "expired" | "suspended" | "unknown";
 export type LookupId = "sf_dbi_permits" | "la_ladbs_permits" | "nyc_dob_now_jobs" | "ca_abc_license" | "ny_sla_license" | "tx_tabc_license"
   | "chicago_building_permits" | "chicago_business_licenses" | "austin_permits" | "seattle_permits" | "boston_permits" | "philly_permits" | "philly_business_licenses"
   | "nyc_dcwp_applications";
-export type Parsed = { status: string; norm: Norm; date: string | null; detail?: string; confidence: number };
+export type Parsed = { status: string; norm: Norm; date: string | null; detail?: string; confidence: number;
+  /** The expiration date on the agency's own record (YYYY-MM-DD), when the feed publishes one: the renewal date that
+   *  counts, whatever a calendar computed. */
+  expires?: string | null };
 
 export type Lookup = {
   id: LookupId;
@@ -33,9 +36,13 @@ export type Lookup = {
   key: "permit number" | "job filing number" | "license number" | "application number";
   /** The request, from a cleaned key; null when it can't be built in code. */
   url: (key: string) => string | null;
+  /** More than one request for the same key (an agency that publishes pending, active and inactive records as separate
+   *  datasets): every one is fetched, and `parse` gets their answers as an array, in this order. url() is the first. */
+  urls?: (key: string) => string[];
   /** Where a person sees it. */
   see: string;
-  /** Reads the feed's answer: the newest matching record, or null when there is none yet. */
+  /** Reads the feed's answer (an array of answers, in order, when `urls` is set): the newest matching record, or null
+   *  when there is none yet. */
   parse?: (body: unknown) => Parsed | null;
   verified: { on: string; how: string } | null;
   source: string;
@@ -62,6 +69,7 @@ export function normStatus(raw: string): { norm: Norm; confidence: number } {
   const s = raw.trim().toLowerCase();
   const rules: [RegExp, Norm][] = [
     [/withdr|cancel+ed|void/, "withdrawn"],
+    [/\bsuspend/, "suspended"],
     [/disapprov|denied|deny|reject|disallow|refus|\brevoked\b/, "denied"],
     [/expired|lapsed|\binactive\b/, "expired"],
     [/incomplete|objection|correction|deficien|on hold|hold|need|pending (info|document|applicant)|resubmi|info(rmation)? requested|\bair requested/, "needs_info"],
@@ -86,6 +94,37 @@ const pick = (rows: unknown, statusKey: string, dateKeys: string[], detailKey?: 
   return { status, norm: n.norm, date: day(dateKeys.map(k => r[k]).find(Boolean)), confidence: n.confidence,
     ...(detailKey && r[detailKey] ? { detail: String(r[detailKey]).slice(0, 160) } : {}) };
 };
+
+/** The SLA's three datasets on data.ny.gov, by the record's own number. */
+const NY_SLA = {
+  pending: (k: string) => `https://data.ny.gov/resource/f8i8-k2gm.json?$limit=5&$where=${soql(`application_id='${k}'`)}`,
+  active: (k: string) => `https://data.ny.gov/resource/9s3h-dpkz.json?$limit=5&$where=${soql(`licensepermitid='${k}'`)}`,
+  inactive: (k: string) => `https://data.ny.gov/resource/6dg3-2z7i.json?$limit=5&$where=${soql(`license_permit_id='${k}'`)}`,
+};
+/** The SLA's pending statuses, which the general words don't read: "IntakeComplete" is received, "Conditionally
+ *  Approved" is approved with conditions still to meet, "Reconsideration" is a second look after a disapproval. */
+const NY_PENDING: Record<string, { norm: Norm; confidence: number }> = {
+  intakecomplete: { norm: "received", confidence: 0.95 }, "under review": { norm: "in_review", confidence: 0.95 },
+  "conditionally approved": { norm: "approved", confidence: 0.9 }, reconsideration: { norm: "in_review", confidence: 0.9 },
+};
+/** TABC's two datasets on data.texas.gov. */
+const TX_TABC = {
+  license: (k: string) => `https://data.texas.gov/resource/7hf9-qc9f.json?$limit=5&$where=${soql(`license_id='${k}'`)}`,
+  pending: (k: string) => `https://data.texas.gov/resource/mxm5-tdpj.json?$limit=5&$where=${soql(`primary_license_id='${k}'`)}`,
+};
+/** TABC's license statuses: a renewal pending on an active license is still active; surrendered and cancelled are
+ *  withdrawn; a suspension is its own state, out of good standing. */
+export function tabcStatus(raw: string): { norm: Norm; confidence: number } {
+  const s = raw.trim().toLowerCase();
+  if (/^suspended/.test(s)) return { norm: "suspended", confidence: 0.95 };
+  if (/^active/.test(s)) return { norm: "issued", confidence: 0.95 };
+  if (/^expired/.test(s)) return { norm: "expired", confidence: 0.95 };
+  if (/surrender|cancel/.test(s)) return { norm: "withdrawn", confidence: 0.95 };
+  return normStatus(raw);
+}
+/** Several answers, one per dataset, or empty ones when the shape is wrong. */
+const answers = (b: unknown, n: number): Record<string, unknown>[][] =>
+  Array.isArray(b) && b.length === n && b.every(Array.isArray) ? b as Record<string, unknown>[][] : Array.from({ length: n }, () => []);
 
 export const LOOKUPS: Lookup[] = [
   {
@@ -204,16 +243,50 @@ export const LOOKUPS: Lookup[] = [
     source: "https://www.abc.ca.gov/licensing/license-lookup/",
   },
   {
-    id: "ny_sla_license", agency: { en: "New York State Liquor Authority", zh: "纽约州酒类管理局" }, kind: "page", where: "NY", key: "license number",
-    // UNVERIFIED: the SLA's public license query page wasn't opened here; Odelia searches sla.ny.gov for it
-    url: () => null, see: "https://sla.ny.gov/",
-    verified: null, source: "https://sla.ny.gov/",
+    // Added 2026-10-24. Three datasets the SLA itself publishes on data.ny.gov, each refreshed daily: pending applications
+    // (by application id, "NA-0071-26-227961"), active licenses and inactive ones (by license id, "0340-19-111757"). The
+    // same key is looked up in all three, so one filing is followed from intake to issued, then for good standing and
+    // its expiration date.
+    id: "ny_sla_license", agency: { en: "New York State Liquor Authority", zh: "纽约州酒类管理局" }, kind: "open_data", where: "NY", key: "license number",
+    url: (raw) => ((k) => k ? NY_SLA.pending(k) : null)(cleanKey(raw)),
+    urls: (raw) => ((k) => k ? [NY_SLA.pending(k), NY_SLA.active(k), NY_SLA.inactive(k)] : [])(cleanKey(raw)),
+    see: "https://data.ny.gov/Economic-Development/Current-Liquor-Authority-Active-Licenses/9s3h-dpkz",
+    parse: (b) => {
+      const [pending, active, inactive] = answers(b, 3);
+      // an active license is the newest truth; then a pending application; an inactive record only when nothing else is
+      const a = active[0];
+      if (a) return { status: "Active", norm: "issued", date: day(a.lastissuedate) ?? day(a.effectivedate), expires: day(a.expirationdate), confidence: 0.95,
+        ...(a.description ? { detail: String(a.description).slice(0, 160) } : {}) };
+      const p = pick(pending, "status", ["received_date"], "description");
+      if (p) return { ...p, ...(NY_PENDING[p.status.toLowerCase()] ?? {}) };
+      const i = inactive[0];
+      if (i) return { status: "Inactive", norm: "expired", date: day(i.expiration_date), expires: day(i.expiration_date), confidence: 0.9,
+        ...(i.description ? { detail: String(i.description).slice(0, 160) } : {}) };
+      return null;
+    },
+    verified: { on: "2026-10-24", how: "queried live: pending f8i8-k2gm by application_id NA-0071-26-227961 (status IntakeComplete, received_date); active 9s3h-dpkz by licensepermitid 0032-23-139868 (lastissuedate, expirationdate); inactive 6dg3-2z7i by license_permit_id 0340-19-111757 (expiration_date); pending statuses across the feed: IntakeComplete, Under Review, Conditionally Approved, Reconsideration" },
+    source: "https://data.ny.gov/resource/9s3h-dpkz.json",
   },
   {
-    id: "tx_tabc_license", agency: { en: "Texas Alcoholic Beverage Commission", zh: "德州酒类委员会" }, kind: "page", where: "TX", key: "license number",
-    // UNVERIFIED: TABC's public inquiry wasn't opened here; its protest page (read 2026-10-22) points to AIMS
-    url: () => null, see: "https://tabc.texas.gov/contact-us/file-a-complaint-protest/protest-a-license/",
-    verified: null, source: "https://tabc.texas.gov/contact-us/file-a-complaint-protest/protest-a-license/",
+    // Added 2026-10-24. Two datasets TABC publishes on data.texas.gov, refreshed daily. A license id is assigned when the
+    // application is filed, and the pending-applications feed carries it as primary_license_id, so one number finds the
+    // application while it's pending and the license once issued.
+    id: "tx_tabc_license", agency: { en: "Texas Alcoholic Beverage Commission", zh: "德州酒类委员会" }, kind: "open_data", where: "TX", key: "license number",
+    url: (raw) => ((k) => k ? TX_TABC.license(k) : null)(cleanKey(raw)),
+    urls: (raw) => ((k) => k ? [TX_TABC.license(k), TX_TABC.pending(k)] : [])(cleanKey(raw)),
+    see: "https://data.texas.gov/dataset/TABC-License-Information/7hf9-qc9f",
+    parse: (b) => {
+      const [lic, pending] = answers(b, 2);
+      const l = lic[0];
+      if (l && String(l.license_status ?? "").trim()) {
+        const status = String(l.license_status).trim(), m = tabcStatus(status);
+        return { status, norm: m.norm, date: day(l.status_change_date) ?? day(l.current_issued_date), expires: day(l.expiration_date), confidence: m.confidence,
+          ...(l.trade_name || l.owner ? { detail: String(l.trade_name ?? l.owner).slice(0, 160) } : {}) };
+      }
+      return pick(pending, "applicationstatus", ["submission_date", "application_submission_date"]);
+    },
+    verified: { on: "2026-10-24", how: "queried live: license 7hf9-qc9f by license_id 200212337 (license_status Active, status_change_date, expiration_date); pending mxm5-tdpj rows carry the license id as primary_license_id (applicationstatus \"Pending – In Review\" or \"Received\"); statuses across the license feed: Active, Active - Renewal Pending, Cancelled, Expired, Expired - Original Required, Surrendered, Suspended, Suspended - Renewal Pending, Temporarily Surrendered" },
+    source: "https://data.texas.gov/resource/7hf9-qc9f.json",
   },
 ];
 export const lookupById = (id: string) => LOOKUPS.find((l) => l.id === id);
@@ -239,7 +312,7 @@ export function lookupFor(app: { name?: Bi; agency?: Bi }, address: string): Loo
   const what = `${app.name?.en ?? ""} ${app.agency?.en ?? ""}`;
   if (/liquor|alcohol|beer|wine|\bABC\b|\bSLA\b|TABC/i.test(what)) {
     const st = stateOf(address);
-    return LOOKUPS.find((l) => l.kind === "page" && l.where === st) ?? null;
+    return LOOKUPS.find((l) => l.where === st && l.key === "license number") ?? null;
   }
   const c = cityKey(address);
   if (/building|alteration|tenant improvement|build-?out|construction|\bDOB\b|LADBS|\bDBI\b/i.test(what)) {

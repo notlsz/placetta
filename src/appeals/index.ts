@@ -34,7 +34,7 @@ export type AppealId =
   | "sf_board_of_appeals_building" | "sf_board_of_appeals_variance" | "sf_board_of_appeals_zoning_admin" | "sf_board_of_appeals_za_violation" | "sf_board_of_appeals_permit"
   | "la_planning_appeal" | "la_bbsc_appeal" | "la_tax_assessment_review" | "la_tax_board_of_review" | "nyc_bsa_appeal" | "nyc_dcwp_denial"
   | "ca_health_permit_hearing" | "ca_health_closure_hearing" | "ca_health_plan_review" | "nyc_health_oath" | "dal_building_appeals_board"
-  | "business_license_denial";
+  | "business_license_denial" | "ma_abcc_appeal" | "nj_abc_municipal_appeal";
 
 /** Holiday lists Placetta can count with: "core" is the six every covered government closes for (New Year's Day,
  *  Memorial Day, Independence Day, Labor Day, Thanksgiving, Christmas); "TX" adds Texas's national holidays (Gov't Code
@@ -72,7 +72,7 @@ export type Appeal = {
   name: Bi;
   /** Who decides it. */
   body: Bi;
-  where: { state: "CA" | "NY" | "TX"; city?: "sf" | "la" | "nyc" | "dallas" };
+  where: { state: "CA" | "NY" | "TX" | "MA" | "NJ"; city?: "sf" | "la" | "nyc" | "dallas" };
   tz: "America/Los_Angeles" | "America/New_York" | "America/Chicago";
   /** What decisions it answers. */
   covers: Bi;
@@ -132,6 +132,12 @@ const OATH_REP = "https://www.nyc.gov/site/oath/hearings/registered-representati
 const OATH_WHAT = "https://www.nyc.gov/assets/oath/downloads/pdf/en-what-is-oathhd.pdf";
 const LADBS_BBSC = "https://dbs.lacity.gov/our-organization/building-and-safety-comissioners/bbsc-appeals-ordinances";
 const NYC_BSA_RULE = "https://www.nyc.gov/site/bsa/about/1-06-appeals-calendar-a.page";
+// Massachusetts and New Jersey liquor licenses, read 2026-10-24
+const READ2 = "2026-10-24";
+const MA_LLA = "https://www.mass.gov/how-to/appeal-a-decision-made-by-your-local-licensing-authority";
+const MA_138_67 = "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXX/Chapter138/Section67";
+const MA_HEARING = "https://www.mass.gov/service-details/prepare-for-an-appeal-or-violation-hearing";
+const NJ_ABC_APPEAL = "https://www.nj.gov/oag/abc/downloads/appeal_procedure_2013.pdf";
 const leginfo = (code: string, sec: string) => `https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=${code}&sectionNum=${sec}`;
 
 const COMMON_EVIDENCE: Bi[] = [
@@ -503,6 +509,49 @@ export const APPEALS: Appeal[] = [
     hearing: [B("As the letter says", "按来函说明")], outcomes: [B("Issued, or denial upheld", "发照或维持拒绝")],
     counsel: { advised: false, why: B("Most denials are fixed and refiled", "多数拒绝可修正后重新提交") }, sources: [SJ_BTC, HOU_START, TX_GENERAL], read: READ,
   },
+  {
+    // Massachusetts: a liquor license is granted by the city or town (the local licensing authority) and approved by the
+    // ABCC; the ABCC hears appeals from the local decision
+    id: "ma_abcc_appeal", name: B("Appeal of a local liquor license decision to the ABCC (Massachusetts)", "向马萨诸塞州酒类管制委员会（ABCC）上诉地方酒牌决定"),
+    body: B("Alcoholic Beverages Control Commission (ABCC)", "马萨诸塞州酒类管制委员会（ABCC）"), where: { state: "MA" }, tz: "America/New_York",
+    covers: B("The city or town's licensing board refused, modified, suspended, cancelled or revoked the license, or didn't act on the application within 30 days", "市镇执照委员会拒绝、修改、暂停、取消或吊销酒牌，或未在 30 天内对申请作出决定"),
+    deadline: { days: 5, unit: "business", from: "decision", trigger: B("Receipt of the local licensing authority's written decision (or the end of its 30 days to act)", "收到地方执照机构书面决定之日（或其 30 天决定期届满之日）"),
+      section: "M.G.L. c.138 §67, as the ABCC states it",
+      says: "The ABCC: an applicant or licensee \"must do so within 5 business days of receipt of the LLA's written decision\", and for an application the LLA hasn't acted on, \"within 5 business days of the expiration of the 30-day period.\" M.G.L. c.138 §67: an aggrieved applicant \"may appeal therefrom to the commission within five days following notice of such action\". Business days skip weekends and the six core holidays only; Massachusetts observes more, which can only make Placetta's date earlier.",
+      verified: { on: READ2, source: MA_LLA } },
+    form: B("A written appeal (the ABCC's page names no form)", "书面上诉（ABCC 页面未指定表格）"),
+    file: B("By mail, the ABCC's preferred way, to Alcoholic Beverages Control Commission, 95 Fourth Street, Suite 3, Chelsea, MA 02150; or by hand; or by fax to (617) 727-1510 or (617) 727-1258. Not by both mail and fax", "首选邮寄至 Alcoholic Beverages Control Commission, 95 Fourth Street, Suite 3, Chelsea, MA 02150；也可亲自递交，或传真至 (617) 727-1510 或 (617) 727-1258。邮寄与传真不可重复提交"),
+    fee: { usd: null, says: B("None stated on the ABCC's page or in §67", "ABCC 页面和 §67 均未列明费用"), verified: false },
+    grounds: [B("The board's reasons aren't supported by the facts or the record", "执照委员会的理由缺乏事实或记录支持"), B("The board didn't act within the 30 days §16B gives it", "执照委员会未在 §16B 规定的 30 天内作出决定"),
+      B("Conditions on the license answer the concern the board named", "酒牌附加条件可以解决委员会提出的顾虑")],
+    evidence: [...COMMON_EVIDENCE, B("The board's written decision and the minutes or recording of its hearing", "执照委员会的书面决定及其听证会议记录或录音"), B("Floor plan, the notice of the hearing and letters of support", "平面图、听证通知和支持信")],
+    hearing: [B("Conducted under the state's Administrative Procedure Act, M.G.L. c.30A, and audio-recorded", "依据州行政程序法（M.G.L. c.30A）进行，并全程录音"),
+      B("Before it, the parties file a jointly prepared Pre-Hearing Memorandum with the proposed exhibits and witness list; without it, exhibits can be excluded or the appeal dismissed", "听证前，双方须共同提交听证前备忘录，附拟提交的证物和证人名单；否则证物可能被排除或上诉被驳回"),
+      B("The ABCC takes it under advisement and mails a written decision", "ABCC 审议后邮寄书面决定")],
+    outcomes: [B("The ABCC approves the board's decision: an appeal to the Superior Court within 30 days of receiving it", "ABCC 维持委员会决定：可在收到后 30 天内向高等法院上诉"),
+      B("The ABCC disapproves it: the board must act on the ABCC's recommendation, and a decision it keeps can be appealed again within 5 days", "ABCC 不予维持：委员会须按 ABCC 建议处理；如委员会仍坚持原决定，可在 5 天内再次上诉")],
+    counsel: { advised: true, why: B("An adjudicatory hearing under c.30A with the local board on the other side; the ABCC's page doesn't say a lawyer isn't needed", "依据 c.30A 进行的裁决性听证，对方为地方执照委员会；ABCC 页面未说明无需律师") },
+    cites: { file: MA_LLA, hearing: MA_HEARING, grounds: MA_138_67 }, sources: [MA_LLA, MA_138_67, MA_HEARING], read: READ2,
+  },
+  {
+    // New Jersey: municipal issuing authorities decide retail licenses; the Division of ABC's Director hears the appeal
+    id: "nj_abc_municipal_appeal", name: B("Appeal of a municipal liquor license decision to the Division of ABC (New Jersey)", "向新泽西州酒类管制局上诉市政酒牌决定"),
+    body: B("Director of the New Jersey Division of Alcoholic Beverage Control", "新泽西州酒类管制局局长"), where: { state: "NJ" }, tz: "America/New_York",
+    covers: B("The municipal issuing authority denied, or otherwise acted on, a license or an application", "市政发证机构拒绝或以其他方式处理了执照或申请"),
+    deadline: { days: 30, unit: "calendar", from: "decision", trigger: B("Personal service, or mailing by registered mail, of the municipality's written notice", "市政书面通知的当面送达或挂号邮寄之日"),
+      section: "N.J. Division of ABC, Procedure to File an Appeal from a Municipal Action",
+      says: "The Division: appeals by a licensee or applicant \"must be taken within 30 days after the personal service or mailing by registered mail\" of the written notice of the municipal action. The procedure doesn't move a last day off a weekend, so Placetta doesn't either.",
+      verified: { on: READ2, source: NJ_ABC_APPEAL } },
+    form: B("A Notice and Petition of Appeal: the legal name and 12-digit license number, the municipal office, any objector, the proceedings below, the municipal resolution, the grounds and the relief asked, signed by the licensee or its attorney, with an affidavit of service on the municipality", "上诉通知暨申请书：法定名称和 12 位执照号码、市政机构、任何异议人、原程序经过、市政决议、上诉理由和请求救济，由执照持有人或其律师签署，并附向市政机构送达的宣誓书"),
+    file: B("Mail to New Jersey Division of Alcoholic Beverage Control, 140 East Front Street, 5th Floor, P.O. Box 087, Trenton, NJ 08625-0087 (leave out the P.O. box for an overnight courier)", "邮寄至 New Jersey Division of Alcoholic Beverage Control, 140 East Front Street, 5th Floor, P.O. Box 087, Trenton, NJ 08625-0087（隔夜快递请勿写邮政信箱）"),
+    fee: { usd: 100, says: B("$100 filing fee, by check or money order payable to \"Division of ABC\"", "申请费 100 美元，以支票或汇票支付，抬头为“Division of ABC”"), verified: true },
+    grounds: [B("The municipality's reasons aren't supported by the facts", "市政机构的理由缺乏事实依据"), B("The objector's concerns are answered by conditions on the license", "附加条件可以解决异议人的顾虑")],
+    evidence: [...COMMON_EVIDENCE, B("The municipal resolution, or the date of the action if the resolution isn't out yet", "市政决议；如尚未发布，则提供决定日期")],
+    hearing: [B("The Division's procedure doesn't describe the hearing; its notice after filing says what comes next", "管制局的程序未说明听证安排；提交后以其通知为准")],
+    outcomes: [B("The Director rules on the municipal action", "由局长对市政决定作出裁决")],
+    counsel: { advised: true, why: B("The Division \"strongly suggests that you seek advice from competent, private legal counsel\"", "管制局“强烈建议您向合格的私人律师寻求意见”") },
+    sources: [NJ_ABC_APPEAL], read: READ2,
+  },
 ];
 export const appealById = (id: string) => APPEALS.find((a) => a.id === id);
 
@@ -525,17 +574,21 @@ export const BUSINESS_LICENSE_ROUTES: { city: string; route: AppealId | null; wh
 const NYC = /new york|nyc|manhattan|brooklyn|queens|bronx|staten island|flushing|\bNY\s*1[01]\d{3}\b/i;
 const cityOf = (addr: string) => NYC.test(addr) ? "nyc" : /san francisco|,\s*CA\s*941\d{2}/i.test(addr) ? "sf" : /los angeles|,\s*CA\s*900\d{2}/i.test(addr) ? "la"
   : /\bdallas\b|,\s*TX\s*752\d{2}/i.test(addr) ? "dallas" : null;
-const stateOf = (addr: string) => /\b(CA|NY|TX)\b\s*\d{5}/.exec(addr)?.[1] ?? (/california/i.test(addr) ? "CA" : /new york/i.test(addr) ? "NY" : /texas/i.test(addr) ? "TX" : null);
+const stateOf = (addr: string) => /\b(CA|NY|TX|MA|NJ)\b\s*\d{5}/.exec(addr)?.[1] ?? (/california/i.test(addr) ? "CA" : /new york/i.test(addr) ? "NY" : /texas/i.test(addr) ? "TX"
+  : /massachusetts/i.test(addr) ? "MA" : /new jersey/i.test(addr) ? "NJ" : null);
 
 /** The playbook for a decision on an application at an address, by what the application is and where. A closure or a
  *  summons is named by the decision's own words (`said`). */
 export function appealFor(app: { name?: Bi; agency?: Bi }, address: string, said = ""): Appeal | null {
   const what = `${app.name?.en ?? ""} ${app.agency?.en ?? ""}`, c = cityOf(address), st = stateOf(address);
-  if (/liquor|alcohol|beer|wine|\bABC\b|\bSLA\b|TABC/i.test(what)) {
+  // New Jersey names its retail liquor licenses "plenary retail consumption" and "plenary retail distribution"
+  if (/liquor|alcohol|beer|wine|\bABC\b|\bSLA\b|TABC|plenary retail/i.test(what)) {
     if (st === "CA") return /appeals board|after (the )?hearing|proposed decision|director'?s decision/i.test(said) ? appealById("ca_abc_appeals_board")! : appealById("ca_abc_denial_hearing")!;
     if (st === "TX") return /final and appealable|rehearing (was )?(overruled|denied)|overruled by operation of law/i.test(said) ? appealById("tx_tabc_court_appeal")!
       : /final order|commission (order|denied|voted)|order (was )?signed/i.test(said) ? appealById("tx_tabc_rehearing")! : appealById("tx_tabc_denial_hearing")!;
     if (st === "NY") return appealById("ny_sla_disapproval")!;
+    if (st === "MA") return appealById("ma_abcc_appeal")!;
+    if (st === "NJ") return appealById("nj_abc_municipal_appeal")!;
     return null;
   }
   if (/variance|conditional use|zoning|planning|land use/i.test(what) || /zoning administrator|variance/i.test(said)) {
@@ -796,6 +849,11 @@ export const TIERS: Record<AppealId, Tier> = {
     "\"This agent does not have to be a lawyer or other professional\"", DAL_BOARD),
   business_license_denial: t("self_serve", "Most denials are fixed and refiled; San José and Houston have no general business license to deny.", "多数拒绝可修正后重新提交；圣何塞和休斯敦没有可被拒绝的一般营业执照。",
     "San José: \"an official receipt for payment of the tax\"; Texas: \"The State of Texas does not require a general license.\"", SJ_BTC),
+  ma_abcc_appeal: t("attorney", "An adjudicatory hearing under c.30A, with exhibits and witnesses agreed with the local board beforehand. You can send the appeal on time yourself; counsel presents it.",
+    "依据 c.30A 进行的裁决性听证，证物和证人须事先与地方委员会商定。上诉可自行按时寄出；由律师出庭陈述。",
+    "Hearings are \"conducted pursuant to the Massachusetts Administrative Procedures Act, M.G.L. c. 30A\"", MA_HEARING),
+  nj_abc_municipal_appeal: t("attorney", "The Division itself recommends counsel, and the petition may be signed by the licensee or its attorney.", "管制局本身建议聘请律师；申请书可由执照持有人或其律师签署。",
+    "The Division \"strongly suggests that you seek advice from competent, private legal counsel\"", NJ_ABC_APPEAL),
 };
 export const tierOf = (id: AppealId): Tier => TIERS[id];
 
