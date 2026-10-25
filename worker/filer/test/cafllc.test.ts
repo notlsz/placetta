@@ -67,8 +67,9 @@ class Scripted implements Model {
     return { name: "click", input: { selector: btn ? btn.selector : s.links[0].selector } };
   }
 }
-/** The fixture. review: what the File Document page shows (the guide's mock shows only its two buttons). */
-async function fixture(o: { fileDocShows?: boolean } = {}) {
+/** The fixture. fileDocShows: the File Document page shows the values (the guide's mock shows only its two buttons).
+ *  forms: noHeading drops the Forms page's heading (title only); mixed adds a File Document heading to it. */
+async function fixture(o: { fileDocShows?: boolean; forms?: "noHeading" | "mixed" | "dup" | "fee" } = {}) {
   const data: Record<string, string> = {};
   let authed = false, submissions = 0, paid = false;
   const page = (t: string, body: string) => `<!doctype html><html><head><title>${t}</title></head><body><h1>${t}</h1>${body}</body></html>`;
@@ -86,7 +87,9 @@ async function fixture(o: { fileDocShows?: boolean } = {}) {
       case "/": return html(page("Login", form("/login", field("u", "Username") + `<p><label for="p">Password</label><input id="p" name="p" type="password"></p>`, btn("Sign In"))));
       case "/login": if (data.u === "fixture-user" && data.p === "fixture-pass") { authed = true; return go("/forms"); } return go("/");
       case "/forms": if (!authed) return go("/");
-        return html(page("Forms", `<p>Business</p>` + form("/wizard", `<p>Application to Register a Foreign LLC. Fee: $70.00</p>`, btn("File Online"))));
+        { const inner = `<p>Business</p>` + (o.forms === "mixed" ? "<h2>File Document</h2>" : "") + (o.forms === "fee" ? "<p>Shopping Cart: 1 item</p>" : "")
+            + form("/wizard", `<p>Application to Register a Foreign LLC. Fee: $70.00</p>`, btn("File Online")) + (o.forms === "dup" ? form("/cart", "", btn("File Online")) : "");
+          return html(o.forms === "noHeading" ? `<!doctype html><html><head><title>Forms</title></head><body>${inner}</body></html>` : page("Forms", inner)); }
       case "/wizard": return html(page("Application to Register a Foreign LLC", form("/attach", field("n", "LLC Name") + field("j", "Jurisdiction of formation") + field("o", "Principal office"), btn("Save Draft", "/draft") + btn("Next Step"))));
       case "/draft": return html(page("Draft saved", "<p>Saved.</p>"));
       case "/attach": return html(page("Attachments", form("/review", `<p><label for="f">Certificate of Good Standing</label><input id="f" name="f" type="file"></p>`, btn("Next Step"), ` enctype="multipart/form-data"`)));
@@ -107,7 +110,7 @@ async function fixture(o: { fileDocShows?: boolean } = {}) {
 
 const servers: { close(): Promise<void> }[] = [];
 after(async () => { for (const s of servers) await s.close(); });
-const fx = async (o: { fileDocShows?: boolean } = {}) => { const p = await fixture(o); servers.push(p); return p; };
+const fx = async (o: { fileDocShows?: boolean; forms?: "noHeading" | "mixed" | "dup" | "fee" } = {}) => { const p = await fixture(o); servers.push(p); return p; };
 
 /** The worker as main.ts builds it: ca-llc-5's real playbook, rebound to the fixture's host, and the start page. */
 const pb = () => { const x = playbookFor("bizfileonline.sos.ca.gov", "ca-llc-5")!; return { playbook: { ...x.playbook, host: "127.0.0.1" }, form: x.form }; };
@@ -133,15 +136,10 @@ test("FIXTURE: the unverified playbook is refused by default: no browser opens a
   assert.ok(store.tasks.includes("first_run"));
   assert.equal(p.submissions(), 0);
 });
-// BLOCKER found by this fixture (2026-10-25): the guide's Forms pop-up opens the form with a button that is also named
-// "File Online", the same words as the sending button on File Document. The generic send words ("file") make the worker
-// treat it as a send, so the final-submit guard runs on the Forms page and the run hands back (review_differs) before it
-// reaches the form. Nothing is sent, so the guard fails safe, but ca-llc-5 can't be completed. A page-scoped `nav`
-// exception fixes it and the two tests below then pass (7/7), but it breaks the playbooks.test.ts rule that no nav
-// button shares its words with a send button. That is a safety-rule decision for the owner, so the fix isn't applied;
-// these two tests are skipped until it's decided.
-const BLOCKED = "ca-llc-5 can't pass the Forms page: its 'File Online' opener is treated as a send (owner decision pending)";
-test("FIXTURE: the supervised first run signs in, fills, uploads, never presses Print and Mail, and stops at File Document for the team", { skip: BLOCKED }, async () => {
+// The guide's Forms pop-up opens the form with a button also named "File Online", the sending button's words on File
+// Document. The playbook's page-scoped `nav` entry (owner-approved 2026-10-25) lets it open the form only on a page whose
+// first heading is exactly "Forms" and which names no send or fee page (navOn); everywhere else it is a send.
+test("FIXTURE: the supervised first run signs in, fills, uploads, never presses Print and Mail, and stops at File Document for the team", async () => {
   const p = await fx({ fileDocShows: true }), store = new Mem();
   const r = await worker(store, p.url, { allowUnverified: true }).run(store.f);
   assert.equal(r?.kind, "review", JSON.stringify(store.f.agent_log.slice(-3)));
@@ -153,7 +151,7 @@ test("FIXTURE: the supervised first run signs in, fills, uploads, never presses 
   assert.ok(!store.f.agent_log.some((e) => /print and mail/i.test(e.en)));
 });
 
-test("FIXTURE: after the team's check it presses File Online once, hands the fee to the person, then keeps the work order", { skip: BLOCKED }, async () => {
+test("FIXTURE: after the team's check it presses File Online once, hands the fee to the person, then keeps the work order", async () => {
   const p = await fx({ fileDocShows: true }), store = new Mem();
   store.f.agent_log = [{ en: "", zh: "", kind: "two_key_ok" }];
   // the person pays in the live view, then taps "I've done it"
@@ -185,13 +183,39 @@ test("FIXTURE: a filing the customer stopped is never sent", async () => {
   assert.equal(p.submissions(), 0);
 });
 
-// Today's behaviour, recorded: even after the team's approval, the run hands back on the Forms page (the BLOCKER above)
-// and nothing reaches the agency. The guard fails safe; this is the evidence that it does.
-test("FIXTURE: today the ca-llc-5 run hands back at the Forms page and nothing is sent (the blocker, failing safe)", async () => {
+test("FIXTURE: the Forms opener navigates without sending: the run reaches the form, and nothing was sent at Forms", async () => {
+  const p = await fx({ fileDocShows: true }), store = new Mem();
+  const r = await worker(store, p.url, { allowUnverified: true }).run(store.f);
+  assert.equal(r?.kind, "review");
+  assert.ok(store.f.agent_log.some((e) => e.kind === "fill" && /LLC Name/.test(e.en)), "it reached the form and filled it");
+  assert.ok(!store.f.agent_log.some((e) => e.kind === "submit" || e.kind === "review_page" && /Forms/.test(e.en)), "no submit at Forms");
+  assert.equal(p.submissions(), 0);
+});
+
+test("FIXTURE: the final File Online still needs the team's approval: in the two-key period it stops, whatever the opener did", async () => {
+  const p = await fx({ fileDocShows: true }), store = new Mem(); store.filed = 0;
+  const r = await worker(store, p.url, { allowUnverified: true }).run(store.f);
+  assert.equal(r?.kind, "review");
+  assert.equal(p.submissions(), 0);
+  assert.equal(store.f.submit_clicked_at, null);
+});
+
+test("FIXTURE: a File Document page that shows none of the approved values is never sent (the guard still compares)", async () => {
   const p = await fx(), store = new Mem();
   store.f.agent_log = [{ en: "", zh: "", kind: "two_key_ok" }];
   const r = await worker(store, p.url, { allowUnverified: true }).run(store.f);
   assert.equal(p.submissions(), 0, "nothing is sent");
   assert.equal(r?.kind, "handoff");
   assert.equal(r && "reason" in r ? r.reason : "", "review_differs");
+});
+
+test("FIXTURE: an opener on a page that isn't plainly Forms (no heading, a File Document heading too, two File Online buttons, a fee page named) gets no exception and hands back", async () => {
+  for (const variant of ["noHeading", "mixed", "dup", "fee"] as const) {
+    const p = await fx({ fileDocShows: true, forms: variant }), store = new Mem();
+    store.f.agent_log = [{ en: "", zh: "", kind: "two_key_ok" }];
+    const r = await worker(store, p.url, { allowUnverified: true }).run(store.f);
+    assert.equal(p.submissions(), 0, `${variant}: nothing is sent`);
+    assert.equal(r?.kind, "handoff", `${variant}: ${JSON.stringify(store.f.agent_log.slice(-2))}`);
+    assert.ok(!store.f.agent_log.some((e) => e.kind === "fill" && /LLC Name/.test(e.en)), `${variant}: it never reached the form`);
+  }
 });

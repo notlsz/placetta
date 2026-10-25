@@ -96,6 +96,17 @@ export function pageInjection(st: PageState): string | null {
   return h && h.score > 0 ? `hidden text: ${h.hits[0]}` : null;
 }
 const urlKey = (u: string) => { try { const x = new URL(u); return x.origin + x.pathname; } catch { return u; } };
+
+/** Teach mode: read the page a page event came from, as soon as it arrives. The page read must still be that page (the
+ *  same address, and the heading the event named among the page's headings); otherwise it's marked as not read, which
+ *  counts as flagged: the team checks it and the model never sees it. Failing closed, a fast click never hides a page. */
+export async function scanPage(page: Page, e: RawEvent): Promise<void> {
+  const st = await pageState(page).catch(() => null);
+  const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
+  const same = !!st && urlKey(st.url) === urlKey(e.url) && (!e.heading || [st.title, ...st.headings].map(norm).includes(norm(e.heading)));
+  if (!st || !same) { e.injection = "the page changed before it could be read"; return; }
+  e.text = st.text; e.injection = pageInjection(st); e.card = mustStop(st)?.reason === "payment";
+}
 export const portalKey = (host: string, official: string) => `portal:${host}:${official}`;
 
 type Ctx = {
@@ -197,7 +208,12 @@ export class Worker {
         : log(`Following the published guide for ${pb.playbook.name}${pb.playbook.verified ? "" : " (first run, watched by the Placetta team)"}`, `按${pb.playbook.name}公布的指南操作${pb.playbook.verified ? "" : "（首次运行，由快哉团队监督）"}`, "playbook", JSON.stringify(pageOutline(pb.form)).slice(0, 800)));
       // Teach mode: the recorder goes in before the first page, so every page of the portal has it.
       const events: RawEvent[] = [];
-      if (teaching) await startRecorder(page, (e) => { events.push(e); });
+      // Each page is read the moment it reports itself, not when the next poll comes round: a person who moves on
+      // quickly must not carry a page past the check for text aimed at an AI (teach.test.ts redteam). A page that
+      // can't be read as itself is treated as flagged (scanPage).
+      const scans: Promise<void>[] = [];
+      if (teaching) await startRecorder(page, (e) => { events.push(e); if (e.kind === "page") scans.push(scanPage(page, e)); });
+      (events as RawEvent[] & { scans?: Promise<void>[] }).scans = scans;
       // The agency's own start page when the destination names one (on a host many agencies share, it's the agency's path).
       const start = pb?.form.start ?? route?.start;
       await page.goto(this.c.startUrl ? this.c.startUrl(host) : start && onAny(start, hosts) ? start : `https://${host}/`);
@@ -321,7 +337,15 @@ export class Worker {
       : await loc.evaluate((el) => (el.textContent || (el as HTMLInputElement).value || el.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim()).catch(() => "");
     // a button the guide shows only opening the next form ("Schedule Inspection" on AB+C's list) isn't a send; the
     // guide's own send button always is
-    const final = !!text && !navOn(ctx.pb?.playbook, st, text) && (isFinal(text) || finalOn(ctx.pb?.playbook, st, text));
+    // The nav exception is decided from the browser's own page (pageState), never from what the model says the page is.
+    // Never after a submit was pressed (a second send is the fee or its confirmation: the person's), and only if the
+    // page read again just before the click is still the same page with the same answer: fail closed.
+    let nav = !!text && !ctx.f.submit_clicked_at && navOn(ctx.pb?.playbook, st, text);
+    if (nav) {
+      const again = await pageState(page).catch(() => null);
+      nav = !!again && urlKey(again.url) === urlKey(st.url) && navOn(ctx.pb?.playbook, again, text);
+    }
+    const final = !!text && !nav && (isFinal(text) || finalOn(ctx.pb?.playbook, st, text));
     if (final && ctx.f.submit_clicked_at) {
       // Already submitted in this run: a second "send" is the agency's fee or a confirmation of it, which is the person's.
       return { end: await this.handBack(ctx, "payment", PAY) };
@@ -560,14 +584,13 @@ export class Worker {
     // page events get what the worker reads from the page: its text (for the confirmation, kept in memory only),
     // whether it reads as instructions to an AI, and whether it takes a card
     const seen = new Set<RawEvent>();
+    const scans = (events as RawEvent[] & { scans?: Promise<void>[] }).scans ?? [];
     const readPages = async () => {
+      await Promise.all(scans);
       for (const e of events) {
         if (e.kind !== "page" || seen.has(e)) continue;
         seen.add(e);
-        const st = await pageState(ctx.page).catch(() => null);
-        if (!st) continue;
-        e.text = st.text; e.injection = pageInjection(st); e.card = mustStop(st)?.reason === "payment";
-        if (e.injection) ctx.f = await store.step(ctx.f, log("A page had text aimed at an AI. Odelia didn't use it, and the team checks those steps.", "某个页面含有针对 AI 的文字。Odelia 没有采用，团队会核对这些步骤。", "refused", e.injection.slice(0, 120)));
+        if (e.injection) ctx.f = await store.step(ctx.f, log("A page had text aimed at an AI, or couldn't be read before it changed. Odelia didn't use it, and the team checks those steps.", "某个页面含有针对 AI 的文字，或在读取前已变化。Odelia 没有采用，团队会核对这些步骤。", "refused", e.injection.slice(0, 120)));
       }
     };
     let sawAt = 0;

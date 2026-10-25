@@ -45,7 +45,39 @@ authorized.
   5. Not deployed.
 - **Commits:** `998413e0`, `4d29f6ea`, `7bf6ec00`.
 
-## M2. One US workflow, end to end. ACTIVE, BLOCKED on one owner decision
+## M2. One US workflow, end to end. DONE (fixture only)
+
+**Update 2026-10-25:** option (a) was approved and implemented. Every result below is fixture-only, and ca-llc-5 stays
+`verified: null`.
+
+- **How the opener exception works** (`navOn` in `playbooks.ts`; the call site is `exec` in `run.ts`):
+  - **Page identity:** it comes only from the browser's own page state (`pageState`: the address and visible
+    h1-h3), never from the model.
+  - **When it applies:** only for a button shared with a send button, and only on a page where all of these hold:
+    - the address parses;
+    - the first visible heading is exactly "Forms" (the `<title>` alone never counts);
+    - exactly one button or link carries the words;
+    - nothing on the page (headings, title or visible text) names File Document or a fee page.
+  - **Checks in `run.ts`:** the page is read again just before the click and must give the same answer at the same
+    address. No exception once a submit has been pressed.
+  - **Anything else gets no exception:** the final-submit guard runs, and the run hands back.
+- **Playbook rule:** `navProblems` allows a shared label only between two named, different pages. Same page,
+  overlapping page names, a send with no page, a fee page, and an entry with no page are still refused.
+- **Tests:**
+  - Unit (`playbooks.test.ts`): positive and negative cases for identity, duplicates, conflicts, missing identity and
+    the playbook rule.
+  - Fixture (`cafllc.test.ts`): 10 of 10.
+- **The teach-mode redteam failure was a real gap in the safety check, not slow test timing, and is fixed:**
+  - Page events were read on the next 100 ms poll, so a page the person left quickly was never checked for text
+    aimed at an AI.
+  - Now each page is read as it arrives (`scanPage`), and a page that has changed by then counts as flagged.
+  - New regression test: "a page that has changed before it is read counts as flagged".
+- **Full worker suite** in the worker image: 101 passed, 0 failed, 0 skipped, three runs in a row. The redteam
+  tests ran alone 10 times: 30 of 30 passed.
+- **Still unverified on the live site:** the real Forms heading and address, how the real opener looks, what the real
+  File Document page shows, and the work-order receipt.
+
+## (earlier) M2 status before the owner decision
 
 - **Candidate:** California foreign LLC registration (`ca-llc-5`) on bizfile Online, from the Secretary of State.
 - **Why this one:**
