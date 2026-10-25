@@ -1,4 +1,5 @@
 // Stripe tells us when someone pays. Signature checked by hand (HMAC-SHA256), each event applied once.
+//   checkout.session.completed, or .async_payment_succeeded when a delayed method clears (logic.ts checkoutEffect):
 //   checkout.session.completed (payment, plan=entry)  -> billing.entry_markets += markets (added in SQL, atomically)
 //   checkout.session.completed (payment, kind=license) -> that filing's license charge is paid (license_charge_settle)
 //   a store plan subscription (plan=store)             -> billing.subscription_*, plan 'store', its stores paid for
@@ -13,21 +14,7 @@ const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE
 });
 const reply = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
-const hex = (buf: ArrayBuffer) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
-function same(a: string, b: string) {
-  if (a.length !== b.length) return false;
-  let d = 0;
-  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return d === 0;
-}
-async function verified(raw: string, header: string, secret: string) {
-  const parts = Object.fromEntries(header.split(",").map((kv) => kv.split("=") as [string, string]).filter((p) => p.length === 2));
-  const t = Number(parts.t);
-  if (!t || Math.abs(Date.now() / 1000 - t) > 300) return false;
-  const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const sig = hex(await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(`${parts.t}.${raw}`)));
-  return header.split(",").filter((p) => p.startsWith("v1=")).some((p) => same(p.slice(3), sig));
-}
+import { checkoutEffect, verified } from "./logic.ts";
 
 const PLAN_NAME: Record<string, { en: string; zh: string }> = {
   entry: { en: "Entry plan", zh: "开店计划" }, starter: { en: "Starter plan", zh: "入门版" }, growth: { en: "Growth plan", zh: "成长版" }, scale: { en: "Scale plan", zh: "规模版" }, locations: { en: "Per location plan", zh: "按门店计费" },
@@ -55,42 +42,40 @@ Deno.serve(async (req) => {
 
   try {
     const o = event.data.object;
-    if (event.type === "checkout.session.completed") {
-      const ws = o.metadata?.workspace_id as string | undefined;
+    // completed (paid now) or async_payment_succeeded (a delayed method cleared): what's paid for is fulfilled
+    // (logic.ts checkoutEffect); unpaid or failed fulfils nothing
+    const c = checkoutEffect(event.type, o);
+    if (c) {
+      const ws = c.ws;
       if (ws) {
-        let markets = 0;
-        if (o.mode === "payment" && o.metadata?.plan === "entry" && o.payment_status === "paid") {
-          markets = Math.max(1, Math.min(20, Number(o.metadata?.markets) || 1));
-        }
         // a license or renewal on the simple model, paid at the price the owner approved: its filing may now go in
-        if (o.mode === "payment" && o.metadata?.kind === "license" && o.payment_status === "paid" && typeof o.metadata?.charge_id === "string") {
-          const { error } = await admin.rpc("license_charge_settle", { p_id: o.metadata.charge_id, p_ok: true, p_stripe: String(o.id ?? "") || null });
+        // (license_charge_settle only moves a pending charge to paid, so a second event changes nothing)
+        if (c.license) {
+          const { error } = await admin.rpc("license_charge_settle", { p_id: c.license, p_ok: true, p_stripe: String(o.id ?? "") || null });
           if (error) throw new Error(error.message);
           await admin.from("audit_log").insert({ workspace_id: ws, actor: "you", actor_id: null, action: { en: "Paid for a filing", zh: "已支付申报费用" }, object: { en: String(o.metadata.ref ?? ""), zh: String(o.metadata.ref ?? "") } });
-        }
-        if (o.mode === "payment" && o.metadata?.kind === "pack" && o.payment_status === "paid") {
-          // the credit was set by the billing function when it made this checkout
-          const usd = Math.max(0, Math.min(1000, Number(o.metadata?.credit_usd) || 0));
-          if (usd > 0) {
-            const { error } = await admin.rpc("ai_add_credit", { ws, p_usd: usd });
-            if (error) throw new Error(error.message);
-            await admin.from("audit_log").insert({ workspace_id: ws, actor: "you", actor_id: null, action: { en: "Added an Odelia pack", zh: "购买 Odelia 加量包" }, object: { en: `$${usd} of Odelia allowance`, zh: `$${usd} Odelia 额度` } });
-          }
         }
         // One statement in the database: the customer (kept if already set), entry markets added to what's there, the
         // stores this checkout billed for (later stores are charged by billing's sync_locations; an older checkout
         // without the list counts the stores billing knows), and the entry credit, which is never given twice.
-        const locations = o.mode === "subscription" && o.metadata?.plan === "locations";
         const { error } = await admin.rpc("billing_checkout_completed", {
-          p_ws: ws, p_customer: typeof o.customer === "string" ? o.customer : null, p_add_markets: markets,
-          p_locations: locations, p_entry_credited: locations && Number(o.metadata?.entry_credit) > 0,
+          p_ws: ws, p_customer: typeof o.customer === "string" ? o.customer : null, p_add_markets: c.markets,
+          p_locations: c.locations, p_entry_credited: c.entryCredited,
         });
         if (error) throw new Error(error.message);
-        if (markets) await log(ws, { en: "Paid", zh: "已付款" }, "entry");
+        if (c.markets) await log(ws, { en: "Paid", zh: "已付款" }, "entry");
         // the contract term the owner chose next to the renewal terms (src/contract.ts)
-        if (locations && o.metadata?.term_years) {
-          const { error: te } = await admin.rpc("billing_term_apply", { p_ws: ws, p_years: Math.max(1, Math.min(3, Number(o.metadata.term_years) || 1)) });
+        if (c.termYears) {
+          const { error: te } = await admin.rpc("billing_term_apply", { p_ws: ws, p_years: c.termYears });
           if (te) throw new Error(te.message);
+        }
+        // The pack's credit is added last, in one statement. A failure above throws before it, the event is forgotten
+        // and Stripe's retry applies it once; before 2026-10-25 the credit came first, so a later failure and its retry
+        // added the credit twice. (The credit was set by the billing function when it made this checkout.)
+        if (c.packUsd > 0) {
+          const { error } = await admin.rpc("ai_add_credit", { ws, p_usd: c.packUsd });
+          if (error) throw new Error(error.message);
+          await admin.from("audit_log").insert({ workspace_id: ws, actor: "you", actor_id: null, action: { en: "Added an Odelia pack", zh: "购买 Odelia 加量包" }, object: { en: `$${c.packUsd} of Odelia allowance`, zh: `$${c.packUsd} Odelia 额度` } });
         }
       }
     } else if (event.type.startsWith("customer.subscription.") && typeof o.metadata?.hq_email === "string" && !o.metadata?.workspace_id) {

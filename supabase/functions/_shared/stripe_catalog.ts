@@ -16,7 +16,11 @@ export const CATALOG: Record<Item, Def> = {
   pack: { env: "STRIPE_PRICE_PACK", lookup: "placetta_odelia_pack", name: "Odelia pack", description: "$25 more Odelia allowance, carried over until it's used.", cents: 4900 },
 };
 
-export const WEBHOOK_EVENTS = ["checkout.session.completed", "customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"];
+// async_payment_succeeded: a checkout paid by a delayed method (a bank debit) completes unpaid, and is fulfilled when
+// this arrives. An endpoint Placetta made earlier keeps its old list until it's made again; a hand-made one (or one
+// made before this) must add these two events in Stripe (docs/implementation-backlog.md M4).
+export const WEBHOOK_EVENTS = ["checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.async_payment_failed",
+  "customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"];
 const VERSION = "2025-03-31.basil";
 
 type Env = (k: string) => string | undefined;

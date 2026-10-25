@@ -812,8 +812,11 @@ export function CloudRoot() {
         catch (e) { notice = (e as api.ApiError).message; }
       }
       if (params.get("connect_error")) notice = lang === "zh" ? "连接未完成，请重试。" : "That connection didn't finish. Try again.";
-      if (params.get("billing") === "success") notice = lang === "zh" ? "付款成功。几秒后方案会自动生效。" : "Payment received. Your plan switches on in a few seconds.";
-      if (params.get("billing") === "cancel") notice = lang === "zh" ? "已取消付款。" : "Checkout canceled.";
+      // Stripe sends people back before its webhook lands, and a delayed method (a bank debit) can still be unpaid: say
+      // only that checkout finished. The plan switches on from the webhook, never from this page. Subscription checkouts
+      // come back with billing=canceled and one-time ones with billing=cancel: both are a cancel.
+      if (params.get("billing") === "success") notice = lang === "zh" ? "结账已完成。付款确认后方案会自动生效，通常只需几秒。" : "Checkout complete. Your plan switches on once the payment is confirmed, usually within seconds.";
+      if (params.get("billing") === "cancel" || params.get("billing") === "canceled") notice = lang === "zh" ? "已取消付款。" : "Checkout canceled.";
       // a brand's invite link (src/hqPlan.ts inviteLink): kept for Settings, Team, Headquarters, where an owner joins
       if (params.get("hq")) { try { sessionStorage.setItem("placetta-hq-invite", params.get("hq")!); } catch { /* storage off */ } notice = lang === "zh" ? "品牌邀请：在“设置 > 团队 > 总部”中点“加入品牌”。" : "A brand invited you: choose Join the brand in Settings, Team, Headquarters."; }
       if ([...params.keys()].length) history.replaceState(null, "", location.pathname + location.hash);

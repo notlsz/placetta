@@ -110,6 +110,62 @@ authorized.
   - `test:home`: all passed.
 - **Worker:** not changed, so not re-run.
 
+## M4. Billing verification in Stripe test mode. DONE LOCALLY; Stripe test mode BLOCKED (authorized 2026-10-25)
+
+- **Stripe test mode: not run.**
+  - No Stripe key of any kind is available here: no `STRIPE_*` environment variable, none in `.env.production`, and
+    no Stripe CLI login.
+  - So no test-mode checkout was created and no webhook was delivered by Stripe.
+  - Nothing below proves the live Stripe integration works; it proves the code's own decisions on synthetic events
+    and requests.
+  - **Missing prerequisite:** a Stripe *test-mode* secret key (`sk_test_…`), set only in a disposable environment,
+    plus a way to deliver test webhooks to a local function (`stripe listen`, or a test endpoint you approve).
+    Creating an endpoint, product or price in Stripe needs separate approval, even in test mode.
+- **Code read** (`supabase/functions/billing/`, `stripe-webhook/`, `_shared/stripe_catalog.ts`, the billing
+  migrations and `src/pricing.ts`):
+  - **Checkout:** server-side price ids, checked against the approved amount before use.
+  - **Who may buy:** only an owner, with two-step sign-in and SSO enforced, and only on their own workspace.
+  - **Workspace id:** taken from the signed-in workspace, not from the client, and written onto the checkout and
+    the subscription.
+  - **Return URL:** allowlisted.
+  - **Subscription events:** applied only if no newer one was applied (`subscription_event_at`).
+  - **Event ids:** each applied once (`stripe_events` primary key); on an error the id is forgotten so Stripe's retry
+    applies it.
+  - **Entitlement:** comes only from webhook-written billing rows (`plan_of`, `can_file_app`), never from the return
+    page.
+  - **License charges:** `license_charge_settle` moves only a pending charge to paid.
+  - **Prices:** match the documented ones ($149 a store a month billed yearly; $179 month to month; $299, $999, $99;
+    pack $49 for $25). No pricing was changed.
+- **Defects found and fixed** (synthetic tests in `stripe-webhook/logic_test.ts`):
+  1. **A pack's credit could be given twice.**
+     - The webhook added the credit before a later database call; if that call failed, the event was forgotten and
+       Stripe's retry added the credit again.
+     - The credit is now added last.
+  2. **Delayed payment methods were never fulfilled.**
+     - A checkout paid by a delayed method (a bank debit) completes "unpaid" and is paid later by
+       `checkout.session.async_payment_succeeded`, an event the webhook neither handled nor subscribed to.
+     - It is now handled (`checkoutEffect`), and both async events are in `WEBHOOK_EVENTS`.
+     - An endpoint made before this keeps its old event list; adding the two events in Stripe needs a dashboard
+       change (not done).
+  3. **A signature header with two timestamps.**
+     - The parser took the last `t=`; a header with two is now refused.
+     - It wasn't exploitable (the HMAC still had to match), but it fails closed now.
+  4. **Copy on the return page:**
+     - "Payment received" was shown on return even when the payment was still pending; it now says checkout is
+       complete and the plan switches on once payment is confirmed.
+     - Subscription checkouts return with `billing=canceled`, which showed nothing; it now says checkout was
+       canceled.
+- **Checks:**
+  - Deno server tests: 525 passed, 0 failed, including 3 new webhook tests.
+  - `deno check` on `stripe-webhook` and `billing`, `tsc -b` and `plain-words`: all pass.
+  - Full `npm run build`: exit 0. `test:leak`: no leak in the 10,146 built files.
+- **Not changed:** prices, Stripe configuration, products, endpoints, approval gates, or anything about filing.
+- **Not covered locally:**
+  - Failed renewals (past_due/unpaid) come from `customer.subscription.updated`. The status is applied, and only
+    active or trialing counts as a plan.
+  - The SQL ordering and idempotency are covered by `supabase/tests/store_billing.sql`, which needs Postgres (not
+    available here; it runs in CI).
+
 ## (earlier) M2 status before the owner decision
 
 - **Candidate:** California foreign LLC registration (`ca-llc-5`) on bizfile Online, from the Secretary of State.
