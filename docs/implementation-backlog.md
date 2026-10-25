@@ -202,6 +202,26 @@ process; it is never to be pasted in chat.
   - Full `npm run build`: exit 0. `test:leak`: ok.
 - **Not checked:** a visual pass in a browser at phone and desktop width. The line uses the existing plan-note style.
 
+## M7. Positioning brief. DONE
+
+- **Deliverable:** `docs/POSITIONING-BRIEF.md`.
+- **What it sorts:** capabilities into available, switched off or fixture-tested, and future, each with its evidence.
+- **Also in it:** what must not be claimed, three acquisition experiments (not run, no spend), and the interview
+  questions.
+- **What it rests on:** nothing customer-facing changed. Every number cites a generated doc or a test in this
+  repository.
+
+## M8. Release readiness. NO-GO (report in `docs/RELEASE-READINESS.md`)
+
+- **Blockers:**
+  - GitHub Actions won't start any job (an account billing or spending limit). Every required check on PR #28, and on
+    `main`, fails with no steps run.
+  - Billing isn't verified against Stripe test mode.
+- **What's ready:**
+  - The PR is mergeable and has no migrations.
+  - The local suites pass, as listed in the report.
+- **Nothing merged or deployed.**
+
 ## (earlier) M2 status before the owner decision
 
 - **Candidate:** California foreign LLC registration (`ca-llc-5`) on bizfile Online, from the Secretary of State.
