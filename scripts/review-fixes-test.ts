@@ -17,7 +17,7 @@ import { PROOF } from "../src/forms/proof";
 import { SAMPLE_WS } from "../src/sample";
 import { APPEALS, appealSay, namesBody } from "../src/appeals";
 import { denialAppeal, scheduleAppeals } from "../src/finish";
-import { approvalRoute, routeOf } from "../src/approvalRoute";
+import { approvalRoute, planSplit, planSplitLine, routeOf } from "../src/approvalRoute";
 import ROUTES from "../src/forms/filingRoutes.json";
 import { channelsFrom } from "../src/channelsRule";
 import { B } from "../src/bi";
@@ -164,6 +164,17 @@ export function reviewFixTests(ok: Ok, eq: Eq) {
   // every form abroad in the route data is either notReady or a kind the card knows; none abroad claims a send today
   const abroad = Object.entries(ROUTES as Record<string, string>).filter(([id]) => (formById(id)?.currency ?? "USD") !== "USD");
   ok(abroad.every(([, k]) => k === "notReady"), "forms abroad: only notReady entries (none is switched on)", abroad);
+
+  console.log("\n# M6: the plan card says who acts on what's left, from the route data only");
+  const app = (official: string, o: Record<string, unknown> = {}) => ({ official, status: "todo", ...o }) as never;
+  const sp = planSplit([app("sj-sign"), app("ca-llc-5"), app("gb-food"), app("mx-rfc"), app("no-such-form"), app("sj-sign", { abstain: true }),
+    app("sj-sign", { status: "approved" }), app("x", { yours: "insurance" }), app("sj-sign", { specialist: B("A notary files it", "公证员提交") })]);
+  eq(sp, { sends: 2, yours: 4, unsure: 1 }, "portal routes count as Odelia's; gb-food (not switched on), a form abroad, an unknown form and a specialist's are yours; an abstained step is unsure; approved and owner-only steps aren't counted");
+  const line = planSplitLine(sp)!;
+  ok(/^Odelia can submit 2 for you once you approve; 4 she prepares for you to send; 1 she can't confirm yet/.test(line.en) && line.zh.includes("2 项") && line.zh.includes("4 项") && line.zh.includes("1 项"), "the line says it in both languages", line);
+  ok(!/automatic|guarantee|ready to open|save|hours|%/i.test(line.en), "no automation, savings, readiness or percentage claim", line.en);
+  ok(planSplitLine(planSplit([app("sj-sign", { status: "approved" })])) === null, "nothing open: no line");
+  eq(planSplit([app("gb-food")]), { sends: 0, yours: 1, unsure: 0 }, "gb-food alone: never counted as Odelia's");
 
   console.log("\n# Gap: channels that aren't set up show nothing to press");
   eq(channelsFrom(null, null), { talk: false, interpreter: false, rehearse: false, calls: false, texts: false, imessage: false }, "with no answer, nothing is set up");

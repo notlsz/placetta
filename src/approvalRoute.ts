@@ -55,6 +55,33 @@ export function personSteps(app?: Pick<Application, "official">): Bi[] {
   return (Array.isArray(steps) ? steps : []).filter((s) => s === "pay").map((s) => STEP[s]);
 }
 
+/** What the plan's open items are, by who acts (M6, the plan card): only from the route data above, never a guess.
+ *  sends: a route Odelia submits on (portal, email, fax, mail; a fax after the owner signs counts too).
+ *  yours: Odelia prepares it and the business (or its notary or lawyer) submits it, including a form whose automatic
+ *  filing isn't switched on. unsure: Odelia doesn't claim the step at all yet (abstain): ask the office it names.
+ *  A step the owner does alone (a certificate, insurance) isn't counted. */
+export function planSplit(apps: Pick<Application, "official" | "status" | "abstain" | "yours" | "specialist">[]): { sends: number; yours: number; unsure: number } {
+  const open = apps.filter((a) => a.status !== "approved" && !a.yours);
+  const out = { sends: 0, yours: 0, unsure: 0 };
+  for (const a of open) {
+    if (a.abstain) { out.unsure++; continue; }
+    const k = routeOf(a);
+    if (!a.specialist && (k === "portal" || k === "email" || k === "fax" || k === "mail" || k === "faxSigned")) out.sends++;
+    else out.yours++;
+  }
+  return out;
+}
+
+/** The plan card's line for that split, in plain words; null when nothing is open. */
+export function planSplitLine(s: { sends: number; yours: number; unsure: number }): Bi | null {
+  if (!s.sends && !s.yours && !s.unsure) return null;
+  const en: string[] = [], zh: string[] = [];
+  if (s.sends) { en.push(`Odelia can submit ${s.sends} for you once you approve`); zh.push(`${s.sends} 项经您批准后可由 Odelia 提交`); }
+  if (s.yours) { en.push(`${s.yours} she prepares for you to send`); zh.push(`${s.yours} 项由她准备、由您提交`); }
+  if (s.unsure) { en.push(`${s.unsure} she can't confirm yet, so she names who to ask`); zh.push(`${s.unsure} 项尚无法确认，她会告诉您该问哪个机构`); }
+  return B(`${en.join("; ")}.`.replace(/^./, (c) => c.toUpperCase()), `${zh.join("；")}。`);
+}
+
 /** An estimate that states no time is no estimate ("To be confirmed", "The agency doesn't publish a processing time"). */
 const SAYS_NO_TIME = /^(to be confirmed|待确认)$|doesn'?t publish|未公布|no published/i;
 

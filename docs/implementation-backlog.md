@@ -166,6 +166,42 @@ authorized.
   - The SQL ordering and idempotency are covered by `supabase/tests/store_billing.sql`, which needs Postgres (not
     available here; it runs in CI).
 
+**M4 status (2026-10-25):** local verification DONE, commit `053d4d4f`. Stripe test mode BLOCKED: no test key is
+available in any project configuration. The owner was asked once to supply one through the secure configuration
+process; it is never to be pasted in chat.
+
+## M5. Bounded coverage. BLOCKED on scope (owner question asked 2026-10-25)
+
+- **Agreed list:** none exists yet.
+- **Proposed smallest batch** (from the M1 research): three UK GOV.UK services.
+  - `gb-incorporate`: Companies House incorporation.
+  - `gb-vat`: HMRC VAT registration.
+  - `gb-paye`: HMRC PAYE employer registration.
+  - Each would be a destination, a routing test and a fixture test, kept disabled and marked `notReady`.
+  - All three need Government Gateway or GOV.UK One Login, which the person signs in to themselves.
+- **Not started until approved.**
+- **Tibet stays blocked** until its locality and administrative scope are clarified.
+- **Mexico** would be a separate batch.
+
+## M6. Signup value display. DONE
+
+- **What it shows:** the plan card on Home (`pages.tsx`, Plan tab) adds one line under the plan summary, from the same
+  route data as every approval card (`approvalRoute.ts` `planSplit` / `planSplitLine`). For example: "Odelia can
+  submit 2 for you once you approve; 4 she prepares for you to send; 1 she can't confirm yet, so she names who to ask."
+- **How it counts:**
+  - An open item counts as Odelia's only when its route is one she submits on.
+  - Items not switched on (gb-food), forms abroad, unknown forms and specialists' forms count as the person's.
+  - Abstained steps count as unconfirmed.
+  - Approved and owner-only steps aren't counted.
+- **No new claims:** none about savings, time, percentages or readiness. The existing design classes are reused
+  (`plan-note`); no new CSS or components.
+- **Evidence:**
+  - `test:agent`: 1924 passed, 0 failed, including 5 new M6 checks (the counting, both languages, no claim words, an
+    empty plan, and gb-food alone).
+  - `tsc -b`, `plain-words` and `test:home` (all passed) pass.
+  - Full `npm run build`: exit 0. `test:leak`: ok.
+- **Not checked:** a visual pass in a browser at phone and desktop width. The line uses the existing plan-note style.
+
 ## (earlier) M2 status before the owner decision
 
 - **Candidate:** California foreign LLC registration (`ca-llc-5`) on bizfile Online, from the Secretary of State.
