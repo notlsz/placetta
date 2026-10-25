@@ -1379,6 +1379,25 @@ export const DEST: Record<string, Dest> = {
     signature: "wet", payment: "in_person",
     checked: "2026-10-18", source: "https://www.abc.ca.gov/wp-content/uploads/forms/ABC-244.pdf",
   },
+  // England, Wales and Northern Ireland: the Food Standards Agency's "Register a Food Business" service, which sends the
+  // registration to the local authority for the address. GOV.UK's guidance links it as "Apply now: Register with your
+  // local authority" (https://register.food.gov.uk/new) and says to register "at least 28 days before trading".
+  // Read with curl on 2026-10-25: the start page answered 200 on register.food.gov.uk itself, with no redirect to a
+  // sign-in (HMRC's services redirect to Government Gateway; this one doesn't), and says it "uses a cookie to create the
+  // registration": so noLogin. The pages past the start were not walked, and no run has filed on it: there is no
+  // playbook, so the first filings stop at the agency's review page for the two-key check like any new form, and the
+  // worker hands back on any account, identity, code or payment page (guards.ts). Its fee isn't stated here because the
+  // pages read didn't state one; its sign-off page wasn't seen, so the signature is the portal's own declaration.
+  "gb-food": {
+    portal: "register.food.gov.uk",
+    portalUrl: "https://register.food.gov.uk/new",
+    noLogin: true,
+    signature: "typed",
+    onBehalf: "unstated",
+    checked: "2026-10-25",
+    source: "https://www.gov.uk/guidance/food-business-registration",
+    also: ["https://register.food.gov.uk/new"],
+  },
 };
 
 /**

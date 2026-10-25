@@ -23,6 +23,29 @@ const dest = (d: Partial<Dest> = {}): Dest => ({
 const ENV = envFrom((k) => ({ FILER_AGENCIES: "test-form", FILER_CHANNELS: "email,fax,mail,portal", FILER_ENABLED: "1", TELNYX_API_KEY: "k", TELNYX_FAX_CONNECTION_ID: "c", TELNYX_FAX_FROM: "+1", LOB_API_KEY: "test_x", LOB_FROM: "{}" } as Record<string, string>)[k]);
 const docs = new Set([`${WS}/filings/f1.pdf`]);
 
+Deno.test("the UK food business registration goes to the Food Standards Agency's own site, and only when switched on", () => {
+  const d = DEST["gb-food"];
+  assert(!!d, "gb-food has a destination");
+  // the agency's own host, started from its own page, with no saved login (the service makes the registration itself)
+  assertEquals(d.portal, "register.food.gov.uk");
+  assertEquals(new URL(d.portalUrl!).hostname, "register.food.gov.uk");
+  assertEquals(d.noLogin, true);
+  // no channel that would send Placetta's own copy: the portal is the only way it goes
+  assert(!d.email && !d.fax && !d.mail && !d.owner, "portal only");
+  assertEquals(destinationProblems({ "gb-food": d }), []);
+  const f = filing({ official: "gb-food" });
+  // the worker on and the portal channel on: the agency's site, with no saved login needed
+  assertEquals(pick(f, d, ENV, { hasLogin: false, mailConnected: true }), "portal");
+  // the portal channel off, or the worker off: nothing Placetta sends on, so the business sends it
+  assertEquals(pick(f, d, { ...ENV, channels: ["email", "fax", "mail"] }, { hasLogin: false, mailConnected: true }), "team");
+  assertEquals(pick(f, d, { ...ENV, portalWorker: false }, { hasLogin: true, mailConnected: true }), "team");
+  // the kill switch: nothing is sent for gb-food until it is listed in FILER_AGENCIES
+  assertEquals(killSwitchOn(f, ENV), false);
+  const on = envFrom((k) => ({ FILER_AGENCIES: "gb-food", FILER_CHANNELS: "portal", FILER_ENABLED: "1" } as Record<string, string>)[k]);
+  assertEquals(killSwitchOn(f, on), true);
+  assertEquals(pick(f, d, on, { hasLogin: false, mailConnected: false }), "portal");
+});
+
 Deno.test("Show Odelia how: only for a form filed on an agency site, with the worker on, before it's sent or while it's free", () => {
   const site = dest({ portal: "tax.county.example" });
   assertEquals(teachRefusal(filing({}, { agent_state: "handoff", channel: "team" }), site, ENV), null);
