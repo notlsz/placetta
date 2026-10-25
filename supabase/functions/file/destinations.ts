@@ -1386,17 +1386,25 @@ export const DEST: Record<string, Dest> = {
   // sign-in (HMRC's services redirect to Government Gateway; this one doesn't), and says it "uses a cookie to create the
   // registration": so noLogin. The pages past the start were not walked, and no run has filed on it: there is no
   // playbook, so the first filings stop at the agency's review page for the two-key check like any new form, and the
-  // worker hands back on any account, identity, code or payment page (guards.ts). Its fee isn't stated here because the
-  // pages read didn't state one; its sign-off page wasn't seen, so the signature is the portal's own declaration.
+  // worker hands back on any account, identity, code or payment page (guards.ts).
+  // Fee: none. The Food Standards Agency's own guidance says "Registration of your food business is free and can't be
+  // refused." (read with curl on 2026-10-25, the `also` page below).
+  // Signature: NOT CONFIRMED. The service's start page names no declaration, and the pages after "Begin registration"
+  // weren't walked, so whether it asks for a declaration, and in whose name, isn't known. "typed" is the closest value
+  // the schema has for a declaration ticked on the site; it is only safe because a portal filing never sends Placetta's
+  // own signed copy (check() in logic.ts skips the signature for a portal route). Whether a filer may submit it for the
+  // business isn't stated either (onBehalf "unstated"). Until both are seen on the live pages, gb-food stays out of
+  // FILER_AGENCIES: not ready for activation.
   "gb-food": {
     portal: "register.food.gov.uk",
     portalUrl: "https://register.food.gov.uk/new",
     noLogin: true,
     signature: "typed",
+    payment: "none",
     onBehalf: "unstated",
     checked: "2026-10-25",
     source: "https://www.gov.uk/guidance/food-business-registration",
-    also: ["https://register.food.gov.uk/new"],
+    also: ["https://register.food.gov.uk/new", "https://www.food.gov.uk/business-guidance/getting-ready-to-start-your-food-business"],
   },
 };
 
