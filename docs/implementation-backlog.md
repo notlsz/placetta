@@ -77,6 +77,39 @@ authorized.
 - **Still unverified on the live site:** the real Forms heading and address, how the real opener looks, what the real
   File Document page shows, and the work-order receipt.
 
+## M3. Approval-card route data for non-US forms. DONE (authorized 2026-10-25)
+
+- **Before:**
+  - `scripts/filing-coverage.mjs` wrote `src/forms/filingRoutes.json` from USD forms only.
+  - Any other form fell back to "team" ("Odelia prepares it and you send it").
+  - The card couldn't show a step the person still takes on a route Odelia sends (the agency's fee on its site).
+- **Now** (nothing that decides what gets sent has changed: FILER_AGENCIES, fees, approval gates and live filing are
+  all untouched):
+  - **The generator** also writes forms abroad, but only when their route isn't the default, and writes
+    `src/forms/filingSteps.json`.
+  - **`filingSteps.json`** lists the step that stays the person's: today only "pay", for routes Odelia files on a
+    portal where the agency takes its fee on its own site.
+  - **`notReady` on a destination** (`destinations.ts`; card metadata only) makes the card say "Odelia prepares it
+    and you submit it on the agency's site" and "Automatic filing isn't switched on for this form yet". It's set
+    for gb-food, whose blockers stay open.
+  - **`approvalRoute.ts`** reads only the route kinds it knows, using the entry's own key (no inherited keys).
+    Anything missing or unknown gets the conservative "Odelia prepares it and you send it".
+  - **`RouteLine` (`pages.tsx`)** shows the steps with the existing `appr-time` style. No new CSS or components.
+- **US cards:** the route kind is the same for every one of the 393 US forms. The routes file diff is one added line,
+  `gb-food: notReady`.
+  - What's new on US cards is the fee line: "You pay the agency's fee on its site" on 48 forms Odelia files on a
+    portal where the agency takes its fee there. That corrects a missing disclosure; it isn't a behaviour change.
+- **Evidence:**
+  - `test:agent`: 1919 passed, 0 failed. The new checks cover a US route with the fee step, gb-food disabled, a
+    form abroad the person sends, an unknown form, an empty id, inherited keys, and that every form abroad in the
+    routes file is notReady.
+  - Deno tests: 522 passed, 0 failed, including the new notReady rule.
+  - `filing-coverage --check`, `deno check` on `file/index.ts`, `tsc -b` and `plain-words`: all pass.
+  - Full `npm run build`: exit 0.
+  - `test:leak`: no server-only text, model id or secret in the 10,146 built files.
+  - `test:home`: all passed.
+- **Worker:** not changed, so not re-run.
+
 ## (earlier) M2 status before the owner decision
 
 - **Candidate:** California foreign LLC registration (`ca-llc-5`) on bizfile Online, from the Secretary of State.

@@ -20,6 +20,7 @@ const OUT = join(root, "docs/FILING_COVERAGE.md");
 // The same first-try routes as data the app can read (src/approvalRoute.ts): form id to route kind and nothing else (no
 // addresses, numbers or logins), so an approval card can say who files it without the browser reaching destinations.ts
 const ROUTES_OUT = join(root, "src/forms/filingRoutes.json");
+const STEPS_OUT = join(root, "src/forms/filingSteps.json");
 
 // Counted with --dest-dir on the destinations.ts and logic.ts of commit 8c8599b2 (2026-10-17), before the research of
 // 2026-10-18. The same registry of US forms is counted both times (recounted when forms batch 3, the target markets and the accuracy fixes added 58 US forms:
@@ -52,12 +53,14 @@ try {
     const now = existsSync(OUT) ? readFileSync(OUT, "utf8") : "";
     if (now !== result.markdown) problems.push("docs/FILING_COVERAGE.md is out of date: run node scripts/filing-coverage.mjs and commit it");
     if ((existsSync(ROUTES_OUT) ? readFileSync(ROUTES_OUT, "utf8") : "") !== result.routesJson) problems.push("src/forms/filingRoutes.json is out of date: run node scripts/filing-coverage.mjs and commit it");
+    if ((existsSync(STEPS_OUT) ? readFileSync(STEPS_OUT, "utf8") : "") !== result.stepsJson) problems.push("src/forms/filingSteps.json is out of date: run node scripts/filing-coverage.mjs and commit it");
     if (problems.length) { console.error(problems.join("\n")); process.exit(1); }
     console.log(`filing coverage: ${result.counts.forms} US forms, ${result.counts.selfFilable} self-filable, every destination cited`);
   } else {
     if (result.problems.length) { console.error(result.problems.join("\n")); process.exit(1); }
     writeFileSync(OUT, result.markdown);
     writeFileSync(ROUTES_OUT, result.routesJson);
+    writeFileSync(STEPS_OUT, result.stepsJson);
     console.log(`wrote docs/FILING_COVERAGE.md: ${JSON.stringify(result.counts.channels)}`);
   }
 } finally {
@@ -162,7 +165,17 @@ function report(FORMS, D, L) {
     md.push(`| ${place(r.f.where)} | ${cell(r.f.title.en)} (\`${r.f.id}\`) | ${cell(why)} | ${src} |`);
   }
   md.push("");
-  const byId = rows.map((r) => [r.f.id, r.route]).sort(([a], [b]) => a.localeCompare(b));
+  // The app's route data (src/approvalRoute.ts): every US form, and each form abroad whose route isn't the default
+  // ("team": prepared for the business to send, which is what a missing entry means). A destination marked notReady
+  // (an unconfirmed sign-off or on-behalf rule) is "notReady" whatever pick() says, so no card promises automatic filing.
+  const abroad = FORMS.filter((f) => f.currency && f.currency !== "USD").map((f) => ({ f, d: DEST[f.id], route: routeOf(f, DEST[f.id]) }));
+  const kind = (r) => (r.d?.notReady ? "notReady" : r.route);
+  for (const r of [...rows, ...abroad]) if (r.d?.notReady && !r.d.portal && !r.d.email && !r.d.fax && !r.d.mail) problems.push(`${r.f.id}: notReady on a destination with no channel`);
+  const byId = [...rows, ...abroad.filter((r) => kind(r) !== "team")].map((r) => [r.f.id, kind(r)]).sort(([a], [b]) => a.localeCompare(b));
   const routesJson = "{\n" + byId.map(([id, r]) => `${JSON.stringify(id)}: ${JSON.stringify(r)}`).join(",\n") + "\n}\n";
-  return { problems, counts, markdown: md.join("\n"), routesJson };
+  // The steps that stay the person's on a route Placetta sends (src/approvalRoute.ts): today only the agency's fee
+  // taken on its own site, which the worker always hands to the person (worker/filer/src/guards.ts).
+  const steps = [...rows, ...abroad].filter((r) => kind(r) === "portal" && r.d?.payment === "portal").map((r) => r.f.id).sort();
+  const stepsJson = "{\n" + steps.map((id) => `${JSON.stringify(id)}: ["pay"]`).join(",\n") + "\n}\n";
+  return { problems, counts, markdown: md.join("\n"), routesJson, stepsJson };
 }
