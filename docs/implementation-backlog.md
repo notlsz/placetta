@@ -97,7 +97,7 @@ authorized.
   - **`RouteLine` (`pages.tsx`)** shows the steps with the existing `appr-time` style. No new CSS or components.
 - **US cards:** the route kind is the same for every one of the 393 US forms. The routes file diff is one added line,
   `gb-food: notReady`.
-  - What's new on US cards is the fee line: "You pay the agency's fee on its site" on 48 forms Odelia files on a
+  - What's new on US cards is the fee line: "You pay the agency's fee on its site" on 47 forms Odelia files on a
     portal where the agency takes its fee there. That corrects a missing disclosure; it isn't a behaviour change.
 - **Evidence:**
   - `test:agent`: 1919 passed, 0 failed. The new checks cover a US route with the fee step, gb-food disabled, a
