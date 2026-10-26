@@ -28,6 +28,8 @@ Everything else on the branch is either tested locally or switched off. Nothing 
   spending limit needs to be increased."
 - **Not specific to this PR:** `main`'s own runs at `8695ccd3` fail the same way.
 - **Vercel's preview build:** reported separately by the Vercel app, which isn't one of the jobs that couldn't start.
+  At `5f378a02` it passed ("Deployment has completed"). It's a preview, not production. The preview page wasn't
+  opened.
 
 ## Local evidence (this branch)
 
