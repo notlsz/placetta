@@ -176,6 +176,14 @@ export function reviewFixTests(ok: Ok, eq: Eq) {
   ok(planSplitLine(planSplit([app("sj-sign", { status: "approved" })])) === null, "nothing open: no line");
   eq(planSplit([app("gb-food")]), { sends: 0, yours: 1, unsure: 0 }, "gb-food alone: never counted as Odelia's");
 
+  console.log("\n# M5: the three GOV.UK services say the person submits them; nothing claims automatic filing");
+  for (const id of ["gb-incorporate", "gb-vat", "gb-paye"]) {
+    const r = approvalRoute({ kind: "file" }, { official: id, est: undefined })!;
+    ok(r.who.en === "Odelia prepares it and you submit it on the agency's site" && !!r.steps?.some(x => /isn't switched on/.test(x.en)), `${id}: prepared, you submit it, not switched on`, r);
+    ok(!r.steps?.some(x => /pay the agency's fee/.test(x.en)), `${id}: no fee step while it isn't switched on`, r.steps);
+  }
+  eq(planSplit([app("gb-incorporate"), app("gb-vat"), app("gb-paye")]), { sends: 0, yours: 3, unsure: 0 }, "the plan card counts all three as the person's");
+
   console.log("\n# Gap: channels that aren't set up show nothing to press");
   eq(channelsFrom(null, null), { talk: false, interpreter: false, rehearse: false, calls: false, texts: false, imessage: false }, "with no answer, nothing is set up");
   eq(channelsFrom({ talk: true, interpreter: false, rehearse: true }, { configured: true, voice: false, sms: true, imessage: false }), { talk: true, interpreter: false, rehearse: true, calls: false, texts: true, imessage: false }, "each channel from its own credentials");

@@ -46,6 +46,34 @@ Deno.test("the UK food business registration goes to the Food Standards Agency's
   assertEquals(pick(f, d, on, { hasLogin: false, mailConnected: false }), "portal");
 });
 
+Deno.test("M5: the three GOV.UK services are routed to their own HMRC paths, marked not ready, and send nothing until switched on", () => {
+  const ids = ["gb-incorporate", "gb-vat", "gb-paye"] as const;
+  const paths = { "gb-incorporate": "/register-your-company", "gb-vat": "/register-for-vat", "gb-paye": "/register-for-paye" };
+  for (const id of ids) {
+    const d = DEST[id];
+    assert(!!d && d.portal === "www.tax.service.gov.uk", `${id}: on HMRC's service host`);
+    assertEquals(d.tenant, paths[id], `${id}: its own path on the shared host`);
+    assert(new URL(d.portalUrl!).pathname.startsWith(paths[id]), `${id}: starts on that path`);
+    assert(!d.noLogin, `${id}: needs the business's own sign-in`);
+    assert(!!d.notReady && d.notReady.length > 10, `${id}: says why it isn't ready`);
+    assert(!d.email && !d.fax && !d.mail && !d.owner, `${id}: no channel but the site`);
+    assertEquals(destinationProblems({ [id]: d }), []);
+    const f = filing({ official: id });
+    // off by default: the kill switch refuses it, whatever the worker settings
+    assertEquals(killSwitchOn(f, ENV), false, `${id}: off by default`);
+    // with no saved login it never goes to the site
+    assertEquals(pick(f, d, ENV, { hasLogin: false, mailConnected: true }), "team", `${id}: no login, no site`);
+  }
+  // a saved login for one HMRC service never opens another on the same host
+  assert(hasLoginFor(["https://www.tax.service.gov.uk/register-for-vat"], DEST["gb-vat"]));
+  assert(!hasLoginFor(["https://www.tax.service.gov.uk/register-for-vat"], DEST["gb-paye"]));
+  assert(!hasLoginFor(["https://www.tax.service.gov.uk/register-for-vat"], DEST["gb-incorporate"]));
+  // the £100 fee is paid on the site (the person's), and nothing else claims a fee
+  assertEquals(DEST["gb-incorporate"].payment, "portal");
+  assertEquals(DEST["gb-vat"].payment, undefined);
+  assertEquals(DEST["gb-paye"].payment, undefined);
+});
+
 Deno.test("Show Odelia how: only for a form filed on an agency site, with the worker on, before it's sent or while it's free", () => {
   const site = dest({ portal: "tax.county.example" });
   assertEquals(teachRefusal(filing({}, { agent_state: "handoff", channel: "team" }), site, ENV), null);

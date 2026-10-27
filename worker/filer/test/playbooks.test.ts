@@ -12,6 +12,10 @@ const state = (heading: string): PageState => ({ url: "https://x.gov/", title: h
 
 // Portals with three or more forms whose only published guides are videos, so there's nothing written to follow.
 const VIDEO_ONLY = new Set(["plus.fairfaxcounty.gov"]);
+// A host shared by separate government services, each on its own path, all behind the person's own sign-in, where
+// every form there is marked notReady (M5, 2026-10-25): there's no one portal to write a playbook for, and nothing past
+// sign-in was seen. The exemption ends the moment any form on the host loses notReady (checked below).
+const SHARED_SIGN_IN = new Set(["www.tax.service.gov.uk"]);
 
 test("every portal three or more forms use has a playbook, and the state formation portals with written guides too", () => {
   assert.equal(PLAYBOOKS.length, 10);
@@ -19,7 +23,13 @@ test("every portal three or more forms use has a playbook, and the state formati
   const count = new Map<string, number>();
   for (const d of Object.values(DEST)) if (d.portal) count.set(d.portal, (count.get(d.portal) ?? 0) + 1);
   for (const [host, n] of count) {
-    if (n >= 3 && !VIDEO_ONLY.has(host)) assert.ok(PLAYBOOKS.some((p) => p.host === host), `${host} has ${n} forms and no playbook`);
+    if (n >= 3 && !VIDEO_ONLY.has(host) && !SHARED_SIGN_IN.has(host)) assert.ok(PLAYBOOKS.some((p) => p.host === host), `${host} has ${n} forms and no playbook`);
+  }
+  // the shared sign-in exemption holds only while every form on that host is notReady, each on its own path
+  for (const host of SHARED_SIGN_IN) {
+    const forms = Object.entries(DEST).filter(([, d]) => d.portal === host);
+    assert.ok(forms.length > 0 && forms.every(([, d]) => !!d.notReady && !d.noLogin && !!d.tenant), `${host}: every form not ready, signed in, on its own path`);
+    assert.equal(new Set(forms.map(([, d]) => d.tenant)).size, forms.length, `${host}: one path per service`);
   }
   for (const p of PLAYBOOKS) assert.ok(Object.keys(p.forms).length >= 1 && (count.get(p.host) ?? 0) >= Object.keys(p.forms).length, p.host);
 });

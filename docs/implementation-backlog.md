@@ -170,16 +170,58 @@ authorized.
 available in any project configuration. The owner was asked once to supply one through the secure configuration
 process; it is never to be pasted in chat.
 
-## M5. Bounded coverage. BLOCKED on scope (owner question asked 2026-10-25)
+**Stripe test mode: the exact prerequisite** (no secret value is ever printed, pasted or committed). Use a disposable
+local environment, never the production Supabase project:
+1. **Key:** a Stripe *test-mode* secret key (`sk_test_…`) from the Stripe dashboard with "Test mode" on. A restricted
+   test key needs read and write access to Checkout Sessions, Customers, Prices, Products, Subscriptions and Webhook
+   Endpoints. Never a live key (`sk_live_…`).
+2. **Where it goes:** into `supabase/functions/.env.local`, which is git-ignored and which you create, as
+   `STRIPE_SECRET_KEY=` followed by the key, typed with your own editor.
+3. **Webhook delivery:** `stripe listen --forward-to localhost:54321/functions/v1/stripe-webhook` (the Stripe CLI,
+   logged in to the test account) prints a `whsec_…` signing secret. It goes in the same file as
+   `STRIPE_WEBHOOK_SECRET=`. That way `ensureWebhook` makes no endpoint in Stripe.
+4. **Then:** tell me the file is ready. I'd run `supabase functions serve --env-file supabase/functions/.env.local`
+   and drive test-mode checkouts with Stripe's test cards. Billing stays "locally verified only" until that succeeds.
 
-- **Agreed list:** none exists yet.
-- **Proposed smallest batch** (from the M1 research): three UK GOV.UK services.
-  - `gb-incorporate`: Companies House incorporation.
+Creating products or prices in the test account (the catalog makes them on first use) is a test-mode change. It
+happens only after you say the file is ready.
+
+## M5. Bounded coverage: three UK services. DONE (owner-approved batch, 2026-10-25)
+
+- **Destinations** (`destinations.ts`), each with `notReady` and out of `FILER_AGENCIES`:
+  - `gb-incorporate`: Companies House, the £100 fee paid on the site.
   - `gb-vat`: HMRC VAT registration.
   - `gb-paye`: HMRC PAYE employer registration.
-  - Each would be a destination, a routing test and a fixture test, kept disabled and marked `notReady`.
-  - All three need Government Gateway or GOV.UK One Login, which the person signs in to themselves.
-- **Not started until approved.**
+- **Paths:** all three are on `www.tax.service.gov.uk`, each with its own path (`/register-your-company`,
+  `/register-for-vat`, `/register-for-paye`). A saved login for one never opens another.
+- **Sources:**
+  - The GOV.UK guide pages for each, read with curl on 2026-10-25.
+  - The start links: Companies House's answered "Are you starting a new application?"; VAT's and PAYE's redirect to
+    "Sign in with Government Gateway".
+  - A fee is stated only where a page states it (£100 for incorporation).
+- **Why `notReady`:**
+  - Government Gateway, GOV.UK One Login and each director's identity code are the person's own. The worker never
+    makes an account and hands back on identity pages.
+  - The pages after sign-in, the sign-off, and the rules for agents weren't seen.
+- **Card:** "Odelia prepares it and you submit it on the agency's site" and "Automatic filing isn't switched on for
+  this form yet". There's no fee step while it isn't switched on.
+- **Evidence:**
+  - Route data: exactly 3 lines added, all `notReady`. The US routes are unchanged and nothing was added to the
+    fee-step file.
+  - `filing-coverage --check`: passes.
+  - Deno: 526 passed, 0 failed, including the new M5 routing test (paths, not ready, off by default, no site without
+    a login, logins kept apart, fees).
+  - `test:agent`: 1931 passed, 0 failed (the cards and the plan count).
+  - Worker suite in its image: 101 passed, 0 failed, 0 skipped.
+    - The first run failed one test: the rule that every portal with three or more forms has a playbook. The three
+      services share a host.
+    - The rule now exempts that one host (`www.tax.service.gov.uk`) only while every form on it is `notReady`,
+      signed in and on its own path. A new check enforces that condition, and the exemption ends when any form is
+      switched on.
+- **No fixture browser test:** the first page past each start link is a sign-in or identity page, where the worker
+  must hand back, and that hand-back is already covered by `guards.test.ts` and `filer.test.ts`. Writing pages past
+  sign-in would mean inventing them.
+- **Not done:** live verification of any page past sign-in.
 - **Tibet stays blocked** until its locality and administrative scope are clarified.
 - **Mexico** would be a separate batch.
 

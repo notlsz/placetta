@@ -1410,6 +1410,42 @@ export const DEST: Record<string, Dest> = {
     source: "https://www.gov.uk/guidance/food-business-registration",
     also: ["https://register.food.gov.uk/new", "https://www.food.gov.uk/business-guidance/getting-ready-to-start-your-food-business"],
   },
+  // M5 (owner-approved batch, 2026-10-25): three GOV.UK services, each NOT ready for automatic filing (notReady) and
+  // out of FILER_AGENCIES. Read with curl on 2026-10-25: each GOV.UK guide's start link, and where it lands.
+  // - Companies House incorporation: "Use this service to register your company with Companies House." The start link
+  //   (tax.service.gov.uk/register-your-company/setting-up-new-limited-company) answered 200 with "Are you starting a
+  //   new application?". The guide says "It costs £100 and can be paid by debit or credit card", that each director
+  //   may need "the Companies House personal code you received after verifying your identity", and "You'll need to
+  //   create a Government Gateway user ID and password for your company when you register it."
+  // - HMRC VAT: "You need to sign in to register for VAT". The start link redirected to "Sign in with Government
+  //   Gateway". No fee is stated on the pages read.
+  // - HMRC PAYE: "Most limited companies can register online". The start link redirected to the same Government
+  //   Gateway sign-in. No fee is stated on the pages read.
+  // Each needs an account and identity checks (Government Gateway, GOV.UK One Login, a director's personal code) that
+  // are the person's own. Placetta never creates an account (worker/filer/src/guards.ts makesAccount, identity), and
+  // whether an agent may submit for the business, and its sign-off, weren't seen. So: notReady, and no fee unless the
+  // page states one.
+  "gb-incorporate": {
+    portal: "www.tax.service.gov.uk",
+    portalUrl: "https://www.tax.service.gov.uk/register-your-company/setting-up-new-limited-company", tenant: "/register-your-company",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    notReady: "Each director's GOV.UK One Login identity check and the company's new Government Gateway account are the person's own; the service's sign-off and whether an agent may submit weren't seen.",
+    checked: "2026-10-25", source: "https://www.gov.uk/limited-company-formation/register-your-company",
+  },
+  "gb-vat": {
+    portal: "www.tax.service.gov.uk",
+    portalUrl: "https://www.tax.service.gov.uk/register-for-vat", tenant: "/register-for-vat",
+    signature: "typed", onBehalf: "unstated",
+    notReady: "HMRC's service needs the business's own Government Gateway sign-in; the pages past sign-in and its rules for agents weren't seen.",
+    checked: "2026-10-25", source: "https://www.gov.uk/register-for-vat/how-register-for-vat",
+  },
+  "gb-paye": {
+    portal: "www.tax.service.gov.uk",
+    portalUrl: "https://www.tax.service.gov.uk/register-for-paye/start-pay-as-you-earn", tenant: "/register-for-paye",
+    signature: "typed", onBehalf: "unstated",
+    notReady: "HMRC's service needs the business's own Government Gateway sign-in; the pages past sign-in and its rules for agents weren't seen.",
+    checked: "2026-10-25", source: "https://www.gov.uk/register-employer",
+  },
 };
 
 /**
