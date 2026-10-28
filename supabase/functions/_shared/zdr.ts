@@ -4,12 +4,25 @@
 // so it enforces the list, nothing more. Off (AI_ZDR_REQUIRED unset) everything behaves as before.
 //
 // AI_ZDR_PROVIDERS, comma separated:
-//   anthropic, gemini, openai, groq, cerebras, openrouter, deepseek    a model vendor, every model
+//   anthropic, gemini, openai, groq, cerebras, openrouter, deepseek, muse    a model vendor, every model
 //   anthropic:claude-sonnet-5-5                                       one model only
 //   anthropic:web-tools                                               Anthropic's server-side web search and fetch
 //   telnyx                                                            the phone assistant (odelia-voice)
 //   azure_speech                                                      reading replies aloud (tts)
-// Used by _shared/llm.ts (every agent model call), _shared/odelia.ts (voiceReady), tts, and the portal filer.
+// Used by _shared/llm.ts (every agent model call), _shared/odelia.ts (voiceReady), tts, and the portal filer
+// (worker/filer/src/llm.ts, every vendor it fails over to).
+//
+// Which vendors offer zero data retention, from their own pages (checked 2026-10-28). List a vendor only once it has
+// confirmed ZDR for Placetta's account in writing:
+//   anthropic   yes, by arrangement: ZDR is enabled per organization by Anthropic's account team (contact sales); the
+//               Messages API is covered for eligible features (platform.claude.com, API and data retention)
+//   gemini      not on the Gemini API by default: paid tier doesn't train on prompts but logs them for a limited time for
+//               abuse monitoring; Google says to use Vertex AI for guaranteed ZDR. Explicit context caching
+//               (GEMINI_CONTEXT_CACHE) and Search grounding keep data, so never with ZDR (ai.google.dev, zdr)
+//   openrouter  OpenRouter itself keeps no prompts unless logging is opted into; provider.zdr=true routes only to
+//               zero-retention hosts, which the worker sends when ZDR is required (openrouter.ai, docs, zdr)
+//   muse        no ZDR offered on Meta Model API as of this date; standard mode isn't used for training, contributor
+//               models are. Leave it off this list unless Meta confirms ZDR in writing
 
 type Env = (k: string) => string | undefined;
 

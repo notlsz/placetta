@@ -251,17 +251,63 @@ test("a sign-in on another host the destination names is allowed; without it the
 });
 
 test("zero data retention: when required and Anthropic (or the filer's model) isn't listed, the model refuses before sending anything", async () => {
-  const { AnthropicModel } = await import("../src/model.ts");
+  const { FilerModel } = await import("../src/model.ts");
+  const { Router } = await import("../src/llm.ts");
   const env = (e: Record<string, string>) => (k: string) => e[k];
   const realFetch = globalThis.fetch;
   let sent = 0;
   globalThis.fetch = (async () => { sent++; return new Response("{}", { status: 500 }); }) as typeof fetch;
   try {
-    const m = new AnthropicModel("k", "claude-sonnet-5-5", env({ AI_ZDR_REQUIRED: "1", AI_ZDR_PROVIDERS: "anthropic:claude-opus-5-5" }));
+    const m = new FilerModel(new Router({ env: env({ ANTHROPIC_API_KEY: "k", GEMINI_API_KEY: "g", GEMINI_PAID: "1", OPENROUTER_API_KEY: "o", FILER_MODELS: "anthropic:claude-sonnet-5-5,gemini,openrouter", AI_ZDR_REQUIRED: "1", AI_ZDR_PROVIDERS: "anthropic:claude-opus-5-5" }) }));
     await assert.rejects(m.next({} as StepInput), /Zero data retention is required/);
     assert.equal(sent, 0);
     assert.equal(m.calls, 0);
   } finally { globalThis.fetch = realFetch; }
+});
+
+/* ------------------------------ failover between model vendors ------------------------------ */
+
+/** The worker with a real router (llm.ts) whose fetch is mocked: Anthropic answers with its usage limit, Gemini answers
+ *  with the choice a scripted model makes for the page, so the run, its guards and its final submit are the real ones. */
+async function failoverWorker(first: ToolCall[] = []) {
+  const { FilerModel } = await import("../src/model.ts");
+  const { Router } = await import("../src/llm.ts");
+  const brain = new Scripted(); brain.first = first;
+  let seen: StepInput | null = null;
+  const asked: string[] = [];
+  const f = (async (url: string) => {
+    asked.push(new URL(url).hostname);
+    if (url.includes("api.anthropic.com")) return new Response(JSON.stringify({ type: "error", error: { type: "invalid_request_error", message: "You have reached your specified API usage limits. You will regain access on 2026-11-01 at 00:00 UTC." } }), { status: 400 });
+    const c = await brain.next(seen!);
+    return new Response(JSON.stringify({ candidates: [{ content: { role: "model", parts: [{ functionCall: { name: c.name, args: c.input } }] }, finishReason: "STOP" }] }), { status: 200 });
+  }) as unknown as typeof fetch;
+  const env = (k: string) => ({ ANTHROPIC_API_KEY: "sk-ant-k", GEMINI_API_KEY: "AIza-k", GEMINI_PAID: "1", FILER_MODELS: "anthropic:claude-sonnet-5-5,gemini:gemini-3.8-flash" } as Record<string, string>)[k];
+  class Seen extends FilerModel { override next(i: StepInput) { seen = i; return super.next(i); } }
+  return { model: new Seen(new Router({ env, fetch: f, log: () => undefined })), asked };
+}
+
+test("failover: with Anthropic at its usage limit, Gemini files the form through the same guards and the same final submit", async () => {
+  const realErr = console.error; console.error = () => undefined;
+  try {
+    const p = await portal(), store = new Mem(), { model, asked } = await failoverWorker();
+    const r = await worker(store, model, p.url).run(store.f);
+    assert.equal(r?.kind, "submitted");
+    assert.equal(store.f.confirmation_number, "CA-10001");
+    assert.equal(p.submissions, 1, "submitted once");
+    assert.equal(asked[0], "api.anthropic.com", "Anthropic is asked first");
+    assert.equal(asked.filter((h) => h === "api.anthropic.com").length, 1, "then sits out its limit instead of being asked every step");
+    assert.ok(asked.slice(1).every((h) => h === "generativelanguage.googleapis.com"));
+  } finally { console.error = realErr; }
+});
+
+test("failover: a value Gemini chose that isn't approved is refused exactly as Claude's would be", async () => {
+  const realErr = console.error; console.error = () => undefined;
+  try {
+    const p = await portal(), store = new Mem();
+    const { model } = await failoverWorker([{ name: "fill_login", input: { selector: "label:Username", which: "username" } }, { name: "fill", input: { selector: "label:Password", value: "EVIL" } }]);
+    await worker(store, model, p.url).run(store.f);
+    assert.ok(store.f.agent_log.some((e) => e.kind === "refused"));
+  } finally { console.error = realErr; }
 });
 
 /* ------------------------------ isolation between runs ------------------------------ */

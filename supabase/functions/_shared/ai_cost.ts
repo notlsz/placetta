@@ -46,6 +46,8 @@ const PRICES: [RegExp, Price][] = [
   [/flash-lite/, { in: 0.3, out: 2.5 }],
   [/flash/, { in: 1.5, out: 9 }],
   [/gemini/, { in: 2.5, out: 15 }],
+  // Meta Muse Spark (Meta Model API pay-as-you-go, dev.meta.ai; the same on OpenRouter)
+  [/muse-spark/, { in: 1.25, out: 4.25 }],
   // OpenAI
   [/gpt-5-nano/, { in: 0.05, out: 0.4 }],
   [/gpt-5-mini|gpt-5\.[0-9]+-mini|-mini/, { in: 0.25, out: 2 }],

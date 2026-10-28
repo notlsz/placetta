@@ -9,10 +9,9 @@
 // submit, pay, sign or book (isFinal). A CAPTCHA, a code, an identity check or an account page ends the check: nobody
 // solves it here, and the daily status check carries on by its other ways. Leaving the portal's hosts ends it too.
 import { checkRead, type StatusRead } from "../../../supabase/functions/_shared/carry.ts";
-import { ZDR_REFUSED, zdrAllows } from "../../../supabase/functions/_shared/zdr.ts";
 import { isFinal, mustStop, onPortal, type PageState } from "./guards.ts";
 import { headingOf, locate, pageState, shortText } from "./page.ts";
-import type { ToolCall } from "./model.ts";
+import { Router, type ToolCall } from "./llm.ts";
 import type { Session } from "./run.ts";
 import type { Login } from "./types.ts";
 
@@ -74,25 +73,13 @@ export function statusPrompt(i: { job: StatusJob; state: PageState; recent: stri
   ].join("\n");
 }
 
-export class AnthropicStatusModel implements StatusModel {
-  calls = 0;
-  private key: string; private model: string; private env: (k: string) => string | undefined;
-  constructor(key: string, model = process.env.FILER_MODEL ?? "claude-sonnet-5-5", env: (k: string) => string | undefined = (k) => process.env[k]) {
-    this.key = key; this.model = model; this.env = env;
-  }
-  async next(i: { job: StatusJob; state: PageState; recent: string[]; signedIn: boolean }): Promise<ToolCall> {
-    if (!zdrAllows(this.env, "anthropic", this.model)) throw new Error(ZDR_REFUSED);
-    this.calls++;
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST", headers: { "content-type": "application/json", "x-api-key": this.key, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: this.model, max_tokens: 800, tools: STATUS_TOOLS, tool_choice: { type: "any" }, messages: [{ role: "user", content: statusPrompt(i) }] }),
-      signal: AbortSignal.timeout(90000),
-    });
-    if (!res.ok) throw new Error(`model error ${res.status}`);
-    const body = await res.json() as { content?: { type: string; name?: string; input?: Record<string, unknown> }[] };
-    const use = body.content?.find((c) => c.type === "tool_use");
-    if (!use?.name) throw new Error("model chose no tool");
-    return { name: use.name, input: use.input ?? {} };
+/** A status check step, asked of the models in order (llm.ts Router), the same failover as a filing. */
+export class FilerStatusModel implements StatusModel {
+  readonly router: Router;
+  get calls() { return this.router.calls; }
+  constructor(router = new Router()) { this.router = router; }
+  next(i: { job: StatusJob; state: PageState; recent: string[]; signedIn: boolean }): Promise<ToolCall> {
+    return this.router.ask({ prompt: () => statusPrompt(i), tools: STATUS_TOOLS, maxTokens: 800 });
   }
 }
 

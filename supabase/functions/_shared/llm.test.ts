@@ -128,3 +128,24 @@ if (bad) throw new Error(`${bad} failed`);
   check("OpenRouter: data_collection deny", sent?.provider?.data_collection === "deny");
   if (bad) throw new Error(`${bad} failed`);
 }
+
+// ODELIA_MODELS: one failover order for every role without its own route; Anthropic's usage limit goes to the next;
+// Muse is reached on Meta Model API, never on a contributor model
+{
+  const seen: { host: string; model: string }[] = [];
+  const f = (async (url: string, init: any) => {
+    const b = JSON.parse(init.body);
+    seen.push({ host: new URL(url).hostname, model: b.model });
+    if (url.includes("anthropic")) return new Response(JSON.stringify({ type: "error", error: { type: "invalid_request_error", message: "You have reached your specified API usage limits." } }), { status: 400 });
+    return new Response(JSON.stringify({ id: "x", choices: [{ message: { content: null, tool_calls: [{ id: "c1", type: "function", function: { name: "lookup", arguments: "{\"city\":\"San Jose\"}" } }] }, finish_reason: "tool_calls" }], usage: { prompt_tokens: 3, completion_tokens: 2 } }), { status: 200 });
+  }) as any;
+  const env = only({ ANTHROPIC_API_KEY: "a", MUSE_API_KEY: "m", ODELIA_MODELS: "anthropic:claude-sonnet-5-5,muse:muse-spark-1.3-contributor,muse:muse-spark-1.3" });
+  check("ODELIA_MODELS sets every role's route", ROLES.every((r) => names(routeFor(env, r, "claude-sonnet-5-5"))[0] === "anthropic:claude-sonnet-5-5" && names(routeFor(env, r, "claude-sonnet-5-5")).includes("muse:muse-spark-1.3")));
+  check("a role's own route still wins over ODELIA_MODELS", names(routeFor(only({ ODELIA_MODELS: "muse:muse-spark-1.3", AGENT_ROUTE_REVIEW: "gemini:gemini-3.8-flash" }), "review", "claude-sonnet-5-5"))[0] === "gemini:gemini-3.8-flash");
+  const r2 = await callModel(env, { payload, role: "plan", research: false, beta: null }, "claude-sonnet-5-5", null, f);
+  check("usage limit on Anthropic -> Muse answers", r2.ok && r2.model === "muse:muse-spark-1.3" && (r2.data as any).content[0].name === "lookup");
+  check("Muse on api.meta.ai, never the contributor model", seen.map((s) => `${s.host}:${s.model}`).join(",") === "api.anthropic.com:claude-sonnet-5-5,api.meta.ai:muse-spark-1.3");
+  check("Muse never gets files", !vendorOk(only({}), "muse", { hasFiles: true, role: "plan" }) && vendorOk(only({}), "muse", { hasFiles: false, role: "plan" }));
+  check("Muse off when ZDR is required and it isn't listed", !vendorOk(only({ AI_ZDR_REQUIRED: "1", AI_ZDR_PROVIDERS: "anthropic" }), "muse", { hasFiles: false, role: "plan" }));
+  if (bad) throw new Error(`${bad} failed`);
+}

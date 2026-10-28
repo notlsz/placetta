@@ -2,6 +2,8 @@
 // worker: it claims nothing, says exactly which value is missing and where to find it (in the log and on /healthz),
 // and Render's health check marks the deploy failed, right where the founder pasted the values. Pure.
 
+import { usableSeats } from "./llm.ts";
+
 export type EnvCheck = {
   ok: boolean;
   /** The values that must be set and aren't, with where to get each one. */
@@ -10,6 +12,8 @@ export type EnvCheck = {
   /** Which browser runs the filings: local Chromium in the container (the default; "browserbase" when its keys are set
    *  for the hosts that refuse a cloud server), or every run on Steel or Browserbase (BROWSER_PROVIDER). */
   browser: "local" | "browserbase" | "steel";
+  /** The models a filing step may go to, in failover order ("anthropic:claude-sonnet-5-5"): no keys, only names. */
+  models: string[];
   /** BROWSER_PROVIDER as read: local (the default), steel or browserbase. */
   provider: Provider;
   /** Every run on a remote browser: no Chromium is ever started in this container (it fits Render's free plan). */
@@ -24,7 +28,7 @@ export const WHERE = {
   SUPABASE_URL: "Supabase, Project Settings, API, Project URL (render.yaml already has it)",
   FILER_DB_KEY: "the filer's own key (docs/soc2/runbooks/filer-least-privilege.md); until it exists, set SUPABASE_SERVICE_ROLE_KEY instead",
   SUPABASE_SERVICE_ROLE_KEY: "Supabase, Project Settings, API keys, service_role (secret)",
-  ANTHROPIC_API_KEY: "console.anthropic.com, Settings, API keys, Create key",
+  ANTHROPIC_API_KEY: "a model key: console.anthropic.com, Settings, API keys, Create key (or GEMINI_API_KEY with GEMINI_PAID=1, OPENROUTER_API_KEY or MUSE_API_KEY: SETUP.md, Odelia's models)",
   STEEL_API_KEY: "app.steel.dev, sign up (the free plan is enough), API Keys, copy the key",
   BROWSERBASE_API_KEY: "browserbase.com, Settings, API Key",
   BROWSERBASE_PROJECT_ID: "browserbase.com, Settings, Project ID",
@@ -47,8 +51,12 @@ export function checkEnv(env: Record<string, string | undefined>): EnvCheck {
   else if (!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(env.SUPABASE_URL!.trim()) && !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/.test(env.SUPABASE_URL!.trim())) warnings.push("SUPABASE_URL doesn't look like https://<project>.supabase.co");
   if (!has("FILER_DB_KEY") && !has("SUPABASE_SERVICE_ROLE_KEY")) missing.push({ key: "SUPABASE_SERVICE_ROLE_KEY", where: WHERE.SUPABASE_SERVICE_ROLE_KEY });
   else if (!has("FILER_DB_KEY")) warnings.push("FILER_DB_KEY is not set: the worker uses the service role key until the filer's own key exists (docs/soc2/runbooks/filer-least-privilege.md).");
-  if (!has("ANTHROPIC_API_KEY")) missing.push({ key: "ANTHROPIC_API_KEY", where: WHERE.ANTHROPIC_API_KEY });
-  else if (!/^sk-ant-/.test(env.ANTHROPIC_API_KEY!.trim())) warnings.push("ANTHROPIC_API_KEY doesn't start with sk-ant-: check it was pasted whole.");
+  // at least one model the data rules allow (llm.ts); every other one set is a failover seat
+  const models = usableSeats((k) => env[k]);
+  if (!models.length) missing.push({ key: "ANTHROPIC_API_KEY", where: WHERE.ANTHROPIC_API_KEY });
+  else if (models.length === 1) warnings.push(`Only one model can run filings: if it hits a spend limit or goes down, filings wait for the team. Add GEMINI_API_KEY (with GEMINI_PAID=1), OPENROUTER_API_KEY or MUSE_API_KEY as a failover.`);
+  if (has("ANTHROPIC_API_KEY") && !/^sk-ant-/.test(env.ANTHROPIC_API_KEY!.trim())) warnings.push("ANTHROPIC_API_KEY doesn't start with sk-ant-: check it was pasted whole.");
+  if (has("GEMINI_API_KEY") && env.GEMINI_PAID !== "1") warnings.push("GEMINI_API_KEY is set without GEMINI_PAID=1: Google's free tier may use prompts to improve its products, so Gemini gets no filing until billing is on and GEMINI_PAID=1.");
   const bb = has("BROWSERBASE_API_KEY") && has("BROWSERBASE_PROJECT_ID");
   const p = providerOf(env);
   if (p === "invalid") missing.push({ key: "BROWSER_PROVIDER", where: WHERE.BROWSER_PROVIDER });
@@ -67,7 +75,7 @@ export function checkEnv(env: Record<string, string | undefined>): EnvCheck {
   const secret = (env.FILER_SECRET ?? "").trim();
   if (!secret) warnings.push("FILER_SECRET is not set: the server can't wake this worker on demand, so on a plan that sleeps, agency-website filings go another way while it's asleep.");
   else if (secret.length < 32) warnings.push("FILER_SECRET is shorter than 32 characters: wake on demand stays off. Use the same value as the Supabase secret.");
-  return { ok: missing.length === 0, missing, warnings, browser, provider, remote, wake: secret.length >= 32, publicUrl: pub };
+  return { ok: missing.length === 0, missing, warnings, models: models.map((m) => `${m.vendor}:${m.model}`), browser, provider, remote, wake: secret.length >= 32, publicUrl: pub };
 }
 
 /** The lines the worker logs at start when something is missing: each key, and where to find it. */

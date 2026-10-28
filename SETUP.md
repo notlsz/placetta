@@ -17,7 +17,8 @@ within 3 minutes (`FILER_WAKE_SECONDS`), the filing goes another way the agency 
 2. **Render**: dashboard.render.com, **New**, **Blueprint**, pick this repository. Render reads `render.yaml` (plan
    `free`, `BROWSER_PROVIDER=steel`) and asks for four values:
    - `SUPABASE_SERVICE_ROLE_KEY`: Supabase, Project Settings, API keys, the `service_role` secret key.
-   - `ANTHROPIC_API_KEY`: console.anthropic.com, Settings, API keys, Create key (starts `sk-ant-`).
+   - `ANTHROPIC_API_KEY`: console.anthropic.com, Settings, API keys, Create key (starts `sk-ant-`). Add a second
+     vendor's key afterwards so a spend limit doesn't stop filings (Odelia's models, below).
    - `STEEL_API_KEY`: the key from step 1.
    - `FILER_SECRET`: the value from step 0.
 
@@ -59,6 +60,41 @@ provider's live view; a CAPTCHA for the Placetta team always opens the worker's 
 with `BROWSER_PROVIDER=local`, `BROWSERBASE_API_KEY` and `BROWSERBASE_PROJECT_ID` send only the few agency sites that
 refuse a cloud server (EDD, bizfile Online, MassTaxConnect, sanjoseca.gov) to Browserbase; `FILER_DB_KEY` per
 `docs/soc2/runbooks/filer-least-privilege.md`.
+
+## Odelia's models: a second vendor so one spend limit doesn't stop her
+
+On 2026-10-28 production stopped with Anthropic's "You have reached your specified API usage limits". With a second
+vendor's key, the next model answers that step instead, on the server (`supabase/functions/_shared/llm.ts`) and in the
+portal worker (`worker/filer/src/llm.ts`). A model call has no side effects, so asking the next one never acts twice;
+the worker's guards (approved values only, the review-page check, the final submit) apply to whichever model chose.
+
+| Key | Where | Who gets it |
+| --- | --- | --- |
+| `ANTHROPIC_API_KEY` | console.anthropic.com, Settings, API keys (starts `sk-ant-`). The spend limit you set in the Console is what stopped production | Claude Sonnet 5.5, first by default |
+| `GEMINI_API_KEY` with `GEMINI_PAID=1` | Google AI Studio, API keys, on a Google Cloud project with billing on. Without `GEMINI_PAID=1` it gets nothing of a customer's (Google's free tier may use prompts) | Gemini 3.8 Flash, native API with function calling |
+| `OPENROUTER_API_KEY` | openrouter.ai, Keys (starts `sk-or-`). Add credit | Claude Sonnet 5.5 through hosts other than our Anthropic account, or any model you name; always with `data_collection: deny` |
+| `MUSE_API_KEY` | dev.meta.ai, API keys (US only, public preview; Meta's docs call it `MODEL_API_KEY`) | Meta's Muse Spark 1.3, never a `-contributor` model (Meta trains on those), never files |
+
+Set each in **both** places that use models: Supabase, Edge Functions, Secrets (the server) and Render, placetta-filer,
+Environment (the worker). Any one key runs the worker; with only one, `/healthz` and `npm run check` warn that there's
+no failover, and `npm run check` asks every model one tool question so a refused key or spent limit shows before a
+filing does.
+
+The order is one setting, `provider:model` separated by commas (a bare provider takes its default model):
+
+- `ODELIA_MODELS`: both places. On the server it replaces every role's route that has no `AGENT_ROUTE_<ROLE>` of its
+  own (Anthropic is still added at the end). Example: `anthropic:claude-sonnet-5-5,gemini:gemini-3.8-flash,openrouter:anthropic/claude-sonnet-5.5,muse:muse-spark-1.3`.
+- `FILER_MODELS`: the worker only, wins over `ODELIA_MODELS` there. Unset, the worker's order is Anthropic, Gemini,
+  OpenRouter, Muse, each used only when its key is set. `FILER_MODEL` still names the Claude model.
+- `FILER_MODEL_COOLDOWN_S`: how long a vendor that hit a limit, refused its key or was down sits out before the worker
+  tries it first again (default 120). The log says which model answered each time it changes; never a key.
+- `MUSE_BASE_URL`: only if Meta moves the API (default `https://api.meta.ai/v1`).
+
+Zero data retention (`AI_ZDR_REQUIRED=1`): only vendors and models on `AI_ZDR_PROVIDERS` get a call, on both sides.
+Anthropic offers ZDR by arrangement with its sales team; the Gemini API has no ZDR by default (Google points to Vertex
+AI); OpenRouter keeps no prompts itself and, when ZDR is required, the worker asks it for zero-retention hosts only;
+Meta Model API states no ZDR. List a vendor only once it has confirmed ZDR for Placetta's account in writing
+(`supabase/functions/_shared/zdr.ts`).
 
 Placetta runs on the Supabase project **Placetta** (`esquxzcfsylffuijvzec`). The database, security rules and server functions are built and tested; going live means bringing the project up to date, adding your keys, configuring sign-in and hosting the app. One command does nearly all of it.
 
@@ -376,7 +412,9 @@ These are separate from the Gmail, Outlook and Drive integrations below, which u
 | `AGENT_DAILY_CALLS`, `TTS_DAILY_CHARS` | Optional caps per workspace a day. Defaults 400 and 20,000. |
 | `AGENT_MODEL`, `AGENT_MODEL_DEEP`, `AGENT_MODEL_FAST` | Optional. The Anthropic models by size: defaults `claude-sonnet-5-5`, `claude-opus-5-5` and `claude-haiku-4-5-20251001`. |
 | `GEMINI_API_KEY`, `GEMINI_PAID` | Optional. A Gemini key runs the cheap roles (reading uploads, the checker, texts, the weekly scan) on Gemini 2.5 Flash-Lite, Flash and Pro, but only with `GEMINI_PAID=1`: Google's free tier may use prompts to improve its products, the paid tier doesn't. Without it the key goes unused. See docs/AI_COSTS.md. |
-| `GROQ_API_KEY`, `CEREBRAS_API_KEY`, `OPENROUTER_API_KEY` | Optional backups: gpt-oss-120b, used only when Gemini and Anthropic can't answer, never with customer files. |
+| `GROQ_API_KEY`, `CEREBRAS_API_KEY`, `OPENROUTER_API_KEY` | Optional backups: gpt-oss-120b, used only when Gemini and Anthropic can't answer, never with customer files. `OPENROUTER_API_KEY` also reaches any OpenRouter model named in `ODELIA_MODELS` (always with `data_collection: deny`). |
+| `MUSE_API_KEY` | Optional. Meta's Muse Spark on Meta Model API (dev.meta.ai), used when `ODELIA_MODELS` or a route names `muse:<model>`; never files, never a `-contributor` model. |
+| `ODELIA_MODELS` | Optional. One failover order for every role without its own `AGENT_ROUTE_<ROLE>`, and for the portal worker: see Odelia's models, above. |
 | `OPENAI_API_KEY`, `DEEPSEEK_API_KEY` | Optional, more vendors for custom routes. DeepSeek (PRC-hosted) also needs `ALLOW_DEEPSEEK=1` and never sees customer files. |
 | `AGENT_ROUTE_PLAN`, `AGENT_ROUTE_REVIEW`, `AGENT_ROUTE_EXTRACT`, `AGENT_ROUTE_TRANSLATE`, `AGENT_ROUTE_DRAFT`, `AGENT_ROUTE_SHORT`, `AGENT_ROUTE_WATCH`, `AGENT_ROUTE_DEEP` | Optional. A role's models, cheapest first, as `provider:model` separated by commas (e.g. `gemini:gemini-2.5-flash-lite,anthropic:claude-haiku-4-5-20251001`). The old `AGENT_ROUTE_FAST`, `AGENT_ROUTE` and `AGENT_ROUTE_DEEP` still mean extract, plan and deep. |
 | `AI_DAILY_LIMIT_USD`, `AI_WS_DAILY_LIMIT_USD`, `AI_TASK_LIMIT_USD` | Optional. The company's AI spend per day before everyone pauses (default $100), one workspace's spend per day before it runs in saver mode for the rest of the day (default $10), and one task's ceiling (default $1.50). |

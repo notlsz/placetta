@@ -1,6 +1,8 @@
 // One door to many models. The app and both agent functions speak Anthropic's Messages format; this module sends
 // each request to the first model in its route that has a key, translating to and from the OpenAI chat format for
-// DeepSeek, Gemini, OpenAI, OpenRouter and Groq, and falls through to the next model when one is busy or down.
+// DeepSeek, Gemini, OpenAI, OpenRouter, Groq, Cerebras and Meta's Muse, and falls through to the next model when one is
+// busy, down, out of credit or over a spend limit (any refusal: a model call has no side effects, so asking the next
+// one can't act twice).
 //
 // Every call has a role, and each role has a route: the cheapest model that is good enough for that work first, a
 // better one behind it, and Anthropic as the safety net. The roles:
@@ -16,9 +18,13 @@
 // replaces a role's route, as a comma-separated "provider:model" list, cheapest first; the three old names still work:
 // AGENT_ROUTE_FAST is extract, AGENT_ROUTE is plan, AGENT_ROUTE_DEEP is deep. Anthropic is added at the end of any route
 // that leaves it out. AGENT_MODEL, AGENT_MODEL_DEEP and AGENT_MODEL_FAST name the Anthropic models (Sonnet, Opus, Haiku).
+// ODELIA_MODELS (the same list format) replaces the route of every role that has no AGENT_ROUTE_<ROLE> of its own, so
+// one secret sets Odelia's failover order everywhere, for example
+// gemini:gemini-3.8-flash,openrouter:anthropic/claude-sonnet-5.5,muse:muse-spark-1.3 (Anthropic still ends it). The portal
+// worker reads the same ODELIA_MODELS (worker/filer/src/llm.ts), or its own FILER_MODELS.
 //
 // Keys: GEMINI_API_KEY (the main one), ANTHROPIC_API_KEY, GROQ_API_KEY, CEREBRAS_API_KEY, OPENROUTER_API_KEY,
-// OPENAI_API_KEY, DEEPSEEK_API_KEY.
+// OPENAI_API_KEY, DEEPSEEK_API_KEY, MUSE_API_KEY (Meta Model API, dev.meta.ai).
 // Which vendors may see what is decided by vendorOk (data-use guardrails):
 //   Anthropic and OpenAI       always (both contractually don't train on API traffic)
 //   Gemini                     everything only with GEMINI_PAID=1 (Google's free tier may use prompts to improve its
@@ -28,6 +34,9 @@
 //                              Gemini key goes unused.
 //   DeepSeek                   PRC-hosted: only with ALLOW_DEEPSEEK=1, and never files
 //   Groq, Cerebras, OpenRouter the gpt-oss-120b backups: on when their key is set, last in every route, never files
+//   Muse                       Meta Model API standard mode ("your content is not used to train Meta models"): on when
+//                              its key is set and a route names it, never files. A "-contributor" model (Meta may train
+//                              on it) is never used, on Muse or through OpenRouter
 // Free models (an OpenRouter model ending in ":free", or anything on Groq's free tier) are skipped unless
 // AGENT_ALLOW_FREE=1, and are never sent customer files, because free tiers may keep or train on prompts.
 // PDFs (document blocks) only go to models that read them: Anthropic, Gemini, OpenRouter.
@@ -68,6 +77,8 @@ const OPENAI_STYLE: Record<string, { url: string; key: string }> = {
   openrouter: { url: "https://openrouter.ai/api/v1/chat/completions", key: "OPENROUTER_API_KEY" },
   groq: { url: "https://api.groq.com/openai/v1/chat/completions", key: "GROQ_API_KEY" },
   cerebras: { url: "https://api.cerebras.ai/v1/chat/completions", key: "CEREBRAS_API_KEY" },
+  // Meta's Muse Spark on Meta Model API, OpenAI SDK compatible (dev.meta.ai docs: base https://api.meta.ai/v1, Bearer key)
+  muse: { url: "https://api.meta.ai/v1/chat/completions", key: "MUSE_API_KEY" },
 };
 export const PROVIDERS = ["anthropic", ...Object.keys(OPENAI_STYLE)];
 /** Each vendor's key, by provider. */
@@ -121,7 +132,7 @@ const parseRoute = (raw: string) => raw.split(",").map((s) => s.trim()).filter(B
 /** The route for a role: its secret if set (or the old name), else the default. Anthropic is always on it. */
 export function routeFor(env: Env, roleOrTier: Role | Tier, fallbackModel: string): [string, string][] {
   const role: Role = (ROLES as string[]).includes(roleOrTier) ? roleOrTier as Role : roleOfTier(roleOrTier as Tier);
-  const raw = env(`AGENT_ROUTE_${role.toUpperCase()}`) ?? (ALIAS[role] ? env(ALIAS[role]!) : undefined) ?? "";
+  const raw = env(`AGENT_ROUTE_${role.toUpperCase()}`) ?? (ALIAS[role] ? env(ALIAS[role]!) : undefined) ?? env("ODELIA_MODELS") ?? "";
   const anth = anthropicFor(env, role, fallbackModel);
   const list = raw ? parseRoute(raw) : DEFAULT_ROUTES[role].map(([p, m]) => [p, p === "anthropic" && m === "*" ? anth : m] as [string, string]);
   // Anthropic stays the safety net at the end of every route.
@@ -147,7 +158,7 @@ export function vendorOk(env: Env, provider: string, o: { hasFiles: boolean; rol
     case "gemini": return env("GEMINI_PAID") === "1" || (!o.hasFiles && o.role === "watch" && o.publicOnly === true);
     case "deepseek": return env("ALLOW_DEEPSEEK") === "1" && !o.hasFiles;
     // the open-model backups: on when their key is set (paid API tiers don't train on traffic), never with files
-    case "openrouter": case "groq": case "cerebras": return !o.hasFiles;
+    case "openrouter": case "groq": case "cerebras": case "muse": return !o.hasFiles;
     default: return false;
   }
 }
@@ -287,6 +298,8 @@ export function candidates(env: Env, call: Call, fallbackModel: string): [string
   const msgs = (call.payload.messages as Block[]) ?? [];
   const files = hasFiles(msgs), docs = hasDocs(msgs), allowFree = env("AGENT_ALLOW_FREE") === "1";
   route = route.filter(([p, m]) => !isFree(p, m) || (allowFree && !files));
+  // a contributor model trades a lower price for the vendor training on the prompts (Meta's Muse Spark contributor tier)
+  route = route.filter(([, m]) => !/contributor/i.test(m));
   if (docs) route = route.filter(([p]) => p === "anthropic" || p === "gemini" || p === "openrouter");   // PDFs need a model that reads them
   route = route.filter(([p, m]) => vendorOk(env, p, { hasFiles: files, role, region: call.region, publicOnly: call.publicOnly }) && zdrAllows(env, p, m));
   if (call.research && RESEARCH_FIRST.has(role)) route = [...route.filter(([p]) => p === "anthropic"), ...route.filter(([p]) => p !== "anthropic")];
