@@ -33,7 +33,7 @@ test("render.yaml: a web service with the health check, memory for its browser, 
   const plan = /^\s+plan: (\w+)/m.exec(y)?.[1] ?? "";
   // the values the blueprint sets, and a stand-in for each one the founder pastes
   const set: Record<string, string> = {};
-  for (const m of y.matchAll(/- key: (\w+)\n\s+(?:value: "?([^"\n#]*?)"?\s*(?:#.*)?$|sync: false)/gm)) set[m[1]] = m[2] ?? (m[1] === "ANTHROPIC_API_KEY" ? "sk-ant-x" : m[1] === "FILER_SECRET" ? "s".repeat(32) : "x");
+  for (const m of y.matchAll(/- key: (\w+)\n\s+(?:value: "?([^"\n#]*?)"?\s*(?:#.*)?$|sync: false|generateValue: true)/gm)) set[m[1]] = m[2] ?? (m[1] === "ANTHROPIC_API_KEY" ? "sk-ant-x" : m[1] === "FILER_SECRET" ? "s".repeat(32) : "x");
   const env = checkEnv(set);
   assert.deepEqual(env.missing, [], "the blueprint asks for every required value");
   // Chromium in the container needs 2 GB; the free plan (512 MB) only with a remote browser, which starts no Chromium here
@@ -50,7 +50,8 @@ test("render.yaml: a web service with the health check, memory for its browser, 
   assert.match(y, /BROWSER_PROVIDER value: local/);
   assert.match(y, /BROWSER_PROVIDER value: browserbase/);
   const asked = [...y.matchAll(/- key: (\w+)\n\s+sync: false/g)].map((m) => m[1]);
-  assert.deepEqual(asked, ["SUPABASE_SERVICE_ROLE_KEY", "ANTHROPIC_API_KEY", "STEEL_API_KEY", "FILER_SECRET"], "the founder pastes four values");
+  assert.deepEqual(asked, ["SUPABASE_SERVICE_ROLE_KEY", "ANTHROPIC_API_KEY", "STEEL_API_KEY"], "the founder pastes three values");
+  assert.match(y, /key: FILER_SECRET\n\s+generateValue: true/, "Render makes the wake secret, so nobody types it");
   const docker = readFileSync(new URL("../Dockerfile", import.meta.url), "utf8");
   for (const p of [...y.matchAll(/^\s+- (supabase\/\S+)/gm)].map((m) => m[1])) assert.ok(docker.includes(p), `the image copies ${p}`);
 });
