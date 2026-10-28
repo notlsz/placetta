@@ -1099,15 +1099,15 @@ export class Worker {
       const g = await this.c.store.step(cur, log("The run stopped after pressing submit, so nothing more is sent until it's checked with the agency.", "运行在点击提交后中断，在向机构确认之前不会再提交。", "handoff", "maybe_submitted"), { agent_state: "handoff", channel: "team" });
       console.error("filer: stopped after submit:", msg);
       await this.c.store.teamTask(g, "check_agency", "Run stopped after submit was pressed. Check the agency first.");
-    } else if (/^(steel|browserbase)\b/.test(msg)) {
+    } else if (/^(steel|browserbase|model error|model chose no tool)\b/.test(msg)) {
       // Placetta's own browser didn't start (the provider refused the session): the agency was never reached, so this is
       // ours to fix. Wait (2, 10, 30 minutes); after 3 tries the filing is held for the team, never handed to the owner.
       if (cur.attempts >= 3) {
-        const g = await this.c.store.step(cur, log("Odelia's browser didn't start, so the agency's site wasn't opened. The Placetta team is fixing it; nothing for you to do.", "Odelia 的浏览器未能启动，因此未打开机构网站。快哉团队正在处理，您无需操作。", "retry", msg), { agent_state: "held" });
-        await this.c.store.teamTask(g, "browser_down", `The browser provider refused the session 3 times: ${msg}`);
+        const g = await this.c.store.step(cur, log("Odelia's own tools (her browser or her AI service) stopped, not the agency's site. The Placetta team is fixing it; nothing for you to do.", "Odelia 自己的工具（浏览器或 AI 服务）出现故障，并非机构网站的问题。快哉团队正在处理，您无需操作。", "retry", msg), { agent_state: "held" });
+        await this.c.store.teamTask(g, "browser_down", `Odelia's browser or AI service failed 3 times: ${msg}`);
       } else {
         const mins = backoffMinutes(cur.attempts), at = new Date(Date.now() + mins * 60_000).toISOString();
-        await this.c.store.step(cur, log(`Odelia's browser didn't start. Trying again in ${mins} minutes.`, `Odelia 的浏览器未能启动，${mins} 分钟后重试。`, "retry", msg), { agent_state: "queued", provider_ref: `retry-after:${at}` });
+        await this.c.store.step(cur, log(`Odelia's own tools stopped (not the agency's site). Trying again in ${mins} minutes.`, `Odelia 自己的工具出现故障（并非机构网站），${mins} 分钟后重试。`, "retry", msg), { agent_state: "queued", provider_ref: `retry-after:${at}` });
       }
       console.error("filer: browser provider:", msg);
     } else if (cur.attempts >= 3) {

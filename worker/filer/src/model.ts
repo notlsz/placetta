@@ -6,6 +6,14 @@ import { headingOf, shortText } from "./page.ts";
 import type { LabelIn, LabelOut } from "./teach.ts";
 import type { Filing } from "./types.ts";
 
+/** The API's own reason for a refusal ("credit balance is too low", a bad field), so a log says what to fix. Never the
+ *  request: only the error's type and message, trimmed. */
+async function apiWhy(res: Response): Promise<string> {
+  const j = await res.json().catch(() => null) as { error?: { type?: string; message?: string } } | null;
+  const t = [j?.error?.type, j?.error?.message].filter(Boolean).join(": ").replace(/sk-ant-[\w-]+/g, "•••").replace(/\s+/g, " ").slice(0, 160);
+  return t ? `: ${t}` : "";
+}
+
 export type ToolCall = { name: string; input: Record<string, unknown> };
 /** account: while the worker makes the business's account on the site (account.ts accountNote): what to do, with no
  *  password and nothing from the inbox. */
@@ -67,7 +75,7 @@ export class AnthropicModel implements Model {
       body: JSON.stringify({ model: this.model, max_tokens: 800, tools: TOOLS, tool_choice: { type: "any" }, messages: [{ role: "user", content: prompt(i) }] }),
       signal: AbortSignal.timeout(90000),
     });
-    if (!res.ok) throw new Error(`model error ${res.status}`);
+    if (!res.ok) throw new Error(`model error ${res.status}${await apiWhy(res)}`);
     const body = await res.json() as { content?: { type: string; name?: string; input?: Record<string, unknown> }[] };
     const use = body.content?.find((c) => c.type === "tool_use");
     if (!use?.name) throw new Error("model chose no tool");
@@ -112,7 +120,7 @@ export class AnthropicLabeler {
       body: JSON.stringify({ model: this.model, max_tokens: 2000, tools: [LABEL_TOOL], tool_choice: { type: "tool", name: "label_steps" }, messages: [{ role: "user", content: labelPrompt(i) }] }),
       signal: AbortSignal.timeout(90000),
     });
-    if (!res.ok) throw new Error(`model error ${res.status}`);
+    if (!res.ok) throw new Error(`model error ${res.status}${await apiWhy(res)}`);
     const body = await res.json() as { content?: { type: string; input?: LabelOut }[] };
     return body.content?.find((c) => c.type === "tool_use")?.input ?? {};
   };
