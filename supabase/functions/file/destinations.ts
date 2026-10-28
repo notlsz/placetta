@@ -6,6 +6,8 @@
 // Placetta team; TEAM_ONLY below says why for the ones that were researched and have no route Placetta can use.
 // docs/FILING_COVERAGE.md is generated from this file by scripts/filing-coverage.mjs.
 
+import { SOUTH_DEST } from "./dest/south.ts";
+
 export type Address = { name: string; line1: string; line2?: string; city: string; state: string; zip: string; country?: string };
 
 /** How the agency takes its fee, as its page says. */
@@ -1950,6 +1952,7 @@ export const DEST: Record<string, Dest> = {
     notReady: "HMRC's service needs the business's own Government Gateway sign-in; the pages past sign-in and its rules for agents weren't seen.",
     checked: "2026-10-25", source: "https://www.gov.uk/register-employer",
   },
+  ...SOUTH_DEST,
 };
 
 /**

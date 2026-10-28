@@ -10961,5 +10961,323 @@
   "found": true,
   "sha256": "daa39a0f33d3a982",
   "context": " other filing............................................................$60.00 *annual report license tax is $60 or two-tenths of one mill on the dollar ($.0002) whichever is greater based on the company's assets located and employed in the state of wyoming. nonprofit"
+ },
+ {
+  "id": "fl-fdacs-wholesale",
+  "read": "https://www.fdacs.gov/Business-Services/Food/Food-Establishments/Wholesale-Manufactured-Food-Establishment-Permit",
+  "quote": "issues wholesale/manufactured food permits to bottled water plants, food processing plants, food storage warehouses and other food establishments",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "f722560a972282fb",
+  "context": "ment permit the florida department of agriculture and consumer services (fdacs) issues wholesale/manufactured food permits to bottled water plants, food processing plants, food storage warehouses and other food establishments that manufacture, process, pack, hold or prepare food for sale or distribution "
+ },
+ {
+  "id": "fl-fdacs-retail",
+  "read": "https://www.fdacs.gov/Business-Services/Food/Food-Establishments/Retail-Food-Establishment-Permit",
+  "quote": "issues retail food permits to food establishments selling directly to customers.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "a104d496e791142a",
+  "context": "ment permit the florida department of agriculture and consumer services (fdacs) issues retail food permits to food establishments selling directly to customers. these food establishments may include supermarkets, grocery stores, convenience"
+ },
+ {
+  "id": "ga-gda-manufacturer",
+  "read": "https://agr.georgia.gov/sites/default/files/documents/assets/legal/ocga/ocga-georgia-food-act.pdf",
+  "quote": "It shall be unlawful for any person to operate a food sales establishment without having first obtained a license from the Commissioner.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "8283b6e63b88c8b6",
+  "context": " hearing; transferability; posting of license; fees; rules and regulations. (a) it shall be unlawful for any person to operate a food sales establishment without having first obtained a license from the commissioner. no license issued under this article shall be suspended or revoked except for h"
+ },
+ {
+  "id": "ga-gda-retail",
+  "read": "https://agr.georgia.gov/sites/default/files/documents/assets/legal/ocga/ocga-georgia-food-act.pdf",
+  "quote": "It shall be unlawful for any person to operate a food sales establishment without having first obtained a license from the Commissioner.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "8283b6e63b88c8b6",
+  "context": " hearing; transferability; posting of license; fees; rules and regulations. (a) it shall be unlawful for any person to operate a food sales establishment without having first obtained a license from the commissioner. no license issued under this article shall be suspended or revoked except for h"
+ },
+ {
+  "id": "al-tax",
+  "read": "https://www.revenue.alabama.gov/sales-use/business-tax-online-registration-system/",
+  "quote": "Businesses must use My Alabama Taxes to apply online for a tax account number for the following tax types.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "a8bbe0e94e490128",
+  "context": "tax holiday – local government exemption limitations back to sales and use home businesses must use my alabama taxes to apply online for a tax account number for the following tax types. once you register online, it takes 3-5 days to receive an account number. you c"
+ },
+ {
+  "id": "al-sr2",
+  "read": "https://adol.alabama.gov/faq/how-does-my-business-register-as-a-new-employer/",
+  "quote": "Employers should submit an application as soon as liability has been established.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "81199e5caccb0592",
+  "context": "n alabama unemployment tax account by completing an application ( form sr-2 *). employers should submit an application as soon as liability has been established. to print an application form, click here * or you can request an application fo"
+ },
+ {
+  "id": "al-adph-mfp",
+  "read": "https://www.alabamapublichealth.gov/foodsafety/mfp/index.html",
+  "quote": "Manufactured food processing permits are required for commercial kitchens that manufacture, process, pack, hold, or prepare foods that are distributed to other businesses",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "adca4a1889275a62",
+  "context": "ood processing establishment sanitation to permit and inspect these facilities. manufactured food processing permits are required for commercial kitchens that manufacture, process, pack, hold, or prepare foods that are distributed to other businesses (wholesale) or for interstate (outside alabama) distribution. a private residen"
+ },
+ {
+  "id": "al-adai-food",
+  "read": "https://agi.alabama.gov/foodsafety/wp-content/uploads/sites/8/2022/02/2026-2027-fs-application.pdf",
+  "quote": "A permit fee of $ 50.00 is required for operation of each Food Sales Establishment that sells baby food, infant formula",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "fcfe56b14dc3f8ac",
+  "context": " chapter 1, title 20, code of alabama (1975) (20-1-33; 80-1-22-.32) as amended. a permit fee of $ 50.00 is required for operation of each food sales establishment that sells baby food, infant formula or potentially hazardous foods (i.e. dairy, eggs, meat, etc.). store name phsyi"
+ },
+ {
+  "id": "ms-dor-tax",
+  "read": "https://dor.ms.gov/business/sales-use-tax/register-taxes",
+  "quote": "Any entity operating in the state of Mississippi may be liable for taxes and should register with the Department of Revenue.",
+  "checked": "2026-10-28",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 000; read with WebFetch on 2026-10-28"
+ },
+ {
+  "id": "ms-mdes-ui",
+  "read": "https://www.mdes.ms.gov/employer-faqs/",
+  "quote": "A Status Report (Form UI-1) must be completed online or submitted to your local tax field representative.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "9e1c074f830e180f",
+  "context": "ting a new business, what forms do i need to complete and who should i contact? a status report (form ui-1) must be completed online or submitted to your local tax field representative. you may also need to contact the mississippi state tax commission, the worker's"
+ },
+ {
+  "id": "ms-msdh-retail",
+  "read": "https://msdh.ms.gov/Page/30,3432,77,311.html",
+  "quote": "If you prepare, hold, transport and/or serve food for pay you are required by state law to have a food permit.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "b05b71ccd6892011",
+  "context": "anslation and is not responsible for any inaccuracies. who needs a food permit? if you prepare, hold, transport and/or serve food for pay you are required by state law to have a food permit. charitable, non-profit organizations and private schools are not required to ha"
+ },
+ {
+  "id": "ms-msdh-manufactured",
+  "read": "https://msdh.ms.gov/page/30,18850,77,770.html",
+  "quote": "Mississippi state law requires anyone who intends to operate a food establishment in the state to obtain a permit",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "f4cad003b68860f3",
+  "context": " has not reviewed this translation and is not responsible for any inaccuracies. mississippi state law requires anyone who intends to operate a food establishment in the state to obtain a permit from the mississippi state department of health (ms code of 1972 §41-3-15). man"
+ },
+ {
+  "id": "la-ldr-tax",
+  "read": "https://revenue.louisiana.gov/businesses/general-resources/business-registration/",
+  "quote": "Do register for the tax accounts required for your business before you begin operating.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "cec3522533ed08ac",
+  "context": "ling returns easier and can help resolve questions if your account is reviewed. do register for the tax accounts required for your business before you begin operating. do create a latap account to manage your business tax obligations online. do as"
+ },
+ {
+  "id": "la-lwc-ui",
+  "read": "https://www.laworks.net/FAQs/FAQ_UI_EmployerTaxes.asp",
+  "quote": "Every employing unit operating in Louisiana is required to complete and submit an employer application",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "3fea55afedb8159d",
+  "context": "at are benefit charges? which employers must pay unemployment compensation tax? every employing unit operating in louisiana is required to complete and submit an employer application to receive an official determination of liability or non-liability under the lo"
+ },
+ {
+  "id": "la-ldh-retail",
+  "read": "https://ldh.la.gov/assets/oph/Center-EH/sanitarian/retailfood/OpenFoodEstab.pdf",
+  "quote": "If, after the final permitting inspection, all requirements have been met, a State Health Department Permit to Operate will be issued.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "b19f483551c27e84",
+  "context": "ou should call at least 5 working days before your anticipated opening date. 9. if, after the final permitting inspection, all requirements have been met, a state health department permit to operate will be issued. permit fees, payable by check or money order only, will be collected at this ti"
+ },
+ {
+  "id": "la-ldh-warehouse",
+  "read": "https://ldh.la.gov/page/619",
+  "quote": "standalone snack-vending warehouses, multiple-foods warehouses, and other kinds of food distribution facilities do require a \"W\"-class permit from our office.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "e74c3a4fb094f56e",
+  "context": "eration; these facilities do not require a separate permit to operate. however, standalone snack-vending warehouses, multiple-foods warehouses, and other kinds of food distribution facilities do require a \"w\"-class permit from our office. food storage warehouses are required to follow gwps (good warehousing practices"
+ },
+ {
+  "id": "ar-dfa-tax",
+  "read": "https://www.dfa.arkansas.gov/office/taxes/excise-tax-administration/sales-use-tax/register-for-a-tax-account/",
+  "quote": "$50.00 sales tax permit fee to be paid electronically upon submission",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "102faa1b46c3eaa5",
+  "context": " were purchased from a previous business date operations will begin in arkansas $50.00 sales tax permit fee to be paid electronically upon submission reminder other tax liabilities must be cleared before a new permit will be issu"
+ },
+ {
+  "id": "ar-dws-ui",
+  "read": "https://www.workforce.arkansas.gov/Tax21/Home.aspx?2",
+  "quote": "Apply for a new DWS Employer Account Number.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "4cfb26a76b4a8d05",
+  "context": "set up your user id from this location you can access the following services: ◆ apply for a new dws employer account number. ◆ sign up to request a logon id for online services. ◆ file and pay your employ"
+ },
+ {
+  "id": "ar-adh-retail",
+  "read": "https://healthy.arkansas.gov/programs-services/public-health-safety/food-protection-inspection-portal/food-protection-faq/",
+  "quote": "Any food sold to the public that requires temperature control to remain safe must be permitted by the Arkansas Department of Health.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "f0899cd5d0520625",
+  "context": "programs & services frequently asked questions who needs a permit to sell food? any food sold to the public that requires temperature control to remain safe must be permitted by the arkansas department of health. examples of food service establishments include but are not limited to restaura"
+ },
+ {
+  "id": "tn-dor-sales",
+  "read": "https://revenue.support.tn.gov/hc/en-us/articles/360058139252-SUT-10-Sales-and-Use-Tax-Account-Registering-for-an-Account",
+  "quote": "Any person who sells, leases, or rents tangible personal property or provides a taxable service is required to register",
+  "checked": "2026-10-28",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-28"
+ },
+ {
+  "id": "tn-ui",
+  "read": "https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax.html",
+  "quote": "Every employer in Tennessee is required to complete an online registration.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "d68a4c9e0f3fa584",
+  "context": "accounts offices employee or independent contractor? unemployment insurance tax every employer in tennessee is required to complete an online registration. submitting this registration will determine the status of your liability for un"
+ },
+ {
+  "id": "tn-tda-warehouse",
+  "read": "https://www.tn.gov/agriculture/consumers/food-safety/ag-farms-food-manufacturing-and-warehousing/startup.html",
+  "quote": "Any warehouse or establishment in the State of Tennessee where food is held for introduction into commerce is required to be licensed.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "a2650ef45d9d069b",
+  "context": " renewal of the applicant's license. when is a food warehouse license required? any warehouse or establishment in the state of tennessee where food is held for introduction into commerce is required to be licensed. as a manufacturer, am i required to obtain a license for my warehouse as well? "
+ },
+ {
+  "id": "tn-tda-retail",
+  "read": "https://www.tn.gov/agriculture/consumers/food-safety/ag-businesses-retail-food-establishments.html",
+  "quote": "please complete the Food Retail / Plan Review Questionnaire and return it to Consumer and Industry Services (CIS)",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "974f7bd250522f1f",
+  "context": "w business, under new ownership, taking on a new name or undergoing renovation, please complete the food retail / plan review questionnaire and return it to consumer and industry services (cis) along with: an electronic copy of the floor plan for the retail establishment s"
+ },
+ {
+  "id": "ky-10a100",
+  "read": "https://revenue.ky.gov/Business/Pages/Register-Business.aspx",
+  "quote": "The Kentucky Tax Registration Application allows new businesses or those starting new taxable activities to register for tax accounts.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "4654aebb0a35791a",
+  "context": "access the internal revenue service webpage. step 3: register for tax accounts. the kentucky tax registration application allows new businesses or those starting new taxable activities to register for tax accounts. complete the online registration via mytaxes.ky.gov or download the paper appli"
+ },
+ {
+  "id": "ky-ui",
+  "read": "https://kcc.ky.gov/career/resources/Documents/Learning%20Resources%20-%20Employers/Registering%20a%20New%20Employer%20Job%20Aid.pdf",
+  "quote": "new Employers subject to Unemployment Insurance (UI) to register an account in KUIP",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "2434811e264b5776",
+  "context": "ployer introduction the objective of this job aid is to outline the process for new employers subject to unemployment insurance (ui) to register an account in kuip. if you have not set up your kuip individual account, see the employer user acc"
+ },
+ {
+  "id": "ky-food-plant",
+  "read": "https://apps.legislature.ky.gov/law/kar/titles/902/045/180/",
+  "quote": "fees to be paid by food processing plants, food storage warehouses, salvage distributors, salvage processing plants, and cosmetic manufacturers for permits to operate",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "4abbf5552c4d6c8c",
+  "context": " the secretary to provide by administrative regulation a schedule of reasonable fees to be paid by food processing plants, food storage warehouses, salvage distributors, salvage processing plants, and cosmetic manufacturers for permits to operate and for inspection activities carried out by the cabinet. this administrative r"
+ },
+ {
+  "id": "sc-dor-retail",
+  "read": "https://dor.sc.gov/businesses/apply-business-tax-account/licensing-retail-license",
+  "quote": "Every person who engages in business in South Carolina as a retailer must obtain a Retail License before making any retail sales",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "7057caaad5d4dbf5",
+  "context": "business tax application on mydorway. ​retail license ($50 non-refundable fee) ​every person who engages in business in south carolina as a retailer must obtain a retail license before making any retail sales that are taxed under sales & use tax​. this includes internet sales and infrequ"
+ },
+ {
+  "id": "sc-dew-ui",
+  "read": "https://uitax.dew.sc.gov/scuiprod/onlinehelp/NetHelp/Documents/faq2.htm",
+  "quote": "Most* Employers must register for an Unemployment Insurance account.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "3401d46bb4a1b02e",
+  "context": "s. do all employers need to register with the unemployment agency in its state? most* employers must register for an unemployment insurance account. not all employers are liable to pay unemployment insurance taxes; however, all "
+ },
+ {
+  "id": "sc-scda-retail",
+  "read": "https://agriculture.sc.gov/permits-and-inspections/retail-food-safety/",
+  "quote": "A Retail Food Establishment Permit must be obtained from SCDA prior to selling food products retail, direct-to-consumer.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "d3e6a77954d7d187",
+  "context": "le food establishments (to include the associated commissary and mobile units). a retail food establishment permit must be obtained from scda prior to selling food products retail, direct-to-consumer. retail food establishments that will use a special process (e.g., reduced oxyge"
+ },
+ {
+  "id": "sc-scda-rvc",
+  "read": "https://agriculture.sc.gov/permits-and-inspections/wholesale-food-safety/",
+  "quote": "A Registration Verification Certificate (RVC) must be obtained from SCDA prior to selling food products wholesale.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "5f6940c674fd61cc",
+  "context": "hold, or prepare food for sale or distribution to other businesses or entities. a registration verification certificate (rvc) must be obtained from scda prior to selling food products wholesale. to do so, registration and the use of an approved and inspected facility is req"
+ },
+ {
+  "id": "nc-dor-br",
+  "read": "https://www.ncdor.gov/registration",
+  "quote": "New business owners should submit the appropriate business registration application to obtain an account ID number.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "9d00c7aa1a1e692e",
+  "context": "on utility menu nc.gov agencies jobs services search business registration home new business owners should submit the appropriate business registration application to obtain an account id number. the account id number is required to file and pay with ncdor. depending on tax "
+ },
+ {
+  "id": "nc-des-ui",
+  "read": "https://des.nc.gov/employers/am-i-required-pay-taxes",
+  "quote": "You need an Employer ID Number if you must pay unemployment taxes.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "13dfd1c130335589",
+  "context": "to the federal unemployment tax act, 26 u.s.c § 3301 et seq. how to get started you need an employer id number if you must pay unemployment taxes. apply online and create an ncsuits account. when you apply online, you will get"
  }
 ]

@@ -9,6 +9,7 @@ COPY supabase/functions/_shared/injection.ts supabase/functions/_shared/injectio
 COPY supabase/functions/_shared/zdr.ts supabase/functions/_shared/zdr.ts
 COPY supabase/functions/file/accounts.ts supabase/functions/file/accounts.ts
 COPY supabase/functions/file/destinations.ts supabase/functions/file/destinations.ts
+COPY supabase/functions/file/dest/south.ts supabase/functions/file/dest/south.ts
 # package-lock pins playwright-core to the same version as this image's browsers (1.56.0); keep them in step
 COPY worker/filer/package.json worker/filer/package-lock.json worker/filer/
 RUN cd worker/filer && npm ci --omit=dev

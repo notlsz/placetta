@@ -1,0 +1,1523 @@
+[
+ {
+  "id": "fl-fdacs-wholesale",
+  "form": "Wholesale/Manufactured Food Establishment Permit",
+  "title": {
+   "en": "Florida food permit for a food processor or food warehouse",
+   "zh": "佛罗里达州食品加工厂或食品仓库许可证"
+  },
+  "agency": {
+   "en": "Florida Department of Agriculture and Consumer Services, Division of Food Safety",
+   "zh": "佛罗里达州农业与消费者服务部食品安全处"
+  },
+  "level": "state",
+  "where": "FL",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "portal",
+  "how": {
+   "en": "Applied for in the FDACS Food Permit Center with proof of approved water and sewer service. An FDACS inspector calls within three to five business days to schedule the inspection, and the permit is issued once it passes and the fee is paid.",
+   "zh": "在 FDACS 食品许可中心申请，并附上合格供水和排污证明。FDACS 检查员会在三至五个工作日内联系安排检查，检查通过并缴费后发证。"
+  },
+  "url": "https://foodpermit.fdacs.gov/",
+  "info": "https://www.fdacs.gov/Business-Services/Food/Food-Establishments/Wholesale-Manufactured-Food-Establishment-Permit",
+  "fee": null,
+  "feeNote": {
+   "en": "Set by the food activities at the place; FDACS emails the amount after the inspection.",
+   "zh": "按场所的食品经营活动确定；检查后 FDACS 会通过电子邮件告知金额。"
+  },
+  "renews": {
+   "en": "Every year, before the permit expires.",
+   "zh": "每年在许可证到期前续期。"
+  },
+  "plain": {
+   "en": "Florida's permit for a place that makes, packs or stores food it sells to other businesses.",
+   "zh": "佛罗里达州对生产、包装或储存食品并销售给其他企业的场所发放的许可证。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "issues wholesale/manufactured food permits to bottled water plants, food processing plants, food storage warehouses and other food establishments",
+   "checked": "2026-10-28",
+   "read": "https://www.fdacs.gov/Business-Services/Food/Food-Establishments/Wholesale-Manufactured-Food-Establishment-Permit"
+  }
+ },
+ {
+  "id": "fl-fdacs-retail",
+  "form": "Retail Food Establishment Permit",
+  "title": {
+   "en": "Florida food permit for a grocery or other food store",
+   "zh": "佛罗里达州食品零售店许可证"
+  },
+  "agency": {
+   "en": "Florida Department of Agriculture and Consumer Services, Division of Food Safety",
+   "zh": "佛罗里达州农业与消费者服务部食品安全处"
+  },
+  "level": "state",
+  "where": "FL",
+  "segments": [
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "portal",
+  "how": {
+   "en": "Applied for in the FDACS Food Permit Center before the store opens. Covers supermarkets, grocery and convenience stores, bakeries and shops selling packaged food; restaurants are licensed by DBPR instead. FDACS inspects, then emails the fee.",
+   "zh": "开业前在 FDACS 食品许可中心申请。适用于超市、杂货店、便利店、烘焙店和销售包装食品的商店；餐厅由 DBPR 另行发证。FDACS 检查后通过电子邮件通知缴费。"
+  },
+  "url": "https://foodpermit.fdacs.gov/",
+  "info": "https://www.fdacs.gov/Business-Services/Food/Food-Establishments/Retail-Food-Establishment-Permit",
+  "fee": null,
+  "feeNote": {
+   "en": "Set by the food activities at the store; FDACS emails the amount after the inspection.",
+   "zh": "按门店的食品经营活动确定；检查后 FDACS 会通过电子邮件告知金额。"
+  },
+  "renews": {
+   "en": "Every year, before the permit expires.",
+   "zh": "每年在许可证到期前续期。"
+  },
+  "plain": {
+   "en": "Florida's permit for a store that sells food to shoppers, issued after an inspection.",
+   "zh": "佛罗里达州对向顾客销售食品的商店发放的许可证，检查后签发。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "issues retail food permits to food establishments selling directly to customers.",
+   "checked": "2026-10-28",
+   "read": "https://www.fdacs.gov/Business-Services/Food/Food-Establishments/Retail-Food-Establishment-Permit"
+  }
+ },
+ {
+  "id": "ga-gda-manufacturer",
+  "form": "Food Sales Establishment License Application (Manufacturers)",
+  "title": {
+   "en": "Georgia food license for a food manufacturer or warehouse",
+   "zh": "佐治亚州食品生产商或仓库食品经营执照"
+  },
+  "agency": {
+   "en": "Georgia Department of Agriculture, Manufactured Food Program",
+   "zh": "佐治亚州农业部加工食品项目"
+  },
+  "level": "state",
+  "where": "GA",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "how": {
+   "en": "The application and business plan go to GDA by email or mail 30 to 90 days before opening. An inspector visits, GDA asks for the Secure and Verifiable documents, then emails how to pay the fee.",
+   "zh": "在开业前 30 至 90 天，将申请表和经营计划通过电子邮件或邮寄提交给 GDA。检查员上门检查后，GDA 会要求提交可靠且可核实的身份文件，再通过电子邮件告知缴费方式。"
+  },
+  "url": "https://agr.georgia.gov/sites/default/files/documents/assets/Food%20Sales%20License%20Application%20-%20Manufacturers.pdf",
+  "info": "https://agr.georgia.gov/sites/default/files/documents/assets/legal/ocga/ocga-georgia-food-act.pdf",
+  "pdf": "https://agr.georgia.gov/sites/default/files/documents/assets/Food%20Sales%20License%20Application%20-%20Manufacturers.pdf",
+  "fee": null,
+  "feeNote": {
+   "en": "From $100 to $300 a year by tier, paid after GDA approves the application.",
+   "zh": "按等级每年 100 至 300 美元，GDA 批准申请后缴纳。"
+  },
+  "renews": {
+   "en": "Every year by July 1.",
+   "zh": "每年 7 月 1 日前续期。"
+  },
+  "foreign": {
+   "en": "GDA must see proof of US citizenship or lawful presence (Secure and Verifiable documents) from the applicant before it issues the license.",
+   "zh": "GDA 发证前须核验申请人的美国公民身份或合法居留证明（可靠且可核实的文件）。"
+  },
+  "plain": {
+   "en": "Georgia's license for a place that makes, packs or stores food for other businesses.",
+   "zh": "佐治亚州对为其他企业生产、包装或储存食品的场所颁发的执照。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "It shall be unlawful for any person to operate a food sales establishment without having first obtained a license from the Commissioner.",
+   "checked": "2026-10-28",
+   "read": "https://agr.georgia.gov/sites/default/files/documents/assets/legal/ocga/ocga-georgia-food-act.pdf"
+  }
+ },
+ {
+  "id": "ga-gda-retail",
+  "form": "Food Sales Establishment License Application (Retailers)",
+  "title": {
+   "en": "Georgia food license for a grocery or other food store",
+   "zh": "佐治亚州食品零售店经营执照"
+  },
+  "agency": {
+   "en": "Georgia Department of Agriculture, Retail Food Program",
+   "zh": "佐治亚州农业部零售食品项目"
+  },
+  "level": "state",
+  "where": "GA",
+  "segments": [
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "how": {
+   "en": "For grocery stores, convenience stores, bakeries and other food retailers; restaurants are permitted by the county health department instead. The application and business plan go to GDA by email or mail 30 to 90 days before opening, then an inspection.",
+   "zh": "适用于杂货店、便利店、烘焙店等食品零售商；餐厅由县卫生部门另行发证。在开业前 30 至 90 天，将申请表和经营计划通过电子邮件或邮寄提交给 GDA，之后接受检查。"
+  },
+  "url": "https://agr.georgia.gov/sites/default/files/documents/assets/Food%20Sales%20License%20Application%20-%20Retailers.pdf",
+  "info": "https://agr.georgia.gov/sites/default/files/documents/assets/legal/ocga/ocga-georgia-food-act.pdf",
+  "pdf": "https://agr.georgia.gov/sites/default/files/documents/assets/Food%20Sales%20License%20Application%20-%20Retailers.pdf",
+  "fee": null,
+  "feeNote": {
+   "en": "From $100 to $300 a year by tier, paid after GDA approves the application.",
+   "zh": "按等级每年 100 至 300 美元，GDA 批准申请后缴纳。"
+  },
+  "renews": {
+   "en": "Every year by July 1.",
+   "zh": "每年 7 月 1 日前续期。"
+  },
+  "foreign": {
+   "en": "GDA must see proof of US citizenship or lawful presence (Secure and Verifiable documents) from the applicant before it issues the license.",
+   "zh": "GDA 发证前须核验申请人的美国公民身份或合法居留证明（可靠且可核实的文件）。"
+  },
+  "plain": {
+   "en": "Georgia's license for a store that sells food, issued by the Department of Agriculture.",
+   "zh": "佐治亚州农业部为销售食品的商店颁发的执照。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "It shall be unlawful for any person to operate a food sales establishment without having first obtained a license from the Commissioner.",
+   "checked": "2026-10-28",
+   "read": "https://agr.georgia.gov/sites/default/files/documents/assets/legal/ocga/ocga-georgia-food-act.pdf"
+  }
+ },
+ {
+  "id": "al-tax",
+  "form": "My Alabama Taxes business registration",
+  "title": {
+   "en": "Alabama sales tax license and withholding account",
+   "zh": "阿拉巴马州销售税执照与预扣税账户"
+  },
+  "agency": {
+   "en": "Alabama Department of Revenue",
+   "zh": "阿拉巴马州税务局"
+  },
+  "level": "state",
+  "where": "AL",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "how": {
+   "en": "Registered online in My Alabama Taxes, which opens the state sales tax account and, for a business with staff, the income tax withholding account. Some cities and counties collect their own sales tax and register separately.",
+   "zh": "在 My Alabama Taxes 在线登记，开设州销售税账户；有员工的企业同时开设工资所得税预扣账户。部分市县自行征收销售税，须另行登记。"
+  },
+  "url": "https://myalabamataxes.alabama.gov/?link=newbusiness",
+  "info": "https://www.revenue.alabama.gov/sales-use/business-tax-online-registration-system/",
+  "fee": 0,
+  "feeNote": {
+   "en": "The registration system is free.",
+   "zh": "登记系统免费。"
+  },
+  "takes": {
+   "en": "About 3 to 5 days for the account number after registering online.",
+   "zh": "在线登记后约 3 至 5 天取得账号。"
+  },
+  "takesDays": 5,
+  "takesSource": "https://www.revenue.alabama.gov/sales-use/business-tax-online-registration-system/ (2026-10-28)",
+  "plain": {
+   "en": "Lets you charge sales tax in Alabama and registers you to withhold tax from wages.",
+   "zh": "让您可以在阿拉巴马州收取销售税，并登记工资预扣税。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 20,
+  "proof": {
+   "quote": "Businesses must use My Alabama Taxes to apply online for a tax account number for the following tax types.",
+   "checked": "2026-10-28",
+   "read": "https://www.revenue.alabama.gov/sales-use/business-tax-online-registration-system/"
+  }
+ },
+ {
+  "id": "al-sr2",
+  "form": "Form SR-2 (Application to Determine Liability)",
+  "title": {
+   "en": "Alabama unemployment tax account",
+   "zh": "阿拉巴马州失业保险税账户"
+  },
+  "agency": {
+   "en": "Alabama Department of Workforce, Unemployment Compensation Division",
+   "zh": "阿拉巴马州劳动力部失业补偿处"
+  },
+  "level": "state",
+  "where": "AL",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "pdf_fax",
+  "how": {
+   "en": "Form SR-2 goes to the Status Unit by fax, email or mail as soon as the business has employees, or is filed in the department's eGov site.",
+   "zh": "企业一旦有员工，即将 SR-2 表通过传真、电子邮件或邮寄交给状态审核科，或在该部门的 eGov 网站提交。"
+  },
+  "url": "https://adol.alabama.gov/wp-content/uploads/2023/11/uc_sr2_application.pdf",
+  "info": "https://adol.alabama.gov/faq/how-does-my-business-register-as-a-new-employer/",
+  "pdf": "https://adol.alabama.gov/wp-content/uploads/2023/11/uc_sr2_application.pdf",
+  "fee": 0,
+  "feeNote": {
+   "en": "No fee.",
+   "zh": "不收费。"
+  },
+  "plain": {
+   "en": "Opens the account Alabama uses to collect unemployment tax on your payroll.",
+   "zh": "开设阿拉巴马州征收工资失业保险税的账户。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 60,
+  "proof": {
+   "quote": "Employers should submit an application as soon as liability has been established.",
+   "checked": "2026-10-28",
+   "read": "https://adol.alabama.gov/faq/how-does-my-business-register-as-a-new-employer/"
+  }
+ },
+ {
+  "id": "al-adph-mfp",
+  "form": "Manufactured Food Processing Permit",
+  "title": {
+   "en": "Alabama permit for a food processor or food warehouse",
+   "zh": "阿拉巴马州食品加工或仓储许可证"
+  },
+  "agency": {
+   "en": "Alabama Department of Public Health, Division of Food, Milk and Lodging",
+   "zh": "阿拉巴马州公共卫生部食品、乳品与住宿处"
+  },
+  "level": "state",
+  "where": "AL",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "how": {
+   "en": "The business emails its layout drawing, food descriptions, process flow and food safety plan to the Manufactured Food program. Once they are approved, the program emails the application, and the county health department takes any fee.",
+   "zh": "企业将设备布局图、产品说明、工艺流程和食品安全计划通过电子邮件发给加工食品项目。审核通过后，项目会通过电子邮件发送申请表，如需缴费由县卫生部门收取。"
+  },
+  "url": "https://www.alabamapublichealth.gov/foodsafety/mfp/permitting.html",
+  "info": "https://www.alabamapublichealth.gov/foodsafety/mfp/index.html",
+  "fee": null,
+  "feeNote": {
+   "en": "Any fee is set and collected by the local county health department.",
+   "zh": "如需缴费，由当地县卫生部门确定并收取。"
+  },
+  "plain": {
+   "en": "Alabama's permit for a place that makes, packs or holds food sold to other businesses.",
+   "zh": "阿拉巴马州对生产、包装或储存食品并销售给其他企业的场所发放的许可证。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "Manufactured food processing permits are required for commercial kitchens that manufacture, process, pack, hold, or prepare foods that are distributed to other businesses",
+   "checked": "2026-10-28",
+   "read": "https://www.alabamapublichealth.gov/foodsafety/mfp/index.html"
+  }
+ },
+ {
+  "id": "al-adai-food",
+  "form": "Application for Food Safety Permit",
+  "title": {
+   "en": "Alabama food safety permit for a food store",
+   "zh": "阿拉巴马州食品商店食品安全许可证"
+  },
+  "agency": {
+   "en": "Alabama Department of Agriculture and Industries, Food Safety Section",
+   "zh": "阿拉巴马州农业与工业部食品安全科"
+  },
+  "level": "state",
+  "where": "AL",
+  "segments": [
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "how": {
+   "en": "Mailed with a check or money order for each store that sells baby food, infant formula or perishable foods such as dairy, eggs or meat. Restaurants are permitted by the county health department instead.",
+   "zh": "每家销售婴儿食品、婴儿配方奶粉或乳制品、蛋类、肉类等易腐食品的门店，须邮寄申请表并附支票或汇票。餐厅由县卫生部门另行发证。"
+  },
+  "url": "https://agi.alabama.gov/foodsafety/wp-content/uploads/sites/8/2022/02/2026-2027-fs-application.pdf",
+  "info": "https://agi.alabama.gov/foodsafety/wp-content/uploads/sites/8/2022/02/2026-2027-fs-application.pdf",
+  "pdf": "https://agi.alabama.gov/foodsafety/wp-content/uploads/sites/8/2022/02/2026-2027-fs-application.pdf",
+  "fee": 50,
+  "feeNote": {
+   "en": "$50 for each location, by check or money order; a 15% penalty after July 31.",
+   "zh": "每个门店 50 美元，以支票或汇票支付；7 月 31 日后另加 15% 罚款。"
+  },
+  "renews": {
+   "en": "Every year, for the period July 1 to June 30.",
+   "zh": "每年续期，有效期为 7 月 1 日至次年 6 月 30 日。"
+  },
+  "plain": {
+   "en": "Alabama's yearly permit for a store selling baby food, formula, dairy, eggs or meat.",
+   "zh": "阿拉巴马州对销售婴儿食品、配方奶粉、乳制品、蛋类或肉类的商店每年发放的许可证。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "A permit fee of $ 50.00 is required for operation of each Food Sales Establishment that sells baby food, infant formula",
+   "checked": "2026-10-28",
+   "read": "https://agi.alabama.gov/foodsafety/wp-content/uploads/sites/8/2022/02/2026-2027-fs-application.pdf"
+  }
+ },
+ {
+  "id": "ms-dor-tax",
+  "form": "Taxpayer Access Point (TAP) registration",
+  "title": {
+   "en": "Mississippi sales tax permit and withholding account",
+   "zh": "密西西比州销售税许可证与预扣税账户"
+  },
+  "agency": {
+   "en": "Mississippi Department of Revenue",
+   "zh": "密西西比州税务局"
+  },
+  "level": "state",
+  "where": "MS",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "how": {
+   "en": "Registered online through TAP, which covers the sales tax permit and, for a business with staff, the withholding account.",
+   "zh": "通过 TAP 在线登记，涵盖销售税许可证；有员工的企业同时开设预扣税账户。"
+  },
+  "url": "https://tap.dor.ms.gov/",
+  "info": "https://dor.ms.gov/business/sales-use-tax/register-taxes",
+  "fee": null,
+  "plain": {
+   "en": "Lets you charge sales tax in Mississippi and registers you to withhold tax from wages.",
+   "zh": "让您可以在密西西比州收取销售税，并登记工资预扣税。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 20,
+  "proof": {
+   "quote": "Any entity operating in the state of Mississippi may be liable for taxes and should register with the Department of Revenue.",
+   "checked": "2026-10-28",
+   "read": "https://dor.ms.gov/business/sales-use-tax/register-taxes"
+  }
+ },
+ {
+  "id": "ms-mdes-ui",
+  "form": "Status Report (Form UI-1)",
+  "title": {
+   "en": "Mississippi unemployment tax account",
+   "zh": "密西西比州失业保险税账户"
+  },
+  "agency": {
+   "en": "Mississippi Department of Employment Security",
+   "zh": "密西西比州就业保障局"
+  },
+  "level": "state",
+  "where": "MS",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "how": {
+   "en": "Filed online as a new business in MDES's unemployment tax system, or given to the local tax field representative.",
+   "zh": "在 MDES 失业保险税系统中以新企业身份在线提交，或交给当地税务外勤代表。"
+  },
+  "url": "https://accessmstax.mdes.ms.gov/accessmstax/faces/login/login.xhtml",
+  "info": "https://www.mdes.ms.gov/employer-faqs/",
+  "fee": 0,
+  "feeNote": {
+   "en": "No fee.",
+   "zh": "不收费。"
+  },
+  "plain": {
+   "en": "Opens the account Mississippi uses to collect unemployment tax on your payroll.",
+   "zh": "开设密西西比州征收工资失业保险税的账户。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 60,
+  "proof": {
+   "quote": "A Status Report (Form UI-1) must be completed online or submitted to your local tax field representative.",
+   "checked": "2026-10-28",
+   "read": "https://www.mdes.ms.gov/employer-faqs/"
+  }
+ },
+ {
+  "id": "ms-msdh-retail",
+  "form": "Food Permit Application and Plan Review (retail)",
+  "title": {
+   "en": "Mississippi food permit for a restaurant or food store",
+   "zh": "密西西比州餐厅或食品店食品许可证"
+  },
+  "agency": {
+   "en": "Mississippi State Department of Health, Division of Food Protection",
+   "zh": "密西西比州卫生局食品保护处"
+  },
+  "level": "state",
+  "where": "MS",
+  "segments": [
+   "restaurant",
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "how": {
+   "en": "Ask food@msdh.ms.gov for the plan review packet, then email back the permit application and plan review with the floor plan, menu and food manager certificate. MSDH emails a link for the $224.25 plan review fee, then invoices the permit.",
+   "zh": "先向 food@msdh.ms.gov 索取图纸审查材料包，再将许可证申请和图纸审查连同平面图、菜单和食品经理证书通过电子邮件寄回。MSDH 会通过电子邮件发送 224.25 美元图纸审查费的付款链接，之后开具许可证费账单。"
+  },
+  "url": "https://msdh.ms.gov/Page/30,0,77,311.html",
+  "info": "https://msdh.ms.gov/Page/30,3432,77,311.html",
+  "fee": null,
+  "feeNote": {
+   "en": "A $224.25 plan review fee, then a yearly permit of $40 to $264.50 by risk level, paid online.",
+   "zh": "图纸审查费 224.25 美元，之后按风险等级每年缴纳 40 至 264.50 美元许可证费，在线支付。"
+  },
+  "takes": {
+   "en": "Up to 30 days to review a complete application.",
+   "zh": "完整申请的审核最多需 30 天。"
+  },
+  "takesDays": 30,
+  "takesSource": "https://msdh.ms.gov/Page/30,3432,77,311.html (2026-10-28)",
+  "renews": {
+   "en": "Every year, after the permit inspection.",
+   "zh": "每年在许可证检查后续期。"
+  },
+  "plain": {
+   "en": "Mississippi's state permit for any place that serves or sells food, issued after a plan review and inspection.",
+   "zh": "密西西比州对任何供应或销售食品的场所发放的州许可证，须经图纸审查和检查。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "If you prepare, hold, transport and/or serve food for pay you are required by state law to have a food permit.",
+   "checked": "2026-10-28",
+   "read": "https://msdh.ms.gov/Page/30,3432,77,311.html"
+  }
+ },
+ {
+  "id": "ms-msdh-manufactured",
+  "form": "Food Permit Application and Plan Review (manufactured food)",
+  "title": {
+   "en": "Mississippi food permit for a food processor or food warehouse",
+   "zh": "密西西比州食品加工厂或食品仓库许可证"
+  },
+  "agency": {
+   "en": "Mississippi State Department of Health, Manufactured Foods",
+   "zh": "密西西比州卫生局加工食品处"
+  },
+  "level": "state",
+  "where": "MS",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "how": {
+   "en": "Ask mfgfoods@msdh.ms.gov for the plan review packet, then email back the permit application with the floor and site plan, food safety plan and product labels. MSDH emails a link for the plan review fee, then invoices the permit.",
+   "zh": "先向 mfgfoods@msdh.ms.gov 索取图纸审查材料包，再将许可证申请连同平面图和场地图、食品安全计划和产品标签通过电子邮件寄回。MSDH 会通过电子邮件发送图纸审查费付款链接，之后开具许可证费账单。"
+  },
+  "url": "https://msdh.ms.gov/Page/30,0,77,311.html",
+  "info": "https://msdh.ms.gov/page/30,18850,77,770.html",
+  "fee": null,
+  "feeNote": {
+   "en": "A $224.25 plan review fee, then a yearly permit set by risk level, paid online.",
+   "zh": "图纸审查费 224.25 美元，之后按风险等级每年缴纳许可证费，在线支付。"
+  },
+  "takes": {
+   "en": "Up to 30 days to review a complete application.",
+   "zh": "完整申请的审核最多需 30 天。"
+  },
+  "takesDays": 30,
+  "takesSource": "https://msdh.ms.gov/page/30,18850,77,770.html (2026-10-28)",
+  "plain": {
+   "en": "Mississippi's permit for food processors, warehouses and repackers, issued after a plan review.",
+   "zh": "密西西比州对食品加工商、仓库和分装商发放的许可证，须经图纸审查。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "Mississippi state law requires anyone who intends to operate a food establishment in the state to obtain a permit",
+   "checked": "2026-10-28",
+   "read": "https://msdh.ms.gov/page/30,18850,77,770.html"
+  }
+ },
+ {
+  "id": "la-ldr-tax",
+  "form": "LaTAP business registration",
+  "title": {
+   "en": "Louisiana sales tax and withholding accounts",
+   "zh": "路易斯安那州销售税与预扣税账户"
+  },
+  "agency": {
+   "en": "Louisiana Department of Revenue",
+   "zh": "路易斯安那州税务局"
+  },
+  "level": "state",
+  "where": "LOU",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "how": {
+   "en": "Registered online in LaTAP under Register My Business, before the business starts operating. Open the withholding account only once there are employees. Parish sales taxes are registered with each parish separately.",
+   "zh": "开始经营前在 LaTAP 的“Register My Business”在线登记。有员工后才开设预扣税账户。教区（parish）销售税须分别向各教区登记。"
+  },
+  "url": "https://latap.revenue.louisiana.gov/",
+  "info": "https://revenue.louisiana.gov/businesses/general-resources/business-registration/",
+  "fee": null,
+  "plain": {
+   "en": "Lets you charge Louisiana's state sales tax and, once you hire, withhold tax from wages.",
+   "zh": "让您可以收取路易斯安那州州销售税，雇人后可代扣工资税。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 20,
+  "proof": {
+   "quote": "Do register for the tax accounts required for your business before you begin operating.",
+   "checked": "2026-10-28",
+   "read": "https://revenue.louisiana.gov/businesses/general-resources/business-registration/"
+  }
+ },
+ {
+  "id": "la-lwc-ui",
+  "form": "Application for an Unemployment Insurance Account Number",
+  "title": {
+   "en": "Louisiana unemployment tax account",
+   "zh": "路易斯安那州失业保险税账户"
+  },
+  "agency": {
+   "en": "Louisiana Works (the Louisiana Workforce Commission)",
+   "zh": "路易斯安那州劳动力机构 Louisiana Works（原路易斯安那州劳动力委员会）"
+  },
+  "level": "state",
+  "where": "LOU",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "how": {
+   "en": "Filed online with Louisiana Works, which decides whether the business is liable and issues its employer account number.",
+   "zh": "向 Louisiana Works 在线提交，由其认定企业是否负有缴税义务并发放雇主账号。"
+  },
+  "url": "https://laors.laworks.net/lastatusreport/register/index.asp",
+  "info": "https://www.laworks.net/FAQs/FAQ_UI_EmployerTaxes.asp",
+  "fee": 0,
+  "feeNote": {
+   "en": "No fee.",
+   "zh": "不收费。"
+  },
+  "plain": {
+   "en": "Opens the account Louisiana uses to collect unemployment tax on your payroll.",
+   "zh": "开设路易斯安那州征收工资失业保险税的账户。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 60,
+  "proof": {
+   "quote": "Every employing unit operating in Louisiana is required to complete and submit an employer application",
+   "checked": "2026-10-28",
+   "read": "https://www.laworks.net/FAQs/FAQ_UI_EmployerTaxes.asp"
+  }
+ },
+ {
+  "id": "la-ldh-retail",
+  "form": "Retail food establishment Permit to Operate",
+  "title": {
+   "en": "Louisiana food permit for a restaurant or food store",
+   "zh": "路易斯安那州餐厅或食品店营业许可证"
+  },
+  "agency": {
+   "en": "Louisiana Department of Health, Sanitarian Services",
+   "zh": "路易斯安那州卫生部卫生监督处"
+  },
+  "level": "state",
+  "where": "LOU",
+  "segments": [
+   "restaurant",
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "in_person",
+  "how": {
+   "en": "Plans go to the state sanitarian in the parish, with the plan review fee, before building. After the final permitting inspection the state issues the Permit to Operate and collects the permit fee.",
+   "zh": "施工前将图纸连同图纸审查费提交给所在教区的州卫生监督员。最终发证检查通过后，州政府签发营业许可证并收取许可证费。"
+  },
+  "url": "https://ldh.la.gov/page/for-new-businesses",
+  "info": "https://ldh.la.gov/assets/oph/Center-EH/sanitarian/retailfood/OpenFoodEstab.pdf",
+  "fee": null,
+  "feeNote": {
+   "en": "A $100 plan review fee ($1,000 expedited), then the permit fee by type; grocery fees scale with revenue.",
+   "zh": "图纸审查费 100 美元（加急 1,000 美元），之后按类型缴纳许可证费；杂货店按营业额计费。"
+  },
+  "plain": {
+   "en": "Louisiana's state permit that lets a restaurant or food store open, issued at the final inspection.",
+   "zh": "路易斯安那州允许餐厅或食品店开业的州许可证，在最终检查时签发。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "If, after the final permitting inspection, all requirements have been met, a State Health Department Permit to Operate will be issued.",
+   "checked": "2026-10-28",
+   "read": "https://ldh.la.gov/assets/oph/Center-EH/sanitarian/retailfood/OpenFoodEstab.pdf"
+  }
+ },
+ {
+  "id": "la-ldh-warehouse",
+  "form": "Food warehouse (W-class) Permit to Operate",
+  "title": {
+   "en": "Louisiana permit for a food warehouse",
+   "zh": "路易斯安那州食品仓库许可证"
+  },
+  "agency": {
+   "en": "Louisiana Department of Health, Food and Drug Unit",
+   "zh": "路易斯安那州卫生部食品药品处"
+  },
+  "level": "state",
+  "where": "LOU",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "in_person",
+  "how": {
+   "en": "Plans for the facility go to the district sanitarian; after approval and a pre-operational inspection a temporary permit is issued and the permit follows by mail. A manufacturer's own attached warehouse needs no separate permit.",
+   "zh": "将设施图纸提交给地区卫生监督员；获批并通过开业前检查后，先发临时许可证，正式许可证随后邮寄。生产商自带的附属仓库无需另行申请。"
+  },
+  "url": "https://ldh.la.gov/page/619",
+  "info": "https://ldh.la.gov/page/619",
+  "fee": 300,
+  "feeNote": {
+   "en": "A flat $300 each fiscal year, whatever the size.",
+   "zh": "每个财政年度统一 300 美元，不论规模。"
+  },
+  "renews": {
+   "en": "Every fiscal year.",
+   "zh": "每个财政年度。"
+  },
+  "plain": {
+   "en": "Louisiana's permit for a warehouse that holds and distributes food.",
+   "zh": "路易斯安那州对储存和分销食品的仓库发放的许可证。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "standalone snack-vending warehouses, multiple-foods warehouses, and other kinds of food distribution facilities do require a \"W\"-class permit from our office.",
+   "checked": "2026-10-28",
+   "read": "https://ldh.la.gov/page/619"
+  }
+ },
+ {
+  "id": "ar-dfa-tax",
+  "form": "Arkansas Taxpayer Access Point (ATAP) registration",
+  "title": {
+   "en": "Arkansas sales tax permit",
+   "zh": "阿肯色州销售税许可证"
+  },
+  "agency": {
+   "en": "Arkansas Department of Finance and Administration",
+   "zh": "阿肯色州财政与行政部"
+  },
+  "level": "state",
+  "where": "AR",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "how": {
+   "en": "Registered online in ATAP with the start date, a signed lease if the place is leased, and the $50 fee paid on submission. ATAP also registers the withholding tax account.",
+   "zh": "在 ATAP 在线登记，提供开业日期、租用场所时附签字租约，并在提交时缴纳 50 美元费用。ATAP 也可登记预扣税账户。"
+  },
+  "url": "https://atap.arkansas.gov/?link=REGISTER",
+  "info": "https://www.dfa.arkansas.gov/office/taxes/excise-tax-administration/sales-use-tax/register-for-a-tax-account/",
+  "fee": 50,
+  "feeNote": {
+   "en": "$50, paid online when you submit.",
+   "zh": "50 美元，提交时在线支付。"
+  },
+  "takes": {
+   "en": "Allow up to 2 weeks.",
+   "zh": "最多约 2 周。"
+  },
+  "takesDays": 14,
+  "takesSource": "https://www.dfa.arkansas.gov/office/taxes/excise-tax-administration/sales-use-tax/register-for-a-tax-account/ (2026-10-28)",
+  "plain": {
+   "en": "Arkansas's sales tax permit, which lets you charge sales tax there.",
+   "zh": "阿肯色州销售税许可证，让您可以在当地收取销售税。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 20,
+  "proof": {
+   "quote": "$50.00 sales tax permit fee to be paid electronically upon submission",
+   "checked": "2026-10-28",
+   "read": "https://www.dfa.arkansas.gov/office/taxes/excise-tax-administration/sales-use-tax/register-for-a-tax-account/"
+  }
+ },
+ {
+  "id": "ar-dws-ui",
+  "form": "DWS employer account registration",
+  "title": {
+   "en": "Arkansas unemployment tax account",
+   "zh": "阿肯色州失业保险税账户"
+  },
+  "agency": {
+   "en": "Arkansas Division of Workforce Services",
+   "zh": "阿肯色州劳动力服务处"
+  },
+  "level": "state",
+  "where": "AR",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "how": {
+   "en": "Applied for online in DWS's employer services site (Tax 21), which issues the employer account number.",
+   "zh": "在 DWS 雇主服务网站（Tax 21）在线申请，取得雇主账号。"
+  },
+  "url": "https://www.workforce.arkansas.gov/Tax21/Home.aspx?2",
+  "info": "https://www.workforce.arkansas.gov/Tax21/Home.aspx?2",
+  "fee": 0,
+  "feeNote": {
+   "en": "No fee.",
+   "zh": "不收费。"
+  },
+  "plain": {
+   "en": "Opens the account Arkansas uses to collect unemployment tax on your payroll.",
+   "zh": "开设阿肯色州征收工资失业保险税的账户。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 60,
+  "proof": {
+   "quote": "Apply for a new DWS Employer Account Number.",
+   "checked": "2026-10-28",
+   "read": "https://www.workforce.arkansas.gov/Tax21/Home.aspx?2"
+  }
+ },
+ {
+  "id": "ar-adh-retail",
+  "form": "Retail Food Establishment Permit Application (EHP-99)",
+  "title": {
+   "en": "Arkansas food permit for a restaurant or food store",
+   "zh": "阿肯色州餐厅或食品店许可证"
+  },
+  "agency": {
+   "en": "Arkansas Department of Health, Food Protection Services",
+   "zh": "阿肯色州卫生部食品保护处"
+  },
+  "level": "state",
+  "where": "AR",
+  "segments": [
+   "restaurant",
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "how": {
+   "en": "Mailed with the fee by check or money order 30 days before opening. A new or remodeled place first has a plan review through the county health unit.",
+   "zh": "开业前 30 天邮寄申请表并以支票或汇票缴费。新建或改建场所须先经县卫生单位进行图纸审查。"
+  },
+  "url": "https://healthy.arkansas.gov/wp-content/uploads/Food-Permit-Application-10.2025.pdf",
+  "info": "https://healthy.arkansas.gov/programs-services/public-health-safety/food-protection-inspection-portal/food-protection-faq/",
+  "pdf": "https://healthy.arkansas.gov/wp-content/uploads/Food-Permit-Application-10.2025.pdf",
+  "fee": 35,
+  "feeNote": {
+   "en": "$35 a year; a new place also pays a plan review fee of 1% of the estimated cost, from $50 to $500.",
+   "zh": "每年 35 美元；新场所另付图纸审查费，为预估造价的 1%，介于 50 至 500 美元。"
+  },
+  "renews": {
+   "en": "Billed every year.",
+   "zh": "每年开具账单。"
+  },
+  "foreign": {
+   "en": "The form asks for a driver's license or government ID number; a passport number serves for an owner without a US ID.",
+   "zh": "表格要求填写驾照或政府证件号码；没有美国证件的业主可填写护照号码。"
+  },
+  "plain": {
+   "en": "Arkansas's state permit for any place selling food that needs temperature control.",
+   "zh": "阿肯色州对销售需温控食品的场所发放的州许可证。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "Any food sold to the public that requires temperature control to remain safe must be permitted by the Arkansas Department of Health.",
+   "checked": "2026-10-28",
+   "read": "https://healthy.arkansas.gov/programs-services/public-health-safety/food-protection-inspection-portal/food-protection-faq/"
+  }
+ },
+ {
+  "id": "tn-dor-sales",
+  "form": "TNTAP sales and use tax registration",
+  "title": {
+   "en": "Tennessee sales and use tax account",
+   "zh": "田纳西州销售与使用税账户"
+  },
+  "agency": {
+   "en": "Tennessee Department of Revenue",
+   "zh": "田纳西州税务局"
+  },
+  "level": "state",
+  "where": "TN",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "how": {
+   "en": "Registered online in TNTAP before the first sale. Tennessee has no income tax on wages, so there is no withholding account.",
+   "zh": "首笔销售前在 TNTAP 在线登记。田纳西州不对工资征收所得税，因此无需开设预扣税账户。"
+  },
+  "url": "https://tntap.tn.gov/eservices/_/",
+  "info": "https://revenue.support.tn.gov/hc/en-us/articles/360058139252-SUT-10-Sales-and-Use-Tax-Account-Registering-for-an-Account",
+  "fee": 0,
+  "feeNote": {
+   "en": "No fee.",
+   "zh": "不收费。"
+  },
+  "plain": {
+   "en": "Lets you charge sales tax in Tennessee.",
+   "zh": "让您可以在田纳西州收取销售税。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 20,
+  "proof": {
+   "quote": "Any person who sells, leases, or rents tangible personal property or provides a taxable service is required to register",
+   "checked": "2026-10-28",
+   "read": "https://revenue.support.tn.gov/hc/en-us/articles/360058139252-SUT-10-Sales-and-Use-Tax-Account-Registering-for-an-Account"
+  }
+ },
+ {
+  "id": "tn-ui",
+  "form": "Unemployment insurance employer registration",
+  "title": {
+   "en": "Tennessee unemployment tax account",
+   "zh": "田纳西州失业保险税账户"
+  },
+  "agency": {
+   "en": "Tennessee Department of Labor and Workforce Development",
+   "zh": "田纳西州劳动与劳动力发展部"
+  },
+  "level": "state",
+  "where": "TN",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "how": {
+   "en": "Every employer completes the online registration, which decides liability and issues an eight-digit employer account number.",
+   "zh": "所有雇主都须完成在线登记，由此认定缴费义务并发放八位数雇主账号。"
+  },
+  "url": "https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax.html",
+  "info": "https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax.html",
+  "fee": 0,
+  "feeNote": {
+   "en": "No fee.",
+   "zh": "不收费。"
+  },
+  "plain": {
+   "en": "Opens the account Tennessee uses to collect unemployment premiums on your payroll.",
+   "zh": "开设田纳西州征收工资失业保险费的账户。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 60,
+  "proof": {
+   "quote": "Every employer in Tennessee is required to complete an online registration.",
+   "checked": "2026-10-28",
+   "read": "https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax.html"
+  }
+ },
+ {
+  "id": "tn-tda-warehouse",
+  "form": "Food Manufacturer or Food Warehouse License",
+  "title": {
+   "en": "Tennessee license for a food manufacturer or food warehouse",
+   "zh": "田纳西州食品生产商或食品仓库执照"
+  },
+  "agency": {
+   "en": "Tennessee Department of Agriculture, Consumer and Industry Services",
+   "zh": "田纳西州农业部消费者与产业服务处"
+  },
+  "level": "state",
+  "where": "TN",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "online",
+  "how": {
+   "en": "Applied for online, or by emailing the application and the checklist documents to NewFood.business@TN.gov. TDA emails an invoice on approval, which is paid before the inspection; the license is issued once it passes.",
+   "zh": "在线申请，或将申请表和清单所列文件通过电子邮件发送至 NewFood.business@TN.gov。TDA 批准后通过电子邮件开具账单，须在检查前付清；检查通过后发证。"
+  },
+  "url": "https://tnlcp.lcp.tracefirst.com/landing_pages/fm_mfg_application/go",
+  "info": "https://www.tn.gov/agriculture/consumers/food-safety/ag-farms-food-manufacturing-and-warehousing/startup.html",
+  "fee": null,
+  "feeNote": {
+   "en": "A warehouse is $100 (dry) or $300 (temperature controlled); a manufacturer $50 to $750 by size and risk.",
+   "zh": "仓库 100 美元（常温）或 300 美元（温控）；生产商按规模和风险 50 至 750 美元。"
+  },
+  "renews": {
+   "en": "Every year; licenses expire June 30.",
+   "zh": "每年续期；执照于 6 月 30 日到期。"
+  },
+  "plain": {
+   "en": "Tennessee's license for a place that makes food or holds it for sale to others.",
+   "zh": "田纳西州对生产食品或储存食品供销售的场所颁发的执照。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "Any warehouse or establishment in the State of Tennessee where food is held for introduction into commerce is required to be licensed.",
+   "checked": "2026-10-28",
+   "read": "https://www.tn.gov/agriculture/consumers/food-safety/ag-farms-food-manufacturing-and-warehousing/startup.html"
+  }
+ },
+ {
+  "id": "tn-tda-retail",
+  "form": "Food Retail / Plan Review Questionnaire",
+  "title": {
+   "en": "Tennessee permit for a retail food store",
+   "zh": "田纳西州零售食品店许可证"
+  },
+  "agency": {
+   "en": "Tennessee Department of Agriculture, Consumer and Industry Services",
+   "zh": "田纳西州农业部消费者与产业服务处"
+  },
+  "level": "state",
+  "where": "TN",
+  "segments": [
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "online",
+  "how": {
+   "en": "A new store sends the questionnaire with its floor plan and its Department of Revenue registration, online, by email to NewFood.Business@TN.gov or by mail. Restaurants are permitted by the Department of Health instead.",
+   "zh": "新开门店须提交问卷、平面图和税务局登记证明，可在线提交、发送至 NewFood.Business@TN.gov 或邮寄。餐厅由卫生部另行发证。"
+  },
+  "url": "https://tnlcp.lcp.tracefirst.com/landing_pages/fr_retail_application/go",
+  "info": "https://www.tn.gov/agriculture/consumers/food-safety/ag-businesses-retail-food-establishments.html",
+  "fee": null,
+  "plain": {
+   "en": "Tennessee's state permit for a grocery or other store that sells food, after a plan review.",
+   "zh": "田纳西州对杂货店等销售食品的商店发放的州许可证，须经图纸审查。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "please complete the Food Retail / Plan Review Questionnaire and return it to Consumer and Industry Services (CIS)",
+   "checked": "2026-10-28",
+   "read": "https://www.tn.gov/agriculture/consumers/food-safety/ag-businesses-retail-food-establishments.html"
+  }
+ },
+ {
+  "id": "ky-10a100",
+  "form": "Kentucky Tax Registration Application (Form 10A100)",
+  "title": {
+   "en": "Kentucky sales and use tax and withholding registration",
+   "zh": "肯塔基州销售与使用税及预扣税登记"
+  },
+  "agency": {
+   "en": "Kentucky Department of Revenue",
+   "zh": "肯塔基州税务局"
+  },
+  "level": "state",
+  "where": "KY",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "pdf_fax",
+  "how": {
+   "en": "Filed online at MyTaxes.ky.gov, or Form 10A100 is emailed, faxed or mailed to the Division of Registration. It covers sales and use tax and employer withholding, not unemployment insurance.",
+   "zh": "在 MyTaxes.ky.gov 在线提交，或将 10A100 表通过电子邮件、传真或邮寄交给登记处。涵盖销售与使用税及雇主预扣税，不含失业保险。"
+  },
+  "url": "https://revenue.ky.gov/Forms/10A100(P)(4-25)_FINAL_locked%20Fill-in.pdf",
+  "info": "https://revenue.ky.gov/Business/Pages/Register-Business.aspx",
+  "pdf": "https://revenue.ky.gov/Forms/10A100(P)(4-25)_FINAL_locked%20Fill-in.pdf",
+  "fee": null,
+  "takes": {
+   "en": "Up to three weeks for a paper application; online is faster.",
+   "zh": "纸质申请最多约三周；在线办理更快。"
+  },
+  "takesDays": 21,
+  "takesSource": "https://revenue.ky.gov/Business/Pages/Register-Business.aspx (2026-10-28)",
+  "plain": {
+   "en": "Lets you charge sales tax in Kentucky and registers you to withhold tax from wages.",
+   "zh": "让您可以在肯塔基州收取销售税，并登记工资预扣税。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 20,
+  "proof": {
+   "quote": "The Kentucky Tax Registration Application allows new businesses or those starting new taxable activities to register for tax accounts.",
+   "checked": "2026-10-28",
+   "read": "https://revenue.ky.gov/Business/Pages/Register-Business.aspx"
+  }
+ },
+ {
+  "id": "ky-ui",
+  "form": "Kentucky Unemployment Insurance Portal (KUIP) employer registration",
+  "title": {
+   "en": "Kentucky unemployment insurance employer account",
+   "zh": "肯塔基州失业保险雇主账户"
+  },
+  "agency": {
+   "en": "Kentucky Office of Unemployment Insurance",
+   "zh": "肯塔基州失业保险办公室"
+  },
+  "level": "state",
+  "where": "KY",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "how": {
+   "en": "A person at the business sets up a KUIP user account, then registers the employer in KUIP.",
+   "zh": "企业人员先开设 KUIP 用户账户，再在 KUIP 中登记雇主。"
+  },
+  "url": "https://kcc.ky.gov/career/resources/Documents/Learning%20Resources%20-%20Employers/Registering%20a%20New%20Employer%20Job%20Aid.pdf",
+  "info": "https://kcc.ky.gov/career/resources/Documents/Learning%20Resources%20-%20Employers/Registering%20a%20New%20Employer%20Job%20Aid.pdf",
+  "fee": 0,
+  "feeNote": {
+   "en": "No fee.",
+   "zh": "不收费。"
+  },
+  "plain": {
+   "en": "Opens the account Kentucky uses to collect unemployment tax on your payroll.",
+   "zh": "开设肯塔基州征收工资失业保险税的账户。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 60,
+  "proof": {
+   "quote": "new Employers subject to Unemployment Insurance (UI) to register an account in KUIP",
+   "checked": "2026-10-28",
+   "read": "https://kcc.ky.gov/career/resources/Documents/Learning%20Resources%20-%20Employers/Registering%20a%20New%20Employer%20Job%20Aid.pdf"
+  }
+ },
+ {
+  "id": "ky-food-plant",
+  "form": "Form DFS-260 (Application for Permit to Operate a Food Plant)",
+  "title": {
+   "en": "Kentucky permit for a food processing plant or food storage warehouse",
+   "zh": "肯塔基州食品加工厂或食品仓库营业许可证"
+  },
+  "agency": {
+   "en": "Kentucky Department for Public Health, Food Safety Branch",
+   "zh": "肯塔基州公共卫生部食品安全科"
+  },
+  "level": "state",
+  "where": "KY",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "in_person",
+  "how": {
+   "en": "The area inspector inspects the facility, completes the application paperwork with the owner and sends it to the Food Safety Branch in Frankfort; the permit is paid for at the inspection or on the invoice.",
+   "zh": "由所在地区检查员检查设施，与业主一同填写申请材料并提交给法兰克福的食品安全科；许可证费在检查时或收到账单后缴纳。"
+  },
+  "url": "https://www.chfs.ky.gov/agencies/dph/dphps/fsb/FSDocs/manufacturingDFS260.pdf",
+  "info": "https://apps.legislature.ky.gov/law/kar/titles/902/045/180/",
+  "pdf": "https://www.chfs.ky.gov/agencies/dph/dphps/fsb/FSDocs/manufacturingDFS260.pdf",
+  "fee": null,
+  "feeNote": {
+   "en": "Set by the facility's square footage and risk level, payable to the Kentucky State Treasurer.",
+   "zh": "按设施面积和风险等级确定，付款对象为肯塔基州财政部。"
+  },
+  "plain": {
+   "en": "Kentucky's permit for a plant that processes food or a warehouse that stores it.",
+   "zh": "肯塔基州对食品加工厂或食品仓库发放的营业许可证。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "fees to be paid by food processing plants, food storage warehouses, salvage distributors, salvage processing plants, and cosmetic manufacturers for permits to operate",
+   "checked": "2026-10-28",
+   "read": "https://apps.legislature.ky.gov/law/kar/titles/902/045/180/"
+  }
+ },
+ {
+  "id": "sc-dor-retail",
+  "form": "Retail License (MyDORWAY Business Tax Application)",
+  "title": {
+   "en": "South Carolina retail license and withholding account",
+   "zh": "南卡罗来纳州零售执照与预扣税账户"
+  },
+  "agency": {
+   "en": "South Carolina Department of Revenue",
+   "zh": "南卡罗来纳州税务局"
+  },
+  "level": "state",
+  "where": "SC",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "how": {
+   "en": "Applied for online in MyDORWAY's Business Tax Application, one Retail License for each location, with the $50 fee paid before it is processed. The same application opens a withholding account for staff.",
+   "zh": "在 MyDORWAY 的营业税申请中在线办理，每个营业地点一份零售执照，须先缴纳 50 美元费用才会处理。同一申请可为员工开设预扣税账户。"
+  },
+  "url": "https://mydorway.dor.sc.gov/",
+  "info": "https://dor.sc.gov/businesses/apply-business-tax-account/licensing-retail-license",
+  "fee": 50,
+  "feeNote": {
+   "en": "$50 for each location, non-refundable. The license doesn't expire.",
+   "zh": "每个营业地点 50 美元，不予退还。执照长期有效。"
+  },
+  "takes": {
+   "en": "Allow up to 5 business days.",
+   "zh": "最多约 5 个工作日。"
+  },
+  "takesDays": 7,
+  "takesSource": "https://dor.sc.gov/businesses/apply-business-tax-account/licensing-retail-license (2026-10-28)",
+  "plain": {
+   "en": "South Carolina's retail license, which lets you collect sales tax at each location.",
+   "zh": "南卡罗来纳州零售执照，让每个营业地点可以收取销售税。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 20,
+  "proof": {
+   "quote": "Every person who engages in business in South Carolina as a retailer must obtain a Retail License before making any retail sales",
+   "checked": "2026-10-28",
+   "read": "https://dor.sc.gov/businesses/apply-business-tax-account/licensing-retail-license"
+  }
+ },
+ {
+  "id": "sc-dew-ui",
+  "form": "SUITS employer registration",
+  "title": {
+   "en": "South Carolina unemployment insurance account",
+   "zh": "南卡罗来纳州失业保险账户"
+  },
+  "agency": {
+   "en": "South Carolina Department of Employment and Workforce",
+   "zh": "南卡罗来纳州就业与劳动力部"
+  },
+  "level": "state",
+  "where": "SC",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "how": {
+   "en": "Registered in DEW's employer portal, or on a paper registration form. An agent may register for the employer with a power of attorney that DEW reviews.",
+   "zh": "在 DEW 雇主门户登记，或填写纸质登记表。代理人可凭经 DEW 审核的授权书为雇主登记。"
+  },
+  "url": "https://uitax.dew.sc.gov/",
+  "info": "https://uitax.dew.sc.gov/scuiprod/onlinehelp/NetHelp/Documents/faq2.htm",
+  "fee": 0,
+  "feeNote": {
+   "en": "No fee.",
+   "zh": "不收费。"
+  },
+  "plain": {
+   "en": "Opens the account South Carolina uses to collect unemployment tax on your payroll.",
+   "zh": "开设南卡罗来纳州征收工资失业保险税的账户。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 60,
+  "proof": {
+   "quote": "Most* Employers must register for an Unemployment Insurance account.",
+   "checked": "2026-10-28",
+   "read": "https://uitax.dew.sc.gov/scuiprod/onlinehelp/NetHelp/Documents/faq2.htm"
+  }
+ },
+ {
+  "id": "sc-scda-retail",
+  "form": "Retail Food Establishment Permit",
+  "title": {
+   "en": "South Carolina food permit for a restaurant or food store",
+   "zh": "南卡罗来纳州餐厅或食品店许可证"
+  },
+  "agency": {
+   "en": "South Carolina Department of Agriculture, Retail Food Safety",
+   "zh": "南卡罗来纳州农业部零售食品安全处"
+  },
+  "level": "state",
+  "where": "SC",
+  "segments": [
+   "restaurant",
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "portal",
+  "how": {
+   "en": "Applied for online in SCDA's retail food registration site before the place sells any food. SCDA now permits restaurants, grocery stores and food trucks across the state.",
+   "zh": "在出售任何食品前，通过 SCDA 零售食品登记网站在线申请。SCDA 现负责全州餐厅、杂货店和餐车的许可。"
+  },
+  "url": "https://retailfoodregistration.agriculture.sc.gov/Registration/Account/Loginuser",
+  "info": "https://agriculture.sc.gov/permits-and-inspections/retail-food-safety/",
+  "fee": null,
+  "feeNote": {
+   "en": "Annual inspection fees by type; paid online by card or by mail.",
+   "zh": "按类型缴纳年度检查费；可在线刷卡或邮寄支付。"
+  },
+  "plain": {
+   "en": "South Carolina's state permit that lets a restaurant or food store sell food.",
+   "zh": "南卡罗来纳州允许餐厅或食品店销售食品的州许可证。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "A Retail Food Establishment Permit must be obtained from SCDA prior to selling food products retail, direct-to-consumer.",
+   "checked": "2026-10-28",
+   "read": "https://agriculture.sc.gov/permits-and-inspections/retail-food-safety/"
+  }
+ },
+ {
+  "id": "sc-scda-rvc",
+  "form": "Registration Verification Certificate (RVC)",
+  "title": {
+   "en": "South Carolina registration for a food manufacturer or food warehouse",
+   "zh": "南卡罗来纳州食品生产商或食品仓库登记证"
+  },
+  "agency": {
+   "en": "South Carolina Department of Agriculture, Wholesale Food Safety",
+   "zh": "南卡罗来纳州农业部批发食品安全处"
+  },
+  "level": "state",
+  "where": "SC",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "online",
+  "how": {
+   "en": "Registered in SCDA's RVC portal, with a label review; the certificate is issued after a compliant wholesale food safety inspection of an approved facility.",
+   "zh": "在 SCDA 的 RVC 门户登记并接受标签审核；经批准的设施通过批发食品安全检查后发证。"
+  },
+  "url": "https://agriculture.sc.gov/permits-and-inspections/wholesale-food-safety/",
+  "info": "https://agriculture.sc.gov/permits-and-inspections/wholesale-food-safety/",
+  "fee": null,
+  "plain": {
+   "en": "South Carolina's registration for a business that makes, packs or holds food sold to other businesses.",
+   "zh": "南卡罗来纳州对生产、包装或储存食品并销售给其他企业的企业所做的登记。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 70,
+  "proof": {
+   "quote": "A Registration Verification Certificate (RVC) must be obtained from SCDA prior to selling food products wholesale.",
+   "checked": "2026-10-28",
+   "read": "https://agriculture.sc.gov/permits-and-inspections/wholesale-food-safety/"
+  }
+ },
+ {
+  "id": "nc-dor-br",
+  "form": "Online Business Registration (Form NC-BR)",
+  "title": {
+   "en": "North Carolina sales and use tax and withholding registration",
+   "zh": "北卡罗来纳州销售与使用税及预扣税登记"
+  },
+  "agency": {
+   "en": "North Carolina Department of Revenue",
+   "zh": "北卡罗来纳州税务局"
+  },
+  "level": "state",
+  "where": "NC",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "how": {
+   "en": "Registered online for sales and use tax and withholding, in place of the paper Form NC-BR. For most applicants the account ID number is issued at once.",
+   "zh": "在线登记销售与使用税及预扣税，代替纸质 NC-BR 表。多数申请人可立即取得账号。"
+  },
+  "url": "https://eservices.dor.nc.gov/ncbusreg/",
+  "info": "https://www.ncdor.gov/registration",
+  "fee": 0,
+  "feeNote": {
+   "en": "No fee.",
+   "zh": "不收费。"
+  },
+  "takes": {
+   "en": "For most applicants the account ID number is issued instantly.",
+   "zh": "多数申请人可立即取得账号。"
+  },
+  "takesDays": 0,
+  "takesSource": "https://www.ncdor.gov/registration (2026-10-28)",
+  "plain": {
+   "en": "Lets you charge sales tax in North Carolina and registers you to withhold tax from wages.",
+   "zh": "让您可以在北卡罗来纳州收取销售税，并登记工资预扣税。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 20,
+  "proof": {
+   "quote": "New business owners should submit the appropriate business registration application to obtain an account ID number.",
+   "checked": "2026-10-28",
+   "read": "https://www.ncdor.gov/registration"
+  }
+ },
+ {
+  "id": "nc-des-ui",
+  "form": "NCSUITS employer account application",
+  "title": {
+   "en": "North Carolina unemployment tax account",
+   "zh": "北卡罗来纳州失业保险税账户"
+  },
+  "agency": {
+   "en": "North Carolina Division of Employment Security",
+   "zh": "北卡罗来纳州就业保障处"
+  },
+  "level": "state",
+  "where": "NC",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "how": {
+   "en": "Applied for online by creating an NCSUITS account; the Employer ID Number and liability status come at the end of the registration.",
+   "zh": "在线创建 NCSUITS 账户申请；登记完成时即取得雇主编号和缴费义务状态。"
+  },
+  "url": "https://des.nc.gov/employers/create-or-update-employer-account",
+  "info": "https://des.nc.gov/employers/am-i-required-pay-taxes",
+  "fee": 0,
+  "feeNote": {
+   "en": "No fee.",
+   "zh": "不收费。"
+  },
+  "plain": {
+   "en": "Opens the account North Carolina uses to collect unemployment tax on your payroll.",
+   "zh": "开设北卡罗来纳州征收工资失业保险税的账户。"
+  },
+  "fields": [],
+  "checked": "page",
+  "order": 60,
+  "proof": {
+   "quote": "You need an Employer ID Number if you must pay unemployment taxes.",
+   "checked": "2026-10-28",
+   "read": "https://des.nc.gov/employers/am-i-required-pay-taxes"
+  }
+ }
+]
