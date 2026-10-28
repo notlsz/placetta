@@ -38,11 +38,17 @@ export function zdrAllows(env: Env, provider: string, model?: string): boolean {
   if (!zdrRequired(env)) return true;
   const p = provider.toLowerCase(), list = zdrList(env);
   if (list.includes(p)) return true;
-  if (model === undefined) return list.some((x) => x.startsWith(p + ":") && x !== `${p}:web-tools`);
+  if (model === undefined) return list.some((x) => x.startsWith(p + ":") && ![`${p}:web-tools`, `${p}:advisor`, `${p}:batch`].includes(x));
   return list.includes(`${p}:${model.toLowerCase()}`);
 }
 
 /** Anthropic's server-side web tools (search, fetch) send the query and pages through Anthropic's tool servers. */
 export const zdrWebTools = (env: Env): boolean => !zdrRequired(env) || zdrList(env).includes("anthropic:web-tools");
+
+/** Anthropic's advisor tool (a server-side sub-inference on the advisor model, beta) and the Message Batches API (which
+ *  stores requests and results for up to 29 days: platform.claude.com, Batch processing, Data retention): with ZDR
+ *  required, each only when listed as anthropic:advisor or anthropic:batch. */
+export const zdrAdvisor = (env: Env): boolean => !zdrRequired(env) || zdrList(env).includes("anthropic:advisor");
+export const zdrBatch = (env: Env): boolean => !zdrRequired(env) || zdrList(env).includes("anthropic:batch");
 
 export const ZDR_REFUSED = "Zero data retention is required (AI_ZDR_REQUIRED=1) and no provider for this call is on AI_ZDR_PROVIDERS.";

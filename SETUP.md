@@ -15,7 +15,8 @@ within 3 minutes (`FILER_WAKE_SECONDS`), the filing goes another way the agency 
 1. **Steel**: app.steel.dev, sign up (the free plan, no card), **API Keys**, copy the key. CAPTCHA solving stays off:
    Placetta never asks Steel to solve one.
 2. **Render**: dashboard.render.com, **New**, **Blueprint**, pick this repository. Render reads `render.yaml` (plan
-   `free`, `BROWSER_PROVIDER=steel`) and asks for four values:
+   `free`, `BROWSER_PROVIDER=browserbase,steel`: Steel until Browserbase's two keys are added) and asks for four values
+   (and Browserbase's two, which may stay empty):
    - `SUPABASE_SERVICE_ROLE_KEY`: Supabase, Project Settings, API keys, the `service_role` secret key.
    - `ANTHROPIC_API_KEY`: console.anthropic.com, Settings, API keys, Create key (starts `sk-ant-`). Add a second
      vendor's key afterwards so a spend limit doesn't stop filings (Odelia's models, below).
@@ -46,7 +47,7 @@ everywhere.
 
 | To | Change |
 | --- | --- |
-| Browserbase instead of Steel | Render, Environment: `BROWSER_PROVIDER=browserbase`, add `BROWSERBASE_API_KEY` and `BROWSERBASE_PROJECT_ID` |
+| Browserbase first, Steel behind it | Render, Environment: add `BROWSERBASE_API_KEY` and `BROWSERBASE_PROJECT_ID` (`BROWSER_PROVIDER` is already `browserbase,steel`) |
 | Always on, more memory | `render.yaml`: `plan: standard` (2 GB, about $25 a month). `FILER_URL` can stay; it isn't needed |
 | Chromium inside the container | `BROWSER_PROVIDER=local` (needs `plan: standard`; 512 MB is too small for Chromium) |
 | Cloud Run (or Fly, or any host) | Build `worker/filer/Dockerfile` from the repo root, set the same variables plus `FILER_PUBLIC_URL` (its https address), and point the Supabase secret `FILER_URL` at it. On Cloud Run, deploy with `--no-cpu-throttling` (the worker files between requests) and one max instance; with zero min instances it wakes on the ping like Render free |
@@ -60,6 +61,14 @@ provider's live view; a CAPTCHA for the Placetta team always opens the worker's 
 with `BROWSER_PROVIDER=local`, `BROWSERBASE_API_KEY` and `BROWSERBASE_PROJECT_ID` send only the few agency sites that
 refuse a cloud server (EDD, bizfile Online, MassTaxConnect, sanjoseca.gov) to Browserbase; `FILER_DB_KEY` per
 `docs/soc2/runbooks/filer-least-privilege.md`.
+
+**Fewer sign-ins and fewer CAPTCHAs, none solved.** After a run signs in with the business's saved login, the portal's
+own cookies and local storage (its hosts only) are kept in Vault for that workspace and host, so the next run starts
+signed in (`agency_sessions`; ends with the portal's session or 30 days, a refused sign-in, a changed or removed login,
+or the workspace). Every CAPTCHA or identity check a run meets is logged by host (`portal_challenges`). On a portal that
+shows CAPTCHAs, the owner chooses once per agency: they do it (one tap on the phone), the Placetta team does it, or it
+goes another way the agency takes (`captcha_preferences`); a CAPTCHA mid-run pauses with the page open and nothing sent
+until they answer, and parks for the team if nobody does. ID.me and Login.gov stay the owner's own, always.
 
 ## Odelia's models: a second vendor so one spend limit doesn't stop her
 
@@ -90,6 +99,30 @@ The order is one setting, `provider:model` separated by commas (a bare provider 
 - `FILER_MODEL_COOLDOWN_S`: how long a vendor that hit a limit, refused its key or was down sits out before the worker
   tries it first again (default 120). The log says which model answered each time it changes; never a key.
 - `MUSE_BASE_URL`: only if Meta moves the API (default `https://api.meta.ai/v1`).
+
+### The cascade: the cheapest model that is right for each step (2026-10-28)
+
+Migration `20261105090800_filer_ai_cost.sql` first (Database, below). Then, all optional:
+
+| Setting | Where | What it does |
+| --- | --- | --- |
+| `BROWSERBASE_API_KEY`, `BROWSERBASE_PROJECT_ID` | Render | browserbase.com, Developer plan ($20 a month: 100 browser hours, 6-hour sessions, recording off). With them, `BROWSER_PROVIDER=browserbase,steel` (render.yaml's value) runs every filing on Browserbase and falls back to Steel when Browserbase refuses a session; without them Browserbase is skipped |
+| `BROWSER_PROVIDER` | Render | An order, for example `browserbase,steel,local`. A provider that refuses a session (quota, 4xx, 5xx, failed connection) passes the run to the next. A person in California who hasn't opted in is never on a recorded session: Browserbase with recording off, or local |
+| `BROWSERBASE_VERIFIED=1` | Render | Browserbase's Verified browsers (Scale plan only): fewer bot checks. Web Bot Auth (Cloudflare signed agents) is switched on for the account by Browserbase on request (browserbase.com/contact-web-bot-auth); there's no per-session option. Nothing ever solves a CAPTCHA |
+| `FILER_MODEL_FAST` | Render | Routine filing steps. Default `anthropic:claude-haiku-5-5` |
+| `FILER_MODEL_STRONG` | Render | The agency's review page, the final submit, deficiency and status pages, CAPTCHA or identity pages, and any page the fast model got wrong. Default `anthropic:claude-opus-5-5`. Each tier fails over through `FILER_MODELS` (else Gemini, OpenRouter, Muse) |
+| `FILER_ADVISOR=0`, `FILER_ADVISOR_MAX` | Render | The fast model consults Opus as its advisor (Anthropic's advisor tool, beta) at most `FILER_ADVISOR_MAX` times a run (default 3); `0` turns it off |
+| `ODELIA_ADVISOR=0`, `ODELIA_ADVISOR_MAX` | Supabase | The same in Odelia's own loop: Sonnet consults Opus, at most 4 times a run by default |
+| `ODELIA_FAST_MODE=1` | Supabase | Opus 5.5 fast mode (2x the price, up to 2.5x the speed) only while a person waits on an Opus answer in chat. Off by default; a 429 falls back to standard speed |
+| `ODELIA_BATCH=1` | Supabase | Work nobody waits on goes through Anthropic's Message Batches API at half price, with a deadline after which it's asked the normal way (`_shared/batch.ts`; the monitor polls). `LIVE_EVAL_BATCH=1` scores the live eval that way too |
+
+The server's roles: Opus 5.5 for the review before a filing goes out, deficiency answers and appeals (and deep
+research); Sonnet 5.5 for chat and plan drafting; Haiku 5.5 for classification, routing, status reading and summaries.
+Each keeps its failover. Every portal run's AI is in `filer_runs` (tier, model, tokens, price for each call) and per
+filing in `filer_run_costs`, staff only.
+
+With `AI_ZDR_REQUIRED=1`, the advisor and the Batches API run only when `AI_ZDR_PROVIDERS` lists `anthropic:advisor` and
+`anthropic:batch` (a batch is stored up to 29 days).
 
 Zero data retention (`AI_ZDR_REQUIRED=1`): only vendors and models on `AI_ZDR_PROVIDERS` get a call, on both sides.
 Anthropic offers ZDR by arrangement with its sales team; the Gemini API has no ZDR by default (Google points to Vertex

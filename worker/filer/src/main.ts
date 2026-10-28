@@ -30,6 +30,13 @@ export const routeOf = (id: string): Route | null => {
   return d?.portal ? { tenant: d.tenant, alsoOn: d.alsoOn, start: d.portalUrl, noLogin: d.noLogin, account: accountOf(d) } : null;
 };
 
+/** The agency's way without a CAPTCHA for this form (email, fax or mail), from the same destination, for the owner's
+ *  question when its site shows one mid-run (captcha.ts). */
+export const altOf = (id: string): "email" | "fax" | "mail" | null => {
+  const d = DEST[id];
+  return d?.email ? "email" : d?.fax ? "fax" : d?.mail ? "mail" : null;
+};
+
 /** A new browser session for one run, never reused (browsers.ts): a new Steel or Browserbase session (no saved profile
  *  or context, so it starts empty), or a new local Chromium process with a new, empty browser context (Playwright gives
  *  it a throwaway profile folder and deletes it on close). The worker checks it's empty (assertFresh) and closes it
@@ -156,7 +163,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     // one router per slot: its filing steps and teach mode's labels share the order and which seats are sitting out
     const router = new Router();
     const w = new Worker({ store, model: new FilerModel(router), open, portalOf: (id) => DEST[id]?.portal ?? null,
-      routeOf, playbookOf: playbookFor, lock, labeler: new FilerLabeler(router).label, live, cards: cardsOn(process.env), ...settings() });
+      routeOf, altOf, playbookOf: playbookFor, lock, labeler: new FilerLabeler(router).label, live, cards: cardsOn(process.env), ...settings() });
     for (;;) {
       try {
         health.running++;

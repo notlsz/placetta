@@ -223,9 +223,9 @@ test("Browserbase for every run: solving off, the debugger view for the owner, r
   assert.equal(launched.n, 0);
 });
 
-test("local (the default): Chromium here, Browserbase only for the hosts that refuse a cloud server when its keys are set", async () => {
+test("local alone: Chromium here, Browserbase only for the hosts that refuse a cloud server when its keys are set", async () => {
   const api = await fresh(), launched = { n: 0 };
-  const d = deps(api, { BROWSERBASE_API_KEY: BBKEY, BROWSERBASE_PROJECT_ID: "p" }, [], launched);
+  const d = deps(api, { BROWSER_PROVIDER: "local", BROWSERBASE_API_KEY: BBKEY, BROWSERBASE_PROJECT_ID: "p" }, [], launched);
   const open = opener(d);
   await assert.rejects(open("boiefiling.fincen.gov"), /local Chromium must not start/);
   assert.equal(launched.n, 1, "an ordinary host opens local Chromium");
@@ -355,15 +355,15 @@ const steelRun = async (o: { privacy: RecordingPolicy; env?: Record<string, stri
   return { r, store, api, portal };
 };
 
-test("California, nobody opted in, Steel and nothing else: the recorded browser never goes to the owner", async () => {
+test("California, nobody opted in, Steel and nothing else: no recorded session is ever opened; the run waits as Odelia's own tools", async () => {
+  // 2026-10-28: never a recorded session for a California person without opt-in, so Steel (which records every session)
+  // isn't opened at all; with no Browserbase and no local Chromium, the filing waits and retries, held for the team
   const { r, store, api, portal } = await steelRun({ privacy: CA });
-  assert.equal(r?.kind, "handoff");
-  assert.equal((r as { reason: string }).reason, "recording_consent");
-  assert.match((r as { message: { en: string } }).message.en, /doesn't record anyone in California without their OK/);
+  assert.equal(r, null);
+  assert.equal(api.creates().length, 0, "Steel was never asked for a session");
   assert.ok(!store.handoffs.some((u) => u?.includes("steel")), "Steel's viewer was never handed out");
   assert.ok(!store.f.agent_log.some((e) => e.kind === "need_person"), "the owner wasn't asked into the page");
-  assert.ok(store.f.agent_log.some((e) => e.kind === "privacy"), "the log says why");
-  assert.equal(api.creates().length, 1, "Steel was the only browser there was");
+  assert.ok(store.f.agent_log.some((e) => e.kind === "retry" && /own tools/.test(e.en)), "Odelia's own tools, not the agency's site");
   assert.equal(portal.submissions, 0);
 });
 

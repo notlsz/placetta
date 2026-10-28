@@ -1261,6 +1261,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       markPaid: async id => { if (!ownerOk()) return; try { await api.markPaid(id); await refresh(); say(lang === "zh" ? "已告知团队，他们会继续提交。" : "Thanks. The team will finish the submission."); } catch (e) { fail(e); } },
       resumeFiling: async (id, resubmit, confirmation) => { try { await api.resumeFiling(cloud.wsId, id, !!resubmit, confirmation ?? ""); await refresh(); say(confirmation !== undefined ? (lang === "zh" ? "已记录为已提交，Odelia 会跟进进度。" : "Marked as sent. Odelia tracks it from here.") : lang === "zh" ? "好的，快哉继续办理。" : "Thanks. Placetta carries on."); } catch (e) { fail(e); } },
       addConfirmation: async (id, confirmation) => { try { await api.addConfirmation(cloud.wsId, id, confirmation); await refresh(); say(lang === "zh" ? "确认号已保存。" : "Confirmation number saved."); } catch (e) { fail(e); } },
+      captchaChoice: async (id, choice) => { if (!ownerOk()) return; try { await api.captchaChoice(cloud.wsId, id, choice); await refresh(); say(lang === "zh" ? "好的，Odelia 会为该机构记住您的选择。" : "Got it. Odelia remembers this for this agency."); } catch (e) { fail(e); } },
       teachFiling: async id => { if (!ownerOk()) return; try { await api.teachFiling(cloud.wsId, id); await refresh(); say(lang === "zh" ? "好的。实时浏览器打开后，请像平时一样提交，Odelia 会在旁记下步骤。" : "Got it. When the live browser opens, file it the way you always do. Odelia watches and writes down the steps."); } catch (e) { fail(e); } },
       uploadSigned: async (id, appId, file) => {
         try {

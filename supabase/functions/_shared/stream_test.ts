@@ -144,13 +144,14 @@ Deno.test("callModel streaming falls through: busy before a word, and broken off
   let n = 0;
   const f = (async (u: string) => {
     n++;
-    if (u.includes("googleapis") && n === 1) return new Response("busy", { status: 429 });
-    if (u.includes("googleapis")) return streamed([...oaiSSE("Half an ans").slice(0, 2), `data: ${JSON.stringify({ error: { code: 503, message: "backend died" } })}\n\n`]);
-    return streamed(anthSSE("The whole answer."));
+    // the plan role (2026-10-28): Sonnet first; busy before a word, then 3.8 Flash breaks off, then 2.5 Flash answers
+    if (u.includes("anthropic")) return new Response("busy", { status: 429 });
+    if (u.includes("googleapis") && n === 2) return streamed([...oaiSSE("Half an ans").slice(0, 2), `data: ${JSON.stringify({ error: { code: 503, message: "backend died" } })}\n\n`]);
+    return streamed(oaiSSE("The whole answer."));
   }) as unknown as typeof fetch;
   const env = { GEMINI_API_KEY: "g", GEMINI_PAID: "1", ANTHROPIC_API_KEY: "a" } as Record<string, string>;
   const r = await callModel((k) => env[k], { payload, role: "plan", research: false, beta: null }, "claude-sonnet-5-5", null, f, (t) => texts.push(t));
-  ok(r.ok && r.model === "anthropic:claude-sonnet-5-5", `3.8 Flash busy, 2.5 Flash broke off, Sonnet answered (${r.model})`);
+  ok(r.ok && r.model === "gemini:gemini-2.5-flash", `Sonnet busy, 3.8 Flash broke off, 2.5 Flash answered (${r.model})`);
   eq((r.data as any).content[0].text, "The whole answer.", "the answer is the one that finished");
   ok(texts.includes("Half an") && texts.at(-1) === "The whole answer.", "the broken one's words showed, then the next model's started over");
 });

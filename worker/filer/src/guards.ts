@@ -46,6 +46,13 @@ const INVISIBLE_MARK = /^(grecaptcha-badge|grecaptcha-logo|grecaptcha-error|g-re
 export const challengeFrame = (f: string) => CAPTCHA_FRAME.test(f) && !INVISIBLE_ANCHOR.test(f);
 export const challengeMark = (m: string) => m.split(/\s+/).some((t) => t && CAPTCHA_MARK.test(t) && !INVISIBLE_MARK.test(t));
 
+/** The owner's one tap for an identity check (ID.me, Login.gov): what to do, and why it's theirs. Always the person's
+ *  own: Placetta never signs in as anyone. The link opens straight on the agency's page, live, on a phone. */
+export const IDENTITY_MSG = {
+  en: "One step only you can do: the agency asks you to prove who you are with your own ID.me or Login.gov account. It's yours because it's your personal identity, and Placetta never signs in as you. Tap Open: the agency's page opens on your phone where Odelia stopped. Sign in there, then tap Done. Odelia keeps the rest of the filing as it is and carries on by herself.",
+  zh: "只有您本人能完成的一步：机构要求您用自己的 ID.me 或 Login.gov 账户证明身份。这一步属于您，因为涉及您的个人身份，快哉从不以您的身份登录。点击“打开”：机构页面会在您的手机上从 Odelia 停下的地方打开。在那里登录后点击“完成”。Odelia 会保留申请的其余部分，并自行继续办理。",
+};
+
 /** Why this page must go to the person, or null. Checked before the model sees the page. */
 export function mustStop(s: PageState): Stop | null {
   let host = "";
@@ -57,7 +64,7 @@ export function mustStop(s: PageState): Stop | null {
     return { reason: "account", en: "The agency's site wants a new account made, and Odelia can't make this one for the business. If you have an account, save its login in Settings; if not, open the live view and create it yourself, then tap \"I've done it\".", zh: "机构网站要求新建账户，而 Odelia 无法为企业开设这个账户。如您已有账户，请在设置中保存登录信息；如没有，请打开实时画面自行创建后点击“我已完成”。" };
   }
   if (ID_HOST.test(host) || s.frames.some((f) => /id\.me|login\.gov/i.test(f))) {
-    return { reason: "identity", en: "The agency needs you to verify your identity. Open the live view and sign in, then tap \"I've done it\".", zh: "机构需要您验证身份。请打开实时画面登录后点击“我已完成”。" };
+    return { reason: "identity", ...IDENTITY_MSG };
   }
   for (const c of s.controls) {
     if (/^cc-/i.test(c.autocomplete) || CARD.test(describeControl(c))) {

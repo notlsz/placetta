@@ -131,3 +131,18 @@ test("every step a playbook says was seen names the day, and every playbook adde
     assert.ok(PLAYBOOKS.find((p) => p.host === host)?.probes?.length, host);
   }
 });
+
+test("an identity check: the owner's one tap opens the live page on a phone, and says plainly what to do and why it's theirs", async () => {
+  const { IDENTITY_MSG } = await import("../src/guards.ts");
+  const stop = mustStop({ url: "https://api.id.me/en/session/new", title: "Sign in", headings: [], controls: [], buttons: [], links: [], text: "", frames: [], markers: [] });
+  assert.equal(stop?.reason, "identity");
+  assert.match(stop!.en, /only you can do/); assert.match(stop!.en, /ID\.me or Login\.gov/); assert.match(stop!.en, /never signs in as you/);
+  assert.match(stop!.en, /Tap Open: the agency's page opens on your phone where Odelia stopped/);
+  assert.match(stop!.zh, /只有您本人能完成/);
+  assert.ok(!/[–—]/.test(IDENTITY_MSG.en + IDENTITY_MSG.zh), "no em or en dashes");
+  const views = new LiveViews("https://placetta-filer.onrender.com");
+  const v = views.open(new FakePage(), 60_000, undefined, IDENTITY_MSG.en)!;
+  const html = String((await views.handle("GET", new URL(v.url).pathname, "")).body);
+  assert.match(html, /width=device-width,initial-scale=1/, "made for a phone");
+  assert.ok(html.indexOf("only you can do") > 0 && html.indexOf("only you can do") < html.indexOf('id="shot"'), "what to do comes first, above the page");
+});

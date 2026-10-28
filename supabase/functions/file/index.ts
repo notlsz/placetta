@@ -44,8 +44,9 @@ import { asAgent,
   handBackDue, handoffPacket, hasLoginFor, holds, isForeign, type LogEntry, mailOutcome, mailTo, OWNER_REF, pick, type Refusal, refusalOf, sentByYou, signedCopy,
   TEACH_REFUSED, teachRefusal, teamApproved, whyYours, YOURS_REF, selfFileScope, workerOn, workerState,
   type Beat, rerouteLead, wakeable, wakeConfig, wakeMs, wakePlan, waitsOnWorker, WORKER_ASLEEP, checkCents, lobCheckBody,
-  canEmailSignedFor, kitAddress, paperFile, signKit, wetAsk, wetPath, type WetPath,
+  canEmailSignedFor, kitAddress, paperFile, signKit, wetAsk, wetPath, type WetPath, captchaPlan,
 } from "./logic.ts";
+import { CAPTCHA_ASK_REF, isChoice, type CaptchaChoice } from "./captcha.ts";
 import { agencyLetter, faxEvent, kitLetter, kitSendAt, lobAddress, lobEvent, lobSigned, type MailEvent } from "./paper.ts";
 import { pingWorker } from "./wake.ts";
 import { feeAuthority, type Authority } from "../_shared/issuing.ts";
@@ -225,8 +226,21 @@ async function facts(f: Filing, d: Dest | undefined) {
     if (error && error.code !== "PGRST202") console.error("account authority:", error.code ?? "");
     authority = !error && typeof data === "string" && data.length > 0;
   }
+  // the portal showed Odelia a CAPTCHA on recent runs (the worker logs each, portal_challenges): pick() prefers a way
+  // without one when it isn't much slower. A database without the function yet says no.
+  let captchaHost = false, captchaChoice: CaptchaChoice | null = null;
+  if (d?.portal) {
+    const [h, c] = await Promise.all([
+      admin.rpc("portal_captcha_host", { p_host: d.portal }),
+      admin.from("captcha_preferences").select("choice").eq("workspace_id", f.workspace_id).eq("host", d.portal.toLowerCase()).maybeSingle(),
+    ]);
+    if (h.error && h.error.code !== "PGRST202") console.error("captcha host:", h.error.code ?? "");
+    captchaHost = !h.error && h.data === true;
+    // the owner's saved answer for this agency's site (asked once: captcha.ts)
+    captchaChoice = !c.error && isChoice(c.data?.choice) ? c.data!.choice as CaptchaChoice : null;
+  }
   return {
-    hasLogin, mailConnected: (mail.data ?? []).length > 0, makesAccount: canMakeAccount(d, authority),
+    hasLogin, mailConnected: (mail.data ?? []).length > 0, makesAccount: canMakeAccount(d, authority), captchaHost, captchaChoice,
     // asked only when a fee would go with a mailed filing and Lob checks are on
     ...(env().checks && feeBlocks(f, d) && d?.payment === "with_filing" ? { feeAuthority: !!(await feeAuthorityOf(f)) } : {}),
   };
@@ -649,7 +663,14 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
   const ePick = synth ? { ...e, channels: ["email", "fax", "mail", "portal"] as typeof e.channels, portalWorker: true, fax: true, mail: true } : e;
   // Where it would go decides what is checked: the filled form and its signature only travel by email, fax and mail.
   const fx = await facts(f, d);
-  const channel = pick(f, d, ePick, fx);
+  const picked = pick(f, d, ePick, fx);
+  // A portal known to show CAPTCHAs, and the agency also takes a slower way without one: the owner decides, once
+  // (captcha.ts). Their saved answer decides without asking.
+  const plan = synth ? { channel: picked } : captchaPlan(f, d, ePick, fx, picked);
+  if ("ask" in plan) {
+    return view(await step(f, log(plan.ask.en, plan.ask.zh, "needs_you", CAPTCHA_ASK_REF), { agent_state: "needs_you", handoff_url: null }));
+  }
+  const channel = plan.channel;
   // FILER_AGENCIES=portal switches on agency websites only: any other route goes the way it would without self-filing
   if (!synth && scope === "portal" && channel !== "portal") return await toYou(f, bi("Placetta doesn't send this form to the agency by itself yet.", "快哉暂时不会自动向机构提交这份表格。"));
   const problems = check(f, d, { docPaths: await docPaths(f) }, channel);
@@ -699,6 +720,37 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
     default:
       return await toYou(f, bi("Placetta doesn't send this form by itself yet.", "快哉暂时无法自动提交这份表格。"));
   }
+}
+
+// ------------------------------------------------------------------ the owner's answer about a CAPTCHA (captcha.ts)
+
+const CHOICE_SAID: Record<CaptchaChoice, Bi> = {
+  ask: { en: "You asked Odelia to ask you each time this agency's site shows a \"prove you're human\" check. This time you do it.", zh: "您要求每次该机构网站出现“证明您是真人”验证时都询问您。这一次由您完成。" },
+  me: { en: "You'll do the \"prove you're human\" check when this agency's site shows it: one tap on your phone. Odelia remembers this.", zh: "该机构网站出现“证明您是真人”验证时由您完成：在手机上点一下即可。Odelia 会记住。" },
+  team: { en: "The Placetta team does the \"prove you're human\" check on this agency's site. Odelia remembers this.", zh: "该机构网站的“证明您是真人”验证由快哉团队完成。Odelia 会记住。" },
+  route: { en: "Odelia sends this agency's filings another way it accepts, without its site's \"prove you're human\" check. Odelia remembers this.", zh: "Odelia 将改用该机构接受的其他方式提交，避开其网站的“证明您是真人”验证。Odelia 会记住。" },
+};
+
+/** The owner answered the CAPTCHA question. Saved as the workspace's default for this agency's site, so it's asked once.
+    Before the filing started (moment 1): it starts again with the answer. Mid-run (moment 2): the worker, waiting on the
+    page, reads the answer from the log. Another way never sends a second copy: the worker only leaves when nothing was
+    submitted (submit_clicked_at), and the file function's sweep takes it from there. */
+async function captchaChoose(f: Filing, choice: CaptchaChoice, req: Request, by: string, userId: string) {
+  const d = destFor(f.payload.official, f.payload);
+  const host = d?.portal?.toLowerCase();
+  if (!host) throw new HttpError("bad_request", "This filing doesn't go to an agency's site.", "这份申请不通过机构网站提交。");
+  const { error } = await admin.from("captcha_preferences").upsert({ workspace_id: f.workspace_id, host, choice, set_by: userId, set_at: new Date().toISOString() }, { onConflict: "workspace_id,host" });
+  if (error) throw new Error(`captcha preference failed: ${error.code ?? ""}`);
+  const asked = [...f.agent_log].reverse().find((e) => e.ref === CAPTCHA_ASK_REF && (e.kind === "needs_you" || e.kind === "need_person"));
+  const said = CHOICE_SAID[choice];
+  // mid-run: the worker is waiting on the page for this entry ("ask" this time is the owner's own tap)
+  if (asked?.kind === "need_person") return view(await step(f, log(said.en, said.zh, "captcha_choice", choice)));
+  // before it started: start again, now with the saved answer
+  if (asked?.kind === "needs_you" && f.agent_state === "needs_you") {
+    const g = await step(f, log(said.en, said.zh, "captcha_choice", choice), { expect_agent_state: "needs_you", agent_state: null }, false);
+    return await start(g, req, by);
+  }
+  return view(await step(f, log(said.en, said.zh, "captcha_choice", choice)));
 }
 
 async function resume(f: Filing, by: string, resubmit = false, confirmation = "") {
@@ -1282,8 +1334,8 @@ serve(async (req) => {
     const f = await loadFiling(ws, filingId);
     return await settled(() => teach(f, by));
   }
-  if (!["start", "resume", "signed", "kit", "kit_undo", "stop", "status", "undo", "send_now", "confirmation"].includes(action)) {
-    throw new HttpError("bad_request", "action must be start, resume, signed, kit, kit_undo, stop, undo, send_now, confirmation, teach, status or worker.");
+  if (!["start", "resume", "signed", "kit", "kit_undo", "stop", "status", "undo", "send_now", "confirmation", "captcha_choice"].includes(action)) {
+    throw new HttpError("bad_request", "action must be start, resume, signed, kit, kit_undo, stop, undo, send_now, confirmation, captcha_choice, teach, status or worker.");
   }
   // Sending, carrying on, and stopping are an owner's, as in the database (only owners approve or cancel filings);
   // any member can check on one.
@@ -1300,6 +1352,10 @@ serve(async (req) => {
     if (action === "kit_undo") return kitUndo(f, by);
     if (action === "undo") return undo(f, by);
     if (action === "send_now") return sendNow(f);
+    if (action === "captcha_choice") {
+      if (!isChoice(body.choice)) throw new HttpError("bad_request", "choice must be ask, me, team or route.");
+      return captchaChoose(f, body.choice, req, by, user.id);
+    }
     return stop(f, by);
   });
 });

@@ -14,8 +14,10 @@ export type EnvCheck = {
   browser: "local" | "browserbase" | "steel";
   /** The models a filing step may go to, in failover order ("anthropic:claude-sonnet-5-5"): no keys, only names. */
   models: string[];
-  /** BROWSER_PROVIDER as read: local (the default), steel or browserbase. */
+  /** BROWSER_PROVIDER's first choice: local (the default), steel or browserbase. */
   provider: Provider;
+  /** The whole order a run tries (providersOf). */
+  providers: Provider[];
   /** Every run on a remote browser: no Chromium is ever started in this container (it fits Render's free plan). */
   remote: boolean;
   /** FILER_SECRET is set (32+ characters): the server can wake this worker with an authenticated ping (POST /wake). */
@@ -32,15 +34,40 @@ export const WHERE = {
   STEEL_API_KEY: "app.steel.dev, sign up (the free plan is enough), API Keys, copy the key",
   BROWSERBASE_API_KEY: "browserbase.com, Settings, API Key",
   BROWSERBASE_PROJECT_ID: "browserbase.com, Settings, Project ID",
-  BROWSER_PROVIDER: "local, steel or browserbase (or leave it unset for local Chromium)",
+  BROWSER_PROVIDER: "local, steel or browserbase, or an order of them such as browserbase,steel,local (unset: browserbase,steel,local when Browserbase's keys are set, else local Chromium)",
 };
 
 export type Provider = "local" | "steel" | "browserbase";
-/** BROWSER_PROVIDER: unset is local Chromium; anything other than the three is "invalid" (the worker files nothing). */
+const PROVIDERS: Provider[] = ["local", "steel", "browserbase"];
+/** BROWSER_PROVIDER, an ordered list ("browserbase,steel,local"): a run opens on the first that gives it a session, and
+ *  the next is tried when one refuses (a quota, a 4xx or 5xx, a failed connection; browsers.ts opener). Unset: with
+ *  Browserbase's two keys, browserbase, then steel when STEEL_API_KEY is set, then local Chromium (Browserbase Developer
+ *  is $20 a month for 100 browser hours with 6-hour sessions and recording that can be turned off; Steel's free plan
+ *  caps a session at 15 minutes and records every one); without them, local Chromium as before. Any name other than
+ *  the three makes the list "invalid" (the worker files nothing). */
+export function providersOf(env: Record<string, string | undefined>): Provider[] | "invalid" {
+  const raw = (env.BROWSER_PROVIDER ?? "").trim().toLowerCase();
+  if (!raw) {
+    const bb = !!env.BROWSERBASE_API_KEY?.trim() && !!env.BROWSERBASE_PROJECT_ID?.trim();
+    return bb ? ["browserbase", ...(env.STEEL_API_KEY?.trim() ? ["steel" as const] : []), "local"] : ["local"];
+  }
+  const list = raw.split(",").map((s) => s.trim()).filter(Boolean);
+  if (!list.length || list.some((p) => !PROVIDERS.includes(p as Provider))) return "invalid";
+  return [...new Set(list)] as Provider[];
+}
+/** The order with every provider whose keys aren't set left out, while one that can run remains (a single provider is
+ *  kept as it is, so its own missing key is what the run reports). */
+export function usableProviders(env: Record<string, string | undefined>): Provider[] | "invalid" {
+  const l = providersOf(env);
+  if (l === "invalid" || l.length < 2) return l;
+  const bb = !!env.BROWSERBASE_API_KEY?.trim() && !!env.BROWSERBASE_PROJECT_ID?.trim();
+  const keyed = (x: Provider) => x === "local" || (x === "steel" ? !!env.STEEL_API_KEY?.trim() : bb);
+  return l.some(keyed) ? l.filter(keyed) : l;
+}
+/** The first choice (what the worker reports as its browser). */
 export function providerOf(env: Record<string, string | undefined>): Provider | "invalid" {
-  const v = (env.BROWSER_PROVIDER ?? "").trim().toLowerCase();
-  if (!v) return "local";
-  return v === "local" || v === "steel" || v === "browserbase" ? v : "invalid";
+  const l = usableProviders(env);
+  return l === "invalid" ? l : l[0];
 }
 
 export function checkEnv(env: Record<string, string | undefined>): EnvCheck {
@@ -62,13 +89,22 @@ export function checkEnv(env: Record<string, string | undefined>): EnvCheck {
   if (has("ANTHROPIC_API_KEY") && !/^sk-ant-/.test(env.ANTHROPIC_API_KEY!.trim())) warnings.push("ANTHROPIC_API_KEY doesn't start with sk-ant-: check it was pasted whole.");
   if (has("GEMINI_API_KEY") && env.GEMINI_PAID !== "1" && env.GEMINI_FREE_SYNTHETIC !== "1") warnings.push("GEMINI_API_KEY is set without GEMINI_PAID=1: Google's free tier may use prompts to improve its products, so Gemini gets no filing until billing is on and GEMINI_PAID=1.");
   const bb = has("BROWSERBASE_API_KEY") && has("BROWSERBASE_PROJECT_ID");
-  const p = providerOf(env);
-  if (p === "invalid") missing.push({ key: "BROWSER_PROVIDER", where: WHERE.BROWSER_PROVIDER });
-  if (p === "steel" && !has("STEEL_API_KEY")) missing.push({ key: "STEEL_API_KEY", where: WHERE.STEEL_API_KEY });
-  if (p === "browserbase") {
+  const list = providersOf(env);
+  if (list === "invalid") missing.push({ key: "BROWSER_PROVIDER", where: WHERE.BROWSER_PROVIDER });
+  // A list is an order of fallbacks: a provider in it without its keys is skipped (a warning) while another listed one
+  // can run; with none that can, its keys are missing and the worker files nothing.
+  const all = list === "invalid" ? [] : list;
+  const keyed = (x: Provider) => x === "local" || (x === "steel" ? has("STEEL_API_KEY") : bb);
+  const named = all.length > 1 && all.some(keyed) ? all.filter(keyed) : all;
+  for (const x of all.filter((y) => !named.includes(y))) warnings.push(`${x} is in BROWSER_PROVIDER but its keys aren't set: skipped until they are.`);
+  if (named.includes("steel") && !has("STEEL_API_KEY")) missing.push({ key: "STEEL_API_KEY", where: WHERE.STEEL_API_KEY });
+  if (named.includes("browserbase")) {
     if (!has("BROWSERBASE_API_KEY")) missing.push({ key: "BROWSERBASE_API_KEY", where: WHERE.BROWSERBASE_API_KEY });
     if (!has("BROWSERBASE_PROJECT_ID")) missing.push({ key: "BROWSERBASE_PROJECT_ID", where: WHERE.BROWSERBASE_PROJECT_ID });
   } else if (has("BROWSERBASE_API_KEY") !== has("BROWSERBASE_PROJECT_ID")) warnings.push("Browserbase needs both BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID; using local Chromium.");
+  const p: Provider | "invalid" = list === "invalid" ? "invalid" : named[0];
+  if (named.length > 1 && named[0] === "steel") warnings.push("Steel first: its free plan caps a session at 15 minutes and records every session. browserbase,steel,local puts it second.");
+  // the first choice is remote: runs start on a provider's browser (local Chromium, if listed, is the last resort)
   const remote = p === "steel" || p === "browserbase";
   const provider: Provider = p === "invalid" ? "local" : p;
   const browser: EnvCheck["browser"] = p === "steel" ? "steel" : p === "browserbase" || bb ? "browserbase" : "local";
@@ -79,7 +115,7 @@ export function checkEnv(env: Record<string, string | undefined>): EnvCheck {
   const secret = (env.FILER_SECRET ?? "").trim();
   if (!secret) warnings.push("FILER_SECRET is not set: the server can't wake this worker on demand, so on a plan that sleeps, agency-website filings go another way while it's asleep.");
   else if (secret.length < 32) warnings.push("FILER_SECRET is shorter than 32 characters: wake on demand stays off. Use the same value as the Supabase secret.");
-  return { ok: missing.length === 0, missing, warnings, models: models.map((m) => `${m.vendor}:${m.model}`), browser, provider, remote, wake: secret.length >= 32, publicUrl: pub };
+  return { ok: missing.length === 0, missing, warnings, models: models.map((m) => `${m.vendor}:${m.model}`), browser, provider, providers: named, remote, wake: secret.length >= 32, publicUrl: pub };
 }
 
 /** The lines the worker logs at start when something is missing: each key, and where to find it. */
