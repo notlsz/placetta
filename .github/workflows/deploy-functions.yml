@@ -42,4 +42,10 @@ jobs:
       - name: Deploy
         if: steps.tok.outputs.ok
         # The CLI at an exact version, so a new release can't change a deploy without a pull request
-        run: npx --yes supabase@2.120.0 functions deploy --project-ref esquxzcfsylffuijvzec --use-api
+        # Supabase's bundler sometimes answers "Bundle generation timed out" on a full deploy: try up to 3 times, a minute apart
+        run: |
+          for i in 1 2 3; do
+            npx --yes supabase@2.120.0 functions deploy --project-ref esquxzcfsylffuijvzec --use-api && exit 0
+            echo "deploy attempt $i failed"; [ "$i" -lt 3 ] && sleep 60
+          done
+          exit 1
