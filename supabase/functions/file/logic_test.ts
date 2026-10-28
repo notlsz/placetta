@@ -451,13 +451,14 @@ Deno.test("every shipped destination: with all four channels on, Placetta sends 
         signed && d.signature === "wet" ? { agent_log: [{ en: "", zh: "", kind: "signed_copy", ref: copy }] } : {});
       const r = pick(f, d, ENV, all);
       seen[r]++;
-      if (r === "email") assert(!!d.email && d.signature !== "wet" && !feeBlocks(f, d), id);
+      // email carries Placetta's e-signed copy, or for an ink form the hand-signed copy to an agency that takes email
+      if (r === "email") assert(!!d.email && !feeBlocks(f, d) && (d.signature !== "wet" || !!signedCopy(f)), id);
       if (r === "fax") assert(!!d.fax && !feeBlocks(f, d) && (d.signature !== "wet" || canFaxSignedFor(f, d, ENV)), id);
       if (r === "mail") assert(!!d.mail && d.signature !== "wet" && !feeBlocks(f, d), id);
       if (r === "portal") assert(!!d.portal, id);
       if (r === "owner") assert(!!d.owner, id);
-      // a wet signature never goes by email or mail
-      if (d.signature === "wet") assert(!["email", "mail"].includes(r), `${id}: wet`);
+      // a wet signature never goes by mail (a mailed form is the original), and by email or fax only as the signed copy
+      if (d.signature === "wet") assert(r !== "mail" && (!["email", "fax"].includes(r) || !!signedCopy(f)), `${id}: wet`);
       if (r === "team") {
         const p = handoffPacket(f, d, whyYours(f, d, ENV, all));
         assert(waysToSend(d, f.payload).en.length > 0 || !!d.owner, `${id}: the packet says where it goes`);

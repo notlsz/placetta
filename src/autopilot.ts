@@ -220,7 +220,7 @@ export function autopilotCheck(w: Workspace, ap: Approval, o: CheckCtx): Autopil
     else if (!ownerLater.length) needs.push({ kind: "wet", why: B("Your signature from the signup session isn't on file for it. Sign it once and Placetta carries on.", "注册时的签名尚未存档。签署一次后快哉即可继续。") });
   } else {
     if (sign === "tap") needs.push({ kind: "law", why: SIGN_WHY.tap });
-    if (sign === "wet" || route === "faxSigned") { if (!needs.some(n => n.kind === "wet")) needs.push({ kind: "wet", why: SIGN_WHY.wet }); }
+    if (sign === "wet" || route === "faxSigned" || route === "emailSigned" || route === "kitReturn") { if (!needs.some(n => n.kind === "wet")) needs.push({ kind: "wet", why: SIGN_WHY.wet }); }
     if (sign === "adopted" || sign === "none") passed.push("signature");
   }
 
@@ -278,7 +278,7 @@ export function ownerTouches(w: Workspace, o: CheckCtx & { as: AutopilotGrant })
     const route = routeOf(a), fee = feeOf(a), pay = paymentOf(a.official), site = siteOf(a.official);
     const n = (t: string, z: string) => ({ what: B(`${a.name.en}: ${t}`, `${a.name.zh}：${z}`), app: a.id });
     const sends = route === "owner" || route === "ownerSigns" || route === "team" || route === "notReady";
-    const wet = r.sign === "wet" || route === "faxSigned", esign = r.sign === "tap" || r.sign === "adopted";
+    const kit = route === "kitReturn", wet = r.sign === "wet" || route === "faxSigned" || route === "emailSigned" || kit, esign = r.sign === "tap" || r.sign === "adopted";
     const pays = (fee === null || fee > 0) && !!pay && pay !== "none";
     const payWords = pay === "invoice" ? n("pay the agency's bill when it comes", "账单到了后支付") : n("pay the agency's fee on its site", "在机构网站上支付费用");
     const login = route === "portal" && !!site.site && !site.open;
@@ -293,7 +293,9 @@ export function ownerTouches(w: Workspace, o: CheckCtx & { as: AutopilotGrant })
     // form with the saved signature, a hand signature, or an approval when a check didn't pass), then what only they do
     if (!r.alone) {
       if (r.sign === "tap") after.push(n("tap to sign it with your saved signature (a sworn declaration is yours to make)", "点一下，用您保存的签名签署（宣誓声明须由您本人作出）"));
-      else if (wet) after.push(n("sign the printed packet by hand", "在打印件上亲笔签名"));
+      else if (wet) after.push(kit ? n("sign the page Placetta mails you and post it back in its return envelope", "在快哉寄来的表格上签名，用回邮信封寄回")
+        : route === "faxSigned" || route === "emailSigned" ? n("sign the page Placetta mails you, then upload a photo of it", "在快哉寄来的表格上签名，然后上传照片")
+        : n("sign the printed packet by hand", "在打印件上亲笔签名"));
       else if (!sends) after.push(n("approve it (a check didn't pass)", "批准（有核对未通过）"));
       if (sends) after.push(n("send it yourself", "自行提交"));
     }

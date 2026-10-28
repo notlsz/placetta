@@ -1,7 +1,14 @@
 import { checkAddress, RULE_LABEL } from "./forms/addressCheck";
 import { FilingChargeSection } from "./FilingCharge";
 import { canFill, onlineOnly, ONLINE_ONLY } from "./forms/canFill";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { signSpotOf } from "./forms/fill";
+import { signRule } from "./forms/esign";
+import { adoptedPng } from "./adoptedSignature";
+import { routeOf } from "./approvalRoute";
+
+/** The form goes as Placetta's own copy of the PDF, which carries the signature: by email, fax or certified mail. */
+const paperRoute = (app?: Application) => { const r = routeOf(app); return r === "email" || r === "fax" || r === "mail"; };
 import { ThinkingOrb } from "thinking-orbs";
 import { FilingLive } from "./FilingLive";
 import { AskSpecialist } from "./Specialist";
@@ -423,14 +430,32 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
   const { b, t, lang, ws, approve, openApp, busy, cloud, go, ask } = useApp();
   const a = ws.approvals.find(x => x.id === id);
   const [sig, setSig] = useState<Signed | null>(null);
+  // Sign once: the signature this owner adopted, placed with this one tap where the agency takes an electronic signature
+  const [saved, setSaved] = useState<{ by: string } | null>(null);
+  const [redraw, setRedraw] = useState(false);
   const allow = useRef<(() => void) | null>(null);   // Always allow, ticked on this card (src/AllowRule.tsx): added on approve
+  useEffect(() => {
+    const ap = ws.approvals.find(x => x.id === id), app0 = ap?.app ? ws.apps.find(x => x.id === ap.app) : undefined;
+    const o = app0?.official ? formById(app0.official) : undefined;
+    if (!cloud || ap?.kind !== "file" || !o || !signSpotOf(o.id) || !signRule(o.id).eSignOk || !paperRoute(app0)) return;
+    let live = true;
+    void api.signatureMine(cloud.wsId).then(async s => {
+      if (!live || !s || s.withdrawnAt) return;
+      const png = await adoptedPng(s);
+      if (png && live) { setSaved({ by: s.by }); setSig({ png, name: s.by, ...(s.title ? { title: s.title } : {}), kind: s.kind, adopted: s.id }); }
+    }).catch(() => undefined);
+    return () => { live = false; };
+    // once per card: the adopted signature doesn't change while it's open
+  }, [id, cloud?.wsId]);
   if (!a) return null;
   const app = a.app ? ws.apps.find(x => x.id === a.app) : undefined;
   const fee = app && a.kind === "file" ? feeTotal(app) : 0;
   const atts = app ? app.checklist.map(c => (c.doc ? ws.docs.find(d => d.id === c.doc) : undefined)).filter((d): d is Doc => !!d) : [];
   const data = a.kind === "send" || a.kind === "change" ? a.data ?? [] : app?.fields ?? [];
   const off = app?.official ? formById(app.official) : undefined;
-  const needSig = !!cloud && a.kind === "file" && !!off?.sign && !!off.esign;
+  // a signature line Placetta can place, on a form whose agency takes an electronic signature (src/forms/esign.ts) and
+  // that goes as Placetta's copy of the PDF (email, fax, certified mail); an agency's site takes its own
+  const needSig = !!cloud && a.kind === "file" && !!off && !!signSpotOf(off.id) && signRule(off.id).eSignOk && paperRoute(app);
   const left = app && a.kind === "file" ? filingBlockers(app) : { empty: [], missing: [] };
   const pf = preflight(ws, a, daysFromNow(0));
   // a card for answers that changed since it was put up, or a filled form that doesn't match them, can't be approved
@@ -506,8 +531,15 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
         {needSig && (
           <section>
             <h3>{lang === "zh" ? "签名" : "Signature"}</h3>
-            <p className="note">{lang === "zh" ? "签名只用于这份表格，不会保存用于其他表格。" : "Your signature goes on this form only and is never kept for another."}</p>
-            <SignaturePad onChange={setSig} />
+            {saved && !redraw
+              ? <>
+                  <p className="note">{lang === "zh" ? `批准即在这份表格上使用您已采用的签名（${saved.by}）。每次使用都会随申报记录在案。` : `Approving places the signature you adopted (${saved.by}) on this form. Each placement is recorded with the filing.`}</p>
+                  <button type="button" className="linkbtn" onClick={() => { setRedraw(true); setSig(null); }}>{lang === "zh" ? "改用这次手写" : "Sign this one differently"}</button>
+                </>
+              : <>
+                  <p className="note">{lang === "zh" ? "签名只用于这份表格，不会保存用于其他表格。" : "Your signature goes on this form only and is never kept for another."}</p>
+                  <SignaturePad onChange={setSig} />
+                </>}
           </section>
         )}
         {app && a.kind === "file" && <ExpeditePick a={app} />}
@@ -569,6 +601,9 @@ function FinishStep({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>[
   const [conf, setConf] = useState("");
   const ask = [...(f.agent_log ?? [])].reverse().find(e => ["need_person", "needs_you", "wet_signature"].includes(e.kind));
   const upload = ask?.kind === "wet_signature" && ask.ref === "upload";
+  // "Mail me the page" (file function, action kit): the form that needs ink, printed and mailed to the owner, with a
+  // return envelope to the agency when it wants the original
+  const kitable = ask?.kind === "wet_signature" && (ask.ref === "upload" || ask.ref === "kit_return");
   // The same form with the same answers as one already sent: going on means sending it again, so the button says so.
   const duplicate = ask?.kind === "needs_you" && ask.ref === "duplicate";
   // the business sends it itself (file function: sentByYou)
@@ -588,7 +623,7 @@ function FinishStep({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>[
           // Carrying on, uploading the signed copy and sending again are an owner's; the file function refuses members.
           ? <span className="note">{zh ? "需要工作区所有者完成这一步。" : "An owner of this workspace finishes this step."}</span>
           : upload
-          ? <><label className={`pill ink sm${busy ? " off" : ""}`}>
+          ? <><KitButton f={f} /><label className={`pill ink sm${busy ? " off" : ""}`}>
               {zh ? "上传签名件" : "Upload the signed copy"}
               <input type="file" accept="application/pdf,image/jpeg,image/png" hidden disabled={busy}
                 onChange={e => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void cloud?.uploadSigned(f.id, f.app_id, file); }} />
@@ -596,10 +631,40 @@ function FinishStep({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>[
           : duplicate
           ? <button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.resumeFiling(f.id, true)}>{zh ? "再次提交" : "Send it again"}</button>
           : yours
-          ? sent
+          ? <>{kitable && <KitButton f={f} />}{sent}</>
           : <button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.resumeFiling(f.id)}>{zh ? "我已完成，继续" : "I've done it, carry on"}</button>}
       </div>
     </div>
+  );
+}
+
+/** "Mail me the page": the owner types where to mail it once; Placetta prints it and mails it (held for the undo
+ *  window, cancel until it's printed). After that the card says it's on its way. */
+function KitButton({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>["filings"][number] }) {
+  const { lang, cloud, busy } = useApp();
+  const zh = lang === "zh";
+  const [open, setOpen] = useState(false);
+  const [a, setA] = useState({ name: "", line1: "", line2: "", city: "", state: "", zip: "" });
+  // the kit on its way: the last sign_kit since the card asked for ink, unless it was canceled
+  const log = f.agent_log ?? [];
+  let onWay = false;
+  for (const e of [...log].reverse()) { if (e.kind === "sign_kit_canceled" || e.kind === "wet_signature") break; if (e.kind === "sign_kit") { onWay = true; break; } }
+  if (onWay) return <button type="button" className="pill quiet sm" disabled={busy} onClick={() => void cloud?.kitUndo(f.id)}>{zh ? "取消寄送" : "Cancel the mailing"}</button>;
+  if (!open) return <button type="button" className="pill quiet sm" disabled={busy} onClick={() => setOpen(true)}>{zh ? "把表格寄给我" : "Mail me the page"}</button>;
+  const ok = a.name.trim().length >= 2 && a.line1.trim().length >= 3 && a.city.trim().length >= 2 && /^[A-Za-z]{2}$/.test(a.state.trim()) && /^\d{5}(-\d{4})?$/.test(a.zip.trim());
+  const field = (k: keyof typeof a, en: string, zhL: string, max: number, extra: Partial<React.InputHTMLAttributes<HTMLInputElement>> = {}) => (
+    <input className="inp sm" value={a[k]} maxLength={max} placeholder={zh ? zhL : en} aria-label={zh ? zhL : en} onChange={e => setA(x => ({ ...x, [k]: e.target.value }))} {...extra} />
+  );
+  return (
+    <form className="kit-addr" onSubmit={e => { e.preventDefault(); if (ok) void cloud?.kitFiling(f.id, { name: a.name.trim(), line1: a.line1.trim(), ...(a.line2.trim() ? { line2: a.line2.trim() } : {}), city: a.city.trim(), state: a.state.trim().toUpperCase(), zip: a.zip.trim() }); }}>
+      {field("name", "Name", "收件人", 40, { autoComplete: "name" })}
+      {field("line1", "Street address", "街道地址", 64, { autoComplete: "address-line1" })}
+      {field("line2", "Suite (optional)", "单元（可选）", 64, { autoComplete: "address-line2" })}
+      {field("city", "City", "城市", 40, { autoComplete: "address-level2" })}
+      {field("state", "State", "州", 2, { autoComplete: "address-level1" })}
+      {field("zip", "ZIP code", "邮编", 10, { autoComplete: "postal-code", inputMode: "numeric" })}
+      <button type="submit" className="pill ink sm" disabled={busy || !ok}>{zh ? "寄给我" : "Mail it to me"}</button>
+    </form>
   );
 }
 

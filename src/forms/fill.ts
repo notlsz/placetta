@@ -268,10 +268,13 @@ export async function fillOfficial(formId: string, fields: Field[], load: LoadPd
   return out ? new Blob([out.pdf as BlobPart], { type: "application/pdf" }) : null;
 }
 
+/** Where a signature and its date go on the form's official PDF, when Placetta knows (the registry, or its box map). */
+export const signSpotOf = (formId: string) => formById(formId)?.sign ?? MAPS[formId]?.sign;
+
 /** Draw a signature image (PNG) on the form's signature line with today's date in its date box. One filing, one
     signature: callers never keep the image for another form. Returns the signed PDF, or null when the form has no spot. */
 export async function stampSignature(pdfBytes: Uint8Array, png: Uint8Array, formId: string, today = new Date()): Promise<Uint8Array | null> {
-  const spot = formById(formId)?.sign ?? MAPS[formId]?.sign;
+  const spot = signSpotOf(formId);
   if (!spot) return null;
   const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
   const doc = await PDFDocument.load(pdfBytes);

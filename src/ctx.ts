@@ -75,6 +75,10 @@ export type CloudCtx = {
   /** "Show Odelia how": file it once yourself in the live browser while Odelia records the steps (teach mode). */
   teachFiling(filingId: string): Promise<void>;
   uploadSigned(filingId: string, appId: string, file: File): Promise<void>;
+  /** "Mail me the page": Placetta mails a form that needs ink to this address (file function, action kit); kitUndo
+   *  cancels it in its undo window. */
+  kitFiling(filingId: string, address: import("./cloud/api").KitAddress): Promise<void>;
+  kitUndo(filingId: string): Promise<void>;
   cancelFiling(filingId: string): Promise<void>;
   /** Stop a filing that's on its way, before anything reaches the agency; it comes back to you to approve again. */
   stopFiling(filingId: string): Promise<void>;
@@ -161,4 +165,6 @@ export const AppCtx = createContext<Ctx | null>(null);
 export const useApp = () => { const c = useContext(AppCtx); if (!c) throw new Error("no app context"); return c; };
 
 /** A signature drawn or typed in the approval card. Belongs to one filing; never kept for another form. */
-export type Signed = { png?: Uint8Array; name: string; title?: string; kind: "typed" | "drawn" };
+/** A signature for one approval: drawn in the card, or the one the owner adopted once (adopted: its id, so each
+ *  placement is recorded against it). */
+export type Signed = { png?: Uint8Array; name: string; title?: string; kind: "typed" | "drawn"; adopted?: string };

@@ -1,6 +1,6 @@
 // The dispatcher's decisions, kept free of I/O so they can be tested: is this agency switched on, is the filing
 // complete, which channel sends it, and is the owner foreign. index.ts does the sending.
-import { type Dest, loginMatches, TEAM_ONLY } from "./destinations.ts";
+import { type Dest, loginMatches, OWNER_KIND, OWNER_KIND_SAID, TEAM_ONLY } from "./destinations.ts";
 import { ACCOUNT_SAY, accountOf } from "./accounts.ts";
 
 export type Bi = { en: string; zh: string };
@@ -257,10 +257,12 @@ export const canMakeAccount = (d: Dest | undefined, authority: boolean): boolean
 /** The filing carries an agency fee. */
 export const feeDue = (f: Filing): boolean => Number(f.fee_estimate ?? 0) > 0;
 
-/** A fee has to go with the filing: the filing's own fee, or the agency's page says the fee is sent with it or paid at
-    the counter. Placetta never sends money, so email, fax and mail are out; the team takes it with the payment. */
+/** A fee has to go with the filing: the agency's page says the fee is sent with it or paid at the counter, or the
+    filing has a fee and the page doesn't say the agency bills it afterwards. Placetta never sends money, so email, fax
+    and mail are out. An agency that invoices after it has the filing ("invoice") gets nothing with it: the bill goes to
+    the business (or its accounts-payable email), so its fee doesn't keep the form off email, fax or mail. */
 export const feeBlocks = (f: Filing, d: Dest | undefined): boolean =>
-  feeDue(f) || d?.payment === "with_filing" || d?.payment === "in_person";
+  d?.payment === "with_filing" || d?.payment === "in_person" || (feeDue(f) && d?.payment !== "invoice");
 
 /** "Show Odelia how" (teach mode, worker/filer/src/teach.ts): why it can't start on this filing, or null. The form's
     destination is an agency site, the portal worker is on, and the filing isn't sent, finished or already running.
@@ -285,9 +287,11 @@ export const EMAIL_ATTACHMENTS = 4;
 const extraFiles = (f: Filing) => (f.payload.attachments ?? []).length;
 
 /** Where it goes, in order: the owner when only the business can submit it, then portal, email, fax, mail, else the
-    team. A wet signature rules out every channel that would send our copy (email, fax and mail); the person signs it
-    themselves. A fee rules out email, fax and mail. A fax or a letter carries only the form, so a filing with
-    attachments never goes by fax or mail, and an email with more than four goes to the team. */
+    team. A wet signature rules out sending Placetta's own copy: once the person has signed it in ink and its photo or
+    scan is in Documents, Placetta faxes that copy, or emails it to an agency that takes the form by email (both take a
+    copy of an ink signature); certified mail never carries it, since a mailed form must be the original. A fee rules
+    out email, fax and mail. A fax or a letter carries only the form, so a filing with attachments never goes by fax or
+    mail, and an email with more than four goes to the team. */
 export function pick(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Route {
   if (!d) return "team";
   if (d.owner) return "owner";
@@ -295,7 +299,11 @@ export function pick(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Ro
   // no saved login: the account is made first, by the worker, when Odelia may make it (worker/filer/src/account.ts)
   if (d.portal && (facts.hasLogin || d.noLogin || facts.makesAccount) && env.portalWorker && on("portal")) return "portal";
   if (feeBlocks(f, d)) return "team";
-  if (d.signature === "wet") return signedCopy(f) && canFaxSignedFor(f, d, env) ? "fax" : "team";
+  if (d.signature === "wet") {
+    if (!signedCopy(f)) return "team";
+    if (canFaxSignedFor(f, d, env)) return "fax";
+    return canEmailSignedFor(f, d, env, facts) ? "email" : "team";
+  }
   if (d.email && facts.mailConnected && on("email") && extraFiles(f) <= EMAIL_ATTACHMENTS) return "email";
   if (extraFiles(f)) return "team";
   if (d.fax && env.fax && on("fax")) return "fax";
@@ -318,6 +326,7 @@ export function whyYours(f: Filing, d: Dest | undefined, env: Env, facts: Facts)
     if (kind !== "none") return facts.makesAccount && kind === "unknown" ? ACCOUNT_SAY.unknown : ACCOUNT_SAY.authority;
   }
   if (feeBlocks(f, d)) return { en: "The agency's fee goes with this filing, and Placetta never sends money.", zh: "这份申请需随附机构费用，快哉从不代付款项。" };
+  if (d.ids) return { en: `It needs your own identity documents: ${d.ids} So you sign it and mail it yourself, with the packet Odelia prepared.`, zh: "这份申请需要附上您本人的身份证件原件（或签发机构认证的副本），因此请您签名后自行寄出，Odelia 已准备好材料包。" };
   if (d.signature === "wet") return { en: "The agency needs a handwritten signature on this form.", zh: "该机构要求在表格上手写签名。" };
   if (d.email && facts.mailConnected && env.channels.includes("email") && extraFiles(f) > EMAIL_ATTACHMENTS) {
     return { en: `It has more than ${EMAIL_ATTACHMENTS} attachments, more than Placetta sends in one email.`, zh: `附件超过 ${EMAIL_ATTACHMENTS} 个，超出快哉单封邮件可发送的数量。` };
@@ -433,6 +442,107 @@ export const canFaxSigned = (d: Dest | undefined, env: Env): boolean => !!d?.fax
 export const canFaxSignedFor = (f: Filing, d: Dest | undefined, env: Env): boolean =>
   canFaxSigned(d, env) && !feeBlocks(f, d) && extraFiles(f) === 0;
 
+/** Placetta can email a hand-signed copy for this filing: the agency takes the form by email (so it takes a scan of an
+    ink signature), a mailbox is connected and email is switched on, no fee goes with it, and it fits in one email. */
+export const canEmailSignedFor = (f: Filing, d: Dest | undefined, env: Env, facts: Pick<Facts, "mailConnected">): boolean =>
+  !!d?.email && facts.mailConnected && env.channels.includes("email") && !feeBlocks(f, d) && extraFiles(f) <= EMAIL_ATTACHMENTS;
+
+/** What gets emailed, faxed or mailed: the hand-signed copy when there is one, otherwise the filled form. */
+export const paperFile = (f: Filing): string | undefined => signedCopy(f) ?? f.payload.pdf_path;
+
+/** How a form that needs an ink signature gets signed without the owner printing or posting anything, the honest
+    default for each form:
+      photo   the agency takes a copy of the ink signature (by fax, or by email): the owner signs the page (Placetta
+              mails it to them with one tap, or they print it) and takes a photo in the app; Placetta sends that copy.
+      return  the agency wants the original by mail: one tap and Placetta prints the form and mails it to the owner with
+              a return envelope whose window shows the agency's address; the owner signs, adds the check when the fee
+              goes with it, and drops it in the mail. Tracked from there.
+      yours   neither fits (the fee is paid at the counter, attachments go with it, or no Lob): the packet, as before. */
+export type WetPath = { path: "photo"; via: "fax" | "email" } | { path: "return" } | { path: "yours" };
+export function wetPath(f: Filing, d: Dest | undefined, env: Env, facts: Pick<Facts, "mailConnected">): WetPath {
+  // the signer's own identity documents go with it (an ITIN application): theirs to send, with a plain reason
+  if (!d || d.signature !== "wet" || d.owner || d.ids) return { path: "yours" };
+  const copy: Filing = { ...f, agent_log: [...f.agent_log, { en: "", zh: "", kind: "signed_copy", ref: "signed" }] };
+  if (canFaxSignedFor(copy, d, env)) return { path: "photo", via: "fax" };
+  if (canEmailSignedFor(copy, d, env, facts)) return { path: "photo", via: "email" };
+  if (env.mail && mailTo(d, f.payload) && d.payment !== "in_person" && extraFiles(f) === 0) return { path: "return" };
+  return { path: "yours" };
+}
+
+/** The one-tap signing kit Placetta mails to the owner (Lob): the photo kit is the form to sign and a cover page; the
+    return kit adds a tear-off slip with the agency's address for the return envelope's window. Lines of plain ASCII
+    for the cover page, and the log entry in English and Chinese. */
+export function signKit(f: Filing, d: Dest, path: Exclude<WetPath, { path: "yours" }>): { cover: string[]; slip: string[] | null; en: string; zh: string } {
+  const form = f.payload.form?.en || f.title.en;
+  const formZh = f.payload.form?.zh || f.title.zh;
+  const to = mailTo(d, f.payload);
+  const fee = feeDue(f) ? Number(f.fee_estimate) : 0;
+  const withCheck = path.path === "return" && (d.payment === "with_filing" || (fee > 0 && d.payment !== "invoice"));
+  const feeLine = withCheck ? (fee ? `the agency's fee, about $${fee}, by check or money order made out as the form says` : "the agency's fee by check or money order, as the form says") : "";
+  const steps = path.path === "photo"
+    ? [
+      `1. Sign ${form} by hand where it asks for your signature, and date it.`,
+      "2. Open Placetta, tap \"Upload the signed copy\" on this filing and take a clear photo of the signed page.",
+      `3. Placetta ${path.via === "fax" ? "faxes" : "emails"} it to the agency and saves the confirmation. You don't mail anything.`,
+    ]
+    : [
+      `1. Sign ${form} by hand where it asks for your signature, and date it.`,
+      ...(withCheck ? [`2. Put in ${feeLine}.`] : []),
+      `${withCheck ? 3 : 2}. Tear off the last page along the perforation and put it in the return envelope so the agency's address shows in the window.`,
+      `${withCheck ? 4 : 3}. Put the signed form in the same envelope, add a first-class stamp and drop it in the mail.`,
+      "Then tap \"I've sent it\" on this filing in Placetta. Odelia tracks it from there.",
+    ];
+  const cover = [
+    `Sign and ${path.path === "photo" ? "photograph" : "mail"}: ${form}`,
+    `For: ${f.payload.fields?.find((x) => x.id === "l1")?.value || f.title.en}`,
+    "",
+    "Why it's on paper:",
+    ...wrap("The agency needs this form signed in ink, so Placetta can't sign it for you. Everything else is filled in."),
+    "",
+    "What to do:",
+    ...steps.flatMap((s) => wrap(s)),
+    ...(to && path.path === "return" ? ["", "It goes to:", ...wrap([to.name, to.line1, to.line2, `${to.city}, ${to.state} ${to.zip}`].filter(Boolean).join(", "))] : []),
+    "",
+    ...wrap(`The agency's page: ${d.source} (checked ${d.checked})`),
+  ];
+  const slip = path.path === "return" && to ? [to.name, to.line1, ...(to.line2 ? [to.line2] : []), `${to.city} ${to.state} ${to.zip}`] : null;
+  const en = path.path === "photo"
+    ? `Placetta is mailing you ${form} to sign. Sign it by hand, then tap "Upload the signed copy" and take a photo: Placetta ${path.via === "fax" ? "faxes" : "emails"} it to the agency. It arrives by post in a few days.`
+    : `Placetta is mailing you ${form} with a return envelope addressed to the agency. Sign it${withCheck ? ", add the check for the fee" : ""}, add a stamp, drop it in the mail and tap "I've sent it". It arrives by post in a few days.`;
+  const zh = path.path === "photo"
+    ? `快哉正在把${formZh}寄给您签字。请亲笔签名后，点击“上传签名件”并拍照，快哉将${path.via === "fax" ? "传真" : "通过邮件发送"}给机构。几天内寄到。`
+    : `快哉正在把${formZh}连同写好机构地址的回邮信封寄给您。请签名${withCheck ? "并放入缴费支票" : ""}，贴上邮票后投入邮筒，再点击“我已发出”。几天内寄到。`;
+  return { cover, slip, en, zh };
+}
+
+/** What the filing card says when a form needs the owner's ink: one tap mails them the page, and what happens after. */
+export function wetAsk(f: Filing, d: Dest, path: Exclude<WetPath, { path: "yours" }>): Bi {
+  const fee = feeDue(f) ? Number(f.fee_estimate) : 0;
+  const check = path.path === "return" && (d.payment === "with_filing" || (fee > 0 && d.payment !== "invoice"));
+  if (path.path === "photo") {
+    const how = path.via === "fax" ? { en: "faxes", zh: "传真" } : { en: "emails", zh: "通过邮件发送" };
+    return {
+      en: `This agency needs a handwritten signature. Tap "Mail me the page" and Placetta prints the filled form and mails it to you, or print it from Documents. Sign it, then upload a photo of the signed page here: Placetta ${how.en} it to the agency and saves the confirmation.`,
+      zh: `该机构要求手写签名。点击“把表格寄给我”，快哉会打印已填好的表格并寄给您；也可从“文件”自行打印。签名后在此上传签名页的照片，快哉会${how.zh}给机构并保存送达确认。`,
+    };
+  }
+  return {
+    en: `This agency wants the original, signed in ink, by mail. Tap "Mail me the page": Placetta prints the filled form and mails it to you with a return envelope addressed to the agency. Sign it${check ? ", add a check for the agency's fee" : ""}, add a stamp, drop it in the mail and tap "I've sent it".`,
+    zh: `该机构要求邮寄亲笔签名的原件。点击“把表格寄给我”：快哉会打印已填好的表格，连同写好机构地址的回邮信封一起寄给您。请签名${check ? "，放入缴纳机构费用的支票" : ""}，贴上邮票投入邮筒，然后点击“我已发出”。`,
+  };
+}
+
+/** A mailing address the owner typed for the signing kit: a name, a street line, a city, a two-letter state and a ZIP
+    code, trimmed and kept short. Null when it isn't one. */
+export function kitAddress(raw: unknown): { name: string; line1: string; line2?: string; city: string; state: string; zip: string } | null {
+  const a = (raw ?? {}) as Record<string, unknown>;
+  const s = (k: string, max: number) => String(a[k] ?? "").replace(/[\r\n\t]+/g, " ").trim().slice(0, max);
+  const out = { name: s("name", 40), line1: s("line1", 64), line2: s("line2", 64), city: s("city", 40), state: s("state", 20).toUpperCase(), zip: s("zip", 20) };
+  if (out.name.length < 2 || out.line1.length < 3 || out.city.length < 2 || !/^[A-Z]{2}$/.test(out.state) || !/^\d{5}(-\d{4})?$/.test(out.zip)) return null;
+  const { line2, ...rest } = out;
+  return line2 ? { ...rest, line2 } : rest;
+}
+
 /** The hand-back that asks the owner to send an owner-only form themselves, with the packet Odelia prepared. */
 export const OWNER_REF = "owner_packet";
 
@@ -448,14 +558,17 @@ export function ownerPacket(f: Filing, d: Dest): { en: string; zh: string; lines
   const fee = feeDue(f) ? ` The agency's fee (about $${Number(f.fee_estimate)}) is yours to pay.` : "";
   const feeZh = feeDue(f) ? `机构费用（约 ${Number(f.fee_estimate)} 美元）由您支付。` : "";
   const link = o.url && /^https:\/\//.test(o.url) ? o.url : null;
+  // the plain reason first (an exam, an ID, a notary, the agency's office, a payment), then the agency's own words
+  const kind = OWNER_KIND[f.payload.official ?? ""], plain = kind ? OWNER_KIND_SAID[kind] : null;
   return {
-    en: `${form} is one you do yourself: ${o.why} Odelia put a packet in Documents (owner-packet.pdf) with what to send and where. Send it ${where}.${fee} Then tap "I've sent it" and add the agency's confirmation number if it gave you one. Odelia tracks it from there.`,
-    zh: `${formZh}需要由您本人办理。快哉已把材料包放在“文件”中（owner-packet.pdf），写明要提交什么、交到哪里。请${whereZh}。${feeZh}发出后点击“我已发出”，如机构给了确认号请一并填写。之后由 Odelia 跟进进度。`,
+    en: `${form} is one you do yourself: ${plain ? `${plain.en} ` : ""}${o.why} Odelia put a packet in Documents (owner-packet.pdf) with what to send and where. Send it ${where}.${fee} Then tap "I've sent it" and add the agency's confirmation number if it gave you one. Odelia tracks it from there.`,
+    zh: `${formZh}需要由您本人办理。${plain?.zh ?? ""}快哉已把材料包放在“文件”中（owner-packet.pdf），写明要提交什么、交到哪里。请${whereZh}。${feeZh}发出后点击“我已发出”，如机构给了确认号请一并填写。之后由 Odelia 跟进进度。`,
     lines: [
       `Owner packet: ${form}`,
       `For: ${f.payload.fields?.find((x) => x.id === "l1")?.value || f.title.en}`,
       "",
       "Why you send it yourself:",
+      ...(plain ? wrap(plain.en) : []),
       ...wrap(o.why),
       "",
       "Where it goes:",
