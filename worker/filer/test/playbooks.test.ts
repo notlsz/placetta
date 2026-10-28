@@ -14,7 +14,7 @@ const state = (heading: string): PageState => ({ url: "https://x.gov/", title: h
 const VIDEO_ONLY = new Set(["plus.fairfaxcounty.gov"]);
 
 test("every portal three or more forms use has a playbook, and the state formation portals with written guides too", () => {
-  assert.equal(PLAYBOOKS.length, 10);
+  assert.equal(PLAYBOOKS.length, 15);
   assert.equal(new Set(PLAYBOOKS.map((p) => p.host)).size, PLAYBOOKS.length, "one playbook per portal");
   const count = new Map<string, number>();
   for (const d of Object.values(DEST)) if (d.portal) count.set(d.portal, (count.get(d.portal) ?? 0) + 1);

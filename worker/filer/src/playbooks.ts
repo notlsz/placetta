@@ -23,7 +23,11 @@ import type { Probe } from "./probe.ts";
 
 /** One step as the guide prints it. selector is the worker's own selector grammar ("button:", "link:", "label:")
     when the guide names the control; the model confirms it against the page. */
-export type Step = { page: string; do: "sign_in" | "open" | "choose" | "fill" | "upload" | "agree" | "review" | "submit" | "pay" | "receipt"; selector?: string; note: string };
+export type Step = { page: string; do: "sign_in" | "open" | "choose" | "fill" | "upload" | "agree" | "review" | "submit" | "pay" | "receipt"; selector?: string; note: string;
+  /** The day this page, and its selector when it names one, was seen on the agency's live public site (probe.ts). A step
+      without it is from the guide only: past a sign-in, or past a page Placetta may not open without filing. Odelia
+      follows the page there, the first run stops at the review page for the team, and its real steps are recorded. */
+  seen?: string };
 export type FormSteps = { start: string; steps: Step[]; guides?: string[] };
 export type Final = { page: string; button?: string };   // a button on that page sends it; with no button, any forward button does
 export type Playbook = {
@@ -450,9 +454,153 @@ export const PLAYBOOKS: Playbook[] = [
       },
     },
   },
+
+  // ---- The beachhead (2026-10-24): forms a Chinese food-and-beverage brand opening a US store files, on portals that
+  // need no account. Each was opened on its public pages from a cloud server (probe.ts); `seen` marks what was there.
+  {
+    // Every metro: a company formed abroad and registered in a US state still files (FinCEN's rule of August 2026 drops
+    // US persons only). No account; an hCaptcha on the Submit tab goes to the person in the live browser.
+    host: "boiefiling.fincen.gov",
+    name: "BOI E-Filing (FinCEN)",
+    guides: ["https://boiefiling.fincen.gov/resources/BOIR_E-File_Online_Step-by-Step_Instructions.pdf"],
+    read: "2026-10-24",
+    verified: null,
+    // Steps 10 to 12: "Select the I agree checkbox ... Select the hCaptcha textbox I am human ... Click the Submit BOIR button."
+    final: [{ page: "Submit", button: "Submit BOIR" }],
+    // "Prepare & Submit BOIR" only opens the online form (step 3)
+    nav: [{ page: "File the Beneficial Ownership Information Report", button: "Prepare & Submit BOIR" }],
+    pay: [],
+    receipt: ["Submission Status Confirmation"],
+    // the form sends from its last tab: no page repeats every value
+    review: "entered",
+    probes: [
+      { url: "https://boiefiling.fincen.gov/", expect: ["Welcome to the BOI E-Filing System", "GET STARTED", "File BOIR"], seen: "2026-10-24" },
+      { url: "https://boiefiling.fincen.gov/fileboir", expect: ["File the Beneficial Ownership Information Report (BOIR)", "File Online BOIR", "Prepare & Submit BOIR"], seen: "2026-10-24" },
+      { url: "https://boiefiling.fincen.gov/boir/html", expect: ["Beneficial Ownership Information Report (BOIR)", "WARNING!", "I Agree"], seen: "2026-10-24" },
+    ],
+    forms: {
+      "fincen-boir": {
+        start: "https://boiefiling.fincen.gov/fileboir",
+        steps: [
+          { page: "File the Beneficial Ownership Information Report", do: "open", selector: "link:Prepare & Submit BOIR", seen: "2026-10-24", note: "\"Click the Prepare & Submit BOIR button under the File Online BOIR\" (step 3). \"It cannot be saved and worked on later\": the whole report goes in one sitting." },
+          { page: "WARNING!", do: "agree", selector: "button:I Agree", seen: "2026-10-24", note: "\"Review the warning language and click the I Agree button\" (step 4): the system-use notice, not the certification." },
+          { page: "Filing Information", do: "choose", note: "Type of filing: Initial report, from the approved values (step 5a); then Next (5b)." },
+          { page: "Reporting Company", do: "fill", note: "Legal name, alternate names, tax identification type and number (Foreign is allowed), country of formation, the state of first registration and the current US address, from the approved values (steps 6a to 6h)." },
+          { page: "Company Applicant(s)", do: "fill", note: "Each company applicant's name, date of birth, address and identifying document, with \"an image of an acceptable identifying document\" from the approved files (steps 7a to 7f). A passport number line goes to the person." },
+          { page: "Beneficial Owner(s)", do: "upload", note: "Each beneficial owner the same way, with the image of their identifying document from the approved files (steps 8 to 8e). Only non-US owners are reported now." },
+          { page: "Submit", do: "submit", selector: "button:Submit BOIR", note: "Submitter name and email from the approved values; \"Select the I agree checkbox\" certifies and checks every tab (step 10); the hCaptcha is the person's (step 11); then Submit BOIR (step 12) after the worker's comparison." },
+          { page: "Submission Status Confirmation", do: "receipt", note: "\"You will see the Submission Status Confirmation page\" (step 13). Downloads are refused in the sandbox, so the worker keeps the page as a PDF and a screenshot instead of the transcript." },
+        ],
+      },
+    },
+  },
+  {
+    // San Francisco: no account, one application, then the owner signs it by DocuSign email.
+    host: "etaxstatement.sfgov.org",
+    name: "New Business Registration (San Francisco Treasurer & Tax Collector)",
+    guides: ["https://sftreasurer.org/business/register-business"],
+    read: "2026-10-24",
+    verified: null,
+    // "review and confirm the information you entered, and then click “Submit for Electronic Signature”"
+    final: [{ page: "Review & Submit", button: "Submit for Electronic Signature" }],
+    pay: ["Registration Fee", "Payment"],
+    receipt: ["DocuSign", "Confirmation"],
+    probes: [
+      { url: "https://etaxstatement.sfgov.org/NewBusinessRegistration/application", expect: ["New Business Registration Form", "Organization Type", "Business Identification", "Review & Submit", "Continue"], seen: "2026-10-24" },
+      { url: "https://sftreasurer.org/business/register-business", expect: ["New Business Registration Application", "Detailed Application Instructions", "Review & Submit"], seen: "2026-10-24" },
+    ],
+    probeHosts: ["sftreasurer.org"],
+    forms: {
+      "sf-business-registration": {
+        start: "https://etaxstatement.sfgov.org/NewBusinessRegistration/application",
+        steps: [
+          { page: "Organization Type", do: "choose", selector: "button:Continue", seen: "2026-10-24", note: "\"What is the organization type of this business?\" (a dropdown) and \"Is this business a non-profit?\" (Yes or No), from the approved values; then Continue." },
+          { page: "Business Identification", do: "fill", note: "Business name as registered with the Secretary of State, the FEIN (an SSN line goes to the person), the San Francisco start date (no future date), phone, the business email the DocuSign goes to, and the mailing address." },
+          { page: "Change of Ownership", do: "choose", note: "\"Is this a change of ownership for an existing business?\": No, unless the approved values give the previous Business Account Number." },
+          { page: "Ownership Information", do: "fill", note: "Each owner's name, tax ID and address (\"+ Add Owner\" for more). Business officers may be left blank." },
+          { page: "Business Information", do: "fill", note: "\"You must answer all questions on this page\": employees per week, estimated San Francisco payroll and gross receipts, business personal property, from the approved values only." },
+          { page: "Taxes and Fees", do: "choose", note: "Every tax or fee type the approved values name for the location; ask the person about any other." },
+          { page: "Location Details", do: "fill", note: "Location name or DBA, its start date and address (\"+ Add Location\" for more), then the First Year Free questions when they appear." },
+          { page: "Review & Submit", do: "submit", selector: "button:Submit for Electronic Signature", note: "\"After you click Submit for Electronic Signature, you cannot make any additional changes.\" The worker compares the page with the approved values first." },
+          { page: "DocuSign", do: "receipt", note: "\"You will receive an email from DocuSign\": the owner signs within 15 days (the signature is theirs); the confirmation then lists the Registration Fee, which the owner pays." },
+        ],
+      },
+    },
+  },
+  {
+    // Illinois: Form REG-1 with no MyTax login. Only the home page's link has been seen; the REG-1 pages are followed as
+    // they come, the first run stops at the review page for the team, and its real steps are recorded.
+    host: "mytax.illinois.gov",
+    name: "MyTax Illinois (Form REG-1)",
+    guides: ["https://tax.illinois.gov/businesses/registration.html"],
+    read: "2026-10-24",
+    verified: null,
+    // not seen yet: the generic send words (guards.ts isFinal) already guard REG-1's last page; this names the usual one
+    final: [{ page: "", button: "Submit" }],
+    pay: [],
+    receipt: ["Confirmation"],
+    probes: [{ url: "https://mytax.illinois.gov/", expect: ["Register a New Business (Form REG-1)", "Online services to register.", "Log in"], seen: "2026-10-24" }],
+    forms: {
+      "il-tax": {
+        start: "https://mytax.illinois.gov/",
+        steps: [
+          { page: "MyTax Illinois", do: "open", selector: "link:Register a New Business (Form REG-1)", seen: "2026-10-24", note: "Under Register (\"Online services to register\"), click Register a New Business (Form REG-1). Never Sign Up: no account is made." },
+          { page: "Register a New Business", do: "fill", note: "Not seen yet past the link: fill each REG-1 page from the approved values (the business, owners, location, sales tax and withholding) and ask the person for anything they don't answer. An SSN line goes to the person." },
+          { page: "Summary", do: "review", selector: "button:Submit", note: "Not seen yet: the last page before sending; the worker compares it with the approved values before any Submit." },
+          { page: "Confirmation", do: "receipt", note: "Not seen yet: note the confirmation number the page shows." },
+        ],
+      },
+    },
+  },
+  {
+    // Georgia: Register a New Business in GTC with no login. As in Illinois, the link is seen and the pages past it aren't.
+    host: "gtc.dor.ga.gov",
+    name: "Georgia Tax Center (Register a New Business)",
+    guides: ["https://dor.georgia.gov/tax-registration"],
+    read: "2026-10-24",
+    verified: null,
+    final: [{ page: "", button: "Submit" }],
+    pay: [],
+    receipt: ["Confirmation"],
+    probes: [{ url: "https://gtc.dor.ga.gov/_/", expect: ["Register a New Business", "Register with the Department of Revenue.", "Log in"], seen: "2026-10-24" }],
+    forms: {
+      "ga-tax": {
+        start: "https://gtc.dor.ga.gov/",
+        steps: [
+          { page: "Georgia Tax Center", do: "open", selector: "link:Register a New Business", seen: "2026-10-24", note: "Under Registration (\"Register with the Department of Revenue\"), click Register a New Business. Never Sign Up for Online Access: no account is made, and a page asking for a new username and password goes to the person." },
+          { page: "Register a New Business", do: "fill", note: "Not seen yet past the link: fill each page from the approved values (the business, owners, location, sales tax and withholding) and ask the person for anything else." },
+          { page: "Summary", do: "review", selector: "button:Submit", note: "Not seen yet: the worker compares the last page with the approved values before any Submit." },
+          { page: "Confirmation", do: "receipt", note: "\"You should receive your specific tax account number within 15 minutes by email\": note the confirmation the page shows." },
+        ],
+      },
+    },
+  },
+  {
+    // California seller's permit: "Register for a Permit, License, or Account" on the public page, no login.
+    host: "onlineservices.cdtfa.ca.gov",
+    name: "CDTFA Online Services (seller's permit registration)",
+    guides: ["https://cdtfa.ca.gov/formspubs/pub107/applying-for-a-sellers-permit.htm"],
+    read: "2026-10-24",
+    verified: null,
+    final: [{ page: "", button: "Submit" }],
+    pay: [],
+    receipt: ["Confirmation"],
+    probes: [{ url: "https://onlineservices.cdtfa.ca.gov/", expect: ["Register for a Permit, License, or Account", "Retrieve a Saved Registration", "Registration"], seen: "2026-10-24" }],
+    forms: {
+      "ca-cdtfa": {
+        start: "https://onlineservices.cdtfa.ca.gov/",
+        steps: [
+          { page: "CDTFA Online Services", do: "open", selector: "link:Register for a Permit, License, or Account", seen: "2026-10-24", note: "Under Registration, click Register for a Permit, License, or Account. Never Login or Sign Up Now." },
+          { page: "Registration", do: "fill", note: "Not seen yet past the link: the seller's permit for the business activity, owners, location and expected sales, from the approved values; ask the person for anything else. An SSN line goes to the person." },
+          { page: "Summary", do: "review", selector: "button:Submit", note: "Not seen yet: the worker compares the last page with the approved values before any Submit. \"There is no charge for a seller's permit.\"" },
+          { page: "Confirmation", do: "receipt", note: "Not seen yet: note the confirmation number; Get Registration Status on the public page follows it." },
+        ],
+      },
+    },
+  },
 ];
 
-const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
+const norm =(s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
 const headings = (s: PageState) => [s.title, ...s.headings].map(norm).join(" | ");
 
 /** The playbook and steps for this portal and form, if any. */
@@ -496,6 +644,6 @@ export function pageOutline(form: FormSteps): string[] {
 export function guideLines(x: { playbook: Playbook; form: FormSteps }): string[] {
   return [
     `Published guide for ${x.playbook.name}${x.playbook.verified ? "" : " (not yet verified on the live site: if the page differs, follow the page and call need_person when unsure)"}:`,
-    ...x.form.steps.map((s, i) => `${i + 1}. [${s.page}] ${s.note}${s.selector ? ` (${s.selector})` : ""}`),
+    ...x.form.steps.map((s, i) => `${i + 1}. [${s.page}] ${s.note}${s.selector ? ` (${s.selector})` : ""}${s.seen ? ` (seen on the live site ${s.seen})` : ""}`),
   ];
 }

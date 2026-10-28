@@ -1,5 +1,36 @@
 # Launch checklist
 
+## Turn on online filing (Odelia submits on agency websites)
+
+About ten minutes. Afterwards Odelia files on agency websites herself; the owner only approves, signs, pays an agency
+fee, or solves a CAPTCHA in the live browser she opens for them.
+
+1. **Render**: dashboard.render.com, **New**, **Blueprint**, pick this repository. Render reads `render.yaml` and asks
+   for two values:
+   - `SUPABASE_SERVICE_ROLE_KEY`: Supabase, Project Settings, API keys, the `service_role` secret key.
+   - `ANTHROPIC_API_KEY`: console.anthropic.com, Settings, API keys, Create key (starts `sk-ant-`).
+
+   Press **Apply**. It builds the worker (Chromium included, no Browserbase account needed) on the Standard plan
+   ($25 a month, 2 GB, which Chromium needs).
+2. **Supabase**: Edge Functions, Secrets (https://supabase.com/dashboard/project/esquxzcfsylffuijvzec/functions/secrets).
+   Add two secrets:
+   - `FILER_CHANNELS` = `email,fax,mail,portal`
+   - `FILER_AGENCIES` = `portal` (if it already lists form ids, add `,portal` to the end): every agency website on,
+     including ones added later; email, fax and mail stay per form.
+
+The database part is one migration, `supabase/migrations/20261102090000_filer_heartbeat.sql`, run like the others
+(Database, below). To check: open the service's address (top of placetta-filer in Render) with `/healthz` on the end
+(`"ok": true`, a recent `"heartbeat"`), or in Render, placetta-filer, Shell, run `npm run check`. In the app, Settings, Agency logins says
+**Online filing is live**. If a key is missing, the deploy shows as failed and `/healthz` names the key and where to
+get it; the worker takes no filing until it's set. `FILER_ENABLED` is no longer needed in Supabase: filings queue for
+the worker only while it's running (set it to `0` to switch websites off).
+
+Still guarded: the owner approves every filing; each form's first 10 stop at the agency's review page for the team;
+CAPTCHAs, codes, SSNs and fees go to the person; no account is ever created; only the destination's own hosts are
+opened; page text is data. Optional: `BROWSERBASE_API_KEY` and `BROWSERBASE_PROJECT_ID` in Render, only for the few
+agency sites that refuse a cloud server (EDD, bizfile Online, MassTaxConnect, sanjoseca.gov); `FILER_DB_KEY` per
+`docs/soc2/runbooks/filer-least-privilege.md`.
+
 Placetta runs on the Supabase project **Placetta** (`esquxzcfsylffuijvzec`). The database, security rules and server functions are built and tested; going live means bringing the project up to date, adding your keys, configuring sign-in and hosting the app. One command does nearly all of it.
 
 ## Go live: the four things only the owner can do
@@ -13,9 +44,8 @@ Everything else is built and deployed. These need your accounts, so no one else 
    `STRIPE_SECRET_KEY`. Nothing else: the billing function makes every price (by lookup key) and the webhook (its
    signing secret goes to `stripe_config`) the first time it runs. Then switch payments on:
    `update public.app_settings set payments_on = true;` (until then everyone has early access, free).
-3. **The portal worker.** Render, New, Blueprint, this repo (`render.yaml`). Paste the service role key and the
-   Anthropic key when it asks. Then add `FILER_ENABLED=1` and `FILER_CHANNELS=email,fax,mail,portal` to the
-   Supabase secrets so filings queue for it.
+3. **The portal worker.** See "Turn on online filing" at the top: a Render Blueprint with two pasted values, then
+   `FILER_CHANNELS` and `FILER_AGENCIES` in the Supabase secrets.
 4. **Texts and calls.** iMessage first: start Linq's trial (linqapp.com) and run `npm run launch`; texts work the
    same day, no carrier registration. Telnyx for calls and as the SMS fallback: buy a number and register the 10DLC
    brand and campaign (it needs your EIN and takes a few days). See "Odelia on iMessage (Linq)" and "Text and call

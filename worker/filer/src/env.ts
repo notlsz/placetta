@@ -33,7 +33,7 @@ export function checkEnv(env: Record<string, string | undefined>): EnvCheck {
   const bb = has("BROWSERBASE_API_KEY") && has("BROWSERBASE_PROJECT_ID");
   if (has("BROWSERBASE_API_KEY") !== has("BROWSERBASE_PROJECT_ID")) warnings.push("Browserbase needs both BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID; using local Chromium.");
   const publicUrl = (env.FILER_PUBLIC_URL || env.RENDER_EXTERNAL_URL || "").trim().replace(/\/+$/, "") || null;
-  if (!bb && !publicUrl?.startsWith("https://")) warnings.push("No public address (RENDER_EXTERNAL_URL or FILER_PUBLIC_URL): hand-backs (a CAPTCHA, a code, the fee) can't open a live browser, so they go to the team.");
+  if (!bb && !publicUrl?.startsWith("https://")) warnings.push("No public address (RENDER_EXTERNAL_URL or FILER_PUBLIC_URL): hand-backs (a CAPTCHA, a code, the fee) can't open a live browser.");
   return { ok: missing.length === 0, missing, warnings, browser: bb ? "browserbase" : "local", publicUrl: publicUrl?.startsWith("https://") ? publicUrl : null };
 }
 

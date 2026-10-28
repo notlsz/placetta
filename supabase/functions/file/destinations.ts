@@ -98,7 +98,8 @@ export const DEST: Record<string, Dest> = {
   },
   "tx-304": {
     mail: { name: "Secretary of State, Corporations Section", line1: "P.O. Box 13697", city: "Austin", state: "TX", zip: "78711-3697" },
-    portal: "direct.sos.state.tx.us",                 // SOSDirect: "Payments for web filings may be made by credit card or client account" (help-corp-filing-304)
+    // SOSDirect's portal entry is gone: direct.sos.state.tx.us now says "SOSPortal has replaced both SOSDirect and
+    // SOSUpload effective September 29, 2026" (seen 2026-10-24), and the Secretary's pages don't print SOSPortal's host.
     signature: "drawn",
     payment: "with_filing",
     checked: "2026-10-13",
@@ -135,7 +136,9 @@ export const DEST: Record<string, Dest> = {
   // https://aca-prod.accela.com/dallastx" (dallascityhall.com/departments/sustainabledevelopment/Pages/DallasNow.aspx, 2026-10-18).
   "dal-co": { portal: "aca-prod.accela.com", portalUrl: "https://aca-prod.accela.com/dallastx", tenant: "/dallastx", signature: "typed", payment: "portal", checked: "2026-10-13", source: "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Pages/certificate_occupancy.aspx", also: ["https://dallascityhall.com/departments/sustainabledevelopment/Pages/DallasNow.aspx"] },
   "dal-building": { portal: "aca-prod.accela.com", portalUrl: "https://aca-prod.accela.com/dallastx", tenant: "/dallastx", signature: "typed", payment: "portal", checked: "2026-10-13", source: "https://dallascityhall.com/departments/sustainabledevelopment/DCH%20documents/3.%20Applying%20for%20a%20Commercial%20Alteration%20and%20Addition%20Application.pdf", also: ["https://dallascityhall.com/departments/sustainabledevelopment/Pages/DallasNow.aspx"] },
-  "sf-business-registration": { portal: "etaxstatement.sfgov.org", signature: "typed", payment: "portal", checked: "2026-10-13", source: "https://sftreasurer.org/business/register-business" },
+  // The application opens with no account (seen 2026-10-24: "New Business Registration Form", Organization Type first);
+  // it ends with "Submit for Electronic Signature" and a DocuSign email the owner signs.
+  "sf-business-registration": { portal: "etaxstatement.sfgov.org", portalUrl: "https://etaxstatement.sfgov.org/NewBusinessRegistration/application", noLogin: true, signature: "typed", payment: "portal", checked: "2026-10-13", source: "https://sftreasurer.org/business/register-business" },
   "sj-building-ti": { portal: "sjpermits.org", portalUrl: "https://www.sjpermits.org/", signature: "drawn", payment: "portal", checked: "2026-10-13", source: "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement" },
   "sj-sign": { portal: "sjpermits.org", portalUrl: "https://www.sjpermits.org/", signature: "drawn", payment: "invoice", checked: "2026-10-13", source: "https://www.sanjoseca.gov/business/development-services-permit-center/online-permits-at-sjpermits-org/planning-online-permits" },
   // Inspection bookings (src/inspections/booking.ts): the agency's own scheduling page, from the inspection guides
@@ -200,7 +203,7 @@ export const DEST: Record<string, Dest> = {
   "fincen-boir": {
     // "Go to boiefiling.fincen.gov"; no account; an hCaptcha before submitting, which the worker hands to the person.
     // Since March 21, 2025 only companies formed under a foreign country's law and registered in a US state file.
-    portal: "boiefiling.fincen.gov",
+    portal: "boiefiling.fincen.gov", portalUrl: "https://boiefiling.fincen.gov/fileboir",
     noLogin: true,
     signature: "none",
     payment: "none",
@@ -210,6 +213,8 @@ export const DEST: Record<string, Dest> = {
   "ca-cdtfa": {
     // "Register Online" links to onlineservices.cdtfa.ca.gov; "There is no charge for a seller's permit."
     portal: "onlineservices.cdtfa.ca.gov",
+    portalUrl: "https://onlineservices.cdtfa.ca.gov/",
+    noLogin: true,                                    // "Register for a Permit, License, or Account" is on the public page, outside Login (seen 2026-10-24)
     signature: "none",
     payment: "none",
     checked: "2026-10-13",
@@ -266,6 +271,7 @@ export const DEST: Record<string, Dest> = {
     // legal effect" as one mailed. The first year's tax is paid at renewal, so nothing is due with the registration.
     email: "Finance.CustomerService@lacity.org",
     portal: "latax.lacity.org", portalUrl: "https://latax.lacity.org/businessregapp/eappreg_criteria",
+    noLogin: true,                                    // the online registration starts at its criteria page with Proceed, no account (seen 2026-10-24)
     signature: "drawn", payment: "none",
     checked: "2026-10-18", source: "https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc",
     also: ["https://finance.lacity.gov/business-tax-forms"],
@@ -522,6 +528,7 @@ export const DEST: Record<string, Dest> = {
     // "MyTax Illinois, available at mytax.illinois.gov. On the MyTax Illinois homepage, click “Register a New Business
     // (Form REG-1).”" The paper REG-1 goes "to the address on the form", which the page doesn't print.
     portal: "mytax.illinois.gov", portalUrl: "https://mytax.illinois.gov/",
+    noLogin: true,                                    // "Register a New Business (Form REG-1)" is among the services that need no login (seen 2026-10-24)
     signature: "typed", payment: "none", onBehalf: "unstated",
     checked: "2026-10-18", source: "https://tax.illinois.gov/businesses/registration.html",
   },
@@ -592,6 +599,7 @@ export const DEST: Record<string, Dest> = {
     // "Online registration is available through Georgia Tax Center (GTC)" (gtc.dor.ga.gov): "you should receive your
     // specific tax account number within 15 minutes by email."
     portal: "gtc.dor.ga.gov", portalUrl: "https://gtc.dor.ga.gov/",
+    noLogin: true,                                    // "Register a New Business" is under Registration on the public page, beside Log in (seen 2026-10-24)
     signature: "typed", payment: "none", onBehalf: "unstated",
     checked: "2026-10-18", source: "https://dor.georgia.gov/tax-registration",
   },
