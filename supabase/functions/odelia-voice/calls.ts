@@ -11,7 +11,7 @@ import { clientState, normalizePhone, odeliaNumber, signCallToken, telnyx, type 
 import { linkOf } from "../_shared/odelia_db.ts";
 import { AGENCY_TOOLS, agencyTool, type FilingRow, planAgencyCall, type TeamNumber } from "../_shared/voice_calls.ts";
 import { type BrainId, type Lang, type TtsId, openAiSipUri, perMinute, phoneReady, pickBrain, sessionConfig, type SessionSpec, type Surface } from "../_shared/voice_brain.ts";
-import { agencyOpen, commitmentsSaid, mergeTurns, type Seg, splitStereoWav } from "../_shared/voice_rules.ts";
+import { agencyOpen, callRecordingAllowed, commitmentsSaid, mergeTurns, type Seg, splitStereoWav } from "../_shared/voice_rules.ts";
 import { GLOSSARY, interpreterGreeting, interpreterInstructions, registryTerms } from "../_shared/interpreter.ts";
 import { AGENCY_LINES, lineForForm } from "../_shared/agency_phones.ts";
 
@@ -47,10 +47,24 @@ async function teamTask(r: Row, kind: "handoff" | "check_agency" | "review", tit
 
 /* ------------------------------ owner calls and the bridge to a brain ------------------------------ */
 
-/** An owner's call, in voice_calls so it shows in Calls and can be played back. */
-export async function ownerCallStarted(o: { ccid: string; workspace_id: string; user_id: string; number: string | null; brain: BrainId; lang: Lang; direction: "in" | "out" }) {
+/** Whether a call with this person on it may be recorded (voice_rules.ts callRecordingAllowed): in California, or where
+ *  nothing says where, only with their opt-in; elsewhere announced at the start. Any failure: not recorded. */
+export async function mayRecordCall(ws: string | null | undefined, uid: string | null | undefined): Promise<boolean> {
+  if (!ws || !uid) return false;
+  const { data, error } = await D.admin.rpc("recording_policy_for", { p_ws: ws, p_uid: uid });
+  if (error) { console.error("recording policy", error.code ?? "error"); return false; }
+  return callRecordingAllowed(data);
+}
+/** The decision made when the call started, kept on its row: "announced" is recorded, anything else isn't. */
+export async function callRecorded(ccid: string): Promise<boolean> {
+  const { data } = await D.admin.from("voice_calls").select("consent").eq("call_control_id", ccid).maybeSingle();
+  return (data as { consent?: string } | null)?.consent === "announced";
+}
+
+/** An owner's call, in voice_calls so it shows in Calls and can be played back (only when record: see mayRecordCall). */
+export async function ownerCallStarted(o: { ccid: string; workspace_id: string; user_id: string; number: string | null; brain: BrainId; lang: Lang; direction: "in" | "out"; record: boolean }) {
   await D.admin.from("voice_calls").upsert({ call_control_id: o.ccid, workspace_id: o.workspace_id, user_id: o.user_id, kind: "owner_phone", direction: o.direction, brain: o.brain,
-    number: o.number, lang: o.lang, status: "live", consent: "announced" }, { onConflict: "call_control_id", ignoreDuplicates: true });
+    number: o.number, lang: o.lang, status: "live", consent: o.record ? "announced" : "none" }, { onConflict: "call_control_id", ignoreDuplicates: true });
 }
 
 /**
@@ -200,7 +214,7 @@ export async function interpretCall(o: { workspace_id: string; filing_id: string
   const gate = (g ?? { ok: false, code: "over_budget" }) as { ok: boolean; code?: string };
   if (!gate.ok) return { ok: false, code: gate.code ?? "over_budget", say: NO[gate.code ?? "over_budget"] ?? NO.over_budget };
   const { data: row } = await D.admin.from("voice_calls").insert({ workspace_id: got.f.workspace_id, user_id: o.user_id, filing_id: got.f.id, kind: "interpreter_phone", direction: "out",
-    brain: pick.brain, agency_key: line.key, number: line.number, lang: "zh", status: "dialing", consent: "announced" }).select("id").single();
+    brain: pick.brain, agency_key: line.key, number: line.number, lang: "zh", status: "dialing", consent: (await mayRecordCall(got.f.workspace_id, o.user_id)) ? "announced" : "none" }).select("id").single();
   const id = String(row?.id ?? "");
   const r = await telnyx(D.env, "/calls", { connection_id: D.env("TELNYX_VOICE_CONNECTION_ID"), to: owner, from: odeliaNumber(D.env), webhook_url: D.self,
     client_state: clientState({ k: "interp", v: id, leg: "owner" }), timeout_secs: 30, time_limit_secs: 1800, command_id: `interp-owner-${id}` });
@@ -218,7 +232,7 @@ export async function interpSpec(id: string, place: "phone" | "counter"): Promis
   const { data: fs } = await D.admin.from("filings").select("title, agency").eq("workspace_id", row.workspace_id).limit(30);
   const terms = [...registryTerms((fs ?? []) as { title: { en: string; zh: string } }[]), ...GLOSSARY];
   const business = String(w?.name ?? "");
-  return { brain: row.brain, lang: "zh", interpret: true, tools: [], instructions: interpreterInstructions({ business, terms, place }), greeting: interpreterGreeting(business),
+  return { brain: row.brain, lang: "zh", interpret: true, tools: [], instructions: interpreterInstructions({ business, terms, place }), greeting: interpreterGreeting(business, place === "phone" && row.consent === "announced"),
     terms: terms.flatMap((t) => t.en).slice(0, 80), toolUrl: `${D.self}?mcp=1`, token: await signCallToken(await D.monitorKey(), `interp:${id}`, exp()) };
 }
 
@@ -264,7 +278,8 @@ export async function callsEvent(type: string, p: P, cs: Record<string, unknown>
           client_state: clientState({ k: "interp", v: row.id, leg: "agency", conf }), timeout_secs: 45, time_limit_secs: 1800, command_id: `interp-agency-${row.id}` });
       } else if (cs.conf) {
         await telnyx(D.env, `/conferences/${encodeURIComponent(String(cs.conf))}/actions/join`, { call_control_id: ccid });
-        await recordStart(ccid);
+        // the owner is on this call: recorded only as decided when it was placed (mayRecordCall), and then announced
+        if (row.consent === "announced") await recordStart(ccid);
       }
       return true;
     }
@@ -299,7 +314,8 @@ export async function callsEvent(type: string, p: P, cs: Record<string, unknown>
 async function saveRecording(ccid: string, p: P) {
   const row = await rowByCall(ccid);
   if (!row) return;
-  if (row.consent === "refused") return;   // someone objected: the file stays unfetched at Telnyx, which deletes it with the call
+  // someone objected, or the call was never to be recorded: the file stays unfetched at Telnyx, which deletes it with the call
+  if (row.consent !== "announced") return;
   const url = p.recording_urls?.wav ?? p.public_recording_urls?.wav;
   if (!url || !/^https:\/\//.test(url)) return;
   const res = await fetch(url, { signal: AbortSignal.timeout(30000) }).catch(() => null);

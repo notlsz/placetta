@@ -36,8 +36,8 @@ Placetta checks her work too: every application is checked line by line before y
 
 ## Texts and calls
 
-- Odelia is an AI. Every call opens with her saying so, and saying that the call is transcribed.
-- Calls use an AI voice and are transcribed as they happen so she can understand you. Placetta does not record call audio.
+- Odelia is an AI. Every call opens with her saying so, and saying that the call is transcribed, and recorded when it is.
+- Calls use an AI voice and are transcribed as they happen so she can understand you. In California a call is recorded only if you turned that on in Settings, Privacy; elsewhere a recorded call is announced at its start (see "Recording" in our Privacy Policy).
 - Your texts, and a record of each call, are kept with your account. You can see recent ones in Settings.
 - By text or call, Odelia can answer from your workspace and start work, but she never files, pays, sends, approves or deletes anything that way. She texts you a link to the approval in the app.
 - She texts or calls you first only if you turned that on in Settings, and never during your quiet hours. Reply STOP to stop texts, or HELP for help.
@@ -99,8 +99,8 @@ AI 生成的内容可能有误。批准前，请审核每一份申请和每一�
 
 ## 短信与电话
 
-- Odelia 是 AI。每次通话开始时，她都会说明这一点，并告知通话会被转录。
-- 通话使用 AI 语音，并在通话过程中实时转录，以便她理解您的话。快哉不录制通话音频。
+- Odelia 是 AI。每次通话开始时，她都会说明这一点，告知通话会被转录，并在录音时说明正在录音。
+- 通话使用 AI 语音，并在通话过程中实时转录，以便她理解您的话。在加州，只有当您在“设置”的“隐私”中开启后，通话才会录音；在其他地方，录音的通话会在开始时告知（见隐私政策中的“录制”）。
 - 您的短信和每次通话的记录随您的账户保存。您可以在“设置”中查看最近的记录。
 - 通过短信或电话，Odelia 可以根据您的工作区回答问题并开始办理，但绝不会以这种方式提交、付款、发送、批准或删除任何内容。她会把应用中的批准链接用短信发给您。
 - 只有在您于“设置”中开启后，她才会主动给您发短信或打电话，并且不会在您的免打扰时段联系您。回复 STOP 可退订短信，回复 HELP 获取帮助。

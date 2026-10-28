@@ -15,8 +15,15 @@
 // worker's own covered view (live.ts, page.ts staffGuard), or no picture at all. A provider address that isn't https,
 // or that carries the API key, is never used as a view.
 //
-// Recordings: Steel records every session, so a Steel session says recorded and never gets Placetta's single-use card
-// (run.ts hands the fee to a person). Browserbase sessions are made with recording off while cards are on.
+// Recordings: Steel records every session ("Every Steel browser session automatically records all page events",
+// docs.steel.dev, Embed Session Recordings; its session options have no switch to turn that off), so a Steel session
+// says recorded and never gets Placetta's single-use card (run.ts hands the fee to a person). Browserbase sessions are
+// made with recording off while cards are on, and whenever the run asks for an unrecorded browser.
+//
+// An unrecorded browser (open's second argument): a run where a person may be handed a page they haven't agreed to
+// have recorded (privacy.ts: California, or nowhere known, without their opt-in). On Steel the run opens on Browserbase
+// with recording off when its two keys are set, else on local Chromium when this container has it, else on Steel all
+// the same, still marked recorded, so run.ts never hands that page to the person.
 //
 // The API key never leaves this module in an error: a refusal says "steel 401", not the address it went to.
 // Tests: worker/filer/test/providers.test.ts (a mock Steel and Browserbase API in front of a real Chromium over CDP).
@@ -126,11 +133,12 @@ export async function openSteel(d: Deps): Promise<Session> {
 }
 
 /** A new Browserbase session for one run. */
-export async function openBrowserbase(d: Deps): Promise<Session> {
+export async function openBrowserbase(d: Deps, o: { record?: boolean } = {}): Promise<Session> {
+  const record = o.record !== false && !cardsOn(d.env);
   const key = (d.env.BROWSERBASE_API_KEY ?? "").trim(), project = (d.env.BROWSERBASE_PROJECT_ID ?? "").trim();
   if (!key || !project) throw new Error("browserbase: BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID are both needed");
   const api = (d.env.BROWSERBASE_API_URL || BB_API).replace(/\/+$/, "");
-  const res = await d.fetch(`${api}/v1/sessions`, { method: "POST", headers: { "X-BB-API-Key": key, "Content-Type": "application/json" }, body: JSON.stringify(browserbaseBody(project, !cardsOn(d.env))), signal: AbortSignal.timeout(30_000) }).catch(() => null);
+  const res = await d.fetch(`${api}/v1/sessions`, { method: "POST", headers: { "X-BB-API-Key": key, "Content-Type": "application/json" }, body: JSON.stringify(browserbaseBody(project, record)), signal: AbortSignal.timeout(30_000) }).catch(() => null);
   if (!res?.ok) throw new Error(`browserbase ${res?.status ?? "unreachable"}`);
   const s = await res.json().catch(() => ({})) as { id?: string; connectUrl?: string };
   if (!s.id || !/^[\w-]{8,80}$/.test(s.id) || typeof s.connectUrl !== "string" || !/^wss?:\/\//.test(s.connectUrl)) throw new Error("browserbase: no session");
@@ -144,7 +152,7 @@ export async function openBrowserbase(d: Deps): Promise<Session> {
     const page = await firstPage(browser);
     const live = await d.fetch(`${api}/v1/sessions/${encodeURIComponent(id)}/debug`, { headers: { "X-BB-API-Key": key }, signal: AbortSignal.timeout(15_000) })
       .then((r) => r.json(), () => ({})).catch(() => ({})) as { debuggerFullscreenUrl?: string };
-    return { browser, page, liveUrl: viewerUrl(live.debuggerFullscreenUrl, key), recorded: !cardsOn(d.env), close: async () => { await browser.close().catch(() => undefined); await release(); } };
+    return { browser, page, liveUrl: viewerUrl(live.debuggerFullscreenUrl, key), recorded: record, close: async () => { await browser.close().catch(() => undefined); await release(); } };
   } catch (e) {
     await browser.close().catch(() => undefined); await release();
     throw new Error(`browserbase: ${e instanceof Error ? e.message.replaceAll(key, "•••").slice(0, 120) : "error"}`);
@@ -160,13 +168,20 @@ export async function openLocal(d: Deps): Promise<Session> {
   return { browser, page, liveUrl: null, recorded: false, close: () => browser.close() };
 }
 
+export type OpenOpts = { /** A person may be handed this page without having agreed to a recording. */ unrecorded?: boolean };
+
 /** The opener the worker uses for each run (run.ts Config.open). An unknown provider opens nothing. */
-export function opener(d: Deps): (host?: string) => Promise<Session> {
+export function opener(d: Deps): (host?: string, o?: OpenOpts) => Promise<Session> {
   const p: Provider | "invalid" = providerOf(d.env);
-  return async (host = "") => {
-    if (p === "steel") return openSteel(d);
-    if (p === "browserbase") return openBrowserbase(d);
-    if (p === "local") return wantsHostedBrowser(host, d.env) ? openBrowserbase(d) : openLocal(d);
+  const bb = () => !!d.env.BROWSERBASE_API_KEY?.trim() && !!d.env.BROWSERBASE_PROJECT_ID?.trim();
+  return async (host = "", o: OpenOpts = {}) => {
+    if (p === "steel") {
+      if (!o.unrecorded) return openSteel(d);
+      if (bb()) return openBrowserbase(d, { record: false });
+      try { return await openLocal(d); } catch { return openSteel(d); }
+    }
+    if (p === "browserbase") return openBrowserbase(d, o.unrecorded ? { record: false } : {});
+    if (p === "local") return wantsHostedBrowser(host, d.env) ? openBrowserbase(d, o.unrecorded ? { record: false } : {}) : openLocal(d);
     throw new Error("BROWSER_PROVIDER must be local, steel or browserbase");
   };
 }

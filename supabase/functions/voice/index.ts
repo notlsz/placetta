@@ -50,6 +50,7 @@ async function authed(req: Request, body: Record<string, unknown>) {
   const access = error ? "none" : String(role);
   if (access === "mfa_required") return { error: fail(401, "mfa_required", "Finish two-step sign-in to continue.") };
   if (access === "sso_required") return { error: fail(401, "sso_required", "Your company requires single sign-on. Sign in with SSO to continue.") };
+  if (access === "age_required") return { error: fail(403, "age_required", "Confirm you are 18 or older to continue. Sign in again to answer.") };
   if (!WORKS.has(access) && access !== "viewer" && access !== "staff") return { error: fail(403, "forbidden", "This isn't your workspace.") };
   return { user, ws, access, acts: WORKS.has(access) };
 }

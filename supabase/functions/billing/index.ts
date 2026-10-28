@@ -326,6 +326,7 @@ Deno.serve(async (req) => {
   const access = await accessFor(ws, user, jwt);
   if (access === "mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
   if (access === "sso_required") return fail(401, "sso_required", "Your company requires single sign-on. Sign in with SSO to continue.");
+  if (access === "age_required") return fail(403, "age_required", "Confirm you are 18 or older to continue. Sign in again to answer.");
   if (body.action === "prices") {
     if (!WORKS.has(access) && access !== "viewer") return fail(403, "forbidden", "This isn't your workspace.");
     try {

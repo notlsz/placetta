@@ -8,7 +8,7 @@
 // a run is open it asks for its own /healthz every few minutes, so the plan doesn't put it to sleep mid-filing.
 import { DEST } from "../../../supabase/functions/file/destinations.ts";
 import { accountOf } from "../../../supabase/functions/file/accounts.ts";
-import { defaultDeps, launcher, opener } from "./browsers.ts";
+import { defaultDeps, launcher, opener, type OpenOpts } from "./browsers.ts";
 import { checkEnv, missingLines } from "./env.ts";
 import { LiveViews } from "./live.ts";
 import { FilerLabeler, FilerModel } from "./model.ts";
@@ -39,9 +39,9 @@ export function openBrowser(host = ""): Promise<Session> {
 }
 
 /** Runs with a browser open right now: while there are any, the worker keeps its own plan awake (keepAwake). */
-export function counted(open: (host?: string) => Promise<Session>, n: { open: number }) {
-  return async (host?: string): Promise<Session> => {
-    const s = await open(host);
+export function counted(open: (host?: string, o?: OpenOpts) => Promise<Session>, n: { open: number }) {
+  return async (host?: string, o?: OpenOpts): Promise<Session> => {
+    const s = await open(host, o);
     n.open++;
     let closed = false;
     return { ...s, close: async () => { if (!closed) { closed = true; n.open--; } await s.close(); } };

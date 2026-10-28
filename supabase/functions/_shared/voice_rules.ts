@@ -40,6 +40,16 @@ export function disclosesFirst(text: string): boolean {
 export const ALL_PARTY_STATES = new Set(["CA", "FL", "IL", "MD", "MA", "MT", "NH", "PA", "WA", "CT", "NV"]);
 export const allPartyState = (state: string | null | undefined) => ALL_PARTY_STATES.has(String(state ?? "").toUpperCase());
 
+/** May a call with this person on the line be recorded? The database's answer (recording_policy_for,
+ *  20261105090600_privacy_recording_age.sql): where the business or the person is in California, or nothing says where,
+ *  only with the person's own opt-in (all-party consent, Penal Code 632); elsewhere yes, announced at the start. Anything
+ *  missing or odd: no. */
+export function callRecordingAllowed(policy: unknown): boolean {
+  if (!policy || typeof policy !== "object") return false;
+  const p = policy as { strict?: unknown; call?: unknown };
+  return p.strict === false || p.call === true;
+}
+
 /** "Please don't record this", "我不同意录音": the other side objects. Then nothing is recorded or transcribed, and only
  *  Odelia's own recap of what was said is kept. */
 const OBJECT_EN = /\b(don'?t|do not|please don'?t|no)\s+(record|recording|transcrib)|\b(stop|turn off|end)\s+(the\s+)?(recording|transcri)|\b(i|we)\s+(don'?t|do not)\s+(consent|agree)\b|\bnot\s+(ok|okay|fine)\s+(with|being)\s+(the\s+)?record|\bi object\b|\bwithout (a |the )?recording\b|\bno recording\b|\boff the record\b/i;

@@ -72,6 +72,7 @@ the worker's guards (approved values only, the review-page check, the final subm
 | --- | --- | --- |
 | `ANTHROPIC_API_KEY` | console.anthropic.com, Settings, API keys (starts `sk-ant-`). The spend limit you set in the Console is what stopped production | Claude Sonnet 5.5, first by default |
 | `GEMINI_API_KEY` with `GEMINI_PAID=1` | Google AI Studio, API keys, on a Google Cloud project with billing on. Without `GEMINI_PAID=1` it gets nothing of a customer's (Google's free tier may use prompts) | Gemini 3.8 Flash, native API with function calling |
+| `GEMINI_FREE_SYNTHETIC=1` (optional) | Lets a free-tier `GEMINI_API_KEY` (no `GEMINI_PAID`) run rehearsals: filings on a synthetic workspace (`workspaces.synthetic`, the production probe or a test, set by the service role only). Never a real customer's filing. With only a free key, the worker starts and every customer filing waits for the team | Rehearsals only |
 | `OPENROUTER_API_KEY` | openrouter.ai, Keys (starts `sk-or-`). Add credit | Claude Sonnet 5.5 through hosts other than our Anthropic account, or any model you name; always with `data_collection: deny` |
 | `MUSE_API_KEY` | dev.meta.ai, API keys (US only, public preview; Meta's docs call it `MODEL_API_KEY`) | Meta's Muse Spark 1.3, never a `-contributor` model (Meta trains on those), never files |
 
@@ -393,6 +394,7 @@ These are separate from the Gmail, Outlook and Drive integrations below, which u
 | Secret | What it is |
 | --- | --- |
 | `GEMINI_API_KEY` | Runs the agent (Gemini 3.8 Flash first). Set `GEMINI_PAID=1` once billing is on for its Google project; without it Gemini gets no customer conversations or files. |
+| `GEMINI_FREE_SYNTHETIC` | Optional, for rehearsals. `1` lets a free-tier Gemini key (no `GEMINI_PAID`) answer Odelia on a synthetic workspace only (the probe, a test). Every real customer's call still refuses it, since Google's free tier may use prompts to improve its products. |
 | `ANTHROPIC_API_KEY` | The reviewer, deep research and the safety net behind Gemini. |
 | `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION` | The voice. Free tier F0 covers 500,000 characters a month. |
 | `STRIPE_SECRET_KEY` | Stripe secret key. |
@@ -412,6 +414,7 @@ These are separate from the Gmail, Outlook and Drive integrations below, which u
 | `AGENT_DAILY_CALLS`, `TTS_DAILY_CHARS` | Optional caps per workspace a day. Defaults 400 and 20,000. |
 | `AGENT_MODEL`, `AGENT_MODEL_DEEP`, `AGENT_MODEL_FAST` | Optional. The Anthropic models by size: defaults `claude-sonnet-5-5`, `claude-opus-5-5` and `claude-haiku-4-5-20251001`. |
 | `GEMINI_API_KEY`, `GEMINI_PAID` | Optional. A Gemini key runs the cheap roles (reading uploads, the checker, texts, the weekly scan) on Gemini 2.5 Flash-Lite, Flash and Pro, but only with `GEMINI_PAID=1`: Google's free tier may use prompts to improve its products, the paid tier doesn't. Without it the key goes unused. See docs/AI_COSTS.md. |
+| `GEMINI_FREE_SYNTHETIC` | Optional. `1` lets a free Gemini key take calls for synthetic workspaces only (rehearsals). Never a customer's. |
 | `GROQ_API_KEY`, `CEREBRAS_API_KEY`, `OPENROUTER_API_KEY` | Optional backups: gpt-oss-120b, used only when Gemini and Anthropic can't answer, never with customer files. `OPENROUTER_API_KEY` also reaches any OpenRouter model named in `ODELIA_MODELS` (always with `data_collection: deny`). |
 | `MUSE_API_KEY` | Optional. Meta's Muse Spark on Meta Model API (dev.meta.ai), used when `ODELIA_MODELS` or a route names `muse:<model>`; never files, never a `-contributor` model. |
 | `ODELIA_MODELS` | Optional. One failover order for every role without its own `AGENT_ROUTE_<ROLE>`, and for the portal worker: see Odelia's models, above. |

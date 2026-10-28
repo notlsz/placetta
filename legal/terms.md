@@ -18,6 +18,8 @@ Placetta is for businesses. To use it, you must:
 - use it for a business, not for personal, family or household purposes
 - have authority to act for that business and to bind it to these terms
 
+When you sign up, or the next time you sign in, you confirm your date of birth. We check it in the app and on our servers and keep only that you confirmed you are 18 or older, and when. We don't keep the date. If you are under 18, we don't open an account for you, and any account started at sign-in is deleted with nothing kept. Placetta is not directed to children and collects nothing from anyone under 13.
+
 ## What Placetta does
 
 Placetta helps businesses get the licenses, permits and registrations they need to open and operate locations in the United States. Odelia, our AI agent:
@@ -408,6 +410,8 @@ Website: placetta.com
 - 年满 18 周岁
 - 为企业使用本服务，而非用于个人、家庭或家居用途
 - 有权代表该企业行事，并有权使该企业受本条款约束
+
+注册时，或下次登录时，您需确认您的出生日期。我们在应用中和服务器上核对，只保存您已确认年满 18 周岁这一事实及确认时间，不保存出生日期。如您未满 18 周岁，我们不会为您开设账户，登录时已开始创建的账户会被删除，不保留任何信息。快哉不面向儿童，也不收集任何未满 13 周岁者的信息。
 
 ## 快哉提供什么服务
 

@@ -24,6 +24,7 @@ import { checkValue, confirmationIn, customerData, draftProblems, factKey, facts
 import { startRecorder } from "./recorder.ts";
 import { blockedPage } from "./env.ts";
 import type { LivePage, LiveViews } from "./live.ts";
+import { screenOk, SCREEN_CONSENT_MSG, STRICT, TEACH_CONSENT_MSG, teachOk, withNotice, type RecordingPolicy } from "./privacy.ts";
 import type { Act, Bi, Filing, Login, Result, Skill, TraceStep } from "./types.ts";
 import { cardLineOk, type CardDetails, type CardOutcome, type CardPart, CARD_PARTS, guardStore, optionCandidates, pageAmount, partValue, redactDeep, redactText, scrubPage, secretsOf } from "./card.ts";
 import { ACCOUNT_MSG, accountNote, accountPage, codeControl, codeToPhone, emailControl, newPassword, phoneCodeMsg, profileValue, termsControl } from "./account.ts";
@@ -42,7 +43,7 @@ export type Config = {
   store: Store; model: Model;
   /** A new, empty browser session for a run on this host (main.ts: local Chromium, or Browserbase for the hosts that
    *  refuse a cloud server's address). */
-  open(host?: string): Promise<Session>;
+  open(host?: string, o?: { unrecorded?: boolean }): Promise<Session>;
   /** The worker's own live browser for hand-backs on a session with no hosted view (live.ts). */
   live?: LiveViews;
   portalOf(official: string): string | null;          // the server-side destination host
@@ -189,6 +190,8 @@ type Ctx = {
    *  registration was sent and the account verified, and whether it's made. */
   account?: { setup: string; email: string; since: string; registered: boolean; verified: boolean; done: boolean };
   blocked?: Blocked[];                                 // what the sandbox refused this run (an ID.me jump among them)
+  /** What this run may record of a person (privacy.ts): read before the browser opens. */
+  privacy?: RecordingPolicy;
 };
 /** The URL is on the portal or one of the other hosts its destination names. */
 const onAny = (url: string, hosts: string[]) => hosts.some((h) => onPortal(url, h));
@@ -273,7 +276,17 @@ export class Worker {
     try {
       // the run's own token for this one filing (store.ts): every database call it makes carries it
       await store.begin?.(f);
-      session = await this.c.open(host);
+      // what may be recorded of a person, and whether this is a rehearsal (privacy.ts): the strict side on any failure
+      const privacy = store.recordingPolicy ? await store.recordingPolicy(f).catch(() => ({ ...STRICT })) : { ...STRICT };
+      this.c.model.rehearsal?.(privacy.synthetic);
+      // teach mode records the person's own actions: in California (or nowhere known) only with their opt-in
+      if (teaching && !teachOk(privacy)) {
+        const res: Result = { kind: "handoff", reason: "teach_consent", task: "handoff", trace: [], message: TEACH_CONSENT_MSG };
+        await this.finish(f, res);
+        return res;
+      }
+      // a browser that records its user isn't opened where a person handed the page hasn't agreed to it
+      session = await this.c.open(host, screenOk(privacy) ? {} : { unrecorded: true });
       track.session = session;
       await assertFresh(session);
       const page = session.page;
@@ -313,7 +326,7 @@ export class Worker {
         await this.finish(f, res);
         return res;
       }
-      const ctx: Ctx = { f, host, hosts, login, page, session, trace: [], t0: Date.now(), files: new Map(), pb, dir, taught, assist: !!taught && taught.status !== "approved", blocked, cardSels: [] };
+      const ctx: Ctx = { f, host, hosts, login, page, session, trace: [], t0: Date.now(), files: new Map(), pb, dir, taught, assist: !!taught && taught.status !== "approved", blocked, cardSels: [], privacy };
       ctxRef = ctx;
       if (setup) {
         const end = await this.makeAccount(ctx, setup, route?.tenant, entry);
@@ -370,6 +383,8 @@ export class Worker {
       await store.end?.().catch(() => undefined);
       if (ctxRef) ctxRef.card = null;
       this.secrets = [];
+      // the next run on this slot is a customer's until its own policy says otherwise
+      this.c.model.rehearsal?.(false);
     }
   }
 
@@ -753,7 +768,15 @@ export class Worker {
 
   /** The page as the owner is handed it, and how to tell they're finished with it. poll: something else that finishes
    *  the step (a code the owner texted Odelia, entered by the worker). */
-  private async ownerBack(ctx: Ctx, reason: string, message: Bi, poll?: () => Promise<boolean>): Promise<Result> {
+  private async ownerBack(ctx: Ctx, reason: string, message0: Bi, poll?: () => Promise<boolean>): Promise<Result> {
+    // A recorded browser (Steel always records) never goes to a person who hasn't agreed to it where the strict rule
+    // applies (privacy.ts): the step goes to the Placetta team instead. Elsewhere the person is told before they open it.
+    const policy = ctx.privacy ?? STRICT;
+    if (ctx.session.recorded && !screenOk(policy)) {
+      ctx.f = await this.c.store.step(ctx.f, log("Didn't hand the recorded browser to a person without their OK to be recorded.", "未经同意，未将录制的浏览器交给任何人。", "privacy", reason));
+      return { kind: "handoff", reason: "recording_consent", task: "handoff", trace: ctx.trace, message: { en: `${message0.en} ${SCREEN_CONSENT_MSG.en}`, zh: `${message0.zh}${SCREEN_CONSENT_MSG.zh}` } };
+    }
+    const message = withNotice(message0, !!ctx.session.recorded);
     const until = new Date(Date.now() + this.c.holdMs).toISOString();
     // A session with no hosted view (local Chromium) gets the worker's own live browser for this hand-back (live.ts).
     const own = !ctx.session.liveUrl ? this.c.live?.open(ctx.page as unknown as Parameters<LiveViews["open"]>[0], this.c.holdMs) ?? null : null;
@@ -1133,6 +1156,11 @@ export class Worker {
     const teachUrl = ctx.session.liveUrl ?? ownView?.url ?? null;
     if (!teachUrl && !this.c.teachWithoutLive) {
       return { kind: "handoff", reason: "no_live_view", trace: [], message: { en: "The live browser isn't available right now, so Odelia can't watch this filing.", zh: "实时浏览器暂时不可用，Odelia 无法观看这次提交。" } };
+    }
+    // the person's screen in a recorded browser is a second recording: the same rule as any hand-back
+    if (ctx.session.recorded && !screenOk(ctx.privacy ?? STRICT)) {
+      this.c.live?.close(ownView?.token);
+      return { kind: "handoff", reason: "recording_consent", task: "handoff", trace: [], message: SCREEN_CONSENT_MSG };
     }
     const official = ctx.f.payload.official ?? "";
     const span = this.c.teachMs ?? this.c.holdMs, settle = this.c.teachSettleMs ?? 3000;

@@ -53,10 +53,14 @@ export function checkEnv(env: Record<string, string | undefined>): EnvCheck {
   else if (!has("FILER_DB_KEY")) warnings.push("FILER_DB_KEY is not set: the worker uses the service role key until the filer's own key exists (docs/soc2/runbooks/filer-least-privilege.md).");
   // at least one model the data rules allow (llm.ts); every other one set is a failover seat
   const models = usableSeats((k) => env[k]);
-  if (!models.length) missing.push({ key: "ANTHROPIC_API_KEY", where: WHERE.ANTHROPIC_API_KEY });
+  // a free Gemini key with GEMINI_FREE_SYNTHETIC=1 runs rehearsals (synthetic workspaces) only: enough to start, but
+  // every customer's filing waits for the team until a model that may see customer data is set
+  const rehearsalOnly = !models.length && usableSeats((k) => env[k], { synthetic: true }).length > 0;
+  if (rehearsalOnly) warnings.push("Only a free Gemini key is set (GEMINI_FREE_SYNTHETIC=1): it runs rehearsals on synthetic workspaces only. Every customer's filing waits for the team until ANTHROPIC_API_KEY (or GEMINI_PAID=1) is set.");
+  else if (!models.length) missing.push({ key: "ANTHROPIC_API_KEY", where: WHERE.ANTHROPIC_API_KEY });
   else if (models.length === 1) warnings.push(`Only one model can run filings: if it hits a spend limit or goes down, filings wait for the team. Add GEMINI_API_KEY (with GEMINI_PAID=1), OPENROUTER_API_KEY or MUSE_API_KEY as a failover.`);
   if (has("ANTHROPIC_API_KEY") && !/^sk-ant-/.test(env.ANTHROPIC_API_KEY!.trim())) warnings.push("ANTHROPIC_API_KEY doesn't start with sk-ant-: check it was pasted whole.");
-  if (has("GEMINI_API_KEY") && env.GEMINI_PAID !== "1") warnings.push("GEMINI_API_KEY is set without GEMINI_PAID=1: Google's free tier may use prompts to improve its products, so Gemini gets no filing until billing is on and GEMINI_PAID=1.");
+  if (has("GEMINI_API_KEY") && env.GEMINI_PAID !== "1" && env.GEMINI_FREE_SYNTHETIC !== "1") warnings.push("GEMINI_API_KEY is set without GEMINI_PAID=1: Google's free tier may use prompts to improve its products, so Gemini gets no filing until billing is on and GEMINI_PAID=1.");
   const bb = has("BROWSERBASE_API_KEY") && has("BROWSERBASE_PROJECT_ID");
   const p = providerOf(env);
   if (p === "invalid") missing.push({ key: "BROWSER_PROVIDER", where: WHERE.BROWSER_PROVIDER });

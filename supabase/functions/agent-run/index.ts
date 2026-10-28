@@ -107,7 +107,15 @@ const MAX_TOOLS = 52;
 /** Some vendor with a key may take a customer's conversation (../_shared/llm.ts). The old list of key names left out
  *  Cerebras, and counted a Gemini key without GEMINI_PAID, which may never see a conversation, so runs started and
  *  every call failed. */
-const configured = () => canConverse((k) => Deno.env.get(k));
+const configured = (o: { synthetic?: boolean } = {}) => canConverse((k) => Deno.env.get(k), o);
+/** Whether a workspace is synthetic (a probe or test), read once per workspace from the database. A free Gemini key may
+ *  rehearse on it with GEMINI_FREE_SYNTHETIC=1 (../_shared/llm.ts); a real customer's call never goes there. */
+const configuredFor = async (ws: string) => configured() || (Deno.env.get("GEMINI_FREE_SYNTHETIC") === "1" && configured({ synthetic: await isSynthetic(ws) }));
+const syntheticSeen = new Map<string, Promise<boolean>>();
+const isSynthetic = (ws: string) => {
+  if (!syntheticSeen.has(ws)) syntheticSeen.set(ws, synthetic(ws).catch(() => false));
+  return syntheticSeen.get(ws)!;
+};
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS" };
@@ -162,7 +170,8 @@ type Who = { uid: string | null; spent: number; reduced?: "allowance" | "throttl
  */
 async function model(ws: string, body: Record<string, unknown>, deep: boolean, location: { city?: string; region?: string } | undefined, signal: AbortSignal, role: Role = "plan", who: Who = { uid: null, spent: 0 }, onText?: (text: string) => void) {
   if (signal.aborted) throw err("cancelled", "Stopped");
-  if (!configured()) {
+  const rehearsal = Deno.env.get("GEMINI_FREE_SYNTHETIC") === "1" && await isSynthetic(ws);
+  if (!configured({ synthetic: rehearsal })) {
     console.error("not configured: add a model key in the Edge Function secrets");
     throw err("not_configured", "The agent isn't set up on the server yet. Placetta's team has been told.");
   }
@@ -201,7 +210,7 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
   const cutSecrets = withoutEnv(payload, serverSecrets());
   if (cutSecrets.cut) { console.error("model call: cut", cutSecrets.cut, "server secret value(s) from the request"); Object.assign(payload, cutSecrets.body); }
   // onText: the answer streams (the main loop's rounds), so the run's draft shows the words as they're written
-  const out = await callModel((k) => Deno.env.get(k), { payload, role, research, beta: research ? FETCH_BETA : null }, anthropicModel,
+  const out = await callModel((k) => Deno.env.get(k), { payload, role, research, beta: research ? FETCH_BETA : null, synthetic: rehearsal }, anthropicModel,
     research ? { search, fetch: fetchTool, pageTools } : null, fetch, onText);
   if (!out.ok) {
     console.error("models", out.model, out.status, out.text.slice(0, 300));
@@ -1217,7 +1226,7 @@ export async function handle(req: Request): Promise<Response> {
     const may = await mayUseAgent(admin, ws, uid);
     if (may === "not_member") return fail(403, "forbidden", zh ? "您不是这个快哉工作区的成员。负责人可以在快哉中邀请您。" : "You're not a member of this Placetta workspace. The owner can invite you in Placetta.");
     if (may === "no_plan") return fail(402, "payment_required", zh ? "Odelia 需要先开通入门套餐。请在快哉中选择套餐。" : "Odelia starts with the entry plan. Choose a plan in Placetta.");
-    if (!configured()) return fail(503, "not_configured", zh ? "此账户的 Odelia 尚未开通，快哉团队已收到通知。" : "Odelia isn't switched on for this account yet. Placetta's team has been told.");
+    if (!(await configuredFor(ws))) return fail(503, "not_configured", zh ? "此账户的 Odelia 尚未开通，快哉团队已收到通知。" : "Odelia isn't switched on for this account yet. Placetta's team has been told.");
     const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
     if (!prompt) return fail(400, "bad_request", "prompt is required.");
     // a repeat joins the run still going, before the gate and the capacity check (see "start")
@@ -1262,7 +1271,7 @@ export async function handle(req: Request): Promise<Response> {
     const may = await mayUseAgent(admin, ws, uid);
     if (may === "not_member") return fail(403, "forbidden", "This isn't their workspace.");
     if (may === "no_plan") return fail(402, "payment_required", "Get the entry plan to start the agent.");
-    if (!configured()) return (console.error("not configured: add a model key in the Edge Function secrets"), fail(503, "not_configured", "The agent isn't set up on the server yet. Placetta's team has been told."));
+    if (!(await configuredFor(ws))) return (console.error("not configured: add a model key in the Edge Function secrets"), fail(503, "not_configured", "The agent isn't set up on the server yet. Placetta's team has been told."));
     const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
     if (!prompt) return fail(400, "bad_request", "prompt is required.");
     const history = (Array.isArray(body.history) ? body.history : []).filter((t: { role?: string; content?: unknown }) => (t.role === "user" || t.role === "assistant") && typeof t.content === "string").slice(-8)
@@ -1303,6 +1312,7 @@ export async function handle(req: Request): Promise<Response> {
   if (accessError) return fail(500, "upstream_error", "Couldn't check access.");
   if (access === "mfa_required" || access === "staff_mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
   if (access === "sso_required") return fail(401, "sso_required", "Your company requires single sign-on. Sign in with SSO to continue.");
+  if (access === "age_required") return fail(403, "age_required", "Confirm you are 18 or older to continue. Sign in again to answer.");
   if (access === "none") return fail(403, "forbidden", "This isn't your workspace.");
   // a task changes the workspace: viewers read it but don't start one
   if (access !== "staff" && !WORKS.has(String(access))) return fail(403, "forbidden", "You can view this workspace but not change it. Ask an admin for member access.");
@@ -1310,7 +1320,7 @@ export async function handle(req: Request): Promise<Response> {
     const { data: plan } = await admin.rpc("plan_of", { ws });
     if (plan === "none") return fail(402, "payment_required", "Get the entry plan to start the agent.");
   }
-  if (!configured()) return (console.error("not configured: add a model key in the Edge Function secrets"), fail(503, "not_configured", "The agent isn't set up on the server yet. Placetta's team has been told."));
+  if (!(await configuredFor(ws))) return (console.error("not configured: add a model key in the Edge Function secrets"), fail(503, "not_configured", "The agent isn't set up on the server yet. Placetta's team has been told."));
   const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 4000) : "";
   if (!prompt) return fail(400, "bad_request", "prompt is required.");
   // "/apply" and "/go" carry out an owner's approval (held changes, an approved plan: src/held.ts): only an owner starts them

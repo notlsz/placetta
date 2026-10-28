@@ -139,6 +139,21 @@ An owner or admin can make a token in Settings that lets an AI assistant, such a
 
 If you save logins for agency websites, they are encrypted in a vault. Placetta's filing software, and our filing team when it takes over, open them only to do what an owner approved, such as filing or booking an inspection, and every opening is recorded in your audit trail. The software types the login itself; the AI model never sees the password.
 
+## Recording
+
+Some parts of Placetta can record what a person types or sees, or what they say. We list each one, and when it happens.
+
+- The live browser. When Odelia hands you a step on an agency's website (a code, a fee, a box only you can tick), you finish it in a live browser. Some of our browser providers record their sessions, including what is typed there.
+- Teach mode. When you show Odelia how to file on an agency's website, she writes down the steps you take there (never your passwords or secret numbers) to learn them.
+- Calls. A call with Odelia can be recorded and transcribed, and the recording kept with your account.
+
+The rule we follow:
+
+- In California, and wherever we can't tell where you or the business are, none of these records you unless you turned it on yourself in Settings, Privacy. We keep a record of that choice: what it covered, the exact words you agreed to, their version, the language and the time. You can turn it off there at any time, and it stops at once. Until you turn it on, a step that needs you goes to a browser that doesn't record, or to our team, and calls aren't recorded.
+- Elsewhere, we tell you before a recording starts: the step says the browser is recorded before you open it, teach mode says what it writes down, and Odelia says at the start of a call that it is recorded. You can ask her to stop.
+- To work out where you are, we use the business's address and states in your workspace and the state your connection comes from (we keep only the country and state, never a precise location).
+- Placetta's app does not record your typing or your screen, and we don't use session replay tools.
+
 ## Texts and calls
 
 If you link a phone to text and call Odelia, we collect:
@@ -149,7 +164,7 @@ If you link a phone to text and call Odelia, we collect:
 - a record of each call: whether you or Odelia called, when, and how long it lasted
 - what you ask Odelia to do by text or on a call, which starts work in your workspace like a request in the app, and her answers
 
-Calls use an AI voice and are transcribed as they happen so Odelia can understand you. Telnyx, and the speech services it uses, process the call audio and transcription to run the call. Placetta does not record call audio.
+Calls use an AI voice and are transcribed as they happen so Odelia can understand you. Telnyx, and the speech services it uses, process the call audio and transcription to run the call. Whether a call is also recorded is set out in "Recording" below: in California, only if you turned on call recording in Settings, Privacy; elsewhere, Odelia says at the start of each recorded call that it is recorded, and stops if you ask.
 
 We use this information only to answer you, do what you ask, send the update texts and urgent calls you turned on, check that a caller is you, and keep a record of your consent.
 
@@ -263,7 +278,7 @@ If you are in the European Economic Area, the United Kingdom or Switzerland, or 
 
 ## Age
 
-Placetta is only for people 18 or older who act for a business.
+Placetta is only for people 18 or older who act for a business. When you sign up, or the next time you sign in, you confirm your date of birth. We check it in the app and on our servers, then discard it: we keep only that you confirmed you are 18 or older, and when. If the date shows you are under 18, we don't open an account and delete any account started at sign-in, keeping nothing about you. If you are under 13, the date doesn't leave your device. Placetta is not directed to children and does not knowingly collect personal information from anyone under 13 (or under 18). If you believe a minor has given us information, email support@placetta.com and we will delete it.
 
 ## Changes to this policy
 
@@ -418,6 +433,21 @@ Email: support@placetta.com
 
 如您保存了机构网站的登录信息，这些信息会加密存放在保险库中。快哉的申报软件，以及接手处理时的申报团队，只会在执行所有者已批准的事项（例如申报或预约检查）时打开这些信息，每次打开都会记入您的审计记录。登录信息由软件自行输入，AI 模型看不到密码。
 
+## 录制
+
+快哉的部分功能可能会录制一个人的输入、看到的画面或说的话。我们逐一列出，并说明何时会发生。
+
+- 实时浏览器。当 Odelia 把机构网站上的某一步交给您（验证码、费用、只能由您勾选的选项）时，您会在实时浏览器中完成。我们的部分浏览器服务商会录制其会话，包括在其中的输入。
+- 教学模式。当您教 Odelia 如何在机构网站上申报时，她会记下您在其中的操作步骤（从不记录您的密码或保密号码），以便学会。
+- 通话。与 Odelia 的通话可能会被录音和转录，录音随您的账户保存。
+
+我们遵守的规则：
+
+- 在加州，以及我们无法判断您或企业所在地的情况下，除非您本人在“设置”的“隐私”中开启，否则以上任何一项都不会录制您。我们会保存这一选择的记录：涵盖的内容、您同意的原文、其版本、语言和时间。您可以随时在该处关闭，关闭立即生效。在您开启之前，需要您完成的步骤会交给不录制的浏览器或我们的团队，通话也不会录音。
+- 在其他地方，我们会在录制开始前告知您：该步骤会在您打开前说明浏览器正在录制，教学模式会说明记录哪些内容，Odelia 会在通话开始时说明正在录音。您可以要求她停止。
+- 为判断您的所在地，我们使用您工作区中的企业地址和所在州，以及您的网络连接来自哪个州（我们只保存国家和州，从不保存精确位置）。
+- 快哉的应用不会录制您的输入或屏幕，我们也不使用会话回放工具。
+
 ## 短信与电话
 
 如您关联手机，用来给 Odelia 发短信和打电话，我们会收集：
@@ -428,7 +458,7 @@ Email: support@placetta.com
 - 每次通话的记录：是您来电还是 Odelia 来电、通话时间和时长
 - 您通过短信或电话请 Odelia 办理的事项（这会像在应用中提出请求一样，在您的工作区中开始办理），以及她的回复
 
-通话使用 AI 语音，并在通话过程中实时转录，以便 Odelia 理解您的话。Telnyx 及其使用的语音服务会处理通话音频和转录内容，以完成通话。快哉不录制通话音频。
+通话使用 AI 语音，并在通话过程中实时转录，以便 Odelia 理解您的话。Telnyx 及其使用的语音服务会处理通话音频和转录内容，以完成通话。通话是否同时录音，见下文“录制”：在加州，只有当您在“设置”的“隐私”中开启通话录音时才会录音；在其他地方，每次录音的通话开始时 Odelia 都会说明正在录音，您要求停止即会停止。
 
 我们使用这些信息，仅为回复您、办理您要求的事项、发送您开启的更新短信和紧急来电、核实来电者是您本人，以及保存您的同意记录。
 
@@ -542,7 +572,7 @@ Email: support@placetta.com
 
 ## 年龄要求
 
-快哉仅供年满 18 周岁、代表企业行事的人使用。
+快哉仅供年满 18 周岁、代表企业行事的人使用。注册时，或下次登录时，您需确认您的出生日期。我们在应用中和服务器上核对后即丢弃：只保存您已确认年满 18 周岁这一事实及确认时间。如日期显示您未满 18 周岁，我们不会开设账户，并删除登录时已开始创建的账户，不保留任何关于您的信息。如您未满 13 周岁，该日期不会离开您的设备。快哉不面向儿童，也不会在知情的情况下收集任何未满 13 周岁（或未满 18 周岁）者的个人信息。如您认为有未成年人向我们提供了信息，请发邮件至 support@placetta.com，我们会将其删除。
 
 ## 政策变更
 

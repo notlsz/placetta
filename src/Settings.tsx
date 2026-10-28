@@ -18,6 +18,7 @@ import { hintOf, MAILBOX_PROVIDERS, PRESETS, providerFor, providerName, type Mai
 import type { HqLink } from "./hq";
 import { TwoStepSetup } from "./cloud/TwoStep";
 import { phoneConsent } from "./consent";
+import { RECORDING_KINDS, type RecordingKind } from "./recordingConsent";
 import { replayTour } from "./Walkthrough";
 import { AuditTrail, ContextPage } from "./pages";
 import { PartnerSharing } from "./Partner";
@@ -1042,6 +1043,40 @@ function Toggle({ on, set, label, disabled }: { on: boolean; set: (v: boolean) =
   return <label className="switch" onClick={e => e.stopPropagation()}><input type="checkbox" checked={on} disabled={disabled} onChange={e => set(e.target.checked)} aria-label={label} /><i /></label>;
 }
 
+/** Recording a person (src/recordingConsent.ts): in California, or where nothing says where, nothing records a person's
+ *  browser, teach-mode actions or calls until they turn it on here. Each switch shows the exact words agreed to; the
+ *  server stores its own copy with the time. Off takes effect at once. */
+function RecordingGroup() {
+  const { lang, cloud } = useApp();
+  const zh = lang === "zh";
+  const wsId = cloud?.wsId ?? "";
+  const [pol, setPol] = useState<api.RecordingPolicy | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [err, setErr] = useState("");
+  const load = useCallback(() => { if (wsId) void api.recordingPolicy(wsId).then(setPol).catch(() => setPol(null)); }, [wsId]);
+  useEffect(load, [load]);
+  if (!cloud || !pol) return null;
+  const set = (kind: RecordingKind) => async (on: boolean) => {
+    setBusy(kind); setErr("");
+    try { await (on ? api.giveRecordingConsent(wsId, kind, zh ? "zh" : "en") : api.withdrawRecordingConsent(wsId, kind)); load(); }
+    catch (e) { setErr((e as api.ApiError).message); }
+    finally { setBusy(null); }
+  };
+  const when = (at: string) => new Date(at).toLocaleString(zh ? "zh-CN" : "en-US", { dateStyle: "medium", timeStyle: "short" });
+  return (
+    <Group id="recording" title={B("Recording", "录制")} note={pol.strict
+      ? B("You or this business are in California, or we can't tell where. Nothing below records you until you turn it on. Off takes effect at once.", "您或该企业位于加州，或我们无法判断所在地。在您开启之前，以下各项都不会录制您。关闭立即生效。")
+      : B("Outside California these may record you, and you're told before each one starts. Turning one on here also covers you if you're in California later.", "在加州以外，这些功能可能会录制您，每次开始前都会告知您。在此开启后，日后您在加州时也同样适用。")}
+      rows={RECORDING_KINDS.map(k => {
+        const at = pol.consents[k.kind];
+        return { label: k.name, sub: `${k.text[lang]}${at ? (zh ? `（已于 ${when(at)} 同意）` : ` (Agreed ${when(at)}.)`) : ""}`,
+          right: <Toggle on={!!at} set={v => void set(k.kind)(v)} label={k.name[lang]} disabled={busy === k.kind} /> };
+      })}>
+      {err && <p className="gate-err" role="alert">{err}</p>}
+    </Group>
+  );
+}
+
 function MemoryGroup() {
   const { lang, memory, setMemory, say } = useApp();
   const zh = lang === "zh";
@@ -1571,11 +1606,11 @@ const SETTINGS_CATS: { id: string; label: Bi; items: string[] }[] = [
   { id: "connections", label: B("Connections", "连接"), items: ["integrations", "assistants", "logins"] },
   { id: "billing", label: B("Billing", "账单"), items: ["billing", "contract", "modules", "filingcap", "spending"] },
   { id: "security", label: B("Security", "安全"), items: ["security", "sso", "scim", "pin"] },
-  { id: "privacy", label: B("Privacy and data", "隐私与数据"), items: ["data"] },
+  { id: "privacy", label: B("Privacy and data", "隐私与数据"), items: ["recording", "data"] },
   { id: "activity", label: B("Activity", "活动记录"), items: ["activity"] },
   { id: "help", label: B("Help and legal", "帮助与法律"), items: ["help", "legal"] },
 ];
-const CLOUD_ONLY = new Set(["team", "hq", "partner", "security", "sso", "scim", "pin", "phone", "contract", "filingcap", "assistants"]);
+const CLOUD_ONLY = new Set(["recording", "team", "hq", "partner", "security", "sso", "scim", "pin", "phone", "contract", "filingcap", "assistants"]);
 const catOf = (k: string) => SETTINGS_CATS.find(c => c.id === k || c.items.includes(k))?.id;
 const readCat = () => { try { return catOf(localStorage.getItem("placetta-settings-cat") ?? ""); } catch { return undefined; } };
 let settingsTarget: string | null = null;
@@ -1748,6 +1783,8 @@ export function Settings() {
           </Group>
 
           {show("language") && <LanguageGroup />}
+
+          {show("recording") && <RecordingGroup />}
 
           <Group id="data" hidden={!show("data")} title={B("Data controls", "数据管理")} note={B("Your data is yours. Placetta doesn't sell it or use it to train AI models.", "您的数据属于您。快哉不会出售数据，也不会用它训练 AI 模型。")} rows={[
             { label: B("Download your workspace data", "下载工作区数据"), sub: b(B("Applications, facts, deadlines, filings and the audit trail, as JSON", "申请、资料、截止日期、申报和审计记录（JSON）")), right: <Btn guard onClick={() => (cloud ? cloud.exportData() : exportAudit())}>{lang === "zh" ? "下载" : "Download"}</Btn> },

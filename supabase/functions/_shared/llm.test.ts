@@ -1,5 +1,5 @@
 // Run: deno test supabase/functions/_shared/llm.test.ts
-import { callModel, candidates, DEFAULT_ROUTES, fromOpenAI, ROLES, routeFor, toOpenAI, vendorOk, type Role } from "./llm.ts";
+import { callModel, canConverse, candidates, DEFAULT_ROUTES, fromOpenAI, ROLES, routeFor, toOpenAI, vendorOk, type Role } from "./llm.ts";
 let ok = 0, bad = 0; const check = (n: string, c: boolean) => { c ? ok++ : bad++; console.log((c ? "PASS " : "FAIL ") + n); };
 const calls: string[] = [];
 // the vendor each URL belongs to (Gemini's OpenAI-compatible endpoint is on googleapis.com)
@@ -147,5 +147,22 @@ if (bad) throw new Error(`${bad} failed`);
   check("Muse on api.meta.ai, never the contributor model", seen.map((s) => `${s.host}:${s.model}`).join(",") === "api.anthropic.com:claude-sonnet-5-5,api.meta.ai:muse-spark-1.3");
   check("Muse never gets files", !vendorOk(only({}), "muse", { hasFiles: true, role: "plan" }) && vendorOk(only({}), "muse", { hasFiles: false, role: "plan" }));
   check("Muse off when ZDR is required and it isn't listed", !vendorOk(only({ AI_ZDR_REQUIRED: "1", AI_ZDR_PROVIDERS: "anthropic" }), "muse", { hasFiles: false, role: "plan" }));
+  // a free Gemini key for rehearsals: GEMINI_FREE_SYNTHETIC=1 and a synthetic workspace, both; never a customer
+  const freeOn = only({ GEMINI_API_KEY: "g", GEMINI_FREE_SYNTHETIC: "1" });
+  check("free Gemini, switch on, a customer's call: refused", !vendorOk(freeOn, "gemini", { hasFiles: false, role: "plan" }) && !vendorOk(freeOn, "gemini", { hasFiles: true, role: "extract", synthetic: false }));
+  check("free Gemini, switch off, a synthetic call: refused", !vendorOk(only({ GEMINI_API_KEY: "g" }), "gemini", { hasFiles: false, role: "plan", synthetic: true }));
+  check("free Gemini, switch on, a synthetic call: allowed", vendorOk(freeOn, "gemini", { hasFiles: false, role: "plan", synthetic: true }));
+  check("canConverse: a free key alone can't run Odelia for a customer, can for a rehearsal",
+    !canConverse(freeOn) && canConverse(freeOn, { synthetic: true }) && !canConverse(only({ GEMINI_API_KEY: "g" }), { synthetic: true }));
+  check("candidates: a synthetic call routes to the free key, a customer's has none",
+    candidates(freeOn, { payload, role: "plan", research: false, beta: null, synthetic: true }, "x").some(([p]) => p === "gemini")
+    && candidates(freeOn, { payload, role: "plan", research: false, beta: null }, "x").every(([p]) => p !== "gemini"));
+  {
+    calls.length = 0;
+    const r = await callModel(freeOn, { payload, role: "plan", research: false, beta: null }, "x", null, mk({ gemini: () => oai({ role: "assistant", content: "from gemini" }) }));
+    check("callModel: a customer's call never reaches Google on a free key", !r.ok && !calls.some((u) => u.includes("googleapis")));
+    const s = await callModel(freeOn, { payload, role: "plan", research: false, beta: null, synthetic: true }, "x", null, mk({ gemini: () => oai({ role: "assistant", content: "from gemini" }) }));
+    check("callModel: a rehearsal does", s.ok && s.model.startsWith("gemini:"));
+  }
   if (bad) throw new Error(`${bad} failed`);
 }
