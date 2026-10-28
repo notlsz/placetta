@@ -1,5 +1,5 @@
 # Build from the repo root: docker build -f worker/filer/Dockerfile .
-FROM mcr.microsoft.com/playwright:v1.56.0-noble
+FROM mcr.microsoft.com/playwright:v1.64.1-noble
 WORKDIR /app
 # Every file outside worker/filer the worker's code imports (test/docker.test.ts checks this list against the imports)
 COPY src/renewal.ts src/renewal.ts
