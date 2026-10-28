@@ -44,7 +44,7 @@ import { asAgent,
   handBackDue, handoffPacket, hasLoginFor, holds, isForeign, type LogEntry, mailOutcome, mailTo, OWNER_REF, pick, type Refusal, refusalOf, sentByYou, signedCopy,
   TEACH_REFUSED, teachRefusal, teamApproved, whyYours, YOURS_REF, selfFileScope, workerOn, workerState,
   type Beat, rerouteLead, wakeable, wakeConfig, wakeMs, wakePlan, waitsOnWorker, WORKER_ASLEEP, checkCents, lobCheckBody,
-  canEmailSignedFor, kitAddress, paperFile, signKit, wetAsk, wetPath, type WetPath, captchaPlan,
+  canEmailSignedFor, kitAddress, paperFile, signKit, wetAsk, wetPath, type WetPath, captchaPlan, pastRejectionProblems, type PastRejection,
 } from "./logic.ts";
 import { CAPTCHA_ASK_REF, isChoice, type CaptchaChoice } from "./captcha.ts";
 import { agencyLetter, faxEvent, kitLetter, kitSendAt, lobAddress, lobEvent, lobSigned, type MailEvent } from "./paper.ts";
@@ -618,6 +618,14 @@ async function refreshMail(f: Filing) {
 
 // ------------------------------------------------------------------ the actions
 
+/** Why the agency sent this form back before, most often seen first. A failed read checks nothing extra (never blocks). */
+async function pastRejections(official: string | undefined): Promise<PastRejection[]> {
+  if (!official) return [];
+  const { data, error } = await admin.rpc("rejection_reasons_for", { p_form: official });
+  if (error || !Array.isArray(data)) return [];
+  return (data as PastRejection[]).filter((r) => typeof r?.reason === "string");
+}
+
 /** An earlier filing of the same form with the same answers in the last 30 days, if any. */
 async function duplicateOf(f: Filing): Promise<{ id: string; approved_at: string } | null> {
   const { data, error } = await admin.rpc("filing_duplicate_of", { p_id: f.id, p_days: 30 });
@@ -673,7 +681,13 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
   const channel = plan.channel;
   // FILER_AGENCIES=portal switches on agency websites only: any other route goes the way it would without self-filing
   if (!synth && scope === "portal" && channel !== "portal") return await toYou(f, bi("Placetta doesn't send this form to the agency by itself yet.", "快哉暂时不会自动向机构提交这份表格。"));
-  const problems = check(f, d, { docPaths: await docPaths(f) }, channel);
+  // what the agency said when it sent this form back before (form_rejection_reasons): checked before it goes again
+  const past = await pastRejections(f.payload.official);
+  const problems = [...check(f, d, { docPaths: await docPaths(f) }, channel), ...pastRejectionProblems(f, past)];
+  if (past.length && !problems.length) {
+    f = await step(f, log(`Checked against ${past.length === 1 ? "the reason" : `the ${past.length} reasons`} the agency gave for sending this form back before`,
+      `已对照机构此前退回这份表格的 ${past.length} 条原因核对`, "rejections_checked", String(past.length)), {}, false);
+  }
   if (problems.length) {
     return await needsYou(f, problems.map((p) => p.en).join(". ").slice(0, 900), problems.map((p) => p.zh).join("；").slice(0, 900), null, "needs_you");
   }

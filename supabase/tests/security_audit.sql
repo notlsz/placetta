@@ -201,11 +201,11 @@ begin
   if e is not null then raise notice 'no search_path: %', e; end if;
 
   -- anon may run only the website's own functions (the public incident log, guide page counts, a partner's name for a
-  -- referral link, whether an email's domain needs SSO, a text-to-start link, and a store's shared status page with its
+  -- referral link, whether an email's domain needs SSO, a text-to-start link, the stats page's gated numbers, and a store's shared status page with its
   -- document request, both by a token only the owner was shown: supabase/tests/trust_pages.sql)
   select string_agg(p.proname, ', ') into e from pg_proc p join pg_namespace s on s.oid = p.pronamespace
    where s.nspname = 'public' and p.prosecdef and has_function_privilege('anon', p.oid, 'execute')
-     and p.proname not in ('incident_log_public', 'page_hit', 'partner_lookup', 'sso_for_email', 'text_start_peek', 'trust_page', 'trust_request');
+     and p.proname not in ('incident_log_public', 'page_hit', 'partner_lookup', 'sso_for_email', 'text_start_peek', 'trust_page', 'trust_request', 'public_outcomes');
   res := res || jsonb_build_object('anon runs only the website''s functions', e is null);
   if e is not null then raise notice 'anon can run: %', e; end if;
 

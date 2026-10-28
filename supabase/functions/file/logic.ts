@@ -206,6 +206,41 @@ export type Problem = { en: string; zh: string; kind: "missing" | "secret" | "si
     authority to act, an agent or authorization letter, a disclosure the agency names for that). */
 const AUTHORIZATION = /authori[sz]|power of attorney|\bpoa\b|authority to act|agent letter|disclosure|授权|委托/i;
 
+/** A reason an agency gave for sending this form back before (form_rejection_reasons, read by rejection_reasons_for). */
+export type PastRejection = { reason: string; seen: number };
+const PLACEHOLDER = /^(tbd|tba|n\/?a|none|unknown|todo|x{2,}|\?+|-+|待定|未知|无)$/i;
+
+/** Checks the next filing of a form against why the agency sent earlier ones back: a field the agency named in a
+    reason that holds a placeholder (TBD, N/A, unknown), a signature it asked for that isn't there, or a document it
+    named that isn't with it yet. Only what can be read for certain stops it. Empty fields and missing documents are
+    check()'s, so nothing is said twice. */
+export function pastRejectionProblems(f: Filing, reasons: PastRejection[]): Problem[] {
+  const out: Problem[] = [];
+  const p = f.payload, seen = new Set<string>();
+  const said = (r: string) => `The agency sent this form back before because: "${r.slice(0, 160)}".`;
+  const saidZh = (r: string) => `机构曾因以下原因退回这份表格："${r.slice(0, 160)}"。`;
+  for (const { reason } of reasons) {
+    const r = reason.toLowerCase();
+    for (const x of p.fields ?? []) {
+      const label = x.label.en.trim().toLowerCase(), v = (x.value ?? "").trim();
+      if (label.length < 4 || !r.includes(label) || !v || !PLACEHOLDER.test(v) || seen.has("f:" + label)) continue;
+      seen.add("f:" + label);
+      out.push({ kind: "missing", en: `${said(reason)} ${x.label.en} still says "${v}".`, zh: `${saidZh(reason)}${x.label.zh}仍为"${v}"。` });
+    }
+    if (/\bsignature|\bsign(ed)?\b|签名|签字/.test(r) && !p.signature && !seen.has("sig")) {
+      seen.add("sig");
+      out.push({ kind: "signature", en: `${said(reason)} It isn't signed yet.`, zh: `${saidZh(reason)}尚未签名。` });
+    }
+    for (const c of p.checklist ?? []) {
+      const label = c.label.en.trim().toLowerCase();
+      if (label.length < 4 || !r.includes(label) || c.state === "done" || c.state === "missing" || seen.has("c:" + label)) continue;
+      seen.add("c:" + label);
+      out.push({ kind: "file", en: `${said(reason)} ${c.label.en} isn't with it yet.`, zh: `${saidZh(reason)}${c.label.zh}尚未附上。` });
+    }
+  }
+  return out;
+}
+
 /** Everything that must be true before anything is sent. Empty when the filing can go. route is where pick() is
     sending it: the filled form and signature are checked only when Placetta sends paper (email, fax or mail). */
 export function check(f: Filing, d: Dest | undefined, ctx: { docPaths: Set<string> }, route?: Route): Problem[] {

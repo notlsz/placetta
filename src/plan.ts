@@ -9,6 +9,9 @@ export type StoreRow = { name: string; address: string; opening?: string };
 
 /** What Placetta has seen on real filings of a form (from filing_stats on the server): only shown with 3 or more. */
 export type FormStat = { form: string; n: number; median_days: number; p90_days: number; rejected_pct: number };
+/** An agency's observed time on Placetta's approved filings, from submission to approval (agency_times on the server):
+ *  only agencies with 5 or more, keyed by the agency's English name in lower case. */
+export type AgencyStat = { agency: string; n: number; median_days: number; p90_days: number };
 
 export type PlannedForm = {
   form: OfficialForm;
