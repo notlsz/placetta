@@ -216,3 +216,46 @@ export function confirmPattern(pageText: string, confirmation: string): string |
   const group = shape.split("").map((c) => (c === "A" ? "[A-Za-z]" : c === "9" ? "\\d" : esc(c))).join("");
   return `${esc(before)}\\s*(${group})`;
 }
+
+// ---------------------------------------------------------------- optional-information questions
+// SF's New Business Registration has a required "Would you like to receive information about City-offered additional
+// opportunities and programs?" with Yes and No. No shares the least and commits to nothing, so Odelia may answer it
+// without the owner. Only a question that asks whether the business wants to RECEIVE something (information, news,
+// newsletters, marketing, surveys, promotional contact) passes, and only when nothing in it touches what is filed. The
+// model has to agree as well (run.ts answerNo, model.ts optOut); anything unsure goes to the owner.
+
+/** "Would you like to receive / Do you want to get / Do you wish to be sent / Sign up for / Subscribe to ..." */
+const OPT_ASK = /^(would you like|do you (want|wish|like)|would you be interested|are you interested|may we|can we|opt in|sign up|subscribe)\b/;
+const OPT_RECEIVE = /\b(receive|get|be sent|be contacted|hear (more )?(about|from)|be (added|subscribed) to|join (our|the) (mailing|email) list|subscribe to|sign up for|send you|contact you|email you)\b/;
+const OPT_WHAT = /\b(information|info|updates?|news|newsletters?|e-?mails?|marketing|promotional|promotions?|offers?|surveys?|programs?|opportunities|announcements?|communications?|mailing list|events?|resources?|tips)\b/;
+/** Anything that can change the filing's legal content, or that the law may require: never auto-answered. */
+const OPT_DENY = /\b(certif\w*|attest\w*|agree\w*|consent\w*|accept\w*|terms?|conditions|acknowledg\w*|declar\w*|swear|affirm\w*|perjury|penalt\w*|eligib\w*|qualif\w*|tax\w*|zon\w*|sell\w*|sale\w*|serv(e|es|ing)|alcohol|liquor|beer|wine|tobacco|cannabis|firearms?|licen[cs]\w*|permits?|registration|register|share|sharing|disclos\w*|release|authoriz\w*|required|law|legal|employ\w*|owners?|exempt\w*|waive\w*|signature|sign|vote|voter|data|records?|personal)\b/;
+const plain = (s: string) => norm(s).replace(/[“”"*]/g, "").trim();
+
+/** May this required question be answered No without the owner? The code's half of the check: a strict allowlist of
+ *  phrasings, and nothing on the deny list. */
+export function optOutQuestion(question: string): boolean {
+  const q = plain(question);
+  if (!q || q.length > 200 || !q.endsWith("?") || (q.match(/\?/g) ?? []).length > 1) return false;
+  if (OPT_DENY.test(q.replace(/^sign up\b/, ""))) return false;
+  return OPT_ASK.test(q) && OPT_RECEIVE.test(q) && OPT_WHAT.test(q);
+}
+
+/** The question is on this page as the model quoted it (it can't name one the agency didn't ask). */
+export const onPage = (question: string, s: PageState) => {
+  const q = plain(question);
+  return !!q && [s.text, ...s.headings, ...s.controls.map((c) => c.label)].some((t) => plain(t).includes(q));
+};
+
+/** The control's No: a radio labelled just "No", or a select with an option "No". Null when there's none. */
+export function noChoice(c: Control): { kind: "radio" } | { kind: "select"; option: string } | null {
+  const isNo = (t: string) => /^no\.?$/i.test(t.trim());
+  if (c.tag === "select") {
+    const o = (c.options ?? []).find(isNo);
+    return o ? { kind: "select", option: o } : null;
+  }
+  if (c.type === "radio" && (isNo(c.label) || isNo(c.value))) return { kind: "radio" };
+  return null;
+}
+
+export const OPT_OUT_LOG = { en: "Answered No to an optional-information question", zh: "已对一个可选信息问题回答“否”" };

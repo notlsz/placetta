@@ -28,7 +28,7 @@ export type Login = { username: string; password: string; host: string };
  *  its value never recorded. */
 export type Act =
   | { action: "fill"; selector: string; field?: string; fact?: string; login?: "username" | "password"; person?: string; ask?: boolean; card?: CardPart }
-  | { action: "select"; selector: string; field?: string; fact?: string; option?: string; ask?: boolean }
+  | { action: "select"; selector: string; field?: string; fact?: string; option?: string; ask?: boolean; /** No to an optional-information question (run.ts answerNo checked it first) */ optOut?: boolean }
   | { action: "check"; selector: string; on: boolean }
   | { action: "click"; selector: string; submit?: boolean }
   | { action: "upload"; selector: string; attachment: string };

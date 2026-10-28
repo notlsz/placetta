@@ -13,7 +13,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Browser, Page } from "playwright-core";
-import { confirmPattern, einFillOk, fieldFor, inertScriptLink, secretControl, isFinal, mustStop, paymentControl, onPortal, optionFor, reviewMismatch, staffMay, stopBesidesCard, stopLinesFilled, type PageState } from "./guards.ts";
+import { confirmPattern, einFillOk, fieldFor, inertScriptLink, secretControl, isFinal, mustStop, noChoice, onPage, OPT_OUT_LOG, optOutQuestion, paymentControl, onPortal, optionFor, reviewMismatch, staffMay, stopBesidesCard, stopLinesFilled, type PageState } from "./guards.ts";
 import { type Model, TOOLS } from "./model.ts";
 import { actionKey, answerTier, guardRefused, pageTier, summarize, tierOf, type Why } from "./cascade.ts";
 import type { CallCost } from "./llm.ts";
@@ -625,6 +625,22 @@ export class Worker {
 
   // ---------------------------------------------------------------- one action, with every guard
 
+  /** No to a required question that only asks whether the business wants to receive information or contact: the
+   *  question must be on the page, pass the phrasing allowlist (guards.ts optOutQuestion), have a No, and the strong
+   *  model must agree on its own read. Anything short of all four is a refusal, and the model then calls need_person. */
+  private async answerNo(ctx: Ctx, st: PageState, selector: string, question: string): Promise<Exec> {
+    const c = st.controls.find((k) => k.selector === selector);
+    const no = c ? noChoice(c) : null;
+    const refused: Exec = { ok: false, error: "Refused: Odelia may answer No by herself only to a question about receiving optional information. Call need_person." };
+    if (!no || !optOutQuestion(question) || !onPage(question, st)) return refused;
+    if (!this.c.model.optOut || !(await this.c.model.optOut(question))) return refused;
+    if (no.kind === "select") return await this.exec(ctx, { action: "select", selector, option: no.option, optOut: true });
+    if (c?.checked) return { ok: true, same: question.slice(0, 80) };
+    const r = await this.exec(ctx, { action: "check", selector, on: true });
+    if ("ok" in r && r.ok) ctx.f = await this.c.store.step(ctx.f, log(OPT_OUT_LOG.en, OPT_OUT_LOG.zh, "fill", "opt_out"));
+    return r;
+  }
+
   private async exec(ctx: Ctx, a: Act, valueOverride?: string): Promise<Exec> {
     const { page } = ctx;
     if (ctx.f.status === "canceled") return { end: { ...STOPPED, trace: ctx.trace } };
@@ -688,7 +704,7 @@ export class Worker {
       const opt = valueOverride ?? a.option ?? "";
       // a fixed choice from the portal's own list that a taught playbook names (the team reviews it with the steps)
       const fixed = !valueOverride && !!a.option && !!ctx.taught && !a.fact;
-      const from = optionFor(opt, p) ?? (fixed ? { label: "the agency's fixed choice" } : null);
+      const from = optionFor(opt, p) ?? (fixed ? { label: "the agency's fixed choice" } : null) ?? (a.optOut && !valueOverride && /^no\.?$/i.test(opt.trim()) ? { label: "an optional-information question" } : null);
       if (!from) return { ok: false, error: "Refused: that option isn't one of the approved values." };
       const options = await loc.locator("option").allTextContents();
       const match = options.find((o) => o.trim().toLowerCase() === opt.trim().toLowerCase());
@@ -697,7 +713,7 @@ export class Worker {
       if (now.trim().toLowerCase() === match.trim().toLowerCase()) return { ok: true, same: from.label };
       await loc.selectOption({ label: match.trim() });
       rec({ action: "select", selector: a.selector, field: from.label });
-      ctx.f = await this.c.store.step(ctx.f, { ...log(`Filled ${from.label}`, `已填写 ${from.label}`, "fill"), value: shown(from.label, match.trim()) });
+      ctx.f = await this.c.store.step(ctx.f, a.optOut ? log(OPT_OUT_LOG.en, OPT_OUT_LOG.zh, "fill", "opt_out") : { ...log(`Filled ${from.label}`, `已填写 ${from.label}`, "fill"), value: shown(from.label, match.trim()) });
       return { ok: true };
     }
     if (a.action === "check") {
@@ -1375,6 +1391,7 @@ export class Worker {
         case "check": r = await this.exec(ctx, { action: "check", selector: x.selector, on: !!x.on }); break;
         case "click": r = await this.exec(ctx, { action: "click", selector: x.selector }); break;
         case "upload": r = await this.exec(ctx, { action: "upload", selector: x.selector, attachment: String(x.attachment) }); break;
+        case "answer_no": r = await this.answerNo(ctx, st, String(x.selector ?? ""), String(x.question ?? "")); break;
         case "wait": await sleep(Math.min(Number(x.ms) || 1000, 10000)); r = { ok: true }; break;
         case "need_person": {
           const msg = { en: String(x.message ?? x.reason).slice(0, 400), zh: String(x.message ?? x.reason).slice(0, 400) };

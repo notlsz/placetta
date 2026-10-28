@@ -1,7 +1,9 @@
 // node --experimental-strip-types --test test/guards.test.ts: the hard guards on pages, without a browser.
 import { test } from "node:test";
 import assert from "node:assert";
-import { einFillOk, inertScriptLink, isFinal, makesAccount, mustStop, type Control, type PageState } from "../src/guards.ts";
+import { einFillOk, inertScriptLink, isFinal, makesAccount, mustStop, noChoice, onPage, OPT_OUT_LOG, optOutQuestion, type Control, type PageState } from "../src/guards.ts";
+import { FilerModel, OPT_OUT_RULE, stepSystem, TOOLS } from "../src/model.ts";
+import type { Router } from "../src/llm.ts";
 
 const control = (o: Partial<Control>): Control => ({ selector: "", tag: "input", type: "text", label: "", name: "", id: "", autocomplete: "", value: "", ...o });
 const page = (o: Partial<PageState>): PageState => ({ url: "https://inspect.lafd.org/x", title: "", headings: [], controls: [], buttons: [], links: [], text: "", frames: [], markers: [], ...o });
@@ -77,4 +79,47 @@ test("SF's Business Identification page: an SSN-shaped value never goes in, and 
 test("an empty script link (GenTax's javascript:;) may be clicked; any other script link may not", () => {
   for (const h of ["javascript:;", "javascript:", "javascript:void(0)", "javascript:void(0);", "JavaScript: void 0"]) assert.ok(inertScriptLink(h), h);
   for (const h of ["javascript:alert(1)", "javascript:location='/x'", "javascript:;alert(1)", "https://x.gov/", "#"]) assert.ok(!inertScriptLink(h), h);
+});
+
+// SF's New Business Registration (live rehearsal, Oct 2026) stopped on this required Yes/No question.
+const SF_ASK = "Would you like to receive information about City-offered additional opportunities and programs?";
+test("a question that only asks about receiving information may be answered No; one that changes the filing never", () => {
+  assert.ok(optOutQuestion(SF_ASK), "SF's phrasing");
+  for (const q of ["Would you like to receive our newsletter?", "Do you want to receive marketing emails?", "Would you like to be contacted about surveys?", "Subscribe to updates?"]) assert.ok(optOutQuestion(q), q);
+  for (const q of [
+    "Do you certify that the information provided is true and correct?",
+    "Will you sell alcohol?",
+    "Do you agree to the terms?",
+    "Would you like to receive information about tax exemptions you may qualify for?",
+    "Would you like to receive information and consent to share your data with partners?",
+    "Do you sell tobacco products?",
+    "Is the business located in a residential zone?",
+    "Would you like to receive a permit for outdoor seating?",
+    "Would you like to receive information about City programs? Do you certify the above?",
+    "Would you like to receive information about City programs",
+  ]) assert.ok(!optOutQuestion(q), q);
+});
+
+test("the No is a radio labelled No or a dropdown's No, and the question must be on the page", () => {
+  assert.deepEqual(noChoice(control({ type: "radio", label: "No", value: "N" })), { kind: "radio" });
+  assert.equal(noChoice(control({ type: "radio", label: "Yes", value: "Y" })), null);
+  assert.deepEqual(noChoice(control({ tag: "select", type: "select-one", options: ["Select", "Yes", "No"] })), { kind: "select", option: "No" });
+  assert.equal(noChoice(control({ type: "checkbox", label: "No" })), null, "a checkbox isn't a No answer");
+  const st = page({ text: `Business Details\n* ${SF_ASK}\nYes No` });
+  assert.ok(onPage(SF_ASK, st));
+  assert.ok(!onPage("Would you like to receive our newsletter?", st), "a question the page didn't ask");
+  assert.match(OPT_OUT_LOG.en, /Answered No to an optional-information question/);
+  assert.ok(OPT_OUT_LOG.zh.length > 0);
+});
+
+test("the model's check: the strong tier must say true; a false, an error or another tool is a no", async () => {
+  const fake = (r: unknown) => new FilerModel({ ask: async () => { if (r instanceof Error) throw r; return r; } } as unknown as Router);
+  assert.equal(await fake({ name: "verdict", input: { only_receive_info: true } }).optOut(SF_ASK), true);
+  assert.equal(await fake({ name: "verdict", input: { only_receive_info: false } }).optOut("Do you agree to the terms?"), false);
+  assert.equal(await fake({ name: "verdict", input: { only_receive_info: "true" } }).optOut(SF_ASK), false);
+  assert.equal(await fake({ name: "need_person", input: {} }).optOut(SF_ASK), false);
+  assert.equal(await fake(new Error("down")).optOut(SF_ASK), false);
+  assert.ok(TOOLS.some((t) => t.name === "answer_no"));
+  const sys = stepSystem({ filing: { payload: { official: "sf-nbr", fields: [] } } as never, agency: "SF" });
+  assert.ok(sys.includes(OPT_OUT_RULE));
 });
