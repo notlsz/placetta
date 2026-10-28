@@ -758,6 +758,10 @@ export const addConfirmation = (ws: string, filingId: string, confirmation: stri
   fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "confirmation", confirmation: confirmation.trim() });
 /** "Show Odelia how": the person files it in the live browser while the portal worker records the steps (teach mode). */
 export const teachFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "teach" });
+/** The owner's answer about an agency site's "prove you're human" check: me (one tap), team, route (another way) or ask
+ *  (each time). Saved as the workspace's default for that site (captcha_preferences). */
+export const captchaChoice = (ws: string, filingId: string, choice: "me" | "team" | "route" | "ask") =>
+  fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "captcha_choice", choice });
 /** The hand-signed copy of a wet-signature form, already in Documents: Placetta faxes it. */
 export const signedCopy = (ws: string, filingId: string, path: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "signed", path });
 /** "Mail me the page": Placetta prints a form that needs ink and mails it to this address (with a return envelope to

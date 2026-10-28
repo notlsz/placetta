@@ -43,14 +43,21 @@ test("render.yaml: a web service with the health check, memory for its browser, 
     assert.match(set.NODE_OPTIONS ?? "", /--max-old-space-size=(\d{3})\b/);
     assert.ok(Number(/--max-old-space-size=(\d+)/.exec(set.NODE_OPTIONS)![1]) <= 384, "the heap fits in 512 MB");
   }
-  assert.equal(plan, "free", "the $0 start: Render free with Steel");
-  assert.equal(env.provider, "steel");
+  assert.equal(plan, "free", "the $0 start: Render free with a remote browser");
+  // Browserbase first, Steel when Browserbase refuses (2026-10-28): both remote, so the free plan still fits
+  assert.equal(env.provider, "browserbase");
+  assert.deepEqual(env.providers, ["browserbase", "steel"]);
   assert.equal(env.wake, true, "FILER_SECRET is asked for, so the app can wake it");
   assert.match(y, /plan: standard/, "the comments show the one-line switch to standard");
   assert.match(y, /BROWSER_PROVIDER value: local/);
   assert.match(y, /BROWSER_PROVIDER value: browserbase/);
   const asked = [...y.matchAll(/- key: (\w+)\n\s+sync: false/g)].map((m) => m[1]);
-  assert.deepEqual(asked, ["SUPABASE_SERVICE_ROLE_KEY", "ANTHROPIC_API_KEY", "STEEL_API_KEY"], "the founder pastes three values");
+  // Browserbase's two keys may stay empty: the worker skips Browserbase and runs on Steel until they're set
+  assert.deepEqual(asked, ["SUPABASE_SERVICE_ROLE_KEY", "ANTHROPIC_API_KEY", "STEEL_API_KEY", "BROWSERBASE_API_KEY", "BROWSERBASE_PROJECT_ID"], "the founder pastes three values, and Browserbase's two when the plan is bought");
+  const steelOnly = checkEnv({ ...set, BROWSERBASE_API_KEY: "", BROWSERBASE_PROJECT_ID: "" });
+  assert.deepEqual(steelOnly.missing, []);
+  assert.equal(steelOnly.provider, "steel");
+  assert.ok(steelOnly.warnings.some((w) => /browserbase is in BROWSER_PROVIDER but its keys aren't set/.test(w)));
   assert.match(y, /key: FILER_SECRET\n\s+generateValue: true/, "Render makes the wake secret, so nobody types it");
   const docker = readFileSync(new URL("../Dockerfile", import.meta.url), "utf8");
   for (const p of [...y.matchAll(/^\s+- (supabase\/\S+)/gm)].map((m) => m[1])) assert.ok(docker.includes(p), `the image copies ${p}`);

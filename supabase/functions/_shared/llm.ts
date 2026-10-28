@@ -46,12 +46,12 @@
 // Anthropic's web tools only when "anthropic:web-tools" is listed; a call with nothing left is refused.
 
 import { anthropicMessage, openaiCompletion, type OnText } from "./stream.ts";
-import { ZDR_REFUSED, zdrAllows, zdrRequired, zdrWebTools } from "./zdr.ts";
+import { ZDR_REFUSED, zdrAdvisor, zdrAllows, zdrRequired, zdrWebTools } from "./zdr.ts";
 import { ensureCache, explicitOn, useCache } from "./gemini_cache.ts";
 
 type Block = Record<string, unknown>;
-export type Role ="plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep";
-export const ROLES: Role[] = ["plan", "review", "extract", "translate", "draft", "short", "watch", "deep"];
+export type Role ="plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep" | "appeal";
+export const ROLES: Role[] = ["plan", "review", "extract", "translate", "draft", "short", "watch", "deep", "appeal"];
 /** The old three-way split, kept so older call sites keep working: fast is extract, standard is plan, deep is deep. */
 export type Tier = "fast" | "standard" | "deep";
 export type Call = {
@@ -70,6 +70,14 @@ export type Call = {
   /** The call is for a synthetic workspace (workspaces.synthetic: a probe or test, never a customer). Only then may a free
    *  Gemini key take it, and only with GEMINI_FREE_SYNTHETIC=1. Set from the database, never from a request. */
   synthetic?: boolean;
+  /** A person is waiting on this answer (a chat streaming to them): only then may fast mode be used (ODELIA_FAST_MODE=1,
+   *  Opus 5.5 only). Never in a batch or a background run. */
+  interactive?: boolean;
+  /** The advisor tool on this request (the plan role's Sonnet consults Opus): how many calls it may still make in this
+   *  run (agent-run counts them; 0 leaves the tool out). */
+  advisorLeft?: number;
+  /** The cached prefix's lifetime: "1h" for calls more than five minutes apart (the monitor's background checks, chases). */
+  cacheTtl?: "5m" | "1h";
 };
 export type Result = { ok: boolean; status: number; data?: Record<string, unknown>; text: string; model: string };
 type Env = (k: string) => string | undefined;
@@ -94,7 +102,7 @@ export const canConverse = (env: Env, o: { synthetic?: boolean } = {}) =>
   Object.entries(PROVIDER_KEYS).some(([p, k]) => !!env(k) && vendorOk(env, p, { hasFiles: false, role: "plan", synthetic: o.synthetic === true }));
 
 /** The Anthropic models by size. The repo's defaults; AGENT_MODEL, AGENT_MODEL_DEEP and AGENT_MODEL_FAST change them. */
-export const ANTHROPIC_MODELS = { plan: "claude-sonnet-5-5", deep: "claude-opus-5-5", fast: "claude-haiku-4-5-20251001" };
+export const ANTHROPIC_MODELS = { plan: "claude-sonnet-5-5", deep: "claude-opus-5-5", fast: "claude-haiku-5-5" };
 const GEMINI = { lite: "gemini-2.5-flash-lite", flash: "gemini-2.5-flash", next: "gemini-3.8-flash", pro: "gemini-2.5-pro" };
 /** The open-model backups: gpt-oss-120b on Groq, then Cerebras, then OpenRouter. Each is used only
  *  when its key is set, only after Gemini and Anthropic can't answer, and never with a customer's files. */
@@ -105,26 +113,53 @@ const BACKUPS: [string, string][] = [["groq", "openai/gpt-oss-120b"], ["cerebras
  * that fits the role (Haiku for the cheap roles, Sonnet for plan and review, Opus for deep), so AGENT_MODEL still
  * picks the exact one. A provider without a key is skipped at call time.
  */
-// Gemini first: 3.8 Flash for the work, 2.5 Flash when 3.8 is unavailable, Flash-Lite for the cheap reads.
-// Anthropic is the top-of-the-line seat (the reviewer when there's a key, deep research) and the safety net; the open
-// gpt-oss backups come last.
-const CHEAP: [string, string][] = [["gemini", GEMINI.lite], ["gemini", GEMINI.flash], ["anthropic", "*"], ...BACKUPS];
+// The model roles (founder-approved 2026-10-28): Anthropic first on every role, at the model that fits it, Gemini and the
+// open backups behind it for failover:
+//   Opus 5.5    Odelia's reasoning that decides something: the review before a filing goes out, deficiency answers and
+//               appeals (appeal), deep research (deep); and, as the advisor, inside the plan role's loop
+//   Sonnet 5.5  chat and plan drafting: the main loop (plan, consulting Opus as its advisor), drafts, one-liners (short)
+//   Haiku 5.5   classification, routing, status reading and summaries (extract, translate, watch)
+// "anthropic:*" stands for that model, so AGENT_MODEL, AGENT_MODEL_DEEP and AGENT_MODEL_FAST still pick the exact one.
+const CHEAP: [string, string][] = [["anthropic", "*"], ["gemini", GEMINI.lite], ["gemini", GEMINI.flash], ...BACKUPS];
 export const DEFAULT_ROUTES: Record<Role, [string, string][]> = {
   extract: CHEAP,
   translate: CHEAP,
-  short: [["gemini", GEMINI.next], ["gemini", GEMINI.flash], ["anthropic", "*"], ...BACKUPS],
   watch: CHEAP,
-  draft: [["gemini", GEMINI.next], ["gemini", GEMINI.flash], ["anthropic", "*"], ...BACKUPS],
-  // the main loop: Gemini 3.8 Flash, then 2.5 Flash, then Sonnet when there's an Anthropic key, then the backups
-  plan: [["gemini", GEMINI.next], ["gemini", GEMINI.flash], ["anthropic", "*"], ...BACKUPS],
-  // the checker: a different model from the doer, so the work isn't graded by the model that did it
+  short: [["anthropic", "*"], ["gemini", GEMINI.next], ["gemini", GEMINI.flash], ...BACKUPS],
+  draft: [["anthropic", "*"], ["gemini", GEMINI.next], ["gemini", GEMINI.flash], ...BACKUPS],
+  // the main loop: Sonnet (with Opus as its advisor), then Gemini 3.8 Flash, 2.5 Flash, then the backups
+  plan: [["anthropic", "*"], ["gemini", GEMINI.next], ["gemini", GEMINI.flash], ...BACKUPS],
+  // the checker: Opus; a vendor other than the doer's still checks when Anthropic can't answer
   review: [["anthropic", "*"], ["gemini", GEMINI.pro], ["gemini", GEMINI.flash], ...BACKUPS],
+  appeal: [["anthropic", "*"], ["gemini", GEMINI.pro], ["gemini", GEMINI.next], ...BACKUPS],
   deep: [["anthropic", "*"], ["gemini", GEMINI.pro], ["gemini", GEMINI.next]],
 };
 
+/** output_config.effort by role (platform.claude.com, Effort, read 2026-10-28: low for short, simple, high-volume work;
+ *  high for complex reasoning and agentic work; Sonnet 5.5 for chat starts at medium). Part of the cached prefix, so a
+ *  role always sends the same one. Anthropic only. */
+export const EFFORT: Record<Role, "low" | "medium" | "high"> = {
+  extract: "low", translate: "low", watch: "low", short: "low", draft: "medium", plan: "medium", review: "high", appeal: "high", deep: "high",
+};
+/** A main-loop turn that answers an agency's deficiency notice or writes an appeal: the last tool Odelia called was one
+ *  of those (appeal_case, or a tool named for a deficiency, an RFI or corrections). That turn is the appeal role (Opus). */
+export function appealTurn(messages: unknown): boolean {
+  const msgs = Array.isArray(messages) ? messages as Block[] : [];
+  for (let i = msgs.length - 1; i >= 0; i--) {
+    if (msgs[i].role !== "assistant" || !Array.isArray(msgs[i].content)) continue;
+    const uses = (msgs[i].content as Block[]).filter((b) => b.type === "tool_use").map((b) => String(b.name ?? ""));
+    if (uses.length) return uses.some((n) => /appeal|deficien|rfi|correction/i.test(n));
+  }
+  return false;
+}
+
+/** The advisor tool (beta; platform.claude.com, Advisor tool): Sonnet 5.5 consults Opus 5.5 mid-answer in the plan role. */
+export const ADVISOR_BETA = "advisor-tool-2026-03-01";
+
 /** The Anthropic model a role falls back to. fallbackModel is what the caller already decided (AGENT_MODEL or AGENT_MODEL_DEEP). */
 export function anthropicFor(env: Env, role: Role, fallbackModel: string): string {
-  if (role === "plan" || role === "review" || role === "deep") return fallbackModel;
+  if (role === "review" || role === "appeal") return env("AGENT_MODEL_DEEP") || ANTHROPIC_MODELS.deep;
+  if (role === "plan" || role === "deep" || role === "draft" || role === "short") return fallbackModel;
   return env("AGENT_MODEL_FAST") || ANTHROPIC_MODELS.fast;
 }
 
@@ -260,8 +295,11 @@ async function anthropic(f: Fetch, key: string, payload: Record<string, unknown>
  * Prompt caching: Odelia's instructions and tools (about 6,500 tokens) are the same on every round, and each round
  * repeats the conversation so far. Marking the end of each as cacheable makes those repeats cost a tenth.
  */
-export function withCache(payload: Record<string, unknown>): Record<string, unknown> {
+export function withCache(payload: Record<string, unknown>, ttl: "5m" | "1h" = "5m"): Record<string, unknown> {
   const out: Record<string, unknown> = { ...payload };
+  // the 1-hour lifetime for the stable prefix (system and tools) when calls are more than five minutes apart; the last
+  // message keeps five minutes (a longer lifetime must come before a shorter one: Prompt caching, Mixing TTLs)
+  const cc = ttl === "1h" ? { type: "ephemeral", ttl: "1h" } : { type: "ephemeral" };
   // cache_breaks (src/odeliaMemory/cache.ts layout): where the stable segments of the system prompt end (the rules; the
   // workspace profile). Each gets its own breakpoint, so a run whose per-run part changed still reads both from the
   // cache; with the tools' and the last message's that's four, the API's limit. Never sent to a provider.
@@ -271,12 +309,12 @@ export function withCache(payload: Record<string, unknown>): Record<string, unkn
     const s = out.system, cuts = [...new Set(breaks)].filter((b) => b < s.length).sort((a, b) => a - b).slice(0, 2);
     const parts: Block[] = [];
     let at = 0;
-    for (const c of cuts) { parts.push({ type: "text", text: s.slice(at, c), cache_control: { type: "ephemeral" } }); at = c; }
-    parts.push({ type: "text", text: s.slice(at), ...(cuts.length ? {} : { cache_control: { type: "ephemeral" } }) });
+    for (const c of cuts) { parts.push({ type: "text", text: s.slice(at, c), cache_control: cc }); at = c; }
+    parts.push({ type: "text", text: s.slice(at), ...(cuts.length ? {} : { cache_control: cc }) });
     out.system = parts.filter((p) => String(p.text).length);
-  } else if (typeof out.system === "string" && out.system) out.system = [{ type: "text", text: out.system, cache_control: { type: "ephemeral" } }];
+  } else if (typeof out.system === "string" && out.system) out.system = [{ type: "text", text: out.system, cache_control: cc }];
   const tools = Array.isArray(out.tools) ? [...(out.tools as Block[])] : [];
-  if (tools.length) { tools[tools.length - 1] = { ...tools[tools.length - 1], cache_control: { type: "ephemeral" } }; out.tools = tools; }
+  if (tools.length) { tools[tools.length - 1] = { ...tools[tools.length - 1], cache_control: cc }; out.tools = tools; }
   const msgs = Array.isArray(out.messages) ? [...(out.messages as Block[])] : [];
   const last = msgs.length - 1;
   if (last >= 0 && msgs[last].role === "user") {
@@ -292,9 +330,44 @@ export function withCache(payload: Record<string, unknown>): Record<string, unkn
 }
 
 /** Anthropic with its research tools, stepping down when the account lacks web fetch or web search. */
-async function viaAnthropic(f: Fetch, key: string, call: Call, model: string, research: { search: Block; fetch: Block; pageTools: Block[] } | null, stream = false) {
-  const payload: Record<string, unknown> = withCache({ ...call.payload, model, ...(stream ? { stream: true } : {}) });
-  let { res, text } = await anthropic(f, key, payload, call.beta);
+/** Fast mode (platform.claude.com, Fast mode, read 2026-10-28): Opus 5.5 at up to 2.5x the output speed for 2x the price.
+ *  Only with ODELIA_FAST_MODE=1, only on Opus 5.5, only while a person waits on the answer (call.interactive); never in a
+ *  batch or the background. */
+export const fastModeFor = (env: Env, call: Call, model: string) => env("ODELIA_FAST_MODE") === "1" && call.interactive === true && /^claude-opus-5-5/.test(model);
+/** The advisor for this request: the plan role on Sonnet (or Haiku), ZDR allowing it, ODELIA_ADVISOR not 0, and calls
+ *  left in the run. Opus 5.5 is a listed advisor for Sonnet 5.5 and Haiku 5.5. */
+export const advisorFor = (env: Env, call: Call, model: string): Block | null =>
+  (call.role ?? roleOfTier(call.tier)) === "plan" && /^claude-(sonnet|haiku)-5-5/.test(model) && env("ODELIA_ADVISOR") !== "0" && zdrAdvisor(env) && (call.advisorLeft ?? 0) > 0
+    ? { type: "advisor_20260301", name: "advisor", model: env("AGENT_MODEL_DEEP") || ANTHROPIC_MODELS.deep, max_uses: Math.min(2, call.advisorLeft ?? 0), max_tokens: 2048 }
+    : null;
+
+async function viaAnthropic(f: Fetch, key: string, call: Call, model: string, research: { search: Block; fetch: Block; pageTools: Block[] } | null, stream = false, env: Env = () => undefined) {
+  const role = call.role ?? roleOfTier(call.tier);
+  const adv = advisorFor(env, call, model);
+  const fast = fastModeFor(env, call, model);
+  const base: Record<string, unknown> = { ...call.payload, model, ...(stream ? { stream: true } : {}),
+    ...(call.payload.output_config ? {} : { output_config: { effort: EFFORT[role] } }),
+    ...(adv ? { tools: [...((call.payload.tools as Block[] | undefined) ?? []), adv] } : {}),
+    ...(fast ? { speed: "fast" } : {}) };
+  const payload: Record<string, unknown> = withCache(base, call.cacheTtl ?? "5m");
+  // the beta header also whenever the history holds an advisor's result (the docs: it must still be sent for those blocks)
+  const advInHistory = JSON.stringify(call.payload.messages ?? []).includes('"advisor_tool_result"');
+  const beta = adv || advInHistory ? [call.beta, ADVISOR_BETA].filter(Boolean).join(",") : call.beta;
+  let { res, text } = await anthropic(f, key, payload, beta);
+  // fast mode over its own rate limit: the same request at standard speed (a cache miss: speeds don't share cached
+  // prefixes, Fast mode, Retries and fallbacks)
+  if (fast && res.status === 429) {
+    console.error("fast mode 429: asking at standard speed (the cached prefix isn't shared across speeds)");
+    delete payload.speed;
+    ({ res, text } = await anthropic(f, key, payload, beta));
+  }
+  // the advisor beta refused (not on for the account, or the pair): the same request without it
+  if (adv && res.status === 400 && /advisor|beta/i.test(text)) {
+    console.error("advisor refused: asking without it");
+    payload.tools = withCache({ tools: (call.payload.tools as Block[] | undefined) ?? [] }, call.cacheTtl ?? "5m").tools;
+    if (!(payload.tools as Block[]).length) delete payload.tools;
+    ({ res, text } = await anthropic(f, key, payload, call.beta));
+  }
   if (research && res.status === 400 && /web_fetch|beta/i.test(text)) { payload.tools = withCache({ tools: [...research.pageTools, research.search] }).tools; ({ res, text } = await anthropic(f, key, payload, null)); }
   if (research && res.status === 400 && /web_search/i.test(text)) { payload.tools = research.pageTools.length ? withCache({ tools: research.pageTools }).tools : undefined; ({ res, text } = await anthropic(f, key, payload, null)); }
   return { res, text };
@@ -348,7 +421,7 @@ export async function callModel(env: Env, call: Call, fallbackModel: string, res
     try {
       if (p === "anthropic") {
         const key = env("ANTHROPIC_API_KEY"); if (!key) continue;
-        const { res, text } = await viaAnthropic(f, key, call, model, research, stream);
+        const { res, text } = await viaAnthropic(f, key, call, model, research, stream, env);
         if (res.ok && stream) { const data = withUsage(await anthropicMessage(res, onText), call.payload); return { ok: true, status: 200, data, text: JSON.stringify(data), model: `${p}:${model}` }; }
         if (res.ok) return { ok: true, status: 200, data: JSON.parse(text), text, model: `${p}:${model}` };
         last = { ok: false, status: res.status, text, model: `${p}:${model}` };

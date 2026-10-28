@@ -45,7 +45,7 @@ export type Skill = {
 export type Result =
   | { kind: "submitted"; confirmation: string; summary: string; trace: TraceStep[]; seconds: number; replayed: boolean }
   | { kind: "needs_you"; reason: string; message: Bi; trace: TraceStep[] }
-  | { kind: "handoff"; reason: string; message: Bi; trace: TraceStep[]; task?: "handoff" | "review" | "check_agency" | "first_run" }
+  | { kind: "handoff"; reason: string; message: Bi; trace: TraceStep[]; task?: "handoff" | "review" | "check_agency" | "first_run" | "captcha_unanswered" }
   | { kind: "review"; message: Bi; trace: TraceStep[] }
   | { kind: "stopped"; trace: TraceStep[] }
   /** Inside a run only (run.ts makeAccount): the business's account is made; the filing carries on signed in. */

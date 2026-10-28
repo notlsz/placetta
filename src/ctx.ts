@@ -74,6 +74,8 @@ export type CloudCtx = {
   addConfirmation(filingId: string, confirmation: string): Promise<void>;
   /** "Show Odelia how": file it once yourself in the live browser while Odelia records the steps (teach mode). */
   teachFiling(filingId: string): Promise<void>;
+  /** How a "prove you're human" check on this filing's agency site is handled, remembered for that site. */
+  captchaChoice(filingId: string, choice: "me" | "team" | "route" | "ask"): Promise<void>;
   uploadSigned(filingId: string, appId: string, file: File): Promise<void>;
   /** "Mail me the page": Placetta mails a form that needs ink to this address (file function, action kit); kitUndo
    *  cancels it in its undo window. */

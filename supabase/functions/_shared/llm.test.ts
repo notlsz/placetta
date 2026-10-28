@@ -30,12 +30,14 @@ check("a PDF travels as a file part", withPdf.messages[0].content[0].type === "f
 // 2. the default routes, by role
 {
   const env = only({ ANTHROPIC_API_KEY: "a", GEMINI_API_KEY: "g" });
-  check("plan: Gemini 3.8 Flash, 2.5 Flash, Sonnet, then the gpt-oss backups", same(names(routeFor(env, "plan", "claude-sonnet-5-5")), ["gemini:gemini-3.8-flash", "gemini:gemini-2.5-flash", "anthropic:claude-sonnet-5-5", "groq:openai/gpt-oss-120b", "cerebras:gpt-oss-120b", "openrouter:openai/gpt-oss-120b"]));
-  check("review: Sonnet first, a different model from the doer", same(names(routeFor(env, "review", "claude-sonnet-5-5")), ["anthropic:claude-sonnet-5-5", "gemini:gemini-2.5-pro", "gemini:gemini-2.5-flash", "groq:openai/gpt-oss-120b", "cerebras:gpt-oss-120b", "openrouter:openai/gpt-oss-120b"]));
+  // the model roles (2026-10-28): Anthropic first at the role's model, Gemini and the open backups behind it
+  check("plan: Sonnet, then Gemini 3.8 Flash, 2.5 Flash, then the gpt-oss backups", same(names(routeFor(env, "plan", "claude-sonnet-5-5")), ["anthropic:claude-sonnet-5-5", "gemini:gemini-3.8-flash", "gemini:gemini-2.5-flash", "groq:openai/gpt-oss-120b", "cerebras:gpt-oss-120b", "openrouter:openai/gpt-oss-120b"]));
+  check("review: Opus first (the check before a filing goes out), then another vendor", same(names(routeFor(env, "review", "claude-sonnet-5-5")), ["anthropic:claude-opus-5-5", "gemini:gemini-2.5-pro", "gemini:gemini-2.5-flash", "groq:openai/gpt-oss-120b", "cerebras:gpt-oss-120b", "openrouter:openai/gpt-oss-120b"]));
+  check("appeal: Opus first (deficiency answers and appeals)", names(routeFor(env, "appeal", "claude-sonnet-5-5"))[0] === "anthropic:claude-opus-5-5");
   for (const r of ["extract", "translate", "watch"] as Role[])
-    check(`${r}: Flash-Lite, Flash, Haiku, backups`, same(names(routeFor(env, r, "claude-sonnet-5-5")), ["gemini:gemini-2.5-flash-lite", "gemini:gemini-2.5-flash", "anthropic:claude-haiku-4-5-20251001", "groq:openai/gpt-oss-120b", "cerebras:gpt-oss-120b", "openrouter:openai/gpt-oss-120b"]));
+    check(`${r}: Haiku 5.5, Flash-Lite, Flash, backups`, same(names(routeFor(env, r, "claude-sonnet-5-5")), ["anthropic:claude-haiku-5-5", "gemini:gemini-2.5-flash-lite", "gemini:gemini-2.5-flash", "groq:openai/gpt-oss-120b", "cerebras:gpt-oss-120b", "openrouter:openai/gpt-oss-120b"]));
   for (const r of ["short", "draft"] as Role[])
-    check(`${r}: 3.8 Flash, 2.5 Flash, Haiku, backups`, same(names(routeFor(env, r, "claude-sonnet-5-5")), ["gemini:gemini-3.8-flash", "gemini:gemini-2.5-flash", "anthropic:claude-haiku-4-5-20251001", "groq:openai/gpt-oss-120b", "cerebras:gpt-oss-120b", "openrouter:openai/gpt-oss-120b"]));
+    check(`${r}: Sonnet, 3.8 Flash, 2.5 Flash, backups`, same(names(routeFor(env, r, "claude-sonnet-5-5")), ["anthropic:claude-sonnet-5-5", "gemini:gemini-3.8-flash", "gemini:gemini-2.5-flash", "groq:openai/gpt-oss-120b", "cerebras:gpt-oss-120b", "openrouter:openai/gpt-oss-120b"]));
   check("deep: Opus, then Gemini Pro and 3.8 Flash", same(names(routeFor(env, "deep", "claude-opus-5-5")), ["anthropic:claude-opus-5-5", "gemini:gemini-2.5-pro", "gemini:gemini-3.8-flash"]));
   check("AGENT_MODEL_FAST picks the cheap Anthropic model", names(routeFor(only({ AGENT_MODEL_FAST: "claude-haiku-9" }), "extract", "x")).includes("anthropic:claude-haiku-9"));
   check("every role has a default route ending in Anthropic", ROLES.every(r => { const d = DEFAULT_ROUTES[r]; return d.length > 0 && d.some(([p]) => p === "anthropic"); }));
@@ -47,12 +49,12 @@ check("a PDF travels as a file part", withPdf.messages[0].content[0].type === "f
 // 3. secrets per role, and the three old names as aliases
 {
   check("AGENT_ROUTE_REVIEW wins", names(routeFor(only({ AGENT_ROUTE_REVIEW: "openai:gpt-5-mini" }), "review", "claude-sonnet-5-5"))[0] === "openai:gpt-5-mini");
-  check("a route that leaves Anthropic out gets it added", names(routeFor(only({ AGENT_ROUTE_SHORT: "openai:gpt-5-mini" }), "short", "x")).pop() === "anthropic:claude-haiku-4-5-20251001");
+  check("a route that leaves Anthropic out gets it added", names(routeFor(only({ AGENT_ROUTE_EXTRACT: "openai:gpt-5-mini" }), "extract", "x")).pop() === "anthropic:claude-haiku-5-5");
   check("AGENT_ROUTE_FAST is extract", names(routeFor(only({ AGENT_ROUTE_FAST: "deepseek:deepseek-chat" }), "extract", "x"))[0] === "deepseek:deepseek-chat");
   check("AGENT_ROUTE is plan", names(routeFor(only({ AGENT_ROUTE: "deepseek:deepseek-chat" }), "plan", "x"))[0] === "deepseek:deepseek-chat");
   check("AGENT_ROUTE_DEEP is deep", names(routeFor(only({ AGENT_ROUTE_DEEP: "gemini:gemini-2.5-pro" }), "deep", "x"))[0] === "gemini:gemini-2.5-pro");
   check("AGENT_ROUTE_EXTRACT beats the old name", names(routeFor(only({ AGENT_ROUTE_FAST: "deepseek:deepseek-chat", AGENT_ROUTE_EXTRACT: "openai:gpt-5-nano" }), "extract", "x"))[0] === "openai:gpt-5-nano");
-  check("AGENT_ROUTE does not leak into other roles", names(routeFor(only({ AGENT_ROUTE: "deepseek:deepseek-chat" }), "extract", "x"))[0] === "gemini:gemini-2.5-flash-lite");
+  check("AGENT_ROUTE does not leak into other roles", names(routeFor(only({ AGENT_ROUTE: "deepseek:deepseek-chat" }), "extract", "x"))[0] === "anthropic:claude-haiku-5-5");
 }
 
 // 4. data-use guardrails: who may see what
@@ -67,15 +69,15 @@ check("a PDF travels as a file part", withPdf.messages[0].content[0].type === "f
   check("an unknown vendor never", !vendorOk(only({}), "mystery", { hasFiles: false }));
   // through the whole filter
   const unpaid = only({ ANTHROPIC_API_KEY: "a", GEMINI_API_KEY: "g" });
-  check("unpaid Gemini: extract skips Gemini (Haiku, then the backups)", same(names(candidates(unpaid, { payload, role: "extract", research: false, beta: null }, "x")), ["anthropic:claude-haiku-4-5-20251001", "groq:openai/gpt-oss-120b", "cerebras:gpt-oss-120b", "openrouter:openai/gpt-oss-120b"]));
-  check("unpaid Gemini: a watch run with the workspace in it may not", names(candidates(unpaid, { payload, role: "watch", research: false, beta: null }, "x"))[0] === "anthropic:claude-haiku-4-5-20251001");
-  check("unpaid Gemini: a public-pages scan may", names(candidates(unpaid, { payload, role: "watch", research: false, beta: null, publicOnly: true }, "x"))[0] === "gemini:gemini-2.5-flash-lite");
+  check("unpaid Gemini: extract skips Gemini (Haiku, then the backups)", same(names(candidates(unpaid, { payload, role: "extract", research: false, beta: null }, "x")), ["anthropic:claude-haiku-5-5", "groq:openai/gpt-oss-120b", "cerebras:gpt-oss-120b", "openrouter:openai/gpt-oss-120b"]));
+  check("unpaid Gemini: a watch run with the workspace in it may not", !names(candidates(unpaid, { payload, role: "watch", research: false, beta: null }, "x")).some((n) => n.startsWith("gemini:")));
+  check("unpaid Gemini: a public-pages scan may (behind Haiku)", names(candidates(unpaid, { payload, role: "watch", research: false, beta: null, publicOnly: true }, "x"))[1] === "gemini:gemini-2.5-flash-lite");
   const paid = only({ ANTHROPIC_API_KEY: "a", GEMINI_API_KEY: "g", GEMINI_PAID: "1" });
-  check("paid Gemini: extract runs on Flash-Lite", names(candidates(paid, { payload, role: "extract", research: false, beta: null }, "x"))[0] === "gemini:gemini-2.5-flash-lite");
+  check("paid Gemini: extract runs on Haiku 5.5, Flash-Lite behind it", same(names(candidates(paid, { payload, role: "extract", research: false, beta: null }, "x")).slice(0, 2), ["anthropic:claude-haiku-5-5", "gemini:gemini-2.5-flash-lite"]));
   const pdf = { ...payload, messages: [{ role: "user", content: [{ type: "document", source: { type: "base64", media_type: "application/pdf", data: "AAA" } }, { type: "text", text: "read" }] }] };
-  check("a PDF skips vendors that can't read it", same(names(candidates(only({ ANTHROPIC_API_KEY: "a", DEEPSEEK_API_KEY: "d", ALLOW_DEEPSEEK: "1", AGENT_ROUTE_EXTRACT: "deepseek:deepseek-chat" }), { payload: pdf, role: "extract", research: false, beta: null }, "claude-haiku")), ["anthropic:claude-haiku-4-5-20251001"]));
-  check("research puts Anthropic first for plan and watch, not for short", names(candidates(paid, { payload, role: "watch", research: true, beta: "b" }, "x"))[0].startsWith("anthropic:")
-    && names(candidates(paid, { payload, role: "short", research: true, beta: "b" }, "x"))[0] === "gemini:gemini-3.8-flash");
+  check("a PDF skips vendors that can't read it", same(names(candidates(only({ ANTHROPIC_API_KEY: "a", DEEPSEEK_API_KEY: "d", ALLOW_DEEPSEEK: "1", AGENT_ROUTE_EXTRACT: "deepseek:deepseek-chat" }), { payload: pdf, role: "extract", research: false, beta: null }, "claude-haiku")), ["anthropic:claude-haiku-5-5"]));
+  check("research puts Anthropic first for plan and watch (and every role now starts there)", names(candidates(paid, { payload, role: "watch", research: true, beta: "b" }, "x"))[0].startsWith("anthropic:")
+    && names(candidates(paid, { payload, role: "short", research: true, beta: "b" }, "x"))[0].startsWith("anthropic:"));
 }
 
 // 5. calls: the first with a key wins, translated; fallthrough when busy
@@ -87,7 +89,7 @@ r = await callModel(k => env[k], { payload, role: "extract", research: false, be
 check("deepseek used", r.ok && r.model === "deepseek:deepseek-chat" && (r.data as any).content[0].text === "cheap answer" && (r.data as any).usage.input_tokens === 7);
 calls.length = 0;
 r = await callModel(k => env[k], { payload, role: "extract", research: false, beta: null }, "claude-haiku", null, mk({ deepseek: () => new Response("busy", { status: 429 }), anthropic: () => anth() }));
-check("falls to anthropic on 429", r.ok && r.model === "anthropic:claude-haiku-4-5-20251001" && calls.length === 2);
+check("falls to anthropic on 429", r.ok && r.model === "anthropic:claude-haiku-5-5" && calls.length === 2);
 calls.length = 0; env = { ANTHROPIC_API_KEY: "a", DEEPSEEK_API_KEY: "d", ALLOW_DEEPSEEK: "1", AGENT_ROUTE: "deepseek:deepseek-chat" };
 r = await callModel(k => env[k], { payload, role: "plan", research: true, beta: "b" }, "claude-sonnet", { search: {}, fetch: {}, pageTools: [] }, mk({ anthropic: () => anth(), deepseek: () => oai({ content: "x" }) }));
 check("research prefers anthropic", r.model === "anthropic:claude-sonnet" && calls[0].includes("anthropic"));
@@ -96,9 +98,9 @@ r = await callModel(k => env[k], { payload, role: "plan", research: true, beta: 
 check("Anthropic down: a research plan falls to Gemini 3.8 Flash", r.ok && r.model === "gemini:gemini-3.8-flash" && calls.length === 2);
 calls.length = 0;
 r = await callModel(k => env[k], { payload, role: "plan", research: false, beta: null }, "claude-sonnet", null, mk({ gemini: () => oai({ content: "flash answer" }), anthropic: () => anth() }));
-check("plan runs on Gemini 3.8 Flash first", r.ok && r.model === "gemini:gemini-3.8-flash" && calls.length === 1);
+check("plan runs on Sonnet first", r.ok && r.model === "anthropic:claude-sonnet" && calls.length === 1);
 r = await callModel(k => env[k], { payload, role: "review", research: false, beta: null }, "claude-sonnet", null, mk({ gemini: () => oai({ content: "{\"items\":[]}" }), anthropic: () => anth() }));
-check("the checker runs on the other vendor (Sonnet)", r.ok && r.model === "anthropic:claude-sonnet");
+check("the checker runs on Opus", r.ok && r.model === "anthropic:claude-opus-5-5");
 calls.length = 0; env = { GEMINI_API_KEY: "g", GEMINI_PAID: "1", GROQ_API_KEY: "q" };
 r = await callModel(k => env[k], { payload, role: "plan", research: false, beta: null }, "claude-sonnet", null, mk({ gemini: () => new Response("down", { status: 503 }), groq: () => oai({ content: "oss answer" }) }));
 check("Gemini down, no Anthropic key: the Groq backup answers", r.ok && r.model === "groq:openai/gpt-oss-120b" && calls.length === 3);
@@ -106,13 +108,13 @@ check("Gemini down, no Anthropic key: the Groq backup answers", r.ok && r.model 
 // 6. free models skipped unless allowed, and never with files
 env = { OPENROUTER_API_KEY: "o", ALLOW_OPENROUTER: "1", ANTHROPIC_API_KEY: "a", AGENT_ROUTE_EXTRACT: "openrouter:deepseek/deepseek-chat:free" };
 r = await callModel(k => env[k], { payload, role: "extract", research: false, beta: null }, "claude-haiku", null, mk({ openrouter: () => oai({ content: "free" }), anthropic: () => anth() }));
-check("free skipped by default", r.model === "anthropic:claude-haiku-4-5-20251001");
+check("free skipped by default", r.model === "anthropic:claude-haiku-5-5");
 env.AGENT_ALLOW_FREE = "1";
 r = await callModel(k => env[k], { payload, role: "extract", research: false, beta: null }, "claude-haiku", null, mk({ openrouter: () => oai({ content: "free" }), anthropic: () => anth() }));
 check("free used when allowed", r.model === "openrouter:deepseek/deepseek-chat:free");
 const withImg = { ...payload, messages: [{ role: "user", content: [{ type: "image", source: { type: "base64", media_type: "image/png", data: "AAA" } }, { type: "text", text: "read" }] }] };
 r = await callModel(k => env[k], { payload: withImg, role: "extract", research: false, beta: null }, "claude-haiku", null, mk({ openrouter: () => oai({ content: "free" }), anthropic: () => anth() }));
-check("free never gets customer files", r.model === "anthropic:claude-haiku-4-5-20251001");
+check("free never gets customer files", r.model === "anthropic:claude-haiku-5-5");
 
 // 7. no keys
 r = await callModel(k => undefined, { payload, role: "extract", research: false, beta: null }, "claude-haiku", null, mk({}));

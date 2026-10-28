@@ -2,6 +2,7 @@
 // complete, which channel sends it, and is the owner foreign. index.ts does the sending.
 import { type Dest, loginMatches, OWNER_KIND, OWNER_KIND_SAID, TEAM_ONLY } from "./destinations.ts";
 import { ACCOUNT_SAY, accountOf } from "./accounts.ts";
+import { CHANNEL_DAYS, captchaQuestion, type CaptchaChoice } from "./captcha.ts";
 
 export type Bi = { en: string; zh: string };
 /** "team" is the database's name for "not sent by Placetta": the business sends it with the packet Odelia prepares
@@ -250,7 +251,28 @@ export function check(f: Filing, d: Dest | undefined, ctx: { docPaths: Set<strin
     20261105090000_agent_accounts.sql). feeAuthority: the filing's fee may be paid by Placetta (a live Autopilot grant
     behind it, or an owner's approval of this fee; _shared/issuing.ts feeAuthority), checked only when checks are on and
     a fee goes with the filing. */
-export type Facts = { hasLogin: boolean; mailConnected: boolean; makesAccount?: boolean; feeAuthority?: boolean };
+/** captchaHost: the agency's portal showed Odelia a CAPTCHA or another bot challenge on recent runs (portal_challenges,
+    20261105090800_filer_ai_cost.sql), so pick() prefers a way without one when it isn't much slower. */
+/** captchaChoice: the workspace's saved answer for this portal (captcha_preferences): "me" or "team" keep the portal,
+    "route" sends it another way, "ask" (or none) lets pick() decide and captchaPlan() ask. */
+export type Facts = { hasLogin: boolean; mailConnected: boolean; makesAccount?: boolean; feeAuthority?: boolean; captchaHost?: boolean; captchaChoice?: CaptchaChoice | null };
+
+export { CHANNEL_DAYS };
+/** How much slower a way without a CAPTCHA may be and still be preferred, unasked, to a portal that shows one. */
+export const CAPTCHA_DETOUR_DAYS = 3;
+
+/** Before the filing starts, on a portal that shows CAPTCHAs: the channel, or the owner's question when the agency also
+    takes a way without one that is slower (pick() already took one that isn't). Their saved answer decides without asking:
+    "me" and "team" keep the portal, "route" takes the other way. */
+export function captchaPlan(f: Filing, d: Dest | undefined, env: Env, facts: Facts, channel: Route): { channel: Route } | { ask: Bi; alt: "email" | "fax" | "mail"; days: number } {
+  if (channel !== "portal" || !d || !(facts.captchaHost || d.captcha)) return { channel };
+  const alt = pick(f, d, { ...env, channels: env.channels.filter((c) => c !== "portal") }, { ...facts, captchaHost: false });
+  if (alt !== "email" && alt !== "fax" && alt !== "mail") return { channel };   // no way without one: the portal, team then owner
+  if (facts.captchaChoice === "route") return { channel: alt };
+  if (facts.captchaChoice === "me" || facts.captchaChoice === "team") return { channel };
+  const days = CHANNEL_DAYS[alt] - CHANNEL_DAYS.portal;
+  return { ask: captchaQuestion(alt, days), alt, days };
+}
 
 /** The worker goes to make this portal's account for the business: the business's agent authority covers making
     accounts, and the site takes a business's own account ("business"), or nobody has said yet ("unknown": the worker
@@ -332,19 +354,18 @@ export function pick(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Ro
   if (!d) return "team";
   if (d.owner) return "owner";
   const on = (c: Channel) => env.channels.includes(c);
-  // no saved login: the account is made first, by the worker, when Odelia may make it (worker/filer/src/account.ts).
-  // A site known to put a CAPTCHA in the way (Dest.captcha) loses to email, fax or mail when the agency takes one of
-  // those: a person would have to solve the CAPTCHA, and the other way needs nobody.
+  // no saved login: the account is made first, by the worker, when Odelia may make it (worker/filer/src/account.ts)
   if (d.portal && (facts.hasLogin || d.noLogin || facts.makesAccount) && env.portalWorker && on("portal")) {
-    const paper = d.captcha ? pickPaper(f, d, env, facts) : "team";
-    return paper === "email" || paper === "fax" || paper === "mail" ? paper : "portal";
+    // A portal that keeps showing CAPTCHAs: a way the agency accepts without one (email, fax or mail), when it isn't
+    // more than CAPTCHA_DETOUR_DAYS slower. Nothing is solved or bypassed either way: the portal's CAPTCHA would still go
+    // to the Placetta team, then the owner.
+    // known two ways: seen on recent runs (facts.captchaHost) or stated by the agency's own guide (Dest.captcha)
+    if ((facts.captchaHost || d.captcha) && facts.captchaChoice !== "me" && facts.captchaChoice !== "team") {
+      const alt = pick(f, d, { ...env, channels: env.channels.filter((c) => c !== "portal") }, { ...facts, captchaHost: false });
+      if ((alt === "email" || alt === "fax" || alt === "mail") && CHANNEL_DAYS[alt] - CHANNEL_DAYS.portal <= CAPTCHA_DETOUR_DAYS) return alt;
+    }
+    return "portal";
   }
-  return pickPaper(f, d, env, facts);
-}
-
-/** pick() without the agency's site: what the agency takes on paper or by email, else the business. */
-function pickPaper(f: Filing, d: Dest, env: Env, facts: Facts): Route {
-  const on = (c: Channel) => env.channels.includes(c);
   if (feeBlocks(f, d)) return checkPays(f, d, env, facts) ? "mail" : "team";
   if (d.signature === "wet") {
     if (!signedCopy(f)) return "team";
@@ -392,6 +413,8 @@ export function whyYours(f: Filing, d: Dest | undefined, env: Env, facts: Facts)
     worker writes these as the hand-back's ref (worker/filer/src/run.ts). Each is tried another way the agency takes,
     else handed to the business with its packet. */
 export const PORTAL_FAILED = new Set(["limit", "left_portal", "no_portal", "portal_failed", "review_differs", "page_injection", "unverified_playbook", "no_live_view", "teach_incomplete", "portal_blocked", WORKER_ASLEEP,
+  // the owner chose another way when the site showed a CAPTCHA mid-run (worker run.ts captchaAsk, captcha.ts)
+  "captcha_reroute",
   // Odelia couldn't make the business's account (worker/filer/src/account.ts): the site wants a person's own identity,
   // nobody has said yet whether an agent may make it, the agent authority doesn't cover it, or the agency's email never came
   "account_identity", "account_unknown", "account_authority", "account_no_mail"]);

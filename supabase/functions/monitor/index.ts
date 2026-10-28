@@ -28,6 +28,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { appLink, noticeText, urgency } from "../_shared/odelia.ts";
 import { HOOK_KINDS, hookData, hookDigest, hookPlan, postHook, type HookKind, type HookSchedule } from "../_shared/channels.ts";
+import { dbJobs, pollBatches } from "../_shared/batch.ts";
 import { deadlineRules } from "../_shared/business_rules.ts";
 // @deno-types="../_shared/opening.d.ts"
 import { appealFor, approvalsLine, daysLeft, deadlineFor, type FilingRow, finishWork, MAX_RESUMES, normalizeState, NOT_A_LAW_FIRM, openingLine, openingPath, resumable, runsOn, type Routine, stampFilings, TIERS } from "../_shared/opening.js";
@@ -1018,6 +1019,11 @@ Deno.serve(async (req) => {
   if (started.getUTCDay() === 1) {
     await weeklyGovernance(admin, today, MAIL_ON && FROM ? sendMail : null, APP).catch((e) => console.error("governance", String(e).slice(0, 160)));
   }
+
+  // Model calls nobody waits on, at half price (Anthropic's Message Batches API, _shared/batch.ts): what is queued goes
+  // in one batch, what has ended is written once and the batch deleted. Off unless ODELIA_BATCH=1.
+  const batches = await pollBatches((k) => Deno.env.get(k), dbJobs(admin)).catch((e) => { console.error("batches", String(e).slice(0, 160)); return null; });
+  if (batches && (batches.submitted || batches.written || batches.failed)) console.log("batches", JSON.stringify(batches));
 
   // Consent records for texts and calls are kept 5 years, then dropped.
   await admin.from("phone_consent_log").delete().lt("at", new Date(now - 5 * 365.25 * 864e5).toISOString());

@@ -310,6 +310,53 @@ test("failover: a value Gemini chose that isn't approved is refused exactly as C
   } finally { console.error = realErr; }
 });
 
+/* ------------------------------ the model cascade (cascade.ts) ------------------------------ */
+
+/** The scripted filer as a tiered model: records which tier answered each page; on its first look at the second page
+ *  the fast tier asks for a person, which goes up to the strong tier. */
+class Tiered extends Scripted {
+  tiered = true; tiers: { heading: string; tier: string }[] = []; askedOnce = false;
+  ledger: { tier: "fast" | "strong"; model: string; input: number; output: number; cache_read: number; cache_write: number; usd: number }[] = [];
+  override async next(i: StepInput): Promise<ToolCall> {
+    const tier = i.tier ?? "fast";
+    this.tiers.push({ heading: i.state.headings[0] ?? i.state.title, tier });
+    this.ledger.push({ tier, model: tier === "fast" ? "anthropic:claude-haiku-5-5" : "anthropic:claude-opus-5-5", input: 1500, output: 250, cache_read: 1500, cache_write: 0, usd: tier === "fast" ? 0.0003 : 0.03 });
+    if (tier === "fast" && !this.askedOnce && /Owner/.test(i.state.headings[0] ?? i.state.title)) { this.askedOnce = true; this.calls++; return { name: "need_person", input: { reason: "unsure", message: "Which owner?" } }; }
+    return super.next(i);
+  }
+  take() { const l = this.ledger; this.ledger = []; return l; }
+}
+
+test("the cascade on a whole run: routine pages fast, the review page strong, a fast need_person re-asked of the strong model; guards unchanged", async () => {
+  const p = await portal(), store = new Mem(), m = new Tiered();
+  const r = await worker(store, m, p.url).run(store.f);
+  assert.equal(r?.kind, "submitted");
+  assert.equal(p.submissions, 1, "submitted once, through the same final-submit guard");
+  const review = m.tiers.filter((t) => /Review/.test(t.heading));
+  assert.ok(review.length > 0 && review.every((t) => t.tier === "strong"), "the review page and its final submit: the strong model");
+  const owner = m.tiers.filter((t) => /Owner/.test(t.heading));
+  assert.deepEqual(owner.slice(0, 2).map((t) => t.tier), ["fast", "strong"], "need_person from the fast model goes to the strong one, not the owner");
+  assert.ok(!store.f.agent_log.some((e) => e.kind === "need_person"), "the strong model carried on; nobody was asked");
+  assert.ok(m.tiers.filter((t) => t.tier === "fast").length > m.tiers.filter((t) => t.tier === "strong").length, "most steps are fast");
+  // the filing log: one quiet line with the counts by tier, and no model, token or price (docs/SECURITY.md)
+  const line = store.f.agent_log.find((e) => e.ref === "ai");
+  assert.ok(line && line.kind === "quiet" && /routine steps/.test(line.en) && /本次运行/.test(line.zh));
+  assert.ok(!/claude|haiku|opus|\$|token/i.test(JSON.stringify(store.f.agent_log)), "nothing about models or money in what the customer's app reads");
+});
+
+test("the run's ledger goes to filer_runs (provider, tier, model, tokens, cost) before the run's token ends", async () => {
+  const p = await portal(), store = new Mem() as Mem & { usage?: unknown; ended?: boolean };
+  (store as unknown as { runUsage: (u: unknown) => Promise<void> }).runUsage = async (u) => { store.usage = u; };
+  const m = new Tiered();
+  const open = async (h?: string) => ({ ...(await openBrowser(h)), provider: "local" as const });
+  await worker(store, m, p.url, { open }).run(store.f);
+  const u = store.usage as { provider: string; calls: number; usd: number; by_tier: Record<string, { calls: number }>; steps: { tier: string; model: string }[] };
+  assert.equal(u.provider, "local");
+  assert.ok(u.calls > 5 && u.usd > 0);
+  assert.ok(u.by_tier.fast.calls > 0 && u.by_tier.strong.calls > 0);
+  assert.ok(u.steps.some((s) => s.model === "anthropic:claude-opus-5-5" && s.tier === "strong"));
+});
+
 /* ------------------------------ isolation between runs ------------------------------ */
 
 /** Opens a real browser like the worker does, and keeps what the test needs to look at afterwards. */

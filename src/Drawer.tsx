@@ -606,6 +606,9 @@ function FinishStep({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>[
   const kitable = ask?.kind === "wet_signature" && (ask.ref === "upload" || ask.ref === "kit_return");
   // The same form with the same answers as one already sent: going on means sending it again, so the button says so.
   const duplicate = ask?.kind === "needs_you" && ask.ref === "duplicate";
+  // The agency's site shows a "prove you're human" check: the owner picks who handles it (file function captcha_choice)
+  const captcha = (ask?.kind === "needs_you" || ask?.kind === "need_person") && ask.ref === "captcha_choice";
+  const otherWay = captcha && /\(c\)/.test(ask?.en ?? "");
   // the business sends it itself (file function: sentByYou)
   const yours = ask?.kind === "wet_signature" || (ask?.kind === "needs_you" && (ask.ref === "yours" || ask.ref === "owner_packet"));
   // a live step on the agency's own page (a CAPTCHA, a code, an ID check, the agency's fee): the browser waits there with
@@ -632,6 +635,13 @@ function FinishStep({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>[
               <input type="file" accept="application/pdf,image/jpeg,image/png" hidden disabled={busy}
                 onChange={e => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void cloud?.uploadSigned(f.id, f.app_id, file); }} />
             </label>{sent}</>
+          : captcha
+          ? <>
+              <button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.captchaChoice(f.id, "me")}>{zh ? "我来完成" : "I'll do it"}</button>
+              <button type="button" className="pill quiet sm" disabled={busy} onClick={() => void cloud?.captchaChoice(f.id, "team")}>{zh ? "由快哉团队完成" : "Placetta's team does it"}</button>
+              {otherWay && <button type="button" className="pill quiet sm" disabled={busy} onClick={() => void cloud?.captchaChoice(f.id, "route")}>{zh ? "改用其他方式" : "Send it another way"}</button>}
+              <button type="button" className="pill quiet sm" disabled={busy} onClick={() => void cloud?.captchaChoice(f.id, "ask")}>{zh ? "每次都问我" : "Ask me each time"}</button>
+            </>
           : duplicate
           ? <button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.resumeFiling(f.id, true)}>{zh ? "再次提交" : "Send it again"}</button>
           : yours
