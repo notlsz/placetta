@@ -42,7 +42,7 @@ services:
       - key: STEEL_API_KEY
         sync: false                      # app.steel.dev, sign up (free plan), API Keys. Not needed with BROWSER_PROVIDER local
       - key: FILER_SECRET
-        sync: false                      # the same value as the Supabase secret FILER_SECRET (32+ characters; make one with: openssl rand -hex 32)
+        generateValue: true              # Render makes a random 256-bit value; copy it from the service's Environment tab to the Supabase secret FILER_SECRET
       # ---- set for you ----
       - key: BROWSER_PROVIDER
         value: steel                     # steel (the free start), browserbase, or local (Chromium in this container: plan standard)
