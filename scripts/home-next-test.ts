@@ -14,6 +14,7 @@ import { doNext, nextRenewal, todos } from "../src/doNext";
 import { daysFromNow } from "../src/time";
 import type { Workspace } from "../src/model";
 import { intakeParseTests } from "./intake-parse-test";
+import { firstRunTests } from "./first-run-test";
 
 type Ok = (cond: unknown, m: string, detail?: unknown) => void;
 const noop = () => undefined;
@@ -77,4 +78,5 @@ let fails = 0;
 const ok: Ok = (cond, m, extra) => { if (cond) console.log("ok  ", m); else { console.error("FAIL", m, extra === undefined ? "" : JSON.stringify(extra).slice(0, 400)); fails++; } };
 homeNextTests(ok);
 intakeParseTests(ok);
+firstRunTests(ok);
 if (fails) { console.error(`\n${fails} failed`); process.exit(1); } else console.log("\nall passed");
