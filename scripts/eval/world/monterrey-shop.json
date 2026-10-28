@@ -1,0 +1,186 @@
+{
+ "id": "monterrey-shop",
+ "title": "A gift shop in Monterrey",
+ "read": "2026-10-27",
+ "input": {
+  "what": "Gift shop",
+  "where": "Monterrey, Mexico",
+  "lang": "en"
+ },
+ "assumptions": "A new Mexican company opening a gift shop with staff, a fit-out and a sign.",
+ "items": [
+  {
+   "key": "mx-sociedad",
+   "name": "Company incorporation before a Mexican notary (fedatario público)",
+   "agency": "Notario or corredor público, then the Registro Público de Comercio",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.sat.gob.mx/gobmx/Paginas/Ficha_43_cff.html",
+   "quote": "Documento constitutivo protocolizado (copia certificada).",
+   "quoteEn": "Notarised deed of incorporation (certified copy).",
+   "read": "2026-10-21",
+   "match": "\\bmx-sociedad\\b",
+   "agencyMatch": "Notario or corredor público"
+  },
+  {
+   "key": "mx-rfc",
+   "name": "Federal taxpayer registration (RFC) with the SAT",
+   "agency": "Servicio de Administración Tributaria (SAT)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.sat.gob.mx/gobmx/Paginas/Ficha_43_cff.html",
+   "quote": "Personas morales de nueva creación a través de sus representantes legales",
+   "quoteEn": "Newly created companies, through their legal representatives",
+   "read": "2026-10-21",
+   "match": "\\bmx-rfc\\b",
+   "agencyMatch": "Servicio de Administración Tributaria"
+  },
+  {
+   "key": "mx-efirma",
+   "name": "Advanced electronic signature (e.firma) with the SAT",
+   "agency": "Servicio de Administración Tributaria (SAT)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.sat.gob.mx/gobmx/Paginas/ficha_105_cff.html",
+   "quote": "Es necesario que el representante legal de la persona moral haya tramitado previamente su certificado de e.firma",
+   "quoteEn": "The company's legal representative must first have obtained their own e.firma certificate",
+   "read": "2026-10-27",
+   "match": "\\bmx\\-efirma\\b",
+   "agencyMatch": "Servicio\\ de\\ Administración\\ Tributaria"
+  },
+  {
+   "key": "mx-mty-edificacion",
+   "name": "Building use licence (uso de edificación), or the SARE fast track",
+   "agency": "Municipio de Monterrey, Secretaría de Desarrollo Urbano Sostenible",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.monterrey.gob.mx/pdf/new/Procedimientos/Sedue/P_SDU_DEC_16_Licencia_del_Uso_de_Edificacion.pdf",
+   "quote": "solicitar la autorización del municipio para hacer construcciones en diferentes zonas habitacionales y determinar el funcionamiento específico del predio",
+   "quoteEn": "apply for the city's authorisation to build in different zones and set the property's specific use",
+   "read": "2026-10-21",
+   "match": "\\bmx-mty-edificacion\\b",
+   "agencyMatch": "Municipio de Monterrey"
+  },
+  {
+   "key": "mx-siem",
+   "name": "Business registry entry for each establishment (SIEM)",
+   "agency": "Secretaría de Economía, through an authorised business chamber",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LCEC_120419.pdf",
+   "quote": "Todos los Comerciantes e Industriales, sin excepción y obligatoriamente, deberán de registrar y actualizar anualmente cada uno de sus establecimientos en el SIEM.",
+   "quoteEn": "All merchants and industrialists, without exception, must register and update every year each of their establishments in the SIEM.",
+   "read": "2026-10-27",
+   "match": "\\bmx\\-siem\\b",
+   "agencyMatch": "Secretaría\\ de\\ Economía"
+  },
+  {
+   "key": "mx-imss",
+   "name": "Employer registration with the IMSS",
+   "agency": "Instituto Mexicano del Seguro Social (IMSS)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://ventanillamipymes.economia.gob.mx/inscripcion-al-imss-persona-moral/",
+   "quote": "Este trámite te permite registrarte ante el Instituto Mexicano del Seguro Social (IMSS) para cumplir con tus obligaciones patronales.",
+   "quoteEn": "This procedure registers you with the Mexican Social Security Institute (IMSS) to meet your obligations as an employer.",
+   "read": "2026-10-22",
+   "match": "\\bmx\\-imss\\b",
+   "agencyMatch": "Instituto\\ Mexicano\\ del\\ Seguro\\ Social"
+  },
+  {
+   "key": "mx-infonavit",
+   "name": "Employer registration with the workers' housing fund (INFONAVIT)",
+   "agency": "Instituto del Fondo Nacional de la Vivienda para los Trabajadores (INFONAVIT)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LIFNVT.pdf",
+   "quote": "Proceder a inscribirse e inscribir a sus trabajadores en el Instituto y dar los avisos a que se refiere el Artículo 31",
+   "quoteEn": "Register with the Institute and register its workers, and give the notices article 31 requires",
+   "read": "2026-10-27",
+   "match": "\\bmx\\-infonavit\\b",
+   "agencyMatch": "Instituto\\ del\\ Fondo\\ Nacional\\ de\\ la\\ Vivienda\\ para\\ los\\ Trabajadores"
+  },
+  {
+   "key": "mx-nle-isn",
+   "name": "State payroll tax registration (Nuevo León)",
+   "agency": "Secretaría de Finanzas y Tesorería General del Estado de Nuevo León",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.hcnl.gob.mx/trabajo_legislativo/leyes/leyes/ley_de_hacienda_del_estado_de_nuevo_leon/",
+   "quote": "Es objeto de este impuesto la realización de pagos en efectivo, en servicios o en especie por concepto de remuneraciones al trabajo personal,",
+   "quoteEn": "The tax falls on payments in cash, services or kind as pay for personal work,",
+   "read": "2026-10-27",
+   "match": "\\bmx\\-nle\\-isn\\b",
+   "agencyMatch": "Secretaría\\ de\\ Finanzas\\ y\\ Tesorería\\ General\\ del\\ Estado\\ de\\ Nuevo\\ León"
+  },
+  {
+   "key": "mx-mty-pc",
+   "name": "Civil protection sign-off",
+   "agency": "Municipio de Monterrey, Dirección de Protección Civil",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.hcnl.gob.mx/trabajo_legislativo/leyes/leyes/ley_de_proteccion_civil_para_el_estado_de_nuevo_leon/",
+   "quote": "tienen la obligación de contar permanentemente con un programa especifico de Protección Civil, Plan de Contingencias,",
+   "quoteEn": "are obliged to keep at all times a specific civil protection programme, a contingency plan,",
+   "read": "2026-10-27",
+   "match": "\\bmx\\-mty\\-pc\\b",
+   "agencyMatch": "Municipio\\ de\\ Monterrey"
+  },
+  {
+   "key": "mx-mty-anuncio",
+   "name": "Sign licence (licencia de anuncios)",
+   "agency": "Municipio de Monterrey, Secretaría de Desarrollo Urbano Sostenible",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.hcnl.gob.mx/trabajo_legislativo/leyes/leyes/ley_de_asentamientos_humanos_ordenamiento_territorial_y_desarrollo_urbano_para_el_estado_de_nuevo_le/",
+   "quote": "Expedir las licencias para la instalación de anuncios, sujetándose a la normatividad establecida;",
+   "quoteEn": "To issue the licences to install signs, under the rules in force (a power of the municipalities, article 11)",
+   "read": "2026-10-27",
+   "match": "\\bmx\\-mty\\-anuncio\\b",
+   "agencyMatch": "Municipio\\ de\\ Monterrey"
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "US filings",
+   "why": "Not in the US.",
+   "match": "irs-|cbp-|fincen|\\bEIN\\b|secretary of state"
+  },
+  {
+   "name": "EU-wide rules",
+   "why": "Not in the EU.",
+   "match": "\\beu-"
+  },
+  {
+   "name": "Mexico City's steps",
+   "why": "Not in Mexico City.",
+   "match": "mx-cdmx|mx-mx-cmx"
+  },
+  {
+   "name": "Food steps",
+   "why": "A gift shop sells no food.",
+   "match": "cofepris"
+  }
+ ]
+}
