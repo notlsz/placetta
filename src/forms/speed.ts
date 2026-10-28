@@ -52,6 +52,8 @@ export function speedSources(forms: OfficialForm[]): { id: string; read: string;
     (f.expedite ?? []).forEach((x, k) => out.push({ id: `${f.id}:expedite:${k}`, read: x.source.url, quote: x.source.quote }));
     if (f.entity?.agent?.source) out.push({ id: `${f.id}:agent`, read: f.entity.agent.source.url, quote: f.entity.agent.source.quote });
     if (f.entity?.report?.source) out.push({ id: `${f.id}:report`, read: f.entity.report.source.url, quote: f.entity.report.source.quote });
+    if (f.entity?.eligibility) out.push({ id: `${f.id}:eligibility`, read: f.entity.eligibility.source.url, quote: f.entity.eligibility.source.quote });
+    if (f.entity?.report?.feeSource) out.push({ id: `${f.id}:report-fee`, read: f.entity.report.feeSource.url, quote: f.entity.report.feeSource.quote });
   }
   return out;
 }

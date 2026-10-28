@@ -19,8 +19,10 @@ import { INTL_FORMS } from "./intl";
 import { FINISH_FIXES, FINISH_FORMS } from "./finish";
 import { SECTOR_FORMS } from "./sectors";
 import { EXPANSION_FIXES, EXPANSION_FORMS } from "./expansion";
-import { VERIFY_FIXES, VERIFY_FORMS, VERIFY_REFERENCE } from "./verify";
+import { VERIFY_BLOCKED, VERIFY_FIXES, VERIFY_FORMS, VERIFY_REFERENCE } from "./verify";
 import { NATIONS_FIXES, NATIONS_FORMS } from "./nations";
+import { applyEntities, buildState, sElection } from "./entities";
+import { ENTITY_STATES } from "./entity-data";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -35,7 +37,8 @@ export type FormField = { id: string; line: string; label: Bi; hint?: Bi; option
 export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; alcohol?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; outOfState?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean; reference?: boolean;
   wood?: boolean; upholstered?: boolean; clothingStorage?: boolean;
   salon?: boolean; autoRepair?: boolean; devices?: boolean; manufactures?: boolean; office?: boolean;   // the landing page's sectors (src/forms/sectors.ts)
-  terrace?: boolean };   // terrace: tables and chairs outside on the street (a pavement licence, a terrasse, a Sondernutzung)   // furniture: wood goods, upholstered furniture, clothing storage units (src/forms/furniture.ts)   // reference: listed in the library and answers, never added to a plan
+  terrace?: boolean;
+  corp?: boolean };   // corp: the company is (or will be) a corporation, not an LLC (src/forms/entities.ts)   // terrace: tables and chairs outside on the street (a pavement licence, a terrasse, a Sondernutzung)   // furniture: wood goods, upholstered furniture, clothing storage units (src/forms/furniture.ts)   // reference: listed in the library and answers, never added to a plan
 
 export type SignSpot = { page: number; x: number; y: number; w: number; h: number; date?: { x: number; y: number; size: number } };
 
@@ -112,13 +115,18 @@ export type EntityAction = "form" | "qualify" | "election";
 export type EntityFiling = {
   kind: EntityKind; action: EntityAction;
   /** Must the company keep a registered (or statutory, or resident) agent in the state? With its source. */
-  agent?: { required: boolean; source?: FactSource };
+  agent?: { required: boolean; source?: FactSource; note?: Bi };
   /** The recurring report Odelia renews: its name, fee, due-date rule in words, and its source. */
-  report?: { name: Bi; feeUsd: number | null; due: Bi; source?: FactSource };
+  report?: { name: Bi; feeUsd: number | null; due: Bi; source?: FactSource; feeSource?: FactSource };
   /** Why the row has no proof: the official page refused automated reads (VERIFY_BLOCKED style), for a person to read. */
   blocked?: string;
   /** The portal's flow needs an account login before any form is shown: no playbook is written for it. */
   loginOnly?: boolean;
+  /** Why no processing time or expedite tier is stated though the filing itself is verified (the page that has them
+      refused automated reads): for a person to read in a browser. */
+  speedBlocked?: string;
+  /** Who may use it, when the agency limits it (the S election: no nonresident alien shareholders). */
+  eligibility?: { note: Bi; source: FactSource };
 };
 
 const F = (id: string, line: string, en: string, zh: string, options?: string[], hint?: Bi): FormField => ({ id, line, label: B(en, zh), ...(options ? { options } : {}), ...(hint ? { hint } : {}) });
@@ -785,6 +793,18 @@ for (const f of FORMS) { const p = PROOF[f.id]; if (p && !f.proof) { f.proof = p
 // pointed at another city's page; a filing that applies only to some businesses becomes a library reference
 export const AUDIT_MISSING = [...applyFixes(FORMS), ...applyFixes(FORMS, FINISH_FIXES), ...applyFixes(FORMS, EXPANSION_FIXES), ...applyFixes(FORMS, VERIFY_FIXES), ...applyFixes(FORMS, NATIONS_FIXES),
   ...VERIFY_REFERENCE.filter(id => { const f = FORMS.find(x => x.id === id); if (f) f.needs = { ...f.needs, reference: true }; return !f; })];
+
+/* Company formation and foreign qualification in every state and DC (src/forms/entities.ts, the data in
+   src/forms/entity-data.ts): the LLC's and the corporation's formation, and the registration of a company formed
+   elsewhere, each with its processing time, expedite tiers, registered agent rule and recurring report. Last, so the
+   rows the library already had (California's LLC-1, Texas's Form 205) get this pass's facts; plus the S election. */
+export const ENTITY_ROWS = ENTITY_STATES.flatMap(buildState);
+export const ENTITY_MISSING = [...applyEntities(FORMS, ENTITY_ROWS), ...sElection(FORMS, {
+  foreign: ["https://www.irs.gov/instructions/i2553", "It has no nonresident alien shareholders (other than as potential current beneficiaries of an ESBT)."],
+  due: ["https://www.irs.gov/instructions/i2553", "Form 2553 generally must be filed no later than 2 months and 15 days after the date entered for item E."],
+})];
+// a company row whose official page couldn't be read says what blocked it, as every unverified entry does
+for (const x of ENTITY_ROWS) { const f = FORMS.find(g => g.id === x.form.id); if (f && !f.proof && f.entity?.blocked) VERIFY_BLOCKED[f.id] = f.entity.blocked; }
 
 export const formById = (id: string) => FORMS.find(f => f.id === id);
 

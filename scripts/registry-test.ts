@@ -13,6 +13,7 @@ import { AUDIT_MISSING, FORMS, formsFor, placesOf } from "../src/forms/registry"
 import { KIND_FACTS } from "../src/forms/kinds";
 import { CITIES, COUNTRIES, STATES, EU_MEMBERS } from "../src/forms/world";
 import { COUNTIES } from "../src/forms/usplace";
+import { STATES as US_STATES } from "../src/plan/line";
 import { US_GAPS } from "../src/forms/us-gaps";
 import { INTL_FORMS } from "../src/forms/intl";
 import { MEXICO_GAPS } from "../src/forms/mexico";
@@ -29,6 +30,8 @@ const US_CODES = new Set<string>(["US", "NY", "CA", "TX", ...STATES.map(s => s.c
   ...CITIES.filter(c => c.country === "US").map(c => c.code)]);
 // county-like codes the registry files under that aren't in COUNTIES (the Las Vegas split, unincorporated LA County)
 for (const c of ["NYC", "LA", "HOU", "LACU", "CLK", "LVC", "SNHD", "LV"]) US_CODES.add(c);
+// every state and DC: the company filings (src/forms/entities.ts) are filed under each state's own code
+for (const [c] of US_STATES) US_CODES.add(c);
 const ABROAD = new Set<string>(["EU", ...EU_MEMBERS, ...COUNTRIES.filter(c => c.code !== "US").map(c => c.code),
   ...CITIES.filter(c => c.country !== "US").flatMap(c => [c.code, ...(c.state ? [c.state] : [])])]);
 
