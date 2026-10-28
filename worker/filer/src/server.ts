@@ -24,7 +24,7 @@ export function healthBody(h: Health, live: LiveViews) {
   return {
     ok: h.env.ok, worker: h.env.ok ? "running" : "missing_keys",
     missing: h.env.missing.map((m) => ({ key: m.key, where: m.where })), warnings: h.env.warnings,
-    browser: h.env.browser, remote_browser: h.env.remote, wake_on_demand: h.env.wake,
+    models_ready: h.env.models.length, browser: h.env.browser, remote_browser: h.env.remote, wake_on_demand: h.env.wake,
     live_view: live.on || h.env.remote || h.env.browser === "browserbase", version: h.version, started: h.started,
     playbooks: h.playbooks, public_pages_checked_nightly: h.probes,
     heartbeat: h.lastHeartbeat, heartbeat_error: h.lastHeartbeatError, last_claim: h.lastClaim, nightly_check: h.lastProbe, nightly_drift: h.probeDrift,

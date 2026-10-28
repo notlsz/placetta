@@ -3,6 +3,7 @@
 // the worker's functions, Chromium starts, and a public agency page opens. Exit code 0 when everything passes.
 import { defaultDeps, launcher } from "./browsers.ts";
 import { checkEnv, missingLines } from "./env.ts";
+import { askSeat, KEY_OF, redact, usableSeats } from "./llm.ts";
 import { readPublic } from "./probe.ts";
 import { PLAYBOOKS } from "./playbooks.ts";
 import { dbKey, SupabaseStore } from "./store.ts";
@@ -12,16 +13,19 @@ const lines: [boolean, string][] = [];
 const say = (ok: boolean, line: string) => { lines.push([ok, line]); console.log(`${ok ? "yes " : "FIX "} ${line}`); };
 
 const env = checkEnv(process.env);
-say(env.ok, env.ok ? "keys: SUPABASE_URL, the database key and ANTHROPIC_API_KEY are set" : `keys: ${missingLines(env).join("; ")}`);
+say(env.ok, env.ok ? `keys: SUPABASE_URL, the database key and a model key are set (models in failover order: ${env.models.join(", ")})` : `keys: ${missingLines(env).join("; ")}`);
 for (const w of env.warnings) console.log(`note ${w}`);
 say(true, `browser: ${env.provider === "steel" ? "Steel for every run (no Chromium in this container)" : env.provider === "browserbase" ? "Browserbase for every run (no Chromium in this container)"
   : env.browser === "local" ? "local Chromium in the container (Browserbase not needed)" : "Browserbase for the hosts that refuse a cloud server, local Chromium for the rest"}`);
 say(!!env.publicUrl || env.browser !== "local", env.publicUrl ? `live browser for hand-backs at ${env.publicUrl}/live/...` : "live browser: no public address; on Render, RENDER_EXTERNAL_URL is set for a web service");
 say(env.wake, env.wake ? "wake on demand: FILER_SECRET is set (use the same value in the Supabase secrets, with FILER_URL)" : "wake on demand: set FILER_SECRET (32+ characters, the same as the Supabase secret) so the app can wake a sleeping worker");
 
-if (process.env.ANTHROPIC_API_KEY) {
-  const r = await fetch("https://api.anthropic.com/v1/models", { headers: { "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" } }).catch(() => null);
-  say(!!r?.ok, r?.ok ? "Anthropic key works" : `Anthropic key refused (${r?.status ?? "no answer"}): make a new one at console.anthropic.com`);
+// every model seat answers a one-tool question (a model call has no side effects); one that doesn't is a failover gap
+const penv = (k: string) => process.env[k];
+for (const s of usableSeats(penv)) {
+  const probe = { prompt: "Health check. Call the ok tool.", tools: [{ name: "ok", description: "Say the check passed.", input_schema: { type: "object", properties: { passed: { type: "boolean" } }, required: ["passed"] } }], only: "ok", maxTokens: 200 };
+  const err = await askSeat(s, probe, penv).then(() => null, (e: Error) => redact(`${(e as { status?: number }).status ?? ""} ${e?.message ?? e}`.trim(), penv).slice(0, 160));
+  say(err === null, err === null ? `model ${s.vendor}:${s.model} answers with a tool call` : `model ${s.vendor}:${s.model} refused (${err || "no answer"}): check ${KEY_OF[s.vendor]} and that account's spend limit`);
 }
 if (env.ok) {
   try {

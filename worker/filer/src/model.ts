@@ -1,20 +1,13 @@
-// Claude picks one tool per step from the compact page state. The worker carries the tool out and the guards apply
-// whatever is chosen. Tests swap in a scripted model.
-import { ZDR_REFUSED, zdrAllows } from "../../../supabase/functions/_shared/zdr.ts";
+// The model picks one tool per step from the compact page state. The worker carries the tool out and the guards apply
+// whatever is chosen, whichever model chose it (llm.ts: Anthropic, Gemini, OpenRouter or Muse, failing over in the order
+// FILER_MODELS sets). Tests swap in a scripted model.
 import type { PageState } from "./guards.ts";
+import { Router, type ToolCall } from "./llm.ts";
 import { headingOf, shortText } from "./page.ts";
 import type { LabelIn, LabelOut } from "./teach.ts";
 import type { Filing } from "./types.ts";
 
-/** The API's own reason for a refusal ("credit balance is too low", a bad field), so a log says what to fix. Never the
- *  request: only the error's type and message, trimmed. */
-async function apiWhy(res: Response): Promise<string> {
-  const j = await res.json().catch(() => null) as { error?: { type?: string; message?: string } } | null;
-  const t = [j?.error?.type, j?.error?.message].filter(Boolean).join(": ").replace(/sk-ant-[\w-]+/g, "•••").replace(/\s+/g, " ").slice(0, 160);
-  return t ? `: ${t}` : "";
-}
-
-export type ToolCall = { name: string; input: Record<string, unknown> };
+export type { ToolCall };
 /** account: while the worker makes the business's account on the site (account.ts accountNote): what to do, with no
  *  password and nothing from the inbox. */
 export type StepInput = { filing: Filing; agency: string; state: PageState; recent: string[]; note?: string; guide?: string[]; account?: string };
@@ -59,29 +52,12 @@ export function prompt(i: StepInput): string {
   ].join("\n");
 }
 
-export class AnthropicModel implements Model {
-  calls = 0;
-  private key: string; private model: string; private env: (k: string) => string | undefined;
-  constructor(key: string, model = process.env.FILER_MODEL ?? "claude-sonnet-5-5", env: (k: string) => string | undefined = (k) => process.env[k]) {
-    this.key = key; this.model = model; this.env = env;
-  }
-  async next(i: StepInput): Promise<ToolCall> {
-    // the filing payload and the portal's page go to Anthropic: refused unless it's on the zero-retention list, when one
-    // is required (the run then fails over to the Placetta team like any model error)
-    if (!zdrAllows(this.env, "anthropic", this.model)) throw new Error(ZDR_REFUSED);
-    this.calls++;
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-api-key": this.key, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: this.model, max_tokens: 800, tools: TOOLS, tool_choice: { type: "any" }, messages: [{ role: "user", content: prompt(i) }] }),
-      signal: AbortSignal.timeout(90000),
-    });
-    if (!res.ok) throw new Error(`model error ${res.status}${await apiWhy(res)}`);
-    const body = await res.json() as { content?: { type: string; name?: string; input?: Record<string, unknown> }[] };
-    const use = body.content?.find((c) => c.type === "tool_use");
-    if (!use?.name) throw new Error("model chose no tool");
-    return { name: use.name, input: use.input ?? {} };
-  }
+/** A filing step, asked of the models in order (llm.ts Router): the first that answers with a tool call decides it. */
+export class FilerModel implements Model {
+  readonly router: Router;
+  get calls() { return this.router.calls; }
+  constructor(router = new Router()) { this.router = router; }
+  next(i: StepInput): Promise<ToolCall> { return this.router.ask({ prompt: () => prompt(i), tools: TOOLS, maxTokens: 800 }); }
 }
 
 // ---------------------------------------------------------------- teach mode's labels
@@ -108,21 +84,10 @@ export function labelPrompt(i: LabelIn): string {
     "For each page give its heading exactly as above, a short name for it (a few words from the heading), and one plain sentence a business owner would understand about what happens there. For each unmapped field, give the fact key it is, only when you're sure; leave it out otherwise. Use only the keys listed.",
   ].join("\n");
 }
-export class AnthropicLabeler {
-  private key: string; private model: string; private env: (k: string) => string | undefined;
-  constructor(key: string, model = process.env.FILER_MODEL ?? "claude-sonnet-5-5", env: (k: string) => string | undefined = (k) => process.env[k]) {
-    this.key = key; this.model = model; this.env = env;
-  }
-  label = async (i: LabelIn): Promise<LabelOut> => {
-    if (!zdrAllows(this.env, "anthropic", this.model)) throw new Error(ZDR_REFUSED);
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-api-key": this.key, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: this.model, max_tokens: 2000, tools: [LABEL_TOOL], tool_choice: { type: "tool", name: "label_steps" }, messages: [{ role: "user", content: labelPrompt(i) }] }),
-      signal: AbortSignal.timeout(90000),
-    });
-    if (!res.ok) throw new Error(`model error ${res.status}${await apiWhy(res)}`);
-    const body = await res.json() as { content?: { type: string; input?: LabelOut }[] };
-    return body.content?.find((c) => c.type === "tool_use")?.input ?? {};
-  };
+/** Teach mode's labels, from the same models in the same order. */
+export class FilerLabeler {
+  private router: Router;
+  constructor(router = new Router()) { this.router = router; }
+  label = async (i: LabelIn): Promise<LabelOut> =>
+    (await this.router.ask({ prompt: () => labelPrompt(i), tools: [LABEL_TOOL], only: LABEL_TOOL.name, maxTokens: 2000 })).input as LabelOut;
 }

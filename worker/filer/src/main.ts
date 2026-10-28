@@ -11,7 +11,8 @@ import { accountOf } from "../../../supabase/functions/file/accounts.ts";
 import { defaultDeps, launcher, opener } from "./browsers.ts";
 import { checkEnv, missingLines } from "./env.ts";
 import { LiveViews } from "./live.ts";
-import { AnthropicLabeler, AnthropicModel } from "./model.ts";
+import { FilerLabeler, FilerModel } from "./model.ts";
+import { Router, usableSeats } from "./llm.ts";
 import { PLAYBOOKS, playbookFor } from "./playbooks.ts";
 import { checkAll, findingsOf, probeDue, probesOf } from "./probe.ts";
 import { type Route, Worker, type Session } from "./run.ts";
@@ -21,7 +22,7 @@ import { startServer, type Health } from "./server.ts";
 import { KeyLock } from "./heal.ts";
 import { cardsOn } from "./card.ts";
 import { Waker } from "./wake.ts";
-import { AnthropicStatusModel, runStatusCheck, sessionPage, type StatusModel, type StatusStore } from "./status.ts";
+import { FilerStatusModel, runStatusCheck, sessionPage, type StatusModel, type StatusStore } from "./status.ts";
 
 /** The destination's tenant path, other hosts and start page, from destinations.ts like its host. */
 export const routeOf = (id: string): Route | null => {
@@ -73,7 +74,7 @@ export const settings = () => ({
 export const slots = (env: Record<string, string | undefined>) => Math.min(4, Math.max(1, Math.floor(Number(env.FILER_CONCURRENCY ?? "1")) || 1));
 
 /** One queued portal status check (status.ts), when there is one and FILER_STATUS_CHECKS isn't 0. True when it ran. */
-export async function statusOnce(store: StatusStore, open: (host?: string) => Promise<Session>, model: StatusModel | null = process.env.ANTHROPIC_API_KEY ? new AnthropicStatusModel(process.env.ANTHROPIC_API_KEY) : null): Promise<boolean> {
+export async function statusOnce(store: StatusStore, open: (host?: string) => Promise<Session>, model: StatusModel | null = usableSeats((k) => process.env[k]).length ? new FilerStatusModel() : null): Promise<boolean> {
   if (process.env.FILER_STATUS_CHECKS === "0" || !model) return false;
   const j = await store.claimStatus();
   if (!j) return false;
@@ -152,8 +153,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const open = counted(opener(defaultDeps(process.env)), runs);
   const loop = async () => {
     const store = new SupabaseStore(process.env.SUPABASE_URL!, dbKey(process.env, () => undefined));
-    const w = new Worker({ store, model: new AnthropicModel(process.env.ANTHROPIC_API_KEY!), open, portalOf: (id) => DEST[id]?.portal ?? null,
-      routeOf, playbookOf: playbookFor, lock, labeler: new AnthropicLabeler(process.env.ANTHROPIC_API_KEY!).label, live, cards: cardsOn(process.env), ...settings() });
+    // one router per slot: its filing steps and teach mode's labels share the order and which seats are sitting out
+    const router = new Router();
+    const w = new Worker({ store, model: new FilerModel(router), open, portalOf: (id) => DEST[id]?.portal ?? null,
+      routeOf, playbookOf: playbookFor, lock, labeler: new FilerLabeler(router).label, live, cards: cardsOn(process.env), ...settings() });
     for (;;) {
       try {
         health.running++;

@@ -66,6 +66,16 @@ services:
       - key: NODE_OPTIONS
         value: "--max-old-space-size=320" # fits the free plan's 512 MB; on standard, 512
       # ---- optional, add later in Render, placetta-filer, Environment ----
+      # Odelia's models (SETUP.md "Odelia's models"): any one key runs the worker; a second keeps it filing when one
+      # vendor hits a spend limit or goes down (each step tries the next, and a model call has no side effects)
+      # GEMINI_API_KEY, GEMINI_PAID=1      Gemini 3.8 Flash (native API, function calling); without GEMINI_PAID=1 the key gets
+      #                                    no filing (Google's free tier may use prompts)
+      # OPENROUTER_API_KEY                 openrouter.ai: anthropic/claude-sonnet-5.5 through hosts other than our Anthropic
+      #                                    account, or any model in FILER_MODELS; hosts that keep or train on prompts are refused
+      # MUSE_API_KEY                       dev.meta.ai: Meta's muse-spark-1.3 (never a -contributor model)
+      # FILER_MODELS                       the order, e.g. anthropic:claude-sonnet-5-5,gemini:gemini-3.8-flash,openrouter:anthropic/claude-sonnet-5.5
+      #                                    (else ODELIA_MODELS, else Anthropic, Gemini, OpenRouter, Muse, whichever have keys)
+      # FILER_MODEL_COOLDOWN_S             seconds a vendor that hit a limit or was down sits out (default 120)
       # FILER_DB_KEY                       the filer's own least-privilege key (runbook above); then delete SUPABASE_SERVICE_ROLE_KEY
       # BROWSERBASE_API_KEY, BROWSERBASE_PROJECT_ID
       #                                    with BROWSER_PROVIDER browserbase, every run; with local, only the agency sites that
