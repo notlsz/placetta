@@ -812,8 +812,16 @@ export function CloudRoot() {
         catch (e) { notice = (e as api.ApiError).message; }
       }
       if (params.get("connect_error")) notice = lang === "zh" ? "连接未完成，请重试。" : "That connection didn't finish. Try again.";
-      if (params.get("billing") === "success") notice = lang === "zh" ? "付款成功。几秒后方案会自动生效。" : "Payment received. Your plan switches on in a few seconds.";
-      if (params.get("billing") === "cancel") notice = lang === "zh" ? "已取消付款。" : "Checkout canceled.";
+      if (params.get("billing") === "success") {
+        notice = lang === "zh" ? "付款成功。几秒后方案会自动生效。" : "Payment received. Your plan switches on in a few seconds.";
+        // apply what Stripe says now, before billing is read below, so the plan shows at once (the webhook may be late)
+        const sid = params.get("session_id");
+        if (sid && /^cs_[A-Za-z0-9_]+$/.test(sid)) {
+          const done = await api.confirmCheckout(row.id, sid).catch(() => null);
+          if (done?.applied) notice = lang === "zh" ? "付款成功，已生效。" : "Payment received. You're all set.";
+        }
+      }
+      if (params.get("billing") === "cancel" || params.get("billing") === "canceled") notice = lang === "zh" ? "已取消付款。" : "Checkout canceled.";
       // a brand's invite link (src/hqPlan.ts inviteLink): kept for Settings, Team, Headquarters, where an owner joins
       if (params.get("hq")) { try { sessionStorage.setItem("placetta-hq-invite", params.get("hq")!); } catch { /* storage off */ } notice = lang === "zh" ? "品牌邀请：在“设置 > 团队 > 总部”中点“加入品牌”。" : "A brand invited you: choose Join the brand in Settings, Team, Headquarters."; }
       if ([...params.keys()].length) history.replaceState(null, "", location.pathname + location.hash);
@@ -832,7 +840,7 @@ export function CloudRoot() {
         reopen: () => void open(row.id),
       } });
       // the webhook can land a moment after Stripe sends people back: look again shortly
-      if (params.get("billing") === "success") setTimeout(() => window.dispatchEvent(new Event("focus")), 4000);
+      if (params.get("billing") === "success") for (const ms of [3000, 8000, 15000, 30000]) setTimeout(() => window.dispatchEvent(new Event("focus")), ms);
     } catch (e) {
       setPhase({ k: "error", msg: (e as api.ApiError).message ?? String(e) });
     }

@@ -87,7 +87,7 @@ Deno.test("the store plan, yearly or month to month: each from its own exact Str
   const { planCheckoutParams, planIntervalOf } = await import("./logic.ts");
   const { PLAN_STORE_YEAR_SAVES_USD, planChargeUsd, planItemOf, planNameOf, planTerms } = await import("../../../src/pricing.ts");
   assertEquals([SIMPLE.planStoreMonthUsd, SIMPLE.planStoreMonthlyUsd, PLAN_STORE_YEAR_SAVES_USD], [149, 179, 360]);
-  assertEquals(SIMPLE_PRICE_ENV.planMonthly, { env: "STRIPE_PRICE_STORE_MONTHLY", cents: 17900, interval: "month" });
+  assertEquals(SIMPLE_PRICE_ENV.planMonthly, { env: "STRIPE_PRICE_STORE_MONTHLY", lookup: "placetta_store_plan_month", cents: 17900, interval: "month" });
   // the yearly price never passes for monthly, nor the other way round, nor a $179 yearly or a $1,788 monthly price
   const price = (unit_amount: number, interval: string) => ({ unit_amount, currency: "usd", active: true, type: "recurring", recurring: { interval, interval_count: 1, usage_type: "licensed" }, billing_scheme: "per_unit" });
   assert(simplePriceOk("planMonthly", price(17900, "month")));

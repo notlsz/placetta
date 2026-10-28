@@ -42,7 +42,6 @@ export type CloudCtx = {
   /** Updated Terms not yet accepted: everything stays readable, but nothing new can be approved. */
   termsHold: boolean;
   openPlans(reason?: "start" | "file"): void;
-  checkout(plan: "entry" | "starter" | "growth" | "locations", o?: { markets?: number; extra_locations?: number; tier?: "essentials" | "pro"; guarantee?: boolean; term_years?: number; renewal_consent?: boolean }): Promise<void>;
   portal(): Promise<void>;
   /** The simple model's store plan for every store, billed yearly (the renewal terms agreed to next to the button). */
   startPlan(stores: number, interval?: PlanInterval): Promise<void>;

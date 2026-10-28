@@ -10,9 +10,11 @@ Everything else is built and deployed. These need your accounts, so no one else 
    (https://supabase.com/dashboard/project/esquxzcfsylffuijvzec/functions/secrets): add `ANTHROPIC_API_KEY`. Odelia
    answers on the web, by text and by phone as soon as it's saved. `npm run selftest` checks it.
 2. **Payments.** Stripe, Developers, API keys: copy the live secret key. Add it in the same Secrets page as
-   `STRIPE_SECRET_KEY`. Nothing else: the billing function makes every price (by lookup key) and the webhook (its
-   signing secret goes to `stripe_config`) the first time it runs. Then switch payments on:
-   `update public.app_settings set payments_on = true;` (until then everyone has early access, free).
+   `STRIPE_SECRET_KEY`. The prices are found by lookup key (they are never made by the code; see "Stripe" below). The
+   webhook is made by the code: on the monitor's next daily run, or at once when a staff member presses Check now
+   under Billing health in the queue; its signing secret goes to `stripe_config`. Check that Billing health says OK
+   before switching payments on: `update public.app_settings set payments_on = true;` (until then everyone has early
+   access, free).
 3. **The portal worker.** Render, New, Blueprint, this repo (`render.yaml`). Paste the service role key and the
    Anthropic key when it asks. Then add `FILER_ENABLED=1` and `FILER_CHANNELS=email,fax,mail,portal` to the
    Supabase secrets so filings queue for it.
@@ -101,12 +103,8 @@ These are separate from the Gmail, Outlook and Drive integrations below, which u
 | `ANTHROPIC_API_KEY` | The reviewer, deep research and the safety net behind Gemini. |
 | `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION` | The voice. Free tier F0 covers 500,000 characters a month. |
 | `STRIPE_SECRET_KEY` | Stripe secret key. |
-| `STRIPE_PRICE_ENTRY` | One-time price, $299. Quantity is the number of markets. |
-| `STRIPE_PRICE_LOCATION` | Optional. Essentials, per location, recurring yearly: $1,788 ($149 a month). Without it the price is found by its lookup key `placetta_essentials_year` (see `_shared/stripe_catalog.ts`). |
-| `STRIPE_PRICE_LOCATION_PRO` | Optional. Pro, per location, recurring yearly: $3,588 ($299 a month). Lookup key `placetta_pro_year`. |
-| `STRIPE_PRICE_OPENING`, `STRIPE_PRICE_OPENING_FOOD` | Optional. One-time store opening: $3,500 retail, $6,500 restaurant or food. |
-| `STRIPE_PRICE_GUARANTEE`, `STRIPE_PRICE_PACK` | Optional. Open-by-date guarantee $2,500 a store; Odelia pack $49. |
-| `STRIPE_WEBHOOK_SECRET` | From the webhook: `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/stripe-webhook`, events `checkout.session.completed` and `customer.subscription.created/updated/deleted`. |
+| `STRIPE_PRICE_STORE_PLAN`, `STRIPE_PRICE_STORE_MONTHLY`, `STRIPE_PRICE_LICENSE`, `STRIPE_PRICE_LICENSE_COMPLEX`, `STRIPE_PRICE_RENEWAL`, `STRIPE_PRICE_PACK` | Optional. Without them each price is the active one with its lookup key (`placetta_store_plan_year` $1,788 a year, `placetta_store_plan_month` $179 a month, `placetta_license` $299, `placetta_license_complex` $999, `placetta_renewal` $99, `placetta_odelia_pack` $49; `src/pricing.ts` SIMPLE_PRICE_ENV). Either way a price is charged only when Stripe's amount, currency and interval match exactly; otherwise the team quotes. |
+| `STRIPE_WEBHOOK_SECRET` | Only for a webhook made by hand at `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/stripe-webhook` (with every event in `WEBHOOK_EVENTS`, `_shared/stripe_catalog.ts`). Leave it unset and the code makes the webhook and keeps its secret. |
 | `APP_ORIGINS` | Your app address. Checkout, invites and integrations only return there. |
 | `DEV_ORIGINS` | Optional, development only. Origins such as `http://localhost:5173` that Stripe checkout may return to. Without it, localhost is refused. |
 | `FILER_DAILY_CAP` | Optional. Faxes and letters Placetta self-files for one workspace in 24 hours before the team takes over. Default 10. |
@@ -129,8 +127,13 @@ These are separate from the Gmail, Outlook and Drive integrations below, which u
 
 ## Stripe
 
-- The $299 entry credit toward the first year: create a promotion code. Checkout accepts codes.
-- Turn on the customer portal so people can change cards and download invoices.
+- Prices from before the simple model (`placetta_entry`, `placetta_essentials_year`, `placetta_pro_year`,
+  `placetta_opening_retail`, `placetta_opening_food`, `placetta_guarantee`) are ignored by the code; archive them in
+  Stripe. Billing health lists any still active.
+- Turn on the customer portal (Settings, Billing, Customer portal) with: update payment method, invoice history, cancel
+  subscriptions (at the end of the period), and quantity changes off (the app keeps the store count). Manage billing
+  in the app opens it.
+- Tax: the code doesn't turn on Stripe Tax (no `automatic_tax` on Checkout). Decide with your accountant.
 - Scale ($5,000+) is sold by email; give that workspace access with `update billing set comped = true where workspace_id = '...'`.
 
 ## Integrations (only the ones you want live)

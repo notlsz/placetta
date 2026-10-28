@@ -28,6 +28,8 @@ import { workspaceToday } from "../../../src/localDay.ts";
 import { wsDailyLimit } from "../_shared/ai_gate.ts";
 import { weeklyGovernance } from "./governance.ts";
 import { dueNotices, noticeFor, type RenewalRow } from "./renewal_notice.ts";
+import { billingHealth } from "../_shared/stripe_catalog.ts";
+import { configStore } from "../_shared/stripe_db.ts";
 // any vendor that may take a conversation (a Gemini key without GEMINI_PAID may not), not just Anthropic or Gemini
 import { canConverse } from "../_shared/llm.ts";
 import { mayEmail, wantsTexts } from "../_shared/reach.ts";
@@ -843,6 +845,23 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Billing health (_shared/stripe_catalog.ts): the day STRIPE_SECRET_KEY is set, the Stripe webhook is made (or its
+  // events brought up to date), without waiting for a customer's first checkout. The result is kept for staff, and any
+  // problem (no webhook, a missing event, no signing secret, a price missing or at the wrong amount) is a team task.
+  let billingOk: boolean | null = null;
+  if (Deno.env.get("STRIPE_SECRET_KEY")) {
+    try {
+      const store = configStore(admin);
+      const h = await billingHealth((k) => Deno.env.get(k), store, `${SUPABASE_URL}/functions/v1/stripe-webhook`, { ensure: true });
+      billingOk = h.ok;
+      await store.set("health", JSON.stringify(h));
+      if (!h.ok) {
+        console.error("billing health:", h.problems.join(" | ").slice(0, 400));
+        await admin.from("team_tasks").upsert({ kind: "billing", workspace_id: null, title: `Billing health: ${h.problems.length} problem${h.problems.length === 1 ? "" : "s"}`, detail: { problems: h.problems }, dedupe: `billing-health:${today}` }, { onConflict: "dedupe", ignoreDuplicates: true });
+      }
+    } catch (e) { billingOk = false; console.error("billing health", String(e).slice(0, 200)); }
+  }
+
   // The renewal notice, 15 to 45 days before a yearly plan renews, once per renewal (renewal_notice.ts).
   let renewalNotices = 0;
   if (RESEND && FROM) {
@@ -1020,5 +1039,5 @@ Deno.serve(async (req) => {
     { app: APP, today, limit: 500 }).catch((e) => { console.error("mention notices", String(e).slice(0, 160)); return null; });
 
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, agency_asks: answered, status_checks: status, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled });
+  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, agency_asks: answered, status_checks: status, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled, billing_ok: billingOk });
 });

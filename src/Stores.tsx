@@ -449,7 +449,6 @@ function BulkPlan({ onClose }: { onClose: () => void }) {
       }
       return { ...w, stores: [...(w.stores ?? []), ...stores], locations, deadlines: [...w.deadlines.filter(d => !deadlines.some(x => x.id === d.id)), ...deadlines] };
     });
-    if (cloud?.owner && cloud.plan === "monthly") void api.syncLocations(cloud.wsId).catch(() => undefined);
     say(zh ? `已添加 ${stores.length} 家门店和 ${deadlines.length} 个提交截止日期。` : `Added ${stores.length} store${stores.length === 1 ? "" : "s"} and ${deadlines.length} file-by date${deadlines.length === 1 ? "" : "s"}.`);
     onClose();
   };
