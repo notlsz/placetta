@@ -355,6 +355,17 @@ export function waysToSend(d: Dest | undefined, p: Payload): { en: string[]; zh:
   if (d.email) { en.push(`By email to ${d.email}`); zh.push(`发送邮件至 ${d.email}`); }
   if (fax) { en.push(`By fax to ${fax}`); zh.push(`传真至 ${fax}`); }
   if (addr) { en.push(`By mail to ${addr}`); zh.push(`邮寄至 ${addr}`); }
+  // an agency that routes by state (the IRS's service centers), when the form didn't say which state: every center
+  if (!m && !fax && d.byState) {
+    for (const g of d.byState.groups) {
+      const a = g.mail ? [g.mail.name, g.mail.line1, g.mail.line2, `${g.mail.city}, ${g.mail.state} ${g.mail.zip}`].filter(Boolean).join(", ") : "";
+      const how = [g.fax ? `fax ${g.fax}` : "", a ? `mail ${a}` : ""].filter(Boolean);
+      en.push(`For a business in ${g.states.join(", ")}: ${how.join(" or ")}`);
+      zh.push(`企业位于 ${g.states.join("、")}：${[g.fax ? `传真 ${g.fax}` : "", a ? `邮寄 ${a}` : ""].filter(Boolean).join(" 或 ")}`);
+    }
+    const ab = d.byState.abroad?.mail;
+    if (ab) { const a = [ab.name, ab.line1, `${ab.city}, ${ab.state} ${ab.zip}`].join(", "); en.push(`For a business outside the US: mail ${a}`); zh.push(`企业位于美国境外：邮寄 ${a}`); }
+  }
   const link = site && /^https:\/\//.test(site) ? site : null;
   return { en, zh, link };
 }

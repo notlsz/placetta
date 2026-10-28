@@ -21,6 +21,11 @@ import { isBlank } from "./core";
  *   submitted   filings that went to the agency this month
  *   approved    filings the agency approved this month
  *   renewals    renewals on Deadlines whose date hasn't passed: caught before they lapse
+ *   to filed    speed to filing, measured per filing: from the owner's approval to the agency having it (filings:
+ *               approved_at to submitted_at), split by who sent it (Odelia on the agency's site, by email, fax or mail;
+ *               or the Placetta team), and from the first plan (firstPlan.at) to filed. Computed from the account's
+ *               filings rows in the app (src/cloud/api.ts listFilings carries approved_at and channel), so it needs no
+ *               new database function.
  * Hours saved is left out on purpose: nothing in docs/ documents a time per task to derive it from, and an estimate
  * without one would be invented.
  * ------------------------------------------------------------------ */
@@ -32,9 +37,37 @@ export type MonthMetrics = {
   plan_ms: number | null; plan_at: string | null; plan_apps: number | null;
   runs: RunTime[]; median_first_ms: number | null; median_done_ms: number | null;
   mapped: Item[]; filled: Item[]; waiting: Item[]; submitted: Item[]; approved: Item[]; renewals: Item[];
+  /** Speed to filing (absent from a server's numbers: the app adds it from the filings rows, see filingSpeed). */
+  filed?: FiledTime[]; median_filed_ms?: number | null; median_odelia_ms?: number | null; median_team_ms?: number | null;
 };
+/** One filing that reached the agency this month, timed: approval to filed (ms), plan to filed (plan_ms, when the
+ *  first plan came before the approval), and who sent it. */
+export type FiledTime = { id: string; title: Bi; approved_at: string; submitted_at: string; ms: number; plan_ms: number | null; by: "odelia" | "team" };
 /** A filing as the account's server keeps it (src/cloud/api.ts Filing), only what the numbers need. */
-export type FilingLite = { id: string; app_id: string; title: Bi; status: string; submitted_at: string | null; decided_at: string | null };
+export type FilingLite = { id: string; app_id: string; title: Bi; status: string; submitted_at: string | null; decided_at: string | null; approved_at?: string | null; channel?: string | null };
+
+/** Who sent a filing: Odelia when it left on a channel she sends on (the agency's site, email, fax, certified mail),
+ *  the Placetta team otherwise (the team's channel, or a row from before the channel column). */
+export const filedBy = (channel: string | null | undefined): FiledTime["by"] => (channel === "portal" || channel === "email" || channel === "fax" || channel === "mail" ? "odelia" : "team");
+
+/** Speed to filing for one month, from the filings rows: each filing submitted in the month with its approval time,
+ *  newest first, and the medians (all, Odelia's, the team's). A row with no approval time, or one submitted before it
+ *  was approved (a clock fixed by hand), isn't timed. */
+export function filingSpeed(filings: FilingLite[], month: string, planAt?: string | null): Pick<MonthMetrics, "filed" | "median_filed_ms" | "median_odelia_ms" | "median_team_ms"> {
+  const filed: FiledTime[] = [];
+  for (const f of filings) {
+    if (!f.approved_at || !inMonth(f.submitted_at, month)) continue;
+    const t = ms(f.approved_at, f.submitted_at);
+    if (!Number.isFinite(t) || t < 0) continue;
+    const p = planAt && Date.parse(planAt) <= Date.parse(f.approved_at) ? ms(planAt, f.submitted_at) : NaN;
+    filed.push({ id: f.id, title: f.title, approved_at: f.approved_at, submitted_at: f.submitted_at!, ms: t, plan_ms: Number.isFinite(p) ? p : null, by: filedBy(f.channel) });
+  }
+  filed.sort((a, b) => b.submitted_at.localeCompare(a.submitted_at));
+  return {
+    filed, median_filed_ms: median(filed.map(x => x.ms)),
+    median_odelia_ms: median(filed.filter(x => x.by === "odelia").map(x => x.ms)), median_team_ms: median(filed.filter(x => x.by === "team").map(x => x.ms)),
+  };
+}
 /** A run as agent_runs keeps it, or as this browser timed it (Workspace.runs). */
 export type RunRow = { id: string; prompt: string; created_at: string; first_text_at?: string | null; done_at?: string | null; status?: string };
 
@@ -75,11 +108,12 @@ export function monthMetrics(w: Workspace, o: { today: string; runs?: RunRow[]; 
     approved: o.filings ? o.filings.filter(f => f.status === "accepted" && inMonth(f.decided_at, month)).map(f => ({ id: f.id, title: f.title, at: f.decided_at }))
       : fromAudit(x => x.actor === "agency" && /^(Approved|Issued)$/.test(x.action.en)),
     renewals: w.deadlines.filter(d => d.kind === "renewal" && d.date >= o.today).sort((a, b) => a.date.localeCompare(b.date)).map(d => ({ id: d.id, title: d.title, date: d.date })),
+    ...(o.filings ? filingSpeed(o.filings, month, fp?.at) : {}),
   };
 }
 
 /** Whether there's anything to show: a card with only zeros says nothing. */
-export const anything = (m: MonthMetrics) => m.plan_ms != null || m.runs.length > 0 || m.mapped.length > 0 || m.submitted.length > 0 || m.approved.length > 0;
+export const anything = (m: MonthMetrics) => m.plan_ms != null || m.runs.length > 0 || m.mapped.length > 0 || m.submitted.length > 0 || m.approved.length > 0 || (m.filed?.length ?? 0) > 0;
 
 /** Headquarters and the Placetta team: the same numbers across workspaces (one row each), with the medians taken over
  *  every run, not over each workspace's median. */

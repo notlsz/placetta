@@ -2831,6 +2831,21 @@ function monthly() {
   eq(m.renewals.map(x => x.id), ["r1"], "renewals caught before they lapse: the one still ahead");
   ok(!("hours" in m) && !Object.keys(m).some(k => /hour|saved/i.test(k)), "no hours-saved number: nothing in docs/ gives a time per task to derive it from");
   eq(median([1, 2, 3, 4]), 3, "an even count takes the mean of the two middle values, rounded (as percentile_cont)");
+  // speed to filing, measured per filing: approval to the agency having it, who sent it, and the time from the plan
+  const H = 3_600_000;
+  const timed = monthMetrics(w, { today, filings: [
+    { ...filings[0], approved_at: "2026-10-09T22:00:00Z", channel: "portal" },                                    // 2 h, Odelia on the agency's site
+    { id: "f4", app_id: "a4", title: same("A4"), status: "submitted", submitted_at: "2026-10-14T00:00:00Z", decided_at: null, approved_at: "2026-10-11T00:00:00Z", channel: "team" },   // 3 days, the team
+    { id: "f5", app_id: "a5", title: same("A5"), status: "submitted", submitted_at: "2026-10-13T06:00:00Z", decided_at: null, approved_at: "2026-10-13T00:00:00Z", channel: "fax" },    // 6 h, Odelia by fax
+    { id: "f6", app_id: "a6", title: same("A6"), status: "submitted", submitted_at: "2026-10-12T00:00:00Z", decided_at: null, approved_at: "2026-10-13T00:00:00Z", channel: "email" },  // a clock fixed by hand: not timed
+    { id: "f7", app_id: "a7", title: same("A7"), status: "submitted", submitted_at: "2026-10-12T00:00:00Z", decided_at: null },                                                          // no approval time: not timed
+    { ...filings[1], approved_at: "2026-09-19T00:00:00Z", channel: "portal" },                                    // last month
+  ] });
+  eq(timed.filed?.map(x => [x.id, x.ms / H, x.by]), [["f4", 72, "team"], ["f5", 6, "odelia"], ["f1", 2, "odelia"]], "each filing this month timed from its approval, newest first, with who sent it");
+  eq([timed.median_filed_ms! / H, timed.median_odelia_ms! / H, timed.median_team_ms! / H], [6, 4, 72], "medians: all three, Odelia's two (2 h and 6 h), the team's one");
+  eq(timed.filed?.find(x => x.id === "f1")?.plan_ms, Date.parse("2026-10-10T00:00:00Z") - Date.parse("2026-10-01T00:00:00Z"), "and the time from the first plan to filed");
+  eq(monthMetrics(w, { today, filings }).filed, [], "rows from before the approval clock: nothing timed, nothing invented");
+  ok(!("filed" in monthMetrics(w, { today })), "no filings rows (the sample): no speed number");
   // the sample: from its audit trail, and the approvals' age from when they were asked
   const s = monthMetrics(SAMPLE_WS, { today: daysFromNow(0) });
   ok(s.mapped.length === SAMPLE_WS.apps.length && s.waiting.length === SAMPLE_WS.approvals.length && s.waiting.some(x => x.at) && s.renewals.length >= 1, "the sample's numbers come from its own records", { waiting: s.waiting, renewals: s.renewals.length });

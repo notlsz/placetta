@@ -410,6 +410,7 @@ Deno.test("every shipped destination: with all four channels on, Placetta sends 
       if (r === "team") {
         const p = handoffPacket(f, d, whyYours(f, d, ENV, all));
         assert(waysToSend(d, f.payload).en.length > 0 || !!d.owner, `${id}: the packet says where it goes`);
+        if (d.byState) assert(waysToSend(d, f.payload).en.some((l) => /Kansas City|Ogden/.test(l)), `${id}: every IRS center, by state`);
         assert(!/\bteam\b/i.test(p.en) && !p.zh.includes("团队"), `${id}: no team in the packet`);
         assert(p.lines.length > 6, id);
       }

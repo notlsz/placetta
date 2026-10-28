@@ -40,7 +40,69 @@ export type Dest = {
   checked: string;                                  // YYYY-MM-DD someone confirmed it on the agency's page
   source: string;                                   // that page
   also?: string[];                                  // other agency pages read for this entry
+  byState?: ByState;                                // the agency sends each state to its own address (the IRS's service centers)
 };
+
+/** An agency that takes a form at a different address (or fax number) depending on the state the business is in, as its
+    page prints them in a table: "If you are located in ... Address to mail form to IRS". from names the form's lines,
+    in order, whose answer says where the business is (the entity's address, or the old address on a change of address).
+    groups must cover every state and DC once; abroad is the table's row for a foreign country, when it has one. A
+    filing whose state can't be read from those lines has no address of its own: it isn't sent, and the business's
+    packet lists every center with the states it takes. */
+export type ByState = {
+  from: string[];
+  groups: { states: string[]; mail?: Address; fax?: string }[];
+  abroad?: { mail?: Address; fax?: string };
+};
+
+export const US_STATES = [
+  "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT",
+  "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
+];
+const STATE_NAMES: Record<string, string> = {
+  alabama: "AL", alaska: "AK", arizona: "AZ", arkansas: "AR", california: "CA", colorado: "CO", connecticut: "CT", delaware: "DE", "district of columbia": "DC",
+  florida: "FL", georgia: "GA", hawaii: "HI", idaho: "ID", illinois: "IL", indiana: "IN", iowa: "IA", kansas: "KS", kentucky: "KY", louisiana: "LA", maine: "ME",
+  maryland: "MD", massachusetts: "MA", michigan: "MI", minnesota: "MN", mississippi: "MS", missouri: "MO", montana: "MT", nebraska: "NE", nevada: "NV",
+  "new hampshire": "NH", "new jersey": "NJ", "new mexico": "NM", "new york": "NY", "north carolina": "NC", "north dakota": "ND", ohio: "OH", oklahoma: "OK",
+  oregon: "OR", pennsylvania: "PA", "rhode island": "RI", "south carolina": "SC", "south dakota": "SD", tennessee: "TN", texas: "TX", utah: "UT", vermont: "VT",
+  virginia: "VA", washington: "WA", "west virginia": "WV", wisconsin: "WI", wyoming: "WY",
+};
+
+/** The US state an address answer is in: the two-letter code before its ZIP code ("San Jose, CA 95112"), or a state's
+    full name before one ("Atlanta, Georgia 30303"). The last one wins, so a street named for a state doesn't count.
+    null when there is no US state with a ZIP code in it. */
+export function stateOf(answer: string | undefined): string | null {
+  const s = (answer ?? "").replace(/\s+/g, " ");
+  let found: string | null = null;
+  for (const m of s.matchAll(/\b([A-Z]{2})\.?,? (\d{5})(?:-\d{4})?\b/g)) {
+    const code = m[1];
+    if (US_STATES.includes(code)) found = code;
+  }
+  if (found) return found;
+  const low = s.toLowerCase();
+  let at = -1;
+  for (const [name, code] of Object.entries(STATE_NAMES)) {
+    const m = new RegExp(`\\b${name},? \\d{5}(?:-\\d{4})?\\b`).exec(low);
+    if (m && m.index >= at) { at = m.index; found = code; }
+  }
+  return found;
+}
+
+/** A form's destination for one filing: for an agency that routes by state (byState), the address and fax for the state
+    the filing's own answers name, or the row for abroad when the owner has no US address. Without a state it has no
+    mail or fax, so the dispatcher hands it to the team. Every other destination is returned as it is. */
+export function destFor(official: string | undefined, payload?: { fields?: { id?: string; value: string }[]; us_address?: boolean }, dest: Record<string, Dest> = DEST): Dest | undefined {
+  const d = dest[official ?? ""];
+  if (!d?.byState) return d;
+  const answer = (id: string) => payload?.fields?.find((x) => x.id === id)?.value;
+  let state: string | null = null;
+  for (const id of d.byState.from) if ((state = stateOf(answer(id)))) break;
+  const row = payload?.us_address === false && !state ? d.byState.abroad : d.byState.groups.find((g) => !!state && g.states.includes(state));
+  // no state on the form: keep the table, so the packet can list each center with its states (waysToSend)
+  if (!row) return d;
+  const { byState: _drop, ...rest } = d;
+  return { ...rest, ...(row?.mail ? { mail: row.mail } : {}), ...(row?.fax ? { fax: { us: row.fax, ...(row === d.byState.abroad ? { foreign: row.fax } : {}) } } : {}) };
+}
 
 /** Verified destinations. Only these are used. */
 export const DEST: Record<string, Dest> = {
@@ -89,15 +151,25 @@ export const DEST: Record<string, Dest> = {
     checked: "2026-10-13",
     source: "https://dos.ny.gov/certificate-publication-domestic-limited-liability-company-0",
   },
+  // Texas's online filing is now SOSPortal (webservices.sos.state.tx.us), which replaced SOSDirect: each form's
+  // instructions (read 2026-10-24) say "For faster processing submit your filing through SOSPortal ... You will be
+  // prompted to enter all required information through the online filing screens", with "Payments ... by ACH or credit
+  // card" and "Mail filings to: P.O. Box 13697, Austin, TX 78711-3697". The options page: SOSPortal lets you "file
+  // business formation documents". Its sign-in is the owner's own SOSPortal account; Placetta never creates one.
   "tx-205": {
     mail: { name: "Secretary of State, Corporations Section", line1: "P.O. Box 13697", city: "Austin", state: "TX", zip: "78711-3697" },
+    portal: "webservices.sos.state.tx.us", portalUrl: "https://webservices.sos.state.tx.us/termsandconditions/tac.html",
     signature: "drawn",                               // "A wet ink signature is not required. Copies and electronically signed documents are accepted."
-    payment: "with_filing",
-    checked: "2026-10-13",
-    source: "https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml",
+    payment: "with_filing",                           // $300: on SOSPortal by ACH or card, or a check with a mailed form
+    checked: "2026-10-24",
+    source: "https://www.sos.state.tx.us/corp/instructions/205.shtml",
+    also: ["https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml", "https://www.sos.state.tx.us/corp/options.shtml"],
   },
   "tx-304": {
     mail: { name: "Secretary of State, Corporations Section", line1: "P.O. Box 13697", city: "Austin", state: "TX", zip: "78711-3697" },
+    // Left on SOSDirect's host for now: the 304 instructions (read 2026-10-24) now send online filings to SOSPortal
+    // (webservices.sos.state.tx.us, as tx-205 and tx-503), and a third form on that host needs its portal playbook
+    // first (worker/filer/src/playbooks.ts, owned with the portal work). Move it with that playbook.
     portal: "direct.sos.state.tx.us",                 // SOSDirect: "Payments for web filings may be made by credit card or client account" (help-corp-filing-304)
     signature: "drawn",
     payment: "with_filing",
@@ -106,10 +178,12 @@ export const DEST: Record<string, Dest> = {
   },
   "tx-503": {
     mail: { name: "Secretary of State, Corporations Section", line1: "P.O. Box 13697", city: "Austin", state: "TX", zip: "78711-3697" },
+    portal: "webservices.sos.state.tx.us", portalUrl: "https://webservices.sos.state.tx.us/termsandconditions/tac.html",   // SOSPortal (see tx-205)
     signature: "drawn",
-    payment: "with_filing",
-    checked: "2026-10-13",
-    source: "https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml",
+    payment: "with_filing",                           // "The filing fee for an assumed name certificate is $25"
+    checked: "2026-10-24",
+    source: "https://www.sos.state.tx.us/corp/instructions/503.shtml",
+    also: ["https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml"],
   },
   // Austin Public Health's page (2026-10-18) now sends City of Austin plan reviews to Development Services and takes the
   // pre-opening inspection and the operational permit online at My Health Department ("Log in to your account. Select:
@@ -1379,6 +1453,297 @@ export const DEST: Record<string, Dest> = {
     signature: "wet", payment: "in_person",
     checked: "2026-10-18", source: "https://www.abc.ca.gov/wp-content/uploads/forms/ABC-244.pdf",
   },
+
+  // ---- The beachhead's team-only forms, read from the agencies' own pages on 2026-10-24 (food and beverage in the 12 top
+  // metros and their states, and the federal forms they file). Every sign-in is the owner's own account: Placetta never
+  // creates one, and the owner approves before anything is filed or paid. ----
+  "wa-sos-foreign": {
+    // "Visit our Corporations and Charities Filing System" (ccfs.sos.wa.gov), "Create or Register a Business", "I would
+    // like to register a business from a different state or country", "Foreign Limited Liability Company". "Filing Fee:
+    // $180 in addition to an online processing fee." The Authorized Person types their name and checks "This document
+    // is hereby executed under penalty of law".
+    portal: "ccfs.sos.wa.gov", portalUrl: "https://ccfs.sos.wa.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    attach: ["A Certificate of Existence/Good Standing or document of similar import from the home jurisdiction issued no more than 60 days before the date of submission"],
+    checked: "2026-10-24", source: "https://www.sos.wa.gov/corporations-charities/business-entities/online-filing-instructions/register-foreign-non-wa-limited-liability-company-llc-online",
+  },
+  "tx-tabc": {
+    // "Apply for a new license or permit in AIMS" (tabc.texas.gov/aims-login, which opens tabcaims.elicense365.com).
+    // AIMS: "Upload supporting documents", "Submit forms, electronic signatures and secure payments online 24/7". The
+    // FAQ: "An authorized user or a principal party can enter and submit an application"; for originals "You will upload
+    // signed applications and documents."
+    portal: "tabcaims.elicense365.com", portalUrl: "https://tabcaims.elicense365.com/",
+    signature: "wet", payment: "portal", onBehalf: "allowed",
+    attach: ["Signed applications and documents", "The public notice, publisher's affidavit and all city, county and state certificates"],
+    checked: "2026-10-24", source: "https://www.tabc.texas.gov/services/tabc-licenses-permits/new-tabc-licenses-permits/",
+    also: ["https://www.tabc.texas.gov/services/alcohol-industry-management-system-aims/", "https://www.tabc.texas.gov/faqs/alcohol-industry-management-system-aims-faqs/"],
+  },
+  "wa-lcb": {
+    // "You can apply online through Business Licensing Services (BLS). Go to the liquor licenses section to complete your
+    // application." BLS: "File online with My DOR" (secure.dor.wa.gov).
+    portal: "secure.dor.wa.gov", portalUrl: "https://secure.dor.wa.gov/home",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://lcb.wa.gov/licensing/apply-liquor-license",
+    also: ["https://dor.wa.gov/open-business/business-licensing-and-renewals-faqs"],
+  },
+  "ga-alcohol": {
+    // "Applicants must file and complete the appropriate license online using the Georgia Tax Center (GTC)"; "Scan and
+    // save all required documentation as individual PDF files to upload to GTC". The local license comes first.
+    portal: "gtc.dor.ga.gov", portalUrl: "https://gtc.dor.ga.gov/",
+    signature: "typed", onBehalf: "unstated",
+    attach: ["All required documentation, each as its own PDF file"],
+    checked: "2026-10-24", source: "https://dor.georgia.gov/alcohol/apply-license-sell-alcohol",
+  },
+  "la-alarm-permit": {
+    // "To obtain an alarm permit, you can apply for the alarm permit online" (latax.lacity.org/policepermitapp/index);
+    // "Initial Permit: $60.00".
+    portal: "latax.lacity.org", portalUrl: "https://latax.lacity.org/policepermitapp/index",
+    signature: "typed", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://finance.lacity.gov/alarm-permits-general-information",
+  },
+  "chi-sidewalk-cafe": {
+    // "Applicants will need to create an account on and submit their applications through the permitting web portal"
+    // (ipi.cityofchicago.org/Profile); "After the application is approved, the applicants will be directed to pay via the
+    // portal." The account is the restaurant's own.
+    portal: "ipi.cityofchicago.org", portalUrl: "https://ipi.cityofchicago.org/Profile",
+    signature: "typed", payment: "invoice", onBehalf: "unstated",
+    attach: ["Proof of licensure (a Retail Food Establishment license or Tavern license)", "Associated insurance documents", "A site plan of the proposed sidewalk café with measurements indicated", "A photo of the sidewalk to be occupied"],
+    checked: "2026-10-24", source: "https://www.chicago.gov/city/en/depts/bacp/supp_info/sidewalkcafe.html",
+  },
+  "ttb-importer": {
+    // TTB F 5100.24 "may be done electronically, through Permits Online"; "TTB does not charge fees for issuing these
+    // permits." Who may submit: the owner or officer, or "A person ... given power of attorney on TTB Form 5000.8", with
+    // the evidence of signing authority uploaded in the Entity Application.
+    portal: "www.ttbonline.gov", portalUrl: "https://www.ttbonline.gov/permitsonline/",
+    signature: "typed", payment: "none", onBehalf: "authorization", authorization: "TTB Form 5000.8 Power of Attorney",
+    checked: "2026-10-24", source: "https://www.ttb.gov/import-export/itd/importing-bottled-alcohol-beverages-into-the-united-states",
+    also: ["https://www.ttb.gov/online-services/ponl/ponl-help/who-may-submit-applications-through-permits-online", "https://www.ttb.gov/online-services/ponl/permits-online-help"],
+  },
+  "irv-license": {
+    // "Service Announcement: PRISM Launched October 19": "local businesses can use PRISM 24/7 ... to apply for a new
+    // business license" (prism.cityofirvine.gov/s/).
+    portal: "prism.cityofirvine.gov", portalUrl: "https://prism.cityofirvine.gov/s/",
+    signature: "typed", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://cityofirvine.gov/community-development/business-licensing",
+  },
+  "fda-device-reg": {
+    // "Registration and listing information is submitted by using FDA's Unified Registration and Listing System (FURLS)/
+    // Device Registration and Listing Module (DRLM)" (www.access.fda.gov); the yearly fee is paid first "at the Device
+    // Facility User Fee (DFUF) website".
+    portal: "www.access.fda.gov",
+    signature: "none", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://www.fda.gov/medical-devices/device-registration-and-listing/how-register-and-list",
+  },
+  // The IRS sends these to a service center by the business's state. Each table is copied from the IRS's page; the
+  // dispatcher reads the state from the form's own address line (destFor), and a filing without one goes to the team.
+  "irs-8832": {
+    // "If you are located in... Address to mail form to IRS"; "A foreign country or U.S. possession": Ogden 84201-0023.
+    // No fax or online route, so the owner signs it and mails it with the filled form Placetta prepared.
+    byState: {
+      from: ["citystatezip", "street"],
+      groups: [
+        { states: ["CT", "DE", "DC", "GA", "IL", "IN", "KY", "ME", "MD", "MA", "MI", "NH", "NJ", "NY", "NC", "OH", "PA", "RI", "SC", "VT", "VA", "WV", "WI"],
+          mail: { name: "Department of the Treasury", line1: "Internal Revenue Service", city: "Kansas City", state: "MO", zip: "64999" } },
+        { states: ["AL", "AK", "AZ", "AR", "CA", "CO", "FL", "HI", "ID", "IA", "KS", "LA", "MN", "MS", "MO", "MT", "NE", "NV", "NM", "ND", "OK", "OR", "SD", "TN", "TX", "UT", "WA", "WY"],
+          mail: { name: "Department of the Treasury", line1: "Internal Revenue Service", city: "Ogden", state: "UT", zip: "84201" } },
+      ],
+      abroad: { mail: { name: "Department of the Treasury", line1: "Internal Revenue Service", city: "Ogden", state: "UT", zip: "84201-0023" } },
+    },
+    signature: "wet", payment: "none",
+    checked: "2026-10-24", source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-8832",
+  },
+  "irs-2553": {
+    // "If the corporation's principal business, office, or agency is located in... Use the following IRS Center address
+    // or fax number": Kansas City (Fax: 855-887-7734) or Ogden (Fax: 855-214-7520). The owner signs by hand; Placetta
+    // faxes the signed copy.
+    byState: {
+      from: ["citystatezip", "street"],
+      groups: [
+        { states: ["CT", "DE", "DC", "GA", "IL", "IN", "KY", "ME", "MD", "MA", "MI", "NH", "NJ", "NY", "NC", "OH", "PA", "RI", "SC", "TN", "VT", "VA", "WV", "WI"],
+          mail: { name: "Department of the Treasury", line1: "Internal Revenue Service", city: "Kansas City", state: "MO", zip: "64999" }, fax: "+18558877734" },
+        { states: ["AL", "AK", "AZ", "AR", "CA", "CO", "FL", "HI", "ID", "IA", "KS", "LA", "MN", "MS", "MO", "MT", "NE", "NV", "NM", "ND", "OK", "OR", "SD", "TX", "UT", "WA", "WY"],
+          mail: { name: "Department of the Treasury", line1: "Internal Revenue Service", city: "Ogden", state: "UT", zip: "84201" }, fax: "+18552147520" },
+      ],
+    },
+    signature: "wet", payment: "none",
+    checked: "2026-10-24", source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-2553",
+  },
+  "irs-8822b": {
+    // "IF your old business address was in . . . THEN use this address": Kansas City, MO 64999, or Ogden, UT 84201-0023
+    // (which also takes "any place outside the United States"). Mail only.
+    byState: {
+      from: ["old_mailing"],
+      groups: [
+        { states: ["CT", "DE", "DC", "GA", "IL", "IN", "KY", "ME", "MD", "MA", "MI", "NH", "NJ", "NY", "NC", "OH", "PA", "RI", "SC", "TN", "VT", "VA", "WV", "WI"],
+          mail: { name: "Internal Revenue Service", line1: "Internal Revenue Service", city: "Kansas City", state: "MO", zip: "64999" } },
+        { states: ["AL", "AK", "AZ", "AR", "CA", "CO", "FL", "HI", "ID", "IA", "KS", "LA", "MN", "MS", "MO", "MT", "NE", "NV", "NM", "ND", "OK", "OR", "SD", "TX", "UT", "WA", "WY"],
+          mail: { name: "Internal Revenue Service", line1: "Internal Revenue Service", city: "Ogden", state: "UT", zip: "84201-0023" } },
+      ],
+      abroad: { mail: { name: "Internal Revenue Service", line1: "Internal Revenue Service", city: "Ogden", state: "UT", zip: "84201-0023" } },
+    },
+    signature: "wet", payment: "none",
+    checked: "2026-10-24", source: "https://www.irs.gov/pub/irs-pdf/f8822b.pdf",
+  },
+  "ga-dol": {
+    // "You must complete an Application for GDOL Tax Account or Status Change (DOL-1A) form and return it to the Georgia
+    // Department of Labor, Suite 850, 148 Andrew Young International Blvd., Atlanta, GA. 30303-1751." The forms page
+    // now publishes it as "Application for GDOL Tax Account or Status Change - DOL 1N" (Employer Status Report, R-3/13),
+    // which "must be signed by owner, partner or principal officer" and asks for a Social Security number that Placetta
+    // never writes: the signer adds it by hand. The form itself (page 2) says "RETURN ORIGINAL WITHIN TEN (10) DAYS TO:
+    // Georgia Department of Labor, P O Box 740234, Atlanta, GA 30374-0234 OR FAX TO: Adjudication Section 404-232-3285";
+    // the mail address here is the FAQ's, the newer of the two.
+    fax: { us: "+14042323285" },
+    mail: { name: "Georgia Department of Labor", line1: "148 Andrew Young International Blvd NE", line2: "Suite 850", city: "Atlanta", state: "GA", zip: "30303-1751" },
+    signature: "wet", payment: "none", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://dol.georgia.gov/faqs-employers/employers-faqs-unemployment-insurance",
+    also: ["https://dol.georgia.gov/documents", "https://dol.georgia.gov/document/unemployment-tax/application-gdol-tax-account-or-status-change-dol-1n/download"],
+  },
+  "cc-business-license": {
+    // Step five of "A Step-By-Step Guide to Apply for a General Business License": "OPTION 1: APPLY ONLINE Apply online at
+    // Clark County Business License Online Application" (blepay.clarkcountynv.gov/NAICSDefault.aspx), or mail the
+    // "COMPLETED APPLICATION AND APPROPRIATE FEES" to the address below; a "one-time $45.00 application fee in addition to
+    // each license fee". Unincorporated Clark County covers most of the Las Vegas Strip.
+    portal: "blepay.clarkcountynv.gov", portalUrl: "https://blepay.clarkcountynv.gov/NAICSDefault.aspx",
+    mail: { name: "Clark County Department of Business License", line1: "500 S. Grand Central Pkwy, 3rd Floor", line2: "Box 551810", city: "Las Vegas", state: "NV", zip: "89155" },
+    signature: "wet", payment: "with_filing", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://www.clarkcountynv.gov/business/doing_business_with_clark_county/divisions/general_business/general-license-guide",
+  },
+
+  // ---- The beachhead metros' suburbs (the Bay Area, the San Gabriel Valley and South Bay, the Eastside, Quincy, Sugar
+  // Land, Gwinnett's Duluth) and New Jersey, read from each city's own page on 2026-10-24. ----
+  "bel-license": {
+    // "Apply online: Go to FileLocal to apply for a Bellevue business license", "Click "Apply for a General Business
+    // License""; "The registration fee for licenses obtained in 2026 is $119", by card or ACH. A Washington business
+    // license comes first.
+    portal: "www.filelocal-wa.gov", portalUrl: "https://www.filelocal-wa.gov/Default_FileLocal.aspx",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://bellevuewa.gov/city-government/departments/finance/business-taxes/business-licenses",
+  },
+  "tor-license": {
+    // "Step 1. Create an online account" (aca-prod.accela.com/TORRANCE), "Step 2. Apply for a business license: Click on
+    // License & Waste Hauling, then click Apply/Register Online." The account is the owner's own.
+    portal: "aca-prod.accela.com", portalUrl: "https://aca-prod.accela.com/TORRANCE/Default.aspx", tenant: "/TORRANCE",
+    signature: "typed", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://www.torranceca.gov/Business/Business-License",
+  },
+  "alh-license": {
+    // The city's own online Business License Application (secure.alhambraca.gov/BusinessLicenseApplication/), its form
+    // open without an account; "You must also apply for an Occupancy Permit" with it.
+    portal: "secure.alhambraca.gov", portalUrl: "https://secure.alhambraca.gov/BusinessLicenseApplication/", noLogin: true,
+    signature: "typed", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://secure.alhambraca.gov/BusinessLicenseApplication/",
+  },
+  "arc-license": {
+    // "Online: Apply for a business license online or renew an existing business license" (arcadia.hdlgov.com).
+    portal: "arcadia.hdlgov.com", portalUrl: "https://arcadia.hdlgov.com/",
+    signature: "typed", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://www.arcadiaca.gov/government/development_services/business_license/index.php",
+  },
+  "dly-license": {
+    // "Business License Online Application: Please click on the highlighted link below to apply online"
+    // (dalycity.hdlgov.com).
+    portal: "dalycity.hdlgov.com", portalUrl: "https://dalycity.hdlgov.com/",
+    signature: "typed", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://dalycity.org/438/Business-License-Requirements-Applicatio",
+  },
+  "mil-license": {
+    // "Apply here (milpitas.hdlgov.com) for a Business License"; "The Building and Planning departments will review and
+    // approve application. Once approve, fees will be emailed or mailed."
+    portal: "milpitas.hdlgov.com", portalUrl: "https://milpitas.hdlgov.com/",
+    signature: "typed", payment: "invoice", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://www.milpitas.gov/243/Apply",
+  },
+  "qcy-license": {
+    // The City Clerk's "Renew or Apply for a Business License" links the city's online permitting
+    // (quincyma.viewpointcloud.com, the business license record type).
+    portal: "quincyma.viewpointcloud.com", portalUrl: "https://quincyma.viewpointcloud.com/categories/1088/record-types/6549",
+    signature: "typed", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://www.quincyma.gov/departments/city_clerk/index.php",
+  },
+  "dul-zoning": {
+    // "CITY OF DULUTH OCCUPATIONAL TAX APPLICATIONS ARE COMPLETED ONLINE. Step 1 - Obtain ZONING USE VERIFICATION":
+    // "Business Zoning and Use Certificate Application" (app.govwell.com/duluth).
+    portal: "app.govwell.com", portalUrl: "https://app.govwell.com/duluth", tenant: "/duluth",
+    signature: "typed", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://www.duluthga.net/services/city_clerk/new_business_applications/index.php",
+  },
+  "dul-otc": {
+    // "Step 2 - Submit OTC BUSINESS INFORMATION FORM" (duluthga.govbuilt.com, "Business Information Form - Part 1 of 3");
+    // "Step 3 - Complete OCCUPATION TAX CERTIFICATE APPLICATION (after Planning approval, link provided via email)".
+    portal: "duluthga.govbuilt.com", portalUrl: "https://duluthga.govbuilt.com/",
+    signature: "typed", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://www.duluthga.net/services/city_clerk/new_business_applications/index.php",
+  },
+  // Sugar Land's food guide: "Plan reviews are only accepted online through Citizen Self-Service (CSS) Portal"
+  // (energovweb.sugarlandtx.gov); the food permit: "Login or register in at CITIZEN SELF-SERVICE (CSS)", "select APPLY",
+  // "type "FOOD", click on PERMANENT FOOD ESTABLISHMENT PERMIT", "upload all required supporting documents". The
+  // pre-opening inspection fee is assessed after.
+  "sl-plan-review": {
+    portal: "energovweb.sugarlandtx.gov", portalUrl: "https://energovweb.sugarlandtx.gov/EnerGov_prod/SelfService#/home",
+    signature: "typed", payment: "invoice", onBehalf: "unstated",
+    attach: ["Menu", "Floor plans, including equipment and finish schedules"],
+    checked: "2026-10-24", source: "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements",
+  },
+  "sl-food-permit": {
+    portal: "energovweb.sugarlandtx.gov", portalUrl: "https://energovweb.sugarlandtx.gov/EnerGov_prod/SelfService#/home",
+    signature: "typed", payment: "invoice", onBehalf: "unstated",
+    attach: ["Certified Food Protection Manager certificate", "Waste manifest or grease trap service receipt"],
+    checked: "2026-10-24", source: "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements",
+  },
+
+  // ---- Out-of-state registrations and formations on the state portals that already file the domestic LLC, each read
+  // from the Secretary's own page on 2026-10-24. ----
+  "pa-foreign-registration": {
+    // "Register a foreign association to do business in PA" in the "online Business Filing Services site"
+    // (file.dos.pa.gov); "Filing online is the easiest, simplest way".
+    portal: "file.dos.pa.gov", portalUrl: "https://file.dos.pa.gov/forms/business",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://www.pa.gov/services/dos/register-a-business",
+  },
+  "co-foreign-registration": {
+    // "File a form to create a new record" (coloradosos.gov/biz/FileDoc.do) for "a new foreign (outside of Colorado)
+    // entity".
+    portal: "www.coloradosos.gov", portalUrl: "https://www.coloradosos.gov/biz/FileDoc.do",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://www.sos.state.co.us/pubs/business/fileAForm.html",
+  },
+  "va-foreign-registration": {
+    // "Register a new Foreign LLC (LLC1052)": "$100", "File Online" (cis.scc.virginia.gov).
+    portal: "cis.scc.virginia.gov", portalUrl: "https://cis.scc.virginia.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://www.scc.virginia.gov/businesses/forms-and-fees/foreign-limited-liability-companies/",
+    also: ["https://www.scc.virginia.gov/businesses/cis-help/foreign-registration-checklist/"],
+  },
+  "md-foreign-registration": {
+    // "Nearly all charter and personal property filings can be made online ... Maryland Business Express' Registrations
+    // and Filings Portal (egov.maryland.gov/BusinessExpress) to register your business".
+    portal: "egov.maryland.gov", portalUrl: "https://egov.maryland.gov/businessexpress",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://dat.maryland.gov/businesses/Pages/default.aspx",
+  },
+  "dc-formation": {
+    // "customer shall deliver articles of organization form DLC-1 to the Superintendent for filing either by web or by
+    // mail / walk-in"; "Submit a Corporate Filing/Register a Business Entity" (corponline.dlcp.dc.gov).
+    portal: "corponline.dlcp.dc.gov", portalUrl: "https://corponline.dlcp.dc.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://dlcp.dc.gov/service/domestic-limited-liability-company",
+  },
+  "dc-foreign-registration": {
+    // DLCP's "Submit a Corporate Filing/Register a Business Entity" (corponline.dlcp.dc.gov), which takes the LLC
+    // filings "domestic or foreign".
+    portal: "corponline.dlcp.dc.gov", portalUrl: "https://corponline.dlcp.dc.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://dlcp.dc.gov/service/domestic-limited-liability-company",
+  },
+  "mn-sos-llc": {
+    // "go here to register your business" (mblsportal.sos.state.mn.us); "How to register your business": decide the
+    // structure "(such as Corporation, LLC ...)", "Step 1: Create an online account with us and login". The account is
+    // the owner's own.
+    portal: "mblsportal.sos.state.mn.us", portalUrl: "https://mblsportal.sos.state.mn.us/", alsoOn: ["mblsportal.sos.mn.gov"],
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-24", source: "https://www.sos.mn.gov/business-liens/start-a-business/",
+    also: ["https://sos.mn.gov/business-liens/start-a-business/how-to-register-your-business/"],
+  },
 };
 
 /**
@@ -1390,6 +1755,17 @@ export const TO_VERIFY: Record<string, { source: string; note: string; partial?:
     source: "https://www.cbp.gov/newsroom/publications/forms",
     note: "Usually goes through the customs broker, and cbp.gov's pages refuse automated reads. Leave it to the team at first.",
   },
+  // 2026-10-24: each of these agencies files online, but its own page refused an automated read (a bot check), so the
+  // route can't be copied from it yet. A person reads the page and moves the entry into DEST.
+  "ny-dos-foreign-llc": { source: "https://dos.ny.gov/application-authority-foreign-limited-liability-companies", note: "dos.ny.gov refused an automated read (403), so the Department of State's online filing route wasn't confirmed." },
+  "ny-assumed-name": { source: "https://dos.ny.gov/certificate-assumed-name-domestic-and-foreign-business-corporations", note: "dos.ny.gov refused an automated read (403), so the Department of State's online filing route wasn't confirmed." },
+  "ga-sos-foreign": { source: "https://sos.ga.gov/how-to-guide/how-to-guide-register-foreign-entity", note: "sos.ga.gov refused an automated read (403); eCorp (ecorp.sos.ga.gov) files Georgia's domestic LLCs, but the foreign registration guide wasn't read." },
+  "ma-sos-foreign-llc": { source: "https://www.sec.state.ma.us/divisions/corporations/download/c156cs48fllcregistration.pdf", note: "sec.state.ma.us answers automated reads with a bot check, so the online route for the foreign LLC registration wasn't confirmed." },
+  "lac-fbn": { source: "https://lavote.gov/home/county-clerk/fictitious-business-names/frequently-asked-questions", note: "lavote.gov refused an automated read (403), so the Registrar-Recorder's online filing route wasn't confirmed." },
+  "scc-fbn": { source: "https://www.santaclaracounty.gov/node/286", note: "santaclaracounty.gov answers automated reads with a bot check, so the Clerk-Recorder's filing route wasn't confirmed." },
+  "hen-license": { source: "https://www.cityofhenderson.com/government/departments/finance/business-licensing/apply-for-a-business-license", note: "cityofhenderson.com refused an automated read (403), so the online application's address wasn't confirmed." },
+  "nj-foreign-registration": { source: "https://www.nj.gov/treasury/revenue/gettingregistered.shtml", note: "Read 2026-10-24: \"File your certificate online\" (www.njportal.com/DOR/BusinessFormation) covers the \"certificate of formation/authorization\", $100. Not routed yet: a third form on njportal.com needs that portal's playbook first (worker/filer/src/playbooks.ts)." },
+  "fre-business-tax": { source: "https://fremont.gov/government/departments/finance/revenue/business-tax/apply-for-a-business-tax-account", note: "fremont.gov refused an automated read (403), so the online application's address wasn't confirmed." },
 };
 
 /**
@@ -1398,6 +1774,9 @@ export const TO_VERIFY: Record<string, { source: string; note: string; partial?:
  * Each says why and which page says so. Never used to send anything; the coverage report reads it.
  */
 export const TEAM_ONLY: Record<string, { why: string; source: string; checked: string }> = {
+  "chi-building": { why: "\"Only an Illinois-licensed architect or engineer or City-licensed expediter can apply for a plan-based building permit\"; the Express Permit Program is for nonstructural work up to 2,000 square feet (500 in an assembly space such as a restaurant dining room).", source: "https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/apply.html", checked: "2026-10-24" },
+  "lv-building": { why: "\"Only a Nevada licensed contractor may obtain a building permit for commercial construction.\"", source: "https://www.lasvegasnevada.gov/Business/Permits-Licenses/Building-Permits", checked: "2026-10-24" },
+  "irv-building": { why: "Plans go in through the IrvineReady! portal, whose address the city's page doesn't print, and are signed by the licensed architect, engineer, contractor or interior designer who prepared them.", source: "https://cityofirvine.gov/node/69516", checked: "2026-10-24" },
   "cbp-301": { why: "Bought from a CBP-approved surety, which files it electronically; the business doesn't file it.", source: "https://www.cbp.gov/trade/priority-issues/bonds", checked: "2026-10-09" },
   "cpsc-cert": { why: "There is no government application: the importer issues the certificate, and its data goes to CBP at entry or into a CPSC Product Registry account.", source: "https://www.cpsc.gov/eFiling", checked: "2026-10-18" },
   "ca-prop65": { why: "Nothing is filed: businesses give a \"clear and reasonable\" warning.", source: "https://www.p65warnings.ca.gov/business-resources/frequently-asked-questions-businesses", checked: "2026-10-18" },
@@ -1417,7 +1796,6 @@ export const TEAM_ONLY: Record<string, { why: string; source: string; checked: s
   "sacc-plan-review": { why: "A printed plan set goes to 11080 White Rock Rd; for electronic submittal the county sends instructions on request (EHPlanReview@SacCounty.gov), so there's no route Placetta can send the whole packet on.", source: "https://emd.saccounty.gov/content/dam/emd/docs/transition/Application%20for%20Food%20Facility%20Plan%20Review%202026-2027.pdf", checked: "2026-10-18" },
   "sdc-plan-check": { why: "Online through the county's Accela Citizen Access, reached through dehpay.com; the portal's own host isn't printed, so the worker can't be pointed at it.", source: "https://www.sandiegocounty.gov/content/dam/sdc/deh/fhd/food/pdf/onlinesubmission_pc.pdf", checked: "2026-10-18" },
   "sj-fire-systems": { why: "Only a licensed contractor can apply: \"Your Contractor's License type will determine which permits you can apply for.\"", source: "https://www.sanjoseca.gov/your-government/departments-offices/fire-department/fire-prevention-permits/development-services", checked: "2026-10-18" },
-  "irv-license": { why: "Irvine is moving business licensing to its new PRISM portal and hasn't published the portal's address yet (\"check back closer to launch\").", source: "https://cityofirvine.gov/community-development/business-licensing", checked: "2026-10-18" },
   "oc-health-permit": { why: "The plan checker directs the owner or contractor to the application at the final inspection; no address or inbox is published for it.", source: "https://ochealthinfo.com/about-hca/public-health-services/environmental-health-division/food/food-facility-health-permit", checked: "2026-10-18" },
   "aus-sign": { why: "The applicant must first register as an Outdoor Advertising Contractor with insurance naming the city, and lit signs need a registered electrical sign contractor.", source: "https://www.austintexas.gov/development-services/sign-permits", checked: "2026-10-18" },
   "ftw-plan-review": { why: "Plans go to the Department of Development at 1000 Throckmorton; no email or online route is published.", source: "https://www.fortworthtexas.gov/departments/environmental-services/consumer-health/plan-review", checked: "2026-10-18" },
@@ -1436,7 +1814,6 @@ export const TEAM_ONLY: Record<string, { why: string; source: string; checked: s
   "fulton-food-permit": { why: "Same district office as the plan review; no confirmed address or online route.", source: "https://fultoncountyga.gov/Inside-Fulton-County/Fulton-County-Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection", checked: "2026-10-18" },
   "phl-plan-review": { why: "Submitted by phone appointment or walk-in at 7801 Essington Ave.", source: "https://phila.gov/services/permits-violations-licenses/get-a-license/business-licenses/food-businesses/apply-for-a-plan-review-for-a-stationary-food-business/", checked: "2026-10-17" },
   "phx-co": { why: "Not an application: the Certificate of Occupancy is generated once the building permit's inspections pass, and that permit goes through plan review by the design professional.", source: "https://www.phoenix.gov/administration/departments/pdd/residential-building/resident-plan-reviews/certificate-of-occupancy.html", checked: "2026-10-17" },
-  "cc-business-license": { why: "The county's apply page loads its options in buttons the page text doesn't carry, so the online route wasn't confirmed.", source: "https://www.clarkcountynv.gov/business/doing_business_with_clark_county/apply-for-a-business-license", checked: "2026-10-18" },
   "nv-esd": { why: "The registration page says DETR shares details with the Department of Taxation but doesn't name the employer portal's address.", source: "https://tax.nv.gov/faqs/register-a-business/", checked: "2026-10-18" },
   "ffx-bpol": { why: "The county's BPOL application PDF now returns \"not found\" and the license page names no route to send it.", source: "https://www.fairfaxcounty.gov/topics/starting-business-step-3-license-taxes", checked: "2026-10-18" },
   "arl-food-license": { why: "Issued after plan approval and the pre-opening inspection; the page publishes no application route of its own.", source: "https://arlingtonva.us/Government/Programs/Health/Environmental-Health/Food-Establishment-Plans-Construction", checked: "2026-10-18" },
@@ -1456,10 +1833,6 @@ export const TEAM_ONLY: Record<string, { why: string; source: string; checked: s
   "fda-prior-notice": { why: "Filed for each shipment by whoever has the shipment data, usually the customs broker.", source: "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/guidance-industry-what-you-need-know-about-prior-notice-imported-food-shipments", checked: "2026-10-17" },
   "il-sos": { why: "ilsos.gov refuses automated reads, so the online filing's address couldn't be confirmed on the Secretary's own page.", source: "https://www.ilsos.gov/departments/business-services/incorporation.html", checked: "2026-10-18" },
   "nv-silverflume": { why: "nvsilverflume.gov now redirects to the new ORION portal (orion.nv.gov), and nvsos.gov's pages refuse automated reads, so the new portal's route couldn't be confirmed on the Secretary's own page.", source: "https://www.nvsilverflume.gov/checklist", checked: "2026-10-18" },
-  // The IRS sends these to a different service center by the business's state (the dispatcher has one address per form),
-  // so the team picks the center; none takes an online submission.
-  "irs-8832": { why: "Mailed to Kansas City or Ogden by the entity's state (Ogden for a foreign country); no fax or online route.", source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-8832", checked: "2026-10-18" },
-  "irs-2553": { why: "Faxed or mailed to Kansas City (855-887-7734) or Ogden (855-214-7520) by the corporation's state.", source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-2553", checked: "2026-10-18" },
   "nyc-dob-alt": { why: "\"Most kitchen and bathroom renovations require an ALT2 permit application, which must be filed by a PE or RA\": the design professional files it.", source: "https://www.nyc.gov/site/buildings/property-or-business-owner/renovating-kitchens-bathrooms.page", checked: "2026-10-18" },
   "nyc-cb-notice": { why: "The notice goes to the community board for the address 30 days before the SLA filing, but the SLA's page doesn't say how it is delivered, and each board has its own address.", source: "https://sla.ny.gov/community-board-faqs", checked: "2026-10-18" },
   "la-alcohol-cup": { why: "\"Visit the Development Services Center to apply for a Conditional Use Permit\"; it needs a public hearing and usually 4 to 5 months.", source: "https://business.lacity.gov/sites/g/files/wph1606/files/2021-02/Restaurant_Bar%20Checklist_0.pdf", checked: "2026-10-18" },
@@ -1470,7 +1843,6 @@ export const TEAM_ONLY: Record<string, { why: string; source: string; checked: s
   "moco-plan-review": { why: "Health and Human Services reviews the plans before any building permit issues; they go in with the building permit to the permitting office for the address (the county's Department of Permitting Services, or the City of Rockville's or Gaithersburg's), filed by the design professional.", source: "https://montgomerycountymd.gov/HHS/Resources/Files/L%26R/Guidance%20-%20DHHS%20Plan%20Review%20via%20DPS%2010_2024.pdf", checked: "2026-10-18" },
   "smc-plan-check": { why: "San Mateo County's plan check page didn't load past its navigation for us, so the plan submission route (MyEHS or paper) wasn't confirmed.", source: "https://www.smchealth.org/food-facility-plan-check-process", checked: "2026-10-18" },
   "gln-brc": { why: "Applied for in the city's GlendalePermits portal, whose address the city's page doesn't print.", source: "https://www.glendaleca.gov/government/departments/community-development/licenses-permits-and-applications/license-and-permit-applications/business-registration-certificate", checked: "2026-10-18" },
-  "irs-8822b": { why: "Mailed to Kansas City or Ogden by the state of the old business address (Ogden for any place outside the US).", source: "https://www.irs.gov/pub/irs-pdf/f8822b.pdf", checked: "2026-10-18" },
   "dal-sign": { why: "A registered sign contractor applies on DallasNow, and lit signs need a registered electrical sign contractor.", source: "https://dallascityhall.com/departments/sustainabledevelopment/buildinginspection/Documents/Signs/SIGN%20PERMITS%20-%20SPSD%20Checklist.pdf", checked: "2026-10-13" },
   "sdg-co": { why: "Not an application: issued after the final inspection of the building permit work.", source: "https://www.sandiego.gov/development-services/forms-publications/information-bulletin/585", checked: "2026-10-12" },
   "sdc-health-permit": { why: "The county issues it in person with the plan check; no remote route is published.", source: "https://www.sandiegocounty.gov/content/sdc/deh/fhd/food/food_faq.html", checked: "2026-10-12" },
@@ -1488,6 +1860,10 @@ const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const HOST = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/;
 const EMAIL = /^[^\s@<>]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
 const PAYMENTS = new Set(["none", "portal", "invoice", "with_filing", "in_person"]);
+/** Hosts where every app is one agency's, so its apps' different paths are not different agencies: latax.lacity.org is
+    the Los Angeles Office of Finance's (business tax registration at /businessregapp, police alarm permits at
+    /policepermitapp, both linked from finance.lacity.gov). */
+const ONE_AGENCY_HOSTS = new Set(["latax.lacity.org"]);
 
 /** A host the worker may open: a public name with a real top-level domain, never an address, localhost or an
     internal name (the same rule the worker's navigation guard and the file function's login lookup rely on). */
@@ -1534,7 +1910,27 @@ export function destinationProblems(dest: Record<string, Dest> = DEST): string[]
     if (!d.checked || !DATE.test(d.checked) || Number.isNaN(Date.parse(d.checked))) out.push(`${id}: checked must be the date it was confirmed (YYYY-MM-DD)`);
     if (!d.source || !/^https:\/\//.test(d.source) || !urlOf(d.source)) out.push(`${id}: source must be the agency's https page`);
     for (const a of d.also ?? []) if (!/^https:\/\//.test(a) || !urlOf(a)) out.push(`${id}: every page in also must be https`);
-    if (!d.email && !d.fax && !d.mail && !d.portal && !d.owner) out.push(`${id}: has no destination`);
+    if (!d.email && !d.fax && !d.mail && !d.portal && !d.owner && !d.byState) out.push(`${id}: has no destination`);
+    if (d.byState) {
+      const b = d.byState, seen = new Map<string, number>();
+      if (!b.from?.length) out.push(`${id}: name the lines a by-state route reads the state from`);
+      if (d.mail || d.fax) out.push(`${id}: a by-state route keeps its addresses in its groups, not on the entry`);
+      for (const g of b.groups ?? []) {
+        if (!g.mail && !g.fax) out.push(`${id}: every state group needs an address or a fax number`);
+        for (const st of g.states) {
+          if (!US_STATES.includes(st)) out.push(`${id}: ${st} isn't a state code`);
+          seen.set(st, (seen.get(st) ?? 0) + 1);
+        }
+        out.push(...addressProblems(id, g.mail, "state group mail"));
+        if (g.fax && !US_FAX.test(g.fax)) out.push(`${id}: a state group's fax must be a US number`);
+      }
+      for (const st of US_STATES) if (seen.get(st) !== 1) out.push(`${id}: ${st} must be in exactly one state group`);
+      if (b.abroad) {
+        if (!b.abroad.mail && !b.abroad.fax) out.push(`${id}: the row for abroad needs an address or a fax number`);
+        out.push(...addressProblems(id, b.abroad.mail, "abroad mail"));
+        if (b.abroad.fax && !US_FAX.test(b.abroad.fax)) out.push(`${id}: the fax for abroad must be a US number`);
+      }
+    }
     if (d.email && !EMAIL.test(d.email)) out.push(`${id}: email is not an address`);
     if (d.fax && (!E164.test(d.fax.us) || (d.fax.foreign !== undefined && !E164.test(d.fax.foreign)))) out.push(`${id}: fax numbers must be E.164 (+1...)`);
     if (d.fax && !US_FAX.test(d.fax.us)) out.push(`${id}: the US fax number must be a US number`);
@@ -1572,6 +1968,7 @@ export function destinationProblems(dest: Record<string, Dest> = DEST): string[]
   for (const [host, list] of byHost) {
     // OpenGov gives each agency its own subdomain (sanfranciscoca.portal.opengov.com): its paths are pages of one agency
     if (/\.portal\.opengov\.com$/i.test(host)) continue;
+    if (ONE_AGENCY_HOSTS.has(host)) continue;
     const segments = new Set(list.map(([, d]) => firstSegment(d.portalUrl)));
     if (segments.size > 1) for (const [id, d] of list) if (!d.tenant) out.push(`${id}: ${host} serves several agencies, so this entry needs its tenant path`);
   }

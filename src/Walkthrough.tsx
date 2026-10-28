@@ -49,16 +49,20 @@ export function Walkthrough() {
   // the tour waits, so the first tap is Approve. It opens on a later visit, or from Help.
   const firstWin = !!ws.firstPlan?.win && ws.approvals.some(a => a.app === ws.firstPlan?.win);
   const [open, setOpen] = useState(() => !tourSeen() && !/[?&]notour\b/.test(location.search) && !firstWin);
+  // On first load the tour floats near the top without a scrim, so the plan behind it stays in view and usable (the
+  // 2026-10-23 review: "An onboarding modal covers the dashboard on first load"). Asked for again from Help, it opens
+  // as a dialog, since the person asked to see it.
+  const [floating, setFloating] = useState(true);
   // where it was left: closing the tab mid-tour comes back to the same card
   const [i, setIRaw] = useState(() => { try { return Math.min(CARDS.length - 1, Number(localStorage.getItem(KEY + "-at")) || 0); } catch { return 0; } });
   const setI = (n: number) => { setIRaw(n); try { localStorage.setItem(KEY + "-at", String(n)); } catch { /* storage blocked */ } };
   const zh = lang === "zh";
-  useEffect(() => { const on = () => { setI(0); setOpen(true); }; window.addEventListener("placetta-tour", on); return () => window.removeEventListener("placetta-tour", on); }, []);
+  useEffect(() => { const on = () => { setI(0); setFloating(false); setOpen(true); }; window.addEventListener("placetta-tour", on); return () => window.removeEventListener("placetta-tour", on); }, []);
   if (!open) return null;
   const done = () => { try { localStorage.setItem(KEY, "1"); localStorage.removeItem(KEY + "-at"); } catch { /* storage blocked */ } setOpen(false); };
   const c = CARDS[i], last = i === CARDS.length - 1;
   return (
-    <div className="scrim tour-scrim" role="dialog" aria-modal="true" aria-label={zh ? "使用导览" : "Quick tour"}>
+    <div className={floating ? "tour-float" : "scrim tour-scrim"} role="dialog" aria-modal={floating ? "false" : "true"} aria-label={zh ? "使用导览" : "Quick tour"}>
       <div className="tour">
         <button type="button" className="tour-skip" onClick={done}>{zh ? "跳过" : "Skip"}</button>
         <Picture i={i} zh={zh} />

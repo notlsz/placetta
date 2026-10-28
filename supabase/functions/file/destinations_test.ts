@@ -10,7 +10,7 @@ Deno.test("every destination has a source page, a checked date and a channel, an
   assertEquals(destinationProblems(), []);
   for (const [id, d] of Object.entries(DEST)) {
     assert(/^https:\/\//.test(d.source), `${id}: source`);
-    assert(!!(d.email || d.fax || d.mail || d.portal || d.owner), `${id}: channel`);
+    assert(!!(d.email || d.fax || d.mail || d.portal || d.owner || d.byState), `${id}: channel`);
     assert(/^\d{4}-\d{2}-\d{2}$/.test(d.checked), `${id}: checked`);
   }
 });
