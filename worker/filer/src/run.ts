@@ -1261,7 +1261,7 @@ export class Worker {
         const mins = backoffMinutes(cur.attempts), at = new Date(Date.now() + mins * 60_000).toISOString();
         await this.c.store.step(cur, log(`Odelia's own tools stopped (not the agency's site). Trying again in ${mins} minutes.`, `Odelia 自己的工具出现故障（并非机构网站），${mins} 分钟后重试。`, "retry", msg), { agent_state: "queued", provider_ref: `retry-after:${at}` });
       }
-      console.error("filer: browser provider:", msg);
+      console.error("filer: own tools (browser or model):", msg);
     } else if (cur.attempts >= 3) {
       // ref portal_failed: the file function's sweep tries another way the agency takes (email, fax, certified mail, or
       // the business's packet) (supabase/functions/file handBacks)
