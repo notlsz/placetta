@@ -2,15 +2,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useApp } from "./ctx";
 import { SetSheet } from "./SetUI";
 import { daysFromNow } from "./time";
+import { saveFile } from "./files";
+import { qrSvg } from "./qr";
 import * as tapi from "./cloud/trustApi";
 import { DAYS_CHOICES, headline, requestPrompt, SHOW_DEFAULT, SHOW_KEYS, SHOW_WORDS, trustPath, trustSnapshot, trustView, type TrustShow } from "./trust";
 import { TrustPage } from "./TrustPage";
 import "./trust.css";
 
 /* Status pages, the owner's side (Stores, "Status pages"): share a store's licenses in good standing with a landlord,
-   franchisor, insurer, lender or delivery platform. Pick who it's for, what shows and for how long; the link shows once.
-   See who opened it and when, change what shows (the page follows at once), revoke in one tap, and answer document
-   requests. In the sample (no account), the preview shows exactly what a viewer would see. */
+   franchisor, insurer, inspector or lender. Pick who it's for, what shows, for how long (or no end date) and, if you
+   like, a password; the link and its QR code for the storefront window show once. See how often it was opened (a count,
+   nothing about who), how many businesses started Placetta from its footer, change what shows (the page follows at
+   once), set or take off its password, revoke in one tap, and answer document requests. In the sample (no account),
+   the preview shows exactly what a viewer would see. */
 
 const origin = () => { try { return location.origin; } catch { return ""; } };
 const fmt = (iso: string | null | undefined, zh: boolean) => {
@@ -18,6 +22,7 @@ const fmt = (iso: string | null | undefined, zh: boolean) => {
   const d = new Date(iso);
   return zh ? `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日` : d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 };
+const esc = (s: string) => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
 function Switches({ show, onChange, disabled }: { show: TrustShow; onChange: (s: TrustShow) => void; disabled?: boolean }) {
   const { b } = useApp();
@@ -25,10 +30,53 @@ function Switches({ show, onChange, disabled }: { show: TrustShow; onChange: (s:
     <div className="ts-switches" role="group">
       {SHOW_KEYS.map(k => (
         <label key={k} className="ts-switch">
-          <input type="checkbox" checked={show[k]} disabled={disabled} onChange={e => onChange({ ...show, [k]: e.target.checked })} />
+          <input type="checkbox" checked={show[k] !== false} disabled={disabled} onChange={e => onChange({ ...show, [k]: e.target.checked })} />
           <span>{b(SHOW_WORDS[k].label)}<small>{b(SHOW_WORDS[k].hint)}</small></span>
         </label>
       ))}
+    </div>
+  );
+}
+
+/** The new link's QR code: download it, or print a sign for the window. Drawn here; the link goes nowhere else. */
+function LinkQr({ url, store, zh }: { url: string; store: string; zh: boolean }) {
+  const svg = useMemo(() => { try { return qrSvg(url, { px: 512, label: zh ? "状态页二维码" : "Status page QR code" }); } catch { return ""; } }, [url, zh]);
+  if (!svg) return null;
+  const print = () => {
+    const w = window.open("", "_blank", "width=640,height=800");
+    if (!w) return;
+    w.document.write(`<!doctype html><html lang="${zh ? "zh-CN" : "en"}"><head><meta charset="utf-8"><title>${esc(store)}</title><style>body{margin:0;display:grid;place-items:center;min-height:100vh;font:16px/1.4 system-ui,sans-serif;color:#111;background:#fff;text-align:center}main{display:grid;gap:14px;justify-items:center;padding:32px}h1{font-size:28px;margin:0}svg{width:320px;height:320px}p{margin:0;max-width:22em}</style></head><body><main><h1>${esc(zh ? "执照与许可" : "Our licenses")}</h1>${svg}<p>${esc(zh ? `扫码查看${store}的执照状态，由快哉 Placetta 核实。` : `Scan to see ${store}'s licenses, verified by Placetta.`)}</p></main></body></html>`);
+    w.document.close();
+    w.focus();
+    setTimeout(() => { try { w.print(); } catch { /* the sign is on screen to print by hand */ } }, 300);
+  };
+  return (
+    <div className="ts-qr">
+      <div className="ts-qr-img" dangerouslySetInnerHTML={{ __html: svg }} />
+      <small>{zh ? "贴在门店橱窗，房东、保险公司或检查员一扫即可查看。二维码与链接一样只显示这一次。" : "For the storefront window: a landlord, insurer or inspector scans it to see the page. Like the link, it shows only this once."}</small>
+      <div className="ts-acts">
+        <button type="button" className="pill quiet sm" onClick={() => void saveFile(`placetta-status-${store.replace(/[^\w-]+/g, "-").toLowerCase() || "store"}.svg`, new Blob([svg], { type: "image/svg+xml" }))}>{zh ? "下载二维码" : "Download QR code"}</button>
+        <button type="button" className="pill quiet sm" onClick={print}>{zh ? "打印橱窗标识" : "Print a window sign"}</button>
+      </div>
+    </div>
+  );
+}
+
+function PasswordEdit({ link, zh, onDone }: { link: tapi.TrustLink; zh: boolean; onDone: (msg: string) => void }) {
+  const [pw, setPw] = useState("");
+  const [busy, setBusy] = useState(false);
+  const go = async (v: string) => {
+    setBusy(true);
+    try { await tapi.trustPassword(link.id, v); setPw(""); onDone(v ? (zh ? "已设置密码" : "Password set") : (zh ? "已取消密码" : "Password taken off")); }
+    catch (e) { onDone((e as Error).message); }
+    setBusy(false);
+  };
+  return (
+    <div className="ts-pw">
+      <input type="password" minLength={6} maxLength={72} autoComplete="new-password" value={pw} onChange={e => setPw(e.target.value)} aria-label={zh ? "新密码" : "New password"}
+        placeholder={link.locked ? (zh ? "新密码" : "New password") : (zh ? "设置密码（至少 6 位）" : "Set a password (6 or more)")} />
+      <button type="button" className="pill quiet sm" disabled={busy || pw.length < 6} onClick={() => void go(pw)}>{link.locked ? (zh ? "更改" : "Change") : (zh ? "设置" : "Set")}</button>
+      {link.locked && <button type="button" className="pill quiet sm" disabled={busy} onClick={() => void go("")}>{zh ? "取消密码" : "Take it off"}</button>}
     </div>
   );
 }
@@ -41,6 +89,7 @@ export function TrustShare({ onClose, store: first }: { onClose: () => void; sto
   const [label, setLabel] = useState("");
   const [show, setShow] = useState<TrustShow>(SHOW_DEFAULT);
   const [days, setDays] = useState<number>(90);
+  const [password, setPassword] = useState("");
   const [links, setLinks] = useState<tapi.TrustLink[] | null>(null);
   const [reqs, setReqs] = useState<tapi.TrustRequest[]>([]);
   const [made, setMade] = useState<{ url: string; prefix: string } | null>(null);
@@ -63,25 +112,26 @@ export function TrustShare({ onClose, store: first }: { onClose: () => void; sto
 
   const create = async () => {
     if (!cloud || !snap) return;
+    if (password && password.length < 6) { setErr(zh ? "密码至少 6 位。" : "A password is 6 characters or more."); return; }
     setBusy(true); setErr("");
     try {
-      const r = await tapi.trustCreate(cloud.wsId, store, label.trim(), show, days, snap);
+      const r = await tapi.trustCreate(cloud.wsId, store, label.trim(), show, days, snap, password);
       setMade({ url: origin() + trustPath(r.token), prefix: r.prefix });
       try { window.dispatchEvent(new Event("placetta:trust")); } catch { /* fine */ }
-      setLabel("");
+      setLabel(""); setPassword("");
       await load();
     } catch (e) { setErr((e as Error).message); }
     setBusy(false);
   };
   const copy = async (s: string) => { try { await navigator.clipboard.writeText(s); say(zh ? "已复制链接" : "Link copied"); } catch { /* the link is on screen to copy by hand */ } };
   const mine = (links ?? []).filter(l => l.store_id === store);
-  const active = (l: tapi.TrustLink) => !l.revoked_at && Date.parse(l.expires_at) > Date.now();
   const storeName = stores.find(s => s.id === store)?.name;
+  const lasts = (d: number) => (d === 0 ? (zh ? "长期有效" : "No end date") : zh ? `${d} 天` : `${d} days`);
 
   return (
     <SetSheet title={zh ? "状态页" : "Status pages"} onClose={onClose} className="ts-body"
-      sub={zh ? "房东、加盟总部、保险公司或贷款方问“执照是否齐全有效”时，发一个链接即可。只显示状态与到期日，不公开文件，可随时撤销。"
-        : "When a landlord, franchisor, insurer or lender asks whether your licenses are in order, send a link. It shows status and expiry, never the documents, and you can revoke it any time."}>
+      sub={zh ? "房东、加盟总部、保险公司、检查员或贷款方问“执照是否齐全有效”时，发一个链接或贴一个二维码即可。只显示状态与到期日，不公开文件、税号或任何人的姓名，可随时撤销。"
+        : "When a landlord, franchisor, insurer, inspector or lender asks whether your licenses are in order, send a link or put its QR code in the window. It shows status and expiry, never documents, tax IDs or anyone's name, and you can revoke it any time."}>
       {stores.length > 1 && (
         <label className="ts-field">{zh ? "门店" : "Store"}
           <select value={store} onChange={e => { setStore(e.target.value); setMade(null); }}>{stores.map(s => <option key={s.id} value={s.id}>{b(s.name)}</option>)}</select>
@@ -98,6 +148,7 @@ export function TrustShare({ onClose, store: first }: { onClose: () => void; sto
             <button type="button" className="pill quiet sm" onClick={() => ask(zh ? `起草一封给对方的简短邮件，附上${storeName ? b(storeName) : "门店"}的状态页链接：${made.url}。说明页面显示执照状态和到期日，文件需另行申请。给我批准后再发。`
               : `Draft a short email sharing the status page for ${storeName ? b(storeName) : "our store"}: ${made.url}. Say it shows each license's status and expiry, and that documents are available on request. Show it to me to approve before it goes.`)}>{zh ? "让 Odelia 起草邮件" : "Have Odelia draft the email"}</button>
           </div>
+          <LinkQr url={made.url} store={storeName ? b(storeName) : zh ? "门店" : "Store"} zh={zh} />
         </div>
       )}
 
@@ -110,11 +161,14 @@ export function TrustShare({ onClose, store: first }: { onClose: () => void; sto
             </label>
             <Switches show={show} onChange={setShow} />
             <div className="ts-field"><span>{zh ? "有效期" : "Lasts"}</span>
-              <div className="ts-days" role="group">{DAYS_CHOICES.map(d => <button key={d} type="button" aria-pressed={days === d} onClick={() => setDays(d)}>{zh ? `${d} 天` : `${d} days`}</button>)}</div>
+              <div className="ts-days" role="group">{DAYS_CHOICES.map(d => <button key={d} type="button" aria-pressed={days === d} onClick={() => setDays(d)}>{lasts(d)}</button>)}</div>
             </div>
+            <label className="ts-field">{zh ? "密码（选填，告诉对方即可）" : "Password (optional; tell them yourself)"}
+              <input type="password" minLength={6} maxLength={72} autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} placeholder={zh ? "不设密码，任何持有链接的人都能打开" : "Without one, anyone with the link can open it"} />
+            </label>
             {err && <p className="tp-err" role="alert">{err}</p>}
             {live
-              ? <div className="ts-acts"><button type="button" className="pill ink sm" disabled={!owner || busy || !snap} onClick={create}>{busy ? (zh ? "正在生成" : "Making the link") : (zh ? "生成链接" : "Make the link")}</button>
+              ? <div className="ts-acts"><button type="button" className="pill ink sm" disabled={!owner || busy || !snap} onClick={create}>{busy ? (zh ? "正在生成" : "Making the link") : (zh ? "生成链接和二维码" : "Make the link and QR code")}</button>
                   {!owner && <small>{zh ? "只有所有者可以共享状态页。" : "Only an owner can share a status page."}</small>}</div>
               : <small>{zh ? "示例中不生成真实链接。登录后即可共享；下方预览就是对方看到的样子。" : "The sample doesn't make real links. Sign in to share one; the preview below is exactly what they'd see."}</small>}
           </div>
@@ -124,24 +178,32 @@ export function TrustShare({ onClose, store: first }: { onClose: () => void; sto
       {live && mine.length > 0 && (
         <section className="ts-sec">
           <h3>{zh ? "已共享的链接" : "Links you've shared"}</h3>
+          <p>{zh ? "只统计打开次数，不记录是谁打开的。" : "Only how many times each was opened is counted, never who opened it."}</p>
           <ul className="ts-links">
-            {mine.map(l => (
-              <li key={l.id} className={"ts-link" + (active(l) ? "" : " off")}>
-                <div className="ts-link-top"><b>{l.label || (zh ? "状态链接" : "Status link")}</b><small>{l.prefix}</small></div>
-                <small>
-                  {l.revoked_at ? (zh ? `已于 ${fmt(l.revoked_at, zh)} 撤销` : `Revoked ${fmt(l.revoked_at, zh)}`)
-                    : !active(l) ? (zh ? `已于 ${fmt(l.expires_at, zh)} 过期` : `Expired ${fmt(l.expires_at, zh)}`)
-                    : (zh ? `有效至 ${fmt(l.expires_at, zh)}；打开 ${l.views} 次${l.last_viewed_at ? `，最近 ${fmt(l.last_viewed_at, zh)}` : ""}` : `Active until ${fmt(l.expires_at, zh)}. Opened ${l.views} time${l.views === 1 ? "" : "s"}${l.last_viewed_at ? `, last ${fmt(l.last_viewed_at, zh)}` : ""}`)}
-                </small>
-                {active(l) && owner && (
-                  <details>
-                    <summary>{zh ? "显示内容" : "What it shows"}</summary>
-                    <Switches show={l.show} onChange={async s => { try { await tapi.trustUpdate(l.id, s); await load(); say(zh ? "已更新，页面立即生效" : "Updated. The page follows now"); } catch (e) { say((e as Error).message); } }} />
-                  </details>
-                )}
-                {active(l) && owner && <div className="ts-acts"><button type="button" className="pill quiet sm" onClick={async () => { try { await tapi.trustRevoke(l.id); await load(); say(zh ? "已撤销，链接立即失效" : "Revoked. The link stops working now"); } catch (e) { say((e as Error).message); } }}>{zh ? "撤销" : "Revoke"}</button></div>}
-              </li>
-            ))}
+            {mine.map(l => {
+              const on = tapi.linkLive(l);
+              const opened = zh ? `打开 ${l.views} 次${l.last_viewed_at ? `，最近 ${fmt(l.last_viewed_at, zh)}` : ""}` : `Opened ${l.views} time${l.views === 1 ? "" : "s"}${l.last_viewed_at ? `, last ${fmt(l.last_viewed_at, zh)}` : ""}`;
+              const until = l.expires_at ? (zh ? `有效至 ${fmt(l.expires_at, zh)}` : `Active until ${fmt(l.expires_at, zh)}`) : (zh ? "长期有效" : "Active, no end date");
+              const signups = l.signups ? (zh ? `；${l.signups} 家商家经此页开始使用快哉` : `. ${l.signups} business${l.signups === 1 ? "" : "es"} started Placetta from it`) : "";
+              return (
+                <li key={l.id} className={"ts-link" + (on ? "" : " off")}>
+                  <div className="ts-link-top"><b>{l.label || (zh ? "状态链接" : "Status link")}{l.locked ? (zh ? "（设有密码）" : " (password)") : ""}</b><small>{l.prefix}</small></div>
+                  <small>
+                    {l.revoked_at ? (zh ? `已于 ${fmt(l.revoked_at, zh)} 撤销` : `Revoked ${fmt(l.revoked_at, zh)}`)
+                      : !on ? (zh ? `已于 ${fmt(l.expires_at, zh)} 过期` : `Expired ${fmt(l.expires_at, zh)}`)
+                      : zh ? `${until}；${opened}${signups}` : `${until}. ${opened}${signups}`}
+                  </small>
+                  {on && owner && (
+                    <details>
+                      <summary>{zh ? "显示内容与密码" : "What it shows, and its password"}</summary>
+                      <Switches show={l.show} onChange={async s => { try { await tapi.trustUpdate(l.id, s); await load(); say(zh ? "已更新，页面立即生效" : "Updated. The page follows now"); } catch (e) { say((e as Error).message); } }} />
+                      <PasswordEdit link={l} zh={zh} onDone={async m => { say(m); await load(); }} />
+                    </details>
+                  )}
+                  {on && owner && <div className="ts-acts"><button type="button" className="pill quiet sm" onClick={async () => { try { await tapi.trustRevoke(l.id); await load(); say(zh ? "已撤销，链接立即失效" : "Revoked. The link stops working now"); } catch (e) { say((e as Error).message); } }}>{zh ? "撤销" : "Revoke"}</button></div>}
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}
@@ -169,8 +231,8 @@ export function TrustShare({ onClose, store: first }: { onClose: () => void; sto
       {view && (
         <section className="ts-sec">
           <h3>{zh ? "对方看到的样子" : "What they'll see"}</h3>
-          <p>{headline(view.counts, lang)}</p>
-          <div className="ts-preview"><TrustPage token={`sample-${store}`} lang={lang} preview={{ status: "ok", snapshot_at: new Date().toISOString(), expires_at: new Date(Date.now() + days * 864e5).toISOString(), ...view }} /></div>
+          <p>{headline(view.counts, lang, view.licensed)}</p>
+          <div className="ts-preview"><TrustPage token={`sample-${store}`} lang={lang} preview={{ status: "ok", snapshot_at: new Date().toISOString(), expires_at: days ? new Date(Date.now() + days * 864e5).toISOString() : null, ...view }} /></div>
         </section>
       )}
     </SetSheet>
@@ -194,7 +256,7 @@ export function TrustSync() {
     let stop = false;
     const t = setTimeout(async () => {
       try {
-        if (!stores.current) stores.current = new Set((await tapi.trustList(cloud.wsId)).filter(l => !l.revoked_at && Date.parse(l.expires_at) > Date.now()).map(l => l.store_id));
+        if (!stores.current) stores.current = new Set((await tapi.trustList(cloud.wsId)).filter(l => tapi.linkLive(l)).map(l => l.store_id));
         const today = daysFromNow(0);
         for (const id of stores.current) {
           if (stop) return;
@@ -211,4 +273,3 @@ export function TrustSync() {
   }, [ws, cloud, tick]);
   return null;
 }
-

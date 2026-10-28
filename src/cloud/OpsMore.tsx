@@ -490,14 +490,24 @@ function PartnersAdmin() {
   const { b, lang, say } = useApp();
   const zh = lang === "zh";
   const [rows, setRows] = useState<pa.PartnerAdminRow[] | null>(null);
-  const [edit, setEdit] = useState<Record<string, { pct: string; months: string }>>({});
+  const [edit, setEdit] = useState<Record<string, { pct: string; months: string; fee: string }>>({});
   const [pay, setPay] = useState<Record<string, { amount: string; on: string; ref: string }>>({});
-  const load = useCallback(async () => { try { setRows(await pa.partnerAdminList()); } catch (e) { say((e as api.ApiError).message); setRows([]); } }, [say]);
+  const [terms, setTerms] = useState<{ plan: string; fee: string } | null>(null);
+  const load = useCallback(async () => {
+    try { setRows(await pa.partnerAdminList()); } catch (e) { say((e as api.ApiError).message); setRows([]); }
+    try { const t = await pa.partnerTermsGet(); setTerms({ plan: String(t.plan_pct), fee: String(t.fee_pct) }); } catch { setTerms(null); }
+  }, [say]);
   useEffect(() => { void load(); }, [load]);
   const set = async (p: pa.PartnerAdminRow, status: pa.PartnerStatus) => {
     const e = edit[p.id];
-    const pctN = e?.pct.trim() ? Number(e.pct) : null, monthsN = e?.months.trim() ? Number(e.months) : null;
-    try { await pa.partnerAdminSet(p.id, status, pctN, monthsN); say(zh ? "已保存" : "Saved"); await load(); } catch (x) { say((x as api.ApiError).message); }
+    // blank goes back to the default terms (-1); a number is this partner's own
+    const own = (v: string | undefined, had: number | null | undefined) => (v === undefined ? null : v.trim() ? Number(v) : had != null ? -1 : null);
+    const monthsN = e?.months.trim() ? Number(e.months) : null;
+    try { await pa.partnerAdminSet(p.id, status, own(e?.pct, p.share_pct), monthsN, own(e?.fee, p.fee_pct)); say(zh ? "已保存" : "Saved"); await load(); } catch (x) { say((x as api.ApiError).message); }
+  };
+  const saveTerms = async () => {
+    if (!terms) return;
+    try { await pa.partnerTermsSet(Number(terms.plan), Number(terms.fee)); say(zh ? "默认佣金已保存" : "Default commission saved"); await load(); } catch (x) { say((x as api.ApiError).message); }
   };
   const payout = async (p: pa.PartnerAdminRow) => {
     const f = pay[p.id];
@@ -506,7 +516,14 @@ function PartnersAdmin() {
   };
   const pending = (rows ?? []).filter(p => p.status === "pending").length;
   return (
-    <Frame tab="partners" title={B("Partners", "合作伙伴")} sub={B("Approve the people who bring brands to Placetta, set each one's revenue share, and record the payouts you make by hand. Partners see only the referrals that agreed to share.", "审核把品牌带到快哉的合作伙伴，设定各自的收入分成，并记录您手动支付的款项。合作伙伴只能看到同意共享的推荐商家。")}>
+    <Frame tab="partners" title={B("Partners", "合作伙伴")} sub={B("Approve the people who bring brands to Placetta, set the commission (a default, or each partner's own), and record the payouts you make by hand. Nothing here moves money. Partners see only the referrals that agreed to share.", "审核把品牌带到快哉的合作伙伴，设定佣金（默认值或各自的比例），并记录您手动支付的款项。这里不会转出任何资金。合作伙伴只能看到同意共享的推荐商家。")}>
+      {terms && (
+        <form className="pa-row" onSubmit={x => { x.preventDefault(); void saveTerms(); }}>
+          <label><span>{zh ? "默认方案佣金 %" : "Default plan %"}</span><input inputMode="decimal" value={terms.plan} onChange={x => setTerms({ ...terms, plan: x.target.value })} /></label>
+          <label><span>{zh ? "默认执照服务费佣金 %" : "Default license fee %"}</span><input inputMode="decimal" value={terms.fee} onChange={x => setTerms({ ...terms, fee: x.target.value })} /></label>
+          <button type="submit" className="sbtn line">{zh ? "保存默认值" : "Save defaults"}</button>
+        </form>
+      )}
       <dl className="hq-tot ops-tot">
         <div className={pending ? "warn" : ""}><dt>{zh ? "待审核" : "Waiting for review"}</dt><dd>{pending}</dd></div>
         <div><dt>{zh ? "已批准" : "Approved"}</dt><dd>{(rows ?? []).filter(p => p.status === "approved").length}</dd></div>
@@ -515,7 +532,7 @@ function PartnersAdmin() {
       </dl>
       {rows === null ? <p className="quiet">{zh ? "加载中…" : "Loading…"}</p> : rows.length === 0 ? <div className="empty"><p>{zh ? "还没有合作伙伴申请。" : "No partner applications yet."}</p></div> : (
         <div className="pa-list">{rows.map(p => {
-          const e = edit[p.id] ?? { pct: p.share_pct == null ? "" : String(p.share_pct), months: String(p.share_months) };
+          const e = edit[p.id] ?? { pct: p.share_pct == null ? "" : String(p.share_pct), months: String(p.share_months), fee: p.fee_pct == null ? "" : String(p.fee_pct) };
           const f = pay[p.id] ?? { amount: "", on: "", ref: "" };
           return (
             <article key={p.id} className="pa">
@@ -524,10 +541,11 @@ function PartnersAdmin() {
               <p className="rq-meta">{[p.website ?? "", p.code ? (zh ? `推荐码 ${p.code}` : `code ${p.code}`) : "", zh ? `推荐 ${p.referred} 家，${p.sharing} 家共享` : `${p.referred} referred, ${p.sharing} sharing`,
                 zh ? `分成 ${usd(p.earned_usd)}，已付 ${usd(p.paid_usd)}` : `earned ${usd(p.earned_usd)}, paid ${usd(p.paid_usd)}`].filter(Boolean).join(zh ? "，" : ", ")}</p>
               <div className="pa-row">
-                <label><span>{zh ? "分成 %" : "Share %"}</span><input inputMode="decimal" value={e.pct} onChange={x => setEdit(s => ({ ...s, [p.id]: { ...e, pct: x.target.value } }))} placeholder={zh ? "未设定" : "not set"} /></label>
+                <label><span>{zh ? "方案佣金 %" : "Plan %"}</span><input inputMode="decimal" value={e.pct} onChange={x => setEdit(s => ({ ...s, [p.id]: { ...e, pct: x.target.value } }))} placeholder={zh ? `默认 ${terms?.plan ?? 15}` : `default ${terms?.plan ?? 15}`} /></label>
+                <label><span>{zh ? "执照服务费佣金 %" : "License fee %"}</span><input inputMode="decimal" value={e.fee} onChange={x => setEdit(s => ({ ...s, [p.id]: { ...e, fee: x.target.value } }))} placeholder={zh ? `默认 ${terms?.fee ?? 10}` : `default ${terms?.fee ?? 10}`} /></label>
                 <label><span>{zh ? "月数" : "Months"}</span><input inputMode="numeric" value={e.months} onChange={x => setEdit(s => ({ ...s, [p.id]: { ...e, months: x.target.value } }))} /></label>
                 {p.status !== "approved" && <button type="button" className="sbtn ink" onClick={() => void set(p, "approved")}>{zh ? "批准" : "Approve"}</button>}
-                {p.status === "approved" && <button type="button" className="sbtn line" onClick={() => void set(p, "approved")}>{zh ? "保存分成" : "Save share"}</button>}
+                {p.status === "approved" && <button type="button" className="sbtn line" onClick={() => void set(p, "approved")}>{zh ? "保存佣金" : "Save commission"}</button>}
                 {p.status === "pending" && <button type="button" className="sbtn quiet" onClick={() => void set(p, "declined")}>{zh ? "不批准" : "Decline"}</button>}
                 {p.status === "approved" && <button type="button" className="sbtn quiet" onClick={() => void set(p, "paused")}>{zh ? "暂停推荐码" : "Pause code"}</button>}
               </div>

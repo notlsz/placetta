@@ -50,16 +50,31 @@ function progress(state: Row) {
   return { stage: stores.length && !opening.length ? "open" : "opening", permits_done: apps.filter(a => a.status === "approved").length, permits_total: apps.length, opening_date: dates[0]?.slice(0, 10) ?? null };
 }
 
+/** Each store's licensing status, as referral_stores gives it in the database (simplified: an application belongs to a
+ *  store that lists it, or to the only store; no deadlines in the preview). No address. */
+function storesOf(state: Row) {
+  const stores = (Array.isArray(state.stores) ? state.stores : []) as Row[], apps = (Array.isArray(state.apps) ? state.apps : []) as Row[];
+  return stores.map((s, i) => {
+    const mine = apps.filter(a => stores.length === 1 || (Array.isArray(s.apps) && (s.apps as unknown[]).includes(a.id)));
+    const approved = mine.filter(a => a.status === "approved").length, pending = mine.length - approved;
+    return { id: String(s.id ?? `store-${i + 1}`), name: s.name ?? { en: "", zh: "" }, stage: s.stage === "open" ? "open" : "opening", status: "current", current: approved, due_30: 0, overdue: 0, pending, next: null,
+      licensed: pending === 0 && approved > 0 };
+  });
+}
+
 export async function moreRpc(fn: string, body: Record<string, unknown>, c: Claims, k: PreviewKit): Promise<Response | null> {
   const ws = String(body.ws ?? "");
   const partners = () => k.t("partners"), refs = () => k.t("workspace_referrals");
   const mine = () => partners().find(p => p.user_id === c.sub);
   const meOf = (p: Row | undefined) => (p ? { id: p.id, org_name: p.org_name, kind: p.kind, contact_name: p.contact_name ?? null, website: p.website ?? null, status: p.status,
-    code: p.status === "approved" ? p.code : null, share_pct: p.share_pct ?? null, share_months: p.share_months ?? 12, created_at: p.created_at, approved_at: p.approved_at ?? null } : null);
-  const referralFor = (w: string) => { const r = refs().find(x => x.workspace_id === w); const p = r && partners().find(x => x.id === r.partner_id); return r && p ? { org_name: p.org_name, kind: p.kind, consent: r.consent, consent_at: r.consent_at, attributed_at: r.attributed_at } : null; };
+    code: p.status === "approved" ? p.code : null, share_pct: p.share_pct ?? null, share_months: p.share_months ?? 12, created_at: p.created_at, approved_at: p.approved_at ?? null,
+    terms: { plan_pct: p.share_pct ?? terms().plan_pct, fee_pct: p.fee_pct ?? terms().fee_pct, months: p.share_months ?? 12, plan_default: p.share_pct == null, fee_default: p.fee_pct == null } } : null);
+  const terms = () => { const t = k.t("partner_terms"); if (!t.length) t.push({ id: "default", plan_pct: 15, fee_pct: 10, updated_at: k.now() }); return t[0] as { plan_pct: number; fee_pct: number; updated_at: string }; };
+  const referralFor = (w: string) => { const r = refs().find(x => x.workspace_id === w); const p = r && partners().find(x => x.id === r.partner_id); return r && p ? { org_name: p.org_name, kind: p.kind, consent: r.consent, consent_at: r.consent_at, attributed_at: r.attributed_at, scope: r.consent_scope ?? 2 } : null; };
   const snapshot = (r: Row) => {
     const w = k.t("workspaces").find(x => x.id === r.workspace_id);
-    Object.assign(r, r.consent && w ? { business_name: w.name, ...progress((w.state ?? {}) as Row), progress_at: k.now() } : { business_name: null, stage: null, permits_done: null, permits_total: null, opening_date: null, progress_at: null });
+    Object.assign(r, r.consent && w ? { business_name: w.name, ...progress((w.state ?? {}) as Row), stores: Number(r.consent_scope ?? 1) >= 2 ? storesOf((w.state ?? {}) as Row) : null, progress_at: k.now() }
+      : { business_name: null, stage: null, permits_done: null, permits_total: null, opening_date: null, stores: null, progress_at: null });
   };
   const staff = () => { if (!k.isStaff(c)) return k.pgErr("Placetta team only."); return null; };
 
@@ -115,7 +130,7 @@ export async function moreRpc(fn: string, body: Record<string, unknown>, c: Clai
       if (p.user_id === c.sub) return k.pgErr("A partner can't refer their own business.");
       if (!refs().some(r => r.workspace_id === ws)) {
         const consent = body.p_consent === true;
-        const r: Row = { id: k.uuid(), workspace_id: ws, partner_id: p.id, code: p.code, touched_at: new Date(at).toISOString(), attributed_at: k.now(), consent, consent_asked_at: k.now(), consent_at: k.now() };
+        const r: Row = { id: k.uuid(), workspace_id: ws, partner_id: p.id, code: p.code, touched_at: new Date(at).toISOString(), attributed_at: k.now(), consent, consent_asked_at: k.now(), consent_at: k.now(), consent_scope: 2 };
         snapshot(r); refs().push(r);
         k.audit(ws, c.sub, "you", consent ? `Started through ${p.org_name}, and shared progress with them (stage, permits approved, opening date)` : `Started through ${p.org_name}, without sharing progress`,
           consent ? `经由 ${p.org_name} 开始使用，并与其共享进展（阶段、已批准许可、开业日期）` : `经由 ${p.org_name} 开始使用，未共享进展`, { en: String(p.org_name), zh: String(p.org_name) });
@@ -128,7 +143,7 @@ export async function moreRpc(fn: string, body: Record<string, unknown>, c: Clai
       if (!k.isOwner(ws, c)) return k.pgErr("Only an owner can change what the partner sees.");
       const r = refs().find(x => x.workspace_id === ws); const p = r && partners().find(x => x.id === r.partner_id);
       if (!r || !p) return k.pgErr("This workspace has no partner.");
-      Object.assign(r, { consent: body.p_consent === true, consent_at: k.now() }); snapshot(r);
+      Object.assign(r, { consent: body.p_consent === true, consent_at: k.now() }); if (r.consent) r.consent_scope = 2; snapshot(r);
       k.audit(ws, c.sub, "you", r.consent ? `Shared progress with ${p.org_name}` : `Stopped sharing progress with ${p.org_name}`, r.consent ? `与 ${p.org_name} 共享进展` : `停止与 ${p.org_name} 共享进展`, { en: String(p.org_name), zh: String(p.org_name) });
       k.save(); return k.json(referralFor(ws));
     }
@@ -137,17 +152,25 @@ export async function moreRpc(fn: string, body: Record<string, unknown>, c: Clai
       return k.json(partners().map(p => ({ ...meOf(p), code: p.code ?? null, email: k.email(String(p.user_id)), note: p.note ?? null,
         referred: refs().filter(r => r.partner_id === p.id).length, sharing: refs().filter(r => r.partner_id === p.id && r.consent).length,
         earned_usd: k.t("partner_revenue").filter(x => x.partner_id === p.id).reduce((s, x) => s + Number(x.share_usd), 0),
-        paid_usd: k.t("partner_payouts").filter(x => x.partner_id === p.id).reduce((s, x) => s + Number(x.amount_usd), 0) })));
+        fee_pct: p.fee_pct ?? null, paid_usd: k.t("partner_payouts").filter(x => x.partner_id === p.id).reduce((s, x) => s + Number(x.amount_usd), 0) })));
     }
     case "partner_admin_set": {
       const no = staff(); if (no) return no;
       const p = partners().find(x => x.id === body.p_id); if (!p) return k.pgErr("No such partner.");
-      const pct = body.p_share_pct == null ? null : Number(body.p_share_pct), months = body.p_share_months == null ? null : Number(body.p_share_months);
-      if (pct != null && !(pct >= 0 && pct <= 50)) return k.pgErr("The share is a percentage from 0 to 50.");
+      const pct = body.p_share_pct == null ? null : Number(body.p_share_pct), months = body.p_share_months == null ? null : Number(body.p_share_months), fee = body.p_fee_pct == null ? null : Number(body.p_fee_pct);
+      if (pct != null && pct !== -1 && !(pct >= 0 && pct <= 50)) return k.pgErr("The share is a percentage from 0 to 50.");
+      if (fee != null && fee !== -1 && !(fee >= 0 && fee <= 50)) return k.pgErr("The share is a percentage from 0 to 50.");
       if (months != null && !(months >= 1 && months <= 60)) return k.pgErr("The share runs 1 to 60 months.");
-      Object.assign(p, { status: body.p_status, share_pct: pct ?? p.share_pct ?? null, share_months: months ?? p.share_months ?? 12 });
+      Object.assign(p, { status: body.p_status, share_pct: pct === -1 ? null : pct ?? p.share_pct ?? null, fee_pct: fee === -1 ? null : fee ?? p.fee_pct ?? null, share_months: months ?? p.share_months ?? 12 });
       if (p.status === "approved") { p.code ??= code8(); p.approved_at ??= k.now(); }
-      k.save(); return k.json({ id: p.id, status: p.status, code: p.code ?? null, share_pct: p.share_pct, share_months: p.share_months });
+      k.save(); return k.json({ id: p.id, status: p.status, code: p.code ?? null, share_pct: p.share_pct, fee_pct: p.fee_pct ?? null, share_months: p.share_months });
+    }
+    case "partner_terms_get": { const no = staff(); if (no) return no; return k.json(terms()); }
+    case "partner_terms_set": {
+      const no = staff(); if (no) return no;
+      const a = Number(body.p_plan_pct), b = Number(body.p_fee_pct);
+      if (!(a >= 0 && a <= 50) || !(b >= 0 && b <= 50)) return k.pgErr("Each share is a percentage from 0 to 50.");
+      Object.assign(terms(), { plan_pct: a, fee_pct: b, updated_at: k.now() }); k.save(); return k.json(terms());
     }
     case "partner_payout_add": {
       const no = staff(); if (no) return no;
@@ -239,7 +262,7 @@ export function moreRest(table: string, req: Request, c: Claims, k: PreviewKit):
   if (table !== "workspace_referrals") return null;
   if (req.method !== "GET") return k.pgErr("permission denied for table workspace_referrals", "42501", 403);
   const p = k.t("partners").find(x => x.user_id === c.sub && x.status === "approved");
-  const cols = ["id", "attributed_at", "business_name", "stage", "permits_done", "permits_total", "opening_date", "progress_at"];
+  const cols = ["id", "attributed_at", "business_name", "stage", "permits_done", "permits_total", "opening_date", "progress_at", "stores", "consent_scope"];
   return k.json(p ? k.t("workspace_referrals").filter(r => r.partner_id === p.id && r.consent).sort((a, b) => String(b.attributed_at).localeCompare(String(a.attributed_at)))
     .map(r => Object.fromEntries(cols.map(x => [x, r[x] ?? null]))) : []);
 }

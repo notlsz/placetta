@@ -806,7 +806,8 @@ This policy explains how Placetta Inc. ("Placetta", "we") handles information wh
 - Appeal records: the decision you received, the deadline we counted, and drafts prepared for you or your attorney.
 - AI assistant tokens: for each token an owner or admin makes, its name, what it may read, who made it and when it was last used, and a record of each call. We keep only a fingerprint of the token, never the token itself.
 - Technical records of tasks: which tools ran, how long they took and what they cost. They hold names and numbers, not your content.
-- Partner referrals: the partner whose code brought you to Placetta, and whether you agreed to share your progress with them.
+- Partner referrals: the partner whose link or code brought you to Placetta, whether you agreed to share your progress with them, and the commission recorded for them.
+- Status pages an owner shares: what each page shows, its settings, how many times it was opened, and document requests viewers send. See "Status pages" below.
 - Headquarters email addresses that an owner shares store status with.
 - Payment details, which Stripe handles. We never see full card numbers.
 - Information from services you choose to connect, used only for the tasks you ask for.
@@ -968,7 +969,19 @@ An owner of a workspace can share its stores' status with a headquarters email a
 
 ## Sharing with a partner who referred you
 
-If your business came to Placetta through a partner's referral code, we record that partner and ask you once whether it may see your progress. If you agree, it sees only your business name, your stage, how many permits are approved out of the total, and your opening date. You can change this in Settings at any time, and the partner's view empties when you do.
+If your business came to Placetta through a partner's referral link or code, we record that partner and ask you once whether it may see your progress. If you agree, it sees only your business name, your stage, how many permits are approved out of the total, your opening date, and for each store its name, stage, whether it is fully licensed, how many licenses are current, due within 30 days, overdue or pending, and the next item due with its date. It never sees store addresses, documents, the contents of applications, tax IDs or anyone's personal details. If you agreed before store status was part of what is shared, the partner sees store status only after you agree again. You can change this in Settings at any time, and the partner's view empties when you do.
+
+We record the commission owed to the partner from what you pay for your plan and license fees. That record is between Placetta and the partner, shows the partner totals across all its referrals rather than your bill, and never changes what you pay.
+
+## Status pages
+
+An owner can share a store's status page by link or QR code with a landlord, franchisor, insurer, inspector or lender. If they do:
+
+- What is shown is what the owner chooses: the business name, and optionally the store's name and address, each license's name, agency, status, expiry and the day Placetta last read the agency's record, and license numbers only if turned on. It never shows documents, tax IDs, owners' names or anyone else's personal details.
+- The link is a random token we keep only as a fingerprint. It can have an end date or none, can have a password (kept only as a one-way hash), and stops working the moment the owner revokes it.
+- We count how many times each page is opened, and when it was last opened. We don't record who opened it, and the page has no third-party trackers, cookies or fonts. To stop abuse we limit how often one network address can open pages, using a one-way hash of the address that is discarded within a minute.
+- A viewer can ask the owner for a document only if the owner turned that on. The request, with the name and email the viewer gives, goes only to the owner, who decides whether to reply.
+- If someone starts using Placetta from the page's "Get your store licensed" link within 90 days, we record which page it came from and show its owner a count. Nothing else about either business is shared.
 
 ## International transfers
 
@@ -1094,7 +1107,8 @@ const PRIVACY_ZH = `生效日期：${UPDATED}。
 - 申诉记录：您收到的决定、我们计算的期限，以及为您或您的律师准备的草稿。
 - AI 助手令牌：所有者或管理员创建的每个令牌的名称、可读取的内容、创建人和最近使用时间，以及每次调用的记录。我们只保存令牌的指纹，从不保存令牌本身。
 - 任务技术记录：运行了哪些工具、用时多久、花费多少。记录只包含名称和数字，不包含您的内容。
-- 合作伙伴推荐：通过其推荐码将您带到快哉的合作伙伴，以及您是否同意与其共享进展。
+- 合作伙伴推荐：通过其推荐链接或推荐码将您带到快哉的合作伙伴、您是否同意与其共享进展，以及为其记录的佣金。
+- 所有者分享的状态页：每个页面显示的内容、设置、被打开的次数，以及查看者发送的文件申请。详见下文“状态页”。
 - 所有者与之共享门店状态的总部邮箱地址。
 - 付款信息，由 Stripe 处理。我们看不到完整卡号。
 - 您选择连接的服务中的信息，仅用于您要求的任务。
@@ -1256,7 +1270,19 @@ const PRIVACY_ZH = `生效日期：${UPDATED}。
 
 ## 与推荐您的合作伙伴共享
 
-如您的企业是通过合作伙伴的推荐码来到快哉的，我们会记录该合作伙伴，并询问您一次是否允许其查看您的进展。如您同意，该合作伙伴只能看到您的企业名称、所处阶段、已获批许可数与总数，以及开业日期。您可以随时在“设置”中更改；更改后，合作伙伴看到的内容会随即清空。
+如您的企业是通过合作伙伴的推荐链接或推荐码来到快哉的，我们会记录该合作伙伴，并询问您一次是否允许其查看您的进展。如您同意，该合作伙伴只能看到您的企业名称、所处阶段、已获批许可数与总数、开业日期，以及每家门店的名称、阶段、是否执照齐全、当前有效、30 天内到期、已逾期或办理中的执照数量，和下一项待办及其日期。合作伙伴看不到门店地址、文件、申请内容、税号或任何人的个人信息。如您同意共享时还不包括门店状态，需您再次同意后合作伙伴才能看到门店状态。您可以随时在“设置”中更改；更改后，合作伙伴看到的内容会随即清空。
+
+我们会根据您支付的方案费用和执照服务费，记录应付给该合作伙伴的佣金。该记录仅在快哉与合作伙伴之间，合作伙伴只能看到其全部推荐的合计金额，看不到您的账单，佣金也不会改变您支付的价格。
+
+## 状态页
+
+所有者可以通过链接或二维码，把门店的状态页分享给房东、加盟总部、保险公司、检查员或贷款方。分享后：
+
+- 显示的内容由所有者决定：企业名称，以及可选的门店名称和地址、每项执照的名称、签发机构、状态、到期日和快哉最近一次核对机构记录的日期；执照编号仅在打开后显示。页面绝不显示文件、税号、所有者姓名或任何其他人的个人信息。
+- 链接是一个随机令牌，我们只保存其指纹。链接可以设定到期日，也可以长期有效；可以设置密码（只保存单向哈希）；所有者撤销后立即失效。
+- 我们统计每个页面被打开的次数和最近一次打开的时间，但不记录是谁打开的；页面没有第三方追踪、Cookie 或字体。为防止滥用，我们会限制同一网络地址打开页面的频率，所用的是该地址的单向哈希，并在一分钟内丢弃。
+- 只有在所有者开启后，查看者才能向所有者申请文件。申请及查看者填写的姓名和邮箱只会发送给所有者，由所有者决定是否回复。
+- 如有人在 90 天内通过页面上的“为您的门店办好执照”链接开始使用快哉，我们会记录其来自哪个页面，并向该页面的所有者显示数量。双方企业的其他信息均不共享。
 
 ## 跨境传输
 

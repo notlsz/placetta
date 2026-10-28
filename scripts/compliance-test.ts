@@ -13,7 +13,9 @@
 
 import { SAMPLE } from "../src/model";
 import type { Workspace } from "../src/model";
-import { SHOW_DEFAULT, headline, requestPrompt, standingOf, tokenFromPath, trustClean, trustSnapshot, trustView, type TrustShow } from "../src/trust";
+import { CHIP_WORDS, SHOW_DEFAULT, footerLink, headline, requestPrompt, standingOf, tokenFromPath, trustClean, trustSnapshot, trustView, verifiedLine, type TrustShow } from "../src/trust";
+import { qrMatrix, qrSvg } from "../src/qr";
+import { statusTouch, touchesWith } from "../src/referral";
 import { checksFor, tally } from "../src/controls";
 import { answerQuestionnaire, openQuestionsPrompt, questionnaireCsv, splitQuestions } from "../src/questions";
 
@@ -51,7 +53,51 @@ export function runCompliance(ok: Ok, eq: Eq, section: (s: string) => void) {
     const row = { id: "x", name: { en: "X", zh: "X" }, status: "approved" as const };
     eq([standingOf({ ...row, expires: "2026-10-22" }, TODAY, true), standingOf({ ...row, expires: "2026-11-22" }, TODAY, true), standingOf({ ...row, expires: "2026-11-23" }, TODAY, true), standingOf({ ...row, expires: "2026-11-24" }, TODAY, true)],
       ["expired", "renewing", "good", "good"], "expired the day after, renewing through day 30, good from day 31");
-    eq(standingOf({ ...row, expires: "2026-10-22" }, TODAY, false), "good", "with dates hidden, a page can't tell expiry, as in the database");
+    eq(standingOf({ ...row, expires: "2026-10-22" }, TODAY, false), "good", "a row with no kept expiry and dates hidden can't tell");
+    eq(standingOf({ ...row, _exp: "2026-10-22" }, TODAY, false), "expired", "with dates hidden, the kept expiry still counts, as in the database");
+    {
+      const lapsed = { ...snap, rows: snap.rows.map((r, i) => (i === 0 ? { ...r, status: "approved" as const, expires: "2026-10-01" } : r)) };
+      const hid = trustView(lapsed, { ...SHOW_DEFAULT, expiry: false }, TODAY);
+      ok(hid.page.rows[0].standing === "expired" && !hid.page.rows.some(r => "expires" in r || "_exp" in r) && !hid.licensed, "a hidden expiry still makes a lapsed license expired, never shows the date, and the store isn't fully licensed");
+      const all = { ...snap, rows: snap.rows.slice(0, 2).map(r => ({ ...r, status: "approved" as const, expires: "2027-06-01" })) };
+      ok(trustView(all, SHOW_DEFAULT, TODAY).licensed && headline(trustView(all, SHOW_DEFAULT, TODAY).counts, "en", true).startsWith("Fully licensed"), "every license active: fully licensed");
+      ok(!trustView({ ...all, rows: [...all.rows, { ...all.rows[0], id: "p", status: "review" as const }] }, SHOW_DEFAULT, TODAY).licensed, "one pending: not fully licensed");
+      ok(!trustView({ ...all, rows: [] }, SHOW_DEFAULT, TODAY).licensed, "no licenses: never fully licensed");
+      ok(trustView({ ...all, rows: [{ ...all.rows[0], expires: "2026-11-10" }] }, SHOW_DEFAULT, TODAY).licensed, "a renewal due still counts as active");
+      ok(!trustView(all, { ...SHOW_DEFAULT, name: false }, TODAY).page.store && !!trustView(all, { ...SHOW_DEFAULT, name: false }, TODAY).page.business, "the store's name can be turned off");
+      eq([CHIP_WORDS.good.en, CHIP_WORDS.pending.en, CHIP_WORDS.renewing.en], ["Active", "Pending", "Renewing"], "the chips say active, pending, renewing");
+      eq(verifiedLine({ verified: "2026-10-27", source: "https://www.sanjoseca.gov/business-tax" }, d => d, "en"), "Verified by Placetta on 2026-10-27 from sanjoseca.gov", "verified by Placetta on a day from the agency's own site");
+      eq(verifiedLine({ verified: "2026-10-27" }, d => d, "en"), "Verified by Placetta on 2026-10-27 from the agency's record", "with the agency hidden, from the agency's record");
+      eq(verifiedLine({ source: "https://x.gov" }, d => d, "en"), "", "never read: no verified line");
+      eq([footerLink("https://www.placetta.com", "abcdefghjk", "en"), footerLink("https://www.placetta.com/", "abcdefghjk", "zh"), footerLink("https://www.placetta.com", "<x>", "en")],
+        ["https://www.placetta.com/app/?st=abcdefghjk", "https://www.placetta.com/app/?st=abcdefghjk&lang=zh", "https://www.placetta.com/app/"], "the footer's sign-up link carries only a well-formed ref");
+    }
+    {
+      // the QR code: the right size for its version, the three finder patterns, a quiet zone, white on black never inverted
+      const url = "https://www.placetta.com/app/trust/" + "0123456789abcdef".repeat(3);
+      const m = qrMatrix(url);
+      ok(m.length === 37 && m.every(r => r.length === 37), "an 83-character link is a version 5 code (37 modules)");
+      const finder = (x: number, y: number) => [0, 1, 2, 3, 4, 5, 6].every(i => m[y][x + i] && m[y + 6][x + i] && m[y + i][x] && m[y + i][x + 6]) && m[y + 3][x + 3] && !m[y + 1][x + 1];
+      ok(finder(0, 0) && finder(30, 0) && finder(0, 30), "three finder patterns in their corners");
+      ok(qrMatrix("hi").length === 21 && qrMatrix("y".repeat(200)).length === 57, "versions 1 to 10");
+      let threw = false; try { qrMatrix("z".repeat(400)); } catch { threw = true; }
+      ok(threw, "too long for version 10 is refused, never truncated");
+      ok(/^<svg [^>]*viewBox="0 0 45 45"/.test(qrSvg(url)) && /fill="#fff"/.test(qrSvg(url)), "the SVG has a four-module quiet zone on white");
+    }
+    {
+      // the first valid referral wins; each expires after 90 days
+      const D = 864e5, now = Date.parse("2026-10-23T12:00:00Z");
+      const t = touchesWith([{ code: "OLDOLD22", at: now - 91 * D }, { code: "TYPO2345", at: now - 10 * D }], "GOODCODE", now);
+      eq(t.map(x => x.code), ["TYPO2345", "GOODCODE"], "a touch past 90 days drops out; a newer code is kept after the older one");
+      eq(touchesWith({ code: "SOLO2345", at: now - D }, null, now).map(x => x.code), ["SOLO2345"], "what older versions kept reads as a list of one");
+      eq(touchesWith(t, "typo2345", now).length, 2, "the same code twice is one touch");
+      eq(touchesWith([], "bad", now), [], "a malformed code is no touch");
+    }
+    {
+      const now = Date.parse("2026-10-23T12:00:00Z");
+      eq(statusTouch({ ref: "abcdefghjk", at: now - 864e5 }, "zzzzzzzzzz", now)?.ref, "abcdefghjk", "a status page's ref: first touch wins");
+      eq(statusTouch({ ref: "abcdefghjk", at: now - 91 * 864e5 }, "zzzzzzzzzz", now)?.ref, "zzzzzzzzzz", "and lapses after 90 days");
+    }
     eq(standingOf({ ...row, expires: "2027-10-22" }, TODAY, true, { norm: "denied" }), "attention", "the agency's record overrides the date");
     eq([standingOf({ ...row, status: "review" }, TODAY, true), standingOf({ ...row, status: "needs" }, TODAY, true)], ["pending", "preparing"], "not yet issued");
     ok(headline(view.counts, "en").includes(`of ${view.counts.total} licenses`) && headline(view.counts, "zh").includes("项状态良好"), "the headline in both languages");

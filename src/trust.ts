@@ -23,12 +23,13 @@ import { detectInjection } from "./security/detect.ts";
    written and when read), and trustView works out standing the same way the database does, for the sample and the
    preview. The tests hold the two to the same answers (scripts/compliance-test.ts). */
 
-export type TrustShow = { address: boolean; agency: boolean; expiry: boolean; verified: boolean; numbers: boolean; docs: boolean };
-/** Status, agency, expiry and the last read of the agency's record show unless turned off; license numbers and document
- *  requests are off unless turned on. */
-export const SHOW_DEFAULT: TrustShow = { address: true, agency: true, expiry: true, verified: true, numbers: false, docs: false };
-export const SHOW_KEYS = ["address", "agency", "expiry", "verified", "numbers", "docs"] as const;
+export type TrustShow = { name: boolean; address: boolean; agency: boolean; expiry: boolean; verified: boolean; numbers: boolean; docs: boolean };
+/** The store's name and address, status, agency, expiry and the last read of the agency's record show unless turned
+ *  off; license numbers and document requests are off unless turned on. Owners' names, tax IDs and documents never show. */
+export const SHOW_DEFAULT: TrustShow = { name: true, address: true, agency: true, expiry: true, verified: true, numbers: false, docs: false };
+export const SHOW_KEYS = ["name", "address", "agency", "expiry", "verified", "numbers", "docs"] as const;
 export const SHOW_WORDS: Record<keyof TrustShow, { label: Bi; hint: Bi }> = {
+  name: { label: B("Store name", "门店名称"), hint: B("Off, the page shows only your business name.", "关闭后，页面只显示企业名称。") },
   address: { label: B("Store address", "门店地址"), hint: B("So they know which store this is.", "让对方知道是哪家门店。") },
   agency: { label: B("Issuing agency and its page", "发证机构及其官方页面"), hint: B("Who issued each license, with a link to the agency's own site.", "每项执照由谁签发，附机构官网链接。") },
   expiry: { label: B("Expiry and renewal dates", "到期与续期日期"), hint: B("Past an expiry, the page says expired on its own.", "过了到期日，页面会自动显示已过期。") },
@@ -36,21 +37,32 @@ export const SHOW_WORDS: Record<keyof TrustShow, { label: Bi; hint: Bi }> = {
   numbers: { label: B("License and permit numbers", "执照与许可编号"), hint: B("Off by default. Turn on for a lender or insurer who needs them.", "默认关闭。贷款方或保险公司需要时再打开。") },
   docs: { label: B("Let them ask for documents", "允许对方申请查看文件"), hint: B("Nothing is published. Each request comes to you to send or decline.", "不公开任何文件。每次申请都由您决定发送或拒绝。") },
 };
-export const DAYS_CHOICES = [30, 90, 365] as const;
+/** How long a link lasts; 0 is no end date (it still stops the moment it's revoked). */
+export const DAYS_CHOICES = [30, 90, 365, 0] as const;
 
 export type TrustStatus = "approved" | "held" | "review" | "filing" | "ready" | "needs" | "draft" | "waiting" | "todo";
 export type TrustRow = {
   id: string; name: Bi; status: TrustStatus; level?: string; confirmed?: boolean; shared?: boolean;
   agency?: Bi; source?: string; expires?: string; renews?: string; approved_on?: string; number?: string; proof?: boolean;
+  /** the expiry, kept for working out standing even when the owner hides the date; never shown */
+  _exp?: string;
 };
 export type TrustSnapshot = { business?: Bi; store?: Bi; address?: string; stage?: "open" | "opening"; as_of?: string; rows: TrustRow[] };
 export type Standing = "good" | "renewing" | "expired" | "attention" | "pending" | "preparing";
 export type TrustViewRow = TrustRow & { standing: Standing; verified?: string };
-export type TrustView = { page: Omit<TrustSnapshot, "rows"> & { rows: TrustViewRow[] }; counts: { good: number; total: number; attention: number }; requests: boolean };
+export type TrustView = { page: Omit<TrustSnapshot, "rows"> & { rows: TrustViewRow[] }; counts: { good: number; total: number; attention: number }; requests: boolean;
+  /** "Fully licensed": at least one license, and every one in the plan active (renewal due counts: it's still in force) */
+  licensed: boolean; ref?: string | null };
 
 export const STANDING_WORDS: Record<Standing, Bi> = {
   good: B("In good standing", "状态良好"), renewing: B("Renewal due within 30 days", "30 天内需续期"), expired: B("Expired", "已过期"),
   attention: B("Agency record needs attention", "机构记录需处理"), pending: B("With the agency", "机构审核中"), preparing: B("Being prepared", "正在准备"),
+};
+
+/** The status chip a viewer reads: active, renewing or pending, or what went wrong. */
+export const CHIP_WORDS: Record<Standing, Bi> = {
+  good: B("Active", "有效"), renewing: B("Renewing", "续期中"), expired: B("Expired", "已过期"),
+  attention: B("Needs attention", "需处理"), pending: B("Pending", "审核中"), preparing: B("Pending", "准备中"),
 };
 
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -97,13 +109,14 @@ export function trustClean(p: unknown, show: TrustShow): TrustSnapshot {
     if (!name || !STATUSES.has(r.status as TrustStatus)) continue;
     const o: TrustRow = { id: cut(r.id, 120) ?? `row${rows.length}`, name, status: r.status as TrustStatus,
       level: ["federal", "state", "county", "city"].includes(r.level as string) ? r.level as string : undefined, confirmed: r.confirmed === true, shared: r.shared === true };
+    o._exp = realDay(r._exp) ?? realDay(r.expires);
     if (show.agency) { o.agency = bi(r.agency, 160); const u = cut(r.source, 400); o.source = u && /^https:\/\/[A-Za-z0-9.-]+\.[A-Za-z]{2,}(\/|$)/.test(u) ? u : undefined; }
-    if (show.expiry) { o.expires = realDay(r.expires); o.renews = realDay(r.renews); o.approved_on = realDay(r.approved_on); }
+    if (show.expiry) { o.expires = realDay(r.expires) ?? realDay(r._exp); o.renews = realDay(r.renews); o.approved_on = realDay(r.approved_on); }
     if (show.numbers) { const n = cut(r.number, 60); o.number = n && /^[A-Za-z0-9 .#/-]{1,60}$/.test(n) ? n : undefined; }
     if (show.docs) o.proof = r.proof === true;
     rows.push(strip(o));
   }
-  return strip({ business: bi(s.business, 160), store: bi(s.store, 160), address: show.address ? cut(s.address, 200) : undefined,
+  return strip({ business: bi(s.business, 160), store: show.name === false ? undefined : bi(s.store, 160), address: show.address ? cut(s.address, 200) : undefined,
     stage: s.stage === "open" || s.stage === "opening" ? s.stage : undefined, as_of: realDay(s.as_of), rows });
 }
 
@@ -115,7 +128,7 @@ export type AgencyRecord = Record<string, { norm?: string | null; checked?: stri
 export function standingOf(r: TrustRow, today: string, showExpiry: boolean, rec?: AgencyRecord[string]): Standing {
   if (r.status === "approved" || r.status === "held") {
     if (rec?.norm && ["expired", "denied", "withdrawn"].includes(rec.norm)) return "attention";
-    const exp = showExpiry ? r.expires : undefined;
+    const exp = r._exp ?? (showExpiry ? r.expires : undefined);
     if (exp && exp < today) return "expired";
     if (exp && exp <= addDays(today, 30)) return "renewing";
     return "good";
@@ -128,14 +141,36 @@ export function trustView(snap: TrustSnapshot, show: TrustShow, today: string, r
   const page = trustClean(snap, show);
   const rows: TrustViewRow[] = page.rows.map(r => {
     const rec = records[r.id];
-    return strip({ ...r, standing: standingOf(r, today, show.expiry, rec), verified: show.verified && rec?.checked ? rec.checked.slice(0, 10) : undefined });
+    const { _exp: _hidden, ...shown } = r;
+    void _hidden;
+    return strip({ ...shown, standing: standingOf(r, today, show.expiry, rec), verified: show.verified && rec?.checked ? rec.checked.slice(0, 10) : undefined });
   });
-  return { page: { ...page, rows }, counts: { good: rows.filter(r => r.standing === "good" || r.standing === "renewing").length, total: rows.length,
-    attention: rows.filter(r => r.standing === "expired" || r.standing === "attention").length }, requests: show.docs };
+  const good = rows.filter(r => r.standing === "good" || r.standing === "renewing").length;
+  return { page: { ...page, rows }, counts: { good, total: rows.length, attention: rows.filter(r => r.standing === "expired" || r.standing === "attention").length },
+    requests: show.docs, licensed: rows.length > 0 && good === rows.length };
+}
+
+/** "Verified by Placetta on Oct 27, 2026 from sanjoseca.gov": the day Placetta last read the agency's own record, and
+ *  where. Without the agency's page shown, "from the agency's record". */
+export function verifiedLine(r: Pick<TrustViewRow, "verified" | "source">, day: (iso: string) => string, lang: "en" | "zh"): string {
+  if (!r.verified) return "";
+  let host = "";
+  try { host = r.source ? new URL(r.source).hostname.replace(/^www\./, "") : ""; } catch { host = ""; }
+  return lang === "zh" ? `快哉于 ${day(r.verified)} 核实，来源：${host || "机构记录"}` : `Verified by Placetta on ${day(r.verified)} from ${host || "the agency's record"}`;
+}
+
+/** The footer's sign-up link: the app's start, carrying this page's public ref (first touch, 90 days; src/referral.ts). */
+export function footerLink(origin: string, ref: string | null | undefined, lang: "en" | "zh"): string {
+  const q = new URLSearchParams();
+  if (ref && /^[a-z2-9]{10}$/.test(ref)) q.set("st", ref);
+  if (lang === "zh") q.set("lang", "zh");
+  const qs = q.toString();
+  return `${origin.replace(/\/+$/, "")}/app/${qs ? "?" + qs : ""}`;
 }
 
 /** A page's headline, in the viewer's words: "3 of 5 licenses and permits in good standing". */
-export function headline(c: TrustView["counts"], lang: "en" | "zh"): string {
+export function headline(c: TrustView["counts"], lang: "en" | "zh", licensed = false): string {
+  if (licensed && c.total) return lang === "zh" ? `执照齐全：${c.total} 项执照与许可全部有效` : `Fully licensed: all ${c.total} licenses and permits active`;
   if (!c.total) return lang === "zh" ? "暂无可显示的执照或许可" : "No licenses or permits to show yet";
   return lang === "zh" ? `${c.total} 项执照与许可中，${c.good} 项状态良好` : `${c.good} of ${c.total} licenses and permits in good standing`;
 }
