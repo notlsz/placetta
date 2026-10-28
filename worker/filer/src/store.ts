@@ -1,6 +1,7 @@
 // Everything the worker reads or writes, behind one interface: Supabase in production, memory in tests.
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { loginMatches } from "../../../supabase/functions/file/destinations.ts";
+import type { CardDetails, CardOutcome, FeeDecision } from "./card.ts";
 import type { Draft } from "./teach.ts";
 import type { Filing, LogEntry, Login, Skill } from "./types.ts";
 
@@ -49,6 +50,12 @@ export interface Store {
   humanCheckOpen?(f: Filing, liveUrl: string, holdUntil: string): Promise<HumanCheck | null>;
   humanCheck?(id: string): Promise<{ state: string; opened_at: string | null } | null>;
   humanCheckClose?(id: string, state: "solved" | "to_owner" | "ended"): Promise<boolean>;
+  /** The agency's fee (card.ts; the spend function's filer actions, with this run's token): may Odelia pay it, and up to
+   *  how much (no card is made); the single-use card itself, made now, in memory only; and how it ended (used: frozen
+   *  and the receipt attached; unused: canceled and refunded; unsure: frozen, and the team checks with the agency). */
+  feeAuthority?(f: Filing, pageCents: number | null): Promise<FeeDecision>;
+  card?(f: Filing, pageCents: number | null): Promise<CardDetails | null>;
+  cardDone?(f: Filing, outcome: CardOutcome, o?: { receipt?: string | null; cents?: number | null; confirmation?: string | null }): Promise<void>;
 }
 export type HumanCheck = { id: string; escalate_at: string };
 
@@ -61,13 +68,19 @@ export class SupabaseStore implements Store {
   /** The client for the run in progress: the same key, plus the run's token header for its one filing. */
   private runDb: SupabaseClient | null = null;
   private make: (headers: Record<string, string>) => SupabaseClient;
+  private url: string; private key: string;
+  /** The run's own token, for the spend function's filer actions (the card for this one filing). Memory only. */
+  private token: string | null = null;
+  /** The spend function's address and fetch (tests swap in a fake). */
+  fetcher: typeof fetch = (...a) => fetch(...a);
   constructor(url: string, key: string, client?: SupabaseClient, make?: (headers: Record<string, string>) => SupabaseClient) {
+    this.url = url.replace(/\/+$/, ""); this.key = key;
     this.make = make ?? ((headers) => createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false }, global: { headers } }));
     this.base = client ?? this.make({});
   }
   private get db(): SupabaseClient { return this.runDb ?? this.base; }
   async begin(f: Filing) {
-    this.runDb = null;
+    this.runDb = null; this.token = null;
     // an hour, the most the database gives: a run may wait on the team for a human check, then on the owner
     const { data, error } = await this.base.rpc("filer_begin_run", { p_filing: f.id, p_minutes: 60 });
     if (error) {
@@ -77,11 +90,34 @@ export class SupabaseStore implements Store {
     }
     if (typeof data !== "string" || data.length < 32) throw new Error("run token failed: no token");
     this.runDb = this.make({ "x-filer-run": data });
+    this.token = data;
   }
   async end() {
     const run = this.runDb;
-    this.runDb = null;
+    this.runDb = null; this.token = null;
     if (run) await run.rpc("filer_end_run", {});
+  }
+  /** The spend function, as this run: its token names the one filing it may pay for. Errors say only the status. */
+  private async spend(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+    if (!this.token) throw new Error("no run token");
+    const res = await this.fetcher(`${this.url}/functions/v1/spend`, {
+      method: "POST", signal: AbortSignal.timeout(30_000),
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${this.key}`, apikey: this.key, "x-filer-run": this.token },
+      body: JSON.stringify(body),
+    }).catch(() => null);
+    if (!res?.ok) throw new Error(`spend ${res?.status ?? "unreachable"}`);
+    return await res.json() as Record<string, unknown>;
+  }
+  async feeAuthority(f: Filing, pageCents: number | null): Promise<FeeDecision> {
+    const r = await this.spend({ action: "filer_fee", filing_id: f.id, page_cents: pageCents });
+    return r.authorized === true && Number(r.limit_cents) > 0 ? { ok: true, limitCents: Number(r.limit_cents) } : { ok: false, why: String(r.why ?? "not authorized").slice(0, 200) };
+  }
+  async card(f: Filing, pageCents: number | null): Promise<CardDetails | null> {
+    const r = await this.spend({ action: "filer_card", filing_id: f.id, page_cents: pageCents });
+    return r.authorized === true && r.card && typeof r.card === "object" ? r.card as CardDetails : null;
+  }
+  async cardDone(f: Filing, outcome: CardOutcome, o: { receipt?: string | null; cents?: number | null; confirmation?: string | null } = {}) {
+    await this.spend({ action: "filer_card_done", filing_id: f.id, outcome, receipt_path: o.receipt ?? null, receipt_cents: o.cents ?? null, confirmation: o.confirmation ?? null });
   }
   private async call<T>(fn: string, args: Record<string, unknown>, what: string): Promise<T> {
     const { data, error } = await this.db.rpc(fn, args);

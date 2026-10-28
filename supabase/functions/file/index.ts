@@ -36,9 +36,11 @@ import { asAgent,
   afterHold, askedToResubmit, type Bi, canFaxSignedFor, CHANNEL_SAID, check, DUPLICATE_REF, emailFor, envFrom, fallback, faxFailures, faxFile, faxTo, feeBlocks, type Filing,
   handBackDue, handoffPacket, hasLoginFor, holds, isForeign, type LogEntry, mailOutcome, mailTo, OWNER_REF, pick, type Refusal, refusalOf, sentByYou, signedCopy,
   TEACH_REFUSED, teachRefusal, teamApproved, whyYours, YOURS_REF, selfFileScope, workerOn, workerState,
-  type Beat, rerouteLead, wakeable, wakeConfig, wakeMs, wakePlan, waitsOnWorker, WORKER_ASLEEP,
+  type Beat, rerouteLead, wakeable, wakeConfig, wakeMs, wakePlan, waitsOnWorker, WORKER_ASLEEP, checkCents, lobCheckBody,
 } from "./logic.ts";
 import { pingWorker } from "./wake.ts";
+import { feeAuthority, type Authority } from "../_shared/issuing.ts";
+import { client as stripeClient } from "../_shared/stripe_catalog.ts";
 
 const env = () => envFrom((k) => Deno.env.get(k));
 /** The portal worker's heartbeat (20261102090000_filer_heartbeat.sql), read at most every 30 seconds. Null when the
@@ -68,7 +70,7 @@ async function wakeWorker(): Promise<void> {
   }, fetch }).catch(() => "not_needed" as const);
   if (out === "sent" || out === "woke") { beatCache = null; console.log("filer wake:", out); }
 }
-const COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, provider_ref, submit_clicked_at, attempts, requirements_checked, confirmation_number, portal_url, receipt_path, fee_estimate, send_after, agent_auth";
+const COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, provider_ref, submit_clicked_at, attempts, requirements_checked, confirmation_number, portal_url, receipt_path, fee_estimate, send_after, agent_auth, autopilot_grant";
 const log = (en: string, zh: string, kind = "info", ref?: string): LogEntry => ({ en, zh, kind, ...(ref ? { ref } : {}) });
 
 // ------------------------------------------------------------------ the filing row
@@ -208,7 +210,105 @@ async function facts(f: Filing, d: Dest | undefined) {
     // The same host, and on a host many agencies share (Accela, BTExpress), the same agency's path.
     hasLogin: hasLoginFor((logins.data ?? []).map((r) => r.url as string), d),
     mailConnected: (mail.data ?? []).length > 0,
+    // asked only when a fee would go with a mailed filing and Lob checks are on
+    ...(env().checks && feeBlocks(f, d) && d?.payment === "with_filing" ? { feeAuthority: !!(await feeAuthorityOf(f)) } : {}),
   };
+}
+
+// ------------------------------------------------------------------ a fee that goes with a mailed filing: a Lob check
+
+/** The filing's fee authority (_shared/issuing.ts feeAuthority): its live Autopilot grant, else an owner's approval of
+ *  this filing's fee. With the purchase that approval is, when it is one. */
+async function feeAuthorityOf(f: Filing): Promise<Authority | null> {
+  const [{ data: rows }, grant] = await Promise.all([
+    admin.from("purchases").select("id, status, method, amount_cents, approvals, approvers_needed, authorization_id, category").eq("workspace_id", f.workspace_id).eq("filing_id", f.id).eq("status", "approved"),
+    f.autopilot_grant ? (async () => {
+      const [{ data: g }, { data: live }] = await Promise.all([
+        admin.from("autopilot_grants").select("id, cap_per_filing").eq("id", f.autopilot_grant!).eq("workspace_id", f.workspace_id).maybeSingle(),
+        admin.rpc("autopilot_live", { p_grant: f.autopilot_grant }),
+      ]);
+      return g ? { id: String(g.id), live: live === true, capPerFiling: Number(g.cap_per_filing) } : null;
+    })() : Promise.resolve(null),
+  ]);
+  const approved = ((rows ?? []) as { id: string; status: string; method: string | null; amount_cents: number; approvals: unknown[]; approvers_needed: number; authorization_id: string | null; category: string }[])
+    .find((r) => r.method !== "card" && r.method !== "check" && r.category === "gov_fees") ?? null;
+  return feeAuthority({ grant, approved });
+}
+
+/** The business's card on file (the one its plan is billed to). */
+async function cardOnFile(ws: string): Promise<{ customer: string; pm: string } | null> {
+  const { data } = await admin.from("billing").select("stripe_customer_id").eq("workspace_id", ws).maybeSingle();
+  const customer = data?.stripe_customer_id as string | undefined;
+  if (!customer) return null;
+  const s = stripeClient(stripeEnv);
+  const c = await s.get(`customers/${encodeURIComponent(customer)}`);
+  const pm = (c?.invoice_settings?.default_payment_method as string | undefined) ?? (await s.get(`customers/${encodeURIComponent(customer)}/payment_methods?type=card&limit=1`))?.data?.[0]?.id;
+  return pm ? { customer, pm } : null;
+}
+const stripeEnv = (k: string) => Deno.env.get(k);
+
+/** The fee goes with the form: re-checked now (authority and cap), the business's card on file charged the exact fee,
+ *  then one Lob check drawn on Placetta's bank account, made out to the agency, with the filled form in the same
+ *  envelope. On a decline nothing is mailed; if Lob refuses, the charge is refunded and the business gets the packet. */
+async function sendCheck(g: Filing, d: Dest, to: NonNullable<ReturnType<typeof mailTo>>, from: Record<string, string>): Promise<ReturnType<typeof view>> {
+  const auth = await feeAuthorityOf(g);
+  const cents = auth ? checkCents(g, auth.capCents) : null;
+  if (!auth || !cents) return await toYou(g, bi("The agency's fee goes with this filing, and it isn't inside what you authorized Placetta to pay.", "这份申请需随附机构费用，但不在您授权快哉代付的范围内。"));
+  if (auth.kind === "autopilot") {
+    const { error: no } = await admin.rpc("autopilot_spend_ok", { p_ws: g.workspace_id, p_grant: auth.grant, p_cents: cents });
+    if (no) return await toYou(g, bi(`The agency's fee can't be paid under Autopilot: ${(/:\s*([^\n]{1,160})/.exec(no.message ?? "")?.[1] ?? "it's over a cap")}.`, "这笔机构费用无法在自动驾驶下支付：超出上限或授权已失效。"));
+  }
+  const payee = (d.payTo ?? to.name).slice(0, 40);
+  const now = new Date().toISOString();
+  // the purchase: new under Autopilot, or the owner's approval turned into a check (one per filing)
+  const ins = auth.kind === "autopilot"
+    ? await admin.from("purchases").insert({ workspace_id: g.workspace_id, category: "gov_fees", payee, payee_url: g.portal_url, amount_cents: cents, fee_cents: cents, app_id: g.app_id, filing_id: g.id,
+        why: { en: `The agency's fee for ${g.title.en}`, zh: `${g.title.zh}的机构费用` }, status: "approved", by_agent: true, approvals: [{ who: `autopilot:${auth.grant}`, at: now }], approvers_needed: 1,
+        method: "check", autopilot_grant: auth.grant, decided_at: now }).select("id").single()
+    : await admin.from("purchases").update({ method: "check", amount_cents: cents, fee_cents: cents }).eq("id", auth.purchase).eq("status", "approved").select("id").single();
+  if (ins.error || !ins.data) { await teamTask(g, "check_agency", "A check for this filing's fee may already be on its way; nothing was mailed again."); return await toYou(g, bi("A check for this fee may already be on its way.", "这笔费用的支票可能已在寄送途中。"), { check: true }); }
+  const purchase = String(ins.data.id);
+  const fail = async (en: string, zh: string, refundPi?: string) => {
+    if (refundPi) await stripeClient(stripeEnv).post("refunds", { payment_intent: refundPi }, `check-refund-${purchase}`).catch(() => console.error("check refund failed"));
+    await admin.from("purchases").update({ status: "failed", reasons: [{ en, zh }] }).eq("id", purchase);
+    return await toYou(g, bi(`The agency's fee couldn't be sent: ${en}`, `机构费用未能寄出：${zh}`));
+  };
+  const file = await cardOnFile(g.workspace_id).catch(() => null);
+  if (!file) return await fail("there's no card on file for the business.", "企业没有登记银行卡。");
+  const pi = await stripeClient(stripeEnv).post("payment_intents", {
+    amount: String(cents), currency: "usd", customer: file.customer, payment_method: file.pm, off_session: "true", confirm: "true",
+    description: `Agency fee to ${payee}, mailed by check by Placetta`.slice(0, 200), "metadata[purchase_id]": purchase, "metadata[workspace_id]": g.workspace_id, "metadata[filing_id]": g.id,
+  }, `check-charge-${purchase}`).catch(() => null);
+  if (!pi || pi.status !== "succeeded") return await fail("the card on file was declined, so nothing was mailed.", "登记的银行卡被拒，未寄出。");
+  const { data: w } = await admin.from("workspaces").select("name").eq("id", g.workspace_id).maybeSingle();
+  const res = await fetch(`${LOB}/checks`, {
+    method: "POST",
+    headers: { Authorization: lobAuth(), "Content-Type": "application/json", "Idempotency-Key": `check-${g.id}` },
+    body: JSON.stringify(lobCheckBody({ filing: g, purchase, to: lobAddress(to), payee, from, bank: Deno.env.get("LOB_CHECK_BANK_ACCOUNT")!, cents, file: await signedUrl(g.payload.pdf_path!), business: String(w?.name ?? "the applicant") })),
+    signal: AbortSignal.timeout(30000),
+  }).catch((e) => { console.error("lob check:", describe(e)); return null; });
+  const body = res ? await res.json().catch(() => ({})) : {};
+  if (!res || !res.ok || !body?.id) {
+    console.error("lob check refused:", res?.status, JSON.stringify(body?.error?.code ?? body?.error?.status_code ?? "").slice(0, 80));
+    await teamTask(g, "check_agency", "The mail service didn't confirm the check and form; the charge was refunded and the business was asked to check before mailing.");
+    return await fail("the mail service didn't confirm the check, so the charge was refunded.", "邮寄服务未确认支票，已退款。", pi.id);
+  }
+  await admin.from("purchases").update({ check_id: String(body.id), charge_id: pi.id, confirmation: body.check_number ? String(body.check_number) : null }).eq("id", purchase);
+  const amt = `$${(cents / 100).toFixed(2)}`;
+  const tracking = String(body.tracking_number ?? "");
+  const h = await step(g, log(`Mailed the form with a ${amt} check to ${payee}${body.check_number ? ` (check ${body.check_number})` : ""}${body.expected_delivery_date ? `, expected ${body.expected_delivery_date}` : ""}`,
+    `已将表格连同 ${amt} 支票寄给 ${payee}${body.check_number ? `（支票号 ${body.check_number}）` : ""}${body.expected_delivery_date ? `，预计 ${body.expected_delivery_date} 送达` : ""}`, "submitted", String(body.id)),
+    { provider_ref: String(body.id), status: "submitted", agent_state: "done", requirements_checked: true, ...(tracking ? { confirmation_number: tracking } : {}) });
+  // the receipt: Placetta's own record of the check, never Lob's proof (it prints Placetta's bank account numbers)
+  const pdf = await receiptPdf(["Fee paid by check", `Form: ${g.payload.form?.en ?? g.payload.official}`, `Payee: ${payee}`, `Amount: ${amt}`, ...(body.check_number ? [`Check number: ${body.check_number}`] : []),
+    `Mailed to: ${to.name}, ${to.city}`, `Mailed: ${new Date().toISOString().slice(0, 10)}`, "Charged to the business's card on file, mailed by Placetta on the applicant's behalf."]);
+  const path = await saveReceipt(h, "fee-check-receipt.pdf", pdf, "application/pdf");
+  if (path) await admin.from("purchases").update({ receipt_path: path }).eq("id", purchase);
+  await admin.from("updates").upsert({ workspace_id: g.workspace_id, kind: "filing", app_id: g.app_id, dedupe: `mailed:${g.id}`,
+    title: { en: `Mailed with its fee: ${g.title.en}`, zh: `已连同费用寄出：${g.title.zh}` },
+    body: { en: `A ${amt} check to ${payee} went with the form, charged to your card on file. Answers to mailed forms usually come back by post in about 4 to 5 weeks.`, zh: `表格附有一张给 ${payee} 的 ${amt} 支票，已从您登记的银行卡扣款。邮寄表格的回复通常约 4 至 5 周后寄回。` },
+  }, { onConflict: "workspace_id,dedupe", ignoreDuplicates: true });
+  return view(path ? await step(h, null, { receipt_path: path }, false) : h);
 }
 
 /** Filings of this form Placetta already submitted itself: the two-key period covers the first FILER_TWO_KEY. */
@@ -416,9 +516,14 @@ async function sendMail(f: Filing, d: Dest) {
   let from: Record<string, string>;
   try { from = JSON.parse(Deno.env.get("LOB_FROM") ?? ""); } catch { return await toYou(f, bi("Placetta's certified mail isn't set up yet.", "快哉的挂号信寄送尚未配置。")); }
   if (!to) return await toYou(f, bi("The agency lists no mailing address for this form.", "机构没有列出这份表格的邮寄地址。"));
-  const claimed = await claimOrTeam(f, `Mailing it by certified mail to ${to.name}, ${to.city}`, `正在以挂号信寄往 ${to.name}，${to.city}`);
+  // a fee that goes with it: only by a check under the filing's fee authority (pick chose mail for that), never without
+  const withFee = feeBlocks(f, d);
+  if (withFee && !env().checks) return await toYou(f, bi("The agency's fee goes with this filing, and Placetta never sends money.", "这份申请需随附机构费用，快哉从不代付款项。"));
+  const claimed = await claimOrTeam(f, withFee ? `Mailing it with its fee by check to ${to.name}, ${to.city}` : `Mailing it by certified mail to ${to.name}, ${to.city}`,
+    withFee ? `正在连同费用支票寄往 ${to.name}，${to.city}` : `正在以挂号信寄往 ${to.name}，${to.city}`);
   if (isView(claimed)) return claimed;
   const g = claimed;
+  if (withFee) return await sendCheck(g, d, to, from);
   const file = await signedUrl(f.payload.pdf_path!);
   const res = await fetch(`${LOB}/letters`, {
     method: "POST",
@@ -450,7 +555,9 @@ async function sendMail(f: Filing, d: Dest) {
 /** The letter's proof, once Lob has rendered it. */
 async function refreshMail(f: Filing) {
   if (!f.provider_ref || !Deno.env.get("LOB_API_KEY") || f.channel !== "mail") return view(f);
-  const res = await fetch(`${LOB}/letters/${encodeURIComponent(f.provider_ref)}`, { headers: { Authorization: lobAuth() }, signal: AbortSignal.timeout(15000) }).catch(() => null);
+  // a check mailed with its form is followed the same way; its proof (which prints Placetta's bank account) is never kept
+  const isCheck = f.provider_ref.startsWith("chk_");
+  const res = await fetch(`${LOB}/${isCheck ? "checks" : "letters"}/${encodeURIComponent(f.provider_ref)}`, { headers: { Authorization: lobAuth() }, signal: AbortSignal.timeout(15000) }).catch(() => null);
   if (!res?.ok) return view(f);
   const l = await res.json().catch(() => ({}));
   const events = Array.isArray(l.tracking_events) ? l.tracking_events : [];
@@ -463,7 +570,7 @@ async function refreshMail(f: Filing) {
     g = await step(g, log(`Mail: ${what}${ev.location ? `, ${ev.location}` : ""}`, `邮件：${what}${ev.location ? `，${ev.location}` : ""}`, "mail_event", id), {}, false);
   }
   const receipt = (f as unknown as { receipt_path?: string | null }).receipt_path;
-  if (!receipt && typeof l.url === "string" && l.url.startsWith("https://")) {
+  if (!receipt && !isCheck && typeof l.url === "string" && l.url.startsWith("https://")) {
     const pdf = await fetch(l.url, { signal: AbortSignal.timeout(20000) }).then((r) => (r.ok ? r.arrayBuffer() : null)).catch(() => null);
     if (pdf) {
       const path = await saveReceipt(g, "certified-mail-proof.pdf", new Uint8Array(pdf), "application/pdf");

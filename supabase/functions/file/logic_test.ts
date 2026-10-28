@@ -4,7 +4,7 @@ import { DEST, destinationProblems, staleDestinations, TO_VERIFY, type Dest } fr
 import {
   afterHold, asAgent, askedToResubmit, canFaxSigned, canFaxSignedFor, check, emailFor, envFrom, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holdMinutes,
   fallback, handBackDue, handoffPacket, holds, isForeign, killSwitchOn, selfFileScope, workerOn, workerState, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, PORTAL_FAILED, refusalOf, REVIEW_HOURS, rerouteDue,
-  sentByYou, signedCopy, teachRefusal, teamApproved, waysToSend, whyYours, YOURS_REF,
+  sentByYou, signedCopy, teachRefusal, teamApproved, waysToSend, whyYours, YOURS_REF, checkCents, lobCheckBody,
 } from "./logic.ts";
 
 const WS = "11111111-1111-1111-1111-111111111111";
@@ -499,4 +499,33 @@ Deno.test("sent as agent only when the database marked it and the payload names 
   assert(!asAgent(filing({ agent: { auth: A } } as Partial<Filing["payload"]>)), "a payload alone (a customer's own insert loses the mark) is not enough");
   assert(!asAgent(filing({}, { agent_auth: A })), "nor the mark with no packet in the payload");
   assert(!asAgent(filing({ agent: { auth: "33333333-3333-4333-8333-333333333333" } } as Partial<Filing["payload"]>, { agent_auth: A })), "nor another packet");
+});
+
+Deno.test("a fee that goes with a mailed form: a Lob check under the fee authority and cap, only with checks on; otherwise the team as today", () => {
+  const CHECKS = envFrom((k) => ({ FILER_AGENCIES: "test-form", FILER_CHANNELS: "email,fax,mail,portal", FILER_ENABLED: "1", LOB_API_KEY: "test_x", LOB_FROM: "{}",
+    STRIPE_ISSUING_ON: "1", LOB_CHECK_BANK_ACCOUNT: "bank_8cfeba6c0f6e2c1" } as Record<string, string>)[k]);
+  assertEquals(ENV.checks, false, "off by default");
+  assertEquals(CHECKS.checks, true);
+  assertEquals(envFrom((k) => ({ LOB_API_KEY: "x", LOB_FROM: "{}", STRIPE_ISSUING_ON: "1", LOB_CHECK_BANK_ACCOUNT: "not-a-bank" } as Record<string, string>)[k]).checks, false, "a bank account id from Lob");
+  assertEquals(envFrom((k) => ({ LOB_API_KEY: "x", LOB_FROM: "{}", LOB_CHECK_BANK_ACCOUNT: "bank_1" } as Record<string, string>)[k]).checks, false, "Placetta paying fees switched off");
+  const d = dest({ fax: undefined, payment: "with_filing" });
+  const f = filing({}, { fee_estimate: 50 });
+  const authorized = { hasLogin: false, mailConnected: false, feeAuthority: true };
+  assertEquals(pick(f, d, CHECKS, authorized), "mail");
+  // every other case: the team, exactly as before
+  assertEquals(pick(f, d, ENV, authorized), "team", "checks off");
+  assertEquals(pick(f, d, CHECKS, { ...authorized, feeAuthority: false }), "team", "no authority");
+  assertEquals(pick(f, dest({ fax: undefined, payment: "portal" }), CHECKS, authorized), "team", "a fee the agency takes online");
+  assertEquals(pick(f, dest({ fax: undefined, payment: "with_filing", signature: "wet" }), CHECKS, authorized), "team", "a handwritten signature");
+  assertEquals(pick(filing({ attachments: [{ name: "a.pdf", path: "p" }] }, { fee_estimate: 50 }), d, CHECKS, authorized), "team", "more than the form");
+  assertEquals(pick(f, dest({ fax: undefined, mail: undefined, payment: "with_filing" }), CHECKS, authorized), "team", "no mailing address");
+  assertEquals(pick(f, d, { ...CHECKS, channels: ["email", "fax", "portal"] }, authorized), "team", "mail switched off");
+  assertEquals(whyYours(f, d, CHECKS, { ...authorized, feeAuthority: false }).en, "The agency's fee goes with this filing, and nobody has authorized Placetta to pay it (Autopilot, or your approval of the fee).");
+  assertEquals(whyYours(f, d, ENV, authorized).en, "The agency's fee goes with this filing, and Placetta never sends money.");
+  // the exact fee, never above the cap
+  assertEquals([checkCents(f, 5000), checkCents(f, 4999), checkCents(filing(), 5000)], [5000, null, null]);
+  const body = lobCheckBody({ filing: filing({ form: b("Assumed name certificate") }, { fee_estimate: 25 }), purchase: "pu-1", to: { address_line1: "1 Main St", address_city: "Town", address_state: "OH", address_zip: "45999", name: "Agency" },
+    payee: "Secretary of State of Ohio, Business Services", from: { name: "Placetta" }, bank: "bank_1", cents: 2500, file: "https://x/signed.pdf", business: "Acme LLC" });
+  assertEquals([body.amount, body.bank_account, body.mail_type, body.to.name, body.memo, body.attachment, body.metadata], [25, "bank_1", "usps_first_class", "Secretary of State of Ohio, Business Ser", "Assumed name certificate", "https://x/signed.pdf", { filing: "f1", purchase: "pu-1" }]);
+  assert(body.message.length <= 400 && /enclosed/.test(body.message));
 });

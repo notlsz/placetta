@@ -60,7 +60,7 @@ export function mustStop(s: PageState): Stop | null {
   }
   for (const c of s.controls) {
     if (/^cc-/i.test(c.autocomplete) || CARD.test(describeControl(c))) {
-      return { reason: "payment", en: "The agency is asking for its fee. Open the live view and pay it yourself, then tap \"I've done it\". Placetta never types a card or bank number.", zh: "机构要求支付费用。请打开实时画面自行支付后点击“我已完成”。快哉从不输入银行卡或账户号码。" };
+      return { reason: "payment", en: "The agency is asking for its fee. Open the live view and pay it yourself, then tap \"I've done it\". Placetta never types your own card or bank number.", zh: "机构要求支付费用。请打开实时画面自行支付后点击“我已完成”。快哉从不输入您本人的银行卡或账户号码。" };
     }
   }
   for (const c of s.controls) {
@@ -73,6 +73,13 @@ export function mustStop(s: PageState): Stop | null {
   }
   return null;
 }
+
+/** A payment line (a card's or a bank account's): Placetta's own single-use card may go in a card line (card.ts). */
+export const paymentControl = (c: Control) => /^cc-/i.test(c.autocomplete) || CARD.test(describeControl(c));
+
+/** What else on a payment page is the person's, once Placetta's card pays its fee: the same checks with the payment
+ *  lines set aside (an SSN line, a code sent to the owner, a CAPTCHA still go to a person). */
+export const stopBesidesCard = (s: PageState): Stop | null => mustStop({ ...s, controls: s.controls.filter((c) => !paymentControl(c)) });
 
 /** After the person filled the lines a stop was for (an SSN, a code), every such line on the page has something in it,
  *  so the same page doesn't send them back again. Only for those two: a CAPTCHA is checked in the page (run.ts), and a

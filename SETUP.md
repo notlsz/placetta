@@ -154,28 +154,79 @@ email as its citation.
 
 ## Stripe Issuing (zero-touch agency fees, off until approved)
 
-Built on the current spend function from the parked `spend-wip` branch, behind `STRIPE_ISSUING=on` and
-`app_settings.issuing_on` (both off). Each agency fee inside an owner's Autopilot caps gets one single-use virtual card:
-the workspace's card on file is charged the exact amount, the card can spend that amount once at government merchant
-categories within 7 days, the real-time authorization approves only that card while the purchase waits and the grant is
-live, and the settled payment closes it (`supabase/functions/_shared/issuing.ts`, `spend` actions `autopilot_card`,
-`bill`, `card`, `stripe-webhook`). The card number goes only to the portal worker; wiring the worker to call `card` is
-left to the worker's owner. Bills no card pays go to the owner's accounts-payable email.
+Odelia pays the agency's fee herself, so the owner isn't handed the browser at the payment step. Off until Stripe
+approves Placetta for Issuing: `STRIPE_ISSUING_ON` (Supabase secret and the portal worker's Render environment) and
+`app_settings.issuing_on`, all off. With them off everything behaves as before: every fee goes to a person.
 
-1. Test mode now: Stripe Dashboard, Issuing, **Get started** (US accounts get test access at once).
-2. Apply for live: dashboard.stripe.com/issuing/overview, the "Cards for your own business" use case (Placetta's own
-   virtual cards to pay government fees for customers who authorize it). Stripe reviews it and gets in touch; it
-   publishes no timeline (https://support.stripe.com/questions/how-to-apply-for-issuing).
-3. Counsel, before switching on: whether charging the customer and paying the agency is money transmission that needs a
-   license in California, and the Terms and Filing Authorization "Fees" lines (today they say Placetta doesn't pay
-   fees). Then a new terms version.
-4. Fund the Issuing balance (an authorization with too little balance is declined before it reaches Placetta).
-5. Create one company cardholder for Placetta; set `STRIPE_ISSUING_CARDHOLDER` to its id.
-6. Issuing settings: set the real-time authorization endpoint to the `stripe-webhook` function's URL and save its signing
+The pattern is Stripe's "Issuing for agents" browser checkout (https://docs.stripe.com/issuing/agents), the way Ramp
+and Brex give software a scoped card: one single-use virtual card per filing, made at the moment it's needed.
+
+- **Authority.** Only a filing with fee authority: the owner's live Autopilot grant (within its per-filing and monthly
+  caps, `autopilot_spend_ok`), or an owner's explicit approval of this fee (Spend's approval, a purchase for the
+  filing). Nothing else ever gets a card.
+- **The card** (`supabase/functions/_shared/issuing.ts`): the registry's fee plus a small margin for an agency's card
+  surcharge (3%, at least $2, at most $25), never above the Autopilot cap or the approved amount; single-use
+  (`lifecycle_controls[cancel_after][payment_count]=1`), government merchant categories only (9399, 9311, 9211, 9222,
+  or a destination's own list), lapsing after 24 hours (Stripe sets a virtual card's printed expiry itself, so the lapse
+  is the real-time decision's and the monitor's sweep, which cancels and refunds an unused card).
+- **Funding.** The business's card on file is charged the card's limit first (a PaymentIntent, off-session,
+  idempotent), then the card draws on Placetta's Issuing balance, which the founder keeps funded. Stripe funds an
+  Issuing balance only from a bank top-up (`POST /v1/topups` with `destination_balance=issuing`, up to 5 business days
+  in the US) or a transfer from the Stripe payments balance (Dashboard, Balances, Add funds; instant in the US but only
+  from available funds). The customer charges land in the payments balance as pending for a couple of days, so the
+  Issuing balance is a float the charges refill; keep it above a few days of fees and turn on Stripe's low-balance
+  alert. The unspent part of the charge is refunded when the agency's charge settles.
+- **The worker** (`worker/filer/src/card.ts`, `run.ts`): at the payment page (a playbook's `pay` page, or card lines the
+  model's page shows) it asks the server whether the fee is authorized and up to how much (`spend` `filer_fee`, with the
+  run's own token, live for that one filing). If yes, the model fills the card with `fill_card {selector, which}` and
+  never sees a value; the card is fetched at that moment (`filer_card`) into the run's memory. The value never reaches
+  a log, a trace, a team task, a recorded skill or the model's prompt (all redacted; tested in
+  `worker/filer/test/card.test.ts`), screenshots mask the card lines, the page is scrubbed before its confirmation is
+  kept, and the lines are emptied before any hand-back. Steel records every session, so a Steel session never gets a
+  card: with `BROWSER_PROVIDER=steel` fees still go to the owner. Use local Chromium (plan standard) or Browserbase
+  (sessions are made with recording off while `STRIPE_ISSUING_ON` is set).
+- **Receipt and reconciliation.** The agency's confirmation (screenshot and PDF) is attached to the purchase with the
+  amount it shows (`filer_card_done`); `issuing_authorization.created` records the authorization and freezes the card;
+  `issuing_transaction.created` marks it paid, refunds the unspent charge and closes the card; any mismatch (over the
+  authorization, the receipt's amount off by more than $1, a merchant outside the list) becomes a `fee_mismatch` team
+  task. A pay button pressed with no confirmation afterwards freezes the card and makes a `fee_check` task.
+- **Checks.** An agency that takes the fee with a mailed form (`payment: "with_filing"`) gets a Lob check
+  (`POST /v1/checks`) drawn on Placetta's bank account in Lob, made out to the destination's `payTo` (or its mailing
+  name), the exact registry fee, with the filled form attached in the same envelope, under the same authority and cap,
+  the business's card charged first. Lob mails checks first class only (no certified mail), and doesn't report when a
+  check is cashed: reconcile cashed checks from the bank statement. Lob's check proof prints Placetta's account and
+  routing numbers, so it is never saved to the business's Documents; Placetta's own receipt PDF is. Fees on email and
+  fax stay with the team.
+- **Link.** Stripe's Link agent wallet (Instinct's pattern: a spend request the person approves, then a one-time card)
+  is consumer-only today (US and Canadian customers, the customer's own Link login), so it isn't built here.
+
+What only the founder can do:
+
+1. Test mode now: Stripe Dashboard, Issuing, **Get started** (US accounts get test access at once). Everything above runs
+   in test mode with test cards.
+2. **Apply for live Issuing**: dashboard.stripe.com/issuing/overview, the "Cards for your own business" use case
+   (Placetta's own virtual cards, paying government fees for customers who authorize it, recharged to the customer). If
+   Stripe says this is spending on customers' behalf, it will ask for "Cards for your platform" (Issuing with Connect:
+   each business its own connected account, cardholder and Issuing balance), which is a sales conversation
+   (stripe.com/contact/embedded-finance) and a rebuild of the funding step. Stripe publishes no review timeline
+   (https://support.stripe.com/questions/how-to-apply-for-issuing).
+3. Ask Stripe in the application whether retrieving a live card's full number through the API (to type it on an
+   agency's checkout) needs a PCI DSS attestation from Placetta; expect it to.
+4. Counsel, before switching on: whether charging the customer and paying the agency (by card or check) is money
+   transmission needing a license in California, and the Terms and Filing Authorization "Fees" lines (today they say
+   Placetta never types a card or bank number and doesn't pay fees). Then a new terms version.
+5. Fund the Issuing balance (an authorization with too little balance is declined before it reaches Placetta).
+6. Create one company cardholder for Placetta with its billing address (agencies check the ZIP); set
+   `STRIPE_ISSUING_CARDHOLDER` to its id.
+7. Issuing settings: set the real-time authorization endpoint to the `stripe-webhook` function's URL and save its signing
    secret as `STRIPE_ISSUING_AUTH_SECRET` (Stripe waits 2 seconds, then uses its timeout setting: set that to decline).
-7. Secrets: `STRIPE_ISSUING=on`, then `update public.app_settings set issuing_on = true;`. The next Billing health
-   check adds `issuing_transaction.created` to the webhook.
-8. Bill forwarding: `RESEND_API_KEY` and `BILLS_FROM` (or point it at the SES sender once that lands).
+8. Secrets: `STRIPE_ISSUING_ON=1` in Supabase and in Render (placetta-filer, Environment), apply
+   `20261105090100_issuing_cards.sql`, then `update public.app_settings set issuing_on = true;`. The next Billing
+   health check adds `issuing_authorization.created` and `issuing_transaction.created` to the webhook. (The older
+   `STRIPE_ISSUING=on` still works.)
+9. Checks (optional): add and verify Placetta's bank account in Lob (micro-deposits, a signatory), then set
+   `LOB_CHECK_BANK_ACCOUNT` to its `bank_...` id.
+10. Bill forwarding: `RESEND_API_KEY` and `BILLS_FROM` (or point it at the SES sender once that lands).
 
 ## The fast way: one command
 

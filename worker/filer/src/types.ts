@@ -1,4 +1,5 @@
 // Shapes shared by the portal worker.
+import type { CardPart } from "./card.ts";
 
 export type Bi = { en: string; zh: string };
 export type LogEntry = { at?: string; en: string; zh: string; kind: string; ref?: string; value?: string };   // value: what was entered, sensitive numbers masked
@@ -22,9 +23,11 @@ export type Login = { username: string; password: string; host: string };
 
 /** One recorded action. Values are never recorded: only which payload field (by English label, and for a taught
  *  playbook its fact key too) supplied one. A step a taught playbook can't fill from what the customer approved says
- *  why instead: `person` (an SSN, a card, a code: always the person's) or `ask` (nothing approved answers it). */
+ *  why instead: `person` (an SSN, the owner's card, a code: always the person's) or `ask` (nothing approved answers it).
+ *  `card` is a line of Placetta's own single-use card for the agency's fee (card.ts): typed only with fee authority,
+ *  its value never recorded. */
 export type Act =
-  | { action: "fill"; selector: string; field?: string; fact?: string; login?: "username" | "password"; person?: string; ask?: boolean }
+  | { action: "fill"; selector: string; field?: string; fact?: string; login?: "username" | "password"; person?: string; ask?: boolean; card?: CardPart }
   | { action: "select"; selector: string; field?: string; fact?: string; option?: string; ask?: boolean }
   | { action: "check"; selector: string; on: boolean }
   | { action: "click"; selector: string; submit?: boolean }

@@ -12,7 +12,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Browser, Page } from "playwright-core";
-import { confirmPattern, fieldFor, isFinal, mustStop, onPortal, optionFor, reviewMismatch, staffMay, stopLinesFilled, type PageState } from "./guards.ts";
+import { confirmPattern, fieldFor, isFinal, mustStop, onPortal, optionFor, reviewMismatch, staffMay, stopBesidesCard, stopLinesFilled, type PageState } from "./guards.ts";
 import type { Model } from "./model.ts";
 import { captchaAnswered, headingOf, locate, pageState, staffGuard } from "./page.ts";
 import { finalOn, type FormSteps, guideLines, navOn, pageOutline, payOn, type Playbook } from "./playbooks.ts";
@@ -25,8 +25,10 @@ import { startRecorder } from "./recorder.ts";
 import { blockedPage } from "./env.ts";
 import type { LivePage, LiveViews } from "./live.ts";
 import type { Act, Bi, Filing, Login, Result, Skill, TraceStep } from "./types.ts";
+import { cardLineOk, type CardDetails, type CardOutcome, type CardPart, CARD_PARTS, guardStore, optionCandidates, pageAmount, partValue, redactDeep, redactText, scrubPage, secretsOf } from "./card.ts";
 
-export type Session = { browser: Browser; page: Page; liveUrl: string | null; close(): Promise<void> };
+/** recorded: the provider keeps a replay of the session (Steel always does): such a session never gets a card (card.ts). */
+export type Session = { browser: Browser; page: Page; liveUrl: string | null; recorded?: boolean; close(): Promise<void> };
 /** The destination's details the worker needs beyond its host: the agency's path on a host many agencies share (so
     its own saved login is used), the other hosts the portal sends the browser to, and the page to start from. */
 export type Route = { tenant?: string; alsoOn?: string[]; start?: string };
@@ -55,6 +57,9 @@ export type Config = {
   teachMs?: number;                                    // how long a person has to file while Odelia watches (default holdMs)
   teachSettleMs?: number;                              // after the confirmation shows, how long before the recording ends
   teachWithoutLive?: boolean;                          // tests: the person's browser is the test itself, not a live view
+  /** STRIPE_ISSUING_ON on the worker (card.ts cardsOn): on an agency's payment page, a filing with fee authority is
+   *  paid with Placetta's single-use card (the server decides each one); off, every fee goes to a person. */
+  cards?: boolean;
 };
 
 const TEACH = {
@@ -71,8 +76,13 @@ export const teachRequested = (f: Filing) => [...f.agent_log].reverse().find((e)
 const registryOf = (f: Filing) => { const ids = (f.payload.fields ?? []).map((x) => x.id).filter((x): x is string => !!x); return ids.length ? ids : undefined; };
 
 const PAY = {
-  en: "The agency is asking for its fee. Open the live view and pay it yourself, then tap \"I've done it\". Placetta never pays an agency.",
-  zh: "机构要求支付费用。请打开实时画面自行支付后点击“我已完成”。快哉从不替您向机构付款。",
+  en: "The agency is asking for its fee. Open the live view and pay it yourself, then tap \"I've done it\".",
+  zh: "机构要求支付费用。请打开实时画面自行支付后点击“我已完成”。",
+};
+const PART_SAID: Record<CardPart, Bi> = {
+  number: { en: "number", zh: "卡号" }, exp: { en: "expiry", zh: "有效期" }, exp_month: { en: "expiry month", zh: "有效期月份" }, exp_year: { en: "expiry year", zh: "有效期年份" },
+  cvc: { en: "security code", zh: "安全码" }, name: { en: "cardholder name", zh: "持卡人姓名" }, postal_code: { en: "billing ZIP code", zh: "账单邮编" },
+  address_line1: { en: "billing address", zh: "账单地址" }, city: { en: "billing city", zh: "账单城市" }, state: { en: "billing state", zh: "账单州" },
 };
 
 /** The agency's site refused the worker's server (env.ts blockedPage). The file function's sweep tries another way the
@@ -154,6 +164,15 @@ type Ctx = {
   /** The hand-back the person just finished, and the page it was on (handBack, waived). */
   waive?: { reason: string; at: string };
   staffChecks?: number;                                // visible CAPTCHAs given to the team this run
+  // The agency's fee, paid with Placetta's single-use card (card.ts). The card itself is in memory only.
+  pay?: { ok: true; limitCents: number } | { ok: false; why: string };
+  card?: CardDetails | null;
+  cardSels: string[];                                  // the lines the card went into on this page
+  paid?: boolean;                                      // the agency's pay button was pressed with the card in
+  cardClicked?: boolean;                               // something was pressed after the card went in
+  feeReceipt?: { path: string | null; cents: number | null; confirmation: string };
+  result?: Result | null;
+  saidWhy?: boolean;
 };
 /** The URL is on the portal or one of the other hosts its destination names. */
 const onAny = (url: string, hosts: string[]) => hosts.some((h) => onPortal(url, h));
@@ -161,7 +180,10 @@ type Exec = { ok: true } | { ok: false; error: string } | { end: Result };
 
 export class Worker {
   private c: Config;
-  constructor(c: Config) { this.c = c; }
+  /** The run's card number and security code once it has a card: every store write and every page the model reads is
+   *  redacted against them (card.ts). Emptied when the run ends. */
+  private secrets: string[] = [];
+  constructor(c: Config) { this.c = { ...c, store: guardStore(c.store, () => this.secrets) }; }
 
   /** Claim and run one filing. False when the queue was empty. */
   async once(): Promise<boolean> {
@@ -196,6 +218,8 @@ export class Worker {
   private async runInner(f0: Filing, track: { session?: Session; dir?: string }, alive: { on: boolean } = { on: true }): Promise<Result | null> {
     const { store } = this.c;
     let f = f0;
+    this.secrets = [];
+    let ctxRef: Ctx | null = null;
     const official = f.payload.official ?? "";
     const host = this.c.portalOf(official);
     if (!host) { await this.finish(f, { kind: "handoff", reason: "no_portal", message: { en: "No approved portal for this form.", zh: "该表格没有经核准的网站。" }, trace: [] }); return null; }
@@ -263,7 +287,8 @@ export class Worker {
         await this.finish(f, res);
         return res;
       }
-      const ctx: Ctx = { f, host, hosts, login, page, session, trace: [], t0: Date.now(), files: new Map(), pb, dir, taught, assist: !!taught && taught.status !== "approved" };
+      const ctx: Ctx = { f, host, hosts, login, page, session, trace: [], t0: Date.now(), files: new Map(), pb, dir, taught, assist: !!taught && taught.status !== "approved", cardSels: [] };
+      ctxRef = ctx;
       const key = portalKey(host, f.payload.official!);
       if (teaching) {
         const res = await this.teach(ctx, events, page.url());
@@ -287,6 +312,8 @@ export class Worker {
         }
       }
       res ??= await this.drive(ctx, skill?.enabled ? "The recorded steps stopped matching this page; carry on from here." : undefined);
+      ctx.result = res;
+      await this.settleCard(ctx);
       for (const b of blocked.slice(0, 10)) ctx.f = await store.step(ctx.f, log(`Refused ${b.kind === "navigation" ? "to leave the agency's site" : b.kind === "scheme" ? "a local or script address" : b.kind === "download" ? "a download" : b.kind === "dialog" ? "a pop-up dialog" : "a new window"}`, `已拒绝${b.kind === "download" ? "下载" : b.kind === "dialog" ? "弹出对话框" : b.kind === "popup" ? "新窗口" : "离开机构网站或打开本地地址"}`, "refused", b.detail));
       await this.finish(ctx.f, res, ctx);
       // selector drift goes to the team once per run, whatever the run's end: the recorded skill needs a look
@@ -304,12 +331,108 @@ export class Worker {
       if (alive.on) await this.fail(f, e);   // a run past its limit was already failed by run()
       return null;
     } finally {
+      // a card the run got and didn't settle (it ended some other way): told to the server while the token still works
+      if (ctxRef) await this.settleCard(ctxRef).catch((e) => console.error("filer: card settle", e instanceof Error ? redactText(e.message, this.secrets) : "error"));
       // storage wiped, then the browser closed, then the run's folder gone; the token stops working
       if (session) await wipe(session.page).catch(() => undefined);
       await session?.close().catch(() => undefined);
       await rm(dir, { recursive: true, force: true }).catch((e) => console.error("filer: couldn't delete the run's folder", e instanceof Error ? e.message : e));
       await store.end?.().catch(() => undefined);
+      if (ctxRef) ctxRef.card = null;
+      this.secrets = [];
     }
+  }
+
+  // ---------------------------------------------------------------- the agency's fee, with Placetta's single-use card
+
+  /** May this page's fee be paid with Placetta's card now? Cards on here, a session nothing records, steps the team
+   *  reviewed (never assist mode), one payment per run, and the server's yes: the filing's fee authority and a limit the
+   *  page's amount fits. The answer is asked once per run; a no is said once in the filing's log. */
+  private async payReady(ctx: Ctx, st: PageState): Promise<boolean> {
+    const { store } = this.c;
+    if (!this.c.cards || !store.feeAuthority || !store.card || ctx.assist || ctx.paid) return false;
+    const say = async (en: string, zh: string) => { if (!ctx.saidWhy) { ctx.saidWhy = true; ctx.f = await store.step(ctx.f, log(en, zh, "fee", "card_refused")); } return false; };
+    if (ctx.session.recorded) return await say("Odelia didn't pay the fee: this browser session is recorded, and Placetta's card is never typed in one.", "Odelia 未支付费用：此浏览器会话被录制，快哉的卡从不在录制的会话中输入。");
+    const page = pageAmount(st.text);
+    ctx.pay ??= await store.feeAuthority(ctx.f, page).catch(() => ({ ok: false as const, why: "Placetta couldn't check who authorized the fee" }));
+    if (!ctx.pay.ok) return await say(`Odelia didn't pay the fee: ${ctx.pay.why}.`, "Odelia 未支付费用：没有可用的付款授权或超出上限。");
+    if (page && page > ctx.pay.limitCents) return await say(`Odelia didn't pay the fee: the agency asks $${(page / 100).toFixed(2)}, more than the $${(ctx.pay.limitCents / 100).toFixed(2)} Placetta may pay for it.`, "Odelia 未支付费用：机构要求的金额超出快哉可支付的上限。");
+    return true;
+  }
+
+  /** The stop on this page, once Placetta's card may pay it: nothing (go on), or what else on the page is the person's. */
+  private async payStop(ctx: Ctx, st: PageState, stop: { reason: string; en: string; zh: string } | null) {
+    if (stop?.reason !== "payment" || !(await this.payReady(ctx, st))) return stop;
+    return stopBesidesCard(st);
+  }
+
+  /** The card, fetched from the server now (the last moment), kept in memory only, with its secrets registered for
+   *  redaction before anything else can see them. */
+  private async cardNow(ctx: Ctx, st: PageState): Promise<CardDetails | null> {
+    if (ctx.card) return ctx.card;
+    const card = await this.c.store.card!(ctx.f, pageAmount(st.text)).catch(() => null);
+    if (!card) return null;
+    this.secrets = secretsOf(card);
+    ctx.card = card;
+    ctx.f = await this.c.store.step(ctx.f, log(`Paying the agency's fee with a single-use card (up to $${(card.limit_cents / 100).toFixed(2)}, for this fee only)`, `正用一次性卡支付机构费用（最多 $${(card.limit_cents / 100).toFixed(2)}，仅限此笔费用）`, "fee", "card"));
+    return card;
+  }
+
+  /** One line of the card, typed into the agency's own line for it. The value never goes into a trace or a log, and a
+   *  typing error is replaced by a plain one (Playwright's could carry what was typed). */
+  private async fillCard(ctx: Ctx, st: PageState, a: Extract<Act, { action: "fill" }>): Promise<Exec> {
+    const part = a.card!;
+    if (!CARD_PARTS.includes(part)) return { ok: false, error: "Unknown card line." };
+    if (!onAny(st.url, ctx.hosts)) return { ok: false, error: "Not on the agency's site." };
+    const c = st.controls.find((x) => x.selector === a.selector);
+    if (!c || !cardLineOk(part, c)) return { ok: false, error: `That isn't the agency's line for the card's ${PART_SAID[part].en}.` };
+    const card = await this.cardNow(ctx, st);
+    if (!card) return { end: await this.handBack(ctx, "payment", PAY) };
+    const v = partValue(part, card, c);
+    const loc = locate(ctx.page, a.selector).first();
+    try {
+      if (c.tag === "select") {
+        const options = (await loc.locator("option").evaluateAll((os) => os.map((o) => ({ v: (o as HTMLOptionElement).value, t: (o.textContent ?? "").trim() })))) as { v: string; t: string }[];
+        const want = optionCandidates(part, v).map((x) => x.toLowerCase());
+        const hit = options.find((o) => want.includes(o.v.toLowerCase()) || want.includes(o.t.toLowerCase()));
+        if (!hit) return { ok: false, error: `No option for the card's ${PART_SAID[part].en}.` };
+        await loc.selectOption({ value: hit.v });
+      } else await loc.fill(v);
+    } catch { return { ok: false, error: `Couldn't type the card's ${PART_SAID[part].en}.` }; }
+    if (!ctx.cardSels.includes(a.selector)) ctx.cardSels.push(a.selector);
+    ctx.trace.push({ action: "fill", selector: a.selector, card: part, url: urlKey(st.url), heading: headingOf(st), at: Date.now() });
+    ctx.f = await this.c.store.step(ctx.f, log(`Entered the single-use card's ${PART_SAID[part].en}`, `已填写一次性卡的${PART_SAID[part].zh}`, "quiet"));
+    return { ok: true };
+  }
+
+  /** Before a person (the owner, or the team) gets the page: the card's lines emptied and its number off the page. */
+  private async clearCard(ctx: Ctx) {
+    if (!ctx.card) return;
+    for (const s of ctx.cardSels) await locate(ctx.page, s).first().fill("").catch(() => undefined);
+    ctx.cardSels = [];
+    await ctx.page.evaluate(scrubPage, this.secrets).catch(() => undefined);
+  }
+
+  /** A picture of the page with the card's lines covered (and every card line the page marks as one). */
+  private async shot(ctx: Ctx, o: { fullPage?: boolean; type?: "jpeg" | "png"; quality?: number } = {}) {
+    if (!ctx.card) return await ctx.page.screenshot(o);
+    await ctx.page.evaluate(scrubPage, this.secrets).catch(() => undefined);
+    const mask = [...ctx.cardSels.map((s) => locate(ctx.page, s)), ctx.page.locator('input[autocomplete^="cc-"], input[autocomplete*=" cc-"]')];
+    return await ctx.page.screenshot({ ...o, mask, maskColor: "#3a3936" });
+  }
+
+  /** How the card ended, told to the server once: used (the agency's confirmation came; the receipt goes with it),
+   *  unused (nothing was pressed after the card went in: canceled and refunded), or unsure (pressed, no confirmation:
+   *  frozen, and the team checks with the agency before anything is paid again). */
+  private async settleCard(ctx: Ctx & { settled?: boolean }) {
+    if (!ctx.card || ctx.settled || !this.c.store.cardDone) return;
+    ctx.settled = true;
+    const outcome: CardOutcome = ctx.result?.kind === "submitted" && (ctx.paid || ctx.cardClicked) ? "used" : ctx.paid || ctx.cardClicked ? "unsure" : "unused";
+    await this.c.store.cardDone(ctx.f, outcome, { receipt: ctx.feeReceipt?.path ?? null, cents: ctx.feeReceipt?.cents ?? null, confirmation: ctx.feeReceipt?.confirmation ?? null });
+    ctx.f = await this.c.store.step(ctx.f, outcome === "used"
+      ? log("Paid the agency's fee with the single-use card and kept the agency's receipt. The card is frozen.", "已用一次性卡支付机构费用并保存机构收据，该卡已冻结。", "fee", "paid")
+      : outcome === "unused" ? log("The single-use card wasn't used. It's canceled and the charge refunded.", "一次性卡未使用，已作废并退款。", "fee", "unused")
+      : log("The card went in and the agency's pay button was pressed, but no confirmation showed. The card is frozen and the Placetta team checks with the agency before anything is paid again.", "已输入卡并点击付款，但未显示确认。该卡已冻结，快哉团队会先向机构核实，再决定是否重新付款。", "fee", "unsure"));
   }
 
   // ---------------------------------------------------------------- one action, with every guard
@@ -319,13 +442,20 @@ export class Worker {
     if (ctx.f.status === "canceled") return { end: { ...STOPPED, trace: ctx.trace } };
     const st = await pageState(page);
     await this.proof(ctx, st);
-    const stop = mustStop(st);
+    // a payment page Placetta's card may pay (payStop): only what else on it is the person's stops the run
+    const stop = await this.payStop(ctx, st, mustStop(st));
     if (stop && !(await this.waived(ctx, stop, st))) return { end: await this.handBack(ctx, stop.reason, { en: stop.en, zh: stop.zh }) };
     const loc = locate(page, a.selector).first();
     if (!(await loc.count())) return { ok: false, error: `No element for ${a.selector}` };
     const p = ctx.f.payload;
     const rec = (x: Act) => ctx.trace.push({ ...x, url: urlKey(st.url), heading: headingOf(st), at: Date.now() });
     if (a.action === "fill") {
+      if (a.card) {
+        // the fee: only on a page that asks for it, with the server's yes for this filing (payReady)
+        const fee = mustStop(st)?.reason === "payment" || payOn(ctx.pb?.playbook, st);
+        if (!fee || !(await this.payReady(ctx, st))) return fee ? { end: await this.handBack(ctx, "payment", PAY) } : { ok: false, error: "This isn't the agency's payment page." };
+        return await this.fillCard(ctx, st, a);
+      }
       if (a.login) {
         if (!ctx.login || !onAny(st.url, ctx.hosts)) return { ok: false, error: "No saved login for this site." };
         await loc.fill(a.login === "username" ? ctx.login.username : ctx.login.password);
@@ -392,17 +522,25 @@ export class Worker {
       nav = !!again && urlKey(again.url) === urlKey(st.url) && navOn(ctx.pb?.playbook, again, text);
     }
     const final = !!text && !nav && (isFinal(text) || finalOn(ctx.pb?.playbook, st, text));
-    if (final && ctx.f.submit_clicked_at) {
-      // Already submitted in this run: a second "send" is the agency's fee or a confirmation of it, which is the person's.
+    // the card is in: this press may pay the agency (once a run; the card itself pays once)
+    const paying = ctx.cardSels.length > 0 && !!ctx.card && !ctx.paid && ctx.pay?.ok === true;
+    if (final && ctx.f.submit_clicked_at && !paying) {
+      // Already submitted in this run: a second "send" is the agency's fee or a confirmation of it, which is the person's
+      // unless Placetta's card is in and this is its one payment.
       return { end: await this.handBack(ctx, "payment", PAY) };
     }
     // Assist mode: steps nobody at Placetta has reviewed never send anything themselves. Odelia filled the pages; the
     // review page is still checked against the approval, then a person presses the agency's button.
     if (final && ctx.assist) return { end: await this.assistSubmit(ctx, st) };
-    if (final) {
+    // the application already went in (its review page was checked then): this press only pays its fee
+    if (final && !(paying && ctx.f.submit_clicked_at)) {
       const end = await this.beforeSubmit(ctx, st);
       if (end) return { end };
       if (this.c.beforeSubmitClick) await this.c.beforeSubmitClick(ctx.f);
+    }
+    if (paying) {
+      ctx.cardClicked = true;
+      if (final) { ctx.paid = true; ctx.f = await this.c.store.step(ctx.f, log(`Paying the agency's fee: pressed ${text}`, `正在支付机构费用：点击 ${text}`, "fee", "pay")); }
     }
     await Promise.all([page.waitForLoadState("domcontentloaded").catch(() => undefined), loc.click()]);
     await page.waitForLoadState("domcontentloaded").catch(() => undefined);
@@ -419,13 +557,13 @@ export class Worker {
     ctx.seen = key; ctx.pages = (ctx.pages ?? 0) + 1;
     const heading = headingOf(st) || ctx.host;
     let path: string | null = null;
-    try { path = await this.c.store.saveProof(ctx.f, `page-${ctx.pages}.jpg`, await ctx.page.screenshot({ fullPage: true, type: "jpeg", quality: 60 }), "image/jpeg"); } catch { /* the page still gets its line */ }
+    try { path = await this.c.store.saveProof(ctx.f, `page-${ctx.pages}.jpg`, await this.shot(ctx, { fullPage: true, type: "jpeg", quality: 60 }), "image/jpeg"); } catch { /* the page still gets its line */ }
     ctx.f = await this.c.store.step(ctx.f, log(`On “${heading}”`, `在“${heading}”页面`, "page", path ?? undefined));
   }
 
   /** The final-submit guard: screenshot, compare with the payload, dry run and two-key, then write submit_clicked_at. */
   private async beforeSubmit(ctx: Ctx, st: PageState): Promise<Result | null> {
-    const shot = await ctx.page.screenshot({ fullPage: true });
+    const shot = await this.shot(ctx, { fullPage: true });
     const path = await this.c.store.saveDoc(ctx.f, "review-page.png", shot, "image/png");
     const missing = this.unconfirmed(ctx, st);
     if (missing.length) {
@@ -473,6 +611,8 @@ export class Worker {
    *  to the owner. Time spent waiting on a person isn't counted against the run's own time. */
   private async handBack(ctx: Ctx, reason: string, message: Bi): Promise<Result> {
     const h0 = Date.now();
+    // a person never gets a page with Placetta's card in it
+    await this.clearCard(ctx);
     try {
       if (reason === "captcha") {
         const r = await this.staffFirst(ctx, message);
@@ -588,7 +728,8 @@ export class Worker {
   private async cleared(ctx: Ctx, reason: string, at: string): Promise<boolean> {
     const st = await pageState(ctx.page).catch(() => null);
     if (!st) return false;
-    const stop = mustStop(st);
+    // a payment page's own lines don't hide another stop on it (an SSN line beside the card's)
+    const stop = reason === "payment" ? mustStop(st) : stopBesidesCard(st);
     const moved = `${urlKey(st.url)}|${headingOf(st)}` !== at;
     if (reason === "payment") return moved && stop?.reason !== "payment" && !payOn(ctx.pb?.playbook, st);
     if (reason === "captcha") return stop?.reason !== "captcha" || await captchaAnswered(ctx.page);
@@ -636,7 +777,7 @@ export class Worker {
       }
       const own = (x: { fact?: string; field?: string }) => (p.fields ?? []).find((f) => (x.fact && factKey(f) === x.fact) || (!!x.field && f.label.en === x.field));
       const value = (s.action === "fill" || s.action === "select") && (s.field || s.fact) ? own(s)?.value : undefined;
-      if ((s.action === "fill" && !s.login && value === undefined) || (s.action === "select" && value === undefined && !(s.option && ctx.taught))) return { ok: false, error: "no value" };
+      if ((s.action === "fill" && !s.login && !s.card && value === undefined) || (s.action === "select" && value === undefined && !(s.option && ctx.taught))) return { ok: false, error: "no value" };
       // a taught playbook's checks run in code before a value is typed (the reviewed validators)
       const check = s.action === "fill" && s.fact ? ctx.taught?.body.validators?.[s.fact] : undefined;
       if (s.action === "fill" && check && value !== undefined && !checkValue(check, value)) {
@@ -666,9 +807,13 @@ export class Worker {
       if (Date.now() - ctx.t0 > this.c.maxMs) break;
       if (ctx.f.status === "canceled") return { ...STOPPED, trace: ctx.trace };
       const st = await pageState(ctx.page);
-      // The guide's fee page goes to the person even before any card field shows.
+      // The guide's fee page goes to the person even before any card field shows, unless Placetta's card may pay it.
       const own = mustStop(st);
-      const stop = (own && !(await this.waived(ctx, own, st)) ? own : null) ?? (payOn(ctx.pb?.playbook, st) ? { reason: "payment" as const, ...PAY } : null);
+      const fee0 = (own && !(await this.waived(ctx, own, st)) ? own : null) ?? (payOn(ctx.pb?.playbook, st) ? { reason: "payment" as const, ...PAY } : null);
+      const stop = await this.payStop(ctx, st, fee0);
+      if (fee0?.reason === "payment" && !stop && ctx.pay?.ok && !ctx.paid) {
+        note = `This is the agency's payment page. Placetta is authorized to pay this fee, up to $${(ctx.pay.limitCents / 100).toFixed(2)}, with its single-use card. Fill each card line with fill_card (number, expiry, security code, and the cardholder name and billing address lines the page asks for; never fill or select a card value any other way), then press the agency's pay button once.`;
+      }
       if (stop) {
         const r = await this.handBack(ctx, stop.reason, { en: stop.en, zh: stop.zh });
         if (r.kind === "needs_you" && r.reason === "resumed") continue;
@@ -683,13 +828,15 @@ export class Worker {
       // After the submit, the guide's confirmation pattern finds the agency's number without asking the model.
       const pattern = ctx.f.submit_clicked_at && ctx.pb?.playbook.confirm ? new RegExp(ctx.pb.playbook.confirm, "i").exec(st.text) : null;
       if (pattern?.[1]) return await this.done(ctx, pattern[1], `Submitted following the published guide for ${ctx.pb!.playbook.name}`, false);
-      const call = await this.c.model.next({ filing: ctx.f, agency: ctx.host, state: st, recent, note, guide: ctx.pb ? guideLines(ctx.pb) : undefined });
+      // what the model reads never holds the card: the page, the steps and the note are redacted against it
+      const call = await this.c.model.next(redactDeep({ filing: ctx.f, agency: ctx.host, state: st, recent, note, guide: ctx.pb ? guideLines(ctx.pb) : undefined }, this.secrets));
       note = undefined;
       const x = call.input as Record<string, string & boolean & number>;
       let r: Exec;
       switch (call.name) {
         case "fill": r = await this.exec(ctx, { action: "fill", selector: x.selector }, String(x.value ?? "")); break;
         case "fill_login": r = await this.exec(ctx, { action: "fill", selector: x.selector, login: x.which === "password" ? "password" : "username" }); break;
+        case "fill_card": r = CARD_PARTS.includes(x.which as CardPart) ? await this.exec(ctx, { action: "fill", selector: x.selector, card: x.which as CardPart }) : { ok: false, error: "Unknown card line." }; break;
         case "select": r = await this.exec(ctx, { action: "select", selector: x.selector, option: String(x.option) }); break;
         case "check": r = await this.exec(ctx, { action: "check", selector: x.selector, on: !!x.on }); break;
         case "click": r = await this.exec(ctx, { action: "click", selector: x.selector }); break;
@@ -725,7 +872,7 @@ export class Worker {
       return { kind: "handoff", reason: "review_differs", task: "handoff", trace: ctx.trace,
         message: { en: `The agency's review page doesn't match what you approved (${missing.join(", ")}). Nothing was submitted.`, zh: `机构的核对页面与您批准的内容不一致（${missing.join("、")}），未提交。` } };
     }
-    const shot = await ctx.page.screenshot({ fullPage: true }).catch(() => null);
+    const shot = await this.shot(ctx, { fullPage: true }).catch(() => null);
     const path = shot ? await this.c.store.saveDoc(ctx.f, "review-page.png", shot, "image/png") : null;
     ctx.f = await this.c.store.step(ctx.f, log("Checked the review page against what you approved. Your turn to press submit.", "已核对页面与您批准的内容一致，请您点击提交。", "review_page", path ?? undefined));
     const h = await this.handBack(ctx, "assist_submit", ASSIST);
@@ -809,12 +956,16 @@ export class Worker {
   }
 
   private async done(ctx: Ctx, confirmation: string, summary: string, replayed: boolean): Promise<Result> {
+    // a page that shows Placetta's card back (some agencies echo the number) has it blanked before it's kept
+    if (ctx.card) await ctx.page.evaluate(scrubPage, this.secrets).catch(() => undefined);
     const st = await pageState(ctx.page);
-    const png = await ctx.page.screenshot({ fullPage: true });
+    const png = await this.shot(ctx, { fullPage: true });
     const shot = await this.c.store.saveDoc(ctx.f, "confirmation.png", png, "image/png");
     let pdfPath: string | null = null;
     try { const pdf = await ctx.page.pdf(); pdfPath = await this.c.store.saveDoc(ctx.f, "confirmation.pdf", pdf, "application/pdf"); } catch { /* not headless */ }
     (ctx as Ctx & { receipt?: string | null; pattern?: string | null }).receipt = pdfPath ?? shot;
+    // the agency's payment confirmation, attached to the card's purchase for reconciling against the authorization
+    if (ctx.card && (ctx.paid || ctx.cardClicked)) ctx.feeReceipt = { path: pdfPath ?? shot, cents: pageAmount(st.text), confirmation };
     // the receipt checklist: what Placetta kept as proof, ticked or missing, in the filing's log for the owner and team
     const check = receiptCheck({ text: st.text, heading: headingOf(st), confirmation, screenshot: shot, pdf: pdfPath, receiptWords: ctx.pb?.playbook.receipt });
     ctx.f = await this.c.store.step(ctx.f, { ...receiptLine(check), kind: "receipt_check", ref: JSON.stringify(check).slice(0, 300) });
@@ -858,7 +1009,7 @@ export class Worker {
   }
 
   private async fail(f: Filing, e: unknown) {
-    const msg = e instanceof Error ? e.message.slice(0, 200) : "error";
+    const msg = e instanceof Error ? redactText(e.message, this.secrets).slice(0, 200) : "error";
     const cur = await this.c.store.reload(f.id).catch(() => f);
     if (cur.status === "canceled") return;   // stopped by the customer: nothing to retry
     if (cur.submit_clicked_at) {

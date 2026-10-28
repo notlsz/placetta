@@ -10,12 +10,14 @@
 //   charge.refunded                       a license charge let go, a pack's credit taken back
 //   checkout.session.async_payment_succeeded / _failed
 //                                         a delayed method (a bank debit) cleared: fulfilled now; or failed: nothing
-// With single-use cards on (STRIPE_ISSUING=on, _shared/issuing.ts), and only then:
+// With single-use cards on (STRIPE_ISSUING_ON=1, _shared/issuing.ts), and only then:
 //   issuing_authorization.request         the real-time endpoint (set in Stripe's Issuing settings to this function):
-//                                         approve only the card made for one approved Autopilot fee, within its
-//                                         amount, before it lapses, while the grant is live; answered at once, never
-//                                         claimed (Stripe gives 2 seconds, then its fallback)
-//   issuing_transaction.created           that fee is paid; its card is closed
+//                                         approve only the card made for one authorized fee, within its limit, at an
+//                                         allowed merchant category, before it lapses, while its authority is live;
+//                                         answered at once, never claimed (Stripe gives 2 seconds, then its fallback)
+//   issuing_authorization.created         an approved authorization: recorded on the purchase, and the card frozen
+//   issuing_transaction.created           the fee settled: reconciled (the purchase paid, the unspent charge refunded,
+//                                         the card closed, anything that doesn't match to the Placetta team)
 import { applyCheckoutSession, applyInvoice, applyRefund, applySubscription, type Db, type Obj } from "../_shared/stripe_apply.ts";
 import { approveAuthorization, issuingOn, STRIPE_VERSION, type CardPurchase } from "../_shared/issuing.ts";
 import { verified } from "./logic.ts";
@@ -31,7 +33,14 @@ export type Deps = {
   /** a PaymentIntent's metadata (a refund names its PaymentIntent, not the Checkout that made it) */
   paymentIntentMeta: (id: string) => Promise<Obj | null>;
   /** Single-use cards: the purchase a card was made for (with whether its grant is still live), and marking it paid. */
-  issuing?: { purchaseForCard(cardId: string): Promise<CardPurchase | null>; paid(cardId: string): Promise<void> };
+  issuing?: {
+    purchaseForCard(cardId: string): Promise<CardPurchase | null>;
+    paid(cardId: string): Promise<void>;
+    /** an approved authorization: record it on the purchase and freeze the card */
+    authorized?(a: Obj): Promise<void>;
+    /** a settled transaction: reconcile it (in place of paid when given) */
+    settled?(t: Obj): Promise<void>;
+  };
   now?: () => number;
 };
 
@@ -47,7 +56,7 @@ export { verified };
 
 export const HANDLED = new Set(["checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.async_payment_failed",
   "customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted", "invoice.paid", "invoice.payment_failed", "charge.refunded",
-  "issuing_transaction.created"]);
+  "issuing_authorization.created", "issuing_transaction.created"]);
 
 export async function handle(req: Request, d: Deps): Promise<Response> {
   if (req.method !== "POST") return reply(405, { error: "POST only" });
@@ -62,17 +71,17 @@ export async function handle(req: Request, d: Deps): Promise<Response> {
   try { event = JSON.parse(raw); } catch { return reply(400, { error: "Bad JSON." }); }
   if (typeof event?.id !== "string" || typeof event?.type !== "string" || !event.data?.object) return reply(400, { error: "Not a Stripe event." });
   if (event.type === "issuing_authorization.request") {
-    // answered now: approve only what the owner's grant covers; anything else, or cards off, is declined
+    // answered now: approve only what the owner's grant or approval covers; anything else, or cards off, is declined
     let approved = false;
     if (issuingOn(d.env) && d.issuing) {
-      const a = event.data.object as { card?: { id?: string; metadata?: Record<string, string> }; pending_request?: { amount?: number }; amount?: number };
+      const a = event.data.object as { card?: { id?: string; metadata?: Record<string, string> }; pending_request?: { amount?: number }; amount?: number; merchant_data?: { category?: string } };
       try { const p = a.card?.id ? await d.issuing.purchaseForCard(a.card.id) : null; const r = approveAuthorization(a, p, d.now?.() ?? Date.now()); approved = r.approved; if (!approved) console.error("issuing: declined", r.why); }
       catch (e) { console.error("issuing: decision failed", (e as Error).message); approved = false; }
     }
     return new Response(JSON.stringify({ approved }), { status: 200, headers: { "Content-Type": "application/json", "Stripe-Version": STRIPE_VERSION } });
   }
   if (!HANDLED.has(event.type)) return reply(200, { received: true, ignored: true });
-  if (event.type === "issuing_transaction.created" && !(issuingOn(d.env) && d.issuing)) return reply(200, { received: true, ignored: true });
+  if (event.type.startsWith("issuing_") && !(issuingOn(d.env) && d.issuing)) return reply(200, { received: true, ignored: true });
 
   let claim: "new" | "retry" | "duplicate";
   try { claim = await d.db.claimEvent(event.id, event.type); }
@@ -90,7 +99,11 @@ export async function handle(req: Request, d: Deps): Promise<Response> {
     else if (event.type.startsWith("customer.subscription.")) await applySubscription(d.db, o, event.type, createdAt, d.env);
     else if (event.type.startsWith("invoice.")) await applyInvoice(d.db, o, event.type, createdAt);
     else if (event.type === "charge.refunded") await applyRefund(d.db, o, d.paymentIntentMeta);
-    else if (event.type === "issuing_transaction.created") { const card = typeof o.card === "string" ? o.card : o.card?.id; if (typeof card === "string" && card) await d.issuing!.paid(card); }
+    else if (event.type === "issuing_authorization.created") { if (o.approved === true) await d.issuing!.authorized?.(o); }
+    else if (event.type === "issuing_transaction.created") {
+      if (d.issuing!.settled) await d.issuing!.settled(o);
+      else { const card = typeof o.card === "string" ? o.card : o.card?.id; if (typeof card === "string" && card) await d.issuing!.paid(card); }
+    }
     await d.db.doneEvent(event.id);
   } catch (e) {
     // Let Stripe retry: forget the event so the retry is applied, and say loudly what failed.
