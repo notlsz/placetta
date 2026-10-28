@@ -15,7 +15,7 @@ import { FilerLabeler, FilerModel } from "./model.ts";
 import { Router, usableSeats } from "./llm.ts";
 import { PLAYBOOKS, playbookFor } from "./playbooks.ts";
 import { checkAll, findingsOf, probeDue, probesOf } from "./probe.ts";
-import { type Route, Worker, type Session } from "./run.ts";
+import { ParkLot, type Route, Worker, type Session } from "./run.ts";
 import { dbKey, SupabaseStore } from "./store.ts";
 import { assertNotRoot } from "./sandbox.ts";
 import { startServer, type Health } from "./server.ts";
@@ -150,13 +150,15 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     }
   })();
   const lock = new KeyLock();
+  // a run waiting on a person parks its browser here and frees its slot for the next filing (run.ts ParkLot)
+  const park = new ParkLot(4, (p) => live.close(p.liveToken));
   const open = counted(opener(defaultDeps(process.env)), runs);
   const loop = async () => {
     const store = new SupabaseStore(process.env.SUPABASE_URL!, dbKey(process.env, () => undefined));
     // one router per slot: its filing steps and teach mode's labels share the order and which seats are sitting out
     const router = new Router();
     const w = new Worker({ store, model: new FilerModel(router), open, portalOf: (id) => DEST[id]?.portal ?? null,
-      routeOf, playbookOf: playbookFor, lock, labeler: new FilerLabeler(router).label, live, cards: cardsOn(process.env), ...settings() });
+      routeOf, playbookOf: playbookFor, lock, park, labeler: new FilerLabeler(router).label, live, cards: cardsOn(process.env), ...settings() });
     for (;;) {
       try {
         health.running++;

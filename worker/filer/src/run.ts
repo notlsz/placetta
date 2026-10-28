@@ -12,7 +12,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Browser, Page } from "playwright-core";
-import { confirmPattern, fieldFor, isFinal, mustStop, onPortal, optionFor, reviewMismatch, staffMay, stopBesidesCard, stopLinesFilled, type PageState } from "./guards.ts";
+import { confirmPattern, einFillOk, fieldFor, secretControl, isFinal, mustStop, paymentControl, onPortal, optionFor, reviewMismatch, staffMay, stopBesidesCard, stopLinesFilled, type PageState } from "./guards.ts";
 import type { Model } from "./model.ts";
 import { captchaAnswered, headingOf, locate, pageState, staffGuard } from "./page.ts";
 import { finalOn, type FormSteps, guideLines, navOn, pageOutline, payOn, type Playbook } from "./playbooks.ts";
@@ -34,7 +34,48 @@ import type { AccountKind } from "../../../supabase/functions/file/accounts.ts";
 import { IDENTITY_HOSTS } from "../../../supabase/functions/file/accounts.ts";
 
 /** recorded: the provider keeps a replay of the session (Steel always does): such a session never gets a card (card.ts). */
-export type Session = { browser: Browser; page: Page; liveUrl: string | null; recorded?: boolean; close(): Promise<void> };
+/** keepAlive: the provider keeps this session alive cheaply while nobody drives it (Browserbase keepAlive), so a run
+ *  waiting on a person may park it (ParkLot). A local Chromium is the worker's own and is kept too; a hosted session
+ *  without it is not. */
+export type Session = { browser: Browser; page: Page; liveUrl: string | null; recorded?: boolean; keepAlive?: boolean; close(): Promise<void> };
+
+/** Runs waiting on a person, parked: the slot is free for the next filing, the browser is kept (only when it's cheap to
+ *  keep), and the filing is in needs_you. "I've done it" queues the filing again; whichever slot claims it picks up the
+ *  kept browser on the same page. A parked browser past the hold is closed and the run starts again from the start.
+ *  Shared by every slot of the worker. Never a submit guard: submit_clicked_at stays on the filing, and a run that may
+ *  have submitted or paid doesn't park (Worker.mayPark). */
+export type Parked = { session: Session; waive: { reason: string; at: string }; trace: TraceStep[]; liveToken?: string; timer: ReturnType<typeof setTimeout> };
+export class ParkLot {
+  private lot = new Map<string, Parked>();
+  private max: number;
+  private onClose: (p: Parked) => void;
+  constructor(max = 4, onClose: (p: Parked) => void = () => undefined) { this.max = max; this.onClose = onClose; }
+  get size() { return this.lot.size; }
+  has(id: string) { return this.lot.has(id); }
+  room() { return this.lot.size < this.max; }
+  park(id: string, p: Omit<Parked, "timer">, ms: number) {
+    this.drop(id);
+    const timer = setTimeout(() => this.drop(id), ms);
+    (timer as { unref?(): void }).unref?.();
+    this.lot.set(id, { ...p, timer });
+  }
+  /** The kept browser for this filing, taken out of the lot (the run that resumes owns it now). */
+  take(id: string): Parked | null {
+    const p = this.lot.get(id);
+    if (!p) return null;
+    clearTimeout(p.timer);
+    this.lot.delete(id);
+    return p;
+  }
+  /** Past the hold, or the filing ended some other way: the browser is wiped and closed. */
+  drop(id: string) {
+    const p = this.take(id);
+    if (!p) return;
+    this.onClose(p);
+    void wipe(p.session.page).catch(() => undefined).then(() => p.session.close()).catch(() => undefined);
+  }
+  closeAll() { for (const id of [...this.lot.keys()]) this.drop(id); }
+}
 /** The destination's details the worker needs beyond its host: the agency's path on a host many agencies share (so
     its own saved login is used), the other hosts the portal sends the browser to, the page to start from, whether it
     files with no account, and who may make its account when there's no saved login (accounts.ts). */
@@ -59,6 +100,9 @@ export type Config = {
    *  the database sends an unopened one to the owner after 15 minutes in the team's hours, at once outside them). */
   staffHoldMs?: number;
   lock?: KeyLock;                                      // shared by the worker's slots: one run per workspace and portal at a time
+  /** Shared by the worker's slots: a run waiting on a person parks here and frees its slot (ParkLot). Without it a run
+   *  waits in its slot, as before. */
+  park?: ParkLot;
   /** Teach mode: names the recorded pages and maps unmapped fields (teach.ts Labeler); without it, labels are plain. */
   labeler?: Labeler;
   teachMs?: number;                                    // how long a person has to file while Odelia watches (default holdMs)
@@ -76,6 +120,10 @@ export type Config = {
 const TEACH = {
   en: "Show Odelia how: open the live browser and file it yourself, the way you always do. Odelia watches and writes down the steps (never your password or any secret number). When the agency shows its confirmation, she keeps it. Tap \"I've done it\" if you finish another way.",
   zh: "教 Odelia 一次：打开实时浏览器，像平时一样亲自提交。Odelia 在旁观看并记下步骤（从不记录您的密码或任何保密号码）。机构显示确认信息后，她会保存下来。如果您以其他方式完成，请点击“我已完成”。",
+};
+const STUCK = {
+  en: "Odelia kept repeating the same step on this page and couldn't move on. Open the live view, finish this page, then tap \"I've done it\".",
+  zh: "Odelia 在此页面反复执行同一步骤，无法继续。请打开实时画面完成此页面，然后点击“我已完成”。",
 };
 const ASSIST = {
   en: "Odelia filled every page from what you approved. These steps for this agency's site are new and the Placetta team hasn't checked them yet, so you press submit: open the live browser, check the page, press the agency's submit button, then tap \"I've done it\".",
@@ -177,6 +225,7 @@ type Ctx = {
   /** The hand-back the person just finished, and the page it was on (handBack, waived). */
   waive?: { reason: string; at: string };
   staffChecks?: number;                                // visible CAPTCHAs given to the team this run
+  parked?: boolean;                                    // this run parked its browser for a person and freed its slot
   // The agency's fee, paid with Placetta's single-use card (card.ts). The card itself is in memory only.
   pay?: { ok: true; limitCents: number } | { ok: false; why: string };
   card?: CardDetails | null;
@@ -195,7 +244,11 @@ type Ctx = {
 };
 /** The URL is on the portal or one of the other hosts its destination names. */
 const onAny = (url: string, hosts: string[]) => hosts.some((h) => onPortal(url, h));
-type Exec = { ok: true } | { ok: false; error: string } | { end: Result };
+/** same: the control already had that value (a no-op: not logged, not progress); it names the approved field. */
+type Exec = { ok: true; same?: string } | { ok: false; error: string } | { end: Result };
+/** The model router's way to a stronger model for a page the usual one is stuck on, when it has one (model.ts may add
+ *  it; until then a stuck page goes to a person). */
+type Escalating = Model & { escalate?(on: boolean): void };
 
 export class Worker {
   private c: Config;
@@ -216,7 +269,7 @@ export class Worker {
 
   /** One filing, under the run's hard time limit: past it the browser is closed, whatever it was waiting on. */
   async run(f0: Filing): Promise<Result | null> {
-    const track: { session?: Session; dir?: string } = {};
+    const track: { session?: Session; dir?: string; parked?: boolean } = {};
     const alive = { on: true };
     const limit = this.c.runMs ?? this.c.maxMs + this.c.holdMs + (this.c.live?.on ? this.c.staffHoldMs ?? STAFF_MS : 0) + 5 * 60_000
       + (this.c.accountMailMs ?? 10 * 60_000);   // making an account may wait on the agency's email once
@@ -235,7 +288,7 @@ export class Worker {
     }
   }
 
-  private async runInner(f0: Filing, track: { session?: Session; dir?: string }, alive: { on: boolean } = { on: true }): Promise<Result | null> {
+  private async runInner(f0: Filing, track: { session?: Session; dir?: string; parked?: boolean }, alive: { on: boolean } = { on: true }): Promise<Result | null> {
     const { store } = this.c;
     let f = f0;
     this.secrets = [];
@@ -243,7 +296,10 @@ export class Worker {
     const official = f.payload.official ?? "";
     const host = this.c.portalOf(official);
     if (!host) { await this.finish(f, { kind: "handoff", reason: "no_portal", message: { en: "No approved portal for this form.", zh: "该表格没有经核准的网站。" }, trace: [] }); return null; }
+    // a browser kept for this filing while it waited on a person (ParkLot): taken now, so it's this run's to close
+    const resumed = this.c.park?.take(f.id) ?? null;
     if (f.submit_clicked_at) {
+      if (resumed) { await wipe(resumed.session.page).catch(() => undefined); await resumed.session.close().catch(() => undefined); }
       await this.finish(f, { kind: "handoff", reason: "maybe_submitted", task: "check_agency", trace: [],
         message: { en: "An earlier run may have submitted this, so nothing more is sent until it's checked with the agency.", zh: "之前的运行可能已提交，在向机构确认之前不会再提交。" } });
       return null;
@@ -286,24 +342,27 @@ export class Worker {
         return res;
       }
       // a browser that records its user isn't opened where a person handed the page hasn't agreed to it
-      session = await this.c.open(host, screenOk(privacy) ? {} : { unrecorded: true });
+      if (resumed) { this.c.live?.close(resumed.liveToken); session = resumed.session; }
+      else session = await this.c.open(host, screenOk(privacy) ? {} : { unrecorded: true });
       track.session = session;
-      await assertFresh(session);
+      if (!resumed) await assertFresh(session);
       const page = session.page;
       // the sandbox (sandbox.ts): navigation only to the run's hosts, no file: or other schemes, no downloads, dialogs
       // dismissed, popups closed; each refusal goes in the filing's log
       const blocked: Blocked[] = [];
-      await harden(page, hosts, (b) => { blocked.push(b); });
+      if (!resumed) await harden(page, hosts, (b) => { blocked.push(b); });
       const login = await store.login(f, host, route?.tenant);
       // No saved login on a site that needs one: Odelia makes the business's own account first, when she may
       // (makeAccount); a person's own identity, or a site nobody has checked, never gets one.
       let setup: AccountSetup | null = null;
-      if (!login && route && !route.noLogin && !teaching && store.accountBegin) {
+      if (!login && route && !route.noLogin && !teaching && store.accountBegin && !resumed) {
         const gate = await this.accountGate(f, host, route);
         if ("end" in gate) { await this.finish(f, gate.end); return gate.end; }
         setup = gate.setup;
       }
-      f = await store.step(f, log(`Opening ${host}`, `打开 ${host}`, "visit"), { provider_ref: null });
+      f = resumed
+        ? await store.step(f, log(`Back on ${host} where you left it`, `回到 ${host} 上您完成的页面`, "resume"), { agent_state: "running", provider_ref: null, handoff_url: null })
+        : await store.step(f, log(`Opening ${host}`, `打开 ${host}`, "visit"), { provider_ref: null });
       if (pb && !teaching) f = await store.step(f, taught
         ? log(`Following the steps taught on ${host}${taught.status === "approved" ? ", reviewed by the Placetta team" : " (not yet reviewed: you press submit)"}`, `按在 ${host} 上学到的步骤操作${taught.status === "approved" ? "（已经快哉团队核对）" : "（尚未核对：由您点击提交）"}`, "playbook", JSON.stringify(pageOutline(pb.form)).slice(0, 800))
         : log(`Following the published guide for ${pb.playbook.name}${pb.playbook.verified ? "" : " (first run, watched by the Placetta team)"}`, `按${pb.playbook.name}公布的指南操作${pb.playbook.verified ? "" : "（首次运行，由快哉团队监督）"}`, "playbook", JSON.stringify(pageOutline(pb.form)).slice(0, 800)));
@@ -318,7 +377,7 @@ export class Worker {
       // The agency's own start page when the destination names one (on a host many agencies share, it's the agency's path).
       const start = pb?.form.start ?? route?.start;
       const entry = this.c.startUrl ? this.c.startUrl(host) : start && onAny(start, hosts) ? start : `https://${host}/`;
-      await page.goto(entry);
+      if (!resumed) await page.goto(entry);
       // the agency's bot protection refused this server's address: nothing was typed; another route, or Browserbase
       const first = await pageState(page).catch(() => null);
       if (first && blockedPage(first)) {
@@ -326,7 +385,7 @@ export class Worker {
         await this.finish(f, res);
         return res;
       }
-      const ctx: Ctx = { f, host, hosts, login, page, session, trace: [], t0: Date.now(), files: new Map(), pb, dir, taught, assist: !!taught && taught.status !== "approved", blocked, cardSels: [], privacy };
+      const ctx: Ctx = { f, host, hosts, login, page, session, trace: resumed?.trace ?? [], waive: resumed?.waive, t0: Date.now(), files: new Map(), pb, dir, taught, assist: !!taught && taught.status !== "approved", blocked, cardSels: [], privacy };
       ctxRef = ctx;
       if (setup) {
         const end = await this.makeAccount(ctx, setup, route?.tenant, entry);
@@ -343,7 +402,7 @@ export class Worker {
         ? { key, name: taught.body.name, enabled: true, uses: taught.runs, fails_in_a_row: 0, last_seconds: null, best_seconds: null, body: { version: taught.body.version, steps: taught.body.trace, ...(taught.body.playbook.confirm ? { confirm: { pattern: taught.body.playbook.confirm } } : {}) } }
         : await store.skill(key);
       let res: Result | null = null;
-      if (skill?.enabled) {
+      if (skill?.enabled && !resumed) {
         const r = await this.replay(ctx, skill);
         if ("end" in r) res = r.end;
         else if (!r.ok) {
@@ -354,8 +413,9 @@ export class Worker {
           }
         }
       }
-      res ??= await this.drive(ctx, skill?.enabled ? "The recorded steps stopped matching this page; carry on from here." : undefined);
+      res ??= await this.drive(ctx, resumed ? "The person finished their step on this page; carry on from here." : skill?.enabled ? "The recorded steps stopped matching this page; carry on from here." : undefined);
       ctx.result = res;
+      if (ctx.parked) track.parked = true;
       await this.settleCard(ctx);
       for (const b of blocked.slice(0, 10)) ctx.f = await store.step(ctx.f, log(`Refused ${b.kind === "navigation" ? "to leave the agency's site" : b.kind === "scheme" ? "a local or script address" : b.kind === "download" ? "a download" : b.kind === "dialog" ? "a pop-up dialog" : "a new window"}`, `已拒绝${b.kind === "download" ? "下载" : b.kind === "dialog" ? "弹出对话框" : b.kind === "popup" ? "新窗口" : "离开机构网站或打开本地地址"}`, "refused", b.detail));
       await this.finish(ctx.f, res, ctx);
@@ -377,8 +437,11 @@ export class Worker {
       // a card the run got and didn't settle (it ended some other way): told to the server while the token still works
       if (ctxRef) await this.settleCard(ctxRef).catch((e) => console.error("filer: card settle", e instanceof Error ? redactText(e.message, this.secrets) : "error"));
       // storage wiped, then the browser closed, then the run's folder gone; the token stops working
-      if (session) await wipe(session.page).catch(() => undefined);
-      await session?.close().catch(() => undefined);
+      // a parked browser stays open for the person (ParkLot); every other one is wiped and closed
+      if (!track.parked) {
+        if (session) await wipe(session.page).catch(() => undefined);
+        await session?.close().catch(() => undefined);
+      }
       await rm(dir, { recursive: true, force: true }).catch((e) => console.error("filer: couldn't delete the run's folder", e instanceof Error ? e.message : e));
       await store.end?.().catch(() => undefined);
       if (ctxRef) ctxRef.card = null;
@@ -408,7 +471,7 @@ export class Worker {
   /** The stop on this page, once Placetta's card may pay it: nothing (go on), or what else on the page is the person's. */
   private async payStop(ctx: Ctx, st: PageState, stop: { reason: string; en: string; zh: string } | null) {
     if (stop?.reason !== "payment" || !(await this.payReady(ctx, st))) return stop;
-    return stopBesidesCard(st);
+    return stopBesidesCard(st, ctx.f.payload);
   }
 
   /** The card, fetched from the server now (the last moment), kept in memory only, with its secrets registered for
@@ -498,7 +561,7 @@ export class Worker {
     if (a.action === "fill") {
       if (a.card) {
         // the fee: only on a page that asks for it, with the server's yes for this filing (payReady)
-        const fee = mustStop(st)?.reason === "payment" || payOn(ctx.pb?.playbook, st);
+        const fee = mustStop(st, ctx.f.payload)?.reason === "payment" || payOn(ctx.pb?.playbook, st);
         if (!fee || !(await this.payReady(ctx, st))) return fee ? { end: await this.handBack(ctx, "payment", PAY) } : { ok: false, error: "This isn't the agency's payment page." };
         return await this.fillCard(ctx, st, a);
       }
@@ -518,9 +581,16 @@ export class Worker {
         return { ok: false, error: "Refused: the account's email and user name are typed with fill_login username." };
       }
       const from = ctx.account ? profileValue(value, p) : fieldFor(value, p);
+      // already set to this value: nothing typed, nothing logged, and the model is told so (drive)
+      if (from && control && control.value === value) return { ok: true, same: from.label };
       if (!from) {
         ctx.f = await this.c.store.step(ctx.f, log("Refused a value the customer didn't approve", "拒绝填写未经批准的内容", "refused"));
         return { ok: false, error: "Refused: that value isn't one of the approved values." };
+      }
+      // an ID line (SSN, ITIN, TIN) takes only the business's approved EIN, and only where the line says it takes one
+      if (control && secretControl(control) && !paymentControl(control) && !einFillOk(control, value, p)) {
+        ctx.f = await this.c.store.step(ctx.f, log("Refused to type into a line for a person's ID number", "拒绝在个人证件号码栏中填写", "refused"));
+        return { ok: false, error: "Refused: this line is for a person's ID number." };
       }
       await loc.fill(value);
       rec({ action: "fill", selector: a.selector, field: from.label });
@@ -536,6 +606,8 @@ export class Worker {
       const options = await loc.locator("option").allTextContents();
       const match = options.find((o) => o.trim().toLowerCase() === opt.trim().toLowerCase());
       if (!match) return { ok: false, error: "No such option." };
+      const now = await loc.evaluate((el) => (el as HTMLSelectElement).selectedOptions?.[0]?.textContent ?? "").catch(() => "");
+      if (now.trim().toLowerCase() === match.trim().toLowerCase()) return { ok: true, same: from.label };
       await loc.selectOption({ label: match.trim() });
       rec({ action: "select", selector: a.selector, field: from.label });
       ctx.f = await this.c.store.step(ctx.f, { ...log(`Filled ${from.label}`, `已填写 ${from.label}`, "fill"), value: shown(from.label, match.trim()) });
@@ -557,6 +629,7 @@ export class Worker {
         ctx.f = await this.c.store.step(ctx.f, log(`Accepted the site's terms for the business, as its agent (recorded with the page and the time)`, "已作为企业的代理人接受网站条款（已记录页面和时间）", "terms", headingOf(st).slice(0, 120)));
         return { ok: true };
       }
+      if (control && typeof control.checked === "boolean" && control.checked === a.on) return { ok: true, same: control.label || control.name || a.selector };
       await loc.setChecked(a.on);
       rec(a);
       return { ok: true };
@@ -782,7 +855,19 @@ export class Worker {
     const own = !ctx.session.liveUrl ? this.c.live?.open(ctx.page as unknown as Parameters<LiveViews["open"]>[0], this.c.holdMs) ?? null : null;
     const liveUrl = ctx.session.liveUrl ?? own?.url ?? null;
     const at = await this.pageKey(ctx);
+    let parked = false;
     try {
+      // Parked: the slot goes to the next filing while this one waits on the person. The browser stays (kept cheaply)
+      // and "I've done it" queues the filing again; a slot that claims it carries on on this same page.
+      if (this.mayPark(ctx, reason, !!poll)) {
+        ctx.f = await this.c.store.step(ctx.f, { ...message, kind: "need_person", ref: reason },
+          { agent_state: "needs_you", handoff_url: liveUrl, provider_ref: null });
+        await this.c.store.notify(ctx.f, { en: "Placetta needs you for one step", zh: "需要您完成一步" }, message);
+        this.c.park!.park(ctx.f.id, { session: ctx.session, waive: { reason, at }, trace: ctx.trace, liveToken: own?.token }, this.c.holdMs);
+        parked = ctx.parked = true;
+        ctx.f = await this.c.store.step(ctx.f, log("Odelia keeps this page open for you and works on other filings meanwhile. Tap \"I've done it\" when you're finished.", "Odelia 为您保留此页面，同时处理其他申请。完成后请点击“我已完成”。", "quiet", "parked"));
+        return { kind: "needs_you", reason, message, trace: ctx.trace };
+      }
       ctx.f = await this.c.store.step(ctx.f, { ...message, kind: "need_person", ref: reason },
         { agent_state: "needs_you", handoff_url: liveUrl, provider_ref: `held-until:${until}` });
       await this.c.store.notify(ctx.f, { en: "Placetta needs you for one step", zh: "需要您完成一步" }, message);
@@ -820,8 +905,17 @@ export class Worker {
       ctx.f = await this.c.store.step(ctx.f, log("Closed the browser while waiting. Placetta starts again when you tap carry on.", "等待时已关闭浏览器，您点击继续后快哉会重新开始。", "quiet"), { provider_ref: null, handoff_url: null });
       return { kind: "needs_you", reason, message, trace: ctx.trace };
     } finally {
-      this.c.live?.close(own?.token);
+      if (!parked) this.c.live?.close(own?.token);
     }
+  }
+  /** May this hand-back park (ParkLot)? Only with a lot that has room, a browser cheap to keep, and nothing that lives
+   *  only in this run: no account being made, no code polled for, no card typed or fee pressed, no submit pressed or
+   *  waiting on the person's press (submit_clicked_at and the two-key rules stay as they are). */
+  private mayPark(ctx: Ctx, reason: string, polled: boolean): boolean {
+    const lot = this.c.park;
+    if (!lot || !lot.room() || polled || ctx.account) return false;
+    if (reason === "assist_submit" || ctx.f.submit_clicked_at || ctx.card || ctx.paid || ctx.cardClicked) return false;
+    return ctx.session.keepAlive ?? !ctx.session.liveUrl;
   }
   private async pageKey(ctx: Ctx): Promise<string> {
     const st = await pageState(ctx.page).catch(() => null);
@@ -832,18 +926,18 @@ export class Worker {
     const st = await pageState(ctx.page).catch(() => null);
     if (!st) return false;
     // a payment page's own lines don't hide another stop on it (an SSN line beside the card's)
-    const stop = reason === "payment" ? mustStop(st) : stopBesidesCard(st);
+    const stop = reason === "payment" ? mustStop(st, ctx.f.payload) : stopBesidesCard(st, ctx.f.payload);
     const moved = `${urlKey(st.url)}|${headingOf(st)}` !== at;
     if (reason === "payment") return moved && stop?.reason !== "payment" && !payOn(ctx.pb?.playbook, st);
     if (reason === "captcha") return stop?.reason !== "captcha" || await captchaAnswered(ctx.page);
-    if (reason === "code" || reason === "secret_number") return stop?.reason !== reason || stopLinesFilled(reason, st);
+    if (reason === "code" || reason === "secret_number") return stop?.reason !== reason || stopLinesFilled(reason, st, ctx.f.payload);
     return moved && stop?.reason !== reason;
   }
   /** The stop the person just finished, on the same page: let it pass once what they did is there. */
   private async waived(ctx: Ctx, stop: { reason: string }, st: PageState): Promise<boolean> {
     if (!ctx.waive || ctx.waive.reason !== stop.reason || ctx.waive.at !== `${urlKey(st.url)}|${headingOf(st)}`) return false;
     if (stop.reason === "captcha") return await captchaAnswered(ctx.page);
-    return (stop.reason === "code" || stop.reason === "secret_number") && stopLinesFilled(stop.reason, st);
+    return (stop.reason === "code" || stop.reason === "secret_number") && stopLinesFilled(stop.reason, st, ctx.f.payload);
   }
   private async takeBack(id: string): Promise<boolean> {
     const s = this.c.store as Store & { takeHeld?(id: string): Promise<boolean> };
@@ -854,7 +948,7 @@ export class Worker {
 
   /** Why this page needs a person, while making the account too: the account page itself is the work, not a stop. */
   private stopOf(ctx: Ctx, st: PageState): Stop | null {
-    const s = mustStop(st);
+    const s = mustStop(st, ctx.f.payload);
     return s && ctx.account && s.reason === "account" ? null : s;
   }
 
@@ -1043,6 +1137,11 @@ export class Worker {
 
   private async drive(ctx: Ctx, note?: string): Promise<Result> {
     const recent: string[] = [];
+    // the same action on the same page again and again isn't progress: what's already set is said in the next note,
+    // and a repeat goes to the stronger model once, then to a person
+    let set: { page: string; labels: string[] } = { page: "", labels: [] };
+    let last = "", repeats = 0, escalated = false;
+    const model = this.c.model as Escalating;
     for (let i = 0; i < this.c.maxSteps; i++) {
       if (Date.now() - ctx.t0 > this.c.maxMs) break;
       if (ctx.f.status === "canceled") return { ...STOPPED, trace: ctx.trace };
@@ -1076,6 +1175,23 @@ export class Worker {
         ...(ctx.account ? { account: accountNote(ctx.account.email, ctx.host) } : {}) }, this.secrets));
       note = undefined;
       const x = call.input as Record<string, string & boolean & number>;
+      const pk = `${urlKey(st.url)}|${headingOf(st)}`;
+      if (set.page !== pk) set = { page: pk, labels: [] };
+      const act = `${pk}|${call.name}|${JSON.stringify(call.input)}`;
+      repeats = call.name !== "wait" && act === last ? repeats + 1 : 1;
+      last = act;
+      if (repeats >= 3) {   // after two of the same: a third is never sent to the page
+        if (!escalated && model.escalate) {
+          escalated = true;
+          model.escalate(true);
+          ctx.f = await this.c.store.step(ctx.f, log("Odelia repeated a step on this page, so a stronger model takes over here", "Odelia 在此页面重复了同一步骤，改由更强的模型接手", "quiet"));
+        } else {
+          model.escalate?.(false);
+          const h = await this.handBack(ctx, "question", STUCK);
+          if (h.kind === "needs_you" && h.reason === "resumed") { last = ""; repeats = 0; escalated = false; continue; }
+          return h;
+        }
+      }
       let r: Exec;
       switch (call.name) {
         case "fill": r = await this.exec(ctx, { action: "fill", selector: x.selector }, String(x.value ?? "")); break;
@@ -1114,8 +1230,13 @@ export class Worker {
         default: r = { ok: false, error: "Unknown tool." };
       }
       if ("end" in r) { if (r.end.kind === "needs_you" && r.end.reason === "resumed") continue; return r.end; }
-      recent.push(`${call.name} ${x.selector ?? ""}${r.ok ? "" : ` (failed: ${r.error})`}`);
+      if (r.ok && r.same) {
+        if (!set.labels.includes(r.same)) set.labels.push(r.same);
+        note = [note, `Already set on this page to the approved values (don't set them again): ${set.labels.join("; ")}. Fill what's still empty, or continue to the next page.`].filter(Boolean).join("\n");
+      } else if (r.ok && escalated) { escalated = false; model.escalate?.(false); }
+      recent.push(`${call.name} ${x.selector ?? ""}${r.ok ? (r.same ? " (already set)" : "") : ` (failed: ${r.error})`}`);
     }
+    model.escalate?.(false);
     return { kind: "handoff", reason: "limit", trace: ctx.trace, message: { en: "Placetta couldn't finish on the agency's site.", zh: "快哉未能在机构网站上完成。" } };
   }
 

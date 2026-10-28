@@ -46,8 +46,26 @@ const INVISIBLE_MARK = /^(grecaptcha-badge|grecaptcha-logo|grecaptcha-error|g-re
 export const challengeFrame = (f: string) => CAPTCHA_FRAME.test(f) && !INVISIBLE_ANCHOR.test(f);
 export const challengeMark = (m: string) => m.split(/\s+/).some((t) => t && CAPTCHA_MARK.test(t) && !INVISIBLE_MARK.test(t));
 
-/** Why this page must go to the person, or null. Checked before the model sees the page. */
-export function mustStop(s: PageState): Stop | null {
+/** A business's EIN: 2 digits, a dash, 7 digits. An SSN or ITIN (NNN-NN-NNNN) never has this shape. */
+export const einShaped = (v: string) => /^\d{2}-\d{7}$/.test(v.trim());
+const BIZ_LINE = /\b(f?ein|tin)\b|employer identification/i;
+const BIZ_FIELD = /\b(f?ein|employer identification|(business|federal|employer) tax ?id|tax ?id)\b/i;
+const PERSON_FIELD = /\b(ssn|social security|itin|passport|individual)\b/i;
+/** The approved EIN, when the payload has one from a business tax ID field (never a person's SSN or ITIN field). */
+export function approvedEin(p?: Payload | null): string | null {
+  const f = (p?.fields ?? []).find((x) => einShaped(x.value) && BIZ_FIELD.test(x.label.en) && !PERSON_FIELD.test(x.label.en));
+  return f ? f.value.trim() : null;
+}
+/** An ID line that also takes a business's FEIN, EIN or TIN ("Business Tax ID (SSN, FEIN, or TIN)"), on a filing whose
+ *  approved values hold an EIN from a business tax ID field: the EIN may go in it. A line that asks only for an SSN,
+ *  ITIN or passport is still the person's. */
+export const einLine = (c: Control, p?: Payload | null) => SECRET.test(describeControl(c)) && BIZ_LINE.test(describeControl(c)) && !/passport/i.test(describeControl(c)) && !!approvedEin(p);
+/** May this value be typed into this ID line? Only the approved EIN, and only in a line that takes one. */
+export const einFillOk = (c: Control, value: string, p?: Payload | null) => einLine(c, p) && einShaped(value) && value.trim() === approvedEin(p);
+
+/** Why this page must go to the person, or null. Checked before the model sees the page. With the filing's payload, an
+ *  ID line that takes the business's EIN (einLine) doesn't stop it. */
+export function mustStop(s: PageState, p?: Payload | null): Stop | null {
   let host = "";
   try { host = new URL(s.url).hostname; } catch { /* about:blank */ }
   if (s.frames.some(challengeFrame) || s.markers.some(challengeMark) || /i'?m not a robot/i.test(s.text)) {
@@ -65,7 +83,7 @@ export function mustStop(s: PageState): Stop | null {
     }
   }
   for (const c of s.controls) {
-    if (SECRET.test(describeControl(c))) {
+    if (SECRET.test(describeControl(c)) && !einLine(c, p)) {
       return { reason: "secret_number", en: "This page asks for an SSN, ITIN or passport number. Placetta never enters one. Open the live view and fill that line, then tap \"I've done it\".", zh: "此页面要求填写 SSN、ITIN 或护照号码，快哉从不填写这类号码。请打开实时画面填写后点击“我已完成”。" };
     }
     if (c.autocomplete === "one-time-code" || CODE.test(describeControl(c))) {
@@ -80,14 +98,14 @@ export const paymentControl = (c: Control) => /^cc-/i.test(c.autocomplete) || CA
 
 /** What else on a payment page is the person's, once Placetta's card pays its fee: the same checks with the payment
  *  lines set aside (an SSN line, a code sent to the owner, a CAPTCHA still go to a person). */
-export const stopBesidesCard = (s: PageState): Stop | null => mustStop({ ...s, controls: s.controls.filter((c) => !paymentControl(c)) });
+export const stopBesidesCard = (s: PageState, p?: Payload | null): Stop | null => mustStop({ ...s, controls: s.controls.filter((c) => !paymentControl(c)) }, p);
 
 /** After the person filled the lines a stop was for (an SSN, a code), every such line on the page has something in it,
  *  so the same page doesn't send them back again. Only for those two: a CAPTCHA is checked in the page (run.ts), and a
  *  fee, an ID check or an account page is never waved through by what's in a box. */
-export function stopLinesFilled(reason: Stop["reason"], s: PageState): boolean {
+export function stopLinesFilled(reason: Stop["reason"], s: PageState, p?: Payload | null): boolean {
   if (reason !== "secret_number" && reason !== "code") return false;
-  const lines = s.controls.filter((c) => reason === "secret_number" ? SECRET.test(describeControl(c)) : c.autocomplete === "one-time-code" || CODE.test(describeControl(c)));
+  const lines = s.controls.filter((c) => reason === "secret_number" ? SECRET.test(describeControl(c)) && !einLine(c, p) : c.autocomplete === "one-time-code" || CODE.test(describeControl(c)));
   return lines.length > 0 && lines.every((c) => !!c.value);
 }
 
