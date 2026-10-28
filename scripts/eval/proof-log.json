@@ -7350,5 +7350,435 @@
   "method": "browser",
   "found": true,
   "note": "curl got HTTP 403; read in a browser on 2026-10-24"
+ },
+ {
+  "id": "mx-mty-pc",
+  "read": "https://www.hcnl.gob.mx/trabajo_legislativo/leyes/leyes/ley_de_proteccion_civil_para_el_estado_de_nuevo_leon/",
+  "quote": "tienen la obligación de contar permanentemente con un programa especifico de Protección Civil, Plan de Contingencias,",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1c7b1047297e0838",
+  "context": "os a que se refiere este ordenamiento, sean de competencia estatal o municipal, tienen la obligación de contar permanentemente con un programa especifico de protección civil, plan de contingencias, el cual deberá estar autorizado y supervisado por la dirección de protección ci"
+ },
+ {
+  "id": "mx-infonavit",
+  "read": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LIFNVT.pdf",
+  "quote": "Proceder a inscribirse e inscribir a sus trabajadores en el Instituto y dar los avisos a que se refiere el Artículo 31",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "79859b3ebe446816",
+  "context": " dof 01-06-2005, 24-01-2017 artículo 29.- son obligaciones de los patrones: i.- proceder a inscribirse e inscribir a sus trabajadores en el instituto y dar los avisos a que se refiere el artículo 31 de esta ley; los patrones estarán obligados, siempre que contraten un nuevo tra"
+ },
+ {
+  "id": "mx-mx-cmx-isn",
+  "read": "https://innovacion.finanzas.cdmx.gob.mx/siscon/archivos/manuales/MANUAL_DE_USUARIO_NOMINAS_VER1_1.pdf",
+  "quote": "Si a la fecha no se encuentra registrado en el Padrón del Impuesto Sobre Nóminas, le aparecera la opción de Alta al Padrón.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f19a009a017e5e16",
+  "context": " formulario de incripción. 3.1 inscripción al padrón del impuesto sobre nóminas si a la fecha no se encuentra registrado en el padrón del impuesto sobre nóminas, le aparecera la opción de alta al padrón. para registrarse, de clic en la opcion y registre la información solicitada en "
+ },
+ {
+  "id": "mx-nle-isn",
+  "read": "https://www.hcnl.gob.mx/trabajo_legislativo/leyes/leyes/ley_de_hacienda_del_estado_de_nuevo_leon/",
+  "quote": "Es objeto de este impuesto la realización de pagos en efectivo, en servicios o en especie por concepto de remuneraciones al trabajo personal,",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "5b29c3bf535a0d3b",
+  "context": " nóminas (reformado primer parrafo p.o. 26 de diciembre de 2003) articulo 154.- es objeto de este impuesto la realización de pagos en efectivo, en servicios o en especie por concepto de remuneraciones al trabajo personal, prestado bajo la subordinación a un patrón, dentro del territorio del estado. ("
+ },
+ {
+  "id": "mx-jal-isn",
+  "read": "https://congresoweb.congresojal.gob.mx/bibliotecavirtual/legislacion/C%C3%B3digos/Documentos_PDF-C%C3%B3digos/C%C3%B3digo%20Fiscal%20del%20Estado%20de%20Jalisco-140526.pdf",
+  "quote": "Las personas físicas o jurídicas que habitualmente cubran las remuneraciones a que se refiere la Ley de Hacienda del Estado, deberán inscribirse,",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "57ee2ce176bd9f15",
+  "context": "a partir de la fecha en que se efectúe la apertura del establecimiento o local. las personas físicas o jurídicas que habitualmente cubran las remuneraciones a que se refiere la ley de hacienda del estado, deberán inscribirse, a más tardar, el día doce del mes siguiente a aquél al que corresponda el pago "
+ },
+ {
+  "id": "mx-mty-alcohol",
+  "read": "https://www.hcnl.gob.mx/trabajo_legislativo/leyes/leyes/ley_estatal_de_prevencion_y_combate_al_abuso_del_alcohol/",
+  "quote": "Resolución administrativa, expedida por la autoridad municipal correspondiente, mediante la cual se manifiesta la opinión favorable para el otorgamiento de las licencias",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "511b6ebabaca0680",
+  "context": "gre o su equivalente en algún otro sistema de medición; ii. anuencia municipal: resolución administrativa, expedida por la autoridad municipal correspondiente, mediante la cual se manifiesta la opinión favorable para el otorgamiento de las licencias o permisos especiales de establecimientos cuyo objeto sea el expendio, venta o "
+ },
+ {
+  "id": "sa-misa",
+  "read": "https://misa.gov.sa/app/uploads/2024/08/Investment-Law.pdf",
+  "quote": "A foreign investor shall register with the Ministry prior to engaging in any investment,",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "240519dd4b40370e",
+  "context": " والمحافظة ع‬،‫باستثماراتهم‬ said register and maintain its confidentiality. 2. a foreign investor shall register with the ministry prior to engaging in any investment,.‫ ع ـ المسـتثمر اﻷجنبـي التسـجيل لـدى الـوزارة قبـل القيـام بـأي اسـتثمار؛ وف ً"
+ },
+ {
+  "id": "sa-cr",
+  "read": "https://misa.gov.sa/app/uploads/2025/07/Commercial-Register-Law.pdf",
+  "quote": "Every merchant must register in the Commercial Register.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "a7d05f3b1fc954ba",
+  "context": "2: registration in the commercial register article 5: mandatory registration 1. every merchant must register in the commercial register. 2. the ministry may, pursuant to controls specified in the regulations, exempt "
+ },
+ {
+  "id": "sa-balady",
+  "read": "https://momah.gov.sa/en/e-services/issuing-commercial-license",
+  "quote": "allows users to commence commercial activities by issuing a Commercial License, along with a Safety Permit issued by the General Directorate of Civil Defense",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "95604212099d7dbf",
+  "context": "trial medical legal an electronic service available on the balady platform that allows users to commence commercial activities by issuing a commercial license, along with a safety permit issued by the general directorate of civil defense for all commercial activities approved by the ministry of municipalities and ho"
+ },
+ {
+  "id": "sa-zatca",
+  "read": "https://zatca.gov.sa/en/RulesRegulations/Taxes/Documents/Implmenting%20Regulations%20of%20the%20VAT%20Law_EN.pdf",
+  "quote": "the Person must apply to the Authority to register within thirty (30) days of the end of that month",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "a71cd1565915c574",
+  "context": "s value exceeds the mandatory registration threshold detailed in the agreement, the person must apply to the authority to register within thirty (30) days of the end of that month pursuant to article eight of these regulations. 2- the registration of a person"
+ },
+ {
+  "id": "sa-gosi",
+  "read": "https://misa.gov.sa/app/uploads/2025/07/Social-Insurance-Law.pdf",
+  "quote": "An employer shall pay the full amount of contributions due from him and from the contributor within the time limit specified in the Regulations,",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "e45cabab9e5e34b4",
+  "context": "it to the organization the data of contributory wages or salaries. article 9 1. an employer shall pay the full amount of contributions due from him and from the contributor within the time limit specified in the regulations, and shall bear the sole responsibility towards the organization for such paymen"
+ },
+ {
+  "id": "sa-civil-defense",
+  "read": "https://momah.gov.sa/en/e-services/issuing-commercial-license",
+  "quote": "along with a Safety Permit issued by the General Directorate of Civil Defense for all commercial activities",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "95604212099d7dbf",
+  "context": "allows users to commence commercial activities by issuing a commercial license, along with a safety permit issued by the general directorate of civil defense for all commercial activities approved by the ministry of municipalities and housing, without the need to vis"
+ },
+ {
+  "id": "sa-sfda",
+  "read": "https://sfda.gov.sa/sites/default/files/2025-02/GuideObtainingLicenseOperateFoodFeedManufacturersWarehouses.pdf",
+  "quote": "Applications for obtaining a license are submitted through the unified electronic system",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "c0482da241ac97e8",
+  "context": " relevant government entities involved in licensing this type of establishment. applications for obtaining a license are submitted through the unified electronic system \"ghad,\" which provides a range of electronic services that facilitate investors"
+ },
+ {
+  "id": "kw-kdipa",
+  "read": "https://kdipa.gov.kw/investors-service-center/investment-licensing-procedures/",
+  "quote": "Submit The Application Request Form on KDIPA’s Investor Service Portal",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "0d8ab93d6c7ea22d",
+  "context": "rs service center 4 steps for kdipa investment licensing procedures 1. proposal submit the application request form on kdipa's investor service portal by selecting the type of the investment entity identify the economic activity f"
+ },
+ {
+  "id": "mx-efirma",
+  "read": "https://www.sat.gob.mx/gobmx/Paginas/ficha_105_cff.html",
+  "quote": "Es necesario que el representante legal de la persona moral haya tramitado previamente su certificado de e.firma",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "84f8a3814a1e7d19",
+  "context": "ada en la unidad de memoria extraíble (usb). f) tratándose de personas morales. es necesario que el representante legal de la persona moral haya tramitado previamente su certificado de e.firma y deberá presentar original o copia certificada de los siguientes documentos: d"
+ },
+ {
+  "id": "mx-rnie",
+  "read": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LIE.pdf",
+  "quote": "Deberán inscribirse en el Registro: I.- Las sociedades mexicanas en las que participen, incluso a través de fideicomiso:",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "e97ffb36c5e802fe",
+  "context": "como la información que deberá proporcionarse al propio registro. artículo 32.- deberán inscribirse en el registro: i.- las sociedades mexicanas en las que participen, incluso a través de fideicomiso: a) la inversión extranjera; b) los mexicanos que posean o adquieran otra nacion"
+ },
+ {
+  "id": "mx-siem",
+  "read": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LCEC_120419.pdf",
+  "quote": "Todos los Comerciantes e Industriales, sin excepción y obligatoriamente, deberán de registrar y actualizar anualmente cada uno de sus establecimientos en el SIEM.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "c0d20e2f8c9af062",
+  "context": "ará a cargo de las cámaras, cuando así lo autorice la secretaría. artículo 30.- todos los comerciantes e industriales, sin excepción y obligatoriamente, deberán de registrar y actualizar anualmente cada uno de sus establecimientos en el siem. artículo 31.- el siem tendrá las siguientes características: i. el registro ten"
+ },
+ {
+  "id": "mx-que-isn",
+  "read": "https://asistenciasf.queretaro.gob.mx/sites/default/files/impuestos/pdf/1.1%20FUNDAMENTO%20LEGAL%20ISN.pdf",
+  "quote": "Están obligados al pago de este impuesto, las personas físicas o morales que efectúen los pagos a que se refiere el artículo anterior,",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d099e74a107bbdf0",
+  "context": "egue como remuneración por un servicio personal. sujetos obligados artículo 71. están obligados al pago de este impuesto, las personas físicas o morales que efectúen los pagos a que se refiere el artículo anterior, así como las unidades económicas cuando por su conducto se realicen los pagos r"
+ },
+ {
+  "id": "mx-mty-anuncio",
+  "read": "https://www.hcnl.gob.mx/trabajo_legislativo/leyes/leyes/ley_de_asentamientos_humanos_ordenamiento_territorial_y_desarrollo_urbano_para_el_estado_de_nuevo_le/",
+  "quote": "Expedir las licencias para la instalación de anuncios, sujetándose a la normatividad establecida;",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d19b9b38650719b0",
+  "context": " presentar alegatos o subsanar irregularidades, cuando ello sea posible; xxiii. expedir las licencias para la instalación de anuncios, sujetándose a la normatividad establecida; xxiv. formular y ejecutar acciones específicas de promoción y protección a los "
+ },
+ {
+  "id": "mx-nle-alcohol",
+  "read": "https://www.hcnl.gob.mx/trabajo_legislativo/leyes/leyes/ley_estatal_de_prevencion_y_combate_al_abuso_del_alcohol/",
+  "quote": "una vez obtenida la anuencia municipal correspondiente y previo dictamen del Comité;",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "511b6ebabaca0680",
+  "context": "men bebidas alcohólicas, en las condiciones que exige el presente ordenamiento, una vez obtenida la anuencia municipal correspondiente y previo dictamen del comité; xxiv. ley de salud: ley de salud vigente en el estado; xxv. ley: ley para la pr"
+ },
+ {
+  "id": "mx-spg-edificacion",
+  "read": "https://www.hcnl.gob.mx/trabajo_legislativo/leyes/leyes/ley_de_asentamientos_humanos_ordenamiento_territorial_y_desarrollo_urbano_para_el_estado_de_nuevo_le/",
+  "quote": "Las autorizaciones serán expedidas por la autoridad Municipal competente, de conformidad con esta Ley",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d19b9b38650719b0",
+  "context": "iles; y xi. licencia de uso de edificación: 10-diez días hábiles. artículo 295. las autorizaciones serán expedidas por la autoridad municipal competente, de conformidad con esta ley y tendrán por objeto: i. la factibilidad de urbanizar y/o factibilidad de uso d"
+ },
+ {
+  "id": "mx-spg-pc",
+  "read": "https://www.hcnl.gob.mx/trabajo_legislativo/leyes/leyes/ley_de_proteccion_civil_para_el_estado_de_nuevo_leon/",
+  "quote": "tienen la obligación de contar permanentemente con un programa especifico de Protección Civil, Plan de Contingencias,",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1c7b1047297e0838",
+  "context": "os a que se refiere este ordenamiento, sean de competencia estatal o municipal, tienen la obligación de contar permanentemente con un programa especifico de protección civil, plan de contingencias, el cual deberá estar autorizado y supervisado por la dirección de protección ci"
+ },
+ {
+  "id": "mx-spg-anuncio",
+  "read": "https://www.hcnl.gob.mx/trabajo_legislativo/leyes/leyes/ley_de_asentamientos_humanos_ordenamiento_territorial_y_desarrollo_urbano_para_el_estado_de_nuevo_le/",
+  "quote": "Expedir las licencias para la instalación de anuncios, sujetándose a la normatividad establecida;",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d19b9b38650719b0",
+  "context": " presentar alegatos o subsanar irregularidades, cuando ello sea posible; xxiii. expedir las licencias para la instalación de anuncios, sujetándose a la normatividad establecida; xxiv. formular y ejecutar acciones específicas de promoción y protección a los "
+ },
+ {
+  "id": "mx-spg-alcohol",
+  "read": "https://www.hcnl.gob.mx/trabajo_legislativo/leyes/leyes/ley_estatal_de_prevencion_y_combate_al_abuso_del_alcohol/",
+  "quote": "Resolución administrativa, expedida por la autoridad municipal correspondiente, mediante la cual se manifiesta la opinión favorable para el otorgamiento de las licencias",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "511b6ebabaca0680",
+  "context": "gre o su equivalente en algún otro sistema de medición; ii. anuencia municipal: resolución administrativa, expedida por la autoridad municipal correspondiente, mediante la cual se manifiesta la opinión favorable para el otorgamiento de las licencias o permisos especiales de establecimientos cuyo objeto sea el expendio, venta o "
+ },
+ {
+  "id": "mx-jal-alcohol",
+  "read": "https://transparencia.info.jalisco.gob.mx/sites/default/files//ley-para-regular-la-venta-y-el-consumo-de-bebidas-alcoholicas-del-estado-de-jalisco-25-oct-2013.pdf",
+  "quote": "Ningún establecimiento puede iniciar su funcionamiento sin contar con la licencia o el permiso provisional respectivo.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "055c53f5356aca85",
+  "context": "go de derechos y otros conceptos que fijen las leyes hacendarias aplicables. 2. ningún establecimiento puede iniciar su funcionamiento sin contar con la licencia o el permiso provisional respectivo. artículo 7. 1. la publicidad dirigida al consumo de bebidas alcohólicas debe cu"
+ },
+ {
+  "id": "mx-zap-licencia",
+  "read": "https://www.zapopan.gob.mx/wp-content/uploads/2020/12/Direccion_de_Padron_y_Licencias.pdf",
+  "quote": "Objetivo del Procedimiento: Dar de alta las licencias municipales.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "70bc068dc0bedd98",
+  "context": "unidad de padrón fiscal. nombre del procedimiento: alta de licencia versión: 00 objetivo del procedimiento: dar de alta las licencias municipales. datos de mapeo etapa descripción de la actividad área sistema 1.1 brinda orient"
+ },
+ {
+  "id": "mx-zap-uso-suelo",
+  "read": "https://www.zapopan.gob.mx/wp-content/uploads/2020/12/Direccion_de_Padron_y_Licencias.pdf",
+  "quote": "Canaliza al ciudadano para tramitar el pre dictamen de uso de suelo.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "70bc068dc0bedd98",
+  "context": " de que no requiera consulta de uso de suelo, continúa en la actividad 3.1. 1.4 canaliza al ciudadano para tramitar el pre dictamen de uso de suelo. 1.5 ¿pre dictamen de uso de suelo es favorable? en caso de que el pre dictamen "
+ },
+ {
+  "id": "mx-qro-licencia",
+  "read": "https://tramites.municipiodequeretaro.gob.mx/cedulas/TP-280110-001Tr%C3%ADptico%20Apertura%20de%20Negocios%20(REV20)%20(2)%20(3).pdf",
+  "quote": "Deberá tramitar su Licencia Municipal de Funcionamiento",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "22ee5ca9856db03b",
+  "context": "cipio de querétaro; 249 del código municipal de querétaro; 5, 9, 10, 13 y 261 1.deberá tramitar su licencia municipal de funcionamiento del reglamento de construcción para el municipio de querétaro; 9 solicitando di"
+ },
+ {
+  "id": "mx-qro-uso-suelo",
+  "read": "https://tramites.municipiodequeretaro.gob.mx/cedulas/TP-280110-001Tr%C3%ADptico%20Apertura%20de%20Negocios%20(REV20)%20(2)%20(3).pdf",
+  "quote": "solicitando Dictamen de Uso de Suelo y Factibilidad de Giro",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "22ee5ca9856db03b",
+  "context": "funcionamiento del reglamento de construcción para el municipio de querétaro; 9 solicitando dictamen de uso de suelo y factibilidad de giro fracción v del reglamento interior de la secretaría de servicios tipo c, especi"
+ },
+ {
+  "id": "mx-qro-pc",
+  "read": "https://tramites.municipiodequeretaro.gob.mx/cedulas/TP-280110-001Tr%C3%ADptico%20Apertura%20de%20Negocios%20(REV20)%20(2)%20(3).pdf",
+  "quote": "No inconveniente de Protección Civil.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "22ee5ca9856db03b",
+  "context": "era acudir a: factibilidad de giro. 2.49 umas de las 7 delegaciones municipales no inconveniente de protección civil. sin costo placa de empadronamiento municipal de 9.20 umas funcionamiento tipo a"
+ },
+ {
+  "id": "mx-qro-anuncio",
+  "read": "https://municipiodequeretaro.gob.mx/municipio/repositorios/desarrollo-urbano/LA_REQUISITOS.pdf",
+  "quote": "Es la primera vez que se solicita la licencia de anuncios.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6b133a0c2752c457",
+  "context": "pales *aplica para todas las clasificaciones de anuncios nuevo regularización • es la primera vez que se solicita la licencia de anuncios. • es la primera vez que se solicita la licencia de al momento de presentar el t"
+ },
+ {
+  "id": "mx-qro-alcohol",
+  "read": "https://tramites.municipiodequeretaro.gob.mx/cedulas/TP-280110-001Tr%C3%ADptico%20Apertura%20de%20Negocios%20(REV20)%20(2)%20(3).pdf",
+  "quote": "a tramitar la Licencia para la Venta de Bebidas Alcohólicas.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "22ee5ca9856db03b",
+  "context": "s en 5 de mayo # 83, centro histórico. ( teléfono: 238 50 00 ext. 5874 y 5884), a tramitar la licencia para la venta de bebidas alcohólicas. 4. una vez que cuente con la autorización por parte de gobierno del estado, deb"
+ },
+ {
+  "id": "mx-tij-licencia",
+  "read": "https://sedeti.tijuana.gob.mx/sare",
+  "quote": "Dictamen de uso de suelo Certificado de medidas de Seguridad Registro de Solidos Urbanos Licencia de Operación",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "74c3553d1c8f4bb1",
+  "context": " con una superficie no mayor a los 100 m2. ¿qué obtengo al realizar el trámite? dictamen de uso de suelo certificado de medidas de seguridad registro de solidos urbanos licencia de operación sedeti - secretaría de desarrollo económico de tijuana avenida independencia 13"
+ },
+ {
+  "id": "mx-tij-uso-suelo",
+  "read": "https://sedeti.tijuana.gob.mx/sare",
+  "quote": "Dictamen de uso de suelo Certificado de medidas de Seguridad Registro de Solidos Urbanos Licencia de Operación",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "74c3553d1c8f4bb1",
+  "context": " con una superficie no mayor a los 100 m2. ¿qué obtengo al realizar el trámite? dictamen de uso de suelo certificado de medidas de seguridad registro de solidos urbanos licencia de operación sedeti - secretaría de desarrollo económico de tijuana avenida independencia 13"
+ },
+ {
+  "id": "mx-tij-seguridad",
+  "read": "https://sedeti.tijuana.gob.mx/sare",
+  "quote": "Dictamen de uso de suelo Certificado de medidas de Seguridad Registro de Solidos Urbanos Licencia de Operación",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "74c3553d1c8f4bb1",
+  "context": " con una superficie no mayor a los 100 m2. ¿qué obtengo al realizar el trámite? dictamen de uso de suelo certificado de medidas de seguridad registro de solidos urbanos licencia de operación sedeti - secretaría de desarrollo económico de tijuana avenida independencia 13"
+ },
+ {
+  "id": "sa-company",
+  "read": "https://misa.gov.sa/app/uploads/2025/07/Companies-Law.pdf",
+  "quote": "A company shall acquire a legal personality upon registration with the Commercial Register.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6c74fd93e11df3dd",
+  "context": " be valid against third parties. article 9: acquisition of legal personality 1. a company shall acquire a legal personality upon registration with the commercial register. however, a company during the incorporation period shall have a legal personali"
+ },
+ {
+  "id": "sa-building",
+  "read": "https://momah.gov.sa/en/e-services/issuance-building-license",
+  "quote": "enables beneficiaries to commence construction work in compliance with applicable regulations, after fulfilling the requirements",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d7e9fa27267be8c5",
+  "context": "uction licenses an electronic service provided through the balady platform that enables beneficiaries to commence construction work in compliance with applicable regulations, after fulfilling the requirements and obtaining approval of the required engineering plans and documents from acc"
+ },
+ {
+  "id": "sa-health-certificate",
+  "read": "https://momah.gov.sa/en/e-services/issuance-health-certificate",
+  "quote": "enables the issuance of health certificates for workers in food and public health establishments, such as restaurants,",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "c790eb21387780e5",
+  "context": "health certificates an electronic service available on the balady platform that enables the issuance of health certificates for workers in food and public health establishments, such as restaurants, barbershops, and laundries, without the need to visit the authority. once the m"
+ },
+ {
+  "id": "ie-eori",
+  "read": "https://www.revenue.ie/en/customs/businesses/electronic-systems/eori-system.aspx",
+  "quote": "If you are a trader who imports or exports goods into or out of the European Union (EU), you will need an EORI number.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "00e9761ec09efe97",
+  "context": "ronic systems economic operators' registration and identification system (eori) if you are a trader who imports or exports goods into or out of the european union (eu), you will need an eori number. this number is valid throughout the eu. it is used as a common reference number"
+ },
+ {
+  "id": "nl-eori",
+  "read": "https://ondernemersplein.overheid.nl/internationaal-ondernemen/douane-en-belastingen/eori-nummer",
+  "quote": "Exporteert of importeert u? En heeft u contact met de Douane? Dan is een EORI-nummer verplicht.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "709c31f05681c3a0",
+  "context": "ezen delen kopieer link deel via e-mail printen meer deelopties english version exporteert of importeert u? en heeft u contact met de douane? dan is een eori-nummer verplicht. u gebruikt dit nummer bijvoorbeeld als u douaneaangifte moet doen. het eori-num"
+ },
+ {
+  "id": "es-eori",
+  "read": "https://sede.agenciatributaria.gob.es/Sede/censos-nif-domicilio-fiscal/quien-debe-estar-censado/registro-identificacion-operadores-economicos/solicitantes-eori.html",
+  "quote": "Infórmate de cómo registrarte para poder realizar operaciones de comercio exterior en España (UE)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6a6ed8dd800796e5",
+  "context": "istro e identificación de operadores económicos (eori) o de asociación eori-nif infórmate de cómo registrarte para poder realizar operaciones de comercio exterior en españa (ue) saltar índice de la información índice índice: el eori y su estructura solicita"
+ },
+ {
+  "id": "fr-lyon-erp",
+  "read": "https://www.lyon.fr/demarche/commerces-et-entreprises/rendre-accessible-son-etablissement-recevant-du-public-erp",
+  "quote": "veuillez déposer une demande d’autorisation de travaux auprès de la Ville de Lyon.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "260b3201c4e3fd19",
+  "context": "effectuer les travaux afin de vous mettre en conformité avec la loi. pour cela, veuillez déposer une demande d'autorisation de travaux auprès de la ville de lyon. téléchargez et complétez les documents suivants: formulaire de demande d'autori"
+ },
+ {
+  "id": "il-tlv-sign",
+  "read": "https://www.tel-aviv.gov.il/Business/Advertising/Pages/SignRequest.aspx",
+  "quote": "אין להציב שילוט טרם קבלת רישיון להצבתו.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "0c1470b46bb76ce3",
+  "context": "ום אגרת השילוט כחוק, זאת לרבות בכל מקרה של שינוי, החלפה או חידוש של שילוט קיים. אין להציב שילוט טרם קבלת רישיון להצבתו. מסמכים נדרשים ​טופס בקשה​​ ​ ​הכולל את פרטי מבקש השלט ואת פרטי השלט המבוקש, סוג"
  }
 ]

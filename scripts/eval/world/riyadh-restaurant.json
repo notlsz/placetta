@@ -1,0 +1,138 @@
+{
+ "id": "riyadh-restaurant",
+ "title": "A restaurant in Riyadh",
+ "read": "2026-10-27",
+ "input": {
+  "what": "Restaurant",
+  "where": "Riyadh, Saudi Arabia",
+  "lang": "en"
+ },
+ "assumptions": "A new Saudi company opening a restaurant with staff and a fit-out. The investment registration applies only to a foreign-owned company, so it isn't here.",
+ "items": [
+  {
+   "key": "sa-company",
+   "name": "Company incorporation under the Companies Law",
+   "agency": "Ministry of Commerce (Saudi Business Center)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://misa.gov.sa/app/uploads/2025/07/Companies-Law.pdf",
+   "quote": "A company shall acquire a legal personality upon registration with the Commercial Register.",
+   "read": "2026-10-27",
+   "match": "\\bsa\\-company\\b",
+   "agencyMatch": "Ministry\\ of\\ Commerce"
+  },
+  {
+   "key": "sa-cr",
+   "name": "Commercial registration",
+   "agency": "Ministry of Commerce, Saudi Business Center",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://misa.gov.sa/app/uploads/2025/07/Commercial-Register-Law.pdf",
+   "quote": "Every merchant must register in the Commercial Register.",
+   "read": "2026-10-27",
+   "match": "\\bsa\\-cr\\b",
+   "agencyMatch": "Ministry\\ of\\ Commerce"
+  },
+  {
+   "key": "sa-zatca",
+   "name": "Tax, VAT and zakat registration",
+   "agency": "Zakat, Tax and Customs Authority (ZATCA)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://zatca.gov.sa/en/RulesRegulations/Taxes/Documents/Implmenting%20Regulations%20of%20the%20VAT%20Law_EN.pdf",
+   "quote": "the Person must apply to the Authority to register within thirty (30) days of the end of that month",
+   "read": "2026-10-27",
+   "match": "\\bsa\\-zatca\\b",
+   "agencyMatch": "Zakat"
+  },
+  {
+   "key": "sa-gosi",
+   "name": "Social insurance employer registration",
+   "agency": "General Organization for Social Insurance",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://misa.gov.sa/app/uploads/2025/07/Social-Insurance-Law.pdf",
+   "quote": "An employer shall pay the full amount of contributions due from him and from the contributor within the time limit specified in the Regulations,",
+   "read": "2026-10-27",
+   "match": "\\bsa\\-gosi\\b",
+   "agencyMatch": "General\\ Organization\\ for\\ Social\\ Insurance"
+  },
+  {
+   "key": "sa-building",
+   "name": "Building permit for the works (Balady)",
+   "agency": "The municipality, through the Ministry of Municipalities and Housing's Balady platform",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://momah.gov.sa/en/e-services/issuance-building-license",
+   "quote": "enables beneficiaries to commence construction work in compliance with applicable regulations, after fulfilling the requirements",
+   "read": "2026-10-27",
+   "match": "\\bsa\\-building\\b",
+   "agencyMatch": "The\\ municipality"
+  },
+  {
+   "key": "sa-balady",
+   "name": "Municipal license",
+   "agency": "Ministry of Municipal and Rural Affairs and Housing (Balady)",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://momah.gov.sa/en/e-services/issuing-commercial-license",
+   "quote": "allows users to commence commercial activities by issuing a Commercial License, along with a Safety Permit issued by the General Directorate of Civil Defense",
+   "read": "2026-10-27",
+   "match": "\\bsa\\-balady\\b",
+   "agencyMatch": "Ministry\\ of\\ Municipal\\ and\\ Rural\\ Affairs\\ and\\ Housing"
+  },
+  {
+   "key": "sa-civil-defense",
+   "name": "Civil Defense safety license",
+   "agency": "General Directorate of Civil Defense",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://momah.gov.sa/en/e-services/issuing-commercial-license",
+   "quote": "along with a Safety Permit issued by the General Directorate of Civil Defense for all commercial activities",
+   "read": "2026-10-27",
+   "match": "\\bsa\\-civil\\-defense\\b",
+   "agencyMatch": "General\\ Directorate\\ of\\ Civil\\ Defense"
+  },
+  {
+   "key": "sa-health-certificate",
+   "name": "Health certificates for food workers (Balady)",
+   "agency": "The municipality, through the Ministry of Municipalities and Housing's Balady platform",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://momah.gov.sa/en/e-services/issuance-health-certificate",
+   "quote": "enables the issuance of health certificates for workers in food and public health establishments, such as restaurants,",
+   "read": "2026-10-27",
+   "match": "\\bsa\\-health\\-certificate\\b",
+   "agencyMatch": "The\\ municipality"
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "US filings",
+   "why": "Not in the US.",
+   "match": "irs-|cbp-|fincen|\\bEIN\\b"
+  },
+  {
+   "name": "UAE steps",
+   "why": "Not in the UAE.",
+   "match": "\\bae-"
+  }
+ ]
+}

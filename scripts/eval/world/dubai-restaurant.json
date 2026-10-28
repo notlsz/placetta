@@ -1,0 +1,110 @@
+{
+ "id": "dubai-restaurant",
+ "title": "A restaurant in Dubai",
+ "read": "2026-10-27",
+ "input": {
+  "what": "Restaurant",
+  "where": "Dubai, UAE",
+  "lang": "en"
+ },
+ "assumptions": "A new mainland company opening a restaurant with staff and a fit-out.",
+ "items": [
+  {
+   "key": "ae-company",
+   "name": "Mainland company formation",
+   "agency": "The emirate's economic department, under the federal Commercial Companies Law",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://u.ae/en/information-and-services/business/Doing-business/doing-business-on-the-mainland/steps-to-start-a-business-on-the-mainland",
+   "quote": "drafting a Memorandum of Association and local service agent agreement",
+   "read": "2026-10-22",
+   "match": "\\bae-company\\b",
+   "agencyMatch": "economic department|Economy"
+  },
+  {
+   "key": "ae-dxb-licence",
+   "name": "Dubai trade licence",
+   "agency": "Dubai Department of Economy and Tourism",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://u.ae/en/information-and-services/business/Doing-business/doing-business-on-the-mainland/steps-to-start-a-business-on-the-mainland",
+   "quote": "investor can collect the business licence from service centres of the economic departments or through their websites.",
+   "read": "2026-10-22",
+   "match": "\\bae-dxb-licence\\b",
+   "agencyMatch": "Dubai"
+  },
+  {
+   "key": "ae-tax",
+   "name": "Corporate tax and VAT registration",
+   "agency": "Federal Tax Authority",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": 0,
+   "source": "https://mof.gov.ae/en/public-finance/tax/corporate-tax-in-the-uae/",
+   "quote": "All Taxable Persons (including Free Zone Persons) will be required to register for Corporate Tax and obtain a Corporate Tax Registration Number.",
+   "read": "2026-10-22",
+   "match": "\\bae-tax\\b",
+   "agencyMatch": "Federal Tax Authority"
+  },
+  {
+   "key": "ae-mohre",
+   "name": "Employer registration",
+   "agency": "Ministry of Human Resources and Emiratisation",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://u.ae/en/information-and-services/jobs/Sector-of-employment/employment-in-the-private-sector/work-permits",
+   "quote": "employers may not recruit or employ any worker unless a work permit is issued in accordance with MoHRE procedures.",
+   "read": "2026-10-22",
+   "match": "\\bae-mohre\\b",
+   "agencyMatch": "Human Resources"
+  },
+  {
+   "key": "ae-dxb-premises",
+   "name": "Premises zoning and lease",
+   "agency": "Dubai Department of Economy and Tourism; Dubai Land Department (Ejari); Dubai Municipality",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://u.ae/en/information-and-services/business/Doing-business/doing-business-on-the-mainland/steps-to-start-a-business-on-the-mainland",
+   "quote": "The business premises and location must comply with the requirements defined by the respective emirate’s Department of Economic Development",
+   "read": "2026-10-22",
+   "match": "\\bae-dxb-premises\\b",
+   "agencyMatch": "Dubai"
+  },
+  {
+   "key": "ae-dxb-food",
+   "name": "Food establishment approval",
+   "agency": "Dubai Municipality, Food Safety",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.dm.gov.ae/municipality-business/food-safety-department-2/important-information-to-food-establishment/",
+   "quote": "Request for Layout Assessment for Food Establishment Licensing",
+   "read": "2026-10-22",
+   "match": "\\bae\\-dxb\\-food\\b",
+   "agencyMatch": "Dubai\\ Municipality"
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "US filings",
+   "why": "Not in the US.",
+   "match": "irs-|cbp-|fincen|\\bEIN\\b"
+  },
+  {
+   "name": "Other emirates",
+   "why": "Not in Abu Dhabi or Sharjah.",
+   "match": "ae-auh|ae-shj"
+  }
+ ]
+}
