@@ -1,7 +1,9 @@
 # Pricing
 
 The simple model, approved by the founder on 2026-10-22 and updated by him the same day: one subscription per store,
-each new license priced on its own. Every workspace that wasn't already a customer is on it. Customers from before keep
+each new license priced on its own. **Outcome pricing, the founder's decision of 2026-10-28** (after Sierra and Decagon,
+who charge per resolution), as he corrected it the same day: a new license is $149, a complex one $999, each charged on
+the agency's decision, never when the owner approves the filing (section "Outcome pricing" below). Every workspace that wasn't already a customer is on it. Customers from before keep
 their plans (grandfathered, at the end of this page).
 
 **Every cost and margin figure on this page is an estimate (est.).** The prices are the founder's. The code is the
@@ -16,8 +18,8 @@ each number is in `docs/PRICING-RESEARCH.md`; how the team quotes it is in `docs
 | Store plan | $149 a store a month, billed yearly ($1,788 a store) | At checkout, for every store in the workspace, after the owner agrees to the renewal terms next to the button. Renews yearly at the same price; auto-renew off in Settings, Billing |
 | Store plan, monthly | $179 a store a month, month to month, cancel anytime (founder, 2026-10-23) | The same plan and inclusions. Charged monthly for every store, after the owner agrees to the renewal terms next to the button. Renews monthly at the same price; cancel anytime in Settings, Billing. Yearly saves $360 a store a year. No yearly renewal notice (the subscription is named `store_monthly`) |
 | What the store plan covers | Tracking every license and renewal date, renewal monitoring, rule-change alerts, the document vault, Odelia's chat, and every renewal Odelia files on her own | Included |
-| A new license, permit or registration | $299, filed and tracked to approval | When the owner approves that filing, at the price its card showed |
-| A complex license | $999 | The same. Only for the fixed list: liquor licenses, building plan review, import permits (`COMPLEX_LIST`) |
+| A new license, permit or registration | $149 (`SIMPLE.licenseOnApprovalUsd`), filed and tracked to a decision | On the agency's decision: when it's approved, or rejected for a reason that isn't Placetta's fault. Nothing if it's rejected because of Placetta's fault. The owner's approval only saves the card (outcome pricing, 2026-10-28; before it, $299 when the owner approved) |
+| A complex license | $999 (`SIMPLE.complexOnApprovalUsd`) | The same way. Only for the fixed list: liquor licenses, building plan review, import permits (`COMPLEX_LIST`) |
 | A renewal the plan doesn't include | $99 | After a one-tap approval: on the saved card when there is one, else Stripe Checkout. "Doesn't include" means the renewal needs Placetta's team (a wet signature, mail only, or no route Odelia can use), or the store has no plan |
 | 10 or more stores on the store plan | Every new license included too | Nothing extra: the plan price only |
 | Never charged | Certificates staff earn themselves (food handler cards, food manager certificates) and inspections inside a permit | Tracked free (`NOT_CHARGED`) |
@@ -30,6 +32,38 @@ on her own are included in it. The plan preview stays the free entry point. The 
 government fees at cost are the founder's numbers, unchanged: each sits inside the range of the real alternatives
 (`docs/PRICING-RESEARCH.md`).
 
+## Outcome pricing (2026-10-28)
+
+The founder's decision of 2026-10-28, copying Sierra and Decagon (pay per resolution), corrected by him the same day:
+
+| What the agency does | What the owner pays |
+| --- | --- |
+| Approves it (with its confirmation, the license number, the license PDF or an approval upload) | $149, or $999 for a complex license |
+| Rejects it because of Placetta's fault: a wrong value in the filing, the wrong form, or a missed document Placetta should have flagged | Nothing, and anything paid for that filing is refunded |
+| Rejects it for a reason that isn't Placetta's fault: zoning, the business ineligible by law, wrong or incomplete information from the owner, or the owner withdrew it | $149, or $999, charged when the team marks the reason |
+
+How the money moves (`supabase/functions/_shared/outcome.ts`, migration `20261105091200_outcome_pricing.sql`):
+
+1. The owner approves the filing at the price its card shows ("$149 when the license is approved. If it's turned down
+   because of a mistake on our side, you pay nothing."). Stripe saves the card: the customer's saved card, or Stripe
+   Checkout in setup mode (a SetupIntent). Placetta never sees or types a card number. Nothing is charged; the charge is
+   recorded as `authorized` and the filing goes in on it.
+2. The agency decides. Accepted with proof, or rejected with a reason that isn't Placetta's fault: `due`. Rejected
+   because of Placetta's fault: `waived`. Until the team marks a reason, nothing moves and the team has a task.
+3. The billing function's `outcome_sweep` (pg_cron every minute while something is due) charges a due charge off session:
+   an invoice made with the charge id in its idempotency key and kept on the charge before anything is added to it,
+   then finalized and paid with the same key. A retry reads the saved invoice back, so a charge is never made twice,
+   and an approval and a rejection of the same filing share the one charge, so they can never both charge.
+4. Authentication required (SCA): the owner gets Stripe's hosted pay link in Updates. A refused card: the existing
+   dunning (`billing_payment_apply` and the owner's notice) and Stripe's own retries; `invoice.paid` settles it.
+5. The team picks the reason from the fixed list, with a note, in the Team view. The owner sees it on the filing and can
+   dispute it with one tap (`filing_dispute_rejection`), which opens a team task. Changing the reason to Placetta's
+   fault refunds the charge (`refund_due`, then the sweep refunds it, or voids an invoice not paid yet).
+6. Agency fees are passed through as before and never refunded by Placetta.
+
+Grandfathering is unchanged: legacy workspaces keep their plans. A simple-model charge paid up front at $299 before
+2026-10-28 keeps its price; a rejection of it because of Placetta's fault is refunded the same way.
+
 ## Rules every charge follows
 
 - Shown before approval, in English and Chinese, in the filing's own approval card (`src/FilingCharge.tsx`) or the plans
@@ -39,8 +73,8 @@ government fees at cost are the founder's numbers, unchanged: each sits inside t
 - Charged only from its own Stripe price, named by an env var below, and only when Stripe's amount, currency and
   interval match exactly (`simplePriceOk`). The code never creates these prices. When the env var is missing or the
   price differs, the card and the sheet say the team sends a quote, a team task is opened, and nothing is charged.
-- The database enforces it too: on the simple model a filing goes in only when its own charge is paid, or recorded as
-  included at $0, or the workspace has 10 or more stores on the plan (`can_file_app`, policy "members request filings
+- The database enforces it too: on the simple model a filing goes in only when its own charge is paid, authorized with a
+  saved card (outcome pricing), or recorded as included at $0, or the workspace has 10 or more stores on the plan (`can_file_app`, policy "members request filings
   they can file").
 - No discounts and no promotion codes on the simple model.
 - The open-by-date guarantee is not offered on the simple model (it refunded an opening fee, which no longer exists).
@@ -49,7 +83,7 @@ government fees at cost are the founder's numbers, unchanged: each sits inside t
 ## Stripe prices the founder must create
 
 All in USD, standard (per unit) pricing. Give each its lookup key (`placetta_store_plan_year`,
-`placetta_store_plan_month`, `placetta_license`, `placetta_license_complex`, `placetta_renewal`, and
+`placetta_store_plan_month`, `placetta_license_on_approval`, `placetta_license_complex`, `placetta_renewal`, and
 `placetta_odelia_pack` for the $49 pack) and the code finds it; an env var below, when set, wins. Names are what the
 invoice shows.
 
@@ -57,8 +91,13 @@ invoice shows.
 | --- | --- | --- | --- |
 | `STRIPE_PRICE_STORE_PLAN` | Placetta store plan, a store | $1,788.00 | yearly (interval count 1) |
 | `STRIPE_PRICE_STORE_MONTHLY` | Placetta store plan, monthly, a store | $179.00 | monthly (interval count 1) |
-| `STRIPE_PRICE_LICENSE` | Placetta license, filed | $299.00 | one time |
-| `STRIPE_PRICE_LICENSE_COMPLEX` | Placetta complex license, filed | $999.00 | one time |
+| `STRIPE_PRICE_LICENSE_ON_APPROVAL` | Placetta license, charged on the agency's decision | $149.00 | one time |
+| `STRIPE_PRICE_LICENSE_COMPLEX` | Placetta complex license, filed (the existing price, unchanged) | $999.00 | one time |
+
+The $149 price is new: lookup key `placetta_license_on_approval`. The $299 price from before (`placetta_license`,
+`STRIPE_PRICE_LICENSE`) is never charged again; archive it in Stripe once no Checkout for it is open. The complex
+license reuses its existing $999 price. `node scripts/stripe-outcome-prices.mjs` prints exactly what to create; with
+`--create` and a test-mode key (`sk_test_`) it creates them in test mode and refuses a live key.
 | `STRIPE_PRICE_RENEWAL` | Placetta renewal | $99.00 | one time |
 
 Until each exists, its item falls back to a team quote. The webhook needs no new event: license payments come in on
@@ -88,7 +127,7 @@ Inputs, as for the legacy plans below: team time $60 an hour loaded; Stripe 3.6%
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Store plan, a store a year | $1,788 | $60 | $24 | 1.5 ($90) support and renewal review | $18, about 6 renewals Odelia files on her own at $3 each | $64.37 | $256 | 86% |
 | Store plan monthly, a store for 12 months | $2,148 | $60 | $24 | 1.5 ($90) support and renewal review | $18, about 6 renewals Odelia files on her own at $3 each | $77.33 | $269 | 87% |
-| New license, each | $299 | $1 | $0.50 | 0.5 ($30), a mix of filings Odelia sends and ones the team sends | $3 printing and postage | $10.76 | $45 | 85% |
+| New license, each (outcome pricing) | $149 | $1 | $0.50 | the founder's estimate assumes Odelia files it on her own; team time is in the note below | $3 printing and postage | $5.36 | about $11 | about $138 profit, 93% |
 | Complex license, each | $999 | $5 | $1 | 5 ($300), plan check corrections, hearings, follow-ups | | $35.96 | $342 | 66% |
 | Renewal outside the plan, each | $99 | $0.50 | $0.50 | 0.5 ($30) | $3 | $3.56 | $38 | 62% |
 | Plan preview | $0 | under $0.10 (the registry, no model) | | | up to $5 a month of free Odelia allowance | | up to $5 a month | an acquisition cost |
@@ -97,10 +136,24 @@ Example accounts, a year (est.):
 
 | | Revenue (est.) | Cost (est.) | Gross margin (est.) |
 | --- | --- | --- | --- |
-| One restaurant opening (9 licenses, 2 complex) plus its first year on the plan | $6,477 | $1,345 | 79% |
+| One restaurant opening (9 licenses, 2 complex) plus its first year on the plan | $5,127 | $1,039 | 80% |
 | The same restaurant, second year, one renewal that needs the team | $1,887 | $294 | 84% |
 | A 12-store chain on the plan opening 3 stores (every new license included) | $21,456 | $6,339 | 70% |
-| A 4-store operator on the plan opening 1 store | $11,841 | $2,113 | 82% |
+| A 4-store operator on the plan opening 1 store | $10,491 | $1,807 | 83% |
+
+Outcome pricing, per new license (all estimates): **cost about $11, so about $138 profit on $149.** The $11 is AI
+($1), hosting ($0.50), printing and postage ($3), Stripe at 3.6% ($5.36) and a little more for the saved card's setup.
+What moves it:
+
+- Rejected because of Placetta's fault: no revenue, and the refund doesn't return Stripe's fee (about $5.36), so the
+  filing costs about $11 plus its team time, all absorbed. That is the incentive to file it right.
+- Rejected for a reason that isn't Placetta's fault: charged like an approval, so the team time spent on it is paid for
+  by the $149, the same as an approved license. A dispute the team upholds turns it into the case above.
+- Team time is the exposure: at $60 an hour, every 30 minutes on a $149 license takes $30 off the $138. Past about
+  2.3 hours of team time a license loses money (est.). The margin watch reads `filings.team_minutes` against each tier's
+  budget (`margin_rules`); keep the $149 license for filings Odelia sends on her own and quote the rest through the team
+  when a form keeps needing hands.
+- SCA and refused cards delay revenue, they don't lose it: Stripe retries and the owner's pay link settles it.
 
 **Blended target: about 80% (est.).** A book of single stores and small operators sits above it; complex licenses and
 chains that open many stores at once sit below. Watch two things: a complex license that keeps needing more than about

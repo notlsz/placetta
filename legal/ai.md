@@ -1,8 +1,8 @@
 # How Placetta's AI works
 
-Last updated: 2026-10-28
+Last updated: 2026-10-29
 
-Effective date: 2026-10-28.
+Effective date: 2026-10-29.
 
 Placetta uses an AI agent, Odelia, to handle the paperwork of getting licenses, permits and registrations. This page explains what she does and where her limits are.
 
@@ -63,9 +63,9 @@ Email: support@placetta.com
 
 # 快哉的 AI 如何工作
 
-最后更新：2026-10-28
+最后更新：2026-10-29
 
-生效日期：2026-10-28。
+生效日期：2026-10-29。
 
 快哉使用 AI 智能体 Odelia，处理办理执照、许可和登记过程中的文书工作。本页说明她能做什么，以及她的局限在哪里。
 

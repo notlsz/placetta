@@ -1,8 +1,8 @@
 # Filing Authorization
 
-Last updated: 2026-10-28
+Last updated: 2026-10-29
 
-Effective date: 2026-10-28.
+Effective date: 2026-10-29.
 
 This authorization sets out the limited authority you give Placetta Inc. ("Placetta") to file license, permit and registration applications for your business. You grant it when you create a workspace. It is part of our Terms of Service.
 
@@ -107,9 +107,9 @@ Email: support@placetta.com
 
 # 申报授权书
 
-最后更新：2026-10-28
+最后更新：2026-10-29
 
-生效日期：2026-10-28。
+生效日期：2026-10-29。
 
 本授权书说明您授予 Placetta Inc.（下称“快哉”）的有限权限，用于为您的企业申报执照、许可和登记。您在创建工作区时即授予本授权。本授权书是我们《服务条款》的一部分。
 

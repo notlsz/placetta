@@ -163,8 +163,9 @@ export function licenseFactsOf(apps: unknown, ref: unknown): LicenseFacts | null
 
 /** The quote an owner sees before approving a filing on the simple model: everything included with 10 or more stores
  *  on the plan (the chain plan); a renewal Odelia files on her own included in the store plan; free for what staff
- *  complete themselves; else $299, $999 or a $99 renewal, from its own Stripe price only. */
-export function simpleQuote(f: LicenseFacts, x: { renewal: boolean; paid: { tier: string; cents: number } | null; chain: boolean; onPlan: boolean; automated: boolean; priceOk: (item: SimpleItem) => boolean }): LicenseQuote {
+ *  complete themselves; else $149 or $999 charged on the agency's decision (outcome pricing, 2026-10-28), or a $99
+ *  renewal, from its own Stripe price only. authorized: the owner already approved it with a saved card. */
+export function simpleQuote(f: LicenseFacts, x: { renewal: boolean; paid: { tier: string; cents: number } | null; authorized?: { tier: string; cents: number } | null; chain: boolean; onPlan: boolean; automated: boolean; priceOk: (item: SimpleItem) => boolean }): LicenseQuote {
   const gov = f.govFeeUsd ? "$" + f.govFeeUsd.toLocaleString("en-US", { maximumFractionDigits: 2 }) : null;
   if (x.chain) return { tier: "chain", cents: 0, priceOk: true, line: licenseQuoteLine("chain", true, false, gov) };
   const tier = licenseTierOf(f.name, x.renewal);
@@ -172,6 +173,10 @@ export function simpleQuote(f: LicenseFacts, x: { renewal: boolean; paid: { tier
   if (x.paid) {
     const t = (["license", "complex", "renewal", "free"].includes(x.paid.tier) ? x.paid.tier : tier) as LicenseTier;
     return { tier: t, cents: x.paid.cents, priceOk: true, paid: true, line: licenseQuoteLine(t, true, true, gov) };
+  }
+  if (x.authorized && (x.authorized.tier === "license" || x.authorized.tier === "complex")) {
+    const t = x.authorized.tier as LicenseTier;
+    return { tier: t, cents: x.authorized.cents, priceOk: true, authorized: true, line: licenseQuoteLine(t, true, false, gov, true) };
   }
   const cents = tierUsd(tier) * 100;
   const ok = tier === "free" || x.priceOk(tier as SimpleItem);

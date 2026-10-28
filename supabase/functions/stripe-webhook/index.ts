@@ -24,7 +24,11 @@ const money = (c: number) => `$${(c / 100).toLocaleString("en-US", { minimumFrac
 const cardOf = (o: Record<string, unknown>) => { const c = o.card as string | { id?: string } | undefined; return typeof c === "string" ? c : c?.id ?? ""; };
 
 Deno.serve((req) => handle(req, {
-  db: stripeDb(admin),
+  db: { ...stripeDb(admin), setupIntentPm: async (id: string) => {
+    if (!env("STRIPE_SECRET_KEY")) return null;
+    const si = await client(env).get(`setup_intents/${encodeURIComponent(id)}`);
+    return typeof si?.payment_method === "string" ? si.payment_method : (si?.payment_method?.id ?? null);
+  } },
   env,
   secret: () => webhookSecret(env, configStore(admin)),
   paymentIntentMeta: async (id) => env("STRIPE_SECRET_KEY") ? ((await client(env).get(`payment_intents/${encodeURIComponent(id)}`))?.metadata ?? null) : null,

@@ -1051,16 +1051,24 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (!ownerOk()) return;
     if (a.kind === "pay") { if (a.url) window.open(a.url, "_blank", "noopener,noreferrer"); return; }
     if (a.kind === "file") {
-      // The simple model (every new workspace): each filing is paid for on its own, at the price its card showed, before
-      // it goes in. A renewal with a saved card, a free item or one the plan includes is paid at once; otherwise Stripe
-      // Checkout opens and the filing waits, approval saved, until it's paid (src/pricing.ts, the billing function).
+      // The simple model (every new workspace): each filing at the price its card showed. A new or complex license
+      // (outcome pricing, 2026-10-28): the card is saved with Stripe and nothing is charged, so it goes in at once; it's
+      // charged on the agency's decision. A renewal with a saved card, a free item or one the plan includes is paid at
+      // once; otherwise Stripe Checkout opens and the filing waits, approval saved (src/pricing.ts, the billing function).
       if (billing?.price_model === "simple" && a.app) {
         const shownQ = shownLicense.get(a.id);
         if (!shownQ) { say(lang === "zh" ? "请先打开这份申报，查看快哉对它的收费，然后再批准。未收取任何费用。" : "Open this filing first to see Placetta's price for it, then approve. Nothing was charged."); return; }
         let r: Awaited<ReturnType<typeof api.licensePay>>;
         try { r = await api.licensePay(cloud.wsId, a.app, shownQ); }
         catch (e) { shownLicense.delete(a.id); const er = e as api.ApiError; say((lang === "zh" && er.message_zh) || er.message); return; }
-        if (!r.paid && r.url) { hold(id); say(lang === "zh" ? "正在打开付款页面。付款后回到这里，再点一次批准即可提交。" : "Opening the payment page. Once it's paid, come back and approve once more to file it."); window.location.href = r.url; return; }
+        // outcome pricing: a new license's card is saved with Stripe and nothing is charged (authorized), or Stripe opens to save it
+        if (!r.paid && !r.authorized && r.url) {
+          hold(id);
+          say(shownQ.tier === "license" || shownQ.tier === "complex"
+            ? (lang === "zh" ? "正在打开 Stripe 保存您的银行卡，今天不收费。保存后回到这里，再点一次批准即可提交。" : "Opening Stripe to save your card. Nothing is charged today. Once it's saved, come back and approve once more to file it.")
+            : (lang === "zh" ? "正在打开付款页面。付款后回到这里，再点一次批准即可提交。" : "Opening the payment page. Once it's paid, come back and approve once more to file it."));
+          window.location.href = r.url; return;
+        }
         shownLicense.delete(a.id);
         const line = await fileOne(a, sig);
         if (line) { setPanelOpen(true); pushTurn(shown, { text: [line], filed: [a.app] }); }

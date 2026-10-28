@@ -376,9 +376,9 @@ async function main() {
     line("Store plan, a store a month (typical)", planMonth, storeMonthAi, sms + ownRenewalCost - ownRenewalsMonth * renewalAi, ownRenewalTeamMin, r2(planStripe), `${ASSUME.chatTurnsPerStoreMonth} chat turns, ${ASSUME.watchRunsPerStoreMonth} weekly checks, ${r2(ownRenewalsMonth)} included renewals`),
     line("Store plan, a store a month (heavy chat)", planMonth, heavyMonthAi, sms + ownRenewalCost - ownRenewalsMonth * renewalAi, ownRenewalTeamMin, r2(planStripe), `${ASSUME.heavyChatTurnsPerStoreMonth} chat turns`),
     line("Store plan, a store a month (abusive: at the allowance)", planMonth, allowanceMonth, sms + ownRenewalCost - ownRenewalsMonth * renewalAi, ownRenewalTeamMin, r2(planStripe), `the gate holds AI at the store plan's $${storeAiBudget().hard} allowance (the $50 ceiling less running cost)`),
-    line("New license", SIMPLE.licenseUsd, aiOf(by.new_license), deliveryAuto, teamMinLicense, stripeFee(SIMPLE.licenseUsd), `route mix measured over ${mix.n} licenses`),
-    line("New license, pessimistic AI and all by the team", SIMPLE.licenseUsd, aiOf(by.new_license, true), 0, ASSUME.teamMinutes.team, stripeFee(SIMPLE.licenseUsd), "worst route, the team files it"),
-    line("Complex license (liquor)", SIMPLE.complexUsd, aiOf(by.complex_license), 0, ASSUME.teamMinutes.complex, stripeFee(SIMPLE.complexUsd), "team-led: hearings, notices, corrections"),
+    line("New license", SIMPLE.licenseOnApprovalUsd, aiOf(by.new_license), deliveryAuto, teamMinLicense, stripeFee(SIMPLE.licenseOnApprovalUsd), `route mix measured over ${mix.n} licenses`),
+    line("New license, pessimistic AI and all by the team", SIMPLE.licenseOnApprovalUsd, aiOf(by.new_license, true), 0, ASSUME.teamMinutes.team, stripeFee(SIMPLE.licenseOnApprovalUsd), "worst route, the team files it"),
+    line("Complex license (liquor)", SIMPLE.complexOnApprovalUsd, aiOf(by.complex_license), 0, ASSUME.teamMinutes.complex, stripeFee(SIMPLE.complexOnApprovalUsd), "team-led: hearings, notices, corrections"),
     line("Renewal the plan doesn't include ($99)", SIMPLE.renewalUsd, renewalAi, 0, ASSUME.teamMinutes.renewalTeam, stripeFee(SIMPLE.renewalUsd), "it needs the team by definition"),
     line("Four-city entry (plan_markets), the planning run", 0, aiOf(by.plan_markets_4), 0, 0, 0, "the plan preview is free; licenses are bought one by one"),
   ];
@@ -402,7 +402,7 @@ async function main() {
     const planRev = storeMonths * planMonth;
     const planCost = storeMonths * typical.cost;
     const lic = c.opens * c.licensesPerOpening, cmp = c.opens * c.complexPerOpening;
-    const licRev = c.chain ? 0 : lic * SIMPLE.licenseUsd + cmp * SIMPLE.complexUsd;
+    const licRev = c.chain ? 0 : lic * SIMPLE.licenseOnApprovalUsd + cmp * SIMPLE.complexOnApprovalUsd;
     // a chain's included licenses cost the same to deliver, with no charge and no Stripe fee
     const licCost = lic * (newLic.cost - (c.chain ? newLic.stripe : 0)) + cmp * (cx.cost - (c.chain ? cx.stripe : 0));
     // renewals the team sends are $99 on every plan (the chain plan includes new licenses, not renewals: src/pricing.ts)
@@ -426,7 +426,7 @@ async function main() {
     ai: r2(200 * aiOf(by.chat_turn, true) + 5 * aiOf(by.new_license, true) + aiOf(by.complex_license, true) + 2 * aiOf(by.renewal, true) + ASSUME.watchRunsPerStoreMonth * ASSUME.watchRunUsd),
     running: runningCostPerStoreMonth(),
     licenseAi: r2(5 * aiOf(by.new_license, true) + aiOf(by.complex_license, true) + 2 * aiOf(by.renewal, true)),
-    fees: 5 * SIMPLE.licenseUsd + SIMPLE.complexUsd + 2 * SIMPLE.renewalUsd,
+    fees: 5 * SIMPLE.licenseOnApprovalUsd + SIMPLE.complexOnApprovalUsd + 2 * SIMPLE.renewalUsd,
     team: r2(5 * newLic.team + cx.team + 2 * rn.team),
     feeStripe: r2(5 * newLic.stripe + cx.stripe + 2 * rn.stripe),
   };

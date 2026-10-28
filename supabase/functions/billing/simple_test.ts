@@ -9,9 +9,9 @@ const all = () => true, none = () => false;
 const facts = (name: string, fee: number | null = null) => ({ name, govFeeUsd: fee });
 
 Deno.test("the founder's numbers", () => {
-  assertEquals([SIMPLE.planStoreMonthUsd, SIMPLE.licenseUsd, SIMPLE.complexUsd, SIMPLE.renewalUsd, SIMPLE.previewUsd, SIMPLE.chainMinStores], [149, 299, 999, 99, 0, 10]);
+  assertEquals([SIMPLE.planStoreMonthUsd, SIMPLE.licenseOnApprovalUsd, SIMPLE.complexOnApprovalUsd, SIMPLE.renewalUsd, SIMPLE.previewUsd, SIMPLE.chainMinStores], [149, 149, 999, 99, 0, 10]);
   assertEquals(SIMPLE_PRICE_ENV.plan.cents, 178800);
-  assertEquals(typicalOpeningUsd(), 9 * 299 + 2 * 999);
+  assertEquals(typicalOpeningUsd(), 9 * 149 + 2 * 999);
 });
 
 Deno.test("the complex list is fixed: liquor, building plan review, import permits", () => {
@@ -28,34 +28,34 @@ Deno.test("what staff complete and inspections inside a permit are never charged
   assertEquals(licenseTierOf("Restaurant wine license (beer and wine)"), "complex");
 });
 
-Deno.test("a quote: $299, $999, a $99 renewal, included on the plan, or a team quote without its Stripe price", () => {
+Deno.test("a quote: $149, $999 (charged on the agency's decision), a $99 renewal, included on the plan, or a team quote without its Stripe price", () => {
   const base = { renewal: false, paid: null, chain: false, onPlan: false, automated: false, priceOk: all };
-  assertEquals(simpleQuote(facts("Sign permit", 445), base).cents, 29900);
+  assertEquals(simpleQuote(facts("Sign permit", 445), base).cents, 14900);
   assert(simpleQuote(facts("Sign permit", 445), base).line.en.includes("($445) is passed through at cost"));
   assertEquals(simpleQuote(facts("Alcoholic beverage license"), base).cents, 99900);
   assertEquals(simpleQuote(facts("Sign permit"), { ...base, renewal: true }).tier, "renewal");
   assertEquals(simpleQuote(facts("Sign permit"), { ...base, renewal: true }).cents, 9900);
   const chain = simpleQuote(facts("Sign permit"), { ...base, chain: true, onPlan: true });
   assertEquals([chain.tier, chain.cents], ["chain", 0]);
-  // the store plan: a renewal Odelia files on her own is included; one that needs the team is $99; a new license is $299
+  // the store plan: a renewal Odelia files on her own is included; one that needs the team is $99; a new license is $149
   assertEquals(simpleQuote(facts("Sign permit"), { ...base, onPlan: true, automated: true, renewal: true }).tier, "plan");
   assertEquals(simpleQuote(facts("Sign permit"), { ...base, onPlan: true, automated: true, renewal: true }).cents, 0);
   assertEquals(simpleQuote(facts("Sign permit"), { ...base, onPlan: true, automated: false, renewal: true }).cents, 9900);
   assertEquals(simpleQuote(facts("Sign permit"), { ...base, onPlan: false, automated: true, renewal: true }).cents, 9900);
-  assertEquals(simpleQuote(facts("Sign permit"), { ...base, onPlan: true, automated: true }).cents, 29900);
+  assertEquals(simpleQuote(facts("Sign permit"), { ...base, onPlan: true, automated: true }).cents, 14900);
   const q = simpleQuote(facts("Sign permit"), { ...base, priceOk: none });
   assert(!q.priceOk && q.line.en.includes("the team sends a quote") && q.line.en.includes("Nothing is charged"));
   const free = simpleQuote(facts("Food handler cards for staff"), { ...base, priceOk: none });
   assert(free.priceOk && free.cents === 0);
-  const paid = simpleQuote(facts("Sign permit"), { ...base, paid: { tier: "license", cents: 29900 } });
+  const paid = simpleQuote(facts("Sign permit"), { ...base, paid: { tier: "license", cents: 29900 } });   // paid up front at $299, before outcome pricing: keeps its price
   assert(paid.paid && paid.line.en.startsWith("Paid"));
 });
 
 Deno.test("the approval must be the exact price and kind shown", () => {
   const q = simpleQuote(facts("Sign permit"), { renewal: false, paid: null, chain: false, onPlan: false, automated: false, priceOk: all });
-  assertEquals(simpleApproval(q, { tier: "license", cents: 29900 }), { ok: true });
-  assertEquals((simpleApproval(q, { tier: "license", cents: 29899 }) as { code: string }).code, "price_changed");
-  assertEquals((simpleApproval(q, { tier: "renewal", cents: 29900 }) as { code: string }).code, "price_changed");
+  assertEquals(simpleApproval(q, { tier: "license", cents: 14900 }), { ok: true });
+  assertEquals((simpleApproval(q, { tier: "license", cents: 14899 }) as { code: string }).code, "price_changed");
+  assertEquals((simpleApproval(q, { tier: "renewal", cents: 14900 }) as { code: string }).code, "price_changed");
   assertEquals((simpleApproval(q, {}) as { code: string }).code, "price_changed");
 });
 
@@ -67,8 +67,8 @@ Deno.test("the store plan bills every store; at 10 or more, every new license is
 });
 
 Deno.test("only the exact Stripe price is charged", () => {
-  assert(simplePriceOk("license", { unit_amount: 29900, currency: "usd", recurring: null }));
-  assert(!simplePriceOk("license", { unit_amount: 29900, currency: "usd", recurring: { interval: "year" } }));
+  assert(simplePriceOk("license", { unit_amount: 14900, currency: "usd", recurring: null }));
+  assert(!simplePriceOk("license", { unit_amount: 14900, currency: "usd", recurring: { interval: "year" } }));
   assert(!simplePriceOk("complex", { unit_amount: 99800, currency: "usd", recurring: null }));
   assert(simplePriceOk("plan", { unit_amount: 178800, currency: "usd", recurring: { interval: "year", interval_count: 1 } }));
   assert(!simplePriceOk("plan", { unit_amount: 14900, currency: "usd", recurring: { interval: "month" } }));

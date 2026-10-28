@@ -221,7 +221,7 @@ export async function journeyTests(ok: Ok, eq: Eq) {
     const w = normalizeState("Moonleaf", { business: B("Moonleaf Tea LLC", "月叶茶"), apps: p.apps, stores: [store("s1", "Flushing, NY", { stage: "opening", plannedOpen: "2027-03-01", apps: p.apps.map(a => a.id) })] });
     const c = costToOpen(w, { today: TODAY });
     const complex = c.placetta.find(x => /complex/.test(x.label.en));
-    ok(complex && complex.amount === SIMPLE.complexUsd * p.apps.filter(a => licenseTierOf(a.name.en) === "complex").length && /^2 complex/.test(complex.label.en), "cost to open: the liquor license and the build-out permit at $999 each, nothing more", complex?.label.en);
+    ok(complex && complex.amount === SIMPLE.complexOnApprovalUsd * p.apps.filter(a => licenseTierOf(a.name.en) === "complex").length && /^2 complex/.test(complex.label.en), "cost to open: the liquor license and the build-out permit at $999 each, nothing more", complex?.label.en);
   }
 
   /* ---------------------------------------------------------------- 6. an import permit */

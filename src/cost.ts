@@ -90,10 +90,10 @@ export function costToOpen(w: Workspace, o: { today: string; billing?: Billed; e
     else {
       const tiers = todo.map(a => licenseTierOf(a.name.en));
       const n = (t: string) => tiers.filter(x => x === t).length;
-      if (n("license")) placetta.push({ label: B(`${n("license")} license${n("license") === 1 ? "" : "s"} at $${SIMPLE.licenseUsd}`, `${n("license")} 项执照，每项 $${SIMPLE.licenseUsd}`), amount: n("license") * SIMPLE.licenseUsd,
-        note: B("Each one filed and tracked to approval, charged only when you approve it.", "每项提交并跟踪至获批，经您批准才收费。") });
-      if (n("complex")) placetta.push({ label: B(`${n("complex")} complex license${n("complex") === 1 ? "" : "s"} at $${SIMPLE.complexUsd}`, `${n("complex")} 项复杂执照，每项 $${SIMPLE.complexUsd}`), amount: n("complex") * SIMPLE.complexUsd,
-        note: B(`${COMPLEX_LIST.map(c => c.name.en).join(", ")}. Charged only when you approve each one.`, `${COMPLEX_LIST.map(c => c.name.zh).join("、")}。每项经您批准才收费。`) });
+      if (n("license")) placetta.push({ label: B(`${n("license")} license${n("license") === 1 ? "" : "s"} at $${SIMPLE.licenseOnApprovalUsd}`, `${n("license")} 项执照，每项 $${SIMPLE.licenseOnApprovalUsd}`), amount: n("license") * SIMPLE.licenseOnApprovalUsd,
+        note: B("Each one filed and tracked, charged when it's approved. Turned down because of a mistake on our side: nothing.", "每项提交并跟踪，获批时收费。如因我们的失误被退回：不收费。") });
+      if (n("complex")) placetta.push({ label: B(`${n("complex")} complex license${n("complex") === 1 ? "" : "s"} at $${SIMPLE.complexOnApprovalUsd}`, `${n("complex")} 项复杂执照，每项 $${SIMPLE.complexOnApprovalUsd}`), amount: n("complex") * SIMPLE.complexOnApprovalUsd,
+        note: B(`${COMPLEX_LIST.map(c => c.name.en).join(", ")}. Each charged when it's approved; nothing if it's turned down because of a mistake on our side.`, `${COMPLEX_LIST.map(c => c.name.zh).join("、")}。每项获批时收费；如因我们的失误被退回，不收费。`) });
       if (n("free")) placetta.push({ label: B(`${n("free")} tracked free`, `${n("free")} 项免费跟踪`), amount: 0, note: B("Certificates your staff earn and inspections inside a permit: Placetta tracks them at no charge.", "员工自行取得的证书和许可内的检查：快哉免费跟踪。") });
     }
     if (onPlan) placetta.push({ label: B("Store plan", "门店方案"), amount: 0, paid: true, note: B("Your plan: tracking, renewal monitoring, alerts, the document vault, Odelia, and the renewals she files on her own.", "您的方案：跟踪、续期监控、提醒、文件库、Odelia，以及她自行提交的续期。") });

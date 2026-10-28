@@ -1,8 +1,8 @@
 # Terms of Service
 
-Last updated: 2026-10-28
+Last updated: 2026-10-29
 
-Effective date: 2026-10-28. If you accepted an earlier version, this version applies to you from the day you accept it in the app, or from 30 days after we notify you of it by email or in the app if you keep using the service after then, whichever comes first. Until then, the previous version applies.
+Effective date: 2026-10-29. If you accepted an earlier version, this version applies to you from the day you accept it in the app, or from 30 days after we notify you of it by email or in the app if you keep using the service after then, whichever comes first. Until then, the previous version applies.
 
 These terms are an agreement between you and Placetta Inc. ("Placetta", "we", "us"). They cover your use of placetta.com, the Placetta app, and texts and calls with Odelia, Placetta's AI agent (together, the "service"). "You" means the business you represent and the people who use the service for it.
 
@@ -40,7 +40,7 @@ Odelia researches requirements on official government websites and cites the age
 
 Odelia never pays or sends anything on her own, and never files anything without an owner's approval: the approval of that filing in the app, or, if an owner turns on Autopilot, the standing authorization they sign, within its limits (see the Filing Authorization). Every message needs your approval in the app.
 
-After you approve an application, Placetta's software checks it against the agency's current requirements and submits it on your behalf by email from your connected mailbox, by fax, by certified mail or on the agency's website, using the saved logins you choose to keep with us. When no automatic channel fits, our filing team submits it. Placetta stops and asks you whenever an agency requires a CAPTCHA, an identity check, a payment, a sworn statement or your handwritten signature, and some agencies require an in-person step. You complete those yourself. Placetta never types a card or bank number and never sends a Social Security, ITIN or passport number.
+After you approve an application, Placetta's software checks it against the agency's current requirements and submits it on your behalf by email from your connected mailbox, by fax, by certified mail or on the agency's website, using the saved logins you choose to keep with us. When no automatic channel fits, our filing team submits it. Placetta stops and asks you whenever an agency requires a CAPTCHA, an identity check, a payment, a sworn statement or your handwritten signature, and some agencies require an in-person step. You complete those yourself. Placetta never types a card or bank number and never sends a Social Security, ITIN or passport number. Placetta's own fees are charged by Stripe to a card you save with Stripe; Placetta never sees or types its number.
 
 Placetta may decline to submit a filing that we believe in good faith is inaccurate, incomplete, unlawful or not authorized by your business. We will tell you why, so you can correct it.
 
@@ -158,8 +158,8 @@ Government, agency and notary fees are at cost. You pay them directly to each ag
 Placetta's fees are billed through Stripe. The prices below apply to every workspace that was not already a paying Placetta customer when this pricing took effect in October 2026. Settings, Billing shows which pricing your workspace is on. "Plans from before" below covers the workspaces that were.
 
 - Store plan: $149 per store per month, billed yearly in advance ($1,788 per store per year), or $179 per store per month billed month to month, for each store in the workspace. It covers tracking every license and renewal date, renewal monitoring and rule-change alerts, your document vault, Odelia's chat for your team, and every renewal Odelia files on her own.
-- New license: $299 for each new license, permit or registration Placetta files, filed and tracked until the agency decides.
-- Complex license: $999, only for liquor licenses, building plan review and import permits. No other license costs $999.
+- New license: $149 for each new license, permit or registration Placetta files, filed and tracked until the agency decides, and charged on the agency's decision as "Charged on the agency's decision" explains.
+- Complex license: $999, only for liquor licenses, building plan review and import permits. No other license costs $999. It is charged the same way as a new license.
 - Renewal the store plan doesn't include: $99. A renewal isn't included when it needs Placetta's team, for example because it needs a handwritten signature, can only be mailed, or has no route Odelia can file on her own, or when the store has no store plan.
 - 10 or more stores on the store plan: every new license is included too, with no charge per license.
 - Never charged: inspections that are part of a permit, steps that belong to a license already priced, and certificates and training your staff earn themselves. Placetta tracks them for free.
@@ -167,7 +167,26 @@ Placetta's fees are billed through Stripe. The prices below apply to every works
 - Government fees are at cost, as "Government fees" explains.
 - Custom plans may be set out in an order form that both sides accept. "Order of precedence" under "General terms" explains which controls if they conflict.
 
-Every charge is shown before you approve it. The app shows each license, complex license or renewal fee, in English and Chinese, with the agency's own fee, before an owner approves that filing, and charges it only when the owner approves it, at the price shown. A fee you paid is never charged twice for the same filing. If online payment isn't available for an item, our team sends you a quote, and nothing is charged until you accept it.
+Every charge is shown before you approve it. The app shows each license, complex license or renewal fee, in English and Chinese, with the agency's own fee, before an owner approves that filing, and charges it at the price shown: a renewal when the owner approves it, and a new license or complex license as "Charged on the agency's decision" explains. A fee you paid is never charged twice for the same filing. If online payment isn't available for an item, our team sends you a quote, and nothing is charged until you accept it.
+
+## Charged on the agency's decision
+
+New licenses and complex licenses are charged on the agency's decision, not when you approve the filing. When an owner approves one, Stripe saves the card for it and nothing is charged that day. Placetta never sees or types the card number. The fee shown is then charged to that card once, at one of these moments:
+
+- When the agency approves the license, as shown by its confirmation, the license number or the license itself.
+- When the agency rejects it for a reason that is not Placetta's fault, at the time our team records the reason.
+
+**Not Placetta's fault** means any of these: the zoning where the store is does not allow it; the business is not eligible under the law; information you or your business gave was wrong or incomplete; or you withdrew the application.
+
+**Placetta's fault** means a mistake Placetta made in the filing: a wrong value, the wrong form, or a missing document Placetta should have asked you for. If an agency rejects a filing because of Placetta's fault, you pay nothing for it, and we refund anything you paid Placetta for that filing.
+
+The app shows you the reason our team recorded, with a note, and you can dispute it with one tap. Our team reviews every dispute. If we agree it was Placetta's fault, we refund the fee.
+
+If your bank asks you to confirm a charge, we send the owners Stripe's payment link. If a charge fails, Stripe tries again and we tell the owners, as for any failed payment.
+
+Government and agency fees are separate. They are paid to the agency, Placetta never refunds them, and any refund of them follows the agency's rules.
+
+These rules apply to new licenses and complex licenses an owner approves from the effective date of these terms. A fee paid before then keeps the terms it was paid under, except that a rejection because of Placetta's fault is refunded as above.
 
 Fees do not include taxes. You pay any sales, use or similar taxes that apply, other than taxes on Placetta's income.
 
@@ -179,12 +198,13 @@ If a payment fails, we tell the owners. Until it is paid, the plan's Odelia allo
 - We email the owners 15 to 45 days before each renewal with what it will charge and how to cancel.
 - If the price will change at renewal, we will tell you at least 30 days before.
 - You can cancel online at any time in Settings, Billing, with one click and no call. Cancelling turns off the next renewal. It takes effect at the end of the current yearly or monthly term, and you keep the service until then.
-- New licenses, complex licenses and renewals are charged one at a time, only when an owner approves them, so there is nothing to cancel for them.
+- Renewals are charged one at a time, when an owner approves them, and new licenses and complex licenses as "Charged on the agency's decision" explains, so there is nothing to cancel for them.
 
 ## Refunds
 
 - Store plan fees are paid in advance, for the year or the month. Cancelling stops the next renewal; it does not refund the current term, except as "Changes to these terms" says or where the law requires a refund.
-- A license, complex license or renewal fee pays for that one filing. Once Placetta has submitted the filing, the fee is earned, whatever the agency decides.
+- A renewal fee pays for that one filing. Once Placetta has submitted it, the fee is earned, whatever the agency decides.
+- A new license or complex license fee is charged and refunded as "Charged on the agency's decision" explains: if the agency rejects the filing because of Placetta's fault, you pay nothing for it and anything paid is refunded; if it rejects it for a reason that is not Placetta's fault, the fee is charged and is not refunded.
 - If Placetta declines to submit a filing you paid for, or cannot submit it, and you don't want us to try again, we refund that filing's fee. Ask at support@placetta.com.
 - Government fees are paid to the agency, and any refund of them follows the agency's rules.
 
@@ -393,9 +413,9 @@ Website: placetta.com
 
 # 服务条款
 
-最后更新：2026-10-28
+最后更新：2026-10-29
 
-生效日期：2026-10-28。如您已接受过上一版本，本版本自您在应用中接受之日起对您适用；如您在我们通过邮件或应用内通知您满 30 天后继续使用本服务，则自该日起适用，以两者中较早者为准。在此之前，继续适用上一版本。
+生效日期：2026-10-29。如您已接受过上一版本，本版本自您在应用中接受之日起对您适用；如您在我们通过邮件或应用内通知您满 30 天后继续使用本服务，则自该日起适用，以两者中较早者为准。在此之前，继续适用上一版本。
 
 本条款是您与 Placetta Inc.（中文名称“快哉”，下称“快哉”或“我们”）之间的协议，适用于您对 placetta.com、快哉应用，以及与快哉 AI 智能体 Odelia 之间的短信和通话（合称“本服务”）的使用。“您”指您所代表的企业及代表该企业使用本服务的人员。
 
@@ -433,7 +453,7 @@ Odelia 在政府官方网站上查询相关要求，并注明所依据的机构�
 
 Odelia 不会自行付款或发送任何内容；未经所有者批准，也不会提交任何申报。所谓批准，是指在应用中对该项申报的批准，或所有者开启自动驾驶时签署的长期授权（以其范围为限，详见《申报授权书》）。每一条消息都须经您在应用中批准。
 
-您批准申请后，快哉的软件会对照该机构的最新要求进行核对，再代表您提交：通过您连接的邮箱发送邮件、发送传真、寄送挂号信，或在该机构网站上使用您选择保存在快哉的登录信息提交。没有合适的自动渠道时，由我们的申报团队提交。如机构要求验证码（CAPTCHA）、身份核验、付款、宣誓声明或您的亲笔签名，快哉会暂停并请您处理；部分机构还要求本人到场。这些步骤由您自行完成。快哉从不输入银行卡号或银行账号，也从不发送社会安全号码（SSN）、个人纳税识别号（ITIN）或护照号码。
+您批准申请后，快哉的软件会对照该机构的最新要求进行核对，再代表您提交：通过您连接的邮箱发送邮件、发送传真、寄送挂号信，或在该机构网站上使用您选择保存在快哉的登录信息提交。没有合适的自动渠道时，由我们的申报团队提交。如机构要求验证码（CAPTCHA）、身份核验、付款、宣誓声明或您的亲笔签名，快哉会暂停并请您处理；部分机构还要求本人到场。这些步骤由您自行完成。快哉从不输入银行卡号或银行账号，也从不发送社会安全号码（SSN）、个人纳税识别号（ITIN）或护照号码。快哉自身的服务费由 Stripe 从您在 Stripe 保存的银行卡中扣取；快哉看不到、也从不输入卡号。
 
 如我们善意地认为某项申报不准确、不完整、违法，或未经您的企业授权，快哉可以拒绝提交，并会告诉您原因，以便您更正。
 
@@ -551,8 +571,8 @@ Odelia 是软件，不是真人。
 快哉的服务费通过 Stripe 收取。以下价格适用于在本定价于 2026 年 10 月生效时尚不是快哉付费客户的所有工作区。您的工作区适用哪种定价，可在“设置”的“账单”中查看。下文“原有套餐”适用于当时已是付费客户的工作区。
 
 - 门店方案：每家门店每月 149 美元，按年预付（每家门店每年 1,788 美元），或按月付费每家门店每月 179 美元，按工作区中的每家门店收取。包括跟踪每一项执照与续期日期、续期监控与规则变化提醒、您的文件库、供全团队使用的 Odelia 聊天，以及 Odelia 自行提交的每一项续期。
-- 新执照：快哉提交的每一项新执照、许可或登记 299 美元，提交并跟踪至机构作出决定。
-- 复杂执照：999 美元，仅限酒类执照、建筑图纸审查和进口许可。其他执照均不收 999 美元。
+- 新执照：快哉提交的每一项新执照、许可或登记 149 美元，提交并跟踪至机构作出决定，并按“按机构决定收费”所述，在机构作出决定时收取。
+- 复杂执照：999 美元，仅限酒类执照、建筑图纸审查和进口许可。其他执照均不收 999 美元。其收费方式与新执照相同。
 - 门店方案不包含的续期：99 美元。续期需要快哉团队处理（例如需要亲笔签名、只能邮寄，或没有 Odelia 可自行提交的渠道），或该门店未开通门店方案时，该续期不包含在方案中。
 - 门店方案内有 10 家及以上门店：每一项新执照也都包含在内，不再按执照收费。
 - 永不收费：属于某项许可一部分的检查、已计价执照中的步骤，以及员工自行取得的证书和培训。快哉免费跟踪这些事项。
@@ -560,7 +580,26 @@ Odelia 是软件，不是真人。
 - 政府规费按实际金额收取，详见“政府规费”。
 - 定制方案可另以双方接受的订单约定。如订单与本条款冲突，以何者为准，见“一般条款”中的“适用顺序”。
 
-每笔费用在您批准前都会显示。应用会在所有者批准该项申报前，以中英文显示每项执照、复杂执照或续期的费用以及机构自身的规费，并且只在所有者批准时按所显示的价格收费。同一项申报绝不重复收费。如某项暂不能在线支付，我们的团队会向您报价，在您接受之前不收取任何费用。
+每笔费用在您批准前都会显示。应用会在所有者批准该项申报前，以中英文显示每项执照、复杂执照或续期的费用以及机构自身的规费，并按所显示的价格收费：续期在所有者批准时收取，新执照和复杂执照按“按机构决定收费”所述收取。同一项申报绝不重复收费。如某项暂不能在线支付，我们的团队会向您报价，在您接受之前不收取任何费用。
+
+## 按机构决定收费
+
+新执照和复杂执照按机构的决定收费，而不是在您批准申报时收费。所有者批准后，由 Stripe 为其保存银行卡，当天不收取任何费用。快哉看不到、也从不输入卡号。之后，所显示的费用会在以下任一时刻从该卡扣取一次：
+
+- 机构批准该执照时，以机构的确认、执照编号或执照本身为准。
+- 机构因非快哉失误的原因拒绝时，在我们的团队记录原因之时。
+
+**非快哉失误** 指以下任一情况：门店所在地的分区规定不允许；该企业依法不符合资格；您或您的企业提供的信息有误或不完整；或您撤回了申请。
+
+**快哉失误** 指快哉在申报中出现的错误：数值有误、表格选错，或遗漏了快哉本应请您提供的文件。如机构因快哉失误拒绝申报，您无需为此付费，您已为该申报向快哉支付的费用也将全额退还。
+
+应用会向您显示我们团队记录的原因及说明，您可以一键提出异议。我们的团队会审核每一项异议；如我们认定属于快哉失误，将退还该费用。
+
+如您的银行要求您确认某笔扣款，我们会把 Stripe 的付款链接发送给所有者。如扣款失败，Stripe 会再次尝试，我们也会像处理任何付款失败一样通知所有者。
+
+政府和机构规费另行支付：直接付给机构，快哉从不退还，是否退还按机构的规定办理。
+
+上述规则适用于所有者自本条款生效之日起批准的新执照和复杂执照。在此之前已支付的费用，仍按支付时的条款处理；但因快哉失误被拒绝的，按上文退还。
 
 服务费不含税。您须支付适用的销售税、使用税或类似税费，但对快哉所得征收的税除外。
 
@@ -572,12 +611,13 @@ Odelia 是软件，不是真人。
 - 每次续费前 15 至 45 天，我们会发邮件告知所有者续费金额和取消方式。
 - 如续费时价格有变，我们会至少提前 30 天告知您。
 - 您可以随时在“设置”的“账单”中在线取消：点一下即可，无需致电。取消会关闭下一次续费，在当前年度或月度期限结束时生效，在此之前您仍可使用本服务。
-- 新执照、复杂执照和续期按项收费，只在所有者批准时收取，因此无需取消。
+- 续期按项收费，在所有者批准时收取；新执照和复杂执照按“按机构决定收费”所述收取，因此无需取消。
 
 ## 退款
 
 - 门店方案费用按年或按月预付。取消会停止下一次续费，但不退还当期费用，除非“条款变更”另有规定或法律要求退款。
-- 每项执照、复杂执照或续期费用对应该项申报。快哉提交该申报后，无论机构作出何种决定，该费用均不退还。
+- 每项续期费用对应该项申报。快哉提交该申报后，无论机构作出何种决定，该费用均不退还。
+- 新执照或复杂执照的费用按“按机构决定收费”所述收取和退还：如机构因快哉失误拒绝该申报，您无需付费，已付费用全额退还；如机构因非快哉失误的原因拒绝，则收取该费用且不予退还。
 - 如快哉拒绝提交或无法提交您已付费的申报，且您不希望我们再次尝试，我们将退还该项申报的费用。请发邮件至 support@placetta.com 申请。
 - 政府规费支付给机构，是否退还按机构的规定办理。
 

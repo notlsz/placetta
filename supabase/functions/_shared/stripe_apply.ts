@@ -16,6 +16,8 @@ export type Db = {
   insert(table: "audit_log" | "updates" | "team_tasks", row: Record<string, unknown>): Promise<void>;
   billing(ws: string): Promise<{ auto_renew?: boolean | null; subscription_id?: string | null; subscription_status?: string | null } | null>;
   wsOfSubscription(sub: string): Promise<string | null>;
+  /** the card a SetupIntent saved (outcome pricing); given by the webhook and billing's confirm */
+  setupIntentPm?(id: string): Promise<string | null>;
 };
 
 const PLAN_NAME: Record<string, Bi> = {
@@ -32,6 +34,11 @@ export const NOTICE = {
     title: { en: "A payment didn't go through", zh: "一笔付款未成功" },
     body: { en: "Stripe couldn't charge your card for the store plan and will try again over the next few days. Update your card in Settings, Billing, Manage billing. Nothing is deleted; until it's paid, the plan's Odelia allowance and included renewals pause.",
       zh: "Stripe 未能从您的银行卡扣取门店方案费用，接下来几天会自动重试。请在“设置 > 账单 > 管理账单”中更新银行卡。任何内容都不会被删除；付款完成前，方案内的 Odelia 额度和包含的续期将暂停。" },
+  },
+  licenseFailed: {
+    title: { en: "A payment didn't go through", zh: "一笔付款未成功" },
+    body: { en: "Stripe couldn't charge your card for a license and will try again over the next few days. Update your card in Settings, Billing, Manage billing, or pay with the link in Updates. Nothing is deleted.",
+      zh: "Stripe 未能从您的银行卡扣取一项执照费用，接下来几天会自动重试。请在“设置 > 账单 > 管理账单”中更新银行卡，或使用“动态”中的付款链接支付。任何内容都不会被删除。" },
   },
   paid: {
     title: { en: "Payment received, your plan is on", zh: "已收到付款，方案已生效" },
@@ -51,6 +58,16 @@ export async function applyCheckoutSession(db: Db, o: Obj, type = "checkout.sess
   const c = checkoutEffect(type, o);
   if (!c?.ws) return;
   const ws = c.ws;
+  // outcome pricing: Stripe saved the owner's card for a license charged on the agency's decision; nothing is charged now
+  if (c.setup) {
+    const si = o.setup_intent;
+    const pm = si && typeof si === "object" ? (typeof si.payment_method === "string" ? si.payment_method : si.payment_method?.id ?? null)
+      : typeof si === "string" && db.setupIntentPm ? await db.setupIntentPm(si) : null;
+    if (!pm) throw new Error("setup Checkout without a saved card");
+    const customer = typeof o.customer === "string" ? o.customer : (o.customer?.id ?? null);
+    const done = await must(db.rpc("license_outcome_authorize", { p_id: c.setup, p_pm: pm, p_customer: customer }));
+    if (done === true) await log(db, ws, { en: "Saved a card for a license, nothing charged", zh: "为执照保存了银行卡，未收费" }, { en: String(o.metadata?.ref ?? ""), zh: String(o.metadata?.ref ?? "") });
+  }
   // a license or renewal on the simple model, paid at the price the owner approved: its filing may now go in
   if (c.license) {
     const settled = await must(db.rpc("license_charge_settle", { p_id: c.license, p_ok: true, p_stripe: String(o.id ?? "") || null }));
@@ -140,11 +157,18 @@ export async function applyInvoice(db: Db, inv: Obj, type: string, createdAt: st
   const ws = await invoiceWs(db, inv);
   if (!ws) return;   // a one-time invoice that isn't Placetta's (or a hand-made one): nothing to do
   const failed = type === "invoice.payment_failed";
+  const outcome = inv.metadata?.kind === "license_outcome" && typeof inv.metadata?.charge_id === "string" ? inv.metadata.charge_id as string : null;
+  // outcome pricing: a license charged on the agency's decision, paid now (Stripe's retry, or the owner's pay link)
+  if (outcome && !failed) await must(db.rpc("license_outcome_paid", { p_id: outcome, p_invoice: String(inv.id ?? "") }));
   const changed = await must(db.rpc("billing_payment_apply", { p_ws: ws, p_failed: failed, p_at: createdAt, p_invoice: String(inv.id ?? "") }));
-  if (failed) {
+  if (failed && outcome) {
+    // the same notice (and dedupe key) the sweep already gave the owner, so it shows once
+    await log(db, ws, { en: "A payment didn't go through", zh: "一笔付款未成功" }, { en: `Invoice ${inv.number ?? inv.id}`, zh: `账单 ${inv.number ?? inv.id}` });
+    await db.insert("updates", { workspace_id: ws, kind: "payment", dedupe: `payment_failed:${inv.id}`, title: NOTICE.licenseFailed.title, body: NOTICE.licenseFailed.body });
+  } else if (failed) {
     await log(db, ws, { en: "A payment didn't go through", zh: "一笔付款未成功" }, { en: `Invoice ${inv.number ?? inv.id}`, zh: `账单 ${inv.number ?? inv.id}` });
     await db.insert("updates", { workspace_id: ws, kind: "payment", dedupe: `payment_failed:${inv.id}`, title: NOTICE.failed.title, body: NOTICE.failed.body });
-  } else if (changed === true) {
+  } else if (changed === true && !outcome) {
     await db.insert("updates", { workspace_id: ws, kind: "payment", dedupe: `payment_ok:${inv.id}`, title: NOTICE.paid.title, body: NOTICE.paid.body });
   }
 }
