@@ -238,7 +238,7 @@ function ReviewQueue() {
           const f = form[r.id] ?? { outcome: "looks_right" as const, comment: "" };
           return (
             <article key={r.id} className="rq">
-              <header><span><b>{b(r.title)}</b><small>{r.business}{r.requested_by ? (zh ? `，${r.requested_by}` : `, ${r.requested_by}`) : ""}</small></span><Sla due={r.due_at} /></header>
+              <header><span><b>{b(r.title)}</b><small>{r.business}{r.requested_by ? (zh ? `，${r.requested_by}` : `, ${r.requested_by}`) : (zh ? "，Odelia 提问" : ", asked by Odelia")}</small></span><Sla due={r.due_at} /></header>
               {r.note && <q className="rq-note">{r.note}</q>}
               <p className="rq-meta">{zh ? `${stamp(r.requested_at, zh)} 提出，目标 ${stamp(r.due_at, zh)}` : `Asked ${stamp(r.requested_at, zh)}, target ${stamp(r.due_at, zh)}`}</p>
               <form className="rq-form" onSubmit={e => { e.preventDefault(); void finish(r); }}>

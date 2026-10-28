@@ -33,3 +33,20 @@ export declare function daysLeft(date: string, today: string): number;
 export declare const NOT_A_LAW_FIRM: Bi;
 /** Who handles each playbook (src/appeals TIERS): the route, why, the source's own words and the page. */
 export declare const TIERS: Record<string, { route: "self_serve" | "self_serve_review" | "attorney"; why: Bi; says: string; source: string }>;
+/** Odelia goes first (src/initiative.ts). */
+export type Holder = "landlord" | "builder" | "insurer" | "staff" | "owner" | "odelia";
+export type Contact = { name: string; role?: string; email?: string; phone?: string };
+export type ChaseLog = Record<string, { n: number; last: string; to?: string; replied?: boolean }>;
+export type Chase = { kind: "chase"; key: string; app: string; appName: Bi; item: string; label: Bi; holder: Holder; to: Contact; ask: number; since?: string; critical: boolean; title: Bi };
+export type RenewalPrep = { kind: "renewal"; key: string; deadline: string; app?: string; name: Bi; date: string; days: number; title: Bi };
+export type Move = Chase | RenewalPrep;
+export type Need = { key: string; why: "signature" | "payment" | "approval" | "document" | "contact" | "no_answer" | "code"; title: Bi; app?: string };
+export type Morning = { moves: Move[]; needs: Need[] };
+export declare function morning(w: Ws, today: string, o: { contacts: Contact[]; chased?: ChaseLog; filings?: { app_id: string; status: string; agent_state?: string | null }[]; maxChases?: number; maxPreps?: number }): Morning;
+export declare function morningUpdate(m: Morning, started?: Move[]): { title: Bi; body: Bi } | null;
+export declare function contactsOf(books: unknown[]): Contact[];
+export declare function chaseMail(c: Chase, business: string, token: string, lang?: "en" | "zh"): { subject: string; text: string };
+export declare function newToken(rand?: () => number): string;
+export declare function weekday(day: string): boolean;
+export declare const MAX_ASKS: number;
+export declare const REF_RE: RegExp;
