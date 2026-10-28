@@ -11,6 +11,7 @@ import { usPlace } from "../forms/usplace";
 import { FURNITURE_KINDS, SECTOR_KINDS, kindFactsAt, kindsOf, type KindFact, type StoreKind } from "../forms/kinds";
 import { FURNITURE, furnitureNeeds } from "../forms/furniture";
 import { sectorNeeds } from "../forms/sectors";
+import { productNeeds, sellsCleaning } from "../forms/states/products";
 import { FOOD_PERMITTER, MUNICIPAL_BUILDING, proofCurrent, whoToAsk, type Src } from "./ask";
 import type { Application, CheckItem, Deadline, Field, Level, Store, Workspace } from "../model";
 import { publishedDays } from "../plan";
@@ -39,6 +40,7 @@ export type PreviewOptions = {
   online?: boolean;         // sells online
   upholstered?: boolean;    // furniture: sells upholstered pieces
   children?: boolean;       // makes or sells products for children 12 or younger
+  antimicrobial?: boolean;  // cleaning products: one claims to kill germs (a pesticide: EPA's and each state's registration)
   today?: string;           // YYYY-MM-DD, for tests
   storeId?: string;         // the store the rows belong to, for the projected opening
 };
@@ -331,10 +333,11 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
   // the company: none yet, it's formed here; one formed in another state or abroad registers here instead
   const legal = (o.entity ?? "").trim(), home = companyHome(o.formedIn, where);
   const corp = o.corp ?? /\b(inc|incorporated|corp|corporation)\.?\s*$/i.test(legal);
-  const needs = { food, employees, signage: o.signage ?? !mobile, buildout, newEntity: !legal, imports: o.imports ?? imports(what), alcohol, terrace: o.terrace ?? terrace(what), ...furnitureNeeds(what), ...sectorNeeds(what),
+  const needs = { food, employees, signage: o.signage ?? !mobile, buildout, newEntity: !legal, imports: o.imports ?? imports(what), alcohol, terrace: o.terrace ?? terrace(what), ...furnitureNeeds(what), ...sectorNeeds(what), ...productNeeds(what),
     ...(legal && home === "abroad" ? { foreignEntity: true } : legal && home === "other" ? { outOfState: true } : {}), ...(corp ? { corp: true } : {}),
     // the intake's answers win over what the words suggest
-    ...(o.upholstered !== undefined && FURNITURE.test(what) ? { upholstered: o.upholstered } : {}), ...(o.children !== undefined ? { children: o.children } : {}) };
+    ...(o.upholstered !== undefined && FURNITURE.test(what) ? { upholstered: o.upholstered } : {}), ...(o.children !== undefined ? { children: o.children } : {}),
+    ...(o.antimicrobial !== undefined && sellsCleaning(what) ? { antimicrobial: o.antimicrobial } : {}) };
   const info = placeInfo(where), places = placesOf(where);
   const country = info.country ?? "US";
   const us = country === "US";

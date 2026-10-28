@@ -641,7 +641,7 @@ function Onboard({ lang, email, agreedAtSignup = false, onCreated, onCancel }: {
         </label>
         {!line && (
           <div className="chips ex">
-            {[B("Milk tea shop in Flushing, NY", "奶茶店，纽约法拉盛"), B("Hot pot restaurant in Irvine, CA", "火锅店，加州尔湾"), B("Bakery in Houston, TX", "烘焙店，德州休斯顿")].map(x => (
+            {[B("Milk tea shop in Flushing, NY", "奶茶店，纽约法拉盛"), B("Hot pot restaurant in Irvine, CA", "火锅店，加州尔湾"), B("Bakery in Houston, TX", "烘焙店，德州休斯顿"), B("Furniture importer in Los Angeles, CA", "家具进口商，洛杉矶"), B("Laundry detergent brand in Houston, TX", "洗衣液品牌，德州休斯顿")].map(x => (
               <button key={x.en} type="button" className="chip" onClick={() => setLine(L(x))}>{L(x)}</button>
             ))}
           </div>

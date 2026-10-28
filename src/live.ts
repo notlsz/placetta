@@ -46,6 +46,7 @@ import { cityName, countyOf, stateCode as stateFromAny } from "./counties";
 import { COUNTRIES } from "./forms/world";
 import { furnitureNeeds } from "./forms/furniture";
 import { sectorNeeds } from "./forms/sectors";
+import { productNeeds } from "./forms/states/products";
 import type { Lang } from "./i18n";
 import { anthropicMessage } from "../supabase/functions/_shared/stream.ts";
 import { FORMS, METHOD, formById, formsFor, placeInfo, placesOf, searchForms, segmentOf, selfStep, type OfficialForm } from "./forms/registry";
@@ -522,6 +523,11 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         sells_online: { type: "boolean", description: "Sells online (its own site or a marketplace like Amazon or Walmart)" },
         sells_upholstered: { type: "boolean", description: "Furniture: sells upholstered pieces (sofas, upholstered chairs)" },
         childrens_products: { type: "boolean", description: "Makes or sells products designed mainly for children 12 or younger" },
+        sells_bedding: { type: "boolean", description: "Makes, imports or sells mattresses, pillows, comforters or other bedding" },
+        sells_cleaning_products: { type: "boolean", description: "Makes, imports or sells laundry detergent or household cleaning products" },
+        claims_to_kill_germs: { type: "boolean", description: "A product claims to disinfect, sanitize or kill germs (that makes it a pesticide; a hand sanitizer is an FDA drug instead)" },
+        imports_meat: { type: "boolean", description: "Imports meat or poultry, or food made with it" },
+        canned_food: { type: "boolean", description: "Sells shelf-stable canned, jarred, pickled or acidified food" },
       } },
       execute(i) {
         const segment = segmentOf(str(i.business) || get().business.en);
@@ -532,7 +538,10 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           // a furniture brand: wood goods, upholstered furniture, dressers and chests (src/forms/furniture.ts)
           ...furnitureNeeds(str(i.business) || get().business.en),
           // the landing page's other sectors: a salon, an auto repair shop, a medical device importer, a factory, an office (src/forms/sectors.ts)
-          ...sectorNeeds(str(i.business) || get().business.en), ...(i.manufactures ? { manufactures: true } : {}) };
+          ...sectorNeeds(str(i.business) || get().business.en), ...(i.manufactures ? { manufactures: true } : {}),
+          // what it makes, imports or sells: bedding, cleaning products and germ-killing claims, meat, canned food (src/forms/states/products.ts)
+          ...productNeeds(str(i.business) || get().business.en), ...(i.sells_bedding ? { bedding: true } : {}), ...(i.sells_cleaning_products ? { cleaning: true } : {}),
+          ...(i.claims_to_kill_germs ? { antimicrobial: true } : {}), ...(i.imports_meat ? { meat: true } : {}), ...(i.canned_food ? { canned: true } : {}) };
         const list: OfficialForm[] = str(i.search) ? searchForms({ text: str(i.search), where: str(i.place) || undefined }) : formsFor({ segment, where: place, needs });
         S("searching", L(`Finding the official forms for ${str(i.search) || place || "the business"}`, `查找${str(i.search) || place || "这家企业"}的官方表格`));
         mark();

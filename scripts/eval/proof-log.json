@@ -10961,5 +10961,653 @@
   "found": true,
   "sha256": "daa39a0f33d3a982",
   "context": " other filing............................................................$60.00 *annual report license tax is $60 or two-tenths of one mill on the dollar ($.0002) whichever is greater based on the company's assets located and employed in the state of wyoming. nonprofit"
+ },
+ {
+  "id": "epa-fifra-reg",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title40-vol26/pdf/CFR-2025-title40-vol26-sec152-15.pdf",
+  "quote": "No person may distribute or sell any pesticide product that is not registered under the Act",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "0e7fbb5e27f60c68",
+  "context": " regulation under fifra. § 152.15 pesticide products required to be registered. no person may distribute or sell any pesticide product that is not registered under the act, except as provided in §§ 152.20, 152.25, and 152.30. a pesticide is any substa"
+ },
+ {
+  "id": "epa-pesticide-est",
+  "read": "https://www.epa.gov/compliance/pesticide-establishment-registration-and-reporting",
+  "quote": "including companies or establishments that import into the United States, must first obtain a company number; second, register the establishment,",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "650316ff1a3de129",
+  "context": "request. establishments that produce pesticides, active ingredients or devices, including companies or establishments that import into the united states, must first obtain a company number; second, register the establishment, then file initial and annual production reports with epa. 1. register each esta"
+ },
+ {
+  "id": "epa-noa-3540-1",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-sec12-112.pdf",
+  "quote": "must submit to the Administrator, prior to the arrival of the shipment in the United States, a Notice of Arrival of Pesticides and Devices",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "c9a440edaf6c80bd",
+  "context": "mporter's agent desiring to import pesticides or devices into the united states must submit to the administrator, prior to the arrival of the shipment in the united states, a notice of arrival of pesticides and devices (notice of arrival) on u.s. environmental protection agency (epa) form 3540–1. "
+ },
+ {
+  "id": "epa-tsca-13",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-sec12-121.pdf",
+  "quote": "must certify in writing or electronically that the chemical shipment complies with all applicable rules and orders under TSCA",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "01922466de97b053",
+  "context": " an importer of a tsca chemical substance in bulk form or as part of a mixture, must certify in writing or electronically that the chemical shipment complies with all applicable rules and orders under tsca by filing with cbp the following statement: i certify that all chemical substan"
+ },
+ {
+  "id": "cpsc-1633",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title16-vol2/pdf/CFR-2025-title16-vol2-part1633.pdf",
+  "quote": "irrespective of whether guarantees are issued relative thereto, shall maintain the following records in English at a location in the United States",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "1e18bfb79e04c119",
+  "context": "rson initially introducing into commerce mattress sets subject to the standard, irrespective of whether guarantees are issued relative thereto, shall maintain the following records in english at a location in the united states: (1) test results and details of each test performed by or for that manufacture"
+ },
+ {
+  "id": "fda-fce-sid",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title21-vol2/pdf/CFR-2025-title21-vol2-sec108-25.pdf",
+  "quote": "Foreign processors shall register before any offering of foods for import into the United States.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "b3f530520393bbd7",
+  "context": "ctronic submission go to fda's industry systems web site at www.access.fda.gov. foreign processors shall register before any offering of foods for import into the united states. commercial processors duly registered under this section shall notify the food "
+ },
+ {
+  "id": "fsis-9540-1",
+  "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title9-vol2/pdf/CFR-2025-title9-vol2-sec327-5.pdf",
+  "quote": "Import inspection applications for each consignment must be submitted (electronically or on paper) to FSIS in advance of the shipment's arrival",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "80df2c9eba112927",
+  "context": "ants may apply for inspection using a paper or electronic application form. (b) import inspection applications for each consignment must be submitted (electronically or on paper) to fsis in advance of the shipment's arrival at the official import establishment where the product will be reinspected, but"
+ },
+ {
+  "id": "ma-dfp-bedding",
+  "read": "https://www.mass.gov/how-to/apply-for-a-license-to-manufacture-and-sell-stuffed-toys-bedding-upholstered-furniture-and-related-products",
+  "quote": "You must have a license from the Division of Food Protection (DFP) to manufacture and sell stuffed toys, bedding, upholstered furniture,",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "972d44401412c4c1",
+  "context": "ure and sell stuffed toys, bedding, upholstered furniture, and related products you must have a license from the division of food protection (dfp) to manufacture and sell stuffed toys, bedding, upholstered furniture, and related products in massachusetts. please allow 6 – 8 weeks for processing."
+ },
+ {
+  "id": "pa-bedding",
+  "read": "https://www.pa.gov/agencies/dli/programs-services/labor-management-relations/bureau-of-occupational-and-industrial-safety/bedding-and-upholstery",
+  "quote": "The law requires manufacturers to use only new filling materials in bedding and upholstered furniture and register with the Bureau",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "f6fd1ac3b507e7c9",
+  "context": " bureau of occupational & industrial safety and relates to consumer protection. the law requires manufacturers to use only new filling materials in bedding and upholstered furniture and register with the bureau to sell those items in pennsylvania. for secondhand and renovated items, they m"
+ },
+ {
+  "id": "ny-bedding",
+  "read": "https://dos.ny.gov/node/66631",
+  "quote": "Every manufacturer of new bedding sold in this state shall file a notice with the Department of State",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "66584b3b467656e5",
+  "context": "submit a completed application and the required fee to the department of state. every manufacturer of new bedding sold in this state shall file a notice with the department of state which: (a) states its name and address; and (b) affirms that it uses new materi"
+ },
+ {
+  "id": "ct-bedding-importer",
+  "read": "https://portal.ct.gov/dcp/license-services-division/all-license-applications/bedding--upholstered-furniture-importer",
+  "quote": "The fee for the importer license is $100 annually and will always expire on April 30th.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "3370daee1a9a0da1",
+  "context": " who imports bedding and upholstered furniture from outside the united states.\" the fee for the importer license is $100 annually and will always expire on april 30th. an importer, with the one license, can import an unlimited number of manufactur"
+ },
+ {
+  "id": "ut-bedding",
+  "read": "https://ag.utah.gov/regulatory-services/bedding-upholstered-furniture-and-quilted-clothing/bedding-upholstered-furniture-and-quilted-clothing-permits/",
+  "quote": "This permit must be purchased prior to the time such merchandise enters the State of Utah",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "8a2e39508149ac3b",
+  "context": "ually a permit issued by this department for their particular type of business. this permit must be purchased prior to the time such merchandise enters the state of utah or before engaging in repairing or reupholstering furniture, or manufacturing w"
+ },
+ {
+  "id": "wv-bedding",
+  "read": "https://labor.wv.gov/weights-measures/bedding-upholstery",
+  "quote": "the section registers all manufacturers, renovators and sterilizers of bedding materials",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "da3dc8b5e2de1664",
+  "context": "lstered furniture against disease and fraudulent practices. to accomplish this, the section registers all manufacturers, renovators and sterilizers of bedding materials and conducts investigations of fraudulent or unhealthy practices by sellers, re"
+ },
+ {
+  "id": "va-bedding",
+  "read": "https://www.vdh.virginia.gov/environmental-health/bedding-and-upholstered-furniture/",
+  "quote": "All manufacturers, importers, distributors, reupholsterers, and renovators must be licensed to offer bedding and upholstered furniture for sale in Virginia.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "d839aec15af27966",
+  "context": "gulations for bedding and upholstered furniture inspection program, click here. all manufacturers, importers, distributors, reupholsterers, and renovators must be licensed to offer bedding and upholstered furniture for sale in virginia. all bedding and upholstered furniture must be tagged with an acceptable law lab"
+ },
+ {
+  "id": "dc-bedding",
+  "read": "https://dchealth.dc.gov/node/1507111",
+  "quote": "who manufacture, renovate, or deal in bedding, mattress, or other upholstered furniture must register with DC Health's Division of Community Hygiene",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "bd3b3dd8bfbdc964",
+  "context": ") in the district of columbia, all facilities/firms, retailers, or corporations who manufacture, renovate, or deal in bedding, mattress, or other upholstered furniture must register with dc health's division of community hygiene. the registration process is very simple and may be started by clicking on the "
+ },
+ {
+  "id": "nc-bedding",
+  "read": "https://www.ncleg.gov/EnactedLegislation/Statutes/PDF/BySection/Chapter_106/GS_106-65.103.pdf",
+  "quote": "A person who has not done business in this State throughout the preceding calendar year shall obtain a license by paying an initial fee",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "7a6c614554380ed9",
+  "context": "0.00) shall be paid to the department of agriculture and consumer services. (b) a person who has not done business in this state throughout the preceding calendar year shall obtain a license by paying an initial fee to the department of agriculture and consumer services in the amount of seven h"
+ },
+ {
+  "id": "de-bedding",
+  "read": "https://www.delcode.delaware.gov/title16/c021/index.html",
+  "quote": "for manufacturers of bedding products within the State or manufacturers of such products who ship said products into this State shall be as follows",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "866a1d3133d5ef5c",
+  "context": " initial annual permit fee and subsequent annual renewal fee under this chapter for manufacturers of bedding products within the state or manufacturers of such products who ship said products into this state shall be as follows: bedding manufacturer__________________________________________________________"
+ },
+ {
+  "id": "wa-epr",
+  "read": "https://ecology.wa.gov/waste-toxics/reducing-recycling-waste/our-recycling-programs/recycling-reform-act/producer-responsibility-organization",
+  "quote": "must meet the following obligations (per RCW 70A.208.030): Register with an approved producer responsibility organization (PRO)",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "1b1ee841f9ccf5a2",
+  "context": " in 2026, producers of products covered under washington's recycling reform act must meet the following obligations (per rcw 70a.208.030): register with an approved producer responsibility organization (pro) report data to the pro on their covered products introduced into washington to "
+ },
+ {
+  "id": "mn-epr",
+  "read": "https://www.revisor.mn.gov/statutes/cite/115A.1443",
+  "quote": "By January 1, 2025, producers must appoint a producer responsibility organization.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "773dfe262c1b10ba",
+  "context": " organizations and service providers. § subdivision 1. annual registration. (a) by january 1, 2025, producers must appoint a producer responsibility organization. the producer responsibility organization must register with the commissioner by"
+ },
+ {
+  "id": "al-pesticide-reg",
+  "read": "https://agi.alabama.gov/pesticidemanagement/productregistration/",
+  "quote": "Any product registered with EPA must also be registered in Alabama before it can be distributed in the state.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "d84a0250d9fb2abc",
+  "context": "n-z will expire on december 31, 2026. federally registered products (section 3) any product registered with epa must also be registered in alabama before it can be distributed in the state. we require separate registrations for each product's primary and alternate bran"
+ },
+ {
+  "id": "ak-pesticide-reg",
+  "read": "https://dec.alaska.gov/eh/pest/registration",
+  "quote": "All pesticide products must be registered by the Pesticide Control Program in order to be sold in the state.",
+  "checked": "2026-10-28",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-28"
+ },
+ {
+  "id": "az-pesticide-reg",
+  "read": "https://www.azleg.gov/ars/3/00351.htm",
+  "quote": "Every pesticide that is distributed shall be registered with the division.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "4c0c3420b7e98430",
+  "context": " confidential information 3-351. registration; fee; confidential information a. every pesticide that is distributed shall be registered with the division. the director may provide by rule for registrations having a term of one or more"
+ },
+ {
+  "id": "ca-pesticide-reg",
+  "read": "https://www.cdpr.ca.gov/how-to-register-a-pesticide/",
+  "quote": "DPR must register any pesticide before it can be sold or used in California.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "6da3827caf65432d",
+  "context": "es evaluating a pesticide for human health and environmental risks and impacts. dpr must register any pesticide before it can be sold or used in california. stakeholder notices and info our committees how pesticides are evaluated regist"
+ },
+ {
+  "id": "co-pesticide-reg",
+  "read": "https://ag.colorado.gov/plants/pesticides/pesticide-product-registration",
+  "quote": "requires registration of all pesticides with CDA before distribution, with few exemptions.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "bc2d8e32bb5856bf",
+  "context": "pply.\" the colorado department of agriculture enforces the pesticide act, which requires registration of all pesticides with cda before distribution, with few exemptions. a \"pesticide\" is any substance intended for preventing, destroying, repelling o"
+ },
+ {
+  "id": "ct-pesticide-reg",
+  "read": "https://portal.ct.gov/DEEP/Pesticides/Pesticide-Product-Registration-Requirements",
+  "quote": "All pesticides that are sold or used in Connecticut must be registered with the Department of Energy and Environmental Protection (DEEP) Pesticide Program.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "3299048f5995f04d",
+  "context": " if you are a new registrant and need an account please see instructions below. all pesticides that are sold or used in connecticut must be registered with the department of energy and environmental protection (deep) pesticide program. pesticides are broadly defined and include insecticides, herbicides, antimicrob"
+ },
+ {
+  "id": "de-pesticide-reg",
+  "read": "https://agriculture.delaware.gov/registration/",
+  "quote": "Any pesticide product distributed or sold in the State of Delaware must be registered with the Department's Pesticide section.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "da32b91a7f826147",
+  "context": " eligible to participate in stakes races for delaware-sired horses. pesticides: any pesticide product distributed or sold in the state of delaware must be registered with the department's pesticide section. poultry: anyone keeping live poultry in delaware must complete a poultry regist"
+ },
+ {
+  "id": "dc-pesticide-reg",
+  "read": "https://doee.dc.gov/sites/default/files/dc/sites/ddoe/service_content/attachments/Pesticide%20Product%20Registration%20FAQs.pdf",
+  "quote": "defoliant or a desiccant MUST be registered with the District of Columbia.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "8a7ade85d9c345c3",
+  "context": " destroy, repel, or mitigate any pest or intended for use as a plant regulator, defoliant or a desiccant must be registered with the district of columbia. registration applies to and includes all 25(b) exempt products and devices. lea"
+ },
+ {
+  "id": "fl-pesticide-reg",
+  "read": "https://www.fdacs.gov/Business-Services/Pesticide-Product-Registration",
+  "quote": "if a product is defined as a pesticide and is distributed, sold or offered for sale in Florida, it must be registered by FDACS.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "c9b1c7a00a0f6cac",
+  "context": "products are registered for use in florida registration requirements generally, if a product is defined as a pesticide and is distributed, sold or offered for sale in florida, it must be registered by fdacs. if you are unsure if a product requires registration, contact us at (850) 617-7"
+ },
+ {
+  "id": "ga-pesticide-reg",
+  "read": "https://agr.georgia.gov/pesticide-product-registrations",
+  "quote": "Pesticide distributors must register all pesticide products that they sell.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "ceb9ab93582939b5",
+  "context": "view the pesticide program web page or contact their staff at the number below. pesticide distributors must register all pesticide products that they sell. you need this registration if you offer, expose, or distribute pesticides for s"
+ },
+ {
+  "id": "id-pesticide-reg",
+  "read": "https://pestreg.isda.idaho.gov/Start/Faq",
+  "quote": "The State of Idaho requires the registration of pesticides, and related, before their distribution and/or sale within the state.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "9910bfe0c0eebc27",
+  "context": "e registered as pesticides by the idaho state department of agriculture (isda)? the state of idaho requires the registration of pesticides, and related, before their distribution and/or sale within the state. the following types of products must be registered: epa section 3 registered pe"
+ },
+ {
+  "id": "il-pesticide-reg",
+  "read": "https://agr.illinois.gov/pesticides/pesticide-product-registration.html",
+  "quote": "All products offered for sale within the State of Illinois that make a “pesticidal” claim must be registered with the Illinois Department of Agriculture.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "85f8c76a24d2d247",
+  "context": ".pesticide@illinois.gov so we can assist you. thank you for your understanding. all products offered for sale within the state of illinois that make a \"pesticidal\" claim must be registered with the illinois department of agriculture. the department registers approximately 13,000 products from approximately 1200 "
+ },
+ {
+  "id": "ia-pesticide-reg",
+  "read": "https://www.legis.iowa.gov/docs/code/206.12.pdf",
+  "quote": "before selling or offering for sale any pesticide for use in this state, shall register each brand and grade of such pesticide",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "d9906d59be5337c2",
+  "context": "shed when the pesticide was registered or last reregistered. 3. the registrant, before selling or offering for sale any pesticide for use in this state, shall register each brand and grade of such pesticide with the secretary upon forms furnished by the secretary. the secretary shall s"
+ },
+ {
+  "id": "ks-pesticide-reg",
+  "read": "https://www.ksrevisor.gov/statutes/chapters/ch02/002_022_0004.html",
+  "quote": "through any point outside this state shall be registered by the secretary.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "62b62e962c631037",
+  "context": "ation or transported in intrastate commerce or between points within this state through any point outside this state shall be registered by the secretary. the secretary shall have the authority to classify or designate as restricted-u"
+ },
+ {
+  "id": "ky-pesticide-reg",
+  "read": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=9388",
+  "quote": "between points within the state through points outside the state shall be registered with the department.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "5a68a5ed6059aec7",
+  "context": " state or delivered for transportation or transported in intrastate commerce or between points within the state through points outside the state shall be registered with the department. (b) registration is not required if: 1. a pesticide is shipped from one (1) pla"
+ },
+ {
+  "id": "la-pesticide-reg",
+  "read": "https://www.ldaf.la.gov/plants/pesticides/registration",
+  "quote": "Each pesticide with a unique United States Environmental Protection Agency pesticide registration number (EPA Reg. No.) or a unique brand name must be registered.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "cc5e1f93398fdd59",
+  "context": "rdless of the time of year the pesticide registration application is submitted. each pesticide with a unique united states environmental protection agency pesticide registration number (epa reg. no.) or a unique brand name must be registered. accordingly, alternate brand names and distributor products are required to be "
+ },
+ {
+  "id": "me-pesticide-reg",
+  "read": "https://www.mainelegislature.org/LEGIS/STATUTES/7/title7sec607.html",
+  "quote": "A pesticide may not be distributed in this State unless it is registered with the board",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "66eef95322d4cc2b",
+  "context": "rol act of 1975 §607-a §607. registration 1. conditions requiring registration. a pesticide may not be distributed in this state unless it is registered with the board in accordance with the provisions of this subchapter, except that registration "
+ },
+ {
+  "id": "md-pesticide-reg",
+  "read": "https://mgaleg.maryland.gov/mgawebsite/Laws/StatuteText?article=gag&section=5-105&enactments=false",
+  "quote": "a distributor shall register with the Secretary each brand or product name of a pesticide before distributing it in the State.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "feb36f7ec507527f",
+  "context": "previous next §5–105. (a) except as provided in subsection (g) of this section, a distributor shall register with the secretary each brand or product name of a pesticide before distributing it in the state. the registration for each pesticide expires december 31 each year. (b) each app"
+ },
+ {
+  "id": "ma-pesticide-reg",
+  "read": "https://www.mass.gov/pesticide-product-registration",
+  "quote": "In order to distribute, purchase or use a pesticide in Massachusetts, it must be registered by the Massachusetts Pesticide Board Subcommittee.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "c1d750b161f8cab5",
+  "context": "esticides registered in massachusetts log in to... register a pesticide product in order to distribute, purchase or use a pesticide in massachusetts, it must be registered by the massachusetts pesticide board subcommittee. the pesticide product must first be registered with the united states environme"
+ },
+ {
+  "id": "mi-pesticide-reg",
+  "read": "https://www.michigan.gov/mdard/licensing/pesticide/pestregistration",
+  "quote": "Michigan requires all pesticides, including those that EPA exempts under FIFRA 25(b), to be registered with MDARD.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "5b7fa94a5a11c5b2",
+  "context": "ribution and sale in the united states. how to register a pesticide in michigan michigan requires all pesticides, including those that epa exempts under fifra 25(b), to be registered with mdard. michigan uses the following criteria to register pesticide: brand name manufact"
+ },
+ {
+  "id": "mn-pesticide-reg",
+  "read": "https://www.mda.state.mn.us/pesticide-fertilizer/pesticide-updates-overview",
+  "quote": "Both agricultural pesticides and non-agricultural pesticides must be registered with the MDA before they can be sold or distributed in the state.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "56b58b1f9feac3f4",
+  "context": "tribute pesticides must obtain a pesticide dealer license. product registration both agricultural pesticides and non-agricultural pesticides must be registered with the mda before they can be sold or distributed in the state. product registrations expire december 31 of each year. renewal applications mus"
+ },
+ {
+  "id": "mo-pesticide-reg",
+  "read": "https://agriculture.mo.gov/plants/pesticides/",
+  "quote": "requires every pesticide which is distributed, sold, offered for sale, or held for sale within this state, be registered",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "e881307a1f553119",
+  "context": "ide registration the missouri pesticide registration act (281.210-281.310 rsmo) requires every pesticide which is distributed, sold, offered for sale, or held for sale within this state, be registered in the mda office of the director, and the registration shall be renewed annual"
+ },
+ {
+  "id": "mt-pesticide-reg",
+  "read": "https://agr.mt.gov/Topics/N-P/Pesticide-Pages/Pesticide-Product-Registration-Pages/Pesticide-Product-Registration",
+  "quote": "pesticide sold, distributed, offered for sale, purchased, given away, used or applied in the state must be registered by the state Department of Agriculture.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "49fd8f369d061897",
+  "context": "program pestreg@mt.gov 406-444-5471 the montana pesticide act requires that any pesticide sold, distributed, offered for sale, purchased, given away, used or applied in the state must be registered by the state department of agriculture. pesticides registered by the state include algaecides, aquatic herbicides, avic"
+ },
+ {
+  "id": "ne-pesticide-reg",
+  "read": "https://nda.nebraska.gov/pesticide/regist",
+  "quote": "All pesticides which are distributed within the state shall be registered.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "caaabf637a4d315f",
+  "context": "a, it needs to be registered with the nebraska department of agriculture (nda). all pesticides which are distributed within the state shall be registered. additionally, all pesticides delivered for commerce within the state through a "
+ },
+ {
+  "id": "nv-pesticide-reg",
+  "read": "https://agri.nv.gov/pesticides/",
+  "quote": "State law requires that all pesticides be registered with NDA prior to being distributed, sold or offered for sale within the state.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "10047b41231755d1",
+  "context": " agriculture (nda) is responsible for the registration of pesticides in nevada. state law requires that all pesticides be registered with nda prior to being distributed, sold or offered for sale within the state. this includes agricultural, industrial, and homeowner products such as insectic"
+ },
+ {
+  "id": "nh-pesticide-reg",
+  "read": "https://agriculture.nh.gov/divisions/pesticide-control/registration.htm",
+  "quote": "Pesticides sold within New Hampshire are registered with the Division.",
+  "checked": "2026-10-28",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-28"
+ },
+ {
+  "id": "nj-pesticide-reg",
+  "read": "https://www.nj.gov/dep/enforcement/pcp/regulations/Subchapter%202%20as%20of%20April%206%202020.pdf",
+  "quote": "Before holding, using, distributing, selling, or offering for sale any pesticide in this State, the applicant or registrant shall pay an annual registration fee",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "3fa1907d755755ef",
+  "context": "ide was registered or re- registered during the previous registration year. (h) before holding, using, distributing, selling, or offering for sale any pesticide in this state, the applicant or registrant shall pay an annual registration fee of $300.00 to the department or its authorized representative for each pesticid"
+ },
+ {
+  "id": "nm-pesticide-reg",
+  "read": "https://nmdeptag.nmsu.edu/pesticides/registrant-information.html",
+  "quote": "All pesticides and devices must be registered before they can be offered for sale in New Mexico.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "ce6676796e721174",
+  "context": "cides for sale are displayed and stored safely and are registered in the state. all pesticides and devices must be registered before they can be offered for sale in new mexico. products are registered by their marketing label, not their active ingredient o"
+ },
+ {
+  "id": "ny-pesticide-reg",
+  "read": "https://dec.ny.gov/environmental-protection/pesticides/product-registration",
+  "quote": "Every pesticide product which is used, distributed, sold, or offered for sale in NY State must be registered by the NYSDEC.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "41ff18b1e86016ab",
+  "context": "state by visiting the new york state pesticide administration database (nyspad) every pesticide product which is used, distributed, sold, or offered for sale in ny state must be registered by the nysdec. any pesticide product registered or required to be registered by the united sta"
+ },
+ {
+  "id": "nc-pesticide-reg",
+  "read": "https://www.ncleg.gov/EnactedLegislation/Statutes/PDF/BySection/Chapter_143/GS_143-442.pdf",
+  "quote": "through any point outside this State shall be registered in the office of the Board",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "41b9ca9d7b8d36b7",
+  "context": "ation or transported in intrastate commerce or between points within this state through any point outside this state shall be registered in the office of the board, and such registration shall be renewed annually before january 1 for the ensui"
+ },
+ {
+  "id": "nd-pesticide-reg",
+  "read": "https://ndlegis.gov/cencode/t04-1c34.pdf",
+  "quote": "a person shall file biennially with the commissioner an application for registration of the pesticide.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "5bb097fd0f65851b",
+  "context": "1. before selling or offering for sale any pesticide for use within this state, a person shall file biennially with the commissioner an application for registration of the pesticide. the application must: a. give the name and address of each manufacturer or dist"
+ },
+ {
+  "id": "oh-pesticide-reg",
+  "read": "https://agri.ohio.gov/divisions/plant-health/pesticides/",
+  "quote": "Each product must be registered and dealer location distributing these products must be properly licensed and inspected.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "6313cf2d7c2c7ff5",
+  "context": " a trained serviceperson under the direct supervision of a licensed applicator. each product must be registered and dealer location distributing these products must be properly licensed and inspected. recent updates certification and training plan updates new updates to ohio pest"
+ },
+ {
+  "id": "ok-pesticide-reg",
+  "read": "https://ag.ok.gov/wp-content/uploads/2026/04/Pesticide-Product-Registration-Form-041526.pdf",
+  "quote": "If a product makes a pesticidal claim, it must be registered.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "4eb5bfa3c06d5ce9",
+  "context": "ument. 25(b) products: must be registered. $210/label – submit a label and sds. if a product makes a pesticidal claim, it must be registered. devices: must be registered. $210/label – submit a label and sds (if applicable"
+ },
+ {
+  "id": "or-pesticide-reg",
+  "read": "https://www.oregon.gov/oda/pesticides/pesticide-product-information/Documents/Oregon-Pesticide-Registrations-Guidance.pdf",
+  "quote": "Registration is required by Oregon Revised Statutes",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "8489af0070d28f1f",
+  "context": "tions team 7 pesticide product registrations in oregon registration requirement registration is required by oregon revised statutes - chapter 634 (ors 634.016) for each pesticide product delivered, distributed, "
+ },
+ {
+  "id": "pa-pesticide-reg",
+  "read": "https://www.pa.gov/agencies/pda/plants-land-water/plant-industry/pesticide-programs/pesticide-product-registration",
+  "quote": "All pesticide products used or distributed into Pennsylvania must be registered with the Pennsylvania Department of Agriculture (PDA).",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "19cc132aeccdc15a",
+  "context": "o circumstances which are urgent and non-routine.&nbsp;&nbsp;<br>\\r\\n</p>\\r\\n<p>all pesticide products used or distributed into pennsylvania must be registered with the pennsylvania department of agriculture (pda). the state may also register additional uses of a federally registered pesticide"
+ },
+ {
+  "id": "ri-pesticide-reg",
+  "read": "https://webserver.rilegislature.gov/Statutes/TITLE23/23-25/23-25-6.htm",
+  "quote": "Every pesticide that is distributed in the state shall be registered with the director",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "cfdbf2e60b9ff078",
+  "context": "pter 25 pesticide control r.i. gen. laws § 23-25-6 § 23-25-6. registration. (a) every pesticide that is distributed in the state shall be registered with the director subject to the provisions of this chapter and shall be categorized for registra"
+ },
+ {
+  "id": "sc-pesticide-reg",
+  "read": "https://www.scstatehouse.gov/code/t46c013.php",
+  "quote": "through a point outside this State must be registered subject to this chapter.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "316c8a1d5178dc06",
+  "context": "ation or transported in intrastate commerce or between points within this state through a point outside this state must be registered subject to this chapter. sections 46-13-170 and 46-13-200 provide enforcement procedures. the registrati"
+ },
+ {
+  "id": "sd-pesticide-reg",
+  "read": "https://danr.sd.gov/Agriculture/Inspection/Pesticide/default.aspx",
+  "quote": "requires that all pesticide products sold in South Dakota be registered with the South Dakota Department of Agriculture and Natural Resources",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "1316d7a161126d3b",
+  "context": "recordkeeping. view details » pesticide product registration state law (38-20a) requires that all pesticide products sold in south dakota be registered with the south dakota department of agriculture and natural resources (danr). view details » pesticide spills information on what to do if pesticide "
+ },
+ {
+  "id": "tx-pesticide-reg",
+  "read": "https://texasagriculture.gov/Regulatory-Programs/Pesticides/Pesticide-FAQs",
+  "quote": "Rodenticide Act (FIFRA) must be registered with TDA to be sold in Texas.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "29eff90702897a8d",
+  "context": "ucts that require epa registration under the federal insecticide, fungicide and rodenticide act (fifra) must be registered with tda to be sold in texas. i manage a chemical dealership and do herbicide custom application. i need more"
+ },
+ {
+  "id": "ut-pesticide-reg",
+  "read": "https://ag.utah.gov/pesticides/pesticide-product-registration/",
+  "quote": "Pesticide products that must be registered include EPA Registered pesticides, EPA 25(b) products and adjuvants.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "0828434e2797b40c",
+  "context": "re registered via the agriculture information management system (aims) website. pesticide products that must be registered include epa registered pesticides, epa 25(b) products and adjuvants. the annual registration fee is $195.00 per pesticide product. the fee must be p"
+ },
+ {
+  "id": "vt-pesticide-reg",
+  "read": "https://agriculture.vermont.gov/public-health-agricultural-resource-management-division/pesticide-programs/product-registration",
+  "quote": "Vermont law defines pesticides as economic poisons, all of which require state registration prior to sale, use, and/or distribution in the State.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "f7d65bdd49fbdb63",
+  "context": "response and recovery resources pesticide product registration & classification vermont law defines pesticides as economic poisons, all of which require state registration prior to sale, use, and/or distribution in the state. \"minimum risk pesticide\" products which meet the federal definition (\"25(b) fed"
+ },
+ {
+  "id": "va-pesticide-reg",
+  "read": "https://law.lis.virginia.gov/vacode/title3.2/chapter39/section3.2-3919/",
+  "quote": "the registrant shall register each brand or grade of a pesticide with the Commissioner annually upon forms furnished by the Department",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "39c23c2c94244db0",
+  "context": "g, distributing, selling, offering for sale, or offering for use any pesticide, the registrant shall register each brand or grade of a pesticide with the commissioner annually upon forms furnished by the department and shall pay the department an annual registration fee for each brand or grade"
+ },
+ {
+  "id": "wa-pesticide-reg",
+  "read": "https://agr.wa.gov/services/licenses-permits-and-certificates/summary-descriptions/pesticide-registration",
+  "quote": "Pesticides registered with the EPA under Section 3 of FIFRA must be registered with WSDA prior to distribution in Washington State.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "b9ee0da12a453b01",
+  "context": "icides, biocides, plant regulators, defoliants, desiccants and spray adjuvants. pesticides registered with the epa under section 3 of fifra must be registered with wsda prior to distribution in washington state. also minimum risk pesticides (e.g. citric acid, corn gluten, garlic, mint oil) "
+ },
+ {
+  "id": "wv-pesticide-reg",
+  "read": "https://agriculture.wv.gov/wp-content/uploads/Guidelines-for-Pesticide-Product-Registration.pdf",
+  "quote": "All pesticides must be registered with the West Virginia Department of Agriculture (WVDA) prior to their distribution, sale, transport, or use in West Virginia.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "121b709936864210",
+  "context": "irginia department of agriculture guidelines for pesticide product registration all pesticides must be registered with the west virginia department of agriculture (wvda) prior to their distribution, sale, transport, or use in west virginia. each pesticide registration begins january 1 and expires december 31. renewal n"
+ },
+ {
+  "id": "wi-pesticide-reg",
+  "read": "https://datcp.wi.gov/Pages/Licenses_Permits/PesticideManufacturingLabeling.aspx",
+  "quote": "the products are considered pesticides and must be registered with DATCP",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "3a62e9d53555b51e",
+  "context": "es claims to kill, control, repel, mitigate, or prevent pests, including weeds, the products are considered pesticides and must be registered with datcp (although there may be no registration fee if the products qualify as minimum r"
+ },
+ {
+  "id": "wy-pesticide-reg",
+  "read": "https://wyoleg.gov/statutes/compress/title35.pdf",
+  "quote": "shall be registered with the department of agriculture by its manufacturer or formulator",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "a5b984dabd27a74e",
+  "context": "mmerce or between points within this state through any point outside this state shall be registered with the department of agriculture by its manufacturer or formulator subject to the provisions of this act. the registration shall be renewed annual"
  }
 ]

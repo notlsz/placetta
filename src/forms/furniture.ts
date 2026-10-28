@@ -130,7 +130,7 @@ export const FURNITURE_FORMS: OfficialForm[] = [
   },
   {
     id: "oh-bedding", form: "Certificate of registration (Ohio Revised Code chapter 3713)", title: B("Ohio registration for upholstered furniture makers and wholesalers", "俄亥俄州软体家具制造商和批发商登记"),
-    agency: B("Ohio Department of Commerce, Division of Industrial Compliance", "俄亥俄州商务部工业合规处"), level: "state", where: "OH", segments: [...IMPORTERS], needs: { imports: true, upholstered: true }, method: "pdf_mail", order: 46,
+    agency: B("Ohio Department of Commerce, Division of Industrial Compliance", "俄亥俄州商务部工业合规处"), level: "state", where: "OH", segments: [...IMPORTERS], needs: { imports: true }, anyOf: ["upholstered", "bedding"], method: "pdf_mail", order: 46,
     how: B("Applied for with the Division before selling upholstered furniture in Ohio, with the $50 annual fee. Registrants other than Ohio-based wholesalers report the number of articles every 12 months.", "在俄亥俄州销售软体家具前向该处申请，缴纳每年 50 美元的登记费。除在俄亥俄州设有营业场所的批发商外，登记人每 12 个月申报一次件数。"),
     url: OH_RULE, info: OH_RULE, fee: 50, renews: B("Every year.", "每年一次。"), checked: "page",
     plain: B("Ohio's registration for anyone making or wholesaling upholstered furniture sold in Ohio, renewed every year.", "在俄亥俄州销售的软体家具，其制造商或批发商须办理的登记，每年续期。"),
