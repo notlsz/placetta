@@ -33,6 +33,8 @@ jobs:
       - run: npm run test:extreme
       # the plush bot's animation math through its extremes: no negative scale or radius ever reaches the canvas
       - run: npm run test:bot
+      # the human check on sign-in: a fresh single-use Turnstile token on every Supabase Auth call, none while it's off
+      - run: npm run test:human
       # what talking leaves in the message box (um and uh out, everything else as said) and what voice notes cost
       - run: npm run test:speech
       # a refusal never ends at "no": every refusal the server's tools throw gets the next step and who takes it, and

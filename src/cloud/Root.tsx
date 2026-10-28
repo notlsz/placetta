@@ -8,6 +8,7 @@ import { I, Menu, Select } from "../ui";
 import { B, type Bi } from "../model";
 import type { Lang } from "../i18n";
 import * as api from "./api";
+import { prepareHuman } from "./human";
 import { normalize, type CloudSession } from "./session";
 import { consumeHandoff, readHandoff } from "./handoff";
 import { TwoStepCode } from "./TwoStep";
@@ -137,7 +138,12 @@ function SignIn({ lang, start }: { lang: Lang; start?: StartPeek | null }) {
   useEffect(() => {
     void api.authProviders().then(setProviders);
     if (new URLSearchParams(location.search).get("error")) history.replaceState(null, "", location.pathname + location.hash);
+    // the human check runs while the person types, so its token is ready when they press the button (src/cloud/human.ts)
+    prepareHuman();
   }, []);
+  // Supabase refused the call because the human check didn't pass (blocked, slow, or a used token)
+  const captchaMsg = L(B("We couldn't confirm you're a person. Wait a moment and try again. If it keeps failing, email support@placetta.com.",
+    "暂时无法确认您是真人操作。请稍候再试。如多次失败，请发邮件至 support@placetta.com。"));
   const withProvider = async (p: api.Provider) => {
     setBusy(true); setErr("");
     try { await api.signInWith(p); } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
@@ -163,7 +169,7 @@ function SignIn({ lang, start }: { lang: Lang; start?: StartPeek | null }) {
     }
     setErr(""); setNoAccount(false); setPw(""); setStep("password");
   };
-  const mailErr = (e: api.ApiError) => e.code === "rate_limited"
+  const mailErr = (e: api.ApiError) => e.code === "captcha" ? captchaMsg : e.code === "rate_limited"
     ? L(B("Too many emails were sent just now. Sign in with a password, or try again in an hour.", "刚刚发送的邮件太多。请用密码登录，或一小时后再试。"))
     : /invalid/i.test(e.message) ? L(B("We can't email this address yet. Sign in with a password instead.", "暂时无法向该邮箱发送邮件，请改用密码登录。")) : e.message;
   const submitPw = async () => {
@@ -180,6 +186,7 @@ function SignIn({ lang, start }: { lang: Lang; start?: StartPeek | null }) {
       const x = e as api.ApiError;
       if (x.code === "bad_login") { setErr(L(B("That password doesn't match, or there's no account for this email yet.", "密码不正确，或该邮箱尚未注册。"))); setNoAccount(true); }
       else if (x.code === "exists") { setErr(L(B("An account with this email already exists. Sign in instead.", "该邮箱已注册，请直接登录。"))); setMode("signin"); }
+      else if (x.code === "captcha") setErr(captchaMsg);
       else if (x.code === "weak") setErr(L(B("Pick a stronger password: at least 8 characters, not a common one.", "请设置更安全的密码：至少 8 位，避免常见密码。")));
       else setErr(x.message);
       setBusy(false);
@@ -207,7 +214,7 @@ function SignIn({ lang, start }: { lang: Lang; start?: StartPeek | null }) {
     try { await api.sendPhoneCode(e164()); setCode(""); setStep("phonecode"); }
     catch (e) {
       const x = e as api.ApiError;
-      setErr(x.code === "phone_off" ? L(B("Phone sign-in isn't available yet. Use your email for now.", "手机号登录暂未开通，请先使用邮箱登录。"))
+      setErr(x.code === "captcha" ? captchaMsg : x.code === "phone_off" ? L(B("Phone sign-in isn't available yet. Use your email for now.", "手机号登录暂未开通，请先使用邮箱登录。"))
         : x.code === "bad_phone" ? L(B("That number doesn't look right. Check the country code.", "号码格式不正确，请检查国家或地区代码。"))
         : x.code === "rate_limited" ? L(B("Too many codes. Wait a minute, then try again.", "验证码发送过于频繁，请稍候再试。")) : x.message);
     }

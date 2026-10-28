@@ -7,6 +7,7 @@ import type { ModuleQuote } from "../modules.ts";
 import type { LicenseQuote, SIMPLE, SimpleItem } from "../pricing.ts";
 import { readSSE } from "../../supabase/functions/_shared/stream.ts";
 import { tempChat } from "../odeliaMemory/tempChat";
+import { humanToken, isCaptchaError } from "./human";
 import type { Pushed } from "./runFeed";
 
 /* ------------------------------------------------------------------ *
@@ -126,14 +127,18 @@ type AuditRow = { id: number; client_id: string | null; actor: Audit["actor"] | 
 
 export const getSession = async () => (await supabase().auth.getSession()).data.session;
 export const onAuth = (fn: (s: Session | null, event: string) => void) => supabase().auth.onAuthStateChange((e, s) => fn(s, e)).data.subscription;
+/** The human check's token for a Supabase Auth call (src/cloud/human.ts): nothing when the check is off. */
+const human = async (a: Parameters<typeof humanToken>[0]) => { const captchaToken = await humanToken(a); return captchaToken ? { captchaToken } : {}; };
+/** Supabase refused the call because the human check failed (missing, used or wrong token). */
+const captcha = (e: { code?: string; message?: string }) => err("captcha", e.message ?? "captcha failed");
 export async function sendSignIn(email: string) {
-  const { error } = await supabase().auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: appHome() } });
-  if (error) throw err(error.status === 429 ? "rate_limited" : "auth", error.message);
+  const { error } = await supabase().auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: appHome(), ...(await human("code")) } });
+  if (error) throw isCaptchaError(error) ? captcha(error) : err(error.status === 429 ? "rate_limited" : "auth", error.message);
 }
 /** Email and password: works without any email being sent once "Confirm email" is off in Supabase. */
 export async function signInPassword(email: string, password: string) {
-  const { error } = await supabase().auth.signInWithPassword({ email, password });
-  if (error) throw err(error.code === "invalid_credentials" ? "bad_login" : error.status === 429 ? "rate_limited" : "auth", error.message);
+  const { error } = await supabase().auth.signInWithPassword({ email, password, options: await human("signin") });
+  if (error) throw isCaptchaError(error) ? captcha(error) : err(error.code === "invalid_credentials" ? "bad_login" : error.status === 429 ? "rate_limited" : "auth", error.message);
 }
 /** Creates the account. `confirm` is true when Supabase still wants the email confirmed before the first sign-in. */
 /* ------------------------------ settings PIN ------------------------------ */
@@ -165,8 +170,8 @@ export async function changePassword(password: string) {
   if (error) throw err(error.code === "weak_password" ? "weak" : error.code === "same_password" ? "same" : error.code === "reauthentication_needed" ? "reauth" : error.status === 429 ? "rate_limited" : "auth", error.message);
 }
 export async function signUpPassword(email: string, password: string): Promise<{ confirm: boolean }> {
-  const { data, error } = await supabase().auth.signUp({ email, password, options: { emailRedirectTo: appHome() } });
-  if (error) throw err(error.code === "user_already_exists" ? "exists" : error.code === "weak_password" ? "weak" : error.status === 429 ? "rate_limited" : "auth", error.message);
+  const { data, error } = await supabase().auth.signUp({ email, password, options: { emailRedirectTo: appHome(), ...(await human("signup")) } });
+  if (error) throw isCaptchaError(error) ? captcha(error) : err(error.code === "user_already_exists" ? "exists" : error.code === "weak_password" ? "weak" : error.status === 429 ? "rate_limited" : "auth", error.message);
   // an existing email comes back with no identities and no session (Supabase hides that the account exists)
   if (!data.session && data.user && (data.user.identities ?? []).length === 0) throw err("exists", "An account with this email already exists.");
   return { confirm: !data.session };
@@ -177,8 +182,9 @@ export async function verifyCode(email: string, token: string) {
 }
 /** Phone: a one-time code by text message. Needs an SMS provider (e.g. Twilio) set in Supabase, Authentication, Phone. */
 export async function sendPhoneCode(phone: string) {
-  const { error } = await supabase().auth.signInWithOtp({ phone, options: { shouldCreateUser: true, channel: "sms" } });
+  const { error } = await supabase().auth.signInWithOtp({ phone, options: { shouldCreateUser: true, channel: "sms", ...(await human("phone")) } });
   if (error) {
+    if (isCaptchaError(error)) throw captcha(error);
     const m = error.message ?? "";
     throw err(error.status === 429 ? "rate_limited" : /provider|disabled|not enabled|unsupported/i.test(m) ? "phone_off" : /invalid|phone/i.test(m) ? "bad_phone" : "auth", m);
   }
@@ -189,8 +195,8 @@ export async function verifyPhoneCode(phone: string, token: string) {
 }
 /** Emails a link to set a new password. The link opens the app with a recovery session (the PASSWORD_RECOVERY event). */
 export async function sendPasswordReset(email: string) {
-  const { error } = await supabase().auth.resetPasswordForEmail(email, { redirectTo: appHome() });
-  if (error) throw err(error.status === 429 ? "rate_limited" : "auth", error.message);
+  const { error } = await supabase().auth.resetPasswordForEmail(email, { redirectTo: appHome(), ...(await human("reset")) });
+  if (error) throw isCaptchaError(error) ? captcha(error) : err(error.status === 429 ? "rate_limited" : "auth", error.message);
 }
 /** Sign out here, or on every device (revokes every session's refresh token). */
 export const signOut = (everywhere = false) => supabase().auth.signOut({ scope: everywhere ? "global" : "local" });
