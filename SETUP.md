@@ -53,6 +53,26 @@ Everything else is built and deployed. These need your accounts, so no one else 
    brand and campaign (it needs your EIN and takes a few days). See "Odelia on iMessage (Linq)" and "Text and call
    Odelia (Telnyx)" below.
 
+## Autopilot (filing without a tap)
+
+An owner signs one standing authorization in Settings, Odelia (scope, fee caps, 12 months, off in one tap), and every
+filing inside it that passes every automated check is filed without asking (`src/autopilot.ts`, migration
+`20261103090000_autopilot.sql`). It ships with the Filing Authorization's Autopilot section (version 2026-10-27, in
+`src/legal.ts`): **counsel reviews that section before the migration is applied**, as with every version.
+
+What stays with a person, by design: a declaration under penalty of perjury (or any certification) on a form, a
+handwritten signature, an agency that takes a form only from the business itself, CAPTCHAs and identity checks, the
+owner's own agency logins, and paying agency fees. The adopted signature is placed without a tap only on forms listed in
+`PLAIN` in `src/forms/esign.ts`, each with the agency page that shows its signature swears to nothing; the list starts
+empty, so until someone reads and cites one, every e-signature form is one tap ("Sign") for the owner.
+
+**Founder decision: zero-touch fees.** Today the owner pays every agency fee on the agency's site (or its bill). The
+clean path to paying them without a touch is Stripe Issuing single-use virtual cards: one card per filing, limited to
+that agency's fee and merchant, created when the filing is approved and closed after, so no card number is ever stored
+and the model never sees one. The WIP is on the `spend-wip` branch (spend function and single-use card events). It
+needs Stripe's approval for Issuing, a funding source, and an update to the Terms (Placetta paying on the business's
+behalf). Nothing in Autopilot builds or types card numbers until that's decided.
+
 ## The fast way: one command
 
 Unzip `placetta-source.zip`, then in that folder:

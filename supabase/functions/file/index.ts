@@ -14,6 +14,10 @@
 // POST { action: "sweep" } with x-monitor-key: the monitor's run, and every minute while a held send is due or a portal
 //   run failed (held sends whose time is up, filings whose agency site failed sent another way, stuck runs, fax and mail
 //   status, stale destinations)
+// POST { action: "autopilot_start", workspace_id, filing_id } with x-monitor-key: Odelia's server starts a filing the
+//   database let in under the owner's Autopilot authorization (autopilot_file); refused unless that grant is still live.
+//   The sweep also starts any it finds unstarted after two minutes. Everything after is the same as an approved filing:
+//   the undo window, the two-key team check of a form's first filings, CAPTCHAs, fees and wet signatures to a person.
 // POST ?provider=telnyx: Telnyx fax webhooks, verified with TELNYX_PUBLIC_KEY.
 //
 // Ground rules: one approval, one submission (only filings.payload, which the database keeps frozen); submit_clicked_at
@@ -462,7 +466,11 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim().slice(0, 64);
   const ua = (req.headers.get("user-agent") ?? "").slice(0, 200);
   const s = f.payload.signature;
-  if (s && !f.agent_log.some((x) => x.kind === "signature")) f = await step(f, log(`Signed by ${s.name}${s.title ? `, ${s.title}` : ""} at ${s.signed_at}${ip ? ` from ${ip}` : ""}`, `由 ${s.name}${s.title ? `（${s.title}）` : ""} 于 ${s.signed_at} 签署${ip ? `，IP ${ip}` : ""}`, "signature", `${by} ${ua}`.trim()));
+  // Autopilot (by "autopilot:<grant>"): the signature the owner adopted in their authorization, placed by Placetta on a
+  // form whose agency takes an electronic signature and whose signature swears to nothing (src/forms/esign.ts)
+  if (s && !f.agent_log.some((x) => x.kind === "signature")) f = await step(f, by.startsWith("autopilot:")
+    ? log(`Signed with the signature ${s.name} adopted in the Autopilot authorization, placed by Placetta at ${s.signed_at}`, `使用 ${s.name} 在自动驾驶授权中采用的签名，由快哉于 ${s.signed_at} 加上`, "signature", by)
+    : log(`Signed by ${s.name}${s.title ? `, ${s.title}` : ""} at ${s.signed_at}${ip ? ` from ${ip}` : ""}`, `由 ${s.name}${s.title ? `（${s.title}）` : ""} 于 ${s.signed_at} 签署${ip ? `，IP ${ip}` : ""}`, "signature", `${by} ${ua}`.trim()));
   if (resubmit && !askedToResubmit(f)) f = await step(f, log("You asked Placetta to send it again", "您要求快哉再次提交", "resubmit", by));
 
   // The same form with the same answers again: not sent unless the person says it's a resubmission.
@@ -839,7 +847,33 @@ async function handBacks(): Promise<number> {
   return n;
 }
 
+/** The live Autopilot grant a filing was made under (20261103090000_autopilot.sql), or null: not an Autopilot filing, or
+ *  its authorization was revoked or has expired. */
+async function autopilotGrant(ws: string, id: string): Promise<string | null> {
+  const { data, error } = await admin.from("filings").select("autopilot_grant").eq("id", id).eq("workspace_id", ws).maybeSingle();
+  const g = (data as { autopilot_grant?: string | null } | null)?.autopilot_grant ?? null;
+  if (error || !g) return null;
+  const { data: live } = await admin.rpc("autopilot_live", { p_grant: g });
+  return live === true ? g : null;
+}
+
+/** Autopilot filings the database let in that nobody started (Odelia's server couldn't reach this function): started
+ *  now, after two minutes, under their grant if it's still live. */
+async function autopilotUnstarted(): Promise<number> {
+  const before = new Date(Date.now() - 2 * 60_000).toISOString();
+  const { data, error } = await admin.from("filings").select(COLS).not("autopilot_grant", "is", null).is("agent_state", null).eq("status", "requested").lt("created_at", before).limit(20);
+  if (error) return 0;   // a database without the Autopilot migration yet
+  let n = 0;
+  for (const r of (data ?? []) as unknown as Filing[]) {
+    const g = await autopilotGrant(r.workspace_id, r.id);
+    if (!g) continue;
+    try { await start(r, new Request("https://placetta.invalid/autopilot"), `autopilot:${g}`); n++; } catch (e) { if (!(e instanceof Refused)) console.error("autopilot start:", describe(e)); }
+  }
+  return n;
+}
+
 async function sweep() {
+  const autopilot = await autopilotUnstarted();
   const released = await releaseDue();
   const rerouted = await handBacks();
   const { data: n } = await admin.rpc("requeue_stuck_filings");
@@ -853,7 +887,7 @@ async function sweep() {
     await admin.from("team_tasks").upsert({ kind: "destination_stale", title: `Re-check ${s.id} destinations (last checked ${s.checked}) on ${s.source}`, dedupe: `stale:${s.id}:${s.checked}` },
       { onConflict: "dedupe", ignoreDuplicates: true });
   }
-  return { released, rerouted, requeued: n ?? 0, lost, refreshed: rows?.length ?? 0 };
+  return { autopilot, released, rerouted, requeued: n ?? 0, lost, refreshed: rows?.length ?? 0 };
 }
 
 // ------------------------------------------------------------------ router
@@ -865,6 +899,14 @@ serve(async (req) => {
   if (mk) {
     const { data: good } = await admin.rpc("monitor_key_ok", { p_key: mk });
     if (good !== true) throw new HttpError("unauthorized", "Wrong monitor key.");
+    // Autopilot: Odelia's server starts a filing the database just let in under the owner's live authorization
+    const sb = await readBody(req).catch(() => ({} as Record<string, unknown>));
+    if (sb.action === "autopilot_start") {
+      const f = await loadFiling(uuidParam(sb.workspace_id, "workspace_id"), uuidParam(sb.filing_id, "filing_id"));
+      const grant = await autopilotGrant(f.workspace_id, f.id);
+      if (!grant) throw new HttpError("forbidden", "Not an Autopilot filing, or its authorization isn't live.");
+      try { return ok(await start(f, req, `autopilot:${grant}`)); } catch (e) { if (e instanceof Refused) return ok(view(await loadFiling(f.workspace_id, f.id))); throw e; }
+    }
     return ok(await sweep());
   }
 

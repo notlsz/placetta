@@ -7,6 +7,7 @@ import type { Lang } from "./i18n";
 import type { Tool } from "./live";
 import { MCP_PREFIX, mcpApp, mcpReads } from "./mcp";
 import { agencyAddress, workspaceContacts } from "./initiative";
+import { autopilotBrief, autopilotCheck, grantState, markAutopilot, whyNotAutopilot, type AutopilotGrant, type AutopilotUse } from "./autopilot";
 
 /* ------------------------------------------------------------------ *
  * The owner's controls over Odelia, the way Claude Code has permission
@@ -18,12 +19,18 @@ import { agencyAddress, workspaceContacts } from "./initiative";
  *   - House rules: the owner's own instructions, read at every run.
  * Everything here wraps the agent's tools (withControls), so the same
  * rules hold in the browser and on the server, whatever the model says.
- * Two things no setting changes: filing, paying and anything with a fee
- * always wait for a person, and a request from outside the app never
- * sends anything under an Always allow rule.
+ * Paying always waits for a person, and a request from outside the app
+ * never sends anything under an Always allow rule. Filing waits for an
+ * owner's approval in every mode but Autopilot, where the owner's signed
+ * standing authorization stands in for it, within its scope and caps,
+ * and only for a filing that passes every automated check
+ * (src/autopilot.ts; the database checks it again).
  * ------------------------------------------------------------------ */
 
-export type Autonomy = "ask" | "usual" | "auto" | "plan";
+export type Autonomy = "ask" | "usual" | "auto" | "plan" | "autopilot";
+/** The modes where routine emails to people the owners saved go out on their own: Hands-off, and Autopilot (which is
+ *  Hands-off plus filing under the standing authorization). */
+export const handsOff = (m: Autonomy | undefined) => m === "auto" || m === "autopilot";
 /** What she does, as an owner thinks of it. A rule names one of these and, optionally, who or what it's about. */
 export type ActionKind = "contact" | "applications" | "filing" | "deadlines" | "calendar" | "stores" | "facts" | "documents" | "purchases" | "routines" | "playbooks" | "memory" | "settings" | "apps";
 export type OwnerRule = { id: string; kind: "allow" | "deny"; action: ActionKind; target?: string; label: Bi; at: string; by?: string; used?: number; last?: string };
@@ -40,14 +47,21 @@ export type Controls = {
   fired?: { key: string; at: string }[];
   /** Plans written under Plan first, and whether an owner approved them. */
   plans?: PlanState[];
+  /** Autopilot (src/autopilot.ts): the standing authorization an owner signed, as the database recorded it, and the
+   *  filings made under it (for the monthly cap the app shows; the database counts its own). */
+  autopilot?: AutopilotGrant;
+  autopilotUsed?: AutopilotUse[];
 };
 
 export const AUTONOMY: { id: Autonomy; label: Bi; sub: Bi }[] = [
   { id: "ask", label: B("Ask me first", "先问我"), sub: B("She reads, researches and drafts on her own. Every other change to the workspace waits on one card for your approval.", "她自己阅读、调研和起草。工作区的其他每项更改都会汇总到一张卡片上，等您批准。") },
-  { id: "usual", label: B("Usual", "常规"), sub: B("She prepares applications, fills lines, adds deadlines and keeps plans current. Anything filed, paid or sent waits for your approval.", "她会准备申请、填写栏目、添加截止日期并更新计划。提交、付款和发送都等您批准。") },
+  { id: "usual", label: B("Ask me each time", "每次都问我"), sub: B("She prepares applications, fills lines, adds deadlines and keeps plans current. Anything filed, paid or sent waits for your approval.", "她会准备申请、填写栏目、添加截止日期并更新计划。提交、付款和发送都等您批准。") },
   { id: "auto", label: B("Hands-off", "放手去做"), sub: B("She works each job end to end. Routine emails to people you told her about (your landlord, contractor, insurer) go out on their own after the 10-minute undo window, and each morning she asks them for missing documents from her own address and follows up until they answer. Filing, paying, signing, texts and anything sent to an agency still wait for you.", "她把每项工作从头做到尾。发给您告诉过她的人（房东、承包商、保险经纪人）的例行邮件，在 10 分钟撤销期后自动发出；每天早上她还会用自己的邮箱向他们索取缺少的文件，并持续跟进直到对方回复。提交、付款、签署、短信以及任何发给机构的内容，仍然等您批准。") },
   { id: "plan", label: B("Plan first", "先做计划"), sub: B("For each job she writes the plan and stops. Once an owner approves it, she works it the usual way.", "每项工作她先写好计划就停下。所有者批准后，她按常规方式执行。") },
+  { id: "autopilot", label: B("Autopilot", "自动驾驶"), sub: B("Everything Hands-off does, and filing too: you sign one authorization (these stores, agencies and filings, a fee cap, 12 months, off in one tap) and every filing that passes every check goes without asking you. You still sign what the law makes yours, sign by hand where the agency needs ink, and pay fees on the agency's site.", "包含“放手去做”的全部内容，并且自动提交：您签署一次授权（指定门店、机构和申报，设定费用上限，有效 12 个月，一键关闭），通过全部核对的申报无需再问您即可提交。法律要求由您本人签署的、机构要求手写签名的，仍由您签署；机构网站上的费用仍由您支付。") },
 ];
+/** The three positions of the dial in Settings; the other two modes (Ask me first, Plan first) are listed under it. */
+export const DIAL: Autonomy[] = ["usual", "auto", "autopilot"];
 
 /* ------------------------------------------------------------------ the tools, sorted */
 
@@ -244,7 +258,7 @@ export function runMode(w: Workspace, prompt: string): RunMode {
   const base: Autonomy = w.controls?.autonomy ?? "usual";
   if (PLAN_CMD.test(prompt)) return { mode: "plan", why: "asked" };
   const job = JOB_REF.exec(prompt)?.[1] ?? GO_CMD.exec(prompt)?.[1];
-  if (job && approvedPlan(w, job)) return { mode: base === "ask" ? "ask" : base === "auto" ? "auto" : "usual", why: "approved", job };
+  if (job && approvedPlan(w, job)) return { mode: base === "ask" ? "ask" : base === "auto" || base === "autopilot" ? base : "usual", why: "approved", job };
   return { mode: base, why: "workspace" };
 }
 /** The request as the model reads it: "/plan" taken off (the instructions say plan first instead). */
@@ -314,8 +328,8 @@ export function controlsBrief(w: Workspace, rm: RunMode): string {
     ? `\n\nPlan first is on for this request${rm.why === "asked" ? " (the person asked for it)" : " (the owner's setting)"}: don't change anything yet. Read and research as much as the plan needs, then write the whole plan with set_plan: every step in order and the done list. Every other tool is refused. Once the plan is saved, stop and say in one or two sentences what it will do and that it starts when an owner approves it.`
     : rm.mode === "ask"
       ? `\n\nAsk me first is on (the owner's setting): reading, researching and drafting you do on your own; every other change to the workspace waits for an owner. A tool that would change something puts the change on one approval card instead, and nothing changes until an owner approves it. Do the job as far as that goes, then say in one sentence what's waiting for approval.`
-      : rm.mode === "auto"
-        ? `\n\nHands-off is on (the owner's setting): work the job end to end without asking about routine steps. A routine email you draft to people the owners told you about (their landlord, contractor, insurer; never an agency) goes out on its own after the undo window; chase what a filing needs from them, then keep going. Filing, paying, signing, texts and anything to an agency still go on a card for an owner. When you aren't sure of a rule, a fee or a deadline, don't guess: ask a Placetta specialist with ask_specialist.${rm.why === "approved" ? ` An owner approved this job's plan (job ${rm.job}).` : ""}`
+      : rm.mode === "auto" || rm.mode === "autopilot"
+        ? `\n\n${rm.mode === "autopilot" ? "Autopilot" : "Hands-off"} is on (the owner's setting): work the job end to end without asking about routine steps. A routine email you draft to people the owners told you about (their landlord, contractor, insurer; never an agency) goes out on its own after the undo window; chase what a filing needs from them, then keep going. ${rm.mode === "autopilot" ? "Paying, texts and anything to an agency other than a filing still go on a card for an owner." : "Filing, paying, signing, texts and anything to an agency still go on a card for an owner."} When you aren't sure of a rule, a fee or a deadline, don't guess: ask a Placetta specialist with ask_specialist.${rm.why === "approved" ? ` An owner approved this job's plan (job ${rm.job}).` : ""}${rm.mode === "autopilot" ? autopilotBrief(w, new Date().toISOString()) : ""}`
       : rm.why === "approved" ? `\n\nAn owner approved this job's plan (job ${rm.job}). Work it now, step by step, keeping set_plan current.` : "";
   const deny = (c?.rules ?? []).filter(r => r.kind === "deny");
   const rules = deny.length ? `\n\nThe owner's Never rules (the tools refuse these, so don't try): ${deny.map(r => r.label.en).join("; ")}.` : "";
@@ -329,9 +343,12 @@ let seq = 0;
 const newId = (p: string) => `${p}-${Date.now().toString(36)}-${(seq++).toString(36)}`;
 const withControlsOf = (w: Workspace, f: (c: Controls) => Controls): Workspace => ({ ...w, controls: f(w.controls ?? {}) });
 
+/** Change the mode. Autopilot only with a live signed authorization (the Autopilot sheet signs it first); without one
+ *  the workspace comes back unchanged. */
 export const setAutonomy = (mode: Autonomy, by?: string): P => w => {
   const was = w.controls?.autonomy ?? "usual";
   if (was === mode) return w;
+  if (mode === "autopilot" && grantState(w.controls?.autopilot, new Date().toISOString()) !== "live") return w;
   const to = AUTONOMY.find(a => a.id === mode)!.label, from = AUTONOMY.find(a => a.id === was)!.label;
   return audit("you", B("Changed how much Odelia does on her own", "更改了 Odelia 自主处理的范围"), to, B(`From ${from.en}${by ? `, by ${by}` : ""}`, `原为${from.zh}${by ? `，${by}` : ""}`))(withControlsOf(w, c => ({ ...c, autonomy: mode })));
 };
@@ -425,6 +442,11 @@ export type ControlCtx = {
   notify?: (n: Notice) => void;
   /** Something that left Placetta during the run (an event on the person's own calendar): Undo lists it as kept. */
   outside?: (what: Bi) => void;
+  /** Autopilot: file a card that passed every check (the server files it under the grant after the run; the sample's
+   *  browser runs it through the undo window). Without it the card is only marked, and filed when the run is saved. */
+  autofile?: (approvalId: string) => void;
+  /** Agency sites with a saved login (hosts), when the run knows them. */
+  logins?: string[];
 };
 
 const HOLD_NOTE = "This workspace is set to Ask me first, so this change is on an approval card for an owner and nothing changed yet. Don't call it again and don't build on it: anything it would create doesn't exist yet. Carry on with reading and drafting; at the end say in one sentence what's waiting for approval.";
@@ -510,7 +532,7 @@ export function withControls(tools: Tool[], c: ControlCtx): Tool[] {
           return { ...o, goes_out_under_owner_rule: yes.label.en, note: `Under the owner's rule "${yes.label.en}" this message is approved without another tap as soon as an owner has Placetta open, then waits out the usual undo window before it's sent. Say so in one short sentence.` };
         }
         // Hands-off: a routine email to people the owners told Odelia about goes the same way; anything else waits
-        if (c.mode.mode === "auto" && ap && ap.kind === "send" && !ap.fee) {
+        if (handsOff(c.mode.mode) && ap && ap.kind === "send" && !ap.fee) {
           const to = (ap.data ?? []).find(f => f.id === "to")?.value ?? "", message = (ap.data ?? []).find(f => f.id === "msg")?.value ?? "";
           const why = routineBlock(c.get(), to, message);
           if (!why) {
@@ -527,6 +549,19 @@ export function withControls(tools: Tool[], c: ControlCtx): Tool[] {
           const fee = app.fees.reduce((s, f) => s + f.amount, 0);
           fireRules(c, { kind: "filing_approval", key: "approval:" + ap.id, title: ap.title, app: app.id, approval: ap.id, fee });
           if (fee > 0) fireRules(c, { kind: "fee_over", key: "approval:" + ap.id, title: ap.title, app: app.id, approval: ap.id, fee });
+        }
+        // Autopilot: a card that passes every automated check is filed under the owner's standing authorization, never
+        // from a request that came from outside the app; one that doesn't stays for the owner, with why
+        if (c.mode.mode === "autopilot" && ap && ap.kind === "file" && !ap.autopilot) {
+          const at = now(), chk = autopilotCheck(c.get(), ap, { now: at, ...(c.logins ? { logins: c.logins } : {}) });
+          if (chk.ok && !c.remote) {
+            c.apply(markAutopilot(ap.id, chk, at));
+            c.autofile?.(ap.id);
+            return { ...o, filed_under_autopilot: true, note: `Autopilot is on and this filing passed every check (${chk.passed.join(", ")}), so Placetta files it for the owner now without a tap; they get a "Filed for you" update and can undo it while it's held.${chk.team.length ? " The Placetta team checks the first filings of each form before they go." : ""}${chk.needs.length ? ` Afterwards: ${chk.needs.map(n => n.why.en).join(" ")}` : ""} Say so in one short sentence.` };
+          }
+          c.apply(whyNotAutopilot(ap.id, chk));
+          const why = c.remote ? ["a request from outside the app never files on its own"] : chk.needs.filter(n => !n.after).map(n => n.why.en);
+          return { ...o, waits_for_owner: why, note: `Autopilot didn't file this one on its own, so it waits on its card for an owner: ${why.join(" ")} Say so in one short sentence.` };
         }
       }
       if (name === "request_purchase" && o.verdict === "ask") {
@@ -573,7 +608,7 @@ export function autoOk(a: Approval, w: Workspace): boolean {
   if (a.auto.rule === HANDS_OFF) {
     // Hands-off: still on, still a routine email to known people, and no Never rule added meanwhile
     const to = (a.data ?? []).find(f => f.id === "to")?.value ?? "", message = (a.data ?? []).find(f => f.id === "msg")?.value ?? "";
-    return w.controls?.autonomy === "auto" && !routineBlock(w, to, message) && !denyRule(w, "draft_message", { to, message, title: a.title.en });
+    return handsOff(w.controls?.autonomy) && !routineBlock(w, to, message) && !denyRule(w, "draft_message", { to, message, title: a.title.en });
   }
   const r = (w.controls?.rules ?? []).find(x => x.id === a.auto!.rule && x.kind === "allow" && x.action === "contact");
   const to = (a.data ?? []).find(f => f.id === "to")?.value ?? "", message = (a.data ?? []).find(f => f.id === "msg")?.value ?? "";

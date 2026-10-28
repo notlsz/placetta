@@ -15,6 +15,8 @@ export { monthMetrics } from "../monthly";
 export { appPdf, fillForm, pdfFile, type Filled, type LoadPdf } from "../forms/fill";
 export { readBack } from "../forms/readback";
 export { answersHash, fillAndRead, latestVersion, refreshForms } from "../forms/versions";
+// Autopilot (src/autopilotFile.ts): the cards a run marked, filed under the owner's standing authorization after it
+export { autofileAll, type AutofileIO, type AutofileRow } from "../autopilotFile";
 // Finishing (src/finish.ts): the filings' record onto the workspace and every job against its proof, for "settle"
 export { finishWork, stampFilings } from "../finish";
 // Odelia's shield (src/security): the model check's prompt and how its answer is read, and the tool-call log's shape

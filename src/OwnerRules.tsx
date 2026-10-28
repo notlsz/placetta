@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { useApp } from "./ctx";
 
-import { ACTIONS, AUTONOMY, HOUSE_MAX, HOUSE_TEMPLATE, addRule, dropBusinessRule, dropRule, houseCheck, putBusinessRule, setAutonomy, setHouse, toggleBusinessRule, type ActionKind, type Autonomy } from "./autonomy";
+import { ACTIONS, AUTONOMY, DIAL, HOUSE_MAX, HOUSE_TEMPLATE, addRule, dropBusinessRule, dropRule, houseCheck, putBusinessRule, setAutonomy, setHouse, toggleBusinessRule, type ActionKind, type Autonomy } from "./autonomy";
+import { grantState } from "./autopilot";
+import { AutopilotSign, AutopilotStatus } from "./AutopilotSettings";
+import { nowIso } from "./time";
 import { BR_ACTIONS, BR_EVENTS, BR_VIAS, actionsFor, ruleLabel, validRule, type BrAction, type BrEventKind, type BrVia } from "./businessRules";
 import { fmtAgo } from "./time";
 import { I, Select } from "./ui";
@@ -26,7 +29,14 @@ export function AutonomyGroup() {
   const [action, setAction] = useState<ActionKind>("contact");
   const [target, setTarget] = useState("");
   const [adding, setAdding] = useState(false);
-  const pick = (m: Autonomy) => { if (!owner || m === mode) return; editWs(setAutonomy(m, by)); say(zh ? `已改为“${AUTONOMY.find(x => x.id === m)!.label.zh}”。` : `Set to ${AUTONOMY.find(x => x.id === m)!.label.en}.`); };
+  const [signing, setSigning] = useState(false);
+  // Autopilot needs its signed authorization first: picking it without one opens the sheet that signs it
+  const pick = (m: Autonomy) => {
+    if (!owner || m === mode) return;
+    if (m === "autopilot" && grantState(ws.controls?.autopilot, nowIso()) !== "live") { setSigning(true); return; }
+    editWs(setAutonomy(m, by)); say(zh ? `已改为“${AUTONOMY.find(x => x.id === m)!.label.zh}”。` : `Set to ${AUTONOMY.find(x => x.id === m)!.label.en}.`);
+  };
+  const cur = AUTONOMY.find(x => x.id === mode) ?? AUTONOMY[1];
   const addNever = () => {
     editWs(addRule({ kind: "deny", action, target: target.trim() || undefined }, by));
     setTarget(""); setAdding(false);
@@ -35,11 +45,21 @@ export function AutonomyGroup() {
   return (
     <section className="sg" id="set-autonomy">
       <h2>{zh ? "Odelia 自主处理的范围" : "How much Odelia does on her own"}</h2>
-      <p className="sg-note">{zh ? "选择她在问您之前能做多少。无论选哪一项，提交、付款和任何收费的事项都会先等您批准。" : "Choose how much she does before she asks. Whatever you pick, filing, paying and anything with a fee always wait for your approval."}</p>
-      <ul className="sg-list" role="radiogroup" aria-label={zh ? "Odelia 自主处理的范围" : "How much Odelia does on her own"}>
-        {AUTONOMY.map(m => (
+      <p className="sg-note">{zh ? "选择她在问您之前能做多少。付款和机构网站上的费用始终由您处理；只有在您签署“自动驾驶”授权后，申报才会无需每次批准即可提交。" : "Choose how much she does before she asks. Paying stays yours whatever you pick, and filing waits for your approval unless you sign Autopilot."}</p>
+      {/* the dial: Ask me each time, Hands-off, Autopilot */}
+      <div className="ap-dial" role="radiogroup" aria-label={zh ? "Odelia 自主处理的范围" : "How much Odelia does on her own"}>
+        {DIAL.map(id => { const m = AUTONOMY.find(x => x.id === id)!; return (
+          <button key={id} type="button" role="radio" aria-checked={mode === id} className={mode === id ? "on" : ""} disabled={!owner} onClick={() => pick(id)}>{b(m.label)}</button>
+        ); })}
+      </div>
+      <p className="ap-dial-sub">{b(cur.sub)}</p>
+      {(mode === "autopilot" || ws.controls?.autopilot) && <AutopilotStatus owner={owner} onSign={() => setSigning(true)} />}
+      {signing && owner && <AutopilotSign onClose={() => setSigning(false)} />}
+      <h3 className="ap-more">{zh ? "更谨慎的方式" : "More careful"}</h3>
+      <ul className="sg-list" role="radiogroup" aria-label={zh ? "更谨慎的方式" : "More careful"}>
+        {AUTONOMY.filter(m => !DIAL.includes(m.id)).map(m => (
           <li key={m.id} className={"sg-row mode-row" + (m.id === mode ? " on" : "")} onClick={() => pick(m.id)}>
-            <span className="sg-tx"><b>{b(m.label)}{m.id === "usual" ? <em className="lock">{zh ? "（默认）" : " (default)"}</em> : null}</b><small>{b(m.sub)}</small></span>
+            <span className="sg-tx"><b>{b(m.label)}</b><small>{b(m.sub)}</small></span>
             <span className="sg-r"><label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="autonomy" checked={m.id === mode} disabled={!owner} onChange={() => pick(m.id)} aria-label={b(m.label)} /><i /></label></span>
           </li>
         ))}

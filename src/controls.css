@@ -74,6 +74,44 @@
 .auto-note { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--sky-wash); font-size: 13.5px; color: var(--blue-deep); }
 .second-note { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--warm-soft); font-size: 13.5px; color: var(--warm); }
 
+/* Autopilot on an approval card: filed for you, or why it waits (src/AllowRule.tsx) */
+.ap-note { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--sky-wash); font-size: 13.5px; line-height: 1.5; color: var(--blue-deep); }
+.ap-note.waits { background: var(--mist); color: var(--ink2); }
+.ap-note ul { margin: 4px 0 0; padding: 0; list-style: none; }
+.ap-note li { padding: 2px 0; }
+
+/* ---------------------------------------------------------------- Settings: the dial and Autopilot (src/Autopilot.tsx) */
+.ap-dial { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin: 4px 0 8px; padding: 4px; border-radius: 14px; background: var(--mist); }
+.ap-dial button { min-height: 40px; padding: 6px 10px; border-radius: 10px; font-size: 14px; font-weight: 500; color: var(--ink2); transition: background .15s, color .15s, box-shadow .15s; }
+.ap-dial button:hover:not(:disabled) { color: var(--ink); }
+.ap-dial button.on { background: var(--card); color: var(--blue-deep); box-shadow: 0 0 0 1px rgba(var(--e), .08), 0 4px 12px -6px rgba(30, 50, 90, .25); }
+.ap-dial button:disabled { cursor: default; }
+.ap-dial-sub { margin: 0 0 12px; font-size: 13.5px; line-height: 1.5; color: var(--ink3); }
+.ap-more { margin: 20px 0 4px; font-size: 13px; font-weight: 600; color: var(--ink3); }
+.ap-box { display: flex; flex-direction: column; gap: 10px; margin: 0 0 8px; padding: 14px 16px; border-radius: 14px; background: var(--mist); font-size: 13.5px; line-height: 1.5; color: var(--ink2); }
+.ap-box.on { background: var(--sky-wash); }
+.ap-box > p { margin: 0; }
+.ap-box > p b { font-weight: 600; color: var(--ink); }
+.ap-box .sbtn { align-self: flex-start; }
+.ap-plan h3 { margin: 12px 0 4px; font-size: 13px; font-weight: 600; color: var(--ink); }
+.ap-rows { list-style: none; margin: 0; padding: 0; }
+.ap-rows li { display: flex; flex-direction: column; gap: 2px; padding: 8px 0; }
+.ap-rows li + li { border-top: 1px solid var(--line); }
+.ap-rows b { font-weight: 500; font-size: 14px; color: var(--ink); }
+.ap-rows small { font-size: 12.5px; line-height: 1.45; color: var(--ink3); }
+.ap-rows .ap-need em { font-style: normal; font-weight: 600; color: var(--ink2); margin-right: 4px; }
+.ap-rows .ap-need.ap-k-law em, .ap-rows .ap-need.ap-k-wet em, .ap-rows .ap-need.ap-k-card em { color: var(--warm); }
+.ap-rows .ap-team, .ap-rows .ap-after { color: var(--ink3); }
+.ap-scope { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; border: 0; }
+.ap-scope legend { margin-bottom: 4px; padding: 0; font-size: 13px; font-weight: 500; color: var(--ink); }
+.ap-caps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.ap-sig { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.ap-pad { display: flex; align-items: flex-end; gap: 8px; }
+.ap-pad canvas { flex: 1; min-width: 0; width: 100%; max-width: 480px; height: 120px; border-radius: 12px; background: var(--card); box-shadow: 0 0 0 1px rgba(var(--e), .12); touch-action: none; cursor: crosshair; }
+.ap-agree { align-items: flex-start !important; }
+.ap-agree input { margin-top: 3px; }
+@media (max-width: 560px) { .ap-dial button { font-size: 13px; padding: 6px 4px; } .ap-caps { grid-template-columns: minmax(0, 1fr); } }
+
 /* ---------------------------------------------------------------- Settings */
 .mode-row { cursor: pointer; }
 .mode-row.on .sg-tx b { color: var(--blue-deep); }

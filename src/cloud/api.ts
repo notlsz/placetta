@@ -338,6 +338,27 @@ export async function acceptTerms(version: string, ws?: string): Promise<TermsSt
   }
   return data as TermsStatus;
 }
+/* Autopilot (20261103090000_autopilot.sql, src/autopilot.ts): an owner signs the standing authorization once, with the
+   version of the Filing Authorization they read; the database records the time, IP and browser, keeps the adopted
+   signature in the vault, and returns the workspace's copy. Revoking is one call. */
+type GrantRow = { id: string; by: string; title?: string; at: string; expires: string; ip?: string; version: string; scope: { stores: string[]; agencies: string[]; forms: string[] }; capFiling: number | string; capMonth: number | string; sig: "typed" | "drawn"; revokedAt?: string };
+const grantOf = (r: GrantRow) => ({ ...r, capFiling: Number(r.capFiling), capMonth: Number(r.capMonth) });
+export async function autopilotGrant(ws: string, o: { name: string; title?: string; agree: boolean; version: string; scope: { stores: string[]; agencies: string[]; forms: string[] }; capFiling: number; capMonth: number; sig: "typed" | "drawn"; drawn?: string }) {
+  const { data, error } = await supabase().rpc("autopilot_grant", { p_ws: ws, p_name: o.name, p_title: o.title ?? null, p_agree: o.agree, p_version: o.version, p_scope: o.scope,
+    p_cap_filing: o.capFiling, p_cap_month: o.capMonth, p_sig_kind: o.sig, p_signature: o.sig === "drawn" ? o.drawn ?? null : null });
+  if (error) {
+    if (/terms_version/.test(error.message ?? "")) throw err("terms_version", "The Filing Authorization was just updated. Reload to read the current version.");
+    const m = /autopilot_\w+:\s*(.+)$/.exec(error.message ?? "");
+    if (m) throw err("autopilot", m[1].charAt(0).toUpperCase() + m[1].slice(1));
+    throw fromPg(error);
+  }
+  return grantOf(data as GrantRow);
+}
+export async function autopilotRevoke(ws: string): Promise<{ revoked: boolean; stopped: number }> {
+  const { data, error } = await supabase().rpc("autopilot_revoke", { p_ws: ws, p_why: "revoked in Settings" });
+  if (error) throw fromPg(error);
+  return data as { revoked: boolean; stopped: number };
+}
 /** Sign-up asks for agreement before there's a session to record it with: kept here until the first sign-in. */
 const TERMS_AGREED = "placetta-terms-agreed";
 export const termsAgreed = {

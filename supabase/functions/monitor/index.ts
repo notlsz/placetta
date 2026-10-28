@@ -30,6 +30,7 @@ import { deadlineRules } from "../_shared/business_rules.ts";
 import { appealFor, approvalsLine, daysLeft, deadlineFor, type FilingRow, finishWork, MAX_RESUMES, normalizeState, NOT_A_LAW_FIRM, openingLine, openingPath, resumable, runsOn, type Routine, stampFilings, TIERS } from "../_shared/opening.js";
 import { cityOf, cityRecords, type CityRecord } from "../../../src/opendata.ts";
 import { workspaceToday } from "../../../src/localDay.ts";
+import { weekDone, weekDoneUpdate, type WeekAudit } from "../../../src/weekDone.ts";
 import { wsDailyLimit } from "../_shared/ai_gate.ts";
 import { weeklyGovernance } from "./governance.ts";
 import { dueNotices, noticeFor, type RenewalRow } from "./renewal_notice.ts";
@@ -676,6 +677,21 @@ Deno.serve(async (req) => {
     const open = new Map<string, number>();
     for (const f of (filings ?? []) as Filing[]) if (["requested", "in_progress", "needs_info", "submitted"].includes(f.status)) open.set(f.workspace_id, (open.get(f.workspace_id) ?? 0) + 1);
     for (const [ws, list] of byWs) { const u = weekAhead(ws, states.get(ws) ?? null, open.get(ws) ?? 0, today); if (u) list.push(u); }
+    // and what Odelia did for each business last week (src/weekDone.ts), from its records: the same lines the value
+    // report shows in the app
+    const weekAgo = day(new Date(now - 7 * 864e5));
+    const { data: chases } = await admin.from("odelia_chases").select("workspace_id").gte("day", weekAgo);
+    const chased = new Map<string, number>();
+    for (const c of (chases ?? []) as { workspace_id: string }[]) chased.set(c.workspace_id, (chased.get(c.workspace_id) ?? 0) + 1);
+    const fs = new Map<string, Filing[]>();
+    for (const f of (filings ?? []) as Filing[]) { const l = fs.get(f.workspace_id) ?? []; l.push(f); fs.set(f.workspace_id, l); }
+    for (const [ws, list] of byWs) {
+      const st = (states.get(ws) ?? {}) as { audit?: WeekAudit[]; approvals?: unknown[] };
+      const d = weekDone({ audit: Array.isArray(st.audit) ? st.audit : [], filings: (fs.get(ws) ?? []).map((f) => ({ title: bi(f.title), status: f.status, submitted_at: f.submitted_at ?? null, decided_at: f.decided_at ?? null })),
+        waiting: Array.isArray(st.approvals) ? st.approvals.length : 0, until: started.toISOString(), chased: chased.get(ws) ?? 0 });
+      const u = weekDoneUpdate(ws, d);
+      if (u) list.push(u);
+    }
   }
 
   // The approvals waiting, once a day: how many, and how many passed every check and go together in one tap from Home

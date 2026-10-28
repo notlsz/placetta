@@ -5,6 +5,7 @@ import * as api from "./cloud/api";
 import { approvalLine, headline, valueReport, valueReportHtml, type AgencyNotice, type ValueLine, type ValueReport } from "./value.ts";
 import { formKeys, valueInputOf } from "./valueInput";
 import { daysFromNow } from "./time";
+import { weekDone, weekLines } from "./weekDone";
 import { I, Modal, Pill, Select } from "./ui";
 
 /* The value report in the app (src/value.ts): what Placetta delivered for each store and the whole brand, from records
@@ -57,6 +58,18 @@ function save(r: ValueReport, lang: "en" | "zh", print: boolean) {
   return true;
 }
 
+/** What Odelia did for you this week (src/weekDone.ts): the same lines as the monitor's Monday update. */
+export function WeekDoneLines() {
+  const { b, ws, cloud } = useApp();
+  const d = useMemo(() => weekDone({ audit: ws.audit, filings: (cloud?.filings ?? []).map(f => ({ title: f.title, status: f.status, submitted_at: f.submitted_at, decided_at: f.decided_at })),
+    waiting: ws.approvals.length, until: new Date().toISOString() }), [ws.audit, ws.approvals.length, cloud?.filings]);
+  return (
+    <div className="vr-line">
+      {d.empty ? <p className="note">{b(B("Nothing on record this week yet.", "本周暂无记录。"))}</p> : <ul className="vr-head">{weekLines(d).map((l, i) => <li key={i}><I.check />{b(l)}</li>)}</ul>}
+    </div>
+  );
+}
+
 /** The whole report: the brand, then each store, with the two ways to share it. */
 export function ValueReportSheet({ onClose }: { onClose: () => void }) {
   const { b, lang, say } = useApp();
@@ -71,6 +84,7 @@ export function ValueReportSheet({ onClose }: { onClose: () => void }) {
       </header>
       <div className="m-body vr">
         {r.empty && <p className="note">{b(B("Nothing to report yet: no filing has reached an agency. The report fills in as Odelia files.", "暂无可报告内容：还没有申报送达机构。Odelia 提交后，报告会自动补充。"))}</p>}
+        <section className="vr-sec"><h3>{b(B("What Odelia did for you this week", "本周 Odelia 为您完成的工作"))}</h3><WeekDoneLines /></section>
         <section className="vr-sec"><h3>{b(B("Whole brand", "品牌合计"))}</h3><Lines v={r.brand} /></section>
         {r.stores.length > 1 && r.stores.map(s => <section key={s.id} className="vr-sec"><h3>{b(s.name)}</h3><Lines v={s} /></section>)}
       </div>

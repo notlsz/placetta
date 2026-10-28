@@ -7,7 +7,8 @@ import "./controls.css";
 
 /* On an approval card: "Always allow" for what the card covers (a message's recipients, or the kinds of change held
    under Ask me first), added when the owner approves. Never offered for a filing, a payment, a purchase or anything
-   with a fee. Also says when a card goes out under a rule, or needs a second owner under a business rule. */
+   with a fee. Also says when a card goes out under a rule, needs a second owner under a business rule, is being filed
+   under Autopilot, or why Autopilot left it for the owner (src/autopilot.ts). */
 export function AllowRule({ a, commit }: { a: Approval; commit: MutableRefObject<(() => void) | null> }) {
   const { b, lang, ws, editWs, cloud } = useApp();
   const [on, setOn] = useState<number[]>([]);
@@ -18,6 +19,11 @@ export function AllowRule({ a, commit }: { a: Approval; commit: MutableRefObject
   const second = a.second ? secondStep(a, me) : null;
   return (
     <>
+      {a.autopilot && <p className="ap-note">{zh ? `自动驾驶：这项申报通过了全部核对，正依据您的授权为您提交，无需再点。发出前 ${HOLD_MINUTES} 分钟内仍可撤销。` : `Autopilot: this filing passed every check and is being filed for you under your authorization, with no tap needed. You can undo it for ${HOLD_MINUTES} minutes before it leaves.`}</p>}
+      {!a.autopilot && a.autopilotWhy && a.autopilotWhy.length > 0 && (
+        <div className="ap-note waits"><b>{zh ? "自动驾驶没有自行提交这一项，原因是：" : "Autopilot didn't file this one on its own:"}</b>
+          <ul>{a.autopilotWhy.map((w, i) => <li key={i}>{b(w)}</li>)}</ul></div>
+      )}
       {a.auto && <p className="auto-note">{zh ? `按您的规则（${b(a.auto.label)}），这条消息无需再点即获批准，${HOLD_MINUTES} 分钟内仍可撤销。` : `Under your rule (${b(a.auto.label)}), this message is approved without another tap. You can still undo it for ${HOLD_MINUTES} minutes.`}</p>}
       {second && <p className="second-note">{second === "first"
         ? (zh ? "按您的业务规则，这一项需要两位所有者批准。您批准后，还需另一位所有者批准。" : "Under your business rule, two owners approve this. After you approve, another owner approves it too.")

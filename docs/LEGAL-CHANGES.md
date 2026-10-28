@@ -1,3 +1,20 @@
+# Legal changes: version 2026-10-27 (Autopilot)
+
+> **Counsel review required before publishing.** Migration `20261103090000_autopilot.sql` makes
+> `public.current_terms_version()` return `2026-10-27`, so everyone accepts again, as below.
+
+- Filing Authorization: a new "Autopilot" section. An owner may sign one standing authorization (typed name, typed or
+  drawn signature, the box; recorded with time, IP, browser and the version shown) for chosen stores, agencies and
+  filing types, a per-filing and a monthly agency-fee cap, 12 months, revocable in one tap or by email. Each filing
+  passes every automated check first and is reported as "Filed for you", undoable until it leaves Placetta. The adopted
+  signature is placed only where the agency's page says it takes an electronic signature and the signature swears,
+  certifies or attests to nothing; a declaration under penalty of perjury is always the signer's own act. Fees stay the
+  owner's; no agency account is created; CAPTCHAs and identity checks stop it; two-owner business rules still apply.
+- "What you authorize", "Signatures", "What we never do" and "Agency portal logins" name the Autopilot exception.
+- Terms ("Your approval comes first", "What Placetta may do for you", the disclaimer's carve-out), Privacy (security
+  list) and the AI page ("What it never does on its own") say a filing needs an owner's approval or their Autopilot
+  authorization.
+
 # Legal changes: version 2026-10-22
 
 > **Counsel review required before publishing.** Nothing here is live. The new text is in `src/legal.ts`

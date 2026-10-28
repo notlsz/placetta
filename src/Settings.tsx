@@ -1724,8 +1724,8 @@ export function Settings() {
           {show("autonomy") && <AutonomyGroup />}
           {show("brules") && <BusinessRulesGroup />}
           {show("phone") && <PhoneGroup />}
-          <Group id="approvals" hidden={!show("approvals")} title={B("Approvals", "批准")} note={B("Placetta prepares on its own. It never files, buys, pays or sends without your approval, and that can't be turned off.", "快哉会自行准备材料，但未经您批准绝不提交、购买、付款或发送，此项无法关闭。")}
-            rows={[B("Every filing with a government agency", "向政府机构提交的每一项申请"), B("Every payment", "每一笔付款"), B("Every message sent for you, unless an Always allow rule you set covers it", "代您发送的每一条消息（您设置的“始终允许”规则除外）")].map(l => ({ label: l, right: <em className="lock">{t("alwaysOn")}</em> }))} />
+          <Group id="approvals" hidden={!show("approvals")} title={B("Approvals", "批准")} note={B("Placetta prepares on its own. It never buys, pays or sends without your approval, and never files without it unless you signed Autopilot (above), which you can turn off in one tap.", "快哉会自行准备材料，但未经您批准绝不购买、付款或发送；除非您签署了“自动驾驶”授权（见上方，可一键关闭），否则也绝不提交。")}
+            rows={[B("Every filing with a government agency, unless your Autopilot authorization covers it", "向政府机构提交的每一项申请（您的自动驾驶授权涵盖的除外）"), B("Every payment", "每一笔付款"), B("Every message sent for you, unless an Always allow rule you set covers it", "代您发送的每一条消息（您设置的“始终允许”规则除外）")].map(l => ({ label: l, right: <em className="lock">{t("alwaysOn")}</em> }))} />
           {show("spending") && <SpendingGroup />}
           {show("memory") && <MemoryGroup />}
           {/* Agent memory (src/AgentMemory.tsx): what Odelia keeps about the business, opt-in, with every control */}

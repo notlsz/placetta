@@ -1,8 +1,8 @@
 # Privacy Policy
 
-Last updated: 2026-10-22
+Last updated: 2026-10-27
 
-Effective date: 2026-10-22.
+Effective date: 2026-10-27.
 
 This policy explains how Placetta Inc. ("Placetta", "we") handles information when people visit placetta.com, and when businesses use the Placetta app and text or call Odelia, Placetta's AI agent. Placetta is a service for businesses. Most of the information we handle comes from businesses and the people who act for them.
 
@@ -207,7 +207,7 @@ Placetta doesn't hold SOC 2 or any other security certification today. What we d
 - You can turn on two-step sign-in, and a PIN for sensitive settings, in Settings. Placetta's team must use two-step sign-in to reach customer records and saved logins.
 - Card numbers are handled by Stripe. We never see full card numbers.
 - The audit trail records every action by Odelia, by you, by our team and by agencies.
-- Nothing is filed, paid or sent without your approval.
+- Nothing is filed, paid or sent without your approval. A filing within an Autopilot authorization an owner signed counts as approved.
 - If a security incident exposes your workspace's information, we tell the owners by email without undue delay, and within 72 hours of confirming that their information was involved, unless the law sets a shorter time.
 
 No system is perfectly secure. If you think someone else has accessed your workspace, email support@placetta.com. Our trust page says what is in place and what isn't finished yet: https://placetta.com/trust
@@ -279,9 +279,9 @@ Email: support@placetta.com
 
 # 隐私政策
 
-最后更新：2026-10-22
+最后更新：2026-10-27
 
-生效日期：2026-10-22。
+生效日期：2026-10-27。
 
 本政策说明访客浏览 placetta.com，以及企业使用快哉应用、给快哉的 AI 智能体 Odelia 发短信或打电话时，Placetta Inc.（下称“快哉”或“我们”）如何处理相关信息。快哉是面向企业的服务，我们处理的信息大多来自企业及代表企业行事的人员。
 
@@ -486,7 +486,7 @@ Email: support@placetta.com
 - 您可以在“设置”中开启两步登录，以及用于敏感设置的 PIN。快哉团队成员必须开启两步登录，才能访问客户记录和已保存的登录信息。
 - 银行卡号由 Stripe 处理。我们看不到完整卡号。
 - 审计记录会记下 Odelia、您、我们的团队和各机构的每一项操作。
-- 未经您批准，不会提交、付款或发送任何内容。
+- 未经您批准，不会提交、付款或发送任何内容。所有者签署的自动驾驶授权范围内的申报视为已批准。
 - 如发生安全事件导致您工作区的信息泄露，我们会在确认相关信息受影响后，及时并在 72 小时内通过邮件告知所有者，法律规定更短期限的，从其规定。
 
 任何系统都无法做到绝对安全。如您认为他人可能进入了您的工作区，请发邮件至 support@placetta.com。我们的信任与安全页面列明了已落实和尚未完成的事项：https://placetta.com/trust

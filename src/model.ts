@@ -122,6 +122,10 @@ export type Approval = {
   /* Owner controls (src/autonomy.ts, src/businessRules.ts) */
   auto?: { rule: string; label: Bi };      // send: goes out under an owner's Always allow rule (a message only; never a filing, payment or fee)
   second?: { by: string[]; rule: string }; // a business rule wants two different owners to approve it; by: who has
+  /* Autopilot (src/autopilot.ts): a filing that passed every automated check, filed under the owner's standing
+     authorization without a tap (filing: the filings row once it's in); or, for one that didn't, why it waits. */
+  autopilot?: { grant: string; at: string; sign: "none" | "adopted" | "tap" | "wet" | "unknown"; filing?: string };
+  autopilotWhy?: Bi[];
   /* A filing's card is for one set of answers (src/forms/versions.ts): the answers' hash and the filled form's version
      it was put up with. When the answers change after it's put up, it's taken back (withdrawn, kept in closed so the
      chat can say why) and a fresh card with the new version goes up; a card whose answers changed can't be filed. */

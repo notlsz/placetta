@@ -156,6 +156,17 @@ export declare function fillForm(formId: string, fields: Field[], load?: LoadPdf
 export declare function readBack(formId: string, f: Filled): Promise<ReadBack>;
 export declare function answersHash(a: { fields: Field[] }): string;
 
+// Autopilot (src/autopilotFile.ts): cards a run marked, filed under the owner's standing authorization
+export type AutofileRow = { grant: string; app_id: string; title: Bi; agency: Bi; portal_url: string | null; fee: number; payload: Record<string, unknown>; store: string; form: string };
+export type AutofileIO = {
+  loadPdf: LoadPdf;
+  signature(grant: string): Promise<string | null>;
+  upload(appId: string, name: string, bytes: Uint8Array): Promise<string>;
+  file(row: AutofileRow): Promise<string>;
+  start(filingId: string): Promise<void>;
+};
+export declare function autofileAll(w: Workspace, io: AutofileIO, now: string): Promise<{ patches: ((w: Workspace) => Workspace)[]; filed: string[]; kept: { app: string; why: Bi }[] }>;
+
 // Odelia's shield (src/security)
 export type Actor = { id: string | null; role: "owner" | "admin" | "member" | "viewer" | "staff" | "system" };
 export type ToolLog = { at: string; run?: string; tool: string; scope: string | null; actor: string | null; role: Actor["role"]; input_hash: string; decision: "allow" | "deny" | "error"; code?: string; reason?: string };

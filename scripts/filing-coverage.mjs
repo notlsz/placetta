@@ -21,6 +21,7 @@ const OUT = join(root, "docs/FILING_COVERAGE.md");
 // addresses, numbers or logins), so an approval card can say who files it without the browser reaching destinations.ts
 const ROUTES_OUT = join(root, "src/forms/filingRoutes.json");
 const STEPS_OUT = join(root, "src/forms/filingSteps.json");
+const SIGN_OUT = join(root, "src/forms/filingSign.json");
 
 // Counted with --dest-dir on the destinations.ts and logic.ts of commit 8c8599b2 (2026-10-17), before the research of
 // 2026-10-18. The same registry of US forms is counted both times (recounted when forms batch 3, the target markets and the accuracy fixes added 58 US forms:
@@ -54,6 +55,7 @@ try {
     if (now !== result.markdown) problems.push("docs/FILING_COVERAGE.md is out of date: run node scripts/filing-coverage.mjs and commit it");
     if ((existsSync(ROUTES_OUT) ? readFileSync(ROUTES_OUT, "utf8") : "") !== result.routesJson) problems.push("src/forms/filingRoutes.json is out of date: run node scripts/filing-coverage.mjs and commit it");
     if ((existsSync(STEPS_OUT) ? readFileSync(STEPS_OUT, "utf8") : "") !== result.stepsJson) problems.push("src/forms/filingSteps.json is out of date: run node scripts/filing-coverage.mjs and commit it");
+    if ((existsSync(SIGN_OUT) ? readFileSync(SIGN_OUT, "utf8") : "") !== result.signJson) problems.push("src/forms/filingSign.json is out of date: run node scripts/filing-coverage.mjs and commit it");
     if (problems.length) { console.error(problems.join("\n")); process.exit(1); }
     console.log(`filing coverage: ${result.counts.forms} US forms, ${result.counts.selfFilable} self-filable, every destination cited`);
   } else {
@@ -61,6 +63,7 @@ try {
     writeFileSync(OUT, result.markdown);
     writeFileSync(ROUTES_OUT, result.routesJson);
     writeFileSync(STEPS_OUT, result.stepsJson);
+    writeFileSync(SIGN_OUT, result.signJson);
     console.log(`wrote docs/FILING_COVERAGE.md: ${JSON.stringify(result.counts.channels)}`);
   }
 } finally {
@@ -191,5 +194,13 @@ function report(FORMS, D, L, selfStep = () => undefined) {
   // taken on its own site, which the worker always hands to the person (worker/filer/src/guards.ts).
   const steps = [...rows, ...abroad].filter((r) => kind(r) === "portal" && r.d?.payment === "portal").map((r) => r.f.id).sort();
   const stepsJson = "{\n" + steps.map((id) => `${JSON.stringify(id)}: ["pay"]`).join(",\n") + "\n}\n";
-  return { problems, counts, markdown: md.join("\n"), routesJson, stepsJson };
+  // What Autopilot reads (src/autopilot.ts, src/forms/esign.ts): for every verified destination, the signature the agency
+  // accepts, how its fee is paid, whether its site needs the owner's own login, and the agency page that says so, with
+  // the day it was checked. No address, number or inbox: only what a card or the Autopilot screen may say.
+  const signJson = "{\n" + Object.keys(DEST).sort().map((id) => {
+    const d = DEST[id];
+    const row = { s: d.signature, ...(d.payment ? { p: d.payment } : {}), ...(d.portal ? { site: d.portal, ...(d.noLogin ? { open: true } : {}) } : {}), ...(d.owner ? { owner: true } : {}), src: d.source, chk: d.checked };
+    return `${JSON.stringify(id)}: ${JSON.stringify(row)}`;
+  }).join(",\n") + "\n}\n";
+  return { problems, counts, markdown: md.join("\n"), routesJson, stepsJson, signJson };
 }
