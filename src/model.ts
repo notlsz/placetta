@@ -177,6 +177,11 @@ export type InspectionBooking = {
   id: string; store: string; inspection: string; where: string; name: Bi; agency: Bi; method: string;
   status: "proposed" | "awaiting_approval" | "with_team" | "requested" | "booked" | "passed" | "failed" | "reinspection" | "canceled";
   slots?: string[]; slot?: string; app?: string; permit?: string; confirmation?: string; deadline?: string; script?: string;
+  /** The agency's inbox for a booking it takes by email: Odelia sends the request there as the business's agent
+   *  (supabase/functions/_shared/carry.ts). */
+  email?: string;
+  /** The owner can't make the booked time: the times they'd take instead, sent to the agency by the morning's carry step. */
+  reschedule?: { slots: string[]; why?: string; at: string };
   result?: { at: string; outcome: "passed" | "failed" | "reinspection"; corrections: string[]; next?: string };
   created: string; updated: string;
 };

@@ -14,7 +14,9 @@ import { lookupFor, cleanKey, type Lookup, type Parsed } from "../../../src/fili
 import { publishedDays } from "../_shared/opening.js";
 import { due, escalate, expiryDrift, hashOf, hotReason, inScope, inStanding, nextCheckAt, NORM_WORDS, pageText, realChange, sla, standingChange, type CheckKind, type Tracking } from "../../../src/tracking/index.ts";
 
-export type StatusFiling = { id: string; workspace_id: string; app_id: string; title: Bi; status: string; submitted_at?: string | null; updated_at: string; confirmation_number?: string | null };
+/** agent_auth: sent under the business's agent packet, so the carry step (carry.ts) follows up with the agency itself,
+ *  by email then a call, and no draft for the owner is needed. */
+export type StatusFiling = { id: string; workspace_id: string; app_id: string; title: Bi; status: string; submitted_at?: string | null; updated_at: string; confirmation_number?: string | null; agent_auth?: string | null };
 type App = { id: string; name?: Bi; agency?: Bi; est?: Bi };
 type Store = { address?: string; apps?: string[] };
 export type WsState = { apps?: App[]; stores?: Store[]; deadlines?: unknown[]; meta?: { city?: string; region?: string } } | null;
@@ -77,9 +79,13 @@ export async function runStatusChecks(o: { filings: StatusFiling[]; states: Map<
     if (f.status === "submitted" && escalate(s, t.escalated_at, o.today)) {
       const name = app?.name ?? f.title, agency = app?.agency ?? { en: "the agency", zh: "机构" };
       const dedupe = `sla:${f.id}:${o.today}`;
+      const asAgent = !!f.agent_auth;
       if (await o.io.update({ workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, dedupe,
         title: { en: `Past due at ${agency.en}: ${name.en}`, zh: `${agency.zh}已逾期：${name.zh}` },
-        body: o.model === false
+        body: asAgent
+          ? { en: `With the agency ${s!.waited} days; it publishes about ${s!.usual}. Nothing has moved in ${s!.stalled} days. Odelia is following up with the agency as your agent: an email first, then a call. Nothing needs doing.`,
+              zh: `已在机构 ${s!.waited} 天，公布的办理时间约 ${s!.usual} 天，已有 ${s!.stalled} 天没有进展。Odelia 正以您的代理人身份跟进：先发邮件，再致电。您无需操作。` }
+          : o.model === false
           ? { en: `With the agency ${s!.waited} days; it publishes about ${s!.usual}. Nothing has moved in ${s!.stalled} days. Placetta's team is following up with the agency.`,
             zh: `已在机构 ${s!.waited} 天，公布的办理时间约 ${s!.usual} 天，已有 ${s!.stalled} 天没有进展。快哉团队正在向机构跟进。` }
           : { en: `With the agency ${s!.waited} days; it publishes about ${s!.usual}. Nothing has moved in ${s!.stalled} days. Odelia is drafting a status inquiry for you to approve, and the team is following up.`,
@@ -87,7 +93,7 @@ export async function runStatusChecks(o: { filings: StatusFiling[]; states: Map<
         await o.io.event({ workspace_id: f.workspace_id, filing_id: f.id, kind: "escalated", status: null, source: "placetta", confidence: 1, url: null, dedupe,
           title: { en: `Escalated: ${s!.waited} days with the agency, about ${s!.usual} published`, zh: `已升级：在机构 ${s!.waited} 天，公布约 ${s!.usual} 天` } });
         await o.io.teamTask(f.id, f.workspace_id, `SLA breached: ${name.en} with ${agency.en} ${s!.waited} days (published ${s!.usual}), no movement in ${s!.stalled}. Call or email the agency.`, dedupe);
-        await o.io.start(f.workspace_id, `The ${lower(name.en)} went to ${agency.en} on ${String(f.submitted_at).slice(0, 10)}, ${s!.waited} days ago${f.confirmation_number ? ` (confirmation ${f.confirmation_number})` : ""}; the agency publishes about ${s!.usual} days and nothing has moved in ${s!.stalled}. Draft a short, polite status inquiry to the agency with draft_message for the owner to approve, citing the confirmation number and the date it went in, and add a deadline to check again in 7 days.`,
+        if (!asAgent) await o.io.start(f.workspace_id, `The ${lower(name.en)} went to ${agency.en} on ${String(f.submitted_at).slice(0, 10)}, ${s!.waited} days ago${f.confirmation_number ? ` (confirmation ${f.confirmation_number})` : ""}; the agency publishes about ${s!.usual} days and nothing has moved in ${s!.stalled}. Draft a short, polite status inquiry to the agency with draft_message for the owner to approve, citing the confirmation number and the date it went in, and add a deadline to check again in 7 days.`,
           { en: `Following up: ${name.en}`, zh: `跟进：${name.zh}` });
         await o.io.saveTracking(f.id, f.workspace_id, { ...t, escalated_at: new Date(o.now).toISOString() });
         t.escalated_at = new Date(o.now).toISOString();

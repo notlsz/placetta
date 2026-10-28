@@ -2,6 +2,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { loginMatches } from "../../../supabase/functions/file/destinations.ts";
 import type { Draft } from "./teach.ts";
+import type { StatusJob, StatusResult, StatusStore } from "./status.ts";
 import type { Filing, LogEntry, Login, Skill } from "./types.ts";
 
 /** A portal's taught playbook (teach.ts), shared by every workspace: structure only. "draft" runs only in assist mode
@@ -56,7 +57,7 @@ export type HumanCheck = { id: string; escalate_at: string };
  *  read or written directly, so the same code runs on the filer's own role key (FILER_DB_KEY, which has no table grants
  *  and bypasses no row-level security) or, until that key is made, the service role. Files go through Storage, which
  *  checks the role's storage policies. */
-export class SupabaseStore implements Store {
+export class SupabaseStore implements Store, StatusStore {
   private base: SupabaseClient;
   /** The client for the run in progress: the same key, plus the run's token header for its one filing. */
   private runDb: SupabaseClient | null = null;
@@ -159,6 +160,39 @@ export class SupabaseStore implements Store {
   }
   async humanCheckClose(id: string, state: "solved" | "to_owner" | "ended") {
     return (await this.call<boolean>("filer_human_check_close", { p_check: id, p_state: state }, "human check close")) === true;
+  }
+  // ---------------------------------------------------------------- portal status checks (status.ts)
+  async claimStatus() {
+    const { data, error } = await this.base.rpc("filer_claim_status_job", {});
+    if (error) { if (error.code === "PGRST202") return null; throw new Error(`status claim failed: ${error.message}`); }   // before the migration: none
+    return ((data as StatusJob[] | null) ?? [])[0] ?? null;
+  }
+  async beginStatus(j: StatusJob) {
+    this.runDb = null;
+    const { data, error } = await this.base.rpc("filer_status_begin", { p_job: j.job_id });
+    if (error || typeof data !== "string" || data.length < 32) throw new Error(`status run token failed: ${error?.message ?? "no token"}`);
+    this.runDb = this.make({ "x-filer-run": data });
+  }
+  async statusLogin(j: StatusJob, host: string, tenant?: string) {
+    const rows = await this.call<{ id: string; url: string | null }[] | null>("filer_status_logins", { p_job: j.job_id }, "status logins lookup");
+    const row = (rows ?? []).find((r) => loginMatches(r.url as string, { portal: host, tenant }));
+    if (!row) return null;
+    // the audit entry first, in the same call that reads the password
+    const { data, error } = await this.db.rpc("filer_status_open_login", { p_job: j.job_id, p_login: row.id });
+    const got = (data as { username: string; password: string }[] | null)?.[0];
+    if (error || !got || typeof got.password !== "string") throw new Error("saved login unreadable");
+    return { username: String(got.username), password: got.password, host };
+  }
+  async saveLicense(j: StatusJob, name: string, bytes: Uint8Array) {
+    return await this.saveDoc({ id: j.filing_id, workspace_id: j.workspace_id } as Filing, name, bytes, "application/pdf");
+  }
+  async reportStatus(j: StatusJob, r: StatusResult | null, error: string | null) {
+    await this.call("filer_status_report", { p_job: j.job_id, p_result: r, p_error: error }, "status report");
+  }
+  async endStatus(j: StatusJob) {
+    const run = this.runDb;
+    this.runDb = null;
+    if (run) await run.rpc("filer_status_end", { p_job: j.job_id });
   }
   async selfFiled(official: string) {
     return (await this.call<number | null>("filer_self_filed", { p_official: official }, "count")) ?? 0;

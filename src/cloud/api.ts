@@ -466,11 +466,28 @@ export async function agencyCall(ws: string, filingId: string, lang: "en" | "zh"
   try { return await fn<{ ok: boolean; say?: Said }>("voice", { action, workspace_id: ws, filing_id: filingId, lang }); }
   catch (e) { const x = e as ApiError; return { ok: false, say: { en: x.message, zh: x.message_zh ?? x.message } }; }
 }
-export type Timeline = { events: TimelineEvent[]; tracking: { last_checked_at: string | null; next_check_at: string | null; agency_status: string | null; agency_norm: string | null; last_movement_at: string | null; escalated_at: string | null } | null };
+/** The issued license on a filing (migration 20261105090300_carry_to_approval): the PDF in Documents, its number and expiry. */
+export type License = { path: string | null; number: string | null; expires: string | null; decided_at: string | null; shown_at: string | null };
+/** What Odelia wrote an agency as the business's agent: held for the undo window, then sent. */
+export type OutboxSend = { id: string; kind: "rfi_answer" | "status_inquiry" | "inspection_booking" | "inspection_reschedule"; to: string; subject: string; body: string; status: "held" | "sending" | "sent" | "undone" | "failed"; send_after: string; sent_at: string | null };
+export type AgencyMail = { at: string; kind: string; from: string; subject: string | null; action: string | null };
+export type Timeline = { events: TimelineEvent[]; tracking: { last_checked_at: string | null; next_check_at: string | null; agency_status: string | null; agency_norm: string | null; last_movement_at: string | null; escalated_at: string | null } | null;
+  license?: License | null; outbox?: OutboxSend[]; mail?: AgencyMail[] };
 export async function filingTimeline(filingId: string): Promise<Timeline | null> {
   const { data, error } = await supabase().rpc("filing_timeline", { p_filing: filingId });
   if (error) { if (error.code === "PGRST202" || error.code === "42883") return null; throw fromPg(error); }
   return (data ?? null) as Timeline | null;
+}
+/** Undo a message to the agency while it waits out the undo window. False when it already went. */
+export async function outboxUndo(id: string): Promise<boolean> {
+  const { data, error } = await supabase().rpc("agency_outbox_undo", { p_id: id });
+  if (error) throw fromPg(error);
+  return data === true;
+}
+/** The owner opened their approved license: on the timeline, once. */
+export async function licenseSeen(filingId: string): Promise<void> {
+  const { error } = await supabase().rpc("filing_license_seen", { p_filing: filingId });
+  if (error && error.code !== "PGRST202") throw fromPg(error);
 }
 
 /* ------------------------------ documents ------------------------------ */
