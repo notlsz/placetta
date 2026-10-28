@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Federal Register Documents published on or after 09/28/2026, from U.S. Customs and Border Protection, and of type Rule or Proposed Rule</title>
+    <link>https://www.federalregister.gov/api/v1/documents.rss?conditions%5Bagencies%5D%5B%5D=u-s-customs-and-border-protection&amp;conditions%5Btype%5D%5B%5D=RULE&amp;conditions%5Btype%5D%5B%5D=PRORULE</link>
+    <pubDate>Thu, 22 Oct 2026 04:00:00 GMT</pubDate>
+    <description>The documents in this feed originate from FederalRegister.gov which displays an unofficial web version of the daily Federal Register. The official electronic version in PDF format is also available as a link from the FederalRegister.gov website. For more information, please see https://www.federalregister.gov/reader-aids/policy/legal-status.</description>
+        <item>
+      <title>Indefinite Suspension of the De Minimis Exemption for Mail Shipments and New Postal Informal Entry Process; Delayed Compliance Extension</title>
+      <link>https://www.federalregister.gov/documents/2026/10/22/2026-21600/indefinite-suspension-of-the-de-minimis-exemption-for-mail-shipments-and-new-postal-informal-entry</link>
+      <description>This document announces that U.S. Customs and Border Protection (CBP) will extend the compliance date for the regulatory provisions mandating the formal entry of merchandise arriving through the international postal network that is subject to partner government agency requirements, subject to duties under Chapter 98 or Chapter 99 of the Harmonized Tariff Schedule of the United States (HTSUS), or for which duty-free treatment is claimed under Chapter 98 of the HTSUS or pursuant to a Free Trade Agreement, which were published in the Federal Register on June 24, 2026. We believe the public will benefit from more time to prepare for compliance with these changes.</description>
+      <pubDate>Thu, 22 Oct 2026 04:00:00 GMT</pubDate>
+      <guid>https://www.federalregister.gov/documents/2026/10/22/2026-21600/indefinite-suspension-of-the-de-minimis-exemption-for-mail-shipments-and-new-postal-informal-entry</guid>
+      <dc:creator>Homeland Security Department, U.S. Customs and Border Protection</dc:creator>
+    </item>
+    <item>
+      <title>Advance Traveler Information for Rail</title>
+      <link>https://www.federalregister.gov/documents/2026/10/13/2026-20884/advance-traveler-information-for-rail</link>
+      <description>U.S. Customs and Border Protection (CBP) is proposing to require rail carriers to transmit advance electronic traveler information to CBP for any individual (crew and passengers) who is arriving in or departing from the United States on board a train. The rail carrier also would be required to transmit an advance notice of arrival or departure, as applicable, for the train. This rule would enhance security while facilitating legitimate international travel on board trains.</description>
+      <pubDate>Tue, 13 Oct 2026 04:00:00 GMT</pubDate>
+      <guid>https://www.federalregister.gov/documents/2026/10/13/2026-20884/advance-traveler-information-for-rail</guid>
+      <dc:creator>Homeland Security Department, U.S. Customs and Border Protection</dc:creator>
+      <category>Canada</category>
+      <category>Freight</category>
+      <category>International boundaries</category>
+      <category>Mexico</category>
+      <category>Railroads</category>
+      <category>Reporting and recordkeeping requirements</category>
+    </item>
+    <item>
+      <title>Low-Value Shipments</title>
+      <link>https://www.federalregister.gov/documents/2026/10/08/2026-20650/low-value-shipments</link>
+      <description>This document proposes to amend the U.S. Customs and Border Protection regulations to modify filing requirements for informal entries of goods valued at $2,500 or less and to establish a new electronic informal entry type for merchandise entering through the mail environment. This document also proposes other related changes such as requiring an additional data element for carriers pertaining to mail shipments and imposing bonding requirements for certain informal entries.</description>
+      <pubDate>Thu, 08 Oct 2026 04:00:00 GMT</pubDate>
+      <guid>https://www.federalregister.gov/documents/2026/10/08/2026-20650/low-value-shipments</guid>
+      <dc:creator>Homeland Security Department, U.S. Customs and Border Protection</dc:creator>
+      <category>Administrative practice and procedure</category>
+      <category>Common carriers</category>
+      <category>Exports</category>
+      <category>Freight</category>
+      <category>Laboratories</category>
+      <category>Lotteries</category>
+      <category>Reporting and recordkeeping requirements</category>
+      <category>Surety bonds</category>
+    </item>
+  </channel>
+</rss>

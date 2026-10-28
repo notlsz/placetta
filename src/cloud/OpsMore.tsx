@@ -8,6 +8,7 @@ import * as ops from "./opsApi";
 import * as pa from "./partnersApi";
 import { KIND as PARTNER_KIND } from "../Partner";
 import "../ode.css";
+import { LawQueue } from "./LawQueue";
 import { keep, SLOW_MS, totals, tree, type Span, type TraceFilter } from "../trace";
 
 /* The team's pages beside the filing queue (src/cloud/Ops.tsx): the specialist review queue with its one-business-day
@@ -124,6 +125,7 @@ function QualityQueue() {
           </article>
         ))}</div>
       )}
+      <LawQueue />
       <TaughtQueue />
     </Frame>
   );

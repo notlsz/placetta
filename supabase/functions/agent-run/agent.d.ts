@@ -192,3 +192,6 @@ export type QaFinding = { kind: string; severity: "high" | "medium" | "low"; sou
 export declare function sampled(runId: string, rate: number): boolean;
 export declare function gradeRun(o: { runId: string; reply: string; calls: { name: string; ok: boolean }[]; ws: Workspace; apps: string[]; today: string }): QaFinding[];
 export declare const GRADER_SAMPLE_RATE: number;
+// Law watch (src/lawWatch.ts): the weekly check's finding as a candidate for the Placetta team's queue
+export type LawCandidate = { origin: "register" | "sweep" | "odelia"; workspace_id?: string | null; jurisdiction: string; forms: string[]; source_url: string | null; source_label: string | null; title: string; excerpt: string | null; published: string | null; dedupe: string };
+export declare function fromWatch(workspaceId: string, runId: string, said: string, where: string): LawCandidate | null;

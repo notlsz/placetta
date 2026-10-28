@@ -88,6 +88,7 @@ import { openingEstimateTests } from "./opening-estimate-test";
 import { filingProgressTests } from "./filing-progress-test";
 import { initiativeTests } from "./initiative-test";
 import { privacyTests } from "./privacy-test";
+import { lawWatchTests } from "./law-watch-test";
 
 /* ------------------------------------------------------------------ checks */
 
@@ -3318,6 +3319,7 @@ openingEstimateTests(ok, eq);
 filingProgressTests(ok, eq);
 await initiativeTests(ok, eq);
 privacyTests(ok, eq);
+lawWatchTests(ok, eq);
 await autopilotTests(ok, eq);
 await agentAuthorityTests(ok, eq);
 await textApproveTests(ok, eq);

@@ -101,3 +101,7 @@
 .ts-body .ts-switch span { color: var(--ink); }
 .sst-body .q-list, .sst-body .ck-list, .sst-body .ts-links { padding-left: 0; margin: 0; display: grid; gap: 8px; }
 .ts-body details summary { cursor: pointer; font-size: 13px; color: var(--blue-ink); margin: 2px 0 8px; }
+/* what Odelia watches for rule changes (src/Checks.tsx, src/lawWatch.ts watchList): one official page or register per line */
+.ts-body .watch-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13px; }
+.ts-body .watch-list a { overflow-wrap: anywhere; }
+.ts-body .watch-list small { color: var(--ink3); margin-left: 6px; }

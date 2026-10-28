@@ -3,6 +3,7 @@ import { useApp } from "./ctx";
 import { SetSheet } from "./SetUI";
 import { daysFromNow } from "./time";
 import { AREA_WORDS, checksFor, tally, type Check, type CheckState } from "./controls";
+import { watchList } from "./lawWatch";
 import "./trust.css";
 
 /* Checks (Stores): every store's compliance as pass or fail, failing first, each with the record behind it and one
@@ -34,6 +35,26 @@ export function CheckList({ checks, compact }: { checks: Check[]; compact?: bool
   );
 }
 
+/** What Odelia watches for rule changes: each official page Placetta quotes for this business's permits, and the
+ *  Federal Register for its federal agencies. A change found there reaches the owner only after the Placetta team has
+ *  checked it (src/lawWatch.ts). */
+function Watching() {
+  const { ws, lang, b } = useApp();
+  const zh = lang === "zh";
+  const list = useMemo(() => watchList(ws), [ws]);
+  if (!list.length) return null;
+  return (
+    <details className="q-margin-t">
+      <summary>{zh ? `Odelia 关注的官方来源 ${list.length} 个` : `Official sources Odelia watches for rule changes: ${list.length}`}</summary>
+      <p className="quiet">{zh ? "这些页面或公报一有变化，快哉团队会先对照官方来源核实，确认对您有影响后才通知您，同一变化只通知一次。"
+        : "When one of these changes, the Placetta team checks it against the official source first. You hear only about changes that affect you, once each."}</p>
+      <ul className="watch-list">{list.map(w => (
+        <li key={w.id + w.url}><a href={w.url} target="_blank" rel="noreferrer">{b(w.name)}</a><small>{w.kind === "register" ? (zh ? "联邦公报" : "Federal Register") : w.label}</small></li>
+      ))}</ul>
+    </details>
+  );
+}
+
 export function ChecksSheet({ onClose, store }: { onClose: () => void; store?: string }) {
   const { ws, lang, b } = useApp();
   const zh = lang === "zh";
@@ -62,6 +83,7 @@ export function ChecksSheet({ onClose, store }: { onClose: () => void; store?: s
           <button key={k} type="button" aria-pressed={filter === k} onClick={() => setFilter(k)}>{l}</button>)}
       </div>
       {shown.length ? <CheckList checks={shown} /> : <p className="quiet">{zh ? "这里没有项目。" : "Nothing here."}</p>}
+      <Watching />
     </SetSheet>
   );
 }

@@ -19,6 +19,9 @@
 // gets one Update with only what needs a person. Under Hands-off the asks go from her own address (ODELIA_EMAIL). A
 // specialist's answer to a question she asked (ask_specialist) wakes the job that waited on it. ODELIA_INITIATIVE=off
 // turns the morning off.
+// Law watch (law_watch.ts, src/lawWatch.ts): the Federal Register's feeds for the agencies behind Placetta's federal
+// forms (and any official feed in RULE_FEEDS) are read daily; new items wait for the Placetta team (rule_alerts), and only
+// a change the team approved, in its own words, reaches the businesses it affects, once each.
 // Odelia's bill: owners get an Update at 50% and 80% of the month's allowance (ai_allowance_alerts), and a workspace
 // that spends more than AI_WS_DAILY_LIMIT_USD in a day (default $10), or more than 5x the median workspace that day,
 // goes into saver mode until midnight UTC with a task for the team (ai_throttle_sweep).
@@ -46,6 +49,8 @@ import { inspectionWork, PREP } from "./inspections.ts";
 import { runStatusChecks, type StatusFiling, type StatusIO, type StatusRun, type WsState } from "./status_checks.ts";
 import { initiative, movePrompt, specialistWake, type ChaseRow, type InitIO } from "./initiative.ts";
 import { carryDaily, carryOutbox, type Start } from "./carry.ts";
+import { feedsFor, lawWatch } from "./law_watch.ts";
+import type { Alert, WsLite } from "../../../src/lawWatch.ts";
 import { mailOutReady, sendMail as sendOdeliaMail, mailBody } from "../_shared/mail.ts";
 import { sendEmail, systemMailReady } from "../_shared/email.ts";
 import { suppressedIn } from "../_shared/suppression.ts";
@@ -756,6 +761,34 @@ Deno.serve(async (req) => {
     } catch (e) { console.error("initiative", String(e).slice(0, 160)); }
   }
 
+  // Law watch (law_watch.ts): the official feeds read, what's new queued for the team, and each change the team approved
+  // as one Update for every business it affects. LAW_WATCH=off turns it off.
+  let law: { feeds: number; read: number; queued: number; errors: number; sent: number } | null = null;
+  if (Deno.env.get("LAW_WATCH") !== "off") {
+    try {
+      const r = await lawWatch({
+        feeds: feedsFor((k) => Deno.env.get(k)), today, now,
+        workspaces: [...states.entries()].map(([id, state]) => ({ id, state: state as WsLite })),
+        io: {
+          fetchText: async (url) => {
+            const res = await fetch(url, { headers: { "User-Agent": "Placetta law watch (https://placetta.com)", Accept: "application/rss+xml, application/atom+xml, text/xml" }, signal: AbortSignal.timeout(15_000) });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return await res.text();
+          },
+          report: async (c) => { const { data, error } = await admin.rpc("rule_alert_report", { p_alerts: c }); if (error) throw new Error(error.code ?? "rule_alert_report"); return Number(data ?? 0); },
+          approved: async () => {
+            const { data, error } = await admin.from("rule_alerts").select("id, workspace_id, jurisdiction, forms, headline, body, source_url, source_label, effective, decided_at")
+              .eq("status", "approved").gt("decided_at", new Date(now - 31 * 864e5).toISOString()).limit(500);
+            if (error) { if (error.code !== "42P01" && error.code !== "PGRST205") throw new Error(error.code); return []; }
+            return (data ?? []) as Alert[];
+          },
+        },
+      });
+      for (const u of r.updates) byWs.get(u.workspace_id)?.push(u);
+      law = { feeds: r.feeds, read: r.read, queued: r.queued, errors: r.errors, sent: r.updates.length };
+    } catch (e) { console.error("law watch", String(e).slice(0, 160)); }
+  }
+
   // Record them; the unique (workspace, dedupe) key keeps a day's run from repeating an earlier one.
   for (const [ws, list] of byWs) {
     if (!list.length) continue;
@@ -1168,5 +1201,5 @@ Deno.serve(async (req) => {
     { app: APP, today, limit: 500 }).catch((e) => { console.error("mention notices", String(e).slice(0, 160)); return null; });
 
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed, worker_wake: sweep.wake ?? null, fell_back: sweep.fell_back ?? 0 } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(MAIL_ON && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, chases_sent: initiativeSent, agency_asks: answered, status_checks: status, carry: carried, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled, billing_ok: billingOk });
+  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed, worker_wake: sweep.wake ?? null, fell_back: sweep.fell_back ?? 0 } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(MAIL_ON && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, chases_sent: initiativeSent, agency_asks: answered, status_checks: status, carry: carried, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled, billing_ok: billingOk, law_watch: law });
 });
