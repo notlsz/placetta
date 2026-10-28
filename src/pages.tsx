@@ -155,7 +155,7 @@ export function RouteLine({ a, app }: { a: Approval; app?: Application }) {
   const { b } = useApp();
   const r = approvalRoute(a, app);
   if (!r) return null;
-  return <span className="appr-route"><em>{b(r.who)}</em>{r.steps?.map((s, i) => <span key={i} className="appr-time">{b(s)}</span>)}{r.time && <span className="appr-time"><I.clock />{b(r.time)}</span>}</span>;
+  return <span className="appr-route"><em>{b(r.who)}</em>{r.steps?.map((s, i) => <span key={i} className="appr-time">{b(s)}</span>)}{r.time && <span className="appr-time"><I.clock />{b(r.time)}</span>}{r.faster && <span className="appr-time">{b(r.faster)}</span>}</span>;
 }
 
 /** One thing only you can do, with its one tap: Approve opens the approval (you confirm there), Upload opens the file

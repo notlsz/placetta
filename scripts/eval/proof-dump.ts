@@ -5,8 +5,11 @@ import { GENERIC_SOURCES } from "../../src/plan/preview";
 import { STATE_SOURCES } from "../../src/plan/ask";
 import { KIND_FACTS } from "../../src/forms/kinds";
 import { LIFECYCLE_SOURCES } from "../../src/forms/lifecycle";
+import { speedSources } from "../../src/forms/speed";
 const out: { id: string; read: string; quote: string }[] = [];
 for (const f of FORMS) if (f.proof) out.push({ id: f.id, read: f.proof.read, quote: f.proof.quote });
+// the company filings' processing times, expedite tiers, agent rules and reports (src/forms/entities.ts)
+out.push(...speedSources(FORMS));
 // what differs by kind of food business (src/forms/kinds.ts)
 for (const k of KIND_FACTS) out.push({ id: `kind:${k.id}`, read: k.proof.read, quote: k.proof.quote });
 // the lifecycle's own sources (src/forms/lifecycle.ts): labels, workplace rules, what an agency decides

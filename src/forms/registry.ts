@@ -19,8 +19,10 @@ import { INTL_FORMS } from "./intl";
 import { FINISH_FIXES, FINISH_FORMS } from "./finish";
 import { SECTOR_FORMS } from "./sectors";
 import { EXPANSION_FIXES, EXPANSION_FORMS } from "./expansion";
-import { VERIFY_FIXES, VERIFY_FORMS, VERIFY_REFERENCE } from "./verify";
+import { VERIFY_BLOCKED, VERIFY_FIXES, VERIFY_FORMS, VERIFY_REFERENCE } from "./verify";
 import { NATIONS_FIXES, NATIONS_FORMS } from "./nations";
+import { applyEntities, buildState, sElection } from "./entities";
+import { ENTITY_STATES } from "./entity-data";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -35,7 +37,8 @@ export type FormField = { id: string; line: string; label: Bi; hint?: Bi; option
 export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; alcohol?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; outOfState?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean; reference?: boolean;
   wood?: boolean; upholstered?: boolean; clothingStorage?: boolean;
   salon?: boolean; autoRepair?: boolean; devices?: boolean; manufactures?: boolean; office?: boolean;   // the landing page's sectors (src/forms/sectors.ts)
-  terrace?: boolean };   // terrace: tables and chairs outside on the street (a pavement licence, a terrasse, a Sondernutzung)   // furniture: wood goods, upholstered furniture, clothing storage units (src/forms/furniture.ts)   // reference: listed in the library and answers, never added to a plan
+  terrace?: boolean;
+  corp?: boolean };   // corp: the company is (or will be) a corporation, not an LLC (src/forms/entities.ts)   // terrace: tables and chairs outside on the street (a pavement licence, a terrasse, a Sondernutzung)   // furniture: wood goods, upholstered furniture, clothing storage units (src/forms/furniture.ts)   // reference: listed in the library and answers, never added to a plan
 
 export type SignSpot = { page: number; x: number; y: number; w: number; h: number; date?: { x: number; y: number; size: number } };
 
@@ -85,6 +88,47 @@ export type OfficialForm = {
   /** Internal only, never shown or cited: a secondary source (a law firm, a blog, an aggregator) that named this filing
       when no official page could be read to confirm it. Staff follow it up; the entry stays unverified (no proof). */
   lead?: string;
+  /** The agency's standard processing time, from its own page (src/forms/speed.ts). */
+  processing?: Processing;
+  /** Paid faster service the agency offers for this filing, each tier from its own page (src/forms/speed.ts). */
+  expedite?: Expedite[];
+  /** A company filing (src/forms/entities.ts): what it does for which kind of company. */
+  entity?: EntityFiling;
+};
+
+/* ------------------------------------------------------------------ speed and company filings (shared types)
+   Read by the plan (src/plan.ts, src/plan/preview.ts), the price (src/pricing.ts), the approval card and the licenses'
+   expedite UX. Each fact carries the official page's own sentence (under 25 words), its URL and the day it was read,
+   checked by scripts/eval/proof-read.py like every proof. No tier, fee or time is stated that a page didn't state. */
+
+/** An official page's own sentence backing one fact. */
+export type FactSource = { url: string; quote: string; checked: string };
+/** One paid expedite tier: "24-hour", "Same day", "2-hour". feeUsd is on top of the filing fee. hours: the turnaround
+ *  in hours when the page states one (24, 2, 1; same day = 8), else null. */
+export type Expedite = { label: Bi; feeUsd: number | null; turnaround: Bi; hours: number | null; source: FactSource; note?: Bi };
+/** The standard (unexpedited) processing time. days: calendar days when the page states a number, else null. */
+export type Processing = { standard: Bi; days: number | null; source: FactSource };
+export type EntityKind = "llc" | "corp";
+/** form: creates a new company in the state. qualify: registers a company formed elsewhere (another state or country)
+ *  to do business in the state. election: a federal tax election for an existing company (IRS Form 2553). */
+export type EntityAction = "form" | "qualify" | "election";
+export type EntityFiling = {
+  kind: EntityKind; action: EntityAction;
+  /** Must the company keep a registered (or statutory, or resident) agent in the state? With its source. */
+  agent?: { required: boolean; source?: FactSource; note?: Bi };
+  /** The recurring report Odelia renews: its name, fee, due-date rule in words, and its source. */
+  report?: { name: Bi; feeUsd: number | null; due: Bi; source?: FactSource; feeSource?: FactSource };
+  /** The sentence that states the filing fee, when the entry's proof (from an earlier pass) states the requirement. */
+  feeSource?: FactSource;
+  /** Why the row has no proof: the official page refused automated reads (VERIFY_BLOCKED style), for a person to read. */
+  blocked?: string;
+  /** The portal's flow needs an account login before any form is shown: no playbook is written for it. */
+  loginOnly?: boolean;
+  /** Why no processing time or expedite tier is stated though the filing itself is verified (the page that has them
+      refused automated reads): for a person to read in a browser. */
+  speedBlocked?: string;
+  /** Who may use it, when the agency limits it (the S election: no nonresident alien shareholders). */
+  eligibility?: { note: Bi; source: FactSource };
 };
 
 const F = (id: string, line: string, en: string, zh: string, options?: string[], hint?: Bi): FormField => ({ id, line, label: B(en, zh), ...(options ? { options } : {}), ...(hint ? { hint } : {}) });
@@ -752,6 +796,21 @@ for (const f of FORMS) { const p = PROOF[f.id]; if (p && !f.proof) { f.proof = p
 export const AUDIT_MISSING = [...applyFixes(FORMS), ...applyFixes(FORMS, FINISH_FIXES), ...applyFixes(FORMS, EXPANSION_FIXES), ...applyFixes(FORMS, VERIFY_FIXES), ...applyFixes(FORMS, NATIONS_FIXES),
   ...VERIFY_REFERENCE.filter(id => { const f = FORMS.find(x => x.id === id); if (f) f.needs = { ...f.needs, reference: true }; return !f; })];
 
+/* Company formation and foreign qualification in every state and DC (src/forms/entities.ts, the data in
+   src/forms/entity-data.ts): the LLC's and the corporation's formation, and the registration of a company formed
+   elsewhere, each with its processing time, expedite tiers, registered agent rule and recurring report. Last, so the
+   rows the library already had (California's LLC-1, Texas's Form 205) get this pass's facts; plus the S election. */
+export const ENTITY_ROWS = ENTITY_STATES.flatMap(buildState);
+export const ENTITY_MISSING = [...applyEntities(FORMS, ENTITY_ROWS), ...sElection(FORMS, {
+  foreign: ["https://www.irs.gov/instructions/i2553", "It has no nonresident alien shareholders (other than as potential current beneficiaries of an ESBT)."],
+  due: ["https://www.irs.gov/instructions/i2553", "Form 2553 generally must be filed no later than 2 months and 15 days after the date entered for item E."],
+})];
+// filings only an LLC makes stay out of a corporation's plan: New York's LLC publication, California's LLC tax and the
+// LLC's Statement of Information (a corporation files its own, src/forms/entity-data.ts)
+for (const id of ["ny-dos-pub", "ca-ftb-3522", "ca-llc-12"]) { const f = FORMS.find(g => g.id === id); if (f && !(f.unless ?? []).includes("corp")) f.unless = [...(f.unless ?? []), "corp"]; }
+// a company row whose official page couldn't be read says what blocked it, as every unverified entry does
+for (const x of ENTITY_ROWS) { const f = FORMS.find(g => g.id === x.form.id); if (f && !f.proof && f.entity?.blocked) VERIFY_BLOCKED[f.id] = f.entity.blocked; }
+
 export const formById = (id: string) => FORMS.find(f => f.id === id);
 
 /** What kind of business it is, from what it sells. */
@@ -809,7 +868,10 @@ export function placesOf(place: string): Where[] {
     const c = up?.county ? up : world.city?.state && !outside ? countyFor(world.city.en, world.city.state) : undefined;
     if (c?.county && !c.ownHealth && !out.includes(c.county.code)) out.push(c.county.code);
     if (c?.county?.code === "LAC" && c.unincorporated) out.push("LACU");
-    if (st && /^[A-Z]{2}$/.test(st) && !out.includes(st)) out.push(st);
+    // Louisiana's postal code is the City of Los Angeles's code here ("LA"), so Louisiana's own filings are under "LOU"
+    // and a Louisiana address never picks up Los Angeles's steps
+    const stCode = st === "LA" ? "LOU" : st;
+    if (stCode && /^[A-Z]{2,3}$/.test(stCode) && !out.includes(stCode)) out.push(stCode);
   }
   // A "Las Vegas" address is in the City of Las Vegas or in unincorporated Clark County (the Strip is in Paradise), and
   // each licenses its own businesses; Henderson and North Las Vegas license their own too. The Health District's steps

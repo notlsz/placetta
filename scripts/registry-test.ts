@@ -9,10 +9,11 @@
 //   - the source audit (src/forms/audit.ts) found every entry it fixes;
 //   - the entries this audit added carry no bullet or dot separators and no leading zeros in their copy.
 import { readFileSync } from "node:fs";
-import { AUDIT_MISSING, FORMS, formsFor, placesOf } from "../src/forms/registry";
+import { AUDIT_MISSING, ENTITY_MISSING, FORMS, formsFor, placesOf } from "../src/forms/registry";
 import { KIND_FACTS } from "../src/forms/kinds";
 import { CITIES, COUNTRIES, STATES, EU_MEMBERS } from "../src/forms/world";
 import { COUNTIES } from "../src/forms/usplace";
+import { STATES as US_STATES } from "../src/plan/line";
 import { US_GAPS } from "../src/forms/us-gaps";
 import { INTL_FORMS } from "../src/forms/intl";
 import { MEXICO_GAPS } from "../src/forms/mexico";
@@ -29,6 +30,9 @@ const US_CODES = new Set<string>(["US", "NY", "CA", "TX", ...STATES.map(s => s.c
   ...CITIES.filter(c => c.country === "US").map(c => c.code)]);
 // county-like codes the registry files under that aren't in COUNTIES (the Las Vegas split, unincorporated LA County)
 for (const c of ["NYC", "LA", "HOU", "LACU", "CLK", "LVC", "SNHD", "LV"]) US_CODES.add(c);
+// every state and DC: the company filings (src/forms/entities.ts) are filed under each state's own code
+for (const [c] of US_STATES) US_CODES.add(c);
+US_CODES.add("LOU");   // Louisiana, whose postal code is the City of Los Angeles's code here (placesOf)
 const ABROAD = new Set<string>(["EU", ...EU_MEMBERS, ...COUNTRIES.filter(c => c.code !== "US").map(c => c.code),
   ...CITIES.filter(c => c.country !== "US").flatMap(c => [c.code, ...(c.state ? [c.state] : [])])]);
 
@@ -63,6 +67,8 @@ for (const k of KIND_FACTS) {
   if (!DAY.test(k.proof.checked) || !/^https?:\/\//.test(k.proof.read)) fail(`kind fact ${k.id}: proof read date or URL`);
 }
 if (AUDIT_MISSING.length) fail(`the audit fixes entries the registry doesn't have: ${AUDIT_MISSING.join(", ")}`);
+// company filings that enrich an entry the registry lacks, or whose fee read now differs from the one it had
+for (const m of ENTITY_MISSING) fail(`company filing: ${m}`);
 
 // the entries this audit added: bilingual copy, no bullet or dot separators, no leading zeros
 for (const f of [...US_GAPS, ...INTL_FORMS, ...MEXICO_GAPS, ...FINISH_FORMS, ...VERIFY_FORMS]) {

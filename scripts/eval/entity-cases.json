@@ -1,0 +1,65 @@
+[
+  {
+    "id": "de-llc",
+    "what": "Online furniture seller",
+    "where": "Wilmington, DE",
+    "options": {},
+    "expect": { "official": "de-llc-form", "fee": 110, "agency": "Delaware Division of Corporations", "tiers": ["1-hour", "2-hour", "Same day", "24-hour"] },
+    "mustNot": ["de-corp-form", "de-llc-qualify", "de-corp-qualify"],
+    "source": "https://corpfiles.delaware.gov/Fee_Schedule/AugustFee2026.pdf"
+  },
+  {
+    "id": "ca-llc",
+    "what": "Bubble tea shop",
+    "where": "San Jose, CA",
+    "options": {},
+    "expect": { "official": "ca-llc-1", "fee": 70, "agency": "California Secretary of State", "tiers": ["24-hour", "Same day", "4-hour"] },
+    "mustNot": ["ca-corp-form", "ca-llc-5", "ca-corp-qualify"],
+    "source": "https://www.sos.ca.gov/business-programs/business-entities/forms/limited-liability-companies-california-domestic"
+  },
+  {
+    "id": "ny-llc",
+    "what": "Bubble tea shop",
+    "where": "Flushing, NY",
+    "options": {},
+    "expect": { "official": "ny-dos-1336", "fee": 200, "agency": "New York Department of State", "tiers": ["24-hour", "Same day", "2-hour"] },
+    "mustNot": ["ny-corp-form", "ny-dos-foreign-llc", "ny-corp-qualify"],
+    "source": "https://dos.ny.gov/fee-schedules"
+  },
+  {
+    "id": "tx-llc",
+    "what": "Restaurant",
+    "where": "Houston, TX",
+    "options": {},
+    "expect": { "official": "tx-205", "fee": 300, "agency": "Texas Secretary of State", "tiers": ["Same day", "Next day", "Standard expedited"] },
+    "mustNot": ["tx-corp-form", "tx-304", "tx-corp-qualify"],
+    "source": "https://www.sos.state.tx.us/corp/instructions/205.shtml"
+  },
+  {
+    "id": "fl-llc",
+    "what": "Clothing store",
+    "where": "Miami, FL",
+    "options": {},
+    "expect": { "official": "fl-sunbiz", "fee": 125, "agency": "Florida Division of Corporations", "tiers": [] },
+    "mustNot": ["fl-corp-form", "fl-sunbiz-foreign-llc", "fl-corp-qualify"],
+    "source": "https://dos.fl.gov/sunbiz/forms/fees/"
+  },
+  {
+    "id": "ca-qualify-de-llc",
+    "what": "Bubble tea shop",
+    "where": "Arcadia, CA",
+    "options": { "entity": "Lotus Tea LLC", "formedIn": "DE" },
+    "expect": { "official": "ca-llc-5", "fee": 70, "agency": "California Secretary of State", "tiers": ["24-hour", "Same day", "4-hour"] },
+    "mustNot": ["ca-llc-1", "ca-corp-form", "ca-corp-qualify"],
+    "source": "https://www.sos.ca.gov/business-programs/business-entities/forms/limited-liability-companies-foreign-out-state-or-out-country"
+  },
+  {
+    "id": "ny-qualify-foreign-corp",
+    "what": "Clothing store",
+    "where": "Flushing, NY",
+    "options": { "entity": "Sunrise Apparel Inc.", "formedIn": "abroad" },
+    "expect": { "official": "ny-corp-qualify", "fee": 225, "agency": "New York Department of State", "tiers": ["24-hour", "Same day", "2-hour"] },
+    "mustNot": ["ny-dos-1336", "ny-dos-pub", "ny-dos-foreign-llc", "ny-corp-form"],
+    "source": "https://dos.ny.gov/fee-schedules"
+  }
+]

@@ -1,7 +1,8 @@
 // Many stores at once: a pasted store list becomes, per store, every official form in filing order with its fee,
 // how long the agency really takes, the date to file by for the opening date, and what renews and when.
 // Pure functions: the Stores page and the tests call them; nothing here talks to a server.
-import { formsFor, segmentOf, type OfficialForm, type Segment } from "./forms/registry";
+import { formsFor, segmentOf, type Expedite, type OfficialForm, type Segment } from "./forms/registry";
+import { expediteOf } from "./forms/speed";
 import { B, type Bi, type Deadline, type Store } from "./model";
 
 export type StoreRow = { name: string; address: string; opening?: string };
@@ -16,6 +17,7 @@ export type PlannedForm = {
   fileBy: string | null;               // the latest day to file and still open on time
   late: boolean;                       // fileBy is already past
   everyMonths: number | null;          // how often it renews
+  expedite: Expedite[];                // the agency's paid faster tiers, current only, fastest first (src/forms/speed.ts)
 };
 export type StorePlan = { row: StoreRow; forms: PlannedForm[]; fees: number; varies: number; fileFirst: string | null; late: number };
 
@@ -88,7 +90,7 @@ export function planStore(row: StoreRow, segment: Segment, stats: FormStat[], to
     const pub = form.takesDays !== undefined ? form.takesDays : publishedDays(form.takes);
     const days = st ? st.p90_days : pub;
     const fileBy = row.opening && days != null ? addDays(row.opening, -(days + BUFFER)) : null;
-    return { form, days, daysFrom: st ? "placetta" : pub != null ? "agency" : null, fileBy, late: !!fileBy && fileBy < today, everyMonths: renewMonths(form.renews) };
+    return { form, days, daysFrom: st ? "placetta" : pub != null ? "agency" : null, fileBy, late: !!fileBy && fileBy < today, everyMonths: renewMonths(form.renews), expedite: expediteOf(form, today) };
   });
   const dated = forms.map(f => f.fileBy).filter((d): d is string => !!d).sort();
   return {
@@ -128,10 +130,11 @@ export function toWorkspace(plans: StorePlan[], existing: Store[]): { stores: St
 /** The plan as CSV, for the expansion team's own tracker. */
 export function planCsv(plans: StorePlan[]): string {
   const q = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-  const head = ["Store", "Address", "Opening", "Form", "Title", "Agency", "How it's filed", "Fee (USD)", "Agency time (days)", "Time from", "File by", "Renews every (months)", "Official link"];
+  const head = ["Store", "Address", "Opening", "Form", "Title", "Agency", "How it's filed", "Fee (USD)", "Agency time (days)", "Time from", "File by", "Renews every (months)", "Expedite (agency fee, USD)", "Official link"];
   const lines = [head.map(q).join(",")];
   for (const p of plans) for (const f of p.forms) lines.push([p.row.name, p.row.address, p.row.opening ?? "", f.form.form, f.form.title.en, f.form.agency.en, f.form.how.en,
-    f.form.fee ?? "varies", f.days ?? "", f.daysFrom === "placetta" ? "Placetta filings" : f.daysFrom === "agency" ? "agency's published time" : "", f.fileBy ?? "", f.everyMonths ?? "", f.form.url].map(q).join(","));
+    f.form.fee ?? "varies", f.days ?? "", f.daysFrom === "placetta" ? "Placetta filings" : f.daysFrom === "agency" ? "agency's published time" : "", f.fileBy ?? "", f.everyMonths ?? "",
+    f.expedite.map(x => `${x.label.en} ${x.feeUsd ?? "varies"}`).join("; "), f.form.url].map(q).join(","));
   return lines.join("\n");
 }
 
