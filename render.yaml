@@ -41,6 +41,7 @@ services:
         - supabase/functions/file/dest/plains.ts
         - supabase/functions/file/dest/west.ts
         - supabase/functions/file/dest/midwest.ts
+        - supabase/functions/file/dest/newengland.ts
     envVars:
       # ---- the four values to paste when Render asks ----
       - key: SUPABASE_SERVICE_ROLE_KEY

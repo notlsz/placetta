@@ -11,6 +11,7 @@ import { MIDATLANTIC_DEST, MIDATLANTIC_TEAM } from "./dest/midatlantic.ts";
 
 import { WEST_DEST, WEST_TEAM_ONLY } from "./dest/west.ts";
 import { MIDWEST_DEST } from "./dest/midwest.ts";
+import { NEWENGLAND_DEST, NEWENGLAND_TEAM } from "./dest/newengland.ts";
 
 export type Address = { name: string; line1: string; line2?: string; city: string; state: string; zip: string; country?: string };
 
@@ -1960,6 +1961,7 @@ export const DEST: Record<string, Dest> = {
   ...PLAINS_DEST,
   ...WEST_DEST,
   ...MIDWEST_DEST,
+  ...NEWENGLAND_DEST,
 };
 
 /**
@@ -2069,6 +2071,7 @@ export const TEAM_ONLY: Record<string, { why: string; source: string; checked: s
   "chi-plan-review": { why: "Reviewed as part of the building permit by a city sanitarian; Public Health isn't on E-Plan.", source: "https://www.chicago.gov/content/dam/city/depts/cdph/FoodProtection/FP_Plan.Review.Requirements.2020_Feb2021.pdf", checked: "2026-10-17" },
   ...MIDATLANTIC_TEAM,
   ...WEST_TEAM_ONLY,
+  ...NEWENGLAND_TEAM,
 };
 
 const E164 = /^\+[1-9]\d{6,14}$/;

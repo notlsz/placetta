@@ -11877,5 +11877,385 @@
     "found": true,
     "sha256": "42c6dede0a75bdf5",
     "context": "rt the wages of agricultural workers also must report general business workers. an employing unit needs to notify the division when it becomes liable to pay taxes as an employer. this notification needs to be submitted to the division within 30 days from the"
+  },
+  {
+    "id": "ma-dph-wholesale-food",
+    "read": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXV/Chapter94/Section305C",
+    "quote": "No person shall carry on the business of a food processor or food distributor unless such person holds a valid license from the department.",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "eed679e7b763be3e",
+    "context": "ner of administration under the provisions of section three b of chapter seven. no person shall carry on the business of a food processor or food distributor unless such person holds a valid license from the department. any person who violates the provisions of this section shall be punished by a f"
+  },
+  {
+    "id": "ct-drs-sales",
+    "read": "https://portal.ct.gov/drs/businesses/new-business-resource-center/registering-with-drs",
+    "quote": "You must obtain a Sales and Use Tax Permit before making any sales.",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "ae2c3e2554c45756",
+    "context": "or operating a hotel, motel, lodging house, or bed and breakfast establishment. you must obtain a sales and use tax permit before making any sales. if you purchase an existing business, you may not use the sales and use tax per"
+  },
+  {
+    "id": "ct-drs-withholding",
+    "read": "https://portal.ct.gov/drs/businesses/new-business-resource-center/registering-with-drs",
+    "quote": "you are generally required to register with the Department of Revenue Services (DRS) to withhold Connecticut income tax.",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "ae2c3e2554c45756",
+    "context": "for income tax withholding? if you employ one or more workers in your business, you are generally required to register with the department of revenue services (drs) to withhold connecticut income tax. use myconnect to register for income tax withholding. if you are already regist"
+  },
+  {
+    "id": "ct-dol-ui",
+    "read": "https://portal.ct.gov/dol/knowledge-base/articles/unemployment-taxes/how-do-i-register",
+    "quote": "All employers of one or more persons (full or part-time) must register online by clicking the link above.",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "7bc891a3b0052146",
+    "context": "of liability follow. other conditions of liability who is required to register? all employers of one or more persons (full or part-time) must register online by clicking the link above. failure to register does not relieve the employer of the obligation to register"
+  },
+  {
+    "id": "ct-dcp-food",
+    "read": "https://prdext3.cga.ct.gov/2026/sup/chap_419b.htm",
+    "quote": "No corporation, firm or person shall operate a bakery, food manufacturing establishment or food warehouse with the intent of producing or storing products",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "b710b0ccac4b0a51",
+    "context": "shment and food warehouse remains subject to the provisions of chapter 418. (b) no corporation, firm or person shall operate a bakery, food manufacturing establishment or food warehouse with the intent of producing or storing products for human consumption without having first obtained from the commissioner of co"
+  },
+  {
+    "id": "ri-tax-permit",
+    "read": "https://webserver.rilegislature.gov/Statutes/TITLE44/44-19/44-19-1.htm",
+    "quote": "shall file with the tax administrator an application for a permit for each place of business.",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "594868a1b4a34c52",
+    "context": "o be included in the measure of the tax imposed under chapter 18 of this title, shall file with the tax administrator an application for a permit for each place of business. the application shall be in a form, include information, and bear any signature"
+  },
+  {
+    "id": "ri-tax-employer",
+    "read": "https://webserver.rilegislature.gov/Statutes/TITLE44/44-30/44-V/44-30-71.htm",
+    "quote": "Every employer maintaining an office or transacting business within this state and making payment of any wages subject to Rhode Island personal income tax",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "9cb99b3e31a88cda",
+    "context": " § 44-30-71 § 44-30-71. requirement of withholding tax from wages. (a) general. every employer maintaining an office or transacting business within this state and making payment of any wages subject to rhode island personal income tax to a resident or nonresident individual shall deduct and withhold from the wage"
+  },
+  {
+    "id": "ri-doh-food-wholesale",
+    "read": "https://webserver.rilegislature.gov/Statutes/TITLE21/21-27/21-27-10.htm",
+    "quote": "No person shall operate a food business as defined in § 21-27-1 unless he or she annually registers the business",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "010dd05c9020d453",
+    "context": "ents r.i. gen. laws § 21-27-10 § 21-27-10. registration of food businesses. (a) no person shall operate a food business as defined in § 21-27-1 unless he or she annually registers the business with the state director of health; provided, that food businesses conducted by "
+  },
+  {
+    "id": "ri-doh-food-service",
+    "read": "https://webserver.rilegislature.gov/Statutes/TITLE21/21-27/21-27-10.htm",
+    "quote": "No person shall operate a food business as defined in § 21-27-1 unless he or she annually registers the business",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "010dd05c9020d453",
+    "context": "ents r.i. gen. laws § 21-27-10 § 21-27-10. registration of food businesses. (a) no person shall operate a food business as defined in § 21-27-1 unless he or she annually registers the business with the state director of health; provided, that food businesses conducted by "
+  },
+  {
+    "id": "ri-doh-food-market",
+    "read": "https://webserver.rilegislature.gov/Statutes/TITLE21/21-27/21-27-10.htm",
+    "quote": "No person shall operate a food business as defined in § 21-27-1 unless he or she annually registers the business",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "010dd05c9020d453",
+    "context": "ents r.i. gen. laws § 21-27-10 § 21-27-10. registration of food businesses. (a) no person shall operate a food business as defined in § 21-27-1 unless he or she annually registers the business with the state director of health; provided, that food businesses conducted by "
+  },
+  {
+    "id": "vt-tax-sales",
+    "read": "https://tax.vermont.gov/business/register",
+    "quote": "You must register with the Vermont Department of Taxes if your business will collect any of the following taxes:",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "86e669dff636aacf",
+    "context": "h the vermont department of taxes please select sign up on the myvtax homepage. you must register with the vermont department of taxes if your business will collect any of the following taxes: sales and use tax meals and rooms tax employer withholding tax cannabis excise "
+  },
+  {
+    "id": "vt-tax-withholding",
+    "read": "https://tax.vermont.gov/business/register",
+    "quote": "You must register with the Vermont Department of Taxes if your business will collect any of the following taxes:",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "86e669dff636aacf",
+    "context": "h the vermont department of taxes please select sign up on the myvtax homepage. you must register with the vermont department of taxes if your business will collect any of the following taxes: sales and use tax meals and rooms tax employer withholding tax cannabis excise "
+  },
+  {
+    "id": "vt-dol-ui",
+    "read": "https://labor.vermont.gov/unemployment-insurance-modernization-employer-resources",
+    "quote": "How-To Register a Business (for new businesses; previously registered businesses do not need to re-register in e-Services)",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "d7049e6ba750a2ee",
+    "context": "ly reports how-to respond to fact finding requests how-to add a secondary logon how-to register a business (for new businesses; previously registered businesses do not need to re-register in e-services) how-to request a waiver how-to enter return to work dates how-to report a chang"
+  },
+  {
+    "id": "vt-doh-food-processor",
+    "read": "https://www.healthvermont.gov/environment/food-lodging-program/food-processing-establishments",
+    "quote": "Warehouses and distribution centers also need this type of license.",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "c4d8b00f79356761",
+    "context": "g, coffee, beverages, snacks, candy, chocolate, condiments, jam and jelly, etc. warehouses and distribution centers also need this type of license. how to get a food processor license determine which license you need. apply for"
+  },
+  {
+    "id": "vt-doh-retail-food",
+    "read": "https://www.healthvermont.gov/environment/food-lodging-program/retail-food-service-establishments",
+    "quote": "You will need a retail food license if you are operating a restaurant, commercial catering business, food truck, push cart, retail bakery,",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "941dfb6d54d98b08",
+    "context": "s for license holders what you need to know about getting a retail food license you will need a retail food license if you are operating a restaurant, commercial catering business, food truck, push cart, retail bakery, limited operation, seafood vending or shellfish reshipping/repacking business. "
+  },
+  {
+    "id": "me-mrs-sales",
+    "read": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_Central_reg_app_booklet%20.pdf",
+    "quote": "You have a business in which you make retail sales of tangible personal property or taxable services and you have not registered before.",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "e54fa438136f2908",
+    "context": "mployer required to withhold income taxes and you have not registered before. • you have a business in which you make retail sales of tangible personal property or taxable services and you have not registered before. • you have a business in which you import, export, sell, or distribute gasoline"
+  },
+  {
+    "id": "me-mrs-withholding",
+    "read": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_Central_reg_app_booklet%20.pdf",
+    "quote": "You are a new employer required to withhold income taxes and you have not registered before.",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "e54fa438136f2908",
+    "context": "require advance registration. generally, you must establish a tax account if: • you are a new employer required to withhold income taxes and you have not registered before. • you have a business in which you make retail sales of tangible personal prope"
+  },
+  {
+    "id": "me-dol-ui",
+    "read": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_Central_reg_app_booklet%20.pdf",
+    "quote": "Note: You must register directly with the Department of Labor for Unemployment Compensation Tax and Paid Family and Medical Leave.",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "e54fa438136f2908",
+    "context": "cial taxes • other business taxes • insurance taxes • electronic funds transfer note: you must register directly with the department of labor for unemployment compensation tax and paid family and medical leave. (see instructions on page 3) register online at: revenue.maine.gov (see instruc"
+  },
+  {
+    "id": "me-pfml",
+    "read": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_Central_reg_app_booklet%20.pdf",
+    "quote": "All employers with Maine employees are required to register with Maine Paid Leave at maine.gov/paidleave/.",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "e54fa438136f2908",
+    "context": "ision.uctax@maine.gov. • registration for maine paid family and medical leave - all employers with maine employees are required to register with maine paid leave at maine.gov/paidleave/. for registration assistance, contact the maine bureau of paid family and medica"
+  },
+  {
+    "id": "me-dacf-food",
+    "read": "https://legislature.maine.gov/statutes/22/title22sec2167.html",
+    "quote": "may not operate a food establishment or a food salvage establishment or act as a salvage broker unless licensed",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "38a950cbab2cd34a",
+    "context": "oods §2168 §2167. license required a person, firm, corporation or copartnership may not operate a food establishment or a food salvage establishment or act as a salvage broker unless licensed for that purpose by the commissioner. in the case of retail food establishments"
+  },
+  {
+    "id": "me-dacf-retail-food",
+    "read": "https://legislature.maine.gov/statutes/22/title22sec2167.html",
+    "quote": "may not operate a food establishment or a food salvage establishment or act as a salvage broker unless licensed",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "38a950cbab2cd34a",
+    "context": "oods §2168 §2167. license required a person, firm, corporation or copartnership may not operate a food establishment or a food salvage establishment or act as a salvage broker unless licensed for that purpose by the commissioner. in the case of retail food establishments"
+  },
+  {
+    "id": "me-hip-eating",
+    "read": "https://legislature.maine.gov/statutes/22/title22sec2492.html",
+    "quote": "may not conduct, control, manage or operate the following establishments for compensation or indirect compensation without a license issued by the department:",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "b3d535c58d1c19af",
+    "context": "ense required 1. license required. a person, corporation, firm or copartnership may not conduct, control, manage or operate the following establishments for compensation or indirect compensation without a license issued by the department: a. an eating establishment; [pl 2003, c. 452, pt. k, §20 (new); pl 2003, c. 452"
+  },
+  {
+    "id": "irs-1120f",
+    "read": "https://www.irs.gov/instructions/i1120f",
+    "quote": "a foreign corporation must file Form 1120-F if, during the tax year, the corporation:",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "17f605d845c01255",
+    "context": "ial return is required ( see special returns for certain organizations, later), a foreign corporation must file form 1120-f if, during the tax year, the corporation: was engaged in a trade or business in the united states, whether or not it had "
+  },
+  {
+    "id": "fda-lacf-fce",
+    "read": "https://www.fda.gov/food/registration-food-facilities-and-other-submissions/establishment-registration-process-filing-acidified-and-low-acid-canned-foods-lacf",
+    "quote": "when first engaging in the manufacture, processing, or packing of acidified foods (AF) or low-acid canned Foods (LACF) shall register and file with FDA",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "cb0d33a5f46426da",
+    "context": "fda.hhs.gov with your issue stated in the subject line. a commercial processor, when first engaging in the manufacture, processing, or packing of acidified foods (af) or low-acid canned foods (lacf) shall register and file with fda information including the name of the establishment, principal place of busines"
+  },
+  {
+    "id": "ct-llc-form:agent",
+    "read": "https://prdext3.cga.ct.gov/current/pub/chap_613a.htm",
+    "quote": "Each limited liability company and each registered foreign limited liability company shall designate and maintain a registered agent in this state.",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "d2becdd9ae7812b4",
+    "context": "ist of chapters) (return to list of titles) sec. 34-243n. registered agent. (a) each limited liability company and each registered foreign limited liability company shall designate and maintain a registered agent in this state. the designation of a registered agent is an affirmation of fact by the limited "
+  },
+  {
+    "id": "ct-llc-qualify:agent",
+    "read": "https://prdext3.cga.ct.gov/current/pub/chap_613a.htm",
+    "quote": "Each limited liability company and each registered foreign limited liability company shall designate and maintain a registered agent in this state.",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "d2becdd9ae7812b4",
+    "context": "ist of chapters) (return to list of titles) sec. 34-243n. registered agent. (a) each limited liability company and each registered foreign limited liability company shall designate and maintain a registered agent in this state. the designation of a registered agent is an affirmation of fact by the limited "
+  },
+  {
+    "id": "ct-corp-form:agent",
+    "read": "https://prdext3.cga.ct.gov/current/pub/chap_601.htm",
+    "quote": "a registered agent at such registered office, who may be: (A) A natural person who is a resident of this state;",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "e9f420bfae08c62f",
+    "context": "egistered office that may be the same as any of its places of business; and (2) a registered agent at such registered office, who may be: (a) a natural person who is a resident of this state; (b) a domestic corporation; (c) a foreign corporation which has procured a cert"
+  },
+  {
+    "id": "ma-sos:agent",
+    "read": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156C/Section5",
+    "quote": "a resident agent for service of process on the limited liability company, which agent must be an individual resident of the commonwealth,",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "377a701cf2a6e4a1",
+    "context": "ch shall be kept the records required by section nine to be maintained; and (2) a resident agent for service of process on the limited liability company, which agent must be an individual resident of the commonwealth, a domestic corporation, or a foreign corporation authorized to do business in t"
+  },
+  {
+    "id": "ma-corp-form:agent",
+    "read": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter156D/Section5.01",
+    "quote": "a registered agent who may be any of the following individuals or entities whose business office is also the registered office of the corporation:",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "25948d4b3e7aeaa0",
+    "context": "e that may, but need not be, the same as any of its places of business; and (2) a registered agent who may be any of the following individuals or entities whose business office is also the registered office of the corporation: (i) an individual, including the secretary or another officer of the corporatio"
+  },
+  {
+    "id": "ri-llc-form:agent",
+    "read": "https://webserver.rilegislature.gov/Statutes/TITLE7/7-16/7-16-11.htm",
+    "quote": "Each domestic or foreign registered limited liability company shall have a resident agent for service of process on the limited liability company",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "3cd6ee89333eb133",
+    "context": "d liability company act r.i. gen. laws § 7-16-11 § 7-16-11. resident agent. (a) each domestic or foreign registered limited liability company shall have a resident agent for service of process on the limited liability company who shall be either: (1) an individual resident of this state; or (2) a corpora"
+  },
+  {
+    "id": "ri-llc-qualify:agent",
+    "read": "https://webserver.rilegislature.gov/Statutes/TITLE7/7-16/7-16-11.htm",
+    "quote": "Each domestic or foreign registered limited liability company shall have a resident agent for service of process on the limited liability company",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "3cd6ee89333eb133",
+    "context": "d liability company act r.i. gen. laws § 7-16-11 § 7-16-11. resident agent. (a) each domestic or foreign registered limited liability company shall have a resident agent for service of process on the limited liability company who shall be either: (1) an individual resident of this state; or (2) a corpora"
+  },
+  {
+    "id": "ri-corp-form:agent",
+    "read": "https://webserver.rilegislature.gov/Statutes/TITLE7/7-1.2/7-1.2-501.htm",
+    "quote": "A registered agent, who may be: (i) An individual resident in this state;",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "c3222ab13385488a",
+    "context": "d office, which may be, but need not be, the same as its place of business. (2) a registered agent, who may be: (i) an individual resident in this state; (ii) a domestic corporation, a domestic limited partnership, a domestic limited"
+  },
+  {
+    "id": "vt-llc-form:agent",
+    "read": "https://legislature.vermont.gov/statutes/section/11/025/04007",
+    "quote": "A limited liability company and a foreign limited liability company authorized to do business in this State shall designate and continuously maintain:",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "1636dd9a98f60b33",
+    "context": "eral provisions (cite as: 11 v.s.a. § 4007) § 4007. designated office and agent a limited liability company and a foreign limited liability company authorized to do business in this state shall designate and continuously maintain: (1) a designated office for notification purposes, which may but need not be a "
+  },
+  {
+    "id": "vt-llc-qualify:agent",
+    "read": "https://legislature.vermont.gov/statutes/section/11/025/04007",
+    "quote": "A limited liability company and a foreign limited liability company authorized to do business in this State shall designate and continuously maintain:",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "1636dd9a98f60b33",
+    "context": "eral provisions (cite as: 11 v.s.a. § 4007) § 4007. designated office and agent a limited liability company and a foreign limited liability company authorized to do business in this state shall designate and continuously maintain: (1) a designated office for notification purposes, which may but need not be a "
+  },
+  {
+    "id": "me-llc-form:agent",
+    "read": "https://legislature.maine.gov/statutes/5/title5sec105.html",
+    "quote": "The name of the represented entity's commercial clerk or commercial registered agent; or",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "e5469535df436f4f",
+    "context": " agent 1. contents of filing. a clerk or registered agent filing must state: a. the name of the represented entity's commercial clerk or commercial registered agent; or [pl 2007, c. 323, pt. a, §1 (new); pl 2007, c. 323, pt. g, §4 (aff).] b. if the"
+  },
+  {
+    "id": "me-llc-qualify:agent",
+    "read": "https://legislature.maine.gov/statutes/5/title5sec105.html",
+    "quote": "The name of the represented entity's commercial clerk or commercial registered agent; or",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "e5469535df436f4f",
+    "context": " agent 1. contents of filing. a clerk or registered agent filing must state: a. the name of the represented entity's commercial clerk or commercial registered agent; or [pl 2007, c. 323, pt. a, §1 (new); pl 2007, c. 323, pt. g, §4 (aff).] b. if the"
+  },
+  {
+    "id": "me-corp-form:agent",
+    "read": "https://legislature.maine.gov/statutes/5/title5sec105.html",
+    "quote": "The name of the represented entity's commercial clerk or commercial registered agent; or",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "e5469535df436f4f",
+    "context": " agent 1. contents of filing. a clerk or registered agent filing must state: a. the name of the represented entity's commercial clerk or commercial registered agent; or [pl 2007, c. 323, pt. a, §1 (new); pl 2007, c. 323, pt. g, §4 (aff).] b. if the"
+  },
+  {
+    "id": "me-corp-qualify:agent",
+    "read": "https://legislature.maine.gov/statutes/5/title5sec105.html",
+    "quote": "The name of the represented entity's commercial clerk or commercial registered agent; or",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "e5469535df436f4f",
+    "context": " agent 1. contents of filing. a clerk or registered agent filing must state: a. the name of the represented entity's commercial clerk or commercial registered agent; or [pl 2007, c. 323, pt. a, §1 (new); pl 2007, c. 323, pt. g, §4 (aff).] b. if the"
   }
 ]
