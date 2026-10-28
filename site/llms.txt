@@ -15,6 +15,7 @@ Free license guides: 103 cities in 29 countries (41 in the US), 24 kinds of busi
 - [中文开店许可指南](https://www.placetta.com/guides/zh/): every city guide in Chinese
 - [About Placetta](https://www.placetta.com/about.html): the company, what it does, where it works and its prices
 - [How the guides are sourced and checked](https://www.placetta.com/editorial.html): the official-source rule
+- [Measured results](https://www.placetta.com/stats.html): what Placetta's filings take, published once 20 real filings are behind a number
 - [License guides, city by city](https://www.placetta.com/guides/): every city, business and official form
 - [Full text of the answers and city guides](https://www.placetta.com/llms-full.txt)
 - [Structured data for all guides](https://www.placetta.com/guides/data.json)

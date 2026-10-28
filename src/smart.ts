@@ -10,7 +10,7 @@ import { fmtDay } from "./time";
 import { filingBlockers, isBlank } from "./core";
 import { formById, placesOf, segmentOf } from "./forms/registry";
 import type { Application, Approval, Deadline, Field, Status, Store, Workspace } from "./model";
-import type { FormStat } from "./plan";
+import type { AgencyStat, FormStat } from "./plan";
 import { calendarDays, expediteOptions, hostOf, timingOf, type Timing } from "./forms/expedite";
 import { BY_HAND, carriesIdentifier, emailsIn, governmentAddress, SECRET_NOTE, secretNumber } from "./guard";
 import { ein as einCheck, latin as latinCheck, premises as premisesCheck, PREMISES_LINE } from "./validate";
@@ -246,7 +246,12 @@ export type OpeningPath = {
 export type Hinge = { app: string; name: Bi; agency: Bi; days: { fast: number; typical: number; slow: number }; timing: Timing; expedite?: { id: string; label: Bi } };
 /** What makes the estimate real: when each application went to the agency, and how long Placetta's own filings of
     each form took (filing_stats, only forms with 3 or more). */
-export type Evidence = { submitted?: Record<string, string>; stats?: FormStat[] };
+export type Evidence = { submitted?: Record<string, string>; stats?: FormStat[]; agencies?: AgencyStat[] };
+
+/** An agency's observed time is used once this many of its filings were approved (outcome_rules agency_min_n). */
+export const AGENCY_MIN_N = 5;
+/** The key an agency's observed time is kept under (agency_times): its English name, trimmed and lower case. */
+export const agencyKey = (name?: string | null) => (name ?? "").trim().toLowerCase();
 
 const BUFFER = 7;
 const addDays = (iso: string, n: number) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
@@ -269,6 +274,12 @@ export function stepTiming(a: Application, ev: Evidence = {}): { timing: Timing;
   if (st) {
     const sp = { fast: st.median_days, typical: st.median_days, slow: Math.max(st.median_days, st.p90_days), unit: "calendar" as const };
     return { timing: { ...sp, kind: "measured", say: B(`${st.median_days} days on Placetta's filings, ${st.p90_days} at the slow end`, `快哉实际办理 ${st.median_days} 天，慢的情况 ${st.p90_days} 天`) }, days: sp, ...chosen };
+  }
+  // the agency's own observed time on Placetta's approved filings (any of its forms), once 5 or more are behind it
+  const ag = ev.agencies?.find(x => x.agency === agencyKey(a.agency?.en) && x.n >= AGENCY_MIN_N);
+  if (ag) {
+    const sp = { fast: ag.median_days, typical: ag.median_days, slow: Math.max(ag.median_days, ag.p90_days), unit: "calendar" as const };
+    return { timing: { ...sp, kind: "measured", say: B(`${ag.median_days} days at this agency on ${ag.n} of Placetta's approved filings, ${ag.p90_days} at the slow end`, `该机构在快哉 ${ag.n} 份已批准申请中实际办理 ${ag.median_days} 天，慢的情况 ${ag.p90_days} 天`) }, days: sp, ...chosen };
   }
   const timing = timingOf(a);
   return { timing, days: each(timing, n => calendarDays(n, timing.unit)), ...chosen };

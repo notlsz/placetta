@@ -1,5 +1,6 @@
 import type { Span } from "../trace";
 import type { Bi } from "../model";
+import type { OutcomeMetrics, OutcomeRow } from "../outcomes";
 import { supabase, type ApiError } from "./api";
 
 /* ------------------------------------------------------------------ *
@@ -115,3 +116,7 @@ export type TaughtPlaybook = {
 export const playbookQueue = () => rpc<TaughtPlaybook[]>("playbook_queue");
 export const playbookDecide = (id: string, status: "approved" | "rejected" | "draft", note?: string) => rpc<{ id: string; status: string }[]>("playbook_decide", { p_id: id, p_status: status, p_note: note ?? null });
 export const governanceReports = () => rpc<GovernanceReport[]>("governance_reports_list");
+/** Measured outcomes (migration 20261105091400_outcomes): every number with its sample size, and one row per real
+ *  filing for the export. Placetta team only. */
+export const outcomeMetrics = () => rpc<OutcomeMetrics>("outcome_metrics");
+export const outcomeExport = () => rpc<OutcomeRow[]>("outcome_export");

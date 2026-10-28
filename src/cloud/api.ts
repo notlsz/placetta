@@ -1190,6 +1190,12 @@ export async function filingStats(): Promise<import("../plan").FormStat[]> {
   if (error) return [];
   return (data ?? []) as import("../plan").FormStat[];
 }
+/* Each agency's observed time from submission to approval on Placetta's filings: only agencies with 5 or more. */
+export async function agencyTimes(): Promise<import("../plan").AgencyStat[]> {
+  const { data, error } = await supabase().rpc("agency_times");
+  if (error) return [];
+  return (data ?? []) as import("../plan").AgencyStat[];
+}
 
 /* ------------------------------ text and call Odelia ------------------------------ */
 /** The phone this person linked to text and call Odelia, and what they want to hear about and when. */

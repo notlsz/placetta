@@ -76,7 +76,15 @@ export const ASSUME = {
   /** FOUNDER TO CONFIRM. Thinking tokens a Gemini 3 call adds. Gemini 3 always thinks and bills it as output; the
    *  offline fixtures can't measure it. The first live eval should (ai_events now records it). */
   thinkingTokensPerCall: 0,
+  /** FOUNDER TO CONFIRM. Minutes an owner spends on one touch of a filing, by kind: approving it, uploading a page,
+   *  picking up what Odelia handed back, answering (paying an agency link, replying). No production timing yet; the
+   *  measured outcomes (migration 20261105091400_outcomes.sql outcome_rules) turn touches into hours with these. */
+  ownerTouchMinutes: { approval: 2, upload: 5, hand_back: 15, answer: 5 },
 } as const;
+
+/** The gates on a measured number: the website shows one only with 20 real filings behind it, and the opening
+ *  estimate uses an agency's observed time only with 5 (outcome_rules public_min_n, agency_min_n). */
+export const OUTCOME_GATES = { publicMinN: 20, agencyMinN: 5 } as const;
 
 /* ------------------------------------------------------------------ the store ceiling (founder, 2026-10-22) */
 

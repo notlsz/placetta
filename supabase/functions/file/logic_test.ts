@@ -4,7 +4,7 @@ import { DEST, destinationProblems, staleDestinations, TO_VERIFY, type Dest } fr
 import {
   afterHold, asAgent, askedToResubmit, canFaxSigned, canFaxSignedFor, check, emailFor, envFrom, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holdMinutes,
   fallback, handBackDue, handoffPacket, holds, isForeign, killSwitchOn, selfFileScope, workerOn, workerState, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, PORTAL_FAILED, refusalOf, REVIEW_HOURS, rerouteDue,
-  sentByYou, signedCopy, teachRefusal, teamApproved, waysToSend, whyYours, YOURS_REF, checkCents, lobCheckBody, captchaPlan,
+  sentByYou, signedCopy, teachRefusal, teamApproved, waysToSend, whyYours, YOURS_REF, checkCents, lobCheckBody, captchaPlan, pastRejectionProblems,
 } from "./logic.ts";
 
 const WS = "11111111-1111-1111-1111-111111111111";
@@ -575,4 +575,19 @@ Deno.test("a fee that goes with a mailed form: a Lob check under the fee authori
     payee: "Secretary of State of Ohio, Business Services", from: { name: "Placetta" }, bank: "bank_1", cents: 2500, file: "https://x/signed.pdf", business: "Acme LLC" });
   assertEquals([body.amount, body.bank_account, body.mail_type, body.to.name, body.memo, body.attachment, body.metadata], [25, "bank_1", "usps_first_class", "Secretary of State of Ohio, Business Ser", "Assumed name certificate", "https://x/signed.pdf", { filing: "f1", purchase: "pu-1" }]);
   assert(body.message.length <= 400 && /enclosed/.test(body.message));
+});
+
+Deno.test("past rejections: the next filing of a form is checked against why the agency sent earlier ones back", () => {
+  const reasons = [{ reason: "Legal name does not match the articles. Signature missing.", seen: 3 }, { reason: "Lease copy not attached", seen: 1 }];
+  // nothing wrong: a real name, signed, every document done
+  const good = filing({ signature: { name: "Mei", signed_at: "2026-10-28", kind: "typed" } });
+  assertEquals(pastRejectionProblems(good, reasons), []);
+  // a placeholder in the field the agency named, no signature, a document it named still pending
+  const bad = filing({ fields: [{ id: "l1", label: b("Legal name"), value: "TBD" }], checklist: [{ label: b("Lease copy"), state: "todo" }] });
+  const p = pastRejectionProblems(bad, reasons);
+  assertEquals(p.map((x) => x.kind), ["missing", "signature", "file"]);
+  assert(p.every((x) => x.en.includes("sent this form back before") && x.zh.includes("退回")));
+  // an empty field is check()'s to say, never twice; a reason that names nothing on the form stops nothing
+  assertEquals(pastRejectionProblems(filing({ fields: [{ id: "l1", label: b("Legal name"), value: "" }], signature: { name: "M", signed_at: "x", kind: "typed" } }), reasons), []);
+  assertEquals(pastRejectionProblems(good, [{ reason: "Fee was short", seen: 1 }]), []);
 });

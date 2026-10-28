@@ -10,16 +10,18 @@ import { KIND as PARTNER_KIND } from "../Partner";
 import "../ode.css";
 import { LawQueue } from "./LawQueue";
 import { keep, SLOW_MS, totals, tree, type Span, type TraceFilter } from "../trace";
+import { outcomesCsv, shown, type Measured, type OutcomeMetrics } from "../outcomes";
 
 /* The team's pages beside the filing queue (src/cloud/Ops.tsx): the specialist review queue with its one-business-day
    target, Agent health (how Odelia runs: speed, first-try checks, tool errors, cost by vendor and model, saver mode,
    throttles, the slowest and most expensive runs with a replay of each, and the weekly summaries), partners (approve,
-   set the share, record payouts) and the incident log. Each opens at /app/queue/<tab>. */
+   set the share, record payouts), the measured outcomes (Outcomes: what each filing took, against what the alternative
+   costs, with the export for investors) and the incident log. Each opens at /app/queue/<tab>. */
 
-export type OpsTab = "filings" | "reviews" | "health" | "quality" | "partners" | "incidents";
+export type OpsTab = "filings" | "reviews" | "health" | "quality" | "outcomes" | "partners" | "incidents";
 const TABS: { id: OpsTab; label: Bi }[] = [
   { id: "filings", label: B("Filing queue", "申报队列") }, { id: "reviews", label: B("Review queue", "审核队列") },
-  { id: "health", label: B("Agent health", "Agent 健康") }, { id: "quality", label: B("Quality", "质量") }, { id: "partners", label: B("Partners", "合作伙伴") }, { id: "incidents", label: B("Incident log", "事件记录") },
+  { id: "health", label: B("Agent health", "Agent 健康") }, { id: "quality", label: B("Quality", "质量") }, { id: "outcomes", label: B("Outcomes", "成效") }, { id: "partners", label: B("Partners", "合作伙伴") }, { id: "incidents", label: B("Incident log", "事件记录") },
 ];
 export const useOpsTab = (): OpsTab => { const { sub } = useApp(); return TABS.some(t => t.id === sub) ? (sub as OpsTab) : "filings"; };
 
@@ -72,6 +74,7 @@ export function OpsMore({ tab }: { tab: Exclude<OpsTab, "filings"> }) {
   if (tab === "health") return <AgentHealth />;
   if (tab === "partners") return <PartnersAdmin />;
   if (tab === "quality") return <QualityQueue />;
+  if (tab === "outcomes") return <Outcomes />;
   return <Incidents />;
 }
 
@@ -595,6 +598,130 @@ function Incidents() {
           ))}</div>
         )}
       </section>
+    </Frame>
+  );
+}
+
+/* ------------------------------ measured outcomes ------------------------------ */
+
+/** "n 23": the sample a number was measured on. */
+const nOf = (n: number | null | undefined, zh: boolean) => (zh ? `样本 ${n ?? 0}` : `n ${n ?? 0}`);
+
+/** What each filing really took (migration 20261105091400_outcomes.sql), every number with its sample, the sourced
+    baseline, the flywheel and the export for investors. Probe workspaces never count. */
+function Outcomes() {
+  const { lang, say } = useApp();
+  const zh = lang === "zh";
+  const [m, setM] = useState<OutcomeMetrics | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { ops.outcomeMetrics().then(setM, e => say((e as api.ApiError).message)); }, [say]);
+  const exportCsv = async () => {
+    setBusy(true);
+    try {
+      const rows = await ops.outcomeExport();
+      const url = URL.createObjectURL(new Blob([outcomesCsv(rows, m)], { type: "text/csv;charset=utf-8" }));
+      const a = document.createElement("a");
+      a.href = url; a.download = `placetta-outcomes-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) { say((e as api.ApiError).message); } finally { setBusy(false); }
+  };
+  const tile = (label: string, value: string, x: Measured | { n: number }, warn = false) => (
+    <div className={warn ? "warn" : ""}><dt>{label}</dt><dd>{value}</dd><small>{nOf(x.n, zh)}</small></div>
+  );
+  const kind = (k: string) => (k === "diy" ? (zh ? "自己办" : "Do it yourself") : k === "expediter" ? (zh ? "代办公司" : "Expediter") : (zh ? "顾问" : "Consultant"));
+  return (
+    <Frame tab="outcomes" title={B("Outcomes", "成效")}
+      sub={B("What each filing really took, measured from the log, with the sample under every number. Probe workspaces never count.", "每份申请实际花了多少，按记录测量，每个数字都注明样本数。测试工作区不计入。")}
+      act={<button type="button" className="sbtn line" disabled={busy || !m} onClick={() => void exportCsv()}>{zh ? "导出 CSV" : "Export CSV"}</button>}>
+      {!m ? <p className="quiet">{zh ? "加载中…" : "Loading…"}</p> : (<>
+        <dl className="hq-tot ops-tot">
+          {tile(zh ? "已批准的许可证" : "Licenses approved", shown(m.licenses_approved.value, "", 0), m.licenses_approved)}
+          {tile(zh ? "批准用时中位数" : "Median days to approval", shown(m.median_days.value, zh ? " 天" : " days"), m.median_days)}
+          {tile(zh ? "全程无人经手" : "Filed with no person", m.human_free.pct == null ? "-" : `${m.human_free.pct}%`, m.human_free)}
+          {tile(zh ? "每张许可证店主操作次数" : "Owner touches per license", shown(m.owner_touches.mean), m.owner_touches)}
+          {tile(zh ? "每张许可证店主小时（估算）" : "Owner hours per license (estimated)", shown(m.owner_touches.hours_mean, "", 2), m.owner_touches)}
+          {tile(zh ? "每张许可证团队分钟" : "Team minutes per license", shown(m.team_minutes.mean), m.team_minutes)}
+          {tile(zh ? "每张许可证 AI 成本" : "AI cost per license", shown(m.ai_usd.mean, "$"), m.ai_usd)}
+          {tile(zh ? "每张许可证毛利" : "Gross margin per license", shown(m.margin.per_license_mean, "$"), m.margin, (m.margin.per_license_mean ?? 0) < 0)}
+          {tile(zh ? "按时续期" : "Renewed on time", m.renewals.on_time_pct == null ? "-" : `${m.renewals.on_time_pct}%`, m.renewals)}
+          {tile(zh ? "工作区留存（90 天）" : "Workspaces retained (90 days)", m.workspaces.retained_pct == null ? "-" : `${m.workspaces.retained_pct}%`, m.workspaces)}
+        </dl>
+        <p className="note">{zh
+          ? `店主小时按每次操作估算：批准 ${m.rules.touch_minutes.approval} 分钟，上传 ${m.rules.touch_minutes.upload} 分钟，交回处理 ${m.rules.touch_minutes.hand_back} 分钟，回复 ${m.rules.touch_minutes.answer} 分钟。团队按每小时 $${m.rules.team_hour_usd} 计。已排除 ${m.probe_filings_left_out} 份测试申请。`
+          : `Owner hours are estimated per touch: approving ${m.rules.touch_minutes.approval} min, an upload ${m.rules.touch_minutes.upload}, picking up a hand-back ${m.rules.touch_minutes.hand_back}, an answer ${m.rules.touch_minutes.answer}. Team time at $${m.rules.team_hour_usd} an hour. ${m.probe_filings_left_out} probe filings left out.`}</p>
+
+        <section className="sec">
+          <div className="sec-h"><h2>{zh ? "毛利" : "Gross margin"}<em className="pt-n">{nOf(m.margin.n, zh)}</em></h2></div>
+          <div className="tscroll"><table className="ah-t">
+            <thead><tr><th>{zh ? "收入" : "Revenue"}</th><th>Stripe</th><th>AI</th><th>{zh ? "浏览器" : "Browser"}</th><th>{zh ? "电话和传真" : "Phone and fax"}</th><th>{zh ? "团队" : "Team"}</th><th>{zh ? "毛利" : "Margin"}</th></tr></thead>
+            <tbody><tr><td>{shown(m.margin.revenue, "$")}</td><td>{shown(m.margin.stripe, "$")}</td><td>{shown(m.margin.ai, "$")}</td><td>{shown(m.margin.browser, "$")}</td><td>{shown(m.margin.telephony, "$")}</td><td>{shown(m.margin.team, "$")}</td><td>{shown(m.margin.total, "$")}{m.margin.pct != null ? ` (${m.margin.pct}%)` : ""}</td></tr></tbody>
+          </table></div>
+          <p className="note">{zh ? `收入为每份申请的许可证收费，不含订阅。另有工作区内 Odelia 对话和规划的 AI：每张许可证 ${shown(m.ai_usd.other_per_license, "$")}。` : `Revenue is the license charge on each filing, not the plan subscription. Odelia's chat and planning AI in those workspaces adds ${shown(m.ai_usd.other_per_license, "$")} a license.`}</p>
+        </section>
+
+        <section className="sec">
+          <div className="sec-h"><h2>{zh ? "飞轮：随同一表格申请次数增加" : "The flywheel: by how many times the form was filed before"}</h2></div>
+          {m.flywheel.length === 0 ? <div className="empty"><p>{zh ? "还没有已批准的申请。" : "No approved filings yet."}</p></div> : (
+            <div className="tscroll"><table className="ah-t">
+              <thead><tr><th>{zh ? "第几次" : "Filing of the form"}</th><th>{zh ? "样本" : "n"}</th><th>{zh ? "成本中位数" : "Median cost"}</th><th>{zh ? "天数中位数" : "Median days"}</th><th>{zh ? "团队分钟中位数" : "Median team minutes"}</th><th>{zh ? "无人经手" : "No person"}</th></tr></thead>
+              <tbody>{m.flywheel.map(b => <tr key={b.bucket}><td>{b.bucket}</td><td>{b.n}</td><td>{shown(b.median_cost_usd, "$")}</td><td>{shown(b.median_days)}</td><td>{shown(b.median_team_minutes)}</td><td>{b.human_free_pct == null ? "-" : `${b.human_free_pct}%`}</td></tr>)}</tbody>
+            </table></div>
+          )}
+          {m.first_vs_tenth.length > 0 && (
+            <div className="tscroll"><table className="ah-t">
+              <thead><tr><th>{zh ? "表格" : "Form"}</th><th>{zh ? "第 1 次成本" : "1st cost"}</th><th>{zh ? "第 10 次成本" : "10th cost"}</th><th>{zh ? "第 1 次天数" : "1st days"}</th><th>{zh ? "第 10 次天数" : "10th days"}</th></tr></thead>
+              <tbody>{m.first_vs_tenth.map(r => <tr key={r.form}><td>{r.form}</td><td>{shown(r.first_cost, "$")}</td><td>{shown(r.tenth_cost, "$")}</td><td>{shown(r.first_days)}</td><td>{shown(r.tenth_days)}</td></tr>)}</tbody>
+            </table></div>
+          )}
+        </section>
+
+        <section className="sec">
+          <div className="sec-h"><h2>{zh ? "各机构批准用时" : "Days to approval by agency"}</h2></div>
+          {m.by_agency.length === 0 ? <div className="empty"><p>{zh ? "还没有已批准的申请。" : "No approved filings yet."}</p></div> : (
+            <div className="tscroll"><table className="ah-t">
+              <thead><tr><th>{zh ? "机构" : "Agency"}</th><th>{zh ? "样本" : "n"}</th><th>{zh ? "中位数" : "Median days"}</th><th>{zh ? "用于开业估算" : "Used in the opening estimate"}</th></tr></thead>
+              <tbody>{m.by_agency.map(r => <tr key={r.agency ?? "?"}><td>{r.agency ?? "-"}</td><td>{r.n}</td><td>{shown(r.median_days)}</td><td>{r.n >= m.rules.agency_min_n ? (zh ? "是" : "Yes") : (zh ? `满 ${m.rules.agency_min_n} 份后` : `From ${m.rules.agency_min_n}`)}</td></tr>)}</tbody>
+            </table></div>
+          )}
+        </section>
+
+        <section className="sec">
+          <div className="sec-h"><h2>{zh ? "退回原因库" : "Why agencies sent filings back"}</h2></div>
+          <p className="note">{zh ? `已退回 ${m.rejections.rejected ?? 0} 份，要求补件 ${m.rejections.returned ?? 0} 次，重新提交 ${m.rejections.resubmissions ?? 0} 次（样本 ${m.rejections.n}）。Odelia 提交同一表格前会对照这些原因。` : `${m.rejections.rejected ?? 0} rejected, ${m.rejections.returned ?? 0} sent back for more, ${m.rejections.resubmissions ?? 0} resubmissions (n ${m.rejections.n}). Odelia checks the next filing of a form against these before it goes.`}</p>
+          {m.rejection_reasons.length > 0 && (
+            <div className="tscroll"><table className="ah-t">
+              <thead><tr><th>{zh ? "表格" : "Form"}</th><th>{zh ? "原因" : "Reason"}</th><th>{zh ? "次数" : "Seen"}</th></tr></thead>
+              <tbody>{m.rejection_reasons.map(r => <tr key={r.form + r.reason}><td>{r.form}</td><td>{r.reason}</td><td>{r.seen}</td></tr>)}</tbody>
+            </table></div>
+          )}
+        </section>
+
+        <section className="sec">
+          <div className="sec-h"><h2>{zh ? "录制步骤的复用次数" : "Recorded steps, and how often they were reused"}</h2></div>
+          {m.scripts.length + m.playbooks.length === 0 ? <div className="empty"><p>{zh ? "还没有复用。" : "Nothing reused yet."}</p></div> : (
+            <div className="tscroll"><table className="ah-t">
+              <thead><tr><th>{zh ? "步骤" : "Steps"}</th><th>{zh ? "复用" : "Reused"}</th><th>{zh ? "成功" : "Went through"}</th></tr></thead>
+              <tbody>
+                {m.scripts.map(x => <tr key={"s" + x.key}><td>{x.name}</td><td>{x.uses}</td><td>-</td></tr>)}
+                {m.playbooks.map(x => <tr key={"p" + x.host + x.official}><td>{x.official} ({x.host})</td><td>{x.runs}</td><td>{x.successes}</td></tr>)}
+              </tbody>
+            </table></div>
+          )}
+        </section>
+
+        <section className="sec">
+          <div className="sec-h"><h2>{zh ? "对照：其他办法的花费" : "Against the alternative"}</h2></div>
+          <div className="tscroll"><table className="ah-t">
+            <thead><tr><th>{zh ? "表格" : "Form"}</th><th>{zh ? "办法" : "Way"}</th><th>{zh ? "价格" : "Price"}</th><th>{zh ? "天数" : "Days"}</th><th>{zh ? "小时" : "Hours"}</th><th>{zh ? "来源" : "Source"}</th></tr></thead>
+            <tbody>{m.baseline.map(x => (
+              <tr key={x.form + x.kind + x.provider}><td>{x.form}</td><td>{kind(x.kind)}: {x.provider}</td><td>{shown(x.price_usd, "$")}</td>
+                <td>{x.days == null ? "-" : `${x.days}${x.days_unit === "business" ? (zh ? " 个工作日" : " business") : ""}`}</td><td>{shown(x.hours, "", 2)}</td>
+                <td><a href={x.source_url} target="_blank" rel="noreferrer">{(() => { try { return new URL(x.source_url).hostname.replace(/^www\./, ""); } catch { return x.source_url; } })()}</a> <small>{fmtDay(x.read_on, lang, true)}</small></td></tr>
+            ))}</tbody>
+          </table></div>
+          <p className="note">{zh ? `网站只在双方都有实测或有来源、且至少 ${m.rules.public_min_n} 份真实申请时才显示对照。` : `The website shows a comparison only where both sides are measured or sourced, with ${m.rules.public_min_n} or more real filings behind it.`}</p>
+        </section>
+      </>)}
     </Frame>
   );
 }

@@ -144,7 +144,7 @@ const LANDING_TITLE = { en: "Placetta: licenses, permits and registrations to op
   // crawlable links to the content for anything that doesn't run the page's script (people with it see the page as before)
   const data = JSON.parse(readFileSync("site/guides/data.json", "utf8"));
   const links = [["/guides/", "License guides, city by city"], ...data.hubs.business.slice(0, 7).map(x => [x.url.replace(ORIGIN, ""), x.name]), ...data.hubs.permits.map(x => [x.url.replace(ORIGIN, ""), x.name]),
-    ...data.cities.slice(0, 12).map(c => [c.url.replace(ORIGIN, ""), `Opening a business in ${c.city}`]), ["/about.html", "About Placetta"], ["/editorial.html", "How we source and check the guides"], ["/help/", "Help Center"], ["/trust", "Trust and security"], ["/ai.html", "How Placetta's AI works"]];
+    ...data.cities.slice(0, 12).map(c => [c.url.replace(ORIGIN, ""), `Opening a business in ${c.city}`]), ["/about.html", "About Placetta"], ["/editorial.html", "How we source and check the guides"], ["/help/", "Help Center"], ["/trust", "Trust and security"], ["/ai.html", "How Placetta's AI works"], ["/stats.html", "Measured results"]];
   landing = block(landing, "links", `<noscript><nav class="ctr" aria-label="Site" style="display:flex;flex-wrap:wrap;gap:8px 20px;padding:24px 0;font-size:14px">${links.map(([h, n]) => `<a href="${h}">${esc(n)}</a>`).join("")}</nav></noscript>`, "<footer>");
   put(LANDING, landing);
 }
@@ -176,7 +176,7 @@ const LANDING_TITLE = { en: "Placetta: licenses, permits and registrations to op
     extra: `<link rel="preload" as="image" href="/media/hero-poster.jpg" fetchpriority="high">\n${HREFLANG}` }), "</title>");
   page = page.replace(/<title>[^<]*<\/title>/, `<title>${esc(LANDING_TITLE.zh)}</title>`);
   const data = JSON.parse(readFileSync("site/guides/data.json", "utf8"));
-  const zlinks = [["/guides/zh/", "开店许可指南"], ...data.cities.slice(0, 12).map(c => [c.url.replace(ORIGIN, "").replace("/guides/", "/guides/zh/"), `${c.city} 开店许可指南`]), ["/help/", "帮助中心"], ["/trust", "信任中心"], ["/about.html", "关于快哉"]];
+  const zlinks = [["/guides/zh/", "开店许可指南"], ...data.cities.slice(0, 12).map(c => [c.url.replace(ORIGIN, "").replace("/guides/", "/guides/zh/"), `${c.city} 开店许可指南`]), ["/help/", "帮助中心"], ["/trust", "信任中心"], ["/about.html", "关于快哉"], ["/stats.html", "实测结果"]];
   page = block(page, "links", `<noscript><nav class="ctr" aria-label="网站" style="display:flex;flex-wrap:wrap;gap:8px 20px;padding:24px 0;font-size:14px">${zlinks.map(([h, n]) => `<a href="${h}">${esc(n)}</a>`).join("")}</nav></noscript>`, "<footer>");
   put(ZH, page);
 }
@@ -332,8 +332,43 @@ infoPage({
 <p><a href="/guides/zh/">开店许可指南</a>、<a href="/about.html">关于快哉</a>、<a href="/ai.html">快哉的 AI 如何工作</a>。</p>`,
 });
 
+/* ------------------------------------------------------------ measured results (site/stats.js fills them in) */
+// Every number on this page is measured on real filings and shown only with 20 or more behind it (public_outcomes in
+// supabase/migrations/20261105091400_outcomes.sql). Until then the line says so. Nothing here is typed by hand.
+const WAIT = ["We publish this once we have 20 filings.", "满 20 份申请后公布。"];
+const statRows = l => [
+  ["licenses_approved", "Licenses approved by the agency", "机构已批准的许可证"],
+  ["median_days", "Median days from submission to approval", "从提交到批准的天数中位数"],
+  ["human_free_pct", "Filed with no person handling it after the owner's approval", "店主批准后全程无人经手的申请"],
+  ["owner_touches", "Times the owner touched a license", "每张许可证店主操作次数"],
+  ["owner_hours", "Owner's hours per license", "每张许可证店主所花小时"],
+].map(([k, en, zh]) => `<tr data-metric="${k}"><th scope="row">${l ? zh : en}</th><td data-value>${WAIT[l]}</td></tr>`).join("");
+infoPage({
+  file: "site/stats.html", path: "/stats.html", title: "Placetta's measured results", titleZh: "快哉的实测结果", type: "WebPage",
+  desc: "What Placetta's filings really take, measured on real filings and published only once 20 or more are behind a number.",
+  en: `<div data-stats>
+<p>These numbers are measured on Placetta's real filings, not estimated or picked. Test runs never count. A number appears here only once 20 or more real filings are behind it, and it always shows how many.</p>
+<table><thead><tr><th scope="col">Measure</th><th scope="col">Result</th></tr></thead><tbody>${statRows(0)}</tbody></table>
+<h2>Against the alternative</h2>
+<div data-comparisons><p>We publish a comparison once we have 20 filings of a form and a public source for the other side: the agency's published processing time, an expediter's published price, or the agency's own estimate of the hours it takes to do yourself.</p></div>
+<h2>How it is measured</h2>
+<p>Days are counted from the day a filing reached the agency to the day the agency approved it. An owner touch is an approval, an upload, picking up something Odelia handed back, or an answer; hours are estimated per touch. "No person" means nobody at Placetta and nothing more from the owner after the approval. Comparisons name their source and the day it was read.</p>
+<p><a href="/about.html">About Placetta</a>, <a href="/editorial.html">how we source and check the guides</a>, <a href="/trust">trust and security</a>.</p>
+<script src="/stats.js" defer></script>
+</div>`,
+  zh: `<div data-stats>
+<p>这些数字来自快哉的真实申请实测，不是估算或挑选的。测试运行不计入。每个数字至少有 20 份真实申请支撑才会显示，并注明样本数。</p>
+<table><thead><tr><th scope="col">指标</th><th scope="col">结果</th></tr></thead><tbody>${statRows(1)}</tbody></table>
+<h2>与其他办法对比</h2>
+<div data-comparisons><p>某张表格满 20 份申请、且另一方有公开来源（机构公布的办理时间、代办公司公布的价格，或机构自己估算的办理小时数）后，我们才公布对比。</p></div>
+<h2>如何测量</h2>
+<p>天数从申请送达机构之日算到机构批准之日。店主操作指一次批准、一次上传、处理 Odelia 交回的事项或一次回复；小时数按每次操作估算。“无人经手”指店主批准后，快哉无人参与，店主也无需再做任何事。每项对比都注明来源和读取日期。</p>
+<p><a href="/about.html">关于快哉</a>、<a href="/editorial.html">我们如何核对来源</a>、<a href="/trust">信任与安全</a>。</p>
+</div>`,
+});
+
 /* ------------------------------------------------------------ sitemaps, robots, llms.txt */
-const PAGES = ["/", "/zh", "/about.html", "/editorial.html", "/help/", ...[...out.keys()].filter(f => /^site\/help\/.+\/index\.html$/.test(f)).map(f => f.slice(4).replace(/index\.html$/, "")), "/trust", "/ai.html", "/privacy.html", "/terms.html", "/authorization.html"];
+const PAGES = ["/", "/zh", "/about.html", "/editorial.html", "/stats.html", "/help/", ...[...out.keys()].filter(f => /^site\/help\/.+\/index\.html$/.test(f)).map(f => f.slice(4).replace(/index\.html$/, "")), "/trust", "/ai.html", "/privacy.html", "/terms.html", "/authorization.html"];
 const pagesXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${PAGES.map(p => `<url><loc>${ORIGIN}${p}</loc><lastmod>${NEXT[p]?.d ?? TODAY}</lastmod></url>`).join("\n")}\n</urlset>\n`;
 put("site/sitemaps/pages.xml", pagesXml);
 const maps = [...new Set(["pages.xml", ...readdirSync("site/sitemaps").filter(f => f.endsWith(".xml"))])].sort();
@@ -360,6 +395,7 @@ ${DESCRIPTION_ZH}快哉为每个门店地址梳理所需的全部执照、许可
 - [中文开店许可指南](${ORIGIN}/guides/zh/): every city guide in Chinese
 - [About Placetta](${ORIGIN}/about.html): the company, what it does, where it works and its prices
 - [How the guides are sourced and checked](${ORIGIN}/editorial.html): the official-source rule
+- [Measured results](${ORIGIN}/stats.html): what Placetta's filings take, published once 20 real filings are behind a number
 - [License guides, city by city](${ORIGIN}/guides/): every city, business and official form
 - [Full text of the answers and city guides](${ORIGIN}/llms-full.txt)
 - [Structured data for all guides](${ORIGIN}/guides/data.json)
