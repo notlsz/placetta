@@ -15,14 +15,17 @@
 // gets the plan from the registry and a link to claim it, in seconds and with no model; anything else gets one
 // question, once. With ODELIA_TEXT_START=off it gets one text explaining how to link it, then nothing for 90 days.
 // A verified number starts a run as that person in the workspace they used last ("switch to <name>" changes it);
-// On iMessage the typing bubble shows while Odelia works; "On it." goes out only if the run takes more than 8 seconds. Nothing is filed, paid, sent or deleted by text: the
-// reply carries a link to the approval in the app.
+// On iMessage the typing bubble shows while Odelia works; "On it." goes out only if the run takes more than 8 seconds.
+// Nothing is paid, sent or deleted by text, and the only thing filed is a card an owner approves by replying "YES" and
+// the 4-digit code from the text that asked (_shared/text_approval.ts, agent-run text_approve, the app's gates); else
+// the reply links to the approval in the app. Every text is scored by the injection rules first: one aimed at an AI is
+// held back, a suspicious one only reads and drafts.
 // Outbox: what the monitor and finished runs want to tell people, held for quiet hours (9pm to 8am theirs by
 // default), at most one call (odelia-voice dials) and three texts a day; pending items go out together in one text.
 // iMessage lines are kept healthy the way Lindy learned to after Apple banned its own line: people spread across lines,
 // replies always on the line they wrote to, at most LIMITS.newChatsPerLine new conversations a line a day (only the
 // verification code starts one), outbound paused on a line Linq scores CRITICAL, and the team told when a line slips.
-import { createClient } from "npm:@supabase/supabase-js@2.117.2";
+import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
 import {
   appLink, appOrigin, BLOCKED_BY_STOP, inboundFlood, inQuietHours, KEYWORD_REPLY, keyword, type Lang, localMinutes, LIMITS, normalizePhone, odeliaNumber,
   pickWorkspace, prettyPhone, randomCode, SAY, smsCountries, smsCountryAllowed, smsReady, splitSms, strangerMayGetReply, switchTarget, underDailyLimit,
@@ -35,12 +38,18 @@ import { hashLine, linqLineHealth, linqLines, linqReady, linqTyping, parseLinq, 
 import { sendStartReminders, startForStranger, textStartOn } from "../_shared/text_start_db.ts";
 import { publicStart } from "../_shared/text_start.ts";
 import { codeInText } from "../_shared/agent_inbox.ts";
+import { scoreText } from "../_shared/injection.ts";
+import { APPROVE_SAY, approvalAsk, approvalReply, cardByText } from "../_shared/text_approval.ts";
+import { takesIMessage } from "../_shared/deliver.ts";
+import { approvalCode } from "../_shared/odelia_db.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
-const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
+let admin: SupabaseClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
+/** Tests only (index_test.ts): a stand-in database (_shared/fakedb_testkit.ts). */
+export function useDb(db: unknown) { admin = db as SupabaseClient; }
 const env = (k: string) => Deno.env.get(k);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const ACK_AFTER_MS = 8000;
+const ACK_AFTER_MS = Number(Deno.env.get("ODELIA_ACK_AFTER_MS") ?? 8000) || 8000;
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
@@ -75,11 +84,12 @@ async function textNumber(to: string, text: string, userId: string | null = null
 type Inbound = { id?: string; from?: { phone_number?: string }; to?: { phone_number?: string }[]; text?: string; media?: unknown[]; autoresponse_type?: string | null };
 /** How a text came in: the iMessage line and conversation (Linq, with the service it actually used: iMessage, RCS or
  *  SMS), WhatsApp (and its message id, for the typing indicator), or nothing (Telnyx SMS). */
-type Via = { line?: string | null; chat?: string | null; app?: "whatsapp"; msg?: string; service?: string };
+type Via = { line?: string | null; chat?: string | null; app?: "whatsapp"; msg?: string; service?: string; flagged?: boolean };
 const waVia = (via: Via, lang: Lang) => (via.app === "whatsapp" ? { open: true, lang } : undefined);
 /** Plain SMS: Telnyx, or a Linq line that fell back to SMS. Its sender is the easiest to forge, so a run started from
- *  it only reads and drafts. Anything not known to be iMessage, RCS or WhatsApp counts as plain SMS. */
-export const plainSms = (via: Via) => via.app !== "whatsapp" && !(via.line && (via.service === "iMessage" || via.service === "RCS"));
+ *  it only reads and drafts. Anything not known to be iMessage, RCS or WhatsApp counts as plain SMS, and so does a text
+ *  the injection rules flagged. */
+export const plainSms = (via: Via) => !!via.flagged || (via.app !== "whatsapp" && !(via.line && (via.service === "iMessage" || via.service === "RCS")));
 
 async function inbound(p: Inbound, logId: number, via: Via = {}) {
   const now = new Date();
@@ -151,12 +161,15 @@ async function inbound(p: Inbound, logId: number, via: Via = {}) {
   }
   // They texted STOP earlier: only START turns texts back on.
   if (link.opted_out_at) return;
-  // Answers go back the way they wrote (the iMessage line, or WhatsApp), and so does everything after.
-  const app = via.app === "whatsapp" ? "whatsapp" : null;
+  // Answers go back the way they wrote (the iMessage line, WhatsApp, or Odelia's Telnyx number), and so does everything
+  // after; and Linq says whether their phone takes iMessage, which decides how updates go (_shared/deliver.ts).
+  const app = via.app === "whatsapp" ? "whatsapp" : via.line ? null : "sms";
   const moved: Record<string, unknown> = {};
   if (via.line && via.line !== link.line) moved.line = link.line = via.line;
   if (app !== (link.via ?? null)) moved.via = link.via = app;
-  if (app) moved.wa_last_in = link.wa_last_in = now.toISOString();
+  if (app === "whatsapp") moved.wa_last_in = link.wa_last_in = now.toISOString();
+  const im = via.line ? takesIMessage(via.service) : null;
+  if (im !== null && im !== (link.imessage ?? null)) moved.imessage = link.imessage = im;
   if (Object.keys(moved).length) await admin.from("phone_links").update({ ...moved, updated_at: now.toISOString() }).eq("user_id", link.user_id);
 
   const since = new Date(now.getTime() - 3600e3).toISOString();
@@ -169,6 +182,22 @@ async function inbound(p: Inbound, logId: number, via: Via = {}) {
   const { ws, all } = await currentWorkspace(admin, link);
   if (!ws) { await textUser(admin, env, { link, segments: [SAY.noWorkspace[lang]], kind: "system" }); return; }
   await admin.from("odelia_messages").update({ workspace_id: ws.id }).eq("id", logId);
+
+  // Approving by text: "YES 4821", the code from the text that asked (_shared/text_approval.ts). Only the verified number
+  // gets this far, and the code proves they saw that text; agent-run checks the card and the app's gates again.
+  const yes = approvalReply(text);
+  if (yes?.code) {
+    await admin.from("odelia_messages").update({ body: lang === "zh" ? `短信批准（代码 ${yes.code.slice(0, 1)}***）` : `Approved by text (code ${yes.code.slice(0, 1)}***)` }).eq("id", logId);
+    const res = await internal("agent-run", { action: "text_approve", user_id: link.user_id, reply_to: link.number, code: yes.code, lang }).catch(() => null);
+    const out = res?.ok ? await res.json().catch(() => null) as { say?: { en: string; zh: string }; workspace_id?: string } | null : null;
+    const say = out?.say?.[lang] || SAY.failed[lang];
+    await textUser(admin, env, { link, workspace_id: out?.workspace_id ?? ws.id, segments: splitSms(say, { max: 2, lang }), kind: "system" });
+    return;
+  }
+  if (yes?.bare === "approve") {
+    const { count: open } = await admin.from("text_approvals").select("id", { count: "exact", head: true }).eq("user_id", link.user_id).is("used_at", null).gt("expires_at", now.toISOString());
+    if (open) { await textUser(admin, env, { link, workspace_id: ws.id, segments: [APPROVE_SAY.how[lang]], kind: "system" }); return; }
+  }
 
   // A code an agency texted the owner for an account Odelia is making for the business (the one tap: forward it here).
   // Kept for the waiting run only when one of the workspace's accounts is waiting on a code; anything else goes on as usual.
@@ -206,7 +235,17 @@ async function inbound(p: Inbound, logId: number, via: Via = {}) {
   const lost = skipped > 0 ? (lang === "zh" ? `\n\n（另有 ${skipped} 个附件无法打开，只支持照片和 PDF。）` : `\n\n(${skipped} other attachment${skipped === 1 ? "" : "s"} couldn't be opened; only photos and PDFs work by text.)`) : "";
   const ask = text || (lang === "zh" ? "我发了一个文件给你。" : "I sent you a file.");
   if (!text) await admin.from("odelia_messages").update({ body: ask }).eq("id", logId);
-  await startRun(link, ws.id, ask + note + lost, logId, via);
+  // The injection rules (_shared/injection.ts) score what came in, as they do a forwarded email or a chat thread: a text
+  // aimed at an AI is held back whole and they hear why; one that's only suspicious runs as plain SMS does (it reads and
+  // drafts, nothing else), whichever app it came by.
+  const verdict = text ? scoreText(text).verdict : "clean";
+  if (verdict !== "clean") await admin.from("odelia_messages").update({ verdict }).eq("id", logId);
+  if (verdict === "quarantined") {
+    console.warn("odelia text held back", link.user_id.slice(0, 8));
+    await textUser(admin, env, { link, workspace_id: ws.id, segments: [APPROVE_SAY.held[lang]], kind: "system" });
+    return;
+  }
+  await startRun(link, ws.id, ask + note + lost, logId, verdict === "flagged" ? { ...via, flagged: true } : via);
 }
 
 type Media = { url?: string; content_type?: string; size?: number; id?: string };
@@ -401,7 +440,20 @@ export async function lineHealth(now = new Date()) {
 
 /* ------------------------------ the outbox ------------------------------ */
 
-type Outbox = { id: string; user_id: string; workspace_id: string | null; kind: "text" | "call"; urgent: boolean; body: string; link: string | null; created_at: string };
+type Outbox = { id: string; user_id: string; workspace_id: string | null; kind: "text" | "call"; urgent: boolean; body: string; link: string | null; created_at: string; approval_id?: string | null };
+
+/** The "Reply YES 4821 to approve" line for the first card in a text that a text can approve, with its code minted
+ *  now (so a code exists only once it's sent); "" when none can. */
+async function askLine(uid: string, items: Outbox[], lang: Lang): Promise<string> {
+  const first = items.find((i) => i.approval_id && i.workspace_id);
+  if (!first) return "";
+  const { data } = await admin.from("workspaces").select("state").eq("id", first.workspace_id!).maybeSingle();
+  const card = (((data?.state ?? {}) as { approvals?: { id?: string; title?: { en?: string; zh?: string } }[] }).approvals ?? []).find((a) => a?.id === first.approval_id);
+  if (!card || !cardByText(card)) return "";
+  const code = await approvalCode(admin, uid, first.workspace_id!, first.approval_id!);
+  if (!code) return "";
+  return approvalAsk(code, lang, items.length > 1 ? (card.title?.[lang] || card.title?.en || "") : undefined);
+}
 
 /** Anything that waited more than 48 hours is stale: drop it. */
 const expireOld = (now: Date) => admin.from("odelia_outbox").update({ dropped_at: now.toISOString(), note: "expired" }).is("sent_at", null).is("dropped_at", null)
@@ -409,7 +461,7 @@ const expireOld = (now: Date) => admin.from("odelia_outbox").update({ dropped_at
 
 export async function flush(now = new Date()) {
   await expireOld(now);
-  const { data } = await admin.from("odelia_outbox").select("id, user_id, workspace_id, kind, urgent, body, link, created_at").is("sent_at", null).is("dropped_at", null)
+  const { data } = await admin.from("odelia_outbox").select("id, user_id, workspace_id, kind, urgent, body, link, created_at, approval_id").is("sent_at", null).is("dropped_at", null)
     .order("urgent", { ascending: false }).order("created_at").limit(500);
   const byUser = new Map<string, Outbox[]>();
   for (const r of (data ?? []) as Outbox[]) byUser.set(r.user_id, [...(byUser.get(r.user_id) ?? []), r]);
@@ -456,7 +508,10 @@ export async function flush(now = new Date()) {
     const body = one ? one.body
       : lang === "zh" ? `快哉：有 ${rest.length} 件事需要您处理。${rest.slice(0, 4).map((i) => i.body.replace(/^快哉：/, "")).join("；")}`
       : `Placetta: ${rest.length} things need you. ${rest.slice(0, 4).map((i) => i.body.replace(/^Placetta: /, "")).join("; ")}`;
-    const r = await textUser(admin, env, { link, workspace_id: rest[0].workspace_id, segments: splitSms(body, { max: 1, lang, tail: tail || undefined }), kind: rest.some((i) => i.urgent) ? "urgent" : "update" });
+    // a card waiting for them can be approved by replying with its code; the code and the link always fit
+    const ask = await askLine(uid, rest, lang).catch(() => "");
+    const end = [ask, tail].filter(Boolean).join(" ");
+    const r = await textUser(admin, env, { link, workspace_id: rest[0].workspace_id, segments: splitSms(body, { max: 1, lang, tail: end || undefined }), kind: rest.some((i) => i.urgent) ? "urgent" : "update" });
     if (r.ok) texts++;
     else if (r.code === "opted_out" || r.code === BLOCKED_BY_STOP) await mark(rest.map((i) => i.id), { sent_at: null, dropped_at: now.toISOString(), note: "opted_out" });
     else await mark(rest.map((i) => i.id), { sent_at: null });   // try again at the next sweep

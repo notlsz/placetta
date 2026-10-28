@@ -1,17 +1,22 @@
 // Odelia by text and phone: the database side shared by odelia-sms, odelia-voice and agent-run. Every function here
 // runs with the service role, so callers have already decided who the person is.
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
-import { BLOCKED_BY_STOP, type Channel, type Env, type Lang, sendSms, smsReady } from "./odelia.ts";
+import { BLOCKED_BY_STOP, type Channel, type Env, type Lang, randomCode, sendSms, smsReady } from "./odelia.ts";
+import { routeFor, takesIMessage } from "./deliver.ts";
 import { WA_WINDOW_CLOSED, waTemplate, waTemplateReady, waText, waWindowOpen, whatsappReady } from "./whatsapp.ts";
 import { LINQ_LINE_RESTRICTED, LINQ_OPTED_OUT, LINQ_TEXT_FIRST, linqLines, linqReady, linqSend, pickLine } from "./linq.ts";
 
 export type Link = {
   user_id: string; number: string; verified_at: string | null; texts_on: boolean; calls_on: boolean; quiet_start: string; quiet_end: string;
   tz: string; lang: Lang; last_workspace_id: string | null; opted_out_at: string | null; line?: string | null;
-  /** The app they last texted Odelia on: "whatsapp", or null for iMessage and SMS. Answers go back there. */
+  /** The way they last texted Odelia: "whatsapp", "sms" (Odelia's Telnyx number), or null (an iMessage line, or never).
+   *  Answers go back there. */
   via?: string | null; wa_last_in?: string | null;
+  /** Whether the phone takes iMessage, as Linq last said (null: not known yet). Updates to a phone that doesn't go by
+   *  Telnyx SMS (deliver.ts routeFor). */
+  imessage?: boolean | null;
 };
-export const LINK_COLS = "user_id, number, verified_at, texts_on, calls_on, quiet_start, quiet_end, tz, lang, last_workspace_id, opted_out_at, line, via, wa_last_in";
+export const LINK_COLS = "user_id, number, verified_at, texts_on, calls_on, quiet_start, quiet_end, tz, lang, last_workspace_id, opted_out_at, line, via, wa_last_in, imessage";
 
 /** The person who verified this number, or null. */
 export async function linkByNumber(admin: SupabaseClient, number: string): Promise<Link | null> {
@@ -70,8 +75,8 @@ export async function sendText(admin: SupabaseClient, env: Env, o: { to: string;
       const r = await linqSend(env, { from: line, to: o.to, text: o.text, key: o.key, courtesy: o.courtesy }, f);
       if (r.ok) return { ok: true, status: r.status, id: r.id ? `linq:${r.id}` : undefined, line, service: r.service ?? "iMessage", chat: r.chat };
       if (r.code === LINQ_OPTED_OUT) return { ok: false, status: r.status, code: BLOCKED_BY_STOP, detail: r.detail, line, service: "iMessage" };
-      // A free-tier line can only answer people who wrote first.
-      if (r.code === LINQ_TEXT_FIRST) return { ok: false, status: r.status, code: "text_first", detail: r.detail, line, service: "iMessage" };
+      // A free-tier line can only answer people who wrote first: SMS takes it when it's set up.
+      if (r.code === LINQ_TEXT_FIRST) { if (smsReady(env)) break; return { ok: false, status: r.status, code: "text_first", detail: r.detail, line, service: "iMessage" }; }
       // That line is restricted or down: try the next one.
       if (r.code === LINQ_LINE_RESTRICTED || r.code === 4002 || r.code === 4008) { bad.add(line); continue; }
       return { ok: false, status: r.status, code: String(r.code ?? r.status), detail: r.detail, line, service: "iMessage" };
@@ -92,24 +97,39 @@ export async function textUser(admin: SupabaseClient, env: Env, o: { link: Link;
   if (o.link.opted_out_at) return { ok: false, sent: 0, code: "opted_out" };
   const reply = ["reply", "ack", "system", "chat", "missed"].includes(o.kind);
   let sent = 0, line = o.link.line ?? null;
-  const whatsapp = o.link.via === "whatsapp" ? { open: waWindowOpen(o.link.wa_last_in), lang: o.link.lang } : undefined;
+  // the way this text goes (deliver.ts): back the way they wrote, else the cheapest way that reaches them
+  const route = routeFor({ via: o.link.via, line, imessage: o.link.imessage, reply, linq: linqReady(env), sms: smsReady(env), whatsapp: whatsappReady(env) });
+  const whatsapp = route === "whatsapp" ? { open: waWindowOpen(o.link.wa_last_in), lang: o.link.lang } : undefined;
+  const smsOnly = route === "sms";
   // WhatsApp has no SMS-sized parts, and each message counts against the month's free replies: one message.
-  const segments = whatsapp && whatsappReady(env) && o.segments.length > 1 ? [o.segments.join("\n\n")] : o.segments;
+  const segments = whatsapp && o.segments.length > 1 ? [o.segments.join("\n\n")] : o.segments;
   for (const text of segments) {
-    const r = await sendText(admin, env, { to: o.link.number, text, line, reply, whatsapp });
+    const r = await sendText(admin, env, { to: o.link.number, text, line, reply, whatsapp, smsOnly });
     if (!r.ok) {
       console.error("odelia text", r.status, r.code, r.detail);
       if (r.code === BLOCKED_BY_STOP) await admin.from("phone_links").update({ opted_out_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("user_id", o.link.user_id);
       return { ok: false, sent, code: r.code };
     }
     sent++;
-    if (r.line && r.line !== line) {
-      line = r.line;
-      await admin.from("phone_links").update({ line, updated_at: new Date().toISOString() }).eq("user_id", o.link.user_id);
+    // the line they're on, and whether their phone takes iMessage (Linq says which service each message went by)
+    const im = r.line ? takesIMessage(r.service) : null;
+    if ((r.line && r.line !== line) || (im !== null && im !== (o.link.imessage ?? null))) {
+      line = r.line ?? line;
+      if (im !== null) o.link.imessage = im;
+      await admin.from("phone_links").update({ line, ...(im !== null ? { imessage: im } : {}), updated_at: new Date().toISOString() }).eq("user_id", o.link.user_id);
     }
     await logMessage(admin, { user_id: o.link.user_id, workspace_id: o.workspace_id, direction: "out", channel: "sms", kind: o.kind, body: o.logBody ?? text, provider_id: r.id, run_id: o.run_id, line: r.line, service: r.service });
   }
   return { ok: true, sent };
+}
+
+/** A 4-digit code that lets this owner approve this card by text (text_approval.ts), or null when they aren't an owner
+ *  of the workspace or it couldn't be saved. Only a hash is kept; the code itself goes in the text. */
+export async function approvalCode(admin: SupabaseClient, userId: string, ws: string, approval: string): Promise<string | null> {
+  const code = randomCode(4);
+  const { data, error } = await admin.rpc("text_approval_set", { p_user: userId, p_ws: ws, p_approval: approval, p_code: code });
+  if (error) { if (error.code !== "PGRST202") console.error("approval code", error.code); return null; }
+  return data === true ? code : null;
 }
 
 export type Ws = { id: string; name: string; role: string };

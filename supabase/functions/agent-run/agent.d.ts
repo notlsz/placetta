@@ -167,6 +167,19 @@ export type AutofileIO = {
 };
 export declare function autofileAll(w: Workspace, io: AutofileIO, now: string): Promise<{ patches: ((w: Workspace) => Workspace)[]; filed: string[]; kept: { app: string; why: Bi }[] }>;
 
+// Approving a filing by text (src/textApprove.ts)
+export type TextFileRow = { app_id: string; approval: string; title: Bi; agency: Bi; portal_url: string | null; fee: number; payload: Record<string, unknown> };
+export type TextFileResult = { result: "filed"; id: string } | { result: "waiting" } | { result: "refused"; why: string };
+export type TextApproveIO = {
+  loadPdf: LoadPdf;
+  upload(appId: string, name: string, bytes: Uint8Array): Promise<string>;
+  file(row: TextFileRow): Promise<TextFileResult>;
+  start(filingId: string): Promise<void>;
+};
+export declare const NOT_BY_TEXT: Bi;
+export declare function textApprovable(a: unknown): boolean;
+export declare function textApprove(w: Workspace, apId: string, io: TextApproveIO, o: { by: string; now: string; lang?: "en" | "zh" }): Promise<{ patch: (w: Workspace) => Workspace; say: Bi; filed?: string; waiting?: boolean }>;
+
 // Odelia's shield (src/security)
 export type Actor = { id: string | null; role: "owner" | "admin" | "member" | "viewer" | "staff" | "system" };
 export type ToolLog = { at: string; run?: string; tool: string; scope: string | null; actor: string | null; role: Actor["role"]; input_hash: string; decision: "allow" | "deny" | "error"; code?: string; reason?: string };

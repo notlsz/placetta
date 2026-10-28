@@ -46,7 +46,11 @@ import { sendEmail, systemMailReady } from "../_shared/email.ts";
 import { suppressedIn } from "../_shared/suppression.ts";
 // @ts-types="./agent.d.ts"
 import { agencyKey, chipsOf, CLASSIFIER_SYSTEM, classifierPrompt, parseClassifier, type ToolLog, DISTILL_SYSTEM, distillPrompt, filingEvidence, type FilingRow, finishWork, keepRecall, type Lesson, lessonKeys, lessonsBrief, type MemoryBook, normalizeState, parseDistill, rank, type Recall, recallFrom, runEvidence, runRounds, startState, stampFilings, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
-import { mayEmail, wantsTexts } from "../_shared/reach.ts";
+import { mayEmail, reachOf, wantsTexts } from "../_shared/reach.ts";
+import { updateChannel } from "../_shared/deliver.ts";
+import { APPROVE_SAY, approvalAsk } from "../_shared/text_approval.ts";
+import { approvalCode } from "../_shared/odelia_db.ts";
+import { NOT_BY_TEXT, textApprovable, textApprove, type TextApproveIO } from "./agent.js";
 import { selftest, SELFTEST_NAMES } from "./selftest.ts";
 import { type Bot, CHAT_KINDS, type ChatTo, chatReply, isChatKind, type SlackBot } from "../_shared/bots.ts";
 import { answerBlocks, type ItemRef, slackEphemeral, slackPostBlocks } from "../_shared/slack.ts";
@@ -1026,35 +1030,119 @@ async function vaultBot(ws: string, kind: "slack_bot" | "lark_bot" | "teams_bot"
 
 /**
  * The answer to someone who texted or called: plain text, at most three messages, ending with the link to the exact
- * approval waiting in the app (or the app, when there are several or the answer runs long). Nothing is approved by text.
+ * approval waiting in the app (or the app, when there are several or the answer runs long). A filing's card also carries
+ * the code that approves it by text ("YES 4821", approveByText); nothing else is approved by text.
  */
-async function textBack(run: Run, text: string, approvals: string[], extra = "") {
+async function textBack(run: Run, text: string, approvals: string[], extra = "", w?: Workspace) {
   if ((run.channel !== "sms" && run.channel !== "voice") || !run.reply_to || !run.created_by) return;
   const link = await linkOf(admin, run.created_by);
   // Only ever to the number this person verified, and only while it's still theirs.
   if (!link?.verified_at || link.number !== normalizePhone(run.reply_to)) return;
   const origin = appOrigin(env);
   const approve = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") : "";
+  // the first card a text can approve gets its code (an owner only: approvalCode says no to anyone else)
+  let ask = "";
+  const card = approvals.length ? ((w?.approvals ?? []) as { id?: string; title?: { en: string; zh: string } }[]).find((a) => a?.id === approvals[0]) : undefined;
+  if (card && textApprovable(card)) {
+    const code = await approvalCode(admin, run.created_by, run.workspace_id, approvals[0]).catch(() => null);
+    if (code) ask = approvalAsk(code, run.lang, approvals.length > 1 ? (card.title?.[run.lang] || card.title?.en) : undefined);
+  }
   // the filled form's line and link, then the approval's: always kept, whatever else is cut to fit
-  const tail = [extra, approve ? `${SAY.approve[run.lang]} ${approve}` : ""].filter(Boolean).join(" ");
+  const tail = [extra, ask, approve ? `${ask ? (run.lang === "zh" ? "或在应用中批准：" : "Or in the app:") : SAY.approve[run.lang]} ${approve}` : ""].filter(Boolean).join(" ");
   const segments = splitSms(text, { max: 3, lang: run.lang, more: appLink(origin, run.workspace_id), tail: tail || undefined });
   await textUser(admin, env, { link, workspace_id: run.workspace_id, segments, kind: "reply", run_id: run.id });
 }
 
-/** Owners who asked for texts hear when an approval is waiting that nobody saw in the app; the outbox holds it for their quiet hours. */
-async function queueApprovalTexts(run: Run, title: { en: string; zh: string }, approvals: string[]) {
-  if (!approvals.length) return;
-  const { data: owners } = await admin.from("workspace_members").select("user_id").eq("workspace_id", run.workspace_id).eq("role", "owner");
-  const ids = (owners ?? []).map((o) => o.user_id as string);
-  if (!ids.length) return;
-  const { data: links } = await admin.from("phone_links").select("user_id, lang").in("user_id", ids).not("verified_at", "is", null).eq("texts_on", true).is("opted_out_at", null);
+/** The owners who hear about a run's approvals by text rather than email (_shared/deliver.ts updateChannel, "important"):
+ *  a verified phone with texts on, not opted out, and not one who told Odelia to use email or not to text. */
+async function approvalTexters(ws: string, w: Workspace | undefined, ids: string[]): Promise<{ user_id: string; lang: string }[]> {
+  if (!ids.length) return [];
+  const { data: links } = await admin.from("phone_links").select("user_id, lang, calls_on").in("user_id", ids).not("verified_at", "is", null).eq("texts_on", true).is("opted_out_at", null);
+  return ((links ?? []) as { user_id: string; lang: string; calls_on: boolean }[])
+    .filter((l) => updateChannel("important", { reach: reachOf(w, l.user_id), phone: { texts: true, calls: !!l.calls_on }, email: true }) === "text");
+}
+
+/** Owners who take texts hear when an approval is waiting that nobody saw in the app, one text a card (the outbox holds
+ *  them for their quiet hours and sends what's waiting together); each carries its card, so the text can carry the
+ *  code that approves it by text. They get this instead of the email about the run, never both. */
+async function queueApprovalTexts(run: Run, approvals: string[], texters: { user_id: string; lang: string }[], w?: Workspace) {
+  if (!approvals.length || !texters.length) return;
   const origin = appOrigin(env);
-  const rows = (links ?? []).map((l) => ({
-    user_id: l.user_id, workspace_id: run.workspace_id, kind: "text", urgent: false, dedupe: `approval:${run.id}`,
-    body: l.lang === "zh" ? `${title.zh}。有 ${approvals.length} 项等待您批准。` : `${title.en}. ${approvals.length} item${approvals.length === 1 ? " is" : "s are"} waiting for your approval.`,
-    link: appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") || null,
+  const cards = ((w?.approvals ?? []) as { id?: string; title?: { en: string; zh: string } }[]);
+  const rows = texters.flatMap((l) => approvals.slice(0, 3).map((ap) => {
+    const t = cards.find((c) => c?.id === ap)?.title ?? run.title ?? { en: "An approval", zh: "一项批准" };
+    return {
+      user_id: l.user_id, workspace_id: run.workspace_id, kind: "text", urgent: false, dedupe: `approval:${run.workspace_id}:${ap}`.slice(0, 300), approval_id: ap,
+      body: l.lang === "zh" ? `快哉：${t.zh || t.en}，等待您批准。` : `Placetta: ${t.en} is waiting for your approval.`,
+      link: appLink(origin, run.workspace_id, ap) || null,
+    };
   }));
   if (rows.length) await admin.from("odelia_outbox").upsert(rows, { onConflict: "user_id,dedupe", ignoreDuplicates: true });
+}
+
+/** What a filing approved by text needs from the server (src/textApprove.ts): the agencies' PDFs, Documents, the
+ *  database's own gates (text_approve_file) and the dispatcher, started with the monitor key (file "text_start"). */
+function textApproveIO(ws: string, uid: string): TextApproveIO {
+  return {
+    loadPdf: (file: string) => sitePdf(file),
+    async upload(appId: string, name: string, bytes: Uint8Array) {
+      const path = `${ws}/${crypto.randomUUID()}/${safeName(name)}`;
+      const up = await admin.storage.from("documents").upload(path, new Blob([bytes as BlobPart], { type: "application/pdf" }), { contentType: "application/pdf", upsert: false });
+      if (up.error) throw new Error("Couldn't store the filled form.");
+      const { error } = await admin.from("documents").insert({ workspace_id: ws, app_id: appId, name: name.slice(0, 200), path, size: bytes.length, mime: "application/pdf", source: "agent", uploaded_by: uid });
+      if (error) { await admin.storage.from("documents").remove([path]); throw new Error("Couldn't record the filled form."); }
+      return path;
+    },
+    async file(r) {
+      const cap = Number(env("ODELIA_TEXT_APPROVE_MAX") ?? "250");
+      const { data, error } = await admin.rpc("text_approve_file", { p_ws: ws, p_user: uid, p_approval: r.approval, p_app_id: r.app_id, p_title: r.title, p_agency: r.agency,
+        p_portal_url: r.portal_url, p_fee: r.fee, p_payload: r.payload, p_cap: Number.isFinite(cap) && cap >= 0 ? cap : 250 });
+      if (error) throw new Error(error.message);
+      const d = (data ?? {}) as { result?: string; id?: string; why?: string };
+      return d.result === "filed" && d.id ? { result: "filed", id: d.id } : d.result === "waiting" ? { result: "waiting" } : { result: "refused", why: String(d.why ?? "refused") };
+    },
+    async start(id: string) {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/file`, {
+        method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${env("SUPABASE_ANON_KEY")}`, apikey: env("SUPABASE_ANON_KEY"), "x-monitor-key": await monitorKey() },
+        body: JSON.stringify({ action: "text_start", workspace_id: ws, filing_id: id }),
+      });
+      if (!res.ok) console.error("text start", ws, res.status);
+    },
+  };
+}
+
+/** "YES 4821" from an owner's verified number: the card that code was minted for, approved with the app's gates
+ *  (src/textApprove.ts) and saved onto the newest copy of the workspace. What to text back, in both languages. */
+async function approveByText(uid: string, number: string, code: string): Promise<{ say: { en: string; zh: string }; workspace_id?: string; filed?: string }> {
+  // the number must still be this person's verified, opted-in number (the link-code check came first)
+  const link = await linkOf(admin, uid);
+  if (!link?.verified_at || link.opted_out_at || link.number !== number) return { say: APPROVE_SAY.none };
+  const { data: took, error } = await admin.rpc("text_approval_take", { p_user: uid, p_code: code });
+  if (error) throw new Error(error.message);
+  const t = (took ?? {}) as { result?: string; workspace_id?: string; approval_id?: string };
+  if (t.result !== "ok" || !t.workspace_id || !t.approval_id) return { say: t.result === "locked" ? APPROVE_SAY.locked : t.result === "wrong" ? APPROVE_SAY.wrong : APPROVE_SAY.none };
+  const ws = t.workspace_id, apId = t.approval_id;
+  if ((await mayUseAgent(admin, ws, uid)) !== "ok") return { say: SAY.noWorkspace, workspace_id: ws };
+  const read = async () => {
+    const { data: fresh, error: e } = await admin.from("workspaces").select("name, state, updated_at").eq("id", ws).maybeSingle();
+    if (e) throw err("save_failed", "Couldn't read the workspace: " + e.code);
+    return fresh?.updated_at ? { w: normalizeState(String(fresh.name ?? ""), fresh.state ?? {}), version: String(fresh.updated_at) } : null;
+  };
+  const first = await read();
+  if (!first) return { say: SAY.noWorkspace, workspace_id: ws };
+  const card = ((first.w.approvals ?? []) as { id?: string }[]).find((a) => a?.id === apId);
+  if (!card || !textApprovable(card)) return { say: card ? NOT_BY_TEXT : APPROVE_SAY.none, workspace_id: ws };
+  const { data: u } = await admin.auth.admin.getUserById(uid);
+  const out = await textApprove(first.w, apId, textApproveIO(ws, uid), { by: String(u?.user?.email ?? "you"), now: new Date().toISOString() });
+  await saveOnto<Workspace>({
+    tries: SAVE_TRIES, read,
+    async write(next, version) {
+      const { data: saved, error: e } = await admin.from("workspaces").update({ state: stripState(next), updated_at: new Date().toISOString() }).eq("id", ws).eq("updated_at", version).select("id");
+      if (e) throw err("save_failed", "save failed: " + e.code);
+      return !!saved?.length;
+    },
+  }, out.patch).catch((e) => console.error("text approve save", ws, String(e).slice(0, 120)));
+  return { say: out.say, workspace_id: ws, ...(out.filed ? { filed: out.filed } : {}) };
 }
 
 /** Owners who asked for texts and said not to email them hear about finished work by text instead (the outbox holds
@@ -1086,7 +1174,9 @@ async function finish(run: Run, reply: Reply, steps: Step[], lease: Lease, w?: W
   const formLine = linked.length ? filledLines(linked, run.lang) : "";
   // Asked by text or on a call: the answer goes back by text, which is where they're watching.
   if (run.channel === "sms" || run.channel === "voice") {
-    await textBack(run, reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim() || SAY.ack[run.lang], reply.approvals ?? [], formLine).catch((e) => console.error("text back", String(e).slice(0, 120)));
+    await textBack(run, reply.text.map((t) => t[run.lang] || t.en).join("\n\n").trim() || SAY.ack[run.lang], reply.approvals ?? [], formLine, w).catch((e) => console.error("text back", String(e).slice(0, 120)));
+    // Email for documents: filled forms also go to the address they sign in with, attached, unless they said not to email
+    if (forms.length && run.created_by && mayEmail(w, run.created_by)) await mailForms(run, forms).catch((e) => console.error("mail forms", String(e).slice(0, 120)));
     return;
   }
   // Asked by email: the answer goes back by email, in their thread, with the filled forms attached.
@@ -1111,17 +1201,38 @@ async function finish(run: Run, reply: Reply, steps: Step[], lease: Lease, w?: W
   const zh = reply.text.map((t) => t.zh).join(" ").trim();
   await admin.from("updates").upsert({ workspace_id: run.workspace_id, kind: "agent", title, body: { en: short(said, 600), zh: short(zh, 600) }, dedupe: `run:${run.id}` }, { onConflict: "workspace_id,dedupe", ignoreDuplicates: true });
   const { data: owners } = await admin.from("workspace_members").select("user_id").eq("workspace_id", run.workspace_id).eq("role", "owner");
+  const waiting = (reply.approvals ?? []).length;
+  // One channel per owner (_shared/deliver.ts): an approval waiting goes by text to an owner who takes texts, and they
+  // don't also get the email; everyone else gets the email, unless they said not to (then a text if they asked for one).
+  const texters = waiting ? await approvalTexters(run.workspace_id, w, (owners ?? []).map((o) => o.user_id as string)).catch(() => []) : [];
+  const byText = new Set(texters.map((t) => t.user_id));
   const emails: string[] = [], texts: string[] = [];
   for (const o of owners ?? []) {
+    if (byText.has(o.user_id)) continue;
     // how each owner asked to be reached (src/recall.ts): never by email when they said so; by text when they asked
     if (!mayEmail(w, o.user_id)) { if (wantsTexts(w, o.user_id)) texts.push(o.user_id); continue; }
     const { data } = await admin.auth.admin.getUserById(o.user_id); if (data?.user?.email && data.user.email_confirmed_at) emails.push(data.user.email);
   }
-  const waiting = (reply.approvals ?? []).length;
   const app = (env("APP_ORIGINS").split(",")[0] ?? "").trim().replace(/\/+$/, "");
   await sendMail(emails, title.en, `${said}${waiting ? `\n\n${waiting} item${waiting === 1 ? "" : "s"} waiting for your approval.` : ""}${app ? `\n\nOpen Placetta: ${app}/app/` : ""}\n`);
   await textInstead(run, texts, title, { en: said, zh }).catch((e) => console.error("text instead", String(e).slice(0, 120)));
-  await queueApprovalTexts(run, title, reply.approvals ?? []).catch((e) => console.error("approval texts", String(e).slice(0, 120)));
+  await queueApprovalTexts(run, reply.approvals ?? [], texters, w).catch((e) => console.error("approval texts", String(e).slice(0, 120)));
+}
+
+/** The forms a text or call filled, emailed to the person who asked, from Odelia's address: documents go by email, the
+ *  text carries the short answer. */
+async function mailForms(run: Run, forms: FilledForm[]) {
+  if (!run.created_by) return;
+  const { data: u } = await admin.auth.admin.getUserById(run.created_by);
+  const to = String(u?.user?.email ?? "").toLowerCase();
+  if (!to || !u?.user?.email_confirmed_at) return;
+  const files = await formAttachments(admin, run.workspace_id, forms).catch(() => []);
+  if (!files.length) return;
+  const zh = run.lang === "zh";
+  const body = mailBody(zh ? `这是您刚才通过${run.channel === "voice" ? "电话" : "短信"}让 Odelia 填写的表格，已附在邮件中。提交前需要您在快哉中批准。` : `Here are the forms you asked Odelia to fill by ${run.channel === "voice" ? "phone" : "text"}, attached. Nothing is filed until you approve it in Placetta.`,
+    appOrigin(env) ? `${SAY.open[run.lang]} ${appLink(appOrigin(env), run.workspace_id)}` : undefined);
+  const r = await sendOdeliaMail(env, { to, subject: zh ? "Odelia 填好的表格" : "Forms Odelia filled", text: body.text, html: body.html, attachments: files }, fetch, suppressedIn(admin));
+  if (r.ok) await logMessage(admin, { user_id: run.created_by, workspace_id: run.workspace_id, direction: "out", channel: "email", kind: "reply", body: body.text, provider_id: r.id ? `mail:${r.id}` : null, run_id: run.id });
 }
 
 /* ------------------------------ requests ------------------------------ */
@@ -1138,6 +1249,15 @@ export async function handle(req: Request): Promise<Response> {
     body = JSON.parse(raw);
   } catch { return fail(400, "bad_request", "Send JSON."); }
   const action = String(body.action ?? "start");
+
+  // text_approve: an owner replied "YES 4821" from their verified number (odelia-sms), with the monitor key
+  if (action === "text_approve") {
+    if (!(await monitorKeyOk(req))) return fail(401, "unauthorized", "unauthorized");
+    const uid = String(body.user_id ?? ""), code = String(body.code ?? ""), number = normalizePhone(body.reply_to);
+    if (!UUID.test(uid) || !/^\d{4}$/.test(code) || !number) return fail(400, "bad_request", "user_id, reply_to and a 4-digit code are required.");
+    try { return json(200, await approveByText(uid, number, code)); }
+    catch (e) { console.error("text approve", String((e as Error)?.message ?? e).slice(0, 160)); return fail(500, "upstream_error", "Couldn't approve it."); }
+  }
 
   if (action === "continue" || action === "watchdog" || action === "watch" || action === "selftest" || action === "learn" || action === "settle") {
     if (!(await monitorKeyOk(req))) return fail(401, "unauthorized", "unauthorized");
