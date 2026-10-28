@@ -11,7 +11,7 @@ import { useEvidence } from "./evidence";
 const host = (u: string) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return ""; } };
 
 /** The cost for this workspace and this account's plan (list prices in the sample). */
-function useCost(): Cost {
+export function useCost(): Cost {
   const { ws, cloud } = useApp();
   const ev = useEvidence();
   return useMemo(() => {

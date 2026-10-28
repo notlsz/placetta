@@ -18,6 +18,7 @@ import { firstPlanClock } from "../plan/prefill";
 import { CITIES, ownWords, parsePlace, readLine, SELLS, STATES, streetIn, zipIn } from "../plan/line";
 import { firstWorkspace } from "../plan/start";
 import { MoreStep } from "./MoreStep";
+import { PlanBuild } from "./PlanBuild";
 import type { Read } from "../intakeParse";
 import { intakeQuestions, type Intake } from "../plan/intake";
 import { phoneConsent } from "../consent";
@@ -473,14 +474,14 @@ function Onboard({ lang, email, agreedAtSignup = false, onCreated, onCancel }: {
   // the street, when the line names one: it carries into the address, so nobody types it twice
   const streetNow = f.street.trim() || streetIn(line);
   // The second screen: optional answers that let Placetta fill a real application before the plan appears.
-  const [step, setStep] = useState<"line" | "about" | "more">(saved.step === "more" ? "more" : "line");
+  const [step, setStep] = useState<"line" | "about" | "build" | "more">(saved.step === "more" ? "more" : "line");
   const [more, setMore] = useState({ legal: "", notFormed: false, owner: "", address: "", ...(saved.more as object) });
   // the intake (src/plan/intake.ts): yes-or-no questions one at a time, only those that apply to what they're opening
   const [intake, setIntake] = useState<Intake>({});
   const [qi, setQi] = useState(0);
   const questions = intakeQuestions(what);
   // every answer is kept as it's typed, so a closed tab resumes here
-  useEffect(() => { if (!hand) draft.set({ line, f, more, step: step === "about" ? "line" : step, agreed: signedUpAgreed }); }, [hand, line, f, more, step, signedUpAgreed]);
+  useEffect(() => { if (!hand) draft.set({ line, f, more, step: step === "about" || step === "build" ? "line" : step, agreed: signedUpAgreed }); }, [hand, line, f, more, step, signedUpAgreed]);
   /** What the first screen settled (the city and state), or why it can't go on yet. */
   const settle = () => {
     const city = parsed?.city ?? placeNow.replace(/,.*$/, "").trim();
@@ -498,34 +499,37 @@ function Onboard({ lang, email, agreedAtSignup = false, onCreated, onCancel }: {
     const zip = zipIn(line);
     setMore(m => ({ ...m, legal: m.legal || f.entity.trim(), address: m.address || (streetNow ? `${streetNow}, ${at.city}, ${at.state}${zip ? " " + zip : ""}` : "") }));
     setQi(0);
-    setStep(questions.length ? "about" : "more");
+    setStep(questions.length ? "about" : "build");
   };
   /** One answer, then the next question that applies, then the three answers. */
   const answer = (v: boolean | undefined) => {
     const q = questions[qi];
     if (q) setIntake(x => { const n = { ...x }; if (v === undefined) delete n[q.key]; else n[q.key] = v; return n; });
-    if (qi + 1 < questions.length) setQi(qi + 1); else setStep("more");
+    if (qi + 1 < questions.length) setQi(qi + 1); else setStep("build");
   };
   // what was pasted or dropped on the last screen: extra facts (EIN, website, phone), and the files, saved to Documents
   // once the workspace exists so Odelia reads them (review_documents) with their quotes
   const [found, setFound] = useState<Read>({});
   const [files, setFiles] = useState<File[]>([]);
+  /** The plan, the store and the facts, built the same way as for a business that texted Odelia (src/plan/start.ts).
+   *  skip: the three answers left out (only what the first screen's details box had). The live build shows this plan. */
+  const build = (city: string, state: string, skip: boolean) => {
+    const notFormed = !skip && more.notFormed;
+    return firstWorkspace({
+      what, city, state, lang, brand: f.brand.trim(), months: WHEN[whenNow]?.months ?? null, notFormed,
+      legal: notFormed ? "" : (skip ? "" : more.legal.trim()) || f.entity.trim(), owner: skip ? "" : more.owner.trim(),
+      address: (skip ? "" : more.address.trim()) || (streetNow ? `${streetNow}, ${city}, ${state}` : ""),
+      intake: Object.fromEntries(Object.entries(intake).filter(([k]) => questions.some(q => q.key === k))),
+    });
+  };
   const create = async (skip = false) => {
     const at = settle();
     if (!at) return;
     const { city, state } = at;
     // the time to plan runs from this press to the plan on Home (src/pages.tsx reads it)
     firstPlanClock.start();
-    // the three answers (a skip keeps only what the first screen's details box already had)
-    const notFormed = !skip && more.notFormed;
     setBusy(true); setErr("");
-    // the plan, the store and the facts, built the same way as for a business that texted Odelia (src/plan/start.ts)
-    const { name: brand, state: ws } = firstWorkspace({
-      what, city, state, lang, brand: f.brand.trim(), months: WHEN[whenNow]?.months ?? null, notFormed,
-      legal: notFormed ? "" : (skip ? "" : more.legal.trim()) || f.entity.trim(), owner: skip ? "" : more.owner.trim(),
-      address: (skip ? "" : more.address.trim()) || (streetNow ? `${streetNow}, ${city}, ${state}` : ""),
-      intake: Object.fromEntries(Object.entries(intake).filter(([k]) => questions.some(q => q.key === k))),
-    });
+    const { name: brand, state: ws } = build(city, state, skip);
     // the EIN, website and phone read from a paste or a document, as business facts with the words they came from
     const extra = ([["ein", B("EIN", "EIN")], ["website", B("Website", "网站")], ["phone", B("Phone", "电话")]] as const)
       .filter(([k, label]) => found[k] && !ws.facts.some(x => x.label.en === label.en))
@@ -606,12 +610,22 @@ function Onboard({ lang, email, agreedAtSignup = false, onCreated, onCancel }: {
       </div>
     );
   }
+  // the same city and state settle() reads, without its messages (they were settled to get here)
+  const city0 = parsed?.city ?? placeNow.replace(/,.*$/, "").trim(), state0 = parsed?.state ?? f.state;
+  if (step === "build" && what && city0 && state0) {
+    const where = streetNow ? (lang === "zh" ? `${city0} ${streetNow}` : `${streetNow}, ${city0}`) : `${city0}, ${state0}`;
+    return (
+      <PlanBuild lang={lang} ws={build(city0, state0, true).state} place={where} busy={busy} err={err}
+        onBack={() => { setErr(""); if (questions.length) { setQi(questions.length - 1); setStep("about"); } else setStep("line"); }}
+        onNext={() => { setErr(""); setStep("more"); }} onSkip={() => void create(true)} />
+    );
+  }
   if (step === "more") {
     const ex = parsed ?? { city: placeNow.replace(/,.*$/, "").trim() || "Flushing", state: f.state || "NY" };
     return (
       <MoreStep lang={lang} more={more} setMore={setMore} found={found} setFound={setFound} files={files} setFiles={setFiles} busy={busy} err={err} email={email}
         placeholder={`38 Main St, ${ex.city}, ${ex.state}`}
-        onBack={() => { setErr(""); if (questions.length) { setQi(questions.length - 1); setStep("about"); } else setStep("line"); }}
+        onBack={() => { setErr(""); setStep("build"); }}
         onSkip={() => void create(true)} onDone={() => void create()} />
     );
   }

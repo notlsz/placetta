@@ -23,10 +23,11 @@ const certScore = (expires: string) => { const d = daysUntil(expires); return d 
 export function readiness(s: Store, w: Workspace): Readiness {
   if (s.stage === "opening") {
     const apps = w.apps.filter(a => s.apps?.includes(a.id));
-    const weight = { approved: 1, review: 0.75, filing: 0.65, ready: 0.5, needs: 0.25, draft: 0.25, waiting: 0, todo: 0 } as const;
-    const got = apps.reduce((t, a) => t + weight[a.status], 0);
-    const score = apps.length ? Math.round((100 * got) / apps.length) : 0;
+    // what's issued, and nothing else: a store opening counts the permits the agencies approved, so the percentage is
+    // always the count beside it ("0 of 13 issued" is 0%), never partial credit for a filing that isn't decided
     const done = apps.filter(a => a.status === "approved").length;
+    const got = done;
+    const score = apps.length ? Math.round((100 * got) / apps.length) : 0;
     // a store just added has nothing mapped yet: say that, not "0, ready to open"
     if (!apps.length) return { score: 0, band: "progress", label: B("Permits not mapped yet", "尚未梳理许可"),
       parts: [{ key: "apps", label: B("Licenses and permits", "执照与许可"), got: 0, max: 1, note: B("Ask Odelia to map this store's permits", "请 Odelia 梳理该门店的许可") }] };
