@@ -1687,9 +1687,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     appealCaseTool(),
     {
       name: "inspection_booking",
-      description: "Book a store's inspection and see it through, and run a mock inspection first. action: plan (how this agency takes bookings and what it needs), book (with the one slot the owner picked from the times you offered: for an agency site Placetta can use, it makes the booking request for the owner to approve with request_filing_approval, and the portal worker books it with the owner's own login; by phone or email it returns the call script or the email for draft_message, and the team makes the call), confirm (the date, window and confirmation once the agency confirms: it goes on Deadlines with a reminder), result (passed, failed with the inspector's corrections, or a re-inspection booked), mock (walk the inspector's checklist with the owner one item at a time: pass ok true or false for the item you asked about, and a document_id when they sent a photo; it returns the next item). Never create an account on an agency site, never get past a CAPTCHA (the owner does it in the live view), and never book a time the owner didn't approve.",
+      description: "Book a store's inspection and see it through, and run a mock inspection first. action: plan (how this agency takes bookings and what it needs), book (with the one slot the owner picked from the times you offered: for an agency site Placetta can use, it makes the booking request for the owner to approve with request_filing_approval, and the portal worker books it with the owner's own login; by phone or email it returns the call script or the email for draft_message, and the team makes the call), confirm (the date, window and confirmation once the agency confirms: it goes on Deadlines with a reminder), reschedule (the owner can't make the booked time: pass the slots they can make and why in note; the agency is asked for one, and the booked time stands until it confirms), result (passed, failed with the inspector's corrections, or a re-inspection booked), mock (walk the inspector's checklist with the owner one item at a time: pass ok true or false for the item you asked about, and a document_id when they sent a photo; it returns the next item). Never create an account on an agency site, never get past a CAPTCHA (the owner does it in the live view), and never book a time the owner didn't approve.",
       inputSchema: { type: "object", properties: {
-        action: { type: "string", enum: ["plan", "book", "confirm", "result", "mock"] },
+        action: { type: "string", enum: ["plan", "book", "confirm", "reschedule", "result", "mock"] },
         store_id: { type: "string" }, inspection_id: { type: "string", description: "An id from inspection_guide" }, booking_id: { type: "string" },
         slots: { type: "array", items: { type: "string" }, description: "plan/book: times to offer, as 'YYYY-MM-DD, morning' (up to 3)" },
         date: { type: "string", description: "book/confirm: YYYY-MM-DD" }, window: { type: "string", description: "book/confirm: morning, afternoon, all day or HH:MM-HH:MM" },
@@ -1758,7 +1758,10 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           }
           // phone, email, plan checker, the applicant of record, a form, or a portal Placetta can't use: drafted for the team
           const script = callScript({ business: get().business.en, address: st.address, inspection: ins.name, agency: ins.agency, permit, slots: [slot, ...slots.filter(s => s !== slot)], contact, phone: ins.phone });
-          setBooking({ id, store: st.id, inspection: ins.id, where, name: ins.name, agency: ins.agency, method: way.method, status: "with_team", slots: slots.length ? slots : [slot], slot, permit, script, created: booking?.created ?? now, updated: now });
+          // an agency that books by email: its inbox, from the guide's own words, so Odelia can send the request as the
+          // business's agent where its packet covers that agency (the morning's carry step)
+          const inbox = way.method === "email" ? /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}/.exec(way.needs.en)?.[0]?.toLowerCase() : undefined;
+          setBooking({ id, store: st.id, inspection: ins.id, where, name: ins.name, agency: ins.agency, method: way.method, status: "with_team", slots: slots.length ? slots : [slot], slot, permit, script, ...(inbox ? { email: inbox } : {}), created: booking?.created ?? now, updated: now });
           mark();
           return { booking_id: id, status: "with_team", method: way.method, needs: way.needs.en, ...(way.method === "phone" || way.method === "plan_checker" ? { call_script: script, phone: ins.phone } : {}),
             do_next: way.method === "email" || way.method === "applicant_of_record" || way.method === "plan_checker"
@@ -1775,6 +1778,18 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           setBooking({ ...booking, status: "booked", slot: slotText(date, window), confirmation: str(i.confirmation, 60) || booking.confirmation, deadline: dlId, updated: now });
           mark();
           return { booking_id: booking.id, status: "booked", on_deadlines: dlId, reminder: "Reminders go out 7, 3 and 1 days before and on the day, with the prep.", prep_still_open: open.length };
+        }
+        if (action === "reschedule") {
+          if (!booking || booking.status !== "booked") throw new Error("booking_id of a booked inspection is required for reschedule.");
+          const want = slots.filter(s => isDate(s.slice(0, 10)) && s.slice(0, 10) >= today);
+          if (!want.length) throw new Error("slots: the times the owner can make instead, as 'YYYY-MM-DD, morning' (up to 3)");
+          setBooking({ ...booking, reschedule: { slots: want, why: str(i.note, 200) || undefined, at: now }, updated: now });
+          apply(audit("agent", L("Asked to move an inspection", "申请改约检查"), booking.name, same(want.join("; "))));
+          mark();
+          return { booking_id: booking.id, status: "booked", reschedule: want,
+            how: booking.email ? `Odelia asks ${booking.agency.en} by email for one of these times tomorrow morning, as the business's agent where its packet covers that agency (otherwise Placetta's team asks). The booked time stands until the agency confirms a new one; then call confirm.`
+              : `Placetta's team asks ${booking.agency.en} for one of these times (the morning check creates their task). The booked time stands until the agency confirms a new one; then call confirm.`,
+            reminder: "Someone from the business has to be there in person for the inspection." };
         }
         if (action === "result") {
           if (!booking) throw new Error("booking_id is required for result (from book).");

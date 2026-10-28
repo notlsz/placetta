@@ -152,6 +152,36 @@ applicant, so the business's sign contractor applies there; Odelia sends them th
 Record each answer in `src/forms/agentAuthority.ts` (the row's `agentOk`, `owner` and `confirm`), with the page or the
 email as its citation.
 
+## Carry to approval (after submission, nobody touches it)
+
+Migration `20261105090300_carry_to_approval.sql`; code in `supabase/functions/_shared/carry.ts` (the decisions),
+`_shared/carry_run.ts` (the moves), `monitor/carry.ts`, `odelia-mail/agency.ts` and `worker/filer/src/status.ts`.
+Deploy `monitor`, `odelia-mail` and the portal worker. What it does:
+
+- Portal status checks: a submitted portal filing with a saved login is queued each weekday inside the portal's hours
+  (7:00 to 19:00 in the store's time zone); the worker signs in with the saved login, the model reads the status page,
+  and the confirmation number it read must be the filing's receipt number and on the page, or nothing is decided. An
+  issued license's PDF is downloaded into the filing's receipts. A CAPTCHA or code ends the check; nobody solves it.
+- Agency mail to `ODELIA_EMAIL`, or to a workspace's own address (`odelia+w<first 12 hex of its id>@...`), from a
+  verified sender: matched by thread, confirmation number (from the agency's domain or any .gov) or the agency's domain
+  when only one filing is open with it; classified; acted on. Unsure ones go to the team to confirm.
+- A deficiency or request for information the workspace answers goes back by email as the business's agent, only under
+  a live agent packet covering that form and agency (checked when written and again when it leaves), after
+  `SEND_HOLD_MINUTES` with Undo on the filing's timeline. Otherwise a draft for one tap, or one plain question.
+- Past the agency's published time with nothing moving for a week: an email to the agency's inbox as agent, then five
+  days later an agency call (Odelia says she's an AI first; needs the voice setup above), at most every 14 days each.
+- A denial: the appeal is drafted to the owner's approval card with its last day; the owner's tap is always required.
+- Inspections: an email booking or a new time (`inspection_booking reschedule`) is sent as agent; a phone one goes to the
+  team; a confirmation in the agency's mail lands on Deadlines (and the calendar feed); photos the owner sends are checked
+  against the inspector's checklist. Someone from the business still has to be there in person.
+- Approved: "Your license is approved" on the filing, the PDF one tap away, and the renewal on Deadlines from the
+  agency's own expiry date (or its published cycle).
+
+Secrets (all optional; defaults shown): `CARRY=off` turns it all off; `CARRY_CHASES_PER_DAY` (20);
+`PORTAL_STATUS_EVERY_HOURS` (24); `PORTAL_STATUS_PER_HOST_HOUR` (6). On the worker (Render): `FILER_STATUS_CHECKS=0`
+turns its status checks off. The per-minute send (pg_cron `placetta-agency-outbox`) calls `monitor` with
+`{"action":"outbox"}`.
+
 ## Stripe Issuing (zero-touch agency fees, off until approved)
 
 Built on the current spend function from the parked `spend-wip` branch, behind `STRIPE_ISSUING=on` and

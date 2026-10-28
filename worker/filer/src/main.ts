@@ -19,6 +19,7 @@ import { assertNotRoot } from "./sandbox.ts";
 import { startServer, type Health } from "./server.ts";
 import { KeyLock } from "./heal.ts";
 import { Waker } from "./wake.ts";
+import { AnthropicStatusModel, runStatusCheck, sessionPage, type StatusModel, type StatusStore } from "./status.ts";
 
 /** The destination's tenant path, other hosts and start page, from destinations.ts like its host. */
 export const routeOf = (id: string): Route | null => {
@@ -65,7 +66,18 @@ export const settings = () => ({
  *  same portal still go one at a time (heal.ts KeyLock). */
 export const slots = (env: Record<string, string | undefined>) => Math.min(4, Math.max(1, Math.floor(Number(env.FILER_CONCURRENCY ?? "1")) || 1));
 
-export const VERSION = "2026-10-24";
+/** One queued portal status check (status.ts), when there is one and FILER_STATUS_CHECKS isn't 0. True when it ran. */
+export async function statusOnce(store: StatusStore, open: (host?: string) => Promise<Session>, model: StatusModel | null = process.env.ANTHROPIC_API_KEY ? new AnthropicStatusModel(process.env.ANTHROPIC_API_KEY) : null): Promise<boolean> {
+  if (process.env.FILER_STATUS_CHECKS === "0" || !model) return false;
+  const j = await store.claimStatus();
+  if (!j) return false;
+  const route = j.official ? routeOf(j.official) : null;
+  const how = await runStatusCheck(j, { store, model, open: async (host) => sessionPage(await open(host)), alsoOn: route?.alsoOn });
+  console.log(`filer: status check ${j.job_id.slice(0, 8)} on ${j.host}: ${how}`);
+  return true;
+}
+
+export const VERSION = "2026-11-05";
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -141,7 +153,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         health.running++;
         const busy = await w.once().finally(() => { health.running--; });
         if (busy) health.lastClaim = new Date().toISOString();
-        else await nap(5000);
+        // nothing to file: a portal status check, if one is queued (status.ts); filings always go first
+        else if (!(await statusOnce(store, open))) await nap(5000);
       }
       catch (e) { console.error("worker:", e instanceof Error ? e.message : e); await sleep(5000); }
     }

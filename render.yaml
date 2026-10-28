@@ -71,3 +71,4 @@ services:
       # FILER_PROBE=1                      the nightly re-check with a remote browser too (spends the provider's minutes)
       # FILER_KEEP_AWAKE=0                 don't ask for its own /healthz while a filing runs (only for a plan that never sleeps)
       # FILER_DRY_RUN=1                    every filing stops at the agency's review page; nothing is sent
+      # FILER_STATUS_CHECKS=0              no portal status checks (signing in with the saved login to read a filing's status)

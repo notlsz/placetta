@@ -7,6 +7,65 @@ import { publishedDays } from "./plan";
 import { CallsList } from "./Calls";
 import { TalkSheet } from "./Talk";
 import { useChannels } from "./channels";
+import { sendingIn, timeLeft } from "./hold";
+
+/* The finished moment (supabase/functions/_shared/carry.ts licenseMoment): once the agency issues it, the license
+   itself, one tap away, with its number and when it renews. And what Odelia wrote the agency as the business's agent,
+   waiting out the undo window with Undo, then sent. */
+function LicenseCard({ a, filing, lic, zh }: { a: Application; filing: api.Filing; lic: api.License; zh: boolean }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const name = zh ? a.name.zh : a.name.en;
+  const open = async () => {
+    if (!lic.path) return;
+    setBusy(true); setErr("");
+    try {
+      const url = URL.createObjectURL(await api.downloadDoc(lic.path));
+      window.open(url, "_blank", "noopener");
+      void api.licenseSeen(filing.id).catch(() => undefined);
+    } catch { setErr(zh ? "暂时打不开，请稍后再试。" : "It didn't open. Try again in a moment."); }
+    finally { setBusy(false); }
+  };
+  return (
+    <div className="tl-license" role="status">
+      <b>{zh ? `您的${name}已获批准` : `Your ${name.charAt(0).toLowerCase() + name.slice(1)} is approved`}</b>
+      <p>
+        {lic.number && <span>{zh ? `编号 ${lic.number}` : `Number ${lic.number}`}</span>}
+        {lic.expires && <span>{zh ? `有效期至 ${lic.expires}，Odelia 会提前 60 天开始续办` : `Valid until ${lic.expires}; Odelia starts the renewal 60 days before`}</span>}
+        {!lic.path && <span className="quiet">{zh ? "Odelia 正在向机构索取执照文件。" : "Odelia is getting the license file from the agency."}</span>}
+      </p>
+      {lic.path && <button type="button" className="vc-btn" disabled={busy} onClick={() => void open()}>{busy ? (zh ? "正在打开…" : "Opening…") : (zh ? "打开执照 PDF" : "Open the license PDF")}</button>}
+      {err && <small className="quiet">{err}</small>}
+    </div>
+  );
+}
+
+const SENT_KIND: Record<api.OutboxSend["kind"], { en: string; zh: string }> = {
+  rfi_answer: { en: "Answer to the agency", zh: "答复机构" }, status_inquiry: { en: "Status inquiry", zh: "进度查询" },
+  inspection_booking: { en: "Inspection request", zh: "检查预约" }, inspection_reschedule: { en: "New inspection time", zh: "改约检查" },
+};
+function Sends({ list, zh, acts, now, onUndo }: { list: api.OutboxSend[]; zh: boolean; acts: boolean; now: number; onUndo: (id: string) => void }) {
+  const shown = list.filter(o => o.status === "held" || o.status === "sent" || o.status === "failed").slice(0, 4);
+  if (!shown.length) return null;
+  return (
+    <div className="tl-sends">
+      {shown.map(o => {
+        const left = timeLeft(o.send_after, now);
+        const k = SENT_KIND[o.kind] ?? SENT_KIND.rfi_answer;
+        return (
+          <details key={o.id} className={"tl-send s-" + o.status}>
+            <summary>
+              <span>{zh ? k.zh : k.en}{zh ? `，发往 ${o.to}` : ` to ${o.to}`}</span>
+              <small>{o.status === "held" ? (zh ? sendingIn(left).zh : sendingIn(left).en) : o.status === "sent" ? (zh ? "已发送" : "Sent") : (zh ? "未发出，团队正在处理" : "Didn't go; the team has it")}</small>
+              {o.status === "held" && acts && left > 0 && <button type="button" className="linkish" onClick={e => { e.preventDefault(); onUndo(o.id); }}>{zh ? "撤销" : "Undo"}</button>}
+            </summary>
+            <pre>{o.subject}{"\n\n"}{o.body}</pre>
+          </details>
+        );
+      })}
+    </div>
+  );
+}
 
 /*
  * A filing's timeline, the way a parcel's is: UPS and FedEx tracking, Amazon's and Shopify's order timelines
@@ -36,13 +95,23 @@ export function StatusTimeline({ a, filing }: { a: Application; filing: api.Fili
   const [sheet, setSheet] = useState<api.VoiceMode | null>(null);
   const [said, setSaid] = useState("");
   const ch = useChannels();   // before any return: a hook runs on every render
+  const [reload, setReload] = useState(0);
   useEffect(() => {
     let live = true;
     api.filingTimeline(filing.id).then(x => { if (live) setT(x); }, () => { if (live) setT(null); });
-    const tick = setInterval(() => setNow(Date.now()), 60_000);
-    return () => { live = false; clearInterval(tick); };
-  }, [filing.id, filing.status, filing.updated_at]);
+    return () => { live = false; };
+  }, [filing.id, filing.status, filing.updated_at, reload]);
+  // a send waiting out its undo window counts down by the second; otherwise "last checked" moves by the minute
+  const holding = !!t?.outbox?.some(o => o.status === "held");
+  useEffect(() => {
+    const tick = setInterval(() => setNow(Date.now()), holding ? 1000 : 60_000);
+    return () => clearInterval(tick);
+  }, [holding]);
   if (!t) return null;
+  const undo = async (id: string) => {
+    try { await api.outboxUndo(id); } catch { /* already sent: the reload shows it */ }
+    setReload(n => n + 1);
+  };
   const tr = t.tracking;
   const s = filing.status === "submitted" ? sla(filing.submitted_at, publishedDays(a.est), new Date(now).toISOString().slice(0, 10), tr?.last_movement_at) : null;
   const when = (iso: string) => new Date(iso).toLocaleString(zh ? "zh-CN" : "en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
@@ -75,6 +144,8 @@ export function StatusTimeline({ a, filing }: { a: Application; filing: api.Fili
         </div>
       ) : <p className="tl-soon quiet">{zh ? "致电机构和现场翻译即将推出。" : "Agency calls and the interpreter are coming soon."}</p>)}
       {said && <p className="tl-said" role="status">{said}</p>}
+      {t.license && (t.license.path || filing.status === "accepted") && <LicenseCard a={a} filing={filing} lic={t.license} zh={zh} />}
+      {t.outbox && <Sends list={t.outbox} zh={zh} acts={acts} now={now} onUndo={id => void undo(id)} />}
       {t.events.length > 0 && (
         <ol className="tl-events">
           {t.events.map((e, i) => (
