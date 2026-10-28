@@ -13,7 +13,8 @@
 # Switching later is one line each (the container is the same plain Docker image everywhere):
 #   bigger plan, always on      plan: standard                    (2 GB, about $25 a month; then FILER_URL is optional)
 #   Chromium in this container  BROWSER_PROVIDER value: local     (needs plan: standard; Chromium is killed in 512 MB)
-#   Browserbase for every run   BROWSER_PROVIDER value: browserbase, and add BROWSERBASE_API_KEY, BROWSERBASE_PROJECT_ID
+#   Browserbase only            BROWSER_PROVIDER value: browserbase, with BROWSERBASE_API_KEY, BROWSERBASE_PROJECT_ID (the
+#                               default value browserbase,steel already puts it first once its keys are set)
 #   off Render (Cloud Run, Fly)  build worker/filer/Dockerfile, set the same variables plus FILER_PUBLIC_URL (its https
 #                               address), and point the Supabase secret FILER_URL at it
 services:
@@ -32,10 +33,13 @@ services:
         - worker/filer/**
         - src/renewal.ts
         - supabase/functions/_shared/agent_inbox.ts
+        - supabase/functions/_shared/ai_cost.ts
+        - supabase/functions/_shared/cache_rates.ts
         - supabase/functions/_shared/carry.ts
         - supabase/functions/_shared/injection.ts
         - supabase/functions/_shared/zdr.ts
         - supabase/functions/file/accounts.ts
+        - supabase/functions/file/captcha.ts
         - supabase/functions/file/destinations.ts
         - supabase/functions/file/dest/midatlantic.ts
         - supabase/functions/file/dest/plains.ts
@@ -52,11 +56,18 @@ services:
         sync: false                      # console.anthropic.com, Settings, API keys, Create key (starts sk-ant-)
       - key: STEEL_API_KEY
         sync: false                      # app.steel.dev, sign up (free plan), API Keys. Not needed with BROWSER_PROVIDER local
+      - key: BROWSERBASE_API_KEY
+        sync: false                      # browserbase.com, Developer plan ($20 a month), Settings, API Key. Left empty: runs use Steel
+      - key: BROWSERBASE_PROJECT_ID
+        sync: false                      # browserbase.com, Settings, Project ID
       - key: FILER_SECRET
         generateValue: true              # Render makes a random 256-bit value; copy it from the service's Environment tab to the Supabase secret FILER_SECRET
       # ---- set for you ----
       - key: BROWSER_PROVIDER
-        value: steel                     # steel (the free start), browserbase, or local (Chromium in this container: plan standard)
+        value: browserbase,steel         # the order a run tries: Browserbase first (Developer, $20 a month: 100 browser hours, 6-hour
+                                         # sessions, recording off), Steel when Browserbase refuses (free plan: 15-minute sessions, every
+                                         # session recorded). Until BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID are set, Browserbase is
+                                         # skipped and runs go to Steel as before. Add ,local on plan standard (Chromium in this container)
       - key: SUPABASE_URL
         value: https://esquxzcfsylffuijvzec.supabase.co
       - key: FILER_ENABLED
@@ -84,9 +95,17 @@ services:
       # FILER_MODEL_COOLDOWN_S             seconds a vendor that hit a limit or was down sits out (default 120)
       # FILER_DB_KEY                       the filer's own least-privilege key (runbook above); then delete SUPABASE_SERVICE_ROLE_KEY
       # BROWSERBASE_API_KEY, BROWSERBASE_PROJECT_ID
-      #                                    with BROWSER_PROVIDER browserbase, every run; with local, only the agency sites that
-      #                                    refuse a cloud server's address (EDD e-Services, bizfile Online, MassTaxConnect,
-      #                                    sanjoseca.gov: worker/filer/src/env.ts)
+      #                                    browserbase.com (Developer plan), Settings: first in BROWSER_PROVIDER's order; with
+      #                                    local alone, only the agency sites that refuse a cloud server's address (EDD
+      #                                    e-Services, bizfile Online, MassTaxConnect, sanjoseca.gov: worker/filer/src/env.ts)
+      # BROWSERBASE_VERIFIED=1             Browserbase "Verified" browsers (Scale plan only; with its proxies): fewer bot checks.
+      #                                    Web Bot Auth (Cloudflare signed agents) is switched on for the account by Browserbase
+      #                                    on request (browserbase.com/contact-web-bot-auth), not per session. Nothing solves a CAPTCHA
+      # FILER_MODEL_FAST                   the cheap model for routine steps (default anthropic:claude-haiku-5-5)
+      # FILER_MODEL_STRONG                 the strong model for review pages, final submit, deficiency pages and hard pages
+      #                                    (default anthropic:claude-opus-5-5); each fails over through FILER_MODELS' vendors
+      # FILER_ADVISOR=0                    no Opus advisor for the fast model (default on: Haiku consults Opus mid-step)
+      # FILER_ADVISOR_MAX                  advisor calls a run may make at most (default 3)
       # FILER_BROWSERBASE_HOSTS            more hosts for Browserbase with BROWSER_PROVIDER local, or "*" for every filing
       # STEEL_SESSION_MS                   how long a Steel session may live (default 1800000, 30 minutes; your Steel plan caps it)
       # STRIPE_ISSUING_ON                  1 once Stripe approves Issuing (SETUP.md "Stripe Issuing"): Odelia pays authorized

@@ -10,7 +10,7 @@ export function cacheRates(model: string): { read: number; write: number } {
   const m = String(model ?? "").toLowerCase();
   if (m.startsWith("anthropic:") || m.includes("claude")) {
     if (/(fable|mythos)-5-1/.test(m)) return { read: 0.025, write: 1.25 };
-    if (/(opus|sonnet)-5-5/.test(m)) return { read: 0.05, write: 1.25 };
+    if (/(opus|sonnet)-5[-.]5/.test(m)) return { read: 0.05, write: 1.25 };
     return { read: 0.1, write: 1.25 };
   }
   if (/gemini-2\.0/.test(m)) return { read: 0.25, write: 1 };

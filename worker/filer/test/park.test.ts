@@ -70,7 +70,11 @@ class Scripted implements Model {
     return { name: "click", input: { selector: s.buttons[0]?.selector ?? s.links[0].selector } };
   }
 }
-class Strong extends Scripted { escalate(on: boolean) { this.escalations.push(on); this.strong = on; } }
+/** The cascade's model (model.ts tiered): run.ts names the tier each step; the strong tier isn't stuck. */
+class Strong extends Scripted {
+  readonly tiered = true; tiers: string[] = [];
+  override async next(i: StepInput): Promise<ToolCall> { this.tiers.push(i.tier ?? "fast"); this.strong = i.tier === "strong"; return await super.next(i); }
+}
 
 const portals: { close(): Promise<void> }[] = [];
 after(async () => { for (const p of portals) await p.close(); });
@@ -98,7 +102,40 @@ test("with a stronger model to hand, a repeat goes to it first, and the filing s
   const r = await new Worker(cfg(store, m, p.url)).run(store.get("f1"));
   assert.equal(r?.kind, "submitted");
   assert.equal(filled(store.get("f1"), "Activity"), 1);
-  assert.deepEqual(m.escalations.slice(0, 2), [true, false], "escalated, then back to the usual model once it moved on");
+  assert.ok(m.tiers.includes("strong"), "the repeat went to the strong tier");
+  assert.ok(!store.get("f1").agent_log.some((e) => e.kind === "need_person"), "no person needed");
+});
+
+test("parked: Done in the worker's live view queues the filing again with the run's key", async () => {
+  const p = await startPortal(); portals.push(p);
+  const store = new Many(); store.fs.push(filing("f1", "queued"));
+  const keys: string[] = [];
+  (store as Many & { resumeParked(id: string, key: string): Promise<boolean> }).resumeParked = async (id, key) => {
+    keys.push(key);
+    const f = store.get(id) as Filing & { provider_ref?: string | null };
+    if (f.agent_state !== "needs_you" || f.provider_ref !== `parked:${key}`) return false;
+    f.agent_state = "queued"; f.provider_ref = null; return true;
+  };
+  let done = false;
+  const live = { open: () => ({ token: "t".repeat(32), url: "https://worker.test/live/t" }), done: () => done, touched: () => 0, close() {} };
+  const lot = new ParkLot();
+  const m = new Scripted();
+  m.first = [{ name: "fill_login", input: { selector: "label:Username", which: "username" } }, { name: "need_person", input: { reason: "question", message: "Check the page" } }];
+  try {
+    assert.ok(await new Worker({ ...cfg(store, m, p.url, { holdMs: 30_000 }), park: lot, live: live as never }).once());
+    const f = store.get("f1") as Filing & { provider_ref?: string | null };
+    assert.equal(f.agent_state, "needs_you");
+    assert.match(f.provider_ref ?? "", /^parked:[0-9a-f]{48}$/);
+    await new Promise((r) => setTimeout(r, 350));
+    assert.equal(f.agent_state, "needs_you", "nothing until the person is done");
+    done = true;
+    for (let i = 0; i < 20 && f.agent_state !== "queued"; i++) await new Promise((r) => setTimeout(r, 100));
+    assert.equal(f.agent_state, "queued", "back in the queue");
+    assert.equal(keys.length, 1);
+    assert.ok(lot.has("f1"), "the kept browser waits for the slot that claims it");
+    assert.ok(await new Worker({ ...cfg(store, new Scripted(), p.url, { holdMs: 30_000 }), park: lot, live: live as never }).once());
+    assert.equal(store.get("f1").status, "submitted");
+  } finally { lot.closeAll(); }
 });
 
 test("one slot, two queued filings: the first parks on need_person and the second starts within a poll interval; I've done it resumes the first on the same browser", async () => {
@@ -117,7 +154,7 @@ test("one slot, two queued filings: the first parks on need_person and the secon
     const f1 = store.get("f1");
     assert.equal(f1.agent_state, "needs_you", "the filing is the person's");
     assert.ok(lot.has("f1"), "its browser is kept");
-    assert.equal((f1 as unknown as { provider_ref: unknown }).provider_ref, null, "nothing holds it from being claimed again");
+    assert.equal(String((f1 as unknown as { provider_ref: unknown }).provider_ref).startsWith("parked:"), true, "parked, not held: nothing keeps it from being claimed again");
     assert.ok(f1.submit_clicked_at === null);
     assert.ok(await slot());
     assert.ok(store.claimedAt.get("f2")! - store.askedAt.get("f1")! < 100, "the second started within a poll interval");

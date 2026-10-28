@@ -7,6 +7,9 @@ import type { Draft } from "./teach.ts";
 import type { StatusJob, StatusResult, StatusStore } from "./status.ts";
 import type { Filing, LogEntry, Login, Skill } from "./types.ts";
 import { policyOf, STRICT, type RecordingPolicy } from "./privacy.ts";
+import type { RunAi } from "./cascade.ts";
+import type { PortalState } from "./session.ts";
+import { isChoice, type CaptchaChoice } from "../../../supabase/functions/file/captcha.ts";
 
 /** A portal's taught playbook (teach.ts), shared by every workspace: structure only. "draft" runs only in assist mode
  *  (Odelia fills, a person presses submit); "approved" runs like any playbook. */
@@ -14,6 +17,8 @@ export type Taught = { id: string; status: "draft" | "approved"; body: Draft; ru
 
 export interface Store {
   claim(): Promise<Filing | null>;
+  /** A parked filing back to the queue, with the key its run parked it under (run.ts ParkLot; 20261105091100_park_resume.sql). */
+  resumeParked?(id: string, key: string): Promise<boolean>;
   reload(id: string): Promise<Filing>;
   /** Append to the log, patch agent columns, write the audit row (actor agent). */
   step(f: Filing, entry: LogEntry | null, patch?: Record<string, unknown>): Promise<Filing>;
@@ -36,6 +41,17 @@ export interface Store {
   begin?(f: Filing): Promise<void>;
   /** The run is over: its token stops working. */
   end?(): Promise<void>;
+  /** The run's AI and browser, to its filer_runs row, before end (20261105090800_filer_ai_cost.sql): server only. */
+  runUsage?(u: RunAi): Promise<void>;
+  /** The business's signed-in state on this portal (session.ts), from the vault: this filing's workspace and this host
+   *  only, unexpired, or null. Saved after a run that signed in; dropped on a sign-in failure or a logout. */
+  sessionGet?(f: Filing, host: string): Promise<PortalState | null>;
+  sessionPut?(f: Filing, host: string, state: PortalState, expires: Date): Promise<void>;
+  sessionDrop?(f: Filing, host: string, reason: "sign_in_failed" | "logged_out"): Promise<void>;
+  /** The workspace's saved answer for a CAPTCHA on this agency's site (captcha_preferences), or null. */
+  captchaChoice?(f: Filing, host: string): Promise<CaptchaChoice | null>;
+  /** A CAPTCHA or identity check met on a host, with the browser that met it (portal_challenges): nothing of the page. */
+  challenge?(f: Filing, host: string, kind: "captcha" | "identity", provider: string | null): Promise<void>;
   /** What this run may record of a person, and whether the workspace is synthetic (privacy.ts,
    *  20261105090600_privacy_recording_age.sql). Without it, or when it fails, the run takes the strict side. */
   recordingPolicy?(f: Filing): Promise<RecordingPolicy>;
@@ -128,6 +144,37 @@ export class SupabaseStore implements Store, StatusStore {
     this.runDb = null; this.token = null;
     if (run) await run.rpc("filer_end_run", {});
   }
+  async sessionGet(f: Filing, host: string): Promise<PortalState | null> {
+    const { data, error } = await this.db.rpc("filer_session_get", { p_filing: f.id, p_host: host });
+    if (error) { if (error.code === "PGRST202") return null; throw new Error("saved session unreadable"); }
+    if (typeof data !== "string" || !data) return null;
+    try { const s = JSON.parse(data) as PortalState; return Array.isArray(s.cookies) ? s : null; } catch { return null; }
+  }
+  async sessionPut(f: Filing, host: string, state: PortalState, expires: Date) {
+    // the error never carries the state: only that saving it failed
+    const { error } = await this.db.rpc("filer_session_put", { p_filing: f.id, p_host: host, p_state: JSON.stringify(state), p_expires: expires.toISOString() });
+    if (error && error.code !== "PGRST202") throw new Error("saving the signed-in session failed");
+  }
+  async sessionDrop(f: Filing, host: string, reason: "sign_in_failed" | "logged_out") {
+    const { error } = await this.db.rpc("filer_session_drop", { p_filing: f.id, p_host: host, p_reason: reason });
+    if (error && error.code !== "PGRST202") throw new Error("dropping the signed-in session failed");
+  }
+  async captchaChoice(f: Filing, host: string): Promise<CaptchaChoice | null> {
+    const { data, error } = await this.db.rpc("filer_captcha_choice", { p_filing: f.id, p_host: host });
+    if (error) { if (error.code === "PGRST202") return null; throw new Error(`captcha choice failed: ${error.message}`); }
+    return isChoice(data) ? data : null;
+  }
+  async challenge(f: Filing, host: string, kind: "captcha" | "identity", provider: string | null) {
+    const { error } = await this.db.rpc("filer_challenge_seen", { p_filing: f.id, p_host: host, p_kind: kind, p_provider: provider });
+    if (error && error.code !== "PGRST202") throw new Error(`challenge log failed: ${error.message}`);
+  }
+  /** The run's ledger onto its own filer_runs row (the token names it). A database without the function yet: skipped. */
+  async runUsage(u: RunAi) {
+    const run = this.runDb;
+    if (!run) return;
+    const { error } = await run.rpc("filer_run_usage", { p_usage: u });
+    if (error && error.code !== "PGRST202") throw new Error(`run usage failed: ${error.message}`);
+  }
   /** The spend function, as this run: its token names the one filing it may pay for. Errors say only the status. */
   private async spend(body: Record<string, unknown>): Promise<Record<string, unknown>> {
     if (!this.token) throw new Error("no run token");
@@ -160,6 +207,11 @@ export class SupabaseStore implements Store, StatusStore {
     if (error) throw new Error(`claim failed: ${error.message}`);
     const data = rows as Filing[] | null;
     return (data ?? [])[0] ?? null;
+  }
+  async resumeParked(id: string, key: string) {
+    const { data, error } = await this.base.rpc("filer_resume_parked", { p_id: id, p_key: key });
+    if (error) throw new Error(`resume failed: ${error.message}`);
+    return data === true;
   }
   async takeHeld(id: string) {
     return (await this.call<boolean>("take_held_filing", { p_id: id }, "take")) === true;

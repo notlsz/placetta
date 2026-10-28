@@ -30,7 +30,7 @@ export type LivePage = {
 /** The team's view: a picture with the owner's lines covered, and whether the line in focus is one of them. */
 export type StaffGuard = { shot(): Promise<Uint8Array>; typingBlocked(): Promise<boolean> };
 
-type View = { page: LivePage; until: number; touched: number; done: boolean; host: string; staff?: StaffGuard };
+type View = { page: LivePage; until: number; touched: number; done: boolean; host: string; staff?: StaffGuard; note?: string };
 export type Reply = { status: number; type: string; body: string | Uint8Array; headers?: Record<string, string> };
 
 /** Keys a person may press in the view: editing and moving between fields, nothing that opens the browser's own tools. */
@@ -48,11 +48,12 @@ export class LiveViews {
   get on(): boolean { return !!this.base && /^https:\/\//.test(this.base); }
 
   /** A view of this page until ttlMs from now. Null when the worker has no public address. With staff, the team's view. */
-  open(page: LivePage, ttlMs: number, staff?: StaffGuard): { token: string; url: string } | null {
+  /** note: what the person is asked to do on this page, shown at the top of the view (the hand-back's own words). */
+  open(page: LivePage, ttlMs: number, staff?: StaffGuard, note?: string): { token: string; url: string } | null {
     if (!this.on) return null;
     const token = randomBytes(24).toString("base64url");
     let host = ""; try { host = new URL(page.url()).hostname; } catch { /* about:blank */ }
-    this.views.set(token, { page, until: this.now() + ttlMs, touched: 0, done: false, host, ...(staff ? { staff } : {}) });
+    this.views.set(token, { page, until: this.now() + ttlMs, touched: 0, done: false, host, ...(staff ? { staff } : {}), ...(note ? { note: note.slice(0, 600) } : {}) });
     return { token, url: `${this.base!.replace(/\/+$/, "")}/live/${token}` };
   }
   close(token: string | null | undefined) { if (token) this.views.delete(token); }
@@ -76,7 +77,7 @@ export class LiveViews {
     const v = m ? this.view(m[1]) : null;
     if (!m || !v) return text(404, "This live view has ended. Go back to Placetta.");
     const part = m[2] ?? "";
-    if (method === "GET" && part === "") return { status: 200, type: "text/html; charset=utf-8", body: page(v.host, !!v.staff), headers: SECURE };
+    if (method === "GET" && part === "") return { status: 200, type: "text/html; charset=utf-8", body: page(v.host, !!v.staff, v.note), headers: SECURE };
     if (method === "GET" && part === "/frame.jpg") {
       // the team's picture or none: never the page uncovered
       let img: Uint8Array;
@@ -121,7 +122,7 @@ const json = (o: unknown): Reply => ({ status: 200, type: "application/json", bo
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 
 /** The view: the page as a picture that refreshes, a box to type into, and Done. */
-function page(host: string, staff = false): string {
+function page(host: string, staff = false, note?: string): string {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Placetta live browser</title>
 <style>
@@ -140,6 +141,7 @@ p{color:var(--mut);margin:6px 0}
 <header><span><b>${staff ? "Placetta team view" : "Live browser"} on ${esc(host || "the agency's site")}</b><small>${staff ? "Solve the human check only. The owner's numbers and saved login are covered, and you can't type in those lines." : "Click on the page to use it. What you type goes only to the agency's page."}</small></span>
 <button class="ink" id="done" type="button">Done, Odelia carries on</button></header>
 <main>
+${note && !staff ? `<p class="ask" style="color:var(--fg)"><b>${esc(note)}</b></p>` : ""}
 <div class="row"><input id="txt" autocomplete="off" placeholder="Type here, then press Send (for a code or a number)"><button id="send" type="button">Send</button>
 <button data-key="Tab" type="button">Tab</button><button data-key="Enter" type="button">Enter</button><button data-key="Backspace" type="button">Delete</button>
 <button data-scroll="-600" type="button">Scroll up</button><button data-scroll="600" type="button">Scroll down</button></div>

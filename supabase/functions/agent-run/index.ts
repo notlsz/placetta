@@ -35,7 +35,7 @@
 // The app polls a run with the poll_agent_run RPC and stops one with stop_agent_run. When nobody is watching as it
 // finishes, the result becomes an Update and the owners get an email (with an email provider and MAIL_FROM set).
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
-import { callModel, canConverse, type Role } from "../_shared/llm.ts";
+import { appealTurn, callModel, canConverse, type Role } from "../_shared/llm.ts";
 import { accessRpc, WORKS } from "../_shared/access.ts";
 import { CHAT_JOBS_PER_HOUR, chatRateLimited, chatToOk, NOT_CHARGED_EN, overTaskLimit, refundable, repeatKey, repeatStatuses, REPEAT_MS, sharedThread, taskLimit, tokenLimit, tooLarge } from "./limits.ts";
 import { gate, record, saverLine, saverNoticeDue } from "../_shared/ai_gate.ts";
@@ -166,7 +166,7 @@ const runsTable: RunsTable<Run> = {
 
 
 /** One task's tally across its model calls: who asked, what it has cost, and whether saver mode was on (and why). */
-type Who = { uid: string | null; spent: number; reduced?: "allowance" | "throttle"; renews?: string | null; events?: number[] };
+type Who = { uid: string | null; spent: number; reduced?: "allowance" | "throttle"; renews?: string | null; events?: number[]; advisor?: number };
 
 /**
  * One model call: the company keys, the role's route (../_shared/llm.ts), research on official sites, the gate and the
@@ -191,6 +191,8 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
   const pageTools = (Array.isArray(body.tools) ? (body.tools as Block[]) : []).filter((t) => t && typeof t.name === "string" && !("type" in t)).slice(0, MAX_TOOLS);
   let maxTokens = Math.min(Math.max(Number(body.max_tokens) || 2000, 256), 4000);
   if (deep && role === "plan") role = "deep";
+  // answering a deficiency notice or writing an appeal: Opus (the appeal role), never on a cheaper model
+  if (role === "plan" && appealTurn(body.messages)) role = "appeal";
   let research = pageTools.length > 0 || role === "deep";
   if (g.tier === "reduced") {
     who.reduced = g.reason ?? "allowance"; who.renews = g.period_end;
@@ -201,7 +203,7 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
   const userLocation = location?.city ? { type: "approximate", city: String(location.city).slice(0, 80), region: String(location.region ?? "").slice(0, 80) || undefined, country: "US" } : undefined;
   const search = { type: "web_search_20250305", name: "web_search", max_uses: 5, ...(userLocation ? { user_location: userLocation } : {}) };
   const fetchTool = { type: "web_fetch_20250910", name: "web_fetch", max_uses: 4, citations: { enabled: true }, max_content_tokens: 24000 };
-  const anthropicModel = role === "deep" ? MODEL_DEEP : MODEL;
+  const anthropicModel = role === "deep" || role === "appeal" ? MODEL_DEEP : MODEL;
   const payload: Record<string, unknown> = { model: anthropicModel, max_tokens: maxTokens, messages: body.messages };
   if (typeof body.system === "string" && body.system) payload.system = body.system.slice(0, 80000);
   // prompt caching (src/odeliaMemory/cache.ts): where the stable segments end, and their fingerprint (../_shared/llm.ts)
@@ -215,15 +217,23 @@ async function model(ws: string, body: Record<string, unknown>, deep: boolean, l
   const cutSecrets = withoutEnv(payload, serverSecrets());
   if (cutSecrets.cut) { console.error("model call: cut", cutSecrets.cut, "server secret value(s) from the request"); Object.assign(payload, cutSecrets.body); }
   // onText: the answer streams (the main loop's rounds), so the run's draft shows the words as they're written
-  const out = await callModel((k) => Deno.env.get(k), { payload, role, research, beta: research ? FETCH_BETA : null, synthetic: rehearsal }, anthropicModel,
+  // the cascade (_shared/llm.ts): the plan role's Sonnet consults Opus as its advisor, at most ODELIA_ADVISOR_MAX (default
+  // 4) times a run; fast mode only while a person waits on a streamed answer; the monitor's background checks come more
+  // than five minutes apart, so their stable prefix is cached for an hour
+  const advisorMax = Math.max(0, Number(Deno.env.get("ODELIA_ADVISOR_MAX") ?? "4") || 0);
+  const out = await callModel((k) => Deno.env.get(k), { payload, role, research, beta: research ? FETCH_BETA : null, synthetic: rehearsal,
+    interactive: !!onText, advisorLeft: Math.max(0, advisorMax - (who.advisor ?? 0)), cacheTtl: role === "watch" ? "1h" : "5m" }, anthropicModel,
     research ? { search, fetch: fetchTool, pageTools } : null, fetch, onText);
   if (!out.ok) {
     console.error("models", out.model, out.status, out.text.slice(0, 300));
     throw out.status === 429 || out.status === 529 ? err("rate_limited", "The agent is busy. Try again in a moment.") : err(out.status === 401 || out.status === 503 ? "not_configured" : "upstream_error", "Couldn't reach the agent's model. Try again.");
   }
   const data = out.data as { content: Block[]; stop_reason: string; usage?: Record<string, never> };
-  const usd = await record(admin, g.event, out.model, data.usage, role);
+  // the appeal role is recorded as review (ai_record keeps the roles it knows)
+  const usd = await record(admin, g.event, out.model, data.usage, role === "appeal" ? "review" : role);
   who.spent += usd;
+  // the advisor calls this answer made (usage.iterations, advisor_message), against the run's cap
+  who.advisor = (who.advisor ?? 0) + (((data.usage as { iterations?: { type?: string }[] } | undefined)?.iterations ?? []).filter((i) => i.type === "advisor_message").length);
   // the model and price ride along for the run's trace (src/trace.ts)
   return { ...data, model: out.model, usd } as unknown as { content: never[]; stop_reason: string };
 }

@@ -19,7 +19,9 @@ type Price = { in: number; out: number; /** the rate past `longAt` input tokens,
 const PRICES: [RegExp, Price][] = [
   // Anthropic
   [/fable|mythos/, { in: 10, out: 50 }],
-  [/opus-5-5/, { in: 4, out: 20 }],
+  // Opus 5.5, Sonnet 5.5 and Haiku 5.5 read again on platform.claude.com (Pricing, models overview) on 2026-10-28:
+  // unchanged. "opus-5.5" is OpenRouter's spelling (anthropic/claude-opus-5.5), priced the same.
+  [/opus-5[-.]5/, { in: 4, out: 20 }],
   [/opus-4-1/, { in: 15, out: 75 }],
   [/opus/, { in: 5, out: 25 }],                       // Opus 4.5, 4.6, 5
   [/sonnet-4/, { in: 3, out: 15 }],                   // Sonnet 4, 4.5, 4.6
@@ -63,8 +65,20 @@ export const SEARCH_USD = 0.01;
 export type Usage = {
   input_tokens?: number; output_tokens?: number;
   cache_creation_input_tokens?: number; cache_read_input_tokens?: number;
+  /** Anthropic splits cache writes by lifetime: the 1-hour ones cost 2x base input, the 5-minute ones 1.25x
+   *  (platform.claude.com, Prompt caching, Pricing, read 2026-10-28). Without it every write is priced as 5-minute. */
+  cache_creation?: { ephemeral_5m_input_tokens?: number; ephemeral_1h_input_tokens?: number };
   server_tool_use?: { web_search_requests?: number };
+  /** The advisor tool (beta): the top-level fields are the executor's only; each advisor_message iteration is billed at
+   *  its own model's rates (platform.claude.com, Advisor tool, Usage and billing). */
+  iterations?: { type?: string; model?: string; input_tokens?: number; output_tokens?: number; cache_read_input_tokens?: number; cache_creation_input_tokens?: number }[];
+  /** "fast": Opus 5.5 fast mode, 2x the standard rates ($8 / $40), caching multipliers on top (Fast mode, Pricing). */
+  speed?: string;
 };
+/** The Message Batches API bills every token at 50% of the standard price (Batch processing, Pricing). */
+export const BATCH_DISCOUNT = 0.5;
+/** Fast mode's multiplier on Opus 5.5's standard rates. */
+export const FAST_MULTIPLIER = 2;
 
 /** One call's price: the model's row as of the call's date (a published change applies from its day), at the long-prompt
  *  rate when the prompt is past it. `at` defaults to now. */
@@ -78,14 +92,27 @@ export function priceOf(model: string, inputTokens = 0, at: Date = new Date()): 
 /** True when the price table has a row for this model (not the unknown-model price). */
 export const priced = (model: string) => PRICES.some(([re]) => re.test(model.toLowerCase()));
 
-/** The dollars a call cost. model is "provider:model" or a bare model id. */
-export function costOf(model: string, u: Usage | undefined, at: Date = new Date()): number {
+/** The dollars a call cost. model is "provider:model" or a bare model id. batch: sent through the Message Batches API. */
+export function costOf(model: string, u: Usage | undefined, at: Date = new Date(), o: { batch?: boolean } = {}): number {
   if (!u) return 0;
   const n = (v: unknown) => (typeof v === "number" && v > 0 ? v : 0);
   const p = priceOf(model, n(u.input_tokens) + n(u.cache_creation_input_tokens) + n(u.cache_read_input_tokens), at);
   // cached input at the vendor's own cached rate (cache_rates.ts): Anthropic reads 0.1x and writes 1.25x, Gemini 2.5 reads 0.25x
   const r = cacheRates(model);
-  const usd = (n(u.input_tokens) * p.in + n(u.cache_creation_input_tokens) * p.in * r.write + n(u.cache_read_input_tokens) * p.in * r.read + n(u.output_tokens) * p.out) / 1e6
-    + n(u.server_tool_use?.web_search_requests) * SEARCH_USD;
+  const anthropic = model.startsWith("anthropic:") || /claude/i.test(model);
+  // the 1-hour writes at 2x base input (Anthropic); the rest of the writes at the 5-minute rate
+  const w1h = anthropic ? Math.min(n(u.cache_creation?.ephemeral_1h_input_tokens), n(u.cache_creation_input_tokens)) : 0;
+  const w5m = n(u.cache_creation_input_tokens) - w1h;
+  const speed = u.speed === "fast" && /opus-5[-.]5/.test(model.toLowerCase()) ? FAST_MULTIPLIER : 1;
+  let usd = speed * (n(u.input_tokens) * p.in + w5m * p.in * r.write + w1h * p.in * 2 + n(u.cache_read_input_tokens) * p.in * r.read + n(u.output_tokens) * p.out) / 1e6;
+  // the advisor's sub-inferences, each at its own model's price (never fast: speed is the executor's)
+  for (const it of u.iterations ?? []) {
+    if (it.type !== "advisor_message" || !it.model) continue;
+    const am = it.model.includes(":") ? it.model : `anthropic:${it.model}`;
+    const ap = priceOf(am, n(it.input_tokens) + n(it.cache_creation_input_tokens) + n(it.cache_read_input_tokens), at), ar = cacheRates(am);
+    usd += (n(it.input_tokens) * ap.in + n(it.cache_creation_input_tokens) * ap.in * ar.write + n(it.cache_read_input_tokens) * ap.in * ar.read + n(it.output_tokens) * ap.out) / 1e6;
+  }
+  if (o.batch) usd *= BATCH_DISCOUNT;
+  usd += n(u.server_tool_use?.web_search_requests) * SEARCH_USD;
   return Math.round(usd * 1e6) / 1e6;
 }

@@ -28,6 +28,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { appLink, noticeText, urgency } from "../_shared/odelia.ts";
 import { HOOK_KINDS, hookData, hookDigest, hookPlan, postHook, type HookKind, type HookSchedule } from "../_shared/channels.ts";
+import { dbJobs, pollBatches } from "../_shared/batch.ts";
 import { deadlineRules } from "../_shared/business_rules.ts";
 // @deno-types="../_shared/opening.d.ts"
 import { appealFor, approvalsLine, daysLeft, deadlineFor, type FilingRow, finishWork, MAX_RESUMES, normalizeState, NOT_A_LAW_FIRM, openingLine, openingPath, resumable, runsOn, type Routine, stampFilings, TIERS } from "../_shared/opening.js";
@@ -45,6 +46,7 @@ import { mayEmail, reachOf, wantsTexts } from "../_shared/reach.ts";
 import { updateChannel } from "../_shared/deliver.ts";
 import { deliverNotices, noticeDb, outboxText } from "../_shared/notices.ts";
 import { stageAlert, stageUpdates, type StageFiling, type StageUpdate } from "./stage.ts";
+import { goodNews, ownerWorthy } from "./quiet.ts";
 import { inspectionWork, PREP } from "./inspections.ts";
 import { runStatusChecks, type StatusFiling, type StatusIO, type StatusRun, type WsState } from "./status_checks.ts";
 import { initiative, movePrompt, specialistWake, type ChaseRow, type InitIO } from "./initiative.ts";
@@ -450,20 +452,26 @@ async function sendMail(to: string[], subject: string, text: string, html: strin
   return res.ok;
 }
 
+/** The owner's one morning email: what needs them first, then good news, nothing they can't act on (quiet.ts decides
+ *  what's in it). No list markers: each item is its own short block. */
 export function digest(business: string, items: Update[]) {
   const link = APP ? `${APP}/app/` : "";
-  const lines = items.map((u) => `- ${u.title.en}${u.body ? `. ${u.body.en}` : ""}`).join("\n");
-  const linesZh = items.map((u) => `- ${u.title.zh}${u.body ? `。${u.body.zh}` : ""}`).join("\n");
-  const text = `${business}: ${items.length} update${items.length === 1 ? "" : "s"} from Placetta\n\n${lines}\n\n${linesZh}${link ? `\n\nOpen Placetta: ${link}` : ""}\n`;
-  const li = (u: Update, lang: "en" | "zh") => `<li style="margin:0 0 10px"><b>${esc(u.title[lang])}</b>${u.body ? `<br><span style="color:#5B6470">${esc(u.body[lang])}</span>` : ""}</li>`;
+  const needs = items.filter((u) => !goodNews(u)), good = items.filter(goodNews);
+  const n = needs.length;
+  const head = n ? `${n} thing${n === 1 ? "" : "s"} for you` : `Good news`;
+  const headZh = n ? `${n} 件事需要您` : "好消息";
+  const line = (u: Update, lang: "en" | "zh") => `${u.title[lang]}${u.body ? (lang === "en" ? `. ${u.body.en}` : `。${u.body.zh}`) : ""}`;
+  const text = `${business}: ${head}\n\n${[...needs, ...good].map((u) => line(u, "en")).join("\n\n")}\n\n${headZh}\n\n${[...needs, ...good].map((u) => line(u, "zh")).join("\n\n")}${link ? `\n\nOpen Placetta: ${link}` : ""}\n`;
+  const block = (u: Update, lang: "en" | "zh") => `<div style="margin:0 0 12px;padding:12px 14px;background:#F5F7FA;border-radius:12px"><b>${esc(u.title[lang])}</b>${u.body ? `<br><span style="color:#5B6470">${esc(u.body[lang])}</span>` : ""}</div>`;
   const html = `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto;padding:28px 22px;color:#0E1116">
 <p style="font-size:13px;color:#5B6470;margin:0 0 6px">Placetta</p>
-<h1 style="font-size:20px;margin:0 0 18px">${esc(business)}: ${items.length} update${items.length === 1 ? "" : "s"}</h1>
-<ul style="padding-left:18px;margin:0 0 18px;font-size:14px;line-height:1.5">${items.map((u) => li(u, "en")).join("")}</ul>
-<ul style="padding-left:18px;margin:0 0 22px;font-size:14px;line-height:1.5">${items.map((u) => li(u, "zh")).join("")}</ul>
+<h1 style="font-size:20px;margin:0 0 18px">${esc(business)}: ${esc(head)}</h1>
+<div style="font-size:14px;line-height:1.5;margin:0 0 18px">${[...needs, ...good].map((u) => block(u, "en")).join("")}</div>
+<p style="font-size:15px;margin:0 0 10px">${esc(headZh)}</p>
+<div style="font-size:14px;line-height:1.5;margin:0 0 22px">${[...needs, ...good].map((u) => block(u, "zh")).join("")}</div>
 ${link ? `<p><a href="${esc(link)}" style="display:inline-block;background:#0E1116;color:#fff;text-decoration:none;padding:10px 18px;border-radius:999px;font-size:14px">Open Placetta</a></p>` : ""}
-<p style="font-size:12px;color:#98A0AB;margin:22px 0 0">You get this because you own this workspace. Nothing is filed, paid or sent without your approval.</p></div>`;
-  return { subject: `${business}: ${items.length} update${items.length === 1 ? "" : "s"} from Placetta`, text, html };
+<p style="font-size:12px;color:#98A0AB;margin:22px 0 0">Odelia handles the rest and keeps it in your timeline. Nothing is filed, paid or sent without your approval.</p></div>`;
+  return { subject: `${business}: ${head}`, text, html };
 }
 
 /* ------------------------------ the weekly headquarters report ------------------------------ */
@@ -523,7 +531,7 @@ function stageDb() {
   const people = noticeDb(admin);
   return {
     async filing(id: string) {
-      const { data, error } = await admin.from("filings").select("id, workspace_id, app_id, title, status, agent_state, updated_at, confirmation_number, note, payment_url, approved_by, channel").eq("id", id).maybeSingle();
+      const { data, error } = await admin.from("filings").select("id, workspace_id, app_id, title, status, agent_state, updated_at, confirmation_number, note, payment_url, approved_by, channel, handoff_url").eq("id", id).maybeSingle();
       if (error) throw new Error("filing: " + error.code);
       return (data ?? null) as StageFiling | null;
     },
@@ -840,11 +848,13 @@ Deno.serve(async (req) => {
   const stateOf = (ws: string) => all.find((w) => w.id === ws)?.state;
   // One channel per update and owner (_shared/deliver.ts updateChannel): urgent ones a call or a text, important ones a
   // text, routine ones the email digest; an owner who asked for texts (src/recall.ts) gets routine ones by text too.
-  // Whatever went by phone is left out of that owner's digest below, so nobody gets the same update twice.
+  // Whatever went by phone is left out of that owner's digest below, so nobody gets the same update twice. Odelia's own
+  // progress reaches nobody by phone or email: it stays in the app's timeline (quiet.ts ownerWorthy).
   const textsAll = (ws: string, uid: string) => wantsTexts(stateOf(ws), uid);
   const hasTexters = (ws: string) => Object.keys(((stateOf(ws) ?? {}) as { memories?: Record<string, unknown> }).memories ?? {}).some((uid) => textsAll(ws, uid));
   const byPhone = new Set<string>();   // `${owner}|${workspace}|${dedupe}` sent by text or call
-  const notices = created.map((u) => ({ u, level: urgency(u, criticalApps(stateOf(u.workspace_id))) })).filter((x) => x.level || x.u.workspace_id && hasTexters(x.u.workspace_id));
+  const worthy = created.filter((u) => ownerWorthy(u, criticalApps(stateOf(u.workspace_id))));
+  const notices = worthy.map((u) => ({ u, level: urgency(u, criticalApps(stateOf(u.workspace_id))) })).filter((x) => x.level || x.u.workspace_id && hasTexters(x.u.workspace_id));
   if (notices.length) {
     const wsIds = [...new Set(notices.map((x) => x.u.workspace_id))];
     const { data: owners } = await admin.from("workspace_members").select("workspace_id, user_id").in("workspace_id", wsIds).eq("role", "owner");
@@ -914,8 +924,9 @@ Deno.serve(async (req) => {
 
   let emailed = 0, team = 0;
   if (MAIL_ON && FROM) {
+    // one email a morning, with only what needs them or what they're paying for; the rest is in the app's timeline
     const fresh = new Map<string, Update[]>();
-    for (const u of created) fresh.set(u.workspace_id, [...(fresh.get(u.workspace_id) ?? []), u]);
+    for (const u of worthy) fresh.set(u.workspace_id, [...(fresh.get(u.workspace_id) ?? []), u]);
     for (const [ws, items] of fresh) {
       const { data: owners } = await admin.from("workspace_members").select("user_id").eq("workspace_id", ws).eq("role", "owner");
       // each owner's digest holds what didn't already reach them by text or call; owners with the same list share one email
@@ -1008,6 +1019,11 @@ Deno.serve(async (req) => {
   if (started.getUTCDay() === 1) {
     await weeklyGovernance(admin, today, MAIL_ON && FROM ? sendMail : null, APP).catch((e) => console.error("governance", String(e).slice(0, 160)));
   }
+
+  // Model calls nobody waits on, at half price (Anthropic's Message Batches API, _shared/batch.ts): what is queued goes
+  // in one batch, what has ended is written once and the batch deleted. Off unless ODELIA_BATCH=1.
+  const batches = await pollBatches((k) => Deno.env.get(k), dbJobs(admin)).catch((e) => { console.error("batches", String(e).slice(0, 160)); return null; });
+  if (batches && (batches.submitted || batches.written || batches.failed)) console.log("batches", JSON.stringify(batches));
 
   // Consent records for texts and calls are kept 5 years, then dropped.
   await admin.from("phone_consent_log").delete().lt("at", new Date(now - 5 * 365.25 * 864e5).toISOString());

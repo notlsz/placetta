@@ -861,7 +861,8 @@ async function routes() {
     // every vendor down but the last
     const d = fake({ gemini: 503, anthropic: 529, groq: 503, cerebras: 500 });
     const r = await callModel(env(all), chat, "claude-sonnet-5-5", null, d.f);
-    eq(d.seen.map(s => s.split(":")[0]), ["gemini", "gemini", "anthropic", "groq", "cerebras", "openrouter"], "Gemini 3.8 Flash 503, then 2.5 Flash, Anthropic, Groq, Cerebras, OpenRouter, in that order");
+    // the plan role (2026-10-28): Sonnet first, then Gemini 3.8 Flash and 2.5 Flash, then the backups
+    eq(d.seen.map(s => s.split(":")[0]), ["anthropic", "gemini", "gemini", "groq", "cerebras", "openrouter"], "Sonnet 529, then Gemini 3.8 Flash, 2.5 Flash, Groq, Cerebras, OpenRouter, in that order");
     ok(r.ok && r.model.startsWith("openrouter:"), "and OpenRouter's answer comes back", r.model);
     // files: an image or a PDF never goes to a gpt-oss backup
     const img: Call = { ...chat, role: "extract", payload: { messages: [{ role: "user", content: [{ type: "image", source: { type: "base64", media_type: "image/png", data: "AAA" } }, { type: "text", text: "read" }] }], max_tokens: 100 } };
@@ -873,14 +874,15 @@ async function routes() {
     }
     // GEMINI_PAID off: no conversation reaches Gemini, for any role
     const unpaid = { ...all, GEMINI_PAID: "" };
-    const roles: Role[] = ["plan", "review", "extract", "translate", "draft", "short", "watch", "deep"];
+    const roles: Role[] = ["plan", "review", "extract", "translate", "draft", "short", "watch", "deep", "appeal"];
     ok(roles.every(role => !candidates(env(unpaid), { ...chat, role }, "x").some(([p]) => p === "gemini")), "without GEMINI_PAID no role sends a conversation to Gemini");
-    ok(candidates(env(unpaid), { ...chat, role: "watch", publicOnly: true }, "x")[0][0] === "gemini", "only a scan of public pages (nothing of the customer's) may use unpaid Gemini");
+    ok(candidates(env(unpaid), { ...chat, role: "watch", publicOnly: true }, "x").some(([p]) => p === "gemini"), "only a scan of public pages (nothing of the customer's) may use unpaid Gemini");
     const g = fake({});
     await callModel(env(unpaid), chat, "claude-sonnet-5-5", null, g.f);
     ok(!g.seen.some(s => s.startsWith("gemini")), "and a live call skips it", g.seen);
     // the checker is a different vendor from the doer
-    ok(candidates(env(all), { ...chat, role: "review" }, "x")[0][0] === "anthropic" && candidates(env(all), chat, "x")[0][0] === "gemini", "the doer runs on Gemini, the checker on Anthropic: no model grades itself");
+    // the checker is Opus, the doer Sonnet: a different, stronger model grades the work
+    ok(candidates(env(all), { ...chat, role: "review" }, "claude-sonnet-5-5")[0].join(":") === "anthropic:claude-opus-5-5" && candidates(env(all), chat, "claude-sonnet-5-5")[0].join(":") === "anthropic:claude-sonnet-5-5", "the doer runs on Sonnet, the checker on Opus: no model grades itself");
     // agent-run only starts work when some vendor may take a conversation
     ok(!canConverse(env({ GEMINI_API_KEY: "g" })) && canConverse(env({ GEMINI_API_KEY: "g", GEMINI_PAID: "1" })) && canConverse(env({ CEREBRAS_API_KEY: "c" })) && !canConverse(env({})), "a Gemini key without GEMINI_PAID can't run Odelia; a Cerebras key alone can");
     ok(Object.values(PROVIDER_KEYS).includes("CEREBRAS_API_KEY") && Object.values(PROVIDER_KEYS).includes("GROQ_API_KEY"), "every vendor's key is known to the server's key check");

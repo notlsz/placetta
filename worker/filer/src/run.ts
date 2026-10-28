@@ -8,12 +8,17 @@
 // anything. When the run ends, however it ends, the browser is closed and the folder deleted. Up to FILER_CONCURRENCY
 // runs go side by side in one worker container (main.ts), never two for one workspace on one portal: this is per-run
 // browser and file isolation inside that container, not a separate virtual machine per run.
+import { randomBytes } from "node:crypto";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Browser, Page } from "playwright-core";
 import { confirmPattern, einFillOk, fieldFor, secretControl, isFinal, mustStop, paymentControl, onPortal, optionFor, reviewMismatch, staffMay, stopBesidesCard, stopLinesFilled, type PageState } from "./guards.ts";
-import type { Model } from "./model.ts";
+import { type Model, TOOLS } from "./model.ts";
+import { actionKey, answerTier, guardRefused, pageTier, summarize, tierOf, type Why } from "./cascade.ts";
+import type { CallCost } from "./llm.ts";
+import { assertOnly, capture, expiresAt, restore, SIGN_IN_FAILED } from "./session.ts";
+import { CAPTCHA_ASK_REF, CAPTCHA_PARKED_MSG, CAPTCHA_ROUTE_MSG, captchaQuestion, CHANNEL_DAYS, isChoice, midRunAction } from "../../../supabase/functions/file/captcha.ts";
 import { captchaAnswered, headingOf, locate, pageState, staffGuard } from "./page.ts";
 import { finalOn, type FormSteps, guideLines, navOn, pageOutline, payOn, type Playbook } from "./playbooks.ts";
 import { backoffMinutes, heal, type KeyLock, portalDown, receiptCheck, receiptLine } from "./heal.ts";
@@ -33,18 +38,19 @@ import type { AccountSetup } from "./store.ts";
 import type { AccountKind } from "../../../supabase/functions/file/accounts.ts";
 import { IDENTITY_HOSTS } from "../../../supabase/functions/file/accounts.ts";
 
-/** recorded: the provider keeps a replay of the session (Steel always does): such a session never gets a card (card.ts). */
-/** keepAlive: the provider keeps this session alive cheaply while nobody drives it (Browserbase keepAlive), so a run
- *  waiting on a person may park it (ParkLot). A local Chromium is the worker's own and is kept too; a hosted session
- *  without it is not. */
-export type Session = { browser: Browser; page: Page; liveUrl: string | null; recorded?: boolean; keepAlive?: boolean; close(): Promise<void> };
+/** recorded: the provider keeps a replay of the session (Steel always does): such a session never gets a card (card.ts).
+ *  provider: which browser served the run (browsers.ts), for the log and filer_runs. */
+export type Session = { browser: Browser; page: Page; liveUrl: string | null; recorded?: boolean; provider?: "local" | "steel" | "browserbase";
+  /** The provider keeps this session alive cheaply while nobody drives it (Browserbase keepAlive): a run waiting on a
+   *  person may park it (ParkLot). A local Chromium is the worker's own and is kept too; a hosted one without it isn't. */
+  keepAlive?: boolean; close(): Promise<void> };
 
 /** Runs waiting on a person, parked: the slot is free for the next filing, the browser is kept (only when it's cheap to
  *  keep), and the filing is in needs_you. "I've done it" queues the filing again; whichever slot claims it picks up the
  *  kept browser on the same page. A parked browser past the hold is closed and the run starts again from the start.
  *  Shared by every slot of the worker. Never a submit guard: submit_clicked_at stays on the filing, and a run that may
  *  have submitted or paid doesn't park (Worker.mayPark). */
-export type Parked = { session: Session; waive: { reason: string; at: string }; trace: TraceStep[]; liveToken?: string; timer: ReturnType<typeof setTimeout> };
+export type Parked = { session: Session; waive: { reason: string; at: string }; trace: TraceStep[]; liveToken?: string; timer: ReturnType<typeof setTimeout>; poll?: ReturnType<typeof setInterval> };
 export class ParkLot {
   private lot = new Map<string, Parked>();
   private max: number;
@@ -53,17 +59,32 @@ export class ParkLot {
   get size() { return this.lot.size; }
   has(id: string) { return this.lot.has(id); }
   room() { return this.lot.size < this.max; }
-  park(id: string, p: Omit<Parked, "timer">, ms: number) {
+  /** watch: polled every pollMs while parked; true twice in a row (Done in the live view, or the page no longer needing
+   *  the person) calls resume once, which queues the filing again (filer_resume_parked). */
+  park(id: string, p: Omit<Parked, "timer" | "poll">, ms: number, w?: { watch(): Promise<boolean>; resume(): Promise<boolean>; pollMs: number }) {
     this.drop(id);
     const timer = setTimeout(() => this.drop(id), ms);
     (timer as { unref?(): void }).unref?.();
-    this.lot.set(id, { ...p, timer });
+    let poll: ReturnType<typeof setInterval> | undefined, hits = 0, busy = false;
+    if (w) {
+      poll = setInterval(async () => {
+        if (busy) return;
+        busy = true;
+        try {
+          hits = await w.watch().catch(() => false) ? hits + 1 : 0;
+          if (hits >= 2 && this.lot.get(id)?.poll === poll) { clearInterval(poll); await w.resume().catch(() => false); }
+        } finally { busy = false; }
+      }, w.pollMs);
+      (poll as { unref?(): void }).unref?.();
+    }
+    this.lot.set(id, { ...p, timer, poll });
   }
   /** The kept browser for this filing, taken out of the lot (the run that resumes owns it now). */
   take(id: string): Parked | null {
     const p = this.lot.get(id);
     if (!p) return null;
     clearTimeout(p.timer);
+    if (p.poll) clearInterval(p.poll);
     this.lot.delete(id);
     return p;
   }
@@ -115,6 +136,9 @@ export type Config = {
    *  the owner forwards a texted code to (ODELIA_NUMBER), when Placetta has one. */
   accountMailMs?: number;
   odeliaNumber?: string;
+  /** The agency's way without a CAPTCHA for this form, if it takes one (main.ts, from destinations.ts): said in the
+   *  owner's question with how much slower it usually is. */
+  altOf?(official: string): "email" | "fax" | "mail" | null;
 };
 
 const TEACH = {
@@ -241,14 +265,18 @@ type Ctx = {
   blocked?: Blocked[];                                 // what the sandbox refused this run (an ID.me jump among them)
   /** What this run may record of a person (privacy.ts): read before the browser opens. */
   privacy?: RecordingPolicy;
+  /** The run's model calls (cascade.ts): tier, seat, tokens, price, and why a step went to the strong model. */
+  ai: (CallCost & { why?: Why })[];
+  /** Steps carried out from a recorded skill or taught playbook, with no model call. */
+  replayed: number;
+  /** The business's signed-in state on this portal (session.ts): restored at the start, the saved password typed this
+   *  run, signed in past the sign-in page, the sign-in refused, or the agency having logged the restored state out. */
+  sess?: { restored?: boolean; typed?: boolean; signedIn?: boolean; failed?: boolean; loggedOut?: boolean };
 };
 /** The URL is on the portal or one of the other hosts its destination names. */
 const onAny = (url: string, hosts: string[]) => hosts.some((h) => onPortal(url, h));
 /** same: the control already had that value (a no-op: not logged, not progress); it names the approved field. */
 type Exec = { ok: true; same?: string } | { ok: false; error: string } | { end: Result };
-/** The model router's way to a stronger model for a page the usual one is stuck on, when it has one (model.ts may add
- *  it; until then a stuck page goes to a person). */
-type Escalating = Model & { escalate?(on: boolean): void };
 
 export class Worker {
   private c: Config;
@@ -335,6 +363,7 @@ export class Worker {
       // what may be recorded of a person, and whether this is a rehearsal (privacy.ts): the strict side on any failure
       const privacy = store.recordingPolicy ? await store.recordingPolicy(f).catch(() => ({ ...STRICT })) : { ...STRICT };
       this.c.model.rehearsal?.(privacy.synthetic);
+      this.c.model.take?.();   // the ledger starts empty: nothing from an earlier run on this slot is counted here
       // teach mode records the person's own actions: in California (or nowhere known) only with their opt-in
       if (teaching && !teachOk(privacy)) {
         const res: Result = { kind: "handoff", reason: "teach_consent", task: "handoff", trace: [], message: TEACH_CONSENT_MSG };
@@ -374,6 +403,17 @@ export class Worker {
       const scans: Promise<void>[] = [];
       if (teaching) await startRecorder(page, (e) => { events.push(e); if (e.kind === "page") scans.push(scanPage(page, e)); });
       (events as RawEvent[] & { scans?: Promise<void>[] }).scans = scans;
+      // The business's signed-in state on this portal from an earlier run (session.ts): this workspace and these hosts
+      // only, put in before the first page, and checked to be nothing else. Never with teach mode or a new account.
+      const sess: NonNullable<Ctx["sess"]> = {};
+      if (login && !teaching && !setup && store.sessionGet) {
+        const saved = await store.sessionGet(f, host).catch((e) => { console.error("filer: saved session", e instanceof Error ? e.message.slice(0, 80) : "error"); return null; });
+        if (saved && (await restore(page.context(), saved, hosts)) > 0) {
+          await assertOnly(page.context(), hosts);
+          sess.restored = true;
+          f = await store.step(f, log(`Using the business's signed-in session on ${host} from an earlier filing`, `沿用企业此前在 ${host} 上的登录状态`, "quiet"));
+        }
+      }
       // The agency's own start page when the destination names one (on a host many agencies share, it's the agency's path).
       const start = pb?.form.start ?? route?.start;
       const entry = this.c.startUrl ? this.c.startUrl(host) : start && onAny(start, hosts) ? start : `https://${host}/`;
@@ -385,7 +425,7 @@ export class Worker {
         await this.finish(f, res);
         return res;
       }
-      const ctx: Ctx = { f, host, hosts, login, page, session, trace: resumed?.trace ?? [], waive: resumed?.waive, t0: Date.now(), files: new Map(), pb, dir, taught, assist: !!taught && taught.status !== "approved", blocked, cardSels: [], privacy };
+      const ctx: Ctx = { f, host, hosts, login, page, session, trace: resumed?.trace ?? [], waive: resumed?.waive, t0: Date.now(), files: new Map(), pb, dir, taught, assist: !!taught && taught.status !== "approved", blocked, cardSels: [], privacy, ai: [], replayed: 0, sess };
       ctxRef = ctx;
       if (setup) {
         const end = await this.makeAccount(ctx, setup, route?.tenant, entry);
@@ -436,6 +476,10 @@ export class Worker {
     } finally {
       // a card the run got and didn't settle (it ended some other way): told to the server while the token still works
       if (ctxRef) await this.settleCard(ctxRef).catch((e) => console.error("filer: card settle", e instanceof Error ? redactText(e.message, this.secrets) : "error"));
+      // the business's signed-in state, kept or dropped while the token still works and before the browser is wiped
+      if (ctxRef && session) await this.keepSession(ctxRef).catch((e) => console.error("filer: signed-in session", e instanceof Error ? e.message.slice(0, 80) : "error"));
+      // the run's AI (tier, model, tokens, price of each call) into filer_runs while the token still works
+      await this.recordAi(ctxRef, ctxRef?.f ?? f, session).catch((e) => console.error("filer: ai ledger", e instanceof Error ? e.message.slice(0, 160) : "error"));
       // storage wiped, then the browser closed, then the run's folder gone; the token stops working
       // a parked browser stays open for the person (ParkLot); every other one is wiped and closed
       if (!track.parked) {
@@ -449,6 +493,42 @@ export class Worker {
       // the next run on this slot is a customer's until its own policy says otherwise
       this.c.model.rehearsal?.(false);
     }
+  }
+
+  // ---------------------------------------------------------------- the business's signed-in session (session.ts)
+
+  /** At the run's end: a sign-in the agency refused drops the saved state (a security event); a run that signed in with
+   *  the saved login and got past the sign-in page, or reused a state the agency still honored, keeps the portal's own
+   *  cookies and local storage for the next run, until the portal's session or 30 days ends. */
+  private async keepSession(ctx: Ctx) {
+    const { store } = this.c, s = ctx.sess ?? {};
+    if (!ctx.login || ctx.account || !store.sessionPut) return;
+    if (s.failed) { await store.sessionDrop?.(ctx.f, ctx.host, "sign_in_failed"); return; }
+    if (!s.signedIn && !(s.restored && !s.loggedOut)) return;
+    const st = await pageState(ctx.page).catch(() => null);
+    if (!st || st.controls.some((c) => c.type === "password")) return;   // still at a sign-in page: nothing worth keeping
+    const state = await capture(ctx.page.context(), ctx.hosts);
+    if (state.cookies.length) await store.sessionPut(ctx.f, ctx.host, state, expiresAt(state));
+  }
+
+  // ---------------------------------------------------------------- what the run's AI cost
+
+  /** The run's ledger (cascade.ts summarize) to filer_runs, server only: which browser served it, and each model call's
+   *  tier, model, tokens and price, so the real cost per license can be read later (filer_run_costs). The filing's own
+   *  log, which the customer's app reads, gets one quiet line with the step counts by tier and no model, token or price
+   *  (docs/SECURITY.md: the browser never gets the model, vendor, tokens or cost). */
+  private async recordAi(ctx: Ctx | null, f: Filing, session: Session | null) {
+    const left = this.c.model.take?.() ?? [];
+    const ai = [...(ctx?.ai ?? []), ...left];
+    const replayed = ctx?.replayed ?? 0;
+    const sum = summarize(ai, { provider: session?.provider ?? null, replayed });
+    if (session?.provider) console.log(`filer: run ${f.id.slice(0, 8)} on ${session.provider}${sum.calls ? `, ${sum.calls} model calls, $${sum.usd.toFixed(4)}` : ""}${replayed ? `, ${replayed} steps replayed` : ""}`);
+    if (!session) return;
+    await this.c.store.runUsage?.(sum).catch((e) => console.error("filer: run usage", e instanceof Error ? e.message.slice(0, 160) : "error"));
+    if (!sum.calls && !replayed) return;
+    const fast = ai.filter((c) => c.tier === "fast").length, strong = ai.filter((c) => c.tier === "strong").length;
+    await this.c.store.step(f, log(`Odelia's work on this run: ${replayed} steps from the recorded skill, ${fast} routine steps, ${strong} checked by her most careful model`,
+      `本次运行：${replayed} 步按已记录的步骤完成，${fast} 步常规操作，${strong} 步由最审慎的模型核对`, "quiet", "ai"));
   }
 
   // ---------------------------------------------------------------- the agency's fee, with Placetta's single-use card
@@ -567,6 +647,13 @@ export class Worker {
       }
       if (a.login) {
         if (!ctx.login || !onAny(st.url, ctx.hosts)) return { ok: false, error: "No saved login for this site." };
+        // a restored session that still meets the sign-in page: the agency logged it out; it's dropped and Odelia signs
+        // in as before (a new one is kept at the end)
+        if (ctx.sess?.restored && !ctx.sess.loggedOut) {
+          ctx.sess.loggedOut = true;
+          await this.c.store.sessionDrop?.(ctx.f, ctx.host, "logged_out").catch(() => undefined);
+        }
+        if (a.login === "password" && ctx.sess) ctx.sess.typed = true;
         await loc.fill(a.login === "username" ? ctx.login.username : ctx.login.password);
         rec({ action: "fill", selector: a.selector, login: a.login });
         ctx.f = await this.c.store.step(ctx.f, log(ctx.account ? `Entered the new account's ${a.login === "username" ? "email" : "password"}` : `Entered the saved ${a.login}`,
@@ -701,6 +788,15 @@ export class Worker {
     await Promise.all([page.waitForLoadState("domcontentloaded").catch(() => undefined), loc.click()]);
     await page.waitForLoadState("domcontentloaded").catch(() => undefined);
     rec({ action: "click", selector: a.selector, ...(final ? { submit: true } : {}) });
+    // after the saved password went in: past the sign-in page (signed in), or still on it with words of a refusal (a
+    // sign-in failure: the saved session is dropped at the end of the run)
+    if (ctx.sess?.typed && !ctx.sess.signedIn && !ctx.sess.failed) {
+      const now = await pageState(page).catch(() => null);
+      // still asked for the password once it was typed and sent (the page came back to sign in, with or without words of
+      // a refusal): the agency refused it
+      if (now && !now.controls.some((c) => c.type === "password")) ctx.sess.signedIn = true;
+      else if (now && (SIGN_IN_FAILED.test(now.text.slice(0, 3000)) || now.controls.some((c) => c.type === "password" && !c.value))) ctx.sess.failed = true;
+    }
     if (!onAny(page.url(), ctx.hosts)) return { end: { kind: "handoff", reason: "left_portal", trace: ctx.trace, message: { en: "The run left the agency's site.", zh: "运行离开了机构网站。" } } };
     ctx.f = await this.c.store.step(ctx.f, log(`Pressed ${text || a.selector.replace(/^\w+:/, "")}`, `点击 ${text || a.selector.replace(/^\w+:/, "")}`, "click"));
     return { ok: true };
@@ -769,6 +865,13 @@ export class Worker {
     const h0 = Date.now();
     // a person never gets a page with Placetta's card in it
     await this.clearCard(ctx);
+    // a challenge met (a CAPTCHA, an identity check): logged per host and browser, so the hosts that still show them are
+    // known (portal_challenges) and the file function prefers a way without one (file/logic.ts pick)
+    if (reason === "captcha" || reason === "identity") {
+      const host = (() => { try { return new URL(ctx.page.url()).hostname; } catch { return ctx.host; } })();
+      console.log(`filer: challenge ${reason} on ${host} (${ctx.session.provider ?? "browser"})`);
+      await this.c.store.challenge?.(ctx.f, host, reason, ctx.session.provider ?? null).catch((e) => console.error("filer: challenge log", e instanceof Error ? e.message.slice(0, 120) : "error"));
+    }
     try {
       // Making the business's account: an ID.me or Login.gov page means the site wants a person's own identity, which
       // stays the owner's (and the registry is wrong about the site); a code is looked for in the business's inbox
@@ -776,13 +879,50 @@ export class Worker {
       if (ctx.account && reason === "identity") return await this.identityBack(ctx);
       if (ctx.account && reason === "code") return await this.accountCode(ctx);
       if (reason === "captcha") {
-        const r = await this.staffFirst(ctx, message);
-        if (r) return r;
+        // the owner decides (captcha.ts): their saved answer for this agency's site, or asked now with the page kept
+        // live and nothing submitted; no answer within the hold parks the run for the team
+        const choice = await this.captchaChoice(ctx);
+        if (choice === null) return { kind: "handoff", reason: "captcha_unanswered", task: "captcha_unanswered", trace: ctx.trace, message: CAPTCHA_PARKED_MSG };
+        if (choice === "route") return { kind: "handoff", reason: "captcha_reroute", task: "handoff", trace: ctx.trace, message: CAPTCHA_ROUTE_MSG };
+        if (choice === "team") {
+          const r = await this.staffFirst(ctx, message);
+          if (r) return r;
+        }
       }
       return await this.ownerBack(ctx, reason, message);
     } finally {
       ctx.t0 += Date.now() - h0;
     }
+  }
+
+  /** Who handles this CAPTCHA (captcha.ts): "me" (the owner's one tap), "team" (the Placetta team first, as before),
+   *  "route" (leave with nothing submitted; the file function sends it another way), or null (nobody answered within the
+   *  hold: park). The workspace's saved answer for this site decides without asking; with none ("always ask"), the owner
+   *  is asked on their channel (the app and a text) while the page stays open. After the submit was pressed, another way
+   *  would be a second filing, so it goes to the team. A store without preferences keeps the old order: the team first. */
+  private async captchaChoice(ctx: Ctx): Promise<"me" | "team" | "route" | null> {
+    const { store } = this.c;
+    const submitted = !!ctx.f.submit_clicked_at;
+    if (!store.captchaChoice) return "team";
+    const saved = await store.captchaChoice(ctx.f, ctx.host).catch(() => null);
+    if (saved && saved !== "ask") return midRunAction(saved, submitted);
+    const alt = submitted ? null : this.c.altOf?.(ctx.f.payload.official ?? "") ?? null;
+    const q = captchaQuestion(alt, alt ? CHANNEL_DAYS[alt] - CHANNEL_DAYS.portal : null, true);
+    ctx.f = await store.step(ctx.f, log(q.en, q.zh, "need_person", CAPTCHA_ASK_REF), { agent_state: "needs_you" });
+    await store.notify(ctx.f, { en: `Your answer, please: ${ctx.f.title.en}`, zh: `请您答复：${ctx.f.title.zh}` }, { en: q.en, zh: q.zh });
+    const h0 = Date.now();
+    const asked = ctx.f.agent_log.length;
+    while (Date.now() - h0 < this.c.holdMs) {
+      await sleep(this.c.pollMs);
+      const now = await store.reload(ctx.f.id).catch(() => ctx.f);
+      if (now.status === "canceled") { ctx.f = now; return null; }
+      const ans = now.agent_log.slice(asked).find((e) => e.kind === "captcha_choice");
+      if (ans && isChoice(ans.ref)) {
+        ctx.f = await store.step(now, null, { agent_state: "running" });
+        return midRunAction(ans.ref, !!now.submit_clicked_at);
+      }
+    }
+    return null;
   }
 
   /** A visible CAPTCHA, to the Placetta team's queue (20261102090200_human_checks.sql): staff open the worker's own live
@@ -852,7 +992,8 @@ export class Worker {
     const message = withNotice(message0, !!ctx.session.recorded);
     const until = new Date(Date.now() + this.c.holdMs).toISOString();
     // A session with no hosted view (local Chromium) gets the worker's own live browser for this hand-back (live.ts).
-    const own = !ctx.session.liveUrl ? this.c.live?.open(ctx.page as unknown as Parameters<LiveViews["open"]>[0], this.c.holdMs) ?? null : null;
+    // its first line is what this hand-back asks (an identity check says what to do and why it's the owner's)
+    const own = !ctx.session.liveUrl ? this.c.live?.open(ctx.page as unknown as Parameters<LiveViews["open"]>[0], this.c.holdMs, undefined, message0.en) ?? null : null;
     const liveUrl = ctx.session.liveUrl ?? own?.url ?? null;
     const at = await this.pageKey(ctx);
     let parked = false;
@@ -860,10 +1001,20 @@ export class Worker {
       // Parked: the slot goes to the next filing while this one waits on the person. The browser stays (kept cheaply)
       // and "I've done it" queues the filing again; a slot that claims it carries on on this same page.
       if (this.mayPark(ctx, reason, !!poll)) {
+        const key = randomBytes(24).toString("hex");
         ctx.f = await this.c.store.step(ctx.f, { ...message, kind: "need_person", ref: reason },
-          { agent_state: "needs_you", handoff_url: liveUrl, provider_ref: null });
+          { agent_state: "needs_you", handoff_url: liveUrl, provider_ref: `parked:${key}` });
         await this.c.store.notify(ctx.f, { en: "Placetta needs you for one step", zh: "需要您完成一步" }, message);
-        this.c.park!.park(ctx.f.id, { session: ctx.session, waive: { reason, at }, trace: ctx.trace, liveToken: own?.token }, this.c.holdMs);
+        // Done in the worker's live view, or the page no longer needing the person (never while their hands are on it):
+        // the filing goes back to the queue with this run's key (filer_resume_parked)
+        const store = this.c.store, id = ctx.f.id;
+        const watch = async () => {
+          if (own && this.c.live?.done(own.token)) return true;
+          const idle = !own || Date.now() - (this.c.live?.touched(own.token) ?? 0) > 3000;
+          return idle && SELF_CLEARING.has(reason) && await this.cleared(ctx, reason, at);
+        };
+        this.c.park!.park(id, { session: ctx.session, waive: { reason, at }, trace: ctx.trace, liveToken: own?.token }, this.c.holdMs,
+          store.resumeParked ? { watch, resume: () => store.resumeParked!(id, key), pollMs: this.c.pollMs } : undefined);
         parked = ctx.parked = true;
         ctx.f = await this.c.store.step(ctx.f, log("Odelia keeps this page open for you and works on other filings meanwhile. Tap \"I've done it\" when you're finished.", "Odelia 为您保留此页面，同时处理其他申请。完成后请点击“我已完成”。", "quiet", "parked"));
         return { kind: "needs_you", reason, message, trace: ctx.trace };
@@ -1128,6 +1279,7 @@ export class Worker {
       const r = await this.exec(ctx, s, value);
       if ("end" in r) { if (r.end.kind === "needs_you" && r.end.reason === "resumed") continue; return r; }
       if (!r.ok) return r;
+      ctx.replayed++;   // carried out with no model call (cascade.ts, tier 1)
     }
     const st = await pageState(ctx.page);
     const m = skill.body.confirm ? safeConfirm(skill.body.confirm.pattern)?.exec(st.text) ?? null : null;
@@ -1137,11 +1289,15 @@ export class Worker {
 
   private async drive(ctx: Ctx, note?: string): Promise<Result> {
     const recent: string[] = [];
-    // the same action on the same page again and again isn't progress: what's already set is said in the next note,
-    // and a repeat goes to the stronger model once, then to a person
+    // The cascade (cascade.ts), for a model that takes a tier per step: the fast model unless the page, or its answer on
+    // the page, goes to the strong one; once a page went strong it stays strong until the page changes.
+    const tiered = !!this.c.model.tiered;
+    let strongHere: { key: string; why: Why } | null = null;
+    const doneOn = new Map<string, Set<string>>();
+    // a control already set isn't set again (exec says so, the next note lists them); the same action three times on
+    // one page, after the strong model had it, goes to a person
     let set: { page: string; labels: string[] } = { page: "", labels: [] };
-    let last = "", repeats = 0, escalated = false;
-    const model = this.c.model as Escalating;
+    let last = "", repeats = 0;
     for (let i = 0; i < this.c.maxSteps; i++) {
       if (Date.now() - ctx.t0 > this.c.maxMs) break;
       if (ctx.f.status === "canceled") return { ...STOPPED, trace: ctx.trace };
@@ -1171,27 +1327,43 @@ export class Worker {
       const pattern = ctx.f.submit_clicked_at && ctx.pb?.playbook.confirm ? new RegExp(ctx.pb.playbook.confirm, "i").exec(st.text) : null;
       if (pattern?.[1]) return await this.done(ctx, pattern[1], `Submitted following the published guide for ${ctx.pb!.playbook.name}`, false);
       // what the model reads never holds the card: the page, the steps and the note are redacted against it
-      const call = await this.c.model.next(redactDeep({ filing: ctx.f, agency: ctx.host, state: st, recent, note, guide: ctx.pb && !ctx.account ? guideLines(ctx.pb) : undefined,
-        ...(ctx.account ? { account: accountNote(ctx.account.email, ctx.host) } : {}) }, this.secrets));
+      const input = redactDeep({ filing: ctx.f, agency: ctx.host, state: st, recent, note, guide: ctx.pb && !ctx.account ? guideLines(ctx.pb) : undefined,
+        ...(ctx.account ? { account: accountNote(ctx.account.email, ctx.host) } : {}) }, this.secrets);
+      // the page as the repeat check knows it: its address, heading and the controls on it
+      const here = `${urlKey(st.url)}|${headingOf(st)}|${st.controls.map((c) => c.selector).join(",")}`;
+      if (strongHere && strongHere.key !== here) strongHere = null;
+      const doneHere = doneOn.get(here) ?? new Set<string>();
+      doneOn.set(here, doneHere);
+      let why: Why | null = tiered ? strongHere?.why ?? pageTier(st) : null;
+      let call = await this.c.model.next(tiered ? { ...input, tier: tierOf(why) } : input);
+      if (tiered && !why) {
+        // the fast model's answer that the strong one takes over: need_person, an invalid call, the same action again
+        // a need_person the fast model gave after consulting its Opus advisor already had Opus's view: not asked twice
+        const up0 = answerTier(call, TOOLS, { doneHere });
+        const up = up0 === "need_person" && this.c.model.advised ? null : up0;
+        if (up) { why = up; strongHere = { key: here, why: up }; call = await this.c.model.next({ ...input, tier: "strong" }); }
+      }
+      for (const c of this.c.model.take?.() ?? []) ctx.ai.push(c.tier === "strong" && why ? { ...c, why } : c);
       note = undefined;
-      const x = call.input as Record<string, string & boolean & number>;
       const pk = `${urlKey(st.url)}|${headingOf(st)}`;
       if (set.page !== pk) set = { page: pk, labels: [] };
-      const act = `${pk}|${call.name}|${JSON.stringify(call.input)}`;
-      repeats = call.name !== "wait" && act === last ? repeats + 1 : 1;
-      last = act;
-      if (repeats >= 3) {   // after two of the same: a third is never sent to the page
-        if (!escalated && model.escalate) {
-          escalated = true;
-          model.escalate(true);
-          ctx.f = await this.c.store.step(ctx.f, log("Odelia repeated a step on this page, so a stronger model takes over here", "Odelia 在此页面重复了同一步骤，改由更强的模型接手", "quiet"));
-        } else {
-          model.escalate?.(false);
-          const h = await this.handBack(ctx, "question", STUCK);
-          if (h.kind === "needs_you" && h.reason === "resumed") { last = ""; repeats = 0; escalated = false; continue; }
-          return h;
-        }
+      const actOf = (c: typeof call) => `${pk}|${c.name}|${JSON.stringify(c.input)}`;
+      repeats = call.name !== "wait" && actOf(call) === last ? repeats + 1 : 1;
+      // after two of the same, a third never reaches the page: the cascade's strong tier takes this page, and if it
+      // repeats too (or there's no strong tier), a person does
+      if (repeats >= 3 && tiered && strongHere?.key !== here) {
+        why = "repeat"; strongHere = { key: here, why };
+        call = await this.c.model.next({ ...input, tier: "strong" });
+        for (const c of this.c.model.take?.() ?? []) ctx.ai.push(c.tier === "strong" ? { ...c, why } : c);
+        if (actOf(call) !== last) repeats = 1;
       }
+      last = actOf(call);
+      if (repeats >= 3) {
+        const h = await this.handBack(ctx, "question", STUCK);
+        if (h.kind === "needs_you" && h.reason === "resumed") { last = ""; repeats = 0; continue; }
+        return h;
+      }
+      const x = call.input as Record<string, string & boolean & number>;
       let r: Exec;
       switch (call.name) {
         case "fill": r = await this.exec(ctx, { action: "fill", selector: x.selector }, String(x.value ?? "")); break;
@@ -1233,10 +1405,12 @@ export class Worker {
       if (r.ok && r.same) {
         if (!set.labels.includes(r.same)) set.labels.push(r.same);
         note = [note, `Already set on this page to the approved values (don't set them again): ${set.labels.join("; ")}. Fill what's still empty, or continue to the next page.`].filter(Boolean).join("\n");
-      } else if (r.ok && escalated) { escalated = false; model.escalate?.(false); }
+      }
+      if (r.ok) doneHere.add(actionKey(call));
+      // a value the approved-values guard refused: the next try on this page is the strong model's (the guard still applies)
+      else if (tiered && guardRefused(r.error)) strongHere = { key: here, why: "guard" };
       recent.push(`${call.name} ${x.selector ?? ""}${r.ok ? (r.same ? " (already set)" : "") : ` (failed: ${r.error})`}`);
     }
-    model.escalate?.(false);
     return { kind: "handoff", reason: "limit", trace: ctx.trace, message: { en: "Placetta couldn't finish on the agency's site.", zh: "快哉未能在机构网站上完成。" } };
   }
 
@@ -1400,7 +1574,7 @@ export class Worker {
       const g = await this.c.store.step(cur, log("The run stopped after pressing submit, so nothing more is sent until it's checked with the agency.", "运行在点击提交后中断，在向机构确认之前不会再提交。", "handoff", "maybe_submitted"), { agent_state: "handoff", channel: "team" });
       console.error("filer: stopped after submit:", msg);
       await this.c.store.teamTask(g, "check_agency", "Run stopped after submit was pressed. Check the agency first.");
-    } else if (/^(steel|browserbase|model error|model chose no tool)\b/.test(msg)) {
+    } else if (/^(steel|browserbase|browsers|local:|model error|model chose no tool)/.test(msg)) {
       // Placetta's own browser didn't start (the provider refused the session): the agency was never reached, so this is
       // ours to fix. Wait (2, 10, 30 minutes); after 3 tries the filing is held for the team, never handed to the owner.
       if (cur.attempts >= 3) {

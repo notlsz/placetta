@@ -4,7 +4,7 @@ import { DEST, destinationProblems, staleDestinations, TO_VERIFY, type Dest } fr
 import {
   afterHold, asAgent, askedToResubmit, canFaxSigned, canFaxSignedFor, check, emailFor, envFrom, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holdMinutes,
   fallback, handBackDue, handoffPacket, holds, isForeign, killSwitchOn, selfFileScope, workerOn, workerState, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, PORTAL_FAILED, refusalOf, REVIEW_HOURS, rerouteDue,
-  sentByYou, signedCopy, teachRefusal, teamApproved, waysToSend, whyYours, YOURS_REF, checkCents, lobCheckBody,
+  sentByYou, signedCopy, teachRefusal, teamApproved, waysToSend, whyYours, YOURS_REF, checkCents, lobCheckBody, captchaPlan,
 } from "./logic.ts";
 
 const WS = "11111111-1111-1111-1111-111111111111";
@@ -126,6 +126,52 @@ Deno.test("pick: portal, email, fax, mail, team in order", () => {
   assertEquals(pick(f, undefined, ENV, { hasLogin: true, mailConnected: true }), "team");
   const noFax = envFrom((k) => (k === "FILER_CHANNELS" ? "fax" : undefined));
   assertEquals(pick(f, dest(), noFax, { hasLogin: false, mailConnected: false }), "team");
+});
+Deno.test("pick: a portal that keeps showing CAPTCHAs gives way to a way without one, unless that is days slower", () => {
+  const f = filing();
+  const seen = { hasLogin: true, mailConnected: true, captchaHost: true };
+  // email and fax arrive within a day: preferred to the CAPTCHA
+  assertEquals(pick(f, dest({ portal: "x.gov", email: "a@x.gov" }), ENV, seen), "email");
+  assertEquals(pick(f, dest({ portal: "x.gov" }), ENV, { ...seen, mailConnected: false }), "fax");
+  // only a letter (about five days): the portal stays, and its CAPTCHA still goes to the team, then the owner
+  assertEquals(pick(f, dest({ portal: "x.gov", fax: undefined }), ENV, { ...seen, mailConnected: false }), "portal");
+  // nothing else the agency accepts: the portal
+  assertEquals(pick(f, { signature: "drawn", checked: "2026-10-01", source: "https://x.gov", portal: "x.gov" }, ENV, seen), "portal");
+  // no CAPTCHA seen there: the portal, as before
+  assertEquals(pick(f, dest({ portal: "x.gov", email: "a@x.gov" }), ENV, { ...seen, captchaHost: false }), "portal");
+});
+Deno.test("before it starts: a CAPTCHA portal with a slower way without one asks the owner, once; a saved answer decides", () => {
+  const f = filing();
+  const d = dest({ portal: "x.gov", fax: undefined });   // mail only, about 5 days slower
+  const facts = { hasLogin: true, mailConnected: false, captchaHost: true };
+  const asked = captchaPlan(f, d, ENV, facts, pick(f, d, ENV, facts));
+  assert("ask" in asked);
+  if ("ask" in asked) {
+    assertEquals(asked.alt, "mail"); assertEquals(asked.days, 5);
+    assert(/\(a\) I'll do it when it comes up, one tap on my phone\. \(b\) Placetta's team does it\. \(c\) Send it another way: by mail, usually about 5 days slower\./.test(asked.ask.en));
+    assert(/通过邮寄，通常约慢 5 天/.test(asked.ask.zh));
+  }
+  // the saved default: "me" and "team" keep the portal without asking (and pick() keeps it even when email is faster),
+  // "route" sends it the other way
+  for (const c of ["me", "team"] as const) {
+    assertEquals(captchaPlan(f, d, ENV, { ...facts, captchaChoice: c }, "portal"), { channel: "portal" });
+    assertEquals(pick(f, dest({ portal: "x.gov", email: "a@x.gov" }), ENV, { ...facts, mailConnected: true, captchaChoice: c }), "portal");
+  }
+  assertEquals(captchaPlan(f, d, ENV, { ...facts, captchaChoice: "route" }, "portal"), { channel: "mail" });
+  // "always ask" asks again
+  assert("ask" in captchaPlan(f, d, ENV, { ...facts, captchaChoice: "ask" }, "portal"));
+  // no CAPTCHA seen, or no way without one: the portal, never a question
+  assertEquals(captchaPlan(f, d, ENV, { ...facts, captchaHost: false }, "portal"), { channel: "portal" });
+  assertEquals(captchaPlan(f, { signature: "drawn", checked: "2026-10-01", source: "https://x.gov", portal: "x.gov" }, ENV, facts, "portal"), { channel: "portal" });
+});
+Deno.test("pick: a site with a CAPTCHA in the way loses to a way that needs nobody; the site still files when it's the only way", () => {
+  const f = filing();
+  const both = dest({ portal: "x.gov", email: "a@x.gov", captcha: true });
+  assertEquals(pick(f, both, ENV, { hasLogin: true, mailConnected: true }), "email", "the agency's inbox takes it: nobody solves a CAPTCHA");
+  assertEquals(pick(f, both, ENV, { hasLogin: true, mailConnected: false }), "fax", "or its fax");
+  const only = dest({ portal: "x.gov", email: undefined, fax: undefined, mail: undefined, captcha: true });
+  assertEquals(pick(f, only, ENV, { hasLogin: true, mailConnected: true }), "portal", "the site is the only way: Odelia files and hands the CAPTCHA to a person");
+  assertEquals(pick(f, dest({ portal: "x.gov", email: "a@x.gov" }), ENV, { hasLogin: true, mailConnected: true }), "portal", "no CAPTCHA: the site first, as before");
 });
 Deno.test("pick: a wet signature never goes by email, fax or mail", () => {
   assertEquals(pick(filing(), dest({ signature: "wet", email: "a@x.gov" }), ENV, { hasLogin: false, mailConnected: true }), "team");
@@ -361,7 +407,7 @@ Deno.test("the other way follows the same rules as the first, without the site",
   assertEquals(fallback(signed, undefined, ENV, facts), "team");
   // what goes by paper gets the paper checks: the filled form must be in Documents
   assert(check(filing({ pdf_path: undefined }), dest({ portal: "x.gov" }), { docPaths: docs }, "mail").some((p) => p.kind === "file"));
-  assertEquals([...PORTAL_FAILED].sort(), ["account_authority", "account_identity", "account_no_mail", "account_unknown", "left_portal", "limit", "no_live_view", "no_portal", "page_injection", "portal_blocked", "portal_failed", "review_differs", "teach_incomplete", "unverified_playbook", "worker_asleep"]);
+  assertEquals([...PORTAL_FAILED].sort(), ["account_authority", "account_identity", "account_no_mail", "account_unknown", "captcha_reroute", "left_portal", "limit", "no_live_view", "no_portal", "page_injection", "portal_blocked", "portal_failed", "review_differs", "teach_incomplete", "unverified_playbook", "worker_asleep"]);
 });
 
 Deno.test("a filing Odelia can't send goes to the business with a packet: why, where, signature, fee, and I've sent it", () => {

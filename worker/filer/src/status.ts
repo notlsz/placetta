@@ -11,7 +11,8 @@
 import { checkRead, type StatusRead } from "../../../supabase/functions/_shared/carry.ts";
 import { isFinal, mustStop, onPortal, type PageState } from "./guards.ts";
 import { headingOf, locate, pageState, shortText } from "./page.ts";
-import { Router, type ToolCall } from "./llm.ts";
+import { type CallCost, type ModelTier, Router, type ToolCall } from "./llm.ts";
+import { summarize } from "./cascade.ts";
 import type { Session } from "./run.ts";
 import type { Login } from "./types.ts";
 
@@ -24,6 +25,8 @@ export interface StatusStore {
   beginStatus(j: StatusJob): Promise<void>;
   statusLogin(j: StatusJob, host: string, tenant?: string): Promise<Login | null>;
   saveLicense(j: StatusJob, name: string, bytes: Uint8Array): Promise<string | null>;
+  /** The check's AI to its filer_runs row (the run token names it), before endStatus. */
+  runUsage?(u: ReturnType<typeof summarize>): Promise<void>;
   reportStatus(j: StatusJob, r: StatusResult | null, error: string | null): Promise<void>;
   endStatus(j: StatusJob): Promise<void>;
 }
@@ -38,7 +41,9 @@ export interface StatusPage {
   pdf(url: string): Promise<Uint8Array | null>;
   close(): Promise<void>;
 }
-export interface StatusModel { calls: number; next(i: { job: StatusJob; state: PageState; recent: string[]; signedIn: boolean }): Promise<ToolCall> }
+export type StatusIn = { job: StatusJob; state: PageState; recent: string[]; signedIn: boolean; tier?: ModelTier };
+/** tiered: takes a tier per step (cascade: fast, then strong only when the fast read is ambiguous); take: the ledger. */
+export interface StatusModel { calls: number; next(i: StatusIn): Promise<ToolCall>; tiered?: boolean; take?(): CallCost[] }
 
 const str = { type: "string" } as const;
 export const STATUS_TOOLS = [
@@ -58,7 +63,11 @@ export const STATUS_TOOLS = [
   { name: "give_up", description: "The status can't be found from here.", input_schema: { type: "object", properties: { reason: str }, required: ["reason"] } },
 ];
 
-export function statusPrompt(i: { job: StatusJob; state: PageState; recent: string[]; signedIn: boolean }): string {
+/** The status check's static part, the same for every check on every portal (no filing, no time, no page): cached behind
+ *  the tools for an hour (llm.ts cacheTtl "1h"), since checks come minutes to an hour apart, past the 5-minute cache. */
+export const STATUS_SYSTEM = "Status check only. Find the current status of the filing named below with its agency. Sign in with fill_login if the portal asks, then go to the list of the account's applications or records and open this one. When its status is on the page, call read_status with what the page shows. Type nothing but the saved login, and never click anything that submits, pays, signs, schedules or books. Choose exactly one tool.";
+
+export function statusPrompt(i: StatusIn): string {
   const s = i.state, j = i.job;
   const controls = s.controls.map((c) => `- ${c.selector} | ${c.type}${c.label ? ` | "${c.label}"` : ""}`).join("\n");
   return [
@@ -73,14 +82,30 @@ export function statusPrompt(i: { job: StatusJob; state: PageState; recent: stri
   ].join("\n");
 }
 
-/** A status check step, asked of the models in order (llm.ts Router), the same failover as a filing. */
+/** A status check step, asked of the step's tier (fast unless the fast read was ambiguous), each tier failing over
+ *  through the vendors (llm.ts Router), the same as a filing. The static instructions and tools are cached for an hour. */
 export class FilerStatusModel implements StatusModel {
   readonly router: Router;
+  readonly tiered = true;
   get calls() { return this.router.calls; }
   constructor(router = new Router()) { this.router = router; }
-  next(i: { job: StatusJob; state: PageState; recent: string[]; signedIn: boolean }): Promise<ToolCall> {
-    return this.router.ask({ prompt: () => statusPrompt(i), tools: STATUS_TOOLS, maxTokens: 800 });
+  next(i: StatusIn): Promise<ToolCall> {
+    const tier = i.tier ?? "fast";
+    // reading a status page is routine (checkRead checks what it says in code): Haiku at low effort; the strong read of an
+    // ambiguous page at high
+    return this.router.ask({ system: STATUS_SYSTEM, prompt: () => statusPrompt(i), tools: STATUS_TOOLS, maxTokens: 800, tier, cacheTtl: "1h",
+      effort: tier === "fast" ? "low" : "high" });
   }
+  take(): CallCost[] { return this.router.take(); }
+}
+
+/** The fast model's status answer is ambiguous and the strong model reads the page instead: a status it couldn't name
+ *  (unknown), a read that doesn't match the filing, giving up, or a tool that isn't one of the check's. */
+export function statusAmbiguous(call: ToolCall, matched: boolean | null): boolean {
+  if (!STATUS_TOOLS.some((t) => t.name === call.name)) return true;
+  if (call.name === "give_up") return true;
+  if (call.name === "read_status") return (call.input as { state?: string }).state === "unknown" || matched === false;
+  return false;
 }
 
 /** One status check, start to report. Returns how it ended, for the log. */
@@ -89,7 +114,11 @@ export async function runStatusCheck(j: StatusJob, o: { store: StatusStore; mode
   const onAny = (u: string) => hosts.some((h) => onPortal(u, h));
   let page: StatusPage | null = null;
   const end = async (r: StatusResult | null, err: string | null, said: string) => {
-    try { await o.store.reportStatus(j, r, err); } finally { await o.store.endStatus(j).catch(() => undefined); }
+    try { await o.store.reportStatus(j, r, err); } finally {
+      const ai = o.model.take?.() ?? [];
+      if (ai.length) await o.store.runUsage?.(summarize(ai)).catch(() => undefined);
+      await o.store.endStatus(j).catch(() => undefined);
+    }
     return said;
   };
   try {
@@ -105,7 +134,13 @@ export async function runStatusCheck(j: StatusJob, o: { store: StatusStore; mode
       if (!onAny(s.url)) return await end(null, `left the portal (${(() => { try { return new URL(s.url).hostname; } catch { return "?"; } })()})`, "off_portal");
       const stop = mustStop(s);
       if (stop) return await end(null, `stopped: ${stop.reason}; nobody solves it, the daily check carries on`, stop.reason);
-      const call = await o.model.next({ job: j, state: s, recent, signedIn });
+      let call = await o.model.next({ job: j, state: s, recent, signedIn, ...(o.model.tiered ? { tier: "fast" as const } : {}) });
+      // the cascade: replay doesn't exist for a status check yet; the fast model reads, and the strong one only when the
+      // fast read is ambiguous (checkRead still decides what counts, whichever read it)
+      if (o.model.tiered) {
+        const m = call.name === "read_status" ? checkRead(call.input as Partial<StatusRead>, { confirmation: j.confirmation_number, pageText: `${s.title}\n${s.headings.join("\n")}\n${s.text}`, host: j.host, alsoOn: o.alsoOn }).matched : null;
+        if (statusAmbiguous(call, m)) call = await o.model.next({ job: j, state: s, recent, signedIn, tier: "strong" });
+      }
       const i = call.input as Record<string, unknown>;
       if (call.name === "fill_login") {
         const which = i.which === "password" ? "password" : "username";

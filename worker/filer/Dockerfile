@@ -4,10 +4,13 @@ WORKDIR /app
 # Every file outside worker/filer the worker's code imports (test/docker.test.ts checks this list against the imports)
 COPY src/renewal.ts src/renewal.ts
 COPY supabase/functions/_shared/agent_inbox.ts supabase/functions/_shared/agent_inbox.ts
+COPY supabase/functions/_shared/ai_cost.ts supabase/functions/_shared/ai_cost.ts
+COPY supabase/functions/_shared/cache_rates.ts supabase/functions/_shared/cache_rates.ts
 COPY supabase/functions/_shared/carry.ts supabase/functions/_shared/carry.ts
 COPY supabase/functions/_shared/injection.ts supabase/functions/_shared/injection.ts
 COPY supabase/functions/_shared/zdr.ts supabase/functions/_shared/zdr.ts
 COPY supabase/functions/file/accounts.ts supabase/functions/file/accounts.ts
+COPY supabase/functions/file/captcha.ts supabase/functions/file/captcha.ts
 COPY supabase/functions/file/destinations.ts supabase/functions/file/destinations.ts
 COPY supabase/functions/file/dest/midatlantic.ts supabase/functions/file/dest/midatlantic.ts
 COPY supabase/functions/file/dest/plains.ts supabase/functions/file/dest/plains.ts

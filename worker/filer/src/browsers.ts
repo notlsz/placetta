@@ -1,6 +1,9 @@
-// Where a run's browser comes from: BROWSER_PROVIDER=local|steel|browserbase (env.ts providerOf).
+// Where a run's browser comes from: BROWSER_PROVIDER, one of local|steel|browserbase or an order of them such as
+// browserbase,steel,local (env.ts providersOf). A run opens on the first that gives it a session; a refusal (quota, 4xx,
+// 5xx, a failed connection) goes to the next for that run (opener). Unset, the order is browserbase,steel,local when
+// Browserbase's two keys are set (steel only with its key), else local alone.
 //
-//   local        Chromium inside this container (the Playwright image). The default. With Browserbase's two keys set,
+//   local        Chromium inside this container (the Playwright image). Alone, with Browserbase's two keys set,
 //                the hosts that refuse a cloud server's address (env.ts BLOCKS_DATACENTER) open on Browserbase instead.
 //   steel        every run on a new Steel session (steel.dev), over CDP. No Chromium is started here, so the worker fits
 //                a small container (Render's free plan).
@@ -29,7 +32,7 @@
 // Tests: worker/filer/test/providers.test.ts (a mock Steel and Browserbase API in front of a real Chromium over CDP).
 import type { Browser } from "playwright-core";
 import type { Session } from "./run.ts";
-import { providerOf, wantsHostedBrowser, type Provider } from "./env.ts";
+import { providerOf, usableProviders, wantsHostedBrowser, type Provider } from "./env.ts";
 import { cardsOn } from "./card.ts";
 
 export type Deps = {
@@ -70,8 +73,14 @@ export function steelBody(ms: number) {
 /** The body Browserbase's sessions API gets. keepAlive so a dropped connection doesn't lose the page mid-filing; the
  *  session is released when the run ends. No saved context. With single-use cards on (STRIPE_ISSUING_ON), record is
  *  false: Browserbase keeps no replay of a session that may type Placetta's card (card.ts). */
-export const browserbaseBody = (project: string, record = true) =>
-  ({ projectId: project, keepAlive: true, browserSettings: { solveCaptchas: false, ...(record ? {} : { recordSession: false }) } });
+/*  recordSession false (docs.browserbase.com, Session replay, read 2026-10-28: "Set recordSession to false under
+ *  browserSettings"). verified (BROWSERBASE_VERIFIED=1, Scale plan): Browserbase's "Verified" browser, a real Chromium
+ *  fingerprint that sites challenge less, made with its proxies as Browserbase's own example does (Identity overview).
+ *  It doesn't solve anything: solveCaptchas stays false. Web Bot Auth (Cloudflare's signed agents) has no session option:
+ *  Browserbase switches it on for the account on request, and every session then carries the signature. */
+export const browserbaseBody = (project: string, record = true, verified = false) =>
+  ({ projectId: project, keepAlive: true, ...(verified ? { proxies: true } : {}),
+    browserSettings: { solveCaptchas: false, ...(record ? {} : { recordSession: false }), ...(verified ? { verified: true } : {}) } });
 
 /** A provider's viewer address, if it's one the owner may be given: https, and never carrying the key. */
 export function viewerUrl(raw: unknown, key: string, params = ""): string | null {
@@ -125,7 +134,7 @@ export async function openSteel(d: Deps): Promise<Session> {
     const page = await firstPage(browser);
     // interactive for the owner's hand-back; no address bar (showControls), so the viewer can't be pointed elsewhere
     const liveUrl = viewerUrl(s.debugUrl, key, "interactive=true&showControls=false");
-    return { browser, page, liveUrl, recorded: true, close: async () => { await browser.close().catch(() => undefined); await release(); } };
+    return { browser, page, liveUrl, recorded: true, provider: "steel", close: async () => { await browser.close().catch(() => undefined); await release(); } };
   } catch (e) {
     await browser.close().catch(() => undefined); await release();
     throw new Error(`steel: ${e instanceof Error ? e.message.replaceAll(key, "•••").slice(0, 120) : "error"}`);
@@ -138,7 +147,7 @@ export async function openBrowserbase(d: Deps, o: { record?: boolean } = {}): Pr
   const key = (d.env.BROWSERBASE_API_KEY ?? "").trim(), project = (d.env.BROWSERBASE_PROJECT_ID ?? "").trim();
   if (!key || !project) throw new Error("browserbase: BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID are both needed");
   const api = (d.env.BROWSERBASE_API_URL || BB_API).replace(/\/+$/, "");
-  const res = await d.fetch(`${api}/v1/sessions`, { method: "POST", headers: { "X-BB-API-Key": key, "Content-Type": "application/json" }, body: JSON.stringify(browserbaseBody(project, record)), signal: AbortSignal.timeout(30_000) }).catch(() => null);
+  const res = await d.fetch(`${api}/v1/sessions`, { method: "POST", headers: { "X-BB-API-Key": key, "Content-Type": "application/json" }, body: JSON.stringify(browserbaseBody(project, record, d.env.BROWSERBASE_VERIFIED === "1")), signal: AbortSignal.timeout(30_000) }).catch(() => null);
   if (!res?.ok) throw new Error(`browserbase ${res?.status ?? "unreachable"}`);
   const s = await res.json().catch(() => ({})) as { id?: string; connectUrl?: string };
   if (!s.id || !/^[\w-]{8,80}$/.test(s.id) || typeof s.connectUrl !== "string" || !/^wss?:\/\//.test(s.connectUrl)) throw new Error("browserbase: no session");
@@ -152,7 +161,7 @@ export async function openBrowserbase(d: Deps, o: { record?: boolean } = {}): Pr
     const page = await firstPage(browser);
     const live = await d.fetch(`${api}/v1/sessions/${encodeURIComponent(id)}/debug`, { headers: { "X-BB-API-Key": key }, signal: AbortSignal.timeout(15_000) })
       .then((r) => r.json(), () => ({})).catch(() => ({})) as { debuggerFullscreenUrl?: string };
-    return { browser, page, liveUrl: viewerUrl(live.debuggerFullscreenUrl, key), recorded: record, close: async () => { await browser.close().catch(() => undefined); await release(); } };
+    return { browser, page, liveUrl: viewerUrl(live.debuggerFullscreenUrl, key), recorded: record, provider: "browserbase", keepAlive: true, close: async () => { await browser.close().catch(() => undefined); await release(); } };
   } catch (e) {
     await browser.close().catch(() => undefined); await release();
     throw new Error(`browserbase: ${e instanceof Error ? e.message.replaceAll(key, "•••").slice(0, 120) : "error"}`);
@@ -165,34 +174,64 @@ export async function openLocal(d: Deps): Promise<Session> {
   // no downloads, no service workers: the run's own throwaway context (sandbox.ts locks the rest down)
   const page = await (await browser.newContext({ acceptDownloads: false, serviceWorkers: "block", viewport: { width: 1280, height: 900 } })).newPage();
   // no hosted view: the worker serves its own live browser for a hand-back (live.ts, run.ts handBack)
-  return { browser, page, liveUrl: null, recorded: false, close: () => browser.close() };
+  return { browser, page, liveUrl: null, recorded: false, provider: "local", close: () => browser.close() };
 }
 
 export type OpenOpts = { /** A person may be handed this page without having agreed to a recording. */ unrecorded?: boolean };
 
-/** The opener the worker uses for each run (run.ts Config.open). An unknown provider opens nothing. */
+/** The providers a run tries, in order (pure, for the tests):
+ *   - BROWSER_PROVIDER's order (env.ts providersOf); local alone sends the hosts that refuse a cloud server's address
+ *     (env.ts BLOCKS_DATACENTER) to Browserbase when its keys are set, as before
+ *   - an unrecorded run (privacy.ts: a person in California, or nowhere known, who hasn't opted in) never opens on Steel,
+ *     which records every session: only Browserbase with recording off, or local Chromium. Browserbase joins the order
+ *     when its keys are set and local Chromium is the last resort, so a Steel-only worker still has somewhere to go. */
+export function orderFor(env: Record<string, string | undefined>, host: string, o: OpenOpts = {}): Provider[] {
+  const list = usableProviders(env);
+  if (list === "invalid") return [];
+  const bb = !!env.BROWSERBASE_API_KEY?.trim() && !!env.BROWSERBASE_PROJECT_ID?.trim();
+  let order: Provider[] = list.length === 1 && list[0] === "local" && wantsHostedBrowser(host, env) ? ["browserbase"] : [...list];
+  if (o.unrecorded) {
+    order = order.filter((p) => p !== "steel");
+    if (bb && !order.includes("browserbase")) order.unshift("browserbase");
+    if (!order.includes("local")) order.push("local");
+  }
+  return order;
+}
+
+/** The opener the worker uses for each run (run.ts Config.open). Each provider in the order is tried until one gives a
+ *  session: a refusal (a plan's quota, a 4xx or 5xx, a failed connection, Chromium that won't start) goes to the next for
+ *  this run, and the log says which one served it. An unknown provider opens nothing. */
 export function opener(d: Deps): (host?: string, o?: OpenOpts) => Promise<Session> {
-  const p: Provider | "invalid" = providerOf(d.env);
-  const bb = () => !!d.env.BROWSERBASE_API_KEY?.trim() && !!d.env.BROWSERBASE_PROJECT_ID?.trim();
   return async (host = "", o: OpenOpts = {}) => {
-    if (p === "steel") {
-      if (!o.unrecorded) return openSteel(d);
-      if (bb()) return openBrowserbase(d, { record: false });
-      try { return await openLocal(d); } catch { return openSteel(d); }
+    const order = orderFor(d.env, host, o);
+    if (!order.length) throw new Error("BROWSER_PROVIDER must be local, steel or browserbase, or an order of them such as browserbase,steel,local");
+    const failed: string[] = [];
+    for (const p of order) {
+      try {
+        const s = p === "steel" ? await openSteel(d) : p === "browserbase" ? await openBrowserbase(d, o.unrecorded ? { record: false } : {}) : await openLocal(d);
+        // the California rule, checked on what was opened, not only on what was asked for
+        if (o.unrecorded && s.recorded) { await s.close().catch(() => undefined); failed.push(`${p}: recorded`); continue; }
+        if (failed.length || order.length > 1) console.log(`filer: browser ${p}${failed.length ? ` after ${failed.join("; ")}` : ""}`);
+        return { ...s, provider: p };
+      } catch (e) {
+        const msg = e instanceof Error ? e.message.slice(0, 160) : "error";
+        failed.push(p === "local" && !/^local:/.test(msg) ? `local: ${msg}` : msg);
+        if (order.length > 1) console.warn(`filer: ${p} refused the session (${failed.at(-1)}), trying the next`);
+      }
     }
-    if (p === "browserbase") return openBrowserbase(d, o.unrecorded ? { record: false } : {});
-    if (p === "local") return wantsHostedBrowser(host, d.env) ? openBrowserbase(d, o.unrecorded ? { record: false } : {}) : openLocal(d);
-    throw new Error("BROWSER_PROVIDER must be local, steel or browserbase");
+    // one provider: its own error as before; several: every refusal, under "browsers" (run.ts treats it as its own tools)
+    if (order.length === 1) throw new Error(failed[0]);
+    throw new Error(`browsers: ${failed.join("; ")}`.slice(0, 400));
   };
 }
 
 /** A whole browser for the nightly re-check and the founder's check (probe.ts Launch): local Chromium, or one remote
- *  session whose close() also releases it. */
+ *  session (in the same order as a run) whose close() also releases it. */
 export function launcher(d: Deps): () => Promise<Browser> {
   const p = providerOf(d.env);
   if (p !== "steel" && p !== "browserbase") return d.launch;
   return async () => {
-    const s = await (p === "steel" ? openSteel(d) : openBrowserbase(d));
+    const s = await opener(d)("");
     const b = s.browser;
     return new Proxy(b, { get: (t, k) => {
       if (k === "close") return () => s.close();
