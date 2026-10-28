@@ -20,6 +20,7 @@
 "dc-food": ["pay"],
 "dc-foreign-registration": ["pay"],
 "dc-formation": ["pay"],
+"de-cra": ["pay"],
 "den-food-license": ["pay"],
 "den-zoning": ["pay"],
 "fda-device-reg": ["pay"],
@@ -65,5 +66,6 @@
 "wa-corp-qualify": ["pay"],
 "wa-lcb": ["pay"],
 "wa-sos": ["pay"],
-"wa-sos-foreign": ["pay"]
+"wa-sos-foreign": ["pay"],
+"wv-tax": ["pay"]
 }
