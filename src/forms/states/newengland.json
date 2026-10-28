@@ -1,0 +1,1183 @@
+[
+ {
+  "id": "ma-dph-wholesale-food",
+  "form": "License to process or distribute food at wholesale (M.G.L. c. 94, s. 305C)",
+  "title": {
+   "en": "Massachusetts wholesale food license (processor, distributor or food warehouse)",
+   "zh": "马萨诸塞州食品批发许可证（加工商、分销商或食品仓库）"
+  },
+  "agency": {
+   "en": "Massachusetts Department of Public Health, Division of Food Protection",
+   "zh": "马萨诸塞州公共卫生局食品保护处"
+  },
+  "where": "MA",
+  "segments": [
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "online",
+  "order": 46,
+  "how": {
+   "en": "Applied for online in the Environmental Health eLicensing Portal, one application for each facility or activity. The Division inspects the place before the license is issued.",
+   "zh": "在环境卫生电子许可门户在线申请，每个设施或每项业务分别申请。食品保护处在发证前检查经营场所。"
+  },
+  "url": "https://environmentalhealthlicensing.mass.gov/",
+  "info": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXV/Chapter94/Section305C",
+  "fee": 300,
+  "feeNote": {
+   "en": "$300 application fee for each site or activity, as the Division's guide states.",
+   "zh": "每个场所或每项业务申请费 300 美元（据食品保护处指南）。"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年续期。"
+  },
+  "plain": {
+   "en": "Anyone who makes, packs, stores or distributes food at wholesale in Massachusetts holds this state license, one per place.",
+   "zh": "在马萨诸塞州从事食品批发生产、包装、储存或分销的企业须持有此州许可证，每个场所一份。"
+  },
+  "proof": {
+   "quote": "No person shall carry on the business of a food processor or food distributor unless such person holds a valid license from the department.",
+   "checked": "2026-10-28",
+   "read": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXV/Chapter94/Section305C"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "ct-drs-sales",
+  "form": "Sales and Use Tax Permit (myconneCT business registration)",
+  "title": {
+   "en": "Connecticut sales and use tax permit",
+   "zh": "康涅狄格州销售与使用税许可证"
+  },
+  "agency": {
+   "en": "Connecticut Department of Revenue Services",
+   "zh": "康涅狄格州税务局"
+  },
+  "where": "CT",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "order": 20,
+  "how": {
+   "en": "Registered online in myconneCT before the first sale, one permit for each location. The permit can be printed once registration is processed and DRS mails the official one.",
+   "zh": "首笔销售前在 myconneCT 在线登记，每个营业地点一份许可证。登记处理后即可打印许可证，DRS 另行邮寄正式许可证。"
+  },
+  "url": "https://drs.ct.gov/eservices/",
+  "info": "https://portal.ct.gov/drs/businesses/new-business-resource-center/registering-with-drs",
+  "fee": 100,
+  "feeNote": {
+   "en": "DRS states a $100 fee to register to collect sales and use tax.",
+   "zh": "DRS 规定登记代收销售与使用税须缴费 100 美元。"
+  },
+  "plain": {
+   "en": "The permit to sell in Connecticut and collect its sales tax, needed before the first sale.",
+   "zh": "在康涅狄格州销售并代收销售税所需的许可证，须在首笔销售前取得。"
+  },
+  "proof": {
+   "quote": "You must obtain a Sales and Use Tax Permit before making any sales.",
+   "checked": "2026-10-28",
+   "read": "https://portal.ct.gov/drs/businesses/new-business-resource-center/registering-with-drs"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "ct-drs-withholding",
+  "form": "Income tax withholding registration (myconneCT)",
+  "title": {
+   "en": "Connecticut employer withholding registration",
+   "zh": "康涅狄格州雇主预扣税登记"
+  },
+  "agency": {
+   "en": "Connecticut Department of Revenue Services",
+   "zh": "康涅狄格州税务局"
+  },
+  "where": "CT",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 60,
+  "how": {
+   "en": "Registered online in myconneCT once the business employs anyone in Connecticut; a business already registered for another Connecticut tax adds withholding to its account.",
+   "zh": "企业在康涅狄格州雇用员工后在 myconneCT 在线登记；已登记其他康州税种的企业在原账户中增加预扣税即可。"
+  },
+  "url": "https://drs.ct.gov/eservices/",
+  "info": "https://portal.ct.gov/drs/businesses/new-business-resource-center/registering-with-drs",
+  "fee": null,
+  "plain": {
+   "en": "Registers the business to withhold Connecticut income tax from wages.",
+   "zh": "登记企业从工资中预扣康涅狄格州所得税。"
+  },
+  "proof": {
+   "quote": "you are generally required to register with the Department of Revenue Services (DRS) to withhold Connecticut income tax.",
+   "checked": "2026-10-28",
+   "read": "https://portal.ct.gov/drs/businesses/new-business-resource-center/registering-with-drs"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "ct-dol-ui",
+  "form": "New employer registration (ReEmployCT)",
+  "title": {
+   "en": "Connecticut unemployment insurance employer registration",
+   "zh": "康涅狄格州失业保险雇主登记"
+  },
+  "agency": {
+   "en": "Connecticut Department of Labor",
+   "zh": "康涅狄格州劳工部"
+  },
+  "where": "CT",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 61,
+  "how": {
+   "en": "Registered online in ReEmployCT under New Employer, Apply Here. Every employer of one or more people registers.",
+   "zh": "在 ReEmployCT 的新雇主栏目点击 Apply Here 在线登记。雇用一人及以上的雇主均须登记。"
+  },
+  "url": "https://reemploycttax.dol.ct.gov/accessct/faces/login/login_local.xhtml",
+  "info": "https://portal.ct.gov/dol/knowledge-base/articles/unemployment-taxes/how-do-i-register",
+  "fee": null,
+  "plain": {
+   "en": "Opens the account the business pays Connecticut unemployment tax into.",
+   "zh": "开设企业缴纳康涅狄格州失业保险税的账户。"
+  },
+  "proof": {
+   "quote": "All employers of one or more persons (full or part-time) must register online by clicking the link above.",
+   "checked": "2026-10-28",
+   "read": "https://portal.ct.gov/dol/knowledge-base/articles/unemployment-taxes/how-do-i-register"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "ct-dcp-food",
+  "form": "Food Manufacturing Establishment license or Food Warehouse registration (C.G.S. 21a-152)",
+  "title": {
+   "en": "Connecticut food manufacturing or food warehouse license",
+   "zh": "康涅狄格州食品生产或食品仓库许可证"
+  },
+  "agency": {
+   "en": "Connecticut Department of Consumer Protection, Food and Standards Division",
+   "zh": "康涅狄格州消费者保护局食品与标准处"
+  },
+  "where": "CT",
+  "segments": [
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "online",
+  "order": 46,
+  "how": {
+   "en": "Applied for in the state's eLicense portal, or on the paper application mailed with the fee: the Food Manufacturing application for a plant that makes or packs food, the Food Warehouse application for a place that stores food for wholesale distribution. The town's zoning approval goes with it unless the site is an existing commercial location. The Department inspects before issuing.",
+   "zh": "在州 eLicense 门户申请，或填写纸质申请表连同费用邮寄：生产或包装食品的工厂用食品生产申请表，储存供批发分销食品的场所用食品仓库申请表。除既有商业场所外，须附所在城镇的分区批准。发证前须经该局检查。"
+  },
+  "url": "https://www.elicense.ct.gov/",
+  "pdf": "https://portal.ct.gov/dcp/-/media/dcp/pdf/applications_added_2014/fwhapplication080614pdf.pdf",
+  "info": "https://prdext3.cga.ct.gov/2026/sup/chap_419b.htm",
+  "fee": 20,
+  "feeNote": {
+   "en": "$20 a year, set by statute.",
+   "zh": "法定每年 20 美元。"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年续期。"
+  },
+  "attach": [
+   {
+    "en": "Certificate of zoning approval from the town (not needed for an approved commercial location)",
+    "zh": "所在城镇的分区批准证明（已获批准的商业场所无需提供）"
+   }
+  ],
+  "plain": {
+   "en": "A Connecticut plant that makes food, or a warehouse that stores it for wholesale, is licensed by the state.",
+   "zh": "在康涅狄格州生产食品的工厂或储存批发食品的仓库须取得州许可证。"
+  },
+  "proof": {
+   "quote": "No corporation, firm or person shall operate a bakery, food manufacturing establishment or food warehouse with the intent of producing or storing products",
+   "checked": "2026-10-28",
+   "read": "https://prdext3.cga.ct.gov/2026/sup/chap_419b.htm"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "ri-tax-permit",
+  "form": "Form BAR, Business Application and Registration (permit to make sales at retail)",
+  "title": {
+   "en": "Rhode Island retail sales permit",
+   "zh": "罗得岛州零售销售许可证"
+  },
+  "agency": {
+   "en": "Rhode Island Division of Taxation",
+   "zh": "罗得岛州税务局"
+  },
+  "where": "RI",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "pdf_mail",
+  "order": 20,
+  "how": {
+   "en": "One permit for each place of business, on the Business Application and Registration (Form BAR). The Division's online registration is being updated, so the form is emailed to its Registration Section for now.",
+   "zh": "每个营业地点一份许可证，通过《企业申请与登记表》（BAR 表）申请。税务局的在线登记正在更新，目前将表格以电子邮件发送至其登记科。"
+  },
+  "url": "https://www.ri.gov/taxation/BAR/assets/BAR_2024-0f89117d70c65f7907130a612bf59768ff6b0e0a0e5048832053717a51e6b4fb.pdf",
+  "pdf": "https://www.ri.gov/taxation/BAR/assets/BAR_2024-0f89117d70c65f7907130a612bf59768ff6b0e0a0e5048832053717a51e6b4fb.pdf",
+  "info": "https://webserver.rilegislature.gov/Statutes/TITLE44/44-19/44-19-1.htm",
+  "fee": 0,
+  "feeNote": {
+   "en": "The statute sets no fee for the permit.",
+   "zh": "法律规定该许可证不收费。"
+  },
+  "renews": {
+   "en": "Every year: valid July 1 to June 30.",
+   "zh": "每年续期：有效期为 7 月 1 日至次年 6 月 30 日。"
+  },
+  "plain": {
+   "en": "The permit to sell in Rhode Island and collect its sales tax, one for each location.",
+   "zh": "在罗得岛州销售并代收销售税所需的许可证，每个营业地点一份。"
+  },
+  "proof": {
+   "quote": "shall file with the tax administrator an application for a permit for each place of business.",
+   "checked": "2026-10-28",
+   "read": "https://webserver.rilegislature.gov/Statutes/TITLE44/44-19/44-19-1.htm"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "ri-tax-employer",
+  "form": "Form BAR, Business Application and Registration (withholding and unemployment insurance accounts)",
+  "title": {
+   "en": "Rhode Island employer registration: withholding, unemployment insurance and TDI",
+   "zh": "罗得岛州雇主登记：预扣税、失业保险与短期残疾保险（TDI）"
+  },
+  "agency": {
+   "en": "Rhode Island Division of Taxation",
+   "zh": "罗得岛州税务局"
+  },
+  "where": "RI",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "pdf_mail",
+  "order": 60,
+  "how": {
+   "en": "The same Form BAR opens the income tax withholding account and the unemployment insurance account (with temporary disability insurance and the job development fund), now kept by the Division of Taxation's Employer Tax section.",
+   "zh": "同一份 BAR 表可开设所得税预扣账户和失业保险账户（含短期残疾保险及就业发展基金），现由税务局雇主税科管理。"
+  },
+  "url": "https://www.ri.gov/taxation/BAR/assets/BAR_2024-0f89117d70c65f7907130a612bf59768ff6b0e0a0e5048832053717a51e6b4fb.pdf",
+  "pdf": "https://www.ri.gov/taxation/BAR/assets/BAR_2024-0f89117d70c65f7907130a612bf59768ff6b0e0a0e5048832053717a51e6b4fb.pdf",
+  "info": "https://webserver.rilegislature.gov/Statutes/TITLE44/44-30/44-V/44-30-71.htm",
+  "fee": null,
+  "plain": {
+   "en": "Sets up the accounts a Rhode Island employer withholds and pays payroll taxes through.",
+   "zh": "开设罗得岛州雇主预扣和缴纳工资税的账户。"
+  },
+  "proof": {
+   "quote": "Every employer maintaining an office or transacting business within this state and making payment of any wages subject to Rhode Island personal income tax",
+   "checked": "2026-10-28",
+   "read": "https://webserver.rilegislature.gov/Statutes/TITLE44/44-30/44-V/44-30-71.htm"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "ri-doh-food-wholesale",
+  "form": "Food business registration: food processor (wholesale), food distributor or food warehouse (R.I. Gen. Laws 21-27-10)",
+  "title": {
+   "en": "Rhode Island food business license for processors, distributors and warehouses",
+   "zh": "罗得岛州食品经营许可证（加工商、分销商与仓库）"
+  },
+  "agency": {
+   "en": "Rhode Island Department of Health, Center for Food Protection",
+   "zh": "罗得岛州卫生局食品保护中心"
+  },
+  "where": "RI",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 46,
+  "how": {
+   "en": "Registered every year with the Department of Health on its application for food processors and distributors (in state or out of state) or for food warehouses, mailed with the fee. In-state places are inspected before opening; the statute includes out-of-state processors that sell food in Rhode Island.",
+   "zh": "每年向卫生局登记：食品加工商和分销商（州内或州外）或食品仓库填写相应申请表，连同费用邮寄。州内场所开业前须接受检查；法律规定在罗得岛州销售食品的州外加工商也须登记。"
+  },
+  "url": "https://health.ri.gov/applications/FoodProcessorRetailWholesale.pdf",
+  "pdf": "https://health.ri.gov/applications/FoodProcessorRetailWholesale.pdf",
+  "info": "https://webserver.rilegislature.gov/Statutes/TITLE21/21-27/21-27-10.htm",
+  "fee": null,
+  "feeNote": {
+   "en": "By category, prorated for a first license; the application lists the current amounts.",
+   "zh": "按类别收费，首次申请按比例计算；具体金额见申请表。"
+  },
+  "renews": {
+   "en": "Every year, on the Department's September 30 cycle.",
+   "zh": "每年续期，按卫生局 9 月 30 日周期。"
+  },
+  "plain": {
+   "en": "Rhode Island registers every food business, including a processor or distributor outside the state that sells food there.",
+   "zh": "罗得岛州要求所有食品经营者登记，包括在该州销售食品的州外加工商或分销商。"
+  },
+  "proof": {
+   "quote": "No person shall operate a food business as defined in § 21-27-1 unless he or she annually registers the business",
+   "checked": "2026-10-28",
+   "read": "https://webserver.rilegislature.gov/Statutes/TITLE21/21-27/21-27-10.htm"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "ri-doh-food-service",
+  "form": "Application for retail food service businesses (restaurant, caterer, commissary)",
+  "title": {
+   "en": "Rhode Island food service license (restaurants)",
+   "zh": "罗得岛州餐饮服务许可证（餐厅）"
+  },
+  "agency": {
+   "en": "Rhode Island Department of Health, Center for Food Protection",
+   "zh": "罗得岛州卫生局食品保护中心"
+  },
+  "where": "RI",
+  "segments": [
+   "restaurant"
+  ],
+  "method": "pdf_mail",
+  "order": 75,
+  "how": {
+   "en": "Mailed to the Center for Food Protection with the fee; a pre-operational inspection is booked two weeks before opening, and a Certified Food Safety Manager is in place first where required. Renewals are online.",
+   "zh": "连同费用邮寄至食品保护中心；开业前两周预约开业前检查，如有要求须先配备注册食品安全经理。续期在线办理。"
+  },
+  "url": "https://health.ri.gov/applications/FoodServiceBusinessRetail.pdf",
+  "pdf": "https://health.ri.gov/applications/FoodServiceBusinessRetail.pdf",
+  "info": "https://webserver.rilegislature.gov/Statutes/TITLE21/21-27/21-27-10.htm",
+  "fee": null,
+  "feeNote": {
+   "en": "Set by seating and type, on the application.",
+   "zh": "按座位数和类型收费，见申请表。"
+  },
+  "renews": {
+   "en": "Every year, online.",
+   "zh": "每年在线续期。"
+  },
+  "plain": {
+   "en": "Rhode Island's state license for a restaurant, issued by the Department of Health after an inspection.",
+   "zh": "罗得岛州卫生局在检查后为餐厅颁发的州许可证。"
+  },
+  "proof": {
+   "quote": "No person shall operate a food business as defined in § 21-27-1 unless he or she annually registers the business",
+   "checked": "2026-10-28",
+   "read": "https://webserver.rilegislature.gov/Statutes/TITLE21/21-27/21-27-10.htm"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "ri-doh-food-market",
+  "form": "Application for food business: retail market (by number of cash registers)",
+  "title": {
+   "en": "Rhode Island retail food market license",
+   "zh": "罗得岛州零售食品市场许可证"
+  },
+  "agency": {
+   "en": "Rhode Island Department of Health, Center for Food Protection",
+   "zh": "罗得岛州卫生局食品保护中心"
+  },
+  "where": "RI",
+  "segments": [
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 75,
+  "how": {
+   "en": "Mailed to the Center for Food Protection with the fee for the store's number of cash registers; an operational inspection is booked two weeks before opening.",
+   "zh": "按门店收银机数量缴费，连同申请表邮寄至食品保护中心；开业前两周预约营业检查。"
+  },
+  "url": "https://health.ri.gov/applications/FoodMarketCashRegisters.pdf",
+  "pdf": "https://health.ri.gov/applications/FoodMarketCashRegisters.pdf",
+  "info": "https://webserver.rilegislature.gov/Statutes/TITLE21/21-27/21-27-10.htm",
+  "fee": null,
+  "feeNote": {
+   "en": "Set by the number of cash registers, on the application.",
+   "zh": "按收银机数量收费，见申请表。"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年续期。"
+  },
+  "plain": {
+   "en": "Rhode Island's state license for a store that sells food.",
+   "zh": "罗得岛州为销售食品的门店颁发的州许可证。"
+  },
+  "proof": {
+   "quote": "No person shall operate a food business as defined in § 21-27-1 unless he or she annually registers the business",
+   "checked": "2026-10-28",
+   "read": "https://webserver.rilegislature.gov/Statutes/TITLE21/21-27/21-27-10.htm"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "vt-tax-sales",
+  "form": "Form BR-400, Application for Business Tax Account (sales and use tax, or meals and rooms tax)",
+  "title": {
+   "en": "Vermont business tax account: sales and use tax, or meals and rooms tax for a restaurant",
+   "zh": "佛蒙特州营业税账户：销售与使用税，餐厅为餐饮与住宿税"
+  },
+  "agency": {
+   "en": "Vermont Department of Taxes",
+   "zh": "佛蒙特州税务局"
+  },
+  "where": "VT",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "order": 20,
+  "how": {
+   "en": "Registered on myVTax (Sign Up), or on Form BR-400 faxed or mailed. Each tax is its own account: a store collects sales and use tax, a restaurant meals and rooms tax. The account does not renew.",
+   "zh": "在 myVTax 注册（Sign Up），或填写 BR-400 表传真或邮寄。每个税种单独开户：零售店代收销售与使用税，餐厅代收餐饮与住宿税。账户无需续期。"
+  },
+  "url": "https://myvtax.vermont.gov/",
+  "pdf": "https://tax.vermont.gov/sites/tax/files/documents/BR-400.pdf",
+  "info": "https://tax.vermont.gov/business/register",
+  "fee": null,
+  "plain": {
+   "en": "The Vermont tax account a business collects sales tax, or a restaurant's meals tax, through.",
+   "zh": "企业代收佛蒙特州销售税（餐厅为餐饮税）所用的税务账户。"
+  },
+  "proof": {
+   "quote": "You must register with the Vermont Department of Taxes if your business will collect any of the following taxes:",
+   "checked": "2026-10-28",
+   "read": "https://tax.vermont.gov/business/register"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "vt-tax-withholding",
+  "form": "Form BR-400, Application for Business Tax Account (employer withholding tax)",
+  "title": {
+   "en": "Vermont employer withholding account",
+   "zh": "佛蒙特州雇主预扣税账户"
+  },
+  "agency": {
+   "en": "Vermont Department of Taxes",
+   "zh": "佛蒙特州税务局"
+  },
+  "where": "VT",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 60,
+  "how": {
+   "en": "Registered on myVTax, or on Form BR-400 faxed or mailed, as a separate withholding account.",
+   "zh": "在 myVTax 注册，或填写 BR-400 表传真或邮寄，单独开设预扣税账户。"
+  },
+  "url": "https://myvtax.vermont.gov/",
+  "pdf": "https://tax.vermont.gov/sites/tax/files/documents/BR-400.pdf",
+  "info": "https://tax.vermont.gov/business/register",
+  "fee": null,
+  "plain": {
+   "en": "Registers the business to withhold Vermont income tax from wages.",
+   "zh": "登记企业从工资中预扣佛蒙特州所得税。"
+  },
+  "proof": {
+   "quote": "You must register with the Vermont Department of Taxes if your business will collect any of the following taxes:",
+   "checked": "2026-10-28",
+   "read": "https://tax.vermont.gov/business/register"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "vt-dol-ui",
+  "form": "Employer registration (Employer e-Services)",
+  "title": {
+   "en": "Vermont unemployment insurance employer registration",
+   "zh": "佛蒙特州失业保险雇主登记"
+  },
+  "agency": {
+   "en": "Vermont Department of Labor",
+   "zh": "佛蒙特州劳工部"
+  },
+  "where": "VT",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 61,
+  "how": {
+   "en": "A new business registers in the Department of Labor's Employer e-Services, signing in with a myVermont account made with a business email address.",
+   "zh": "新企业在劳工部的雇主电子服务（Employer e-Services）登记，使用以企业邮箱注册的 myVermont 账户登录。"
+  },
+  "url": "https://labor.ui.vermont.gov/UI/Employer",
+  "info": "https://labor.vermont.gov/unemployment-insurance-modernization-employer-resources",
+  "fee": null,
+  "plain": {
+   "en": "Opens the account the business pays Vermont unemployment tax into.",
+   "zh": "开设企业缴纳佛蒙特州失业保险税的账户。"
+  },
+  "proof": {
+   "quote": "How-To Register a Business (for new businesses; previously registered businesses do not need to re-register in e-Services)",
+   "checked": "2026-10-28",
+   "read": "https://labor.vermont.gov/unemployment-insurance-modernization-employer-resources"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "vt-doh-food-processor",
+  "form": "Application for License to Operate a Food Processor Establishment",
+  "title": {
+   "en": "Vermont food processor license (manufacturers, warehouses and distribution centers)",
+   "zh": "佛蒙特州食品加工许可证（生产商、仓库与配送中心）"
+  },
+  "agency": {
+   "en": "Vermont Department of Health, Food and Lodging Program",
+   "zh": "佛蒙特州卫生局餐饮与住宿项目"
+  },
+  "where": "VT",
+  "segments": [
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "online",
+  "order": 46,
+  "how": {
+   "en": "Applied for online or on the paper application mailed in, at least 30 days before opening, with the product list and, for a private water supply, water test results. The license is emailed after the opening inspection.",
+   "zh": "至少在开业前 30 天在线申请或邮寄纸质申请表，附产品清单；使用自备水源的须附水质检测结果。开业检查合格后许可证以电子邮件发出。"
+  },
+  "url": "https://vtdoh.safefoodinspection.com/Login.aspx",
+  "pdf": "https://www.healthvermont.gov/sites/default/files/document/env-fl-manufactured-food-application.pdf",
+  "info": "https://www.healthvermont.gov/environment/food-lodging-program/food-processing-establishments",
+  "fee": null,
+  "feeNote": {
+   "en": "By expected gross annual sales.",
+   "zh": "按预计年销售总额分级收费。"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年续期。"
+  },
+  "plain": {
+   "en": "Vermont licenses every place that makes food for sale, and warehouses and distribution centers too.",
+   "zh": "佛蒙特州要求所有生产销售食品的场所以及仓库和配送中心取得许可证。"
+  },
+  "proof": {
+   "quote": "Warehouses and distribution centers also need this type of license.",
+   "checked": "2026-10-28",
+   "read": "https://www.healthvermont.gov/environment/food-lodging-program/food-processing-establishments"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "vt-doh-retail-food",
+  "form": "Application for License to Operate a Retail Food Establishment",
+  "title": {
+   "en": "Vermont retail food license (restaurants and caterers)",
+   "zh": "佛蒙特州零售食品许可证（餐厅与外烩）"
+  },
+  "agency": {
+   "en": "Vermont Department of Health, Food and Lodging Program",
+   "zh": "佛蒙特州卫生局餐饮与住宿项目"
+  },
+  "where": "VT",
+  "segments": [
+   "restaurant"
+  ],
+  "method": "online",
+  "order": 75,
+  "how": {
+   "en": "Applied for online or on the paper application mailed in, at least 30 days before opening, with the proposed menu. The license is emailed after the opening inspection.",
+   "zh": "至少在开业前 30 天在线申请或邮寄纸质申请表，附拟定菜单。开业检查合格后许可证以电子邮件发出。"
+  },
+  "url": "https://vtdoh.safefoodinspection.com/Login.aspx",
+  "pdf": "https://www.healthvermont.gov/sites/default/files/document/env-fl-retail-food-application.pdf",
+  "info": "https://www.healthvermont.gov/environment/food-lodging-program/retail-food-service-establishments",
+  "fee": null,
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年续期。"
+  },
+  "plain": {
+   "en": "Vermont's state license for a restaurant, caterer or food truck, issued after an inspection.",
+   "zh": "佛蒙特州在检查后为餐厅、外烩或餐车颁发的州许可证。"
+  },
+  "proof": {
+   "quote": "You will need a retail food license if you are operating a restaurant, commercial catering business, food truck, push cart, retail bakery,",
+   "checked": "2026-10-28",
+   "read": "https://www.healthvermont.gov/environment/food-lodging-program/retail-food-service-establishments"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "me-mrs-sales",
+  "form": "Application for Tax Registration, Section 3 (sales and use tax)",
+  "title": {
+   "en": "Maine sales and use tax registration",
+   "zh": "缅因州销售与使用税登记"
+  },
+  "agency": {
+   "en": "Maine Revenue Services",
+   "zh": "缅因州税务局"
+  },
+  "where": "ME",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "order": 20,
+  "how": {
+   "en": "Registered online on the Maine Tax Portal (Register a Business), or on the combined paper application sent by fax, email or mail.",
+   "zh": "在缅因州税务门户（Register a Business）在线登记，或填写综合纸质申请表以传真、电子邮件或邮寄提交。"
+  },
+  "url": "https://revenue.maine.gov/",
+  "pdf": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_Central_reg_app_booklet%20.pdf",
+  "info": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_Central_reg_app_booklet%20.pdf",
+  "fee": null,
+  "plain": {
+   "en": "Registers the business to collect Maine sales tax.",
+   "zh": "登记企业代收缅因州销售税。"
+  },
+  "proof": {
+   "quote": "You have a business in which you make retail sales of tangible personal property or taxable services and you have not registered before.",
+   "checked": "2026-10-28",
+   "read": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_Central_reg_app_booklet%20.pdf"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "me-mrs-withholding",
+  "form": "Application for Tax Registration, Section 2 (income tax withholding)",
+  "title": {
+   "en": "Maine employer withholding registration",
+   "zh": "缅因州雇主预扣税登记"
+  },
+  "agency": {
+   "en": "Maine Revenue Services",
+   "zh": "缅因州税务局"
+  },
+  "where": "ME",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 60,
+  "how": {
+   "en": "Registered online on the Maine Tax Portal, or in Section 2 of the combined paper application sent by fax, email or mail.",
+   "zh": "在缅因州税务门户在线登记，或填写综合纸质申请表第 2 部分以传真、电子邮件或邮寄提交。"
+  },
+  "url": "https://revenue.maine.gov/",
+  "pdf": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_Central_reg_app_booklet%20.pdf",
+  "info": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_Central_reg_app_booklet%20.pdf",
+  "fee": null,
+  "plain": {
+   "en": "Registers the business to withhold Maine income tax from wages.",
+   "zh": "登记企业从工资中预扣缅因州所得税。"
+  },
+  "proof": {
+   "quote": "You are a new employer required to withhold income taxes and you have not registered before.",
+   "checked": "2026-10-28",
+   "read": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_Central_reg_app_booklet%20.pdf"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "me-dol-ui",
+  "form": "Unemployment compensation tax account registration (ReEmployME)",
+  "title": {
+   "en": "Maine unemployment insurance employer registration",
+   "zh": "缅因州失业保险雇主登记"
+  },
+  "agency": {
+   "en": "Maine Department of Labor",
+   "zh": "缅因州劳工部"
+  },
+  "where": "ME",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 61,
+  "how": {
+   "en": "Registered directly with the Department of Labor online at maine.gov/reemployme, not on the Revenue Services application.",
+   "zh": "直接在劳工部网站 maine.gov/reemployme 在线登记，不使用税务局的申请表。"
+  },
+  "url": "https://www.maine.gov/reemployme",
+  "info": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_Central_reg_app_booklet%20.pdf",
+  "fee": null,
+  "plain": {
+   "en": "Opens the account the business pays Maine unemployment tax into.",
+   "zh": "开设企业缴纳缅因州失业保险税的账户。"
+  },
+  "proof": {
+   "quote": "Note: You must register directly with the Department of Labor for Unemployment Compensation Tax and Paid Family and Medical Leave.",
+   "checked": "2026-10-28",
+   "read": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_Central_reg_app_booklet%20.pdf"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "me-pfml",
+  "form": "Maine Paid Family and Medical Leave employer registration",
+  "title": {
+   "en": "Maine Paid Leave employer registration",
+   "zh": "缅因州带薪家庭与医疗假雇主登记"
+  },
+  "agency": {
+   "en": "Maine Department of Labor, Bureau of Paid Family and Medical Leave",
+   "zh": "缅因州劳工部带薪家庭与医疗假局"
+  },
+  "where": "ME",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 62,
+  "how": {
+   "en": "Every employer with Maine employees registers with Maine Paid Leave online.",
+   "zh": "所有雇用缅因州员工的雇主均须在线向缅因州带薪假计划登记。"
+  },
+  "url": "https://www.maine.gov/paidleave/",
+  "info": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_Central_reg_app_booklet%20.pdf",
+  "fee": null,
+  "plain": {
+   "en": "Registers the business for Maine's paid family and medical leave contributions.",
+   "zh": "登记企业缴纳缅因州带薪家庭与医疗假供款。"
+  },
+  "proof": {
+   "quote": "All employers with Maine employees are required to register with Maine Paid Leave at maine.gov/paidleave/.",
+   "checked": "2026-10-28",
+   "read": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_Central_reg_app_booklet%20.pdf"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "me-dacf-food",
+  "form": "Food establishment license (22 M.R.S. 2167): food processing, manufacturing or warehouse",
+  "title": {
+   "en": "Maine food establishment license for processors and warehouses",
+   "zh": "缅因州食品场所许可证（加工商与仓库）"
+  },
+  "agency": {
+   "en": "Maine Department of Agriculture, Conservation and Forestry, Quality Assurance and Regulations",
+   "zh": "缅因州农业、保育与林业局质量保证与监管处"
+  },
+  "where": "ME",
+  "segments": [
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 46,
+  "how": {
+   "en": "Applied for on the Department's Food and Fuel License Application; an inspector visits before the license is issued.",
+   "zh": "填写农业、保育与林业局的《食品与燃料许可证申请表》；发证前检查员到场检查。"
+  },
+  "url": "https://www.maine.gov/dacf/qar/permits_and_licenses/index.shtml",
+  "info": "https://legislature.maine.gov/statutes/22/title22sec2167.html",
+  "fee": null,
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年续期。"
+  },
+  "plain": {
+   "en": "Maine licenses every factory, plant or warehouse where food is made, packed or held for sale.",
+   "zh": "缅因州要求所有生产、包装或储存待售食品的工厂、车间或仓库取得许可证。"
+  },
+  "proof": {
+   "quote": "may not operate a food establishment or a food salvage establishment or act as a salvage broker unless licensed",
+   "checked": "2026-10-28",
+   "read": "https://legislature.maine.gov/statutes/22/title22sec2167.html"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "me-dacf-retail-food",
+  "form": "Food establishment license (22 M.R.S. 2167): retail food store",
+  "title": {
+   "en": "Maine retail food store license",
+   "zh": "缅因州零售食品店许可证"
+  },
+  "agency": {
+   "en": "Maine Department of Agriculture, Conservation and Forestry, Quality Assurance and Regulations",
+   "zh": "缅因州农业、保育与林业局质量保证与监管处"
+  },
+  "where": "ME",
+  "segments": [
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 75,
+  "how": {
+   "en": "Applied for on the Department's Food and Fuel License Application; the license is kept at the store for customers to see.",
+   "zh": "填写农业、保育与林业局的《食品与燃料许可证申请表》；许可证须放在店内供顾客查看。"
+  },
+  "url": "https://www.maine.gov/dacf/qar/permits_and_licenses/index.shtml",
+  "info": "https://legislature.maine.gov/statutes/22/title22sec2167.html",
+  "fee": null,
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年续期。"
+  },
+  "plain": {
+   "en": "Maine's state license for a store that sells food to take away.",
+   "zh": "缅因州为销售外带食品的门店颁发的州许可证。"
+  },
+  "proof": {
+   "quote": "may not operate a food establishment or a food salvage establishment or act as a salvage broker unless licensed",
+   "checked": "2026-10-28",
+   "read": "https://legislature.maine.gov/statutes/22/title22sec2167.html"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "me-hip-eating",
+  "form": "Eating establishment license (22 M.R.S. 2492)",
+  "title": {
+   "en": "Maine eating establishment license (restaurants)",
+   "zh": "缅因州餐饮场所许可证（餐厅）"
+  },
+  "agency": {
+   "en": "Maine Center for Disease Control and Prevention, Health Inspection Program",
+   "zh": "缅因州疾病控制与预防中心卫生检查项目"
+  },
+  "where": "ME",
+  "segments": [
+   "restaurant"
+  ],
+  "method": "online",
+  "order": 75,
+  "how": {
+   "en": "Applied for through the Health Inspection Program's online license application service, or on its downloadable form.",
+   "zh": "通过卫生检查项目的在线许可证申请服务申请，或下载表格填写。"
+  },
+  "url": "https://www.maine.gov/dhhs/mecdc/services/business-services/business-licensing/license-a-new-business",
+  "info": "https://legislature.maine.gov/statutes/22/title22sec2492.html",
+  "fee": null,
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年续期。"
+  },
+  "plain": {
+   "en": "Maine's state license for a restaurant, from the Maine CDC's Health Inspection Program.",
+   "zh": "缅因州疾病控制与预防中心卫生检查项目为餐厅颁发的州许可证。"
+  },
+  "proof": {
+   "quote": "may not conduct, control, manage or operate the following establishments for compensation or indirect compensation without a license issued by the department:",
+   "checked": "2026-10-28",
+   "read": "https://legislature.maine.gov/statutes/22/title22sec2492.html"
+  },
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "nh-dra-meals",
+  "form": "Meals and Rooms (Rentals) Tax operator license",
+  "title": {
+   "en": "New Hampshire meals and rentals tax license (restaurants)",
+   "zh": "新罕布什尔州餐饮与租赁税许可证（餐厅）"
+  },
+  "agency": {
+   "en": "New Hampshire Department of Revenue Administration",
+   "zh": "新罕布什尔州税务管理局"
+  },
+  "where": "NH",
+  "segments": [
+   "restaurant"
+  ],
+  "method": "online",
+  "order": 20,
+  "how": {
+   "en": "New Hampshire has no general sales tax; a restaurant that serves taxable meals holds a meals and rentals operator license from the Department of Revenue Administration. Odelia's team confirms the current steps on the Department's page before filing.",
+   "zh": "新罕布什尔州没有一般销售税；供应应税餐饮的餐厅须向税务管理局取得餐饮与租赁税经营者许可证。提交前，Odelia 团队会在该局页面确认现行步骤。"
+  },
+  "url": "https://www.revenue.nh.gov/meals-rooms/",
+  "info": "https://www.revenue.nh.gov/meals-rooms/",
+  "fee": null,
+  "lead": "https://www.revenue.nh.gov/faq/new-business-tax.htm (search result titled Meals and Rooms (Rentals) License)",
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "nh-nhes-ui",
+  "form": "Employer registration (New Hampshire Employment Security)",
+  "title": {
+   "en": "New Hampshire unemployment insurance employer registration",
+   "zh": "新罕布什尔州失业保险雇主登记"
+  },
+  "agency": {
+   "en": "New Hampshire Employment Security",
+   "zh": "新罕布什尔州就业保障局"
+  },
+  "where": "NH",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 61,
+  "how": {
+   "en": "Employers register with New Hampshire Employment Security for unemployment tax. New Hampshire has no state income tax on wages, so there is no withholding registration. Odelia's team confirms the current steps before filing.",
+   "zh": "雇主须向新罕布什尔州就业保障局登记缴纳失业保险税。新罕布什尔州不对工资征收州所得税，因此无需预扣税登记。提交前，Odelia 团队会确认现行步骤。"
+  },
+  "url": "https://www.nhes.nh.gov/",
+  "info": "https://www.nhes.nh.gov/",
+  "fee": null,
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "nh-dhhs-food",
+  "form": "Food establishment license (food service, retail food store or food processing plant)",
+  "title": {
+   "en": "New Hampshire food establishment license",
+   "zh": "新罕布什尔州食品场所许可证"
+  },
+  "agency": {
+   "en": "New Hampshire Department of Health and Human Services, Food Protection Section",
+   "zh": "新罕布什尔州卫生与公众服务部食品保护科"
+  },
+  "where": "NH",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 46,
+  "how": {
+   "en": "Licensed by the state's Food Protection Section, except in the cities and towns that inspect food places themselves. Odelia's team confirms which office licenses the address before filing.",
+   "zh": "由州食品保护科颁发许可证，但自行检查食品场所的城镇除外。提交前，Odelia 团队会确认该地址由哪个机构发证。"
+  },
+  "url": "https://www.dhhs.nh.gov/programs-services/environmental-health-and-you/food-protection",
+  "info": "https://www.dhhs.nh.gov/programs-services/environmental-health-and-you/food-protection",
+  "fee": null,
+  "fields": [],
+  "checked": "page",
+  "level": "state"
+ },
+ {
+  "id": "irs-1120f",
+  "form": "Form 1120-F",
+  "title": {
+   "en": "U.S. Income Tax Return of a Foreign Corporation",
+   "zh": "外国公司美国所得税申报表"
+  },
+  "agency": {
+   "en": "Internal Revenue Service",
+   "zh": "美国国税局（IRS）"
+  },
+  "level": "federal",
+  "where": "US",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "foreignEntity": true
+  },
+  "method": "pdf_mail",
+  "order": 91,
+  "how": {
+   "en": "Filed every year by a company formed abroad that does business in the U.S. (a Chinese company registered in a state), with Form 5472 attached when it had transactions with a related party. E-filed by a preparer, or mailed to the IRS in Ogden.",
+   "zh": "在美国开展业务的外国公司（在州注册的中国公司）每年申报；与关联方有交易的须附 5472 表。可由报税人电子申报，或邮寄至位于 Ogden 的 IRS。"
+  },
+  "url": "https://www.irs.gov/pub/irs-pdf/f1120f.pdf",
+  "pdf": "https://www.irs.gov/pub/irs-pdf/f1120f.pdf",
+  "info": "https://www.irs.gov/instructions/i1120f",
+  "fee": 0,
+  "renews": {
+   "en": "Every year: by the 15th day of the 4th month after the tax year with a U.S. office, the 6th month without one.",
+   "zh": "每年申报：在美国设有办事处的，在纳税年度结束后第 4 个月 15 日前；没有的，在第 6 个月 15 日前。"
+  },
+  "foreign": {
+   "en": "This is the return for the foreign company itself. A U.S. LLC owned by it files a pro forma Form 1120 with Form 5472 instead.",
+   "zh": "这是外国公司本身的申报表。由其持有的美国 LLC 则改为提交附 5472 表的形式 1120 表。"
+  },
+  "plain": {
+   "en": "The yearly federal tax return of a foreign company that does business in the U.S., filed even if no tax is due.",
+   "zh": "在美国开展业务的外国公司每年须提交的联邦所得税申报表，即使无应纳税额也须申报。"
+  },
+  "proof": {
+   "quote": "a foreign corporation must file Form 1120-F if, during the tax year, the corporation:",
+   "checked": "2026-10-28",
+   "read": "https://www.irs.gov/instructions/i1120f"
+  },
+  "fields": [],
+  "checked": "page"
+ },
+ {
+  "id": "fda-lacf-fce",
+  "form": "Form FDA 2541 (food canning establishment registration) and process filing (Forms FDA 2541d, 2541e, 2541f, 2541g)",
+  "title": {
+   "en": "FDA registration and process filing for acidified and low-acid canned foods",
+   "zh": "酸化食品及低酸罐头食品的 FDA 登记与工艺备案"
+  },
+  "agency": {
+   "en": "U.S. Food and Drug Administration",
+   "zh": "美国食品药品监督管理局（FDA）"
+  },
+  "level": "federal",
+  "where": "US",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true,
+   "reference": true
+  },
+  "method": "online",
+  "order": 47,
+  "how": {
+   "en": "A processor that makes acidified or low-acid canned food for the U.S., including one abroad, registers the establishment and files each product's scheduled process with FDA before shipping, electronically where it can.",
+   "zh": "为美国市场生产酸化食品或低酸罐头食品的加工商（包括境外加工商）须在发货前向 FDA 登记生产场所，并为每种产品备案其预定工艺，尽可能以电子方式提交。"
+  },
+  "url": "https://www.fda.gov/food/registration-food-facilities-and-other-submissions/establishment-registration-process-filing-acidified-and-low-acid-canned-foods-lacf",
+  "info": "https://www.fda.gov/food/registration-food-facilities-and-other-submissions/establishment-registration-process-filing-acidified-and-low-acid-canned-foods-lacf",
+  "fee": 0,
+  "plain": {
+   "en": "Canned and jarred low-acid or acidified foods need the plant registered and each product's process filed with FDA.",
+   "zh": "低酸或酸化的罐装、瓶装食品须向 FDA 登记生产厂并备案每种产品的工艺。"
+  },
+  "proof": {
+   "quote": "when first engaging in the manufacture, processing, or packing of acidified foods (AF) or low-acid canned Foods (LACF) shall register and file with FDA",
+   "checked": "2026-10-28",
+   "read": "https://www.fda.gov/food/registration-food-facilities-and-other-submissions/establishment-registration-process-filing-acidified-and-low-acid-canned-foods-lacf"
+  },
+  "fields": [],
+  "checked": "page"
+ }
+]

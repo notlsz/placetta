@@ -23,6 +23,7 @@ import { VERIFY_BLOCKED, VERIFY_FIXES, VERIFY_FORMS, VERIFY_REFERENCE } from "./
 import { NATIONS_FIXES, NATIONS_FORMS } from "./nations";
 import { applyEntities, buildState, sElection } from "./entities";
 import { ENTITY_STATES } from "./entity-data";
+import { NEWENGLAND_FORMS, applyNewEngland } from "./states/newengland";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -739,7 +740,7 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
-FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES, ...FURNITURE_FORMS, ...US_GAPS, ...INTL_FORMS, ...FINISH_FORMS, ...SECTOR_FORMS, ...EXPANSION_FORMS, ...VERIFY_FORMS, ...NATIONS_FORMS);
+FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES, ...FURNITURE_FORMS, ...US_GAPS, ...INTL_FORMS, ...FINISH_FORMS, ...SECTOR_FORMS, ...EXPANSION_FORMS, ...VERIFY_FORMS, ...NATIONS_FORMS, ...NEWENGLAND_FORMS);
 
 /** A step that isn't a filing Placetta makes for the business: insurance bought from an insurer (workers' compensation)
  *  or a certificate a person earns with a course or an exam (food handler cards, the food protection or food safety
@@ -826,6 +827,7 @@ export const ENTITY_MISSING = [...applyEntities(FORMS, ENTITY_ROWS), ...sElectio
 for (const id of ["ny-dos-pub", "ca-ftb-3522", "ca-llc-12"]) { const f = FORMS.find(g => g.id === id); if (f && !(f.unless ?? []).includes("corp")) f.unless = [...(f.unless ?? []), "corp"]; }
 // a company row whose official page couldn't be read says what blocked it, as every unverified entry does
 for (const x of ENTITY_ROWS) { const f = FORMS.find(g => g.id === x.form.id); if (f && !f.proof && f.entity?.blocked) VERIFY_BLOCKED[f.id] = f.entity.blocked; }
+ENTITY_MISSING.push(...applyNewEngland(FORMS));   // New England's agent sources and the federal audit's fixes (src/forms/states/newengland.ts)
 
 export const formById = (id: string) => FORMS.find(f => f.id === id);
 
