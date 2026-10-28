@@ -32,6 +32,9 @@ import {
   uuidParam,
 } from "./shared.ts";
 import { deliverNotices, noticeDb, outboxText } from "../_shared/notices.ts";
+import { sendEmail, systemMailReady } from "../_shared/email.ts";
+import { suppressedIn } from "../_shared/suppression.ts";
+const menv = (k: string) => Deno.env.get(k);
 
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 
@@ -160,19 +163,16 @@ async function askPerson(ws: string, user: User, jwt: string, body: Record<strin
     if (/forbidden/.test(m)) throw new HttpError("forbidden", "You are not a member of this workspace.", "您不是这个工作区的成员。");
     throw new HttpError("bad_request", "Say what you need help with.", "请写下需要帮助的内容。");
   }
-  const key = Deno.env.get("RESEND_API_KEY"), from = Deno.env.get("MAIL_FROM");
-  if (key && from) {
+  if (systemMailReady(menv)) {
+    const from = menv("MAIL_FROM") ?? "";
     const { data: staff } = await admin.from("staff_emails").select("email");
     const to = (staff ?? []).map((s) => s.email as string).filter(Boolean);
     const { data: w } = await admin.from("workspaces").select("name").eq("id", ws).maybeSingle();
     const app = appOrigins()[0] ?? "";
     if (to.length) {
-      const r = await fetch("https://api.resend.com/emails", {
-        method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ from, to, subject: `A customer asks for a person: ${(w?.name as string | undefined) ?? "a workspace"}`,
-          text: `${user.email ?? "A member"} asks (${lang === "zh" ? "reply in Chinese" : "reply in English"}):\n\n${question}\n\n${app ? `Reply from the filing queue: ${app}/app/` : ""}\n` }),
-      }).catch((e) => { console.error("ask alert failed:", String(e).slice(0, 120)); return null; });
-      if (r && !r.ok) console.error("ask alert failed:", r.status);
+      const r = await sendEmail(menv, { from, to, subject: `A customer asks for a person: ${(w?.name as string | undefined) ?? "a workspace"}`,
+        text: `${user.email ?? "A member"} asks (${lang === "zh" ? "reply in Chinese" : "reply in English"}):\n\n${question}\n\n${app ? `Reply from the filing queue: ${app}/app/` : ""}\n` }, { suppressed: suppressedIn(admin) });
+      if (!r.ok) console.error("ask alert failed:", r.status, r.detail ?? "");
     }
   }
   return ok({ id });
@@ -183,15 +183,12 @@ async function askPerson(ws: string, user: User, jwt: string, body: Record<strin
    for each person it names. This sends the ones the caller made, right away, each by that person's own channel; the
    monitor sends anything left each morning. Only notices the caller created, so it can't be used to mail anyone else. */
 async function notifyMine(user: User) {
-  const key = Deno.env.get("RESEND_API_KEY") ?? "", from = Deno.env.get("MAIL_FROM") ?? "";
+  const from = menv("MAIL_FROM") ?? "";
   const mail = async (to: string, subject: string, body: string, html: string) => {
-    if (!key || !from) return false;
-    const r = await fetch("https://api.resend.com/emails", {
-      method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to: [to], subject, text: body, html }),
-    }).catch((e) => { console.error("notice mail failed:", String(e).slice(0, 120)); return null; });
-    if (r && !r.ok) console.error("notice mail failed:", r.status);
-    return !!r?.ok;
+    if (!systemMailReady(menv)) return false;
+    const r = await sendEmail(menv, { from, to: [to], subject, text: body, html }, { suppressed: suppressedIn(admin) });
+    if (!r.ok) console.error("notice mail failed:", r.status, r.detail ?? "");
+    return r.ok;
   };
   const r = await deliverNotices(noticeDb(admin), { mail, text: outboxText(admin) }, { app: appOrigins()[0] ?? "", today: new Date().toISOString().slice(0, 10), by: user.id, limit: 60 });
   return ok({ sent: r.emailed + r.texted, only_in_app: r.quiet });

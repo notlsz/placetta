@@ -10,6 +10,8 @@ import { appLink, appOrigin, type Env } from "./odelia.ts";
 import { postHook, type HookKind } from "./channels.ts";
 import { wechatAccount } from "./wechat_db.ts";
 import { wxSendText } from "./wechat.ts";
+import { sendEmail, systemMailReady } from "./email.ts";
+import { suppressedIn } from "./suppression.ts";
 
 export type { Notice };
 type Bi = { en: string; zh: string };
@@ -42,12 +44,10 @@ export async function deliverNotice(admin: SupabaseClient, env: Env, ws: string,
   const both = `${n.text.en}\n${n.text.zh}${link ? `\n\n${link}` : ""}`;
   try {
     if (n.via === "email") {
-      const key = env("RESEND_API_KEY"), from = env("MAIL_FROM");
-      if (!key || !from) return { ok: false, why: "mail not set up" };
+      if (!systemMailReady(env)) return { ok: false, why: "mail not set up" };
       if (!isEmail(n.to)) return { ok: false, why: "no address" };
-      const res = await f("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ from, to: [n.to], subject: n.text.en.slice(0, 140), text: both }) });
-      return res.ok ? { ok: true } : { ok: false, why: "resend " + res.status };
+      const res = await sendEmail(env, { from: env("MAIL_FROM") ?? "", to: [n.to], subject: n.text.en.slice(0, 140), text: both }, { f, suppressed: suppressedIn(admin) });
+      return res.ok ? { ok: true } : { ok: false, why: `${res.provider ?? "mail"} ${res.status}` };
     }
     if (n.via === "text") {
       if (!isEmail(n.to)) return { ok: false, why: "no teammate" };

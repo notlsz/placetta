@@ -350,9 +350,84 @@ Someone who isn't on Placetta texts Odelia "Milk tea shop in Flushing, NY" (or "
 4. WeChat: connect Placetta's own Official Account to a Placetta workspace in Settings, Integrations, then set `ODELIA_PUBLIC_WECHAT_WS` to that workspace's id (its followers who aren't teammates get text to start) and `ODELIA_PUBLIC_WECHAT` to the account's WeChat ID for the website.
 5. Optional: `ODELIA_START_PER_HOUR`, the replies a whole hour may send to new businesses across everyone (default 200). Each number gets at most 4 an hour and 8 a day.
 
+## Email with Amazon SES
+
+All of Placetta's email goes through Amazon SES once its keys are set: Odelia's replies and her Hands-off asks to landlords and contractors, team alerts, reminders, filing updates, monitor digests and payment notices. Mail to Odelia comes back through SES too, and so do bounces and complaints (an address that hard-bounces or marks us as spam is never mailed again). Free for the first 12 months up to 3,000 messages a month, then $0.10 per 1,000. Resend and Postmark stay wired: `EMAIL_PROVIDER=resend` (or `postmark`) switches back.
+
+Odelia receives on a subdomain, `in.placetta.com`, so the inbox you already have at IONOS for `placetta.com` is never touched. She sends as `odelia@placetta.com` and replies come to `odelia@in.placetta.com`.
+
+**1. Account and region.** Create an AWS account at aws.amazon.com (this needs a card). Sign in, set the region at the top right to **US East (N. Virginia) us-east-1**, and open **Amazon SES**. Once the account exists, apply for **AWS Activate Founders** ($1,000 in credits) at aws.amazon.com/activate with the account ID shown at the top right.
+
+**2. Verify placetta.com.** SES, Configuration, **Identities**, **Create identity**, **Domain**, `placetta.com`. Tick **Use a custom MAIL FROM domain** and enter `bounce` (so `bounce.placetta.com`), "Behavior on MX failure: Use default MAIL FROM domain". Leave **Easy DKIM**, RSA 2048-bit, on. Create it, and the console lists these records. Add each at IONOS (Domains & SSL, placetta.com, **DNS**, Add record). IONOS's host name field takes only the part before `.placetta.com`.
+
+| Type | Name the console shows | Host name at IONOS | Value |
+| --- | --- | --- | --- |
+| CNAME | `<token1>._domainkey.placetta.com` | `<token1>._domainkey` | `<token1>.dkim.amazonses.com` |
+| CNAME | `<token2>._domainkey.placetta.com` | `<token2>._domainkey` | `<token2>.dkim.amazonses.com` |
+| CNAME | `<token3>._domainkey.placetta.com` | `<token3>._domainkey` | `<token3>.dkim.amazonses.com` |
+| MX | `bounce.placetta.com` | `bounce` | `feedback-smtp.us-east-1.amazonses.com`, priority 10 |
+| TXT | `bounce.placetta.com` | `bounce` | `v=spf1 include:amazonses.com ~all` |
+| TXT (if you have none yet) | `_dmarc.placetta.com` | `_dmarc` | `v=DMARC1; p=none;` |
+
+Copy the three tokens exactly as the console shows them. The identity says **Verified** within an hour, usually minutes. Don't change the existing MX records for `placetta.com`.
+
+**3. Leave the sandbox.** Until this is approved SES only sends to addresses you've verified. SES, **Account dashboard**, **Request production access**. The form asks:
+- **Mail type**: Transactional.
+- **Website URL**: `https://placetta.com`.
+- **Use case description** (if AWS asks for one, in the form or by email afterwards): "Placetta sends transactional email only, to customers who signed up for an account and to the contacts they ask us to reach for their own permit filings (a landlord, a contractor): sign-in notices, reminders about permit deadlines, filing status updates, replies to emails customers send our assistant, and payment receipts. We send no marketing. Recipients are people who signed up or whom a customer named; anyone can opt out from the account settings or by replying, and we honor it. We receive bounce and complaint notifications through SNS and stop mailing any address that hard-bounces or complains. Expected volume is under 1,000 emails a day."
+- **Additional contacts**: your email. **Preferred contact language**: English. Tick the AWS Service Terms box and submit.
+
+Approval usually takes a day.
+
+**4. A key that can only send.** IAM, **Users**, **Create user** `placetta-ses` (no console access), **Create user**. Open it, Permissions, **Add permissions**, **Create inline policy**, JSON, paste this with your 12-digit account ID, name it `send-as-placetta`:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "SendAsPlacetta",
+      "Effect": "Allow",
+      "Action": ["ses:SendEmail", "ses:SendRawEmail"],
+      "Resource": "arn:aws:ses:us-east-1:ACCOUNT_ID:identity/placetta.com"
+    }
+  ]
+}
+```
+
+If you name a configuration set in `AWS_SES_CONFIGURATION_SET`, add `"arn:aws:ses:us-east-1:ACCOUNT_ID:configuration-set/NAME"` to `Resource` (make it a list). If you take the S3 option in step 5, add a second statement: `{"Effect": "Allow", "Action": "s3:GetObject", "Resource": "arn:aws:s3:::BUCKET/*"}`. Then Security credentials, **Create access key**, "Application running outside AWS", and copy the key ID and secret.
+
+**5. Odelia's inbox on in.placetta.com.** At IONOS add an MX record: host name `in`, points to `inbound-smtp.us-east-1.amazonaws.com`, priority 10. (Verifying `placetta.com` covers its subdomains; if the rule below says `in.placetta.com` isn't verified, create a domain identity for it too.) Then SES, **Email receiving**, **Create rule set** `placetta`, and **Set as active**. In it, **Create rule** `odelia`:
+- Recipient condition: `odelia@in.placetta.com`. Leave spam and virus scanning on.
+- Action: **Publish to Amazon SNS topic**, **Create SNS topic** named `placetta-mail` (creating it here gives SES permission to publish), **Encoding: Base64**.
+
+That carries each message whole up to 150 KB; SES bounces larger mail back to the sender. If owners will email large scans, use instead the action **Deliver to S3 bucket** (Create S3 bucket, for example `placetta-inbound-ACCOUNT_ID`, object key prefix `inbound/`, SNS topic `placetta-mail`) and set `AWS_SES_S3_BUCKET` to the bucket's name; `odelia-mail` then reads each message from that bucket and from no other.
+
+**6. The SNS topic.** SNS, **Topics**, `placetta-mail`: copy its ARN (`arn:aws:sns:us-east-1:ACCOUNT_ID:placetta-mail`). Placetta accepts only SHA256 signatures, so open **CloudShell** (the terminal icon at the top of the console) and run once:
+
+```
+aws sns set-topic-attributes --region us-east-1 --topic-arn arn:aws:sns:us-east-1:ACCOUNT_ID:placetta-mail --attribute-name SignatureVersion --attribute-value 2
+```
+
+Bounces and complaints use the same topic: SES, Identities, `placetta.com`, **Notifications**, Feedback notifications, **Edit**: Bounce feedback `placetta-mail`, Complaint feedback `placetta-mail`, Save. Then do step 7, and only after it **Create subscription** on the topic: protocol **HTTPS**, endpoint `https://<project-ref>.supabase.co/functions/v1/odelia-mail`. `odelia-mail` confirms it on its own (it shows **Confirmed** after a refresh) and from then on accepts messages only from the topics in `AWS_SES_SNS_TOPIC_ARNS`.
+
+**7. Supabase secrets**, then the database and functions:
+
+```
+supabase secrets set EMAIL_PROVIDER=ses \
+  AWS_SES_ACCESS_KEY_ID=AKIA... AWS_SES_SECRET_ACCESS_KEY=... AWS_SES_REGION=us-east-1 \
+  AWS_SES_SNS_TOPIC_ARNS=arn:aws:sns:us-east-1:ACCOUNT_ID:placetta-mail \
+  ODELIA_EMAIL=odelia@placetta.com ODELIA_REPLY_TO=odelia@in.placetta.com \
+  MAIL_FROM="Placetta <hello@placetta.com>"
+supabase db push        # 20261104090000_email_suppressions.sql
+supabase functions deploy odelia-mail agent-run monitor team file odelia-sms
+```
+
+Optional: `AWS_SES_CONFIGURATION_SET` (a configuration set's name, for SES's delivery dashboards) and `AWS_SES_S3_BUCKET` (the S3 option in step 5). To test, email `odelia@in.placetta.com` from the address you sign in with; she answers from `odelia@placetta.com`. Sign-in codes are sent by Supabase itself: to send those through SES too, SES, **SMTP settings**, **Create SMTP credentials**, and put host `email-smtp.us-east-1.amazonaws.com`, port 587 and those credentials in Supabase, Authentication, SMTP Settings.
+
 ## Email Odelia (Postmark or Resend)
 
-Owners write to Odelia, or forward an agency's letter, from the address they sign in with; she answers in the same thread and saves attached photos and PDFs in Documents. Postmark is the better way in ($16.50 a month on Pro for 10,000 emails, inbound included, and it strips the quoted reply). Resend is the free one (3,000 a month, counting both ways) and already sends sign-in mail. Both feed `odelia-mail`; replies go out through Postmark when its token is set, else Resend.
+Owners write to Odelia, or forward an agency's letter, from the address they sign in with; she answers in the same thread and saves attached photos and PDFs in Documents. Amazon SES (above) is the default once its keys are set. Without it: Postmark is the better way in ($16.50 a month on Pro for 10,000 emails, inbound included, and it strips the quoted reply). Resend is the free one (3,000 a month, counting both ways) and already sends sign-in mail. All three feed `odelia-mail`; replies go out through SES when its keys are set (or whatever `EMAIL_PROVIDER` names), else Postmark when its token is set, else Resend.
 
 1. Pick the address (for example `odelia@placetta.com`) on a domain whose MX points at the provider: `inbound.postmarkapp.com` for Postmark, or turn on receiving for the domain in Resend.
 2. `npm run launch` sets `ODELIA_EMAIL`, then either points Postmark's inbound webhook at `odelia-mail` with a random password in the URL (`POSTMARK_SERVER_TOKEN`, `POSTMARK_INBOUND_AUTH`), or creates Resend's signed `email.received` webhook (`RESEND_WEBHOOK_SECRET`).
@@ -360,7 +435,7 @@ Owners write to Odelia, or forward an agency's letter, from the address they sig
 
 The same address is how Odelia goes first. Each morning the monitor asks the people an owner told her about (the landlord, contractor, insurer) for documents a filing is missing, following up every three business days, three times at most. Under **Hands-off** (Settings, How much Odelia does on her own) those asks go from `ODELIA_EMAIL` with a reference like `[P-K7QX9ABC]` in the subject; a reply that keeps it, from the very address asked and verified the same way as below, has its files put in Documents and on the checklist item, and the job carries on. Otherwise a run drafts each ask for an owner's approval. Run `20261102090100_odelia_initiative.sql` and deploy `monitor`, `odelia-mail` and `agent-run`; `ODELIA_INITIATIVE=off` turns the morning off.
 
-Email's From line can be forged, and so can any header the sender writes (Authentication-Results, ARC, X-Spam-Tests), so Odelia trusts only what the receiving provider itself establishes. With Resend, that's the `authentication` result Resend's own servers attach (DMARC pass, or DKIM pass for the From domain). With Postmark, `odelia-mail` verifies the DKIM signature on the raw message itself, so the inbound server must have **Include raw email content in JSON payload** on (`RawEmailEnabled`, which `npm run launch` sets); without it every email is treated as unverified. A signature counts only from the From address's own domain or a parent of it (Gmail, Outlook and Google Workspace with DKIM set up all qualify). Anything else gets one note a day saying it couldn't be verified, and nothing is done. Mail from addresses with no account gets nothing back, and auto-replies, bounces and lists are dropped.
+Email's From line can be forged, and so can any header the sender writes (Authentication-Results, ARC, X-Spam-Tests), so Odelia trusts only what the receiving provider itself establishes. With SES, that's the receipt in the signed SNS notification: SES's DMARC pass for the message's single From address, or else a DKIM signature by that domain that `odelia-mail` verifies on the raw message (SES's own DKIM verdict doesn't say which domain signed, so it isn't enough alone); a virus verdict is always a no. With Resend, that's the `authentication` result Resend's own servers attach (DMARC pass, or DKIM pass for the From domain). With Postmark, `odelia-mail` verifies the DKIM signature on the raw message itself, so the inbound server must have **Include raw email content in JSON payload** on (`RawEmailEnabled`, which `npm run launch` sets); without it every email is treated as unverified. A signature counts only from the From address's own domain or a parent of it (Gmail, Outlook and Google Workspace with DKIM set up all qualify). Anything else gets one note a day saying it couldn't be verified, and nothing is done. Mail from addresses with no account gets nothing back, and auto-replies, bounces and lists are dropped.
 
 ## Which provider for what (checked October 2026)
 
@@ -370,7 +445,7 @@ Email's From line can be forged, and so can any header the sender writes (Authen
 | Plain texts (SMS) | Telnyx, $0.004 a text | none for real traffic | Half Twilio's price; Twilio's API answers faster but at our volume the gap is about $10 a month. Codes go here. |
 | Calls | Telnyx AI Assistants, about $0.06 a minute | Telnyx's $25 trial credit | Cheapest managed option and the lowest measured caller-side latency; HIPAA on every plan. Mandarin calls use Soniox and Qwen3 voices (Deepgram Flux has no Chinese). |
 | WhatsApp | Meta Cloud API, direct | 1,000 replies a month per number | No reseller fee; Twilio adds $0.005 a message. |
-| Email | Postmark Pro, $16.50 a month | Resend, 3,000 a month | Postmark parses replies cleanly and includes inbound; Resend is free and already sends sign-in mail. Both are wired. |
+| Email | Amazon SES, $0.10 per 1,000 | SES, 3,000 a month for the first year | The founder's choice: fast, reliable, inbound through SNS, bounce and complaint suppression. Postmark Pro ($16.50 a month, parses replies cleanly) and Resend (3,000 a month free) stay wired; `EMAIL_PROVIDER` switches. |
 | WeChat | not built | none | Needs an overseas Service Account (about $99 a year, Tencent's verification), replies only within 48 hours and 5 messages, and AI content rules. |
 | Telegram | not built | free | Blocked in mainland China and rare among these owners. |
 

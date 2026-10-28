@@ -30,6 +30,8 @@ import {
   SUPABASE_URL, b64urlDecode, utf8,
 } from "./shared.ts";
 import { DEST, destFor, staleDestinations, TEAM_ONLY, type Dest } from "./destinations.ts";
+import { sendEmail, systemMailReady } from "../_shared/email.ts";
+import { suppressedIn } from "../_shared/suppression.ts";
 import {
   afterHold, askedToResubmit, type Bi, canFaxSignedFor, CHANNEL_SAID, check, DUPLICATE_REF, emailFor, envFrom, fallback, faxFailures, faxFile, faxTo, feeBlocks, type Filing,
   handBackDue, handoffPacket, hasLoginFor, holds, isForeign, type LogEntry, mailOutcome, mailTo, OWNER_REF, pick, type Refusal, refusalOf, sentByYou, signedCopy,
@@ -110,8 +112,8 @@ function view(f: Filing) {
 
 /** Tells the team right away when work lands in their queue (the monitor still sends a daily reminder for anything left waiting). */
 async function alertTeam(f: Filing, kind: string, title: string) {
-  const key = Deno.env.get("RESEND_API_KEY"), from = Deno.env.get("MAIL_FROM");
-  if (!key || !from) return;
+  const menv = (k: string) => Deno.env.get(k), from = menv("MAIL_FROM") ?? "";
+  if (!systemMailReady(menv)) return;
   const { data: staff } = await admin.from("staff_emails").select("email");
   const to = (staff ?? []).map((s) => s.email as string).filter(Boolean);
   if (!to.length) return;
@@ -122,13 +124,8 @@ async function alertTeam(f: Filing, kind: string, title: string) {
   const subject = kind === "destination_stale" ? `Team task: ${title}` : `New for the team: ${what} (${who})`;
   const text = `${what} for ${who}\n\n${title}\n\n${app ? `Filing queue: ${app}/app/` : ""}`;
   const html = `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif"><p><b>${esc(what)}</b> for ${esc(who)}</p><p>${esc(title)}</p>${app ? `<p><a href="${esc(app)}/app/">Open the filing queue</a></p>` : ""}</div>`;
-  try {
-    const r = await fetch("https://api.resend.com/emails", {
-      method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to, subject, text, html }),
-    });
-    if (!r.ok) console.error("team alert failed:", r.status);
-  } catch (e) { console.error("team alert failed:", (e as Error).message); }
+  const r = await sendEmail(menv, { from, to, subject, text, html }, { suppressed: suppressedIn(admin) });
+  if (!r.ok) console.error("team alert failed:", r.status, r.detail ?? "");
 }
 
 /** A production probe workspace (migration 20261030090000): checked like any other, never sent, no team tasks. */

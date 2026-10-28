@@ -2,7 +2,7 @@
 // monitor key, it looks at every workspace and records what changed or is coming up as updates:
 //   deadlines in the next two weeks and overdue ones, renewals in the next 60 days, filing status changes from the
 //   team (submitted, approved, returned, action needed) and agency fees still unpaid after two days.
-// New updates show in the app's Updates; when RESEND_API_KEY and MAIL_FROM are set, owners also get them by email,
+// New updates show in the app's Updates; when email is set up (a provider and MAIL_FROM), owners also get them by email,
 // and the Placetta team gets an email about approved filings nobody has picked up for a day.
 // Mondays, with email on, each headquarters email a workspace shares with (hq_links) gets one page across every
 // franchisee that shared with it: totals, then one line per store at risk. hq_reports keeps it to once a week.
@@ -45,13 +45,16 @@ import { inspectionWork, PREP } from "./inspections.ts";
 import { runStatusChecks, type StatusFiling, type StatusIO, type StatusRun, type WsState } from "./status_checks.ts";
 import { initiative, movePrompt, specialistWake, type ChaseRow, type InitIO } from "./initiative.ts";
 import { mailOutReady, sendMail as sendOdeliaMail, mailBody } from "../_shared/mail.ts";
+import { sendEmail, systemMailReady } from "../_shared/email.ts";
+import { suppressedIn } from "../_shared/suppression.ts";
 // @deno-types="../_shared/opening.d.ts"
 import type { ChaseLog, Move } from "../_shared/opening.js";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
-const RESEND = Deno.env.get("RESEND_API_KEY") ?? "";
+// a provider is set up (Amazon SES, Resend or Postmark; _shared/email.ts) and MAIL_FROM names the sender
+const MAIL_ON = systemMailReady((k) => Deno.env.get(k)) ? "on" : "";
 const FROM = Deno.env.get("MAIL_FROM") ?? "";
 const APP = ((Deno.env.get("APP_ORIGINS") ?? "").split(",")[0] ?? "").trim().replace(/\/+$/, "");
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
@@ -435,12 +438,8 @@ export function watchDue(rows: { id: string; state: unknown }[], weekday: number
 }
 
 async function sendMail(to: string[], subject: string, text: string, html: string) {
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${RESEND}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: FROM, to, subject, text, html }),
-  });
-  if (!res.ok) console.error("resend", res.status, (await res.text()).slice(0, 200));
+  const res = await sendEmail((k) => Deno.env.get(k), { from: FROM, to, subject, text, html }, { suppressed: suppressedIn(admin) });
+  if (!res.ok) console.error("mail", res.provider ?? "", res.status, res.detail ?? "");
   return res.ok;
 }
 
@@ -540,7 +539,7 @@ function stageDb() {
 function stageOut(key: string) {
   const text = outboxText(admin);
   return {
-    mail: (to: string, subject: string, t: string, html: string) => (RESEND && FROM ? sendMail([to], subject, t, html) : Promise.resolve(false)),
+    mail: (to: string, subject: string, t: string, html: string) => (MAIL_ON && FROM ? sendMail([to], subject, t, html) : Promise.resolve(false)),
     text,
     async chats(ws: string, business: string, items: StageUpdate[]) {
       let n = 0;
@@ -729,7 +728,7 @@ Deno.serve(async (req) => {
         claim: async (row: ChaseRow) => { const { data, error } = await admin.from("odelia_chases").upsert(row, { onConflict: "workspace_id,key,n", ignoreDuplicates: true }).select("id"); if (error) console.error("chase claim", error.code); return !!data?.length; },
         release: async (ws, key, n) => { await admin.from("odelia_chases").delete().eq("workspace_id", ws).eq("key", key).eq("n", n); },
         sent: async (ws, key, n, id) => { await admin.from("odelia_chases").update({ provider_id: id.slice(0, 200) }).eq("workspace_id", ws).eq("key", key).eq("n", n); },
-        mail: mailOk ? async (to, subject, text) => { const b = mailBody(text); const r = await sendOdeliaMail((k) => Deno.env.get(k), { to, subject, text: b.text, html: b.html }); return { ok: r.ok, id: r.id }; } : null,
+        mail: mailOk ? async (to, subject, text) => { const b = mailBody(text); const r = await sendOdeliaMail((k) => Deno.env.get(k), { to, subject, text: b.text, html: b.html }, fetch, suppressedIn(admin)); return { ok: r.ok, id: r.id }; } : null,
         claimPrep: async (ws, key, date) => { const { data } = await admin.from("routine_runs").upsert({ workspace_id: ws, routine_id: key.slice(0, 200), day: date }, { onConflict: "workspace_id,routine_id,day", ignoreDuplicates: true }).select("routine_id"); return !!data?.length; },
       };
       const canStart = canConverse((k) => Deno.env.get(k)) && Deno.env.get("ODELIA_JOBS") !== "off";
@@ -868,7 +867,7 @@ Deno.serve(async (req) => {
   }
 
   let emailed = 0, team = 0;
-  if (RESEND && FROM) {
+  if (MAIL_ON && FROM) {
     const fresh = new Map<string, Update[]>();
     for (const u of created) fresh.set(u.workspace_id, [...(fresh.get(u.workspace_id) ?? []), u]);
     for (const [ws, items] of fresh) {
@@ -898,7 +897,7 @@ Deno.serve(async (req) => {
 
   // Mondays: the one-page report for each headquarters email, once a week (a row in hq_reports is the claim).
   let hqSent = 0;
-  if (RESEND && FROM && started.getUTCDay() === 1) {
+  if (MAIL_ON && FROM && started.getUTCDay() === 1) {
     const { data: hq, error: he } = await admin.rpc("hq_weekly");
     if (he) console.error("hq_weekly", he.code);
     const byEmail = new Map<string, HqWeekly[]>();
@@ -931,7 +930,7 @@ Deno.serve(async (req) => {
 
   // The renewal notice, 15 to 45 days before a yearly plan renews, once per renewal (renewal_notice.ts).
   let renewalNotices = 0;
-  if (RESEND && FROM) {
+  if (MAIL_ON && FROM) {
     const { data: rows, error: re } = await admin.from("billing")
       .select("workspace_id, current_period_end, subscription_status, subscription_plan, paid_locations, auto_renew, renewal_notice_for, hq_paid_by, subscription_id, term_years, module_qty")
       .not("current_period_end", "is", null);
@@ -953,7 +952,7 @@ Deno.serve(async (req) => {
 
   // Mondays: the agent health summary for the team, by email and as an Update, once a week (governance.ts).
   if (started.getUTCDay() === 1) {
-    await weeklyGovernance(admin, today, RESEND && FROM ? sendMail : null, APP).catch((e) => console.error("governance", String(e).slice(0, 160)));
+    await weeklyGovernance(admin, today, MAIL_ON && FROM ? sendMail : null, APP).catch((e) => console.error("governance", String(e).slice(0, 160)));
   }
 
   // Consent records for texts and calls are kept 5 years, then dropped.
@@ -1126,9 +1125,9 @@ Deno.serve(async (req) => {
 
   // Team review (_shared/notices.ts): mentions, assignments and headquarters' questions the app didn't send yet, and
   // the reminders set for today, each by the person's own channel.
-  const mentions = await deliverNotices(noticeDb(admin), { mail: (to, subject, text, html) => (RESEND && FROM ? sendMail([to], subject, text, html) : Promise.resolve(false)), text: outboxText(admin) },
+  const mentions = await deliverNotices(noticeDb(admin), { mail: (to, subject, text, html) => (MAIL_ON && FROM ? sendMail([to], subject, text, html) : Promise.resolve(false)), text: outboxText(admin) },
     { app: APP, today, limit: 500 }).catch((e) => { console.error("mention notices", String(e).slice(0, 160)); return null; });
 
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed, worker_wake: sweep.wake ?? null, fell_back: sweep.fell_back ?? 0 } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, chases_sent: initiativeSent, agency_asks: answered, status_checks: status, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled, billing_ok: billingOk });
+  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed, worker_wake: sweep.wake ?? null, fell_back: sweep.fell_back ?? 0 } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(MAIL_ON && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, chases_sent: initiativeSent, agency_asks: answered, status_checks: status, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled, billing_ok: billingOk });
 });

@@ -33,7 +33,7 @@
 // last of them finishes, to write one summary. A finishing run starts the next queued one; so does the watchdog.
 // Every run keeps its moments on steps (src/replay.ts): the job's replay in the app.
 // The app polls a run with the poll_agent_run RPC and stops one with stop_agent_run. When nobody is watching as it
-// finishes, the result becomes an Update and the owners get an email (with RESEND_API_KEY and MAIL_FROM set).
+// finishes, the result becomes an Update and the owners get an email (with an email provider and MAIL_FROM set).
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { callModel, canConverse, type Role } from "../_shared/llm.ts";
 import { accessRpc, WORKS } from "../_shared/access.ts";
@@ -42,6 +42,8 @@ import { gate, record, saverLine, saverNoticeDue } from "../_shared/ai_gate.ts";
 import { appLink, appOrigin, normalizePhone, SAY, splitSms } from "../_shared/odelia.ts";
 import { linkOf, logMessage, mayUseAgent, textUser } from "../_shared/odelia_db.ts";
 import { mailBody, replySubject, sendMail as sendOdeliaMail } from "../_shared/mail.ts";
+import { sendEmail, systemMailReady } from "../_shared/email.ts";
+import { suppressedIn } from "../_shared/suppression.ts";
 // @ts-types="./agent.d.ts"
 import { agencyKey, chipsOf, CLASSIFIER_SYSTEM, classifierPrompt, parseClassifier, type ToolLog, DISTILL_SYSTEM, distillPrompt, filingEvidence, type FilingRow, finishWork, keepRecall, type Lesson, lessonKeys, lessonsBrief, type MemoryBook, normalizeState, parseDistill, rank, type Recall, recallFrom, runEvidence, runRounds, startState, stampFilings, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
 import { mayEmail, wantsTexts } from "../_shared/reach.ts";
@@ -599,10 +601,9 @@ const ROUTINE = {
 };
 
 async function sendMail(to: string[], subject: string, text: string) {
-  const key = env("RESEND_API_KEY"), from = env("MAIL_FROM");
-  if (!key || !from || !to.length) return false;
-  const res = await fetch("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify({ from, to, subject, text }) });
-  if (!res.ok) console.error("resend", res.status);
+  if (!systemMailReady(env) || !to.length) return false;
+  const res = await sendEmail(env, { from: env("MAIL_FROM"), to, subject, text }, { suppressed: suppressedIn(admin) });
+  if (!res.ok) console.error("mail", res.provider ?? "", res.status, res.detail ?? "");
   return res.ok;
 }
 
@@ -940,7 +941,7 @@ async function mailBack(run: Run, text: string, approvals: string[], attachments
   const approve = approvals.length ? appLink(origin, run.workspace_id, approvals.length === 1 ? approvals[0] : "ready") : "";
   const footer = approve ? `${SAY.approve[run.lang]} ${approve}` : `${SAY.open[run.lang]} ${appLink(origin, run.workspace_id)}`;
   const body = mailBody(text || SAY.ack[run.lang], origin ? footer : undefined);
-  const r = await sendOdeliaMail(env, { to, subject: replySubject(String(asked?.subject ?? "")), text: body.text, html: body.html, inReplyTo: String(asked?.provider_id ?? "").replace(/^mail:/, "") || undefined, ...(attachments.length ? { attachments } : {}) });
+  const r = await sendOdeliaMail(env, { to, subject: replySubject(String(asked?.subject ?? "")), text: body.text, html: body.html, inReplyTo: String(asked?.provider_id ?? "").replace(/^mail:/, "") || undefined, ...(attachments.length ? { attachments } : {}) }, fetch, suppressedIn(admin));
   if (r.ok) await logMessage(admin, { user_id: run.created_by, workspace_id: run.workspace_id, direction: "out", channel: "email", kind: "reply", body: body.text, provider_id: r.id ? `mail:${r.id}` : null, run_id: run.id });
   else console.error("odelia mail", r.status, r.detail);
 }
@@ -1145,7 +1146,8 @@ export async function handle(req: Request): Promise<Response> {
           "GEMINI_PAID", "ALLOW_DEEPSEEK", "ALLOW_OPENROUTER", "ALLOW_GROQ", "AGENT_ROUTE_PLAN", "AGENT_ROUTE_REVIEW", "AGENT_ROUTE_EXTRACT", "AGENT_ROUTE_TRANSLATE", "AGENT_ROUTE_DRAFT", "AGENT_ROUTE_SHORT", "AGENT_ROUTE_WATCH", "AGENT_ROUTE_DEEP",
           "AI_DAILY_LIMIT_USD", "AI_WS_DAILY_LIMIT_USD", "AI_TASK_LIMIT_USD",
           "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ENTRY", "STRIPE_PRICE_LOCATION", "STRIPE_PRICE_LOCATION_PRO", "STRIPE_PRICE_OPENING", "STRIPE_PRICE_OPENING_FOOD", "STRIPE_PRICE_PACK", "STRIPE_PRICE_GUARANTEE",
-          "RESEND_API_KEY", "MAIL_FROM", "APP_ORIGINS", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "MS_CLIENT_ID", "MS_CLIENT_SECRET", "SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET", "QB_CLIENT_ID", "OAUTH_STATE_SECRET",
+          "EMAIL_PROVIDER", "AWS_SES_ACCESS_KEY_ID", "AWS_SES_SECRET_ACCESS_KEY", "AWS_SES_REGION", "AWS_SES_CONFIGURATION_SET", "AWS_SES_SNS_TOPIC_ARNS", "ODELIA_EMAIL", "ODELIA_REPLY_TO",
+          "RESEND_API_KEY", "POSTMARK_SERVER_TOKEN", "MAIL_FROM", "APP_ORIGINS", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "MS_CLIENT_ID", "MS_CLIENT_SECRET", "SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET", "QB_CLIENT_ID", "OAUTH_STATE_SECRET",
           "SQUARE_CLIENT_ID", "SQUARE_CLIENT_SECRET", "TOAST_CLIENT_ID", "TOAST_CLIENT_SECRET", "WECHAT_API_BASE",
           "TELNYX_API_KEY", "TELNYX_FAX_CONNECTION_ID", "TELNYX_MESSAGING_PROFILE_ID", "TELNYX_VOICE_CONNECTION_ID", "ODELIA_NUMBER", "LOB_API_KEY", "FILER_SECRET", "AZURE_SPEECH_KEY"];
         return json(200, { secrets: Object.fromEntries(names.map((n) => [n, !!env(n)])), checks: SELFTEST_NAMES() });

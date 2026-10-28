@@ -4,6 +4,8 @@
 //
 // POST, Authorization: Basic (Postmark inbound webhook, POSTMARK_INBOUND_AUTH)      the best way in
 // POST, signed (Standard Webhooks, RESEND_WEBHOOK_SECRET), {type: "email.received"} the free way in (Resend)
+// POST, x-amz-sns-message-type, signed by SNS (our topics only, AWS_SES_SNS_TOPIC_ARNS)  Amazon SES: inbound mail,
+//      and bounces and complaints, which put the address on the suppression list (_shared/ses_inbound.ts)
 //
 // Only mail from a Placetta account's own address, and only when the receiving provider vouches for it (Resend's own
 // DMARC or aligned DKIM result, or for Postmark a DKIM signature by that domain that we verify on the raw message;
@@ -19,7 +21,9 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { appLink, appOrigin, type Lang, SAY } from "../_shared/odelia.ts";
 import { currentWorkspace, DOC_TYPES, type Link, logMessage, storeDocs } from "../_shared/odelia_db.ts";
-import { fetchResend, type InMail, mailAsk, mailBody, mailReady, odeliaEmail, parsePostmark, postmarkAuthOk, replySubject, sendMail, senderVerified, verifyStandardWebhook } from "../_shared/mail.ts";
+import { fetchResend, type InMail, mailAsk, mailBody, mailReady, odeliaAddresses, parsePostmark, postmarkAuthOk, replySubject, sendMail, senderVerified, verifyStandardWebhook } from "../_shared/mail.ts";
+import { routeSns } from "../_shared/ses_inbound.ts";
+import { suppress, suppressedIn } from "../_shared/suppression.ts";
 import { attachReply, type ChaseRow, fromAsked, refOf, replyPrompt } from "../_shared/chase.ts";
 import { scoreText } from "../_shared/injection.ts";
 
@@ -51,20 +55,20 @@ const MAIL_SAY = {
 function automated(m: InMail): boolean {
   const h = (k: string) => (m.headers[k] ?? []).join(" ").toLowerCase();
   return (h("auto-submitted") !== "" && h("auto-submitted") !== "no") || /\b(bulk|junk|list|auto_reply)\b/.test(h("precedence")) || !!m.headers["list-id"] || !!m.headers["x-autoreply"] || !!m.headers["x-autorespond"]
-    || /^(mailer-daemon|postmaster|no-?reply|do-?not-?reply)@/.test(m.from) || m.from === odeliaEmail(env);
+    || /^(mailer-daemon|postmaster|no-?reply|do-?not-?reply)@/.test(m.from) || odeliaAddresses(env).includes(m.from);
 }
 
 async function reply(to: string, lang: Lang, m: InMail, text: string, o: { uid: string | null; ws?: string | null; kind: "system" | "reply"; footer?: string }) {
   const body = mailBody(text, o.footer);
-  const r = await sendMail(env, { to, subject: replySubject(m.subject), text: body.text, html: body.html, inReplyTo: m.id.replace(/^mail:/, "") });
+  const r = await sendMail(env, { to, subject: replySubject(m.subject), text: body.text, html: body.html, inReplyTo: m.id.replace(/^mail:/, "") }, fetch, suppressedIn(admin));
   if (r.ok) await logMessage(admin, { user_id: o.uid, workspace_id: o.ws ?? null, direction: "out", channel: "email", kind: o.kind, body: body.text, provider_id: r.id ? `mail:${r.id}` : null });
   else console.error("odelia mail", r.status, r.detail);
   return r.ok;
 }
 
 export async function received(m: InMail) {
-  const me = odeliaEmail(env);
-  if (!m.to.includes(me) || automated(m)) return { ok: true, skipped: "not_for_odelia" };
+  const mine = odeliaAddresses(env);
+  if (!m.to.some((t) => mine.includes(t)) || automated(m)) return { ok: true, skipped: "not_for_odelia" };
   const { data: uid } = await admin.rpc("user_by_email", { p_email: m.from });
   const user = typeof uid === "string" ? uid : null;
   // Logged first (keyed on the Message-ID, so a redelivery is a no-op), but without its words until the sender checks out:
@@ -89,7 +93,7 @@ export async function received(m: InMail) {
     const noteId = await logMessage(admin, { user_id: user, direction: "out", channel: "email", kind: "system", body: MAIL_SAY.unverified[lang], provider_id: `mail-unverified:${user}:${day}` });
     if (noteId !== null) {
       const body = mailBody(MAIL_SAY.unverified[lang]);
-      const r = await sendMail(env, { to: m.from, subject: replySubject(m.subject), text: body.text, html: body.html, inReplyTo: m.id.replace(/^mail:/, "") });
+      const r = await sendMail(env, { to: m.from, subject: replySubject(m.subject), text: body.text, html: body.html, inReplyTo: m.id.replace(/^mail:/, "") }, fetch, suppressedIn(admin));
       if (!r.ok) await admin.from("odelia_messages").delete().eq("id", noteId);
     }
     return { ok: true, skipped: "unverified" };
@@ -183,7 +187,13 @@ async function chaseReply(m: InMail, token: string): Promise<Record<string, unkn
 
 export async function handle(req: Request): Promise<Response> {
   if (req.method !== "POST") return fail(405, "bad_request", "Use POST.");
-  if (!mailReady(env)) return fail(503, "not_configured", "Email isn't set up: set ODELIA_EMAIL and Postmark (POSTMARK_INBOUND_AUTH, POSTMARK_SERVER_TOKEN) or Resend (RESEND_WEBHOOK_SECRET, RESEND_API_KEY).");
+  // Amazon SES, by SNS: inbound mail, bounces and complaints. The header only routes; the signature and topic decide.
+  if (req.headers.get("x-amz-sns-message-type")) {
+    const r = await routeSns(await req.text(), env, { suppress: (list) => suppress(admin, list, "ses") });
+    if (r.mail) { const mail = r.mail; bg(received(mail).catch((e) => console.error("mail", String(e).slice(0, 200)))); }
+    return json(r.status, r.body);
+  }
+  if (!mailReady(env)) return fail(503, "not_configured", "Email isn't set up: set ODELIA_EMAIL and Amazon SES (AWS_SES_*), Postmark (POSTMARK_INBOUND_AUTH, POSTMARK_SERVER_TOKEN) or Resend (RESEND_WEBHOOK_SECRET, RESEND_API_KEY).");
   const raw = await req.text();
   let m: InMail | null = null;
   if (req.headers.get("webhook-signature")) {

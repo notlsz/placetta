@@ -31,7 +31,7 @@ const PROOF: Record<string, RegExp[]> = {
   "mcp": [/mcp_token_auth/],
   "monitor": [/monitor_key_ok|monitorKeyOk|x-monitor-key/],
   "oauth-callback": [/verifyState\(/],
-  "odelia-mail": [/verifyStandardWebhook\(|postmarkAuthOk\(/],
+  "odelia-mail": [/verifyStandardWebhook\(|postmarkAuthOk\(/, /routeSns\(/],
   "odelia-sms": [/verifyTelnyx\(/, /verifyLinq\(/, /verifyWhatsApp\(/, /monitorKeyOk\(/],
   "odelia-voice": [/verifyTelnyx\(/, /verifyCallToken\(/, /monitorKeyOk\(/],
   "partner-api": [/partner_api_auth/],
@@ -41,6 +41,8 @@ const PROOF: Record<string, RegExp[]> = {
 // a function whose request handler lives in a module beside its index.ts: what that module must do
 const HANDLER: Record<string, [string, RegExp[]]> = {
   "stripe-webhook": ["handler.ts", [/verified\(raw, req\.headers\.get\("stripe-signature"\)/, /if \(!\(await verified\(/]],
+  // Amazon SES over SNS: the signature, our own topics, before anything else
+  "odelia-mail": ["../_shared/ses_inbound.ts", [/const v = await verifySns\(raw, env/, /if \(!v\.ok\)/]],
 };
 
 Deno.test("every server function says how it knows who is calling, and does it", () => {

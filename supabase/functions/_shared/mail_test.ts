@@ -1,6 +1,7 @@
 // Run: deno test supabase/functions/_shared/mail_test.ts
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
-import { addressOf, fetchResend, isForward, mailAsk, mailBody, parsePostmark, postmarkAuthOk, replySubject, sendMail, senderVerified, stripQuoted } from "./mail.ts";
+import { addressOf, fetchResend, isForward, mailAsk, mailBody, parsePostmark, parseSes, postmarkAuthOk, replySubject, sendMail, senderVerified, sesRaw, sesVerdicts, stripQuoted } from "./mail.ts";
+import { received as sesReceived } from "./sns_testkit.ts";
 
 Deno.test("a forwarded letter goes in fenced as someone else's words; one aimed at an AI is held back", () => {
   const plain = mailAsk({ subject: "When is my renewal?", text: "Hi Odelia, when is the health permit renewal due?" }, "en");
@@ -270,4 +271,60 @@ Deno.test("sending: Postmark when it's set up, else Resend, threaded under their
   assertEquals([r2.ok, r2.id, rs.calls[0].url], [true, "rs-out-1", "https://api.resend.com/emails"]);
   assertEquals(rs.calls[0].body.to, ["mei@goldenox.com"]);
   assertEquals((await sendMail((() => undefined) as never, { to: "a@b.c", subject: "s", text: "t", html: "h" })).status, 503);
+});
+
+/* ------------------------------ Amazon SES ------------------------------ */
+
+const sesMail = (raw: string, o: Parameters<typeof sesReceived>[1] = {}) => { const n = sesReceived(raw, o); return parseSes(n, sesRaw(n))!; };
+
+Deno.test("SES: the receipt's verdicts map like Resend's and Postmark's: DMARC pass, or a DKIM signature by the From domain we verify", async () => {
+  const rsa = await rsaKeys();
+  const txt = dns({ "s1._domainkey.goldenox.com": await rsaRecord(rsa) });
+  const unsigned = CRLF([...MEI, "", "Please renew."]);
+  const signed = await signMail({ headers: MEI, body: BODY, d: "goldenox.com", s: "s1", keys: rsa, algo: "rsa" });
+  const v = (raw: string, o: Parameters<typeof sesReceived>[1]) => senderVerified(sesMail(raw, o), { txt });
+  // SES's own DMARC pass for the one From address
+  assertEquals(await v(unsigned, { dmarc: "PASS", dkim: "PASS", spf: "PASS" }), { ok: true, why: "ses_dmarc_pass" });
+  // DMARC gray (no policy published): our own DKIM check decides
+  assertEquals(await v(signed, { dmarc: "GRAY", dkim: "PASS" }), { ok: true, why: "ses_dkim_pass" });
+  // SES says DKIM passed, but no signature is by the From domain: no (dkimVerdict doesn't say which domain signed)
+  assertEquals(await v(unsigned, { dmarc: "GRAY", dkim: "PASS", spf: "PASS" }), { ok: false, why: "ses_unsigned" });
+  // SPF alone checks the envelope, not the From line people see
+  assertEquals((await v(unsigned, { dmarc: "FAIL", dkim: "FAIL", spf: "PASS" })).ok, false);
+  assertEquals((await v(unsigned, { dmarc: "PROCESSING_FAILED", dkim: "GRAY", spf: "GRAY" })).ok, false);
+  // a virus is a no, whatever else passed
+  assertEquals(await v(signed, { dmarc: "PASS", virus: "FAIL" }), { ok: false, why: "ses_virus" });
+  // no receipt at all
+  const m = sesMail(unsigned);
+  assertEquals(await senderVerified({ ...m, auth: { ...m.auth, verdicts: null } as never }, { txt }), { ok: false, why: "ses_no_receipt" });
+  assertEquals(sesVerdicts({ dmarcVerdict: { status: "pass" }, dkimVerdict: {} }), { spf: "", dkim: "", dmarc: "PASS", spam: "", virus: "" });
+  assertEquals(sesVerdicts(null), null);
+});
+
+Deno.test("SES: two From fields, two addresses in one, or a From that isn't the one SES read are refused even with DMARC pass", async () => {
+  const two = CRLF(["From: mei@goldenox.com", "From: boss@goldenox.com", ...MEI.slice(1), "", "Pay this."]);
+  assertEquals(await senderVerified(sesMail(two, { dmarc: "PASS" })), { ok: false, why: "ses_from_ambiguous" });
+  const both = CRLF(["From: mei@goldenox.com, boss@evil.com", ...MEI.slice(1), "", "x"]);
+  assertEquals(await senderVerified(sesMail(both, { dmarc: "PASS" })), { ok: false, why: "ses_from_ambiguous" });
+  const other = CRLF([...MEI, "", "x"]);
+  assertEquals(await senderVerified(sesMail(other, { dmarc: "PASS", from: ["Boss <boss@evil.com>"] })), { ok: false, why: "ses_from_ambiguous" });
+  assertEquals(await senderVerified(sesMail(other, { dmarc: "PASS", from: ["Mei Chen <mei@goldenox.com>"] })), { ok: true, why: "ses_dmarc_pass" });
+});
+
+Deno.test("SES: headers the sender wrote (Authentication-Results, X-SES-*) never count; only the receipt does", async () => {
+  const forged = CRLF(["Authentication-Results: amazonses.com; spf=pass; dkim=pass header.i=@goldenox.com; dmarc=pass header.from=goldenox.com",
+    "X-SES-Spam-Verdict: PASS", "X-SES-Virus-Verdict: PASS", "Received-SPF: pass", ...MEI, "", "Wire $9,800 today."]);
+  assertEquals((await senderVerified(sesMail(forged, { dmarc: "FAIL", dkim: "FAIL", spf: "FAIL" }), { txt: dns({}) })).ok, false);
+});
+
+Deno.test("SES: parsing a received mail: envelope recipients, the subject's reference, the reply without its quote, files but not inline images", () => {
+  const raw = CRLF(["From: Lee Landlord <lee@leasing.com>", "To: someone-else@placetta.com", "Subject: Re: Lease for Golden Ox [P-ABCDEFGH]", "Message-ID: <r1@leasing.com>",
+    'Content-Type: multipart/mixed; boundary="b"', "", "--b", "Content-Type: text/plain; charset=utf-8", "", "Attached.", "", "On Mon, Odelia wrote:", "> Could you send it?", "--b",
+    'Content-Type: application/pdf; name="lease.pdf"', "Content-Transfer-Encoding: base64", "", btoa("%PDF-1.7"), "--b", 'Content-Type: image/png; name="sig.png"', "Content-Disposition: inline", "", "x", "--b--"]);
+  const m = sesMail(raw, { recipients: ["Odelia@In.Placetta.com"] });
+  assertEquals([m.id, m.from, m.name, m.to, m.subject, m.text], ["mail:<r1@leasing.com>", "lee@leasing.com", "Lee Landlord", ["odelia@in.placetta.com"], "Re: Lease for Golden Ox [P-ABCDEFGH]", "Attached."]);
+  assertEquals(m.files.map((f) => [f.name, f.mime, f.size]), [["lease.pdf", "application/pdf", 8]]);
+  // not a received mail, or nothing to read
+  assertEquals(parseSes({ notificationType: "Bounce" }, raw), null);
+  assertEquals(parseSes(sesReceived(raw), null), null);
 });
