@@ -20,6 +20,7 @@ import { denialAppeal, scheduleAppeals } from "../src/finish";
 import { approvalRoute, planSplit, planSplitLine, routeOf } from "../src/approvalRoute";
 import ROUTES from "../src/forms/filingRoutes.json";
 import { channelsFrom } from "../src/channelsRule";
+import { ONLINE_FILING } from "../src/onlineFilingWords";
 import { B } from "../src/bi";
 
 type Ok = (cond: unknown, m: string, detail?: unknown) => void;
@@ -191,5 +192,14 @@ export function reviewFixTests(ok: Ok, eq: Eq) {
   eq(channelsFrom(null, null), { talk: false, interpreter: false, rehearse: false, calls: false, texts: false, imessage: false }, "with no answer, nothing is set up");
   eq(channelsFrom({ talk: true, interpreter: false, rehearse: true }, { configured: true, voice: false, sms: true, imessage: false }), { talk: true, interpreter: false, rehearse: true, calls: false, texts: true, imessage: false }, "each channel from its own credentials");
   ok(!channelsFrom(null, { configured: false, voice: true, sms: true, imessage: true }).calls, "a line that isn't configured has no calls, whatever else it says");
+
+  console.log("\n# Online filing: every state in both languages, asleep included (wakes on demand)");
+  eq(Object.keys(ONLINE_FILING).sort(), ["asleep", "down", "live", "not_set_up", "off"], "every state the file function says");
+  for (const [k, v] of Object.entries(ONLINE_FILING)) {
+    ok(v.short.en.length > 10 && v.long.en.length > 20 && /[一-鿿]/.test(v.short.zh) && /[一-鿿]/.test(v.long.zh), `${k}: said in English and Chinese`, v);
+  }
+  ok(/asleep/i.test(ONLINE_FILING.asleep.short.en) && /wakes on demand/i.test(ONLINE_FILING.asleep.short.en) && /休眠/.test(ONLINE_FILING.asleep.short.zh) && /唤醒/.test(ONLINE_FILING.asleep.short.zh), "asleep says it sleeps and wakes on demand", ONLINE_FILING.asleep.short);
+  ok(ONLINE_FILING.asleep.live && ONLINE_FILING.live.live && !ONLINE_FILING.down.live, "asleep still files online: no paused banner");
+  ok(/another way/.test(ONLINE_FILING.asleep.long.en) && /其他方式/.test(ONLINE_FILING.asleep.long.zh), "asleep says what happens if it doesn't wake", ONLINE_FILING.asleep.long);
 }
 const inDaysFrom = (iso: string, n: number) => new Date(Date.parse(iso + "T00:00:00Z") + n * 864e5).toISOString().slice(0, 10);

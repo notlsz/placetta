@@ -361,7 +361,7 @@ Deno.test("the other way follows the same rules as the first, without the site",
   assertEquals(fallback(signed, undefined, ENV, facts), "team");
   // what goes by paper gets the paper checks: the filled form must be in Documents
   assert(check(filing({ pdf_path: undefined }), dest({ portal: "x.gov" }), { docPaths: docs }, "mail").some((p) => p.kind === "file"));
-  assertEquals([...PORTAL_FAILED].sort(), ["left_portal", "limit", "no_live_view", "no_portal", "page_injection", "portal_blocked", "portal_failed", "review_differs", "teach_incomplete", "unverified_playbook"]);
+  assertEquals([...PORTAL_FAILED].sort(), ["left_portal", "limit", "no_live_view", "no_portal", "page_injection", "portal_blocked", "portal_failed", "review_differs", "teach_incomplete", "unverified_playbook", "worker_asleep"]);
 });
 
 Deno.test("a filing Odelia can't send goes to the business with a packet: why, where, signature, fee, and I've sent it", () => {

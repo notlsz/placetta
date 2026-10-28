@@ -92,21 +92,87 @@ export function selfFileScope(f: Filing, env: Env, d: Dest | undefined): "all" |
   return env.agencies.includes("portal") && !!d?.portal ? "portal" : null;
 }
 
+/** The worker's heartbeat as filer_live reads it (20261102090000_filer_heartbeat.sql, 20261102090300_filer_wake.sql):
+    live while it beat in the last three minutes; wake_since is when the current wake attempt began (null: none since). */
+export type Beat = { live: boolean; seen_at: string | null; wake_since?: string | null };
+
+// ---------------------------------------------------------------- sleep and wake
+// On a plan that sleeps (Render's free plan: asleep after 15 idle minutes, awake about a minute after a request), the
+// worker stops beating while it sleeps. With FILER_URL (its address) and FILER_SECRET set, a worker that has beaten
+// before counts as asleep but wakeable: filings still queue for it, the file function and its sweep ping FILER_URL/wake,
+// and if it hasn't beaten within the wake window (FILER_WAKE_SECONDS, default 180) the queued filings go the way they
+// would without the worker. After a failed wake, the next attempt is allowed WAKE_RETRY_MS later.
+
+export const WAKE_RETRY_MS = 30 * 60_000;
+/** The hand-back ref for a queued filing whose worker didn't wake: the sweep sends it another way (PORTAL_FAILED). */
+export const WORKER_ASLEEP = "worker_asleep";
+/** How long a wake may take before the queued filings go another way: FILER_WAKE_SECONDS, 60 to 900, default 180. */
+export function wakeMs(raw: string | undefined): number {
+  const n = Number((raw ?? "").trim());
+  return (Number.isFinite(n) && (raw ?? "").trim() ? Math.min(900, Math.max(60, Math.floor(n))) : 180) * 1000;
+}
+
+/** The worker's wake address and the secret it checks, or null when wake on demand isn't set up: FILER_URL must be the
+    worker's https address (no user or password in it; a trailing /wake is fine), FILER_SECRET 32 characters or more. */
+export function wakeConfig(url: string | undefined, secret: string | undefined): { url: string; secret: string } | null {
+  const s = (secret ?? "").trim(), raw = (url ?? "").trim();
+  if (s.length < 32 || !raw) return null;
+  let u: URL;
+  try { u = new URL(raw); } catch { return null; }
+  if (u.protocol !== "https:" || u.username || u.password || u.search || u.hash) return null;
+  const path = u.pathname.replace(/\/+$/, "").replace(/\/wake$/, "");
+  return { url: `${u.origin}${path}/wake`, secret: s };
+}
+
+/** The last wake attempt got no heartbeat within the window (and isn't old enough to try again). */
+export function wakeFailed(beat: Beat | null, nowMs: number, windowMs: number): boolean {
+  if (!beat || beat.live || !beat.wake_since) return false;
+  const since = Date.parse(beat.wake_since), seen = Date.parse(beat.seen_at ?? "");
+  if (!Number.isFinite(since)) return false;
+  if (Number.isFinite(seen) && seen >= since) return false;          // it beat after the ping: that wake worked
+  const age = nowMs - since;
+  return age > windowMs && age < WAKE_RETRY_MS;
+}
+
+/** Asleep but wakeable: wake on demand is set up, the worker has beaten before, it isn't beating now, and its last wake
+    didn't fail. */
+export const wakeable = (configured: boolean, beat: Beat | null, nowMs: number, windowMs: number): boolean =>
+  configured && !!beat?.seen_at && !beat.live && !wakeFailed(beat, nowMs, windowMs);
+
+/** A queued portal filing the worker would take now: not waiting out a retry or a held browser (provider_ref). */
+export function waitsOnWorker(f: Pick<Filing, "channel" | "agent_state" | "status" | "provider_ref" | "submit_clicked_at">, nowMs: number): boolean {
+  if (f.channel !== "portal" || f.agent_state !== "queued" || f.submit_clicked_at) return false;
+  if (["canceled", "submitted", "accepted", "rejected"].includes(f.status)) return false;
+  const m = /^(?:retry-after|held-until):(.+)$/.exec(f.provider_ref ?? "");
+  const until = m ? Date.parse(m[1]) : NaN;
+  return !(Number.isFinite(until) && until > nowMs);
+}
+
+/** What the sweep does for the filings queued for the worker: nothing (it's live, or there are none), ping it (asleep,
+    wakeable), or send them another way (its wake failed). Without wake on demand set up, nothing: as before. */
+export function wakePlan(o: { configured: boolean; beat: Beat | null; waiting: number; nowMs: number; windowMs: number }): "none" | "wake" | "fall_back" {
+  if (!o.waiting || o.beat?.live || !o.configured || !o.beat?.seen_at) return "none";
+  return wakeFailed(o.beat, o.nowMs, o.windowMs) ? "fall_back" : "wake";
+}
+
 /** Is the portal worker on? FILER_ENABLED=1 says so, FILER_ENABLED=0 says not; unset, the worker's own heartbeat decides
-    (supabase/migrations/20261102090000_filer_heartbeat.sql): filings queue for it only while it beats. */
-export function workerOn(enabled: string | undefined, beat: { live: boolean } | null): boolean {
+    (supabase/migrations/20261102090000_filer_heartbeat.sql): filings queue for it only while it beats, or while it's
+    asleep but wakeable (asleep: wakeable(), above). */
+export function workerOn(enabled: string | undefined, beat: { live: boolean } | null, asleep = false): boolean {
   const v = (enabled ?? "").trim();
   if (v === "1") return true;
   if (v === "0") return false;
-  return !!beat?.live;
+  return !!beat?.live || asleep;
 }
 
-/** What the app shows for online filing: live (the worker beats and the portal channel is on), off (switched off, or
-    the portal channel isn't in FILER_CHANNELS), down (it beat once and stopped), or not set up (it never has). */
-export type WorkerState = "live" | "off" | "down" | "not_set_up";
-export function workerState(enabled: string | undefined, env: Pick<Env, "channels" | "agencies">, beat: { live: boolean; seen_at: string | null } | null): WorkerState {
+/** What the app shows for online filing: live (the worker beats and the portal channel is on), asleep (it sleeps and
+    wakes on demand), off (switched off, or the portal channel isn't in FILER_CHANNELS), down (it beat once and stopped,
+    or didn't wake), or not set up (it never has). */
+export type WorkerState = "live" | "asleep" | "off" | "down" | "not_set_up";
+export function workerState(enabled: string | undefined, env: Pick<Env, "channels" | "agencies">, beat: Beat | null, asleep = false): WorkerState {
   if ((enabled ?? "").trim() === "0" || !env.channels.includes("portal")) return "off";
   if (beat?.live) return "live";
+  if (asleep && beat?.seen_at) return "asleep";
   if ((enabled ?? "").trim() === "1" && !beat) return "live";   // a database without the heartbeat yet: trust the switch
   return beat?.seen_at ? "down" : "not_set_up";
 }
@@ -243,7 +309,17 @@ export function whyYours(f: Filing, d: Dest | undefined, env: Env, facts: Facts)
     (unverified_playbook), or a "Show Odelia how" run ended without a filing (no_live_view, teach_incomplete). The
     worker writes these as the hand-back's ref (worker/filer/src/run.ts). Each is tried another way the agency takes,
     else handed to the business with its packet. */
-export const PORTAL_FAILED = new Set(["limit", "left_portal", "no_portal", "portal_failed", "review_differs", "page_injection", "unverified_playbook", "no_live_view", "teach_incomplete", "portal_blocked"]);
+export const PORTAL_FAILED = new Set(["limit", "left_portal", "no_portal", "portal_failed", "review_differs", "page_injection", "unverified_playbook", "no_live_view", "teach_incomplete", "portal_blocked", WORKER_ASLEEP]);
+
+/** A reroute's sentences, from why the agency's site wasn't used: it failed, or the worker didn't wake in time.
+    lead is a whole sentence; sends(said) says the other way it goes. */
+export function rerouteLead(f: Pick<Filing, "agent_log">): { lead: Bi; sends(said: Bi): Bi } {
+  const last = [...f.agent_log].reverse().find((e) => e.kind === "handoff");
+  const c = last?.ref === WORKER_ASLEEP
+    ? { en: "Odelia's filing browser didn't start in time", zh: "Odelia 的提交浏览器未能及时启动" }
+    : { en: "The agency's site didn't work", zh: "机构网站无法完成" };
+  return { lead: { en: `${c.en}.`, zh: `${c.zh}。` }, sends: (said) => ({ en: `${c.en}, so Placetta sends it ${said.en} instead.`, zh: `${c.zh}，快哉改为${said.zh}提交。` }) };
+}
 
 /** Hand-backs after which something may already have reached the agency: the business checks before anything else. */
 export const MAYBE_SENT = new Set(["maybe_submitted"]);

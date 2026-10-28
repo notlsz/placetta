@@ -1,20 +1,28 @@
 # Render Blueprint: the portal worker that files on agency websites (worker/filer). SETUP.md "Turn on online filing".
-# Render, New, Blueprint, pick this repo, paste the two values marked sync: false, Apply. That's all on Render.
+# Render, New, Blueprint, pick this repo, paste the four values marked sync: false, Apply. That's all on Render.
 #
 # A web service, not a background worker, so Render gives it a health check (/healthz: are the keys set, did the last
 # heartbeat reach the database) and a public https address (RENDER_EXTERNAL_URL) for the live browser a person uses
-# when a filing needs them (a CAPTCHA, a code sent to their phone, the agency's fee). Nothing else is served.
+# when a filing needs them (a CAPTCHA, a code sent to their phone, the agency's fee), and for the app's wake ping
+# (POST /wake, with FILER_SECRET). Nothing else is served.
 #
-# Browser: Chromium runs inside this container (the Playwright image), so no Browserbase account is needed. Chromium
-# needs memory: "standard" (2 GB RAM, 1 CPU) runs one filing at a time with room to spare; "starter" (512 MB) is too
-# small and Chromium is killed mid-filing. Browserbase stays optional (see its keys below).
+# The $0 start: Render's free plan (512 MB, sleeps after 15 minutes without a request, wakes on the next one in about a
+# minute) with the browser on Steel's free plan (steel.dev). No Chromium runs in this container, so it fits. When a
+# filing is queued for an agency's website, Supabase pings FILER_URL/wake; the worker files, then sleeps again.
+#
+# Switching later is one line each (the container is the same plain Docker image everywhere):
+#   bigger plan, always on      plan: standard                    (2 GB, about $25 a month; then FILER_URL is optional)
+#   Chromium in this container  BROWSER_PROVIDER value: local     (needs plan: standard; Chromium is killed in 512 MB)
+#   Browserbase for every run   BROWSER_PROVIDER value: browserbase, and add BROWSERBASE_API_KEY, BROWSERBASE_PROJECT_ID
+#   off Render (Cloud Run, Fly)  build worker/filer/Dockerfile, set the same variables plus FILER_PUBLIC_URL (its https
+#                               address), and point the Supabase secret FILER_URL at it
 services:
   - type: web
     name: placetta-filer
     runtime: docker
     dockerfilePath: ./worker/filer/Dockerfile
     dockerContext: .
-    plan: standard
+    plan: free                           # $0, sleeps when idle and wakes on the app's ping. One-line switch: plan: standard
     region: oregon                       # US West, near the California agencies and the Supabase project
     numInstances: 1                      # one container; FILER_CONCURRENCY runs more filings inside it
     healthCheckPath: /healthz            # 503 until every key is set, so a deploy with a missing key shows as failed
@@ -26,12 +34,18 @@ services:
         - supabase/functions/_shared/injection.ts
         - supabase/functions/_shared/zdr.ts
     envVars:
-      # ---- the two values to paste when Render asks ----
+      # ---- the four values to paste when Render asks ----
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false                      # Supabase, Project Settings, API keys, service_role "secret" key. Later, swap it for FILER_DB_KEY (docs/soc2/runbooks/filer-least-privilege.md)
       - key: ANTHROPIC_API_KEY
         sync: false                      # console.anthropic.com, Settings, API keys, Create key (starts sk-ant-)
+      - key: STEEL_API_KEY
+        sync: false                      # app.steel.dev, sign up (free plan), API Keys. Not needed with BROWSER_PROVIDER local
+      - key: FILER_SECRET
+        sync: false                      # the same value as the Supabase secret FILER_SECRET (32+ characters; make one with: openssl rand -hex 32)
       # ---- set for you ----
+      - key: BROWSER_PROVIDER
+        value: steel                     # steel (the free start), browserbase, or local (Chromium in this container: plan standard)
       - key: SUPABASE_URL
         value: https://esquxzcfsylffuijvzec.supabase.co
       - key: FILER_ENABLED
@@ -41,16 +55,19 @@ services:
       - key: FILER_ALLOW_UNVERIFIED
         value: "1"                       # playbooks not yet watched on the live site run, and always stop at the review page for the team; 0 sends them to the team instead
       - key: FILER_CONCURRENCY
-        value: "1"                       # filings side by side in this container (up to 4; about 500 MB each)
+        value: "1"                       # filings side by side in this container (up to 4; with local Chromium about 500 MB each)
       - key: FILER_PROBE_HOUR
-        value: "10"                      # UTC hour of the nightly re-check of every playbook against the agencies' public pages (10 = 3 a.m. Pacific)
+        value: "10"                      # UTC hour of the nightly re-check of every playbook against the agencies' public pages (10 = 3 a.m. Pacific; with a remote browser only when FILER_PROBE=1)
       - key: NODE_OPTIONS
-        value: "--max-old-space-size=512"
+        value: "--max-old-space-size=320" # fits the free plan's 512 MB; on standard, 512
       # ---- optional, add later in Render, placetta-filer, Environment ----
       # FILER_DB_KEY                       the filer's own least-privilege key (runbook above); then delete SUPABASE_SERVICE_ROLE_KEY
       # BROWSERBASE_API_KEY, BROWSERBASE_PROJECT_ID
-      #                                    only for the agency sites that refuse a cloud server's address (EDD e-Services, bizfile
-      #                                    Online, MassTaxConnect, sanjoseca.gov: worker/filer/src/env.ts); without them those
-      #                                    filings take another route the agency accepts
-      # FILER_BROWSERBASE_HOSTS            more hosts for Browserbase, or "*" for every filing
+      #                                    with BROWSER_PROVIDER browserbase, every run; with local, only the agency sites that
+      #                                    refuse a cloud server's address (EDD e-Services, bizfile Online, MassTaxConnect,
+      #                                    sanjoseca.gov: worker/filer/src/env.ts)
+      # FILER_BROWSERBASE_HOSTS            more hosts for Browserbase with BROWSER_PROVIDER local, or "*" for every filing
+      # STEEL_SESSION_MS                   how long a Steel session may live (default 1800000, 30 minutes; your Steel plan caps it)
+      # FILER_PROBE=1                      the nightly re-check with a remote browser too (spends the provider's minutes)
+      # FILER_KEEP_AWAKE=0                 don't ask for its own /healthz while a filing runs (only for a plan that never sleeps)
       # FILER_DRY_RUN=1                    every filing stops at the agency's review page; nothing is sent
