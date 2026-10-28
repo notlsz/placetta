@@ -38,7 +38,8 @@ import { billingHealth, issuingOn } from "../_shared/stripe_catalog.ts";
 import { configStore } from "../_shared/stripe_db.ts";
 // any vendor that may take a conversation (a Gemini key without GEMINI_PAID may not), not just Anthropic or Gemini
 import { canConverse } from "../_shared/llm.ts";
-import { mayEmail, wantsTexts } from "../_shared/reach.ts";
+import { mayEmail, reachOf, wantsTexts } from "../_shared/reach.ts";
+import { updateChannel } from "../_shared/deliver.ts";
 import { deliverNotices, noticeDb, outboxText } from "../_shared/notices.ts";
 import { stageAlert, stageUpdates, type StageFiling, type StageUpdate } from "./stage.ts";
 import { inspectionWork, PREP } from "./inspections.ts";
@@ -804,10 +805,12 @@ Deno.serve(async (req) => {
   // Phones: urgent items become a call (or a text), important ones a text, for owners who linked a phone.
   let phoned = 0;
   const stateOf = (ws: string) => all.find((w) => w.id === ws)?.state;
-  // An owner who told Odelia "text me, don't email" (src/recall.ts) gets every update by text, since the email digest
-  // below skips them; everyone else only the urgent and important ones.
-  const textsAll = (ws: string, uid: string) => wantsTexts(stateOf(ws), uid) && !mayEmail(stateOf(ws), uid);
+  // One channel per update and owner (_shared/deliver.ts updateChannel): urgent ones a call or a text, important ones a
+  // text, routine ones the email digest; an owner who asked for texts (src/recall.ts) gets routine ones by text too.
+  // Whatever went by phone is left out of that owner's digest below, so nobody gets the same update twice.
+  const textsAll = (ws: string, uid: string) => wantsTexts(stateOf(ws), uid);
   const hasTexters = (ws: string) => Object.keys(((stateOf(ws) ?? {}) as { memories?: Record<string, unknown> }).memories ?? {}).some((uid) => textsAll(ws, uid));
+  const byPhone = new Set<string>();   // `${owner}|${workspace}|${dedupe}` sent by text or call
   const notices = created.map((u) => ({ u, level: urgency(u, criticalApps(stateOf(u.workspace_id))) })).filter((x) => x.level || x.u.workspace_id && hasTexters(x.u.workspace_id));
   if (notices.length) {
     const wsIds = [...new Set(notices.map((x) => x.u.workspace_id))];
@@ -821,10 +824,12 @@ Deno.serve(async (req) => {
     for (const { u, level } of notices) {
       for (const o of (owners ?? []).filter((x) => x.workspace_id === u.workspace_id)) {
         const l = byUser.get(o.user_id as string);
-        if (!level && !textsAll(u.workspace_id, o.user_id as string)) continue;
-        if (!l || (!l.texts_on && !(level === "urgent" && l.calls_on))) continue;
+        if (!l) continue;
+        const how = updateChannel(level, { reach: reachOf(stateOf(u.workspace_id), o.user_id as string), phone: { texts: !!l.texts_on, calls: !!l.calls_on }, email: !!MAIL_ON && !!FROM });
+        if (how !== "text" && how !== "call") continue;
         const lang = l.lang === "zh" ? "zh" : "en";
-        rows.push({ user_id: o.user_id, workspace_id: u.workspace_id, kind: level === "urgent" && l.calls_on ? "call" : "text", urgent: level === "urgent",
+        byPhone.add(`${o.user_id}|${u.workspace_id}|${u.dedupe}`);
+        rows.push({ user_id: o.user_id, workspace_id: u.workspace_id, kind: how, urgent: level === "urgent",
           body: noticeText(u, names.get(u.workspace_id) ?? "", lang), link: appLink(APP, u.workspace_id) || null, dedupe: `update:${u.workspace_id}:${u.dedupe}`.slice(0, 300) });
       }
     }
@@ -880,15 +885,23 @@ Deno.serve(async (req) => {
     for (const u of created) fresh.set(u.workspace_id, [...(fresh.get(u.workspace_id) ?? []), u]);
     for (const [ws, items] of fresh) {
       const { data: owners } = await admin.from("workspace_members").select("user_id").eq("workspace_id", ws).eq("role", "owner");
-      const emails: string[] = [];
+      // each owner's digest holds what didn't already reach them by text or call; owners with the same list share one email
+      const lists = new Map<string, { emails: string[]; items: Update[] }>();
       for (const o of owners ?? []) {
         if (!mayEmail(stateOf(ws), o.user_id)) continue;   // they told Odelia not to email them (src/recall.ts)
+        const mine = items.filter((u) => !byPhone.has(`${o.user_id}|${ws}|${u.dedupe}`));
+        if (!mine.length) continue;
         const { data } = await admin.auth.admin.getUserById(o.user_id);
-        if (data?.user?.email && data.user.email_confirmed_at) emails.push(data.user.email);
+        if (!data?.user?.email || !data.user.email_confirmed_at) continue;
+        const key = mine.map((u) => u.dedupe).join("\n");
+        const l = lists.get(key) ?? { emails: [], items: mine };
+        l.emails.push(data.user.email);
+        lists.set(key, l);
       }
-      if (!emails.length) continue;
-      const m = digest(names.get(ws) ?? "Your business", items.slice(0, 20));
-      if (await sendMail(emails, m.subject, m.text, m.html)) emailed++;
+      for (const l of lists.values()) {
+        const m = digest(names.get(ws) ?? "Your business", l.items.slice(0, 20));
+        if (await sendMail(l.emails, m.subject, m.text, m.html)) emailed++;
+      }
     }
     // The team: approved filings nobody has picked up within a day.
     const stale = ((filings ?? []) as Filing[]).filter((f) => f.status === "requested" && !f.assigned_to && f.approved_at && now - Date.parse(f.approved_at) > 864e5);

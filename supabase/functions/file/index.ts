@@ -1180,6 +1180,12 @@ async function autopilotUnstarted(): Promise<number> {
     if (!g) continue;
     try { await start(r, new Request("https://placetta.invalid/autopilot"), `autopilot:${g}`); n++; } catch (e) { if (!(e instanceof Refused)) console.error("autopilot start:", describe(e)); }
   }
+  // and the filings an owner approved by text whose start didn't get through (agent-run text_approve)
+  const { data: texted, error: te } = await admin.from("filings").select(COLS + ", approved_by").eq("approved_via", "text").is("agent_state", null).eq("status", "requested").lt("created_at", before).limit(20);
+  if (te) return n;   // a database without the messaging migration yet
+  for (const r of (texted ?? []) as unknown as (Filing & { approved_by: string })[]) {
+    try { await start(r, new Request("https://placetta.invalid/text"), `text:${r.approved_by}`); n++; } catch (e) { if (!(e instanceof Refused)) console.error("text start:", describe(e)); }
+  }
   return n;
 }
 
@@ -1246,6 +1252,13 @@ serve(async (req) => {
       const grant = await autopilotGrant(f.workspace_id, f.id);
       if (!grant) throw new HttpError("forbidden", "Not an Autopilot filing, or its authorization isn't live.");
       try { return ok(await start(f, req, `autopilot:${grant}`)); } catch (e) { if (e instanceof Refused) return ok(view(await loadFiling(f.workspace_id, f.id))); throw e; }
+    }
+    // An owner approved it by text (agent-run text_approve): the database let it in as theirs, marked approved_via text
+    if (sb.action === "text_start") {
+      const f = await loadFiling(uuidParam(sb.workspace_id, "workspace_id"), uuidParam(sb.filing_id, "filing_id"));
+      const { data: via } = await admin.from("filings").select("approved_via, approved_by").eq("id", f.id).maybeSingle();
+      if (via?.approved_via !== "text") throw new HttpError("forbidden", "Not a filing approved by text.");
+      try { return ok(await start(f, req, `text:${via.approved_by}`)); } catch (e) { if (e instanceof Refused) return ok(view(await loadFiling(f.workspace_id, f.id))); throw e; }
     }
     return ok(await sweep());
   }

@@ -922,7 +922,7 @@ try {
     mark = recorded.length;
     await telnyxPost("odelia-sms", smsEvent(OWNER_PHONE, "What's due this month?", "msg-after-wa"));
     await settle();
-    check("a text by SMS is answered by SMS, and WhatsApp is no longer where updates go", sms(mark, OWNER_PHONE).length === 1 && wa(mark).length === 0 && (await sql`select via from public.phone_links where user_id = ${owner.id}`)[0].via === null, { sms: sms(mark).map((r) => r.body.text), wa: wa(mark).map(waBody) });
+    check("a text by SMS is answered by SMS, and WhatsApp is no longer where updates go (answers go back to the Telnyx number they wrote to)", sms(mark, OWNER_PHONE).length === 1 && wa(mark).length === 0 && (await sql`select via from public.phone_links where user_id = ${owner.id}`)[0].via === "sms", { sms: sms(mark).map((r) => r.body.text), wa: wa(mark).map(waBody) });
 
     // a stranger on WhatsApp: the one question, there
     mark = recorded.length;
@@ -1365,9 +1365,10 @@ try {
     const [upd] = await sql`select title from public.updates where workspace_id = ${ws} and dedupe = ${"run:" + r.data?.id}`;
     check("an unwatched run becomes an Update", !!upd, upd);
     const mails = emails(mark);
-    check("and an email to the owner", mails.length === 1 && mails[0].body.to.includes(owner.email) && /waiting for your approval/.test(mails[0].body.text), mails.map((m) => m.body));
-    const [ob] = await sql`select body, link, sent_at from public.odelia_outbox where user_id = ${owner.id} and dedupe = ${"approval:" + r.data?.id}`;
-    check("and a text waits in the outbox with the approval's deep link", ob && ob.sent_at === null && ob.link === `${APP}/app/?ws=${ws}&approval=ap-app-dohmh`, ob);
+    // one channel per update (_shared/deliver.ts): the owner takes texts, so the approval goes by text and not also by email
+    check("and no email to the owner, who hears by text instead (never both)", !mails.some((m) => m.body.to.includes(owner.email)), mails.map((m) => m.body));
+    const [ob] = await sql`select body, link, sent_at, approval_id from public.odelia_outbox where user_id = ${owner.id} and dedupe = ${`approval:${ws}:ap-app-dohmh`}`;
+    check("and a text waits in the outbox with the approval's deep link and its card", ob && ob.sent_at === null && ob.link === `${APP}/app/?ws=${ws}&approval=ap-app-dohmh` && ob.approval_id === "ap-app-dohmh", ob);
 
     // the monitor finds the CO paperwork due in 5 days: an important text; it sweeps the outbox right away
     mark = recorded.length;
@@ -1390,7 +1391,8 @@ try {
     check("only what matters reaches the phone (the CO due in 5 days)", due.length === 1 && due[0].dedupe.includes("deadline:dl-co"), due);
     const texts = sms(mark, OWNER_PHONE);
     check("one text carries both waiting items, sent outside quiet hours", texts.length === 1 && /^Placetta: 2 things need you/.test(texts[0].body.text) && texts[0].body.text.length <= 306, texts.map((x) => x.body.text));
-    check("both outbox items are marked sent", (await sql`select count(*)::int n from public.odelia_outbox where user_id = ${owner.id} and sent_at is null and dropped_at is null`)[0].n === 0);
+    check("and the approval's code, to approve it by text", /Reply YES \d{4} to approve/.test(texts[0]?.body.text ?? "") && (await sql`select count(*)::int n from public.text_approvals where user_id = ${owner.id} and approval_id = 'ap-app-dohmh' and used_at is null`)[0].n === 1, texts.map((x) => x.body.text));
+    check("both outbox items are marked sent",(await sql`select count(*)::int n from public.odelia_outbox where user_id = ${owner.id} and sent_at is null and dropped_at is null`)[0].n === 0);
 
     // quiet hours hold a text
     const queue = (tag: string) => sql`insert into public.odelia_outbox (user_id, workspace_id, kind, body, link, dedupe) values (${owner.id}, ${ws}, 'text', ${"Placetta: " + tag + " (Golden Ox Noodle)."}, ${APP + "/app/?ws=" + ws}, ${"e2e:" + tag})`;

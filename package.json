@@ -54,6 +54,7 @@
     "test:e2e": "deno run -A --no-check --no-lock --node-modules-dir=none scripts/e2e/run.ts",
     "scan:local": "bash scripts/scan/local.sh",
     "test:tenancy": "deno run -A --no-check --no-lock --node-modules-dir=none scripts/tenancy/run.ts",
+    "check:messaging": "deno run -A --no-lock --node-modules-dir=none scripts/check-messaging.ts",
     "test:dnc": "node --test scripts/dnc.test.mjs",
     "dnc": "node scripts/dnc.mjs",
     "test:channels": "esbuild scripts/channels-test.mts --bundle --platform=node --format=esm --outfile=.channels-test.mjs --log-level=error && node .channels-test.mjs; s=$?; rm -f .channels-test.mjs; exit $s",

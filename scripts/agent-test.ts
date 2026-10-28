@@ -32,6 +32,7 @@ import { appealLetter as caseLetter, checkAnswer, datesFor, hearingScript, mayFi
 import { emailsIn } from "../src/guard";
 import { BUILTIN } from "../src/skills";
 import { autopilotTests, grant as autopilotGrant } from "./autopilot-test";
+import { textApproveTests } from "./text-approve-test";
 import { agentAuthorityTests } from "./agent-authority-test";
 import { putGrant } from "../src/autopilot";
 import { lessonKeys, lessonsBrief, parseDistill, rank, runEvidence, score, scrubLesson, worthLearning, type Lesson } from "../src/learning";
@@ -3319,6 +3320,7 @@ await initiativeTests(ok, eq);
 privacyTests(ok, eq);
 await autopilotTests(ok, eq);
 await agentAuthorityTests(ok, eq);
+await textApproveTests(ok, eq);
 
 {
   console.log("\n# Autopilot end to end: the server's loop files a complete seller's permit without a tap, and not a pricey one");

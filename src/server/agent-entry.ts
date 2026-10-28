@@ -17,6 +17,8 @@ export { readBack } from "../forms/readback";
 export { answersHash, fillAndRead, latestVersion, refreshForms } from "../forms/versions";
 // Autopilot (src/autopilotFile.ts): the cards a run marked, filed under the owner's standing authorization after it
 export { autofileAll, type AutofileIO, type AutofileRow } from "../autopilotFile";
+// Approving a filing by text (src/textApprove.ts): an owner's "YES 4821" to the text that put the card in front of them
+export { NOT_BY_TEXT, textApprovable, textApprove, type TextApproveIO, type TextFileResult, type TextFileRow } from "../textApprove";
 // Finishing (src/finish.ts): the filings' record onto the workspace and every job against its proof, for "settle"
 export { finishWork, stampFilings } from "../finish";
 // Odelia's shield (src/security): the model check's prompt and how its answer is read, and the tool-call log's shape
