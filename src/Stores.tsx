@@ -24,6 +24,7 @@ import { TrustShare } from "./TrustShare";
 import { ChecksSheet, CheckList } from "./Checks";
 import { QuestionnaireSheet } from "./Questionnaire";
 import { checksFor, tally } from "./controls";
+import { ReplicaFacts, ReplicateSheet } from "./ReplicateStore";
 
 /* Stores: every store inspection-ready every day. A score per store, today's logs, staff certificates, schedules,
    a mock inspection, and the three numbers that show the value: opened on time, stayed open, no fines. Each store has
@@ -512,7 +513,7 @@ export function Stores() {
   const [bulk, setBulk] = useState(false);
   const [check, setCheck] = useState(false);
   const [report, setReport] = useState(false);
-  const [sheet, setSheet] = useState<"checks" | "trust" | "q" | null>(null);
+  const [sheet, setSheet] = useState<"checks" | "trust" | "q" | "replicate" | null>(null);
   const stores = ws.stores ?? [];
   const s = stores.find(x => x.id === open);
   if (s) return <StoreDetail s={s} onBack={() => setOpen(null)} />;
@@ -525,7 +526,8 @@ export function Stores() {
           <Menu className="st-more" buttonClass="pill" label={lang === "zh" ? "更多" : "More"} button={<>{lang === "zh" ? "更多" : "More"}<I.chev /></>} items={[
             ...(!bulk ? [{ key: "bulk", label: lang === "zh" ? "规划多家门店" : "Plan many stores", onPick: () => setBulk(true) }] : []),
             ...(!check ? [{ key: "check", label: lang === "zh" ? "检查已开业门店" : "Check stores already open", onPick: () => setCheck(true) }] : []),
-            ...(stores.length > 0 ? [{ key: "checks", label: lang === "zh" ? "合规检查" : "Checks", onPick: () => setSheet("checks") },
+            ...(stores.length > 0 ? [{ key: "replicate", label: lang === "zh" ? "复制这家门店" : "Replicate this store", onPick: () => setSheet("replicate") },
+              { key: "checks", label: lang === "zh" ? "合规检查" : "Checks", onPick: () => setSheet("checks") },
               { key: "trust", label: lang === "zh" ? "状态页" : "Status pages", onPick: () => setSheet("trust") },
               { key: "q", label: lang === "zh" ? "回答合规问卷" : "Answer a questionnaire", onPick: () => setSheet("q") }] : []),
             ...(cloud?.owner && stores.length > 0 ? [{ key: "hq", label: lang === "zh" ? "与总部共享" : "Share with headquarters", onPick: () => openSettings(go, "hq") }] : []),
@@ -537,6 +539,8 @@ export function Stores() {
       {sheet === "checks" && <ChecksSheet onClose={() => setSheet(null)} />}
       {sheet === "trust" && <TrustShare onClose={() => setSheet(null)} />}
       {sheet === "q" && <QuestionnaireSheet onClose={() => setSheet(null)} />}
+      {sheet === "replicate" && <ReplicateSheet onClose={() => setSheet(null)} />}
+      <ReplicaFacts />
       {stores.length === 1 ? (
         // one store: its card beside its permits, so the page is the store's own dashboard, not a card in an empty page
         <div className="stores one">

@@ -168,6 +168,8 @@ const PLAIN_SMS_MAY = new Set([
   "find_official_forms", "plan_markets", "network_lessons", "skill_read", "memory_search", "search_past_chats", "show_licenses", "city_records", "check_progress",
   "address_rules", "inspection_guide", "appeal_options", "search_email", "read_email", "find_files", "get_income", "review_documents",
   "draft_message", "send_email", "draft_document",
+  // plans new locations and puts up one card; the stores open only when an owner approves it in the app
+  "replicate_store",
 ]);
 /** Tools plain SMS may use whose side effects don't stick there (guardPatch drops them): what the model must know so
  *  it doesn't say otherwise. */

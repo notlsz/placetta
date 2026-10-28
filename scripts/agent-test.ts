@@ -34,6 +34,7 @@ import { BUILTIN } from "../src/skills";
 import { autopilotTests, grant as autopilotGrant } from "./autopilot-test";
 import { textApproveTests } from "./text-approve-test";
 import { agentAuthorityTests } from "./agent-authority-test";
+import { bakery as replicaBakery, replicateTests } from "./replicate-test";
 import { putGrant } from "../src/autopilot";
 import { lessonKeys, lessonsBrief, parseDistill, rank, runEvidence, score, scrubLesson, worthLearning, type Lesson } from "../src/learning";
 import { inDays } from "../src/time";
@@ -3325,6 +3326,28 @@ lawWatchTests(ok, eq);
 await autopilotTests(ok, eq);
 await agentAuthorityTests(ok, eq);
 await textApproveTests(ok, eq);
+replicateTests(ok, eq);
+
+{
+  console.log("\n# replicate_store: the comparison and one approval card, from a text too; nothing opens before an owner approves");
+  const base = replicaBakery();
+  const r = await agent({ ws: base, prompt: "Open 3 more like our San Jose store in Texas", script: [
+    () => ask(["replicate_store", { region: "Texas", count: 3 }]),
+    c => { const o = c.out("replicate_store"); return say(`Planned ${(o.places as unknown[]).length} Texas stores; approve the card to open them.`); },
+  ] });
+  const o = callNamed(r, "replicate_store")[0];
+  ok(o?.ok && (o.parsed?.places as unknown[]).length === 3 && (o.parsed?.picked_cities as string[]).every(p => /, TX$/.test(p)), "three Texas cities, named as the registry's", o?.out);
+  const card = r.w.approvals.find(a => a.change?.op === "replicate");
+  ok(!!card && card.change?.op === "replicate" && card.change.targets.length === 3 && card.kind === "change", "one change card for all three");
+  ok(((r.reply?.table as { rows: string[][] })?.rows ?? []).length === 3, "the comparison table goes to the person");
+  ok((r.w.stores ?? []).length === (base.stores ?? []).length && r.w.apps.length === base.apps.length, "no store or application before the owner approves");
+  const again = await agent({ ws: r.w, prompt: "x", script: [() => ask(["replicate_store", { places: ["Dallas", "Houston", "Austin"] }]), () => say("Same card.")] });
+  ok(again.w.approvals.filter(a => a.change?.op === "replicate").length === 1 && callNamed(again, "replicate_store")[0]?.parsed?.approval_id === card?.id, "asking again doesn't put up a second card");
+  const bad = await agent({ ws: base, prompt: "x", script: [() => ask(["replicate_store", { places: ["Fremont"] }]), () => say("Which state?")] });
+  ok(!callNamed(bad, "replicate_store")[0]?.ok && /Couldn't tell where "Fremont"/.test(callNamed(bad, "replicate_store")[0]?.out ?? ""), "a place it can't tell isn't guessed");
+  const sms = await agent({ ws: base, prompt: "open 2 more like our San Jose store in Toronto and Dallas", channel: "sms", sender: "+14085550100", script: [() => ask(["replicate_store", { places: ["Toronto", "Dallas"] }]), () => say("Approve it in the app.")] });
+  ok(callNamed(sms, "replicate_store")[0]?.ok && sms.w.approvals.some(a => a.change?.op === "replicate"), "from a text, the card goes up the same way", callNamed(sms, "replicate_store")[0]?.out);
+}
 
 {
   console.log("\n# Autopilot end to end: the server's loop files a complete seller's permit without a tap, and not a pricey one");

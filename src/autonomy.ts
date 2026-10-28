@@ -78,7 +78,7 @@ const READ = new Set(["find_official_forms", "plan_markets", "network_lessons", 
  *  works under these same controls, so under Ask me first its changes wait on its own card. */
 const PLANNING = new Set(["set_plan", "hand_off", "split_job", "ask_specialist"]);
 /** Drafting, or putting something in front of a person to approve or confirm: these ask already. */
-const DRAFTS = new Set(["draft_message", "send_email", "draft_document", "request_filing_approval", "request_purchase", "set_budgets", "remove_store", "remove_application"]);
+const DRAFTS = new Set(["draft_message", "send_email", "draft_document", "request_filing_approval", "request_purchase", "set_budgets", "remove_store", "remove_application", "replicate_store"]);
 /** What a Plan first run may do: read, research and write the plan. */
 const PLAN_OK = new Set([...READ, "set_plan", "ask_specialist"]);
 
@@ -98,7 +98,7 @@ export const ACTIONS: Record<ActionKind, { label: Bi; tools: string[]; allowable
   filing: { label: B("Ask to file", "申请提交"), tools: ["request_filing_approval"], allowable: false },
   deadlines: { label: B("Add and change deadlines", "添加和修改截止日期"), tools: ["add_deadline", "edit_deadline"], allowable: true },
   calendar: { label: B("Put dates on your calendar", "把日期加入日历"), tools: ["add_calendar_event"], allowable: true },
-  stores: { label: B("Add and change stores", "添加和修改门店"), tools: ["add_store", "update_store", "remove_store"], allowable: true },
+  stores: { label: B("Add and change stores", "添加和修改门店"), tools: ["add_store", "update_store", "remove_store", "replicate_store"], allowable: true },
   facts: { label: B("Change business facts", "修改企业资料"), tools: ["remember", "edit_workspace"], allowable: true },
   documents: { label: B("Write and review documents", "撰写和审阅文件"), tools: ["draft_document", "review_documents"], allowable: true },
   purchases: { label: B("Ask to buy something", "申请购买"), tools: ["request_purchase", "set_budgets"], allowable: false },

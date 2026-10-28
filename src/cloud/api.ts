@@ -418,6 +418,12 @@ export async function autopilotRevoke(ws: string): Promise<{ revoked: boolean; s
   if (error) throw fromPg(error);
   return data as { revoked: boolean; stopped: number };
 }
+/** Replicate a store (src/replicate.ts): the owner's one approval, kept as a record (migration 20261105091500). */
+export async function recordReplication(ws: string, source: string, places: string[]): Promise<string> {
+  const { data, error } = await supabase().rpc("store_replication_record", { p_ws: ws, p_source: source, p_places: places });
+  if (error) throw fromPg(error);
+  return data as string;
+}
 /** Sign-up asks for agreement before there's a session to record it with: kept here until the first sign-in. */
 const TERMS_AGREED = "placetta-terms-agreed";
 export const termsAgreed = {
