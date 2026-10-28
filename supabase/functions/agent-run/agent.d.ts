@@ -10,7 +10,7 @@ export type Turn = { role: "user" | "assistant"; content: string };
 export type RunState = { messages: { role: string; content: unknown }[]; rounds: number; plainSms?: boolean; spent?: number; events?: number[]; toolCalls?: number; toolErrors?: number; trace?: unknown[]; [k: string]: unknown };
 export type Block = { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; citations?: { url?: string; title?: string }[] };
 /** What a model call is for; the server routes each role to its own model (../_shared/llm.ts). */
-export type Role = "plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep";
+export type Role = "plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep" | "appeal";
 export type Send = (body: Record<string, unknown>, deep: boolean, role?: Role, onText?: (text: string) => void) => Promise<{ content: Block[]; stop_reason: string }>;
 export type Services = {
   filings(): { app_id: string; status: string; confirmation_number: string | null; submitted_at: string | null; updated_at: string; note: string | null; payment_url: string | null; agent_state?: string | null; channel?: string | null; agent_log?: { en: string; zh: string; kind: string }[];

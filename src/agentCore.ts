@@ -28,7 +28,7 @@ export type Source = { title: string; url: string };
  *  (supabase/functions/_shared/llm.ts): plan is the main loop, review the independent checker, extract reads uploads,
  *  translate renders decided text, draft writes routine documents, short answers texts and chat bots, watch is the
  *  weekly scan, deep is web research. */
-export type Role = "plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep";
+export type Role = "plan" | "review" | "extract" | "translate" | "draft" | "short" | "watch" | "deep" | "appeal";
 export type Tool = { name: string; description: string; inputSchema: { type: "object"; properties: Record<string, unknown>; required?: string[] }; execute: (input: Record<string, unknown>) => unknown };
 export type Model = {
   kind: "claude" | "api" | "server";
