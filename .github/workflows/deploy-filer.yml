@@ -1,0 +1,59 @@
+# Deploy the portal worker (Render, placetta-filer) when its code changes on main, once CI passes on that commit.
+# Render's own auto-deploy didn't fire for this service, so this calls its deploy hook instead.
+# One-time setup: Render, placetta-filer, Settings, Deploy Hook, copy the URL; GitHub, Settings, Secrets and variables,
+# Actions, New repository secret RENDER_FILER_DEPLOY_HOOK. Without the secret this workflow does nothing.
+name: Deploy filer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - worker/filer/**
+      - src/renewal.ts
+      - supabase/functions/_shared/agent_inbox.ts
+      - supabase/functions/_shared/ai_cost.ts
+      - supabase/functions/_shared/cache_rates.ts
+      - supabase/functions/_shared/carry.ts
+      - supabase/functions/_shared/injection.ts
+      - supabase/functions/_shared/zdr.ts
+      - supabase/functions/file/accounts.ts
+      - supabase/functions/file/captcha.ts
+      - supabase/functions/file/destinations.ts
+      - supabase/functions/file/dest/**
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-filer
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      HOOK: ${{ secrets.RENDER_FILER_DEPLOY_HOOK }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Wait for CI on this commit
+        if: env.HOOK != ''
+        run: |
+          for i in $(seq 1 100); do
+            c=$(gh run list -R "$GITHUB_REPOSITORY" --workflow ci.yml --commit "$GITHUB_SHA" --json status,conclusion -q '.[0] | "\(.status) \(.conclusion)"')
+            echo "CI: ${c:-not started}"
+            case "$c" in
+              "completed success") exit 0 ;;
+              completed*) echo "CI didn't pass; not deploying."; exit 1 ;;
+            esac
+            sleep 30
+          done
+          echo "CI took too long; not deploying."; exit 1
+      - name: Deploy on Render
+        if: env.HOOK != ''
+        run: curl -fsS -X POST "$HOOK" -o /dev/null && echo "Render deploy started for $GITHUB_SHA"
+      - name: No hook yet
+        if: env.HOOK == ''
+        run: echo "RENDER_FILER_DEPLOY_HOOK isn't set, so nothing was deployed. See the top of this file."

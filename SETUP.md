@@ -25,6 +25,10 @@ within 3 minutes (`FILER_WAKE_SECONDS`), the filing goes another way the agency 
 
    Press **Apply**. When it's live, copy the service's address from the top of placetta-filer
    (`https://placetta-filer-….onrender.com`).
+
+   So every worker change goes live by itself once CI passes: placetta-filer, **Settings**, **Deploy Hook**, copy the
+   URL. In GitHub, **Settings**, **Secrets and variables**, **Actions**, **New repository secret**, name
+   `RENDER_FILER_DEPLOY_HOOK`, paste it. `.github/workflows/deploy-filer.yml` calls it.
 3. **Supabase**: Edge Functions, Secrets (https://supabase.com/dashboard/project/esquxzcfsylffuijvzec/functions/secrets).
    Add:
    - `FILER_URL` = the Render address from step 2
