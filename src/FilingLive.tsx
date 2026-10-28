@@ -84,6 +84,8 @@ function fromFiling(f: Filing, app: Application): Run {
       case "visit": case "queued": events.push({ kind: "open", at, text }); break;
       case "need_person": case "needs_you": case "wet_signature": events.push({ kind: "needs", at, text }); break;
       case "handoff": case "take_over": case "review_wait": case "you_sent": events.push({ kind: "team", at, text }); break;
+      // a visible CAPTCHA with the Placetta team (worker/filer/src/run.ts staffFirst): solved for the owner, or given to them
+      case "team_check": events.push({ kind: e.ref === "to_owner" ? "needs" : "team", at, text }); break;
       case "stopped": case "undone": events.push({ kind: "stopped", at, text }); break;
       case "retry": case "fax_failed": events.push({ kind: "retry", at, text }); break;
       case "fax_queued": case "mail_event": events.push({ kind: "sent", at, text }); break;
@@ -211,6 +213,9 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
   // Stopping is an owner's (the file function refuses it from members), so members don't see the button.
   const canStop = !!cloud?.owner && !!f && !f.submit_clicked_at && ["queued", "running", "needs_you"].includes(f.agent_state ?? "") && !["submitted", "accepted", "rejected", "canceled"].includes(f.status);
   const refused = run.events.filter(e => e.kind === "refused").length;
+  // the Placetta team has a human check on the agency's page right now: nothing for the owner to do
+  const lastCheck = [...(f?.agent_log ?? [])].reverse().find(x => x.kind === "team_check");
+  const teamOnIt = state === "running" && !!lastCheck && ["waiting", "opened"].includes(lastCheck.ref ?? "");
   const head: Record<State, Bi> = {
     queued: B("Starting", "即将开始"), running: B("Filing now", "正在提交"), needs_you: B("Needs you for one step", "需要您完成一步"),
     done: B("Submitted", "已提交"), team: B("With Placetta for a check", "快哉正在核对"), stopped: B("Stopped before anything was sent", "已在发送前停止"), failed: B("Didn't go through", "未能完成"),
@@ -284,6 +289,9 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
       {state === "needs_you" && f?.handoff_url && (
         <p className="fl-take"><span>{zh ? "机构网站需要真人完成一步（如验证码、验证码短信、签名或机构费用）。打开实时浏览器完成这一步，Odelia 会自己继续，无需再点任何按钮。" : "The agency's site needs a person for one step, like a CAPTCHA, a code sent to your phone, a signature or the agency's fee. Open the live browser and do that step: Odelia carries on by herself, with nothing else to tap."}</span>
           <a className="pill ink sm" href={f.handoff_url} target="_blank" rel="noopener noreferrer">{zh ? "打开实时浏览器" : "Open the live browser"}<I.ext /></a></p>
+      )}
+      {teamOnIt && (
+        <p className="fl-take"><span>{zh ? "机构网站要求完成真人验证（验证码）。快哉团队正在为您完成，您无需操作，之后 Odelia 会自己继续。" : "The agency's site asked for a human check (a CAPTCHA). The Placetta team is solving it for you, so there's nothing for you to do. Odelia carries on after."}</span></p>
       )}
       {run.channel === "portal" && state === "queued" && !run.sample && <WorkerWait />}
 
