@@ -10,10 +10,18 @@
 // see mail.ts): a From line, and any header the sender writes, can be forged. Unknown senders get nothing back (no backscatter);
 // unverified mail from a real account gets one note a day saying why. Auto-replies, bounces and lists are dropped.
 // Nothing is filed, paid, sent or deleted by email: the answer links to the approval in the app.
+//
+// One other kind of mail is read: a reply to an ask Odelia emailed someone else under Hands-off (the landlord's lease,
+// the contractor's plans; _shared/chase.ts). It's tied back by the reference in its subject, and only when it comes
+// from the very address that was asked and the provider vouches for it. Its files go into Documents and onto the
+// checklist item that was asked for, the owner gets an Update, and the job that waited on it carries on (agent-run
+// "watch"), with what they wrote fenced as data. Nobody gets an email back.
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { appLink, appOrigin, type Lang, SAY } from "../_shared/odelia.ts";
 import { currentWorkspace, DOC_TYPES, type Link, logMessage, storeDocs } from "../_shared/odelia_db.ts";
 import { fetchResend, type InMail, mailAsk, mailBody, mailReady, odeliaEmail, parsePostmark, postmarkAuthOk, replySubject, sendMail, senderVerified, verifyStandardWebhook } from "../_shared/mail.ts";
+import { attachReply, type ChaseRow, fromAsked, refOf, replyPrompt } from "../_shared/chase.ts";
+import { scoreText } from "../_shared/injection.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
@@ -63,6 +71,9 @@ export async function received(m: InMail) {
   // a forged mail's text never shows up as something the account holder said.
   const logId = await logMessage(admin, { user_id: user, direction: "in", channel: "email", kind: "chat", body: "", provider_id: m.id, subject: null });
   if (logId === null) return { ok: true, duplicate: true };
+  // a reply to an ask Odelia made of someone else, tied back by its reference
+  const ref = refOf(m.subject);
+  if (ref) { const r = await chaseReply(m, ref); if (r) return r; }
   if (!user) return { ok: true, skipped: "unknown_sender" };   // no backscatter to strangers or spoofed addresses
 
   const { data: pl } = await admin.from("phone_links").select("lang, last_workspace_id").eq("user_id", user).maybeSingle();
@@ -117,6 +128,57 @@ export async function received(m: InMail) {
   const { id } = await res.json() as { id: string };
   await admin.from("odelia_messages").update({ run_id: id }).eq("id", logId);
   return { ok: true, run: id };
+}
+
+/** A reply to one of Odelia's asks. null when the reference isn't one of hers (the mail is then handled as usual). */
+async function chaseReply(m: InMail, token: string): Promise<Record<string, unknown> | null> {
+  const { data: row } = await admin.from("odelia_chases").select("id, workspace_id, key, app_id, item_id, n, to_name, to_email, token").eq("token", token).maybeSingle();
+  if (!row) return null;
+  const c = row as ChaseRow;
+  // only the person asked, and only when the receiving provider vouches for their address; nobody gets mail back
+  if (!fromAsked(c, m.from)) return { ok: true, skipped: "not_the_person_asked" };
+  const verdict = await senderVerified(m);
+  if (!verdict.ok) { console.warn("chase reply unverified", verdict.why); return { ok: true, skipped: "unverified" }; }
+  const files: { name: string; mime: string; bytes: Uint8Array }[] = [];
+  for (const f of m.files.slice(0, 5)) {
+    if (!DOC_TYPES[f.mime]) continue;
+    let bytes = f.bytes;
+    if (!bytes && f.url?.startsWith("https://")) { try { const r = await fetch(f.url, { signal: AbortSignal.timeout(20000) }); if (r.ok) bytes = new Uint8Array(await r.arrayBuffer()); } catch { /* skipped */ } }
+    if (bytes?.length && bytes.length <= 20 * 1024 * 1024) files.push({ name: f.name.replace(/[\r\n]/g, " ").slice(0, 120), mime: f.mime, bytes });
+  }
+  const ws = c.workspace_id, at = new Date().toISOString(), day = at.slice(0, 10), who = c.to_name ?? m.from;
+  const saved: { id: string; name: string; path: string; size: number; mime: string }[] = [];
+  for (const f of files) {
+    const path = `${ws}/email/${crypto.randomUUID()}/${f.name.replace(/\s+/g, "-").replace(/[^\w.\-\u3400-\u9fff]+/g, "_").slice(0, 120)}`;
+    const up = await admin.storage.from("documents").upload(path, new Blob([f.bytes as BlobPart], { type: f.mime }), { contentType: f.mime, upsert: false });
+    if (up.error) continue;
+    const { error } = await admin.from("documents").insert({ workspace_id: ws, app_id: c.app_id, name: f.name, path, size: f.bytes.length, mime: f.mime, source: "agent", uploaded_by: null });
+    if (error) { await admin.storage.from("documents").remove([path]); continue; }
+    saved.push({ id: "d-" + crypto.randomUUID().slice(0, 8), name: f.name, path, size: f.bytes.length, mime: f.mime });
+  }
+  // the files into the workspace's Documents, the first onto the checklist item it was asked for
+  const { data: w } = await admin.from("workspaces").select("state").eq("id", ws).maybeSingle();
+  const state = (w?.state ?? {}) as { apps?: { id?: string; checklist?: { id?: string; label?: { en: string; zh: string } }[] }[]; docs?: unknown[] };
+  const label = (state.apps ?? []).find((a) => a?.id === c.app_id)?.checklist?.find((x) => x?.id === c.item_id)?.label ?? null;
+  if (saved.length) {
+    const tag = { en: `From ${who}`, zh: `来自 ${who}` };
+    const docs = saved.map((f) => ({ id: f.id, name: f.name, kind: f.mime === "application/pdf" ? "pdf" : "jpg", size: f.size, by: "agent", at, tag, path: f.path, app: c.app_id }));
+    const next = attachReply({ ...state, docs: [...docs, ...(Array.isArray(state.docs) ? state.docs : [])] }, { app: c.app_id, item: c.item_id, doc: saved[0].id, name: who, day });
+    await admin.from("workspaces").update({ state: next }).eq("id", ws);
+  }
+  const text = (m.text ?? "").trim();
+  const held = scoreText(text).verdict !== "clean";
+  await admin.from("odelia_chases").update({ replied_at: at, reply_from: m.from.slice(0, 320), reply_snippet: held ? "(held back: it was aimed at an AI)" : text.slice(0, 600), reply_files: saved.length })
+    .eq("workspace_id", ws).eq("key", c.key).is("replied_at", null);
+  const what = label ?? { en: "what Odelia asked for", zh: "Odelia 索取的文件" };
+  await admin.from("updates").upsert({ workspace_id: ws, kind: "mail", app_id: c.app_id, dedupe: `chase-reply:${c.id}:${m.id}`.slice(0, 300),
+    title: { en: `${who} answered about the ${what.en.toLowerCase()}${saved.length ? `: ${saved.length} file${saved.length === 1 ? "" : "s"} in` : ""}`.slice(0, 200), zh: `${who} 回复了${what.zh}${saved.length ? `：已收到 ${saved.length} 个文件` : ""}`.slice(0, 200) },
+    body: { en: "Odelia is checking it and carrying on with the job. Nothing is filed until you approve.", zh: "Odelia 正在核对并继续这项工作。您批准之前不会提交任何内容。" } },
+    { onConflict: "workspace_id,dedupe", ignoreDuplicates: true });
+  const prompt = replyPrompt(c, label, text, saved.map((f) => f.name), held);
+  const res = await internal("agent-run", { action: "watch", workspace_id: ws, prompt: prompt.slice(0, 2000), title: { en: `${who} answered: carrying on`, zh: `${who} 已回复：继续处理` } }).catch(() => null);
+  if (!res?.ok) console.error("chase reply wake", res?.status ?? "unreachable");
+  return { ok: true, chase: c.id, files: saved.length, woke: !!res?.ok };
 }
 
 export async function handle(req: Request): Promise<Response> {

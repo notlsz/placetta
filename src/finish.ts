@@ -240,7 +240,7 @@ export function resumable(w: Workspace, now = Date.now(), lang: "en" | "zh" = "e
   const plans = new Set((w.controls?.plans ?? []).filter(p => p.state === "waiting").map(p => p.job));
   const out: { job: string; prompt: string; title: Bi }[] = [];
   for (const j of w.jobs ?? []) {
-    if (j.parent || plans.has(j.id)) continue;
+    if (j.parent || plans.has(j.id) || j.specialist) continue;   // a specialist's answer wakes it, not the clock
     const age = now - Date.parse(j.updated);
     const stopped = j.status === "waiting" && (j.on === "odelia" || (!j.on && j.waiting?.en === STOPPED_HERE.en)) && age >= RESUME_AFTER_MS;
     const dead = j.status === "running" && !j.children?.length && age >= DEAD_RUN_MS;

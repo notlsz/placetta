@@ -9,3 +9,5 @@ export { finishWork, resumable, stampFilings, MAX_RESUMES } from "../finish";
 export { approvalsLine } from "../today";
 // Appeals (src/appeals): the playbook and the deadline for a denied filing, for the monitor's Update and handoff
 export { appealFor, deadlineFor, daysLeft, NOT_A_LAW_FIRM, TIERS } from "../appeals";
+// Odelia goes first (src/initiative.ts): the morning's moves, the chase email and the Update, for monitor/initiative.ts
+export { chaseMail, contactsOf, MAX_ASKS, morning, morningUpdate, newToken, weekday, REF_RE } from "../initiative";

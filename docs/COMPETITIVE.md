@@ -736,3 +736,80 @@ Why each moved, or didn't:
 | The monitor refreshing every page daily | Vanta's tests run on a schedule | Today the page's rows refresh whenever the team has the workspace open, and expiry, agency drift and approvals are live at read. A daily refresh needs the report builder in the monitor's bundle (`npm run build:agent`, function size) |
 | Reading search-page-only agency records weekly | Vanta's integrations pull data on their own | A page lookup per license (California ABC, New York SLA, Texas TABC) needs the team to set it, or Odelia to read it at model cost |
 | The words "in good standing" on a public page | Vanta shows a green check only for passing controls | The page says where its status comes from and that it isn't legal advice; counsel should review that wording before it goes to lenders |
+
+## Odelia goes first (2026-10-27)
+
+The brief: automation above all. Odelia does the work on the owner's behalf and asks a person only for a signature, a
+payment approval, a fact only they know, or a CAPTCHA. Pages read on 2026-10-27; third-party pages by a company that
+sells a competing product are marked. Not fetched this session (the fetch needed a permission that never came):
+help.openai.com (ChatGPT agent) and town.com/docs; their lines come from the pages named.
+
+### Each product's best and worst agent mechanic
+
+| Product | Best (copied, with source) | Worst (filled) |
+|---|---|---|
+| Instinct | The "most proactive personal assistant agent": it starts conversations and follows up; a dedicated email address per assistant since September ([eesel review](https://www.eesel.ai/blog/instinct-ai-review), competitor; [TechCrunch, 2026-10-24](https://techcrunch.com/2026/10/24/all-the-ai-agents-that-can-live-in-your-text-messages/)) | "not responsible for any unintended Actions", "records of Actions … may not always be accurate", and a hallucination layer built after an incident (same review) |
+| Town | "Townie" routines "on a schedule or whenever something new comes in", "asks before anything important goes out", and named CPAs answering within a day ([town.com](https://town.com); docs/COMPARE-ALL.md) | No base price; the product is never shown (COMPARE-ALL) |
+| OpenAI Dots | Ongoing responsibility "between conversations"; rules of "take action if pre-approved", "ask before taking action", "hand off to you"; money and passwords "always come back to you" ([eesel](https://www.eesel.ai/blog/openai-dots), competitor) | Prompt-injection defenses "do not eliminate it"; an agent "had more permissions than I thought, and made use of those permissions" (same page) |
+| Grok Bot | Bots that "finish jobs end to end, and only come back when something needs your approval"; async bot-to-bot wake-ups ([eesel](https://www.eesel.ai/blog/grok-bot), competitor) | "no product-enforced list of actions that always stop"; "There is no dry-run mode" (same page) |
+| Claude Code and the Agent SDK | Permission modes up to `auto`, where "a separate classifier model reviews actions before they run"; "Deny rules block in every mode" ([Claude Code docs](https://code.claude.com/docs/en/permission-modes)) | A kit: what an action means for a license is the builder's job |
+| ChatGPT agent | Pauses for payments and asks before anything dangerous (via the earlier pass's aiagentrank source) | "Multi-hour agent runs still fail at ~20–30% rates" (same) |
+| Perplexity Computer | "Tasks can run for hours, days, or even weeks"; paused tasks "resume automatically" ([eesel](https://eesel.ai/blog/perplexity-computer), competitor) | No per-task cost; "minimal long-term user feedback" (same) |
+| Perplexity Comet | Browser control on the user's own pages | "PleaseFix": a calendar invite steered it into sending local files to an attacker, "the victim is oblivious" ([TechRadar, 2026-03-03](https://www.techradar.com/pro/security/the-attack-requires-no-exploit-no-user-clicks-and-no-explicit-request-for-sensitive-actions-experts-say-perplexitys-ai-comet-browser-can-be-hijacked-to-steal-your-passwords)) |
+
+### Already in Placetta, not redone
+
+Ask me first, Usual and Plan first with Always allow and Never rules (Claude Code's modes, `src/autonomy.ts`); store bots
+and `split_job` (subagents); `set_plan` with steps, a done list and a separate check (plan and todo); jobs picked back up
+after a crash or a stop (`resumable`, `MAX_RESUMES`); the daily status check that chases agencies past their published
+time; renewal jobs from 60 days; inspection booking tasks; teach mode (Grok); parallel markets (Perplexity); the live
+filing view with takeover (another agent's area).
+
+### What was missing, and built
+
+1. **Odelia goes first** (`src/initiative.ts`, `supabase/functions/monitor/initiative.ts`). Each morning, for every
+   store: who holds each missing document (the landlord's lease, the contractor's plans, the insurer's certificate,
+   from the label in English or Chinese), asked of the saved contact with that role, followed up every three business
+   days, three asks, then the owner hears "Lena hasn't answered 3 asks since Oct 20: call her". Renewals 61 to 90 days
+   out are prepared ahead (nothing filed; the renewal job puts it up at 60). The owner gets one Update with only what
+   needs a person: a signature, a payment, an approval, their own ID, how to reach someone, a portal code. Fills
+   Instinct's gap: every ask is a row (`odelia_chases`), and the email says up front it's from an AI assistant.
+2. **Hands-off**, a fourth setting (`src/autonomy.ts`), copying Claude Code's `auto` and Dots's "pre-approved". A
+   routine email to people an owner saved goes out on its own after the 10-minute undo window, and the morning's asks go
+   from Odelia's own address (Instinct's own email). Fills Grok's and Dots's gap in code, not guidance: an agency, a text
+   (no third-party consent), a link, money, a signature or a commitment, anyone not saved, and any request from outside
+   the app always wait; it's checked again when the undo window ends.
+3. **Jobs that wake on a reply** (`supabase/functions/_shared/chase.ts`, `odelia-mail`). A reply keeps the subject's
+   reference; only the address asked, verified by the provider, can answer. Its files go into Documents and onto the
+   checklist item asked for, the job carries on (Perplexity's and Devin's resume), and its words reach the run as one
+   fenced piece of data, held back entirely when aimed at an AI (Comet's gap).
+4. **A specialist when unsure** (`src/escalate.ts`, `ask_specialist`, migration `20261102090000_odelia_initiative`).
+   No current source, two sources that disagree, a variance or hearing, an unconfirmed deadline rule: Odelia asks a
+   Placetta specialist instead of guessing (Town's CPA). The job waits on them with "answers by Thu, Nov 5, 2:00 PM ET"
+   (one business day, New York time, the database's own rule), nothing moves it back early, and the specialist's
+   answer wakes it (monitor). Server only, one open per application, three a day per business.
+
+### Scores, before and after
+
+Out of 10 for Odelia's job. Done for the owner uses the incumbents table's scale above; automation is new: how much of
+the job moves without the owner touching it.
+
+| | Done for the owner | Automation |
+|---|---:|---:|
+| Instinct | 4 | 6 |
+| Town | 7 | 5 |
+| OpenAI Dots | 4 | 6 |
+| Grok Bot | 5 | 6 |
+| Claude Code | 3 | 4 |
+| ChatGPT agent | 4 | 4 |
+| Perplexity Computer | 5 | 5 |
+| Perplexity Comet | 2 | 3 |
+| **Odelia, before** | 8.5 | 6.5 |
+| **Odelia, after** | 9 | 8.5 |
+
+Why not higher: filing, paying and signing stay the owner's on purpose; texts to third parties need their consent;
+Hands-off emails need `ODELIA_EMAIL` with Postmark or Resend live; the specialist's one-day answer needs staff on the
+queue; none of it has run with a real owner yet.
+
+Tests: `scripts/initiative-test.ts` (in `npm run test:agent`), `supabase/functions/monitor/initiative_test.ts`,
+`supabase/functions/_shared/chase_test.ts`, `supabase/tests/odelia_initiative.sql` (17 checks), red team H1 to H12.

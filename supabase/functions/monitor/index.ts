@@ -14,6 +14,11 @@
 // Owners who linked a phone (Settings, Text and call Odelia) also hear about what matters most there: a call for
 // something urgent if they want calls, a text for what needs them this week. Those go into odelia_outbox, and
 // odelia-sms sends them outside their quiet hours, at most one call and three texts a day.
+// Odelia goes first (initiative.ts): each morning she starts the next unblocked step for every store (asks the landlord,
+// contractor or insurer for a missing document and follows up, gets ahead of renewals 61 to 90 days out) and the owner
+// gets one Update with only what needs a person. Under Hands-off the asks go from her own address (ODELIA_EMAIL). A
+// specialist's answer to a question she asked (ask_specialist) wakes the job that waited on it. ODELIA_INITIATIVE=off
+// turns the morning off.
 // Odelia's bill: owners get an Update at 50% and 80% of the month's allowance (ai_allowance_alerts), and a workspace
 // that spends more than AI_WS_DAILY_LIMIT_USD in a day (default $10), or more than 5x the median workspace that day,
 // goes into saver mode until midnight UTC with a task for the team (ai_throttle_sweep).
@@ -35,6 +40,10 @@ import { deliverNotices, noticeDb, outboxText } from "../_shared/notices.ts";
 import { stageAlert, stageUpdates, type StageFiling, type StageUpdate } from "./stage.ts";
 import { inspectionWork, PREP } from "./inspections.ts";
 import { runStatusChecks, type StatusFiling, type StatusIO, type StatusRun, type WsState } from "./status_checks.ts";
+import { initiative, movePrompt, specialistWake, type ChaseRow, type InitIO } from "./initiative.ts";
+import { mailOutReady, sendMail as sendOdeliaMail, mailBody } from "../_shared/mail.ts";
+// @deno-types="../_shared/opening.d.ts"
+import type { ChaseLog, Move } from "../_shared/opening.js";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -679,6 +688,48 @@ Deno.serve(async (req) => {
     } catch (e) { console.error("approvals line", ws, String(e).slice(0, 120)); }
   }
 
+  // Odelia goes first (initiative.ts). The asks Hands-off sends from her own address go now (no model needed); the
+  // ones a run drafts for approval, and the renewals she gets ahead of, start with the other jobs below.
+  const laterMoves = new Map<string, Move[]>();
+  let initiativeSent = 0;
+  if (Deno.env.get("ODELIA_INITIATIVE") !== "off") {
+    try {
+      const { data: owners } = await admin.from("workspace_members").select("workspace_id, user_id").eq("role", "owner");
+      const ownersOf = new Map<string, string[]>();
+      for (const o of owners ?? []) ownersOf.set(o.workspace_id as string, [...(ownersOf.get(o.workspace_id as string) ?? []), o.user_id as string]);
+      const { data: asks } = await admin.from("odelia_chases").select("workspace_id, key, n, day, to_email, replied_at").gte("day", new Date(now - 180 * 864e5).toISOString().slice(0, 10));
+      const logs = new Map<string, ChaseLog>();
+      for (const a of (asks ?? []) as { workspace_id: string; key: string; n: number; day: string; to_email: string | null; replied_at: string | null }[]) {
+        const log = logs.get(a.workspace_id) ?? {}, was = log[a.key];
+        log[a.key] = { n: Math.max(was?.n ?? 0, a.n), last: !was || a.day > was.last ? a.day : was.last, ...(a.to_email ? { to: a.to_email } : {}), ...((was?.replied || a.replied_at) ? { replied: true } : {}) };
+        logs.set(a.workspace_id, log);
+      }
+      const mailOk = mailOutReady((k) => Deno.env.get(k));
+      const io: InitIO = {
+        owners: (ws) => ownersOf.get(ws) ?? [],
+        chased: (ws) => logs.get(ws) ?? {},
+        claim: async (row: ChaseRow) => { const { data, error } = await admin.from("odelia_chases").upsert(row, { onConflict: "workspace_id,key,n", ignoreDuplicates: true }).select("id"); if (error) console.error("chase claim", error.code); return !!data?.length; },
+        release: async (ws, key, n) => { await admin.from("odelia_chases").delete().eq("workspace_id", ws).eq("key", key).eq("n", n); },
+        sent: async (ws, key, n, id) => { await admin.from("odelia_chases").update({ provider_id: id.slice(0, 200) }).eq("workspace_id", ws).eq("key", key).eq("n", n); },
+        mail: mailOk ? async (to, subject, text) => { const b = mailBody(text); const r = await sendOdeliaMail((k) => Deno.env.get(k), { to, subject, text: b.text, html: b.html }); return { ok: r.ok, id: r.id }; } : null,
+        claimPrep: async (ws, key, date) => { const { data } = await admin.from("routine_runs").upsert({ workspace_id: ws, routine_id: key.slice(0, 200), day: date }, { onConflict: "workspace_id,routine_id,day", ignoreDuplicates: true }).select("routine_id"); return !!data?.length; },
+      };
+      const canStart = canConverse((k) => Deno.env.get(k)) && Deno.env.get("ODELIA_JOBS") !== "off";
+      const filingsOf = new Map<string, Filing[]>();
+      for (const f of (filings ?? []) as Filing[]) filingsOf.set(f.workspace_id, [...(filingsOf.get(f.workspace_id) ?? []), f]);
+      for (const [ws, list] of byWs) {
+        const { data: plan } = await admin.rpc("plan_of", { ws });
+        if (plan === "none") continue;
+        try {
+          const r = await initiative(ws, names.get(ws) ?? "", states.get(ws), workspaceToday((states.get(ws) as { stores?: unknown } | null)?.stores, started), io, { canStart, filings: filingsOf.get(ws) ?? [] });
+          if (r.update) list.push(r.update);
+          if (r.later.length) laterMoves.set(ws, r.later);
+          initiativeSent += r.sent;
+        } catch (e) { console.error("initiative", ws, String(e).slice(0, 160)); }
+      }
+    } catch (e) { console.error("initiative", String(e).slice(0, 160)); }
+  }
+
   // Record them; the unique (workspace, dedupe) key keeps a day's run from repeating an earlier one.
   for (const [ws, list] of byWs) {
     if (!list.length) continue;
@@ -980,6 +1031,29 @@ Deno.serve(async (req) => {
         title: `Counsel advisable (${a.appeal.why.en}): introduce an attorney for ${a.appeal.name.en}${a.appeal.last_day ? `, deadline ${a.appeal.last_day}` : ""}. Placetta takes no referral fee.` },
         { onConflict: "dedupe", ignoreDuplicates: true }).then(({ error }) => { if (error) console.error("counsel task", error.code); });
     }
+    // Odelia goes first: the asks a run drafts for approval and the renewals she gets ahead of (claimed above). A move
+    // that doesn't start gives its claim back, so tomorrow tries again.
+    let moved = 0;
+    for (const [ws, list] of laterMoves) {
+      for (const mv of list) {
+        const p = movePrompt(mv);
+        const id = await start(ws, p.prompt, p.title);
+        if (id) { moved++; if (mv.kind === "chase") await admin.from("odelia_chases").update({ run_id: id }).eq("workspace_id", ws).eq("key", mv.key).eq("n", mv.ask); }
+        else if (mv.kind === "chase") await admin.from("odelia_chases").delete().eq("workspace_id", ws).eq("key", mv.key).eq("n", mv.ask);
+        else await admin.from("routine_runs").delete().eq("workspace_id", ws).eq("routine_id", mv.key.slice(0, 200)).eq("day", mv.date);
+      }
+    }
+    // A specialist answered a question Odelia asked (ask_specialist): the job that waited on it carries on from the
+    // answer, which goes to her as the team's words. Marked woken first, so it's picked up once.
+    const { data: replies } = await admin.from("specialist_reviews").select("id, workspace_id, app_id, title, note, outcome, comment, reviewer_name, job_id")
+      .eq("asked_by_agent", true).eq("status", "done").is("woke_at", null).limit(50);
+    for (const r of (replies ?? []) as { id: string; workspace_id: string; app_id: string; title: Bi; note: string | null; outcome: string | null; comment: string | null; reviewer_name: string | null; job_id: string | null }[]) {
+      const { data: mine } = await admin.from("specialist_reviews").update({ woke_at: started.toISOString() }).eq("id", r.id).is("woke_at", null).select("id");
+      if (!mine?.length) continue;
+      const w = specialistWake(r);
+      if (await start(r.workspace_id, w.prompt, w.title)) moved++;
+      else await admin.from("specialist_reviews").update({ woke_at: null }).eq("id", r.id);
+    }
     // Jobs she stopped partway (a run out of time or out of steps, or one that died): picked back up, at most once a day
     // each and MAX_RESUMES times in all; after that they wait for the person (src/finish.ts resumable). Each pick-up
     // claims its day in routine_runs, so two runs of the monitor never start it twice.
@@ -1020,5 +1094,5 @@ Deno.serve(async (req) => {
     { app: APP, today, limit: 500 }).catch((e) => { console.error("mention notices", String(e).slice(0, 160)); return null; });
 
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, agency_asks: answered, status_checks: status, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled });
+  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, chases_sent: initiativeSent, agency_asks: answered, status_checks: status, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled });
 });
