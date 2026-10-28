@@ -150,7 +150,7 @@ Read at 600 5th Ave S, Seattle, WA 98104. Jurisdictions: US, WA, SEA, KC. King C
 
 | Filing | Official form or portal | Agency PDF filled | Route | Gap |
 |---|---|---|---|---|
-| LLC formation | `wa-sos` Certificate of Formation · [PDF](https://www.sos.wa.gov/sites/default/files/2025-06/6.2025%20-%20LLC%20-%20COF_0.pdf) · portal ccfs.sos.wa.gov | yes | portal (ccfs.sos.wa.gov) |  |
+| LLC formation | `wa-sos` Certificate of Formation · [PDF](https://www.sos.wa.gov/sites/default/files/2025-06/6.2025%20-%20LLC%20-%20COF_0.pdf) · portal ccfs.sos.wa.gov | yes | portal (ccfs.sos.wa.gov) (an agency fee keeps email, fax and mail with the team) |  |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Washington business license (state tax registration) | `wa-bls` Business License Application · [PDF](https://dor.wa.gov/sites/default/files/2022-03/700028_0.pdf) · portal secure.dor.wa.gov | yes | portal (secure.dor.wa.gov), mail |  |
 | Food worker cards for staff | `wa-food-worker` Washington State Food Worker Card | no | Owner packet: Each worker takes the state training and exam themselves, online at foodworkercard.wa.gov or through a local health department. | The owner (or the person certified) does it: Each worker takes the state training and exam themselves, online at foodworkercard.wa.gov or through a local health department. |
@@ -456,7 +456,7 @@ Read at 8065 Leesburg Pike, Tysons, VA 22182. Jurisdictions: US, VA, FFX.
 
 | Filing | Official form or portal | Agency PDF filled | Route | Gap |
 |---|---|---|---|---|
-| LLC formation (Articles of Organization) | `va-llc` Articles of Organization (Clerk's Information System) · portal cis.scc.virginia.gov | no | portal (cis.scc.virginia.gov) | Online only (cis.scc.virginia.gov): Placetta prepares the answers summary for the agency's site. |
+| LLC formation (Articles of Organization) | `va-llc` Articles of Organization (Clerk's Information System) · portal cis.scc.virginia.gov | no | portal (cis.scc.virginia.gov) (an agency fee keeps email, fax and mail with the team) | Online only (cis.scc.virginia.gov): Placetta prepares the answers summary for the agency's site. |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Virginia business tax registration | `va-tax` Business registration (Virginia Tax online, or Form R-1) · [PDF](https://www.tax.virginia.gov/sites/default/files/taxforms/business-registration/any/r-1-any.pdf) · portal account.tax.virginia.gov | yes | portal (account.tax.virginia.gov) |  |
 | Certified food protection manager | `va-food-manager` Certified Food Protection Manager (12VAC5-421) | no | Owner packet: An employee with authority over food holds a certificate from a CFP-accredited program, earned by passing its exam. | The owner (or the person certified) does it: An employee with authority over food holds a certificate from a CFP-accredited program, earned by passing its exam. |
@@ -491,7 +491,7 @@ Read at 668 N 44th St, Phoenix, AZ 85008. Jurisdictions: US, AZ, PHX, MARI. Mari
 
 | Filing | Official form or portal | Agency PDF filled | Route | Gap |
 |---|---|---|---|---|
-| Arizona LLC formation | `az-llc` Articles of Organization (Form L010) · [PDF](https://www.azcc.gov/docs/default-source/corps-files/forms/l010-articles-of-organization.pdf) · portal arizonabusinesscenter.azcc.gov | yes | portal (arizonabusinesscenter.azcc.gov), fax, mail |  |
+| Arizona LLC formation | `az-llc` Articles of Organization (Form L010) · [PDF](https://www.azcc.gov/docs/default-source/corps-files/forms/l010-articles-of-organization.pdf) · portal arizonabusinesscenter.azcc.gov | yes | portal (arizonabusinesscenter.azcc.gov), fax, mail (an agency fee keeps email, fax and mail with the team) |  |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Transaction privilege tax (TPT) license | `az-tpt` Arizona Joint Tax Application (JT-1/UC-001) · [PDF](https://www.azdor.gov/sites/default/files/2023-03/FORMS_TPT_10196_f.pdf) · portal www.aztaxes.gov | yes | portal (www.aztaxes.gov) |  |
 | Certified food protection manager | `mc-cfpm` Certified Food Protection Manager (Maricopa County Environmental Health Code, Chapter VII) | no | Placetta team: not researched | Online only (www.maricopa.gov): Placetta prepares the answers summary for the agency's site. |
@@ -599,7 +599,7 @@ Read at 600 5th Ave S, Seattle, WA 98104. Jurisdictions: US, WA.
 
 | Filing | Official form or portal | Agency PDF filled | Route | Gap |
 |---|---|---|---|---|
-| LLC formation | `wa-sos` Certificate of Formation · [PDF](https://www.sos.wa.gov/sites/default/files/2025-06/6.2025%20-%20LLC%20-%20COF_0.pdf) · portal ccfs.sos.wa.gov | yes | portal (ccfs.sos.wa.gov) |  |
+| LLC formation | `wa-sos` Certificate of Formation · [PDF](https://www.sos.wa.gov/sites/default/files/2025-06/6.2025%20-%20LLC%20-%20COF_0.pdf) · portal ccfs.sos.wa.gov | yes | portal (ccfs.sos.wa.gov) (an agency fee keeps email, fax and mail with the team) |  |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Washington business license (state tax registration) | `wa-bls` Business License Application · [PDF](https://dor.wa.gov/sites/default/files/2022-03/700028_0.pdf) · portal secure.dor.wa.gov | yes | portal (secure.dor.wa.gov), mail |  |
 | Food worker cards for staff | `wa-food-worker` Washington State Food Worker Card | no | Owner packet: Each worker takes the state training and exam themselves, online at foodworkercard.wa.gov or through a local health department. | The owner (or the person certified) does it: Each worker takes the state training and exam themselves, online at foodworkercard.wa.gov or through a local health department. |
@@ -633,7 +633,7 @@ Read at 1655 Oak Tree Rd, Edison, NJ 08820. Jurisdictions: US, NJ.
 
 | Filing | Official form or portal | Agency PDF filled | Route | Gap |
 |---|---|---|---|---|
-| Business formation and tax registration | `nj-formation` Public Records Filing for New Business Entity · [PDF](https://www.nj.gov/treasury/revenue/pdf/Legacy-Reg-Form.pdf) · portal www.njportal.com | yes | portal (www.njportal.com) |  |
+| Business formation and tax registration | `nj-formation` Public Records Filing for New Business Entity · [PDF](https://www.nj.gov/treasury/revenue/pdf/Legacy-Reg-Form.pdf) · portal www.njportal.com | yes | portal (www.njportal.com) (an agency fee keeps email, fax and mail with the team) |  |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | New Jersey tax and employer registration (NJ-REG) | `nj-reg` Form NJ-REG (Business Registration) · [PDF](https://www.nj.gov/treasury/revenue/pdf/Legacy-Reg-Form.pdf) · portal www.njportal.com | yes | portal (www.njportal.com) |  |
 | Workers' compensation insurance | `nj-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
@@ -668,7 +668,7 @@ Read at 8065 Leesburg Pike, Tysons, VA 22182. Jurisdictions: US, VA.
 
 | Filing | Official form or portal | Agency PDF filled | Route | Gap |
 |---|---|---|---|---|
-| LLC formation (Articles of Organization) | `va-llc` Articles of Organization (Clerk's Information System) · portal cis.scc.virginia.gov | no | portal (cis.scc.virginia.gov) | Online only (cis.scc.virginia.gov): Placetta prepares the answers summary for the agency's site. |
+| LLC formation (Articles of Organization) | `va-llc` Articles of Organization (Clerk's Information System) · portal cis.scc.virginia.gov | no | portal (cis.scc.virginia.gov) (an agency fee keeps email, fax and mail with the team) | Online only (cis.scc.virginia.gov): Placetta prepares the answers summary for the agency's site. |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Virginia business tax registration | `va-tax` Business registration (Virginia Tax online, or Form R-1) · [PDF](https://www.tax.virginia.gov/sites/default/files/taxforms/business-registration/any/r-1-any.pdf) · portal account.tax.virginia.gov | yes | portal (account.tax.virginia.gov) |  |
 | Certified food protection manager | `va-food-manager` Certified Food Protection Manager (12VAC5-421) | no | Owner packet: An employee with authority over food holds a certificate from a CFP-accredited program, earned by passing its exam. | The owner (or the person certified) does it: An employee with authority over food holds a certificate from a CFP-accredited program, earned by passing its exam. |
@@ -681,7 +681,7 @@ Read at 668 N 44th St, Phoenix, AZ 85008. Jurisdictions: US, AZ.
 
 | Filing | Official form or portal | Agency PDF filled | Route | Gap |
 |---|---|---|---|---|
-| Arizona LLC formation | `az-llc` Articles of Organization (Form L010) · [PDF](https://www.azcc.gov/docs/default-source/corps-files/forms/l010-articles-of-organization.pdf) · portal arizonabusinesscenter.azcc.gov | yes | portal (arizonabusinesscenter.azcc.gov), fax, mail |  |
+| Arizona LLC formation | `az-llc` Articles of Organization (Form L010) · [PDF](https://www.azcc.gov/docs/default-source/corps-files/forms/l010-articles-of-organization.pdf) · portal arizonabusinesscenter.azcc.gov | yes | portal (arizonabusinesscenter.azcc.gov), fax, mail (an agency fee keeps email, fax and mail with the team) |  |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Transaction privilege tax (TPT) license | `az-tpt` Arizona Joint Tax Application (JT-1/UC-001) · [PDF](https://www.azdor.gov/sites/default/files/2023-03/FORMS_TPT_10196_f.pdf) · portal www.aztaxes.gov | yes | portal (www.aztaxes.gov) |  |
 | Employer registration for withholding and unemployment insurance (JT-1) | `az-jt1` Arizona Joint Tax Application (Form JT-1), on AZTaxes.gov | no | Placetta team: not researched | Online only (www.aztaxes.gov): Placetta prepares the answers summary for the agency's site. |
@@ -720,7 +720,7 @@ Read at 3390 S State St, Salt Lake City, UT 84115. Jurisdictions: US, UT.
 
 | Filing | Official form or portal | Agency PDF filled | Route | Gap |
 |---|---|---|---|---|
-| LLC formation (Certificate of Organization) | `ut-llc` Certificate of Organization (online) · portal businessregistration.utah.gov | no | portal (businessregistration.utah.gov) | Online only (businessregistration.utah.gov): Placetta prepares the answers summary for the agency's site. |
+| LLC formation (Certificate of Organization) | `ut-llc` Certificate of Organization (online) · portal businessregistration.utah.gov | no | portal (businessregistration.utah.gov) (an agency fee keeps email, fax and mail with the team) | Online only (businessregistration.utah.gov): Placetta prepares the answers summary for the agency's site. |
 | Application for Employer Identification Number (EIN) | `irs-ss4` Form SS-4 (Rev. December 2025) · [PDF](https://www.irs.gov/pub/irs-pdf/fss4.pdf) | no | fax, mail | Filed online by most owners (the IRS's EIN assistant); the paper SS-4 goes to the team, which fills it with the owner's ITIN or SSN line left for them. |
 | Utah sales tax license and withholding account | `ut-tax` Utah State Business and Tax Registration (online, formerly TC-69) · portal tap.tax.utah.gov | no | portal (tap.tax.utah.gov) | Online only (tap.tax.utah.gov): Placetta prepares the answers summary for the agency's site. |
 | New employer registration (unemployment insurance) | `ut-ui` Employer Registration (online) · portal jobs.utah.gov | no | portal (jobs.utah.gov) | Online only (jobs.utah.gov): Placetta prepares the answers summary for the agency's site. |

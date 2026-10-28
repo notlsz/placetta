@@ -724,6 +724,76 @@ export const DEST: Record<string, Dest> = {
     signature: "typed", payment: "portal", onBehalf: "unstated",
     checked: "2026-10-18", source: "https://www.nj.gov/treasury/revenue/gettingregistered.shtml",
   },
+
+  // ---- Company formation and foreign qualification (src/forms/entities.ts), read on the agencies' own pages on
+  // 2026-10-27. Every portal here asks for an account or a sign-in before the form, or isn't documented step by step,
+  // so no worker playbook is written for it: the first filing runs in teach mode with the team watching. ----
+  // New Jersey's Business Formation service: "file certificates of formation and authorization of business entities";
+  // an account is optional ("you may want to consider creating an account"), the fee is paid by "Credit Card or eCheck"
+  ...Object.fromEntries(["nj-corp-form", "nj-foreign-registration", "nj-corp-qualify"].map((id) => [id, {
+    portal: "www.njportal.com", portalUrl: "https://www.njportal.com/DOR/BusinessFormation/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    ...(id !== "nj-corp-form" ? { attach: ["Good Standing Certificate from your home state (only for foreign entities)"] } : {}),
+    checked: "2026-10-27", source: "https://www.njportal.com/DOR/BusinessFormation/",
+  } satisfies Dest])),
+  // California: "File Articles of Incorporation online at bizfileOnline.sos.ca.gov"; a foreign corporation files its
+  // Statement and Designation there and "must attach a valid certificate of good standing"
+  "ca-corp-form": {
+    portal: "bizfileonline.sos.ca.gov", portalUrl: "https://bizfileonline.sos.ca.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-27", source: "https://www.sos.ca.gov/business-programs/business-entities/faqs",
+  },
+  "ca-corp-qualify": {
+    portal: "bizfileonline.sos.ca.gov", portalUrl: "https://bizfileonline.sos.ca.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    attach: ["Certificate of good standing from the jurisdiction where the corporation is incorporated"],
+    checked: "2026-10-27", source: "https://www.sos.ca.gov/business-programs/business-entities/faqs",
+  },
+  // Washington's CCFS: "Start a Domestic (WA) Profit Corporation Online" and "Register a Foreign (Non-WA) Profit
+  // Corporation Online", "Filing Fee: $180 in addition to an online processing fee", paid at checkout after sign-in
+  "wa-corp-form": {
+    portal: "ccfs.sos.wa.gov", portalUrl: "https://ccfs.sos.wa.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-27", source: "https://www.sos.wa.gov/corporations-charities/business-entities/online-filing-instructions/start-domestic-wa-profit-corporation-online",
+  },
+  "wa-corp-qualify": {
+    portal: "ccfs.sos.wa.gov", portalUrl: "https://ccfs.sos.wa.gov/",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    checked: "2026-10-27", source: "https://www.sos.wa.gov/corporations-charities/business-entities/online-filing-instructions/register-foreign-non-wa-profit-corporation-online",
+  },
+  // New York: the certificate and the application "should be forwarded to the New York Department of State, Division of
+  // Corporations, One Commerce Plaza, 99 Washington Avenue, Albany, NY 12231", with the fee; the team sends it
+  "ny-corp-form": {
+    mail: { name: "New York Department of State, Division of Corporations", line1: "One Commerce Plaza, 99 Washington Avenue", city: "Albany", state: "NY", zip: "12231" },
+    signature: "wet", payment: "with_filing",
+    checked: "2026-10-27", source: "https://dos.ny.gov/certificate-incorporation-domestic-business-corporation",
+  },
+  "ny-corp-qualify": {
+    mail: { name: "New York Department of State, Division of Corporations", line1: "One Commerce Plaza, 99 Washington Avenue", city: "Albany", state: "NY", zip: "12231" },
+    signature: "wet", payment: "with_filing",
+    checked: "2026-10-27", source: "https://dos.ny.gov/application-authority-foreign-business-corporation",
+  },
+  // Texas: "Mail filings to: P.O. Box 13697, Austin, TX 78711-3697" (the 201 and 301 instructions); "A wet ink signature
+  // is not required" (the filing FAQ)
+  "tx-corp-form": {
+    mail: { name: "Secretary of State, Corporations Section", line1: "P.O. Box 13697", city: "Austin", state: "TX", zip: "78711-3697" },
+    signature: "drawn", payment: "with_filing",
+    checked: "2026-10-27", source: "https://www.sos.state.tx.us/corp/instructions/201.shtml",
+    also: ["https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml"],
+  },
+  "tx-corp-qualify": {
+    mail: { name: "Secretary of State, Corporations Section", line1: "P.O. Box 13697", city: "Austin", state: "TX", zip: "78711-3697" },
+    signature: "drawn", payment: "with_filing",
+    checked: "2026-10-27", source: "https://www.sos.state.tx.us/corp/instructions/301.shtml",
+    also: ["https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml"],
+  },
+  // Delaware: "mail in your completed request to our office. The mailing address is Division of Corporations - John G.
+  // Townsend Building – 401 Federal Street – Suite 4 – Dover, DE 19901. All filing fees must be paid upon submission"
+  ...Object.fromEntries(["de-llc-form", "de-corp-form", "de-llc-qualify", "de-corp-qualify"].map((id) => [id, {
+    mail: { name: "Delaware Division of Corporations", line1: "John G. Townsend Building", line2: "401 Federal Street, Suite 4", city: "Dover", state: "DE", zip: "19901" },
+    signature: "wet", payment: "with_filing",
+    checked: "2026-10-27", source: "https://corp.delaware.gov/howtoform/",
+  } satisfies Dest])),
   "az-tpt": {
     // "AZTaxes.gov: Register, file and pay TPT online"; the paper JT-1 is mailed "to the address indicated on the form";
     // "Licenses are not delivered until fees are paid in full."
