@@ -168,6 +168,14 @@ button.pt-tag { cursor: pointer; }
 .taught-steps li small { color: var(--ink3); overflow-wrap: anywhere; }
 .rq-form { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center; }
 .rq-form .seg { margin: 0; }
+/* the team's rule changes (src/cloud/LawQueue.tsx): the owner's words in two languages, then the source and the date */
+.law-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.law-form textarea { width: 100%; min-width: 0; padding: 9px 12px; border: 0; border-radius: 12px; background: var(--card); color: var(--ink); box-shadow: 0 0 0 1px rgba(var(--e), .12); font: 400 14px/1.45 var(--sans); outline: 0; resize: vertical; }
+.law-form textarea:focus { box-shadow: 0 0 0 1.5px var(--blue), 0 0 0 4px rgba(115, 153, 198, .2); }
+.law-form input[aria-invalid="true"] { box-shadow: 0 0 0 1.5px var(--warm, #c98a4b); }
+.law-form .sbtn { justify-self: start; }
+.law-done { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; font-size: 13px; }
+.law-done small { color: var(--ink3); }
 .rq-done .arow-n { flex: 1; }
 .rq-done { display: flex; align-items: center; gap: 12px; }
 .pa-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; }
@@ -216,7 +224,7 @@ button.pt-tag { cursor: pointer; }
   .sc-stores > li .sc-x { grid-column: 3; grid-row: 1; }
   .sc-num { grid-row: 1; padding-top: 22px; align-self: start; }
   .sc-tot { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .rq-form { grid-template-columns: minmax(0, 1fr); }
+  .rq-form, .law-form { grid-template-columns: minmax(0, 1fr); }
   .rq-form .sbtn { justify-self: start; }
 }
 @media (max-width: 640px) {

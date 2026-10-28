@@ -211,6 +211,24 @@ team as always. A code sent to the owner's phone is their one tap.
 Record each answer in `src/forms/agentAuthority.ts` (the row's `agentOk`, `owner` and `confirm`), with the page or the
 email as its citation.
 
+## Law watch (rule changes, checked by the team before owners hear)
+
+The monitor reads the Federal Register's own feeds of rules and proposed rules for FDA, TTB and CBP each day
+(`src/lawWatch.ts`). New items, the nightly sweep's "quoted words gone from the agency's page" findings, and anything
+Odelia's weekly check finds for one business all wait in the team's queue (the Quality tab, "Rule changes"). Nothing
+reaches an owner until someone on the team reads the official source, writes the headline and what changes in English
+and Chinese, and approves. Each affected business then gets one Update the next morning, by the channel the owner chose.
+
+1. Run `20261105091000_rule_alerts.sql` and deploy `monitor` and `agent-run`.
+2. Someone on the team checks the queue on business days. Until the migration is applied, Odelia's weekly findings go
+   to owners directly, as before.
+3. Optional, Supabase secrets:
+   - `LAW_WATCH=off` stops reading the feeds and sending approved changes.
+   - `RULE_FEEDS`: more official feeds as JSON, for example a state register's RSS once you've confirmed it is the
+     state's own: `[{"id":"tx-register","agency":"Texas Register","url":"https://…gov/…","jurisdiction":"US-TX","forms":[]}]`.
+     Only https feeds on a `.gov` host are read. No state register feed is built in: none with a current official RSS
+     was confirmed on 2026-10-28 (California OAL's feed answers, but its last post is from 2024).
+
 ## Carry to approval (after submission, nobody touches it)
 
 Migration `20261105090300_carry_to_approval.sql`; code in `supabase/functions/_shared/carry.ts` (the decisions),

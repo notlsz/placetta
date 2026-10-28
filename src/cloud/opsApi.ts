@@ -88,6 +88,17 @@ export type QaFinding = {
 };
 export const qaQueue = () => rpc<QaFinding[]>("qa_queue");
 export const qaDecide = (id: string, status: "approved" | "dismissed" | "fixed", note?: string) => rpc<QaFinding>("qa_decide", { p_id: id, p_status: status, p_note: note ?? null });
+/** Law watch (migration 20261105091000_rule_alerts, src/lawWatch.ts): rule changes from official sources, held for the
+ *  team. Approving writes the owners' words; only then does the monitor tell the businesses it affects. */
+export type RuleAlert = {
+  id: string; origin: "register" | "sweep" | "odelia"; workspace_id: string | null; jurisdiction: string; forms: string[];
+  source_url: string | null; source_label: string | null; title: string; excerpt: string | null; published: string | null;
+  status: "pending" | "approved" | "dismissed"; headline: Bi | null; body: Bi | null; effective: string | null;
+  decided_at: string | null; note: string | null; created_at: string;
+};
+export const ruleAlertQueue = () => rpc<RuleAlert[]>("rule_alert_queue");
+export const ruleAlertDecide = (id: string, status: "approved" | "dismissed", o: { headline?: Bi; body?: Bi; source_url?: string; effective?: string; note?: string } = {}) =>
+  rpc<RuleAlert>("rule_alert_decide", { p_id: id, p_status: status, p_headline: o.headline ?? null, p_body: o.body ?? null, p_source_url: o.source_url || null, p_effective: o.effective || null, p_note: o.note || null });
 /** Teach mode's taught playbooks (migration 20261030174100_teach_mode): a draft from a recorded run waits here for the
  *  team; approved ones show their record. The body is structure only (worker/filer/src/teach.ts Draft). */
 export type TaughtStep = { action: string; selector: string; heading?: string; login?: string; person?: string; ask?: boolean; option?: string; fact?: string; field?: string; submit?: boolean };

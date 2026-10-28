@@ -67,6 +67,7 @@ import { secretValues, withoutEnv } from "../_shared/secrets.ts";
 import { loadMemory, saveRun, type RunMemory } from "./agent.js";
 import { autofileAll, type AutofileIO } from "./agent.js";
 import { gradeRun, GRADER_SAMPLE_RATE, sampled } from "./agent.js";
+import { fromWatch } from "./agent.js";
 import { memoryDb, pastRuns } from "./memory.ts";
 
 type Workspace = ReturnType<typeof normalizeState>;
@@ -1102,6 +1103,20 @@ async function finish(run: Run, reply: Reply, steps: Step[], lease: Lease, w?: W
     return;
   }
   if (run.kind === "watch" && /^no changes\.?$/i.test(said)) return;
+  // The weekly check (no title: not a routine, a renewal or a chase) found a possible rule change. It goes to the
+  // Placetta team's queue, not to the owner: the team reads the official source and writes what the owner hears
+  // (src/lawWatch.ts), so a wrong read never becomes an alarm. Deadlines the run added stay on the calendar.
+  if (run.kind === "watch" && !run.title) {
+    const { data: wsRow } = await admin.from("workspaces").select("state").eq("id", run.workspace_id).maybeSingle();
+    const meta = ((wsRow?.state ?? {}) as { meta?: { city?: string; region?: string } }).meta ?? {};
+    const c = fromWatch(run.workspace_id, run.id, said, [meta.city, meta.region].filter(Boolean).join(", "));
+    if (c) {
+      const { error } = await admin.rpc("rule_alert_report", { p_alerts: [c] });
+      if (!error) return;
+      // the queue isn't there yet (migration not applied): fall through to the owner's Update, as before
+      console.error("rule_alert_report", error.code);
+    }
+  }
   // Someone watching in the app already sees it; otherwise it becomes an Update and an email.
   const { data: seen } = await admin.from("agent_runs").select("seen_at").eq("id", run.id).maybeSingle();
   if (run.kind === "task" && seen?.seen_at && Date.now() - Date.parse(seen.seen_at) < 20_000) return;

@@ -283,6 +283,7 @@ export function urgency(u: UpdateLike, critical: Set<string>): "urgent" | "impor
   if (head === "filing" && parts[2] === "rejected") return isCritical ? "urgent" : "important";
   if (head === "filing" && parts[2] === "needs_info") return "important";
   if (head === "needs_you" || head === "pay" || head === "approval") return "important";
+  if (head === "law") return "important";   // a rule change the Placetta team checked and approved (src/lawWatch.ts)
   if ((head === "deadline" || head === "renewal" || head === "permit") && Number.isFinite(bucket) && bucket <= 7) return "important";
   return null;
 }

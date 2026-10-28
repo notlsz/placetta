@@ -26,3 +26,5 @@ export type { Actor } from "../security/policy";
 // The online grader (src/qa/grade.ts) and its sample rate (src/economics.ts, FOUNDER TO CONFIRM)
 export { gradeRun, sampled } from "../qa/grade";
 export { GRADER_SAMPLE_RATE } from "../economics";
+// Law watch (src/lawWatch.ts): the weekly check's finding as a candidate for the team's queue, never straight to owners
+export { fromWatch } from "../lawWatch";
