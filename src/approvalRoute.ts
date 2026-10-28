@@ -2,6 +2,7 @@ import { B, type Bi } from "./bi";
 import type { Application, Approval } from "./model";
 import { formById } from "./forms/registry";
 import ROUTES from "./forms/filingRoutes.json";
+import STEPS from "./forms/filingSteps.json";
 
 /* Who files it and how long the agency takes, on every approval card: from data Placetta already keeps, never a guess.
    Who: the form's first-try route (src/forms/filingRoutes.json, written with docs/FILING_COVERAGE.md by
@@ -11,8 +12,15 @@ import ROUTES from "./forms/filingRoutes.json";
    when it states one. With neither, the card says nothing about time. Pure: NeedRow and the approval sheet render it,
    scripts/review-fixes-test.ts tests it. */
 
-export type RouteKind = "portal" | "email" | "fax" | "mail" | "owner" | "faxSigned" | "ownerSigns" | "team";
-const BY_ID = ROUTES as Record<string, RouteKind>;
+/* notReady: the agency's site is known, but automatic filing isn't switched on for the form (its sign-off or on-behalf
+   rule isn't confirmed, supabase/functions/file/destinations.ts notReady). The card says the person submits it, never
+   that Odelia files it. A form with no entry, or an entry this file doesn't know, is "team": prepared, the business sends. */
+export type RouteKind = "portal" | "email" | "fax" | "mail" | "owner" | "faxSigned" | "ownerSigns" | "notReady" | "team";
+const KINDS = new Set<RouteKind>(["portal", "email", "fax", "mail", "owner", "faxSigned", "ownerSigns", "notReady", "team"]);
+const BY_ID = ROUTES as Record<string, string>;
+/** The steps that stay the person's on a route Placetta sends (scripts/filing-coverage.mjs): "pay", the agency's fee on
+ *  its own site, which the portal worker always hands back. */
+const STEPS_BY_ID = STEPS as Record<string, string[]>;
 
 const WHO: Record<RouteKind, Bi> = {
   portal: B("Odelia files online", "Odelia 在线提交"),
@@ -22,11 +30,57 @@ const WHO: Record<RouteKind, Bi> = {
   faxSigned: B("You sign it, then Odelia faxes it", "您签字后，Odelia 传真提交"),
   owner: B("Odelia prepares it and you send it", "Odelia 准备好，由您寄出"),
   ownerSigns: B("Odelia prepares it, you sign and send it", "Odelia 准备好，由您签字寄出"),
+  notReady: B("Odelia prepares it and you submit it on the agency's site", "Odelia 准备好，由您在机构网站上提交"),
   team: B("Odelia prepares it and you send it", "Odelia 准备好，由您提交"),
 };
 
-/** The route kind for an application's form. */
-export const routeOf = (app?: Pick<Application, "official">): RouteKind => (app?.official && BY_ID[app.official]) || "team";
+/** What else the card says: the person's own step on a route Odelia sends, or why Odelia doesn't send it. */
+const STEP: Record<string, Bi> = {
+  pay: B("You pay the agency's fee on its site", "您在机构网站上自行支付规费"),
+  notReady: B("Automatic filing isn't switched on for this form yet", "这份表格尚未开通自动提交"),
+};
+
+/** The route kind for an application's form: only a kind this file knows, else "team". */
+export const routeOf = (app?: Pick<Application, "official">): RouteKind => {
+  const k = app?.official && Object.prototype.hasOwnProperty.call(BY_ID, app.official) ? BY_ID[app.official] : undefined;
+  return k && KINDS.has(k as RouteKind) ? (k as RouteKind) : "team";
+};
+
+/** The person's own steps on this form's route (only on a route Odelia sends; a known step only). */
+export function personSteps(app?: Pick<Application, "official">): Bi[] {
+  const k = routeOf(app);
+  if (k === "notReady") return [STEP.notReady];
+  if (k !== "portal" || !app?.official) return [];
+  const steps = Object.prototype.hasOwnProperty.call(STEPS_BY_ID, app.official) ? STEPS_BY_ID[app.official] : [];
+  return (Array.isArray(steps) ? steps : []).filter((s) => s === "pay").map((s) => STEP[s]);
+}
+
+/** What the plan's open items are, by who acts (M6, the plan card): only from the route data above, never a guess.
+ *  sends: a route Odelia submits on (portal, email, fax, mail; a fax after the owner signs counts too).
+ *  yours: Odelia prepares it and the business (or its notary or lawyer) submits it, including a form whose automatic
+ *  filing isn't switched on. unsure: Odelia doesn't claim the step at all yet (abstain): ask the office it names.
+ *  A step the owner does alone (a certificate, insurance) isn't counted. */
+export function planSplit(apps: Pick<Application, "official" | "status" | "abstain" | "yours" | "specialist">[]): { sends: number; yours: number; unsure: number } {
+  const open = apps.filter((a) => a.status !== "approved" && !a.yours);
+  const out = { sends: 0, yours: 0, unsure: 0 };
+  for (const a of open) {
+    if (a.abstain) { out.unsure++; continue; }
+    const k = routeOf(a);
+    if (!a.specialist && (k === "portal" || k === "email" || k === "fax" || k === "mail" || k === "faxSigned")) out.sends++;
+    else out.yours++;
+  }
+  return out;
+}
+
+/** The plan card's line for that split, in plain words; null when nothing is open. */
+export function planSplitLine(s: { sends: number; yours: number; unsure: number }): Bi | null {
+  if (!s.sends && !s.yours && !s.unsure) return null;
+  const en: string[] = [], zh: string[] = [];
+  if (s.sends) { en.push(`Odelia can submit ${s.sends} for you once you approve`); zh.push(`${s.sends} 项经您批准后可由 Odelia 提交`); }
+  if (s.yours) { en.push(`${s.yours} she prepares for you to send`); zh.push(`${s.yours} 项由她准备、由您提交`); }
+  if (s.unsure) { en.push(`${s.unsure} she can't confirm yet, so she names who to ask`); zh.push(`${s.unsure} 项尚无法确认，她会告诉您该问哪个机构`); }
+  return B(`${en.join("; ")}.`.replace(/^./, (c) => c.toUpperCase()), `${zh.join("；")}。`);
+}
 
 /** An estimate that states no time is no estimate ("To be confirmed", "The agency doesn't publish a processing time"). */
 const SAYS_NO_TIME = /^(to be confirmed|待确认)$|doesn'?t publish|未公布|no published/i;
@@ -42,8 +96,11 @@ export function expectedTime(app?: Pick<Application, "official" | "est">): Bi | 
 
 /** What an approval card says under its title about who acts and how long it takes. null: a card with no filing (an
  *  upload is the owner's own step). */
-export function approvalRoute(a: Pick<Approval, "kind">, app?: Pick<Application, "official" | "est">): { who: Bi; time?: Bi } | null {
-  if (a.kind === "file") return { who: WHO[routeOf(app)], time: expectedTime(app) };
+export function approvalRoute(a: Pick<Approval, "kind">, app?: Pick<Application, "official" | "est">): { who: Bi; time?: Bi; steps?: Bi[] } | null {
+  if (a.kind === "file") {
+    const steps = personSteps(app);
+    return { who: WHO[routeOf(app)], time: expectedTime(app), ...(steps.length ? { steps } : {}) };
+  }
   if (a.kind === "send") return { who: B("Odelia sends it once you approve", "您批准后由 Odelia 发送") };
   if (a.kind === "pay") return { who: B("You pay the agency on its own page", "您在机构官网直接付款") };
   return null;

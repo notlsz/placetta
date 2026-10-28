@@ -1,8 +1,8 @@
 # How Placetta's AI works
 
-Last updated: 2026-10-13
+Last updated: 2026-10-22
 
-Effective date: 2026-10-13.
+Effective date: 2026-10-22.
 
 Placetta uses an AI agent, Odelia, to handle the paperwork of getting licenses, permits and registrations. This page explains what she does and where her limits are.
 
@@ -14,6 +14,9 @@ Placetta uses an AI agent, Odelia, to handle the paperwork of getting licenses, 
 - Tracks deadlines and renewals, and reminds you of them.
 - Drafts messages for you to review.
 - Answers your texts and calls, if you link a phone.
+- Checks the status of your filings every day.
+- Books inspections at a time you approve.
+- When an agency says no, shows the official way to appeal, counts the deadline from the rule, and drafts what you may need with each rule cited. She never files an appeal and gives no legal opinion.
 
 ## Where its answers come from
 
@@ -29,6 +32,8 @@ After you approve a filing, Placetta checks it against the agency's current requ
 
 AI output can be wrong. Review every application and message before you approve it, and read the cited source when something looks off. Reminders help you, but your business remains responsible for its deadlines. Placetta is not a law firm and does not give legal advice.
 
+Placetta checks her work too: every application is checked line by line before you can approve it, and about 1 in 5 finished tasks is checked again by fixed rules, without an AI model, so our team can fix mistakes. These checks don't replace your review.
+
 ## Texts and calls
 
 - Odelia is an AI. Every call opens with her saying so, and saying that the call is transcribed.
@@ -42,7 +47,9 @@ AI output can be wrong. Review every application and message before you approve 
 - Odelia runs on Claude models from Anthropic and, when our paid Google account is on, Gemini models from Google. If those can't answer, a backup open model on Groq, Cerebras or OpenRouter answers, without your files. Models from OpenAI and DeepSeek can be switched on, and are off by default. Every company that processes your information is listed at https://placetta.com/trust
 - Spoken replies in the app are generated with Microsoft Azure text to speech.
 - On calls, Odelia's voice and speech recognition run through Telnyx.
-- We do not use your content to train AI models.
+- We do not use your content to train AI models, and we choose providers whose terms for our account don't allow training on what we send.
+- Zero data retention is not in place today. We are asking each AI provider to confirm it in writing, and Placetta can limit AI processing to providers that have.
+- Memory is off until an owner or admin turns it on. Odelia then suggests short notes about your business, an owner or admin approves each one, and each shows where it came from and when, so you can see why she remembered it.
 
 ## Every action is recorded
 
@@ -56,9 +63,9 @@ Email: support@placetta.com
 
 # 快哉的 AI 如何工作
 
-最后更新：2026-10-13
+最后更新：2026-10-22
 
-生效日期：2026-10-13。
+生效日期：2026-10-22。
 
 快哉使用 AI 智能体 Odelia，处理办理执照、许可和登记过程中的文书工作。本页说明她能做什么，以及她的局限在哪里。
 
@@ -70,6 +77,9 @@ Email: support@placetta.com
 - 跟踪截止日期和续期，并提醒您。
 - 起草消息供您审核。
 - 如您关联了手机，回复您的短信和来电。
+- 每天查询您的申报进度。
+- 在您批准的时间预约检查。
+- 机构作出不利决定时，说明官方申诉途径，按规定计算期限，并起草您可能需要的材料，注明每条规定的出处。她绝不提起申诉，也不提供法律意见。
 
 ## 信息从哪里来
 
@@ -85,6 +95,8 @@ Odelia 不会自行提交、付款或发送任何内容。每一份申请、每�
 
 AI 生成的内容可能有误。批准前，请审核每一份申请和每一条消息；如有疑问，请查看所注明的来源。提醒只是辅助，按时办理仍是您企业的责任。快哉不是律师事务所，不提供法律意见。
 
+快哉也会检查她的工作：每一份申请在您批准前都会逐行核对；已完成的任务中，约五分之一会按固定规则（不使用 AI 模型）再次抽查，以便我们的团队纠正错误。这些检查不能代替您的审核。
+
 ## 短信与电话
 
 - Odelia 是 AI。每次通话开始时，她都会说明这一点，并告知通话会被转录。
@@ -98,7 +110,9 @@ AI 生成的内容可能有误。批准前，请审核每一份申请和每一�
 - Odelia 基于 Anthropic 的 Claude 模型运行；我们的 Google 付费账户开启时，也使用 Google 的 Gemini 模型。如果它们无法回答，会改由 Groq、Cerebras 或 OpenRouter 上的备用开源模型回答，且不会收到您的文件。OpenAI 和 DeepSeek 的模型可以开启，默认关闭。处理您信息的每一家公司都列在 https://placetta.com/trust
 - 应用中的语音回复由 Microsoft Azure 文字转语音服务生成。
 - 通话中，Odelia 的语音和语音识别通过 Telnyx 提供。
-- 我们不会用您的内容训练 AI 模型。
+- 我们不会用您的内容训练 AI 模型；我们选择的提供方，其针对我们账户的条款不允许用我们发送的内容进行训练。
+- 目前尚未实现零数据保留。我们正在请每家 AI 提供方以书面形式确认；快哉可以将 AI 处理限定于已作出确认的提供方。
+- 记忆功能默认关闭，须由所有者或管理员开启。开启后，Odelia 会提出关于您企业的简短记录，由所有者或管理员逐条批准；每条记录都注明来源和日期，让您了解她为什么记住它。
 
 ## 每项操作都有记录
 

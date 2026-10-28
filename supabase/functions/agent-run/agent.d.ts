@@ -30,6 +30,8 @@ export type Services = {
   formPdf?(file: string): Promise<Uint8Array | null>;
   /** Team review: the workspace's comments, for read_comments (src/live.ts AgentComment). */
   comments?(item?: { kind: "app" | "doc" | "job"; id: string }): Promise<{ id: string; item: { kind: "app" | "doc" | "job"; id: string }; by: string; hq: boolean; text: string; at: string; resolved: boolean }[]>;
+  /** A Placetta specialist (src/escalate.ts, ask_specialist): opens a review for the team; when they answer by. */
+  specialist?(o: { app: string; title: Bi; note: string; reason: string; job?: string }): Promise<{ due_at: string; open?: boolean }>;
 };
 /** What a store's bot came back with, for the run that split the work. */
 export type ChildResult = { job: string; store: string; status: string; reply: string };

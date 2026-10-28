@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { ONLINE_FILING, useOnlineFiling } from "./onlineFiling";
 import { hrefOf, plainClick, readRoute, setRoute } from "./route";
 import { useApp } from "./ctx";
 import { B, type Bi } from "./model";
@@ -531,6 +532,15 @@ function Integrations() {
   );
 }
 
+/** Whether Odelia submits on agency websites herself right now (src/onlineFiling.ts): live, or who files them instead. */
+function OnlineFilingLine() {
+  const { b } = useApp();
+  const st = useOnlineFiling();
+  if (!st) return null;
+  const say = ONLINE_FILING[st.state];
+  return <p className={"sg-note of-line" + (say.live ? " ok" : "")} aria-live="polite"><b>{b(say.short)}.</b> {b(say.long)}</p>;
+}
+
 function Logins() {
   const { b, lang, cloud, ws } = useApp();
   const [adding, setAdding] = useState(false);
@@ -546,6 +556,7 @@ function Logins() {
       rows={cloud.logins.map(l => ({ label: { en: l.agency, zh: l.agency },
         sub: <>{l.username}{l.last_opened_at ? (lang === "zh" ? `，团队上次打开 ${fmtAgo(l.last_opened_at, lang)}` : `. Team last opened it ${fmtAgo(l.last_opened_at, lang)}`) : ""}</>,
         right: cloud.owner ? <Btn kind="warm" guard onClick={() => void cloud.removeLogin(l.id)}>{lang === "zh" ? "删除" : "Remove"}</Btn> : undefined }))}>
+      <OnlineFilingLine />
       {!cloud.owner ? <p className="sg-note">{lang === "zh" ? "只有所有者可以添加或删除登录信息。" : "Only owners can add or remove saved logins."}</p>
         : <div className="sg-act"><Btn guard kind="line" onClick={() => setAdding(true)}><I.plus />{lang === "zh" ? "添加登录" : "Add a login"}</Btn></div>}
       {cloud.owner && adding && (
@@ -1673,7 +1684,9 @@ export function Settings() {
           <Group id="billing" hidden={!show("billing")} title={B("Plan and billing", "方案与账单")} note={B("Payment methods and invoices are handled by Stripe; Placetta never sees card numbers. Government fees are paid by you directly to each agency.", "付款方式和发票由 Stripe 处理，快哉看不到卡号。政府规费由您直接支付给各机构。")}
             rows={[
               { label: planName, sub: renew || (bl?.free && !bl.subscription_status ? b(B("Paid plans start later. Nothing is charged now.", "付费方案稍后推出，现在不收取任何费用。")) : cloud?.plan === "entry" ? b(B("Credited toward your first year on an annual plan", "可抵扣年度方案首年费用")) : undefined),
-                right: cloud && !cloud.owner ? <em className="lock">{lang === "zh" ? "由所有者管理" : "Managed by owners"}</em> : cloud ? <>{cloud.plan !== "monthly" && <Btn guard kind="ink" onClick={() => cloud.openPlans(cloud.plan === "none" ? "start" : "file")}>{lang === "zh" ? "选择方案" : "Choose a plan"}</Btn>}{bl?.stripe_customer_id && <Btn guard onClick={() => void cloud.portal()}>{lang === "zh" ? "管理账单" : "Manage billing"}</Btn>}</> : undefined },
+                right: cloud && !cloud.owner ? <em className="lock">{lang === "zh" ? "由所有者管理" : "Managed by owners"}</em> : cloud ? <>{cloud.plan !== "monthly" && !(bl?.subscription_status === "past_due" || bl?.subscription_status === "unpaid") && <Btn guard kind="ink" onClick={() => cloud.openPlans(cloud.plan === "none" ? "start" : "file")}>{lang === "zh" ? "选择方案" : "Choose a plan"}</Btn>}{bl?.stripe_customer_id && <Btn guard onClick={() => void cloud.portal()}>{lang === "zh" ? "管理账单" : "Manage billing"}</Btn>}</> : undefined },
+              // a card that failed, or a plan that ended: said plainly, with where to fix it; nothing is deleted
+              ...(cloud && api.dunningOf(bl ?? null) ? [{ label: B("Payment", "付款"), sub: <span role="status">{b(api.dunningOf(bl ?? null)!)}</span> }] : []),
               ...(ai && ai.plan !== "none" ? [{ label: B("Odelia allowance", "Odelia 额度"), sub: aiSub,
                 right: <span className="aimeter" aria-label={`${ai.used_pct}%`}><i style={{ width: `${ai.used_pct}%` }} className={ai.used_pct >= 100 ? "full" : ai.used_pct >= (ai.saver_at_pct ?? 60) ? "near" : ""} /></span> },
                 ...(cloud?.owner && (ai.plan === "monthly" || ai.plan === "entry" || ai.plan === "comped") ? [{ label: B("Odelia packs", "Odelia 加量包"), sub: b(B("More allowance on top of your plan. It carries over until it's used.", "在方案之外增加额度，长期有效直到用完。")),

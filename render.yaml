@@ -1,31 +1,56 @@
-# Render Blueprint: the portal worker that files on agency websites (worker/filer).
-# Render, New, Blueprint, pick this repo. It asks for the two values marked sync: false and starts the worker.
-# Then set FILER_ENABLED=1 and FILER_CHANNELS (include "portal") in the Supabase Edge Function secrets so filings queue for it.
+# Render Blueprint: the portal worker that files on agency websites (worker/filer). SETUP.md "Turn on online filing".
+# Render, New, Blueprint, pick this repo, paste the two values marked sync: false, Apply. That's all on Render.
+#
+# A web service, not a background worker, so Render gives it a health check (/healthz: are the keys set, did the last
+# heartbeat reach the database) and a public https address (RENDER_EXTERNAL_URL) for the live browser a person uses
+# when a filing needs them (a CAPTCHA, a code sent to their phone, the agency's fee). Nothing else is served.
+#
+# Browser: Chromium runs inside this container (the Playwright image), so no Browserbase account is needed. Chromium
+# needs memory: "standard" (2 GB RAM, 1 CPU) runs one filing at a time with room to spare; "starter" (512 MB) is too
+# small and Chromium is killed mid-filing. Browserbase stays optional (see its keys below).
 services:
-  - type: worker
+  - type: web
     name: placetta-filer
     runtime: docker
     dockerfilePath: ./worker/filer/Dockerfile
     dockerContext: .
-    plan: starter
-    region: oregon
+    plan: standard
+    region: oregon                       # US West, near the California agencies and the Supabase project
+    numInstances: 1                      # one container; FILER_CONCURRENCY runs more filings inside it
+    healthCheckPath: /healthz            # 503 until every key is set, so a deploy with a missing key shows as failed
     autoDeploy: true
     buildFilter:
       paths:
         - worker/filer/**
         - supabase/functions/file/destinations.ts
+        - supabase/functions/_shared/injection.ts
+        - supabase/functions/_shared/zdr.ts
     envVars:
-      - key: FILER_ENABLED
-        value: "1"
-      - key: FILER_TWO_KEY
-        value: "10"          # the first 10 portal filings wait for a person on the team to check the review page
-      - key: FILER_ALLOW_UNVERIFIED
-        value: "0"           # 1 only while staff watch a playbook's first run (worker/filer/src/playbooks.ts); 0 refuses unverified playbooks
+      # ---- the two values to paste when Render asks ----
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false                      # Supabase, Project Settings, API keys, service_role "secret" key. Later, swap it for FILER_DB_KEY (docs/soc2/runbooks/filer-least-privilege.md)
+      - key: ANTHROPIC_API_KEY
+        sync: false                      # console.anthropic.com, Settings, API keys, Create key (starts sk-ant-)
+      # ---- set for you ----
       - key: SUPABASE_URL
         value: https://esquxzcfsylffuijvzec.supabase.co
-      - key: FILER_DB_KEY
-        sync: false          # the filer's own role key, no table access (docs/soc2/runbooks/filer-least-privilege.md)
-      - key: SUPABASE_SERVICE_ROLE_KEY
-        sync: false          # only until FILER_DB_KEY is set; then delete it from Render (the worker warns while it's used)
-      - key: ANTHROPIC_API_KEY
-        sync: false          # console.anthropic.com, API keys
+      - key: FILER_ENABLED
+        value: "1"                       # 0 stops the worker taking filings
+      - key: FILER_TWO_KEY
+        value: "10"                      # each form's first 10 filings stop at the agency's review page for a person on the team to check
+      - key: FILER_ALLOW_UNVERIFIED
+        value: "1"                       # playbooks not yet watched on the live site run, and always stop at the review page for the team; 0 sends them to the team instead
+      - key: FILER_CONCURRENCY
+        value: "1"                       # filings side by side in this container (up to 4; about 500 MB each)
+      - key: FILER_PROBE_HOUR
+        value: "10"                      # UTC hour of the nightly re-check of every playbook against the agencies' public pages (10 = 3 a.m. Pacific)
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=512"
+      # ---- optional, add later in Render, placetta-filer, Environment ----
+      # FILER_DB_KEY                       the filer's own least-privilege key (runbook above); then delete SUPABASE_SERVICE_ROLE_KEY
+      # BROWSERBASE_API_KEY, BROWSERBASE_PROJECT_ID
+      #                                    only for the agency sites that refuse a cloud server's address (EDD e-Services, bizfile
+      #                                    Online, MassTaxConnect, sanjoseca.gov: worker/filer/src/env.ts); without them those
+      #                                    filings take another route the agency accepts
+      # FILER_BROWSERBASE_HOSTS            more hosts for Browserbase, or "*" for every filing
+      # FILER_DRY_RUN=1                    every filing stops at the agency's review page; nothing is sent

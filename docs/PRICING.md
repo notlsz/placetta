@@ -48,8 +48,10 @@ government fees at cost are the founder's numbers, unchanged: each sits inside t
 
 ## Stripe prices the founder must create
 
-All in USD, standard (per unit) pricing. Set each price id as the env var on the billing function and the stripe
-webhook. Names are what the invoice shows.
+All in USD, standard (per unit) pricing. Give each its lookup key (`placetta_store_plan_year`,
+`placetta_store_plan_month`, `placetta_license`, `placetta_license_complex`, `placetta_renewal`, and
+`placetta_odelia_pack` for the $49 pack) and the code finds it; an env var below, when set, wins. Names are what the
+invoice shows.
 
 | Env var | Product name | Amount | Interval |
 | --- | --- | --- | --- |

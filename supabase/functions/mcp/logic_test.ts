@@ -77,7 +77,7 @@ Deno.test("Placetta's own MCP client connects (initialize, 2025-11-25), lists th
   const filings = JSON.parse((await c.callTool("filing_status", {})).text);
   assertEquals(filings.filings.map((f: { confirmation_number: string }) => f.confirmation_number), ["FSE-123"]);
   const ready = JSON.parse((await c.callTool("store_readiness", { store_id: "flushing" })).text);
-  assert(ready.stores[0].score > 0 && ready.stores[0].measures === "Ready to open", JSON.stringify(ready));
+  assert(ready.stores[0].score === 0 && ready.stores[0].parts[0].got === 0 && ready.stores[0].measures === "Ready to open", JSON.stringify(ready));
   const plan = JSON.parse((await c.callTool("plan_preview", { business: "bubble tea shop", place: "Flushing, NY" })).text);
   assert(plan.permits.length > 3 && plan.permits.every((p: { source: { url: string } }) => /^https:\/\//.test(p.source.url)), "the plan preview lists permits, each with its official source");
 });

@@ -31,4 +31,4 @@ The site already says the scoped version: the landing page reads "We never sell 
 
 | Date | Choice (a or b, per statement) | Done | Counsel | By |
 | --- | --- | --- | --- | --- |
-| | | | | |
+| 2026-10-22 | (b) for both, in version 2026-10-22 ([LEGAL-CHANGES.md](../../LEGAL-CHANGES.md)) | Written, not published | Pending | Claude, for the founder |

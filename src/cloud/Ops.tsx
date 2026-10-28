@@ -34,6 +34,7 @@ const KIND: Record<string, Bi> = {
   margin: B("AI cost is high against this customer's revenue", "AI 成本相对该客户收入偏高"),
   team_time: B("This filing took longer than its budget", "此项申报用时超出预算"),
   playbook_review: B("Check the steps Odelia learned on a new agency site (Quality tab)", "核对 Odelia 在新机构网站上学会的步骤（质量页）"),
+  billing: B("Billing needs a look", "账单需要处理"),
 };
 
 /** What Odelia's models cost this month against what the plans pay, with the ten workspaces that cost the most. */
@@ -201,6 +202,40 @@ function Detail({ f, me, onChange }: { f: api.QueueRow; me: string; onChange: ()
   );
 }
 
+/** Billing health, for staff: is Stripe set up so a customer who pays gets their plan. Check now makes or repairs the
+ *  webhook first (the monitor does the same each day); the list says what's missing and which old prices to archive. */
+function BillingHealthCard() {
+  const { lang, say } = useApp();
+  const zh = lang === "zh";
+  const [h, setH] = useState<api.BillingHealth | null>(null);
+  const [busy, setBusy] = useState(false);
+  const check = async () => {
+    setBusy(true);
+    try { setH((await api.billingHealth()).health); } catch (e) { const x = e as api.ApiError; say((zh && x.message_zh) || x.message); }
+    setBusy(false);
+  };
+  return (
+    <section className="sec">
+      <div className="sec-h"><h2>{zh ? "账单健康" : "Billing health"}{h ? <em>{h.ok ? (zh ? "正常" : "OK") : `${h.problems.length}`}</em> : null}</h2>
+        <Pill sm kind="quiet" disabled={busy} onClick={() => void check()}>{busy ? "…" : zh ? "立即检查" : "Check now"}</Pill></div>
+      {h && (
+        <div className="q-margin">
+          <p className="q-margin-line">{zh
+            ? `密钥：${h.key.set ? (h.key.mode === "live" ? "正式" : "测试") : "未设置"}。Webhook：${h.webhook.exists ? (h.webhook.missing_events.length ? `缺少 ${h.webhook.missing_events.join("、")}` : "已就绪") : "不存在"}。签名密钥：${h.secret.stored || h.secret.env ? "已保存" : "缺失"}。`
+            : `Key: ${h.key.set ? h.key.mode : "not set"}. Webhook: ${h.webhook.exists ? (h.webhook.missing_events.length ? `missing ${h.webhook.missing_events.join(", ")}` : "ready") : "missing"}. Signing secret: ${h.secret.stored || h.secret.env ? "stored" : "missing"}.`}</p>
+          <table className="q-margin-t">
+            <thead><tr><th>{zh ? "价格" : "Price"}</th><th>{zh ? "状态" : "Status"}</th></tr></thead>
+            <tbody>{h.prices.map(p => <tr key={p.lookup}><td>{p.lookup}</td><td>{p.ok ? (zh ? "正确" : "OK") : p.found ? (zh ? "金额不符" : "Wrong amount") : (zh ? "未找到" : "Not found")}</td></tr>)}</tbody>
+          </table>
+          {h.problems.length > 0 && <ul className="note">{h.problems.map((p, i) => <li key={i}>{p}</li>)}</ul>}
+          {h.legacy_active.length > 0 && <p className="note">{zh ? "请在 Stripe 中归档这些旧价格（代码已忽略它们）：" : "Archive these old prices in Stripe (the code ignores them): "}{h.legacy_active.join(", ")}</p>}
+          <p className="note">{h.tax}</p>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export function Queue() {
   const { b, lang, say } = useApp();
   const [rows, setRows] = useState<api.QueueRow[]>([]);
@@ -224,6 +259,7 @@ export function Queue() {
       <div className="q-grid">
         <div className="q-list">
           <AiMarginCard />
+          <BillingHealthCard />
           <CompanyMetrics />
           {tasks.length > 0 && (
             <section className="sec">

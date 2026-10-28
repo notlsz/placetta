@@ -3,6 +3,7 @@ import { useApp } from "./ctx";
 import { B, type Bi } from "./bi";
 import { I } from "./ui";
 import { AgentBot } from "./Bot";
+import { isFirstRun } from "./firstRun";
 
 /* The first minute: three cards, one idea each, a picture of the real thing on each. Anyone gets it, with no AI
    experience at all: say what you need, she does the work, you tap Approve. Shown once; Help, Take the tour, shows it
@@ -48,7 +49,9 @@ export function Walkthrough() {
   // An application filled at sign-up and waiting for approval (src/plan/prefill.ts) is the tour's last card for real:
   // the tour waits, so the first tap is Approve. It opens on a later visit, or from Help.
   const firstWin = !!ws.firstPlan?.win && ws.approvals.some(a => a.app === ws.firstPlan?.win);
-  const [open, setOpen] = useState(() => !tourSeen() && !/[?&]notour\b/.test(location.search) && !firstWin);
+  // In the first run Home already leads with the plan and one button (src/FirstRun.tsx): nothing covers it, and the
+  // tour waits for a later visit.
+  const [open, setOpen] = useState(() => !tourSeen() && !/[?&]notour\b/.test(location.search) && !firstWin && !isFirstRun(ws));
   // On first load the tour floats near the top without a scrim, so the plan behind it stays in view and usable (the
   // 2026-10-23 review: "An onboarding modal covers the dashboard on first load"). Asked for again from Help, it opens
   // as a dialog, since the person asked to see it.

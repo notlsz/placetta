@@ -83,6 +83,34 @@ export function envFrom(get: (k: string) => string | undefined): Env {
 /** The kill switch: off unless this form id is listed in FILER_AGENCIES. */
 export const killSwitchOn = (f: Filing, env: Env): boolean => !!f.payload.official && env.agencies.includes(f.payload.official.toLowerCase());
 
+/** What FILER_AGENCIES switches on for this form: "all" its channels (its id is listed), or only filing it on the
+    agency's own website (the word "portal" is listed and the form has a portal), or nothing. "portal" lets the founder
+    switch on every agency website with one word, including the ones playbooks are added for later, without opening
+    email, fax or mail for those forms. */
+export function selfFileScope(f: Filing, env: Env, d: Dest | undefined): "all" | "portal" | null {
+  if (killSwitchOn(f, env)) return "all";
+  return env.agencies.includes("portal") && !!d?.portal ? "portal" : null;
+}
+
+/** Is the portal worker on? FILER_ENABLED=1 says so, FILER_ENABLED=0 says not; unset, the worker's own heartbeat decides
+    (supabase/migrations/20261102090000_filer_heartbeat.sql): filings queue for it only while it beats. */
+export function workerOn(enabled: string | undefined, beat: { live: boolean } | null): boolean {
+  const v = (enabled ?? "").trim();
+  if (v === "1") return true;
+  if (v === "0") return false;
+  return !!beat?.live;
+}
+
+/** What the app shows for online filing: live (the worker beats and the portal channel is on), off (switched off, or
+    the portal channel isn't in FILER_CHANNELS), down (it beat once and stopped), or not set up (it never has). */
+export type WorkerState = "live" | "off" | "down" | "not_set_up";
+export function workerState(enabled: string | undefined, env: Pick<Env, "channels" | "agencies">, beat: { live: boolean; seen_at: string | null } | null): WorkerState {
+  if ((enabled ?? "").trim() === "0" || !env.channels.includes("portal")) return "off";
+  if (beat?.live) return "live";
+  if ((enabled ?? "").trim() === "1" && !beat) return "live";   // a database without the heartbeat yet: trust the switch
+  return beat?.seen_at ? "down" : "not_set_up";
+}
+
 /** SSN or ITIN shapes. Placetta never stores or sends one. */
 export const SECRET_NUMBER = /\b\d{3}-?\d{2}-?\d{4}\b|\b9\d{2}-?[78]\d-?\d{4}\b/;
 const SECRET_LABEL = /\b(ssn|itin|social security|passport)\b|社会安全号|护照号/i;
@@ -211,11 +239,11 @@ export function whyYours(f: Filing, d: Dest | undefined, env: Env, facts: Facts)
 /** Why a portal run handed a filing back without submitting anything: it couldn't finish on the agency's site (limit),
     the site sent it elsewhere (left_portal), there's no approved portal for the form (no_portal), it failed three
     times (portal_failed), the agency's review page didn't match what was approved (review_differs), the page had text
-    aimed at an AI (page_injection), the steps for the site haven't had their first supervised run
+    aimed at an AI (page_injection), the agency's bot protection refused the worker's server (portal_blocked), the steps for the site haven't had their first supervised run
     (unverified_playbook), or a "Show Odelia how" run ended without a filing (no_live_view, teach_incomplete). The
     worker writes these as the hand-back's ref (worker/filer/src/run.ts). Each is tried another way the agency takes,
     else handed to the business with its packet. */
-export const PORTAL_FAILED = new Set(["limit", "left_portal", "no_portal", "portal_failed", "review_differs", "page_injection", "unverified_playbook", "no_live_view", "teach_incomplete"]);
+export const PORTAL_FAILED = new Set(["limit", "left_portal", "no_portal", "portal_failed", "review_differs", "page_injection", "unverified_playbook", "no_live_view", "teach_incomplete", "portal_blocked"]);
 
 /** Hand-backs after which something may already have reached the agency: the business checks before anything else. */
 export const MAYBE_SENT = new Set(["maybe_submitted"]);

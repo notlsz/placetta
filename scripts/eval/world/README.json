@@ -1,5 +1,5 @@
 {
- "what": "The world set: store openings abroad (src/forms/europe.ts, src/forms/mexico.ts): a milk tea shop in Paris, a furniture showroom in Milan, a restaurant in Berlin, a retail store in London, a coffee shop in Madrid, a bakery in Amsterdam, a restaurant in Mexico City and a warehouse in Monterrey. Every expected answer is quoted from an official page in its own language, with an English translation, the URL and the read day.",
+ "what": "The world set: store openings abroad (src/forms/europe.ts, src/forms/mexico.ts): a milk tea shop in Paris, a furniture showroom in Milan, a restaurant in Berlin, a retail store in London, a coffee shop in Madrid, a bakery in Amsterdam, a restaurant in Mexico City and a warehouse in Monterrey. Every expected answer is quoted from an official page in its own language, with an English translation, the URL and the read day. Added 2026-10-27 with src/forms/nations.ts: a gift shop in Mexico City, a restaurant and a gift shop in Monterrey, a restaurant in Dubai, a restaurant and a gift shop in Riyadh, a gift shop in Berlin, and a restaurant and a gift shop in Paris; Mexico City's restaurant and Monterrey's warehouse now carry the e.firma, SIEM, INFONAVIT and state payroll tax steps.",
  "researched": "2026-10-21, from official pages only, each quote re-read with scripts/eval/proof-read.py (curl).",
  "left_out": [
   {
@@ -7,20 +7,16 @@
    "why": "They refused every automated read (connection reset, robots); Mexico City's steps are quoted from the Ley de Establecimientos Mercantiles on the city congress's site instead."
   },
   {
-   "what": "IMSS employer registration",
-   "why": "imss.gob.mx and its gob.mx pages refused every read; the row abstains and names IMSS."
-  },
-  {
    "what": "Madrid food handler training and health registration",
    "why": "No Madrid Salud or Comunidad de Madrid page could be read that states it; not claimed."
   },
   {
-   "what": "Monterrey civil protection sign-off",
-   "why": "The city's trámites site was refused by the proxy; the row abstains and names the office."
-  },
-  {
    "what": "Rome, Lyon, Hamburg, Munich, Frankfurt, Barcelona, Rotterdam, Cork, Guadalajara and Cancún city permits",
    "why": "Only the national steps and the local office are named; their own pages weren't quoted in this pass."
+  },
+  {
+   "what": "Mexico City's civil protection program and sign licence",
+   "why": "proteccioncivil.cdmx.gob.mx, seduvi.cdmx.gob.mx and the city congress's site didn't answer on 2026-10-27; the rows abstain and name the office."
   }
  ]
 }

@@ -190,16 +190,33 @@ export function licenseTierOf(name: string, renewal = false): LicenseTier {
 }
 export const tierUsd = (t: LicenseTier): number => (t === "complex" ? SIMPLE.complexUsd : t === "renewal" ? SIMPLE.renewalUsd : t === "free" ? 0 : SIMPLE.licenseUsd);
 
-/** The Stripe price for each simple item, by env var. The code never makes these: until the founder creates one and
- *  sets its env var (at exactly this amount), the team sends a quote for that item and nothing is charged. */
+/** The Stripe price for each simple item: its env var when set, else the active price with its lookup key. The code
+ *  never makes these: until the founder creates one (at exactly this amount), the team sends a quote for that item and
+ *  nothing is charged. A price found either way is charged only when Stripe's amount, currency and interval match. */
 export const SIMPLE_PRICE_ENV = {
-  license: { env: "STRIPE_PRICE_LICENSE", cents: SIMPLE.licenseUsd * 100, interval: null },
-  complex: { env: "STRIPE_PRICE_LICENSE_COMPLEX", cents: SIMPLE.complexUsd * 100, interval: null },
-  renewal: { env: "STRIPE_PRICE_RENEWAL", cents: SIMPLE.renewalUsd * 100, interval: null },
-  plan: { env: "STRIPE_PRICE_STORE_PLAN", cents: PLAN_STORE_YEAR_USD * 100, interval: "year" },
-  planMonthly: { env: "STRIPE_PRICE_STORE_MONTHLY", cents: SIMPLE.planStoreMonthlyUsd * 100, interval: "month" },
+  license: { env: "STRIPE_PRICE_LICENSE", lookup: "placetta_license", cents: SIMPLE.licenseUsd * 100, interval: null },
+  complex: { env: "STRIPE_PRICE_LICENSE_COMPLEX", lookup: "placetta_license_complex", cents: SIMPLE.complexUsd * 100, interval: null },
+  renewal: { env: "STRIPE_PRICE_RENEWAL", lookup: "placetta_renewal", cents: SIMPLE.renewalUsd * 100, interval: null },
+  plan: { env: "STRIPE_PRICE_STORE_PLAN", lookup: "placetta_store_plan_year", cents: PLAN_STORE_YEAR_USD * 100, interval: "year" },
+  planMonthly: { env: "STRIPE_PRICE_STORE_MONTHLY", lookup: "placetta_store_plan_month", cents: SIMPLE.planStoreMonthlyUsd * 100, interval: "month" },
+  /** an Odelia pack: $49 once, $25 more allowance, for a workspace on the store plan */
+  pack: { env: "STRIPE_PRICE_PACK", lookup: "placetta_odelia_pack", cents: PUBLISHED.packUsd * 100, interval: null },
 } as const;
 export type SimpleItem = keyof typeof SIMPLE_PRICE_ENV;
+
+/** Prices from before the simple model. Never offered, never charged and never made by the code; Stripe may still have
+ *  them active, and the founder archives them there (billing health lists any that are still active). */
+export const LEGACY_LOOKUPS = ["placetta_entry", "placetta_essentials_year", "placetta_pro_year", "placetta_opening_retail", "placetta_opening_food", "placetta_guarantee"] as const;
+
+/** The store plan item a Stripe price is, by its id (the env var) or its lookup key; else null. */
+export function storePlanItemOf(p: { id?: string; lookup_key?: string | null } | null | undefined, env: (k: string) => string | undefined): "plan" | "planMonthly" | null {
+  if (!p) return null;
+  for (const k of ["plan", "planMonthly"] as const) {
+    const d = SIMPLE_PRICE_ENV[k];
+    if ((p.id && env(d.env) === p.id) || (p.lookup_key && p.lookup_key === d.lookup)) return k;
+  }
+  return null;
+}
 
 /** Which model a workspace is on: 'legacy' only when the migration found it was already a customer. */
 export type PriceModel = "legacy" | "simple";

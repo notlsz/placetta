@@ -294,13 +294,29 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const families = useRef(new Set<string>());
   const saveT = useRef(0);
   const lastSaved = useRef("");
+  // the stores the plan's count was last synced for (starts as the stores the workspace opened with)
+  const syncedStores = useRef<string | null>((cloud?.initial.stores ?? []).map(s => s.id).join(","));
+  const billingRef = useRef(billing);
+  useEffect(() => { billingRef.current = billing; }, [billing]);
   useEffect(() => {
     if (!cloud || cloud.role === "viewer") return;   // viewers read; the database refuses their writes anyway
     clearTimeout(saveT.current);
     saveT.current = window.setTimeout(() => {
       if (serverRun.current || families.current.size) return;   // the agent is saving on the server; take its result when it's done
       const body = JSON.stringify(api.strip(ws));
-      if (body !== lastSaved.current) { lastSaved.current = body; api.saveState(cloud.wsId, ws).catch(() => { lastSaved.current = ""; say(lang === "zh" ? "保存失败，稍后会重试。" : "Couldn't save. It will retry."); }); }
+      if (body !== lastSaved.current) {
+        lastSaved.current = body;
+        const storeKey = (ws.stores ?? []).map(s => s.id).join(",");
+        api.saveState(cloud.wsId, ws).then(() => {
+          // stores added or removed: once the server has them (store_billing), the plan's store count follows, prorated
+          // by Stripe. After the save, never before it, so the count billing reads is the new one.
+          const st = billingRef.current?.subscription_status;
+          if (cloud.role === "owner" && (st === "active" || st === "trialing" || st === "past_due") && storeKey !== syncedStores.current) {
+            syncedStores.current = storeKey;
+            void api.syncLocations(cloud.wsId).catch(() => { syncedStores.current = null; });
+          }
+        }, () => { lastSaved.current = ""; say(lang === "zh" ? "保存失败，稍后会重试。" : "Couldn't save. It will retry."); });
+      }
       const fresh = ws.audit.filter(a => !synced.current.has(a.id) && (a.actor === "you" || a.actor === "agent"));
       if (fresh.length) { fresh.forEach(a => synced.current.add(a.id)); api.logAudit(cloud.wsId, cloud.me.id, fresh).catch(() => fresh.forEach(a => synced.current.delete(a.id))); }
     }, 900);
@@ -1186,7 +1202,6 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       email: cloud.me.email, staff: cloud.me.staff, staffEmail: cloud.me.staff_email, twoStep: cloud.me.two_step, role: cloud.role, owner, admin, viewer,
       wsId: cloud.wsId, plan, billing, filings, integrations, logins, workspaces: cloud.workspaces, hq: cloud.hq, termsHold,
       openPlans: r => { if (!ownerOk()) return; setPlans(r ?? "start"); },
-      checkout: async (p, o) => { if (!ownerOk()) return; try { goTo((await api.checkout(cloud.wsId, p, o)).url); } catch (e) { fail(e); } },
       portal: async () => { if (!ownerOk()) return; try { goTo((await api.billingPortal(cloud.wsId)).url); } catch (e) { fail(e); } },
       startPlan: async (stores: number, interval: PlanInterval = "year") => { if (!ownerOk()) return; try { goTo((await api.planCheckout(cloud.wsId, stores, interval)).url); } catch (e) { fail(e); } },
       buyPack: async () => { if (!ownerOk()) return; try { goTo((await api.buyPack(cloud.wsId)).url); } catch (e) { if ((e as api.ApiError).code === "plan_required") setPlans("start"); else fail(e); } },

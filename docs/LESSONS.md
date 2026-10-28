@@ -46,6 +46,23 @@ the browser throws. The body's squash scales (`pose.sx`, `pose.sy`) had no floor
 4. A patch to a third-party library keeps its new math in a plain module the tests import, so what is tested is exactly
    what is drawn.
 
+## 2026-10: payments were on with no way for a payment to reach the app
+
+**What happened.** Payments were switched on (`app_settings.payments_on = true`) with the six current prices live in
+Stripe, but Stripe had no webhook endpoint, `stripe_config` was empty and `stripe_events` had never seen an event. The
+webhook was made only inside the billing function, just before a checkout, and the only call to billing that day was a
+401. The store plan's prices were looked up by env var only, so without the env vars a checkout fell back to a team
+quote; with them, a subscription found by lookup key alone would not have counted its stores.
+
+**The guards that now prevent it.** The monitor's daily run and staff's Billing health (Check now) make or repair the
+webhook as soon as `STRIPE_SECRET_KEY` is set, and report the key, the webhook's events, the signing secret, every
+price by lookup key and any legacy price still active (`billingHealth`, `_shared/stripe_catalog.ts`). Prices are found
+by env var or lookup key and checked to the cent. The person back from Checkout confirms the session, so the plan shows
+even if the webhook is late. Signed sample events test the webhook (`stripe-webhook/handler_test.ts`).
+
+**Rules.** Never switch payments on until Billing health says OK. A Stripe webhook is created by the server, never on a
+customer's first visit. Every event the app relies on is in `WEBHOOK_EVENTS` and tested with a signed sample.
+
 ## 2026-10: the sample contradicted itself and cited the wrong agencies
 
 **What happened.** An independent review of the sample (2026-10-23) asked Odelia "What permits do I still need for San

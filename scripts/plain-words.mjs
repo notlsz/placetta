@@ -50,7 +50,7 @@ const inPair = lead => /\b[BL]\(\s*$|\{\s*en:\s*$|,\s*$/.test(lead);
 const files = [];
 const srcDir = join(ROOT, "src");
 for (const f of readdirSync(srcDir)) if (f.endsWith(".tsx") || f === "i18n.ts") files.push({ path: join(srcDir, f), all: true });
-for (const f of ["jobs.ts", "serverRun.ts", "harness.ts", "live.ts", "replay.ts", "autonomy.ts", "rewind.ts", "businessRules.ts", "commands.ts", "held.ts", "demoPlan.ts", "finish.ts", "today.ts"]) files.push({ path: join(srcDir, f), all: false });
+for (const f of ["jobs.ts", "serverRun.ts", "harness.ts", "live.ts", "replay.ts", "autonomy.ts", "rewind.ts", "businessRules.ts", "commands.ts", "held.ts", "demoPlan.ts", "finish.ts", "today.ts", "initiative.ts", "escalate.ts"]) files.push({ path: join(srcDir, f), all: false });
 
 const hits = [];
 for (const { path, all } of files) {

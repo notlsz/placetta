@@ -298,7 +298,10 @@ async function signUp(p, w, { email = "qa@example.com", line, answers = true, no
   await p.click("form.onb button[type=submit]");
   // the yes-or-no questions that apply (src/plan/intake.ts), answered "Not sure"
   for (let i = 0; i < 8 && !(await p.locator("#onb-legal").count()); i++) {
-    if (await p.locator("#onb-q").count()) { await p.locator(".onb-act3 .sbtn.line").click(); await p.waitForTimeout(250); } else await p.waitForTimeout(400);
+    if (await p.locator("#onb-q").count()) { await p.locator(".onb-act3 .sbtn.line").click(); await p.waitForTimeout(250); }
+    // the plan Odelia builds in front of them (src/cloud/PlanBuild.tsx): on to the three answers once it's done
+    else if (await p.locator("[data-plan-next]").count()) { await p.locator("[data-plan-next]").click(); await p.waitForTimeout(250); }
+    else await p.waitForTimeout(400);
   }
   if (!(await appear("#onb-legal"))) return null;
   if (notFormed) await p.locator(".onb-pair .chip").click();
@@ -437,12 +440,21 @@ flow("signup-one-line", ["preview"], async w => {
   await w.tap(new RegExp(w.L("Add a name, opening date", "添加店名")), { what: "the optional details link" });
   await w.look("details open");
   await p.locator("#onb-agree").check();
+  // past the yes-or-no questions and the plan Odelia builds live, to the three answers
+  const toAnswers = async () => {
+    for (let i = 0; i < 12 && !(await p.locator("#onb-legal").count()); i++) {
+      if (await p.locator("#onb-q").count()) await p.locator(".onb-act3 .sbtn.line").click();
+      else if (await p.locator("[data-plan-next]").count()) { await w.look("plan built live"); await p.locator("[data-plan-next]").click(); }
+      await p.waitForTimeout(300);
+    }
+  };
   await w.tap("form.onb button[type=submit]", { what: "Start" });
+  await toAnswers();
   await w.look("second screen");
   if (!(await w.expect(await p.locator("#onb-legal").count(), "no second screen (the three answers) after Start"))) return;
   await w.tap(new RegExp("^" + w.L("Back", "返回") + "$"), { what: "Back on the second screen" });
-  await w.expect(await p.locator("#onb-line").count(), "Back didn't return to the one line");
-  await w.tap("form.onb button[type=submit]", { what: "Start again" });
+  await w.expect(await p.locator("[data-plan-build]").count(), "Back didn't return to the plan");
+  await w.tap("[data-plan-next]", { what: "Fill my first application again" });
   for (const [id, v] of [["#onb-legal", "Lucky Leaf Tea LLC"], ["#onb-owner", "Mei Chen"], ["#onb-address", "1 N First St, San Jose, CA 95113"]]) {
     await p.locator(id).waitFor({ timeout: 5000 }).catch(() => {});
     await p.fill(id, v);

@@ -1,5 +1,36 @@
 # Launch checklist
 
+## Turn on online filing (Odelia submits on agency websites)
+
+About ten minutes. Afterwards Odelia files on agency websites herself; the owner only approves, signs, pays an agency
+fee, or solves a CAPTCHA in the live browser she opens for them.
+
+1. **Render**: dashboard.render.com, **New**, **Blueprint**, pick this repository. Render reads `render.yaml` and asks
+   for two values:
+   - `SUPABASE_SERVICE_ROLE_KEY`: Supabase, Project Settings, API keys, the `service_role` secret key.
+   - `ANTHROPIC_API_KEY`: console.anthropic.com, Settings, API keys, Create key (starts `sk-ant-`).
+
+   Press **Apply**. It builds the worker (Chromium included, no Browserbase account needed) on the Standard plan
+   ($25 a month, 2 GB, which Chromium needs).
+2. **Supabase**: Edge Functions, Secrets (https://supabase.com/dashboard/project/esquxzcfsylffuijvzec/functions/secrets).
+   Add two secrets:
+   - `FILER_CHANNELS` = `email,fax,mail,portal`
+   - `FILER_AGENCIES` = `portal` (if it already lists form ids, add `,portal` to the end): every agency website on,
+     including ones added later; email, fax and mail stay per form.
+
+The database part is one migration, `supabase/migrations/20261102090000_filer_heartbeat.sql`, run like the others
+(Database, below). To check: open the service's address (top of placetta-filer in Render) with `/healthz` on the end
+(`"ok": true`, a recent `"heartbeat"`), or in Render, placetta-filer, Shell, run `npm run check`. In the app, Settings, Agency logins says
+**Online filing is live**. If a key is missing, the deploy shows as failed and `/healthz` names the key and where to
+get it; the worker takes no filing until it's set. `FILER_ENABLED` is no longer needed in Supabase: filings queue for
+the worker only while it's running (set it to `0` to switch websites off).
+
+Still guarded: the owner approves every filing; each form's first 10 stop at the agency's review page for the team;
+CAPTCHAs, codes, SSNs and fees go to the person; no account is ever created; only the destination's own hosts are
+opened; page text is data. Optional: `BROWSERBASE_API_KEY` and `BROWSERBASE_PROJECT_ID` in Render, only for the few
+agency sites that refuse a cloud server (EDD, bizfile Online, MassTaxConnect, sanjoseca.gov); `FILER_DB_KEY` per
+`docs/soc2/runbooks/filer-least-privilege.md`.
+
 Placetta runs on the Supabase project **Placetta** (`esquxzcfsylffuijvzec`). The database, security rules and server functions are built and tested; going live means bringing the project up to date, adding your keys, configuring sign-in and hosting the app. One command does nearly all of it.
 
 ## Go live: the four things only the owner can do
@@ -10,12 +41,13 @@ Everything else is built and deployed. These need your accounts, so no one else 
    (https://supabase.com/dashboard/project/esquxzcfsylffuijvzec/functions/secrets): add `ANTHROPIC_API_KEY`. Odelia
    answers on the web, by text and by phone as soon as it's saved. `npm run selftest` checks it.
 2. **Payments.** Stripe, Developers, API keys: copy the live secret key. Add it in the same Secrets page as
-   `STRIPE_SECRET_KEY`. Nothing else: the billing function makes every price (by lookup key) and the webhook (its
-   signing secret goes to `stripe_config`) the first time it runs. Then switch payments on:
-   `update public.app_settings set payments_on = true;` (until then everyone has early access, free).
-3. **The portal worker.** Render, New, Blueprint, this repo (`render.yaml`). Paste the service role key and the
-   Anthropic key when it asks. Then add `FILER_ENABLED=1` and `FILER_CHANNELS=email,fax,mail,portal` to the
-   Supabase secrets so filings queue for it.
+   `STRIPE_SECRET_KEY`. The prices are found by lookup key (they are never made by the code; see "Stripe" below). The
+   webhook is made by the code: on the monitor's next daily run, or at once when a staff member presses Check now
+   under Billing health in the queue; its signing secret goes to `stripe_config`. Check that Billing health says OK
+   before switching payments on: `update public.app_settings set payments_on = true;` (until then everyone has early
+   access, free).
+3. **The portal worker.** See "Turn on online filing" at the top: a Render Blueprint with two pasted values, then
+   `FILER_CHANNELS` and `FILER_AGENCIES` in the Supabase secrets.
 4. **Texts and calls.** iMessage first: start Linq's trial (linqapp.com) and run `npm run launch`; texts work the
    same day, no carrier registration. Telnyx for calls and as the SMS fallback: buy a number and register the 10DLC
    brand and campaign (it needs your EIN and takes a few days). See "Odelia on iMessage (Linq)" and "Text and call
@@ -101,12 +133,8 @@ These are separate from the Gmail, Outlook and Drive integrations below, which u
 | `ANTHROPIC_API_KEY` | The reviewer, deep research and the safety net behind Gemini. |
 | `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION` | The voice. Free tier F0 covers 500,000 characters a month. |
 | `STRIPE_SECRET_KEY` | Stripe secret key. |
-| `STRIPE_PRICE_ENTRY` | One-time price, $299. Quantity is the number of markets. |
-| `STRIPE_PRICE_LOCATION` | Optional. Essentials, per location, recurring yearly: $1,788 ($149 a month). Without it the price is found by its lookup key `placetta_essentials_year` (see `_shared/stripe_catalog.ts`). |
-| `STRIPE_PRICE_LOCATION_PRO` | Optional. Pro, per location, recurring yearly: $3,588 ($299 a month). Lookup key `placetta_pro_year`. |
-| `STRIPE_PRICE_OPENING`, `STRIPE_PRICE_OPENING_FOOD` | Optional. One-time store opening: $3,500 retail, $6,500 restaurant or food. |
-| `STRIPE_PRICE_GUARANTEE`, `STRIPE_PRICE_PACK` | Optional. Open-by-date guarantee $2,500 a store; Odelia pack $49. |
-| `STRIPE_WEBHOOK_SECRET` | From the webhook: `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/stripe-webhook`, events `checkout.session.completed` and `customer.subscription.created/updated/deleted`. |
+| `STRIPE_PRICE_STORE_PLAN`, `STRIPE_PRICE_STORE_MONTHLY`, `STRIPE_PRICE_LICENSE`, `STRIPE_PRICE_LICENSE_COMPLEX`, `STRIPE_PRICE_RENEWAL`, `STRIPE_PRICE_PACK` | Optional. Without them each price is the active one with its lookup key (`placetta_store_plan_year` $1,788 a year, `placetta_store_plan_month` $179 a month, `placetta_license` $299, `placetta_license_complex` $999, `placetta_renewal` $99, `placetta_odelia_pack` $49; `src/pricing.ts` SIMPLE_PRICE_ENV). Either way a price is charged only when Stripe's amount, currency and interval match exactly; otherwise the team quotes. |
+| `STRIPE_WEBHOOK_SECRET` | Only for a webhook made by hand at `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/stripe-webhook` (with every event in `WEBHOOK_EVENTS`, `_shared/stripe_catalog.ts`). Leave it unset and the code makes the webhook and keeps its secret. |
 | `APP_ORIGINS` | Your app address. Checkout, invites and integrations only return there. |
 | `DEV_ORIGINS` | Optional, development only. Origins such as `http://localhost:5173` that Stripe checkout may return to. Without it, localhost is refused. |
 | `FILER_DAILY_CAP` | Optional. Faxes and letters Placetta self-files for one workspace in 24 hours before the team takes over. Default 10. |
@@ -129,8 +157,13 @@ These are separate from the Gmail, Outlook and Drive integrations below, which u
 
 ## Stripe
 
-- The $299 entry credit toward the first year: create a promotion code. Checkout accepts codes.
-- Turn on the customer portal so people can change cards and download invoices.
+- Prices from before the simple model (`placetta_entry`, `placetta_essentials_year`, `placetta_pro_year`,
+  `placetta_opening_retail`, `placetta_opening_food`, `placetta_guarantee`) are ignored by the code; archive them in
+  Stripe. Billing health lists any still active.
+- Turn on the customer portal (Settings, Billing, Customer portal) with: update payment method, invoice history, cancel
+  subscriptions (at the end of the period), and quantity changes off (the app keeps the store count). Manage billing
+  in the app opens it.
+- Tax: the code doesn't turn on Stripe Tax (no `automatic_tax` on Checkout). Decide with your accountant.
 - Scale ($5,000+) is sold by email; give that workspace access with `update billing set comped = true where workspace_id = '...'`.
 
 ## Integrations (only the ones you want live)
@@ -274,6 +307,8 @@ Owners write to Odelia, or forward an agency's letter, from the address they sig
 1. Pick the address (for example `odelia@placetta.com`) on a domain whose MX points at the provider: `inbound.postmarkapp.com` for Postmark, or turn on receiving for the domain in Resend.
 2. `npm run launch` sets `ODELIA_EMAIL`, then either points Postmark's inbound webhook at `odelia-mail` with a random password in the URL (`POSTMARK_SERVER_TOKEN`, `POSTMARK_INBOUND_AUTH`), or creates Resend's signed `email.received` webhook (`RESEND_WEBHOOK_SECRET`).
 3. Run `20261016100000_odelia_email.sql` and deploy `odelia-mail` and `agent-run`.
+
+The same address is how Odelia goes first. Each morning the monitor asks the people an owner told her about (the landlord, contractor, insurer) for documents a filing is missing, following up every three business days, three times at most. Under **Hands-off** (Settings, How much Odelia does on her own) those asks go from `ODELIA_EMAIL` with a reference like `[P-K7QX9ABC]` in the subject; a reply that keeps it, from the very address asked and verified the same way as below, has its files put in Documents and on the checklist item, and the job carries on. Otherwise a run drafts each ask for an owner's approval. Run `20261102090100_odelia_initiative.sql` and deploy `monitor`, `odelia-mail` and `agent-run`; `ODELIA_INITIATIVE=off` turns the morning off.
 
 Email's From line can be forged, and so can any header the sender writes (Authentication-Results, ARC, X-Spam-Tests), so Odelia trusts only what the receiving provider itself establishes. With Resend, that's the `authentication` result Resend's own servers attach (DMARC pass, or DKIM pass for the From domain). With Postmark, `odelia-mail` verifies the DKIM signature on the raw message itself, so the inbound server must have **Include raw email content in JSON payload** on (`RawEmailEnabled`, which `npm run launch` sets); without it every email is treated as unverified. A signature counts only from the From address's own domain or a parent of it (Gmail, Outlook and Google Workspace with DKIM set up all qualify). Anything else gets one note a day saying it couldn't be verified, and nothing is done. Mail from addresses with no account gets nothing back, and auto-replies, bounces and lists are dropped.
 

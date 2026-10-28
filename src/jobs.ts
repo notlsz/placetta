@@ -48,6 +48,9 @@ export type Job = {
   runs?: string[];            // the runs that worked it, oldest first: their moments are its replay (src/replay.ts)
   on?: WaitOn;                // while waiting: who it waits on
   report?: DoneReport;        // once done: what was filed and the proof
+  // Odelia asked a Placetta specialist (ask_specialist, src/escalate.ts): the job waits on them until they answer, and
+  // nothing the workspace shows moves it back to Odelia before then. The next plan she writes clears it.
+  specialist?: { asked: string; due: string; question: string };
 };
 /** The main Odelia, as the bot on a replay's moments; a store's bot is its store id. */
 export const MAIN_BOT = "odelia";
@@ -352,6 +355,8 @@ export function reconcile<W extends Evidence>(w: W, now = new Date().toISOString
     } else {
       const act = nextAction(ev, n);
       if (steps.every(s => s.done) && allProven) n = { ...n, status: "done", waiting: undefined, on: undefined };
+      // with a Placetta specialist: it waits on them, whatever else moved
+      else if (j.specialist && j.status === "waiting") n = { ...n, on: "team" };
       else if (act?.who === "you") n = { ...n, status: "waiting", on: "you", waiting: act.kind === "upload"
         ? B(`${andList(act.items.map(i => i.label.en))} for the ${act.appName.en.toLowerCase()}.`, `${act.appName.zh}：${act.items.map(i => i.label.zh).join("、")}。`)
         : act.kind === "answer" ? act.note

@@ -85,6 +85,14 @@ export const CITIES: City[] = [
   c("MX-MTY", "MX", "Monterrey", "蒙特雷", ["monterrey", "蒙特雷"], true, "NLE"),
   c("MX-GDL", "MX", "Guadalajara", "瓜达拉哈拉", ["guadalajara", "瓜达拉哈拉"], true, "JAL"),
   c("MX-CUN", "MX", "Cancún", "坎昆", ["cancun", "坎昆", "benito juarez, quintana roo"], true, "ROO"),
+  // added in the other nations' pass of 2026-10-27 (src/forms/nations.ts), each with its state's ISO code: "BCN" Baja
+  // California, "QUE" Querétaro, "PUE" Puebla, "MEX" the Estado de México
+  c("MX-SPG", "MX", "San Pedro Garza García", "圣佩德罗加尔萨加西亚", ["san pedro garza garcia", "san pedro garza garcía", "san pedro, nuevo leon", "san pedro, n.l.", "圣佩德罗加尔萨加西亚"], true, "NLE"),
+  c("MX-ZAP", "MX", "Zapopan", "萨波潘", ["zapopan", "萨波潘"], true, "JAL"),
+  c("MX-TIJ", "MX", "Tijuana", "蒂华纳", ["tijuana", "蒂华纳"], true, "BCN"),
+  c("MX-QRO", "MX", "Querétaro", "克雷塔罗", ["santiago de queretaro", "queretaro, qro", "queretaro, mexico", "queretaro", "克雷塔罗"], true, "QUE"),
+  c("MX-PUE", "MX", "Puebla", "普埃布拉", ["heroica puebla de zaragoza", "puebla, pue", "puebla, mexico", "puebla de zaragoza", "普埃布拉"], true, "PUE"),
+  c("MX-TLC", "MX", "Toluca", "托卢卡", ["toluca", "托卢卡"], false, "MEX"),
 
   /* Canada: each city's province is its state code ("CA-ON" Ontario, "CA-BC" British Columbia), for the province's own steps */
   c("CA-TOR", "CA", "Toronto", "多伦多", ["toronto", "多伦多", "scarborough, on", "north york", "markham, on"], true, "CA-ON"),
@@ -166,7 +174,9 @@ export const CITIES: City[] = [
   c("SE-GOT", "SE", "Gothenburg", "哥德堡", ["gothenburg", "goteborg", "哥德堡"]),
   c("DK-AAR", "DK", "Aarhus", "奥胡斯", ["aarhus", "århus", "奥胡斯"]),
   c("NO-BGO", "NO", "Bergen", "卑尔根", ["bergen, norway", "bergen", "卑尔根"]),
-  ...([["GB", "Birmingham", "伯明翰"], ["GB", "Edinburgh", "爱丁堡"], ["GB", "Glasgow", "格拉斯哥"], ["GB", "Liverpool", "利物浦"], ["FR", "Lyon", "里昂"], ["FR", "Marseille", "马赛"],
+  // Lyon, a guide city since the other nations' pass of 2026-10-27 (src/forms/nations.ts), with its own building step
+  c("FR-LYON", "FR", "Lyon", "里昂", ["lyon", "里昂"]),
+  ...([["GB", "Birmingham", "伯明翰"], ["GB", "Edinburgh", "爱丁堡"], ["GB", "Glasgow", "格拉斯哥"], ["GB", "Liverpool", "利物浦"], ["FR", "Marseille", "马赛"],
     ["FR", "Nice, France", "尼斯"], ["DE", "Cologne", "科隆"], ["DE", "Stuttgart", "斯图加特"], ["DE", "Düsseldorf", "杜塞尔多夫"], ["ES", "Valencia", "瓦伦西亚"], ["ES", "Seville", "塞维利亚"],
     ["IT", "Naples", "那不勒斯"], ["IT", "Turin", "都灵"], ["IT", "Florence", "佛罗伦萨"], ["IT", "Venice, Italy", "威尼斯"], ["NL", "The Hague", "海牙"], ["NL", "Utrecht", "乌得勒支"],
     ["BE", "Antwerp", "安特卫普"], ["PT", "Porto", "波尔图"], ["CH", "Geneva", "日内瓦"], ["CZ", "Prague", "布拉格"], ["HU", "Budapest", "布达佩斯"], ["GR", "Athens", "雅典"],

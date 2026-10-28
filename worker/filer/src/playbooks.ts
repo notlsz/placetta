@@ -19,10 +19,15 @@
 // only approved values are typed (guards.ts), the final-submit guard runs before every button in `final`, and every
 // page named in `pay` goes to the person, who pays the agency's fee themselves.
 import type { PageState } from "./guards.ts";
+import type { Probe } from "./probe.ts";
 
 /** One step as the guide prints it. selector is the worker's own selector grammar ("button:", "link:", "label:")
     when the guide names the control; the model confirms it against the page. */
-export type Step = { page: string; do: "sign_in" | "open" | "choose" | "fill" | "upload" | "agree" | "review" | "submit" | "pay" | "receipt"; selector?: string; note: string };
+export type Step = { page: string; do: "sign_in" | "open" | "choose" | "fill" | "upload" | "agree" | "review" | "submit" | "pay" | "receipt"; selector?: string; note: string;
+  /** The day this page, and its selector when it names one, was seen on the agency's live public site (probe.ts). A step
+      without it is from the guide only: past a sign-in, or past a page Placetta may not open without filing. Odelia
+      follows the page there, the first run stops at the review page for the team, and its real steps are recorded. */
+  seen?: string };
 export type FormSteps = { start: string; steps: Step[]; guides?: string[] };
 export type Final = { page: string; button?: string };   // a button on that page sends it; with no button, any forward button does
 export type Playbook = {
@@ -35,10 +40,17 @@ export type Playbook = {
   final: Final[];
   /** Buttons the guide shows only opening the next form, on the page it names ("Schedule Inspection" on AB+C's My
       Inspections opens the request; "Request Inspection" sends it). Never a button `final` names. */
-  nav?: { page: string; button: string }[];
+  nav?: { page: string; button: string; path?: string }[];   // path: the nav page's own address path, when the guide shows it
   pay: string[];                                          // words in the heading of a page where the agency takes its fee
   receipt: string[];                                      // words in the heading of the page that confirms it
   confirm?: string;                                       // a pattern whose first group is the confirmation number, when the guide shows one
+  /** The public pages this playbook was checked against, with the words seen there and when (probe.ts). The nightly
+      re-check opens each one and sends missing words to the Quality tab as drift. */
+  probes?: Probe[];
+  /** "entered": the agency has no review page (the form sends from its last tab), so the final-submit guard counts the
+      values this run typed through the approved-values guard (run.ts unconfirmed). Default: the review page shows them. */
+  review?: "page" | "entered";
+  probeHosts?: string[];                                  // other hosts those public pages load their frames from
 };
 
 const ACA = "https://dallascityhall.com/departments/sustainabledevelopment/DCH%20documents/3.%20Applying%20for%20a%20Commercial%20Alteration%20and%20Addition%20Application.pdf";
@@ -311,6 +323,11 @@ export const PLAYBOOKS: Playbook[] = [
     // Help guide 11.1.8 (File Document): "Choose File Online to send the document to the Shopping Cart"; the Shopping
     // Cart then takes the fee. The other choice there, Print and Mail, is never used.
     final: [{ page: "File Document", button: "File Online" }],
+    // On the Forms page the same words only open the form: "a pop-up window will describe the form and fee, and select
+    // File Online" (7.1). The guides don't print the address, so the exception holds only on a page whose main heading
+    // is exactly "Forms" and which names neither File Document nor a fee page (navOn); anywhere else "File Online" is a
+    // send and the final-submit guard runs. Found by worker/filer/test/cafllc.test.ts; not yet seen on the live site.
+    nav: [{ page: "Forms", button: "File Online" }],
     pay: ["Shopping Cart", "Checkout", "Payment"],
     receipt: ["My Work Queue", "Receipt"],
     forms: Object.fromEntries(([
@@ -442,9 +459,153 @@ export const PLAYBOOKS: Playbook[] = [
       },
     },
   },
+
+  // ---- The beachhead (2026-10-24): forms a Chinese food-and-beverage brand opening a US store files, on portals that
+  // need no account. Each was opened on its public pages from a cloud server (probe.ts); `seen` marks what was there.
+  {
+    // Every metro: a company formed abroad and registered in a US state still files (FinCEN's rule of August 2026 drops
+    // US persons only). No account; an hCaptcha on the Submit tab goes to the person in the live browser.
+    host: "boiefiling.fincen.gov",
+    name: "BOI E-Filing (FinCEN)",
+    guides: ["https://boiefiling.fincen.gov/resources/BOIR_E-File_Online_Step-by-Step_Instructions.pdf"],
+    read: "2026-10-24",
+    verified: null,
+    // Steps 10 to 12: "Select the I agree checkbox ... Select the hCaptcha textbox I am human ... Click the Submit BOIR button."
+    final: [{ page: "Submit", button: "Submit BOIR" }],
+    // "Prepare & Submit BOIR" only opens the online form (step 3)
+    nav: [{ page: "File the Beneficial Ownership Information Report", button: "Prepare & Submit BOIR" }],
+    pay: [],
+    receipt: ["Submission Status Confirmation"],
+    // the form sends from its last tab: no page repeats every value
+    review: "entered",
+    probes: [
+      { url: "https://boiefiling.fincen.gov/", expect: ["Welcome to the BOI E-Filing System", "GET STARTED", "File BOIR"], seen: "2026-10-24" },
+      { url: "https://boiefiling.fincen.gov/fileboir", expect: ["File the Beneficial Ownership Information Report (BOIR)", "File Online BOIR", "Prepare & Submit BOIR"], seen: "2026-10-24" },
+      { url: "https://boiefiling.fincen.gov/boir/html", expect: ["Beneficial Ownership Information Report (BOIR)", "WARNING!", "I Agree"], seen: "2026-10-24" },
+    ],
+    forms: {
+      "fincen-boir": {
+        start: "https://boiefiling.fincen.gov/fileboir",
+        steps: [
+          { page: "File the Beneficial Ownership Information Report", do: "open", selector: "link:Prepare & Submit BOIR", seen: "2026-10-24", note: "\"Click the Prepare & Submit BOIR button under the File Online BOIR\" (step 3). \"It cannot be saved and worked on later\": the whole report goes in one sitting." },
+          { page: "WARNING!", do: "agree", selector: "button:I Agree", seen: "2026-10-24", note: "\"Review the warning language and click the I Agree button\" (step 4): the system-use notice, not the certification." },
+          { page: "Filing Information", do: "choose", note: "Type of filing: Initial report, from the approved values (step 5a); then Next (5b)." },
+          { page: "Reporting Company", do: "fill", note: "Legal name, alternate names, tax identification type and number (Foreign is allowed), country of formation, the state of first registration and the current US address, from the approved values (steps 6a to 6h)." },
+          { page: "Company Applicant(s)", do: "fill", note: "Each company applicant's name, date of birth, address and identifying document, with \"an image of an acceptable identifying document\" from the approved files (steps 7a to 7f). A passport number line goes to the person." },
+          { page: "Beneficial Owner(s)", do: "upload", note: "Each beneficial owner the same way, with the image of their identifying document from the approved files (steps 8 to 8e). Only non-US owners are reported now." },
+          { page: "Submit", do: "submit", selector: "button:Submit BOIR", note: "Submitter name and email from the approved values; \"Select the I agree checkbox\" certifies and checks every tab (step 10); the hCaptcha is the person's (step 11); then Submit BOIR (step 12) after the worker's comparison." },
+          { page: "Submission Status Confirmation", do: "receipt", note: "\"You will see the Submission Status Confirmation page\" (step 13). Downloads are refused in the sandbox, so the worker keeps the page as a PDF and a screenshot instead of the transcript." },
+        ],
+      },
+    },
+  },
+  {
+    // San Francisco: no account, one application, then the owner signs it by DocuSign email.
+    host: "etaxstatement.sfgov.org",
+    name: "New Business Registration (San Francisco Treasurer & Tax Collector)",
+    guides: ["https://sftreasurer.org/business/register-business"],
+    read: "2026-10-24",
+    verified: null,
+    // "review and confirm the information you entered, and then click “Submit for Electronic Signature”"
+    final: [{ page: "Review & Submit", button: "Submit for Electronic Signature" }],
+    pay: ["Registration Fee", "Payment"],
+    receipt: ["DocuSign", "Confirmation"],
+    probes: [
+      { url: "https://etaxstatement.sfgov.org/NewBusinessRegistration/application", expect: ["New Business Registration Form", "Organization Type", "Business Identification", "Review & Submit", "Continue"], seen: "2026-10-24" },
+      { url: "https://sftreasurer.org/business/register-business", expect: ["New Business Registration Application", "Detailed Application Instructions", "Review & Submit"], seen: "2026-10-24" },
+    ],
+    probeHosts: ["sftreasurer.org"],
+    forms: {
+      "sf-business-registration": {
+        start: "https://etaxstatement.sfgov.org/NewBusinessRegistration/application",
+        steps: [
+          { page: "Organization Type", do: "choose", selector: "button:Continue", seen: "2026-10-24", note: "\"What is the organization type of this business?\" (a dropdown) and \"Is this business a non-profit?\" (Yes or No), from the approved values; then Continue." },
+          { page: "Business Identification", do: "fill", note: "Business name as registered with the Secretary of State, the FEIN (an SSN line goes to the person), the San Francisco start date (no future date), phone, the business email the DocuSign goes to, and the mailing address." },
+          { page: "Change of Ownership", do: "choose", note: "\"Is this a change of ownership for an existing business?\": No, unless the approved values give the previous Business Account Number." },
+          { page: "Ownership Information", do: "fill", note: "Each owner's name, tax ID and address (\"+ Add Owner\" for more). Business officers may be left blank." },
+          { page: "Business Information", do: "fill", note: "\"You must answer all questions on this page\": employees per week, estimated San Francisco payroll and gross receipts, business personal property, from the approved values only." },
+          { page: "Taxes and Fees", do: "choose", note: "Every tax or fee type the approved values name for the location; ask the person about any other." },
+          { page: "Location Details", do: "fill", note: "Location name or DBA, its start date and address (\"+ Add Location\" for more), then the First Year Free questions when they appear." },
+          { page: "Review & Submit", do: "submit", selector: "button:Submit for Electronic Signature", note: "\"After you click Submit for Electronic Signature, you cannot make any additional changes.\" The worker compares the page with the approved values first." },
+          { page: "DocuSign", do: "receipt", note: "\"You will receive an email from DocuSign\": the owner signs within 15 days (the signature is theirs); the confirmation then lists the Registration Fee, which the owner pays." },
+        ],
+      },
+    },
+  },
+  {
+    // Illinois: Form REG-1 with no MyTax login. Only the home page's link has been seen; the REG-1 pages are followed as
+    // they come, the first run stops at the review page for the team, and its real steps are recorded.
+    host: "mytax.illinois.gov",
+    name: "MyTax Illinois (Form REG-1)",
+    guides: ["https://tax.illinois.gov/businesses/registration.html"],
+    read: "2026-10-24",
+    verified: null,
+    // not seen yet: the generic send words (guards.ts isFinal) already guard REG-1's last page; this names the usual one
+    final: [{ page: "", button: "Submit" }],
+    pay: [],
+    receipt: ["Confirmation"],
+    probes: [{ url: "https://mytax.illinois.gov/", expect: ["Register a New Business (Form REG-1)", "Online services to register.", "Log in"], seen: "2026-10-24" }],
+    forms: {
+      "il-tax": {
+        start: "https://mytax.illinois.gov/",
+        steps: [
+          { page: "MyTax Illinois", do: "open", selector: "link:Register a New Business (Form REG-1)", seen: "2026-10-24", note: "Under Register (\"Online services to register\"), click Register a New Business (Form REG-1). Never Sign Up: no account is made." },
+          { page: "Register a New Business", do: "fill", note: "Not seen yet past the link: fill each REG-1 page from the approved values (the business, owners, location, sales tax and withholding) and ask the person for anything they don't answer. An SSN line goes to the person." },
+          { page: "Summary", do: "review", selector: "button:Submit", note: "Not seen yet: the last page before sending; the worker compares it with the approved values before any Submit." },
+          { page: "Confirmation", do: "receipt", note: "Not seen yet: note the confirmation number the page shows." },
+        ],
+      },
+    },
+  },
+  {
+    // Georgia: Register a New Business in GTC with no login. As in Illinois, the link is seen and the pages past it aren't.
+    host: "gtc.dor.ga.gov",
+    name: "Georgia Tax Center (Register a New Business)",
+    guides: ["https://dor.georgia.gov/tax-registration"],
+    read: "2026-10-24",
+    verified: null,
+    final: [{ page: "", button: "Submit" }],
+    pay: [],
+    receipt: ["Confirmation"],
+    probes: [{ url: "https://gtc.dor.ga.gov/_/", expect: ["Register a New Business", "Register with the Department of Revenue.", "Log in"], seen: "2026-10-24" }],
+    forms: {
+      "ga-tax": {
+        start: "https://gtc.dor.ga.gov/",
+        steps: [
+          { page: "Georgia Tax Center", do: "open", selector: "link:Register a New Business", seen: "2026-10-24", note: "Under Registration (\"Register with the Department of Revenue\"), click Register a New Business. Never Sign Up for Online Access: no account is made, and a page asking for a new username and password goes to the person." },
+          { page: "Register a New Business", do: "fill", note: "Not seen yet past the link: fill each page from the approved values (the business, owners, location, sales tax and withholding) and ask the person for anything else." },
+          { page: "Summary", do: "review", selector: "button:Submit", note: "Not seen yet: the worker compares the last page with the approved values before any Submit." },
+          { page: "Confirmation", do: "receipt", note: "\"You should receive your specific tax account number within 15 minutes by email\": note the confirmation the page shows." },
+        ],
+      },
+    },
+  },
+  {
+    // California seller's permit: "Register for a Permit, License, or Account" on the public page, no login.
+    host: "onlineservices.cdtfa.ca.gov",
+    name: "CDTFA Online Services (seller's permit registration)",
+    guides: ["https://cdtfa.ca.gov/formspubs/pub107/applying-for-a-sellers-permit.htm"],
+    read: "2026-10-24",
+    verified: null,
+    final: [{ page: "", button: "Submit" }],
+    pay: [],
+    receipt: ["Confirmation"],
+    probes: [{ url: "https://onlineservices.cdtfa.ca.gov/", expect: ["Register for a Permit, License, or Account", "Retrieve a Saved Registration", "Registration"], seen: "2026-10-24" }],
+    forms: {
+      "ca-cdtfa": {
+        start: "https://onlineservices.cdtfa.ca.gov/",
+        steps: [
+          { page: "CDTFA Online Services", do: "open", selector: "link:Register for a Permit, License, or Account", seen: "2026-10-24", note: "Under Registration, click Register for a Permit, License, or Account. Never Login or Sign Up Now." },
+          { page: "Registration", do: "fill", note: "Not seen yet past the link: the seller's permit for the business activity, owners, location and expected sales, from the approved values; ask the person for anything else. An SSN line goes to the person." },
+          { page: "Summary", do: "review", selector: "button:Submit", note: "Not seen yet: the worker compares the last page with the approved values before any Submit. \"There is no charge for a seller's permit.\"" },
+          { page: "Confirmation", do: "receipt", note: "Not seen yet: note the confirmation number; Get Registration Status on the public page follows it." },
+        ],
+      },
+    },
+  },
 ];
 
-const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
+const norm =(s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
 const headings = (s: PageState) => [s.title, ...s.headings].map(norm).join(" | ");
 
 /** The playbook and steps for this portal and form, if any. */
@@ -466,11 +627,56 @@ export function finalOn(p: Playbook | undefined, s: PageState, buttonText: strin
 }
 
 /** This button, on this page, only opens the next form, as the guide shows: the generic send words ("Schedule") don't
- *  make it a send. A button the guide's `final` names is always a send. */
+ *  make it a send. A button the guide's `final` names is always a send on its own page.
+ *
+ *  A nav button may carry the same words as a send button (bizfile Online's "File Online" opens the form on Forms and
+ *  sends it on File Document) only when both are scoped to different pages (navProblems). The exception then applies
+ *  only when the page is unambiguously the nav page, read from the page itself (pageState: the DOM's visible h1-h3
+ *  and its address, never the model's say-so): it has a parseable address, on the nav entry's `path` when the entry
+ *  names one; its first visible heading is exactly the nav page (the <title> alone never counts: a page with no
+ *  heading gets no exception); exactly one button or link on the page carries the words; and nothing on the page
+ *  (headings, title or visible text) names the send page or any fee page. Anything else gets no exception, so the
+ *  final-submit guard runs and the run hands back: fail closed, never navigation. The worker (run.ts exec) also
+ *  refuses the exception once a submit has been pressed, and reads the page again just before the click. */
 export function navOn(p: Playbook | undefined, s: PageState, buttonText: string): boolean {
   if (!p?.nav?.length || !buttonText.trim() || finalOn(p, s, buttonText)) return false;
-  const on = headings(s);
-  return p.nav.some((n) => on.includes(norm(n.page)) && norm(buttonText) === norm(n.button));
+  const all = [s.title, ...s.headings].map(norm).filter(Boolean);
+  const main = norm(s.headings[0] ?? "");
+  let path: string | null = null;
+  try { path = new URL(s.url).pathname.toLowerCase(); } catch { path = null; }
+  return p.nav.some((n) => {
+    if (norm(buttonText) !== norm(n.button)) return false;
+    const shared = p.final.some((f) => f.button && norm(f.button) === norm(n.button));
+    if (!shared) return all.join(" | ").includes(norm(n.page));
+    // the shared-word case: an address, the nav page's own path when named, the exact first heading, no other guide page
+    if (path === null || !main || main !== norm(n.page)) return false;
+    if (n.path && !path.startsWith(n.path.toLowerCase())) return false;
+    // exactly one control on the page carries these words: two or more is ambiguous
+    if ([...s.buttons.map((x) => x.text), ...s.links.map((x) => x.text)].filter((t) => norm(t) === norm(n.button)).length !== 1) return false;
+    // the heading never outweighs the rest of the page: the send page or a fee page named anywhere on it is a conflict
+    const others = [...p.final.map((f) => f.page), ...p.pay].map((x) => norm(x ?? "")).filter((x) => x && x !== norm(n.page));
+    const seen = [...all, norm(s.text ?? "")];
+    return !seen.some((h) => others.some((o) => h.includes(o)));
+  });
+}
+
+/** Every reason the playbook's nav entries could let a send through. A nav button may share its words with a send
+ *  button only when both name a page and the pages differ; a nav entry with no page, or on the send's own page, or
+ *  sharing words with a send that names no page, is refused. */
+export function navProblems(p: Playbook): string[] {
+  const out: string[] = [];
+  for (const n of p.nav ?? []) {
+    if (!n.page.trim() || !n.button.trim()) out.push(`${p.host}: a nav entry needs a page and a button`);
+    for (const f of p.final) {
+      if (!f.button || norm(f.button) !== norm(n.button)) continue;
+      if (!f.page?.trim()) out.push(`${p.host}: "${n.button}" is a send on every page, so it can't also open a form`);
+      else if (norm(f.page) === norm(n.page) || norm(f.page).includes(norm(n.page)) || norm(n.page).includes(norm(f.page))) {
+        out.push(`${p.host}: "${n.button}" opens on "${n.page}" and sends on "${f.page}": the pages overlap`);
+      }
+    }
+    if (p.pay.some((w) => norm(n.page).includes(norm(w)) || norm(w).includes(norm(n.page)))) out.push(`${p.host}: "${n.page}" is also a fee page`);
+  }
+  return out;
 }
 
 /** This page is where the agency takes its fee: the person pays it. */
@@ -488,6 +694,6 @@ export function pageOutline(form: FormSteps): string[] {
 export function guideLines(x: { playbook: Playbook; form: FormSteps }): string[] {
   return [
     `Published guide for ${x.playbook.name}${x.playbook.verified ? "" : " (not yet verified on the live site: if the page differs, follow the page and call need_person when unsure)"}:`,
-    ...x.form.steps.map((s, i) => `${i + 1}. [${s.page}] ${s.note}${s.selector ? ` (${s.selector})` : ""}`),
+    ...x.form.steps.map((s, i) => `${i + 1}. [${s.page}] ${s.note}${s.selector ? ` (${s.selector})` : ""}${s.seen ? ` (seen on the live site ${s.seen})` : ""}`),
   ];
 }

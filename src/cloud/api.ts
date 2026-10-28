@@ -77,7 +77,21 @@ export type Billing = {
   free?: boolean;
   /** legacy: a customer from before the simple model, on its old plan; simple: per license (src/pricing.ts SIMPLE) */
   price_model?: "legacy" | "simple";
+  /** Stripe couldn't collect the last invoice and it's still unpaid (the dunning notice); null once it's paid */
+  payment_issue_at?: string | null;
 };
+/** What to tell an owner about a payment, in English and Chinese, or null: a card that failed (Stripe retries), or a
+ *  plan that ended. Nothing is deleted either way. */
+export function dunningOf(b: Billing | null): { en: string; zh: string } | null {
+  if (!b || b.comped) return null;
+  if (b.payment_issue_at || b.subscription_status === "past_due" || b.subscription_status === "unpaid")
+    return { en: "Your last payment didn't go through. Stripe tries again over the next few days; update your card in Manage billing. Nothing is deleted; until it's paid, the plan's Odelia allowance and included renewals pause.",
+      zh: "您最近一笔付款未成功。Stripe 会在接下来几天自动重试；请在“管理账单”中更新银行卡。任何内容都不会被删除；付款完成前，方案内的 Odelia 额度和包含的续期将暂停。" };
+  if (b.subscription_status === "canceled" || b.subscription_status === "incomplete_expired")
+    return { en: "Your store plan has ended. Everything you saved stays; renewal monitoring and the plan's Odelia allowance stop until you start a plan again.",
+      zh: "您的门店方案已结束。您保存的一切都会保留；续期监控和方案内的 Odelia 额度将暂停，直到您重新开通方案。" };
+  return null;
+}
 /** simple: the simple model with no chain plan, so each filing is paid for on its own when it's approved. */
 export type Plan = "none" | "entry" | "monthly" | "simple";
 export const planOf = (b: Billing | null): Plan =>
@@ -614,6 +628,9 @@ export async function getBilling(ws: string): Promise<Billing | null> {
   const cols = "workspace_id, entry_markets, entry_paid_at, subscription_status, subscription_plan, current_period_end, comped, stripe_customer_id";
   const row = async (): Promise<{ data: unknown; error: { code?: string; message: string } | null }> => {
     // price_model (migration 20261023120000): before it runs, every workspace is on the plans it had ('legacy')
+    // payment_issue_at (migration 20261101120000): the dunning notice; without it, no notice
+    const n = await supabase().from("billing").select(`${cols}, price_model, payment_issue_at`).eq("workspace_id", ws).maybeSingle();
+    if (n.error?.code !== "42703") return n;
     const r = await supabase().from("billing").select(`${cols}, price_model`).eq("workspace_id", ws).maybeSingle();
     if (r.error?.code !== "42703") return r;
     const x = await supabase().from("billing").select(cols).eq("workspace_id", ws).maybeSingle();
@@ -646,6 +663,9 @@ export const signedCopy = (ws: string, filingId: string, path: string) => fn<Fil
 /** Stop a filing before anything has left for the agency. Refused once Placetta has pressed submit or sent it. */
 export const stopFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "stop" });
 export const filingStatus = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "status" });
+/** Is online filing live: the portal worker beating and the portal channel on (supabase/functions/file action worker). */
+export type WorkerStatus = { state: "live" | "off" | "down" | "not_set_up"; seen_at: string | null };
+export const portalWorker = (ws: string) => fn<{ worker: WorkerStatus }>("file", { workspace_id: ws, action: "worker" }).then((r) => r.worker);
 /** The undo window: take a held filing back (nothing has left), or end the wait and send it now. */
 export const undoFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "undo" });
 export const sendFilingNow = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "send_now" });
@@ -798,8 +818,16 @@ export const licensePay = (ws: string, ref: string, shown: { tier: string; cents
 /** The store plan for every store, billed yearly or month to month, after the renewal terms were agreed to next to the button. */
 export const planCheckout = (ws: string, stores: number, interval: "year" | "month" = "year") => fn<{ url: string; stores: number }>("billing", { action: "plan_checkout", workspace_id: ws, shown_stores: stores, interval, renewal_consent: true, return_url: appHome() });
 export const syncLocations = (ws: string) => fn<{ synced: boolean }>("billing", { action: "sync_locations", workspace_id: ws, return_url: appHome() });
-export const checkout = (ws: string, plan: "entry" | "starter" | "growth" | "locations", o: { markets?: number; extra_locations?: number; tier?: "essentials" | "pro"; guarantee?: boolean; term_years?: number; renewal_consent?: boolean } = {}) =>
-  fn<{ url: string }>("billing", { action: "checkout", workspace_id: ws, plan, ...o, return_url: appHome() });
+/** Back from Stripe Checkout: the billing function applies what Stripe says now, so the plan shows at once. */
+export const confirmCheckout = (ws: string, sessionId: string) => fn<{ applied: boolean }>("billing", { action: "confirm", workspace_id: ws, session_id: sessionId, return_url: appHome() });
+/** Staff only, with two-step: the Stripe setup checked (and the webhook made or repaired) now. */
+export type BillingHealth = {
+  ok: boolean; checked_at: string; key: { set: boolean; mode: "live" | "test" | null };
+  webhook: { exists: boolean; id: string | null; status: string | null; missing_events: string[]; how: string | null; error?: string };
+  secret: { stored: boolean; env: boolean }; prices: { item: string; lookup: string; found: boolean; ok: boolean; id: string | null }[];
+  legacy_active: string[]; tax: string; problems: string[];
+};
+export const billingHealth = () => fn<{ health: BillingHealth }>("billing", { action: "health", return_url: appHome() });
 export const billingPortal = (ws: string) => fn<{ url: string }>("billing", { action: "portal", workspace_id: ws, return_url: appHome() });
 
 /* ------------------------------ growth: the cap, modules, the term, the brand plan ------------------------------ */

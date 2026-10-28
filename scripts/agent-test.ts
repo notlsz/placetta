@@ -78,6 +78,7 @@ import { voiceJourneys } from "./voice-journeys";
 import { citeTests } from "./cite-test";
 import { reviewFixTests } from "./review-fixes-test";
 import { filingProgressTests } from "./filing-progress-test";
+import { initiativeTests } from "./initiative-test";
 
 /* ------------------------------------------------------------------ checks */
 
@@ -3269,6 +3270,33 @@ edgeTests(ok, eq);
 citeTests(ok, eq);
 reviewFixTests(ok, eq);
 filingProgressTests(ok, eq);
+await initiativeTests(ok, eq);
+
+{
+  console.log("\n# ask_specialist: Odelia asks a person instead of guessing, and the job waits on them");
+  const asked: Record<string, unknown>[] = [];
+  const svc = { ...account().svc, specialist: async (o: Record<string, unknown>) => { asked.push(o); return { due_at: "2026-11-05T19:00:00.000Z" }; } } as Services;
+  const w0 = workspace({ apps: [app("zn", "draft")] });
+  const r = await agent({ ws: w0, svc, prompt: "Can we open in the old bank building on Main?", script: [
+    () => ask(["set_plan", { title: "Check the zoning for Main St", steps: [{ title: "Find whether a change of use needs a hearing" }, { title: "Prepare the application" }, { title: "Put it up for approval" }], done: ["The zoning answer is on file", "The application is prepared"] }]),
+    c => ask(["ask_specialist", { question: "Does turning a bank into a tea shop on Main need a change-of-use hearing here?", why: "judgment", application_id: "zn", found: "The city's page lists change of use but not which ones need a hearing." }]),
+    c => { const o = c.out("ask_specialist"); return say(`Asked a Placetta specialist whether the change of use needs a hearing; the answer comes ${o.answers_by}.`); },
+  ] });
+  const o = callNamed(r, "ask_specialist")[0];
+  ok(o?.ok && o.parsed?.answers_by === "2026-11-05T19:00:00.000Z", "the specialist's answer-by time comes back", o?.out);
+  ok(asked.length === 1 && asked[0].app === "zn" && asked[0].reason === "judgment" && /The agency's call needs judgment: Does turning a bank/.test(String(asked[0].note)), "the team gets the application, why and what she found", asked[0]);
+  const j = (r.w.jobs ?? [])[0];
+  ok(j?.status === "waiting" && j.on === "team" && !!j.specialist && /With a Placetta specialist, who answers by Thu, Nov 5/.test(j.waiting?.en ?? ""), "the job waits on the specialist and says when they answer", j);
+  ok(r.w.audit.some(a => /Asked a Placetta specialist/.test(a.action.en)), "the audit trail says so");
+  // without the server (the sample), the same wait, timed by the same rule
+  const local = await agent({ ws: w0, prompt: "x", script: [() => ask(["ask_specialist", { question: "Which form for a sidewalk cafe?", why: "no_source" }]), () => say("Asked.")] });
+  ok(callNamed(local, "ask_specialist")[0]?.ok && Date.parse(String(callNamed(local, "ask_specialist")[0].parsed?.answers_by)) > Date.now(), "without the server it still waits on a time in the future");
+  // Plan first may still ask; Ask me first doesn't hold the question on a card
+  const plan = await agent({ ws: workspace({ controls: { autonomy: "plan" } }), prompt: "x", script: [() => ask(["ask_specialist", { question: "Is a hearing needed?", why: "judgment" }]), () => say("Asked.")] });
+  ok(callNamed(plan, "ask_specialist")[0]?.ok, "Plan first lets her ask a specialist");
+  const askFirst = await agent({ ws: workspace({ controls: { autonomy: "ask" } }), prompt: "x", script: [() => ask(["ask_specialist", { question: "Is a hearing needed?", why: "judgment" }]), () => say("Asked.")] });
+  ok(callNamed(askFirst, "ask_specialist")[0]?.parsed?.asked === true && !askFirst.w.approvals.length, "Ask me first doesn't hold a question for the team on a card");
+}
 
 console.log("\n# Every declared tool is exercised");
 const missed = declared.filter(n => !covered.has(n));

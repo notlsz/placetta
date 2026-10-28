@@ -424,7 +424,7 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
       const bl = t("billing").find(x => x.workspace_id === ws);
       // the simple model, as the billing function prices it; the preview never charges, so a paid filing is marked paid
       if (bl?.price_model === "simple") {
-        if (body.action === "prices") return json({ ok: true, model: "simple", simple: { prices: SIMPLE, online: { license: true, complex: true, renewal: true, plan: true, planMonthly: true } } });
+        if (body.action === "prices") return json({ ok: true, model: "simple", simple: { prices: SIMPLE, online: { license: true, complex: true, renewal: true, plan: true, planMonthly: true, pack: true } } });
         if (body.action === "license_quote" || body.action === "license_pay") {
           const app = ((t("workspaces").find(x => x.id === ws)?.state as { apps?: { id: string; name: { en: string } }[] } | undefined)?.apps ?? []).find(a => a.id === body.ref);
           if (!app) return fnErr("not_found", "That filing isn't in this workspace. Nothing was charged.", 404);
@@ -449,8 +449,10 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
           save(); return json({ ok: true, url: "preview:billing" });
         }
       }
-      if (body.action === "prices") return json({ ok: true, model: "legacy", location: { amount: 1788, currency: "USD", interval: "year", interval_count: 1 }, pro: { amount: 3588, currency: "USD", interval: "year", interval_count: 1 }, opening: { amount: 3500, currency: "USD", interval: null, interval_count: null }, opening_food: { amount: 6500, currency: "USD", interval: null, interval_count: null }, guarantee: { amount: 2500, currency: "USD", interval: null, interval_count: null }, pack: { amount: 49, currency: "USD", interval: null, interval_count: null } });   // the prices the launcher creates in Stripe
+      // a customer from before keeps its plan; the old prices are never offered (the billing function says the same)
+      if (body.action === "prices") return json({ ok: true, model: "legacy", simple: { prices: SIMPLE, online: { license: true, complex: true, renewal: true, plan: true, planMonthly: true, pack: true } } });
       if (body.action === "sync_locations") return json({ ok: true, synced: false });
+      if (body.action === "checkout") return fnErr("plan_retired", "That plan isn't offered any more. Choose the store plan, or email support@placetta.com. Nothing was charged.", 409);
       const no = needOwner(); if (no) return no;
       if (body.action === "portal") return fnErr("not_configured", "Billing management opens Stripe on the live app.", 409);
       // owner prices are quoted from Stripe on the live app only; the preview never shows or charges one

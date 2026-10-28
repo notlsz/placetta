@@ -5,9 +5,10 @@ import { allowanceOf, approvalMatches, filingKindOf, filingModeOf, IN_PLAN, quot
 import { moduleById, moduleFactsOf, moduleQuantity, moduleQuote, type ModuleId, type ModuleQuote } from "../../../src/modules.ts";
 import { hqQuote, type BillTo } from "../../../src/hqPlan.ts";
 import { validTerm } from "../../../src/contract.ts";
-import { planNameOf, planTerms, type PlanInterval, licenseQuoteLine, licenseTierOf, MODULE_PRICES, moduleStripeCents, moduleStripeInterval, OWNER_PRICE_ENV, SIMPLE, SIMPLE_PRICE_ENV, stripePriceMatches, TERM_PRICE_ENV, termYearCents, tierUsd,
+import { planNameOf, planTerms, type PlanInterval, PUBLISHED, storePlanItemOf, licenseQuoteLine, licenseTierOf, MODULE_PRICES, moduleStripeCents, moduleStripeInterval, OWNER_PRICE_ENV, SIMPLE, SIMPLE_PRICE_ENV, stripePriceMatches, TERM_PRICE_ENV, termYearCents, tierUsd,
   type LicenseQuote, type LicenseTier, type SimpleItem } from "../../../src/pricing.ts";
 import { DEST } from "../file/destinations.ts";
+import { itemOf } from "../_shared/stripe_catalog.ts";
 
 /** The origins Stripe may send someone back to: the app's own (APP_ORIGINS), its Vercel address (which keeps working
     when a custom domain isn't connected), and, only when DEV_ORIGINS lists them, development origins such as
@@ -210,10 +211,44 @@ export function planIntervalOf(v: unknown): PlanInterval | null {
 export function planCheckoutParams(o: { ws: string; back: string; price: string; qty: number; interval: PlanInterval; consentAt: string }): Record<string, string> {
   const plan = planNameOf(o.interval), terms = planTerms(o.interval, o.qty).en;
   return {
-    mode: "subscription", success_url: `${o.back}?billing=success`, cancel_url: `${o.back}?billing=canceled`, client_reference_id: o.ws,
+    // the session id comes back with the person, so the app confirms the plan at once (action "confirm")
+    mode: "subscription", success_url: `${o.back}?billing=success&session_id={CHECKOUT_SESSION_ID}`, cancel_url: `${o.back}?billing=cancel`, client_reference_id: o.ws,
     "metadata[workspace_id]": o.ws, "metadata[plan]": plan, "metadata[interval]": o.interval, "metadata[renewal_consent]": o.consentAt,
     ...(o.interval === "year" ? { "metadata[term_years]": "1" } : {}), "metadata[renewal_terms]": terms,
     "subscription_data[metadata][workspace_id]": o.ws, "subscription_data[metadata][plan]": plan, "subscription_data[metadata][interval]": o.interval,
     "line_items[0][price]": o.price, "line_items[0][quantity]": String(o.qty),
+  };
+}
+
+/** Subscription states that still bill: a second store plan checkout is refused while one of these is on. */
+export const LIVE_SUB = new Set(["active", "trialing", "past_due", "unpaid", "incomplete"]);
+
+/** The store count change for sync_locations: the subscription item that bills per store (the store plan's yearly or
+ *  monthly price, or a location price from before) and the quantity it should have (every store, at least one). Null
+ *  when no item bills per store. change: false when it already has that quantity, so nothing is sent to Stripe. */
+export function syncStep(items: { id: string; quantity?: number; price?: { id?: string; lookup_key?: string | null } }[], stores: number, env: (k: string) => string | undefined): { item: string; qty: number; change: boolean } | null {
+  const perStore = (p: { id?: string; lookup_key?: string | null } | undefined) => {
+    if (storePlanItemOf(p, env)) return true;
+    const it = itemOf(p, env);
+    if (it === "essentials" || it === "pro") return true;
+    return (["essentials", "pro"] as const).some((t) => Object.values(TERM_PRICE_ENV[t]).some((k) => !!p?.id && env(k) === p.id));
+  };
+  const item = items.find((i) => perStore(i.price));
+  if (!item) return null;
+  const qty = planQuantity(stores);
+  return { item: item.id, qty, change: (Number(item.quantity) || 0) !== qty };
+}
+
+/** What a pack adds to Odelia's allowance, in dollars (src/pricing.ts PUBLISHED). */
+export const SIMPLE_PACK_CREDIT_USD = PUBLISHED.packCreditUsd;
+
+/** The Stripe Checkout for Odelia packs: $49 each, the credit kept on the session and on the payment (for a refund). */
+export function packCheckoutParams(o: { ws: string; back: string; price: string; packs: number; creditUsd: number }): Record<string, string> {
+  const packs = Math.max(1, Math.min(10, Math.floor(o.packs) || 1)), credit = String(o.creditUsd * packs);
+  return {
+    mode: "payment", "line_items[0][price]": o.price, "line_items[0][quantity]": String(packs),
+    success_url: `${o.back}?billing=success&session_id={CHECKOUT_SESSION_ID}`, cancel_url: `${o.back}?billing=cancel`, client_reference_id: o.ws,
+    "metadata[workspace_id]": o.ws, "metadata[kind]": "pack", "metadata[packs]": String(packs), "metadata[credit_usd]": credit,
+    "payment_intent_data[metadata][workspace_id]": o.ws, "payment_intent_data[metadata][kind]": "pack", "payment_intent_data[metadata][credit_usd]": credit,
   };
 }

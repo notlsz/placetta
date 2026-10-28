@@ -36,7 +36,11 @@ const PROOF: Record<string, RegExp[]> = {
   "odelia-voice": [/verifyTelnyx\(/, /verifyCallToken\(/, /monitorKeyOk\(/],
   "partner-api": [/partner_api_auth/],
   "scim": [/scim_auth/],
-  "stripe-webhook": [/verified\(raw, req\.headers\.get\("stripe-signature"\)/],
+  "stripe-webhook": [/handle\(req, \{/],
+};
+// a function whose request handler lives in a module beside its index.ts: what that module must do
+const HANDLER: Record<string, [string, RegExp[]]> = {
+  "stripe-webhook": ["handler.ts", [/verified\(raw, req\.headers\.get\("stripe-signature"\)/, /if \(!\(await verified\(/]],
 };
 
 Deno.test("every server function says how it knows who is calling, and does it", () => {
@@ -44,6 +48,7 @@ Deno.test("every server function says how it knows who is calling, and does it",
   for (const f of fns) {
     const src = read(`${f}/index.ts`);
     for (const r of PROOF[f]) ok(r.test(src), `${f}/index.ts no longer has ${r}`);
+    if (HANDLER[f]) for (const r of HANDLER[f][1]) ok(r.test(read(`${f}/${HANDLER[f][0]}`)), `${f}/${HANDLER[f][0]} no longer has ${r}`);
   }
 });
 

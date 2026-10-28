@@ -1,8 +1,8 @@
 # Terms of Service
 
-Last updated: 2026-10-13
+Last updated: 2026-10-22
 
-Effective date: 2026-10-13. If you accepted an earlier version, this version applies to you from the day you accept it in the app, or from 30 days after we notify you of it by email or in the app if you keep using the service after then, whichever comes first. Until then, the previous version applies.
+Effective date: 2026-10-22. If you accepted an earlier version, this version applies to you from the day you accept it in the app, or from 30 days after we notify you of it by email or in the app if you keep using the service after then, whichever comes first. Until then, the previous version applies.
 
 These terms are an agreement between you and Placetta Inc. ("Placetta", "we", "us"). They cover your use of placetta.com, the Placetta app, and texts and calls with Odelia, Placetta's AI agent (together, the "service"). "You" means the business you represent and the people who use the service for it.
 
@@ -28,6 +28,9 @@ Placetta helps businesses get the licenses, permits and registrations they need 
 - tracks deadlines and renewals and reminds you of them
 - drafts messages
 - answers your texts and calls, if you link a phone
+- checks the status of your filings on agency websites and public records every day
+- books inspections at a time you approve
+- when an agency says no, shows you the official way to appeal and its deadline, and drafts what you may need
 
 Odelia researches requirements on official government websites and cites the agency source.
 
@@ -41,10 +44,22 @@ Placetta may decline to submit a filing that we believe in good faith is inaccur
 
 Our Filing Authorization sets out the limited authority you give us to file for you. It is part of these terms.
 
+## What Placetta may do for you, and when
+
+Odelia and Placetta's filing software and team act for your business only within these limits:
+
+- Without asking each time: read what you upload or connect, look up requirements and fees on official websites, check the status of your filings on agency websites and public records, track deadlines, and prepare drafts for you to review.
+- Only after an owner of your workspace approves that exact item in the app: submit a filing, send a message as your business, book an inspection at the time the owner picked, or change something in an app you connected. Each approval covers that one item.
+- Saved agency logins are opened only to do something an owner approved, such as submitting a filing or booking an inspection, and each opening is recorded in your audit trail. Placetta's software types the login itself; the AI model never sees the password. Placetta never creates an agency account in your name.
+- Never: pay a government fee, type a card or bank number, sign your name, make a sworn statement for you, file an appeal, appear at a hearing or an inspection for you, or send a Social Security, ITIN or passport number.
+
+Only an owner of your workspace can give these approvals. You decide who is an owner, and an owner's approval is your business's approval.
+
 ## Monitoring and reminders
 
 Placetta tracks the expiry and renewal dates of the licenses and permits in your workspace, and reminds you by email, in the app and, if you turn them on, by text or call. Monitoring and reminders are a service to help you. They do not replace your own records and calendar.
 
+- Placetta checks the status of each filing with an agency once a day, from the agency's public records, its status page or a lookup by Odelia, and tells you when something changes. What the agency tells you directly controls over what our check shows.
 - Your business remains responsible for holding the licenses and permits it needs, for renewing them, and for meeting every agency deadline, whether or not you receive a reminder.
 - Placetta will use commercially reasonable efforts to keep the dates in your workspace accurate and to send reminders on time. We do not promise that every requirement, rule change or deadline will be caught, or that every reminder will arrive.
 - Dates come from your documents, the agencies and what you tell us. Check them, and tell us if one looks wrong. Agencies can change rules, fees and deadlines without notice.
@@ -56,7 +71,17 @@ Odelia is software, not a person.
 - Her output, including license maps, filled applications, answers by text or call, and reminders, can be wrong or incomplete. Review what she prepares, and check the cited source, before you approve it or rely on it.
 - On every call, Odelia says that she is an AI and that the call is transcribed.
 - Odelia cannot file, pay, send, approve or delete anything by text or call. Those happen only in the app, after your approval.
+- If an owner or admin turns on memory (it is off by default), Odelia suggests short notes about your business and an owner or admin approves each one. Each note shows where it came from and when, so you can see why Odelia remembered it. Your team can edit or delete any note at any time. Your records, such as filings and deadlines, win over a note that disagrees with them.
+- Placetta checks Odelia's work: every application is checked line by line before you can approve it, and a sample of finished tasks, about 1 in 5, is checked again by fixed rules, without an AI model, so our team can find and fix mistakes. These checks help, but they do not replace your review.
 - You are responsible for what you approve.
+
+## AI models and your content
+
+- Placetta does not use your content to train AI models. We choose AI providers whose terms for our account don't allow training on what we send. Our Privacy Policy names each provider, what it receives and where it is based.
+- Zero data retention is not in place today. We are asking each AI provider to confirm zero data retention in writing, and Placetta can limit AI processing to providers that have.
+- To save cost, a provider may keep the unchanging start of a request in its prompt cache for a short time, from minutes to an hour. It is not used for training.
+- What Odelia prepares for you from your content, such as applications, drafts and messages, is yours to use for your business. Similar output may be prepared for others, and Placetta's software, forms and guides stay Placetta's.
+- Placetta keeps a technical record of each task: which tools ran, how long they took and what they cost. It holds names and numbers, not your content. We use it to run, fix and price the service.
 
 ## Texts and calls
 
@@ -85,6 +110,14 @@ An owner of a workspace can share its stores' status, read only, with a headquar
 - You are responsible for having the right to share this information with that headquarters, for example under your franchise agreement, and for entering the right email address.
 - An owner can stop sharing at any time in Settings. Summary emails already sent cannot be recalled.
 
+## Sharing with a partner who referred you
+
+If your business came to Placetta through a partner's referral code, such as a franchisor, broker, landlord, investor or accountant, Placetta asks you once whether that partner may see your progress.
+
+- If you agree, the partner sees only your business name, your stage, how many permits are approved out of the total, and your opening date. Nothing else.
+- You can change this in Settings at any time.
+- Placetta may pay the partner a share of what you pay us. It doesn't change your price.
+
 ## Professional services
 
 Placetta is not a law firm, a customs broker or an accounting firm. We do not give legal, customs, tax or accounting advice, and using the service does not create an attorney-client relationship with Placetta.
@@ -99,38 +132,77 @@ Some steps can legally be done only by a licensed professional, such as an attor
 
 Where a city requires a registered filing representative or permit expediter for a step, that step is handled by someone registered there.
 
+## Appeals and denials
+
+When an agency denies an application, revokes a license or issues a fine, Placetta can show you the official way to challenge it, its deadline, and what is on file. Placetta is not your lawyer.
+
+- Placetta reads the process from the statute, rule or agency page, cites it, and counts the deadline from that rule, showing how it counted. A rule we could not confirm on an official source is marked unconfirmed and is never turned into a date. The deadline in the agency's letter and the law control, and your business is responsible for meeting it.
+- Placetta drafts what you may need, such as a letter or a list of evidence, with each rule cited, for you or your attorney to check. A draft is not legal advice and does not state your legal position.
+- Placetta never files an appeal, never appears at a hearing for you, never tells you whether you will win, and gives no opinion on your legal rights.
+- Where a lawyer is advisable or required, such as for a hearing or a court case, Placetta can prepare one packet for an independent attorney you choose or one we introduce you to: the decision, the deadline and how it was counted, the grounds, the evidence on file and what is missing, and the questions for the attorney. Placetta sends it only with your approval. The attorney works for you under your own agreement, as "Professional services" explains.
+
 ## What Placetta is not
 
 - Placetta is not a government agency and is not affiliated with or endorsed by any agency.
-- Agencies decide whether to approve an application and how long it takes. We cannot guarantee approval, timing, inspection results or an opening date; the open-by-date guarantee, if you buy it, is a refund of the opening fee, not a promise of the date. Timelines and fees we give you are estimates.
+- Agencies decide whether to approve an application and how long it takes. We cannot guarantee approval, timing, inspection results, the outcome of an appeal or an opening date. Timelines, deadlines and fees we give you are estimates.
 
 ## Government fees
 
-You pay government fees directly to each agency. We send you the agency's payment link. Placetta never charges agency fees. Fees that professionals bill you directly are also separate from Placetta's fees.
+Government, agency and notary fees are at cost. You pay them directly to each agency, using the payment link we send you. Placetta never marks them up and never keeps any part of them. Fees that professionals bill you directly are also separate from Placetta's fees.
 
 ## Plans and billing
 
-Placetta's fees are billed through Stripe.
+Placetta's fees are billed through Stripe. The prices below apply to every workspace that was not already a paying Placetta customer when this pricing took effect in October 2026. Settings, Billing shows which pricing your workspace is on. "Plans from before" below covers the workspaces that were.
+
+- Store plan: $149 per store per month, billed yearly in advance ($1,788 per store per year), or $179 per store per month billed month to month, for each store in the workspace. It covers tracking every license and renewal date, renewal monitoring and rule-change alerts, your document vault, Odelia's chat for your team, and every renewal Odelia files on her own.
+- New license: $299 for each new license, permit or registration Placetta files, filed and tracked until the agency decides.
+- Complex license: $999, only for liquor licenses, building plan review and import permits. No other license costs $999.
+- Renewal the store plan doesn't include: $99. A renewal isn't included when it needs Placetta's team, for example because it needs a handwritten signature, can only be mailed, or has no route Odelia can file on her own, or when the store has no store plan.
+- 10 or more stores on the store plan: every new license is included too, with no charge per license.
+- Never charged: inspections that are part of a permit, steps that belong to a license already priced, and certificates and training your staff earn themselves. Placetta tracks them for free.
+- The plan preview, which lists the licenses a store needs with their fees and timelines, is free.
+- Government fees are at cost, as "Government fees" explains.
+- Custom plans may be set out in an order form that both sides accept. "Order of precedence" under "General terms" explains which controls if they conflict.
+
+Every charge is shown before you approve it. The app shows each license, complex license or renewal fee, in English and Chinese, with the agency's own fee, before an owner approves that filing, and charges it only when the owner approves it, at the price shown. A fee you paid is never charged twice for the same filing. If online payment isn't available for an item, our team sends you a quote, and nothing is charged until you accept it.
+
+Fees do not include taxes. You pay any sales, use or similar taxes that apply, other than taxes on Placetta's income.
+
+If a payment fails, we tell the owners. Until it is paid, the plan's Odelia allowance and included renewals pause; nothing in the workspace is deleted.
+
+## Renewal and cancellation
+
+- The store plan renews automatically at the same price, every year on yearly billing or every month on monthly billing, until you cancel. Before you pay, the app shows these renewal terms next to the payment button and asks you to agree to them.
+- We email the owners 15 to 45 days before each renewal with what it will charge and how to cancel.
+- If the price will change at renewal, we will tell you at least 30 days before.
+- You can cancel online at any time in Settings, Billing, with one click and no call. Cancelling turns off the next renewal. It takes effect at the end of the current yearly or monthly term, and you keep the service until then.
+- New licenses, complex licenses and renewals are charged one at a time, only when an owner approves them, so there is nothing to cancel for them.
+
+## Refunds
+
+- Store plan fees are paid in advance, for the year or the month. Cancelling stops the next renewal; it does not refund the current term, except as "Changes to these terms" says or where the law requires a refund.
+- A license, complex license or renewal fee pays for that one filing. Once Placetta has submitted the filing, the fee is earned, whatever the agency decides.
+- If Placetta declines to submit a filing you paid for, or cannot submit it, and you don't want us to try again, we refund that filing's fee. Ask at support@placetta.com.
+- Government fees are paid to the agency, and any refund of them follows the agency's rules.
+
+## Plans from before
+
+If your workspace was already a paying Placetta customer when the store plan pricing took effect, you keep the plan you bought, at its price, with everything it included, as shown in Settings, Billing and on any order form. The store plan pricing doesn't change it, and we move a workspace to the store plan pricing only with an owner's written agreement. Those plans are:
 
 - Entry plan: $299 per market, paid once. It is credited toward your first year of a location plan if that plan starts within 60 days of paying for the entry plan. After 60 days it is not credited.
 - Essentials: $149 per location per month, billed yearly in advance. It covers tracking, filing and renewals for each location.
 - Pro: $299 per location per month, billed yearly in advance. It adds inspection readiness: daily logs, mock inspections, staff certificates and a larger Odelia allowance.
 - Openings: $3,500 per new retail store and $6,500 per new restaurant or food store, paid once when the store is added while still opening. Openings that need a liquor license or a complex build-out are quoted before any work starts. Opening fees are not credited against a location plan.
-- Open-by-date guarantee: $2,500 per opening, optional. We agree an opening date with you in writing. If a permit Placetta files for you is the reason the store opens after that date, we refund that store's opening fee. It does not apply when the delay comes from the agency's own review time beyond its published times, from steps you or your landlord, contractors or professionals have to complete, from information you gave us that was incomplete or wrong, or from inspections, construction or permits we don't file. The guarantee fee itself is not refunded.
-- Headquarters (10 or more locations) and US entry for brands from outside the US are set out in an order form.
-- Custom plans may be set out in an order form that both sides accept. "Order of precedence" under "General terms" explains which controls if they conflict.
+- Open-by-date guarantee, only on plans from before: $2,500 per opening, optional. We agree an opening date with you in writing. If a permit Placetta files for you is the reason the store opens after that date, we refund that store's opening fee. It does not apply when the delay comes from the agency's own review time beyond its published times, from steps you or your landlord, contractors or professionals have to complete, from information you gave us that was incomplete or wrong, or from inspections, construction or permits we don't file. The guarantee fee itself is not refunded. The guarantee is not offered with the store plan.
+- Headquarters (10 or more locations), US entry for brands from outside the US, modules and multi-year terms are set out in an order form or in Settings, Billing.
 
-The location plan renews for another year at the end of each yearly term until you cancel. If its price will change at renewal, we will tell you at least 30 days before. You can cancel at any time in Settings, Billing. Cancellation takes effect at the end of the current billing period, and you keep the service until then.
-
-Fees do not include taxes. You pay any sales, use or similar taxes that apply, other than taxes on Placetta's income.
-
-Fees are non-refundable, except under the open-by-date guarantee or where the law requires a refund. If a payment fails, we may pause filing work for the workspace after telling you.
+A location plan from before renews for another year at the end of each yearly term until you cancel, as "Renewal and cancellation" describes. Its fees are non-refundable, except under the open-by-date guarantee, under "Changes to these terms", or where the law requires a refund.
 
 ## Fair use of Odelia
 
 Odelia, Placetta's AI agent, does compliance work for your business: its licenses, permits, registrations, filings, inspections, stores and the documents behind them. She isn't a general-purpose AI assistant.
 
-- Each plan includes an Odelia allowance, shown in Settings, under Billing; Pro's is twice Essentials'. Packs ($49 for $25 of allowance) add more and carry over until they're used. When the allowance is used up, deadlines, reminders and filings already in motion carry on; new work for Odelia waits for the next period, a pack or a larger plan.
+- Each plan includes an Odelia allowance, shown in Settings, under Billing. On plans from before, Pro's is twice Essentials', and packs ($49 for $25 of allowance) add more and carry over until they're used. When the allowance is used up, deadlines, reminders and filings already in motion carry on; new work for Odelia waits for the next period or, on plans from before, a pack or a larger plan.
 - To keep the service fast for everyone, there are limits on how many tasks you can start in an hour and in a day.
 - You may not use the service or Odelia's output to build, train or improve another AI model; reach the service with scripts, bots or other automated means except through features we provide; resell or share access to it; or try to get around its limits or instructions.
 
@@ -149,10 +221,11 @@ You agree to:
 - use the service lawfully, and upload or connect only content you have the right to share, including information about other people such as owners and managers
 - link only a phone number you own or are authorized to use
 - keep your login secure, and tell us at support@placetta.com if you think someone else has accessed your workspace
+- keep tokens for AI assistants secret, give each only the access it needs, and revoke one you no longer use
 
 ## Your content
 
-Your documents and information stay yours. You give Placetta a limited license to use, copy, store and transmit them only to provide the service to you. That includes sending them to the agencies when you approve a filing, to professionals you engage with your approval, to a headquarters you share with as described above, and to the processors named in our Privacy Policy.
+Your documents and information stay yours. You give Placetta a limited license to use, copy, store and transmit them only to provide the service to you. That includes sending them to the agencies when you approve a filing, to professionals you engage with your approval, to a headquarters or partner you share with as described in these terms, and to the processors named in our Privacy Policy.
 
 We do not use your content to train AI models. We do not sell it, and we do not use it for advertising.
 
@@ -169,13 +242,27 @@ Placetta owns the service, including its software, guides and design, but not yo
 
 ## Connected services
 
-You can choose to connect Gmail, Google Calendar, Google Drive, Outlook Mail, Outlook Calendar, Dropbox, QuickBooks and Slack. We use them only for the tasks you ask for. Each is run by its provider under its own terms. You can disconnect any of them in Settings at any time.
+You can choose to connect the services the app offers, such as Gmail, Google Calendar, Google Drive, Outlook Mail, Outlook Calendar, Microsoft Teams, Dropbox, QuickBooks, Slack, Lark, WeCom, DingTalk, and other apps through MCP. We use them only for the tasks you ask for. Reading from a connected app can run on its own; anything that would change data in it waits for an owner's approval. Each is run by its provider under its own terms. You can disconnect any of them in Settings at any time.
+
+## Connecting an AI assistant
+
+An owner or admin can make a token in Settings that lets an AI assistant you use, such as Claude or ChatGPT, read your workspace through Placetta's MCP server.
+
+- Each token reads one workspace, and only the kinds of information chosen for it, such as store status, deadlines, readiness or filings. It is read only: it cannot file, send, pay, approve or change anything.
+- The token is shown once, when it is made. Placetta keeps only a fingerprint of it, never the token itself. Treat it like a password.
+- Every call made with a token is recorded in your workspace. A token stops working when an owner or admin revokes it in Settings, or when the person who made it is no longer an owner or admin.
+- The assistant you connect is run by its provider under its own terms. What it does with the answers it receives is between you and that provider.
+- We may limit how often a token is used, and may revoke a token that is misused or that we believe has leaked, and will tell you if we do.
+
+## Security
+
+Placetta protects your information with the measures in our Privacy Policy, under "Security", and on our Trust page, https://placetta.com/trust, which also says what isn't finished yet. Placetta doesn't hold SOC 2 or any other security certification today. If a security incident exposes your workspace's information, we will tell the owners by email without undue delay, and within 72 hours of confirming that their information was involved, unless the law sets a shorter time.
 
 ## Ending your use
 
 - You can cancel your plan in Settings, Billing at any time.
 - You can revoke your Filing Authorization at any time, as it explains.
-- You can download your workspace data and export the audit trail in Settings, Privacy and data.
+- You can download your workspace data, including the audit trail entries shown in the app, in Settings, Privacy and data.
 - You can delete your account in Settings, Privacy and data. That deletes the workspaces you own alone, with their documents, filings and audit trail, and removes you from the others. Cancel any paid plan on a workspace you own alone first. You can also ask us to delete a workspace by emailing support@placetta.com.
 - We keep records the law requires us to keep, such as billing records.
 
@@ -303,9 +390,9 @@ Website: placetta.com
 
 # 服务条款
 
-最后更新：2026-10-13
+最后更新：2026-10-22
 
-生效日期：2026-10-13。如您已接受过上一版本，本版本自您在应用中接受之日起对您适用；如您在我们通过邮件或应用内通知您满 30 天后继续使用本服务，则自该日起适用，以两者中较早者为准。在此之前，继续适用上一版本。
+生效日期：2026-10-22。如您已接受过上一版本，本版本自您在应用中接受之日起对您适用；如您在我们通过邮件或应用内通知您满 30 天后继续使用本服务，则自该日起适用，以两者中较早者为准。在此之前，继续适用上一版本。
 
 本条款是您与 Placetta Inc.（中文名称“快哉”，下称“快哉”或“我们”）之间的协议，适用于您对 placetta.com、快哉应用，以及与快哉 AI 智能体 Odelia 之间的短信和通话（合称“本服务”）的使用。“您”指您所代表的企业及代表该企业使用本服务的人员。
 
@@ -331,6 +418,9 @@ Website: placetta.com
 - 跟踪截止日期和续期，并提醒您
 - 起草消息
 - 如您关联了手机，回复您的短信和来电
+- 每天在机构网站和公开记录中查询您的申报进度
+- 在您批准的时间预约检查
+- 机构作出不利决定时，向您说明官方申诉途径及其期限，并起草您可能需要的材料
 
 Odelia 在政府官方网站上查询相关要求，并注明所依据的机构来源。
 
@@ -344,10 +434,22 @@ Odelia 不会自行提交、付款或发送任何内容。每一份申请、每�
 
 您授予我们代为申报的有限权限，详见《申报授权书》。该授权书是本条款的一部分。
 
+## 快哉可以代您做什么，以及何时可以做
+
+Odelia 以及快哉的申报软件和团队，只在以下范围内代表您的企业行事：
+
+- 无需每次询问：阅读您上传或连接的内容，在官方网站上查询要求和费用，在机构网站和公开记录中查询您的申报进度，跟踪截止日期，以及准备草稿供您审核。
+- 须经您工作区的所有者在应用中批准该具体事项后才可进行：提交申报、以您企业的名义发送消息、在所有者选定的时间预约检查，或更改您所连接应用中的内容。每次批准只涵盖该一项事项。
+- 已保存的机构登录信息，只在执行所有者已批准的事项（例如提交申报或预约检查）时才会打开，每次打开都会记入您的审计记录。登录信息由快哉的软件自行输入，AI 模型看不到密码。快哉绝不以您的名义开设机构账户。
+- 绝不：支付政府规费、输入银行卡号或银行账号、代您签名、代您作出宣誓声明、提起申诉、代您出席听证或检查，或发送社会安全号码（SSN）、个人纳税识别号（ITIN）或护照号码。
+
+只有您工作区的所有者才能作出上述批准。由您决定谁是所有者；所有者的批准即为您企业的批准。
+
 ## 监控与提醒
 
 快哉会跟踪您工作区中各项执照和许可的到期和续期日期，并通过邮件、应用内通知以及（如您开启）短信或电话提醒您。监控与提醒是一项辅助服务，不能代替您自己的记录和日程。
 
+- 快哉每天查询一次您向各机构提交的每项申报的进度，信息来自机构的公开记录、其进度查询页面或 Odelia 的查询，有变化时会通知您。如机构直接告知您的信息与我们的查询结果不同，以机构告知的为准。
 - 无论您是否收到提醒，持有所需执照和许可、按时续期并遵守各机构的每一个截止日期，始终是您企业的责任。
 - 快哉将尽商业上合理的努力，保持您工作区中日期的准确，并按时发送提醒。我们不保证能发现每一项要求、规则变化或截止日期，也不保证每一条提醒都能送达。
 - 日期来自您的文件、各机构以及您告诉我们的信息。请自行核对；如发现日期有误，请告诉我们。机构可能不经通知即变更规则、费用和截止日期。
@@ -359,7 +461,17 @@ Odelia 是软件，不是真人。
 - 她生成的内容，包括执照清单、填好的申请、短信或电话中的回答以及提醒，可能有误或不完整。批准或依赖这些内容之前，请先审核，并查看所注明的来源。
 - 每次通话时，Odelia 都会说明她是 AI，并告知通话会被转录。
 - Odelia 不能通过短信或电话提交、付款、发送、批准或删除任何内容。这些操作只能在您批准后于应用中进行。
+- 如所有者或管理员开启了记忆功能（默认关闭），Odelia 会提出关于您企业的简短记录，由所有者或管理员逐条批准。每条记录都注明来源和日期，让您了解 Odelia 为什么记住它。您的团队可以随时编辑或删除任何一条记录。如记录与您的申报、截止日期等档案不一致，以档案为准。
+- 快哉会检查 Odelia 的工作：每一份申请在您批准前都会逐行核对；已完成的任务中，约五分之一会按固定规则（不使用 AI 模型）再次抽查，以便我们的团队发现并纠正错误。这些检查有帮助，但不能代替您的审核。
 - 您批准的内容，由您负责。
+
+## AI 模型与您的内容
+
+- 快哉不会用您的内容训练 AI 模型。我们选择的 AI 提供方，其针对我们账户的条款不允许用我们发送的内容进行训练。我们的隐私政策列明了每家提供方、其接收的内容及其所在地。
+- 目前尚未实现零数据保留。我们正在请每家 AI 提供方以书面形式确认零数据保留；快哉可以将 AI 处理限定于已作出确认的提供方。
+- 为降低成本，提供方可能会将请求中固定不变的开头部分短暂保存在其提示缓存中，时间从几分钟到一小时不等，不会用于训练。
+- Odelia 根据您的内容为您准备的成果，例如申请、草稿和消息，归您用于您的企业。类似的成果也可能为其他客户准备；快哉的软件、表格和指南仍归快哉所有。
+- 快哉会为每项任务保留技术记录：运行了哪些工具、用时多久、花费多少。记录只包含名称和数字，不包含您的内容。我们用它来运行、修复本服务并为其定价。
 
 ## 短信与电话
 
@@ -388,6 +500,14 @@ Odelia 是软件，不是真人。
 - 您须确保自己有权与该总部共享这些信息（例如依据您的特许经营协议），并负责填写正确的邮箱。
 - 所有者可以随时在“设置”中停止共享。已发送的摘要邮件无法撤回。
 
+## 与推荐您的合作伙伴共享
+
+如您的企业是通过合作伙伴（例如特许经营总部、经纪人、房东、投资人或会计师）的推荐码来到快哉的，快哉会询问您一次，是否允许该合作伙伴查看您的进展。
+
+- 如您同意，合作伙伴只能看到您的企业名称、所处阶段、已获批许可数与总数，以及开业日期，其他一概看不到。
+- 您可以随时在“设置”中更改。
+- 快哉可能会将您所付费用的一部分支付给该合作伙伴，但这不会改变您的价格。
+
 ## 专业服务
 
 快哉不是律师事务所、报关行或会计师事务所，不提供法律、海关、税务或会计意见。使用本服务不会在您与快哉之间建立律师与客户关系。
@@ -402,38 +522,77 @@ Odelia 是软件，不是真人。
 
 如某城市要求某一步骤须由注册的申报代表或许可代办人办理，该步骤将由在当地注册的人员办理。
 
+## 申诉与不利决定
+
+如机构驳回申请、吊销执照或开出罚单，快哉可以向您说明官方的申诉途径、期限以及已有的材料。快哉不是您的律师。
+
+- 快哉依据法规、规章或机构页面梳理申诉流程，注明出处，并按该规定计算期限，同时说明计算方法。未能在官方来源上确认的规定会标注为“未确认”，绝不会据此推算日期。以机构来函所载期限和法律规定为准，按时办理是您企业的责任。
+- 快哉会起草您可能需要的材料，例如信函或证据清单，并注明每条规定的出处，供您或您的律师核对。草稿不是法律意见，也不代表您的法律立场。
+- 快哉绝不提起申诉，绝不代您出席听证，绝不告诉您能否胜诉，也不对您的法律权利发表意见。
+- 如建议或必须聘请律师（例如听证或法院诉讼），快哉可以为您选择的独立律师或我们为您介绍的律师准备一份材料包：决定内容、期限及其计算方法、申诉理由、已有证据和缺少的材料，以及需要律师解答的问题。材料包只有经您批准才会发送。律师按照您与其签订的协议为您服务，详见“专业服务”。
+
 ## 快哉不是什么
 
 - 快哉不是政府机构，与任何政府机构均无隶属关系，也未获其背书。
-- 申请能否获批、需要多长时间，由各机构决定。我们无法保证获批、办理时间、检查结果或开业日期；如您购买按期开业保障，其内容是退还开业费用，并非对开业日期的承诺。我们提供的时间和费用均为估计。
+- 申请能否获批、需要多长时间，由各机构决定。我们无法保证获批、办理时间、检查结果、申诉结果或开业日期。我们提供的时间、期限和费用均为估计。
 
 ## 政府规费
 
-政府规费由您直接支付给各机构。我们会把机构的付款链接发给您。快哉从不收取机构费用。专业人士直接向您收取的费用，也与快哉的服务费分开。
+政府、机构和公证费用均按实际金额收取。您通过我们发送的付款链接，直接支付给各机构。快哉绝不加价，也绝不从中留取任何部分。专业人士直接向您收取的费用，也与快哉的服务费分开。
 
 ## 套餐与计费
 
-快哉的服务费通过 Stripe 收取。
+快哉的服务费通过 Stripe 收取。以下价格适用于在本定价于 2026 年 10 月生效时尚不是快哉付费客户的所有工作区。您的工作区适用哪种定价，可在“设置”的“账单”中查看。下文“原有套餐”适用于当时已是付费客户的工作区。
+
+- 门店方案：每家门店每月 149 美元，按年预付（每家门店每年 1,788 美元），或按月付费每家门店每月 179 美元，按工作区中的每家门店收取。包括跟踪每一项执照与续期日期、续期监控与规则变化提醒、您的文件库、供全团队使用的 Odelia 聊天，以及 Odelia 自行提交的每一项续期。
+- 新执照：快哉提交的每一项新执照、许可或登记 299 美元，提交并跟踪至机构作出决定。
+- 复杂执照：999 美元，仅限酒类执照、建筑图纸审查和进口许可。其他执照均不收 999 美元。
+- 门店方案不包含的续期：99 美元。续期需要快哉团队处理（例如需要亲笔签名、只能邮寄，或没有 Odelia 可自行提交的渠道），或该门店未开通门店方案时，该续期不包含在方案中。
+- 门店方案内有 10 家及以上门店：每一项新执照也都包含在内，不再按执照收费。
+- 永不收费：属于某项许可一部分的检查、已计价执照中的步骤，以及员工自行取得的证书和培训。快哉免费跟踪这些事项。
+- 计划预览免费，列出门店所需的执照及其费用和办理时间。
+- 政府规费按实际金额收取，详见“政府规费”。
+- 定制方案可另以双方接受的订单约定。如订单与本条款冲突，以何者为准，见“一般条款”中的“适用顺序”。
+
+每笔费用在您批准前都会显示。应用会在所有者批准该项申报前，以中英文显示每项执照、复杂执照或续期的费用以及机构自身的规费，并且只在所有者批准时按所显示的价格收费。同一项申报绝不重复收费。如某项暂不能在线支付，我们的团队会向您报价，在您接受之前不收取任何费用。
+
+服务费不含税。您须支付适用的销售税、使用税或类似税费，但对快哉所得征收的税除外。
+
+如付款失败，我们会通知所有者。在付款完成前，方案包含的 Odelia 额度和续期将暂停；工作区中的任何内容都不会被删除。
+
+## 续费与取消
+
+- 门店方案按相同价格自动续费（按年付费每年续费，按月付费每月续费），直到您取消。付款前，应用会在付款按钮旁显示这些续费条款，并请您同意。
+- 每次续费前 15 至 45 天，我们会发邮件告知所有者续费金额和取消方式。
+- 如续费时价格有变，我们会至少提前 30 天告知您。
+- 您可以随时在“设置”的“账单”中在线取消：点一下即可，无需致电。取消会关闭下一次续费，在当前年度或月度期限结束时生效，在此之前您仍可使用本服务。
+- 新执照、复杂执照和续期按项收费，只在所有者批准时收取，因此无需取消。
+
+## 退款
+
+- 门店方案费用按年或按月预付。取消会停止下一次续费，但不退还当期费用，除非“条款变更”另有规定或法律要求退款。
+- 每项执照、复杂执照或续期费用对应该项申报。快哉提交该申报后，无论机构作出何种决定，该费用均不退还。
+- 如快哉拒绝提交或无法提交您已付费的申报，且您不希望我们再次尝试，我们将退还该项申报的费用。请发邮件至 support@placetta.com 申请。
+- 政府规费支付给机构，是否退还按机构的规定办理。
+
+## 原有套餐
+
+如您的工作区在门店方案定价生效时已是快哉的付费客户，您将保留所购买的套餐、价格及其包含的全部内容，以“设置”的“账单”和订单所示为准。门店方案定价不会改变您的套餐；只有经所有者书面同意，我们才会将工作区转为门店方案定价。这些套餐包括：
 
 - 入门套餐：每个市场 299 美元，一次性付费。如您在支付入门套餐后 60 天内开通门店套餐，这笔费用可抵扣第一年的门店套餐费用；超过 60 天则不再抵扣。
 - 基础版：每家门店每月 149 美元，按年预付，包括每家门店的跟踪、申报和续期。
 - 专业版：每家门店每月 299 美元，按年预付，另含检查准备：每日记录、模拟检查、员工证书，以及更多的 Odelia 额度。
 - 新店开业：每家零售新店 3,500 美元，每家餐厅或食品新店 6,500 美元，在门店尚未开业时加入即一次性收取。需要酒类执照或复杂装修的开业项目，在开始工作前单独报价。开业费用不抵扣门店套餐费用。
-- 按期开业保障：每个开业项目 2,500 美元，可选。我们会与您书面约定开业日期。如因快哉为您提交的许可导致门店晚于该日期开业，我们将退还该门店的开业费用。以下情况不适用：机构审核时间超出其公布时限；需由您或您的房东、承包商、专业人士完成的步骤；您提供的信息不完整或有误；检查、施工，或并非由我们提交的许可。保障费用本身不予退还。
-- 品牌总部（10 家及以上门店）以及海外品牌进入美国，以订单另行约定。
-- 定制方案可另以双方接受的订单约定。如订单与本条款冲突，以何者为准，见“一般条款”中的“适用顺序”。
+- 按期开业保障，仅适用于原有套餐：每个开业项目 2,500 美元，可选。我们会与您书面约定开业日期。如因快哉为您提交的许可导致门店晚于该日期开业，我们将退还该门店的开业费用。以下情况不适用：机构审核时间超出其公布时限；需由您或您的房东、承包商、专业人士完成的步骤；您提供的信息不完整或有误；检查、施工，或并非由我们提交的许可。保障费用本身不予退还。门店方案不提供按期开业保障。
+- 品牌总部（10 家及以上门店）、海外品牌进入美国、功能模块以及多年期合约，以订单或“设置”的“账单”另行约定。
 
-门店套餐在每个年度期限结束时自动续订一年，直至您取消。如续订时价格有变，我们会至少提前 30 天告知您。您可以随时在“设置”的“账单”中取消。取消在当前计费周期结束时生效，在此之前您仍可使用本服务。
-
-服务费不含税。您须支付适用的销售税、使用税或类似税费，但对快哉所得征收的税除外。
-
-除按期开业保障或法律另有规定外，已付费用不予退还。如付款失败，我们在通知您后可以暂停该工作区的申报工作。
+原有的门店套餐在每个年度期限结束时自动续订一年，直至您取消，详见“续费与取消”。除按期开业保障、“条款变更”的规定或法律要求退款外，其费用不予退还。
 
 ## Odelia 的合理使用
 
 Odelia 是快哉的 AI 助理，专门为您的企业处理合规工作：执照、许可、登记、申报、检查、门店以及相关文件。她不是通用型 AI 助手。
 
-- 每个套餐都包含一份 Odelia 额度，可在“设置”的“账单”中查看；专业版的额度是基础版的两倍。加量包（49 美元，含 25 美元额度）可增加额度，长期有效直到用完。额度用完后，截止日期、提醒和已在办理的申报照常进行；新的工作需等到下一个周期、购买加量包或升级套餐。
+- 每个套餐都包含一份 Odelia 额度，可在“设置”的“账单”中查看。在原有套餐中，专业版的额度是基础版的两倍，加量包（49 美元，含 25 美元额度）可增加额度，长期有效直到用完。额度用完后，截止日期、提醒和已在办理的申报照常进行；新的工作需等到下一个周期，或（原有套餐）购买加量包或升级套餐。
 - 为保证所有用户的速度，每小时和每天可发起的任务数量有上限。
 - 您不得使用本服务或 Odelia 的输出来构建、训练或改进其他 AI 模型；不得通过脚本、机器人或其他自动化方式访问本服务（我们提供的功能除外）；不得转售或共享访问权限；也不得试图绕过其限制或指令。
 
@@ -452,10 +611,11 @@ Odelia 是快哉的 AI 助理，专门为您的企业处理合规工作：执照
 - 合法使用本服务，只上传或连接您有权分享的内容，包括企业所有人、经理等他人的信息
 - 只关联您拥有或有权使用的手机号
 - 妥善保管登录信息；如怀疑他人进入了您的工作区，请发邮件至 support@placetta.com 告知我们
+- 对 AI 助手的令牌保密，只给每个令牌所需的权限，并撤销不再使用的令牌
 
 ## 您的内容
 
-您的文件和信息仍归您所有。您授予快哉有限许可，仅为向您提供本服务而使用、复制、存储和传输这些内容，包括在您批准申报时将其提交给相关机构，经您批准提供给您聘请的专业人士，按上文所述提供给您共享的总部，以及提供给隐私政策中列明的服务提供方。
+您的文件和信息仍归您所有。您授予快哉有限许可，仅为向您提供本服务而使用、复制、存储和传输这些内容，包括在您批准申报时将其提交给相关机构，经您批准提供给您聘请的专业人士，按本条款所述提供给您共享的总部或合作伙伴，以及提供给隐私政策中列明的服务提供方。
 
 我们不会用您的内容训练 AI 模型，不会出售您的内容，也不会将其用于广告。
 
@@ -472,13 +632,27 @@ Odelia 是快哉的 AI 助理，专门为您的企业处理合规工作：执照
 
 ## 连接的服务
 
-您可以自行选择连接 Gmail、Google Calendar、Google Drive、Outlook Mail、Outlook Calendar、Dropbox、QuickBooks 和 Slack。我们只将这些服务用于您要求的任务。这些服务由各自的提供方运营，适用其自身条款。您可以随时在“设置”中断开任何一项连接。
+您可以自行选择连接应用提供的服务，例如 Gmail、Google Calendar、Google Drive、Outlook Mail、Outlook Calendar、Microsoft Teams、Dropbox、QuickBooks、Slack、飞书、企业微信、钉钉，以及通过 MCP 连接的其他应用。我们只将这些服务用于您要求的任务。从已连接的应用读取信息可以自动进行；任何会更改该应用中数据的操作，都须等待所有者批准。这些服务由各自的提供方运营，适用其自身条款。您可以随时在“设置”中断开任何一项连接。
+
+## 连接 AI 助手
+
+所有者或管理员可以在“设置”中创建令牌，让您使用的 AI 助手（例如 Claude 或 ChatGPT）通过快哉的 MCP 服务器读取您的工作区。
+
+- 每个令牌只能读取一个工作区，且只能读取为其选定的信息类别，例如门店状态、截止日期、准备情况或申报。令牌只读，不能提交、发送、付款、批准或更改任何内容。
+- 令牌只在创建时显示一次。快哉只保存令牌的指纹，从不保存令牌本身。请像对待密码一样保管它。
+- 用令牌进行的每次调用都会记入您的工作区。所有者或管理员在“设置”中撤销令牌后，或创建令牌的人不再是所有者或管理员时，令牌即失效。
+- 您连接的助手由其提供方按其自身条款运营。该助手如何使用其收到的答复，由您与该提供方之间约定。
+- 我们可以限制令牌的使用频率，也可以撤销被滥用或我们认为已泄露的令牌，并会告知您。
+
+## 安全
+
+快哉通过隐私政策“安全”一节以及我们的信任与安全页面 https://placetta.com/trust 所述的措施保护您的信息；该页面也列明了尚未完成的事项。快哉目前未持有 SOC 2 或任何其他安全认证。如发生安全事件导致您工作区的信息泄露，我们会在确认相关信息受影响后，及时并在 72 小时内通过邮件告知所有者，法律规定更短期限的，从其规定。
 
 ## 停止使用
 
 - 您可以随时在“设置”的“账单”中取消套餐。
 - 您可以按《申报授权书》的说明，随时撤销申报授权。
-- 您可以在“设置”的“隐私与数据”中下载工作区数据并导出审计记录。
+- 您可以在“设置”的“隐私与数据”中下载工作区数据，包括应用中显示的审计记录。
 - 您可以在“设置”的“隐私与数据”中删除账户。这会删除您单独拥有的工作区，包括其中的文件、申报和审计记录，并让您退出其他工作区。如您单独拥有的工作区仍有付费套餐，请先取消。您也可以发邮件至 support@placetta.com，要求删除某个工作区。
 - 法律要求我们保留的记录（例如账单记录）会继续保留。
 
