@@ -2,7 +2,30 @@
 // fflate (for Word files) and pdf-lib (for filling the agencies' forms) are loaded from npm by Deno at run time. The two
 // agency PDFs kept with the code (src/forms/pdf, the SS-4 and CBP 5106) aren't in agent.js: agent-run fetches them from
 // the site's /app/forms/ like every other agency PDF (agent-run sitePdf), which keeps the function under the 5 MB limit.
-import { build } from "esbuild";
+import { build as esbuild } from "esbuild";
+import { readFileSync } from "node:fs";
+import { gzipSync } from "node:zlib";
+// The registry's data (the form box maps, proof checks and the rest) is most of each bundle as plain JSON. The server
+// copies carry each data file over 4 KB gzipped and inflate it once on load (fflate, from npm at run time), which keeps
+// every function well under Supabase's 5 MB deployment limit. The browser build imports the same JSON unchanged.
+const packedJson = {
+  name: "packed-json",
+  setup(b) {
+    b.onLoad({ filter: /\.json$/ }, (a) => {
+      const text = readFileSync(a.path, "utf8");
+      if (text.length < 4096) return { contents: text, loader: "json" };
+      const z = gzipSync(Buffer.from(JSON.stringify(JSON.parse(text))), { level: 9 }).toString("base64");
+      return { contents: `import { unpack } from "placetta-unpack"; export default unpack(${JSON.stringify(z)});`, loader: "js", resolveDir: a.path.replace(/[^/]+$/, "") };
+    });
+    b.onResolve({ filter: /^placetta-unpack$/ }, () => ({ path: "placetta-unpack", namespace: "packed-json" }));
+    b.onLoad({ filter: /.*/, namespace: "packed-json" }, () => ({
+      contents: `import { gunzipSync, strFromU8 } from "npm:fflate@0.8.3";
+export const unpack = (b64) => { const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return JSON.parse(strFromU8(gunzipSync(u))); };`,
+      loader: "js",
+    }));
+  },
+};
+const build = (o) => esbuild({ ...o, plugins: [...(o.plugins ?? []), packedJson] });
 // Odelia's server copy doesn't carry them: agent-run fetches them from the site (/app/forms/irs-fss4.pdf and
 // cbp-5106.pdf, copies in public/forms) like every other agency PDF, which keeps the function under Supabase's 5 MB.
 const fetchedPdf = {
@@ -59,3 +82,10 @@ await build({
   outfile: "supabase/functions/mcp/tools.js",
 });
 console.log("built supabase/functions/mcp/tools.js");
+// Supabase refuses a function over 5 MB of source, and a function carries its bundle plus its own files: keep each bundle
+// under 4 MB so a deploy never fails on size.
+import { statSync } from "node:fs";
+for (const f of ["agent-run/agent.js", "_shared/opening.js", "_shared/start.js", "partner-api/plan.js", "mcp/tools.js"]) {
+  const n = statSync(`supabase/functions/${f}`).size;
+  if (n > 4_000_000) { console.error(`${f} is ${(n / 1e6).toFixed(2)} MB: over the 4 MB budget, the deploy would fail`); process.exit(1); }
+}
