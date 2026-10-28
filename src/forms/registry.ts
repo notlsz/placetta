@@ -13,6 +13,7 @@ import { LINES } from "./lines";
 import { PLAIN } from "./plain";
 import { MAPS } from "./maps";
 import { FURNITURE, FURNITURE_FORMS } from "./furniture";
+import { PRODUCT_FORMS } from "./states/products";
 import { applyFixes } from "./audit";
 import { US_GAPS } from "./us-gaps";
 import { INTL_FORMS } from "./intl";
@@ -42,6 +43,7 @@ export type Method = "online" | "pdf_mail" | "pdf_fax" | "portal" | "in_person" 
 export type FormField = { id: string; line: string; label: Bi; hint?: Bi; options?: string[] };
 export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; alcohol?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; outOfState?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean; reference?: boolean;
   wood?: boolean; upholstered?: boolean; clothingStorage?: boolean;
+  bedding?: boolean; cleaning?: boolean; antimicrobial?: boolean; meat?: boolean; canned?: boolean;   // what it makes, imports or sells (src/forms/states/products.ts)
   salon?: boolean; autoRepair?: boolean; devices?: boolean; manufactures?: boolean; office?: boolean;   // the landing page's sectors (src/forms/sectors.ts)
   terrace?: boolean;
   corp?: boolean };   // corp: the company is (or will be) a corporation, not an LLC (src/forms/entities.ts)   // terrace: tables and chairs outside on the street (a pavement licence, a terrasse, a Sondernutzung)   // furniture: wood goods, upholstered furniture, clothing storage units (src/forms/furniture.ts)   // reference: listed in the library and answers, never added to a plan
@@ -58,6 +60,7 @@ export type OfficialForm = {
   segments: Segment[];
   needs?: Needs;              // only when the business does this
   unless?: (keyof Needs)[];   // not when the business does any of these (an importer's license covers California's retail one)
+  anyOf?: (keyof Needs)[];    // and at least one of these (a state's bedding law covers mattresses and upholstered furniture alike)
   method: Method;
   how: Bi;                    // how it's filed, in one line
   url: string;                // where it's filed: the portal, or the official PDF
@@ -753,6 +756,7 @@ FORMS.push(...WEST_FORMS);
 FORMS.push(...MIDWEST_FORMS);
 FORMS.push(...NEWENGLAND_FORMS);
 FORMS.push(...SOUTH_FORMS);
+FORMS.push(...PRODUCT_FORMS);
 
 /** A step that isn't a filing Placetta makes for the business: insurance bought from an insurer (workers' compensation)
  *  or a certificate a person earns with a course or an exam (food handler cards, the food protection or food safety
@@ -944,7 +948,7 @@ const usFormAbroad = (f: OfficialForm, places: Where[]) => !places.includes("US"
 export function formsFor(o: { segment: Segment; where: string; needs?: Needs }): OfficialForm[] {
   const places = placesOf(o.where), have = o.needs ?? {};
   return FORMS.filter(f => places.includes(f.where) && !(f.except ?? []).some(x => places.includes(x)) && !usFormAbroad(f, places) && f.segments.includes(o.segment)
-    && Object.keys(f.needs ?? {}).every(k => needMet(f, k as keyof Needs, have)) && !(f.unless ?? []).some(k => have[k]))
+    && Object.keys(f.needs ?? {}).every(k => needMet(f, k as keyof Needs, have)) && (!f.anyOf?.length || f.anyOf.some(k => needMet(f, k, have))) && !(f.unless ?? []).some(k => have[k]))
     .sort((a, b) => (formsEntity(a) ? 5 : a.order) - (formsEntity(b) ? 5 : b.order));
 }
 

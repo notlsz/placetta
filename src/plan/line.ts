@@ -14,6 +14,9 @@ export const SELLS: { en: string; zh: string }[] = [
   { en: "Milk tea", zh: "奶茶" }, { en: "Coffee", zh: "咖啡" }, { en: "Bakery and desserts", zh: "烘焙甜品" },
   { en: "Restaurant", zh: "餐厅" }, { en: "Grocery", zh: "超市" }, { en: "Retail", zh: "零售" },
   { en: "Importer or online seller", zh: "进口商或电商卖家" }, { en: "Warehouse or 3PL", zh: "仓库或第三方物流" },
+  // the product brands whose filings Placetta covers state by state (src/forms/furniture.ts, src/forms/states/products.ts)
+  { en: "Furniture", zh: "家具" }, { en: "Mattresses and bedding", zh: "床垫和床上用品" },
+  { en: "Laundry detergent and cleaning products", zh: "洗衣液和清洁用品" }, { en: "Packaged food importer", zh: "预包装食品进口商" },
 ];
 
 /** The cities the city box suggests, and the ones a line names without its state. */
@@ -30,7 +33,12 @@ export const ZH_CITIES: [RegExp, string, string][] = [[/法拉盛/, "Flushing, N
   [/费城/, "Philadelphia, PA", "费城"], [/亚特兰大/, "Atlanta, GA", "亚特兰大"], [/迈阿密/, "Miami, FL", "迈阿密"], [/波特兰/, "Portland, OR", "波特兰"], [/丹佛/, "Denver, CO", "丹佛"]];
 
 /** The kinds of business the chips stand for, from the words people use for them. */
-export const KINDS: [RegExp, string][] = [[/milk ?tea|bubble tea|boba|tea shop|奶茶|茶饮|珍珠/i, "Milk tea"], [/coffee|caf[eé]|咖啡/i, "Coffee"], [/bakery|bake|dessert|cake|烘焙|甜品|面包|蛋糕/i, "Bakery and desserts"],
+export const KINDS: [RegExp, string][] = [
+  // products first: a "coffee table" is furniture, and a food importer isn't a restaurant
+  [/mattress|bedding|\bpillows?\b|\bcomforters?\b|床垫|床上用品|枕头|被子/i, "Mattresses and bedding"], [/furniture|\bsofas?\b|\bcouch|upholster|\bdressers?\b|家具|沙发|衣柜/i, "Furniture"],
+  [/detergent|laundry (liquid|pods?|powder|products?)|cleaning (products?|supplies)|household cleaners?|disinfectant|dish ?soap|洗衣液|洗衣粉|洗涤|清洁用品|清洁剂|消毒液|日化/i, "Laundry detergent and cleaning products"],
+  [/packaged food|food (import|brand|distribut)|snack (import|brand)|import(s|ing|er|ers)? (food|snacks)|预包装|食品进口|进口食品|零食进口/i, "Packaged food importer"],
+  [/milk ?tea|bubble tea|boba|tea shop|奶茶|茶饮|珍珠/i, "Milk tea"], [/coffee|caf[eé]|咖啡/i, "Coffee"], [/bakery|bake|dessert|cake|烘焙|甜品|面包|蛋糕/i, "Bakery and desserts"],
   [/restaurant|hot ?pot|noodle|dumpling|bbq|kitchen|餐厅|火锅|面馆|饭店|饺子|烧烤|餐馆/i, "Restaurant"], [/grocery|supermarket|market|超市|生鲜/i, "Grocery"], [/import|e-?commerce|online|amazon|进口|电商|跨境/i, "Importer or online seller"],
   [/warehouse|3pl|fulfil|仓库|物流/i, "Warehouse or 3PL"], [/retail|boutique|store|shop|零售|门店|商店/i, "Retail"]];
 

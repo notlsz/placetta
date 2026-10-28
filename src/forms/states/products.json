@@ -1,0 +1,2883 @@
+[
+ {
+  "id": "epa-fifra-reg",
+  "form": "FIFRA section 3 pesticide product registration",
+  "title": {
+   "en": "EPA registration for products that claim to kill germs (FIFRA)",
+   "zh": "宣称杀菌的产品须办理的 EPA 农药登记（FIFRA）"
+  },
+  "agency": {
+   "en": "U.S. Environmental Protection Agency (EPA), Office of Pesticide Programs",
+   "zh": "美国环境保护署（EPA）农药项目办公室"
+  },
+  "level": "federal",
+  "where": "US",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 44,
+  "how": {
+   "en": "A disinfectant, sanitizer or any cleaning product that claims to kill or control germs is a pesticide: the brand registers each product with EPA before it is sold or distributed, with its label, formula and data. Placetta prepares the file; the data studies come from the brand or its lab.",
+   "zh": "消毒剂、除菌剂或任何宣称能杀灭或控制细菌病毒的清洁产品都属于农药：品牌须在销售或分销前就每个产品向 EPA 登记，提交标签、配方和数据。快哉准备申请材料，数据研究由品牌方或其实验室提供。"
+  },
+  "url": "https://www.epa.gov/pesticide-registration/about-pesticide-registration",
+  "info": "https://www.govinfo.gov/content/pkg/CFR-2025-title40-vol26/pdf/CFR-2025-title40-vol26-sec152-15.pdf",
+  "fee": null,
+  "feeNote": {
+   "en": "Set by the kind of application under the Pesticide Registration Improvement Act (PRIA).",
+   "zh": "按《农药登记改进法》（PRIA）规定的申请类型核定。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "Federal registration for any product sold with a claim that it kills germs, before the first sale.",
+   "zh": "凡宣称杀菌的产品，首次销售前须办理的联邦登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "No person may distribute or sell any pesticide product that is not registered under the Act",
+   "checked": "2026-10-28",
+   "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title40-vol26/pdf/CFR-2025-title40-vol26-sec152-15.pdf"
+  }
+ },
+ {
+  "id": "epa-pesticide-est",
+  "form": "EPA Form 3540-8 (establishment registration) and EPA Form 3540-16 (production report)",
+  "title": {
+   "en": "Pesticide-producing establishment registration and yearly production report",
+   "zh": "农药生产场所登记及年度生产报告"
+  },
+  "agency": {
+   "en": "U.S. Environmental Protection Agency (EPA)",
+   "zh": "美国环境保护署（EPA）"
+  },
+  "level": "federal",
+  "where": "US",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 43,
+  "how": {
+   "en": "Each factory that makes, packs or relabels the product, the one abroad included, gets an EPA company number, registers as a pesticide-producing establishment once, then files a production report within 30 days and every year by March 1.",
+   "zh": "生产、包装或重贴标签的每家工厂（包括境外工厂）须取得 EPA 公司编号，一次性登记为农药生产场所，此后在 30 天内提交首次生产报告，并于每年 3 月 1 日前提交年度报告。"
+  },
+  "url": "https://www.epa.gov/compliance/pesticide-establishment-registration-and-reporting",
+  "info": "https://www.epa.gov/compliance/pesticide-establishment-registration-and-reporting",
+  "fee": null,
+  "renews": {
+   "en": "Production report every year by March 1.",
+   "zh": "每年 3 月 1 日前提交生产报告。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "The factory that makes a germ-killing product registers with EPA and reports what it produced each year.",
+   "zh": "生产杀菌产品的工厂须向 EPA 登记，并每年申报产量。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "including companies or establishments that import into the United States, must first obtain a company number; second, register the establishment,",
+   "checked": "2026-10-28",
+   "read": "https://www.epa.gov/compliance/pesticide-establishment-registration-and-reporting"
+  }
+ },
+ {
+  "id": "epa-noa-3540-1",
+  "form": "EPA Form 3540-1 (Notice of Arrival of Pesticides and Devices)",
+  "title": {
+   "en": "Notice of Arrival for each imported shipment of germ-killing products",
+   "zh": "每批进口杀菌产品的抵港通知（Notice of Arrival）"
+  },
+  "agency": {
+   "en": "U.S. Environmental Protection Agency (EPA), with U.S. Customs and Border Protection",
+   "zh": "美国环境保护署（EPA）与美国海关与边境保护局（CBP）"
+  },
+  "level": "federal",
+  "where": "US",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "imports": true,
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 41,
+  "how": {
+   "en": "The importer or its customs broker submits the Notice of Arrival before each shipment of disinfectants or sanitizers reaches the US, naming the EPA registration and establishment numbers; EPA says how the shipment may be released.",
+   "zh": "进口商或其报关行须在每批消毒剂或除菌剂抵达美国前提交抵港通知，写明 EPA 登记号和生产场所编号；EPA 会告知货物如何放行。"
+  },
+  "url": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-sec12-112.pdf",
+  "info": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-sec12-112.pdf",
+  "fee": null,
+  "feeNote": {
+   "en": "The rule names no fee.",
+   "zh": "该规定未列出费用。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "A notice to EPA before each imported shipment of a germ-killing product arrives.",
+   "zh": "每批进口杀菌产品抵达前向 EPA 提交的通知。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "must submit to the Administrator, prior to the arrival of the shipment in the United States, a Notice of Arrival of Pesticides and Devices",
+   "checked": "2026-10-28",
+   "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-sec12-112.pdf"
+  }
+ },
+ {
+  "id": "epa-tsca-13",
+  "form": "TSCA section 13 import certification (19 CFR 12.121)",
+  "title": {
+   "en": "TSCA import certification for detergents and cleaning chemicals",
+   "zh": "洗涤剂及清洁化学品的 TSCA 进口认证"
+  },
+  "agency": {
+   "en": "U.S. Environmental Protection Agency (EPA), at entry through U.S. Customs and Border Protection",
+   "zh": "美国环境保护署（EPA），入境时经美国海关与边境保护局（CBP）申报"
+  },
+  "level": "federal",
+  "where": "US",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "imports": true,
+   "cleaning": true
+  },
+  "method": "none",
+  "order": 42,
+  "how": {
+   "en": "At entry, the importer or its broker certifies that every chemical substance in the shipment, as a chemical or as part of a mixture such as a detergent, complies with TSCA. Products registered as pesticides are covered by FIFRA instead. Separate from the composite wood certification for furniture.",
+   "zh": "入境时，进口商或其报关行须证明货物中的每种化学物质（无论是单独的化学品还是洗涤剂等混合物的成分）均符合 TSCA。已登记为农药的产品改由 FIFRA 管辖。此项与家具的复合木材认证分开。"
+  },
+  "url": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-sec12-121.pdf",
+  "info": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-sec12-121.pdf",
+  "fee": 0,
+  "feeNote": {
+   "en": "The rule names no fee; the broker usually makes it with the entry.",
+   "zh": "该规定未列出费用；通常由报关行随报关一并申报。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "A statement with each import of detergents or cleaning chemicals that they meet the federal chemicals law.",
+   "zh": "每次进口洗涤剂或清洁化学品时声明其符合联邦化学品法规。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "must certify in writing or electronically that the chemical shipment complies with all applicable rules and orders under TSCA",
+   "checked": "2026-10-28",
+   "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title19-vol1/pdf/CFR-2025-title19-vol1-sec12-121.pdf"
+  }
+ },
+ {
+  "id": "cpsc-1633",
+  "form": "16 CFR parts 1632 and 1633 (mattress flammability), records and certification",
+  "title": {
+   "en": "Mattress flammability standards: prototype tests, records kept in the US, and the certification label",
+   "zh": "床垫阻燃标准：原型测试、在美国保存记录及合格标签"
+  },
+  "agency": {
+   "en": "U.S. Consumer Product Safety Commission (CPSC)",
+   "zh": "美国消费品安全委员会（CPSC）"
+  },
+  "level": "federal",
+  "where": "US",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "bedding": true
+  },
+  "anyOf": [
+   "imports",
+   "manufactures"
+  ],
+  "method": "none",
+  "order": 43,
+  "how": {
+   "en": "Every mattress model is made from a prototype that passed the open-flame test (part 1633) and the cigarette test (part 1632). The importer or maker keeps the test and manufacturing records in English at a US location, labels each mattress with its certification, and issues the certificate CPSC requires at entry. There is no government form.",
+   "zh": "每款床垫须基于通过明火测试（第 1633 部分）和香烟阴燃测试（第 1632 部分）的原型生产。进口商或制造商须在美国境内以英文保存测试和生产记录，在每张床垫上标注合格声明，并出具 CPSC 要求在入境时提供的证书。没有政府表格。"
+  },
+  "url": "https://www.govinfo.gov/content/pkg/CFR-2025-title16-vol2/pdf/CFR-2025-title16-vol2-part1633.pdf",
+  "info": "https://www.govinfo.gov/content/pkg/CFR-2025-title16-vol2/pdf/CFR-2025-title16-vol2-part1633.pdf",
+  "fee": 0,
+  "feeNote": {
+   "en": "No government filing: the records stay with the importer or maker.",
+   "zh": "无需向政府申报：记录由进口商或制造商保存。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "The federal fire rules for mattresses: tested prototypes, records kept in the US, and a certification on every mattress.",
+   "zh": "联邦床垫防火规定：原型须经测试、记录保存在美国，每张床垫都须标注合格声明。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "irrespective of whether guarantees are issued relative thereto, shall maintain the following records in English at a location in the United States",
+   "checked": "2026-10-28",
+   "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title16-vol2/pdf/CFR-2025-title16-vol2-part1633.pdf"
+  }
+ },
+ {
+  "id": "fda-fce-sid",
+  "form": "Form FDA 2541 (food canning establishment registration) and process filings",
+  "title": {
+   "en": "Canned and acidified food: canning establishment registration (FCE) and process filing (SID)",
+   "zh": "罐头及酸化食品：罐装企业注册（FCE）及工艺备案（SID）"
+  },
+  "agency": {
+   "en": "U.S. Food and Drug Administration",
+   "zh": "美国食品药品监督管理局（FDA）"
+  },
+  "level": "federal",
+  "where": "US",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true,
+   "canned": true
+  },
+  "method": "online",
+  "order": 46,
+  "how": {
+   "en": "The plant that makes shelf-stable canned, jarred or acidified food, the one abroad included, registers with FDA on Form 2541 and files the scheduled process for each product and container size before any of it is offered for import. Filed online in FDA Industry Systems.",
+   "zh": "生产常温保存的罐头、瓶装或酸化食品的工厂（包括境外工厂）须以 FDA 2541 表向 FDA 注册，并在任何产品进口前就每种产品及容器规格备案工艺规程。在 FDA 行业系统在线提交。"
+  },
+  "url": "https://www.access.fda.gov/",
+  "info": "https://www.govinfo.gov/content/pkg/CFR-2025-title21-vol2/pdf/CFR-2025-title21-vol2-sec108-25.pdf",
+  "fee": null,
+  "feeNote": {
+   "en": "The rules name no fee.",
+   "zh": "相关规定未列出费用。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "FDA registration of the canning plant and its process for each canned or pickled food, before the first shipment.",
+   "zh": "首批货物前，罐装工厂及每种罐头或腌制食品的工艺须在 FDA 注册备案。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Foreign processors shall register before any offering of foods for import into the United States.",
+   "checked": "2026-10-28",
+   "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title21-vol2/pdf/CFR-2025-title21-vol2-sec108-25.pdf"
+  }
+ },
+ {
+  "id": "fsis-9540-1",
+  "form": "Import inspection application (FSIS Form 9540-1)",
+  "title": {
+   "en": "USDA FSIS import inspection application for each meat or poultry shipment",
+   "zh": "每批肉类或禽类产品的 USDA FSIS 进口检验申请"
+  },
+  "agency": {
+   "en": "USDA Food Safety and Inspection Service (FSIS)",
+   "zh": "美国农业部食品安全检验局（FSIS）"
+  },
+  "level": "federal",
+  "where": "US",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "imports": true,
+   "food": true,
+   "meat": true
+  },
+  "method": "online",
+  "order": 47,
+  "how": {
+   "en": "Meat, poultry and foods made with them come only from countries and plants FSIS lists as eligible, with the foreign government's health certificate. For each consignment the importer or broker submits the import inspection application before the shipment reaches the official import establishment, where FSIS reinspects it.",
+   "zh": "肉类、禽类及含其成分的食品只能来自 FSIS 认定合格的国家和工厂，并附出口国政府的卫生证书。每批货物到达官方进口检验场所前，进口商或报关行须提交进口检验申请，由 FSIS 复检。"
+  },
+  "url": "https://www.govinfo.gov/content/pkg/CFR-2025-title9-vol2/pdf/CFR-2025-title9-vol2-sec327-5.pdf",
+  "info": "https://www.govinfo.gov/content/pkg/CFR-2025-title9-vol2/pdf/CFR-2025-title9-vol2-sec327-5.pdf",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "A USDA inspection request for every shipment of imported meat or poultry, sent before it arrives.",
+   "zh": "每批进口肉类或禽类产品抵达前提交的 USDA 检验申请。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Import inspection applications for each consignment must be submitted (electronically or on paper) to FSIS in advance of the shipment's arrival",
+   "checked": "2026-10-28",
+   "read": "https://www.govinfo.gov/content/pkg/CFR-2025-title9-vol2/pdf/CFR-2025-title9-vol2-sec327-5.pdf"
+  }
+ },
+ {
+  "id": "ma-dfp-bedding",
+  "form": "License to manufacture and sell bedding and upholstered furniture (Division of Food Protection)",
+  "title": {
+   "en": "Massachusetts license for bedding and upholstered furniture makers",
+   "zh": "马萨诸塞州床上用品及软体家具制造商执照"
+  },
+  "agency": {
+   "en": "Massachusetts Department of Public Health, Division of Food Protection",
+   "zh": "马萨诸塞州公共卫生部食品保护处"
+  },
+  "level": "state",
+  "where": "MA",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "imports": true
+  },
+  "anyOf": [
+   "upholstered",
+   "bedding"
+  ],
+  "method": "portal",
+  "order": 45,
+  "how": {
+   "en": "Applied for on the Environmental Health eLicensing Portal, one application and fee for each manufacturing facility, the factory abroad included, before its mattresses, bedding or upholstered furniture are sold in Massachusetts. Allow 6 to 8 weeks.",
+   "zh": "在马萨诸塞州销售床垫、床上用品或软体家具前，须在环境卫生电子执照门户申请，每个生产工厂（包括境外工厂）各提交一份申请并缴费。处理约需 6 至 8 周。"
+  },
+  "url": "https://environmentalhealthlicensing.mass.gov/",
+  "info": "https://www.mass.gov/how-to/apply-for-a-license-to-manufacture-and-sell-stuffed-toys-bedding-upholstered-furniture-and-related-products",
+  "fee": 300,
+  "feeNote": {
+   "en": "$300 for each manufacturing facility.",
+   "zh": "每个生产工厂 300 美元。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "Massachusetts licenses each factory whose bedding or upholstered furniture is sold in the state.",
+   "zh": "马萨诸塞州为其床上用品或软体家具在该州销售的每家工厂发放执照。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "You must have a license from the Division of Food Protection (DFP) to manufacture and sell stuffed toys, bedding, upholstered furniture,",
+   "checked": "2026-10-28",
+   "read": "https://www.mass.gov/how-to/apply-for-a-license-to-manufacture-and-sell-stuffed-toys-bedding-upholstered-furniture-and-related-products"
+  }
+ },
+ {
+  "id": "pa-bedding",
+  "form": "Bedding and Upholstery registration (Form LIBU-32)",
+  "title": {
+   "en": "Pennsylvania bedding and upholstery registration",
+   "zh": "宾夕法尼亚州床上用品及软体家具登记"
+  },
+  "agency": {
+   "en": "Pennsylvania Department of Labor and Industry, Bureau of Occupational and Industrial Safety",
+   "zh": "宾夕法尼亚州劳工与工业部职业与工业安全局"
+  },
+  "level": "state",
+  "where": "PA",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "imports": true
+  },
+  "anyOf": [
+   "upholstered",
+   "bedding"
+  ],
+  "method": "portal",
+  "order": 45,
+  "how": {
+   "en": "The manufacturer registers with the Bureau, on Form LIBU-32 or the eDAP portal with the fee, before its bedding or upholstered furniture is sold in Pennsylvania. An importer may register together with a manufacturer, once for each factory it imports from.",
+   "zh": "制造商须在其床上用品或软体家具于宾夕法尼亚州销售前，通过 LIBU-32 表或 eDAP 门户向该局登记并缴费。进口商可与制造商一同登记，所进口的每家工厂各登记一次。"
+  },
+  "url": "https://www.boisedap.pa.gov/index.html",
+  "info": "https://www.pa.gov/agencies/dli/programs-services/labor-management-relations/bureau-of-occupational-and-industrial-safety/bedding-and-upholstery",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Pennsylvania's registration for bedding and upholstered furniture makers whose goods are sold in the state.",
+   "zh": "宾夕法尼亚州对其产品在该州销售的床上用品及软体家具制造商的登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "The law requires manufacturers to use only new filling materials in bedding and upholstered furniture and register with the Bureau",
+   "checked": "2026-10-28",
+   "read": "https://www.pa.gov/agencies/dli/programs-services/labor-management-relations/bureau-of-occupational-and-industrial-safety/bedding-and-upholstery"
+  }
+ },
+ {
+  "id": "ny-bedding",
+  "form": "Bedding Manufacturers & Refurbisher license (General Business Law article 25-A)",
+  "title": {
+   "en": "New York license for makers of new mattresses and box springs",
+   "zh": "纽约州新床垫及弹簧床座制造商执照"
+  },
+  "agency": {
+   "en": "New York Department of State, Division of Licensing Services",
+   "zh": "纽约州务院执照服务处"
+  },
+  "level": "state",
+  "where": "NY",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "imports": true,
+   "bedding": true
+  },
+  "method": "pdf_mail",
+  "order": 45,
+  "how": {
+   "en": "The manufacturer of new mattresses or box springs sold in New York files the application with the fee, stating its name and address and affirming that it uses only new material. Paid by check, money order or a credit card authorization form; renewed every year.",
+   "zh": "在纽约州销售的新床垫或弹簧床座的制造商须提交申请并缴费，写明名称和地址，并声明只使用新材料。以支票、汇票或信用卡授权表付款；每年续期。"
+  },
+  "url": "https://dos.ny.gov/node/66631",
+  "info": "https://dos.ny.gov/node/66631",
+  "fee": 150,
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "New York's yearly license for anyone making new mattresses sold in the state.",
+   "zh": "在纽约州销售新床垫的制造商须办理的年度执照。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Every manufacturer of new bedding sold in this state shall file a notice with the Department of State",
+   "checked": "2026-10-28",
+   "read": "https://dos.ny.gov/node/66631"
+  }
+ },
+ {
+  "id": "ct-bedding-importer",
+  "form": "Bedding & Upholstered Furniture Importer license",
+  "title": {
+   "en": "Connecticut importer's license for bedding and upholstered furniture",
+   "zh": "康涅狄格州床上用品及软体家具进口商执照"
+  },
+  "agency": {
+   "en": "Connecticut Department of Consumer Protection, License Services Division",
+   "zh": "康涅狄格州消费者保护部执照服务处"
+  },
+  "level": "state",
+  "where": "CT",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "imports": true
+  },
+  "anyOf": [
+   "upholstered",
+   "bedding"
+  ],
+  "method": "portal",
+  "order": 45,
+  "how": {
+   "en": "A business that imports bedding or upholstered furniture from outside the US holds one importer license, applied for online or by mail. Each factory it imports from also holds its own Connecticut manufacturer license ($100), which the importer may pay for. Every license expires April 30.",
+   "zh": "从美国境外进口床上用品或软体家具的企业须持有一张进口商执照，可在线或邮寄申请。其进口的每家工厂还须各自持有康涅狄格州制造商执照（100 美元），可由进口商代缴。所有执照均于 4 月 30 日到期。"
+  },
+  "url": "https://www.elicense.ct.gov/",
+  "info": "https://portal.ct.gov/dcp/license-services-division/all-license-applications/bedding--upholstered-furniture-importer",
+  "fee": 100,
+  "renews": {
+   "en": "Every year, by April 30.",
+   "zh": "每年 4 月 30 日前。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "Connecticut's yearly license for importers of bedding and upholstered furniture, plus one for each factory.",
+   "zh": "康涅狄格州对床上用品及软体家具进口商的年度执照，每家工厂另需一张。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "The fee for the importer license is $100 annually and will always expire on April 30th.",
+   "checked": "2026-10-28",
+   "read": "https://portal.ct.gov/dcp/license-services-division/all-license-applications/bedding--upholstered-furniture-importer"
+  }
+ },
+ {
+  "id": "ut-bedding",
+  "form": "Bedding, Upholstered Furniture, and Quilted Clothing permit",
+  "title": {
+   "en": "Utah permit for bedding and upholstered furniture makers and importers",
+   "zh": "犹他州床上用品及软体家具制造商和进口商许可"
+  },
+  "agency": {
+   "en": "Utah Department of Agriculture and Food, Regulatory Services",
+   "zh": "犹他州农业与食品部监管服务处"
+  },
+  "level": "state",
+  "where": "UT",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "imports": true
+  },
+  "anyOf": [
+   "upholstered",
+   "bedding"
+  ],
+  "method": "online",
+  "order": 45,
+  "how": {
+   "en": "Every manufacturer, supply dealer and wholesaler, importers included, whose bedding or upholstered furniture is offered for sale in Utah applies online for its permit before the goods enter the state. The permit year runs January 1 to December 31.",
+   "zh": "凡在犹他州销售床上用品或软体家具的制造商、供应商和批发商（包括进口商），须在货物进入该州前在线申请许可。许可年度为 1 月 1 日至 12 月 31 日。"
+  },
+  "url": "https://ag.utah.gov/regulatory-services/bedding-upholstered-furniture-and-quilted-clothing/bedding-upholstered-furniture-and-quilted-clothing-permits/",
+  "info": "https://ag.utah.gov/regulatory-services/bedding-upholstered-furniture-and-quilted-clothing/bedding-upholstered-furniture-and-quilted-clothing-permits/",
+  "fee": null,
+  "renews": {
+   "en": "Every year, January 1 to December 31.",
+   "zh": "每年一次，1 月 1 日至 12 月 31 日。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "Utah's yearly permit, needed before bedding or upholstered furniture enters the state.",
+   "zh": "犹他州的年度许可，床上用品或软体家具进入该州前须取得。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "This permit must be purchased prior to the time such merchandise enters the State of Utah",
+   "checked": "2026-10-28",
+   "read": "https://ag.utah.gov/regulatory-services/bedding-upholstered-furniture-and-quilted-clothing/bedding-upholstered-furniture-and-quilted-clothing-permits/"
+  }
+ },
+ {
+  "id": "wv-bedding",
+  "form": "Bedding and Upholstery registration (West Virginia Code 47-1A)",
+  "title": {
+   "en": "West Virginia bedding and upholstery registration",
+   "zh": "西弗吉尼亚州床上用品及软体家具登记"
+  },
+  "agency": {
+   "en": "West Virginia Division of Labor, Bedding and Upholstery",
+   "zh": "西弗吉尼亚州劳工处床上用品与软体家具科"
+  },
+  "level": "state",
+  "where": "WV",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "imports": true
+  },
+  "anyOf": [
+   "upholstered",
+   "bedding"
+  ],
+  "method": "pdf_mail",
+  "order": 45,
+  "how": {
+   "en": "Manufacturers of bedding and upholstered furniture sold in West Virginia register with the Division using its application packet.",
+   "zh": "在西弗吉尼亚州销售的床上用品及软体家具的制造商须使用该处的申请材料包向其登记。"
+  },
+  "url": "https://labor.wv.gov/weights-measures/bedding-upholstery",
+  "info": "https://labor.wv.gov/weights-measures/bedding-upholstery",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "West Virginia's registration for makers of bedding and upholstered furniture sold in the state.",
+   "zh": "西弗吉尼亚州对其产品在该州销售的床上用品及软体家具制造商的登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "the section registers all manufacturers, renovators and sterilizers of bedding materials",
+   "checked": "2026-10-28",
+   "read": "https://labor.wv.gov/weights-measures/bedding-upholstery"
+  }
+ },
+ {
+  "id": "va-bedding",
+  "form": "Bedding and Upholstered Furniture license (12VAC5-125)",
+  "title": {
+   "en": "Virginia license for bedding and upholstered furniture makers and importers",
+   "zh": "弗吉尼亚州床上用品及软体家具制造商和进口商执照"
+  },
+  "agency": {
+   "en": "Virginia Department of Health, Bedding and Upholstered Furniture Program",
+   "zh": "弗吉尼亚州卫生部床上用品与软体家具项目"
+  },
+  "level": "state",
+  "where": "VA",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "imports": true
+  },
+  "anyOf": [
+   "upholstered",
+   "bedding"
+  ],
+  "method": "pdf_mail",
+  "order": 45,
+  "how": {
+   "en": "Manufacturers, importers and distributors are licensed before offering bedding or upholstered furniture for sale in Virginia, one license for each place of business, renewed every year. Every piece carries a law label with the Uniform Registry Number.",
+   "zh": "制造商、进口商和分销商在弗吉尼亚州销售床上用品或软体家具前须取得执照，每个营业地点一张，每年续期。每件产品须贴有带统一登记号的法定标签。"
+  },
+  "url": "https://www.vdh.virginia.gov/environmental-health/bedding-and-upholstered-furniture/",
+  "info": "https://www.vdh.virginia.gov/environmental-health/bedding-and-upholstered-furniture/",
+  "fee": null,
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "Virginia's yearly license for anyone making or importing bedding or upholstered furniture sold there.",
+   "zh": "在弗吉尼亚州销售的床上用品或软体家具，其制造商或进口商须办理的年度执照。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "All manufacturers, importers, distributors, reupholsterers, and renovators must be licensed to offer bedding and upholstered furniture for sale in Virginia.",
+   "checked": "2026-10-28",
+   "read": "https://www.vdh.virginia.gov/environmental-health/bedding-and-upholstered-furniture/"
+  }
+ },
+ {
+  "id": "dc-bedding",
+  "form": "Bedding and Upholstery Program registration",
+  "title": {
+   "en": "DC registration for businesses that make or sell mattresses, bedding or upholstered furniture",
+   "zh": "华盛顿特区床垫、床上用品或软体家具制造及销售企业登记"
+  },
+  "agency": {
+   "en": "DC Health, Division of Community Hygiene",
+   "zh": "华盛顿特区卫生局社区卫生处"
+  },
+  "level": "state",
+  "where": "DC",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "anyOf": [
+   "upholstered",
+   "bedding"
+  ],
+  "method": "online",
+  "order": 45,
+  "how": {
+   "en": "Registered online with the Division, uploading the Basic Business License and, where there is one, the Certificate of Occupancy. Stores and warehouses that keep mattresses or bedding for sale register too.",
+   "zh": "在线向该处登记，并上传基本营业执照及（如有）占用证书。存放待售床垫或床上用品的门店和仓库也须登记。"
+  },
+  "url": "https://dchealth.dc.gov/node/1507111",
+  "info": "https://dchealth.dc.gov/node/1507111",
+  "fee": null,
+  "feeNote": {
+   "en": "$476 every two years for a maker; $34 every two years for a store or warehouse.",
+   "zh": "制造商每两年 476 美元；门店或仓库每两年 34 美元。"
+  },
+  "renews": {
+   "en": "Every two years.",
+   "zh": "每两年一次。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "DC's registration for anyone making, storing or selling mattresses, bedding or upholstered furniture there.",
+   "zh": "在华盛顿特区制造、存放或销售床垫、床上用品或软体家具的企业须办理的登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "who manufacture, renovate, or deal in bedding, mattress, or other upholstered furniture must register with DC Health's Division of Community Hygiene",
+   "checked": "2026-10-28",
+   "read": "https://dchealth.dc.gov/node/1507111"
+  }
+ },
+ {
+  "id": "nc-bedding",
+  "form": "Bedding manufacturer license (G.S. 106-65.103)",
+  "title": {
+   "en": "North Carolina bedding manufacturer license",
+   "zh": "北卡罗来纳州床上用品制造商执照"
+  },
+  "agency": {
+   "en": "North Carolina Department of Agriculture and Consumer Services, Sleep Products Section",
+   "zh": "北卡罗来纳州农业与消费者服务部睡眠产品科"
+  },
+  "level": "state",
+  "where": "NC",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "imports": true,
+   "bedding": true
+  },
+  "method": "pdf_mail",
+  "order": 45,
+  "how": {
+   "en": "The manufacturer files the new bedding manufacturer application with the registration number request and a sample law label before its mattresses or bedding are sold in North Carolina, and renews every year.",
+   "zh": "制造商须在其床垫或床上用品于北卡罗来纳州销售前提交新床上用品制造商申请、登记号申请表及法定标签样本，并每年续期。"
+  },
+  "url": "https://www.ncagr.gov/divisions/structural-pest-control-and-pesticides/sleep-products-licensing-and-registration",
+  "info": "https://www.ncleg.gov/EnactedLegislation/Statutes/PDF/BySection/Chapter_106/GS_106-65.103.pdf",
+  "fee": null,
+  "feeNote": {
+   "en": "$720 for the first year, prorated by the quarter business starts; after that 5.2 cents a unit sold in the state, $50 at least.",
+   "zh": "第一年 720 美元，按开始营业的季度折算；此后按在该州销售的每件 5.2 美分计，最低 50 美元。"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "North Carolina's yearly license for makers of mattresses and bedding sold in the state.",
+   "zh": "在北卡罗来纳州销售的床垫及床上用品的制造商须办理的年度执照。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "A person who has not done business in this State throughout the preceding calendar year shall obtain a license by paying an initial fee",
+   "checked": "2026-10-28",
+   "read": "https://www.ncleg.gov/EnactedLegislation/Statutes/PDF/BySection/Chapter_106/GS_106-65.103.pdf"
+  }
+ },
+ {
+  "id": "de-bedding",
+  "form": "Bedding manufacturer permit (16 Del. C. chapter 21)",
+  "title": {
+   "en": "Delaware bedding manufacturer permit",
+   "zh": "特拉华州床上用品制造商许可"
+  },
+  "agency": {
+   "en": "Delaware Division of Public Health, Bedding Program",
+   "zh": "特拉华州公共卫生处床上用品项目"
+  },
+  "level": "state",
+  "where": "DE",
+  "segments": [
+   "seller",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "imports": true,
+   "bedding": true
+  },
+  "method": "pdf_mail",
+  "order": 45,
+  "how": {
+   "en": "Manufacturers of mattresses, pillows and other bedding made in Delaware or shipped into it register with the Division for a permit and a registry number, renewed each calendar year.",
+   "zh": "在特拉华州生产或运入该州的床垫、枕头及其他床上用品的制造商须向该处登记，取得许可和登记号，每个日历年续期。"
+  },
+  "url": "https://dhss.delaware.gov/dph/homepage/about/sections/hsp/licenses-and-permits/bedding-program/",
+  "info": "https://www.delcode.delaware.gov/title16/c021/index.html",
+  "fee": 50,
+  "renews": {
+   "en": "Every calendar year.",
+   "zh": "每个日历年一次。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "Delaware's yearly permit for makers of bedding sold or shipped into the state.",
+   "zh": "在特拉华州销售或运入该州的床上用品的制造商须办理的年度许可。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "for manufacturers of bedding products within the State or manufacturers of such products who ship said products into this State shall be as follows",
+   "checked": "2026-10-28",
+   "read": "https://www.delcode.delaware.gov/title16/c021/index.html"
+  }
+ },
+ {
+  "id": "wa-epr",
+  "form": "Producer responsibility organization registration (Recycling Reform Act, RCW 70A.208)",
+  "title": {
+   "en": "Washington packaging producer responsibility (EPR): register with the PRO, unless exempt",
+   "zh": "华盛顿州包装生产者责任（EPR）：在生产者责任组织登记（豁免者除外）"
+  },
+  "agency": {
+   "en": "Washington Department of Ecology, through the approved producer responsibility organization",
+   "zh": "华盛顿州生态部（经批准的生产者责任组织）"
+  },
+  "level": "state",
+  "where": "WA",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "imports": true
+  },
+  "method": "portal",
+  "order": 47,
+  "how": {
+   "en": "Starting in 2026, the brand whose packaged products reach Washington consumers registers with the approved producer responsibility organization, reports its packaging and pays the organization's fees. De minimis producers are exempt.",
+   "zh": "自 2026 年起，其包装产品销往华盛顿州消费者的品牌须在经批准的生产者责任组织登记、申报包装并缴纳该组织的费用。低于最低限额的生产者豁免。"
+  },
+  "url": "https://ecology.wa.gov/waste-toxics/reducing-recycling-waste/our-recycling-programs/recycling-reform-act/producer-responsibility-organization",
+  "info": "https://ecology.wa.gov/waste-toxics/reducing-recycling-waste/our-recycling-programs/recycling-reform-act/producer-responsibility-organization",
+  "fee": null,
+  "feeNote": {
+   "en": "The producer responsibility organization sets the fees.",
+   "zh": "费用由生产者责任组织核定。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "Washington's packaging law: the brand joins the producer organization and pays into recycling, unless exempt.",
+   "zh": "华盛顿州包装法：品牌须加入生产者组织并为回收付费（豁免者除外）。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "must meet the following obligations (per RCW 70A.208.030): Register with an approved producer responsibility organization (PRO)",
+   "checked": "2026-10-28",
+   "read": "https://ecology.wa.gov/waste-toxics/reducing-recycling-waste/our-recycling-programs/recycling-reform-act/producer-responsibility-organization"
+  }
+ },
+ {
+  "id": "mn-epr",
+  "form": "Producer responsibility organization membership (Packaging Waste and Cost Reduction Act, Minn. Stat. 115A.144 to 115A.1463)",
+  "title": {
+   "en": "Minnesota packaging producer responsibility (EPR): join the PRO, unless exempt",
+   "zh": "明尼苏达州包装生产者责任（EPR）：加入生产者责任组织（豁免者除外）"
+  },
+  "agency": {
+   "en": "Minnesota Pollution Control Agency, through Circular Action Alliance",
+   "zh": "明尼苏达州污染控制局（经 Circular Action Alliance）"
+  },
+  "level": "state",
+  "where": "MN",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "imports": true
+  },
+  "method": "portal",
+  "order": 47,
+  "how": {
+   "en": "The brand whose packaged products are sold in Minnesota belongs to the producer responsibility organization, reports its packaging and pays its dues every year.",
+   "zh": "在明尼苏达州销售包装产品的品牌须加入生产者责任组织、申报包装并每年缴纳会费。"
+  },
+  "url": "https://www.revisor.mn.gov/statutes/cite/115A.1443",
+  "info": "https://www.revisor.mn.gov/statutes/cite/115A.1443",
+  "fee": null,
+  "feeNote": {
+   "en": "The producer responsibility organization sets the dues.",
+   "zh": "会费由生产者责任组织核定。"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  },
+  "checked": "page",
+  "plain": {
+   "en": "Minnesota's packaging law: the brand joins the producer organization and pays into recycling every year.",
+   "zh": "明尼苏达州包装法：品牌须加入生产者组织并每年为回收付费。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "By January 1, 2025, producers must appoint a producer responsibility organization.",
+   "checked": "2026-10-28",
+   "read": "https://www.revisor.mn.gov/statutes/cite/115A.1443"
+  }
+ },
+ {
+  "id": "al-pesticide-reg",
+  "form": "Alabama pesticide product registration",
+  "title": {
+   "en": "Alabama registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "阿拉巴马州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Alabama Department of Agriculture and Industries",
+   "zh": "阿拉巴马州农业与工业部"
+  },
+  "level": "state",
+  "where": "AL",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Alabama Department of Agriculture and Industries after its EPA registration and before it is sold or distributed in Alabama, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于阿拉巴马州销售或分销前向阿拉巴马州农业与工业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://agi.alabama.gov/pesticidemanagement/productregistration/",
+  "info": "https://agi.alabama.gov/pesticidemanagement/productregistration/",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Alabama's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的阿拉巴马州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Any product registered with EPA must also be registered in Alabama before it can be distributed in the state.",
+   "checked": "2026-10-28",
+   "read": "https://agi.alabama.gov/pesticidemanagement/productregistration/"
+  }
+ },
+ {
+  "id": "ak-pesticide-reg",
+  "form": "Alaska pesticide product registration",
+  "title": {
+   "en": "Alaska registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "阿拉斯加州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Alaska Department of Environmental Conservation, Pesticide Control Program",
+   "zh": "阿拉斯加州环境保护部农药管理项目"
+  },
+  "level": "state",
+  "where": "AK",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Alaska Department of Environmental Conservation after its EPA registration and before it is sold or distributed in Alaska, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于阿拉斯加州销售或分销前向阿拉斯加州环境保护部农药管理项目登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://dec.alaska.gov/eh/pest/registration",
+  "info": "https://dec.alaska.gov/eh/pest/registration",
+  "fee": 120,
+  "checked": "page",
+  "plain": {
+   "en": "Alaska's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的阿拉斯加州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "All pesticide products must be registered by the Pesticide Control Program in order to be sold in the state.",
+   "checked": "2026-10-28",
+   "read": "https://dec.alaska.gov/eh/pest/registration"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "az-pesticide-reg",
+  "form": "Arizona pesticide product registration",
+  "title": {
+   "en": "Arizona registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "亚利桑那州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Arizona Department of Agriculture",
+   "zh": "亚利桑那州农业部"
+  },
+  "level": "state",
+  "where": "AZ",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "pdf_mail",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Arizona Department of Agriculture after its EPA registration and before it is sold or distributed in Arizona, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于亚利桑那州销售或分销前向亚利桑那州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.azleg.gov/ars/3/00351.htm",
+  "info": "https://www.azleg.gov/ars/3/00351.htm",
+  "fee": 100,
+  "checked": "page",
+  "plain": {
+   "en": "Arizona's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的亚利桑那州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Every pesticide that is distributed shall be registered with the division.",
+   "checked": "2026-10-28",
+   "read": "https://www.azleg.gov/ars/3/00351.htm"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "ca-pesticide-reg",
+  "form": "California pesticide product registration",
+  "title": {
+   "en": "California registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "加州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "California Department of Pesticide Regulation (DPR)",
+   "zh": "加州农药监管局（DPR）"
+  },
+  "level": "state",
+  "where": "CA",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the California Department of Pesticide Regulation (DPR) after its EPA registration and before it is sold or distributed in California, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于加州销售或分销前向加州农药监管局登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.cdpr.ca.gov/how-to-register-a-pesticide/",
+  "info": "https://www.cdpr.ca.gov/how-to-register-a-pesticide/",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "California's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的加州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "DPR must register any pesticide before it can be sold or used in California.",
+   "checked": "2026-10-28",
+   "read": "https://www.cdpr.ca.gov/how-to-register-a-pesticide/"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "co-pesticide-reg",
+  "form": "Colorado pesticide product registration",
+  "title": {
+   "en": "Colorado registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "科罗拉多州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Colorado Department of Agriculture",
+   "zh": "科罗拉多州农业部"
+  },
+  "level": "state",
+  "where": "CO",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "portal",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Colorado Department of Agriculture after its EPA registration and before it is sold or distributed in Colorado, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于科罗拉多州销售或分销前向科罗拉多州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.ag.state.co.us/elicense/Index.aspx",
+  "info": "https://ag.colorado.gov/plants/pesticides/pesticide-product-registration",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Colorado's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的科罗拉多州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "requires registration of all pesticides with CDA before distribution, with few exemptions.",
+   "checked": "2026-10-28",
+   "read": "https://ag.colorado.gov/plants/pesticides/pesticide-product-registration"
+  }
+ },
+ {
+  "id": "ct-pesticide-reg",
+  "form": "Connecticut pesticide product registration",
+  "title": {
+   "en": "Connecticut registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "康涅狄格州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Connecticut Department of Energy and Environmental Protection (DEEP)",
+   "zh": "康涅狄格州能源与环境保护部（DEEP）"
+  },
+  "level": "state",
+  "where": "CT",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "portal",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Connecticut Department of Energy and Environmental Protection (DEEP) after its EPA registration and before it is sold or distributed in Connecticut, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于康涅狄格州销售或分销前向康涅狄格州能源与环境保护部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.elicense.ct.gov/",
+  "info": "https://portal.ct.gov/DEEP/Pesticides/Pesticide-Product-Registration-Requirements",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Connecticut's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的康涅狄格州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "All pesticides that are sold or used in Connecticut must be registered with the Department of Energy and Environmental Protection (DEEP) Pesticide Program.",
+   "checked": "2026-10-28",
+   "read": "https://portal.ct.gov/DEEP/Pesticides/Pesticide-Product-Registration-Requirements"
+  }
+ },
+ {
+  "id": "de-pesticide-reg",
+  "form": "Delaware pesticide product registration",
+  "title": {
+   "en": "Delaware registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "特拉华州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Delaware Department of Agriculture",
+   "zh": "特拉华州农业部"
+  },
+  "level": "state",
+  "where": "DE",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Delaware Department of Agriculture after its EPA registration and before it is sold or distributed in Delaware, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于特拉华州销售或分销前向特拉华州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://agriculture.delaware.gov/registration/",
+  "info": "https://agriculture.delaware.gov/registration/",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Delaware's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的特拉华州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Any pesticide product distributed or sold in the State of Delaware must be registered with the Department's Pesticide section.",
+   "checked": "2026-10-28",
+   "read": "https://agriculture.delaware.gov/registration/"
+  }
+ },
+ {
+  "id": "dc-pesticide-reg",
+  "form": "The District of Columbia pesticide product registration",
+  "title": {
+   "en": "The District of Columbia registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "华盛顿特区消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "DC Department of Energy and Environment (DOEE)",
+   "zh": "华盛顿特区能源与环境局（DOEE）"
+  },
+  "level": "state",
+  "where": "DC",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "portal",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the DC Department of Energy and Environment (DOEE) after its EPA registration and before it is sold or distributed in the District of Columbia, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于华盛顿特区销售或分销前向华盛顿特区能源与环境局登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://dcplants.doee.dc.gov/SecurityLogin.aspx",
+  "info": "https://doee.dc.gov/sites/default/files/dc/sites/ddoe/service_content/attachments/Pesticide%20Product%20Registration%20FAQs.pdf",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "The District of Columbia's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的华盛顿特区登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "defoliant or a desiccant MUST be registered with the District of Columbia.",
+   "checked": "2026-10-28",
+   "read": "https://doee.dc.gov/sites/default/files/dc/sites/ddoe/service_content/attachments/Pesticide%20Product%20Registration%20FAQs.pdf"
+  },
+  "renews": {
+   "en": "Every year, January 1 to December 31.",
+   "zh": "每年一次，1 月 1 日至 12 月 31 日。"
+  }
+ },
+ {
+  "id": "fl-pesticide-reg",
+  "form": "Florida pesticide product registration",
+  "title": {
+   "en": "Florida registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "佛罗里达州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Florida Department of Agriculture and Consumer Services (FDACS)",
+   "zh": "佛罗里达州农业与消费者服务部（FDACS）"
+  },
+  "level": "state",
+  "where": "FL",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Florida Department of Agriculture and Consumer Services (FDACS) after its EPA registration and before it is sold or distributed in Florida, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于佛罗里达州销售或分销前向佛罗里达州农业与消费者服务部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.fdacs.gov/Business-Services/Pesticide-Product-Registration",
+  "info": "https://www.fdacs.gov/Business-Services/Pesticide-Product-Registration",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Florida's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的佛罗里达州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "if a product is defined as a pesticide and is distributed, sold or offered for sale in Florida, it must be registered by FDACS.",
+   "checked": "2026-10-28",
+   "read": "https://www.fdacs.gov/Business-Services/Pesticide-Product-Registration"
+  },
+  "renews": {
+   "en": "Every two years.",
+   "zh": "每两年一次。"
+  }
+ },
+ {
+  "id": "ga-pesticide-reg",
+  "form": "Georgia pesticide product registration",
+  "title": {
+   "en": "Georgia registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "佐治亚州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Georgia Department of Agriculture",
+   "zh": "佐治亚州农业部"
+  },
+  "level": "state",
+  "where": "GA",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Georgia Department of Agriculture after its EPA registration and before it is sold or distributed in Georgia, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于佐治亚州销售或分销前向佐治亚州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://agr.georgia.gov/pesticide-product-registrations",
+  "info": "https://agr.georgia.gov/pesticide-product-registrations",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Georgia's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的佐治亚州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Pesticide distributors must register all pesticide products that they sell.",
+   "checked": "2026-10-28",
+   "read": "https://agr.georgia.gov/pesticide-product-registrations"
+  }
+ },
+ {
+  "id": "id-pesticide-reg",
+  "form": "Idaho pesticide product registration",
+  "title": {
+   "en": "Idaho registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "爱达荷州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Idaho State Department of Agriculture",
+   "zh": "爱达荷州农业部"
+  },
+  "level": "state",
+  "where": "ID",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "portal",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Idaho State Department of Agriculture after its EPA registration and before it is sold or distributed in Idaho, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于爱达荷州销售或分销前向爱达荷州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://pestreg.isda.idaho.gov/",
+  "info": "https://pestreg.isda.idaho.gov/Start/Faq",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Idaho's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的爱达荷州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "The State of Idaho requires the registration of pesticides, and related, before their distribution and/or sale within the state.",
+   "checked": "2026-10-28",
+   "read": "https://pestreg.isda.idaho.gov/Start/Faq"
+  }
+ },
+ {
+  "id": "il-pesticide-reg",
+  "form": "Illinois pesticide product registration",
+  "title": {
+   "en": "Illinois registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "伊利诺伊州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Illinois Department of Agriculture",
+   "zh": "伊利诺伊州农业部"
+  },
+  "level": "state",
+  "where": "IL",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Illinois Department of Agriculture after its EPA registration and before it is sold or distributed in Illinois, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于伊利诺伊州销售或分销前向伊利诺伊州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://agr.illinois.gov/pesticides/pesticide-product-registration.html",
+  "info": "https://agr.illinois.gov/pesticides/pesticide-product-registration.html",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Illinois's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的伊利诺伊州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "All products offered for sale within the State of Illinois that make a “pesticidal” claim must be registered with the Illinois Department of Agriculture.",
+   "checked": "2026-10-28",
+   "read": "https://agr.illinois.gov/pesticides/pesticide-product-registration.html"
+  }
+ },
+ {
+  "id": "ia-pesticide-reg",
+  "form": "Iowa pesticide product registration",
+  "title": {
+   "en": "Iowa registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "艾奥瓦州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Iowa Department of Agriculture and Land Stewardship",
+   "zh": "艾奥瓦州农业与土地管理部"
+  },
+  "level": "state",
+  "where": "IA",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "pdf_mail",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Iowa Department of Agriculture and Land Stewardship after its EPA registration and before it is sold or distributed in Iowa, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于艾奥瓦州销售或分销前向艾奥瓦州农业与土地管理部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.legis.iowa.gov/docs/code/206.12.pdf",
+  "info": "https://www.legis.iowa.gov/docs/code/206.12.pdf",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Iowa's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的艾奥瓦州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "before selling or offering for sale any pesticide for use in this state, shall register each brand and grade of such pesticide",
+   "checked": "2026-10-28",
+   "read": "https://www.legis.iowa.gov/docs/code/206.12.pdf"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "ks-pesticide-reg",
+  "form": "Kansas pesticide product registration",
+  "title": {
+   "en": "Kansas registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "堪萨斯州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Kansas Department of Agriculture",
+   "zh": "堪萨斯州农业部"
+  },
+  "level": "state",
+  "where": "KS",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "pdf_mail",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Kansas Department of Agriculture after its EPA registration and before it is sold or distributed in Kansas, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于堪萨斯州销售或分销前向堪萨斯州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.ksrevisor.gov/statutes/chapters/ch02/002_022_0004.html",
+  "info": "https://www.ksrevisor.gov/statutes/chapters/ch02/002_022_0004.html",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Kansas's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的堪萨斯州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "through any point outside this state shall be registered by the secretary.",
+   "checked": "2026-10-28",
+   "read": "https://www.ksrevisor.gov/statutes/chapters/ch02/002_022_0004.html"
+  }
+ },
+ {
+  "id": "ky-pesticide-reg",
+  "form": "Kentucky pesticide product registration",
+  "title": {
+   "en": "Kentucky registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "肯塔基州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Kentucky Department of Agriculture",
+   "zh": "肯塔基州农业部"
+  },
+  "level": "state",
+  "where": "KY",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "pdf_mail",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Kentucky Department of Agriculture after its EPA registration and before it is sold or distributed in Kentucky, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于肯塔基州销售或分销前向肯塔基州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=9388",
+  "info": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=9388",
+  "fee": 250,
+  "checked": "page",
+  "plain": {
+   "en": "Kentucky's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的肯塔基州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "between points within the state through points outside the state shall be registered with the department.",
+   "checked": "2026-10-28",
+   "read": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=9388"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "la-pesticide-reg",
+  "form": "Louisiana pesticide product registration",
+  "title": {
+   "en": "Louisiana registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "路易斯安那州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Louisiana Department of Agriculture and Forestry (LDAF)",
+   "zh": "路易斯安那州农林部（LDAF）"
+  },
+  "level": "state",
+  "where": "LOU",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "portal",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Louisiana Department of Agriculture and Forestry (LDAF) after its EPA registration and before it is sold or distributed in Louisiana, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于路易斯安那州销售或分销前向路易斯安那州农林部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://usaplantsla.ldaf.state.la.us/USAPlantsLA/SecurityLogin.aspx",
+  "info": "https://www.ldaf.la.gov/plants/pesticides/registration",
+  "fee": 400,
+  "checked": "page",
+  "plain": {
+   "en": "Louisiana's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的路易斯安那州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Each pesticide with a unique United States Environmental Protection Agency pesticide registration number (EPA Reg. No.) or a unique brand name must be registered.",
+   "checked": "2026-10-28",
+   "read": "https://www.ldaf.la.gov/plants/pesticides/registration"
+  }
+ },
+ {
+  "id": "me-pesticide-reg",
+  "form": "Maine pesticide product registration",
+  "title": {
+   "en": "Maine registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "缅因州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Maine Board of Pesticides Control",
+   "zh": "缅因州农药管理委员会"
+  },
+  "level": "state",
+  "where": "ME",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Maine Board of Pesticides Control after its EPA registration and before it is sold or distributed in Maine, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于缅因州销售或分销前向缅因州农药管理委员会登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.mainelegislature.org/LEGIS/STATUTES/7/title7sec607.html",
+  "info": "https://www.mainelegislature.org/LEGIS/STATUTES/7/title7sec607.html",
+  "fee": 215,
+  "checked": "page",
+  "plain": {
+   "en": "Maine's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的缅因州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "A pesticide may not be distributed in this State unless it is registered with the board",
+   "checked": "2026-10-28",
+   "read": "https://www.mainelegislature.org/LEGIS/STATUTES/7/title7sec607.html"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "md-pesticide-reg",
+  "form": "Maryland pesticide product registration",
+  "title": {
+   "en": "Maryland registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "马里兰州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Maryland Department of Agriculture, State Chemist",
+   "zh": "马里兰州农业部州化学师办公室"
+  },
+  "level": "state",
+  "where": "MD",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Maryland Department of Agriculture after its EPA registration and before it is sold or distributed in Maryland, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于马里兰州销售或分销前向马里兰州农业部州化学师办公室登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://mgaleg.maryland.gov/mgawebsite/Laws/StatuteText?article=gag&section=5-105&enactments=false",
+  "info": "https://mgaleg.maryland.gov/mgawebsite/Laws/StatuteText?article=gag&section=5-105&enactments=false",
+  "fee": 110,
+  "checked": "page",
+  "plain": {
+   "en": "Maryland's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的马里兰州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "a distributor shall register with the Secretary each brand or product name of a pesticide before distributing it in the State.",
+   "checked": "2026-10-28",
+   "read": "https://mgaleg.maryland.gov/mgawebsite/Laws/StatuteText?article=gag&section=5-105&enactments=false"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "ma-pesticide-reg",
+  "form": "Massachusetts pesticide product registration",
+  "title": {
+   "en": "Massachusetts registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "马萨诸塞州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Massachusetts Department of Agricultural Resources, Pesticide Program",
+   "zh": "马萨诸塞州农业资源部农药项目"
+  },
+  "level": "state",
+  "where": "MA",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "portal",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Massachusetts Department of Agricultural Resources after its EPA registration and before it is sold or distributed in Massachusetts, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于马萨诸塞州销售或分销前向马萨诸塞州农业资源部农药项目登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://permitting.state.ma.us/CitizenAccess/",
+  "info": "https://www.mass.gov/pesticide-product-registration",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Massachusetts's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的马萨诸塞州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "In order to distribute, purchase or use a pesticide in Massachusetts, it must be registered by the Massachusetts Pesticide Board Subcommittee.",
+   "checked": "2026-10-28",
+   "read": "https://www.mass.gov/pesticide-product-registration"
+  }
+ },
+ {
+  "id": "mi-pesticide-reg",
+  "form": "Michigan pesticide product registration",
+  "title": {
+   "en": "Michigan registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "密歇根州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Michigan Department of Agriculture and Rural Development (MDARD)",
+   "zh": "密歇根州农业与农村发展部（MDARD）"
+  },
+  "level": "state",
+  "where": "MI",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Michigan Department of Agriculture and Rural Development (MDARD) after its EPA registration and before it is sold or distributed in Michigan, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于密歇根州销售或分销前向密歇根州农业与农村发展部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.michigan.gov/mdard/licensing/pesticide/pestregistration",
+  "info": "https://www.michigan.gov/mdard/licensing/pesticide/pestregistration",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Michigan's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的密歇根州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Michigan requires all pesticides, including those that EPA exempts under FIFRA 25(b), to be registered with MDARD.",
+   "checked": "2026-10-28",
+   "read": "https://www.michigan.gov/mdard/licensing/pesticide/pestregistration"
+  }
+ },
+ {
+  "id": "mn-pesticide-reg",
+  "form": "Minnesota pesticide product registration",
+  "title": {
+   "en": "Minnesota registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "明尼苏达州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Minnesota Department of Agriculture (MDA)",
+   "zh": "明尼苏达州农业部（MDA）"
+  },
+  "level": "state",
+  "where": "MN",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Minnesota Department of Agriculture (MDA) after its EPA registration and before it is sold or distributed in Minnesota, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于明尼苏达州销售或分销前向明尼苏达州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.mda.state.mn.us/pesticide-fertilizer/pesticide-updates-overview",
+  "info": "https://www.mda.state.mn.us/pesticide-fertilizer/pesticide-updates-overview",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Minnesota's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的明尼苏达州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Both agricultural pesticides and non-agricultural pesticides must be registered with the MDA before they can be sold or distributed in the state.",
+   "checked": "2026-10-28",
+   "read": "https://www.mda.state.mn.us/pesticide-fertilizer/pesticide-updates-overview"
+  }
+ },
+ {
+  "id": "mo-pesticide-reg",
+  "form": "Missouri pesticide product registration",
+  "title": {
+   "en": "Missouri registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "密苏里州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Missouri Department of Agriculture",
+   "zh": "密苏里州农业部"
+  },
+  "level": "state",
+  "where": "MO",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Missouri Department of Agriculture after its EPA registration and before it is sold or distributed in Missouri, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于密苏里州销售或分销前向密苏里州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://agriculture.mo.gov/plants/pesticides/",
+  "info": "https://agriculture.mo.gov/plants/pesticides/",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Missouri's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的密苏里州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "requires every pesticide which is distributed, sold, offered for sale, or held for sale within this state, be registered",
+   "checked": "2026-10-28",
+   "read": "https://agriculture.mo.gov/plants/pesticides/"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "mt-pesticide-reg",
+  "form": "Montana pesticide product registration",
+  "title": {
+   "en": "Montana registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "蒙大拿州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Montana Department of Agriculture",
+   "zh": "蒙大拿州农业部"
+  },
+  "level": "state",
+  "where": "MT",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Montana Department of Agriculture after its EPA registration and before it is sold or distributed in Montana, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于蒙大拿州销售或分销前向蒙大拿州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://agr.mt.gov/Topics/N-P/Pesticide-Pages/Pesticide-Product-Registration-Pages/Pesticide-Product-Registration",
+  "info": "https://agr.mt.gov/Topics/N-P/Pesticide-Pages/Pesticide-Product-Registration-Pages/Pesticide-Product-Registration",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Montana's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的蒙大拿州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "pesticide sold, distributed, offered for sale, purchased, given away, used or applied in the state must be registered by the state Department of Agriculture.",
+   "checked": "2026-10-28",
+   "read": "https://agr.mt.gov/Topics/N-P/Pesticide-Pages/Pesticide-Product-Registration-Pages/Pesticide-Product-Registration"
+  }
+ },
+ {
+  "id": "ne-pesticide-reg",
+  "form": "Nebraska pesticide product registration",
+  "title": {
+   "en": "Nebraska registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "内布拉斯加州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Nebraska Department of Agriculture",
+   "zh": "内布拉斯加州农业部"
+  },
+  "level": "state",
+  "where": "NE",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "portal",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Nebraska Department of Agriculture after its EPA registration and before it is sold or distributed in Nebraska, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于内布拉斯加州销售或分销前向内布拉斯加州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://nda.nebraska.gov/online/pesticide_renewal",
+  "info": "https://nda.nebraska.gov/pesticide/regist",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Nebraska's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的内布拉斯加州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "All pesticides which are distributed within the state shall be registered.",
+   "checked": "2026-10-28",
+   "read": "https://nda.nebraska.gov/pesticide/regist"
+  }
+ },
+ {
+  "id": "nv-pesticide-reg",
+  "form": "Nevada pesticide product registration",
+  "title": {
+   "en": "Nevada registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "内华达州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Nevada Department of Agriculture",
+   "zh": "内华达州农业部"
+  },
+  "level": "state",
+  "where": "NV",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "portal",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Nevada Department of Agriculture after its EPA registration and before it is sold or distributed in Nevada, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于内华达州销售或分销前向内华达州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://nv.certifyag.com/pest/",
+  "info": "https://agri.nv.gov/pesticides/",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Nevada's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的内华达州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "State law requires that all pesticides be registered with NDA prior to being distributed, sold or offered for sale within the state.",
+   "checked": "2026-10-28",
+   "read": "https://agri.nv.gov/pesticides/"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "nh-pesticide-reg",
+  "form": "New Hampshire pesticide product registration",
+  "title": {
+   "en": "New Hampshire registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "新罕布什尔州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "New Hampshire Division of Pesticide Control",
+   "zh": "新罕布什尔州农药管理处"
+  },
+  "level": "state",
+  "where": "NH",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the New Hampshire Division of Pesticide Control after its EPA registration and before it is sold or distributed in New Hampshire, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于新罕布什尔州销售或分销前向新罕布什尔州农药管理处登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://agriculture.nh.gov/divisions/pesticide-control/registration.htm",
+  "info": "https://agriculture.nh.gov/divisions/pesticide-control/registration.htm",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "New Hampshire's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的新罕布什尔州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Pesticides sold within New Hampshire are registered with the Division.",
+   "checked": "2026-10-28",
+   "read": "https://agriculture.nh.gov/divisions/pesticide-control/registration.htm"
+  }
+ },
+ {
+  "id": "nj-pesticide-reg",
+  "form": "New Jersey pesticide product registration",
+  "title": {
+   "en": "New Jersey registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "新泽西州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "New Jersey Department of Environmental Protection, Pesticide Control Program",
+   "zh": "新泽西州环境保护部农药管理项目"
+  },
+  "level": "state",
+  "where": "NJ",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the New Jersey Department of Environmental Protection after its EPA registration and before it is sold or distributed in New Jersey, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于新泽西州销售或分销前向新泽西州环境保护部农药管理项目登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.nj.gov/dep/enforcement/pcp/regulations/Subchapter%202%20as%20of%20April%206%202020.pdf",
+  "info": "https://www.nj.gov/dep/enforcement/pcp/regulations/Subchapter%202%20as%20of%20April%206%202020.pdf",
+  "fee": 300,
+  "checked": "page",
+  "plain": {
+   "en": "New Jersey's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的新泽西州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Before holding, using, distributing, selling, or offering for sale any pesticide in this State, the applicant or registrant shall pay an annual registration fee",
+   "checked": "2026-10-28",
+   "read": "https://www.nj.gov/dep/enforcement/pcp/regulations/Subchapter%202%20as%20of%20April%206%202020.pdf"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "nm-pesticide-reg",
+  "form": "New Mexico pesticide product registration",
+  "title": {
+   "en": "New Mexico registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "新墨西哥州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "New Mexico Department of Agriculture",
+   "zh": "新墨西哥州农业部"
+  },
+  "level": "state",
+  "where": "NM",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the New Mexico Department of Agriculture after its EPA registration and before it is sold or distributed in New Mexico, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于新墨西哥州销售或分销前向新墨西哥州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://nmdeptag.nmsu.edu/pesticides/registrant-information.html",
+  "info": "https://nmdeptag.nmsu.edu/pesticides/registrant-information.html",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "New Mexico's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的新墨西哥州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "All pesticides and devices must be registered before they can be offered for sale in New Mexico.",
+   "checked": "2026-10-28",
+   "read": "https://nmdeptag.nmsu.edu/pesticides/registrant-information.html"
+  }
+ },
+ {
+  "id": "ny-pesticide-reg",
+  "form": "New York pesticide product registration",
+  "title": {
+   "en": "New York registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "纽约州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "New York State Department of Environmental Conservation (DEC)",
+   "zh": "纽约州环境保护部（DEC）"
+  },
+  "level": "state",
+  "where": "NY",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the New York State Department of Environmental Conservation (DEC) after its EPA registration and before it is sold or distributed in New York, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于纽约州销售或分销前向纽约州环境保护部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://dec.ny.gov/environmental-protection/pesticides/product-registration",
+  "info": "https://dec.ny.gov/environmental-protection/pesticides/product-registration",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "New York's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的纽约州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Every pesticide product which is used, distributed, sold, or offered for sale in NY State must be registered by the NYSDEC.",
+   "checked": "2026-10-28",
+   "read": "https://dec.ny.gov/environmental-protection/pesticides/product-registration"
+  }
+ },
+ {
+  "id": "nc-pesticide-reg",
+  "form": "North Carolina pesticide product registration",
+  "title": {
+   "en": "North Carolina registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "北卡罗来纳州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "North Carolina Department of Agriculture and Consumer Services, Pesticide Board",
+   "zh": "北卡罗来纳州农业与消费者服务部农药委员会"
+  },
+  "level": "state",
+  "where": "NC",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "pdf_mail",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the North Carolina Department of Agriculture and Consumer Services after its EPA registration and before it is sold or distributed in North Carolina, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于北卡罗来纳州销售或分销前向北卡罗来纳州农业与消费者服务部农药委员会登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.ncleg.gov/EnactedLegislation/Statutes/PDF/BySection/Chapter_143/GS_143-442.pdf",
+  "info": "https://www.ncleg.gov/EnactedLegislation/Statutes/PDF/BySection/Chapter_143/GS_143-442.pdf",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "North Carolina's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的北卡罗来纳州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "through any point outside this State shall be registered in the office of the Board",
+   "checked": "2026-10-28",
+   "read": "https://www.ncleg.gov/EnactedLegislation/Statutes/PDF/BySection/Chapter_143/GS_143-442.pdf"
+  }
+ },
+ {
+  "id": "nd-pesticide-reg",
+  "form": "North Dakota pesticide product registration",
+  "title": {
+   "en": "North Dakota registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "北达科他州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "North Dakota Department of Agriculture",
+   "zh": "北达科他州农业部"
+  },
+  "level": "state",
+  "where": "ND",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "pdf_mail",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the North Dakota Department of Agriculture after its EPA registration and before it is sold or distributed in North Dakota, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于北达科他州销售或分销前向北达科他州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://ndlegis.gov/cencode/t04-1c34.pdf",
+  "info": "https://ndlegis.gov/cencode/t04-1c34.pdf",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "North Dakota's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的北达科他州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "a person shall file biennially with the commissioner an application for registration of the pesticide.",
+   "checked": "2026-10-28",
+   "read": "https://ndlegis.gov/cencode/t04-1c34.pdf"
+  },
+  "renews": {
+   "en": "Every two years.",
+   "zh": "每两年一次。"
+  }
+ },
+ {
+  "id": "oh-pesticide-reg",
+  "form": "Ohio pesticide product registration",
+  "title": {
+   "en": "Ohio registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "俄亥俄州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Ohio Department of Agriculture",
+   "zh": "俄亥俄州农业部"
+  },
+  "level": "state",
+  "where": "OH",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "portal",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Ohio Department of Agriculture after its EPA registration and before it is sold or distributed in Ohio, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于俄亥俄州销售或分销前向俄亥俄州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://ohioagenterprise.agri.ohio.gov/web",
+  "info": "https://agri.ohio.gov/divisions/plant-health/pesticides/",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Ohio's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的俄亥俄州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Each product must be registered and dealer location distributing these products must be properly licensed and inspected.",
+   "checked": "2026-10-28",
+   "read": "https://agri.ohio.gov/divisions/plant-health/pesticides/"
+  }
+ },
+ {
+  "id": "ok-pesticide-reg",
+  "form": "Oklahoma pesticide product registration",
+  "title": {
+   "en": "Oklahoma registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "俄克拉何马州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Oklahoma Department of Agriculture, Food and Forestry",
+   "zh": "俄克拉何马州农业、食品与林业部"
+  },
+  "level": "state",
+  "where": "OK",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "portal",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Oklahoma Department of Agriculture after its EPA registration and before it is sold or distributed in Oklahoma, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于俄克拉何马州销售或分销前向俄克拉何马州农业、食品与林业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.kellysolutions.com/erenewals/newreg/",
+  "info": "https://ag.ok.gov/wp-content/uploads/2026/04/Pesticide-Product-Registration-Form-041526.pdf",
+  "fee": 210,
+  "checked": "page",
+  "plain": {
+   "en": "Oklahoma's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的俄克拉何马州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "If a product makes a pesticidal claim, it must be registered.",
+   "checked": "2026-10-28",
+   "read": "https://ag.ok.gov/wp-content/uploads/2026/04/Pesticide-Product-Registration-Form-041526.pdf"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "or-pesticide-reg",
+  "form": "Oregon pesticide product registration",
+  "title": {
+   "en": "Oregon registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "俄勒冈州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Oregon Department of Agriculture",
+   "zh": "俄勒冈州农业部"
+  },
+  "level": "state",
+  "where": "OR",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "pdf_mail",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Oregon Department of Agriculture after its EPA registration and before it is sold or distributed in Oregon, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于俄勒冈州销售或分销前向俄勒冈州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.oregon.gov/oda/pesticides/pesticide-product-information/Documents/Oregon-Pesticide-Registrations-Guidance.pdf",
+  "info": "https://www.oregon.gov/oda/pesticides/pesticide-product-information/Documents/Oregon-Pesticide-Registrations-Guidance.pdf",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Oregon's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的俄勒冈州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Registration is required by Oregon Revised Statutes",
+   "checked": "2026-10-28",
+   "read": "https://www.oregon.gov/oda/pesticides/pesticide-product-information/Documents/Oregon-Pesticide-Registrations-Guidance.pdf"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "pa-pesticide-reg",
+  "form": "Pennsylvania pesticide product registration",
+  "title": {
+   "en": "Pennsylvania registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "宾夕法尼亚州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Pennsylvania Department of Agriculture",
+   "zh": "宾夕法尼亚州农业部"
+  },
+  "level": "state",
+  "where": "PA",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Pennsylvania Department of Agriculture after its EPA registration and before it is sold or distributed in Pennsylvania, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于宾夕法尼亚州销售或分销前向宾夕法尼亚州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.pa.gov/agencies/pda/plants-land-water/plant-industry/pesticide-programs/pesticide-product-registration",
+  "info": "https://www.pa.gov/agencies/pda/plants-land-water/plant-industry/pesticide-programs/pesticide-product-registration",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Pennsylvania's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的宾夕法尼亚州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "All pesticide products used or distributed into Pennsylvania must be registered with the Pennsylvania Department of Agriculture (PDA).",
+   "checked": "2026-10-28",
+   "read": "https://www.pa.gov/agencies/pda/plants-land-water/plant-industry/pesticide-programs/pesticide-product-registration"
+  }
+ },
+ {
+  "id": "ri-pesticide-reg",
+  "form": "Rhode Island pesticide product registration",
+  "title": {
+   "en": "Rhode Island registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "罗得岛州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Rhode Island Department of Environmental Management, Division of Agriculture",
+   "zh": "罗得岛州环境管理部农业处"
+  },
+  "level": "state",
+  "where": "RI",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Rhode Island Department of Environmental Management after its EPA registration and before it is sold or distributed in Rhode Island, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于罗得岛州销售或分销前向罗得岛州环境管理部农业处登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://webserver.rilegislature.gov/Statutes/TITLE23/23-25/23-25-6.htm",
+  "info": "https://webserver.rilegislature.gov/Statutes/TITLE23/23-25/23-25-6.htm",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Rhode Island's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的罗得岛州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Every pesticide that is distributed in the state shall be registered with the director",
+   "checked": "2026-10-28",
+   "read": "https://webserver.rilegislature.gov/Statutes/TITLE23/23-25/23-25-6.htm"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "sc-pesticide-reg",
+  "form": "South Carolina pesticide product registration",
+  "title": {
+   "en": "South Carolina registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "南卡罗来纳州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Clemson University Department of Pesticide Regulation, South Carolina's pesticide regulator",
+   "zh": "克莱姆森大学农药监管部（南卡罗来纳州农药监管机构）"
+  },
+  "level": "state",
+  "where": "SC",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Clemson University Department of Pesticide Regulation after its EPA registration and before it is sold or distributed in South Carolina, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于南卡罗来纳州销售或分销前向克莱姆森大学农药监管部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://www.scstatehouse.gov/code/t46c013.php",
+  "info": "https://www.scstatehouse.gov/code/t46c013.php",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "South Carolina's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的南卡罗来纳州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "through a point outside this State must be registered subject to this chapter.",
+   "checked": "2026-10-28",
+   "read": "https://www.scstatehouse.gov/code/t46c013.php"
+  },
+  "renews": {
+   "en": "Every year, before September 1.",
+   "zh": "每年 9 月 1 日前。"
+  }
+ },
+ {
+  "id": "sd-pesticide-reg",
+  "form": "South Dakota pesticide product registration",
+  "title": {
+   "en": "South Dakota registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "南达科他州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "South Dakota Department of Agriculture and Natural Resources (DANR)",
+   "zh": "南达科他州农业与自然资源部（DANR）"
+  },
+  "level": "state",
+  "where": "SD",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the South Dakota Department of Agriculture and Natural Resources (DANR) after its EPA registration and before it is sold or distributed in South Dakota, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于南达科他州销售或分销前向南达科他州农业与自然资源部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://danr.sd.gov/Agriculture/Inspection/Pesticide/default.aspx",
+  "info": "https://danr.sd.gov/Agriculture/Inspection/Pesticide/default.aspx",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "South Dakota's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的南达科他州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "requires that all pesticide products sold in South Dakota be registered with the South Dakota Department of Agriculture and Natural Resources",
+   "checked": "2026-10-28",
+   "read": "https://danr.sd.gov/Agriculture/Inspection/Pesticide/default.aspx"
+  },
+  "renews": {
+   "en": "Every year, by June 30.",
+   "zh": "每年 6 月 30 日前。"
+  }
+ },
+ {
+  "id": "tx-pesticide-reg",
+  "form": "Texas pesticide product registration",
+  "title": {
+   "en": "Texas registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "德州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Texas Department of Agriculture (TDA)",
+   "zh": "德州农业部（TDA）"
+  },
+  "level": "state",
+  "where": "TX",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "portal",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Texas Department of Agriculture (TDA) after its EPA registration and before it is sold or distributed in Texas, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于德州销售或分销前向德州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://tap.texasagriculture.gov/",
+  "info": "https://texasagriculture.gov/Regulatory-Programs/Pesticides/Pesticide-FAQs",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Texas's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的德州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Rodenticide Act (FIFRA) must be registered with TDA to be sold in Texas.",
+   "checked": "2026-10-28",
+   "read": "https://texasagriculture.gov/Regulatory-Programs/Pesticides/Pesticide-FAQs"
+  }
+ },
+ {
+  "id": "ut-pesticide-reg",
+  "form": "Utah pesticide product registration",
+  "title": {
+   "en": "Utah registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "犹他州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Utah Department of Agriculture and Food",
+   "zh": "犹他州农业与食品部"
+  },
+  "level": "state",
+  "where": "UT",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Utah Department of Agriculture and Food after its EPA registration and before it is sold or distributed in Utah, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于犹他州销售或分销前向犹他州农业与食品部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://ag.utah.gov/pesticides/pesticide-product-registration/",
+  "info": "https://ag.utah.gov/pesticides/pesticide-product-registration/",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Utah's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的犹他州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Pesticide products that must be registered include EPA Registered pesticides, EPA 25(b) products and adjuvants.",
+   "checked": "2026-10-28",
+   "read": "https://ag.utah.gov/pesticides/pesticide-product-registration/"
+  }
+ },
+ {
+  "id": "vt-pesticide-reg",
+  "form": "Vermont pesticide product registration",
+  "title": {
+   "en": "Vermont registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "佛蒙特州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Vermont Agency of Agriculture, Food and Markets",
+   "zh": "佛蒙特州农业、食品与市场局"
+  },
+  "level": "state",
+  "where": "VT",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Vermont Agency of Agriculture after its EPA registration and before it is sold or distributed in Vermont, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于佛蒙特州销售或分销前向佛蒙特州农业、食品与市场局登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://agriculture.vermont.gov/public-health-agricultural-resource-management-division/pesticide-programs/product-registration",
+  "info": "https://agriculture.vermont.gov/public-health-agricultural-resource-management-division/pesticide-programs/product-registration",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Vermont's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的佛蒙特州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Vermont law defines pesticides as economic poisons, all of which require state registration prior to sale, use, and/or distribution in the State.",
+   "checked": "2026-10-28",
+   "read": "https://agriculture.vermont.gov/public-health-agricultural-resource-management-division/pesticide-programs/product-registration"
+  }
+ },
+ {
+  "id": "va-pesticide-reg",
+  "form": "Virginia pesticide product registration",
+  "title": {
+   "en": "Virginia registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "弗吉尼亚州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Virginia Department of Agriculture and Consumer Services (VDACS)",
+   "zh": "弗吉尼亚州农业与消费者服务部（VDACS）"
+  },
+  "level": "state",
+  "where": "VA",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "portal",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Virginia Department of Agriculture and Consumer Services (VDACS) after its EPA registration and before it is sold or distributed in Virginia, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于弗吉尼亚州销售或分销前向弗吉尼亚州农业与消费者服务部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://online.vdacs.virginia.gov/",
+  "info": "https://law.lis.virginia.gov/vacode/title3.2/chapter39/section3.2-3919/",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Virginia's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的弗吉尼亚州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "the registrant shall register each brand or grade of a pesticide with the Commissioner annually upon forms furnished by the Department",
+   "checked": "2026-10-28",
+   "read": "https://law.lis.virginia.gov/vacode/title3.2/chapter39/section3.2-3919/"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "wa-pesticide-reg",
+  "form": "Washington pesticide product registration",
+  "title": {
+   "en": "Washington registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "华盛顿州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Washington State Department of Agriculture (WSDA)",
+   "zh": "华盛顿州农业部（WSDA）"
+  },
+  "level": "state",
+  "where": "WA",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "online",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Washington State Department of Agriculture (WSDA) after its EPA registration and before it is sold or distributed in Washington, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于华盛顿州销售或分销前向华盛顿州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://agr.wa.gov/services/licenses-permits-and-certificates/summary-descriptions/pesticide-registration",
+  "info": "https://agr.wa.gov/services/licenses-permits-and-certificates/summary-descriptions/pesticide-registration",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Washington's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的华盛顿州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "Pesticides registered with the EPA under Section 3 of FIFRA must be registered with WSDA prior to distribution in Washington State.",
+   "checked": "2026-10-28",
+   "read": "https://agr.wa.gov/services/licenses-permits-and-certificates/summary-descriptions/pesticide-registration"
+  }
+ },
+ {
+  "id": "wv-pesticide-reg",
+  "form": "West Virginia pesticide product registration",
+  "title": {
+   "en": "West Virginia registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "西弗吉尼亚州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "West Virginia Department of Agriculture",
+   "zh": "西弗吉尼亚州农业部"
+  },
+  "level": "state",
+  "where": "WV",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "pdf_mail",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the West Virginia Department of Agriculture after its EPA registration and before it is sold or distributed in West Virginia, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于西弗吉尼亚州销售或分销前向西弗吉尼亚州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://agriculture.wv.gov/wp-content/uploads/Guidelines-for-Pesticide-Product-Registration.pdf",
+  "info": "https://agriculture.wv.gov/wp-content/uploads/Guidelines-for-Pesticide-Product-Registration.pdf",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "West Virginia's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的西弗吉尼亚州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "All pesticides must be registered with the West Virginia Department of Agriculture (WVDA) prior to their distribution, sale, transport, or use in West Virginia.",
+   "checked": "2026-10-28",
+   "read": "https://agriculture.wv.gov/wp-content/uploads/Guidelines-for-Pesticide-Product-Registration.pdf"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "wi-pesticide-reg",
+  "form": "Wisconsin pesticide product registration",
+  "title": {
+   "en": "Wisconsin registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "威斯康星州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Wisconsin Department of Agriculture, Trade and Consumer Protection (DATCP)",
+   "zh": "威斯康星州农业、贸易与消费者保护部（DATCP）"
+  },
+  "level": "state",
+  "where": "WI",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "pdf_mail",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Wisconsin Department of Agriculture after its EPA registration and before it is sold or distributed in Wisconsin, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于威斯康星州销售或分销前向威斯康星州农业、贸易与消费者保护部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://datcp.wi.gov/Pages/Licenses_Permits/PesticideManufacturingLabeling.aspx",
+  "info": "https://datcp.wi.gov/Pages/Licenses_Permits/PesticideManufacturingLabeling.aspx",
+  "fee": null,
+  "checked": "page",
+  "plain": {
+   "en": "Wisconsin's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的威斯康星州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "the products are considered pesticides and must be registered with DATCP",
+   "checked": "2026-10-28",
+   "read": "https://datcp.wi.gov/Pages/Licenses_Permits/PesticideManufacturingLabeling.aspx"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ },
+ {
+  "id": "wy-pesticide-reg",
+  "form": "Wyoming pesticide product registration",
+  "title": {
+   "en": "Wyoming registration for disinfecting and germ-killing products (state pesticide registration)",
+   "zh": "怀俄明州消毒杀菌类产品登记（州农药登记）"
+  },
+  "agency": {
+   "en": "Wyoming Department of Agriculture",
+   "zh": "怀俄明州农业部"
+  },
+  "level": "state",
+  "where": "WY",
+  "segments": [
+   "seller",
+   "retail"
+  ],
+  "needs": {
+   "antimicrobial": true
+  },
+  "method": "pdf_mail",
+  "order": 48,
+  "how": {
+   "en": "Each product that claims to kill or control germs is registered with the Wyoming Department of Agriculture after its EPA registration and before it is sold or distributed in Wyoming, with its EPA-stamped label, and kept current while it is in the channels of trade.",
+   "zh": "每个宣称能杀灭或控制细菌病毒的产品，须在取得 EPA 登记后、于怀俄明州销售或分销前向怀俄明州农业部登记，提交 EPA 盖章标签，并在产品流通期间保持有效。"
+  },
+  "url": "https://wyoleg.gov/statutes/compress/title35.pdf",
+  "info": "https://wyoleg.gov/statutes/compress/title35.pdf",
+  "fee": 140,
+  "checked": "page",
+  "plain": {
+   "en": "Wyoming's own registration for a disinfectant or sanitizer, on top of EPA's.",
+   "zh": "消毒剂或除菌剂在 EPA 登记之外还须办理的怀俄明州登记。"
+  },
+  "fields": [],
+  "proof": {
+   "quote": "shall be registered with the department of agriculture by its manufacturer or formulator",
+   "checked": "2026-10-28",
+   "read": "https://wyoleg.gov/statutes/compress/title35.pdf"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年一次。"
+  }
+ }
+]

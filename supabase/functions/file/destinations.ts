@@ -14,6 +14,7 @@ import { MIDWEST_DEST } from "./dest/midwest.ts";
 import { NEWENGLAND_DEST, NEWENGLAND_TEAM } from "./dest/newengland.ts";
 
 import { SOUTH_DEST } from "./dest/south.ts";
+import { PRODUCT_DEST } from "./dest/products.ts";
 
 export type Address = { name: string; line1: string; line2?: string; city: string; state: string; zip: string; country?: string };
 
@@ -1965,6 +1966,7 @@ export const DEST: Record<string, Dest> = {
   ...MIDWEST_DEST,
   ...NEWENGLAND_DEST,
   ...SOUTH_DEST,
+  ...PRODUCT_DEST,   // bedding, germ-killing products and canned food (dest/products.ts)
 };
 
 /**

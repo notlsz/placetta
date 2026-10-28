@@ -59,6 +59,10 @@ WEBFETCH_SEEN = {
     # revenue.support.tn.gov answers curl with 403; each sentence was read word for word with WebFetch
     "https://dor.ms.gov/business/sales-use-tax/register-taxes": "2026-10-28",
     "https://revenue.support.tn.gov/hc/en-us/articles/360058139252-SUT-10-Sales-and-Use-Tax-Account-Registering-for-an-Account": "2026-10-28",
+    # the products pass (src/forms/states/products.json): Alaska DEC answers curl with 403 and New Hampshire's
+    # agriculture.nh.gov drops the connection; each sentence was read word for word with WebFetch
+    "https://dec.alaska.gov/eh/pest/registration": "2026-10-28",
+    "https://agriculture.nh.gov/divisions/pesticide-control/registration.htm": "2026-10-28",
 }
 # pages that refused curl and WebFetch alike (a 403, a Cloudflare wall, a page built in script), read by a person in a
 # real browser and the sentence copied as it appears there, by day
