@@ -1,9 +1,14 @@
 # Build from the repo root: docker build -f worker/filer/Dockerfile .
 FROM mcr.microsoft.com/playwright:v1.56.0-noble
 WORKDIR /app
-COPY supabase/functions/file/destinations.ts supabase/functions/file/destinations.ts
-COPY supabase/functions/_shared/zdr.ts supabase/functions/_shared/zdr.ts
+# Every file outside worker/filer the worker's code imports (test/docker.test.ts checks this list against the imports)
+COPY src/renewal.ts src/renewal.ts
+COPY supabase/functions/_shared/agent_inbox.ts supabase/functions/_shared/agent_inbox.ts
+COPY supabase/functions/_shared/carry.ts supabase/functions/_shared/carry.ts
 COPY supabase/functions/_shared/injection.ts supabase/functions/_shared/injection.ts
+COPY supabase/functions/_shared/zdr.ts supabase/functions/_shared/zdr.ts
+COPY supabase/functions/file/accounts.ts supabase/functions/file/accounts.ts
+COPY supabase/functions/file/destinations.ts supabase/functions/file/destinations.ts
 # package-lock pins playwright-core to the same version as this image's browsers (1.56.0); keep them in step
 COPY worker/filer/package.json worker/filer/package-lock.json worker/filer/
 RUN cd worker/filer && npm ci --omit=dev

@@ -55,3 +55,25 @@ test("render.yaml: a web service with the health check, memory for its browser, 
   const docker = readFileSync(new URL("../Dockerfile", import.meta.url), "utf8");
   for (const p of [...y.matchAll(/^\s+- (supabase\/\S+)/gm)].map((m) => m[1])) assert.ok(docker.includes(p), `the image copies ${p}`);
 });
+
+test("the image carries every file outside worker/filer that the worker imports, and Render rebuilds when one changes", async () => {
+  const { readdirSync } = await import("node:fs");
+  const { dirname, resolve, relative } = await import("node:path");
+  const root = new URL("../../../", import.meta.url).pathname, seen = new Set<string>(), outside = new Set<string>();
+  const walk = (f: string) => {
+    if (seen.has(f)) return; seen.add(f);
+    for (const m of readFileSync(f, "utf8").matchAll(/(?:import|export)[^"']*?from\s+["']([^"']+)["']|import\(\s*["']([^"']+)["']\s*\)/g)) {
+      const p = m[1] ?? m[2];
+      if (!p.startsWith(".")) continue;
+      const t = resolve(dirname(f), p), r = relative(root, t);
+      if (!r.startsWith("worker/")) outside.add(r);
+      walk(t);
+    }
+  };
+  for (const f of readdirSync(`${root}worker/filer/src`)) if (f.endsWith(".ts")) walk(`${root}worker/filer/src/${f}`);
+  const docker = readFileSync(`${root}worker/filer/Dockerfile`, "utf8"), y = readFileSync(`${root}render.yaml`, "utf8");
+  for (const f of outside) {
+    assert.ok(docker.includes(`COPY ${f} ${f}`), `Dockerfile copies ${f} (the worker imports it; without it the container crashes on start)`);
+    assert.ok(y.includes(`- ${f}`), `render.yaml's buildFilter lists ${f}`);
+  }
+});

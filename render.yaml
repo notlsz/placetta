@@ -30,9 +30,13 @@ services:
     buildFilter:
       paths:
         - worker/filer/**
-        - supabase/functions/file/destinations.ts
+        - src/renewal.ts
+        - supabase/functions/_shared/agent_inbox.ts
+        - supabase/functions/_shared/carry.ts
         - supabase/functions/_shared/injection.ts
         - supabase/functions/_shared/zdr.ts
+        - supabase/functions/file/accounts.ts
+        - supabase/functions/file/destinations.ts
     envVars:
       # ---- the four values to paste when Render asks ----
       - key: SUPABASE_SERVICE_ROLE_KEY
