@@ -361,7 +361,7 @@ Deno.test("the other way follows the same rules as the first, without the site",
   assertEquals(fallback(signed, undefined, ENV, facts), "team");
   // what goes by paper gets the paper checks: the filled form must be in Documents
   assert(check(filing({ pdf_path: undefined }), dest({ portal: "x.gov" }), { docPaths: docs }, "mail").some((p) => p.kind === "file"));
-  assertEquals([...PORTAL_FAILED].sort(), ["left_portal", "limit", "no_live_view", "no_portal", "page_injection", "portal_blocked", "portal_failed", "review_differs", "teach_incomplete", "unverified_playbook", "worker_asleep"]);
+  assertEquals([...PORTAL_FAILED].sort(), ["account_authority", "account_identity", "account_no_mail", "account_unknown", "left_portal", "limit", "no_live_view", "no_portal", "page_injection", "portal_blocked", "portal_failed", "review_differs", "teach_incomplete", "unverified_playbook", "worker_asleep"]);
 });
 
 Deno.test("a filing Odelia can't send goes to the business with a packet: why, where, signature, fee, and I've sent it", () => {
@@ -451,13 +451,14 @@ Deno.test("every shipped destination: with all four channels on, Placetta sends 
         signed && d.signature === "wet" ? { agent_log: [{ en: "", zh: "", kind: "signed_copy", ref: copy }] } : {});
       const r = pick(f, d, ENV, all);
       seen[r]++;
-      if (r === "email") assert(!!d.email && d.signature !== "wet" && !feeBlocks(f, d), id);
+      // email carries Placetta's e-signed copy, or for an ink form the hand-signed copy to an agency that takes email
+      if (r === "email") assert(!!d.email && !feeBlocks(f, d) && (d.signature !== "wet" || !!signedCopy(f)), id);
       if (r === "fax") assert(!!d.fax && !feeBlocks(f, d) && (d.signature !== "wet" || canFaxSignedFor(f, d, ENV)), id);
       if (r === "mail") assert(!!d.mail && d.signature !== "wet" && !feeBlocks(f, d), id);
       if (r === "portal") assert(!!d.portal, id);
       if (r === "owner") assert(!!d.owner, id);
-      // a wet signature never goes by email or mail
-      if (d.signature === "wet") assert(!["email", "mail"].includes(r), `${id}: wet`);
+      // a wet signature never goes by mail (a mailed form is the original), and by email or fax only as the signed copy
+      if (d.signature === "wet") assert(r !== "mail" && (!["email", "fax"].includes(r) || !!signedCopy(f)), `${id}: wet`);
       if (r === "team") {
         const p = handoffPacket(f, d, whyYours(f, d, ENV, all));
         assert(waysToSend(d, f.payload).en.length > 0 || !!d.owner, `${id}: the packet says where it goes`);

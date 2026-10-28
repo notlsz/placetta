@@ -9,6 +9,7 @@ import { MCP_PREFIX, mcpApp, mcpReads } from "./mcp";
 import { agencyAddress, workspaceContacts } from "./initiative";
 import { autopilotBrief, autopilotCheck, grantState, markAutopilot, whyNotAutopilot, type AutopilotGrant, type AutopilotUse } from "./autopilot";
 import type { AgentAuth } from "./agentPacket";
+import type { AdoptedSignature } from "./esignDisclosure";
 
 /* ------------------------------------------------------------------ *
  * The owner's controls over Odelia, the way Claude Code has permission
@@ -54,6 +55,8 @@ export type Controls = {
   autopilotUsed?: AutopilotUse[];
   /** "Placetta as your agent" (src/agentPacket.ts): the packet an owner signed once, as the database recorded it. */
   agent?: AgentAuth;
+  /** Sign once (src/esignDisclosure.ts): the signature an owner adopted, with its consent record; never the image. */
+  signature?: AdoptedSignature;
 };
 
 export const AUTONOMY: { id: Autonomy; label: Bi; sub: Bi }[] = [

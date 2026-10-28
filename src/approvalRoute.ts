@@ -17,8 +17,11 @@ import STEPS from "./forms/filingSteps.json";
 /* notReady: the agency's site is known, but automatic filing isn't switched on for the form (its sign-off or on-behalf
    rule isn't confirmed, supabase/functions/file/destinations.ts notReady). The card says the person submits it, never
    that Odelia files it. A form with no entry, or an entry this file doesn't know, is "team": prepared, the business sends. */
-export type RouteKind = "portal" | "email" | "fax" | "mail" | "owner" | "faxSigned" | "ownerSigns" | "notReady" | "team";
-const KINDS = new Set<RouteKind>(["portal", "email", "fax", "mail", "owner", "faxSigned", "ownerSigns", "notReady", "team"]);
+/* faxSigned, emailSigned: the agency needs ink but takes a copy; the owner signs the page (Placetta mails it to them
+   with one tap) and uploads a photo, and Odelia faxes or emails it. kitReturn: the agency wants the original by mail;
+   Placetta mails the owner the page with a return envelope addressed to the agency, and the owner signs and posts it. */
+export type RouteKind = "portal" | "email" | "fax" | "mail" | "owner" | "faxSigned" | "emailSigned" | "kitReturn" | "ownerSigns" | "notReady" | "team";
+const KINDS = new Set<RouteKind>(["portal", "email", "fax", "mail", "owner", "faxSigned", "emailSigned", "kitReturn", "ownerSigns", "notReady", "team"]);
 const BY_ID = ROUTES as Record<string, string>;
 /** The steps that stay the person's on a route Placetta sends (scripts/filing-coverage.mjs): "pay", the agency's fee on
  *  its own site, which the portal worker always hands back. */
@@ -30,6 +33,8 @@ const WHO: Record<RouteKind, Bi> = {
   fax: B("Odelia faxes it", "Odelia 传真提交"),
   mail: B("Odelia mails it", "Odelia 邮寄提交"),
   faxSigned: B("You sign it, then Odelia faxes it", "您签字后，Odelia 传真提交"),
+  emailSigned: B("You sign it, then Odelia emails it", "您签字后，Odelia 通过邮件提交"),
+  kitReturn: B("Odelia mails you the page and a return envelope; you sign and post it", "Odelia 把表格和回邮信封寄给您，您签字后寄出"),
   owner: B("Odelia prepares it and you send it", "Odelia 准备好，由您寄出"),
   ownerSigns: B("Odelia prepares it, you sign and send it", "Odelia 准备好，由您签字寄出"),
   notReady: B("Odelia prepares it and you submit it on the agency's site", "Odelia 准备好，由您在机构网站上提交"),
@@ -68,7 +73,7 @@ export function planSplit(apps: Pick<Application, "official" | "status" | "absta
   for (const a of open) {
     if (a.abstain) { out.unsure++; continue; }
     const k = routeOf(a);
-    if (!a.specialist && (k === "portal" || k === "email" || k === "fax" || k === "mail" || k === "faxSigned")) out.sends++;
+    if (!a.specialist && (k === "portal" || k === "email" || k === "fax" || k === "mail" || k === "faxSigned" || k === "emailSigned")) out.sends++;
     else out.yours++;
   }
   return out;

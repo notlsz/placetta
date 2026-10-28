@@ -9,7 +9,7 @@
     "start": "node --experimental-strip-types src/main.ts",
     "check": "node --experimental-strip-types src/selfcheck.ts",
     "probe": "node --experimental-strip-types src/probe.ts --all",
-    "test": "node --experimental-strip-types --test test/cafllc.test.ts test/card.test.ts test/docker.test.ts test/filer.test.ts test/gbfood.test.ts test/guards.test.ts test/heal.test.ts test/live.test.ts test/playbooks.test.ts test/providers.test.ts test/replay.test.ts test/reroute.test.ts test/sandbox.test.ts test/staff.test.ts test/store.test.ts test/teach.test.ts test/wake.test.ts",
+    "test": "node --experimental-strip-types --test test/account.test.ts test/cafllc.test.ts test/card.test.ts test/docker.test.ts test/filer.test.ts test/gbfood.test.ts test/guards.test.ts test/heal.test.ts test/live.test.ts test/playbooks.test.ts test/providers.test.ts test/replay.test.ts test/reroute.test.ts test/sandbox.test.ts test/staff.test.ts test/status.test.ts test/store.test.ts test/teach.test.ts test/wake.test.ts",
     "typecheck": "node ../../node_modules/typescript/bin/tsc -p tsconfig.json"
   },
   "dependencies": {

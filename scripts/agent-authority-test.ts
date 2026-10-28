@@ -92,7 +92,7 @@ export async function agentAuthorityTests(ok: Ok, eq: Eq) {
   console.log(`   before Autopilot ${before.before.length}, Autopilot alone ${before.after.length}; with the agent packet: ${on.signup.length} at signup (one session), ${on.during.length} during (cards on) or ${offCards.during.length} during and ${offCards.bills.length} bills to accounts payable (cards off)`);
   for (const t of on.signup) console.log(`     signup: ${t.what.en}`);
   for (const t of on.during) console.log(`     during: ${t.what.en}`);
-  eq([before.before.length, before.after.length], [23, 16], "the baseline: 23 before Autopilot, 16 with it");
+  eq([before.before.length, before.after.length], [21, 14], "the baseline: 21 before Autopilot, 14 with it (the county's two ink forms now go by email once signed)");
   eq(on.signup.length, 4, "4 at signup, all in one session (2 e-signatures, 2 by hand)");
   eq(on.during.length, 3, "3 during the process with single-use cards on: the DE 1 (law), the plan check signature and the business tax registration (agency, until they confirm an agent may)");
   eq([offCards.during.length, offCards.bills.length], [4, 2], "with cards off: the building permit's fee too, and 2 county bills forwarded to accounts payable");

@@ -19,7 +19,9 @@ const SHARED_SIGN_IN = new Set(["www.tax.service.gov.uk"]);
 // Portals with no step-by-step written guide to write a playbook from, whose forms are filed in teach mode first ("Show
 // Odelia how", src/teach.ts) and then from the steps the team reviewed (run.ts, store.taught). New Jersey's Business
 // Formation and Registration services on njportal.com (commit 550ac4e19, 2026-10-27). Remove a host once it has a playbook.
-const TEACH_FIRST = new Set(["www.njportal.com"]);
+// California ABC's online application (services.abc.ca.gov, 2026-10-28): the original license and the four pages its
+// instructions have uploaded inside it, filed once as the business's consultant; no recorded steps yet.
+const TEACH_FIRST = new Set(["www.njportal.com", "services.abc.ca.gov"]);
 
 test("every portal three or more forms use has a playbook, and the state formation portals with written guides too", () => {
   assert.equal(PLAYBOOKS.length, 15);
@@ -147,7 +149,9 @@ test("the model reads the steps with the warning that they aren't verified yet",
 });
 
 test("the worker gets each destination's tenant path, other hosts and start page", () => {
-  assert.deepEqual(routeOf("dal-co"), { tenant: "/dallastx", alsoOn: undefined, start: "https://aca-prod.accela.com/dallastx" });
+  assert.deepEqual(routeOf("dal-co"), { tenant: "/dallastx", alsoOn: undefined, start: "https://aca-prod.accela.com/dallastx", noLogin: undefined, account: "business" });
+  assert.equal(routeOf("hc-business-tax")?.noLogin, true);
+  assert.equal(routeOf("irs-8821")?.account, "individual", "IRS e-Services is the owner's own ID.me sign-in");
   assert.deepEqual(routeOf("hc-business-tax")?.alsoOn, ["hillsborough.county-taxes.com"]);
   assert.equal(routeOf("irs-ss4"), null, "no portal, no route");
 });

@@ -369,5 +369,17 @@
   "parent_ein": "^none$",
   "foreign_country": "^none$",
   "late_explanation": "^none$"
+ },
+ "sign": {
+  "page": 2,
+  "x": 40,
+  "y": 410,
+  "w": 205,
+  "h": 20,
+  "date": {
+   "x": 258,
+   "y": 416,
+   "size": 9
+  }
  }
 }

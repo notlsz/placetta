@@ -141,6 +141,28 @@ and works the team queue's "Send as the business's agent" tasks (the dispatcher 
 SJPermits.org's simple permits (the sign permit among them) take only a licensed contractor or the property owner as
 applicant, so the business's sign contractor applies there; Odelia sends them the packet.
 
+### The business's own accounts (Odelia gets the login)
+
+The table above is Placetta's own accounts. A business's own account on an agency site, where the business has no
+saved login, Odelia makes for it (`worker/filer/src/account.ts`): its email is the business's inbox at Placetta
+(`odelia+<token>@in.placetta.com`), the password is new and goes straight into the vault, the agency's verification
+email is read from that inbox, and the login is saved for every later filing and status check. Which sites allow it is
+`supabase/functions/file/accounts.ts` (business, an owner's own ID.me or Login.gov identity, or not read yet: the team
+gets a task). `docs/FILING_COVERAGE.md`, Portal logins, has the counts. To switch it on:
+
+1. Run `20261105090000_agent_accounts.sql`, and deploy `file`, `odelia-mail`, `odelia-sms` and the worker.
+2. SES inbound (Email with Amazon SES, step 5): make the rule's recipient condition the domain `in.placetta.com`, not
+   only `odelia@in.placetta.com`, so the plus addresses reach `odelia-mail`.
+3. COUNSEL REVIEW REQUIRED: the agent section of the Filing Authorization must say Placetta may make and hold the
+   business's accounts on agency sites and accept their terms of use for it. Then, in Supabase SQL:
+   `update public.app_settings set agent_accounts_on = true;` Until then nothing changes: the owner is asked as before.
+4. Optional, in Render (placetta-filer): `ODELIA_NUMBER` (the owner forwards a texted code there in one tap) and
+   `FILER_ACCOUNT_MAIL_MINUTES` (default 10).
+
+A terms box is ticked only while the agent packet is live and account making is on; each acceptance (the page, its
+heading, the time) is in `portal_accounts.terms`, `agent_acts` and the audit trail. A CAPTCHA on a sign-up goes to the
+team as always. A code sent to the owner's phone is their one tap.
+
 ### Questions for the agencies (each yes removes a touch)
 
 - Santa Clara County DEH (dehplancheck@deh.sccgov.org): may an authorized agent sign the plan check application's
@@ -151,6 +173,36 @@ applicant, so the business's sign contractor applies there; Odelia sends them th
 
 Record each answer in `src/forms/agentAuthority.ts` (the row's `agentOk`, `owner` and `confirm`), with the page or the
 email as its citation.
+
+## Carry to approval (after submission, nobody touches it)
+
+Migration `20261105090300_carry_to_approval.sql`; code in `supabase/functions/_shared/carry.ts` (the decisions),
+`_shared/carry_run.ts` (the moves), `monitor/carry.ts`, `odelia-mail/agency.ts` and `worker/filer/src/status.ts`.
+Deploy `monitor`, `odelia-mail` and the portal worker. What it does:
+
+- Portal status checks: a submitted portal filing with a saved login is queued each weekday inside the portal's hours
+  (7:00 to 19:00 in the store's time zone); the worker signs in with the saved login, the model reads the status page,
+  and the confirmation number it read must be the filing's receipt number and on the page, or nothing is decided. An
+  issued license's PDF is downloaded into the filing's receipts. A CAPTCHA or code ends the check; nobody solves it.
+- Agency mail to `ODELIA_EMAIL`, or to a workspace's own address (`odelia+w<first 12 hex of its id>@...`), from a
+  verified sender: matched by thread, confirmation number (from the agency's domain or any .gov) or the agency's domain
+  when only one filing is open with it; classified; acted on. Unsure ones go to the team to confirm.
+- A deficiency or request for information the workspace answers goes back by email as the business's agent, only under
+  a live agent packet covering that form and agency (checked when written and again when it leaves), after
+  `SEND_HOLD_MINUTES` with Undo on the filing's timeline. Otherwise a draft for one tap, or one plain question.
+- Past the agency's published time with nothing moving for a week: an email to the agency's inbox as agent, then five
+  days later an agency call (Odelia says she's an AI first; needs the voice setup above), at most every 14 days each.
+- A denial: the appeal is drafted to the owner's approval card with its last day; the owner's tap is always required.
+- Inspections: an email booking or a new time (`inspection_booking reschedule`) is sent as agent; a phone one goes to the
+  team; a confirmation in the agency's mail lands on Deadlines (and the calendar feed); photos the owner sends are checked
+  against the inspector's checklist. Someone from the business still has to be there in person.
+- Approved: "Your license is approved" on the filing, the PDF one tap away, and the renewal on Deadlines from the
+  agency's own expiry date (or its published cycle).
+
+Secrets (all optional; defaults shown): `CARRY=off` turns it all off; `CARRY_CHASES_PER_DAY` (20);
+`PORTAL_STATUS_EVERY_HOURS` (24); `PORTAL_STATUS_PER_HOST_HOUR` (6). On the worker (Render): `FILER_STATUS_CHECKS=0`
+turns its status checks off. The per-minute send (pg_cron `placetta-agency-outbox`) calls `monitor` with
+`{"action":"outbox"}`.
 
 ## Stripe Issuing (zero-touch agency fees, off until approved)
 
@@ -314,6 +366,10 @@ These are separate from the Gmail, Outlook and Drive integrations below, which u
 | `DEV_ORIGINS` | Optional, development only. Origins such as `http://localhost:5173` that Stripe checkout may return to. Without it, localhost is refused. |
 | `FILER_DAILY_CAP` | Optional. Faxes and letters Placetta self-files for one workspace in 24 hours before the team takes over. Default 10. |
 | `SEND_HOLD_MINUTES` | Optional. The undo window: after an approval, an email, fax, letter or portal submission waits this many minutes, with Undo, before it leaves (a pg_cron job sends it when the time is up). Default 10; 0 turns it off. |
+| `LOB_API_KEY`, `LOB_FROM` | Lob (lob.com), for certified mail to agencies and the signing kits Placetta mails to owners. `LOB_FROM` is Placetta's return address as Lob's address JSON (`{"name":"Placetta","address_line1":"...","address_city":"...","address_state":"CA","address_zip":"...","address_country":"US"}`). Use a `test_` key until the first proofs look right. |
+| `LOB_WEBHOOK_SECRET` | The secret of the Lob webhook at `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/file?provider=lob` (Lob dashboard, Webhooks; subscribe to every `letter.` event, including `letter.certified.*` and `letter.return_envelope.*`). Without it every Lob event is refused, and the monitor's sweep still refreshes letters every run. Return envelope tracking needs the return envelope feature on the Lob account; without it the owner taps "I've sent it". |
+| `LOB_RETURN_ENVELOPE` | Optional. The id of a custom Lob return envelope for signing kits, such as a Business Reply envelope (Lob Enterprise and a USPS BRM permit), which is the only way the envelope's postage is prepaid. Without it, kits use Lob's standard #9 return envelope: the agency's address shows in its window and the owner adds a stamp. Check the first kit's proof: the agency address sits in the lower third of the last page. |
+| `TELNYX_FAX_CONNECTION_ID`, `TELNYX_FAX_FROM` | The Telnyx fax application and Placetta's fax number (E.164). Point the fax application's webhook at `https://esquxzcfsylffuijvzec.supabase.co/functions/v1/file?provider=telnyx`: every fax status goes on the filing's timeline. |
 | `FORMS_PER_HOUR` | Optional. Official forms one person can fetch through the `forms` function in an hour. Default 60. |
 | `ODELIA_SMS_COUNTRIES` | Optional. Country codes Odelia texts verification codes to, comma separated. Default `1,86` (US, Canada, mainland China mobiles). To add one, also add it to `app_settings.phone_countries`. |
 | `OAUTH_STATE_SECRET` | Any long random string. |
@@ -523,7 +579,7 @@ Approval usually takes a day.
 If you name a configuration set in `AWS_SES_CONFIGURATION_SET`, add `"arn:aws:ses:us-east-1:ACCOUNT_ID:configuration-set/NAME"` to `Resource` (make it a list). If you take the S3 option in step 5, add a second statement: `{"Effect": "Allow", "Action": "s3:GetObject", "Resource": "arn:aws:s3:::BUCKET/*"}`. Then Security credentials, **Create access key**, "Application running outside AWS", and copy the key ID and secret.
 
 **5. Odelia's inbox on in.placetta.com.** At IONOS add an MX record: host name `in`, points to `inbound-smtp.us-east-1.amazonaws.com`, priority 10. (Verifying `placetta.com` covers its subdomains; if the rule below says `in.placetta.com` isn't verified, create a domain identity for it too.) Then SES, **Email receiving**, **Create rule set** `placetta`, and **Set as active**. In it, **Create rule** `odelia`:
-- Recipient condition: `odelia@in.placetta.com`. Leave spam and virus scanning on.
+- Recipient condition: `odelia@in.placetta.com`, and the domain `in.placetta.com` so each business's own inbox (`odelia+<token>@in.placetta.com`, the email on accounts Odelia makes for it) arrives too. Leave spam and virus scanning on.
 - Action: **Publish to Amazon SNS topic**, **Create SNS topic** named `placetta-mail` (creating it here gives SES permission to publish), **Encoding: Base64**.
 
 That carries each message whole up to 150 KB; SES bounces larger mail back to the sender. If owners will email large scans, use instead the action **Deliver to S3 bucket** (Create S3 bucket, for example `placetta-inbound-ACCOUNT_ID`, object key prefix `inbound/`, SNS topic `placetta-mail`) and set `AWS_SES_S3_BUCKET` to the bucket's name; `odelia-mail` then reads each message from that bucket and from no other.

@@ -2,7 +2,9 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { loginMatches } from "../../../supabase/functions/file/destinations.ts";
 import type { CardDetails, CardOutcome, FeeDecision } from "./card.ts";
+import { type InboxMail, type MailWait, pickVerification, type Verification } from "../../../supabase/functions/_shared/agent_inbox.ts";
 import type { Draft } from "./teach.ts";
+import type { StatusJob, StatusResult, StatusStore } from "./status.ts";
 import type { Filing, LogEntry, Login, Skill } from "./types.ts";
 
 /** A portal's taught playbook (teach.ts), shared by every workspace: structure only. "draft" runs only in assist mode
@@ -56,14 +58,39 @@ export interface Store {
   feeAuthority?(f: Filing, pageCents: number | null): Promise<FeeDecision>;
   card?(f: Filing, pageCents: number | null): Promise<CardDetails | null>;
   cardDone?(f: Filing, outcome: CardOutcome, o?: { receipt?: string | null; cents?: number | null; confirmation?: string | null }): Promise<void>;
+  /** "Odelia gets the login" (20261105090000_agent_accounts.sql, account.ts): start making the business's account on a
+   *  site (refused with "account_authority" unless the business's agent authority covers it), save its login in the
+   *  vault (pending until verified), accept a terms page (refused with "terms_not_covered"), say where it stands, and
+   *  mark the login saved once the agency verified it. The password goes in once, to saveLogin, and nowhere else. */
+  accountBegin?(f: Filing, host: string, tenant: string | undefined, agency: string): Promise<AccountSetup>;
+  saveLogin?(f: Filing, setup: string, url: string, username: string, password: string): Promise<string>;
+  acceptTerms?(f: Filing, setup: string, url: string, heading: string, label: string): Promise<void>;
+  accountState?(f: Filing, setup: string, state: "creating" | "awaiting_email" | "awaiting_code" | "handed_back" | "failed", note?: string): Promise<void>;
+  accountSaved?(f: Filing, setup: string): Promise<void>;
+  /** The business's inbox at Placetta: wait (up to timeoutMs) for the agency's message, by its sender or a link to its
+   *  site, after w.since; the verification it gives (a link on the portal's hosts, or a code) is marked used. */
+  waitForMail?(f: Filing, w: MailWait, o: { timeoutMs: number; pollMs: number; stop?: () => boolean }): Promise<Verification | null>;
 }
 export type HumanCheck = { id: string; escalate_at: string };
+export type AccountSetup = { id: string; email: string; login: string | null; state: string };
+
+/** Polls an inbox reader until a message answers the wait (pickVerification), the time is up, or stop() says so. */
+export async function waitForMail(read: (since: string) => Promise<InboxMail[]>, used: (id: InboxMail["id"]) => Promise<void>, w: MailWait,
+  o: { timeoutMs: number; pollMs: number; stop?: () => boolean }): Promise<Verification | null> {
+  const end = Date.now() + o.timeoutMs;
+  for (;;) {
+    const hit = pickVerification(await read(w.since).catch(() => []), w);
+    if (hit) { await used(hit.mail.id).catch(() => undefined); return hit; }
+    if (Date.now() >= end || o.stop?.()) return null;
+    await new Promise((r) => setTimeout(r, Math.max(10, Math.min(o.pollMs, end - Date.now()))));
+  }
+}
 
 /** The worker's database access, through the functions in 20261022120000_filer_least_privilege.sql only: no table is
  *  read or written directly, so the same code runs on the filer's own role key (FILER_DB_KEY, which has no table grants
  *  and bypasses no row-level security) or, until that key is made, the service role. Files go through Storage, which
  *  checks the role's storage policies. */
-export class SupabaseStore implements Store {
+export class SupabaseStore implements Store, StatusStore {
   private base: SupabaseClient;
   /** The client for the run in progress: the same key, plus the run's token header for its one filing. */
   private runDb: SupabaseClient | null = null;
@@ -195,6 +222,65 @@ export class SupabaseStore implements Store {
   }
   async humanCheckClose(id: string, state: "solved" | "to_owner" | "ended") {
     return (await this.call<boolean>("filer_human_check_close", { p_check: id, p_state: state }, "human check close")) === true;
+  }
+  // ---------------------------------------------------------------- portal status checks (status.ts)
+  async claimStatus() {
+    const { data, error } = await this.base.rpc("filer_claim_status_job", {});
+    if (error) { if (error.code === "PGRST202") return null; throw new Error(`status claim failed: ${error.message}`); }   // before the migration: none
+    return ((data as StatusJob[] | null) ?? [])[0] ?? null;
+  }
+  async beginStatus(j: StatusJob) {
+    this.runDb = null;
+    const { data, error } = await this.base.rpc("filer_status_begin", { p_job: j.job_id });
+    if (error || typeof data !== "string" || data.length < 32) throw new Error(`status run token failed: ${error?.message ?? "no token"}`);
+    this.runDb = this.make({ "x-filer-run": data });
+  }
+  async statusLogin(j: StatusJob, host: string, tenant?: string) {
+    const rows = await this.call<{ id: string; url: string | null }[] | null>("filer_status_logins", { p_job: j.job_id }, "status logins lookup");
+    const row = (rows ?? []).find((r) => loginMatches(r.url as string, { portal: host, tenant }));
+    if (!row) return null;
+    // the audit entry first, in the same call that reads the password
+    const { data, error } = await this.db.rpc("filer_status_open_login", { p_job: j.job_id, p_login: row.id });
+    const got = (data as { username: string; password: string }[] | null)?.[0];
+    if (error || !got || typeof got.password !== "string") throw new Error("saved login unreadable");
+    return { username: String(got.username), password: got.password, host };
+  }
+  async saveLicense(j: StatusJob, name: string, bytes: Uint8Array) {
+    return await this.saveDoc({ id: j.filing_id, workspace_id: j.workspace_id } as Filing, name, bytes, "application/pdf");
+  }
+  async reportStatus(j: StatusJob, r: StatusResult | null, error: string | null) {
+    await this.call("filer_status_report", { p_job: j.job_id, p_result: r, p_error: error }, "status report");
+  }
+  async endStatus(j: StatusJob) {
+    const run = this.runDb;
+    this.runDb = null;
+    if (run) await run.rpc("filer_status_end", { p_job: j.job_id });
+  }
+  async accountBegin(f: Filing, host: string, tenant: string | undefined, agency: string) {
+    const rows = await this.call<{ setup_id: string; email: string; login_id: string | null; state: string }[] | null>("filer_account_begin",
+      { p_filing: f.id, p_host: host, p_tenant: tenant ?? null, p_agency: agency }, "account begin");
+    const r = (rows ?? [])[0];
+    if (!r) throw new Error("account begin failed: no row");
+    return { id: r.setup_id, email: r.email, login: r.login_id, state: r.state };
+  }
+  async saveLogin(f: Filing, setup: string, url: string, username: string, password: string) {
+    // never through call(): its error text would carry the database's message, and nothing here may echo the arguments
+    const { data, error } = await this.db.rpc("filer_save_login", { p_filing: f.id, p_setup: setup, p_url: url, p_username: username, p_password: password });
+    if (error || typeof data !== "string") throw new Error(`login save failed${error?.code ? ` (${error.code})` : ""}`);
+    return data;
+  }
+  async acceptTerms(f: Filing, setup: string, url: string, heading: string, label: string) {
+    await this.call("filer_account_terms", { p_filing: f.id, p_setup: setup, p_url: url, p_heading: heading.slice(0, 200), p_label: label.slice(0, 300) }, "terms");
+  }
+  async accountState(f: Filing, setup: string, state: string, note?: string) {
+    await this.call("filer_account_state", { p_filing: f.id, p_setup: setup, p_state: state, p_note: note?.slice(0, 500) ?? null }, "account state");
+  }
+  async accountSaved(f: Filing, setup: string) {
+    await this.call("filer_account_saved", { p_filing: f.id, p_setup: setup }, "account saved");
+  }
+  async waitForMail(f: Filing, w: MailWait, o: { timeoutMs: number; pollMs: number; stop?: () => boolean }) {
+    const read = async (since: string) => (await this.call<InboxMail[] | null>("filer_inbox_mail", { p_filing: f.id, p_since: since }, "inbox")) ?? [];
+    return await waitForMail(read, async (id) => { await this.call("filer_inbox_used", { p_filing: f.id, p_id: id }, "inbox used"); }, w, o);
   }
   async selfFiled(official: string) {
     return (await this.call<number | null>("filer_self_filed", { p_official: official }, "count")) ?? 0;

@@ -44,6 +44,7 @@ import { stageAlert, stageUpdates, type StageFiling, type StageUpdate } from "./
 import { inspectionWork, PREP } from "./inspections.ts";
 import { runStatusChecks, type StatusFiling, type StatusIO, type StatusRun, type WsState } from "./status_checks.ts";
 import { initiative, movePrompt, specialistWake, type ChaseRow, type InitIO } from "./initiative.ts";
+import { carryDaily, carryOutbox, type Start } from "./carry.ts";
 import { mailOutReady, sendMail as sendOdeliaMail, mailBody } from "../_shared/mail.ts";
 import { sendEmail, systemMailReady } from "../_shared/email.ts";
 import { suppressedIn } from "../_shared/suppression.ts";
@@ -623,6 +624,13 @@ Deno.serve(async (req) => {
     try { return json(200, await stageAlert(stageDb(), stageOut(req.headers.get("x-monitor-key") ?? ""), { app: APP, filingId: id })); }
     catch (e) { console.error("stage alert", id, String(e).slice(0, 160)); return json(500, { error: "stage alert failed" }); }
   }
+  // What Odelia wrote an agency as the business's agent, once its undo window is over (pg_cron, every minute while one
+  // is due; migration 20261105090300_carry_to_approval).
+  if (asked.action === "outbox") {
+    if (Deno.env.get("CARRY") === "off") return json(200, { ok: true, off: true });
+    try { return json(200, await carryOutbox(admin, (k) => Deno.env.get(k))); }
+    catch (e) { console.error("agency outbox", String(e).slice(0, 160)); return json(500, { error: "outbox failed" }); }
+  }
 
   const started = new Date(), today = day(started), now = started.getTime();
   const { data: settings } = await admin.from("app_settings").select("monitor_last_run").maybeSingle();
@@ -651,7 +659,7 @@ Deno.serve(async (req) => {
     if (!rows || rows.length < 500) break;
   }
   const { data: filings, error: fe } = await admin.from("filings")
-    .select("id, workspace_id, app_id, title, status, agent_state, updated_at, approved_at, payment_url, customer_paid_at, fee_paid, confirmation_number, assigned_to, note, submitted_at, receipt_path, decided_at, channel")
+    .select("id, workspace_id, app_id, title, status, agent_state, updated_at, approved_at, payment_url, customer_paid_at, fee_paid, confirmation_number, assigned_to, note, submitted_at, receipt_path, decided_at, channel, agent_auth")
     .neq("status", "canceled");
   if (fe) return json(500, { error: "filings: " + fe.code });
   for (const f of (filings ?? []) as Filing[]) byWs.get(f.workspace_id)?.push(...filingUpdates(f, since, now));
@@ -994,6 +1002,7 @@ Deno.serve(async (req) => {
   // status inquiry), filings the agency sent back or asked about (she drafts the answer), and jobs she stopped partway
   // (she picks them back up).
   let jobs = 0, resumed = 0, answered = 0, status: StatusRun | null = null;
+  let startJob: Start = async () => null;   // the carry step starts runs only where Odelia's jobs can
   if (canConverse((k) => Deno.env.get(k)) && Deno.env.get("ODELIA_JOBS") !== "off") {
     let left = Math.max(0, Number(Deno.env.get("ODELIA_JOBS_PER_DAY") ?? "60") || 0);
     const plans = new Map<string, string>();
@@ -1009,6 +1018,7 @@ Deno.serve(async (req) => {
       left--; jobs++;
       return ((await res.json().catch(() => ({}))) as { id?: string }).id ?? null;
     };
+    startJob = start;
     // routines: each one claims its day first, so two runs of the monitor never start it twice
     for (const [ws, st] of states) {
       for (const r of (((st ?? {}) as { routines?: Routine[] }).routines ?? [])) {
@@ -1116,6 +1126,15 @@ Deno.serve(async (req) => {
     } catch (e) { console.error("status checks", String(e).slice(0, 160)); }
   }
 
+  // Carry to approval (carry.ts): portal sign-in checks queued and what they read acted on, the stale chase (an email
+  // to the agency as the business's agent, then a disclosed call), inspections booked and moved by email, and the photo
+  // self-audit. Runs without a model too; only the runs it starts need one.
+  let carried: Awaited<ReturnType<typeof carryDaily>> | null = null;
+  try {
+    carried = await carryDaily(admin, { env: (k) => Deno.env.get(k), states: states as Map<string, unknown>, start: startJob, today, now: started,
+      monitorKey: req.headers.get("x-monitor-key") ?? "", selfUrl: SUPABASE_URL });
+  } catch (e) { console.error("carry", String(e).slice(0, 160)); }
+
   // Self-filing: requeue stuck runs, wake a sleeping portal worker for queued filings (or send them another way when it
   // doesn't wake), refresh faxes and letters on their way, flag destinations older than 90 days.
   const sweep = await fetch(`${SUPABASE_URL}/functions/v1/file`, {
@@ -1136,5 +1155,5 @@ Deno.serve(async (req) => {
     { app: APP, today, limit: 500 }).catch((e) => { console.error("mention notices", String(e).slice(0, 160)); return null; });
 
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed, worker_wake: sweep.wake ?? null, fell_back: sweep.fell_back ?? 0 } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(MAIL_ON && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, chases_sent: initiativeSent, agency_asks: answered, status_checks: status, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled, billing_ok: billingOk });
+  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed, worker_wake: sweep.wake ?? null, fell_back: sweep.fell_back ?? 0 } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(MAIL_ON && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, chases_sent: initiativeSent, agency_asks: answered, status_checks: status, carry: carried, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled, billing_ok: billingOk });
 });

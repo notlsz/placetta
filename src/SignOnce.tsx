@@ -6,6 +6,9 @@ import { grantOf } from "./autopilot";
 import { UPDATED } from "./legal";
 import { nowIso } from "./time";
 import { SetSheet } from "./SetUI";
+import { DrawPad } from "./AutopilotSettings";
+import { Guard } from "./SafeBoundary";
+import { CONSENTS, DISCLOSURE, DISCLOSURE_VERSION, type AdoptedSignature } from "./esignDisclosure";
 import "./controls.css";
 
 /* "Sign once, 2 minutes" (src/agentPacket.ts): everything Placetta needs the owner's own hand for, in one sitting, so
@@ -29,10 +32,17 @@ export function SignOnce({ onClose }: { onClose: () => void }) {
   const [photos, setPhotos] = useState<Record<string, { name: string; path?: string }>>({});
   const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
+  // Sign once: the signature adopted here goes on every agency form that takes an electronic signature, each time the
+  // owner approves one (or Autopilot covers it), so no filing asks them to sign again
+  const [kind, setKind] = useState<"typed" | "drawn">("drawn");
+  const [png, setPng] = useState<string | null>(null);
+  const [consent, setConsent] = useState<Record<string, boolean>>({});
+  const [opened, setOpened] = useState(false);
   const esign = p.items.filter(i => i.sig === "esign" && !(p.blocked && i.namesAgent));
   const hand = p.items.filter(i => i.sig === "hand" && !(p.blocked && i.namesAgent));
   const apOk = !ap.trim() || EMAIL.test(ap.trim());
-  const ready = agree && name.trim().length >= 2 && apOk && hand.every(i => photos[i.id]) && esign.length > 0 && !busy;
+  const sigOk = (kind === "typed" || !!png) && CONSENTS.every(c => consent[c.id]);
+  const ready = agree && sigOk && name.trim().length >= 2 && apOk && hand.every(i => photos[i.id]) && esign.length > 0 && !busy;
 
   const addPhoto = async (i: PacketItem, f: File | undefined) => {
     if (!f) return;
@@ -54,6 +64,12 @@ export function SignOnce({ onClose }: { onClose: () => void }) {
             items: items.map(i => ({ id: i.id, ...(i.form ? { form: i.form } : {}), ...(i.agency ? { agency: i.agency } : {}), sig: i.sig, at: now, ...(i.months ? { expires: new Date(Date.parse(now) + 365 * 864e5).toISOString() } : {}), ...(photos[i.id] ? { doc: photos[i.id].name } : {}) })),
             agent: agent?.name ?? "Placetta", ...(ap.trim() ? { apEmail: ap.trim().toLowerCase() } : {}) };
       editWs(putAgent(a));
+      // the signature itself, with its consent record (20261105090200_sign_once_paper.sql)
+      const s: AdoptedSignature = cloud
+        ? await api.signatureAdopt(cloud.wsId, { name: name.trim(), title: title.trim() || undefined, kind, drawn: png ?? undefined, version: DISCLOSURE_VERSION,
+            records: !!consent.records, sign: !!consent.sign, apply: !!consent.apply, demonstrated: opened })
+        : { id: "sg-" + Date.now().toString(36), by: name.trim(), ...(title.trim() ? { title: title.trim() } : {}), kind, at: now, version: DISCLOSURE_VERSION, demonstrated: opened };
+      editWs(w => ({ ...w, controls: { ...(w.controls ?? {}), signature: s } }));
       say(zh ? "已签好。之后这些申报不会再请您签字，法律或机构要求您本人办理的除外（见下方）。" : "Signed. You won't be asked to sign these filings again, except what the law or the agency keeps yours (listed below).");
       onClose();
     } catch (e) { const er = e as api.ApiError; say((zh && er.message_zh) || er.message || (zh ? "未能签署，请重试。" : "It didn't go through. Try again.")); }
@@ -96,6 +112,18 @@ export function SignOnce({ onClose }: { onClose: () => void }) {
         {!apOk && <p className="rf-note">{zh ? "请检查邮箱地址。" : "Check the email address."}</p>}
         <label className="sst-field"><span>{zh ? "您的全名（作为签名）" : "Your full name (your signature)"}</span><input value={name} onChange={e => setName(e.target.value.slice(0, 120))} autoComplete="name" /></label>
         <label className="sst-field"><span>{zh ? "职务（可选）" : "Title (optional)"}</span><input value={title} onChange={e => setTitle(e.target.value.slice(0, 120))} /></label>
+        <h3>{zh ? "您的签名，只需一次" : "Your signature, once"}</h3>
+        <p className="sg-note">{zh ? "快哉只在您批准申报（或自动驾驶授权涵盖）、且机构接受电子签名的表格上使用它。机构要求亲笔签名的，快哉会把表格寄给您。" : "Placetta places it only on forms you approve (or your Autopilot covers) whose agency takes an electronic signature. Where the agency wants ink, Placetta mails you the page."}</p>
+        <label className="check"><input type="radio" name="so-sig" checked={kind === "drawn"} onChange={() => setKind("drawn")} /><span>{zh ? "手写签名" : "Draw my signature"}</span></label>
+        <label className="check"><input type="radio" name="so-sig" checked={kind === "typed"} onChange={() => setKind("typed")} /><span>{zh ? "以打字姓名作为签名" : "Use my typed name as my signature"}</span></label>
+        {kind === "drawn" && <Guard quiet><DrawPad onChange={setPng} /></Guard>}
+        <details className="so-disclosure" onToggle={e => { if ((e.currentTarget as HTMLDetailsElement).open) setOpened(true); }}>
+          <summary>{b(DISCLOSURE.title)}</summary>
+          {DISCLOSURE.parts.map(x => <p key={x.h.en}><b>{b(x.h)}</b> {b(x.p)}</p>)}
+        </details>
+        {CONSENTS.map(c => (
+          <label key={c.id} className="check ap-agree"><input type="checkbox" checked={!!consent[c.id]} onChange={e => setConsent(x => ({ ...x, [c.id]: e.target.checked }))} /><span>{b(c.label)}</span></label>
+        ))}
         <label className="check ap-agree"><input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} />
           <span>{zh ? `我已阅读《申报授权书》中的“快哉作为您的代理人”部分，同意在上方各页使用我的电子签名，并有权代表本企业签署。有效期 ${AGENT_MONTHS} 个月，可随时一键撤销。` : `I've read the "Placetta as your agent" section of the Filing Authorization, agree to my e-signature on the pages above, and have authority to sign for this business. It lasts ${AGENT_MONTHS} months; revoke it any time, in one tap.`}
             {" "}<a href="/authorization#placetta-as-your-agent" target="_blank" rel="noopener">{zh ? "阅读全文" : "Read it"}</a></span></label>

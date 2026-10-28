@@ -37,7 +37,7 @@ export function whoFiles(a: Pick<Application, "abstain" | "yours" | "specialist"
   if (!f) return "confirm";
   if (f.method === "in_person" || f.method === "insurer" || f.method === "none") return "you";
   const r = routeOf(a);
-  return r === "email" || r === "fax" || r === "mail" || r === "faxSigned" ? "odelia" : r === "portal" ? "online" : "prepares";
+  return r === "email" || r === "fax" || r === "mail" || r === "faxSigned" || r === "emailSigned" ? "odelia" : r === "portal" ? "online" : "prepares";
 }
 
 export type FirstRun = {

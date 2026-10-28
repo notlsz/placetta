@@ -26,6 +26,10 @@ import { routeSns } from "../_shared/ses_inbound.ts";
 import { suppress, suppressedIn } from "../_shared/suppression.ts";
 import { attachReply, type ChaseRow, fromAsked, refOf, replyPrompt } from "../_shared/chase.ts";
 import { scoreText } from "../_shared/injection.ts";
+import { wsTagOf } from "../_shared/carry.ts";
+import { agencyMail } from "./agency.ts";
+import { inboxTokenOf } from "../_shared/agent_inbox.ts";
+import { inboxRow } from "../_shared/agent_inbox_in.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
@@ -66,9 +70,42 @@ async function reply(to: string, lang: Lang, m: InMail, text: string, o: { uid: 
   return r.ok;
 }
 
+/** A run for a workspace, started by an agency's mail (agency.ts). */
+const agencyStart = async (ws: string, prompt: string, title: { en: string; zh: string }) => {
+  const res = await internal("agent-run", { action: "watch", workspace_id: ws, prompt: prompt.slice(0, 4000), title }).catch(() => null);
+  return res?.ok ? (((await res.json().catch(() => ({}))) as { id?: string }).id ?? null) : null;
+};
+/** Bounces, vacation replies and our own mail: never an agency's notice, whatever its headers. */
+const systemMail = (m: InMail) => /^(mailer-daemon|postmaster)@/.test(m.from) || odeliaAddresses(env).includes(m.from)
+  || /auto-replied/.test((m.headers["auto-submitted"] ?? []).join(" ").toLowerCase()) || !!m.headers["x-autoreply"] || !!m.headers["x-autorespond"];
+
+/** Mail to a business's own inbox at Placetta (odelia+<token>@, the email on accounts Odelia makes on agency sites):
+ *  kept for the portal worker waiting on it (sender, subject, links, codes), and nothing else. Nobody gets mail back. */
+async function agentInbox(m: InMail, token: string) {
+  const verdict = await senderVerified(m).catch(() => ({ ok: false, why: "error" }));
+  const { data, error } = await admin.rpc("agent_inbox_receive", inboxRow(m, token, verdict.ok));
+  if (error) { console.error("agent inbox", error.code ?? ""); return { ok: false, skipped: "agent_inbox_failed" }; }
+  return data === true ? { ok: true, inbox: true } : { ok: true, skipped: "unknown_inbox" };
+}
+
 export async function received(m: InMail) {
   const mine = odeliaAddresses(env);
-  if (!m.to.some((t) => mine.includes(t)) || automated(m)) return { ok: true, skipped: "not_for_odelia" };
+  // The business's own inbox (odelia+<token>@, the email on agency accounts Odelia makes): kept for the portal worker
+  // waiting on a verification (agent_inbox.ts). An agency also writes there about a filing, so the same mail then goes
+  // through the agency reader (agency.ts). A workspace tag (odelia+w<12 hex>@, carry.ts) is never an inbox token.
+  const token = inboxTokenOf(m.to, mine);
+  if (token && !/^w[0-9a-f]{12}$/.test(token)) {
+    const kept = await agentInbox(m, token);
+    if (!systemMail(m)) await agencyMail(admin, m, { odelia: mine, start: agencyStart, env }).catch((e) => { console.error("agency mail", String(e).slice(0, 200)); return null; });
+    return kept;
+  }
+  // Odelia's address, or a workspace's own (odelia+w<id>@..., for agencies)
+  if (!(m.to.some((t) => mine.includes(t)) || wsTagOf(m.to, mine))) return { ok: true, skipped: "not_for_odelia" };
+  if (automated(m)) {
+    // an agency's system notice comes from a no-reply address, auto-generated: still news about a filing (agency.ts)
+    if (!systemMail(m)) { const r = await agencyMail(admin, m, { odelia: mine, start: agencyStart, env }).catch((e) => { console.error("agency mail", String(e).slice(0, 200)); return null; }); if (r) return r; }
+    return { ok: true, skipped: "not_for_odelia" };
+  }
   const { data: uid } = await admin.rpc("user_by_email", { p_email: m.from });
   const user = typeof uid === "string" ? uid : null;
   // Logged first (keyed on the Message-ID, so a redelivery is a no-op), but without its words until the sender checks out:
@@ -78,6 +115,11 @@ export async function received(m: InMail) {
   // a reply to an ask Odelia made of someone else, tied back by its reference
   const ref = refOf(m.subject);
   if (ref) { const r = await chaseReply(m, ref); if (r) return r; }
+  // an agency writing about a filing (agency.ts): matched, classified and carried on, with nobody emailed back
+  if (!user) {
+    const r = await agencyMail(admin, m, { odelia: mine, start: agencyStart, env }).catch((e) => { console.error("agency mail", String(e).slice(0, 200)); return null; });
+    if (r) return r;
+  }
   if (!user) return { ok: true, skipped: "unknown_sender" };   // no backscatter to strangers or spoofed addresses
 
   const { data: pl } = await admin.from("phone_links").select("lang, last_workspace_id").eq("user_id", user).maybeSingle();

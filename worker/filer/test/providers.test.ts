@@ -181,7 +181,7 @@ test("Steel refuses, or the connection fails: the error says which, never the ke
   const api = await fresh();
   api.refuse = 401;
   const open = opener(deps(api, { BROWSER_PROVIDER: "steel", STEEL_API_KEY: KEY }));
-  await assert.rejects(open(""), (e: Error) => e.message === "steel 401" && !e.message.includes(KEY));
+  await assert.rejects(open(""), (e: Error) => /^steel 401\b/.test(e.message) && !e.message.includes(KEY));
   api.refuse = 0;
   const bad = opener({ ...deps(api, { BROWSER_PROVIDER: "steel", STEEL_API_KEY: KEY }), connect: async (url) => { throw new Error(`connect ECONNREFUSED ${url}`); } });
   await assert.rejects(bad(""), (e: Error) => /couldn't connect/.test(e.message) && !e.message.includes(KEY));
@@ -322,4 +322,16 @@ test("keep awake: only while a run or a view is open, with a public address, eve
   assert.equal(keepAwakeDue({ ...base, last: base.now - 60_000 }), false);
   assert.equal(keepAwakeDue({ ...base, publicUrl: null }), false);
   assert.equal(keepAwakeDue({ ...base, off: true }), false);
+});
+
+test("Steel refuses a session longer than the plan allows: the worker asks again for 15 minutes, then 5", async () => {
+  const { openSteel } = await import("../src/browsers.ts");
+  const asked: number[] = [];
+  const fetch = (async (_url: string, init?: RequestInit) => {
+    const ms = JSON.parse(String(init?.body ?? "{}")).timeout as number;
+    asked.push(ms);
+    return new Response(JSON.stringify({ error: `timeout ${ms} is over your plan's limit` }), { status: 400 });
+  }) as typeof globalThis.fetch;
+  await assert.rejects(openSteel({ env: { STEEL_API_KEY: KEY }, fetch } as never), (e: Error) => /^steel 400: .*limit/.test(e.message) && !e.message.includes(KEY));
+  assert.deepEqual(asked, [30 * 60_000, 15 * 60_000, 5 * 60_000]);
 });

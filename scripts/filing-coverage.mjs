@@ -29,7 +29,13 @@ const SIGN_OUT = join(root, "src/forms/filingSign.json");
 const BASELINE = {
   date: "2026-10-17",
   channels: { team: 231, email: 5, fax: 4, mail: 13, portal: 16, owner: 0 },
-  routes: { portal: 16, email: 1, fax: 0, mail: 0, owner: 0, faxSigned: 3, ownerSigns: 6, team: 233 },
+  routes: { portal: 16, email: 1, fax: 0, mail: 0, owner: 0, faxSigned: 3, emailSigned: 0, kitReturn: 0, ownerSigns: 6, team: 233 },
+};
+// Counted the same way on commit 7f619454f (2026-10-28), before sign once and paper without the owner
+// (20261105090200_sign_once_paper.sql): the same registry, so the column shows only what that change moved.
+const BEFORE_SIGN_ONCE = {
+  date: "2026-10-28",
+  routes: { portal: 158, email: 1, fax: 0, mail: 0, owner: 31, faxSigned: 6, emailSigned: 0, kitReturn: 0, ownerSigns: 25, team: 336 },
 };
 
 const tmp = mkdtempSync(join(tmpdir(), "filing-coverage-"));
@@ -40,14 +46,15 @@ try {
         `export { FORMS, selfStep } from ${JSON.stringify(join(root, "src/forms/registry.ts"))};`,
         `export * as D from ${JSON.stringify(join(destDir, "destinations.ts"))};`,
         `export * as L from ${JSON.stringify(join(destDir, "logic.ts"))};`,
+        ...(existsSync(join(destDir, "accounts.ts")) ? [`export * as A from ${JSON.stringify(join(destDir, "accounts.ts"))};`] : []),
       ].join("\n"),
       resolveDir: root, loader: "ts",
     },
     bundle: true, platform: "node", format: "esm", outfile: join(tmp, "coverage.mjs"), logLevel: "error",
     external: ["*.pdf?inline"],
   });
-  const { FORMS, selfStep, D, L } = await import(join(tmp, "coverage.mjs"));
-  const result = report(FORMS, D, L, selfStep);
+  const { FORMS, selfStep, D, L, A } = await import(join(tmp, "coverage.mjs"));
+  const result = report(FORMS, D, L, selfStep, A);
   if (at >= 0) { console.log(JSON.stringify(result.counts)); process.exit(0); }
   if (check) {
     const problems = [...result.problems];
@@ -70,7 +77,7 @@ try {
   rmSync(tmp, { recursive: true, force: true });
 }
 
-function report(FORMS, D, L, selfStep = () => undefined) {
+function report(FORMS, D, L, selfStep = () => undefined, A = null) {
   const DEST = D.DEST, TEAM_ONLY = D.TEAM_ONLY ?? {}, TO_VERIFY = D.TO_VERIFY ?? {};
   const us = FORMS.filter((f) => !f.currency || f.currency === "USD");
   const ids = new Set(FORMS.map((f) => f.id));
@@ -94,6 +101,12 @@ function report(FORMS, D, L, selfStep = () => undefined) {
     if (!d) return "team";
     const r = L.pick(filing(f), d, env, { hasLogin: true, mailConnected: true });
     if (r === "team" && d.signature === "wet" && !d.portal) {
+      // the honest way for each form that needs ink (wetPath in logic.ts): a copy Placetta faxes or emails, or the
+      // original mailed back in Placetta's return envelope; older copies of logic.ts (the baseline) knew only the fax
+      if (L.wetPath) {
+        const w = L.wetPath(filing(f), d, env, { mailConnected: true });
+        return w.path === "photo" ? (w.via === "fax" ? "faxSigned" : "emailSigned") : w.path === "return" ? "kitReturn" : "ownerSigns";
+      }
       const faxable = L.canFaxSignedFor ? L.canFaxSignedFor(filing(f), d, env) : L.canFaxSigned(d, env) && !(Number(f.fee ?? 0) > 0);
       return faxable ? "faxSigned" : "ownerSigns";
     }
@@ -118,7 +131,7 @@ function report(FORMS, D, L, selfStep = () => undefined) {
     team: count((r) => !r.d), email: count((r) => r.d?.email), fax: count((r) => r.d?.fax), mail: count((r) => r.d?.mail),
     portal: count((r) => r.d?.portal), owner: count((r) => r.d?.owner),
   };
-  const routeKeys = ["portal", "email", "fax", "mail", "owner", "faxSigned", "ownerSigns", "team"];
+  const routeKeys = ["portal", "email", "fax", "mail", "owner", "faxSigned", "emailSigned", "kitReturn", "ownerSigns", "team"];
   const routes = Object.fromEntries(routeKeys.map((k) => [k, count((r) => r.route === k)]));
   const counts = { forms: us.length, abroad: FORMS.length - us.length, selfFilable: count((r) => r.d && !r.d.owner), channels, routes };
 
@@ -133,15 +146,30 @@ function report(FORMS, D, L, selfStep = () => undefined) {
   for (const [k, label] of CH) md.push(`| ${label} | ${BASELINE.channels[k]} | ${channels[k]} |`);
   md.push(`| Any route Placetta sends on | ${us.length - BASELINE.channels.team - BASELINE.channels.owner} | ${counts.selfFilable} |`, "");
   md.push("## How each form would go on its first try", "");
-  md.push("With every channel switched on, a saved login for each portal and a connected mailbox, using the registry's fee and no attachments (`pick()` in `supabase/functions/file/logic.ts`). An agency fee keeps a filing off email, fax and mail; a hand signature means the owner signs first.", "");
-  const RT = { portal: "On the agency's portal", email: "By email", fax: "By fax", mail: "By certified mail", owner: "Owner packet: the owner sends it", faxSigned: "Signed by hand, then Placetta faxes it", ownerSigns: "Signed by hand and sent by the owner", team: "The Placetta team" };
-  md.push(`| Route | Before (${BASELINE.date}) | Now |`, "|---|---:|---:|");
-  for (const k of routeKeys) md.push(`| ${RT[k]} | ${BASELINE.routes[k]} | ${routes[k]} |`);
+  md.push("With every channel switched on, a saved login for each portal and a connected mailbox, using the registry's fee and no attachments (`pick()` and `wetPath()` in `supabase/functions/file/logic.ts`). An agency fee keeps a filing off email, fax and mail unless the agency bills it afterwards; a hand signature means the owner signs first, on a page Placetta mails them with one tap.", "");
+  const RT = { portal: "On the agency's portal", email: "By email", fax: "By fax", mail: "By certified mail", owner: "Owner packet: the owner sends it", faxSigned: "Signed by hand, then Placetta faxes it", emailSigned: "Signed by hand, then Placetta emails it", kitReturn: "Signed by hand, mailed back in Placetta's return envelope", ownerSigns: "Signed by hand and sent by the owner", team: "The Placetta team" };
+  md.push(`| Route | Before (${BASELINE.date}) | Before sign once (${BEFORE_SIGN_ONCE.date}) | Now |`, "|---|---:|---:|---:|");
+  for (const k of routeKeys) md.push(`| ${RT[k]} | ${BASELINE.routes[k]} | ${BEFORE_SIGN_ONCE.routes[k]} | ${routes[k]} |`);
   md.push("");
   // Workers' compensation is a policy bought from an insurer (selfStep in src/forms/registry.ts): the plan keeps it as the
   // owner's step and never puts it up for filing, so the team row above counts it but no one files it.
   const insurance = rows.filter((r) => r.route === "team" && selfStep(r.f) === "insurance").length;
   md.push(`Of the ${routes.team} forms with the team, ${insurance} are insurance the owner buys from an insurer (workers' compensation), which the plan keeps as the owner's step: nothing is filed, so ${routes.team - insurance} are forms the team files.`, "");
+
+  // Who makes each portal's account when the business has no saved login (supabase/functions/file/accounts.ts)
+  if (A?.accountOf) {
+    const portalRows = rows.filter((r) => r.d?.portal);
+    const kindOf = (r) => { const k = A.accountOf(r.d); return k === "business" ? `business:${A.PORTAL_ACCOUNTS[r.d.portal.toLowerCase()]?.basis ?? "entry"}` : k; };
+    const n = (k) => portalRows.filter((r) => kindOf(r) === k).length;
+    md.push("## Portal logins", "");
+    md.push(`Of the ${portalRows.length} forms filed on an agency portal, who makes the account when the business has none saved (\`supabase/functions/file/accounts.ts\`). Odelia makes a business account under the business's agent authority, with its inbox at Placetta, and saves the login (\`worker/filer/src/account.ts\`).`, "");
+    md.push("| Account | Forms |", "|---|---:|");
+    md.push(`| None needed: the portal files without one | ${n("none")} |`);
+    md.push(`| Odelia makes it: the agency's page says you make your own | ${n("business:page")} |`);
+    md.push(`| Odelia makes it: the platform's public sign-up (the team confirms on the first run) | ${n("business:platform") + n("business:entry")} |`);
+    md.push(`| The owner's own identity (ID.me, Login.gov): stays with the owner | ${n("individual")} |`);
+    md.push(`| Not read yet: the Placetta team is asked | ${n("unknown")} |`, "");
+  }
 
   const PLACE = {
     US: "Federal", NY: "New York State", NYC: "New York City", CA: "California", LA: "Los Angeles", LAC: "Los Angeles County", TX: "Texas", HOU: "Houston",
@@ -199,7 +227,8 @@ function report(FORMS, D, L, selfStep = () => undefined) {
   // the day it was checked. No address, number or inbox: only what a card or the Autopilot screen may say.
   const signJson = "{\n" + Object.keys(DEST).sort().map((id) => {
     const d = DEST[id];
-    const row = { s: d.signature, ...(d.payment ? { p: d.payment } : {}), ...(d.portal ? { site: d.portal, ...(d.noLogin ? { open: true } : {}) } : {}), ...(d.owner ? { owner: true } : {}), src: d.source, chk: d.checked };
+    const flag = D.signFlag ? D.signFlag(id, d) : null;
+    const row = { s: d.signature, ...(flag ? { f: flag } : {}), ...(d.payment ? { p: d.payment } : {}), ...(d.portal ? { site: d.portal, ...(d.noLogin ? { open: true } : {}) } : {}), ...(d.owner ? { owner: true } : {}), src: d.source, chk: d.checked };
     return `${JSON.stringify(id)}: ${JSON.stringify(row)}`;
   }).join(",\n") + "\n}\n";
   return { problems, counts, markdown: md.join("\n"), routesJson, stepsJson, signJson };

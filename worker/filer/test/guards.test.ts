@@ -9,7 +9,7 @@ const page = (o: Partial<PageState>): PageState => ({ url: "https://inspect.lafd
 test("a page that makes a new account goes to the owner; a sign-in page doesn't", () => {
   const register = page({ title: "Create an Account", controls: [control({ type: "email", label: "Email" }), control({ type: "password", label: "Password" })] });
   assert.equal(mustStop(register)?.reason, "account");
-  assert.match(mustStop(register)!.en, /never creates one/);
+  assert.match(mustStop(register)!.en, /Odelia can't make this one/);
   assert.ok(makesAccount(page({ controls: [control({ type: "password", label: "Password" }), control({ type: "password", label: "Confirm password" })] })), "a password typed twice");
   assert.ok(!makesAccount(page({ title: "Sign In", headings: ["Sign in", "New here? Sign up"], controls: [control({ type: "password", label: "Password" })] })), "sign in with a sign-up link is a sign-in page");
   assert.equal(mustStop(page({ title: "Login", controls: [control({ type: "text", label: "User name" }), control({ type: "password", label: "Password" })] })), null);

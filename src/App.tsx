@@ -19,6 +19,8 @@ import { AppCtx, type CloudCtx, type Ctx, type OdeliaTab, type PermitsTab, type 
 import { formById } from "./forms/registry";
 import { canFill } from "./forms/canFill";
 import { appPdf, fillForm, stampSignature } from "./forms/fill";
+import { signRule } from "./forms/esign";
+import { sha256Hex } from "./adoptedSignature";
 import { readBack } from "./forms/readback";
 import { answersHash, fieldsOf, fileable, formName, latestVersion, needsForm, problemLine, problemsOf, refreshForms, TYPING_MS, type FilledCopy } from "./forms/versions";
 import { ApproveModal, AppDrawer } from "./Drawer";
@@ -849,7 +851,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (!g.ok) { say(g.why[lang]); return null; }
     try {
       const off = app.official ? formById(app.official) : undefined;
-      let pdf_path: string | undefined, signature: api.FilingPayload["signature"];
+      let pdf_path: string | undefined, signature: api.FilingPayload["signature"], stamp: { signature: string; form: string; sha256: string } | undefined;
       if (off && canFill(off)) {
         const filled = await fillForm(off.id, g.version ? fieldsOf(g.version.answers) : app.fields, appPdf);
         // read back once more, the copy that's filed: a line that didn't come out right stops it here
@@ -857,9 +859,14 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         if (rb && !rb.ok) { const p = problemLine(problemsOf(app, rb)[0]); say(lang === "zh" ? `还不能提交。${p.zh}` : `Not filed. ${p.en}`); return null; }
         if (filled) {
           let bytes: Uint8Array = filled.pdf;
-          if (sig?.png && off.esign) {
+          // only where the agency takes an electronic signature (src/forms/esign.ts): the one drawn in the card, or
+          // the one the owner adopted once, placed by this approval
+          if (sig?.png && signRule(off.id).eSignOk) {
             const signed = await stampSignature(bytes, sig.png, off.id);
-            if (signed) { bytes = signed; signature = { name: sig.name, title: sig.title, signed_at: nowIso(), kind: sig.kind }; }
+            if (signed) {
+              bytes = signed; signature = { name: sig.name, title: sig.title, signed_at: nowIso(), kind: sig.kind };
+              if (sig.adopted) stamp = { signature: sig.adopted, form: off.id, sha256: await sha256Hex(bytes) };
+            }
           }
           pdf_path = await api.uploadForm(cloud.wsId, app.id, `${off.form.split(" (")[0]}${signature ? " signed" : ""}.pdf`, new Blob([bytes as BlobPart], { type: "application/pdf" }));
         }
@@ -875,6 +882,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         },
       });
       setWs(x => setApp(app.id, { status: "filing" })(dropApproval(a.id)(x)));
+      // the adopted signature's placement, recorded against this filing (UETA attribution); never blocks the filing
+      if (stamp) void api.signatureStamped(cloud.wsId, { ...stamp, filing: filing.id });
       const v = await api.fileNow(cloud.wsId, filing.id).catch(() => null);
       void refresh();
       const st = v?.filing.agent_state, last = v?.filing.agent_log?.at(-1);
@@ -1257,9 +1266,14 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         try {
           const row = await api.uploadDoc(cloud.wsId, file, appId);
           await api.signedCopy(cloud.wsId, id, row.path); await refresh();
-          say(lang === "zh" ? "已收到签名件，快哉正在传真给机构。" : "Got the signed copy. Placetta is faxing it to the agency.");
+          say(lang === "zh" ? "已收到签名件，快哉正在发送给机构。" : "Got the signed copy. Placetta is sending it to the agency.");
         } catch (e) { fail(e); }
       },
+      kitFiling: async (id, address) => {
+        if (!ownerOk()) return;
+        try { await api.kitFiling(cloud.wsId, id, address); await refresh(); say(lang === "zh" ? "好的，快哉会把表格寄给您。打印前仍可取消。" : "Done. Placetta is mailing you the page. You can cancel it until it's printed."); } catch (e) { fail(e); }
+      },
+      kitUndo: async id => { if (!ownerOk()) return; try { await api.kitUndo(cloud.wsId, id); await refresh(); say(lang === "zh" ? "已取消，未寄出任何内容。" : "Canceled. Nothing was mailed."); } catch (e) { fail(e); } },
       cancelFiling: async id => { if (!ownerOk()) return; try { await api.cancelFiling(id); await refresh(); } catch (e) { fail(e); } },
       stopFiling: id => takeBack(id, "stop"),
       // the undo window (src/hold.ts, supabase/functions/file): Undo while it's held, or Send now

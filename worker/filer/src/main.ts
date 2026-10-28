@@ -7,6 +7,7 @@
 // (wake.ts); it drains the queue and idles, and the plan puts it to sleep again after 15 minutes with no request. While
 // a run is open it asks for its own /healthz every few minutes, so the plan doesn't put it to sleep mid-filing.
 import { DEST } from "../../../supabase/functions/file/destinations.ts";
+import { accountOf } from "../../../supabase/functions/file/accounts.ts";
 import { defaultDeps, launcher, opener } from "./browsers.ts";
 import { checkEnv, missingLines } from "./env.ts";
 import { LiveViews } from "./live.ts";
@@ -20,11 +21,12 @@ import { startServer, type Health } from "./server.ts";
 import { KeyLock } from "./heal.ts";
 import { cardsOn } from "./card.ts";
 import { Waker } from "./wake.ts";
+import { AnthropicStatusModel, runStatusCheck, sessionPage, type StatusModel, type StatusStore } from "./status.ts";
 
 /** The destination's tenant path, other hosts and start page, from destinations.ts like its host. */
 export const routeOf = (id: string): Route | null => {
   const d = DEST[id];
-  return d?.portal ? { tenant: d.tenant, alsoOn: d.alsoOn, start: d.portalUrl } : null;
+  return d?.portal ? { tenant: d.tenant, alsoOn: d.alsoOn, start: d.portalUrl, noLogin: d.noLogin, account: accountOf(d) } : null;
 };
 
 /** A new browser session for one run, never reused (browsers.ts): a new Steel or Browserbase session (no saved profile
@@ -59,6 +61,10 @@ export const settings = () => ({
   // unverified one stops at the agency's review page for the team's check, however many filings the agency has had
   // (run.ts beforeSubmit). FILER_ALLOW_UNVERIFIED=0 sends those filings to the team instead, as before.
   allowUnverified: process.env.FILER_ALLOW_UNVERIFIED !== "0",
+  // Making the business's account (account.ts): how long to wait for the agency's verification email, and Odelia's
+  // number the owner forwards a texted code to (the same ODELIA_NUMBER odelia-sms answers on), when there is one.
+  accountMailMs: Math.min(30, Math.max(1, Number(process.env.FILER_ACCOUNT_MAIL_MINUTES ?? "10") || 10)) * 60_000,
+  odeliaNumber: /^\+[1-9]\d{6,14}$/.test(process.env.ODELIA_NUMBER ?? "") ? process.env.ODELIA_NUMBER : undefined,
 });
 
 /** How many filings run side by side in this container (FILER_CONCURRENCY, 1 to 4, default 1). Each slot has its own
@@ -66,7 +72,18 @@ export const settings = () => ({
  *  same portal still go one at a time (heal.ts KeyLock). */
 export const slots = (env: Record<string, string | undefined>) => Math.min(4, Math.max(1, Math.floor(Number(env.FILER_CONCURRENCY ?? "1")) || 1));
 
-export const VERSION = "2026-10-24";
+/** One queued portal status check (status.ts), when there is one and FILER_STATUS_CHECKS isn't 0. True when it ran. */
+export async function statusOnce(store: StatusStore, open: (host?: string) => Promise<Session>, model: StatusModel | null = process.env.ANTHROPIC_API_KEY ? new AnthropicStatusModel(process.env.ANTHROPIC_API_KEY) : null): Promise<boolean> {
+  if (process.env.FILER_STATUS_CHECKS === "0" || !model) return false;
+  const j = await store.claimStatus();
+  if (!j) return false;
+  const route = j.official ? routeOf(j.official) : null;
+  const how = await runStatusCheck(j, { store, model, open: async (host) => sessionPage(await open(host)), alsoOn: route?.alsoOn });
+  console.log(`filer: status check ${j.job_id.slice(0, 8)} on ${j.host}: ${how}`);
+  return true;
+}
+
+export const VERSION = "2026-11-05";
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -142,7 +159,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         health.running++;
         const busy = await w.once().finally(() => { health.running--; });
         if (busy) health.lastClaim = new Date().toISOString();
-        else await nap(5000);
+        // nothing to file: a portal status check, if one is queued (status.ts); filings always go first
+        else if (!(await statusOnce(store, open))) await nap(5000);
       }
       catch (e) { console.error("worker:", e instanceof Error ? e.message : e); await sleep(5000); }
     }
