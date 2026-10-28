@@ -3530,6 +3530,65 @@ html[lang="zh-CN"] .c98 .r1 td.us b em{margin:0 0 0 4px}
   html[lang="zh-CN"] .c98 .r1 td.us b em{font-size:38px}
   .c98h{font-size:20px}
 }
+/* c99 (Oct 27): read like Linear, Stripe and Vercel's pricing tables. One short line a cell, any note on a muted line
+   under it; every cell in a row shares the first line's baseline (the icon hangs in the left gutter, out of the flow);
+   the same padding on every row; competitor text in full ink, notes in ink2 (6:1 on white, AA). The billing toggle
+   sits in Placetta's header, so the price row is no taller than its neighbours. On a phone: Placetta's card, then the
+   attorney and the expediter as full-width cards, one under the other, their rows in the same order. */
+.c98k{width:19%}.c98a{width:24%}.c98b{width:22%}.c98u{width:35%}
+.c98w::after{left:65%}
+.c98 thead th{padding:28px 24px 16px;font-size:15px;line-height:1.3;font-weight:600;color:var(--ink);vertical-align:bottom}
+.c98 thead th.us{padding:6px 24px 16px;white-space:nowrap}
+.c98 thead th.us .c98h{display:inline-flex;vertical-align:middle;line-height:40px}
+.c98 thead th.us .print{float:right;margin:0}
+.c98 tbody th,.c98 tbody td{padding:22px 24px;vertical-align:baseline}
+.c98 tbody tr:last-child th,.c98 tbody tr:last-child td{padding-bottom:28px}
+.c98 tbody th{font-size:14px;line-height:1.5;font-weight:500;color:var(--ink)}
+.c98v{display:block;position:relative;padding-left:26px}
+.c98v>svg{position:absolute;left:0;top:5px;margin:0!important}
+.c98 td .c98v>.c98c{top:3px}
+.c98 td b{font-size:16px;line-height:1.5;font-weight:400;letter-spacing:-.1px;color:var(--ink)}
+.c98 td small{margin-top:2px;font-size:13px;line-height:1.45;color:var(--ink2)}
+.c98 td.us b{font-size:16px;line-height:1.5;font-weight:600;color:#fff}
+.c98 td.us small{color:rgba(255,255,255,.72)}
+.c98 .r1 td b{font-size:28px;line-height:1.15}
+.c98 .r1 td .c98v>.c98x{top:11px}
+.c98 .r1 td.us b{font-size:16px;line-height:1.2;font-weight:500;color:rgba(255,255,255,.86)}
+.c98 .r1 td.us b em{font-size:48px}
+.c98 .r1 td.us .c98v>.c98c{top:20px;width:20px;height:20px}
+.c98 .r1 td small{margin-top:6px}
+html[lang="zh-CN"] .c98 .r1 td:not(.us) b{font-size:24px;line-height:1.3}
+html[lang="zh-CN"] .c98 .r1 td .c98v>.c98x{top:10px}
+@media (min-width:1200px){.c98 tbody th,.c98 .r1 td b{white-space:nowrap}html[lang="zh-CN"] .c98 .r1 td:not(.us) b{font-size:22px}}
+.c98 td.ab b{font-weight:500}
+.c98 td .c98v>.c98k2{top:4px}
+@media (max-width:767px){
+  .c98 thead th.us{padding:20px 20px 10px;white-space:normal}
+  .c98 thead th.us .c98h{line-height:40px}
+  .c98 th.a,.c98 td.a,.c98 th.b,.c98 td.b{grid-column:1/-1}
+  .c98 thead th.a,.c98 thead th.b{margin-top:14px;padding:18px 20px 4px;font-size:15px}
+  .c98 thead th.b{grid-row:12}
+  .c98 td.a,.c98 td.b{padding:12px 20px;border-top:1px solid var(--line)}
+  .c98 .r1 td.a,.c98 .r1 td.b{border-top:0}
+  .c98 .r1 td.b{grid-row:13}.c98 .r2 td.b{grid-row:14}.c98 .r3 td.b{grid-row:15}
+  .c98 .r4 td.a,.c98 .r4 td.b{padding-bottom:18px}
+  .c98 .r4 td.b{grid-row:16}
+  .c98 td.ab{grid-row:17;margin-top:14px;padding:16px 20px}
+  .c98 tbody td.us{padding:14px 20px}
+  .c98 tbody tr.r5 td.us{padding:14px 20px 22px}
+  .c98q{margin-bottom:4px;font-size:11px;color:var(--ink2)}
+  .c98 td.us .c98q{color:rgba(255,255,255,.66)}
+  .c98v{padding-left:24px}
+  .c98 td b{font-size:15px;line-height:1.45}
+  .c98 td.us b{font-size:16px;line-height:1.45}
+  .c98 td small{font-size:12.5px}
+  .c98 .r1 td:not(.us) b{font-size:22px;line-height:1.2}
+  .c98 .r1 td .c98v>.c98x{top:8px}
+  html[lang="zh-CN"] .c98 .r1 td:not(.us) b{font-size:18px}
+  .c98 .r1 td.us b em{font-size:44px}
+  html[lang="zh-CN"] .c98 .r1 td.us b em{font-size:36px}
+  .c98 .r1 td.us .c98v>.c98c{top:16px}
+}
 .c96p{background:var(--ink)!important}
 .c96p small,.c96p span{color:rgba(255,255,255,.66)!important}
 .c96p b{color:#fff!important}
@@ -4035,15 +4094,15 @@ body .ctas .ctah{font-size:clamp(34px,4vw,56px)!important}
       <table class="c96t c98">
         <caption class="sr" data-i18n="c96.cap">An attorney, a permit expediter and Placetta, compared</caption>
         <colgroup><col class="c98k"><col class="c98a"><col class="c98b"><col class="c98u"></colgroup>
-        <thead><tr><td></td><th scope="col" class="a" data-i18n="c96.a">With an attorney</th><th scope="col" class="b" data-i18n="c96.b">A permit expediter</th><th scope="col" class="us"><span class="c98h"><svg viewBox="33.5 2 504 504" aria-hidden="true"><path fill-rule="evenodd" d="M43 51L252 51L252 213.15A82.5 82.5 0 0 0 258.16 368.98L243.12 423.21A145.5 145.5 0 0 1 198 164.2L198 107L103 107L103 458L43 458ZM521 51L312 51L312 213.15A82.5 82.5 0 0 1 305.84 368.98L320.88 423.21A145.5 145.5 0 0 0 366 164.2L366 107L461 107L461 458L521 458Z"/></svg><span data-i18n="c96.c">Placetta</span></span></th></tr></thead>
+        <thead><tr><td></td><th scope="col" class="a" data-i18n="c96.a">With an attorney</th><th scope="col" class="b" data-i18n="c96.b">A permit expediter</th><th scope="col" class="us"><span class="c98h"><svg viewBox="33.5 2 504 504" aria-hidden="true"><path fill-rule="evenodd" d="M43 51L252 51L252 213.15A82.5 82.5 0 0 0 258.16 368.98L243.12 423.21A145.5 145.5 0 0 1 198 164.2L198 107L103 107L103 458L43 458ZM521 51L312 51L312 213.15A82.5 82.5 0 0 1 305.84 368.98L320.88 423.21A145.5 145.5 0 0 0 366 164.2L366 107L461 107L461 458L521 458Z"/></svg><span data-i18n="c96.c">Placetta</span></span><div class="qseg print" id="prInt" role="group" aria-label="Billing" data-i18n-aria="price.int" hidden><button type="button" data-int="year" aria-pressed="true" data-i18n="price.yr">Yearly</button><button type="button" data-int="month" aria-pressed="false" data-i18n="price.mo">Monthly</button></div></th></tr></thead>
         <tbody>
           <!-- The "Your team's time" row (hours of your team's work for each way) is out until Placetta has measured it on
                real customers: bring it back only with time logged on customer openings, each figure sourced, never an
                estimate shown as a fact. The "How long" row is the agencies' own clock, from the World Bank; Placetta's
                cell there says only what the product does (filed once you approve, followed up until the agency decides). -->
-          <tr class="r1"><th scope="row" data-i18n="c98.q1">What does it cost?</th><td class="a"><i class="c98q" aria-hidden="true" data-i18n="c98.q1">What does it cost?</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.a2">$378 an hour</b><small data-i18n="c96.a2s">Average for business formation and compliance work</small></div></div></td><td class="b"><i class="c98q" aria-hidden="true" data-i18n="c98.q1">What does it cost?</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.b2">$2,000 to $7,500</b><small data-i18n="c96.b2s">Usually one city</small></div></div></td><td class="us"><i class="c98q" aria-hidden="true" data-i18n="c98.q1">What does it cost?</i><div class="c98v"><svg class="c98c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.8 4.8L19.5 7"/></svg><div class="c98t"><b id="c96P" data-i18n="c96.c2"><em>$149</em> a store a month</b><small id="c96Ps" data-i18n="c96.c2y">Billed yearly, plus $299 a license</small><div class="qseg print" id="prInt" role="group" aria-label="Billing" data-i18n-aria="price.int" hidden><button type="button" data-int="year" aria-pressed="true" data-i18n="price.yr">Yearly</button><button type="button" data-int="month" aria-pressed="false" data-i18n="price.mo">Monthly</button></div></div></div></td></tr>
-          <tr class="r2"><th scope="row" data-i18n="c98.q2">Who files?</th><td class="a"><i class="c98q" aria-hidden="true" data-i18n="c98.q2">Who files?</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.a3">The attorney's office, billed by the hour</b></div></div></td><td class="b"><i class="c98q" aria-hidden="true" data-i18n="c98.q2">Who files?</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.b3">The expediter</b></div></div></td><td class="us"><i class="c98q" aria-hidden="true" data-i18n="c98.q2">Who files?</i><div class="c98v"><svg class="c98c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.8 4.8L19.5 7"/></svg><div class="c98t"><b data-i18n="c96.c3">Odelia files it for you</b></div></div></td></tr>
-          <tr class="r3"><th scope="row" data-i18n="c98.q3">What happens after opening?</th><td class="a"><i class="c98q" aria-hidden="true" data-i18n="c98.q3">What happens after opening?</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.a4">Each renewal billed again</b></div></div></td><td class="b"><i class="c98q" aria-hidden="true" data-i18n="c98.q3">What happens after opening?</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.b4">Ends on opening day</b></div></div></td><td class="us"><i class="c98q" aria-hidden="true" data-i18n="c98.q3">What happens after opening?</i><div class="c98v"><svg class="c98c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.8 4.8L19.5 7"/></svg><div class="c98t"><b data-i18n="c96.c4">Renewals and inspections handled, so you can focus on scaling.</b></div></div></td></tr>
+          <tr class="r1"><th scope="row" data-i18n="c98.q1">What does it cost?</th><td class="a"><i class="c98q" aria-hidden="true" data-i18n="c98.q1">What does it cost?</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.a2">$378 an hour</b><small data-i18n="c96.a2s">Average for business formation and compliance work</small></div></div></td><td class="b"><i class="c98q" aria-hidden="true" data-i18n="c98.q1">What does it cost?</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.b2">$2,000 to $7,500</b><small data-i18n="c96.b2s">Usually one city</small></div></div></td><td class="us"><i class="c98q" aria-hidden="true" data-i18n="c98.q1">What does it cost?</i><div class="c98v"><svg class="c98c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.8 4.8L19.5 7"/></svg><div class="c98t"><b id="c96P" data-i18n="c96.c2"><em>$149</em> a store a month</b><small id="c96Ps" data-i18n="c96.c2y">Billed yearly, plus $299 a license</small></div></div></td></tr>
+          <tr class="r2"><th scope="row" data-i18n="c98.q2">Who files?</th><td class="a"><i class="c98q" aria-hidden="true" data-i18n="c98.q2">Who files?</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c99.a3">The attorney's office</b><small data-i18n="c99.a3s">Billed by the hour</small></div></div></td><td class="b"><i class="c98q" aria-hidden="true" data-i18n="c98.q2">Who files?</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.b3">The expediter</b></div></div></td><td class="us"><i class="c98q" aria-hidden="true" data-i18n="c98.q2">Who files?</i><div class="c98v"><svg class="c98c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.8 4.8L19.5 7"/></svg><div class="c98t"><b data-i18n="c96.c3">Odelia files it for you</b></div></div></td></tr>
+          <tr class="r3"><th scope="row" data-i18n="c98.q3">What happens after opening?</th><td class="a"><i class="c98q" aria-hidden="true" data-i18n="c98.q3">What happens after opening?</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.a4">Each renewal billed again</b></div></div></td><td class="b"><i class="c98q" aria-hidden="true" data-i18n="c98.q3">What happens after opening?</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.b4">Ends on opening day</b></div></div></td><td class="us"><i class="c98q" aria-hidden="true" data-i18n="c98.q3">What happens after opening?</i><div class="c98v"><svg class="c98c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.8 4.8L19.5 7"/></svg><div class="c98t"><b data-i18n="c99.c4">Renewals and inspections handled</b><small data-i18n="c99.c4s">So you can focus on scaling.</small></div></div></td></tr>
           <tr class="r4"><th scope="row" data-i18n="c98.q4">How do you see where it stands?</th><td class="a"><i class="c98q" aria-hidden="true" data-i18n="c98.q4">How do you see where it stands?</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c98.sa">Ask the office</b></div></div></td><td class="b"><i class="c98q" aria-hidden="true" data-i18n="c98.q4">How do you see where it stands?</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c98.sb">Ask the expediter</b></div></div></td><td class="us"><i class="c98q" aria-hidden="true" data-i18n="c98.q4">How do you see where it stands?</i><div class="c98v"><svg class="c98c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.8 4.8L19.5 7"/></svg><div class="c98t"><b data-i18n="c98.su">Every license, live in your dashboard</b></div></div></td></tr>
           <tr class="r5"><th scope="row" data-i18n="c98.q5">How long does it take?</th><td class="ab" colspan="2"><i class="c98q" aria-hidden="true" data-i18n="c98.q5">How long does it take?</i><div class="c98v"><svg class="c98k2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18zM12 7.5V12l3 2"/></svg><div class="c98t"><b data-i18n="c96.w">The agencies set the clock, whoever files.</b><small data-i18n="c96.ws">A building permit took 68 days in Los Angeles and 89 in New York City.</small></div></div></td><td class="us"><i class="c98q" aria-hidden="true" data-i18n="c98.q5">How long does it take?</i><div class="c98v"><svg class="c98c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.8 4.8L19.5 7"/></svg><div class="c98t"><b data-i18n="c98.l">Filed once you approve</b><small data-i18n="c98.ls">Odelia follows up until the agency decides.</small></div></div></td></tr>
         </tbody>
@@ -4683,6 +4742,9 @@ Object.assign(T.zh, {"hero.see": "免注册，看看实际效果", "cs97.h": "�
    with its number set large (renderPrice writes it as HTML) */
 Object.assign(T.en, {"c98.q1": "What does it cost?", "c98.q2": "Who files?", "c98.q3": "What happens after opening?", "c98.q4": "How do you see where it stands?", "c98.q5": "How long does it take?", "c96.c2": "<em>$149</em> a store a month", "c96.c2m": "<em>$179</em> a store a month", "c96.c4": "Renewals and inspections handled, so you can focus on scaling.", "c98.sa": "Ask the office", "c98.sb": "Ask the expediter", "c98.su": "Every license, live in your dashboard", "c98.l": "Filed once you approve", "c98.ls": "Odelia follows up until the agency decides."});
 Object.assign(T.zh, {"c98.q1": "费用多少？", "c98.q2": "谁来提交？", "c98.q3": "开业之后呢？", "c98.q4": "进度怎么查？", "c98.q5": "要多久？", "c96.c2": "每家门店每月<em>149 美元</em>", "c96.c2m": "每家门店每月<em>179 美元</em>", "c96.c4": "续期和检查都替您办好，您只管专心扩张。", "c98.sa": "去问律师事务所", "c98.sb": "去问代办公司", "c98.su": "每项执照的进度，在看板上实时可见", "c98.l": "您一批准就提交", "c98.ls": "Odelia 持续跟进，直到机构作出决定。"});
+/* c99 (Oct 27): the comparison reads like a pricing table: one short line a cell, the rest on a muted line under it */
+Object.assign(T.en, {"c99.a3": "The attorney's office", "c99.a3s": "Billed by the hour", "c99.c4": "Renewals and inspections handled", "c99.c4s": "So you can focus on scaling."});
+Object.assign(T.zh, {"c99.a3": "律师事务所", "c99.a3s": "按小时计费", "c99.c4": "续期和检查都替您办好", "c99.c4s": "您只管专心扩张。"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 
 /* furniture variant: placetta.com/furniture or ?for=furniture */
