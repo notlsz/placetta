@@ -8,7 +8,9 @@
 // cookcountypublichealth.org ("Copyright © Cook County Department of Public Health").
 // Added 2026-10-28 with the plains states (src/forms/states/plains.json): jobsnd.com ("An official website of the State of
 // North Dakota", "© Copyright 2026 Job Service North Dakota").
-const OFFICIAL_HOSTS = /(^|\.)(jobsnd\.com|dallascityhall\.com|lafd\.org|octaxcol\.com|floridarevenue\.com|cookcountypublichealth\.org|sfplanning\.org|sftreasurer\.org|sfdph\.org|sf-fire\.org|sfgov\.org|ochealthinfo\.com|southernnevadahealthdistrict\.org|houstonpermittingcenter\.org|houstonhealth\.org|denvergov\.org|phila\.gov|sjpermits\.org|nvsilverflume\.gov|cityofirvine\.(org|gov)|lacity\.org|sjeconomy\.com|chicago\.gov|boston\.gov|kingcounty\.gov|cityofnewyork\.us|dalycity\.org|duluthga\.net|cityofhenderson\.com|fortleenj\.org|gnrhealth\.com|smchealth\.org|acgov\.org|edisonnj\.org|njoag\.gov|myfloridalicense\.com|cityofsanmateo\.org|sangabrielcity\.com)$/;
+const OFFICIAL_HOSTS = /(^|\.)(jobsnd\.com|dallascityhall\.com|lafd\.org|octaxcol\.com|floridarevenue\.com|cookcountypublichealth\.org|sfplanning\.org|sftreasurer\.org|sfdph\.org|sf-fire\.org|sfgov\.org|ochealthinfo\.com|southernnevadahealthdistrict\.org|houstonpermittingcenter\.org|houstonhealth\.org|denvergov\.org|phila\.gov|sjpermits\.org|nvsilverflume\.gov|cityofirvine\.(org|gov)|lacity\.org|sjeconomy\.com|chicago\.gov|boston\.gov|kingcounty\.gov|cityofnewyork\.us|dalycity\.org|duluthga\.net|cityofhenderson\.com|fortleenj\.org|gnrhealth\.com|smchealth\.org|acgov\.org|edisonnj\.org|njoag\.gov|myfloridalicense\.com|cityofsanmateo\.org|sangabrielcity\.com|laworks\.net)$/;
+// Added 2026-10-28 with the southern states' filings (src/forms/states/south.json): laworks.net, Louisiana's workforce
+// agency ("Louisiana Works is the state's comprehensive workforce solution", PublicRelations/PR_AboutUs.asp).
 // Abroad (added 2026-10-21 for the furniture set's EU and UK cases): the European Union's own domain (europa.eu: the
 // Commission, EUR-Lex), the UK government's (gov.uk, legislation.gov.uk) and France's (gouv.fr), each reserved to that
 // government.

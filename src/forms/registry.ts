@@ -28,6 +28,7 @@ import { ENTITY_STATES } from "./entity-data";
 import { MIDATLANTIC_FORMS } from "./states/midatlantic";
 import { PLAINS_FORMS } from "./states/plains";
 import { NEWENGLAND_FORMS, applyNewEngland } from "./states/newengland";
+import { SOUTH_FORMS } from "./states/south";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -751,6 +752,7 @@ FORMS.push(...PLAINS_FORMS);
 FORMS.push(...WEST_FORMS);
 FORMS.push(...MIDWEST_FORMS);
 FORMS.push(...NEWENGLAND_FORMS);
+FORMS.push(...SOUTH_FORMS);
 
 /** A step that isn't a filing Placetta makes for the business: insurance bought from an insurer (workers' compensation)
  *  or a certificate a person earns with a course or an exam (food handler cards, the food protection or food safety

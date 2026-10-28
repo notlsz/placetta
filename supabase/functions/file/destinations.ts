@@ -13,6 +13,8 @@ import { WEST_DEST, WEST_TEAM_ONLY } from "./dest/west.ts";
 import { MIDWEST_DEST } from "./dest/midwest.ts";
 import { NEWENGLAND_DEST, NEWENGLAND_TEAM } from "./dest/newengland.ts";
 
+import { SOUTH_DEST } from "./dest/south.ts";
+
 export type Address = { name: string; line1: string; line2?: string; city: string; state: string; zip: string; country?: string };
 
 /** How the agency takes its fee, as its page says. */
@@ -1962,6 +1964,7 @@ export const DEST: Record<string, Dest> = {
   ...WEST_DEST,
   ...MIDWEST_DEST,
   ...NEWENGLAND_DEST,
+  ...SOUTH_DEST,
 };
 
 /**

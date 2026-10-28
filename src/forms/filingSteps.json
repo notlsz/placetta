@@ -1,4 +1,5 @@
 {
+"ar-dfa-tax": ["pay"],
 "arl-plan-review": ["pay"],
 "atl-license": ["pay"],
 "az-tpt": ["pay"],
@@ -55,6 +56,8 @@
 "phl-food-license": ["pay"],
 "phmsa-5800": ["pay"],
 "sat-co": ["pay"],
+"sc-dor-retail": ["pay"],
+"sc-scda-retail": ["pay"],
 "sd-doh-food-service": ["pay"],
 "sea-building": ["pay"],
 "sea-business-license": ["pay"],

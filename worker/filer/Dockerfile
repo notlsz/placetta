@@ -14,6 +14,7 @@ COPY supabase/functions/file/dest/plains.ts supabase/functions/file/dest/plains.
 COPY supabase/functions/file/dest/west.ts supabase/functions/file/dest/west.ts
 COPY supabase/functions/file/dest/midwest.ts supabase/functions/file/dest/midwest.ts
 COPY supabase/functions/file/dest/newengland.ts supabase/functions/file/dest/newengland.ts
+COPY supabase/functions/file/dest/south.ts supabase/functions/file/dest/south.ts
 # package-lock pins playwright-core to the same version as this image's browsers (1.56.0); keep them in step
 COPY worker/filer/package.json worker/filer/package-lock.json worker/filer/
 RUN cd worker/filer && npm ci --omit=dev
