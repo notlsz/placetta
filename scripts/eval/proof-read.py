@@ -48,6 +48,10 @@ WEBFETCH_SEEN = {
     # sos.iowa.gov answers curl with 403; each sentence was read word for word with WebFetch
     "https://ilga.gov/Documents/legislation/ilcs/documents/080501800K50-10.htm": "2026-10-27",
     "https://sos.iowa.gov/businesses/business-entity-forms-and-fees": "2026-10-27",
+    # the plains states' filings (src/forms/states/plains.json): the Kansas Departments of Agriculture and Labor answer
+    # curl with 403
+    "https://www.agriculture.ks.gov/licenses/food-and-lodging-applications-and-licenses/license-information-food-safety": "2026-10-28",
+    "https://www.dol.ks.gov/home/showpublisheddocument/68/639015674355270000": "2026-10-28",
 }
 # pages that refused curl and WebFetch alike (a 403, a Cloudflare wall, a page built in script), read by a person in a
 # real browser and the sentence copied as it appears there, by day

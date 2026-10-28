@@ -5,6 +5,7 @@
 // Keys are official form ids from src/forms/registry.ts, local-us.ts and world.ts. A form that isn't here goes to the
 // Placetta team; TEAM_ONLY below says why for the ones that were researched and have no route Placetta can use.
 // docs/FILING_COVERAGE.md is generated from this file by scripts/filing-coverage.mjs.
+import { PLAINS_DEST } from "./dest/plains.ts";
 
 import { MIDATLANTIC_DEST, MIDATLANTIC_TEAM } from "./dest/midatlantic.ts";
 
@@ -1953,6 +1954,7 @@ export const DEST: Record<string, Dest> = {
     checked: "2026-10-25", source: "https://www.gov.uk/register-employer",
   },
   ...MIDATLANTIC_DEST,
+  ...PLAINS_DEST,
 };
 
 /**

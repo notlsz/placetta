@@ -1,0 +1,1394 @@
+[
+ {
+  "id": "tx-dshs-food-mfr",
+  "form": "Food Manufacturer license (EF23-10853, or Regulatory Services Online)",
+  "title": {
+   "en": "Texas food manufacturer license",
+   "zh": "德州食品生产商执照"
+  },
+  "agency": {
+   "en": "Texas Department of State Health Services, Food Manufacturers, Wholesalers, and Warehouses",
+   "zh": "德州州卫生服务局食品生产商、批发商与仓储处"
+  },
+  "level": "state",
+  "where": "TX",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "online",
+  "order": 46,
+  "how": {
+   "en": "A Texas firm that processes, packages or repackages food for wholesale or for retail self-service, or that puts its name and address on a label a co-packer makes (a private labeler), licenses with DSHS. Applied for online in Regulatory Services Online, or on Form EF23-10853.",
+   "zh": "在德州加工、包装或分装食品用于批发或零售自助销售的企业，以及在代工厂生产的产品标签上印自己名称和地址的企业（贴牌商），须向州卫生服务局申领执照。可在 Regulatory Services Online 在线申请，或填写 EF23-10853 表。"
+  },
+  "url": "https://vo.ras.dshs.state.tx.us/",
+  "pdf": "https://www.dshs.texas.gov/sites/default/files/fdlicense/PDF/PDFfoods/EF23-10853FoodMFG-Initial2401Rev42015.pdf",
+  "info": "https://www.dshs.texas.gov/food-manufacturers-wholesalers-warehouses/food-manufacturers-general-information",
+  "fee": null,
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Texas's license for a business that makes, packs or private-labels food for sale.",
+   "zh": "德州为生产、包装或贴牌销售食品的企业颁发的执照。"
+  },
+  "proof": {
+   "quote": "Firms that manufacture food for sale to the public in the following manner are required to have a Food Manufacturer license with DSHS.",
+   "checked": "2026-10-28",
+   "read": "https://www.dshs.texas.gov/food-manufacturers-wholesalers-warehouses/food-manufacturers-general-information"
+  }
+ },
+ {
+  "id": "tx-dshs-food-wholesale",
+  "form": "Food Wholesaler license (EF23-10505) or Warehouse Operator license (EF23-12980)",
+  "title": {
+   "en": "Texas food wholesaler or warehouse operator license",
+   "zh": "德州食品批发商或仓储经营者执照"
+  },
+  "agency": {
+   "en": "Texas Department of State Health Services, Food Manufacturers, Wholesalers, and Warehouses",
+   "zh": "德州州卫生服务局食品生产商、批发商与仓储处"
+  },
+  "level": "state",
+  "where": "TX",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "online",
+  "order": 46,
+  "how": {
+   "en": "A business that distributes food wholesale or stores it in a Texas warehouse takes the food wholesaler license, the warehouse operator license, or the food wholesaler registration, whichever DSHS's licensing flowchart gives. Applied for online in Regulatory Services Online, or on the paper application.",
+   "zh": "在德州批发分销食品或在仓库储存食品的企业，须按州卫生服务局的执照流程图申领食品批发商执照、仓储经营者执照或食品批发商登记。可在 Regulatory Services Online 在线申请，或填写纸质申请表。"
+  },
+  "url": "https://vo.ras.dshs.state.tx.us/",
+  "pdf": "https://www.dshs.texas.gov/sites/default/files/foods/pdf/EF23-10505Rev42015.pdf",
+  "info": "https://www.dshs.texas.gov/food-manufacturers-wholesalers-warehouses/food-wholesalers-warehouses-general-information",
+  "fee": null,
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Texas's license for a business that wholesales or warehouses food.",
+   "zh": "德州为批发或仓储食品的企业颁发的执照。"
+  },
+  "proof": {
+   "quote": "Firms that engage in any of the following activities are required to obtain a food wholesaler license",
+   "checked": "2026-10-28",
+   "read": "https://www.dshs.texas.gov/food-manufacturers-wholesalers-warehouses/food-wholesalers-warehouses-general-information"
+  }
+ },
+ {
+  "id": "nm-trd-registration",
+  "form": "Business Tax Registration (ACD-31015, or online in TAP)",
+  "title": {
+   "en": "New Mexico business tax registration (gross receipts and withholding)",
+   "zh": "新墨西哥州营业税登记（总收入税与预扣税）"
+  },
+  "agency": {
+   "en": "New Mexico Taxation and Revenue Department",
+   "zh": "新墨西哥州税务局"
+  },
+  "level": "state",
+  "where": "NM",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "order": 20,
+  "how": {
+   "en": "Anyone doing business in New Mexico registers once with the Taxation and Revenue Department, online in TAP (Apply for a New Mexico Business Tax ID) or on Form ACD-31015 at a district office. The one Business Tax ID covers gross receipts tax, compensating tax and wage withholding.",
+   "zh": "在新墨西哥州经营的任何人都须向州税务局登记一次：在 TAP 在线办理（Apply for a New Mexico Business Tax ID），或到地区税务办公室提交 ACD-31015 表。同一个营业税号涵盖总收入税、补偿税和工资预扣税。"
+  },
+  "url": "https://tap.state.nm.us/TAP/_/",
+  "pdf": "https://www.tax.newmexico.gov/wp-content/uploads/2022/11/acd-31015.pdf",
+  "info": "https://www.tax.newmexico.gov/businesses/who-must-register-a-business/",
+  "fee": 0,
+  "feeNote": {
+   "en": "There is no fee to register or obtain a Business Tax Identification Number.",
+   "zh": "登记或取得营业税号不收费。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "New Mexico's tax number for gross receipts tax (its sales tax) and, with staff, wage withholding. Free.",
+   "zh": "新墨西哥州的税号，用于总收入税（相当于销售税），有员工时也用于工资预扣税。免费。"
+  },
+  "proof": {
+   "quote": "Anyone who engages in business in New Mexico must register with the Taxation and Revenue Department.",
+   "checked": "2026-10-28",
+   "read": "https://www.tax.newmexico.gov/businesses/who-must-register-a-business/"
+  }
+ },
+ {
+  "id": "nm-dws-ui",
+  "form": "Employer registration (Unemployment Insurance Tax and Claims System)",
+  "title": {
+   "en": "Unemployment insurance employer account",
+   "zh": "失业保险雇主账户"
+  },
+  "agency": {
+   "en": "New Mexico Department of Workforce Solutions",
+   "zh": "新墨西哥州劳动力解决方案局"
+  },
+  "level": "state",
+  "where": "NM",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 60,
+  "how": {
+   "en": "A new employer subject to unemployment insurance tax registers online in the Unemployment Insurance Tax and Claims System; the Employer Account Number then goes on every wage report and payment.",
+   "zh": "须缴纳失业保险税的新雇主在失业保险税务与申领系统在线登记；此后每份工资报告和缴款都须填写雇主账号。"
+  },
+  "url": "https://ui.dws.nm.gov/Employer/Revenue/Registration/EmployerRegistration/RegisterEmployer.ASPX",
+  "info": "https://www.dws.nm.gov/UI-Tax-Information",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page states no fee for registering.",
+   "zh": "该机构页面未列明登记费用。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Registers you as an employer for unemployment insurance once you have staff on payroll.",
+   "zh": "有员工发薪后，登记失业保险雇主账户。"
+  },
+  "proof": {
+   "quote": "New employers subject to Unemployment Insurance taxes must register with NMDWS on to the Unemployment Insurance Tax Self-Service System.",
+   "checked": "2026-10-28",
+   "read": "https://www.dws.nm.gov/UI-Tax-Information"
+  }
+ },
+ {
+  "id": "nm-nmed-retail-food",
+  "form": "Retail food permit (Retail Plan Review Application)",
+  "title": {
+   "en": "New Mexico retail food permit",
+   "zh": "新墨西哥州零售食品许可证"
+  },
+  "agency": {
+   "en": "New Mexico Environment Department, Food Safety Program",
+   "zh": "新墨西哥州环境局食品安全项目"
+  },
+  "level": "state",
+  "where": "NM",
+  "segments": [
+   "restaurant",
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "except": [
+   "BERNALILLO"
+  ],
+  "method": "pdf_mail",
+  "order": 76,
+  "how": {
+   "en": "A business that prepares food and serves it directly to customers needs a food permit from the Environment Department. Complete the retail application, then the nearest field office says how to submit it, sets up the opening inspection and takes the fee. Not in Albuquerque or Bernalillo County, which run their own food programs.",
+   "zh": "制作食品并直接供应给顾客的企业须取得环境局的食品许可证。填写零售申请表后，由最近的外勤办公室说明提交方式、安排开业检查并收取费用。阿尔伯克基市和伯纳利欧县自设食品项目，不适用本许可。"
+  },
+  "url": "https://www.env.nm.gov/foodprogram/wp-content/uploads/sites/8/2025/06/Retail-Plan-Review-Application.pdf",
+  "pdf": "https://www.env.nm.gov/foodprogram/wp-content/uploads/sites/8/2025/06/Retail-Plan-Review-Application.pdf",
+  "info": "https://www.env.nm.gov/foodprogram/retail-food-application/",
+  "fee": null,
+  "feeNote": {
+   "en": "The field office takes the permit fee with the opening inspection; the page doesn't state it.",
+   "zh": "许可费由外勤办公室在开业检查时收取，页面未列明金额。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "The state's permit to serve food to customers, issued after an opening inspection.",
+   "zh": "州政府颁发的向顾客供应食品的许可证，开业检查合格后签发。"
+  },
+  "proof": {
+   "quote": "The retail food permit application required to serve food directly to customers is available here.",
+   "checked": "2026-10-28",
+   "read": "https://www.env.nm.gov/foodprogram/retail-food-application/"
+  }
+ },
+ {
+  "id": "nm-nmed-manufactured-food",
+  "form": "Manufactured food permit (Manufacturer Food Plan Review application)",
+  "title": {
+   "en": "New Mexico food manufacturing permit",
+   "zh": "新墨西哥州食品生产许可证"
+  },
+  "agency": {
+   "en": "New Mexico Environment Department, Food Safety Program",
+   "zh": "新墨西哥州环境局食品安全项目"
+  },
+  "level": "state",
+  "where": "NM",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "except": [
+   "BERNALILLO"
+  ],
+  "method": "pdf_mail",
+  "order": 46,
+  "how": {
+   "en": "A business that produces food in New Mexico for sale to other businesses needs the Environment Department's manufactured food permit, applied for on the manufacturer plan review application. Not in Albuquerque or Bernalillo County, which run their own food programs.",
+   "zh": "在新墨西哥州生产食品并销售给其他企业的，须凭生产商图纸审查申请表申领环境局的食品生产许可证。阿尔伯克基市和伯纳利欧县自设食品项目，不适用本许可。"
+  },
+  "url": "https://www.env.nm.gov/foodprogram/wp-content/uploads/sites/8/2025/06/Manufacturer-Food-Plan-Review-application.pdf",
+  "pdf": "https://www.env.nm.gov/foodprogram/wp-content/uploads/sites/8/2025/06/Manufacturer-Food-Plan-Review-application.pdf",
+  "info": "https://www.env.nm.gov/foodprogram/retail-food-application/",
+  "fee": null,
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "The state's permit to make food in New Mexico and sell it to other businesses.",
+   "zh": "在新墨西哥州生产食品并销售给其他企业所需的州许可证。"
+  },
+  "proof": {
+   "quote": "If your restaurant is permitted but you would like to begin selling products to other businesses, you must also obtain a food manufacturing permit.",
+   "checked": "2026-10-28",
+   "read": "https://www.env.nm.gov/foodprogram/retail-food-application/"
+  }
+ },
+ {
+  "id": "co-cdphe-manufactured-food",
+  "form": "Manufactured food or storage facility registration",
+  "title": {
+   "en": "Colorado wholesale food manufacturer and storage registration",
+   "zh": "科罗拉多州食品批发生产与仓储登记"
+  },
+  "agency": {
+   "en": "Colorado Department of Public Health and Environment, Manufactured Food Program",
+   "zh": "科罗拉多州公共卫生与环境局加工食品项目"
+  },
+  "level": "state",
+  "where": "CO",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 46,
+  "how": {
+   "en": "Manufacturers, warehouses and re-packers register each facility with CDPHE on the registration form, sent with the $100 application fee by check or money order; the department then invoices the rest of the registration fee and issues the registration once it's paid.",
+   "zh": "生产商、仓库和分装商须为每个设施向州公共卫生与环境局填写登记表，并以支票或汇票随附 100 美元申请费；该局随后开具其余登记费账单，付清后签发登记。"
+  },
+  "url": "https://cdphe.colorado.gov/dehs/mf",
+  "info": "https://cdphe.colorado.gov/dehs/mf",
+  "fee": null,
+  "feeNote": {
+   "en": "A $100 application fee, not refundable, by check or money order, then an invoiced registration fee the page doesn't state.",
+   "zh": "100 美元申请费，不予退还，以支票或汇票支付；其后另开具登记费账单，页面未列明金额。"
+  },
+  "renews": {
+   "en": "Renewal invoices are mailed each year by May 31.",
+   "zh": "续期账单每年 5 月 31 日前寄出。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Colorado's registration for a facility that makes, repacks or stores food for wholesale.",
+   "zh": "科罗拉多州对生产、分装或仓储批发食品设施的登记。"
+  },
+  "proof": {
+   "quote": "Manufacturers, warehouses, re-packers, shellfish dealers, salvage operations, and grain storage facilities must be registered.",
+   "checked": "2026-10-28",
+   "read": "https://cdphe.colorado.gov/dehs/mf"
+  }
+ },
+ {
+  "id": "ok-otc-sales",
+  "form": "Sales tax permit (OkTAP business registration)",
+  "title": {
+   "en": "Oklahoma sales tax permit",
+   "zh": "俄克拉何马州销售税许可证"
+  },
+  "agency": {
+   "en": "Oklahoma Tax Commission",
+   "zh": "俄克拉何马州税务委员会"
+  },
+  "level": "state",
+  "where": "OK",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "order": 20,
+  "how": {
+   "en": "Wholesale and retail businesses that sell goods in Oklahoma get a sales tax permit from the Tax Commission, registered online in OkTAP.",
+   "zh": "在俄克拉何马州销售商品的批发和零售企业须向州税务委员会申领销售税许可证，在 OkTAP 在线登记。"
+  },
+  "url": "https://oktap.tax.ok.gov/OkTAP/Web/_/",
+  "info": "https://oklahoma.gov/business/operate/business-taxes.html",
+  "fee": null,
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Lets you collect Oklahoma sales tax.",
+   "zh": "让您可以收取俄克拉何马州销售税。"
+  },
+  "proof": {
+   "quote": "Wholesale and retail businesses that sell such items to customers in the state are required to obtain one or more applicable sales tax permits",
+   "checked": "2026-10-28",
+   "read": "https://oklahoma.gov/business/operate/business-taxes.html"
+  }
+ },
+ {
+  "id": "ok-otc-withholding",
+  "form": "Withholding tax account (OkTAP business registration)",
+  "title": {
+   "en": "Oklahoma withholding tax account",
+   "zh": "俄克拉何马州预扣税账户"
+  },
+  "agency": {
+   "en": "Oklahoma Tax Commission",
+   "zh": "俄克拉何马州税务委员会"
+  },
+  "level": "state",
+  "where": "OK",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 22,
+  "how": {
+   "en": "A business with employees sets up a withholding account with the Tax Commission in OkTAP, in the same business registration as the sales tax permit.",
+   "zh": "有员工的企业须在 OkTAP 向州税务委员会开立预扣税账户，可与销售税许可证在同一次企业登记中办理。"
+  },
+  "url": "https://oktap.tax.ok.gov/OkTAP/Web/_/",
+  "info": "https://oklahoma.gov/business/operate/business-taxes.html",
+  "fee": null,
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Lets you withhold Oklahoma income tax from wages.",
+   "zh": "让您可以从工资中预扣俄克拉何马州所得税。"
+  },
+  "proof": {
+   "quote": "Businesses with employees must set up an account with the Oklahoma Tax Commission (OTC) for withholding and remitting state income taxes",
+   "checked": "2026-10-28",
+   "read": "https://oklahoma.gov/business/operate/business-taxes.html"
+  }
+ },
+ {
+  "id": "ok-oesc-ui",
+  "form": "Employer status report (EZ Tax Express)",
+  "title": {
+   "en": "Unemployment insurance employer account",
+   "zh": "失业保险雇主账户"
+  },
+  "agency": {
+   "en": "Oklahoma Employment Security Commission",
+   "zh": "俄克拉何马州就业保障委员会"
+  },
+  "level": "state",
+  "where": "OK",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 60,
+  "how": {
+   "en": "An employer creates a user ID in EZ Tax Express and submits a status report to get an Oklahoma unemployment account, then reports wages and pays unemployment tax each quarter.",
+   "zh": "雇主在 EZ Tax Express 创建用户名并提交状况报告，取得俄克拉何马州失业保险账户，之后每季度申报工资并缴纳失业保险税。"
+  },
+  "url": "https://eztaxexpress.oesc.ok.gov/",
+  "info": "https://oklahoma.gov/business/operate/business-taxes.html",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page states no fee for registering.",
+   "zh": "该机构页面未列明登记费用。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Registers you as an employer for unemployment insurance once you have staff on payroll.",
+   "zh": "有员工发薪后，登记失业保险雇主账户。"
+  },
+  "proof": {
+   "quote": "Employers must also set up an account and withhold and remit state unemployment taxes to the Oklahoma Employment Security Commission (OESC)",
+   "checked": "2026-10-28",
+   "read": "https://oklahoma.gov/business/operate/business-taxes.html"
+  }
+ },
+ {
+  "id": "ok-osdh-food-establishment",
+  "form": "Food Establishment License (Initial Application for Food, Drug or Lodging)",
+  "title": {
+   "en": "Oklahoma food establishment license",
+   "zh": "俄克拉何马州食品场所执照"
+  },
+  "agency": {
+   "en": "Oklahoma State Department of Health, Consumer Health Service",
+   "zh": "俄克拉何马州卫生局消费者健康服务处"
+  },
+  "level": "state",
+  "where": "OK",
+  "segments": [
+   "restaurant",
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 76,
+  "how": {
+   "en": "A restaurant or food store licenses with the State Department of Health. Get a classification number from the county health department, send the application there (plans first, with a $425 plan review fee, when the county asks for them), pay the license fee online, and pass the pre-licensure inspection. Every applicant includes an Affidavit of Lawful Presence.",
+   "zh": "餐厅或食品店须向州卫生局申领执照。先向县卫生局取得分类编号，把申请表交给县卫生局（县里要求时先交图纸，附 425 美元图纸审查费），在线缴纳执照费，并通过发证前检查。所有申请人都须附上合法居留宣誓书。"
+  },
+  "url": "https://oklahoma.gov/content/dam/ok/en/health/health2/aem-documents/protective-health/consumer-health-services/forms/InitialApplicationforFoodDrugorLodging.pdf",
+  "pdf": "https://oklahoma.gov/content/dam/ok/en/health/health2/aem-documents/protective-health/consumer-health-services/forms/InitialApplicationforFoodDrugorLodging.pdf",
+  "info": "https://oklahoma.gov/health/services/licensing-inspections/consumer-health-service/licensure/food.html",
+  "fee": null,
+  "feeNote": {
+   "en": "A license application fee paid online, separate from the $425 plan review fee when plans are required; the page doesn't state the license fee.",
+   "zh": "执照申请费在线缴纳，与需要时的 425 美元图纸审查费分开；页面未列明执照费金额。"
+  },
+  "foreign": {
+   "en": "Every applicant gives an Affidavit of Lawful Presence with the application.",
+   "zh": "所有申请人都须随申请提交合法居留宣誓书。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "The state's license to serve or sell food, issued after a pre-licensure inspection.",
+   "zh": "州政府颁发的供应或销售食品执照，发证前须经检查。"
+  },
+  "proof": {
+   "quote": "A license application is submitted to the Oklahoma State Department of Health, along with the required application fee.",
+   "checked": "2026-10-28",
+   "read": "https://oklahoma.gov/health/services/licensing-inspections/consumer-health-service/licensure/food.html"
+  }
+ },
+ {
+  "id": "ok-osdh-food-manufacturing",
+  "form": "Food Manufacturing Establishment License (Initial Application for Food, Drug or Lodging)",
+  "title": {
+   "en": "Oklahoma food manufacturing or warehousing license",
+   "zh": "俄克拉何马州食品生产或仓储执照"
+  },
+  "agency": {
+   "en": "Oklahoma State Department of Health, Consumer Health Service",
+   "zh": "俄克拉何马州卫生局消费者健康服务处"
+  },
+  "level": "state",
+  "where": "OK",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 46,
+  "how": {
+   "en": "A food manufacturer or food warehouse licenses with the State Department of Health. Get a classification number from the county health department, send the application there (plans first, with a $425 plan review fee, when the county asks for them), pay the license fee online, and pass the pre-licensure inspection. Every applicant includes an Affidavit of Lawful Presence.",
+   "zh": "食品生产商或食品仓库须向州卫生局申领执照。先向县卫生局取得分类编号，把申请表交给县卫生局（县里要求时先交图纸，附 425 美元图纸审查费），在线缴纳执照费，并通过发证前检查。所有申请人都须附上合法居留宣誓书。"
+  },
+  "url": "https://oklahoma.gov/content/dam/ok/en/health/health2/aem-documents/protective-health/consumer-health-services/forms/InitialApplicationforFoodDrugorLodging.pdf",
+  "pdf": "https://oklahoma.gov/content/dam/ok/en/health/health2/aem-documents/protective-health/consumer-health-services/forms/InitialApplicationforFoodDrugorLodging.pdf",
+  "info": "https://oklahoma.gov/health/services/licensing-inspections/consumer-health-service/licensure/food.html",
+  "fee": null,
+  "feeNote": {
+   "en": "A license application fee paid online, separate from the $425 plan review fee when plans are required; the page doesn't state the license fee.",
+   "zh": "执照申请费在线缴纳，与需要时的 425 美元图纸审查费分开；页面未列明执照费金额。"
+  },
+  "foreign": {
+   "en": "Every applicant gives an Affidavit of Lawful Presence with the application.",
+   "zh": "所有申请人都须随申请提交合法居留宣誓书。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "The state's license for a facility that makes or stores food.",
+   "zh": "州政府为生产或储存食品的设施颁发的执照。"
+  },
+  "proof": {
+   "quote": "A license application is submitted to the Oklahoma State Department of Health, along with the required application fee.",
+   "checked": "2026-10-28",
+   "read": "https://oklahoma.gov/health/services/licensing-inspections/consumer-health-service/licensure/food.html"
+  }
+ },
+ {
+  "id": "ks-kdor-sales",
+  "form": "Retailers' sales tax registration (Business Tax Application, KDOR Customer Service Center)",
+  "title": {
+   "en": "Kansas sales tax registration certificate",
+   "zh": "堪萨斯州销售税登记证"
+  },
+  "agency": {
+   "en": "Kansas Department of Revenue",
+   "zh": "堪萨斯州税务局"
+  },
+  "level": "state",
+  "where": "KS",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "order": 20,
+  "how": {
+   "en": "A business making retail sales in Kansas registers with the Department of Revenue: set up an account in the KDOR Customer Service Center and complete the business tax application there. The registration certificate is displayed at the business.",
+   "zh": "在堪萨斯州进行零售的企业须向州税务局登记：在 KDOR 客户服务中心开设账户并在线填写营业税申请。登记证须在营业场所展示。"
+  },
+  "url": "https://www.kdor.ks.gov/Apps/kcsc/login.aspx",
+  "info": "https://www.ksrevenue.gov/pdf/pub1510.pdf",
+  "fee": null,
+  "renews": {
+   "en": "The registration certificate is valid until canceled.",
+   "zh": "登记证在注销前一直有效。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Lets you collect Kansas sales tax.",
+   "zh": "让您可以收取堪萨斯州销售税。"
+  },
+  "proof": {
+   "quote": "If you are making retail sales or providing taxable services in Kansas, you must register and collect the tax.",
+   "checked": "2026-10-28",
+   "read": "https://www.ksrevenue.gov/pdf/pub1510.pdf"
+  }
+ },
+ {
+  "id": "ks-kdor-withholding",
+  "form": "Withholding tax registration (Business Tax Application, KDOR Customer Service Center)",
+  "title": {
+   "en": "Kansas withholding tax registration",
+   "zh": "堪萨斯州预扣税登记"
+  },
+  "agency": {
+   "en": "Kansas Department of Revenue",
+   "zh": "堪萨斯州税务局"
+  },
+  "level": "state",
+  "where": "KS",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 22,
+  "how": {
+   "en": "An employer registers for Kansas withholding in the KDOR Customer Service Center, in the same business tax application as sales tax.",
+   "zh": "雇主在 KDOR 客户服务中心登记堪萨斯州预扣税，可与销售税在同一份营业税申请中办理。"
+  },
+  "url": "https://www.kdor.ks.gov/Apps/kcsc/login.aspx",
+  "info": "https://www.ksrevenue.gov/bustaxtypeswh.html",
+  "fee": null,
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Lets you withhold Kansas income tax from wages.",
+   "zh": "让您可以从工资中预扣堪萨斯州所得税。"
+  },
+  "proof": {
+   "quote": "An employer must withhold Kansas tax if the employee is a resident of Kansas, performing services inside or outside of Kansas",
+   "checked": "2026-10-28",
+   "read": "https://www.ksrevenue.gov/bustaxtypeswh.html"
+  }
+ },
+ {
+  "id": "ks-kdol-ui",
+  "form": "Employer Status Report (K-CNS 010)",
+  "title": {
+   "en": "Unemployment insurance employer account",
+   "zh": "失业保险雇主账户"
+  },
+  "agency": {
+   "en": "Kansas Department of Labor",
+   "zh": "堪萨斯州劳工部"
+  },
+  "level": "state",
+  "where": "KS",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 60,
+  "how": {
+   "en": "A new employer files the Status Report, K-CNS 010, within 15 days of paying its first employee, online through the Department of Labor's employer registration or on paper.",
+   "zh": "新雇主须在向首位员工支付工资后 15 天内提交状况报告（K-CNS 010），可通过劳工部雇主登记在线提交或纸质提交。"
+  },
+  "url": "https://www.dol.ks.gov/home/showpublisheddocument/68/639015674355270000",
+  "info": "https://www.dol.ks.gov/home/showpublisheddocument/68/639015674355270000",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page states no fee for registering.",
+   "zh": "该机构页面未列明登记费用。"
+  },
+  "takes": {
+   "en": "Due within 15 days of paying the first employee.",
+   "zh": "须在向首位员工支付工资后 15 天内提交。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Registers you as an employer for unemployment insurance once you have staff on payroll.",
+   "zh": "有员工发薪后，登记失业保险雇主账户。"
+  },
+  "proof": {
+   "quote": "is required to file form K-CNS 010, Status Report, within 15 days of paying its first employee.",
+   "checked": "2026-10-28",
+   "read": "https://www.dol.ks.gov/home/showpublisheddocument/68/639015674355270000"
+  }
+ },
+ {
+  "id": "ks-kda-food-establishment",
+  "form": "Food Establishment License",
+  "title": {
+   "en": "Kansas food establishment license",
+   "zh": "堪萨斯州食品场所执照"
+  },
+  "agency": {
+   "en": "Kansas Department of Agriculture, Food Safety and Lodging",
+   "zh": "堪萨斯州农业部食品安全与住宿处"
+  },
+  "level": "state",
+  "where": "KS",
+  "segments": [
+   "restaurant",
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 76,
+  "how": {
+   "en": "A restaurant, grocery or convenience store that prepares or offers food licenses with the Department of Agriculture. The facility passes a licensing inspection and the licensee sends a signed application with the application and license fees. Every license expires March 31.",
+   "zh": "制作或供应食品的餐厅、杂货店或便利店须向州农业部申领执照。设施须通过发证检查，持照人须提交签字申请表并缴纳申请费和执照费。所有执照均于 3 月 31 日到期。"
+  },
+  "url": "https://www.agriculture.ks.gov/licenses/food-and-lodging-applications-and-licenses/license-information-food-safety",
+  "info": "https://www.agriculture.ks.gov/licenses/food-and-lodging-applications-and-licenses/license-information-food-safety",
+  "fee": null,
+  "feeNote": {
+   "en": "An application fee the first year plus a yearly license fee.",
+   "zh": "首年缴纳申请费，另每年缴纳执照费。"
+  },
+  "renews": {
+   "en": "Every year; licenses expire March 31.",
+   "zh": "每年续期；执照于 3 月 31 日到期。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "The state's license to serve or sell food in Kansas, issued after an inspection.",
+   "zh": "在堪萨斯州供应或销售食品的州执照，检查合格后签发。"
+  },
+  "proof": {
+   "quote": "A business that prepares or offers food for immediate consumption is required to have a Food Establishment License.",
+   "checked": "2026-10-28",
+   "read": "https://www.agriculture.ks.gov/licenses/food-and-lodging-applications-and-licenses/license-information-food-safety"
+  }
+ },
+ {
+  "id": "ks-kda-food-processing",
+  "form": "Food Processor or Food Storage License",
+  "title": {
+   "en": "Kansas food processing plant or food storage license",
+   "zh": "堪萨斯州食品加工厂或食品仓储执照"
+  },
+  "agency": {
+   "en": "Kansas Department of Agriculture, Food Safety and Lodging",
+   "zh": "堪萨斯州农业部食品安全与住宿处"
+  },
+  "level": "state",
+  "where": "KS",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 46,
+  "how": {
+   "en": "Food manufacturers, re-packers, wholesalers and warehouses license with the Department of Agriculture: category one to process and store food, category two to store it only. The facility passes a licensing inspection and the licensee sends a signed application with the application and license fees. Every license expires March 31.",
+   "zh": "食品生产商、分装商、批发商和仓库须向州农业部申领执照：第一类用于加工和储存食品，第二类仅用于储存。设施须通过发证检查，持照人须提交签字申请表并缴纳申请费和执照费。所有执照均于 3 月 31 日到期。"
+  },
+  "url": "https://www.agriculture.ks.gov/licenses/food-and-lodging-applications-and-licenses/license-information-food-safety",
+  "info": "https://www.ksrevisor.gov/statutes/chapters/ch65/065_006_0089.html",
+  "fee": null,
+  "feeNote": {
+   "en": "An application fee and a yearly license fee, each set by the facility's square footage.",
+   "zh": "申请费和年度执照费均按设施面积确定。"
+  },
+  "renews": {
+   "en": "Every year; licenses expire March 31.",
+   "zh": "每年续期；执照于 3 月 31 日到期。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "The state's license for a facility that makes, repacks or stores food in Kansas.",
+   "zh": "在堪萨斯州生产、分装或储存食品设施的州执照。"
+  },
+  "proof": {
+   "quote": "It shall be unlawful for any person to engage in the business of conducting a food establishment or food processing plant",
+   "checked": "2026-10-28",
+   "read": "https://www.ksrevisor.gov/statutes/chapters/ch65/065_006_0089.html"
+  }
+ },
+ {
+  "id": "ne-dor-sales",
+  "form": "Nebraska Tax Application, Form 20 (sales tax permit)",
+  "title": {
+   "en": "Nebraska sales tax permit",
+   "zh": "内布拉斯加州销售税许可证"
+  },
+  "agency": {
+   "en": "Nebraska Department of Revenue",
+   "zh": "内布拉斯加州税务局"
+  },
+  "level": "state",
+  "where": "NE",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "order": 20,
+  "how": {
+   "en": "Register online, or mail or fax Form 20 signed by the owner, partner or corporate officer. Each Nebraska retail location needs its own permit, posted at the location; no renewal is needed.",
+   "zh": "可在线登记，或邮寄、传真由业主、合伙人或公司高管签字的 Form 20。在内布拉斯加州的每个零售地点都须单独取得许可证并张贴；无需续期。"
+  },
+  "url": "https://revenue.nebraska.gov/businesses/register-your-new-business-online",
+  "pdf": "https://revenue.nebraska.gov/sites/default/files/doc/business/f_20.pdf",
+  "info": "https://revenue.nebraska.gov/sites/default/files/doc/business/f_20.pdf",
+  "fee": null,
+  "takes": {
+   "en": "Online, the number is usually assigned at registration, or DOR calls within five business days; a paper Form 20 takes about two weeks.",
+   "zh": "在线登记通常当场分配编号，否则税务局会在五个工作日内联系；纸质 Form 20 约需两周。"
+  },
+  "renews": {
+   "en": "No renewal is required.",
+   "zh": "无需续期。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Lets you collect Nebraska sales tax at each retail location.",
+   "zh": "让您可以在每个零售地点收取内布拉斯加州销售税。"
+  },
+  "proof": {
+   "quote": "Every person engaged in business as a retailer making retail sales of taxable property or services in Nebraska must obtain a sales tax permit",
+   "checked": "2026-10-28",
+   "read": "https://revenue.nebraska.gov/sites/default/files/doc/business/f_20.pdf"
+  }
+ },
+ {
+  "id": "ne-dor-withholding",
+  "form": "Nebraska Tax Application, Form 20 (income tax withholding certificate)",
+  "title": {
+   "en": "Nebraska income tax withholding certificate",
+   "zh": "内布拉斯加州所得税预扣证书"
+  },
+  "agency": {
+   "en": "Nebraska Department of Revenue",
+   "zh": "内布拉斯加州税务局"
+  },
+  "level": "state",
+  "where": "NE",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 22,
+  "how": {
+   "en": "An employer applies for the withholding certificate before withholding Nebraska income tax, online or on Form 20 with its federal EIN.",
+   "zh": "雇主在预扣内布拉斯加州所得税前须申领预扣证书，可在线申请或填写 Form 20，并提供联邦 EIN。"
+  },
+  "url": "https://revenue.nebraska.gov/businesses/register-your-new-business-online",
+  "pdf": "https://revenue.nebraska.gov/sites/default/files/doc/business/f_20.pdf",
+  "info": "https://revenue.nebraska.gov/sites/default/files/doc/business/f_20.pdf",
+  "fee": null,
+  "renews": {
+   "en": "The certificate doesn't need yearly renewal.",
+   "zh": "证书无需每年续期。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Lets you withhold Nebraska income tax from wages.",
+   "zh": "让您可以从工资中预扣内布拉斯加州所得税。"
+  },
+  "proof": {
+   "quote": "you must apply for an income tax withholding certificate prior to withholding income taxes for Nebraska.",
+   "checked": "2026-10-28",
+   "read": "https://revenue.nebraska.gov/sites/default/files/doc/business/f_20.pdf"
+  }
+ },
+ {
+  "id": "ne-ndol-ui",
+  "form": "New employer registration (NEworks)",
+  "title": {
+   "en": "Unemployment insurance employer account",
+   "zh": "失业保险雇主账户"
+  },
+  "agency": {
+   "en": "Nebraska Department of Labor",
+   "zh": "内布拉斯加州劳工部"
+  },
+  "level": "state",
+  "where": "NE",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 60,
+  "how": {
+   "en": "An employer completes the new employer registration in NEworks; staff review it before the account is enabled for wage reports and payments.",
+   "zh": "雇主在 NEworks 完成新雇主登记；工作人员审核后才会开通账户用于工资申报和缴款。"
+  },
+  "url": "https://neworks.nebraska.gov/",
+  "info": "https://dol.nebraska.gov/webdocs/Resources/Items/1_UI%20Tax%20Account%20Instruction%20guide.pdf",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page states no fee for registering.",
+   "zh": "该机构页面未列明登记费用。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Registers you as an employer for unemployment insurance once you have staff on payroll.",
+   "zh": "有员工发薪后，登记失业保险雇主账户。"
+  },
+  "proof": {
+   "quote": "Employers must complete a new employer registration to create an on‐line account and gain access to tax functionality.",
+   "checked": "2026-10-28",
+   "read": "https://dol.nebraska.gov/webdocs/Resources/Items/1_UI%20Tax%20Account%20Instruction%20guide.pdf"
+  }
+ },
+ {
+  "id": "ne-nda-food-establishment",
+  "form": "Food establishment permit (Request for Permit)",
+  "title": {
+   "en": "Nebraska food establishment permit",
+   "zh": "内布拉斯加州食品场所许可证"
+  },
+  "agency": {
+   "en": "Nebraska Department of Agriculture, Food Safety and Consumer Protection",
+   "zh": "内布拉斯加州农业部食品安全与消费者保护处"
+  },
+  "level": "state",
+  "where": "NE",
+  "segments": [
+   "restaurant",
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "except": [
+   "LANCASTERNE",
+   "DOUGLASNE",
+   "HALLNE"
+  ],
+  "method": "pdf_mail",
+  "order": 76,
+  "how": {
+   "en": "A restaurant or food store holds the Department of Agriculture's permit. In Lancaster, Douglas or Hall County the request goes to the local health department instead. Email the Request for Permit to agr.foodsafety@nebraska.gov about 60 days before opening; an inspection comes before operating. Opening before applying adds a $60 fee.",
+   "zh": "餐厅或食品店须持有州农业部的许可证。位于兰开斯特县、道格拉斯县或霍尔县的，申请转交当地卫生部门。约在开业前 60 天将许可申请表（Request for Permit）电邮至 agr.foodsafety@nebraska.gov；营业前须经检查。先营业后申请的须加收 60 美元。"
+  },
+  "url": "https://nda.nebraska.gov/sites/default/files/fscp/foods/Request%20for%20Permit%20(printable).pdf",
+  "pdf": "https://nda.nebraska.gov/sites/default/files/fscp/foods/Request%20for%20Permit%20(printable).pdf",
+  "info": "https://nda.nebraska.gov/fscp/foods/inspection_areas",
+  "fee": null,
+  "feeNote": {
+   "en": "An initial permit fee and an annual fee set each year by the director; $60 more if the business opened before applying.",
+   "zh": "初始许可费和年费由主管每年确定；先营业后申请的另加 60 美元。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "The state's permit to serve or sell food in Nebraska, issued after an inspection.",
+   "zh": "在内布拉斯加州供应或销售食品的州许可证，检查合格后签发。"
+  },
+  "proof": {
+   "quote": "Application for a permit shall be made prior to the operation of a food establishment, food processing plant, or salvage operation.",
+   "checked": "2026-10-28",
+   "read": "https://nda.nebraska.gov/fscp/foods/inspection_areas"
+  }
+ },
+ {
+  "id": "ne-nda-food-processing",
+  "form": "Food processing plant permit (Request for Permit)",
+  "title": {
+   "en": "Nebraska food processing plant permit",
+   "zh": "内布拉斯加州食品加工厂许可证"
+  },
+  "agency": {
+   "en": "Nebraska Department of Agriculture, Food Safety and Consumer Protection",
+   "zh": "内布拉斯加州农业部食品安全与消费者保护处"
+  },
+  "level": "state",
+  "where": "NE",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 46,
+  "how": {
+   "en": "A food processing plant or food warehouse holds the Department of Agriculture's permit and follows FDA's current good manufacturing practice rules (21 CFR 117). Email the Request for Permit to agr.foodsafety@nebraska.gov about 60 days before opening; an inspection comes before operating. Opening before applying adds a $60 fee.",
+   "zh": "食品加工厂或食品仓库须持有州农业部的许可证，并遵守 FDA 现行良好生产规范（21 CFR 117）。约在开业前 60 天将许可申请表（Request for Permit）电邮至 agr.foodsafety@nebraska.gov；营业前须经检查。先营业后申请的须加收 60 美元。"
+  },
+  "url": "https://nda.nebraska.gov/sites/default/files/fscp/foods/Request%20for%20Permit%20(printable).pdf",
+  "pdf": "https://nda.nebraska.gov/sites/default/files/fscp/foods/Request%20for%20Permit%20(printable).pdf",
+  "info": "https://nda.nebraska.gov/fscp/foods/inspection_areas",
+  "fee": null,
+  "feeNote": {
+   "en": "An initial permit fee and an annual fee set each year by the director; $60 more if the business opened before applying.",
+   "zh": "初始许可费和年费由主管每年确定；先营业后申请的另加 60 美元。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "The state's permit for a facility that makes or stores food in Nebraska.",
+   "zh": "在内布拉斯加州生产或储存食品设施的州许可证。"
+  },
+  "proof": {
+   "quote": "Application for a permit shall be made prior to the operation of a food establishment, food processing plant, or salvage operation.",
+   "checked": "2026-10-28",
+   "read": "https://nda.nebraska.gov/fscp/foods/inspection_areas"
+  }
+ },
+ {
+  "id": "sd-dor-sales",
+  "form": "Sales tax license (online tax license application)",
+  "title": {
+   "en": "South Dakota sales tax license",
+   "zh": "南达科他州销售税执照"
+  },
+  "agency": {
+   "en": "South Dakota Department of Revenue",
+   "zh": "南达科他州税务局"
+  },
+  "level": "state",
+  "where": "SD",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "order": 20,
+  "how": {
+   "en": "A business with a physical presence in South Dakota (or over $100,000 of sales into the state) applies for a sales tax license online; a license card is issued once it's approved.",
+   "zh": "在南达科他州有实体存在（或向该州销售额超过 10 万美元）的企业须在线申请销售税执照；获批后发放执照卡。"
+  },
+  "url": "https://apps.sd.gov/rv23cedar/main/main.aspx",
+  "info": "https://dor.sd.gov/media/qn3a1y31/license-requirements-for-sales-use-contractors-excise-tax.pdf",
+  "fee": 0,
+  "feeNote": {
+   "en": "There is no fee for a sales tax license.",
+   "zh": "销售税执照不收费。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Lets you collect South Dakota sales tax. Free.",
+   "zh": "让您可以收取南达科他州销售税。免费。"
+  },
+  "proof": {
+   "quote": "Businesses are required to have a South Dakota sales tax license and must collect and remit sales tax on taxable transactions if:",
+   "checked": "2026-10-28",
+   "read": "https://dor.sd.gov/media/qn3a1y31/license-requirements-for-sales-use-contractors-excise-tax.pdf"
+  }
+ },
+ {
+  "id": "sd-dlr-ui",
+  "form": "Employer Registration (Reemployment Assistance Tax)",
+  "title": {
+   "en": "Reemployment assistance (unemployment insurance) employer account",
+   "zh": "再就业援助（失业保险）雇主账户"
+  },
+  "agency": {
+   "en": "South Dakota Department of Labor and Regulation, Reemployment Assistance Division",
+   "zh": "南达科他州劳工与监管局再就业援助处"
+  },
+  "level": "state",
+  "where": "SD",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 60,
+  "how": {
+   "en": "A new business registers with the Reemployment Assistance Tax Unit, online or on the Employer Registration Application.",
+   "zh": "新企业须向再就业援助税务科登记，可在线办理或填写雇主登记申请表。"
+  },
+  "url": "https://apps.sd.gov/ld94empuimenu/default.aspx",
+  "pdf": "https://dlr.sd.gov/ra/forms/Employer_Registration_Application_fillable.pdf",
+  "info": "https://dlr.sd.gov/ra/businesses/registration.aspx",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page states no fee for registering.",
+   "zh": "该机构页面未列明登记费用。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Registers you as an employer for South Dakota's unemployment insurance.",
+   "zh": "登记南达科他州失业保险雇主账户。"
+  },
+  "proof": {
+   "quote": "All newly established businesses are required to register with the Reemployment Assistance Tax Unit.",
+   "checked": "2026-10-28",
+   "read": "https://dlr.sd.gov/ra/businesses/registration.aspx"
+  }
+ },
+ {
+  "id": "sd-doh-food-service",
+  "form": "Food Service License (online application)",
+  "title": {
+   "en": "South Dakota food service license",
+   "zh": "南达科他州餐饮服务执照"
+  },
+  "agency": {
+   "en": "South Dakota Department of Health, Office of Health Protection",
+   "zh": "南达科他州卫生局健康保护办公室"
+  },
+  "level": "state",
+  "where": "SD",
+  "segments": [
+   "restaurant"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "online",
+  "order": 76,
+  "how": {
+   "en": "A restaurant, carry-out, bakery, caterer or convenience store applies online with the fee and emails the plan review questionnaire to the regional advisor; the license issues after the state inspection. A certified food service manager is needed before that inspection.",
+   "zh": "餐厅、外卖店、烘焙店、餐饮承办商或便利店须在线申请并缴费，并将图纸审查问卷电邮给区域顾问；州检查合格后签发执照。检查前须有一名持证餐饮服务经理。"
+  },
+  "url": "https://sddoh.safefoodinspection.com/",
+  "info": "https://doh.sd.gov/topics/food-lodging-safety/licensure-codes/food-service/",
+  "fee": null,
+  "feeNote": {
+   "en": "Paid with the online application; the page doesn't state the amount.",
+   "zh": "随在线申请缴纳，页面未列明金额。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "The state's license to serve food in South Dakota, issued after an inspection.",
+   "zh": "在南达科他州供应餐饮的州执照，检查合格后签发。"
+  },
+  "proof": {
+   "quote": "Steps 1-3 must be completed before issuance of a food service license.",
+   "checked": "2026-10-28",
+   "read": "https://doh.sd.gov/topics/food-lodging-safety/licensure-codes/food-service/"
+  }
+ },
+ {
+  "id": "nd-tax-sales",
+  "form": "Sales and use tax permit (ND TAP)",
+  "title": {
+   "en": "North Dakota sales tax permit",
+   "zh": "北达科他州销售税许可证"
+  },
+  "agency": {
+   "en": "North Dakota Office of State Tax Commissioner",
+   "zh": "北达科他州税务专员办公室"
+  },
+  "level": "state",
+  "where": "ND",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "order": 20,
+  "how": {
+   "en": "A business selling taxable goods or services in North Dakota applies for a sales tax permit online in ND TAP.",
+   "zh": "在北达科他州销售应税商品或服务的企业须在 ND TAP 在线申请销售税许可证。"
+  },
+  "url": "https://tap.tax.nd.gov/",
+  "info": "https://www.tax.nd.gov/starting-new-business",
+  "fee": null,
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Lets you collect North Dakota sales tax.",
+   "zh": "让您可以收取北达科他州销售税。"
+  },
+  "proof": {
+   "quote": "If they are, you need to apply for a North Dakota Sales Tax Permit.",
+   "checked": "2026-10-28",
+   "read": "https://www.tax.nd.gov/starting-new-business"
+  }
+ },
+ {
+  "id": "nd-tax-withholding",
+  "form": "Income tax withholding account (ND TAP)",
+  "title": {
+   "en": "North Dakota income tax withholding account",
+   "zh": "北达科他州所得税预扣账户"
+  },
+  "agency": {
+   "en": "North Dakota Office of State Tax Commissioner",
+   "zh": "北达科他州税务专员办公室"
+  },
+  "level": "state",
+  "where": "ND",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 22,
+  "how": {
+   "en": "An employer registers its withholding account online in ND TAP.",
+   "zh": "雇主须在 ND TAP 在线登记预扣税账户。"
+  },
+  "url": "https://tap.tax.nd.gov/",
+  "info": "https://www.tax.nd.gov/income-tax-withholding",
+  "fee": null,
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Lets you withhold North Dakota income tax from wages.",
+   "zh": "让您可以从工资中预扣北达科他州所得税。"
+  },
+  "proof": {
+   "quote": "Employers must register for an Income Tax Withholding account with the Office of State Tax Commissioner online",
+   "checked": "2026-10-28",
+   "read": "https://www.tax.nd.gov/income-tax-withholding"
+  }
+ },
+ {
+  "id": "nd-jsnd-ui",
+  "form": "Register for Unemployment Insurance Tax (UI EASY)",
+  "title": {
+   "en": "Unemployment insurance employer account",
+   "zh": "失业保险雇主账户"
+  },
+  "agency": {
+   "en": "Job Service North Dakota",
+   "zh": "北达科他州就业服务局"
+  },
+  "level": "state",
+  "where": "ND",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 60,
+  "how": {
+   "en": "An employer registers in UI EASY within 20 days after first employing workers, signing in through the State of North Dakota login.",
+   "zh": "雇主须在首次雇用员工后 20 天内通过北达科他州登录系统进入 UI EASY 登记。"
+  },
+  "url": "https://apps.nd.gov/jsnd/uiiatax/login.htm",
+  "info": "https://www.jobsnd.com/unemployment-business-tax/file-reports",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page states no fee for registering.",
+   "zh": "该机构页面未列明登记费用。"
+  },
+  "takes": {
+   "en": "Due within 20 days after first employing workers.",
+   "zh": "须在首次雇用员工后 20 天内登记。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "Registers you as an employer for unemployment insurance once you have staff on payroll.",
+   "zh": "有员工发薪后，登记失业保险雇主账户。"
+  },
+  "proof": {
+   "quote": "An employer must  Register for Unemployment Insurance Tax within 20 days after first employing workers.",
+   "checked": "2026-10-28",
+   "read": "https://www.jobsnd.com/unemployment-business-tax/file-reports"
+  }
+ },
+ {
+  "id": "nd-wsi",
+  "form": "Application for workers' compensation coverage (WSI)",
+  "title": {
+   "en": "Workers' compensation coverage with WSI (the state fund)",
+   "zh": "向 WSI（州基金）投保工伤保险"
+  },
+  "agency": {
+   "en": "North Dakota Workforce Safety and Insurance",
+   "zh": "北达科他州劳动安全与保险局（WSI）"
+  },
+  "level": "state",
+  "where": "ND",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 61,
+  "how": {
+   "en": "North Dakota doesn't let private insurers write workers' compensation: every employer applies for coverage with WSI, the state fund, and reports payroll through myWSI.",
+   "zh": "北达科他州不允许私营保险公司承保工伤保险：所有雇主都须向州基金 WSI 申请投保，并通过 myWSI 申报工资。"
+  },
+  "url": "https://forms.apps.mywsi.workforcesafety.com/?form=OAI",
+  "info": "https://www.nd.gov/faq/workforce-safety-and-insurance-faq",
+  "fee": null,
+  "feeNote": {
+   "en": "WSI bills a premium based on payroll; the page doesn't state an application fee.",
+   "zh": "WSI 按工资总额收取保费；页面未列明申请费。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "North Dakota's workers' comp comes only from the state fund, WSI: you apply to it, not to an insurer.",
+   "zh": "北达科他州的工伤保险只能向州基金 WSI 投保，不能向保险公司购买。"
+  },
+  "proof": {
+   "quote": "As an employer or prospective employer in North Dakota, you must provide workers' compensation insurance coverage for your employees.",
+   "checked": "2026-10-28",
+   "read": "https://www.nd.gov/faq/workforce-safety-and-insurance-faq"
+  }
+ },
+ {
+  "id": "nd-hhs-food-processing",
+  "form": "Food processing license",
+  "title": {
+   "en": "North Dakota food processing license",
+   "zh": "北达科他州食品加工执照"
+  },
+  "agency": {
+   "en": "North Dakota Department of Health and Human Services, Food and Lodging",
+   "zh": "北达科他州卫生与公众服务部食品与住宿处"
+  },
+  "level": "state",
+  "where": "ND",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 46,
+  "how": {
+   "en": "A business that processes, packages, labels or stores food for wholesale licenses with Food and Lodging. Request the application from the office and send it with the plan review documents at least 30 days before operating or building; review takes up to 30 days after payment. Where one of eight local health units licenses under an agreement with the state, that unit may handle it.",
+   "zh": "加工、包装、贴标或储存批发食品的企业须向食品与住宿处申领执照。向该处索取申请表，并在营业或施工前至少 30 天连同图纸审查文件提交；付款后审核最多 30 天。在与州政府签有协议的八个地方卫生单位辖区内，可能由该单位办理。"
+  },
+  "url": "https://www.hhs.nd.gov/health/food-and-lodging/food-and-beverage-establishments/manufactured-and-processed-food",
+  "info": "https://www.hhs.nd.gov/health/food-and-lodging/food-and-beverage-establishments/manufactured-and-processed-food",
+  "fee": null,
+  "takes": {
+   "en": "Allow up to 30 calendar days for review after payment.",
+   "zh": "付款后审核最多 30 个自然日。"
+  },
+  "renews": {
+   "en": "A yearly license fee, on the department's fee schedule.",
+   "zh": "按该部门收费表每年缴纳执照费。"
+  },
+  "checked": "page",
+  "fields": [],
+  "plain": {
+   "en": "The state's license for a facility that makes or stores food for wholesale in North Dakota.",
+   "zh": "在北达科他州生产或储存批发食品设施的州执照。"
+  },
+  "proof": {
+   "quote": "In North Dakota, a food processing license is required to process, manufacture, package, label, or store food and drink products intended for human consumption",
+   "checked": "2026-10-28",
+   "read": "https://www.hhs.nd.gov/health/food-and-lodging/food-and-beverage-establishments/manufactured-and-processed-food"
+  }
+ }
+]
