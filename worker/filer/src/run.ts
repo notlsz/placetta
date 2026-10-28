@@ -11,9 +11,9 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Browser, Page } from "playwright-core";
-import { confirmPattern, fieldFor, isFinal, mustStop, onPortal, optionFor, reviewMismatch, type PageState } from "./guards.ts";
+import { confirmPattern, fieldFor, isFinal, mustStop, onPortal, optionFor, reviewMismatch, stopLinesFilled, type PageState } from "./guards.ts";
 import type { Model } from "./model.ts";
-import { headingOf, locate, pageState } from "./page.ts";
+import { captchaAnswered, headingOf, locate, pageState } from "./page.ts";
 import { finalOn, type FormSteps, guideLines, navOn, pageOutline, payOn, type Playbook } from "./playbooks.ts";
 import { backoffMinutes, heal, type KeyLock, portalDown, receiptCheck, receiptLine } from "./heal.ts";
 import type { Store, Taught } from "./store.ts";
@@ -21,6 +21,8 @@ import { harden, linkAllowed, safeConfirm, wipe, withTimeout, type Blocked } fro
 import { scoreText } from "../../../supabase/functions/_shared/injection.ts";
 import { checkValue, confirmationIn, customerData, draftProblems, factKey, factsOf, fileFor, fillFacts, generalize, type Labeler, type RawEvent, record } from "./teach.ts";
 import { startRecorder } from "./recorder.ts";
+import { blockedPage } from "./env.ts";
+import type { LiveViews } from "./live.ts";
 import type { Act, Filing, Login, Result, Skill, TraceStep } from "./types.ts";
 
 export type Session = { browser: Browser; page: Page; liveUrl: string | null; close(): Promise<void> };
@@ -28,7 +30,12 @@ export type Session = { browser: Browser; page: Page; liveUrl: string | null; cl
     its own saved login is used), the other hosts the portal sends the browser to, and the page to start from. */
 export type Route = { tenant?: string; alsoOn?: string[]; start?: string };
 export type Config = {
-  store: Store; model: Model; open(): Promise<Session>;
+  store: Store; model: Model;
+  /** A new, empty browser session for a run on this host (main.ts: local Chromium, or Browserbase for the hosts that
+   *  refuse a cloud server's address). */
+  open(host?: string): Promise<Session>;
+  /** The worker's own live browser for hand-backs on a session with no hosted view (live.ts). */
+  live?: LiveViews;
   portalOf(official: string): string | null;          // the server-side destination host
   routeOf?(official: string): Route | null;           // from the same destination
   playbookOf?(host: string, official: string): { playbook: Playbook; form: FormSteps } | null;
@@ -63,6 +70,15 @@ const PAY = {
   en: "The agency is asking for its fee. Open the live view and pay it yourself, then tap \"I've done it\". Placetta never pays an agency.",
   zh: "机构要求支付费用。请打开实时画面自行支付后点击“我已完成”。快哉从不替您向机构付款。",
 };
+
+/** The agency's site refused the worker's server (env.ts blockedPage). The file function's sweep tries another way the
+ *  agency takes before the team (logic.ts PORTAL_FAILED). */
+const BLOCKED_MSG = {
+  en: "The agency's site refused Placetta's server before anything was entered. Placetta tries another way the agency takes, or the team files it.",
+  zh: "机构网站在填写任何内容前拒绝了快哉的服务器。快哉会改用机构接受的其他方式，否则由团队提交。",
+};
+/** Hand-backs a person finishes on the page itself: once the page no longer needs them, Odelia carries on by herself. */
+const SELF_CLEARING = new Set(["captcha", "code", "identity", "account", "secret_number", "payment"]);
 
 const log = (en: string, zh: string, kind = "info", ref?: string) => ({ en, zh, kind, ...(ref ? { ref } : {}) });
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -106,6 +122,8 @@ type Ctx = {
   taught?: Taught | null;                              // the portal's taught playbook this run follows
   assist?: boolean;                                    // its draft isn't reviewed: Odelia fills, a person presses submit
   replayFailed?: boolean;
+  /** The hand-back the person just finished, and the page it was on (handBack, waived). */
+  waive?: { reason: string; at: string };
 };
 /** The URL is on the portal or one of the other hosts its destination names. */
 const onAny = (url: string, hosts: string[]) => hosts.some((h) => onPortal(url, h));
@@ -161,11 +179,13 @@ export class Worker {
     let pb = this.c.playbookOf?.(host, official) ?? null;
     // No playbook from a published guide: one taught on this portal by an earlier customer or the team, if any. A
     // reviewed one runs like any playbook; a draft runs only in assist mode, where a person presses submit.
+    // A playbook from a guide that nobody has watched on the live site gives way to steps recorded there and reviewed by
+    // the team: what someone actually did on the portal beats what its guide says.
     let taught: Taught | null = null;
-    if (!pb && !teaching) {
+    if ((!pb || !pb.playbook.verified) && !teaching) {
       taught = await store.taught?.(host, official).catch((e) => { console.error("filer: taught lookup", e instanceof Error ? e.message : e); return null; }) ?? null;
       const form = taught?.body?.playbook?.forms?.[official];
-      if (taught && form) pb = { playbook: { ...taught.body.playbook, verified: taught.status === "approved" ? { on: "reviewed", by: "the Placetta team", filing: "" } : null }, form };
+      if (taught && form && (!pb || taught.status === "approved")) pb = { playbook: { ...taught.body.playbook, verified: taught.status === "approved" ? { on: "reviewed", by: "the Placetta team", filing: "" } : null }, form };
       else taught = null;
     }
     if (pb && !pb.playbook.verified && !this.c.allowUnverified && !taught && !teaching) {
@@ -182,7 +202,7 @@ export class Worker {
     try {
       // the run's own token for this one filing (store.ts): every database call it makes carries it
       await store.begin?.(f);
-      session = await this.c.open();
+      session = await this.c.open(host);
       track.session = session;
       await assertFresh(session);
       const page = session.page;
@@ -201,6 +221,13 @@ export class Worker {
       // The agency's own start page when the destination names one (on a host many agencies share, it's the agency's path).
       const start = pb?.form.start ?? route?.start;
       await page.goto(this.c.startUrl ? this.c.startUrl(host) : start && onAny(start, hosts) ? start : `https://${host}/`);
+      // the agency's bot protection refused this server's address: nothing was typed; another route, or Browserbase
+      const first = await pageState(page).catch(() => null);
+      if (first && blockedPage(first)) {
+        const res: Result = { kind: "handoff", reason: "portal_blocked", task: "handoff", trace: [], message: BLOCKED_MSG };
+        await this.finish(f, res);
+        return res;
+      }
       const ctx: Ctx = { f, host, hosts, login, page, session, trace: [], t0: Date.now(), files: new Map(), pb, dir, taught, assist: !!taught && taught.status !== "approved" };
       const key = portalKey(host, f.payload.official!);
       if (teaching) {
@@ -258,7 +285,7 @@ export class Worker {
     const st = await pageState(page);
     await this.proof(ctx, st);
     const stop = mustStop(st);
-    if (stop) return { end: await this.handBack(ctx, stop.reason, { en: stop.en, zh: stop.zh }) };
+    if (stop && !(await this.waived(ctx, stop, st))) return { end: await this.handBack(ctx, stop.reason, { en: stop.en, zh: stop.zh }) };
     const loc = locate(page, a.selector).first();
     if (!(await loc.count())) return { ok: false, error: `No element for ${a.selector}` };
     const p = ctx.f.payload;
@@ -357,7 +384,7 @@ export class Worker {
   private async beforeSubmit(ctx: Ctx, st: PageState): Promise<Result | null> {
     const shot = await ctx.page.screenshot({ fullPage: true });
     const path = await this.c.store.saveDoc(ctx.f, "review-page.png", shot, "image/png");
-    const missing = reviewMismatch(st.text, ctx.f.payload);
+    const missing = this.unconfirmed(ctx, st);
     if (missing.length) {
       return { kind: "handoff", reason: "review_differs", task: "handoff", trace: ctx.trace,
         message: { en: `The agency's review page doesn't match what you approved (${missing.join(", ")}). Nothing was submitted; the team is checking.`, zh: `机构的核对页面与您批准的内容不一致（${missing.join("、")}），未提交，团队正在核查。` } };
@@ -376,6 +403,16 @@ export class Worker {
     return null;
   }
 
+  /** Approved values the agency's sending page doesn't show. A form with no review page (FinCEN's BOIR sends from its
+   *  last tab) names review "entered": a value this run typed itself, through the guard that types only approved
+   *  values, counts as confirmed; any other approved value must still be on the page. */
+  private unconfirmed(ctx: Ctx, st: PageState): string[] {
+    const missing = reviewMismatch(st.text, ctx.f.payload);
+    if (ctx.pb?.playbook.review !== "entered") return missing;
+    const typed = new Set(ctx.trace.filter((t) => (t.action === "fill" || t.action === "select") && t.field).map((t) => (t as { field?: string }).field));
+    return missing.filter((label) => !typed.has(label));
+  }
+
   private async file(ctx: Ctx, name: string): Promise<string | null> {
     if (ctx.files.has(name)) return ctx.files.get(name)!;
     const p = ctx.f.payload;
@@ -389,23 +426,68 @@ export class Worker {
 
   // ---------------------------------------------------------------- hand-back
 
+  /** The page as the person is handed it, and how to tell they're finished with it. */
   private async handBack(ctx: Ctx, reason: string, message: { en: string; zh: string }): Promise<Result> {
     const until = new Date(Date.now() + this.c.holdMs).toISOString();
-    ctx.f = await this.c.store.step(ctx.f, { ...message, kind: "need_person", ref: reason },
-      { agent_state: "needs_you", handoff_url: ctx.session.liveUrl, provider_ref: `held-until:${until}` });
-    await this.c.store.notify(ctx.f, { en: "Placetta needs you for one step", zh: "需要您完成一步" }, message);
-    const end = Date.now() + this.c.holdMs;
-    while (Date.now() < end) {
-      await sleep(this.c.pollMs);
-      const now = await this.c.store.reload(ctx.f.id).catch(() => ctx.f);
-      if (now.status === "canceled") { ctx.f = now; return { ...STOPPED, trace: ctx.trace }; }
-      if (await this.takeBack(ctx.f.id)) {
-        ctx.f = await this.c.store.reload(ctx.f.id);
-        return { kind: "needs_you", reason: "resumed", message, trace: ctx.trace };   // marker: drive continues
+    // A session with no hosted view (local Chromium) gets the worker's own live browser for this hand-back (live.ts).
+    const own = !ctx.session.liveUrl ? this.c.live?.open(ctx.page as unknown as Parameters<LiveViews["open"]>[0], this.c.holdMs) ?? null : null;
+    const liveUrl = ctx.session.liveUrl ?? own?.url ?? null;
+    const at = await this.pageKey(ctx);
+    try {
+      ctx.f = await this.c.store.step(ctx.f, { ...message, kind: "need_person", ref: reason },
+        { agent_state: "needs_you", handoff_url: liveUrl, provider_ref: `held-until:${until}` });
+      await this.c.store.notify(ctx.f, { en: "Placetta needs you for one step", zh: "需要您完成一步" }, message);
+      const end = Date.now() + this.c.holdMs;
+      let clearFor = 0;
+      while (Date.now() < end) {
+        await sleep(this.c.pollMs);
+        const now = await this.c.store.reload(ctx.f.id).catch(() => ctx.f);
+        if (now.status === "canceled") { ctx.f = now; return { ...STOPPED, trace: ctx.trace }; }
+        if (await this.takeBack(ctx.f.id)) {
+          ctx.f = await this.c.store.reload(ctx.f.id);
+          ctx.waive = { reason, at };
+          return { kind: "needs_you", reason: "resumed", message, trace: ctx.trace };   // marker: drive continues
+        }
+        // One tap: Done in the live browser, or the page simply no longer needing the person (the CAPTCHA solved, the
+        // code typed, the fee paid and the agency's next page showing), and Odelia carries on by herself. Never while
+        // the person's hands are on the page: two quiet polls in a row, nothing clicked or typed for 3 seconds.
+        const idle = !own || Date.now() - (this.c.live?.touched(own.token) ?? 0) > 3000;
+        const tapped = !!own && !!this.c.live?.done(own.token);
+        const cleared = SELF_CLEARING.has(reason) && await this.cleared(ctx, reason, at);
+        clearFor = cleared && idle ? clearFor + 1 : 0;
+        if (tapped || clearFor >= 2) {
+          ctx.f = await this.c.store.step(ctx.f, log(tapped ? "You finished your step. Odelia carries on." : "The step is done. Odelia carries on.", tapped ? "您已完成这一步，Odelia 继续办理。" : "这一步已完成，Odelia 继续办理。", "resume"),
+            { agent_state: "running", provider_ref: null, handoff_url: null });
+          ctx.waive = { reason, at };
+          return { kind: "needs_you", reason: "resumed", message, trace: ctx.trace };
+        }
       }
+      ctx.f = await this.c.store.step(ctx.f, log("Closed the browser while waiting. Placetta starts again when you tap carry on.", "等待时已关闭浏览器，您点击继续后快哉会重新开始。", "quiet"), { provider_ref: null, handoff_url: null });
+      return { kind: "needs_you", reason, message, trace: ctx.trace };
+    } finally {
+      this.c.live?.close(own?.token);
     }
-    ctx.f = await this.c.store.step(ctx.f, log("Closed the browser while waiting. Placetta starts again when you tap carry on.", "等待时已关闭浏览器，您点击继续后快哉会重新开始。", "quiet"), { provider_ref: null, handoff_url: null });
-    return { kind: "needs_you", reason, message, trace: ctx.trace };
+  }
+  private async pageKey(ctx: Ctx): Promise<string> {
+    const st = await pageState(ctx.page).catch(() => null);
+    return st ? `${urlKey(st.url)}|${headingOf(st)}` : "";
+  }
+  /** The page no longer needs the person for this reason: it moved on, or what they were asked for is done on it. */
+  private async cleared(ctx: Ctx, reason: string, at: string): Promise<boolean> {
+    const st = await pageState(ctx.page).catch(() => null);
+    if (!st) return false;
+    const stop = mustStop(st);
+    const moved = `${urlKey(st.url)}|${headingOf(st)}` !== at;
+    if (reason === "payment") return moved && stop?.reason !== "payment" && !payOn(ctx.pb?.playbook, st);
+    if (reason === "captcha") return stop?.reason !== "captcha" || await captchaAnswered(ctx.page);
+    if (reason === "code" || reason === "secret_number") return stop?.reason !== reason || stopLinesFilled(reason, st);
+    return moved && stop?.reason !== reason;
+  }
+  /** The stop the person just finished, on the same page: let it pass once what they did is there. */
+  private async waived(ctx: Ctx, stop: { reason: string }, st: PageState): Promise<boolean> {
+    if (!ctx.waive || ctx.waive.reason !== stop.reason || ctx.waive.at !== `${urlKey(st.url)}|${headingOf(st)}`) return false;
+    if (stop.reason === "captcha") return await captchaAnswered(ctx.page);
+    return (stop.reason === "code" || stop.reason === "secret_number") && stopLinesFilled(stop.reason, st);
   }
   private async takeBack(id: string): Promise<boolean> {
     const s = this.c.store as Store & { takeHeld?(id: string): Promise<boolean> };
@@ -473,7 +555,8 @@ export class Worker {
       if (ctx.f.status === "canceled") return { ...STOPPED, trace: ctx.trace };
       const st = await pageState(ctx.page);
       // The guide's fee page goes to the person even before any card field shows.
-      const stop = mustStop(st) ?? (payOn(ctx.pb?.playbook, st) ? { reason: "payment" as const, ...PAY } : null);
+      const own = mustStop(st);
+      const stop = (own && !(await this.waived(ctx, own, st)) ? own : null) ?? (payOn(ctx.pb?.playbook, st) ? { reason: "payment" as const, ...PAY } : null);
       if (stop) {
         const r = await this.handBack(ctx, stop.reason, { en: stop.en, zh: stop.zh });
         if (r.kind === "needs_you" && r.reason === "resumed") continue;
@@ -481,6 +564,7 @@ export class Worker {
       }
       // A page with instructions aimed at an AI (in sight, or in text hidden from a person) isn't the agency talking to
       // the customer: the run stops before the model reads it, and the team takes the filing.
+      if (blockedPage(st)) return { kind: "handoff", reason: "portal_blocked", task: "handoff", trace: ctx.trace, message: BLOCKED_MSG };
       const inj = pageInjection(st);
       if (inj) return { kind: "handoff", reason: "page_injection", trace: ctx.trace,
         message: { en: `The agency's page had text aimed at an AI (${inj}), so Placetta stopped before reading it. The team takes this filing from here.`, zh: "机构页面中含有针对 AI 的文字，快哉在读取前已停止，由团队接手这份申请。" } };
@@ -524,7 +608,7 @@ export class Worker {
    *  agency's button in the live browser. Odelia never clicks it. submit_clicked_at is written as soon as they say
    *  they did, so the filing is never sent again. */
   private async assistSubmit(ctx: Ctx, st: PageState): Promise<Result> {
-    const missing = reviewMismatch(st.text, ctx.f.payload);
+    const missing = this.unconfirmed(ctx, st);
     if (missing.length) {
       return { kind: "handoff", reason: "review_differs", task: "handoff", trace: ctx.trace,
         message: { en: `The agency's review page doesn't match what you approved (${missing.join(", ")}). Nothing was submitted; the team is checking.`, zh: `机构的核对页面与您批准的内容不一致（${missing.join("、")}），未提交，团队正在核查。` } };
@@ -549,13 +633,17 @@ export class Worker {
    *  the recording becomes a draft playbook (teach.ts) for the team's review, and the confirmation is this filing's. */
   private async teach(ctx: Ctx, events: RawEvent[], start: string): Promise<Result> {
     const { store } = this.c;
-    if (!ctx.session.liveUrl && !this.c.teachWithoutLive) {
+    const span0 = this.c.teachMs ?? this.c.holdMs;
+    // with no hosted view, the worker's own live browser (live.ts) for the whole teaching run
+    const ownView = !ctx.session.liveUrl ? this.c.live?.open(ctx.page as unknown as Parameters<LiveViews["open"]>[0], span0) ?? null : null;
+    const teachUrl = ctx.session.liveUrl ?? ownView?.url ?? null;
+    if (!teachUrl && !this.c.teachWithoutLive) {
       return { kind: "handoff", reason: "no_live_view", trace: [], message: { en: "The live browser isn't available right now, so Odelia can't watch this filing. The Placetta team files it.", zh: "实时浏览器暂时不可用，Odelia 无法观看这次提交，由快哉团队提交。" } };
     }
     const official = ctx.f.payload.official ?? "";
     const span = this.c.teachMs ?? this.c.holdMs, settle = this.c.teachSettleMs ?? 3000;
     const until = new Date(Date.now() + span).toISOString();
-    ctx.f = await store.step(ctx.f, { ...TEACH, kind: "need_person", ref: "teach" }, { agent_state: "needs_you", handoff_url: ctx.session.liveUrl, provider_ref: `held-until:${until}` });
+    ctx.f = await store.step(ctx.f, { ...TEACH, kind: "need_person", ref: "teach" }, { agent_state: "needs_you", handoff_url: teachUrl, provider_ref: `held-until:${until}` });
     await store.notify(ctx.f, { en: "Show Odelia how", zh: "教 Odelia 一次" }, TEACH);
     // page events get what the worker reads from the page: its text (for the confirmation, kept in memory only),
     // whether it reads as instructions to an AI, and whether it takes a card
@@ -582,7 +670,9 @@ export class Worker {
       if (confirmation && !ctx.f.submit_clicked_at) ctx.f = await store.step(ctx.f, log("You submitted it on the agency's site", "您已在机构网站上提交", "submit"), { submit_clicked_at: new Date().toISOString() });
       if (confirmation) { sawAt ||= Date.now(); if (Date.now() - sawAt >= settle) break; }
       if (await this.takeBack(ctx.f.id)) { ctx.f = await store.reload(ctx.f.id); break; }
+      if (ownView && this.c.live?.done(ownView.token)) break;
     }
+    this.c.live?.close(ownView?.token);
     await readPages();
     const { recording, confirmation } = record(events, { payload: ctx.f.payload, host: ctx.host, official, start });
     let learned = false;

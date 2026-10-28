@@ -19,6 +19,7 @@
 // only approved values are typed (guards.ts), the final-submit guard runs before every button in `final`, and every
 // page named in `pay` goes to the person, who pays the agency's fee themselves.
 import type { PageState } from "./guards.ts";
+import type { Probe } from "./probe.ts";
 
 /** One step as the guide prints it. selector is the worker's own selector grammar ("button:", "link:", "label:")
     when the guide names the control; the model confirms it against the page. */
@@ -39,6 +40,13 @@ export type Playbook = {
   pay: string[];                                          // words in the heading of a page where the agency takes its fee
   receipt: string[];                                      // words in the heading of the page that confirms it
   confirm?: string;                                       // a pattern whose first group is the confirmation number, when the guide shows one
+  /** The public pages this playbook was checked against, with the words seen there and when (probe.ts). The nightly
+      re-check opens each one and sends missing words to the Quality tab as drift. */
+  probes?: Probe[];
+  /** "entered": the agency has no review page (the form sends from its last tab), so the final-submit guard counts the
+      values this run typed through the approved-values guard (run.ts unconfirmed). Default: the review page shows them. */
+  review?: "page" | "entered";
+  probeHosts?: string[];                                  // other hosts those public pages load their frames from
 };
 
 const ACA = "https://dallascityhall.com/departments/sustainabledevelopment/DCH%20documents/3.%20Applying%20for%20a%20Commercial%20Alteration%20and%20Addition%20Application.pdf";

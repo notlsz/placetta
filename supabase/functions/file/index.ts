@@ -28,10 +28,22 @@ import {
 import { DEST, staleDestinations, type Dest } from "./destinations.ts";
 import {
   afterHold, askedToResubmit, canFaxSignedFor, CHANNEL_SAID, check, DUPLICATE_REF, emailFor, envFrom, fallback, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holds,
-  isForeign, killSwitchOn, type LogEntry, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, type Refusal, refusalOf, rerouteDue, signedCopy, TEACH_REFUSED, teachRefusal, teamApproved,
+  isForeign, type LogEntry, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, type Refusal, refusalOf, rerouteDue, signedCopy, TEACH_REFUSED, teachRefusal, teamApproved, selfFileScope, workerOn, workerState,
 } from "./logic.ts";
 
 const env = () => envFrom((k) => Deno.env.get(k));
+/** The portal worker's heartbeat (20261102090000_filer_heartbeat.sql), read at most every 30 seconds. Null when the
+ *  database doesn't have it yet. */
+let beatCache: { at: number; beat: { live: boolean; seen_at: string | null } | null } | null = null;
+async function workerBeat() {
+  if (beatCache && Date.now() - beatCache.at < 30_000) return beatCache.beat;
+  const { data, error } = await admin.rpc("filer_live", {});
+  const r = (data as { live: boolean; seen_at: string | null }[] | null)?.[0];
+  beatCache = { at: Date.now(), beat: error || !r ? null : { live: r.live === true, seen_at: r.seen_at ?? null } };
+  return beatCache.beat;
+}
+/** The env, with the portal worker on only while it's on (FILER_ENABLED, or unset: its heartbeat). */
+const liveEnv = async () => ({ ...env(), portalWorker: workerOn(Deno.env.get("FILER_ENABLED"), await workerBeat()) });
 const COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, provider_ref, submit_clicked_at, attempts, requirements_checked, confirmation_number, portal_url, receipt_path, fee_estimate, send_after";
 const log = (en: string, zh: string, kind = "info", ref?: string): LogEntry => ({ en, zh, kind, ...(ref ? { ref } : {}) });
 
@@ -434,7 +446,7 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
   if (["canceled", "accepted", "rejected", "submitted"].includes(f.status)) throw new HttpError("bad_request", "This filing is already finished.", "这份申请已经办完。");
   // Claim the run: of two calls racing to start the same filing, only one moves it out of "not started".
   f = await step(f, null, { expect_agent_state: null, agent_state: "running" }, false);
-  const e = env();
+  const e = await liveEnv();
   // Who approved and signed, from where: the e-signature record.
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim().slice(0, 64);
   const ua = (req.headers.get("user-agent") ?? "").slice(0, 200);
@@ -456,11 +468,14 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
 
   // A probe workspace goes through every check as if self-filing were on for every channel, then stops: nothing leaves.
   const synth = await isSynthetic(f.workspace_id);
-  if (!synth && !killSwitchOn(f, e)) return await toTeam(f, "Self-filing isn't on for this agency yet. The Placetta team submits it.", "该机构尚未开通自动提交，由快哉团队提交。");
   const d = DEST[f.payload.official ?? ""];
+  const scope = selfFileScope(f, e, d);
+  if (!synth && !scope) return await toTeam(f, "Self-filing isn't on for this agency yet. The Placetta team submits it.", "该机构尚未开通自动提交，由快哉团队提交。");
   const ePick = synth ? { ...e, channels: ["email", "fax", "mail", "portal"] as typeof e.channels, portalWorker: true, fax: true, mail: true } : e;
   // Where it would go decides what is checked: the filled form and its signature only travel by email, fax and mail.
   const channel = pick(f, d, ePick, await facts(f, d));
+  // FILER_AGENCIES=portal switches on agency websites only: any other route stays with the team
+  if (!synth && scope === "portal" && channel !== "portal") return await toTeam(f, "Self-filing isn't on for this agency yet. The Placetta team submits it.", "该机构尚未开通自动提交，由快哉团队提交。");
   const problems = check(f, d, { docPaths: await docPaths(f) }, channel);
   if (problems.length) {
     return await needsYou(f, problems.map((p) => p.en).join(". ").slice(0, 900), problems.map((p) => p.zh).join("；").slice(0, 900), null, "needs_you");
@@ -650,7 +665,7 @@ async function teamApprove(f: Filing, by: string) {
  *  secret numbers are never recorded. The recording becomes a draft for the team's review (worker/filer/src/teach.ts).
  *  Compare-and-set on the agent state, so two taps start one run. */
 async function teach(f: Filing, by: string) {
-  const why = teachRefusal(f, DEST[f.payload.official ?? ""], env());
+  const why = teachRefusal(f, DEST[f.payload.official ?? ""], await liveEnv());
   if (why) throw new HttpError("bad_request", TEACH_REFUSED[why].en, TEACH_REFUSED[why].zh);
   return view(await step(f, log("You're showing Odelia how to file this on the agency's site. The live browser opens in a moment.", "您正在教 Odelia 如何在机构网站上提交。实时浏览器即将打开。", "teach", by),
     { expect_agent_state: f.agent_state, channel: "portal", agent_state: "queued", handoff_url: null, provider_ref: null }));
@@ -808,8 +823,14 @@ serve(async (req) => {
   const { user, jwt } = await requireUser(req);
   const body = await readBody(req);
   const ws = uuidParam(body.workspace_id, "workspace_id");
-  const filingId = uuidParam(body.filing_id, "filing_id");
   const action = String(body.action ?? "");
+  // Is online filing live? Any member may ask; the answer is a word and a time, never the worker's details.
+  if (action === "worker") {
+    await requireAccess(ws, user, jwt, "member");
+    const beat = await workerBeat();
+    return ok({ worker: { state: workerState(Deno.env.get("FILER_ENABLED"), env(), beat), seen_at: beat?.seen_at ?? null } });
+  }
+  const filingId = uuidParam(body.filing_id, "filing_id");
   const by = user.email ?? user.id;
   // A refusal from the database means another call already acted on this filing: answer with it as it is now.
   const settled = async (run: () => Promise<ReturnType<typeof view>>) => {
@@ -832,7 +853,7 @@ serve(async (req) => {
     return await settled(() => teach(f, by));
   }
   if (!["start", "resume", "signed", "stop", "status", "undo", "send_now"].includes(action)) {
-    throw new HttpError("bad_request", "action must be start, resume, signed, stop, undo, send_now, teach or status.");
+    throw new HttpError("bad_request", "action must be start, resume, signed, stop, undo, send_now, teach, status or worker.");
   }
   // Sending, carrying on, and stopping are an owner's, as in the database (only owners approve or cancel filings);
   // any member can check on one.

@@ -3,7 +3,7 @@
 // Selectors: "label:<text>" (getByLabel, exact), "button:<text>", "link:<text>", or a CSS selector built from
 // id or name ("#id", "[name=\"x\"]"). Labels first, so a recorded step survives cosmetic changes to the page.
 import type { Locator, Page } from "playwright-core";
-import type { PageState } from "./guards.ts";
+import { secretControl, type PageState } from "./guards.ts";
 
 /** The page as the model sees it. A page that starts a navigation while it's read (a refused jump to another site
  *  included) is read again once it settles. */
@@ -83,6 +83,9 @@ async function readState(page: Page): Promise<PageState> {
   const dup = new Map(s.labels as [string, number][]);
   const controls = (s.controls as Omit<PageState["controls"][number], "selector">[]).map((c) => ({
     ...c,
+    // what a person typed on an SSN, card, bank or code line is never read back: the model and the logs see only that
+    // the line has something in it
+    value: c.value && secretControl(c) ? "(filled)" : c.value,
     selector: c.label && dup.get(c.label) === 1 && c.type !== "radio" ? `label:${c.label}` : c.id ? `#${c.id}` : c.name ? `[name="${c.name}"]` : `label:${c.label}`,
   }));
   return {
@@ -91,6 +94,13 @@ async function readState(page: Page): Promise<PageState> {
     links: s.links.map((l: { text: string; href: string }) => ({ selector: `link:${l.text}`, text: l.text, href: l.href })),
     text: s.text, frames: s.frames, markers: s.markers, hidden: s.hidden,
   };
+}
+
+/** A person has answered the page's CAPTCHA: the widget's own response field has its token. Read only, never written:
+ *  Placetta never solves a CAPTCHA, it only sees that the person did. */
+export async function captchaAnswered(page: Page): Promise<boolean> {
+  return await page.evaluate(() => Array.from(document.querySelectorAll('[name^="g-recaptcha-response"], [name="h-captcha-response"], [name="cf-turnstile-response"]'))
+    .some((e) => !!(e as HTMLInputElement).value)).catch(() => false);
 }
 
 /** The selector as a Playwright locator. */

@@ -643,6 +643,9 @@ export const signedCopy = (ws: string, filingId: string, path: string) => fn<Fil
 /** Stop a filing before anything has left for the agency. Refused once Placetta has pressed submit or sent it. */
 export const stopFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "stop" });
 export const filingStatus = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "status" });
+/** Is online filing live: the portal worker beating and the portal channel on (supabase/functions/file action worker). */
+export type WorkerStatus = { state: "live" | "off" | "down" | "not_set_up"; seen_at: string | null };
+export const portalWorker = (ws: string) => fn<{ worker: WorkerStatus }>("file", { workspace_id: ws, action: "worker" }).then((r) => r.worker);
 /** The undo window: take a held filing back (nothing has left), or end the wait and send it now. */
 export const undoFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "undo" });
 export const sendFilingNow = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "send_now" });

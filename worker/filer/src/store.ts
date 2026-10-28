@@ -38,6 +38,11 @@ export interface Store {
   taught?(host: string, official: string): Promise<Taught | null>;
   saveTaught?(f: Filing, d: Draft): Promise<{ id: string; status: string } | null>;
   taughtResult?(id: string, f: Filing, ok: boolean, drift?: string[]): Promise<string | null>;
+  /** The worker is alive (20261102090000_filer_heartbeat.sql): the app shows online filing as live while this is fresh,
+   *  and the file function queues portal filings only then. info carries counts and versions, never a filing. */
+  heartbeat?(info: Record<string, unknown>): Promise<void>;
+  /** The nightly re-check's drift, for the Quality tab (qa_report through filer_probe_report). */
+  probeReport?(findings: unknown[]): Promise<number>;
 }
 
 /** The worker's database access, through the functions in 20261022120000_filer_least_privilege.sql only: no table is
@@ -127,6 +132,12 @@ export class SupabaseStore implements Store {
   }
   async taughtResult(id: string, f: Filing, ok: boolean, drift?: string[]) {
     return await this.call<string | null>("filer_taught_result", { p_playbook: id, p_filing: f.id, p_ok: ok, p_drift: drift?.length ? drift.slice(0, 20) : null }, "taught result");
+  }
+  async heartbeat(info: Record<string, unknown>) {
+    await this.call("filer_heartbeat", { p_info: info }, "heartbeat");
+  }
+  async probeReport(findings: unknown[]) {
+    return (await this.call<number | null>("filer_probe_report", { p_findings: findings }, "probe report")) ?? 0;
   }
   async selfFiled(official: string) {
     return (await this.call<number | null>("filer_self_filed", { p_official: official }, "count")) ?? 0;

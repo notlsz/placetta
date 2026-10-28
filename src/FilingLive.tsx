@@ -9,6 +9,7 @@ import { fmtStamp, money } from "./time";
 import { FilingHold } from "./SendHold";
 import { ReviewBadges } from "./Specialist";
 import { outlineOf, progressOf } from "./filingProgress";
+import { ONLINE_FILING, useOnlineFiling } from "./onlineFiling";
 
 /*
  * Watch it file. Every filing, live while it runs and replayable after: each page of the agency's site with what was
@@ -281,9 +282,10 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
       </ol>
 
       {state === "needs_you" && f?.handoff_url && (
-        <p className="fl-take"><span>{zh ? "机构网站需要真人完成一步（如验证码或身份核验）。在实时浏览器中完成后，Odelia 会继续。" : "The agency's site needs a person for one step, like a CAPTCHA or an ID check. Do it in the live browser and Odelia carries on."}</span>
-          <a className="pill ink sm" href={f.handoff_url} target="_blank" rel="noopener noreferrer">{zh ? "接手浏览器" : "Take over the browser"}<I.ext /></a></p>
+        <p className="fl-take"><span>{zh ? "机构网站需要真人完成一步（如验证码、验证码短信、签名或机构费用）。打开实时浏览器完成这一步，Odelia 会自己继续，无需再点任何按钮。" : "The agency's site needs a person for one step, like a CAPTCHA, a code sent to your phone, a signature or the agency's fee. Open the live browser and do that step: Odelia carries on by herself, with nothing else to tap."}</span>
+          <a className="pill ink sm" href={f.handoff_url} target="_blank" rel="noopener noreferrer">{zh ? "打开实时浏览器" : "Open the live browser"}<I.ext /></a></p>
       )}
+      {run.channel === "portal" && state === "queued" && !run.sample && <WorkerWait />}
 
       <footer className="fl-f">
         <ReviewBadges appId={run.app.id} />
@@ -297,6 +299,14 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
       {open !== null && <Replay run={run} start={open} onClose={() => setOpen(null)} />}
     </section>
   );
+}
+
+/** A filing queued for an agency's website while online filing isn't live says who files it instead (src/onlineFiling.ts). */
+function WorkerWait() {
+  const { b } = useApp();
+  const st = useOnlineFiling();
+  if (!st || ONLINE_FILING[st.state].live) return null;
+  return <p className="fl-take"><span><b>{b(ONLINE_FILING[st.state].short)}.</b> {b(ONLINE_FILING[st.state].long)}</span></p>;
 }
 
 /* ------------------------------ a page, as Placetta saw it ------------------------------ */
