@@ -25,7 +25,7 @@ import {
   admin, aalOf, describe, HttpError, isStaff, ok, readBody, requireAccess, requireUser, serve, uuidParam,
   SUPABASE_URL, b64urlDecode, utf8,
 } from "./shared.ts";
-import { DEST, staleDestinations, TEAM_ONLY, type Dest } from "./destinations.ts";
+import { DEST, destFor, staleDestinations, TEAM_ONLY, type Dest } from "./destinations.ts";
 import {
   afterHold, askedToResubmit, type Bi, canFaxSignedFor, CHANNEL_SAID, check, DUPLICATE_REF, emailFor, envFrom, fallback, faxFailures, faxFile, faxTo, feeBlocks, type Filing,
   handBackDue, handoffPacket, hasLoginFor, holds, isForeign, type LogEntry, mailOutcome, mailTo, OWNER_REF, pick, type Refusal, refusalOf, sentByYou, signedCopy,
@@ -136,7 +136,7 @@ async function teamTask(f: Filing, kind: string, title: string, detail?: unknown
     something may already have reached the agency, so the packet says to look first. The status stays as it was: a
     request nobody has started can still be canceled. */
 async function toYou(f: Filing, why: Bi, opts: { check?: boolean; expect?: Record<string, unknown> } = {}) {
-  const d = DEST[f.payload.official ?? ""];
+  const d = destFor(f.payload.official, f.payload);
   const t = TEAM_ONLY[f.payload.official ?? ""];
   const packet = handoffPacket(f, d, why, { check: opts.check, agencyWhy: t?.why, agencySource: t?.source });
   // Saved with the filing's documents (not as its receipt: nothing has reached the agency yet).
@@ -343,7 +343,7 @@ async function applyFax(f: Filing, status: string, info: { pages?: number; reaso
   const ref = f.provider_ref;
   const same = { expect_agent_state: "running", expect_provider_ref: ref };
   if (status === "delivered") {
-    const d = DEST[f.payload.official ?? ""];
+    const d = destFor(f.payload.official, f.payload);
     const to = d ? faxTo(d, f.payload) : "";
     const g = await step(f, log(`Faxed to the agency at ${to}. Delivered.`, `已传真至机构 ${to}，已送达。`, "submitted", ref),
       { ...same, status: "submitted", agent_state: "done", requirements_checked: true });
@@ -357,7 +357,7 @@ async function applyFax(f: Filing, status: string, info: { pages?: number; reaso
     const g = await step(f, log(`The fax didn't go through${info.reason ? ` (${info.reason})` : ""}`, `传真未送达${info.reason ? `（${info.reason}）` : ""}`, "fax_failed", ref),
       { ...same, provider_ref: null });
     // Counted from the row the database just returned, not from what this caller read earlier.
-    if (faxFailures(g) < 3) return await sendFax(g, DEST[f.payload.official ?? ""]!, true);
+    if (faxFailures(g) < 3) return await sendFax(g, destFor(f.payload.official, f.payload)!, true);
     return await toYou(g, bi("The fax didn't go through after 3 tries.", "传真尝试 3 次均未送达。"));
   }
   return view(f);
@@ -479,7 +479,7 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
 
   // A probe workspace goes through every check as if self-filing were on for every channel, then stops: nothing leaves.
   const synth = await isSynthetic(f.workspace_id);
-  const d = DEST[f.payload.official ?? ""];
+  const d = destFor(f.payload.official, f.payload);
   const scope = selfFileScope(f, e, d);
   if (!synth && !scope) return await toYou(f, bi("Placetta doesn't send this form to the agency by itself yet.", "快哉暂时不会自动向机构提交这份表格。"));
   const ePick = synth ? { ...e, channels: ["email", "fax", "mail", "portal"] as typeof e.channels, portalWorker: true, fax: true, mail: true } : e;
@@ -579,7 +579,7 @@ async function signed(f: Filing, path: string, by: string) {
   if (f.agent_state !== "needs_you") throw new HttpError("bad_request", "This filing isn't waiting for a signed copy.");
   const last = [...f.agent_log].reverse().find((e) => ["needs_you", "wet_signature", "need_person"].includes(e.kind));
   if (last?.kind !== "wet_signature") throw new HttpError("bad_request", "This filing isn't waiting for a signed copy.");
-  const d = DEST[f.payload.official ?? ""];
+  const d = destFor(f.payload.official, f.payload);
   if (!canFaxSignedFor(f, d, env())) throw new HttpError("bad_request", "Placetta can't fax this form yet. Send it yourself, then tap \"I've done it\".", "快哉暂时无法传真这份表格。请您自行提交，然后点击“我已完成”。");
   if (!path.startsWith(`${f.workspace_id}/`) || path.split("/").some((p) => p === ".." || p === ".")) throw new HttpError("bad_request", "That file isn't in this workspace.");
   const { data: doc, error } = await admin.from("documents").select("path, name, mime").eq("workspace_id", f.workspace_id).eq("path", path).maybeSingle();
@@ -629,7 +629,7 @@ const holdSend = (f: Filing, minutes: number) => rpcFiling("filing_hold", { p_id
 
 /** Released from the hold (by the sweep, or by "Send now"): send it on its channel. */
 async function sendHeld(f: Filing) {
-  const d = DEST[f.payload.official ?? ""];
+  const d = destFor(f.payload.official, f.payload);
   switch (afterHold(f, !!d)) {
     case "email": return await sendEmail(f, d!);
     case "fax": return await sendFax(f, d!);
@@ -672,7 +672,7 @@ async function teamApprove(f: Filing, by: string) {
   if (env().dryRun) throw new HttpError("bad_request", "Dry run is on: nothing is sent. Turn FILER_DRY_RUN off first.");
   // Compare-and-set on handoff: two approvals (or an approval racing a take-over) send at most once.
   const g = await step(f, log("The Placetta team checked it. Sending now.", "快哉团队已核对，现在发送。", "two_key_ok", by), { expect_agent_state: "handoff", agent_state: "running" });
-  const d = DEST[f.payload.official ?? ""];
+  const d = destFor(f.payload.official, f.payload);
   switch (g.channel) {
     case "email": return await sendEmail(g, d!);
     case "fax": return await sendFax(g, d!);
@@ -687,7 +687,7 @@ async function teamApprove(f: Filing, by: string) {
  *  secret numbers are never recorded. The recording becomes a draft for the team's review (worker/filer/src/teach.ts).
  *  Compare-and-set on the agent state, so two taps start one run. */
 async function teach(f: Filing, by: string) {
-  const why = teachRefusal(f, DEST[f.payload.official ?? ""], await liveEnv());
+  const why = teachRefusal(f, destFor(f.payload.official, f.payload), await liveEnv());
   if (why) throw new HttpError("bad_request", TEACH_REFUSED[why].en, TEACH_REFUSED[why].zh);
   return view(await step(f, log("You're showing Odelia how to file this on the agency's site. The live browser opens in a moment.", "您正在教 Odelia 如何在机构网站上提交。实时浏览器即将打开。", "teach", by),
     { expect_agent_state: f.agent_state, channel: "portal", agent_state: "queued", handoff_url: null, provider_ref: null }));
@@ -775,7 +775,7 @@ async function lostRuns(): Promise<number> {
     its hand-back. When there's no other way, the business gets the packet, and it says why. */
 async function reroute(f: Filing) {
   const e = env();
-  const d = DEST[f.payload.official ?? ""];
+  const d = destFor(f.payload.official, f.payload);
   const was = { expect_agent_state: "handoff" };
   const route = fallback(f, d, e, await facts(f, d));
   const problems = route === "team" ? [] : check(f, d, { docPaths: await docPaths(f) }, route);

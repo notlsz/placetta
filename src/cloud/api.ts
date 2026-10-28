@@ -1043,6 +1043,20 @@ export async function finishTeamTask(id: string) {
   const { error } = await supabase().rpc("finish_team_task", { p_id: id });
   if (error) throw fromPg(error);
 }
+/** A human check (a visible CAPTCHA) the portal worker gave the team (20261102090200_human_checks.sql): the live view of
+ *  that one page, after the owner's audit trail records who opened it. Staff with two-step sign-in only. */
+export async function takeHumanCheck(id: string): Promise<string> {
+  const { data, error } = await supabase().rpc("human_check_take", { p_id: id });
+  if (error) throw fromPg(error);
+  if (typeof data !== "string" || !/^https:\/\//.test(data)) throw err("db_error", "That live view has ended.");
+  return data;
+}
+/** Give the human check to the owner now: the worker hands them the page on its next look. */
+export async function passHumanCheck(id: string): Promise<boolean> {
+  const { data, error } = await supabase().rpc("human_check_pass", { p_id: id });
+  if (error) throw fromPg(error);
+  return data === true;
+}
 export async function updateFiling(id: string, patch: Partial<Pick<Filing, "status" | "requirements_checked" | "confirmation_number" | "fee_paid" | "receipt_path" | "note" | "payment_url">> & { assigned_to?: string | null }) {
   const { error } = await supabase().from("filings").update(patch).eq("id", id);
   if (error) throw fromPg(error);

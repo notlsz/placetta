@@ -153,11 +153,12 @@ function BatchApprove() {
 
 /** Who files it and how long the agency takes (src/approvalRoute.ts): a line on every approval card. The time shows only
  *  when the registry or the application states one. */
-export function RouteLine({ a, app }: { a: Approval; app?: Application }) {
+/** noFaster: the card shows the expedite choice itself (src/ExpeditePick.tsx), so its tiers aren't said twice. */
+export function RouteLine({ a, app, noFaster }: { a: Approval; app?: Application; noFaster?: boolean }) {
   const { b } = useApp();
   const r = approvalRoute(a, app);
   if (!r) return null;
-  return <span className="appr-route"><em>{b(r.who)}</em>{r.steps?.map((s, i) => <span key={i} className="appr-time">{b(s)}</span>)}{r.time && <span className="appr-time"><I.clock />{b(r.time)}</span>}</span>;
+  return <span className="appr-route"><em>{b(r.who)}</em>{r.steps?.map((s, i) => <span key={i} className="appr-time">{b(s)}</span>)}{r.time && <span className="appr-time"><I.clock />{b(r.time)}</span>}{r.faster && !noFaster && <span className="appr-time">{b(r.faster)}</span>}</span>;
 }
 
 /** One thing only you can do, with its one tap: Approve opens the approval (you confirm there), Upload opens the file

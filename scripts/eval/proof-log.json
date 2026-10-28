@@ -7780,5 +7780,3186 @@
   "found": true,
   "sha256": "0c1470b46bb76ce3",
   "context": "ום אגרת השילוט כחוק, זאת לרבות בכל מקרה של שינוי, החלפה או חידוש של שילוט קיים. אין להציב שילוט טרם קבלת רישיון להצבתו. מסמכים נדרשים ​טופס בקשה​​ ​ ​הכולל את פרטי מבקש השלט ואת פרטי השלט המבוקש, סוג"
+ },
+ {
+  "id": "ny-dos-1336",
+  "read": "https://dos.ny.gov/fee-schedules",
+  "quote": "DOMESTIC Articles of Organization $200",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "7ef66164bf8a4a0e",
+  "context": "ted liability companies filing limited liability company certificates rev. 3/16 domestic articles of organization $200 articles of organization — professional service $200 reservation of name $20 pu"
+ },
+ {
+  "id": "ca-llc-1",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/forms/limited-liability-companies-california-domestic",
+  "quote": "Formation - Articles of Organization Form LLC-1 (PDF) $70.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "dcdb3cb29d127a4d",
+  "context": " for fastest response 5 days or less california llcs pdf forms 10+ days fees 1. formation - articles of organization form llc-1 (pdf) $70.00 2. statement of information: due within 90 days of initial registration and eve"
+ },
+ {
+  "id": "ca-llc-5",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/forms/limited-liability-companies-foreign-out-state-or-out-country",
+  "quote": "Application to Register Form LLC-5 (PDF) $70.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "97472eab549bbb58",
+  "context": "ine for fastest response 5 days or less foreign llcs pdf forms 10+ days fees 1. application to register form llc-5 (pdf) $70.00 2. name change amendment form llc-6 (pdf) $30.00 3. certificate of correction -"
+ },
+ {
+  "id": "tx-205",
+  "read": "https://www.sos.state.tx.us/corp/instructions/205.shtml",
+  "quote": "The filing fee for a certificate of formation for an LLC is $300.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "4f549cf93129250d",
+  "context": "lt in the involuntary termination of the llc. payment and delivery instructions the filing fee for a certificate of formation for an llc is $300. online filing for faster processing submit your filing through sosportal. you w"
+ },
+ {
+  "id": "il-sos",
+  "read": "https://ilga.gov/Documents/legislation/ilcs/documents/080501800K50-10.htm",
+  "quote": "Filing articles of organization (domestic), application for admission (foreign), and restated articles of organization (domestic), $150.",
+  "checked": "2026-10-27",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 000; read with WebFetch on 2026-10-27"
+ },
+ {
+  "id": "wa-sos",
+  "read": "https://www.sos.wa.gov/corporations-charities/business-entities/online-filing-instructions/start-domestic-wa-limited-liability-company-llc-online",
+  "quote": "Filing Fee: $180 in addition to an online processing fee.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "93e11b903e5f9701",
+  "context": "of the secretary of state; or is beyond its five (5) year reinstatement period. filing fee: $180 in addition to an online processing fee. expedited service: you may add expedited priority for an additional $100 at che"
+ },
+ {
+  "id": "fl-sunbiz",
+  "read": "https://dos.fl.gov/sunbiz/forms/fees/",
+  "quote": "New Florida/Foreign LLC Filing Fee (required) $100.00 Registered Agent Fee (required) $25.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "e398099ea90f7803",
+  "context": " $8.75 back to top limited liability company fees service price additional fees new florida/foreign llc filing fee (required) $100.00 registered agent fee (required) $25.00 certified copy (optional) $30.00 certificate of status (optional) $5.00 total $"
+ },
+ {
+  "id": "ga-sos",
+  "read": "https://georgia.gov/register-llc",
+  "quote": "Pay the $100 filing fee by approved credit card: Visa, MasterCard, American Express, or Discover.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ed0b662fe3c6e1e3",
+  "context": "y. fill out the required information about your business entity (listed above). pay the $100 filing fee by approved credit card: visa, mastercard, american express, or discover. processing time: 7 business days; processing in 2 business days costs an additi"
+ },
+ {
+  "id": "pa-dos",
+  "read": "https://www.pa.gov/agencies/dos/programs/business/fees-and-payments",
+  "quote": "Domestic Limited Liability Company Fee Certificate of Organization $125",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "e2d51ee214a91a76",
+  "context": "top\\\">$75 plus amount of attached filing</td>\\r\\n</tr></tbody></table>\\r\\n\"}}\"> domestic limited liability company fee certificate of organization $125 each ancillary transaction $70 certificate of merger, consolidation or division"
+ },
+ {
+  "id": "nv-silverflume",
+  "read": "https://www.leg.state.nv.us/nrs/nrs-086.html",
+  "quote": "(a) Filing the original articles of organization, or for registration of a foreign company, $75;",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "07acfa90f3a53e77",
+  "context": "n, 59) nrs 86.561 fees. 1. the secretary of state shall charge and collect for: (a) filing the original articles of organization, or for registration of a foreign company, $75; (b) amending or restating the articles of organization, amending the registrati"
+ },
+ {
+  "id": "co-sos",
+  "read": "https://www.sos.state.co.us/pubs/info_center/fees/business.html",
+  "quote": "Limited liability company Online fee Paper fee Articles of Organization $50.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "2142dfbf55f83cd0",
+  "context": "of association $25.00 n/a dissolve a limited partnership association $10.00 n/a limited liability company online fee paper fee articles of organization $50.00 n/a amend articles of organization $25.00 n/a amend and restate articles of org"
+ },
+ {
+  "id": "nj-formation",
+  "read": "https://www.nj.gov/treasury/revenue/fees.shtml",
+  "quote": "Certificate of formation $100.00 Certificate of registration for a foreign LLC $100.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "8baaebeaa58f0570",
+  "context": "er document $15.00 $500.00 $1000.00 limited liability company (llc) filing fees certificate of formation $100.00 certificate of registration for a foreign llc $100.00 all amendments $100.00 reinstatement of charter $75.00 certificate of cancellat"
+ },
+ {
+  "id": "az-llc",
+  "read": "https://azcc.gov/docs/default-source/corps-files/fee-schedules/fee-schedule-llcs.pdf",
+  "quote": "Articles of Organization $50.00 $85.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "816faac7a4df678d",
+  "context": "00 $60.00 articles of amendment to foreign $25.00 $60.00 registration statement articles of organization $50.00 $85.00 articles of termination $35.00 $70.00 certificate of cancellation $10.00 $45.00"
+ },
+ {
+  "id": "hi-llc",
+  "read": "https://cca.hawaii.gov/breg/registration/dllc/fees/",
+  "quote": "DOMESTIC LIMITED LIABILITY COMPANY FILING FEE EXPEDITED REVIEW Articles of Organization $50.00 $25.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "8a59653b8ffe59d8",
+  "context": "f commerce and consumer affairs mailing address p.o. box 40, honolulu, hi 96810 domestic limited liability company filing fee expedited review articles of organization $50.00 $25.00 articles of amendment $25.00 $25.00 articles of amendment to change limited lia"
+ },
+ {
+  "id": "ut-llc",
+  "read": "https://commerce.utah.gov/wp-content/uploads/2023/04/currentfees.pdf",
+  "quote": "Limited liability company (LLC) - certificate of organization​ ​$59",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "27050aaca0a2f1e9",
+  "context": "corporation​ ​ 59​ $ ​nonprofit corporation - articles of incorporation​ ​$59​ ​limited liability company (llc) - certificate of organization​ ​$59​ ​limited liability partnership (llp) - statement of qualification​ ​$70​ ​limi"
+ },
+ {
+  "id": "va-llc",
+  "read": "https://www.scc.virginia.gov/businesses/new-business-resources/business-types/",
+  "quote": "Virginia LLC File Online or complete Articles of Organization (Form LLC1011-DOC) $100",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "30a56984897e956a",
+  "context": "igations of the limited liability company. business type how to file filing fee virginia llc file online or complete articles of organization (form llc1011-doc) $100 foreign llc file online or complete an application for registration as a foreig"
+ },
+ {
+  "id": "dc-formation",
+  "read": "https://dlcp.dc.gov/node/1621921",
+  "quote": "Domestic Limited Liability Company Certificate of organization $99.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "110553c4773e4cb0",
+  "context": "ivision fees - limited liability company entity type fee description fee amount domestic limited liability company certificate of organization $99.00 domestic limited liability company amendment or restatement of certificate of o"
+ },
+ {
+  "id": "oh-sos-llc",
+  "read": "https://codes.ohio.gov/ohio-revised-code/section-111.16",
+  "quote": "For filing and recording articles of organization of a limited liability company, for filing and recording an application to become a registered foreign",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "4a3b4f1a02d570a6",
+  "context": "icles of incorporation of a credit union or the association, fifty dollars; (f) for filing and recording articles of organization of a limited liability company, for filing and recording an application to become a registered foreign limited liability company, for filing and recording a registration application "
+ },
+ {
+  "id": "ny-dos-foreign-llc",
+  "read": "https://dos.ny.gov/fee-schedules",
+  "quote": "FOREIGN Application for Authority $250",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "7ef66164bf8a4a0e",
+  "context": "ger or consolidation $60 conversion $200 resignation for receipt of process $10 foreign application for authority $250 application for authority — professional service $200 certificate of publicatio"
+ },
+ {
+  "id": "de-llc-form",
+  "read": "https://corpfiles.delaware.gov/Fee_Schedule/AugustFee2026.pdf",
+  "quote": "Formation – domestic $110.00 $50.00 $100.00 $50.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d2f6498d7f828a7a",
+  "context": " limited partnership $200.00 $50.00 $200.00 $100.00 limited liability companies formation – domestic $110.00 $50.00 $100.00 $50.00 formation statutory public benefit llc $110.00 $50.00 $100.00 $50.00 registered"
+ },
+ {
+  "id": "de-corp-form",
+  "read": "https://corpfiles.delaware.gov/Fee_Schedule/AugustFee2026.pdf",
+  "quote": "Incorporation (including Public Benefit Corporations) *$109.00 $50.00 $100.00 $50.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d2f6498d7f828a7a",
+  "context": "ling certified same day fee 24-hour fee fee copy (each) corporations – domestic incorporation (including public benefit corporations) *$109.00 $50.00 $100.00 $50.00 domestication $234.00 $50.00 $200.00 $100.00 and incorporation *$109.00 $50.00 "
+ },
+ {
+  "id": "de-llc-qualify",
+  "read": "https://corpfiles.delaware.gov/Fee_Schedule/AugustFee2026.pdf",
+  "quote": "Foreign Certificate of Registration $200.00 $50.00 $100.00 $50.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d2f6498d7f828a7a",
+  "context": "$50.00 $100.00 $50.00 registered series formation $110.00 $50.00 $100.00 $50.00 foreign certificate of registration $200.00 $50.00 $100.00 $50.00 *additional fee of $50 is due for each registered series named in the certifica"
+ },
+ {
+  "id": "de-corp-qualify",
+  "read": "https://corpfiles.delaware.gov/Fee_Schedule/AugustFee2026.pdf",
+  "quote": "Corporations – Foreign Qualification $245.00 $50.00 $100.00 $50.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d2f6498d7f828a7a",
+  "context": "ertificate type state filing fee certified same day fee 24-hour fee copy (each) corporations – foreign qualification $245.00 $50.00 $100.00 $50.00 merger $50.00 $50.00 $200.00 $100.00 amendment (name change) $100.00 $50.00 $20"
+ },
+ {
+  "id": "ca-corp-form",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/forms/corporations-california-domestic",
+  "quote": "Articles of Incorporation - General Stock Form ARTS-GS (PDF) $100.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f0f8d1c6f76afe35",
+  "context": "test response 5 days or less california corporations pdf forms 10+ days fees 1. articles of incorporation - general stock form arts-gs (pdf) $100.00 2. articles of incorporation - close form arts-cl (pdf) $100.00 3. articles of "
+ },
+ {
+  "id": "ca-corp-qualify",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/forms/corporations-foreign-out-state-or-out-country",
+  "quote": "Statement and Designation by Foreign Corporation - Stock Form S&DC-S/N (PDF) $100.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "58854656f0b6994c",
+  "context": "fastest response 5 days or less foreign corporations pdf forms 10+ days fees 1. statement and designation by foreign corporation - stock form s&dc-s/n (pdf) $100.00 2. statement and designation by foreign corporation - insurer -- form s&dc-ins "
+ },
+ {
+  "id": "ny-corp-form",
+  "read": "https://dos.ny.gov/fee-schedules",
+  "quote": "Incorporation (all corporations) $125",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "7ef66164bf8a4a0e",
+  "context": " the \"department of state.\" filing under the business corporation law rev. 3/16 incorporation (all corporations) $125 amendment or restated $60 consolidation or merger $60 change §805-a(a) or §1309"
+ },
+ {
+  "id": "ny-corp-qualify",
+  "read": "https://dos.ny.gov/fee-schedules",
+  "quote": "Application for Authority (Foreign) $225",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "7ef66164bf8a4a0e",
+  "context": "olution $60 reservation of name or extension or cancellation of reservation $20 application for authority (foreign) $225 application for authority (foreign authority) $200 surrender of authority or te"
+ },
+ {
+  "id": "tx-corp-form",
+  "read": "https://www.sos.state.tx.us/corp/instructions/201.shtml",
+  "quote": "The filing fee for a Certificate of Formation for a for-profit corporation is $300.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "fe50c7850b8e5846",
+  "context": "oration before the 30th day after the change. payment and delivery instructions the filing fee for a certificate of formation for a for-profit corporation is $300. online filing for faster processing submit your filing through sosportal. you w"
+ },
+ {
+  "id": "tx-corp-qualify",
+  "read": "https://www.sos.state.tx.us/corp/instructions/301.shtml",
+  "quote": "The filing fee for an application for registration for a for-profit corporation is $750.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1ffc94f3725c7040",
+  "context": "oration before the 30th day after the change. payment and delivery instructions the filing fee for an application for registration for a for-profit corporation is $750. in addition, the foreign entity will be assessed a late filing fee for each yea"
+ },
+ {
+  "id": "fl-corp-form",
+  "read": "https://dos.fl.gov/sunbiz/forms/fees/",
+  "quote": "New Florida/Foreign Corporation Filing Fees $35.00 Registered Agent Designation $35.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "e398099ea90f7803",
+  "context": " lien trademark and service mark corporation fees service price additional fees new florida/foreign corporation filing fees $35.00 registered agent designation $35.00 certified copy (optional) $8.75 certificate of status (optional) $8.75 total $8"
+ },
+ {
+  "id": "fl-corp-qualify",
+  "read": "https://form.sunbiz.org/pdf/cr2e007.pdf",
+  "quote": "There is a $70.00 registration fee and a letter of acknowledgment will be issued free of charge upon registration.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "3e864e9710f6e8e7",
+  "context": "ranslation of the certificate under oath of the translator must be submitted. • there is a $70.00 registration fee and a letter of acknowledgment will be issued free of charge upon registration. • certification fees are optional. please submit an additional $8.75 if a certi"
+ },
+ {
+  "id": "wa-corp-form",
+  "read": "https://www.sos.wa.gov/corporations-charities/business-entities/online-filing-instructions/start-domestic-wa-profit-corporation-online",
+  "quote": "Filing Fee: $180 in addition to an online processing fee.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "173b7a0072681e1a",
+  "context": "of the secretary of state; or is beyond its five (5) year reinstatement period. filing fee: $180 in addition to an online processing fee. expedited service: you may add expedited priority for an additional $100 at che"
+ },
+ {
+  "id": "wa-corp-qualify",
+  "read": "https://www.sos.wa.gov/corporations-charities/business-entities/online-filing-instructions/register-foreign-non-wa-profit-corporation-online",
+  "quote": "Filing Fee: $180 in addition to an online processing fee.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "76a1a870a97a26e2",
+  "context": "tence resource page regarding links and contact information from another state. filing fee: $180 in addition to an online processing fee. expedited service: you may add expedited priority for an additional $100 at che"
+ },
+ {
+  "id": "nv-corp-form",
+  "read": "https://www.leg.state.nv.us/nrs/nrs-078.html",
+  "quote": "The fee for filing articles of incorporation is prescribed in the following schedule:",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6f7f02c0c16d3590",
+  "context": "; 1997, 2810; 2003, 3107) nrs 78.760 filing fees: articles of incorporation. 1. the fee for filing articles of incorporation is prescribed in the following schedule: if the amount represented by the total number of shares provided for in the art"
+ },
+ {
+  "id": "nv-corp-qualify",
+  "read": "https://www.leg.state.nv.us/nrs/nrs-080.html",
+  "quote": "foreign corporations shall pay the same fees to the Secretary of State as are required to be paid by corporations organized",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "9af1527384abefe2",
+  "context": " a 1977, 406) nrs 80.050 fees. 1. except as otherwise provided in subsection 3, foreign corporations shall pay the same fees to the secretary of state as are required to be paid by corporations organized pursuant to the laws of this state, but the amount of fees to be charged must n"
+ },
+ {
+  "id": "nj-corp-form",
+  "read": "https://www.nj.gov/treasury/revenue/fees.shtml",
+  "quote": "Certificate of incorporation or limited partnership $100.00 Certificate of authority for a foreign corporation or limited partnership $100.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "8baaebeaa58f0570",
+  "context": " and service fees for-profit corporate and limited partnership (lp) filing fees certificate of incorporation or limited partnership $100.00 certificate of authority for a foreign corporation or limited partnership $100.00 all amendments to certificates of incorporation/limited partnership and certifi"
+ },
+ {
+  "id": "ga-corp-form",
+  "read": "https://georgia.gov/register-corporation",
+  "quote": "Pay the $100 filing fee by approved credit card: Visa, MasterCard, American Express, or Discover.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6a925bfc84a9b412",
+  "context": "t. fill out the required information about your business entity (listed above). pay the $100 filing fee by approved credit card: visa, mastercard, american express, or discover. processing time: 7 business days; registrations can be expedited for an additio"
+ },
+ {
+  "id": "ga-corp-qualify",
+  "read": "https://georgia.gov/register-corporation",
+  "quote": "Foreign entities must follow a different procedure to do business in Georgia.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6a925bfc84a9b412",
+  "context": "tate of georgia - whether that is another country or simply another u.s. state. foreign entities must follow a different procedure to do business in georgia. select a registered agent for your business entity. the registered agent is the"
+ },
+ {
+  "id": "ma-corp-form",
+  "read": "https://www.sec.state.ma.us/divisions/corporations/download/Fee_Schedule.pdf",
+  "quote": "Articles of Organization $275.00 min. for up to 275,000 shares, $250.00 plus $15.00 expedite fee",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "bcfc67da7052cdd6",
+  "context": "rvation of name $30.00 cannot file by fax cannot file electronically (optional) articles of organization $275.00 min. for up to 275,000 shares, $250.00 plus $15.00 expedite fee with limit of $250.00 plus $15.00 expedite fee and is mgl ch156d $100.00 for ea"
+ },
+ {
+  "id": "ma-corp-qualify",
+  "read": "https://www.sec.state.ma.us/divisions/corporations/download/Fee_Schedule.pdf",
+  "quote": "Foreign Corporation Certiﬁcate of $400.00 $375 plus $15.00 expedite fee",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "bcfc67da7052cdd6",
+  "context": "n of name $30.00 cannot file by fax cannot file electronically (optional) start foreign corporation certiﬁcate of $400.00 $375 plus $15.00 expedite fee cannot file electronically registrations must be accompanied by a certificate o"
+ },
+ {
+  "id": "pa-corp-form",
+  "read": "https://www.pa.gov/agencies/dos/programs/business/fees-and-payments",
+  "quote": "Articles of Incorporation or like instrument incorporating a corporation or association $125",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "e2d51ee214a91a76",
+  "context": "(pdf) fee schedule domestic corporation/association (profit and non-profit) fee articles of incorporation or like instrument incorporating a corporation or association $125 articles of conversion $70 each ancillary transaction $70 articles of merger, c"
+ },
+ {
+  "id": "pa-llc-qualify",
+  "read": "https://www.pa.gov/agencies/dos/programs/business/fees-and-payments",
+  "quote": "Foreign Limited Liability Partnership/Limited Liability Company Fee Registration $250",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "e2d51ee214a91a76",
+  "context": "/td>\\r\\n<td valign=\\\"top\\\">at least $500</td>\\r\\n</tr></tbody></table>\\r\\n\"}}\"> foreign limited liability partnership/limited liability company fee registration $250 amended registration $250 domestication of foreign limited liability company $1"
+ },
+ {
+  "id": "pa-corp-qualify",
+  "read": "https://www.pa.gov/agencies/dos/programs/business/fees-and-payments",
+  "quote": "Foreign Registration Statement $250 Amendment of Foreign Registration $250",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "e2d51ee214a91a76",
+  "context": "n</tr></tbody></table>\\r\\n\"}}\"> foreign corporation (profit and non-profit) fee foreign registration statement $250 amendment of foreign registration $250 domestication $70 each ancillary transaction $250 statement of merger or consol"
+ },
+ {
+  "id": "al-llc-form",
+  "read": "https://www.sos.alabama.gov/business-entities/llcs",
+  "quote": "Domestic LLC Filing Filing Fees Secretary of State: $200.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "101a36d840ccd9a8",
+  "context": "page provides various other forms for certificate requests and filing purposes. domestic llc filing filing fees secretary of state: $200.00 domestic llc procedures your entity name must contain the words limited liabili"
+ },
+ {
+  "id": "al-corp-form",
+  "read": "https://www.sos.alabama.gov/business-entities/domestic-corporations",
+  "quote": "Domestic Business Filing Filing Fee Secretary of State: $200.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "a2e0e787c7a19c9d",
+  "context": "h domestic corporations breadcrumb home business entities domestic corporations domestic business filing filing fee secretary of state: $200.00 business filing procedures your corporate name must include the word \"corporati"
+ },
+ {
+  "id": "al-llc-qualify",
+  "read": "https://www.sos.alabama.gov/business-entities/llcs",
+  "quote": "File Foreign LLC Online - Filing Fee $150.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "101a36d840ccd9a8",
+  "context": "tgomery, alabama 36103 or 770 washington ave., suite 580, montgomery, al 36104. file foreign llc online - filing fee $150.00 foreignllcregistration.pdf categories business forms general forms name reserva"
+ },
+ {
+  "id": "al-corp-qualify",
+  "read": "https://www.sos.alabama.gov/business-entities/foreign-corporations",
+  "quote": "File Foreign Corporation online - Filing Fee $150.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "8747162ae6ce7e0e",
+  "context": "6 attn: business entities 770 washington avenue, suite 580 montgomery, al 36104 file foreign corporation online - filing fee $150.00 categories business forms general forms name reservations registered agent and/"
+ },
+ {
+  "id": "az-corp-form",
+  "read": "https://azcc.gov/docs/default-source/corps-files/fee-schedules/fee-schedule-corporations6def4cc74b1a47129d16c2b1c3851bda.pdf",
+  "quote": "Articles of Incorporation $60.00 $95.00 For-profit",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "df3d703be67cb23d",
+  "context": "rity articles of correction $25.00 $60.00 articles of dissolution $25.00 $60.00 articles of incorporation $60.00 $95.00 for-profit articles of incorporation $40.00 $75.00 nonprofit articles of revocation of dis"
+ },
+ {
+  "id": "az-corp-qualify",
+  "read": "https://azcc.gov/docs/default-source/corps-files/fee-schedules/fee-schedule-corporations6def4cc74b1a47129d16c2b1c3851bda.pdf",
+  "quote": "Application for Authority $175.00 $210.00 to Transact Business in Arizona",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "df3d703be67cb23d",
+  "context": "eport – nonprofit corporation $10.00 $45.00 annual benefit report $10.00 $45.00 application for authority $175.00 $210.00 to transact business in arizona application for renewal of registered $10.00 $45.00 foreign corporation name ap"
+ },
+ {
+  "id": "ar-llc-form",
+  "read": "https://www.sos.arkansas.gov/business-commercial-services-bcs/forms-fees/llc",
+  "quote": "Certificate of Organization for a Dom. Limited Liability Co. LL-01 $45.00 $50.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "2e50ca9ca66aaa87",
+  "context": "pany name of official document form # online fee paper fee online form pdf form certificate of organization for a dom. limited liability co. ll-01 $45.00 $50.00 online pdf certificate of amendment to certificate of organization for a dom. l"
+ },
+ {
+  "id": "ar-corp-form",
+  "read": "https://www.sos.arkansas.gov/business-commercial-services-bcs/forms-fees/corporations",
+  "quote": "Articles of Incorporation DN-01 $45.00 $50.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "02894d804dffdcf6",
+  "context": "tion name of official document form # online fee paper fee online form pdf form articles of incorporation dn-01 $45.00 $50.00 online pdf application for reservation of a corporate name rn-06 $22.50 $25.00 "
+ },
+ {
+  "id": "ar-llc-qualify",
+  "read": "https://www.sos.arkansas.gov/business-commercial-services-bcs/forms-fees/llc/foreign-llc",
+  "quote": "Application for Certificate of Registration of Foreign Limited Liability Company FL-01 $270.00 $300.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "7fae57f622c057e4",
+  "context": " company name of official document form # online $ paper $ online form pdf form application for certificate of registration of foreign limited liability company fl-01 $270.00 $300.00 online pdf board resolution adopting a fictitious name in arkansas n/a no fee n"
+ },
+ {
+  "id": "ar-corp-qualify",
+  "read": "https://www.sos.arkansas.gov/business-commercial-services-bcs/forms-fees/corporations/foreign-corporations",
+  "quote": "Application for Certificate of Authority F-01 $270.00 $300.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "df7ea115e3cf269e",
+  "context": "tion name of official document form # online fee paper fee online form pdf form application for certificate of authority f-01 $270.00 $300.00 online pdf board resolution for adoption of fictitious name n/a no fee n/a pdf "
+ },
+ {
+  "id": "co-corp-form",
+  "read": "https://www.sos.state.co.us/pubs/info_center/fees/business.html",
+  "quote": "Profit corporations Online fee Paper fee Articles of Incorporation $50.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "2142dfbf55f83cd0",
+  "context": "m n/a $125.00 statement of removal of personal identifying information n/a free profit corporations online fee paper fee articles of incorporation $50.00 n/a amend articles of incorporation $25.00 n/a amend and restate articles of in"
+ },
+ {
+  "id": "co-llc-qualify",
+  "read": "https://www.sos.state.co.us/pubs/info_center/fees/business.html",
+  "quote": "Foreign entities Online fee Paper fee Foreign Entity Authority Statement $100.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "2142dfbf55f83cd0",
+  "context": "ssociation statement n/a $150.00 dissolve an article 64 partnership n/a $150.00 foreign entities online fee paper fee foreign entity authority statement $100.00 n/a foreign entity authority withdrawal $10.00 n/a statement of change changing"
+ },
+ {
+  "id": "ct-llc-form",
+  "read": "https://business.ct.gov/knowledge-base/articles/domestic-limited-liability-companies-forms-and-fees",
+  "quote": "Certificate of Organization - required, including appointment of statutory agent. (file online) > $120",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "65e3669fe6e1b795",
+  "context": "of amendment (file online) > $120 certificate of dissolution (file online) > $0 certificate of organization - required, including appointment of statutory agent. (file online) > $120 change of agent (file online) > $50 change of agent's address (file online) > $"
+ },
+ {
+  "id": "ct-corp-form",
+  "read": "https://portal.ct.gov/-/media/sots/business-services/bsd-forms/fee-schedule-revised-712020.pdf?rev=584e7111891242319ce570a4d20221c0&hash=D46A230464D9BB9B2AE176B451F4FCFB",
+  "quote": "D. Certificate of Incorporation 250 Includes the minimum franchise tax if authorizing up to 20,000.00 shares.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "574671fd0680084d",
+  "context": "ransfer of reserved name 60 c. application for cancellation of reserved name 60 d. certificate of incorporation 250 includes the minimum franchise tax if authorizing up to 20,000.00 shares. please see franchise schedule if authorizing more than 20,000.00 shares in cert"
+ },
+ {
+  "id": "ct-llc-qualify",
+  "read": "https://portal.ct.gov/-/media/sots/business-services/bsd-forms/fee-schedule-revised-712020.pdf?rev=584e7111891242319ce570a4d20221c0&hash=D46A230464D9BB9B2AE176B451F4FCFB",
+  "quote": "F. Foreign Registration Statement 120",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "574671fd0680084d",
+  "context": "ication to renew registration of name 60 e. transfer of registration of name 60 f. foreign registration statement 120 g. annual report (filed online annually between january 1 and march 31) 80 h. i"
+ },
+ {
+  "id": "ct-corp-qualify",
+  "read": "https://portal.ct.gov/-/media/sots/business-services/bsd-forms/fee-schedule-revised-712020.pdf?rev=584e7111891242319ce570a4d20221c0&hash=D46A230464D9BB9B2AE176B451F4FCFB",
+  "quote": "F. Application for Certificate of Authority (Includes $285 License Fee) 385",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "574671fd0680084d",
+  "context": "egistration of corporate name 60 (filed only between october 1 and december 31) f. application for certificate of authority (includes $285 license fee) 385 g. application for amended certificate of authority 100 h. application for cert"
+ },
+ {
+  "id": "dc-corp-form",
+  "read": "https://dlcp.dc.gov/node/1621906",
+  "quote": "Filing articles of incorporation for a corporation with authorized capital up to one hundred thousand dollars ($100,000) $99.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f3247afd3af13622",
+  "context": "orporation entity type fee description fee amount domestic business corporation filing articles of incorporation for a corporation with authorized capital up to one hundred thousand dollars ($100,000) $99.00 domestic business corporation filing articles of incorporation for a corporatio"
+ },
+ {
+  "id": "dc-llc-qualify",
+  "read": "https://dlcp.dc.gov/node/1621921",
+  "quote": "Foreign Limited Liability Company Foreign registration statement $220.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "110553c4773e4cb0",
+  "context": "0 foreign limited liability company registration of name or its renewal $200.00 foreign limited liability company foreign registration statement $220.00 foreign limited liability company amendment of foreign registration statement $"
+ },
+ {
+  "id": "dc-corp-qualify",
+  "read": "https://dlcp.dc.gov/node/1621906",
+  "quote": "Foreign Business Corporation Foreign registration statement $220.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f3247afd3af13622",
+  "context": " $50.00 domestic & foreign business corporation certified copy of filing $50.00 foreign business corporation foreign registration statement $220.00 foreign business corporation registration of name or renewal $200.00 foreign bu"
+ },
+ {
+  "id": "hi-corp-form",
+  "read": "https://cca.hawaii.gov/breg/registration/dpc/fees/",
+  "quote": "DOMESTIC PROFIT CORPORATION FILING FEE EXPEDITED REVIEW Articles of Incorporation $50.00 $25.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "dc18e37a15b6c81a",
+  "context": "f commerce and consumer affairs mailing address p.o. box 40, honolulu, hi 96810 domestic profit corporation filing fee expedited review articles of incorporation $50.00 $25.00 articles of amendment $25.00 $25.00 restated articles of incorporation $25.00 $"
+ },
+ {
+  "id": "hi-llc-qualify",
+  "read": "https://cca.hawaii.gov/wp-content/uploads/2025/12/Form-Fee-Schedule-12-2022.pdf",
+  "quote": "Liability Company Application for Certificate of Authority $50.00* $25.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "b8bb8cf22a56f3e5",
+  "context": " any other statement or document of a domestic or foreign limited $25.00 $25.00 liability company application for certificate of authority $50.00* $25.00 application for cancellation*** $25.00 $25.00 reservation of limited liability "
+ },
+ {
+  "id": "hi-corp-qualify",
+  "read": "https://cca.hawaii.gov/wp-content/uploads/2025/12/Form-Fee-Schedule-12-2022.pdf",
+  "quote": "Application for a Certificate of Authority $50.00* $25.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "b8bb8cf22a56f3e5",
+  "context": " report, certificate, application, or document $25.00 $25.00 (domestic/foreign) application for a certificate of authority $50.00* $25.00 application for a certificate of withdrawal (foreign***) $25.00 $25.00 reservat"
+ },
+ {
+  "id": "id-llc-form",
+  "read": "https://sos.idaho.gov/business-forms/",
+  "quote": "Start an LLC Certificate of Organization – Limited Liability Company $100 (base filing fee)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "3e0a54b6a710d442",
+  "context": "cycle of a public charity for more information. limited liability company (llc) start an llc certificate of organization – limited liability company $100 (base filing fee) $20 (manual processing fee) $120 total download start a professional llc certif"
+ },
+ {
+  "id": "id-corp-form",
+  "read": "https://sos.idaho.gov/business-forms/",
+  "quote": "Start a corporation Articles of Incorporation – General Business $100 (base filing fee)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "3e0a54b6a710d442",
+  "context": "$100 (same-day service) download corporation forms domestic profit corporations start a corporation articles of incorporation – general business $100 (base filing fee) $20 (manual processing fee) $120 total download amend a corporation articles of"
+ },
+ {
+  "id": "id-llc-qualify",
+  "read": "https://sos.idaho.gov/business-forms/",
+  "quote": "Register an out-of-state business in Idaho Foreign Registration Statement $100 (base filing fee)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "3e0a54b6a710d442",
+  "context": "g fee) $20 (manual processing fee) $30 total download foreign business entities register an out-of-state business in idaho foreign registration statement $100 (base filing fee) $20 (manual processing fee) $120 total download amend a foreign registration am"
+ },
+ {
+  "id": "in-llc-form",
+  "read": "https://iga.in.gov/ic/2026/Title_23/Article_0.5/Chapter_9.pdf",
+  "quote": "organization of a domestic limited liability company: (1) Seventy-five dollars ($75) for an electronic filing.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "22304b639cd93404",
+  "context": " secretary of state shall collect the following fees for filing the articles of organization of a domestic limited liability company: (1) seventy-five dollars ($75) for an electronic filing. (2) one hundred dollars ($100) for filing in a manner other than electronically"
+ },
+ {
+  "id": "in-corp-form",
+  "read": "https://iga.in.gov/ic/2026/Title_23/Article_0.5/Chapter_9.pdf",
+  "quote": "incorporation of a domestic business corporation: (1) Seventy-five dollars ($75) for an electronic filing.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "22304b639cd93404",
+  "context": " secretary of state shall collect the following fees for filing the articles of incorporation of a domestic business corporation: (1) seventy-five dollars ($75) for an electronic filing. (2) one hundred dollars ($100) for filing in a manner other than electronically"
+ },
+ {
+  "id": "in-llc-qualify",
+  "read": "https://iga.in.gov/ic/2026/Title_23/Article_0.5/Chapter_9.pdf",
+  "quote": "registration statement electronically: (1) Seventy-five dollars ($75) for a for-profit entity.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "22304b639cd93404",
+  "context": "a) the secretary of state shall collect the following fees for filing a foreign registration statement electronically: (1) seventy-five dollars ($75) for a for-profit entity. (2) twenty dollars ($20) for a nonprofit corporation. (b) the secretary of stat"
+ },
+ {
+  "id": "ia-llc-form",
+  "read": "https://sos.iowa.gov/businesses/business-entity-forms-and-fees",
+  "quote": "Certificate of Organization - $50",
+  "checked": "2026-10-27",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-27"
+ },
+ {
+  "id": "ia-corp-form",
+  "read": "https://sos.iowa.gov/businesses/business-entity-forms-and-fees",
+  "quote": "Articles of Incorporation - $50",
+  "checked": "2026-10-27",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-27"
+ },
+ {
+  "id": "ia-llc-qualify",
+  "read": "https://sos.iowa.gov/businesses/business-entity-forms-and-fees",
+  "quote": "Foreign Registration Statement- $100",
+  "checked": "2026-10-27",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-27"
+ },
+ {
+  "id": "ia-corp-qualify",
+  "read": "https://sos.iowa.gov/businesses/business-entity-forms-and-fees",
+  "quote": "Foreign Registration Statement - $100",
+  "checked": "2026-10-27",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-27"
+ },
+ {
+  "id": "ks-llc-form",
+  "read": "https://www.sos.ks.gov/forms/business_services/dl.pdf",
+  "quote": "Online Articles of Organization:...................... $85",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "a03f94bd87cae801",
+  "context": " articles of organization is as follows: 915 sw harrison street topeka ks 66612 online articles of organization:...................... $85 paper articles of organization:....................... $90 checks and credit/de"
+ },
+ {
+  "id": "ks-corp-form",
+  "read": "https://sos.ks.gov/forms/business_services/AI.pdf",
+  "quote": "For-profit Corporation online filing:................. $85",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "e9eed729894927a0",
+  "context": "reet topeka ks 66612 for-profit corporation paper filing:.................. $90 for-profit corporation online filing:................. $85 checks and credit/debit cards are accepted for payment. make not-for-profit cor"
+ },
+ {
+  "id": "ks-llc-qualify",
+  "read": "https://sos.ks.gov/forms/business_services/FA.pdf",
+  "quote": "o Limited liability company o Series limited liability company (fee $115) (fee $115)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "68aa9ab5093aeb5f",
+  "context": "orporation not for profit o limited liability partnership (fee $115) (fee $115) o limited liability company o series limited liability company (fee $115) (fee $115) 2. name of business: (do not include dba, fictitious, assumed, or trade names) "
+ },
+ {
+  "id": "ks-corp-qualify",
+  "read": "https://sos.ks.gov/forms/business_services/FA.pdf",
+  "quote": "o Corporation for profit o Limited partnership (fee $115) (fee $115)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "68aa9ab5093aeb5f",
+  "context": "he entire topeka, ks 66612 https://sos.ks.gov form. 1. choose type of business: o corporation for profit o limited partnership (fee $115) (fee $115) o corporation not for profit o limited liability partnership (fee $115) (fee $1"
+ },
+ {
+  "id": "ky-llc-form",
+  "read": "https://www.sos.ky.gov/bus/business-filings/Pages/Fees.aspx",
+  "quote": "Domestic Limited Liability Company (Profit, Non-Profit or Professional Service) Articles of Organization: $40.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "0ce11ff2a7207e81",
+  "context": "ual report: $15.00 any other document required or permitted to be filed: $15.00 domestic limited liability company (profit, non-profit or professional service) articles of organization: $40.00 amendment of articles of organization: $40.00 restated articles of organization"
+ },
+ {
+  "id": "ky-corp-form",
+  "read": "https://www.sos.ky.gov/bus/business-filings/Pages/Fees.aspx",
+  "quote": "Domestic Corporations (Profit and Professional Service) Articles of Incorporation: $40.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "0ce11ff2a7207e81",
+  "context": "surer, prepaid account *, or debit or credit card issued by an approved issuer. domestic corporations (profit and professional service) articles of incorporation: $40.00 (pursuant to krs 136.060, profit entities must add organization tax based on nu"
+ },
+ {
+  "id": "ky-llc-qualify",
+  "read": "https://www.sos.ky.gov/bus/business-filings/Pages/Fees.aspx",
+  "quote": "Foreign Corporation or Limited Liability Company (Profit, Non-Profit or Professional Service) Application for Certificate of Authority: $90.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "0ce11ff2a7207e81",
+  "context": "ual report: $15.00 any other document required or permitted to be filed: $15.00 foreign corporation or limited liability company (profit, non-profit or professional service) application for certificate of authority: $90.00 application for amended certificate of authority: $40.00 application for certif"
+ },
+ {
+  "id": "la-llc-form",
+  "read": "https://static.sos.la.gov/shared/fee_changes_2026.pdf",
+  "quote": "Articles of Organization-Louisiana Limited Liability Company $125",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "daf70720009b4a77",
+  "context": "roﬁt $10 name reservation cancellation $25 domestic limited liability companies articles of organization-louisiana limited liability company $125 articles of organization-louisiana low-proﬁt limited liability company $125 cha"
+ },
+ {
+  "id": "la-corp-form",
+  "read": "https://static.sos.la.gov/shared/fee_changes_2026.pdf",
+  "quote": "Articles of Incorporation Louisiana Business $95",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "daf70720009b4a77",
+  "context": "nce with act 921 of the 2026 regular legislative session. domestic corporations articles of incorporation louisiana business $95 articles of incorporation-louisiana nonproﬁt $95 change of registered office or"
+ },
+ {
+  "id": "la-llc-qualify",
+  "read": "https://static.sos.la.gov/shared/fee_changes_2026.pdf",
+  "quote": "Application of Foreign Limited Liability Company $185",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "daf70720009b4a77",
+  "context": "ditional certiﬁcates $25 annual reports $35 foreign limited liability companies application of foreign limited liability company $185 statement of change-foreign corporation & limited liability company $30 applica"
+ },
+ {
+  "id": "la-corp-qualify",
+  "read": "https://static.sos.la.gov/shared/fee_changes_2026.pdf",
+  "quote": "Application of Foreign Corporation for Certiﬁcate of Authority $155",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "daf70720009b4a77",
+  "context": "35 domestic partnerships name reservation cancellation $25 foreign corporations application of foreign corporation for certiﬁcate of authority $155 statement of change-foreign corporation & limited liability company $30 stateme"
+ },
+ {
+  "id": "me-llc-form",
+  "read": "https://legislature.maine.gov/statutes/31/title31sec1680.html",
+  "quote": "For filing of a certificate of formation under section 1531, a fee of $175;",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d3b48391ab779ea8",
+  "context": ". a, §2 (new); pl 2009, c. 629, pt. a, §3 (aff).] 13. certificate of formation. for filing of a certificate of formation under section 1531, a fee of $175; [pl 2009, c. 629, pt. a, §2 (new); pl 2009, c. 629, pt. a, §3 (aff).] 14. amend"
+ },
+ {
+  "id": "me-corp-form",
+  "read": "https://legislature.maine.gov/statutes/13-c/title13-Csec123.html",
+  "quote": "For articles of incorporation, the fee is $145.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "a680be7c2c3f37e8",
+  "context": "s 1. filing fees. the following fees must be paid to the secretary of state. a. for articles of incorporation, the fee is $145. [pl 2003, c. 673, pt. www, §11 (amd); pl 2003, c. 673, pt. www, §37 (aff).] b. "
+ },
+ {
+  "id": "me-llc-qualify",
+  "read": "https://legislature.maine.gov/statutes/31/title31sec1680.html",
+  "quote": "For filing of a statement of foreign qualification under section 1622, a fee of $250;",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d3b48391ab779ea8",
+  "context": "0; [pl 2011, c. 113, pt. b, §19 (amd).] 19. statement of foreign qualification. for filing of a statement of foreign qualification under section 1622, a fee of $250; [pl 2009, c. 629, pt. a, §2 (new); pl 2009, c. 629, pt. a, §3 (aff).] 20. state"
+ },
+ {
+  "id": "me-corp-qualify",
+  "read": "https://legislature.maine.gov/statutes/13-c/title13-Csec123.html",
+  "quote": "For an application for authority, the fee is $250.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "a680be7c2c3f37e8",
+  "context": "o fee. [pl 2001, c. 640, pt. a, §2 (new); pl 2001, c. 640, pt. b, §7 (aff).] z. for an application for authority, the fee is $250. [pl 2001, c. 640, pt. a, §2 (new); pl 2001, c. 640, pt. b, §7 (aff).] aa. for a"
+ },
+ {
+  "id": "md-corp-form",
+  "read": "https://dat.maryland.gov/Documents/Accessible%20Documents/Charter%20-%20Resource%20Docs/List%20of%20Fees%20for%20Charter%20Services%20and%20Document%20Filings_0326-A.pdf",
+  "quote": "Articles of Incorporation: $100 *$20 $50",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1a4e6b697f0d637e",
+  "context": ".00. type of filing fee organization & expedited capitalization fee service fee articles of incorporation: $100 *$20 $50 you must pay this fee if you *non-stock, professional and religious, stock and "
+ },
+ {
+  "id": "md-llc-qualify",
+  "read": "https://dat.maryland.gov/Documents/Accessible%20Documents/Charter%20-%20Resource%20Docs/List%20of%20Fees%20for%20Charter%20Services%20and%20Document%20Filings_0326-A.pdf",
+  "quote": "Registration $100 (foreign) $50 Certificate of Amendment $100 (foreign) $50",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1a4e6b697f0d637e",
+  "context": "omestic) $50 articles of conversion $100 $50 sdat revised: may 2024 page 4 of 5 registration $100 (foreign) $50 certificate of amendment $100 (foreign) $50 cancellation of registration $0 (foreign) $50 certificate of merger $25 (foreig"
+ },
+ {
+  "id": "md-corp-qualify",
+  "read": "https://dat.maryland.gov/Documents/Accessible%20Documents/Charter%20-%20Resource%20Docs/List%20of%20Fees%20for%20Charter%20Services%20and%20Document%20Filings_0326-A.pdf",
+  "quote": "Qualification to do intrastate business $100 $50",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1a4e6b697f0d637e",
+  "context": "ating to foreign corporations registration of name for a calendar year $100 $50 qualification to do intrastate business $100 $50 requalification of a canceled corporation $100 $50 sdat revised: may 2024 page "
+ },
+ {
+  "id": "mi-llc-form",
+  "read": "https://www.michigan.gov/-/media/Project/Websites/lara/cscl/Folder6/Filing_Fees.pdf?rev=db2522dff4d445a581c925e6f840d3f8",
+  "quote": "700 Articles of Organization $50 Yes",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ee0d72f5e654a33a",
+  "context": "f the document reservation name 540 application for reservation of name $25 yes 700 articles of organization $50 yes formation of new company articles of organization – professional service 701 $5"
+ },
+ {
+  "id": "mi-corp-form",
+  "read": "https://www.michigan.gov/-/media/Project/Websites/lara/cscl/Folder6/Filing_Fees.pdf?rev=db2522dff4d445a581c925e6f840d3f8",
+  "quote": "1-60,000.................................................................$50.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ee0d72f5e654a33a",
+  "context": " profit authorized shares...............................................fee yes 1-60,000.................................................................$50.00 60,001-1,000,000.................................................$100.00 format"
+ },
+ {
+  "id": "mi-llc-qualify",
+  "read": "https://www.michigan.gov/-/media/Project/Websites/lara/cscl/Folder6/Filing_Fees.pdf?rev=db2522dff4d445a581c925e6f840d3f8",
+  "quote": "QUALIFY A FOREIGN COMPANY Certificate of Authority to Transact 760 $50 No",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ee0d72f5e654a33a",
+  "context": "… …........ $50.00 above fees are in addition to the filing fee of the document qualify a foreign company certificate of authority to transact 760 $50 no business in michigan asssumed name 541 certificate of assumed name $25 yes 542 "
+ },
+ {
+  "id": "mi-corp-qualify",
+  "read": "https://www.michigan.gov/-/media/Project/Websites/lara/cscl/Folder6/Filing_Fees.pdf?rev=db2522dff4d445a581c925e6f840d3f8",
+  "quote": "Total Initial Admission Fees...................................$60.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ee0d72f5e654a33a",
+  "context": "0.00 initial franchise fee...............................................$50.00 total initial admission fees...................................$60.00 541 certificate of assumed name $10 yes assumed name 542 certificate of renewal"
+ },
+ {
+  "id": "mn-corp-form",
+  "read": "https://www.sos.mn.gov/media/1687/businessentityfees.pdf",
+  "quote": "Articles of Incorporation – Original Filing $135.00 $155.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f178e51081c7e4a0",
+  "context": "ation (domestic) – chapter 302a mail filing fee in-person and online filing fee articles of incorporation – original filing $135.00 $155.00 amendment $35.00 $55.00 annual renewal $0 $0 annual reinstatement $25.00 $45.00"
+ },
+ {
+  "id": "mn-llc-qualify",
+  "read": "https://www.sos.mn.gov/media/1687/businessentityfees.pdf",
+  "quote": "Certificate of Authority – Original Filing for 322C $185.00 $205.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f178e51081c7e4a0",
+  "context": "foreign) – chapter mail filing fee in-person and 322b or 322c online filing fee certificate of authority – original filing for 322c $185.00 $205.00 amendments for 322b or 322c $35.00 $55.00 annual renewal for 322b or 322c $0 $0"
+ },
+ {
+  "id": "mn-corp-qualify",
+  "read": "https://www.sos.mn.gov/media/1687/businessentityfees.pdf",
+  "quote": "Certificate of Authority – Original Filing $200.00 $220.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f178e51081c7e4a0",
+  "context": "oration (foreign) – chapter 303 mail filing fee in-person and online filing fee certificate of authority – original filing $200.00 $220.00 amendment $50.00 $70.00 annual renewal $115.00 $135.00 annual reinstatement $50"
+ },
+ {
+  "id": "ms-llc-form",
+  "read": "https://www.sos.ms.gov/content/documents/Business/FeeSchedule.pdf",
+  "quote": "F0100 MS LLC Certificate of Formation $50",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f198701a7d318bce",
+  "context": "rofit status report $25 mississippilimitedliabilitycompanies formname filingfee f0100 ms llc certificate of formation $50 f0101 ms llc certificate of amendment $50 f0102 ms llc certificate of merger $2"
+ },
+ {
+  "id": "ms-corp-form",
+  "read": "https://www.sos.ms.gov/content/documents/Business/FeeSchedule.pdf",
+  "quote": "F0001 Articles of Incorporation $50 F0008 Annual Report $25",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f198701a7d318bce",
+  "context": "businessdocumentsfilingfees mississippibusinesscorporations formname filingfee f0001 articles of incorporation $50 f0008 annual report $25 f0010 registered agent/office statement of change–profit corporation $10 f0011 "
+ },
+ {
+  "id": "ms-llc-qualify",
+  "read": "https://www.sos.ms.gov/content/documents/Business/FeeSchedule.pdf",
+  "quote": "F0200 Application for Registration of Foreign Limited Liability Company $250",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f198701a7d318bce",
+  "context": "of registered agent $0 foreignlimitedliabilitycompanies(llc) formname filingfee f0200 application for registration of foreign limited liability company $250 f0009 application for appointment of registered agent of a foreign llc $25 f001"
+ },
+ {
+  "id": "ms-corp-qualify",
+  "read": "https://www.sos.ms.gov/content/documents/Business/FeeSchedule.pdf",
+  "quote": "F0002 Application for Certificate of Authority $100 Nonprofit $500 Profit",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f198701a7d318bce",
+  "context": "y f0088 nonprofit status report $25 foreigncorporations(all) formname filingfee f0002 application for certificate of authority $100 nonprofit $500 profit f0008 annual report f0010 registered agent/office statement of change $10 f0011"
+ },
+ {
+  "id": "mo-llc-form",
+  "read": "https://s1.sos.mo.gov/CMSImages/Business/llc1.pdf",
+  "quote": "(Submit with filing fee of $105.00)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ce62010cd4acabf6",
+  "context": "78 / 600 w. main st., rm. 322 jefferson city, mo 65102 articles of organization (submit with filing fee of $105.00) 1. the name of the limited liability company is: (must include \"limited liabili"
+ },
+ {
+  "id": "mo-corp-form",
+  "read": "https://www.sos.mo.gov/business/faqs",
+  "quote": "30,000 shares are the most that may be authorized for the minimum incorporation fee of $58.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "346d3b17393171a0",
+  "context": " corporation will have to issue is left to the discretion of the incorporators; 30,000 shares are the most that may be authorized for the minimum incorporation fee of $58.00 if a corporation discovers that it needs to issue more shares of stock than are"
+ },
+ {
+  "id": "mo-llc-qualify",
+  "read": "https://www.sos.mo.gov/CMSImages/Business/llc4.pdf?v=2",
+  "quote": "(Submit with filing fee of $105.00)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "30dbd46a2d200309",
+  "context": "y, mo 65102 application for registration of a foreign limited liability company (submit with filing fee of $105.00) 1. the name of the foreign limited liability company is: 2. the name under whic"
+ },
+ {
+  "id": "mo-corp-qualify",
+  "read": "https://www.sos.mo.gov/business/corporations/business.asp",
+  "quote": "There is a fee of $155 to obtain a certificate of authority.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "49d2a0f42ad0ffc4",
+  "context": "uri; instead, it obtains a certificate of authority to do business in missouri. there is a fee of $155 to obtain a certificate of authority. the application must be accompanied by a certificate from the secretary of stat"
+ },
+ {
+  "id": "mt-llc-form",
+  "read": "https://sosmt.gov/business/fees/",
+  "quote": "Articles Of Organization $35.00 plus $50.00 for each series member named in the series LLC",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "b8aa3b7eca163914",
+  "context": " statements, other reports $15.00 limited liability companies: domestic filings articles of organization $35.00 plus $50.00 for each series member named in the series llc articles of correction $15.00 articles of amendment $15.00 restated articles of"
+ },
+ {
+  "id": "mt-corp-form",
+  "read": "https://sosmt.gov/business/fees/",
+  "quote": "Articles Of Incorporation – Profit Corporation $35.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "b8aa3b7eca163914",
+  "context": " business services business services filing fees corporations: domestic filings articles of incorporation – profit corporation $35.00 articles of incorporation – non-profit corporation $20.00 articles of incorpora"
+ },
+ {
+  "id": "mt-llc-qualify",
+  "read": "https://sosmt.gov/business/fees/",
+  "quote": "Foreign Filings Certificate Of Authority $70.00 plus $50.00 for each series member named in the series LLC",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "b8aa3b7eca163914",
+  "context": "/year for each year of delinquent annual reports certificate of existence $5.00 foreign filings certificate of authority $70.00 plus $50.00 for each series member named in the series llc amended certificate of authority $15.00 plus $50.00 for each series member name"
+ },
+ {
+  "id": "mt-corp-qualify",
+  "read": "https://sosmt.gov/business/fees/",
+  "quote": "Foreign Registration Statement – Profit Corporation $70.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "b8aa3b7eca163914",
+  "context": "articles of dissolution no fee revocation of dissolution $15.00 foreign filings foreign registration statement – profit corporation $70.00 certificate of authority – non-profit corporation $15.00 certificate of authori"
+ },
+ {
+  "id": "ne-llc-form",
+  "read": "https://sos.nebraska.gov/business-services/forms-and-fee-information",
+  "quote": "Certificate of Organization $110 (In-Office) / $100 (Online)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1bb1586f0dbb48ff",
+  "context": "ort $30 limited liability companies (domestic) name of filing fee online filing certificate of organization $110 (in-office) / $100 (online) edelivery certificate of organization (professional service) $110 (in-office) /"
+ },
+ {
+  "id": "ne-corp-form",
+  "read": "https://sos.nebraska.gov/business-services/forms-and-fee-information",
+  "quote": "Articles of Incorporation and Domestication $110 (In-Office) / $100 (Online)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1bb1586f0dbb48ff",
+  "context": "ofessional, ne benefit; cooperative (domestic) name of filing fee online filing articles of incorporation and domestication $110 (in-office) / $100 (online) edelivery insurance companies: articles of incorporation and domestication $300"
+ },
+ {
+  "id": "ne-llc-qualify",
+  "read": "https://sos.nebraska.gov/sites/sos.nebraska.gov/files/doc/Form%20Cert%20of%20Authority%20Foreign%20LLC_7.01.2021.pdf",
+  "quote": "FILING FEE: $110.00 (In-Office) / $100.00 (Online) + $10 for Certificate",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "602d99def850cf61",
+  "context": "_____________________________________ printed name of authorized representative filing fee: $110.00 (in-office) / $100.00 (online) + $10 for certificate revised 07/01/2021 neb. rev. stat. §21-156 application for certificate of autho"
+ },
+ {
+  "id": "ne-corp-qualify",
+  "read": "https://sos.nebraska.gov/business-services/forms-and-fee-information",
+  "quote": "Application for Certificate of Authority to Transact Business $110 (In-Office) / $100 (Online)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1bb1586f0dbb48ff",
+  "context": "corporations, business, professional (foreign) name of filing fee online filing application for certificate of authority to transact business $110 (in-office) / $100 (online) edelivery domestication insurance company $300 application for reserved name $3"
+ },
+ {
+  "id": "nc-llc-form",
+  "read": "https://sosnc.gov/fees/by_title/_Business_Registration/",
+  "quote": "Domestic & Foreign Limited Liability Companies* Articles of Organization $125.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ff03489b36ce10ac",
+  "context": "oreign corporation adopting a fictitious name $0.00 limited liability companies domestic & foreign limited liability companies* articles of organization $125.00 application for reserved name $10.00 notice of transfer of reserved name $10.00"
+ },
+ {
+  "id": "nc-corp-form",
+  "read": "https://sosnc.gov/fees/by_title/_Business_Registration/",
+  "quote": "Domestic & Foreign Business Corporations* Articles of Incorporation $125.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ff03489b36ce10ac",
+  "context": "ke checks payable to \"north carolina secretary of state\". business corporations domestic & foreign business corporations* articles of incorporation $125.00 application to reserve a corporate name $30.00 notice of transfer of reserved c"
+ },
+ {
+  "id": "nc-llc-qualify",
+  "read": "https://sosnc.gov/fees/by_title/_Business_Registration/",
+  "quote": "Certificate of Judicial Dissolution $0.00 Application for Certificate of Authority $250.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ff03489b36ce10ac",
+  "context": "following administrative dissolution $100.00 certificate of reinstatement $0.00 certificate of judicial dissolution $0.00 application for certificate of authority $250.00 application for amended certificate of authority $50.00 application for certifi"
+ },
+ {
+  "id": "nc-corp-qualify",
+  "read": "https://sosnc.gov/fees/by_title/_Business_Registration/",
+  "quote": "Application for Certificate of Authority (For Only) $250.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ff03489b36ce10ac",
+  "context": "cles of revocation of dissolution by board of directors and shareholders $10.00 application for certificate of authority (for only) $250.00 application for amended certificate of authority (for only) $75.00 application "
+ },
+ {
+  "id": "nd-llc-form",
+  "read": "https://ndlegis.gov/cencode/t10c32-1.pdf",
+  "quote": "Filing articles of organization and issuing a certificate of organization, one hundred thirty-five dollars.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f7596895ebc37c7a",
+  "context": "ate - fees and charges. the secretary of state shall charge and collect for: 1. filing articles of organization and issuing a certificate of organization, one hundred thirty-five dollars. 2. filing articles of amendment, fifty dollars. 3. filing statement of correcti"
+ },
+ {
+  "id": "nd-corp-form",
+  "read": "https://ndlegis.gov/cencode/t10c19-1.pdf",
+  "quote": "Filing articles of incorporation and issuing a certificate of incorporation, one hundred dollars.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "736e4113f6a09a77",
+  "context": "ficates - license fees. the secretary of state shall charge and collect for: 1. filing articles of incorporation and issuing a certificate of incorporation, one hundred dollars. 2. filing articles of amendment, twenty dollars. 3. filing a statement of corre"
+ },
+ {
+  "id": "nd-llc-qualify",
+  "read": "https://ndlegis.gov/cencode/t10c32-1.pdf",
+  "quote": "transact business in this state and issuing a certificate of authority, one hundred thirty-five dollars.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f7596895ebc37c7a",
+  "context": "cation of a foreign limited liability company for a certificate of authority to transact business in this state and issuing a certificate of authority, one hundred thirty-five dollars. 21. filing an amendment to the certificate of authority by a foreign limited li"
+ },
+ {
+  "id": "nd-corp-qualify",
+  "read": "https://ndlegis.gov/cencode/t10c19-1.pdf",
+  "quote": "business in this state and issuing a certificate of authority, one hundred forty-five dollars.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "736e4113f6a09a77",
+  "context": "application of a foreign corporation for a certificate of authority to transact business in this state and issuing a certificate of authority, one hundred forty-five dollars. 21. filing an application of a foreign corporation for an amended certificate o"
+ },
+ {
+  "id": "oh-corp-form",
+  "read": "https://codes.ohio.gov/ohio-revised-code/section-111.16",
+  "quote": "(A) For filing and recording articles of incorporation of a domestic corporation, including designation of agent:",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "4a3b4f1a02d570a6",
+  "context": "ate shall charge and collect, for the benefit of the state, the following fees: (a) for filing and recording articles of incorporation of a domestic corporation, including designation of agent: (1) wherein the corporation shall not be authorized to issue any shares of capi"
+ },
+ {
+  "id": "oh-corp-qualify",
+  "read": "https://codes.ohio.gov/ohio-revised-code/section-111.16",
+  "quote": "A license to transact business in this state by a foreign corporation for profit pursuant to section 1703.04 of the Revised Code",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "4a3b4f1a02d570a6",
+  "context": "herefor, or their agent; (i) for filing and recording any of the following: (1) a license to transact business in this state by a foreign corporation for profit pursuant to section 1703.04 of the revised code or a foreign nonprofit corporation pursuant to section 1703.27 of the revised c"
+ },
+ {
+  "id": "ok-llc-form",
+  "read": "https://www.sos.ok.gov/business/fees.aspx",
+  "quote": "Articles of Organization - Oklahoma LLC 18 OS 2055 100.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "45a2ebecb1658124",
+  "context": "on - domestic rail road corporation 18 os 1142 min. 50.00(1/10 of 1%) order now articles of organization - oklahoma llc 18 os 2055 100.00 order now cancellation of partnership fictitious name 54 os 1-105 25.00 order n"
+ },
+ {
+  "id": "ok-corp-form",
+  "read": "https://www.sos.ok.gov/business/fees.aspx",
+  "quote": "Certificate of Incorporation - Oklahoma For Profit Corporation 18 OS 1142 Min. 50.00(1/10 of 1%)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "45a2ebecb1658124",
+  "context": " incorporation - oklahoma not for profit corporation 18 os 1142 25.00 order now certificate of incorporation - oklahoma for profit corporation 18 os 1142 min. 50.00(1/10 of 1%) order now certificate of limited partnership 54 os 314 100.00 order now certifi"
+ },
+ {
+  "id": "ok-llc-qualify",
+  "read": "https://www.sos.ok.gov/business/fees.aspx",
+  "quote": "Certificate of Registration - LLC 18 OS 2055 300.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "45a2ebecb1658124",
+  "context": " qualification - foreign not for profit corporation 18 os 1142 300.00 order now certificate of registration - llc 18 os 2055 300.00 order now certificate of renewal revival extension/restoration - oklahoma for p"
+ },
+ {
+  "id": "ok-corp-qualify",
+  "read": "https://www.sos.ok.gov/business/fees.aspx",
+  "quote": "Certificate of Qualification - Foreign For Profit Corporation 18 OS 1142 Min. 300.00(1/10 of 1%)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "45a2ebecb1658124",
+  "context": "ertificate of merger - oklahoma/foreign for profit 18 os 11422 100.00 order now certificate of qualification - foreign for profit corporation 18 os 1142 min. 300.00(1/10 of 1%) order now certificate of qualification - foreign not for profit corporation 18 "
+ },
+ {
+  "id": "or-corp-form",
+  "read": "https://sos.oregon.gov/business/documents/business-registry-forms/dbc-articles.pdf",
+  "quote": "Required Processing Fee $100",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f101140ee77a1f64",
+  "context": " penalized by fines, imprisonment or both. signature: printed name: title: fees required processing fee $100 contact name: (to resolve questions with this filing) phone number: (include ar"
+ },
+ {
+  "id": "or-corp-qualify",
+  "read": "https://sos.oregon.gov/business/Documents/business-registry-forms/fbc-authority.pdf",
+  "quote": "Required Processing Fee $275",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "5c1f97190d0ca433",
+  "context": "inted name: title: contact n ame: (to resolve questions with this filing.) fees required processing fee $275 phone number: (please include area code.) processing fees are nonrefundable. pl"
+ },
+ {
+  "id": "ri-llc-form",
+  "read": "https://docs.sos.ri.gov/documents/BusinessServices/business-forms-fee-schedule.pdf",
+  "quote": "400 ARTICLES OF ORGANIZATION YES $150.00 $6.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "28fe731ec6013257",
+  "context": "iability company – rhode island form description online fee enhanced fee filing 400 articles of organization yes $150.00 $6.00 401 amendment to articles of organization yes $50.00 $2.50 402 restated article"
+ },
+ {
+  "id": "ri-corp-form",
+  "read": "https://docs.sos.ri.gov/documents/BusinessServices/business-forms-fee-schedule.pdf",
+  "quote": "100 ARTICLES OF INCORPORATION (UNDER 75,000,000 SHARES) YES $230.00 $8.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "28fe731ec6013257",
+  "context": "ness corporation – rhode island form description online fee enhanced fee filing 100 articles of incorporation (under 75,000,000 shares) yes $230.00 $8.00 101 articles of amendment yes $50.00/$210.00 $2.50 102 restated articles of inc"
+ },
+ {
+  "id": "ri-llc-qualify",
+  "read": "https://docs.sos.ri.gov/documents/BusinessServices/business-forms-fee-schedule.pdf",
+  "quote": "450 APPLICATION FOR REGISTRATION YES $150.00 $6.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "28fe731ec6013257",
+  "context": "ted liability company - foreign form description online fee enhanced fee filing 450 application for registration yes $150.00 $6.00 451 amendment to application for registration yes $50.00 $2.50 452 certficate o"
+ },
+ {
+  "id": "ri-corp-qualify",
+  "read": "https://docs.sos.ri.gov/documents/BusinessServices/business-forms-fee-schedule.pdf",
+  "quote": "150 CERTIFICATE OF AUTHORITY (UNDER 75,000,000 SHARES) YES $310.00 $9.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "28fe731ec6013257",
+  "context": " business corporation - foreign form description online fee enhanced fee filing 150 certificate of authority (under 75,000,000 shares) yes $310.00 $9.00 151 amended certificate of authority no $75.00/$235.00 154 certificate of withd"
+ },
+ {
+  "id": "sc-llc-form",
+  "read": "https://www.scstatehouse.gov/code/t33c044.php",
+  "quote": "a limited liability company, consisting of one or more members, by delivering articles of organization to the office of the Secretary of State",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "9e40f50d6822394b",
+  "context": "ection 2. section 33-44-202. organization. (a) one or more persons may organize a limited liability company, consisting of one or more members, by delivering articles of organization to the office of the secretary of state for filing. (b) unless a delayed effective date is specified, the existence of "
+ },
+ {
+  "id": "sc-corp-form",
+  "read": "https://www.scstatehouse.gov/code/t33c001.php",
+  "quote": "Articles of incorporation $10.00. (2) Application for use of indistinguishable name",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "427cd2b02824b383",
+  "context": " described in this subsection are delivered to him for filing: document fee (1) articles of incorporation $10.00. (2) application for use of indistinguishable name $10.00. (3) application for reserved name $10.00. (4) notice of transfer of res"
+ },
+ {
+  "id": "sc-llc-qualify",
+  "read": "https://www.scstatehouse.gov/code/t33c044.php",
+  "quote": "may apply for a certificate of authority to transact business in this State by delivering an application to the Secretary of State for filing.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "9e40f50d6822394b",
+  "context": "plication for certificate of authority. (a) a foreign limited liability company may apply for a certificate of authority to transact business in this state by delivering an application to the secretary of state for filing. the application must set forth: (1) the name of the foreign company or, if its "
+ },
+ {
+  "id": "sc-corp-qualify",
+  "read": "https://www.scstatehouse.gov/code/t33c001.php",
+  "quote": "Application for certificate of authority $10.00. (20) Application for amended certificate of authority",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "427cd2b02824b383",
+  "context": " of reinstatement no fee. (18) certificate of judicial dissolution no fee. (19) application for certificate of authority $10.00. (20) application for amended certificate of authority $10.00. (21) application for certificate of withdrawal $10.00. (22) certificate"
+ },
+ {
+  "id": "sd-llc-form",
+  "read": "https://sdsos.gov/general-information/filing-fees.aspx",
+  "quote": "Domestic Articles of Organization Filed Electronically online $150",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "2f8cc04739e5d984",
+  "context": "ed partnership (lllp) $125 limited liability company (llc) - domestic & foreign domestic articles of organization filed electronically online $150 filed via paper (includes paper filing fee) $165 foreign certificate of authori"
+ },
+ {
+  "id": "sd-corp-form",
+  "read": "https://sdsos.gov/general-information/filing-fees.aspx",
+  "quote": "Domestic Articles of Incorporation Filed Electronically online $150",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "2f8cc04739e5d984",
+  "context": "e to be filed online $15 business corporations - domestic & foreign service fee domestic articles of incorporation filed electronically online $150 filed via paper (includes paper filing fee) $165 foreign application for certif"
+ },
+ {
+  "id": "sd-llc-qualify",
+  "read": "https://sdsos.gov/general-information/filing-fees.aspx",
+  "quote": "Foreign Certificate of Authority Filed Electronically online $750 Filed via Paper (includes paper filing fee) $765",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "2f8cc04739e5d984",
+  "context": "led electronically online $150 filed via paper (includes paper filing fee) $165 foreign certificate of authority filed electronically online $750 filed via paper (includes paper filing fee) $765 annual report filed electronically online $55 filed via paper (includes paper f"
+ },
+ {
+  "id": "sd-corp-qualify",
+  "read": "https://sdsos.gov/general-information/filing-fees.aspx",
+  "quote": "Foreign Application for Certificate of Authority Filed Electronically online $750",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "2f8cc04739e5d984",
+  "context": "led electronically online $150 filed via paper (includes paper filing fee) $165 foreign application for certificate of authority filed electronically online $750 filed via paper (includes paper filing fee) $765 annual report filed electronic"
+ },
+ {
+  "id": "tn-llc-form",
+  "read": "https://sos.tn.gov/businesses/services/business-forms-fees",
+  "quote": "Articles of Organization Limited Liability Company ( PDF , 294.3KB ) SS-4270 $300*",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "721b050be921ac62",
+  "context": "notice of cancellation or transfer of reserved name ( pdf, 262.6kb) ss-4406 $20 articles of organization limited liability company ( pdf, 294.3kb) ss-4270 $300* amended and restated articles of organization limited liability company ( pdf, "
+ },
+ {
+  "id": "tn-corp-form",
+  "read": "https://sos.tn.gov/businesses/services/business-forms-fees",
+  "quote": "Charter For-Profit Corporation ( PDF , 285.2KB ) SS-4417 $100",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "721b050be921ac62",
+  "context": "notice of cancellation or transfer of reserved name ( pdf, 262.6kb) ss-4406 $20 charter for-profit corporation ( pdf, 285.2kb) ss-4417 $100 amended and restated for-profit corporation charter ( pdf, 293.8kb) ss-4703 $20"
+ },
+ {
+  "id": "tn-llc-qualify",
+  "read": "https://sos.tn.gov/businesses/services/business-forms-fees",
+  "quote": "Application for Certificate of Authority Limited Liability Company ( PDF , 287.0KB ) SS-4233 $300*",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "721b050be921ac62",
+  "context": "istration of foreign limited liability company name ( pdf, 51.7kb) ss-4236 $`20 application for certificate of authority limited liability company ( pdf, 287.0kb) ss-4233 $300* application for certificate of authority nonprofit limited liability company ( "
+ },
+ {
+  "id": "tn-corp-qualify",
+  "read": "https://sos.tn.gov/businesses/services/business-forms-fees",
+  "quote": "Application for Certificate of Authority For-Profit Corporation ( PDF , 284.2KB ) SS-4431 $600",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "721b050be921ac62",
+  "context": "or renewal of registration of foreign corporate name ( pdf, 57.6kb) ss-4430 $20 application for certificate of authority for-profit corporation ( pdf, 284.2kb) ss-4431 $600 application for amended certificate of authority for-profit corporation ( pdf, "
+ },
+ {
+  "id": "ut-corp-form",
+  "read": "https://commerce.utah.gov/wp-content/uploads/2023/04/currentfees.pdf",
+  "quote": "Business corporation - articles of incorporation​ ​ 59",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "27050aaca0a2f1e9",
+  "context": "tic formation filings​ 1 ​create or register a domestic business organization​ ​business corporation - articles of incorporation​ ​ 59​ $ ​nonprofit corporation - articles of incorporation​ ​$59​ ​limited liability"
+ },
+ {
+  "id": "ut-llc-qualify",
+  "read": "https://commerce.utah.gov/wp-content/uploads/2023/04/currentfees.pdf",
+  "quote": "Limited liability company (LLC)​ ​$59",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "27050aaca0a2f1e9",
+  "context": "nization in utah​ ​business corporation​ ​ 59​ $ ​nonprofit corporation​ ​$59​ ​limited liability company (llc)​ ​$59​ ​limited liability partnership (llp)​ ​$70​ ​limited partnership (lp and lllp)"
+ },
+ {
+  "id": "ut-corp-qualify",
+  "read": "https://commerce.utah.gov/wp-content/uploads/2023/04/currentfees.pdf",
+  "quote": "Register your foreign business organization in Utah​ ​Business corporation​ ​ 59",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "27050aaca0a2f1e9",
+  "context": "tary dissolution/termination​ ​no charge​ ​.​ ​foreign registration filings​ 2 ​register your foreign business organization in utah​ ​business corporation​ ​ 59​ $ ​nonprofit corporation​ ​$59​ ​limited liability company (llc)​ ​$59​ ​limit"
+ },
+ {
+  "id": "vt-llc-form",
+  "read": "https://sos.vermont.gov/business-services/fees-statutes",
+  "quote": "Articles of Organization 11 V.S.A. § 4023 $155.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "3c6cbe273c5f7a71",
+  "context": "00 11 v.s.a. § 4012 service of process 11 v.s.a. § 4010 $35.00 11 v.s.a. § 4012 articles of organization 11 v.s.a. § 4023 $155.00 11 v.s.a. § 4012 articles of amendment 11 v.s.a. § 4024 $35.00 11 v.s.a. § 4012"
+ },
+ {
+  "id": "vt-corp-form",
+  "read": "https://sos.vermont.gov/business-services/fees-statutes",
+  "quote": "Articles of Incorporation 11A V.S.A. § 2.02 $155.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "3c6cbe273c5f7a71",
+  "context": "ion for certificate of good standing 11a v.s.a. § 1.28 $25.00 11a v.s.a. § 1.22 articles of incorporation 11a v.s.a. § 2.02 $155.00 11a v.s.a. § 1.22 application for reserved name 11a v.s.a. § 4.02 $40.00 11a v."
+ },
+ {
+  "id": "vt-llc-qualify",
+  "read": "https://sos.vermont.gov/business-services/fees-statutes",
+  "quote": "Application for Certificate of Authority 11 V.S.A. § 4112 $155.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "3c6cbe273c5f7a71",
+  "context": "$170.00 11 v.s.a. § 4012 reinstatement 11 v.s.a. § 4034 $35.00 11 v.s.a. § 4012 application for certificate of authority 11 v.s.a. § 4112 $155.00 11 v.s.a. § 4012 amended certificate of authority 11 v.s.a. § 4115 $35.00 11 v."
+ },
+ {
+  "id": "vt-corp-qualify",
+  "read": "https://sos.vermont.gov/business-services/fees-statutes",
+  "quote": "Application for Certificate of Authority 11A V.S.A. § 15.03 $155.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "3c6cbe273c5f7a71",
+  "context": "a. § 1.22 articles of domestication 11a v.s.a. § 11.15 $20.00 11a v.s.a. § 1.22 application for certificate of authority 11a v.s.a. § 15.03 $155.00 11a v.s.a. § 1.22 application for amended certificate of authority 11a v.s.a. §"
+ },
+ {
+  "id": "va-corp-form",
+  "read": "https://www.scc.virginia.gov/businesses/new-business-resources/business-types/",
+  "quote": "Stock Corporation File Online or complete Articles of Incorporation (Form SCC619-DOC) See Corporation Charter Fee/Entrance Fee Schedule $25",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "30a56984897e956a",
+  "context": "bligations of the corporation. business type how to file charter fee filing fee stock corporation file online or complete articles of incorporation (form scc619-doc) see corporation charter fee/entrance fee schedule $25 nonstock corporation file online or complete articles of incorporation (form sc"
+ },
+ {
+  "id": "va-llc-qualify",
+  "read": "https://www.scc.virginia.gov/businesses/new-business-resources/business-types/",
+  "quote": "Foreign LLC File Online or complete an Application for Registration as a Foreign Limited Liability Company (Form LLC1052-DOC) $100",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "30a56984897e956a",
+  "context": "ia llc file online or complete articles of organization (form llc1011-doc) $100 foreign llc file online or complete an application for registration as a foreign limited liability company (form llc1052-doc) $100 professional limited liability companies a professional llc is an llc that is o"
+ },
+ {
+  "id": "va-corp-qualify",
+  "read": "https://www.scc.virginia.gov/media/sccvirginiagov-home/business-home/forms-and-fees/foreign-corporations/scc759.pdf",
+  "quote": "Entrance Fee: Stock Corporation 1 million or fewer authorized shares - $50.00 for each 25,000 shares or fraction thereof",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "70c8af02d999eb66",
+  "context": "or words to that effect. required fees filing fee: $25.00 and file online today entrance fee: stock corporation 1 million or fewer authorized shares - $50.00 for each 25,000 shares or fraction thereof more than 1 million shares - $2,500.00 visit https://cis.scc.virginia.gov to fi"
+ },
+ {
+  "id": "wv-llc-form",
+  "read": "https://sos.wv.gov/media/335/download?inline=",
+  "quote": "Articles of Organization -- Domestic Limited Liability Company $100.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "641fdc57ecc1e756",
+  "context": "0.00 exemption from certificate of authority $25.00 other business registration articles of organization -- domestic limited liability company $100.00 foreign limited liability company $150.00 statement of registration -- domestic"
+ },
+ {
+  "id": "wv-corp-form",
+  "read": "https://sos.wv.gov/media/335/download?inline=",
+  "quote": "Articles of Incorporation -- Domestic For-Profit Corporation $100.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "641fdc57ecc1e756",
+  "context": "te additional $500.00 corporation registration & amendment fee for registration articles of incorporation -- domestic for-profit corporation $100.00 domestic non-profit corporation $25.00 certificate of authority -- foreign for-"
+ },
+ {
+  "id": "wv-llc-qualify",
+  "read": "https://sos.wv.gov/media/335/download?inline=",
+  "quote": "Domestic Limited Liability Company $100.00 Foreign Limited Liability Company $150.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "641fdc57ecc1e756",
+  "context": "ate of authority $25.00 other business registration articles of organization -- domestic limited liability company $100.00 foreign limited liability company $150.00 statement of registration -- domestic limited liability partnership $250.00 for"
+ },
+ {
+  "id": "wv-corp-qualify",
+  "read": "https://sos.wv.gov/media/335/download?inline=",
+  "quote": "Certificate of Authority -- Foreign For-Profit Corporation $100.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "641fdc57ecc1e756",
+  "context": " domestic for-profit corporation $100.00 domestic non-profit corporation $25.00 certificate of authority -- foreign for-profit corporation $100.00 foreign non-profit corporation $50.00 exemption from certificate of authority $"
+ },
+ {
+  "id": "wi-llc-form",
+  "read": "https://dfi.wi.gov/Documents/BusinessServices/BusinessEntities/Forms/CORP502.pdf",
+  "quote": "together with a check for the $170.00 filing fee, payable to the Department of Financial Institutions.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "97302f6b6ac296a1",
+  "context": "ate of wi-dept. of financial institutions, box 93348, milwaukee wi, 53293-0348, together with a check for the $170.00 filing fee, payable to the department of financial institutions. (if sent by express or priority u.s. mail, please mail to state of wi-dept. of "
+ },
+ {
+  "id": "wi-corp-form",
+  "read": "https://dfi.wi.gov/Documents/BusinessServices/BusinessEntities/Forms/CORP2.pdf",
+  "quote": "together with a check for the $100.00 filing fee, payable to the Department of Financial Institutions.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1168a6863784c722",
+  "context": "ate of wi-dept. of financial institutions, box 93348, milwaukee wi, 53293-0348, together with a check for the $100.00 filing fee, payable to the department of financial institutions. (if sent by express or priority u.s. mail, please mail to state of wi-dept. of "
+ },
+ {
+  "id": "wi-llc-qualify",
+  "read": "https://dfi.wi.gov/Documents/BusinessServices/BusinessEntities/Forms/CORP521.pdf",
+  "quote": "State of Wisconsin FILING FEE $100.00 +",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "00dd75b129f3c62b",
+  "context": "state of wisconsin filing fee $100.00 + department of financial institutions please check box to request division of co"
+ },
+ {
+  "id": "wi-corp-qualify",
+  "read": "https://dfi.wi.gov/Documents/BusinessServices/BusinessEntities/Forms/CORP21.pdf",
+  "quote": "State of Wisconsin FILING FEE $100.00+",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "436bc3b7a4f25519",
+  "context": "state of wisconsin filing fee $100.00+ department of financial institutions please check box to request division of co"
+ },
+ {
+  "id": "wy-llc-form",
+  "read": "https://sos.wyo.gov/Business/docs/BusinessFees.pdf",
+  "quote": "Articles of Organization*/Continuance/Domestication .......................................$100.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "daa39a0f33d3a982",
+  "context": "............................................$25.00 limited liability companies: articles of organization*/continuance/domestication.......................................$100.00 certificate of authority......................................................."
+ },
+ {
+  "id": "wy-corp-form",
+  "read": "https://sos.wyo.gov/Business/docs/BusinessFees.pdf",
+  "quote": "Articles of Incorporation*/Continuance/Domestication .......................................$100.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "daa39a0f33d3a982",
+  "context": "* may be filed electronically. profit corporations and processing cooperatives: articles of incorporation*/continuance/domestication.......................................$100.00 certificate of authority......................................................."
+ },
+ {
+  "id": "wy-llc-qualify",
+  "read": "https://sos.wyo.gov/Business/docs/BusinessFees.pdf",
+  "quote": "Certificate of Authority ........................................................................................$150.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "daa39a0f33d3a982",
+  "context": "ration*/continuance/domestication.......................................$100.00 certificate of authority........................................................................................$150.00 reinstatement for tax*........................................................."
+ },
+ {
+  "id": "ny-dos-1336:expedite:0",
+  "read": "https://dos.ny.gov/fee-schedules",
+  "quote": "For processing within 24 hours $25",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "7ef66164bf8a4a0e",
+  "context": " filing fee) for processing within 2 hours $150 for processing the same day $75 for processing within 24 hours $25 certificates of status and copy requests - per request (in addition to applicab"
+ },
+ {
+  "id": "ny-dos-1336:expedite:1",
+  "read": "https://dos.ny.gov/fee-schedules",
+  "quote": "For processing the same day $75",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "7ef66164bf8a4a0e",
+  "context": "t - per document (in addition to filing fee) for processing within 2 hours $150 for processing the same day $75 for processing within 24 hours $25 certificates of status and copy requests - p"
+ },
+ {
+  "id": "ny-dos-1336:expedite:2",
+  "read": "https://dos.ny.gov/fee-schedules",
+  "quote": "For processing within 2 hours $150",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "7ef66164bf8a4a0e",
+  "context": "ll filings except biennial statement - per document (in addition to filing fee) for processing within 2 hours $150 for processing the same day $75 for processing within 24 hours $25 certificates"
+ },
+ {
+  "id": "ny-dos-1336:agent",
+  "read": "https://dos.ny.gov/certificate-incorporation-domestic-business-corporation",
+  "quote": "The corporation must designate the Secretary of State as its agent for service of process.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "8f7e5dfc3e19e78a",
+  "context": "hey are without par value. paragraph fifth - designation for service of process the corporation must designate the secretary of state as its agent for service of process. complete paragraph fifth by providing an address within the united states to wh"
+ },
+ {
+  "id": "ny-dos-1336:report",
+  "read": "https://dos.ny.gov/biennial-statements-business-corporations-and-limited-liability-companies",
+  "quote": "are required by Section 301(e) of the Limited Liability Company Law to file a Biennial Statement every two years",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "be4976ecdca27416",
+  "context": "f such board are women. domestic and foreign limited liability companies (llcs) are required by section 301(e) of the limited liability company law to file a biennial statement every two years with the new york department of state setting forth the address to which the ne"
+ },
+ {
+  "id": "ny-dos-1336:report-fee",
+  "read": "https://dos.ny.gov/biennial-statements-business-corporations-and-limited-liability-companies",
+  "quote": "$9 filing fee for Biennial Statement",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "be4976ecdca27416",
+  "context": "ecretary of state shall mail a copy of any process accepted on its behalf. fees $9 filing fee for biennial statement. mastercard, visa and american express are acceptable forms of payment. how to "
+ },
+ {
+  "id": "ca-llc-1:processing",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/forms/limited-liability-companies-california-domestic",
+  "quote": "File Online for fastest response 5 days or less",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "dcdb3cb29d127a4d",
+  "context": "domestic) item california limited liability companies (llcs) online submissions file online for fastest response 5 days or less california llcs pdf forms 10+ days fees 1. formation - articles of organization"
+ },
+ {
+  "id": "ca-llc-1:expedite:0",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/service-options",
+  "quote": "24–Hour Filing Service (Class C) - $350.00 : Online or Drop-Off in Sacramento.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d110efc4ee3592d8",
+  "context": "ling, requesting completion in one of three of the below-specified time frames. 24–hour filing service (class c) - $350.00: online or drop-off in sacramento. filing response guaranteed within 24 hours (e.g., submitted wednesday at 11:00 "
+ },
+ {
+  "id": "ca-llc-1:expedite:1",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/service-options",
+  "quote": "Same Day Filing Service (Class B) - $750.00 : Online or Drop-Off in Sacramento.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d110efc4ee3592d8",
+  "context": "ng response available thursday by 11:00 a.m.), excluding weekends and holidays. same day filing service (class b) - $750.00: online or drop-off in sacramento. filing response guaranteed by 4:00 p.m. the same day. note: the document must b"
+ },
+ {
+  "id": "ca-llc-1:expedite:2",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/service-options",
+  "quote": "4–Hour Filing Service (Class A) - $500.00 : Drop-Off-Only in Sacramento.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d110efc4ee3592d8",
+  "context": "ing confirmation or filing response will be available the same day by 4:00 p.m. 4–hour filing service (class a) - $500.00: drop-off-only in sacramento. filing response guaranteed within 4 hours (e.g., submitted monday at 10:00 a.m."
+ },
+ {
+  "id": "ca-llc-1:agent",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/faqs",
+  "quote": "An agent for service of process is an individual who resides in California, or a registered 1505 corporate agent,",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "3392209226304b84",
+  "context": " state? what is an \"agent for service of process\" and who can be such an agent? an agent for service of process is an individual who resides in california, or a registered 1505 corporate agent, designated to accept service of process (court papers) if the business entity i"
+ },
+ {
+  "id": "ca-llc-1:report",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/forms/limited-liability-companies-california-domestic",
+  "quote": "Statement of Information : Due within 90 days of initial registration and every two years thereafter.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "dcdb3cb29d127a4d",
+  "context": "0+ days fees 1. formation - articles of organization form llc-1 (pdf) $70.00 2. statement of information: due within 90 days of initial registration and every two years thereafter. form llc-12 (pdf) $20.00 attachment to statement of information: use if the lim"
+ },
+ {
+  "id": "tx-205:expedite:0",
+  "read": "https://www.sos.state.tx.us/express.shtml",
+  "quote": "Filings received by 12:00 p.m. are processed by close of business the same day. $750 per document",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "41a11227c23f59f3",
+  "context": "turnaround times, fees, and filing options. fastest turnaround same-day service filings received by 12:00 p.m. are processed by close of business the same day. $750 per document plus additional document filing fee same-day transactions may be requested onli"
+ },
+ {
+  "id": "tx-205:expedite:1",
+  "read": "https://www.sos.state.tx.us/express.shtml",
+  "quote": "Filings received by 12:00 p.m. are processed by close of business the next business day. $500 per document",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "41a11227c23f59f3",
+  "context": "78701 for in person requests. if you have questions, email us. next-day service filings received by 12:00 p.m. are processed by close of business the next business day. $500 per document plus additional document filing fee next-day transactions may be requested onli"
+ },
+ {
+  "id": "tx-205:expedite:2",
+  "read": "https://www.sos.state.tx.us/express.shtml",
+  "quote": "Filings are processed before regular submissions, typically within 2-3 business days. $50 per document",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "41a11227c23f59f3",
+  "context": "701 for in person requests. if you have questions, email us. standard expedited filings are processed before regular submissions, typically within 2-3 business days. $50 per document plus additional document filing fee standard expedited processing is available "
+ },
+ {
+  "id": "tx-205:agent",
+  "read": "https://www.sos.state.tx.us/corp/instructions/205.shtml",
+  "quote": "A person designated as the registered agent of an entity must have consented, either in a written or electronic form,",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "4f549cf93129250d",
+  "context": "he limited liability company name as the name of the registered agent. consent: a person designated as the registered agent of an entity must have consented, either in a written or electronic form, to serve as the registered agent of the entity. although consent is required, a"
+ },
+ {
+  "id": "tx-205:report",
+  "read": "https://comptroller.texas.gov/taxes/franchise/",
+  "quote": "The annual franchise tax report is due May 15.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "7b5fcc848b28f40a",
+  "context": "xtension report common owner information due dates annual franchise tax reports the annual franchise tax report is due may 15. if may 15 falls on a weekend or holiday, the due date will be the next business"
+ },
+ {
+  "id": "il-sos:report",
+  "read": "https://ilga.gov/Documents/legislation/ilcs/documents/080501800K50-10.htm",
+  "quote": "Filing an annual report of a limited liability company or foreign limited liability company, $75,",
+  "checked": "2026-10-27",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 000; read with WebFetch on 2026-10-27"
+ },
+ {
+  "id": "wa-sos:expedite:0",
+  "read": "https://www.sos.wa.gov/corporations-charities/frequently-asked-questions-faqs/fee-schedules-priority-services",
+  "quote": "Expedited service: $100 per business entity, generally processed within three working days.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "0c24b2e7a12ac173",
+  "context": "mited liability companies all llc fees are outlined in rcw 25.15. priority fees expedited service: $100 per business entity, generally processed within three working days. to expedite by mail, include an additional $100 per business entity and label t"
+ },
+ {
+  "id": "wa-sos:expedite:1",
+  "read": "https://www.sos.wa.gov/corporations-charities/frequently-asked-questions-faqs/fee-schedules-priority-services",
+  "quote": "Same-day service: This service charges a \"same-day\" fee of $150 per business entity.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "0c24b2e7a12ac173",
+  "context": "onal $100 per business entity and label the outside of the envelope \"expedite\". same-day service: this service charges a \"same-day\" fee of $150 per business entity. for front counter cutoff times, visit our contact us page. service type fee amo"
+ },
+ {
+  "id": "wa-sos:agent",
+  "read": "https://www.sos.wa.gov/corporations-charities/business-entities/online-filing-instructions/start-domestic-wa-limited-liability-company-llc-online",
+  "quote": "All businesses must designate a Registered Agent in Washington State, as required by RCW",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "93e11b903e5f9701",
+  "context": " business name already registered with the secretary of state. registered agent all businesses must designate a registered agent in washington state, as required by rcw 23.95.415. the agent must consent to serve, and by selecting a consent option, "
+ },
+ {
+  "id": "wa-sos:report",
+  "read": "https://www.sos.wa.gov/corporations-charities/business-entities/maintain-business-compliance/annual-reports",
+  "quote": "This annual report is due by the last day of the month in which the business was originally formed or registered.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "857d8adc9647da3b",
+  "context": "ctive status and keep their unified business identifier (ubi) in good standing. this annual report is due by the last day of the month in which the business was originally formed or registered. annual report filing window: file up to 180 days before the expiration date. su"
+ },
+ {
+  "id": "wa-sos:report-fee",
+  "read": "https://www.sos.wa.gov/corporations-charities/frequently-asked-questions-faqs/fee-schedules-priority-services",
+  "quote": "Annual Report $70 Annual Report with delinquency fee $95",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "0c24b2e7a12ac173",
+  "context": "ement $140 + all missed annual report fees initial or amended annual report $10 annual report $70 annual report with delinquency fee $95 change of registered agent / office no fee reservation of name $30 merger $20 p"
+ },
+ {
+  "id": "ma-sos:expedite:0",
+  "read": "https://www.sec.state.ma.us/divisions/corporations/download/Fee_Schedule.pdf",
+  "quote": "Certificate of Organization $500.00 $500.00 plus $20.00 expedite fee $500.00 plus $20.00 expedite fee",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "bcfc67da7052cdd6",
+  "context": "n of name $30.00 cannot file by fax cannot file electronically (optional) start certificate of organization $500.00 $500.00 plus $20.00 expedite fee $500.00 plus $20.00 expedite fee certificate of organization (professional) $500.00 $500.00 plus $20.00 expedite"
+ },
+ {
+  "id": "ma-sos:report",
+  "read": "https://www.sec.state.ma.us/divisions/corporations/download/Fee_Schedule.pdf",
+  "quote": "Annual Report $500.00 $500.00 plus $20.00 expedite fee $500.00 plus $20.00 expedite fee Due on or before the anniversary date of organization.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "bcfc67da7052cdd6",
+  "context": " file electronically requires additional form: certificate by regulatory board. annual report $500.00 $500.00 plus $20.00 expedite fee $500.00 plus $20.00 expedite fee due on or before the anniversary date of organization. maintain annual report (professional) $500.00 $500.00 plus $20.00 expedite fee "
+ },
+ {
+  "id": "fl-sunbiz:agent",
+  "read": "https://www.flsenate.gov/Laws/Statutes/2025/605.0113",
+  "quote": "that has a certificate of authority under s. 605.0902 shall designate and continuously maintain in this state:",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1939f4d7af3d6f54",
+  "context": "— (1) each limited liability company and each foreign limited liability company that has a certificate of authority under s. 605.0902 shall designate and continuously maintain in this state: (a) a registered office, which may be the same as its place of business in this"
+ },
+ {
+  "id": "fl-sunbiz:report",
+  "read": "https://form.sunbiz.org/pdf/cr2e047.pdf",
+  "quote": "The report must be filed electronically online between January 1st and May 1st. The fee for the annual report is $138.75.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "7f271ffb127f7c55",
+  "context": "ntain \"active\" status. the first report is due in the year following formation. the report must be filed electronically online between january 1st and may 1st. the fee for the annual report is $138.75. after may 1st a $400 late fee is added to the annual report filing fee. \"annual"
+ },
+ {
+  "id": "ga-sos:processing",
+  "read": "https://georgia.gov/register-llc",
+  "quote": "Processing Time: 7 business days; Processing in 2 business days costs an additional $100.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ed0b662fe3c6e1e3",
+  "context": "g fee by approved credit card: visa, mastercard, american express, or discover. processing time: 7 business days; processing in 2 business days costs an additional $100. processing in the same business day (if submitted before noon on a weekday) cos"
+ },
+ {
+  "id": "ga-sos:expedite:0",
+  "read": "https://georgia.gov/register-llc",
+  "quote": "Processing in 2 business days costs an additional $100.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ed0b662fe3c6e1e3",
+  "context": "a, mastercard, american express, or discover. processing time: 7 business days; processing in 2 business days costs an additional $100. processing in the same business day (if submitted before noon on a weekday) cos"
+ },
+ {
+  "id": "ga-sos:expedite:1",
+  "read": "https://georgia.gov/register-llc",
+  "quote": "Processing in the same business day (if submitted before noon on a weekday) costs an additional $250.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ed0b662fe3c6e1e3",
+  "context": " time: 7 business days; processing in 2 business days costs an additional $100. processing in the same business day (if submitted before noon on a weekday) costs an additional $250. register by mail either draft your own articles of organization, or download an"
+ },
+ {
+  "id": "ga-sos:expedite:2",
+  "read": "https://georgia.gov/register-llc",
+  "quote": "Processing in one hour costs an additional $1,000.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ed0b662fe3c6e1e3",
+  "context": " business day (if submitted before noon on a weekday) costs an additional $250. processing in one hour costs an additional $1,000. register in person registering in person provides you with additional expeditin"
+ },
+ {
+  "id": "ga-sos:agent",
+  "read": "https://georgia.gov/register-llc",
+  "quote": "A registered agent must be located in Georgia.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ed0b662fe3c6e1e3",
+  "context": " process, documents, or other official communication on behalf of the business. a registered agent must be located in georgia. have any optional provisions prepared in advance. optional provisions refer to "
+ },
+ {
+  "id": "ga-sos:report",
+  "read": "https://georgia.gov/register-llc",
+  "quote": "Each year, you must file an annual registration for your LLC between January 1 and April 1.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ed0b662fe3c6e1e3",
+  "context": "ill receive your articles of organization within the specified processing time. each year, you must file an annual registration for your llc between january 1 and april 1. if you do not, your llc will be administratively dissolved for failure to file "
+ },
+ {
+  "id": "pa-dos:expedite:0",
+  "read": "https://www.pa.gov/agencies/dos/programs/business/fees-and-payments",
+  "quote": "1 hour service (received before 4:00 p.m.) $1,000",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "e2d51ee214a91a76",
+  "context": "s are not accepted through the mail. expedited service fees are as follows: fee 1 hour service (received before 4:00 p.m.) $1,000 3 hour service (received before 2:00 p.m.) $300 same-day service (received befo"
+ },
+ {
+  "id": "pa-dos:expedite:1",
+  "read": "https://www.pa.gov/agencies/dos/programs/business/fees-and-payments",
+  "quote": "3 hour service (received before 2:00 p.m.) $300",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "e2d51ee214a91a76",
+  "context": "vice fees are as follows: fee 1 hour service (received before 4:00 p.m.) $1,000 3 hour service (received before 2:00 p.m.) $300 same-day service (received before 10:00 a.m.) $100 expedited service fees may b"
+ },
+ {
+  "id": "pa-dos:expedite:2",
+  "read": "https://www.pa.gov/agencies/dos/programs/business/fees-and-payments",
+  "quote": "Same-day service (received before 10:00 a.m.) $100",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "e2d51ee214a91a76",
+  "context": "ceived before 4:00 p.m.) $1,000 3 hour service (received before 2:00 p.m.) $300 same-day service (received before 10:00 a.m.) $100 expedited service fees may be paid by credit card, check, money order, or custo"
+ },
+ {
+  "id": "pa-dos:report",
+  "read": "https://www.pa.gov/agencies/dos/programs/business/fees-and-payments",
+  "quote": "All other annual reports (for profit entities) $7",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "e2d51ee214a91a76",
+  "context": "mited partnership or limited liability company with a not-for-profit purpose $0 all other annual reports (for profit entities) $7 reinstatement of domestic association fee application for reinstatement deliver"
+ },
+ {
+  "id": "nv-silverflume:agent",
+  "read": "https://www.leg.state.nv.us/nrs/nrs-086.html",
+  "quote": "Registered agent required; address of registered office. A limited-liability company shall have a",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "07acfa90f3a53e77",
+  "context": ", 65; 2005, 2193; 2011, 2800) registered agent and registered office nrs 86.231 registered agent required; address of registered office. a limited-liability company shall have a registered agent who must have a street address for the service of process. the"
+ },
+ {
+  "id": "nv-silverflume:report",
+  "read": "https://www.leg.state.nv.us/nrs/nrs-086.html",
+  "quote": "on or before the last day of the month in which the anniversary date of its organization occurs,",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "07acfa90f3a53e77",
+  "context": "true, complete and accurate. 2. the limited-liability company shall thereafter, on or before the last day of the month in which the anniversary date of its organization occurs, or, if, pursuant to subsection 12, the limited-liability company has selected a"
+ },
+ {
+  "id": "nv-silverflume:report-fee",
+  "read": "https://www.leg.state.nv.us/nrs/nrs-086.html",
+  "quote": "(b) Each annual list required by subsection 2, the limited-liability company shall pay to the Secretary of State a fee of $150.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "07acfa90f3a53e77",
+  "context": "he limited-liability company shall pay to the secretary of state a fee of $150. (b) each annual list required by subsection 2, the limited-liability company shall pay to the secretary of state a fee of $150. 5. if a limited-liability company files an amended list of managers and managin"
+ },
+ {
+  "id": "co-sos:expedite:0",
+  "read": "https://www.sos.state.co.us/pubs/info_center/fees/business.html",
+  "quote": "Expedited Service, business organization document filing (fulfilled within 3 business days) - additional fee n/a $150.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "2142dfbf55f83cd0",
+  "context": "ocessing services certificates and other services services online fee paper fee expedited service, business organization document filing (fulfilled within 3 business days) - additional fee n/a $150.00 certificate of good standing, certificates of fact, certified copies free n/a a"
+ },
+ {
+  "id": "co-sos:agent",
+  "read": "https://www.sos.state.co.us/pubs/business/FAQs/foreigns.html",
+  "quote": "An entity appointed to serve as a registered agent must have a usual place of business in Colorado,",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "2e2d37a5c04a86db",
+  "context": "ou have questions. q4. why can't i use the registered agent i already have? a4. an entity appointed to serve as a registered agent must have a usual place of business in colorado, and foreign (outside of colorado) entities must also have authority to transact"
+ },
+ {
+  "id": "co-sos:report",
+  "read": "https://www.sos.state.co.us/pubs/info_center/fees/business.html",
+  "quote": "Periodic Report $25.00 n/a Periodic Report Late Filing Penalty $50.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "2142dfbf55f83cd0",
+  "context": "5.00 expedited business transactions general applicability online fee paper fee periodic report $25.00 n/a periodic report late filing penalty $50.00 n/a reservation of name $25.00 n/a reserved name transfer $25.00 n/a reserved n"
+ },
+ {
+  "id": "nj-formation:expedite:0",
+  "read": "https://www.nj.gov/treasury/revenue/fees.shtml",
+  "quote": "per filing Same Day service fee (FAX filing only) 2 hour service fee, per document 1 hour service fee, per document $25.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "8baaebeaa58f0570",
+  "context": "t $75.00 expedited service fee (applies only to over-the-counter transactions): per filing same day service fee (fax filing only) 2 hour service fee, per document 1 hour service fee, per document $25.00 $50.00 $500.00 $1000.00 limited liability partnership (llp) filing fees certifi"
+ },
+ {
+  "id": "nj-formation:expedite:1",
+  "read": "https://www.nj.gov/treasury/revenue/fees.shtml",
+  "quote": "Same Day service fee (FAX filing only) 2 hour service fee, per document 1 hour service fee, per document $25.00 $50.00 $500.00 $1000.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "8baaebeaa58f0570",
+  "context": "pedited service fee (applies only to over-the-counter transactions): per filing same day service fee (fax filing only) 2 hour service fee, per document 1 hour service fee, per document $25.00 $50.00 $500.00 $1000.00 limited liability partnership (llp) filing fees certificate of formation $100.0"
+ },
+ {
+  "id": "nj-formation:agent",
+  "read": "https://www.njportal.com/DOR/BusinessFormation/",
+  "quote": "Registered Agent information (including Email Address to receive Registered Agent notifications)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "119b90794052a0ac",
+  "context": " trade/service mark filing requirements what you will need business name & type registered agent information (including email address to receive registered agent notifications) good standing certificate from your home state (only for foreign entities) cred"
+ },
+ {
+  "id": "nj-formation:report",
+  "read": "https://www.nj.gov/treasury/revenue/fees.shtml",
+  "quote": "Renewal of LLC alternate name $50.00 Annual Report $75.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "8baaebeaa58f0570",
+  "context": "0.00 renewal of reserved llc name $50.00 llc alternate name registration $50.00 renewal of llc alternate name $50.00 annual report $75.00 expedited service fee (applies only to over-the-counter transactions): per fili"
+ },
+ {
+  "id": "az-llc:processing",
+  "read": "https://azcc.gov/faqs/BusinessServicesFAQs",
+  "quote": "Regular (no additional fee; the estimated processing time is typically 14-16 days)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "998d823c2e987006",
+  "context": "ou are completing, you are generally able to select from the following options: regular (no additional fee; the estimated processing time is typically 14-16 days) expedite ($35 in addition to the filing fee; the estimated processing time is t"
+ },
+ {
+  "id": "az-llc:expedite:0",
+  "read": "https://azcc.gov/faqs/BusinessServicesFAQs",
+  "quote": "Expedite ($35 in addition to the filing fee; the estimated processing time is typically 3-5 days)",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "998d823c2e987006",
+  "context": "ular (no additional fee; the estimated processing time is typically 14-16 days) expedite ($35 in addition to the filing fee; the estimated processing time is typically 3-5 days) next day ($100 in addition to the filing fee; the filing will be reviewed by th"
+ },
+ {
+  "id": "az-llc:expedite:1",
+  "read": "https://azcc.gov/docs/default-source/corps-files/instructions/m004i-instructions-expedite-pending-document.pdf?sfvrsn=a2fbe0ac_4",
+  "quote": "For Next Day Service, $100.00.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "89fb83053aa44737",
+  "context": "tion commission for same day service, $200.00. accepts only visa or mastercard. for next day service, $100.00. number 7. list the method by which for questions, contact our call center at th"
+ },
+ {
+  "id": "az-llc:expedite:2",
+  "read": "https://azcc.gov/docs/default-source/corps-files/instructions/m004i-instructions-expedite-pending-document.pdf?sfvrsn=a2fbe0ac_4",
+  "quote": "For Same Day Service, $200.00.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "89fb83053aa44737",
+  "context": "ice, $400.00. originally submitted to the a.c.c. arizona corporation commission for same day service, $200.00. accepts only visa or mastercard. for next day service, $100.00. number 7. list "
+ },
+ {
+  "id": "az-llc:expedite:3",
+  "read": "https://azcc.gov/docs/default-source/corps-files/instructions/m004i-instructions-expedite-pending-document.pdf?sfvrsn=a2fbe0ac_4",
+  "quote": "For Two-Hour Service, $400.00.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "89fb83053aa44737",
+  "context": "essing, $35.00. document being expedited was be used if submitting by mail. the for two-hour service, $400.00. originally submitted to the a.c.c. arizona corporation commission for same day "
+ },
+ {
+  "id": "az-llc:report",
+  "read": "https://azcc.gov/faqs/BusinessServicesFAQs",
+  "quote": "No, LLCs are not required to file annual reports.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "998d823c2e987006",
+  "context": "ing the articles of organization with the acc. 17. do llcs file annual reports? no, llcs are not required to file annual reports. only corporations are required to file annual reports. 18. how do i change from"
+ },
+ {
+  "id": "irs-2553:report",
+  "read": "https://www.irs.gov/instructions/i2553",
+  "quote": "Form 2553 generally must be filed no later than 2 months and 15 days after the date entered for item E.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "35d3d4f2a6acc2a1",
+  "context": "etails, see the instructions for form ss-4. item e. effective date of election. form 2553 generally must be filed no later than 2 months and 15 days after the date entered for item e. for details and exceptions, see when to make the election and relief for late e"
+ },
+ {
+  "id": "irs-2553:eligibility",
+  "read": "https://www.irs.gov/instructions/i2553",
+  "quote": "It has no nonresident alien shareholders (other than as potential current beneficiaries of an ESBT).",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "35d3d4f2a6acc2a1",
+  "context": ". 2013-30, 2013-36 i.r.b. 173, available at irs.gov/irb/2013-36_irb#rp-2013-30. it has no nonresident alien shareholders (other than as potential current beneficiaries of an esbt). it has only one class of stock (disregarding differences in voting rights). gen"
+ },
+ {
+  "id": "md-llc:processing",
+  "read": "https://dat.maryland.gov/Documents/Accessible%20Documents/Charter%20-%20Resource%20Docs/List%20of%20Fees%20for%20Charter%20Services%20and%20Document%20Filings_0326-A.pdf",
+  "quote": "Non-expedited documents will be reviewed within 6-8 weeks.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1a4e6b697f0d637e",
+  "context": " non expedited. expedited documents will be reviewed within 7-10 business days. non-expedited documents will be reviewed within 6-8 weeks. this electronic government service includes a 3% service/convenience fee for pa"
+ },
+ {
+  "id": "md-llc:expedite:0",
+  "read": "https://dat.maryland.gov/Documents/Accessible%20Documents/Charter%20-%20Resource%20Docs/List%20of%20Fees%20for%20Charter%20Services%20and%20Document%20Filings_0326-A.pdf",
+  "quote": "will require a $50 expedite fee and will be reviewed within 7-10 business days.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1a4e6b697f0d637e",
+  "context": "rvice fees: documents hand-delivered or via dropbox requesting expedite service will require a $50 expedite fee and will be reviewed within 7-10 business days. hand-delivered transactions are to be paid by check, credit card or money order"
+ },
+ {
+  "id": "md-llc:expedite:1",
+  "read": "https://dat.maryland.gov/Documents/Accessible%20Documents/Charter%20-%20Resource%20Docs/List%20of%20Fees%20for%20Charter%20Services%20and%20Document%20Filings_0326-A.pdf",
+  "quote": "Same-day service via online has an expedited fee of $325 and must be submitted by 2:30 PM for Same-day review.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1a4e6b697f0d637e",
+  "context": "s://telegov.egov.com/sdatcharter/appointmentwizard rush filing fees via online: same-day service via online has an expedited fee of $325 and must be submitted by 2:30 pm for same-day review. not all documents are eligible for same-day service online. online filings: som"
+ },
+ {
+  "id": "md-llc:expedite:2",
+  "read": "https://dat.maryland.gov/Documents/Accessible%20Documents/Charter%20-%20Resource%20Docs/List%20of%20Fees%20for%20Charter%20Services%20and%20Document%20Filings_0326-A.pdf",
+  "quote": "Same-day service has an expedited fee of $425.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "1a4e6b697f0d637e",
+  "context": "t card or money order; between 8:30 am and 3:30 pm. rush filing fees via paper: same-day service has an expedited fee of $425. documents may be delivered via the dropbox by 10 am for same-day review and pic"
+ },
+ {
+  "id": "hi-llc:report",
+  "read": "https://cca.hawaii.gov/wp-content/uploads/2025/12/Form-Fee-Schedule-12-2022.pdf",
+  "quote": "Annual Report (Domestic/Foreign) $15.00** $25.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "b8bb8cf22a56f3e5",
+  "context": "atement for administratively terminated limited $25.00 $25.00 liability company annual report (domestic/foreign) $15.00** $25.00 any other statement or document of a domestic or foreign limited $25.00 $25.00 "
+ },
+ {
+  "id": "ut-llc:expedite:0",
+  "read": "https://commerce.utah.gov/wp-content/uploads/2023/04/currentfees.pdf",
+  "quote": "Expedited processing fee​ ​$75 per filing",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "27050aaca0a2f1e9",
+  "context": "compilation customized​ ​$5 + $.03 per record​ ​ 1.​​other filings and fees​ 1 ​expedited processing fee​ ​$75 per filing​ ​statement of correction​ ​$17​ ​statement of authority (llc)​ ​$15​ ​statemen"
+ },
+ {
+  "id": "ut-llc:report",
+  "read": "https://commerce.utah.gov/wp-content/uploads/2023/04/currentfees.pdf",
+  "quote": "*Domestic/foreign limited liability company (LLC)​ ​ 18",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "27050aaca0a2f1e9",
+  "context": " 2026 fee schedule​ ​effective july 1, 2025​ *​ limited partnership (lp lllp)​ ​*domestic/foreign limited liability company (llc)​ ​ 18​ $ ​*domestic/foreign limited liability partnership (llp)​ ​$18​ ​*domestic/for"
+ },
+ {
+  "id": "dc-formation:expedite:0",
+  "read": "https://dlcp.dc.gov/node/1621901",
+  "quote": "Expedited same-day service: $100, in addition to all other fees required by statute or regulation;",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "c21bca2dd53c0424",
+  "context": "porations division also offers expedited service for each of the filings below: expedited same-day service: $100, in addition to all other fees required by statute or regulation; and expedited 3-day service: $50, in addition to all other fees required by sta"
+ },
+ {
+  "id": "dc-formation:expedite:1",
+  "read": "https://dlcp.dc.gov/node/1621901",
+  "quote": "Expedited 3-day service: $50, in addition to all other fees required by statute or regulation.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "c21bca2dd53c0424",
+  "context": "ice: $100, in addition to all other fees required by statute or regulation; and expedited 3-day service: $50, in addition to all other fees required by statute or regulation. expedited service fee is required for all walk-in customers that receive servic"
+ },
+ {
+  "id": "dc-formation:report",
+  "read": "https://dlcp.dc.gov/node/1621921",
+  "quote": "Domestic & Foreign Limited Liability Company Biennial report $300.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "110553c4773e4cb0",
+  "context": "00 domestic & foreign limited liability company certified copy of filing $50.00 domestic & foreign limited liability company biennial report $300.00 domestic & foreign limited liability company biennial report late fee $100.00 d"
+ },
+ {
+  "id": "ma-sos-foreign-llc:report",
+  "read": "https://www.sec.state.ma.us/divisions/corporations/download/Fee_Schedule.pdf",
+  "quote": "Annual Report $500.00 $500.00 plus $20.00 expedite fee $500.00 plus $20.00 expedite fee Due on or before anniversary date of registration.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "bcfc67da7052cdd6",
+  "context": "ctronically requires additional form: certificate by regulatory board. maintain annual report $500.00 $500.00 plus $20.00 expedite fee $500.00 plus $20.00 expedite fee due on or before anniversary date of registration. annual report (professional) $500.00 $500.00 plus $20.00 expedite fee $500.00 p"
+ },
+ {
+  "id": "fl-sunbiz-foreign-llc:report",
+  "read": "https://dos.fl.gov/media/702554/cr2e027.pdf",
+  "quote": "The report must be filed electronically online between January 1st and May 1st. The fee for the annual report is $138.75.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "9ff3c5c39c55d459",
+  "context": "ntain \"active\" status. the first report is due in the year following formation. the report must be filed electronically online between january 1st and may 1st. the fee for the annual report is $138.75. after may 1st a $400 late fee is added to the annual report filing fee. \"annual"
+ },
+ {
+  "id": "de-llc-form:expedite:0",
+  "read": "https://corp.delaware.gov/expserv/",
+  "quote": "One Hour Service – $1,000.00 Processed within one hour of receipt.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "5deb9d27a35584ff",
+  "context": "at these fees are in addition to the fees that apply to fulfilling the request. one hour service – $1,000.00 processed within one hour of receipt. filing must be received by 9:00pm est or edt. two hour service – $500.00 proces"
+ },
+ {
+  "id": "de-llc-form:expedite:1",
+  "read": "https://corp.delaware.gov/expserv/",
+  "quote": "Two Hour Service – $500.00 Processed within two hours of receipt.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "5deb9d27a35584ff",
+  "context": "essed within one hour of receipt. filing must be received by 9:00pm est or edt. two hour service – $500.00 processed within two hours of receipt. filing must be received by 7:00pm est or edt. same day service – ranges from $1"
+ },
+ {
+  "id": "de-llc-form:agent",
+  "read": "https://corp.delaware.gov/howtoform/",
+  "quote": "Delaware law requires that every business entity have and maintain a Registered Agent in the State of Delaware",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "deeac3811a5602dc",
+  "context": " one stop business registration and licensing system. obtain a registered agent delaware law requires that every business entity have and maintain a registered agent in the state of delaware who may be either an individual resident or business entity that is authorized "
+ },
+ {
+  "id": "de-llc-form:report",
+  "read": "https://corp.delaware.gov/howtoform/",
+  "quote": "pay an annual tax of $300.00. Taxes for these entities are to be received no later than June 1st of each year.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "deeac3811a5602dc",
+  "context": "med in the state of delaware do not file an annual report, they are required to pay an annual tax of $300.00. taxes for these entities are to be received no later than june 1st of each year. about frequently asked questions contact information delaware laws newsroom age"
+ },
+ {
+  "id": "de-corp-form:report",
+  "read": "https://corp.delaware.gov/howtoform/",
+  "quote": "Taxes and Annual Reports are to be received no later than March 1st of each year.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "deeac3811a5602dc",
+  "context": "ended annual report for non-exempt domestic corporations the filing fee is $50. taxes and annual reports are to be received no later than march 1st of each year. the minimum tax is $175.00 with a maximum tax of $200,000.00. taxpayers owing $"
+ },
+ {
+  "id": "de-corp-form:report-fee",
+  "read": "https://corp.delaware.gov/howtoform/",
+  "quote": "For an Annual Report or Amended Annual Report for non-exempt domestic corporations the filing fee is $50.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "deeac3811a5602dc",
+  "context": "annual report or amended annual report for exempt domestic corporations is $25. for an annual report or amended annual report for non-exempt domestic corporations the filing fee is $50. taxes and annual reports are to be received no later than march 1st of each yea"
+ },
+ {
+  "id": "ca-corp-form:report",
+  "read": "https://www.sos.ca.gov/business-programs/business-entities/forms/corporations-statement-information",
+  "quote": "Statement of Information - Domestic and Foreign Stock : Due within 90 days of initial registration and every year thereafter.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "0ad69bdaaed43a8e",
+  "context": "nitial registration and every two years thereafter. form si-100 (pdf) $20.00 4. statement of information - domestic and foreign stock: due within 90 days of initial registration and every year thereafter. form si-550 (pdf) $25.00 attachment to statement of information: use if the cor"
+ },
+ {
+  "id": "ny-corp-form:report",
+  "read": "https://dos.ny.gov/biennial-statements-business-corporations-and-limited-liability-companies",
+  "quote": "are required by Section 408 of the Business Corporation Law to file a Biennial Statement every two years",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "be4976ecdca27416",
+  "context": "limited liability companies overview domestic and foreign business corporations are required by section 408 of the business corporation law to file a biennial statement every two years with the new york department of state. the biennial statement must set forth: ("
+ },
+ {
+  "id": "fl-corp-form:agent",
+  "read": "https://www.flsenate.gov/Laws/Statutes/2025/607.0501",
+  "quote": "Each corporation shall designate and continuously maintain in this state:",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "28f5f5eaf073c5b0",
+  "context": "0000000 i 0607.0501 0501 607.0501 registered office and registered agent. — (1) each corporation shall designate and continuously maintain in this state: (a) a registered office, which may be the same as its place of business in this"
+ },
+ {
+  "id": "fl-corp-form:report",
+  "read": "https://form.sunbiz.org/pdf/cr2e010.pdf",
+  "quote": "The report must be filed electronically online between January 1st and May 1st. The fee for the annual report is $150.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6cc1d39f51b710f6",
+  "context": "ntain \"active\" status. the first report is due in the year following formation. the report must be filed electronically online between january 1st and may 1st. the fee for the annual report is $150. after may 1st a $400 late fee is added to the annual report filing fee. \"annual"
+ },
+ {
+  "id": "fl-corp-qualify:report",
+  "read": "https://form.sunbiz.org/pdf/cr2e007.pdf",
+  "quote": "The report must be filed electronically online between January 1st and May 1st. The fee for the annual report is $150.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "3e864e9710f6e8e7",
+  "context": "ntain \"active\" status. the first report is due in the year following formation. the report must be filed electronically online between january 1st and may 1st. the fee for the annual report is $150. after may 1st a $400 late fee is added to the annual report filing fee. \"annual"
+ },
+ {
+  "id": "nv-corp-form:report",
+  "read": "https://www.leg.state.nv.us/nrs/nrs-078.html",
+  "quote": "on or before the last day of the month in which the anniversary date of incorporation occurs in each year,",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6f7f02c0c16d3590",
+  "context": "t is true, complete and accurate. 2. the corporation shall annually thereafter, on or before the last day of the month in which the anniversary date of incorporation occurs in each year, or, if, pursuant to subsection 12, the corporation has selected an alternative "
+ },
+ {
+  "id": "nv-corp-form:report-fee",
+  "read": "https://www.leg.state.nv.us/nrs/nrs-078.html",
+  "quote": "Subsection 1, the corporation shall pay to the Secretary of State a fee of $150.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6f7f02c0c16d3590",
+  "context": "he securities and exchange commission. 4. upon filing the list required by: (a) subsection 1, the corporation shall pay to the secretary of state a fee of $150. (b) subsection 2, the corporation shall pay to the secretary of state, if the a"
+ },
+ {
+  "id": "nj-corp-form:expedite:0",
+  "read": "https://www.nj.gov/treasury/revenue/fees.shtml",
+  "quote": "per filing for corporations and limited partnerships 2 hour service fee, per document 1 hour service fee, per document $15.00 $500.00 $1000.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "8baaebeaa58f0570",
+  "context": ") $75.00 expedited service fee (applies only to over-the-counter transactions): per filing for corporations and limited partnerships 2 hour service fee, per document 1 hour service fee, per document $15.00 $500.00 $1000.00 non-profit corporation filing fees certificate of incorporation $50.00 certific"
+ },
+ {
+  "id": "nj-corp-form:report",
+  "read": "https://www.nj.gov/treasury/revenue/fees.shtml",
+  "quote": "Annual Report - corporate and LP (Expediting is not available on this item.) $75.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "8baaebeaa58f0570",
+  "context": "te and lp $50.00 renewal of alternate name corporate name lp name $25.00 $50.00 annual report - corporate and lp (expediting is not available on this item.) $75.00 expedited service fee (applies only to over-the-counter transactions): per fili"
+ },
+ {
+  "id": "ga-corp-form:processing",
+  "read": "https://georgia.gov/register-corporation",
+  "quote": "Processing Time: 7 business days; registrations can be expedited for an additional fee.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6a925bfc84a9b412",
+  "context": "g fee by approved credit card: visa, mastercard, american express, or discover. processing time: 7 business days; registrations can be expedited for an additional fee. processing in 2 business days costs an additional $100. processing in the same "
+ },
+ {
+  "id": "ga-corp-form:expedite:0",
+  "read": "https://georgia.gov/register-corporation",
+  "quote": "Processing in 2 business days costs an additional $100.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6a925bfc84a9b412",
+  "context": "ng time: 7 business days; registrations can be expedited for an additional fee. processing in 2 business days costs an additional $100. processing in the same business day (if submitted before noon on a weekday) cos"
+ },
+ {
+  "id": "ga-corp-form:expedite:1",
+  "read": "https://georgia.gov/register-corporation",
+  "quote": "Processing in the same business day (if submitted before noon on a weekday) costs an additional $250.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6a925bfc84a9b412",
+  "context": " for an additional fee. processing in 2 business days costs an additional $100. processing in the same business day (if submitted before noon on a weekday) costs an additional $250. register by mail draft your articles of incorporation. a sample articles of inc"
+ },
+ {
+  "id": "ga-corp-form:expedite:2",
+  "read": "https://georgia.gov/register-corporation",
+  "quote": "Processing in one hour costs an additional $1,000.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6a925bfc84a9b412",
+  "context": " business day (if submitted before noon on a weekday) costs an additional $250. processing in one hour costs an additional $1,000. register in person draft your own articles of incorporation. a sample articles "
+ },
+ {
+  "id": "ga-corp-form:report",
+  "read": "https://georgia.gov/register-corporation",
+  "quote": "Within 90 days of incorporation, each Georgia corporation must file an initial annual registration that lists three principal officers",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6a925bfc84a9b412",
+  "context": "receive your certificate of incorporation within the specified processing time. within 90 days of incorporation, each georgia corporation must file an initial annual registration that lists three principal officers with the secretary of state. the fee is $50.00 for profit and professional corp"
+ },
+ {
+  "id": "ma-corp-form:report",
+  "read": "https://www.sec.state.ma.us/divisions/corporations/download/Fee_Schedule.pdf",
+  "quote": "within two and one half months of the fiscal year end to be considered on time.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "bcfc67da7052cdd6",
+  "context": "ry board certificate annual reports must arrive in our office, not post marked, within two and one half months of the fiscal year end to be considered on time. late fees will be waived for annual reports filed in paper following administra"
+ },
+ {
+  "id": "ma-corp-form:report-fee",
+  "read": "https://www.sec.state.ma.us/divisions/corporations/download/Fee_Schedule.pdf",
+  "quote": "Annual Report for Domestic $125.00, $150.00 if late.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "bcfc67da7052cdd6",
+  "context": "ch additional 100,000 shares or 275,000 shares are authorized. portion thereof. annual report for domestic $125.00, $150.00 if late. $100.00 plus $10.00 expedite fee; $125.00 $100.00 plus $10.00 expedite fee; $12"
+ },
+ {
+  "id": "al-llc-form:agent",
+  "read": "https://www.sos.alabama.gov/sites/default/files/2022-09/ForeignLLCRegistration.pdf",
+  "quote": "Name of registered agent for service of process (MUST be physically located in Alabama):",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "b85d786cbe387a0c",
+  "context": " liability company under the laws of the entity's jurisdiction of formation. 9. name of registered agent for service of process (must be physically located in alabama): 10. street (no po boxes) address of registered office of registered agent (must"
+ },
+ {
+  "id": "az-corp-form:report",
+  "read": "https://azcc.gov/faqs/BusinessServicesFAQs",
+  "quote": "Each corporation must file their annual report by their designated due date each year.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "998d823c2e987006",
+  "context": " fee of $45 and nonprofit corporations have an annual report filing fee of $10. each corporation must file their annual report by their designated due date each year. 3. what is my corporation's due date for its annual report? to find your corpor"
+ },
+ {
+  "id": "az-corp-form:report-fee",
+  "read": "https://azcc.gov/docs/default-source/corps-files/fee-schedules/fee-schedule-corporations6def4cc74b1a47129d16c2b1c3851bda.pdf",
+  "quote": "Annual Report – For-profit corporation $45.00 $80.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "df3d703be67cb23d",
+  "context": "ted articles of $25.00 $60.00 incorporation amended annual report $25.00 $60.00 annual report – for-profit corporation $45.00 $80.00 annual report – nonprofit corporation $10.00 $45.00 annual benefit report $10.0"
+ },
+ {
+  "id": "ct-llc-form:expedite:0",
+  "read": "https://portal.ct.gov/-/media/sots/business-services/bsd-forms/fee-schedule-revised-712020.pdf?rev=584e7111891242319ce570a4d20221c0&hash=D46A230464D9BB9B2AE176B451F4FCFB",
+  "quote": "A. Expedited Services (Per transaction) $50",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "574671fd0680084d",
+  "context": "tion of agent (file in duplicate; no form available) 20 vii. expedited services a. expedited services (per transaction) $50 viii. service of process a. foreign corporations $50 b. limited partnerships 50"
+ },
+ {
+  "id": "ct-llc-form:report",
+  "read": "https://business.ct.gov/knowledge-base/articles/domestic-limited-liability-companies-forms-and-fees",
+  "quote": "Annual Report - filed online annually from January 1 to March 31. (file online) > $80",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "65e3669fe6e1b795",
+  "context": " available online. domestic limited liability companies forms and fees form fee annual report - filed online annually from january 1 to march 31. (file online) > $80 application for reservation of name (file online) > $60 certificate of amendmen"
+ },
+ {
+  "id": "ct-corp-form:report",
+  "read": "https://portal.ct.gov/-/media/sots/business-services/bsd-forms/fee-schedule-revised-712020.pdf?rev=584e7111891242319ce570a4d20221c0&hash=D46A230464D9BB9B2AE176B451F4FCFB",
+  "quote": "G. Annual Report (Filed online) 150",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "574671fd0680084d",
+  "context": "cation of dissolution 50 f. certification of correction (no form available) 100 g. annual report (filed online) 150 h. corrected annual report (must contact office for forms) 100 i. interim notic"
+ },
+ {
+  "id": "ct-llc-qualify:report",
+  "read": "https://portal.ct.gov/-/media/sots/business-services/bsd-forms/fee-schedule-revised-712020.pdf?rev=584e7111891242319ce570a4d20221c0&hash=D46A230464D9BB9B2AE176B451F4FCFB",
+  "quote": "G. Annual Report (Filed online annually between January 1 and March 31) 80",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "574671fd0680084d",
+  "context": "60 e. transfer of registration of name 60 f. foreign registration statement 120 g. annual report (filed online annually between january 1 and march 31) 80 h. interim notice of change of manager/member 20 i. amendment of foreign regist"
+ },
+ {
+  "id": "ct-corp-qualify:report",
+  "read": "https://portal.ct.gov/-/media/sots/business-services/bsd-forms/fee-schedule-revised-712020.pdf?rev=584e7111891242319ce570a4d20221c0&hash=D46A230464D9BB9B2AE176B451F4FCFB",
+  "quote": "I. Annual Report (Filed online) 435",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "574671fd0680084d",
+  "context": "ded certificate of authority 100 h. application for certificate of withdrawal 0 i. annual report (filed online) 435 j. corrected annual report (must contact office for forms) 100 k. interim notic"
+ },
+ {
+  "id": "dc-corp-form:report",
+  "read": "https://dlcp.dc.gov/node/1621906",
+  "quote": "Domestic & Foreign Business Corporation Biennial report $300.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f3247afd3af13622",
+  "context": " corporation amendment or abandonment of statement of interest exchange $220.00 domestic & foreign business corporation biennial report $300.00 domestic & foreign business corporation biennial report late fee $100.00 domest"
+ },
+ {
+  "id": "hi-corp-form:report",
+  "read": "https://cca.hawaii.gov/wp-content/uploads/2025/12/Form-Fee-Schedule-12-2022.pdf",
+  "quote": "Annual Report of Domestic and Foreign Corporations Organized for $15.00** $25.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "b8bb8cf22a56f3e5",
+  "context": "(subsidiary corporation) $50.00 $75.00 articles of dissolution*** $25.00 $25.00 annual report of domestic and foreign corporations organized for $15.00** $25.00 profit any other statement, report, certificate, application, or document $25.0"
+ },
+ {
+  "id": "id-llc-form:processing",
+  "read": "https://sos.idaho.gov/business-forms/",
+  "quote": "Business Filings are currently being processed approximately 3-5 days from the date of filing.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "3e0a54b6a710d442",
+  "context": "ols idaho blue book news & media press releases newsletter sign-up please note: business filings are currently being processed approximately 3-5 days from the date of filing. view our processed-through dates. business forms most business filings can be c"
+ },
+ {
+  "id": "id-llc-form:expedite:0",
+  "read": "https://sos.idaho.gov/CORP/forms/CORP/Art%20of%20Incorp%20General.pdf",
+  "quote": "If expedited service is requested, add an additional $40.00 to the filing fee.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "20a6079ceaa3cd76",
+  "context": "fee (make checks payable to idaho secretary of state): a. the fee is $120.00 b. if expedited service is requested, add an additional $40.00 to the filing fee. c. if 'same day' service is requested, add $100.00 to the filing fee. pursuant "
+ },
+ {
+  "id": "id-llc-form:expedite:1",
+  "read": "https://sos.idaho.gov/CORP/forms/CORP/Art%20of%20Incorp%20General.pdf",
+  "quote": "If 'same day' service is requested, add $100.00 to the filing fee.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "20a6079ceaa3cd76",
+  "context": " expedited service is requested, add an additional $40.00 to the filing fee. c. if 'same day' service is requested, add $100.00 to the filing fee. pursuant to idaho code § 67-910(6), the secretary of state's office may delete "
+ },
+ {
+  "id": "ia-llc-form:report",
+  "read": "https://sos.iowa.gov/businesses/business-entity-forms-and-fees",
+  "quote": "Every Odd numbered year beginning January 1st and due by April 1st.",
+  "checked": "2026-10-27",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-27"
+ },
+ {
+  "id": "ia-llc-form:report-fee",
+  "read": "https://sos.iowa.gov/businesses/business-entity-forms-and-fees",
+  "quote": "$30* by online filing or $45* by paper.",
+  "checked": "2026-10-27",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-27"
+ },
+ {
+  "id": "ia-corp-form:report",
+  "read": "https://sos.iowa.gov/businesses/business-entity-forms-and-fees",
+  "quote": "Every Even numbered year beginning January 1st and due by April 1st. The filing fee is $60.",
+  "checked": "2026-10-27",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-27"
+ },
+ {
+  "id": "ky-llc-form:report",
+  "read": "https://www.sos.ky.gov/bus/business-filings/Pages/Annual-Reports.aspx",
+  "quote": "Domestic entities that fail to file their annual reports by June 30 are administratively dissolved,",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "74802ee5b43b4b0c",
+  "context": "ent of change of registered agent and office​ (rac)​ administrative dissolution domestic entities that fail to file their annual reports by june 30 are administratively dissolved, meaning that until they reinstate, they are inactive and in bad standing with t"
+ },
+ {
+  "id": "ky-llc-form:report-fee",
+  "read": "https://www.sos.ky.gov/bus/business-filings/Pages/Annual-Reports.aspx",
+  "quote": "Your annual report must be signed, dated and accompanied by a $15 filing fee.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "74802ee5b43b4b0c",
+  "context": "t online; or printing your annual report and returning it by mail or in person. your annual report must be signed, dated and accompanied by a $15 filing fee. on your annual report, yo​​u must confirm the principal and registered agent/of"
+ },
+ {
+  "id": "la-llc-form:expedite:0",
+  "read": "https://static.sos.la.gov/shared/fee_changes_2026.pdf",
+  "quote": "Documents processed within 24 hours available for pick-up or mail. Referred to $35 as \"expedite.\"",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "daf70720009b4a77",
+  "context": "ts processed while you wait. referred to as \"priority expedite or $60 waiting.\" documents processed within 24 hours available for pick-up or mail. referred to $35 as \"expedite.\" credit card payments are subject to an additional statutory convenience fee. $5"
+ },
+ {
+  "id": "la-llc-form:expedite:1",
+  "read": "https://static.sos.la.gov/shared/fee_changes_2026.pdf",
+  "quote": "Documents processed while you wait. Referred to as \"priority expedite or waiting.\" $60",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "daf70720009b4a77",
+  "context": "ervice provider application no fee renewal no fee special handling instructions documents processed while you wait. referred to as \"priority expedite or waiting.\" $60 documents processed within 24 hours available for pick-up or mail. referred to "
+ },
+ {
+  "id": "la-llc-form:report",
+  "read": "https://static.sos.la.gov/shared/fee_changes_2026.pdf",
+  "quote": "Annual Reports $35 Name Reservation Cancellation $25",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "daf70720009b4a77",
+  "context": "tiﬁed copies $20 certiﬁed copies with amendments $30 additional certiﬁcates $25 annual reports $35 name reservation cancellation $25 domestic partnerships partnership registration-louisiana $125 name reservation-"
+ },
+ {
+  "id": "la-corp-form:report",
+  "read": "https://static.sos.la.gov/shared/fee_changes_2026.pdf",
+  "quote": "Annual Report $35 Annual Report for Nonproﬁt $10",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "daf70720009b4a77",
+  "context": "tiﬁed copies $20 certiﬁed copies with amendments $30 additional certiﬁcates $25 annual report $35 annual report for nonproﬁt $10 name reservation cancellation $25 domestic limited liability companies articles"
+ },
+ {
+  "id": "me-llc-form:processing",
+  "read": "https://www.maine.gov/sos/corporations-commissions/i-need-a-business-form/limited-liability-company-forms",
+  "quote": "Corporate filings processing time is 2 - 7 business days.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "c657d5a37c915dfa",
+  "context": " 5 p.m. customer service telephone hours are 10 a.m. to 5 p.m. processing time: corporate filings processing time is 2 - 7 business days. to determine if your filing has been processed, please go to corporate search t"
+ },
+ {
+  "id": "me-llc-form:expedite:0",
+  "read": "https://www.maine.gov/sos/sites/maine.gov.sos/files/inline-files/mllc6.pdf",
+  "quote": "24-hour expedited filing (next business day) service: $50 additional filing fee per entity",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "55b5d980f252d177",
+  "context": "opy for pick up (will be required to pick up at our office in augusta, maine) ϒ 24-hour expedited filing (next business day) service: $50 additional filing fee per entity ϒ immediate expedited filing (same business day): $100 additional filing fee pe"
+ },
+ {
+  "id": "me-llc-form:expedite:1",
+  "read": "https://www.maine.gov/sos/sites/maine.gov.sos/files/inline-files/mllc6.pdf",
+  "quote": "Immediate expedited filing (same business day): $100 additional filing fee per entity",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "55b5d980f252d177",
+  "context": "ited filing (next business day) service: $50 additional filing fee per entity ϒ immediate expedited filing (same business day): $100 additional filing fee per entity note: only one expedite fee is required if filing multiple documents for the sa"
+ },
+ {
+  "id": "me-llc-form:report",
+  "read": "https://legislature.maine.gov/statutes/31/title31sec1680.html",
+  "quote": "a fee of $85 for a limited liability company or a fee of $150 for a foreign limited liability company;",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "d3b48391ab779ea8",
+  "context": "§3 (aff).] 6. annual report. for filing of an annual report under section 1665, a fee of $85 for a limited liability company or a fee of $150 for a foreign limited liability company; [pl 2011, c. 113, pt. b, §17 (amd).] 7. application for excuse. for filing a st"
+ },
+ {
+  "id": "me-corp-form:report",
+  "read": "https://legislature.maine.gov/statutes/13-c/title13-Csec123.html",
+  "quote": "For an annual report or amended annual report, the fee is $85.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "a680be7c2c3f37e8",
+  "context": " $70. [pl 2001, c. 640, pt. a, §2 (new); pl 2001, c. 640, pt. b, §7 (aff).] dd. for an annual report or amended annual report, the fee is $85. [pl 2003, c. 673, pt. xxx, §2 (amd); pl 2003, c. 673, pt. xxx, §10 (aff).] dd-1"
+ },
+ {
+  "id": "me-corp-qualify:report",
+  "read": "https://legislature.maine.gov/statutes/13-c/title13-Csec123.html",
+  "quote": "For an annual report or amended annual report for a foreign business corporation, the fee is $150.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "a680be7c2c3f37e8",
+  "context": "pl 2003, c. 673, pt. xxx, §2 (amd); pl 2003, c. 673, pt. xxx, §10 (aff).] dd-1. for an annual report or amended annual report for a foreign business corporation, the fee is $150. [pl 2003, c. 673, pt. xxx, §3 (new); pl 2003, c. 673, pt. xxx, §10 (aff).] ee. "
+ },
+ {
+  "id": "mi-llc-form:expedite:0",
+  "read": "https://www.michigan.gov/lara/-/media/Project/Websites/lara/cscl/NonImages_new/Corps/forms/llc/701-0725.pdf?rev=ddcdc292b70b4173a9b1dbc768a0db37&hash=0200673293E4E4D7CFCDFA58ABBC3012",
+  "quote": "24-hour service - $50 for formation documents and applications for certificate of authority.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6a7572f7adedb5ae",
+  "context": "72 form for expedited service for each document submitted in person or by mail. 24-hour service - $50 for formation documents and applications for certificate of authority. 24-hour service - $100 for any document concerning an existing entity. same day"
+ },
+ {
+  "id": "mi-llc-form:expedite:1",
+  "read": "https://www.michigan.gov/lara/-/media/Project/Websites/lara/cscl/NonImages_new/Corps/forms/llc/701-0725.pdf?rev=ddcdc292b70b4173a9b1dbc768a0db37&hash=0200673293E4E4D7CFCDFA58ABBC3012",
+  "quote": "Same day - $100 for formation documents and applications for certificate of authority.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6a7572f7adedb5ae",
+  "context": "rvice - $100 for any document concerning an existing entity. same day service • same day - $100 for formation documents and applications for certificate of authority. • same day - $200 for any document concerning an existing entity. review comple"
+ },
+ {
+  "id": "mi-llc-form:expedite:2",
+  "read": "https://www.michigan.gov/lara/-/media/Project/Websites/lara/cscl/NonImages_new/Corps/forms/llc/701-0725.pdf?rev=ddcdc292b70b4173a9b1dbc768a0db37&hash=0200673293E4E4D7CFCDFA58ABBC3012",
+  "quote": "Two hour - $500",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6a7572f7adedb5ae",
+  "context": "request for same day expedited service must be received by 1 p.m. est or edt.  two hour - $500 review completed within two hours on day of receipt. document and request for t"
+ },
+ {
+  "id": "mi-llc-form:expedite:3",
+  "read": "https://www.michigan.gov/lara/-/media/Project/Websites/lara/cscl/NonImages_new/Corps/forms/llc/701-0725.pdf?rev=ddcdc292b70b4173a9b1dbc768a0db37&hash=0200673293E4E4D7CFCDFA58ABBC3012",
+  "quote": "One hour - $1000",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6a7572f7adedb5ae",
+  "context": "request for two hour expedited service must be received by 3 p.m. est or edt.  one hour - $1000 review completed within one hour on day of receipt. document and request for 1 "
+ },
+ {
+  "id": "mn-corp-qualify:report",
+  "read": "https://www.sos.mn.gov/media/1687/businessentityfees.pdf",
+  "quote": "Annual Renewal $115.00 $135.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f178e51081c7e4a0",
+  "context": "tificate of authority – original filing $200.00 $220.00 amendment $50.00 $70.00 annual renewal $115.00 $135.00 annual reinstatement $500.00 $520.00 conversion $35.00 $55.00 dissolution $50.0"
+ },
+ {
+  "id": "ms-llc-form:report",
+  "read": "https://www.sos.ms.gov/content/documents/Business/FeeSchedule.pdf",
+  "quote": "F0108 MS LLC Annual Report $0",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f198701a7d318bce",
+  "context": "02 ms llc certificate of merger $25 f0103 ms llc certificate of dissolution $50 f0108 ms llc annual report $0 f0109 llc reinstatement $50 f0110 ms llc application for name reservation $25 f"
+ },
+ {
+  "id": "ms-llc-qualify:report",
+  "read": "https://www.sos.ms.gov/content/documents/Business/FeeSchedule.pdf",
+  "quote": "F0208 Foreign LLC Annual Report $250",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f198701a7d318bce",
+  "context": "ed liability company $25 f0110 foreign llc application for name reservation $25 f0208 foreign llc annual report $250 f0209 foreign llc reinstatement $100 mississippigeneralpartnerships formname fi"
+ },
+ {
+  "id": "mt-llc-form:report",
+  "read": "https://sosmt.gov/business/fees/",
+  "quote": "Annual Report Prior To April 15th WAIVED Annual Report After April 15th",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "b8aa3b7eca163914",
+  "context": " reservation no fee statement of change – registered office, agent, both no fee annual report prior to april 15th waived annual report after april 15th $35.00 operating agreements, other statements, other reports $15.00 limited lia"
+ },
+ {
+  "id": "mt-corp-form:report",
+  "read": "https://sosmt.gov/business/fees/",
+  "quote": "Annual Report – Prior To April 15th WAIVED Annual Report – After April 15th $35.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "b8aa3b7eca163914",
+  "context": "e registration $15.00 statement of change – registered office/agent/both no fee annual report – prior to april 15th waived annual report – after april 15th $35.00 certificate of existence (domestic) $5.00 certificate of authority (foreign) $5"
+ },
+ {
+  "id": "nc-llc-form:expedite:0",
+  "read": "https://www.sosnc.gov/manual/register_a_foreign_business/expedited",
+  "quote": "24 Hour Received anytime between 8:00 a.m. and 5:00 p.m. $100.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "c29a678742af21f1",
+  "context": "eeds to be included on a cover letter or cover sheet submitted to the division. 24 hour received anytime between 8:00 a.m. and 5:00 p.m. $100.00 same day must be received in the office before 12 noon on the day same day serv"
+ },
+ {
+  "id": "nc-llc-form:expedite:1",
+  "read": "https://www.sosnc.gov/manual/register_a_foreign_business/expedited",
+  "quote": "Must be received in the office before 12 Noon on the day same day service is being requested. $200.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "c29a678742af21f1",
+  "context": "sion. 24 hour received anytime between 8:00 a.m. and 5:00 p.m. $100.00 same day must be received in the office before 12 noon on the day same day service is being requested. $200.00 24 hour service guarantees that the document will be reviewed and filed, if acc"
+ },
+ {
+  "id": "nc-llc-form:report",
+  "read": "https://sosnc.gov/fees/by_title/_Business_Registration/",
+  "quote": "Certificate of Existence or Certificate of Authorization $15.00 Annual Report $200.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ff03489b36ce10ac",
+  "context": "evocation of authority to transact business $0.00 articles of correction $10.00 certificate of existence or certificate of authorization $15.00 annual report $200.00 any other document required or permitted to be filed by chapter 57d $10.00 limi"
+ },
+ {
+  "id": "nc-corp-form:report",
+  "read": "https://sosnc.gov/fees/by_title/_Business_Registration/",
+  "quote": "Annual Report (effective September 1, 2007) $25.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "ff03489b36ce10ac",
+  "context": "ate of withdrawal (for only) $25.00 articles of correction (dom and for) $10.00 annual report (effective september 1, 2007) $25.00 application for reinstatement following administrative dissolution $100.00 desi"
+ },
+ {
+  "id": "nd-llc-form:report",
+  "read": "https://ndlegis.gov/cencode/t10c32-1.pdf",
+  "quote": "must be delivered to the secretary of state before November sixteenth of each year.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f7596895ebc37c7a",
+  "context": "nual report of a limited liability company or foreign limited liability company must be delivered to the secretary of state before november sixteenth of each year. the first annual report of a limited liability company must be delivered before"
+ },
+ {
+  "id": "nd-llc-form:report-fee",
+  "read": "https://ndlegis.gov/cencode/t10c32-1.pdf",
+  "quote": "Filing an annual report of a limited liability company or foreign limited liability company, fifty dollars.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "f7596895ebc37c7a",
+  "context": " liability company and issuing a certificate of withdrawal, twenty dollars. 25. filing an annual report of a limited liability company or foreign limited liability company, fifty dollars. a. the secretary of state shall charge and collect additional fees for late fil"
+ },
+ {
+  "id": "nd-corp-form:report",
+  "read": "https://ndlegis.gov/cencode/t10c19-1.pdf",
+  "quote": "Filing an annual report of a corporation or foreign corporation, twenty-five dollars.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "736e4113f6a09a77",
+  "context": "oreign corporation and issuing a certificate of withdrawal, twenty dollars. 24. filing an annual report of a corporation or foreign corporation, twenty-five dollars. a. the secretary of state shall charge and collect additional fees for late fil"
+ },
+ {
+  "id": "ok-llc-form:report",
+  "read": "https://www.sos.ok.gov/business/fees.aspx",
+  "quote": "Annual Certificates - Oklahoma/Foreign LLC 18 OS 2055.2 25.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "45a2ebecb1658124",
+  "context": "00.00 order now annual certificates 18 os 1142 min. 10.00(1/10 of 1%) order now annual certificates - oklahoma/foreign llc 18 os 2055.2 25.00 order now annual certificates - oklahoma/foreign lp 54 os 311.1 50.00 order now"
+ },
+ {
+  "id": "ri-llc-form:report",
+  "read": "https://docs.sos.ri.gov/documents/BusinessServices/business-forms-fee-schedule.pdf",
+  "quote": "632 ANNUAL REPORT YES $50.00 $2.50",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "28fe731ec6013257",
+  "context": "00 $2.50 625 abandonment of fictitious business name statement yes $50.00 $2.50 632 annual report yes $50.00 $2.50 632 annual report – penalty imposed yes $75.00 $3.00 632 annual report – amende"
+ },
+ {
+  "id": "ri-corp-form:report",
+  "read": "https://docs.sos.ri.gov/documents/BusinessServices/business-forms-fee-schedule.pdf",
+  "quote": "630 ANNUAL REPORT YES $50.00 $2.50",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "28fe731ec6013257",
+  "context": "00 $2.50 625 abandonment of fictitious business name statement yes $50.00 $2.50 630 annual report yes $50.00 $2.50 630 annual report – penalty imposed yes $75.00 $3.00 630 annual report – amende"
+ },
+ {
+  "id": "sd-llc-form:expedite:0",
+  "read": "https://sdsos.gov/general-information/filing-fees.aspx",
+  "quote": "Expedited Service (Expedited service is defined as: completion sooner than the normal course of business upon request.) $50",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "2f8cc04739e5d984",
+  "context": "l fees collected by the secretary of state's office. general office service fee expedited service (expedited service is defined as: completion sooner than the normal course of business upon request.) $50 copies (per page) $2 certified copies $15 + $2 per page bond information statem"
+ },
+ {
+  "id": "sd-llc-form:report",
+  "read": "https://sdsos.gov/general-information/filing-fees.aspx",
+  "quote": "Annual Report Filed Electronically online $55 Filed via Paper (includes paper filing fee) $70",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "2f8cc04739e5d984",
+  "context": "led electronically online $750 filed via paper (includes paper filing fee) $765 annual report filed electronically online $55 filed via paper (includes paper filing fee) $70 amended or restated domestic articles of incorporation $60 application for amen"
+ },
+ {
+  "id": "ut-corp-form:report",
+  "read": "https://commerce.utah.gov/wp-content/uploads/2023/04/currentfees.pdf",
+  "quote": "*Domestic/foreign corporation​ ​ 18",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "27050aaca0a2f1e9",
+  "context": "a \"*\" include a $5 surcharge​ ​for the state of utah's single sign-on portal.​ ​*domestic/foreign corporation​ ​ 18​ $ ​domestic/foreign nonprofit corporation​ ​$18​ ​1​ ​fiscal year 2026 fee sch"
+ },
+ {
+  "id": "vt-llc-form:report",
+  "read": "https://sos.vermont.gov/business-services/fees-statutes",
+  "quote": "Annual Report 11 V.S.A. § 4033 $45.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "3c6cbe273c5f7a71",
+  "context": "plication for certificate of existence 11 v.s.a. § 4028 $35.00 11 v.s.a. § 4012 annual report 11 v.s.a. § 4033 $45.00 11 v.s.a. § 4012 reinstatement 11 v.s.a. § 4034 $35.00 11 v.s.a. § 4012 article"
+ },
+ {
+  "id": "vt-corp-form:report",
+  "read": "https://sos.vermont.gov/business-services/fees-statutes",
+  "quote": "Annual Report 11A V.S.A. § 16.22 $60.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "3c6cbe273c5f7a71",
+  "context": "fee (failure to file annual report) 11a v.s.a. § 14.20 $50.00 11a v.s.a. § 1.22 annual report 11a v.s.a. § 16.22 $60.00 11a v.s.a. § 1.22 any other document permitted or required to be filed under ti"
+ },
+ {
+  "id": "vt-llc-qualify:report",
+  "read": "https://sos.vermont.gov/business-services/fees-statutes",
+  "quote": "Annual Report 11 V.S.A. § 4033 $170.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "3c6cbe273c5f7a71",
+  "context": "ation for certificate of authorization 11 v.s.a. § 4028 $35.00 11 v.s.a. § 4012 annual report 11 v.s.a. § 4033 $170.00 11 v.s.a. § 4012 reinstatement 11 v.s.a. § 4034 $35.00 11 v.s.a. § 4012 applica"
+ },
+ {
+  "id": "wv-llc-form:expedite:0",
+  "read": "https://sos.wv.gov/media/335/download?inline=",
+  "quote": "24-HOUR Expedite additional $25.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "641fdc57ecc1e756",
+  "context": "he nature of the business. expedite service fees apply to business filings only 24-hour expedite additional $25.00 2-hour expedite additional $250.00 1-hour expedite additional $500.00 corporati"
+ },
+ {
+  "id": "wv-llc-form:expedite:1",
+  "read": "https://sos.wv.gov/media/335/download?inline=",
+  "quote": "2-HOUR Expedite additional $250.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "641fdc57ecc1e756",
+  "context": " service fees apply to business filings only 24-hour expedite additional $25.00 2-hour expedite additional $250.00 1-hour expedite additional $500.00 corporation registration & amendment fee for"
+ },
+ {
+  "id": "wv-llc-form:expedite:2",
+  "read": "https://sos.wv.gov/media/335/download?inline=",
+  "quote": "1-HOUR Expedite additional $500.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "641fdc57ecc1e756",
+  "context": "ings only 24-hour expedite additional $25.00 2-hour expedite additional $250.00 1-hour expedite additional $500.00 corporation registration & amendment fee for registration articles of incorpora"
+ },
+ {
+  "id": "wv-llc-form:report",
+  "read": "https://sos.wv.gov/business/updates-and-changes/annual-reports",
+  "quote": "and pay the annual report $25.00 filing fee between January 1 and June 30 of each year",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "6aa48f43fcaa478c",
+  "context": "gistered through the west virginia secretary of state to file an annual report, and pay the annual report $25.00 filing fee between january 1 and june 30 of each year following the calendar year in which the business was registered with the offic"
+ },
+ {
+  "id": "wi-llc-form:expedite:0",
+  "read": "https://dfi.wi.gov/Documents/BusinessServices/BusinessEntities/Forms/CORP502.pdf",
+  "quote": "please check the expedited service box in the upper-right corner of the first page and include an additional $100.00.",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "97302f6b6ac296a1",
+  "context": "fl., north tower, madison wi, 53705.) if requesting optional expedited service, please check the expedited service box in the upper-right corner of the first page and include an additional $100.00. filing fees are non-refundable. this document can be made available in alternat"
+ },
+ {
+  "id": "wy-llc-form:expedite:0",
+  "read": "https://sos.wyo.gov/Business/docs/BusinessFees.pdf",
+  "quote": "Expedited Filing Service - Same Business Day..............................................$1,400.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "daa39a0f33d3a982",
+  "context": ".................................................................... $10,200.00 expedited filing service - same business day..............................................$1,400.00 expedited filing service - next business day..................................."
+ },
+ {
+  "id": "wy-llc-form:expedite:1",
+  "read": "https://sos.wyo.gov/Business/docs/BusinessFees.pdf",
+  "quote": "Expedited Filing Service - Next Business Day...................................................$700.00",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "daa39a0f33d3a982",
+  "context": "vice - same business day..............................................$1,400.00 expedited filing service - next business day...................................................$700.00 revised: june 2026 3 wyoming secretary of state business division herschler bui"
+ },
+ {
+  "id": "wy-llc-form:report",
+  "read": "https://sos.wyo.gov/Business/docs/BusinessFees.pdf",
+  "quote": "*Annual Report License tax is $60 or two-tenths of one mill on the dollar ($.0002) whichever is greater based",
+  "checked": "2026-10-27",
+  "method": "curl",
+  "found": true,
+  "sha256": "daa39a0f33d3a982",
+  "context": " other filing............................................................$60.00 *annual report license tax is $60 or two-tenths of one mill on the dollar ($.0002) whichever is greater based on the company's assets located and employed in the state of wyoming. nonprofit"
  }
 ]

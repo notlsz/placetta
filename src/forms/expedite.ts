@@ -10,14 +10,16 @@
      An expedite fee is the agency's own, passed through to the agency at cost. Placetta never marks it up and never
      charges it: the owner pays the agency, on the agency's page or through the approval card's existing pay step.
 
-   The Secretary of State tiers for forming a company are kept on the registry entries themselves (OfficialForm.expedite,
-   added with the 50-state entity formation work); expediteOf reads those first. This file holds everything else. */
+   One Expedite type for the whole library (src/forms/registry.ts): the Secretary of State tiers sit on the registry
+   rows themselves (src/forms/entities.ts, read through src/forms/speed.ts, fail closed on their proof); this file's
+   table holds the rest (plan reviews, building departments, the IRS). expediteOptions merges both, each once. */
 import { B, type Bi } from "../bi";
-import { formById, type OfficialForm } from "./registry";
+import { formById, type Expedite, type Span } from "./registry";
+import { expediteOf as currentTiers, processingOf } from "./speed";
 import RESEARCHED from "./times.json";
+import { daysFromNow } from "../time";
 
-/** A length of time as the agency states it: the quickest it says, the usual, and the longest, in its own unit. */
-export type Span = { fast: number; typical: number; slow: number; unit: "business" | "calendar" };
+export type { Expedite, Span };
 
 /** Where a step's time comes from:
  *    agency     the agency's published processing time
@@ -28,35 +30,6 @@ export type Span = { fast: number; typical: number; slow: number; unit: "busines
 export type TimeKind = "agency" | "report" | "statistic" | "measured" | "default";
 
 export type Timing = Span & { say: Bi; source?: string; checked?: string; kind: TimeKind; note?: Bi };
-
-/** One way the agency offers to go faster, as it publishes it. The shared shape for every expedite in the library:
- *  label, feeUsd, turnaround and source, plus what the estimate and the filing need. */
-export type Expedite = {
-  id?: string;
-  label: Bi | string;
-  /** The agency's own extra fee, in dollars, on top of its standard fee; 0 when the faster route is free; null when the
-   *  agency sets it per project (feeNote says how). Passed through to the agency, never marked up. */
-  feeUsd: number | null;
-  feeNote?: Bi;
-  /** In the agency's words, short: "within 10 working days". */
-  turnaround: Bi | string;
-  /** The official page that states it. */
-  source: string;
-  checked?: string;
-  /** What the estimate uses when it's chosen; absent when the agency publishes no time for it (the estimate then keeps
-   *  the standard time, and says so). */
-  span?: Span;
-  /** form: a line on the agency's own form or portal carries the choice, and Odelia fills it. team: there's no line for
-   *  it, so Placetta's team asks the agency for it when it files. */
-  how?: "form" | "team";
-  /** The line that carries it: the value written when it's chosen (a fixed value, or the standard answer mapped to its
-   *  expedited one), and the value it goes back to when the owner picks standard again. */
-  fill?: { line: string; value: string | Record<string, string>; standard?: string };
-  /** When the agency's extra fee depends on an answer on the form (the size tier), the extra fee for each answer. */
-  tiers?: { line: string; extra: Record<string, number> };
-  /** Who may use it, when the agency limits it. */
-  only?: Bi;
-};
 
 const CHECKED = "2026-10-27";
 
@@ -131,14 +104,14 @@ export const EXPEDITE: Record<string, Expedite[]> = {
   // free and faster: the IRS issues an EIN online at once (an owner with an SSN or ITIN), or on the phone to an
   // international applicant; Placetta's team does either with the owner
   "irs-ss4": [
-    { id: "online", label: B("Online", "在线申请"), feeUsd: 0, turnaround: B("issued immediately", "当场签发"), span: cd(0, 0, 0), source: IRS_EIN, checked: CHECKED, how: "team",
+    { id: "online", label: B("Online", "在线申请"), feeUsd: 0, turnaround: B("issued immediately", "当场签发"), hours: 0, span: cd(0, 0, 0), source: { url: IRS_EIN, quote: "an EIN is issued immediately", checked: CHECKED }, how: "team",
       only: B("Only when the responsible party has an SSN or ITIN.", "仅限负责人有 SSN 或 ITIN。") },
-    { id: "phone", label: B("By phone (international applicants)", "电话申请（境外申请人）"), feeUsd: 0, turnaround: B("issued during the call, 267-941-1099", "通话中签发，267-941-1099"), span: cd(0, 0, 0), source: IRS_EIN, checked: CHECKED, how: "team",
+    { id: "phone", label: B("By phone (international applicants)", "电话申请（境外申请人）"), feeUsd: 0, turnaround: B("issued during the call, 267-941-1099", "通话中签发，267-941-1099"), hours: 0, span: cd(0, 0, 0), source: { url: IRS_EIN, quote: "267-941-1099 (not a toll-free number)", checked: CHECKED }, how: "team",
       only: B("For an applicant with no legal residence or place of business in the US.", "适用于在美国没有合法居所或营业地点的申请人。") },
   ],
   "lac-plan-check": [
     { id: "expedited", label: B("Expedited plan review", "加急图纸审查"), feeUsd: null, feeNote: B("50% more than the regular fee for the size: $1,530 becomes $2,295 for 501 to 1,999 sq ft.", "按面积档在常规费用上加 50%：501 至 1,999 平方英尺由 1,530 美元变为 2,295 美元。"),
-      turnaround: B("within 10 working days after payment", "付款后 10 个工作日内"), span: bd(10, 10, 10), source: LAC_FORM, checked: CHECKED, how: "form",
+      turnaround: B("within 10 working days after payment", "付款后 10 个工作日内"), hours: null, span: bd(10, 10, 10), source: { url: LAC_FORM, quote: "Plans shall be reviewed within 20 (regular) or 10 (expedited) working days after receipt of payment.", checked: CHECKED }, how: "form",
       fill: { line: "square_footage", value: LAC_MAP }, tiers: { line: "square_footage", extra: LAC_EXTRA },
       only: B("The county asks you to confirm the expedited service is available before paying for it.", "县政府要求付款前先确认可提供加急服务。") },
   ],
@@ -146,58 +119,65 @@ export const EXPEDITE: Record<string, Expedite[]> = {
     { id: "star", label: B("STAR review (Streamlined Tenant Alteration Review)", "STAR 快速租户装修审查"), feeUsd: null,
       feeNote: B("A premium fee on the city's Building Fee Schedule; the STAR page doesn't state the amount.", "按市建筑收费表收取附加费；STAR 页面未列明金额。"),
       turnaround: B("one 90-minute review meeting at City Hall with Planning, Building, Public Works and Fire, instead of rounds of review", "在市政厅与规划、建筑、公共工程和消防部门开一次 90 分钟审查会，代替多轮审查"),
-      source: SJ_STAR, checked: CHECKED, how: "team",
+      hours: null, source: { url: SJ_STAR, quote: "a 90-minute, in-person meeting at City Hall", checked: CHECKED }, how: "team",
       only: B("For eligible tenant improvements: the city confirms eligibility from a request form first.", "限符合条件的租户装修：市政府先根据申请表确认资格。") },
   ],
   "la-ladbs": [
     { id: "expedited", label: B("Expedited plan check", "加急图纸审查"), feeUsd: null, feeNote: B("50% of the plan check fee, added to it.", "在图纸审查费基础上加收 50%。"),
-      turnaround: B("reviewed ahead of the regular queue; LADBS publishes no time for it", "优先于常规队列审查；LADBS 未公布时间"), source: LADBS_RPC, checked: CHECKED, how: "team" },
+      turnaround: B("reviewed ahead of the regular queue; LADBS publishes no time for it", "优先于常规队列审查；LADBS 未公布时间"), hours: null, source: { url: LADBS_RPC, quote: "With 50% more of the plan check fee paid, the plan check review will be expedited.", checked: CHECKED }, how: "team" },
   ],
   "sf-dbi-building": [
     { id: "premium", label: B("Premium plan review", "优先图纸审查"), feeUsd: null, feeNote: B("50% of the plan review fee plus $1,000 (Table 1A-B, permits issued from July 12, 2026).", "图纸审查费的 50% 另加 1,000 美元（1A-B 表，适用于 2026 年 7 月 12 日起签发的许可）。"),
-      turnaround: B("reviewed ahead of standard plan review; DBI publishes no time for it", "优先于标准审查；DBI 未公布时间"), source: SF_FEES, checked: CHECKED, how: "team" },
+      turnaround: B("reviewed ahead of standard plan review; DBI publishes no time for it", "优先于标准审查；DBI 未公布时间"), hours: null, source: { url: SF_FEES, quote: "50% of Plan Review Fee plus $1,000", checked: CHECKED }, how: "team" },
   ],
   "dal-building": [
     { id: "q-team", label: B("Minor Commercial Q-Team express plan review", "小型商业 Q-Team 快速审查"), feeUsd: null,
       feeNote: B("A $500 intake fee plus $1,000 an hour of review, at most $2,000: $1,500 to $2,500 on top of the permit fees.", "500 美元受理费，另加每小时 1,000 美元审查费、最多 2,000 美元：在许可费之外共 1,500 至 2,500 美元。"),
       turnaround: B("reviewed on the day of the appointment, booked at least 5 days ahead; corrections within 5 business days", "预约当天审查，须提前至少 5 天预约；修改后 5 个工作日内复审"),
-      span: cd(5, 5, 12), source: DAL_QTEAM, checked: CHECKED, how: "form",
+      hours: null, span: cd(5, 5, 12), source: { url: DAL_QTEAM, quote: "Less than 10,000 square feet total including any expansions.", checked: CHECKED }, how: "form",
       fill: { line: "review_type", value: "Minor Commercial Q-Team Express Plan Review", standard: "Standard plan review" },
       only: B("Interior finish-outs under 10,000 sq ft in the existing footprint.", "限现有建筑范围内 10,000 平方英尺以下的室内装修。") },
   ],
   "phl-plan-review": [
-    { id: "expedited", label: B("Expedited review", "加急审查"), feeUsd: 380, turnaround: B("completed within 10 business days", "10 个工作日内完成"), span: bd(10, 10, 10),
-      source: PHL_PLAN, checked: CHECKED, how: "team", only: B("Requested by phone at (215) 685-7495, with every document in and the fee paid.", "致电 (215) 685-7495 申请，须材料齐全并已缴费。") },
+    { id: "expedited", label: B("Expedited review", "加急审查"), feeUsd: 380, turnaround: B("completed within 10 business days", "10 个工作日内完成"), hours: null, span: bd(10, 10, 10),
+      source: { url: PHL_PLAN, quote: "There is an expediting fee of $380 in addition to the fees based on the establishment's square footage.", checked: CHECKED }, how: "team", only: B("Requested by phone at (215) 685-7495, with every document in and the fee paid.", "致电 (215) 685-7495 申请，须材料齐全并已缴费。") },
   ],
   "ac-plan-check": [
     { id: "expedited", label: B("Expedited review", "加急审查"), feeUsd: null, feeNote: B("The county's guide doesn't list the expedite fee; the team confirms it.", "县指南未列出加急费用，由团队确认。"),
-      turnaround: B("a first response within 7 working days", "7 个工作日内首次答复"), span: bd(7, 7, 7), source: AC_GUIDE, checked: "2026-10-17", how: "team" },
+      turnaround: B("a first response within 7 working days", "7 个工作日内首次答复"), hours: null, span: bd(7, 7, 7), source: { url: AC_GUIDE, quote: "Expedited Plan Review provides 1st response time within 7 working days.", checked: CHECKED }, how: "team" },
   ],
   "cmh-plan-review": [
-    { id: "expedited", label: B("Expedited review", "加急审查"), feeUsd: 1400, turnaround: B("Columbus publishes no time for it", "哥伦布市未公布时间"), source: CMH_FOOD, checked: "2026-10-17", how: "team" },
+    { id: "expedited", label: B("Expedited review", "加急审查"), feeUsd: 1400, turnaround: B("plans reviewed within two business days", "两个工作日内审查图纸"), hours: null, span: bd(2, 2, 2), source: { url: CMH_FOOD, quote: "Requires an additional payment of $1,400 to be submitted with the application and plan review fee.", checked: CHECKED }, how: "team" },
   ],
   "hou-plan-review": [
     { id: "expedited", label: B("Expedited plan review", "加急图纸审查"), feeUsd: null,
       feeNote: B("Set by project value; the department's published schedule is from 2022 and has since gone up, so the team confirms it.", "按项目金额收费；卫生局公布的收费表为 2022 年版且已上调，由团队确认。"),
-      turnaround: B("within 1 to 2 business days, at the plan analyst's earliest opening", "按审查员最早空档，1 至 2 个工作日内"), span: bd(1, 2, 2), source: HOU_EXP, checked: CHECKED, how: "team" },
+      turnaround: B("within 1 to 2 business days, at the plan analyst's earliest opening", "按审查员最早空档，1 至 2 个工作日内"), hours: null, span: bd(1, 2, 2), source: { url: HOU_EXP, quote: "Expedited review will be performed based on the earliest availability of the plan analyst within 1-2 business days.", checked: CHECKED }, how: "team" },
   ],
 };
 
 /* ------------------------------------------------------------- the helpers */
 
-const asBi = (x: Bi | string): Bi => (typeof x === "string" ? B(x, x) : x);
-/** Every expedite option the agency offers for a form: the registry entry's own first (Secretary of State tiers), then
- *  this file's. Each gets an id, and its label and turnaround in both languages. */
-export function expediteOf(formId?: string): (Expedite & { id: string; label: Bi; turnaround: Bi })[] {
+/** A tier's turnaround in hours as days for the estimate: same day or sooner is the day it's filed. */
+const fromHours = (h: number | null): Span | undefined => (h == null ? undefined : cd(Math.ceil(h / 24), Math.ceil(h / 24), Math.ceil(h / 24)));
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+export type Option = Expedite & { id: string; span?: Span };
+
+/** Every way the agency offers to go faster for a form, each once: the registry row's own tiers (the Secretary of State's,
+ *  only while their quote is current, src/forms/speed.ts), then this file's. Each gets an id and a span for the estimate. */
+export function expediteOptions(formId?: string, today = daysFromNow(0)): Option[] {
   if (!formId) return [];
-  const f = formById(formId) as (OfficialForm & { expedite?: Expedite[] }) | undefined;
-  const list = [...(f?.expedite ?? []), ...(EXPEDITE[formId] ?? [])];
+  const f = formById(formId);
+  const list: Expedite[] = [...currentTiers(f, today), ...(EXPEDITE[formId] ?? [])];
   const seen = new Set<string>();
-  return list.map((x, i) => {
-    const label = asBi(x.label);
-    const id = x.id ?? (label.en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || `option-${i + 1}`);
-    return { ...x, id, label, turnaround: asBi(x.turnaround) };
-  }).filter(x => (seen.has(x.id) ? false : (seen.add(x.id), true)));
+  const out: Option[] = [];
+  for (const x of list) {
+    const id = x.id ?? (slug(x.label.en) || `option-${out.length + 1}`);
+    if (seen.has(id) || seen.has("label:" + x.label.en.toLowerCase())) continue;
+    seen.add(id); seen.add("label:" + x.label.en.toLowerCase());
+    out.push({ ...x, id, how: x.how ?? "team", ...(x.span ?? fromHours(x.hours) ? { span: x.span ?? fromHours(x.hours) } : {}) });
+  }
+  return out;
 }
 
 /** The agency's extra fee for an option, for this application's answers (the size tier on the form), or null. */
@@ -250,9 +230,12 @@ export function splitSource(s?: string): { url?: string; checked?: string } {
 
 /** How long a step takes, from the best source there is: this file's table, the registry's sentence and its source, the
  *  application's own sentence with the agency page it cites, or the default. */
-export function timingOf(a: { official?: string; est?: Bi; source?: { url: string } }): Timing {
+export function timingOf(a: { official?: string; est?: Bi; source?: { url: string } }, today = daysFromNow(0)): Timing {
   const f = a.official ? formById(a.official) : undefined;
   if (f && TIMES[f.id]) return TIMES[f.id];
+  // the registry row's own standard time (the Secretary of State's), while its quote is current (src/forms/speed.ts)
+  const p = processingOf(f, today);
+  if (p?.days != null) return { ...cd(p.days, p.days, p.days), kind: "agency", say: p.standard, source: p.source.url, checked: p.source.checked };
   // a time the research read from a page other than the one stating it (published: false) is no published time
   const r = f ? (RESEARCHED as Record<string, { published?: boolean }>)[f.id] : undefined;
   if (r && r.published === false && f && splitSource(f.takesSource).url) return DEFAULT_TIMING;

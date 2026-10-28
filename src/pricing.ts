@@ -262,6 +262,23 @@ export function licenseQuoteLine(tier: LicenseQuote["tier"], priceOk: boolean, p
   return { en: what.en + gov.en, zh: what.zh + gov.zh };
 }
 
+/** The agency's own fee for a filing, with a paid expedite tier when the owner picks one (the tiers are the agency's,
+ *  from OfficialForm.expedite through src/forms/speed.ts). Both are government fees, passed through at cost and paid to
+ *  the agency; Placetta's price is the same either way. Structural types, so this file keeps no imports. null when the
+ *  agency publishes no filing fee (never guessed). */
+export function agencyFeeUsd(fee: number | null | undefined, tier?: { feeUsd: number | null } | null): number | null {
+  if (fee == null) return null;
+  if (tier && tier.feeUsd == null) return null;
+  return Math.round((fee + (tier?.feeUsd ?? 0)) * 100) / 100;
+}
+/** The words the approval card passes to licenseQuoteLine as govFee: "$70 + $350 (24-hour)". */
+export function agencyFeeText(fee: number | null | undefined, tier?: { feeUsd: number | null; label: { en: string; zh: string } } | null): { en: string; zh: string } | null {
+  if (fee == null) return null;
+  if (!tier) return { en: usd0(fee), zh: `${fee} 美元` };
+  if (tier.feeUsd == null) return { en: `${usd0(fee)} + the agency's ${tier.label.en} fee`, zh: `${fee} 美元 + 机构的${tier.label.zh}费用` };
+  return { en: `${usd0(fee)} + ${usd0(tier.feeUsd)} (${tier.label.en})`, zh: `${fee} 美元 + ${tier.feeUsd} 美元（${tier.label.zh}）` };
+}
+
 /** Odelia's own knowledge of Placetta's prices, for her instructions: the simple list, the same numbers as above. */
 export function priceFacts(model: PriceModel = "simple"): string {
   const s = SIMPLE;

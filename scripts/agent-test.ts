@@ -79,6 +79,7 @@ import { citeTests } from "./cite-test";
 import { reviewFixTests } from "./review-fixes-test";
 import { openingEstimateTests } from "./opening-estimate-test";
 import { filingProgressTests } from "./filing-progress-test";
+import { initiativeTests } from "./initiative-test";
 
 /* ------------------------------------------------------------------ checks */
 
@@ -2832,6 +2833,21 @@ function monthly() {
   eq(m.renewals.map(x => x.id), ["r1"], "renewals caught before they lapse: the one still ahead");
   ok(!("hours" in m) && !Object.keys(m).some(k => /hour|saved/i.test(k)), "no hours-saved number: nothing in docs/ gives a time per task to derive it from");
   eq(median([1, 2, 3, 4]), 3, "an even count takes the mean of the two middle values, rounded (as percentile_cont)");
+  // speed to filing, measured per filing: approval to the agency having it, who sent it, and the time from the plan
+  const H = 3_600_000;
+  const timed = monthMetrics(w, { today, filings: [
+    { ...filings[0], approved_at: "2026-10-09T22:00:00Z", channel: "portal" },                                    // 2 h, Odelia on the agency's site
+    { id: "f4", app_id: "a4", title: same("A4"), status: "submitted", submitted_at: "2026-10-14T00:00:00Z", decided_at: null, approved_at: "2026-10-11T00:00:00Z", channel: "team" },   // 3 days, the team
+    { id: "f5", app_id: "a5", title: same("A5"), status: "submitted", submitted_at: "2026-10-13T06:00:00Z", decided_at: null, approved_at: "2026-10-13T00:00:00Z", channel: "fax" },    // 6 h, Odelia by fax
+    { id: "f6", app_id: "a6", title: same("A6"), status: "submitted", submitted_at: "2026-10-12T00:00:00Z", decided_at: null, approved_at: "2026-10-13T00:00:00Z", channel: "email" },  // a clock fixed by hand: not timed
+    { id: "f7", app_id: "a7", title: same("A7"), status: "submitted", submitted_at: "2026-10-12T00:00:00Z", decided_at: null },                                                          // no approval time: not timed
+    { ...filings[1], approved_at: "2026-09-19T00:00:00Z", channel: "portal" },                                    // last month
+  ] });
+  eq(timed.filed?.map(x => [x.id, x.ms / H, x.by]), [["f4", 72, "team"], ["f5", 6, "odelia"], ["f1", 2, "odelia"]], "each filing this month timed from its approval, newest first, with who sent it");
+  eq([timed.median_filed_ms! / H, timed.median_odelia_ms! / H, timed.median_team_ms! / H], [6, 4, 72], "medians: all three, Odelia's two (2 h and 6 h), the team's one");
+  eq(timed.filed?.find(x => x.id === "f1")?.plan_ms, Date.parse("2026-10-10T00:00:00Z") - Date.parse("2026-10-01T00:00:00Z"), "and the time from the first plan to filed");
+  eq(monthMetrics(w, { today, filings }).filed, [], "rows from before the approval clock: nothing timed, nothing invented");
+  ok(!("filed" in monthMetrics(w, { today })), "no filings rows (the sample): no speed number");
   // the sample: from its audit trail, and the approvals' age from when they were asked
   const s = monthMetrics(SAMPLE_WS, { today: daysFromNow(0) });
   ok(s.mapped.length === SAMPLE_WS.apps.length && s.waiting.length === SAMPLE_WS.approvals.length && s.waiting.some(x => x.at) && s.renewals.length >= 1, "the sample's numbers come from its own records", { waiting: s.waiting, renewals: s.renewals.length });
@@ -3256,6 +3272,33 @@ citeTests(ok, eq);
 reviewFixTests(ok, eq);
 openingEstimateTests(ok, eq);
 filingProgressTests(ok, eq);
+await initiativeTests(ok, eq);
+
+{
+  console.log("\n# ask_specialist: Odelia asks a person instead of guessing, and the job waits on them");
+  const asked: Record<string, unknown>[] = [];
+  const svc = { ...account().svc, specialist: async (o: Record<string, unknown>) => { asked.push(o); return { due_at: "2026-11-05T19:00:00.000Z" }; } } as Services;
+  const w0 = workspace({ apps: [app("zn", "draft")] });
+  const r = await agent({ ws: w0, svc, prompt: "Can we open in the old bank building on Main?", script: [
+    () => ask(["set_plan", { title: "Check the zoning for Main St", steps: [{ title: "Find whether a change of use needs a hearing" }, { title: "Prepare the application" }, { title: "Put it up for approval" }], done: ["The zoning answer is on file", "The application is prepared"] }]),
+    c => ask(["ask_specialist", { question: "Does turning a bank into a tea shop on Main need a change-of-use hearing here?", why: "judgment", application_id: "zn", found: "The city's page lists change of use but not which ones need a hearing." }]),
+    c => { const o = c.out("ask_specialist"); return say(`Asked a Placetta specialist whether the change of use needs a hearing; the answer comes ${o.answers_by}.`); },
+  ] });
+  const o = callNamed(r, "ask_specialist")[0];
+  ok(o?.ok && o.parsed?.answers_by === "2026-11-05T19:00:00.000Z", "the specialist's answer-by time comes back", o?.out);
+  ok(asked.length === 1 && asked[0].app === "zn" && asked[0].reason === "judgment" && /The agency's call needs judgment: Does turning a bank/.test(String(asked[0].note)), "the team gets the application, why and what she found", asked[0]);
+  const j = (r.w.jobs ?? [])[0];
+  ok(j?.status === "waiting" && j.on === "team" && !!j.specialist && /With a Placetta specialist, who answers by Thu, Nov 5/.test(j.waiting?.en ?? ""), "the job waits on the specialist and says when they answer", j);
+  ok(r.w.audit.some(a => /Asked a Placetta specialist/.test(a.action.en)), "the audit trail says so");
+  // without the server (the sample), the same wait, timed by the same rule
+  const local = await agent({ ws: w0, prompt: "x", script: [() => ask(["ask_specialist", { question: "Which form for a sidewalk cafe?", why: "no_source" }]), () => say("Asked.")] });
+  ok(callNamed(local, "ask_specialist")[0]?.ok && Date.parse(String(callNamed(local, "ask_specialist")[0].parsed?.answers_by)) > Date.now(), "without the server it still waits on a time in the future");
+  // Plan first may still ask; Ask me first doesn't hold the question on a card
+  const plan = await agent({ ws: workspace({ controls: { autonomy: "plan" } }), prompt: "x", script: [() => ask(["ask_specialist", { question: "Is a hearing needed?", why: "judgment" }]), () => say("Asked.")] });
+  ok(callNamed(plan, "ask_specialist")[0]?.ok, "Plan first lets her ask a specialist");
+  const askFirst = await agent({ ws: workspace({ controls: { autonomy: "ask" } }), prompt: "x", script: [() => ask(["ask_specialist", { question: "Is a hearing needed?", why: "judgment" }]), () => say("Asked.")] });
+  ok(callNamed(askFirst, "ask_specialist")[0]?.parsed?.asked === true && !askFirst.w.approvals.length, "Ask me first doesn't hold a question for the team on a card");
+}
 
 console.log("\n# Every declared tool is exercised");
 const missed = declared.filter(n => !covered.has(n));

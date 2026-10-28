@@ -41,6 +41,7 @@ import m_fl_fictitious from "./fl-fictitious.json";
 import m_fl_sunbiz from "./fl-sunbiz.json";
 import m_ftw_co from "./ftw-co.json";
 import m_fulton_plan_review from "./fulton-plan-review.json";
+import m_ga_dol from "./ga-dol.json";
 import m_hi_bb1 from "./hi-bb1.json";
 import m_hou_co from "./hou-co.json";
 import m_hou_food_dealer from "./hou-food-dealer.json";
@@ -143,6 +144,7 @@ export const MAPS: Record<string, FormMap> = {
   "fl-sunbiz": m_fl_sunbiz as FormMap,
   "ftw-co": m_ftw_co as FormMap,
   "fulton-plan-review": m_fulton_plan_review as FormMap,
+  "ga-dol": m_ga_dol as FormMap,
   "hi-bb1": m_hi_bb1 as FormMap,
   "hou-co": m_hou_co as FormMap,
   "hou-food-dealer": m_hou_food_dealer as FormMap,

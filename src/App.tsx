@@ -3,7 +3,7 @@ import { filingKindOf, IN_PLAN } from "./overage.ts";
 import type { PlanInterval } from "./pricing";
 import { shownCharges, shownLicense } from "./FilingCharge";
 import { expediteStep } from "./expedite";
-import { expediteOf, extraFee } from "./forms/expedite";
+import { expediteOptions, extraFee } from "./forms/expedite";
 import { speakTag } from "./langs";
 import { audit, demoAgent, dropApproval, setApp, setFact, setField, type AgentBackend, type AgentEvent, type Reply, type Request, type Step } from "./agent";
 import { blockersSay, confirmChange, readyToFile } from "./core";
@@ -867,7 +867,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         app_id: app.id, title: a.title, agency: app.agency, portal_url: app.source.url || undefined, fee_estimate: app.fees.reduce((s, f) => s + f.amount, 0),
         payload: {
           form: app.form, source: app.source, does: [...a.does, ...(expediteStep(app) ? [expediteStep(app)!] : [])], official: app.official, pdf_path, signature, answers_hash: answersHash(app), ...(g.version ? { version: g.version.n } : {}),
-          ...(() => { const x = app.expedite ? expediteOf(app.official).find(o => o.id === app.expedite) : undefined; return x ? { expedite: { id: x.id, label: x.label, turnaround: x.turnaround, fee_usd: extraFee(x, app.fields), how: x.how, source: x.source } } : {}; })(),
+          ...(() => { const x = app.expedite ? expediteOptions(app.official).find(o => o.id === app.expedite) : undefined; return x ? { expedite: { id: x.id, label: x.label, turnaround: x.turnaround, fee_usd: extraFee(x, app.fields), how: x.how, source: x.source.url } } : {}; })(),
           fields: app.fields.map(f => ({ id: f.id, label: f.label, value: f.value, from: f.from })),
           checklist: app.checklist.map((c, i) => ({ label: c.label, state: c.state, doc: appDocs[i]?.path })),
           attachments: appDocs.filter((d): d is Doc => !!d?.path).map(d => ({ name: d.name, path: d.path! })),

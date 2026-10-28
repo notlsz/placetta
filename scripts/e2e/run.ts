@@ -26,7 +26,7 @@ const ENV: Record<string, string> = {
   ANTHROPIC_API_KEY: "sk-ant-e2e", APP_ORIGINS: APP, RESEND_API_KEY: "re_e2e", MAIL_FROM: "Placetta <hello@placetta.test>",
   TELNYX_API_KEY: "KEY_e2e", TELNYX_PUBLIC_KEY: b64(await crypto.subtle.exportKey("raw", telnyxKeys.publicKey)), ODELIA_NUMBER: ODELIA,
   TELNYX_MESSAGING_PROFILE_ID: "mp_e2e", TELNYX_VOICE_CONNECTION_ID: "conn_e2e", TELNYX_ASSISTANT_ID: "assistant-e2e",
-  STRIPE_SECRET_KEY: "sk_test_e2e", STRIPE_WEBHOOK_SECRET: "whsec_e2e", STRIPE_PRICE_LOCATION: "price_location", STRIPE_PRICE_OPENING: "price_opening", STRIPE_PRICE_LOCATION_PRO: "price_location_pro", STRIPE_PRICE_OPENING_FOOD: "price_opening_food", STRIPE_PRICE_GUARANTEE: "price_guarantee", STRIPE_PRICE_ENTRY: "price_entry", STRIPE_PRICE_PACK: "price_pack", PACK_CREDIT_USD: "25", RECORDS: "off",
+  STRIPE_SECRET_KEY: "sk_test_e2e", STRIPE_WEBHOOK_SECRET: "whsec_e2e", STRIPE_PRICE_LOCATION: "price_location", STRIPE_PRICE_OPENING: "price_opening", STRIPE_PRICE_LOCATION_PRO: "price_location_pro", STRIPE_PRICE_OPENING_FOOD: "price_opening_food", STRIPE_PRICE_GUARANTEE: "price_guarantee", STRIPE_PRICE_ENTRY: "price_entry", STRIPE_PRICE_PACK: "price_pack", STRIPE_PRICE_STORE_PLAN: "price_store_plan", STRIPE_PRICE_STORE_MONTHLY: "price_store_month", PACK_CREDIT_USD: "25", RECORDS: "off",
   OAUTH_STATE_SECRET: "e2e-oauth-state-secret-0123456789abcdef",
   // self-filing: on for Form SS-4 by fax only, without the two-key review, so a filing can go all the way
   FILER_AGENCIES: "irs-ss4", FILER_CHANNELS: "fax", FILER_TWO_KEY: "0", TELNYX_FAX_CONNECTION_ID: "fax_conn_e2e", TELNYX_FAX_FROM: "+12125550101", FILER_SECRET: "e2e-filer-secret-0123456789abcdef0123",
@@ -1445,39 +1445,31 @@ try {
 
   /* ---------------- e. billing ---------------- */
   await scenario("e. billing", async () => {
-    const checkout = async (extra: Record<string, unknown> = {}) => {
-      mark = recorded.length;
-      const r = await call("billing", { action: "checkout", plan: "locations", workspace_id: ws, return_url: `${APP}/app/`, renewal_consent: true, ...extra }, { jwt: owner.jwt });
-      return { r, sess: since(mark).find((x) => x.service === "stripe" && x.path === "/v1/checkout/sessions")?.body, cpn: since(mark).find((x) => x.service === "stripe" && x.path === "/v1/coupons")?.body };
-    };
-    // Pro with the open-by-date guarantee: the Pro price per location, a food opening, and the guarantee for it
-    const pro = await checkout({ tier: "pro", guarantee: true });
-    check("Pro with the guarantee: Pro per location, the food opening fee, one guarantee", pro.r.status === 200 && pro.sess?.line_items?.["0"]?.price === "price_location_pro" && pro.sess?.line_items?.["0"]?.quantity === "2" && pro.sess?.line_items?.["1"]?.price === "price_opening_food" && pro.sess?.line_items?.["1"]?.quantity === "1" && pro.sess?.line_items?.["2"]?.price === "price_guarantee" && pro.sess?.line_items?.["2"]?.quantity === "1" && pro.sess?.metadata?.tier === "pro" && pro.sess?.metadata?.guarantee === "1" && pro.sess?.["subscription_data"]?.metadata?.tier === "pro", pro.sess);
-    // the entry plan is credited only within 60 days of paying for it
-    await sql`update public.billing set entry_paid_at = now() - interval '61 days' where workspace_id = ${ws}`;
-    const stale = await checkout();
-    check("an entry plan paid over 60 days ago isn't credited", stale.r.status === 200 && !stale.cpn && !stale.sess?.discounts && stale.sess?.allow_promotion_codes === "true", { cpn: stale.cpn, sess: stale.sess?.metadata });
-    await sql`update public.billing set entry_paid_at = now() - interval '2 days' where workspace_id = ${ws}`;
-    // a complex opening (liquor, major build-out) is quoted by the team, not charged at checkout
-    await saveState((s) => ({ ...s, stores: [...s.stores, { id: "st-bar", name: same("Bar, 40th Rd"), address: "1 40th Rd, Flushing, NY", stage: "opening", kind: "complex", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }] as typeof s.stores }));
-    const cx = await checkout();
-    const quotes = await sql`select title, dedupe from public.team_tasks where kind = 'quote' and workspace_id = ${ws}`;
-    check("a complex opening goes to the team for a quote, with no fee at checkout", cx.r.status === 200 && cx.r.data?.quoted === 1 && cx.sess?.line_items?.["0"]?.quantity === "3" && cx.sess?.line_items?.["1"]?.quantity === "1" && !cx.sess?.line_items?.["2"] && quotes.length === 1 && /Bar, 40th Rd/.test(quotes[0].title), { li: cx.sess?.line_items, quotes });
-    await checkout();
-    check("asking again doesn't add a second quote task", (await sql`select count(*)::int n from public.team_tasks where kind = 'quote' and workspace_id = ${ws}`)[0].n === 1);
-    await saveState((s) => ({ ...s, stores: s.stores.filter((x) => x.id !== "st-bar") }));
+    // The plans from before the simple model (locations, Pro, the open-by-date guarantee, opening fees, the entry credit)
+    // are retired: a checkout for one answers plan_retired and nothing reaches Stripe. What's sold is the store plan.
+    await sql`update public.billing set price_model = 'simple' where workspace_id = ${ws}`;
     mark = recorded.length;
+    const old = await call("billing", { action: "checkout", plan: "locations", tier: "pro", guarantee: true, workspace_id: ws, return_url: `${APP}/app/`, renewal_consent: true }, { jwt: owner.jwt });
+    check("a retired plan's checkout is refused, and nothing reaches Stripe", old.status === 409 && old.data?.error?.code === "plan_retired" && !since(mark).some((x) => x.service === "stripe" && x.method === "POST"), old);
+    const plan = (extra: Record<string, unknown> = {}) => call("billing", { action: "plan_checkout", interval: "year", shown_stores: 2, workspace_id: ws, return_url: `${APP}/app/`, renewal_consent: true, ...extra }, { jwt: owner.jwt });
     // the automatic renewal terms (src/contract.ts) are agreed to next to the button, or nothing opens
-    const noConsent = await call("billing", { action: "checkout", plan: "locations", workspace_id: ws, return_url: `${APP}/app/` }, { jwt: owner.jwt });
+    const noConsent = await plan({ renewal_consent: undefined });
     check("without agreeing to the renewal terms, checkout is refused", noConsent.status === 400 && noConsent.data?.error?.code === "consent_required", noConsent);
+    const stale = await plan({ shown_stores: 1 });
+    check("a price shown for another number of stores is refused, nothing charged", stale.status === 409 && stale.data?.error?.code === "price_changed", stale);
     mark = recorded.length;
-    const co = await call("billing", { action: "checkout", plan: "locations", workspace_id: ws, return_url: `${APP}/app/`, renewal_consent: true }, { jwt: owner.jwt });
-    check("checkout answers with Stripe's URL", co.status === 200 && /^https:\/\/checkout\.stripe\.com\//.test(co.data?.url ?? ""), co);
+    const co = await plan();
+    check("checkout answers with Stripe's URL", co.status === 200 && /^https:\/\/checkout\.stripe\.com\//.test(co.data?.url ?? "") && co.data?.stores === 2, co);
     const sess = since(mark).find((x) => x.service === "stripe" && x.path === "/v1/checkout/sessions")?.body;
-    check("line items: 2 locations (one open, one opening), 1 restaurant opening fee", sess?.line_items?.["0"]?.price === "price_location" && sess?.line_items?.["0"]?.quantity === "2" && sess?.line_items?.["1"]?.price === "price_opening_food" && sess?.line_items?.["1"]?.quantity === "1" && !sess?.line_items?.["2"], sess?.line_items);
-    const cpn = since(mark).find((x) => x.service === "stripe" && x.path === "/v1/coupons")?.body;
-    check("a one-time coupon of the $299 entry plan only (opening fees aren't credited)", cpn?.amount_off === "29900" && cpn?.duration === "once" && sess?.discounts?.["0"]?.coupon, { cpn, discounts: sess?.discounts });
-    check("the session carries the workspace and the entry credit", sess?.metadata?.workspace_id === ws && sess?.metadata?.plan === "locations" && sess?.metadata?.entry_credit === "29900" && sess?.customer === "cus_goldenox", sess?.metadata);
+    check("line items: the store plan, one per store (one open, one opening), nothing else", sess?.mode === "subscription" && sess?.line_items?.["0"]?.price === "price_store_plan" && sess?.line_items?.["0"]?.quantity === "2" && !sess?.line_items?.["1"], sess?.line_items);
+    check("the session carries the workspace, the interval and the renewal consent", sess?.metadata?.workspace_id === ws && sess?.metadata?.interval === "year" && !!sess?.metadata?.renewal_consent && sess?.customer === "cus_goldenox", sess?.metadata);
+    mark = recorded.length;
+    const monthly = await plan({ interval: "month" });
+    const ms = since(mark).find((x) => x.service === "stripe" && x.path === "/v1/checkout/sessions")?.body;
+    check("month to month uses its own price", monthly.status === 200 && ms?.line_items?.["0"]?.price === "price_store_month" && ms?.line_items?.["0"]?.quantity === "2", ms?.line_items);
+    await plan();   // the yearly checkout is the one completed below
+    // back to the grandfathered customer's own plan for the subscription, allowance and sync checks below
+    await sql`update public.billing set price_model = 'legacy' where workspace_id = ${ws}`;
     mark = recorded.length;
     const portal = await call("billing", { action: "portal", workspace_id: ws, return_url: `${APP}/app/` }, { jwt: owner.jwt });
     const ps = since(mark).find((x) => x.path === "/v1/billing_portal/sessions")?.body;
@@ -1495,7 +1487,8 @@ try {
     stripeState.subscriptions.set(sub.id, sub);
     const done = await stripePost({ id: "evt_cs_locations", type: "checkout.session.completed", data: { object: { id: "cs_test_1", object: "checkout.session", mode: "subscription", payment_status: "paid", customer: "cus_goldenox", subscription: sub.id, metadata: sess?.metadata ?? {} } } });
     const [b1] = await sql`select charged_store_ids, entry_credited_at from public.billing where workspace_id = ${ws}`;
-    check("checkout.session.completed records the charged stores and the entry credit", done.status === 200 && JSON.stringify(b1.charged_store_ids) === JSON.stringify(["st-main", "st-roosevelt"]) && !!b1.entry_credited_at, b1);
+    // the store plan has no opening fees, so no store is marked as charged for one
+    check("checkout.session.completed is applied, and no store is charged an opening fee", done.status === 200 && (b1.charged_store_ids ?? []).length === 0 && !b1.entry_credited_at, b1);
     check("a store added during checkout isn't marked as paid for", !(b1.charged_store_ids as string[]).includes("st-late"), b1);
     await sql`update public.workspaces set state = jsonb_set(state, '{stores}', (select coalesce(jsonb_agg(x), '[]'::jsonb) from jsonb_array_elements(state->'stores') x where x->>'id' <> 'st-late')) where id = ${ws}`;
     const created = await stripePost({ id: "evt_sub_created", type: "customer.subscription.created", data: { object: sub } });
@@ -1533,16 +1526,14 @@ try {
     mark = recorded.length;
     const sync = await call("billing", { action: "sync_locations", workspace_id: ws, return_url: `${APP}/app/` }, { jwt: owner.jwt });
     const items = since(mark).filter((x) => x.service === "stripe" && x.path === "/v1/invoiceitems");
-    check("sync_locations succeeds", sync.status === 200 && sync.data?.synced === true && sync.data?.new_openings === 1, sync);
+    check("sync_locations succeeds", sync.status === 200 && sync.data?.synced === true && sync.data?.stores === 3, sync);
     check("the subscription now counts 3 locations", sub.items.data[0].quantity === 3);
-    check("one restaurant opening fee on the next invoice, and no credit against it", items.length === 1 && items[0].status === 200 && (items[0].body.pricing?.price ?? items[0].body.price) === "price_opening_food" && items[0].body.quantity === "1", items.map((x) => ({ s: x.status, b: x.body })));
+    check("no opening fee on the next invoice (opening fees are retired)", items.length === 0, items.map((x) => ({ s: x.status, b: x.body })));
     // a store that's already open: counted, no opening fee
     await saveState((s) => ({ ...s, stores: [...s.stores, { id: "st-astoria", name: same("Astoria, Steinway St"), address: "31-01 Steinway St, Astoria, NY 11103", stage: "open", opened: "2024-05-01", rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 }, apps: [] }] as typeof s.stores }));
     mark = recorded.length;
     const sync2 = await call("billing", { action: "sync_locations", workspace_id: ws, return_url: `${APP}/app/` }, { jwt: owner.jwt });
-    check("an open store added later is counted but not charged an opening fee", sync2.data?.new_openings === 0 && sub.items.data[0].quantity === 4 && since(mark).filter((x) => x.path === "/v1/invoiceitems").length === 0, sync2);
-    const [b3] = await sql`select charged_store_ids from public.billing where workspace_id = ${ws}`;
-    check("both new stores are remembered as charged", ["st-bayside", "st-astoria"].every((s) => (b3.charged_store_ids as string[]).includes(s)), b3);
+    check("an open store added later is counted, with no fee of its own", sync2.data?.stores === 4 && sub.items.data[0].quantity === 4 && since(mark).filter((x) => x.path === "/v1/invoiceitems").length === 0, sync2);
     mark = recorded.length;
     await call("billing", { action: "sync_locations", workspace_id: ws, return_url: `${APP}/app/` }, { jwt: owner.jwt });
     check("syncing again changes nothing", since(mark).filter((x) => x.service === "stripe" && x.method === "POST").length === 0, since(mark).map((x) => x.path));

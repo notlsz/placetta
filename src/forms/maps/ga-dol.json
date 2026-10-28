@@ -1,0 +1,260 @@
+{
+ "form": "ga-dol",
+ "rev": "DOL-1N (R-3/13) Employer Status Report",
+ "pdf": "ga-dol.pdf",
+ "url": "https://dol.georgia.gov/document/unemployment-tax/application-gdol-tax-account-or-status-change-dol-1n/download",
+ "checked": "2026-10-24",
+ "notes": "Georgia's Application for GDOL Tax Account or Status Change, now published as the DOL-1N Employer Status Report (the FAQ still calls it the DOL-1A). Fillable boxes over an XFA layer, which the filler drops. Yes/No answers tick the form's Yes or No box. The EIN and the Georgia DOL account numbers print a digit to a box. Item 1 is the name and mailing address, one per line. Item 4 is the place in Georgia (no P.O. Box); the form prints GA. Item 7 is answered only after an acquisition, merger or change of ownership ('None' leaves its lines blank). Each 'If yes, show date' box takes the date when the answer is Yes. Item C takes up to three 'product or service: percent' lines. The owner's Social Security number is never printed: the signer writes it in its nine boxes by hand, then signs, dates and mails the form to the Georgia Department of Labor. Item B's construction details (general, special trade or heavy construction and their percentages) apply only to construction businesses and are left for the signer.",
+ "lines": [
+  { "id": "business_name_address", "line": "1", "en": "Business name and mailing address (name on the first line, address on the next)", "zh": "企业名称及邮寄地址（第一行名称，下一行地址）", "hint": { "en": "e.g. \"Lotus Tea House LLC\" then \"5150 Buford Hwy NE, Suite 120, Doraville, GA 30340\".", "zh": "如第一行 \"Lotus Tea House LLC\"，下一行 \"5150 Buford Hwy NE, Suite 120, Doraville, GA 30340\"。" } },
+  { "id": "gdol_account", "line": "Account", "en": "Georgia DOL account number, if already assigned", "zh": "佐治亚州劳工部账号（如已分配）", "hint": { "en": "\"None\" for a new employer.", "zh": "新雇主填 \"None\"。" } },
+  { "id": "org_type", "line": "2", "en": "Type of organization", "zh": "组织类型", "options": ["Individual", "Partnership", "Corporation", "Nonprofit org.", "Limited Liability CO. (LLC)", "Other (specify)"], "hint": { "en": "For another type, write \"Other: \" and the type.", "zh": "其他类型请写 \"Other: \" 加类型。" } },
+  { "id": "trade_name", "line": "3", "en": "Trade name, if different from the business name", "zh": "商号（如与企业名称不同）" },
+  { "id": "location", "line": "4", "en": "Principal business location in Georgia: street, city, GA ZIP (no P.O. Box)", "zh": "在佐治亚州的主要营业地点：街道、城市、GA 邮编（不可用邮政信箱）" },
+  { "id": "county", "line": "4", "en": "County of that location", "zh": "该地点所在县" },
+  { "id": "phone", "line": "4", "en": "Telephone number of that location", "zh": "该地点电话" },
+  { "id": "first_employed", "line": "5", "en": "Date first began employing workers in Georgia (MM/DD/YYYY)", "zh": "首次在佐治亚州雇用员工的日期（月/日/年）" },
+  { "id": "first_payroll", "line": "5", "en": "Date of first Georgia payroll (MM/DD/YYYY)", "zh": "首次在佐治亚州发薪的日期（月/日/年）" },
+  { "id": "futa_liable", "line": "6", "en": "Are you liable for federal unemployment tax (do you file Form 940)?", "zh": "是否须缴纳联邦失业税（是否提交 940 表）？", "options": ["Yes", "No"] },
+  { "id": "fein", "line": "6", "en": "Federal employer identification number (EIN)", "zh": "联邦雇主识别号（EIN）" },
+  { "id": "acquired", "line": "7", "en": "Have you acquired another business?", "zh": "是否收购了其他企业？", "options": ["Yes", "No"] },
+  { "id": "merged", "line": "7", "en": "Have you merged with another business?", "zh": "是否与其他企业合并？", "options": ["Yes", "No"] },
+  { "id": "formed", "line": "7", "en": "Have you formed a corporation or partnership?", "zh": "是否成立了公司或合伙企业？", "options": ["Yes", "No"] },
+  { "id": "other_change", "line": "7", "en": "Have you made any other change in the ownership of your business?", "zh": "企业所有权是否有其他变更？", "options": ["Yes", "No"] },
+  { "id": "other_change_explain", "line": "7", "en": "If yes, explain the change", "zh": "如有，请说明变更", "hint": { "en": "\"None\" when there was no other change.", "zh": "没有其他变更时填 \"None\"。" } },
+  { "id": "date_acquired", "line": "7", "en": "Date acquired or changed (MM/DD/YYYY)", "zh": "收购或变更日期（月/日/年）", "hint": { "en": "\"None\" when nothing was acquired or changed.", "zh": "没有收购或变更时填 \"None\"。" } },
+  { "id": "predecessor_account", "line": "7", "en": "Predecessor's Georgia DOL account number", "zh": "前任雇主的佐治亚州劳工部账号", "hint": { "en": "\"None\" when there's no predecessor.", "zh": "没有前任雇主时填 \"None\"。" } },
+  { "id": "portion", "line": "7", "en": "Did you acquire all, substantially all (90% or more) or part of the Georgia operations?", "zh": "收购的是全部、绝大部分（90% 以上）还是部分佐治亚州业务？", "options": ["None", "All of Georgia operations", "Substantially all of Georgia operations (90% or more)", "Part of Georgia operations (less than 90%)"] },
+  { "id": "former_owner_employees", "line": "7", "en": "Does the former owner continue to have employees?", "zh": "原业主是否仍有员工？", "options": ["None", "Yes", "No"] },
+  { "id": "predecessor_name", "line": "7", "en": "From whom (organization name, including trade name)", "zh": "从谁处取得（机构名称，含商号）", "hint": { "en": "\"None\" when there's no predecessor.", "zh": "没有前任时填 \"None\"。" } },
+  { "id": "predecessor_address", "line": "7", "en": "Address of that organization", "zh": "该机构地址", "hint": { "en": "\"None\" when there's no predecessor.", "zh": "没有前任时填 \"None\"。" } },
+  { "id": "twenty_weeks", "line": "8", "en": "Did you, or do you expect to, employ at least one worker in 20 different calendar weeks during a calendar year?", "zh": "一个日历年内是否已经或预计在 20 个不同的日历周雇有至少一名员工？", "options": ["Yes", "No"] },
+  { "id": "twenty_weeks_date", "line": "8", "en": "If yes, the date the 20th week first occurred or will occur", "zh": "如是，第 20 周首次出现或将出现的日期", "hint": { "en": "\"None\" when the answer above is No.", "zh": "上题为否时填 \"None\"。" } },
+  { "id": "payroll_1500", "line": "8", "en": "Did you, or do you expect to, have a quarterly payroll of $1,500 or more?", "zh": "季度工资是否已经或预计达到 1,500 美元以上？", "options": ["Yes", "No"] },
+  { "id": "payroll_1500_date", "line": "8", "en": "If yes, the date this first occurred or will occur", "zh": "如是，首次出现或将出现的日期", "hint": { "en": "\"None\" when the answer above is No.", "zh": "上题为否时填 \"None\"。" } },
+  { "id": "domestic", "line": "9", "en": "Domestic employment: did you, or do you expect to, pay cash wages of $1,000 or more in any calendar quarter?", "zh": "家政雇佣：任一季度是否已经或预计支付 1,000 美元以上现金工资？", "options": ["Yes", "No"] },
+  { "id": "domestic_date", "line": "9", "en": "If yes, the date this first occurred or will occur", "zh": "如是，首次出现或将出现的日期", "hint": { "en": "\"None\" when the answer above is No.", "zh": "上题为否时填 \"None\"。" } },
+  { "id": "ag_workers", "line": "10", "en": "Agricultural employment: did you, or do you expect to, employ 10 or more agricultural workers in 20 different calendar weeks during a calendar year?", "zh": "农业雇佣：一个日历年内是否已经或预计在 20 个不同的日历周雇有 10 名以上农业工人？", "options": ["Yes", "No"] },
+  { "id": "ag_workers_date", "line": "10", "en": "If yes, the date the 20th week first occurred or will occur", "zh": "如是，第 20 周首次出现或将出现的日期", "hint": { "en": "\"None\" when the answer above is No.", "zh": "上题为否时填 \"None\"。" } },
+  { "id": "ag_payroll", "line": "10", "en": "Did you, or do you expect to, have a gross cash agricultural payroll of $20,000 or more in any calendar quarter?", "zh": "任一季度农业现金工资总额是否已经或预计达到 20,000 美元以上？", "options": ["Yes", "No"] },
+  { "id": "ag_payroll_date", "line": "10", "en": "If yes, the date this first occurred or will occur", "zh": "如是，首次出现或将出现的日期", "hint": { "en": "\"None\" when the answer above is No.", "zh": "上题为否时填 \"None\"。" } },
+  { "id": "nonprofit_workers", "line": "11", "en": "501(c)(3) nonprofits only: did you, or do you expect to, employ four or more workers in 20 different calendar weeks during a calendar year?", "zh": "仅限 501(c)(3) 非营利组织：一个日历年内是否已经或预计在 20 个不同的日历周雇有 4 名以上员工？", "options": ["None", "Yes", "No"] },
+  { "id": "nonprofit_date", "line": "11", "en": "If yes, the date the 20th week first occurred or will occur", "zh": "如是，第 20 周首次出现或将出现的日期", "hint": { "en": "\"None\" when the answer above isn't Yes.", "zh": "上题不是\"是\"时填 \"None\"。" } },
+  { "id": "employees", "line": "12", "en": "How many employees do you have (or anticipate when in full operation)?", "zh": "现有（或全面运营时预计的）员工人数" },
+  { "id": "owner_name", "line": "Owner", "en": "Name of the owner, a partner or the principal officer", "zh": "业主、合伙人或主要负责人姓名" },
+  { "id": "owner_address", "line": "Owner", "en": "That person's residence address: street, city, state ZIP", "zh": "该人的住址：街道、城市、州 邮编" },
+  { "id": "owner_phone", "line": "Owner", "en": "That person's telephone number", "zh": "该人电话" },
+  { "id": "records_name", "line": "Records", "en": "Name of the person or firm who maintains the financial records of the business", "zh": "保管企业财务记录的个人或公司名称" },
+  { "id": "records_address", "line": "Records", "en": "Their address: street, city, state ZIP", "zh": "其地址：街道、城市、州 邮编" },
+  { "id": "records_phone", "line": "Records", "en": "Their telephone number", "zh": "其电话" },
+  { "id": "signer_title", "line": "Certification", "en": "Title of the owner, partner or principal officer who signs", "zh": "签字人（业主、合伙人或主要负责人）的职务" },
+  { "id": "locations", "line": "A", "en": "How many Georgia locations do you operate?", "zh": "在佐治亚州经营几个地点？" },
+  { "id": "industry", "line": "B", "en": "The industry that best describes your business activities", "zh": "最能描述您业务活动的行业", "options": ["Agriculture", "Forestry", "Fishing", "Mining", "Construction", "Manufacturing", "Transportation", "Communication", "Public Utilities", "Wholesale Trade", "Retail Trade", "Finance", "Insurance", "Real Estate", "Services", "Public Administration", "Private Household Employer"] },
+  { "id": "products", "line": "C", "en": "Principal services or products, in order of importance, each with its approximate % of annual income (one per line)", "zh": "主要服务或产品（按重要性排列，每行一项，附年收入大致占比）", "hint": { "en": "Up to three lines like \"Bubble tea and snacks: 100\".", "zh": "最多三行，如 \"Bubble tea and snacks: 100\"。" } },
+  { "id": "product_kind", "line": "C", "en": "Are the principal products manufactured, grown or sold?", "zh": "主要产品是自制、种植还是销售？", "options": ["None", "Mfg.", "Grown", "Sold"] },
+  { "id": "support_services", "line": "D", "en": "If an establishment here only serves other units of the company, its primary type of support", "zh": "如本地点只为公司其他单位提供服务，其主要支持类型", "options": ["None", "Central Administration", "Research, development, and testing", "Storage (warehouse)", "Other (specify)"], "hint": { "en": "For another type, write \"Other: \" and the type.", "zh": "其他类型请写 \"Other: \" 加类型。" } }
+ ],
+ "blank": {
+  "gdol_account": "^(none|no|n/?a)\\.?$",
+  "trade_name": "^(none|no|n/?a)\\.?$",
+  "other_change_explain": "^(none|no|n/?a)\\.?$",
+  "date_acquired": "^(none|no|n/?a)\\.?$",
+  "predecessor_account": "^(none|no|n/?a)\\.?$",
+  "portion": "^none$",
+  "former_owner_employees": "^none$",
+  "predecessor_name": "^(none|no|n/?a)\\.?$",
+  "predecessor_address": "^(none|no|n/?a)\\.?$",
+  "twenty_weeks_date": "^(none|no|n/?a)\\.?$",
+  "payroll_1500_date": "^(none|no|n/?a)\\.?$",
+  "domestic_date": "^(none|no|n/?a)\\.?$",
+  "ag_workers_date": "^(none|no|n/?a)\\.?$",
+  "ag_payroll_date": "^(none|no|n/?a)\\.?$",
+  "nonprofit_workers": "^none$",
+  "nonprofit_date": "^(none|no|n/?a)\\.?$",
+  "product_kind": "^none$",
+  "support_services": "^none$"
+ },
+ "boxes": {
+  "business_name_address": [{ "text": "topmostSubform[0].Page1[0].business_name_and_address[0]" }],
+  "gdol_account": [
+   { "text": "topmostSubform[0].Page1[0].gdol_acc_num1[0]", "pick": "d1", "if": "^(?!(none|no|n/?a)\\.?$)" },
+   { "text": "topmostSubform[0].Page1[0].gdol_acc_num2[0]", "pick": "d2", "if": "^(?!(none|no|n/?a)\\.?$)" },
+   { "text": "topmostSubform[0].Page1[0].gdol_acc_num3[0]", "pick": "d3", "if": "^(?!(none|no|n/?a)\\.?$)" },
+   { "text": "topmostSubform[0].Page1[0].gdol_acc_num4[0]", "pick": "d4", "if": "^(?!(none|no|n/?a)\\.?$)" },
+   { "text": "topmostSubform[0].Page1[0].gdol_acc_num5[0]", "pick": "d5", "if": "^(?!(none|no|n/?a)\\.?$)" },
+   { "text": "topmostSubform[0].Page1[0].gdol_acc_num6[0]", "pick": "d6", "if": "^(?!(none|no|n/?a)\\.?$)" },
+   { "text": "topmostSubform[0].Page1[0].gdol_acc_num7[0]", "pick": "d7", "if": "^(?!(none|no|n/?a)\\.?$)" },
+   { "text": "topmostSubform[0].Page1[0].gdol_acc_num8[0]", "pick": "d8", "if": "^(?!(none|no|n/?a)\\.?$)" }
+  ],
+  "org_type": [
+   { "radio": "topmostSubform[0].Page1[0].type_of_organization[0]", "value": "1", "if": "^individual" },
+   { "radio": "topmostSubform[0].Page1[0].type_of_organization[0]", "value": "2", "if": "^partnership" },
+   { "radio": "topmostSubform[0].Page1[0].type_of_organization[0]", "value": "3", "if": "^corp" },
+   { "radio": "topmostSubform[0].Page1[0].type_of_organization[0]", "value": "4", "if": "^nonprofit" },
+   { "radio": "topmostSubform[0].Page1[0].type_of_organization[0]", "value": "5", "if": "^(limited liability|llc)" },
+   { "radio": "topmostSubform[0].Page1[0].type_of_organization[0]", "value": "6", "if": "^other" },
+   { "text": "topmostSubform[0].Page1[0].Other_specify[0]", "pick": "tail", "if": "^other\\b.*:" }
+  ],
+  "trade_name": [{ "text": "topmostSubform[0].Page1[0].Trade_name[0]", "if": "^(?!(none|no|n/?a)\\.?$)" }],
+  "location": [
+   { "text": "topmostSubform[0].Page1[0].Street_Address[0]", "pick": "street" },
+   { "text": "topmostSubform[0].Page1[0].City[0]", "pick": "city" },
+   { "text": "topmostSubform[0].Page1[0].Zip_Code[0]", "pick": "zip" }
+  ],
+  "county": [{ "text": "topmostSubform[0].Page1[0].County[0]" }],
+  "phone": [
+   { "text": "topmostSubform[0].Page1[0].phone_number1[0]", "pick": "phone1" },
+   { "text": "topmostSubform[0].Page1[0].phone_number1[1]", "pick": "phonelocal|digits" }
+  ],
+  "first_employed": [{ "text": "topmostSubform[0].Page1[0].date_first_began_employing_workers_withihn_georgia[0]", "pick": "date" }],
+  "first_payroll": [{ "text": "topmostSubform[0].Page1[0].date_of_first_ga_payroll[0]", "pick": "date" }],
+  "futa_liable": [
+   { "radio": "topmostSubform[0].Page1[0].tax_liability[0]", "value": "1", "if": "^(y|yes|是)" },
+   { "radio": "topmostSubform[0].Page1[0].tax_liability[0]", "value": "2", "if": "^(n|no|否)" }
+  ],
+  "fein": [
+   { "text": "topmostSubform[0].Page1[0].federal_id_number1[0]", "pick": "d1" },
+   { "text": "topmostSubform[0].Page1[0].federal_id_number2[0]", "pick": "d2" },
+   { "text": "topmostSubform[0].Page1[0].federal_id_number3[0]", "pick": "d3" },
+   { "text": "topmostSubform[0].Page1[0].federal_id_number4[0]", "pick": "d4" },
+   { "text": "topmostSubform[0].Page1[0].federal_id_number5[0]", "pick": "d5" },
+   { "text": "topmostSubform[0].Page1[0].federal_id_number6[0]", "pick": "d6" },
+   { "text": "topmostSubform[0].Page1[0].federal_id_number7[0]", "pick": "d7" },
+   { "text": "topmostSubform[0].Page1[0].federal_id_number8[0]", "pick": "d8" },
+   { "text": "topmostSubform[0].Page1[0].federal_id_number9[0]", "pick": "d9" }
+  ],
+  "acquired": [
+   { "radio": "topmostSubform[0].Page1[0].acquired_another_business[0]", "value": "1", "if": "^(y|yes|是)" },
+   { "radio": "topmostSubform[0].Page1[0].acquired_another_business[0]", "value": "2", "if": "^(n|no|否)" }
+  ],
+  "merged": [
+   { "radio": "topmostSubform[0].Page1[0].merged_with_another_business[0]", "value": "1", "if": "^(y|yes|是)" },
+   { "radio": "topmostSubform[0].Page1[0].merged_with_another_business[0]", "value": "2", "if": "^(n|no|否)" }
+  ],
+  "formed": [
+   { "radio": "topmostSubform[0].Page1[0].formed_corporation_or_partnership[0]", "value": "1", "if": "^(y|yes|是)" },
+   { "radio": "topmostSubform[0].Page1[0].formed_corporation_or_partnership[0]", "value": "2", "if": "^(n|no|否)" }
+  ],
+  "other_change": [
+   { "radio": "topmostSubform[0].Page1[0].change_in_ownership_of_business[0]", "value": "1", "if": "^(y|yes|是)" },
+   { "radio": "topmostSubform[0].Page1[0].change_in_ownership_of_business[0]", "value": "2", "if": "^(n|no|否)" }
+  ],
+  "other_change_explain": [{ "text": "topmostSubform[0].Page1[0].If_yes_explain[0]", "if": "^(?!(none|no|n/?a)\\.?$)" }],
+  "date_acquired": [{ "text": "topmostSubform[0].Page1[0].date_acquired_or_changed[0]", "pick": "date", "if": "^(?!(none|no|n/?a)\\.?$)" }],
+  "predecessor_account": [
+   { "text": "topmostSubform[0].Page1[0].pred_gdol_acc_num1[0]", "pick": "d1", "if": "^(?!(none|no|n/?a)\\.?$)" },
+   { "text": "topmostSubform[0].Page1[0].pred_gdol_acc_num2[0]", "pick": "d2", "if": "^(?!(none|no|n/?a)\\.?$)" },
+   { "text": "topmostSubform[0].Page1[0].pred_gdol_acc_num3[0]", "pick": "d3", "if": "^(?!(none|no|n/?a)\\.?$)" },
+   { "text": "topmostSubform[0].Page1[0].pred_gdol_acc_num4[0]", "pick": "d4", "if": "^(?!(none|no|n/?a)\\.?$)" },
+   { "text": "topmostSubform[0].Page1[0].pred_gdol_acc_num5[0]", "pick": "d5", "if": "^(?!(none|no|n/?a)\\.?$)" },
+   { "text": "topmostSubform[0].Page1[0].pred_gdol_acc_num6[0]", "pick": "d6", "if": "^(?!(none|no|n/?a)\\.?$)" },
+   { "text": "topmostSubform[0].Page1[0].pred_gdol_acc_num7[0]", "pick": "d7", "if": "^(?!(none|no|n/?a)\\.?$)" },
+   { "text": "topmostSubform[0].Page1[0].pred_gdol_acc_num8[0]", "pick": "d8", "if": "^(?!(none|no|n/?a)\\.?$)" }
+  ],
+  "portion": [
+   { "radio": "topmostSubform[0].Page1[0].business_acquisition[0]", "value": "Choice1", "if": "^all" },
+   { "radio": "topmostSubform[0].Page1[0].business_acquisition[0]", "value": "Choice2", "if": "^substantially" },
+   { "radio": "topmostSubform[0].Page1[0].business_acquisition[0]", "value": "Choice3", "if": "^part" }
+  ],
+  "former_owner_employees": [
+   { "radio": "topmostSubform[0].Page1[0].employees[0]", "value": "Yes", "if": "^(y|yes|是)" },
+   { "radio": "topmostSubform[0].Page1[0].employees[0]", "value": "No", "if": "^(n|no|否)$" }
+  ],
+  "predecessor_name": [{ "text": "topmostSubform[0].Page1[0].for_whom[0]", "if": "^(?!(none|no|n/?a)\\.?$)" }],
+  "predecessor_address": [{ "text": "topmostSubform[0].Page1[0].address1[0]", "if": "^(?!(none|no|n/?a)\\.?$)" }],
+  "twenty_weeks": [
+   { "radio": "topmostSubform[0].Page1[0].private_business_employment[0]", "value": "1", "if": "^(y|yes|是)" },
+   { "radio": "topmostSubform[0].Page1[0].private_business_employment[0]", "value": "2", "if": "^(n|no|否)" }
+  ],
+  "twenty_weeks_date": [{ "text": "topmostSubform[0].Page1[0].If_yes_show_date_the_20th_week_first_occurred[0]", "pick": "date", "if": "^(?!(none|no|n/?a)\\.?$)" }],
+  "payroll_1500": [
+   { "radio": "topmostSubform[0].Page1[0].quarterly_payroll[0]", "value": "1", "if": "^(y|yes|是)" },
+   { "radio": "topmostSubform[0].Page1[0].quarterly_payroll[0]", "value": "2", "if": "^(n|no|否)" }
+  ],
+  "payroll_1500_date": [{ "text": "topmostSubform[0].Page1[0].If_yes_show_date_this_first_occurred[0]", "pick": "date", "if": "^(?!(none|no|n/?a)\\.?$)" }],
+  "domestic": [
+   { "radio": "topmostSubform[0].Page1[0].domestic_employment[0]", "value": "1", "if": "^(y|yes|是)" },
+   { "radio": "topmostSubform[0].Page1[0].domestic_employment[0]", "value": "2", "if": "^(n|no|否)" }
+  ],
+  "domestic_date": [{ "text": "topmostSubform[0].Page1[0].If_yes_show_date1[0]", "pick": "date", "if": "^(?!(none|no|n/?a)\\.?$)" }],
+  "ag_workers": [
+   { "radio": "topmostSubform[0].Page1[0].agricultural_employment[0]", "value": "1", "if": "^(y|yes|是)" },
+   { "radio": "topmostSubform[0].Page1[0].agricultural_employment[0]", "value": "2", "if": "^(n|no|否)" }
+  ],
+  "ag_workers_date": [{ "text": "topmostSubform[0].Page1[0].If_yes_show_date2[0]", "pick": "date", "if": "^(?!(none|no|n/?a)\\.?$)" }],
+  "ag_payroll": [
+   { "radio": "topmostSubform[0].Page1[0].agricultural_payroll[0]", "value": "1", "if": "^(y|yes|是)" },
+   { "radio": "topmostSubform[0].Page1[0].agricultural_payroll[0]", "value": "2", "if": "^(n|no|否)" }
+  ],
+  "ag_payroll_date": [{ "text": "topmostSubform[0].Page1[0].If_yes_show_date3[0]", "pick": "date", "if": "^(?!(none|no|n/?a)\\.?$)" }],
+  "nonprofit_workers": [
+   { "radio": "topmostSubform[0].Page1[0].if_nonprofit[0]", "value": "1", "if": "^(y|yes|是)" },
+   { "radio": "topmostSubform[0].Page1[0].if_nonprofit[0]", "value": "2", "if": "^(n|no|否)$" }
+  ],
+  "nonprofit_date": [{ "text": "topmostSubform[0].Page1[0].If_yes_show_date[0]", "pick": "date", "if": "^(?!(none|no|n/?a)\\.?$)" }],
+  "employees": [{ "text": "topmostSubform[0].Page1[0].number_of_employees[0]" }],
+  "owner_name": [{ "text": "topmostSubform[0].Page1[0].owner_name[0]" }],
+  "owner_address": [
+   { "text": "topmostSubform[0].Page1[0].owner_address[0]", "pick": "street" },
+   { "text": "topmostSubform[0].Page1[0].owner_city[0]", "pick": "city" },
+   { "text": "topmostSubform[0].Page1[0].owner_state[0]", "pick": "state" },
+   { "text": "topmostSubform[0].Page1[0].owner_zip[0]", "pick": "zip" }
+  ],
+  "owner_phone": [
+   { "text": "topmostSubform[0].Page1[0].owner_area_code[0]", "pick": "phone1" },
+   { "text": "topmostSubform[0].Page1[0].owner_telephone[0]", "pick": "phonelocal|digits" }
+  ],
+  "records_name": [{ "text": "topmostSubform[0].Page1[0].Name2[0]" }],
+  "records_address": [
+   { "text": "topmostSubform[0].Page1[0].Address2[0]", "pick": "street" },
+   { "text": "topmostSubform[0].Page1[0].City2[0]", "pick": "city" },
+   { "text": "topmostSubform[0].Page1[0].State2[0]", "pick": "state" },
+   { "text": "topmostSubform[0].Page1[0].Zip_Code2[0]", "pick": "zip" }
+  ],
+  "records_phone": [
+   { "text": "topmostSubform[0].Page1[0].area_code3[0]", "pick": "phone1" },
+   { "text": "topmostSubform[0].Page1[0].Telephone3[0]", "pick": "phonelocal|digits" }
+  ],
+  "signer_title": [{ "text": "topmostSubform[0].Page1[0].Title[0]" }],
+  "locations": [{ "text": "topmostSubform[0].Page2[0].locations[0]" }],
+  "industry": [
+   { "check": "topmostSubform[0].Page2[0].Agriculture[0]", "if": "^agriculture" },
+   { "check": "topmostSubform[0].Page2[0].Forestry[0]", "if": "^forestry" },
+   { "check": "topmostSubform[0].Page2[0].Fishing[0]", "if": "^fishing" },
+   { "check": "topmostSubform[0].Page2[0].Mining[0]", "if": "^mining" },
+   { "check": "topmostSubform[0].Page2[0].Construction[0]", "if": "^construction" },
+   { "check": "topmostSubform[0].Page2[0].Manufacturing[0]", "if": "^manufacturing" },
+   { "check": "topmostSubform[0].Page2[0].Transportation[0]", "if": "^transportation" },
+   { "check": "topmostSubform[0].Page2[0].Communication[0]", "if": "^communication" },
+   { "check": "topmostSubform[0].Page2[0].Public_Utilities[0]", "if": "^public utilities" },
+   { "check": "topmostSubform[0].Page2[0].Wholesale_Trade[0]", "if": "^wholesale" },
+   { "check": "topmostSubform[0].Page2[0].Retail_Trade[0]", "if": "^retail" },
+   { "check": "topmostSubform[0].Page2[0].Finance[0]", "if": "^finance" },
+   { "check": "topmostSubform[0].Page2[0].Insurance[0]", "if": "^insurance" },
+   { "check": "topmostSubform[0].Page2[0].Real_Estate[0]", "if": "^real estate" },
+   { "check": "topmostSubform[0].Page2[0].Services[0]", "if": "^services" },
+   { "check": "topmostSubform[0].Page2[0].Public_Administration[0]", "if": "^public administration" },
+   { "check": "topmostSubform[0].Page2[0].Private_Household[0]", "if": "^private household" }
+  ],
+  "products": [
+   { "text": "topmostSubform[0].Page2[0].services_rendered1[0]", "pick": "line1|head" },
+   { "text": "topmostSubform[0].Page2[0].percent_services_rendered1[0]", "pick": "line1|tail" },
+   { "text": "topmostSubform[0].Page2[0].services_rendered2[0]", "pick": "line2|head" },
+   { "text": "topmostSubform[0].Page2[0].percent_services_rendered2[0]", "pick": "line2|tail" },
+   { "text": "topmostSubform[0].Page2[0].services_rendered3[0]", "pick": "line3|head" },
+   { "text": "topmostSubform[0].Page2[0].percent_services_rendered3[0]", "pick": "line3|tail" }
+  ],
+  "product_kind": [
+   { "check": "topmostSubform[0].Page2[0].Mfg[0]", "if": "^(mfg|manufactur)" },
+   { "check": "topmostSubform[0].Page2[0].Grown[0]", "if": "^grown" },
+   { "check": "topmostSubform[0].Page2[0].Sold[0]", "if": "^sold" }
+  ],
+  "support_services": [
+   { "check": "topmostSubform[0].Page2[0].Central_Administration[0]", "if": "^central" },
+   { "check": "topmostSubform[0].Page2[0].Research_development[0]", "if": "^research" },
+   { "check": "topmostSubform[0].Page2[0].Storage[0]", "if": "^storage" },
+   { "check": "topmostSubform[0].Page2[0].Other[0]", "if": "^other" },
+   { "text": "topmostSubform[0].Page2[0].specify[0]", "pick": "tail", "if": "^other\\b.*:" }
+  ]
+ }
+}

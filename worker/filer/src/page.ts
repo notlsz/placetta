@@ -3,7 +3,7 @@
 // Selectors: "label:<text>" (getByLabel, exact), "button:<text>", "link:<text>", or a CSS selector built from
 // id or name ("#id", "[name=\"x\"]"). Labels first, so a recorded step survives cosmetic changes to the page.
 import type { Locator, Page } from "playwright-core";
-import { secretControl, type PageState } from "./guards.ts";
+import { secretControl, STAFF_HIDDEN_AUTOCOMPLETE, STAFF_HIDDEN_SOURCE, type PageState } from "./guards.ts";
 
 /** The page as the model sees it. A page that starts a navigation while it's read (a refused jump to another site
  *  included) is read again once it settles. */
@@ -101,6 +101,40 @@ async function readState(page: Page): Promise<PageState> {
 export async function captchaAnswered(page: Page): Promise<boolean> {
   return await page.evaluate(() => Array.from(document.querySelectorAll('[name^="g-recaptcha-response"], [name="h-captcha-response"], [name="cf-turnstile-response"]'))
     .some((e) => !!(e as HTMLInputElement).value)).catch(() => false);
+}
+
+/** Marks every line the team's live view covers (guards.ts staffHides, the same rule run in the page). A mark stays put,
+ *  so a password line a person switches to plain text stays covered. */
+const HIDDEN_ATTR = "data-placetta-hidden";
+export async function tagHidden(page: Page): Promise<void> {
+  await page.evaluate(([src, attr, acs]) => {
+    const re = new RegExp(src, "i");
+    for (const el of Array.from(document.querySelectorAll("input, select, textarea")) as HTMLInputElement[]) {
+      if (el.hasAttribute(attr)) continue;
+      const type = (el.getAttribute("type") ?? "").toLowerCase(), ac = (el.getAttribute("autocomplete") ?? "").toLowerCase();
+      const id = el.getAttribute("id");
+      const label = [id ? document.querySelector(`label[for="${CSS.escape(id)}"]`)?.textContent : "", el.closest("label")?.textContent, el.getAttribute("aria-label")].filter(Boolean).join(" ");
+      const said = `${label} ${el.getAttribute("name") ?? ""} ${id ?? ""} ${el.getAttribute("placeholder") ?? ""}`.replace(/[_-]+/g, " ");
+      if (type === "password" || /^cc-/.test(ac) || (acs as readonly string[]).includes(ac) || re.test(said)) el.setAttribute(attr, "1");
+    }
+  }, [STAFF_HIDDEN_SOURCE, HIDDEN_ATTR, STAFF_HIDDEN_AUTOCOMPLETE] as const);
+}
+
+/** The team's live view of a page (live.ts StaffGuard): a picture with every owner's line covered, and whether the line
+ *  in focus is one of them (staff can't type there). Fails closed: if the page can't be marked, no picture. */
+export function staffGuard(page: Page) {
+  return {
+    async shot(): Promise<Uint8Array> {
+      await tagHidden(page);
+      return await page.screenshot({ type: "jpeg", quality: 70, mask: [page.locator(`[${HIDDEN_ATTR}]`)], maskColor: "#3a3936" });
+    },
+    async typingBlocked(): Promise<boolean> {
+      try {
+        await tagHidden(page);
+        return await page.evaluate((attr) => !!document.activeElement?.closest(`[${attr}]`), HIDDEN_ATTR);
+      } catch { return true; }
+    },
+  };
 }
 
 /** The selector as a Playwright locator. */

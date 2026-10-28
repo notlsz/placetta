@@ -6,11 +6,14 @@ import type { Approval, Workspace } from "./model";
 import type { Lang } from "./i18n";
 import type { Tool } from "./live";
 import { MCP_PREFIX, mcpApp, mcpReads } from "./mcp";
+import { agencyAddress, workspaceContacts } from "./initiative";
 
 /* ------------------------------------------------------------------ *
  * The owner's controls over Odelia, the way Claude Code has permission
  * modes and allow and deny rules:
- *   - How much she does on her own: Ask me first, Usual or Plan first.
+ *   - How much she does on her own: Ask me first, Usual, Hands-off or
+ *     Plan first (Claude Code's manual, default, auto and plan modes;
+ *     OpenAI Dots's "ask before", "pre-approved" and "hand off to you").
  *   - Always allow rules, added from an approval card, and Never rules.
  *   - House rules: the owner's own instructions, read at every run.
  * Everything here wraps the agent's tools (withControls), so the same
@@ -20,7 +23,7 @@ import { MCP_PREFIX, mcpApp, mcpReads } from "./mcp";
  * sends anything under an Always allow rule.
  * ------------------------------------------------------------------ */
 
-export type Autonomy = "ask" | "usual" | "plan";
+export type Autonomy = "ask" | "usual" | "auto" | "plan";
 /** What she does, as an owner thinks of it. A rule names one of these and, optionally, who or what it's about. */
 export type ActionKind = "contact" | "applications" | "filing" | "deadlines" | "calendar" | "stores" | "facts" | "documents" | "purchases" | "routines" | "playbooks" | "memory" | "settings" | "apps";
 export type OwnerRule = { id: string; kind: "allow" | "deny"; action: ActionKind; target?: string; label: Bi; at: string; by?: string; used?: number; last?: string };
@@ -42,6 +45,7 @@ export type Controls = {
 export const AUTONOMY: { id: Autonomy; label: Bi; sub: Bi }[] = [
   { id: "ask", label: B("Ask me first", "先问我"), sub: B("She reads, researches and drafts on her own. Every other change to the workspace waits on one card for your approval.", "她自己阅读、调研和起草。工作区的其他每项更改都会汇总到一张卡片上，等您批准。") },
   { id: "usual", label: B("Usual", "常规"), sub: B("She prepares applications, fills lines, adds deadlines and keeps plans current. Anything filed, paid or sent waits for your approval.", "她会准备申请、填写栏目、添加截止日期并更新计划。提交、付款和发送都等您批准。") },
+  { id: "auto", label: B("Hands-off", "放手去做"), sub: B("She works each job end to end. Routine emails to people you told her about (your landlord, contractor, insurer) go out on their own after the 10-minute undo window, and each morning she asks them for missing documents from her own address and follows up until they answer. Filing, paying, signing, texts and anything sent to an agency still wait for you.", "她把每项工作从头做到尾。发给您告诉过她的人（房东、承包商、保险经纪人）的例行邮件，在 10 分钟撤销期后自动发出；每天早上她还会用自己的邮箱向他们索取缺少的文件，并持续跟进直到对方回复。提交、付款、签署、短信以及任何发给机构的内容，仍然等您批准。") },
   { id: "plan", label: B("Plan first", "先做计划"), sub: B("For each job she writes the plan and stops. Once an owner approves it, she works it the usual way.", "每项工作她先写好计划就停下。所有者批准后，她按常规方式执行。") },
 ];
 
@@ -52,11 +56,11 @@ const READ = new Set(["find_official_forms", "plan_markets", "network_lessons", 
   "address_rules", "inspection_guide", "appeal_options", "search_email", "read_email", "find_files", "get_income", "get_sales", "get_staff", "read_comments", "connected_locations", "company_profile"]);
 /** Her own plan and notes for a job, and handing a job's parts to the stores' bots (split_job): each store's bot then
  *  works under these same controls, so under Ask me first its changes wait on its own card. */
-const PLANNING = new Set(["set_plan", "hand_off", "split_job"]);
+const PLANNING = new Set(["set_plan", "hand_off", "split_job", "ask_specialist"]);
 /** Drafting, or putting something in front of a person to approve or confirm: these ask already. */
 const DRAFTS = new Set(["draft_message", "send_email", "draft_document", "request_filing_approval", "request_purchase", "set_budgets", "remove_store", "remove_application"]);
 /** What a Plan first run may do: read, research and write the plan. */
-const PLAN_OK = new Set([...READ, "set_plan"]);
+const PLAN_OK = new Set([...READ, "set_plan", "ask_specialist"]);
 
 /** Whether a call changes the workspace without asking anyone: what Ask me first holds for approval. A tool this list
  *  doesn't know counts as a change, on the safe side. */
@@ -157,6 +161,30 @@ export function allowRule(w: Workspace, tool: string, input: Record<string, unkn
   return live(w, "allow").find(r => ruleMatches(r, tool, input, w));
 }
 
+/* ------------------------------------------------------------------ Hands-off */
+
+/** The rule id a message carries when it goes out under Hands-off rather than an owner's Always allow rule. */
+export const HANDS_OFF = "mode:auto";
+export const HANDS_OFF_LABEL = B("Hands-off: a routine email to someone you told Odelia about", "放手去做：发给您告诉过 Odelia 的人的例行邮件");
+/** What a routine message may not do on its own: commit the business, ask for or mention money, sign or attest. */
+const NOT_ROUTINE = /\b(please sign|sign (here|below|and|this|it|the attached|the form|the application)|countersign|e-?sign|docusign|signature (page|line|block|required|needed)|your signature|attest|certify|certifies|under penalty|perjury|agree to|we agree|pay|pays|paid|payment|wire|invoice|deposit|refund|fee|fees|usd|contract|terminate|cancel|lawsuit|attorney|legal action)\b|\$\s?\d|签署|签名|签字|付款|支付|汇款|费用|发票|合同|律师/i;
+/** Why a message can't go out under Hands-off, or null when it can: an email (texts need the person's own consent,
+ *  which Placetta doesn't hold for a third party) to people every one of whom an owner told Odelia about and saved,
+ *  none at an agency, with no link and nothing that commits, pays or signs. Checked when it's drafted and again when
+ *  its undo window ends. */
+export function routineBlock(w: Workspace, to: string, message: string): string | null {
+  const parts = to.split(/[,;\n]|\s+and\s+|、|和/).map(x => x.trim()).filter(Boolean);
+  if (!parts.length) return "no recipient";
+  const emails = parts.map(x => /[^\s<>"]+@[^\s<>"]+/.exec(x)?.[0]?.toLowerCase() ?? "");
+  if (emails.some(e => !e)) return "a text or a recipient with no email address: texts always wait for an owner";
+  if (emails.some(e => agencyAddress(e, w))) return "an agency: anything sent to an agency waits for an owner";
+  const known = new Set(workspaceContacts(w).map(c => c.email).filter(Boolean));
+  if (emails.some(e => !known.has(e))) return "someone the owners haven't told Odelia about";
+  if (/\b(?:https?:\/\/|www\.)\S+/i.test(message)) return "a link";
+  if (NOT_ROUTINE.test(message)) return "money, a signature or a commitment";
+  return null;
+}
+
 /** A rule as people read it: "Always allow: messages to kevin@contractor.com", "Never: contact landlord". */
 export function ruleWords(kind: OwnerRule["kind"], action: ActionKind, target: string | undefined, w?: Workspace): Bi {
   const t = (target ?? "").trim();
@@ -216,7 +244,7 @@ export function runMode(w: Workspace, prompt: string): RunMode {
   const base: Autonomy = w.controls?.autonomy ?? "usual";
   if (PLAN_CMD.test(prompt)) return { mode: "plan", why: "asked" };
   const job = JOB_REF.exec(prompt)?.[1] ?? GO_CMD.exec(prompt)?.[1];
-  if (job && approvedPlan(w, job)) return { mode: base === "ask" ? "ask" : "usual", why: "approved", job };
+  if (job && approvedPlan(w, job)) return { mode: base === "ask" ? "ask" : base === "auto" ? "auto" : "usual", why: "approved", job };
   return { mode: base, why: "workspace" };
 }
 /** The request as the model reads it: "/plan" taken off (the instructions say plan first instead). */
@@ -286,6 +314,8 @@ export function controlsBrief(w: Workspace, rm: RunMode): string {
     ? `\n\nPlan first is on for this request${rm.why === "asked" ? " (the person asked for it)" : " (the owner's setting)"}: don't change anything yet. Read and research as much as the plan needs, then write the whole plan with set_plan: every step in order and the done list. Every other tool is refused. Once the plan is saved, stop and say in one or two sentences what it will do and that it starts when an owner approves it.`
     : rm.mode === "ask"
       ? `\n\nAsk me first is on (the owner's setting): reading, researching and drafting you do on your own; every other change to the workspace waits for an owner. A tool that would change something puts the change on one approval card instead, and nothing changes until an owner approves it. Do the job as far as that goes, then say in one sentence what's waiting for approval.`
+      : rm.mode === "auto"
+        ? `\n\nHands-off is on (the owner's setting): work the job end to end without asking about routine steps. A routine email you draft to people the owners told you about (their landlord, contractor, insurer; never an agency) goes out on its own after the undo window; chase what a filing needs from them, then keep going. Filing, paying, signing, texts and anything to an agency still go on a card for an owner. When you aren't sure of a rule, a fee or a deadline, don't guess: ask a Placetta specialist with ask_specialist.${rm.why === "approved" ? ` An owner approved this job's plan (job ${rm.job}).` : ""}`
       : rm.why === "approved" ? `\n\nAn owner approved this job's plan (job ${rm.job}). Work it now, step by step, keeping set_plan current.` : "";
   const deny = (c?.rules ?? []).filter(r => r.kind === "deny");
   const rules = deny.length ? `\n\nThe owner's Never rules (the tools refuse these, so don't try): ${deny.map(r => r.label.en).join("; ")}.` : "";
@@ -479,6 +509,16 @@ export function withControls(tools: Tool[], c: ControlCtx): Tool[] {
           c.apply(w2 => audit("agent", B("Used your rule", "使用了您的规则"), yes.label, ap.title)(usedRule(yes.id, now())({ ...w2, approvals: w2.approvals.map(a => (a.id === ap.id ? { ...a, auto: { rule: yes.id, label: yes.label } } : a)) })));
           return { ...o, goes_out_under_owner_rule: yes.label.en, note: `Under the owner's rule "${yes.label.en}" this message is approved without another tap as soon as an owner has Placetta open, then waits out the usual undo window before it's sent. Say so in one short sentence.` };
         }
+        // Hands-off: a routine email to people the owners told Odelia about goes the same way; anything else waits
+        if (c.mode.mode === "auto" && ap && ap.kind === "send" && !ap.fee) {
+          const to = (ap.data ?? []).find(f => f.id === "to")?.value ?? "", message = (ap.data ?? []).find(f => f.id === "msg")?.value ?? "";
+          const why = routineBlock(c.get(), to, message);
+          if (!why) {
+            c.apply(w2 => audit("agent", B("Sending on its own (Hands-off)", "将自动发送（放手去做）"), HANDS_OFF_LABEL, ap.title)({ ...w2, approvals: w2.approvals.map(a => (a.id === ap.id ? { ...a, auto: { rule: HANDS_OFF, label: HANDS_OFF_LABEL } } : a)) }));
+            return { ...o, goes_out_hands_off: true, note: "Hands-off is on and this is a routine email to someone the owners told you about, so it goes out on its own after the 10-minute undo window. Say so in one short sentence." };
+          }
+          return { ...o, waits_for_owner: why, note: `Hands-off doesn't send this one on its own (${why}), so it waits for an owner's approval. Say so in one short sentence.` };
+        }
       }
       // Business rules, where their events happen
       if (name === "request_filing_approval" && str(o.approval_id)) {
@@ -530,6 +570,11 @@ export function allowOptions(a: Approval, w: Workspace): { action: ActionKind; t
  *  and still covering everyone it goes to. */
 export function autoOk(a: Approval, w: Workspace): boolean {
   if (!a.auto || a.kind !== "send" || a.fee || a.second) return false;
+  if (a.auto.rule === HANDS_OFF) {
+    // Hands-off: still on, still a routine email to known people, and no Never rule added meanwhile
+    const to = (a.data ?? []).find(f => f.id === "to")?.value ?? "", message = (a.data ?? []).find(f => f.id === "msg")?.value ?? "";
+    return w.controls?.autonomy === "auto" && !routineBlock(w, to, message) && !denyRule(w, "draft_message", { to, message, title: a.title.en });
+  }
   const r = (w.controls?.rules ?? []).find(x => x.id === a.auto!.rule && x.kind === "allow" && x.action === "contact");
   const to = (a.data ?? []).find(f => f.id === "to")?.value ?? "", message = (a.data ?? []).find(f => f.id === "msg")?.value ?? "";
   // checked again when the undo window ends: a Never rule added meanwhile stops it too

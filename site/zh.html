@@ -3138,19 +3138,6 @@ html[lang="zh-CN"] .sc95b b{font-family:var(--zhserif);letter-spacing:0;font-siz
 /* the comparison: three columns, four rows, Placetta's column tinted */
 #pricing .c96h{margin-bottom:28px;max-width:860px}
 .cmp96{display:flex;flex-direction:column;gap:14px;margin-bottom:44px}
-.c96t{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;background:#fff;border-radius:20px;box-shadow:0 0 0 1px #ebebeb,0 28px 70px rgba(15,27,51,.06);overflow:hidden}
-.c96t thead td{width:19%}
-.c96t thead th{padding:24px 24px 14px;text-align:left;font-size:15px;line-height:1.3;font-weight:500;color:var(--ink2);vertical-align:bottom}
-.c96t thead th.us{color:var(--ink)}
-.c96t tbody th{padding:22px 24px;text-align:left;font-size:14px;line-height:1.35;font-weight:500;color:var(--muted);vertical-align:top;border-top:1px solid var(--line)}
-.c96t tbody td{padding:20px 24px 22px;vertical-align:top;border-top:1px solid var(--line)}
-.c96t td b{display:block;font-size:17px;line-height:1.35;font-weight:500;letter-spacing:-.2px;color:var(--ink);font-variant-numeric:tabular-nums}
-.c96t tbody tr:nth-child(-n+2) td b{font-family:var(--serif);font-weight:300;font-size:30px;line-height:1.08;letter-spacing:-.02em}
-html[lang="zh-CN"] .c96t tbody tr:nth-child(-n+2) td b{font-family:var(--zhserif);font-weight:500;font-size:24px;letter-spacing:0}
-.c96t td small{display:block;margin-top:6px;font-size:13px;line-height:1.4;color:var(--ink2)}
-.c96t td small.c96e{display:inline-block;margin-top:8px;padding:2px 8px;border-radius:6px;background:var(--chip);font-size:12px;color:var(--muted)}
-.c96t .us{background:var(--gs-ll)}
-.c96t td.us small.c96e{background:#fff}
 /* one card: the visitor's own price next to the expediter's range, then the two-field calculator */
 .c96calc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 20px;align-items:end;padding:24px;border-radius:20px;background:#fff;box-shadow:0 0 0 1px #ebebeb}
 .c96calc>p{display:flex;flex-direction:column;gap:5px;margin:0;min-width:0}
@@ -3238,19 +3225,6 @@ html[lang="zh-CN"] .c96ch b{font-family:var(--zhserif);font-weight:500;font-size
   .c96ch b{font-size:28px}
   .c96calc>p.c96fair{font-size:14px;margin:0}
 }
-@media (max-width:767px){
-  .c96t,.c96t thead,.c96t tbody{display:block}
-  .c96t thead tr,.c96t tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
-  .c96t thead td{display:none}
-  .c96t thead th{padding:16px 12px 10px;font-size:13px}
-  .c96t tbody tr{border-top:1px solid var(--line)}
-  .c96t tbody th{grid-column:1/-1;padding:14px 12px 4px;border:0;font-size:12px}
-  .c96t tbody td{padding:6px 12px 16px;border:0}
-  .c96t td b{font-size:14px;line-height:1.35}
-  .c96t tbody tr:nth-child(-n+2) td b{font-size:19px}
-  html[lang="zh-CN"] .c96t tbody tr:nth-child(-n+2) td b{font-size:16px}
-  .c96t td small{font-size:12px}
-}
 @media (min-width:1024px){main>section[id]:not(#top){margin-top:72px!important}main>section#agencies:not(#top),main>section#together:not(#top){margin-top:40px!important}}
 #together{margin-top:40px}
 .wt96 .wtc{margin-bottom:24px}
@@ -3304,7 +3278,6 @@ html[lang="zh-CN"] .c96ch b{font-family:var(--zhserif);font-weight:500;font-size
   main .btn{min-height:44px}
   /* links inside running text get a 44px tap height without moving the text */
   #faq a,.c96src a{display:inline-block;padding-block:13px;margin-block:-13px}
-  .c96t tbody tr:nth-child(-n+2) td b{font-size:17px}
 }
 
 /* the phone, Tesla and SpaceX style: one image, one headline, one line, one action. Headline centered in the upper
@@ -3379,10 +3352,6 @@ html[lang="zh-CN"] .c96ch b{font-family:var(--zhserif);font-weight:500;font-size
   /* how it works: two cards, now that the live demo above shows the mapping */
   .feat.feat2{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-/* pricing: the "How long" row spans the three ways, since the agencies set the clock whoever files */
-.c96t tr.c96wait td{text-align:left}
-.c96t tr.c96wait td b{font-size:17px}
-.c96t tr.c96wait td small{display:block;margin-top:4px}
 /* backers: one row of marks with the heading, "See all" opens the rest */
 .bkhd{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:20px}
 .bkhd .bkh{margin:0}
@@ -3410,9 +3379,6 @@ html[lang="zh-CN"] .c96ch b{font-family:var(--zhserif);font-weight:500;font-size
   #security .dvl li{padding:12px 0}
   #security .dvl li:nth-last-child(-n+3){border-bottom:0}
 }
-/* the comparison: only the cost row is set large; "Who files" reads as a sentence */
-.c96t tbody tr:nth-child(2) td b{font-family:inherit!important;font-weight:500!important;font-size:17px!important;line-height:1.35!important;letter-spacing:-.2px!important}
-@media (max-width:767px){.c96t tbody tr:nth-child(2) td b{font-size:14px!important}.c96t tr.c96wait td{grid-column:1/-1}.c96t tr.c96wait td b{font-size:14px}}
 /* Shenzhen and New York: folded like the coverage map; the dashboards open on tap */
 .cn96[open] .irow{padding:8px 0 28px}
 .cn96 .il .cnq{margin-top:0}
@@ -3490,45 +3456,143 @@ html[lang="zh-CN"] .c96ch b{font-family:var(--zhserif);font-weight:500;font-size
   .vdemo{margin-top:-80px!important}
   .hero .hbot{bottom:104px!important}
 }
-/* the comparison, Oct 23: Placetta is the dark column (the pick on a pricing page), the others recede; on a phone each
-   row is a short stack, Placetta first, instead of three columns crushed into 390px. The typical-opening card matches. */
-.c96l{display:none}
-@media (min-width:768px){
-  .c96t thead th.us{background:var(--ink);color:#fff;border-radius:0}
-  .c96t td.us{background:var(--ink);border-top-color:rgba(255,255,255,.12)}
-  .c96t td.us b{color:#fff}
-  .c96t td.us small{color:rgba(255,255,255,.66)}
-  .c96t td:not(.us) b{color:var(--ink2)}
-  .c96t tbody th{color:var(--ink2)}
-  .c96t tr.c96wait td{background:var(--gs-ll)}
-  .c96t tr.c96wait td b{color:var(--ink)}
+/* the comparison, Oct 27: Placetta is a raised ink card over the right column (one shape behind the cells, so the
+   card has no seams), the attorney and the expediter recede in lighter ink. Every row asks one question. On a phone
+   Placetta comes first as one card, the attorney and the expediter side by side under it with their rows lined up by
+   question: the same table, placed on a grid. No motion of its own; the section's reveal is the one entrance. */
+.c98w{position:relative;margin:26px 0 24px}
+.c98w::before{content:"";position:absolute;inset:0;border-radius:20px;background:#fff;box-shadow:0 0 0 1px #ebebeb,0 28px 70px rgba(15,27,51,.06)}
+.c98w::after{content:"";position:absolute;top:-24px;bottom:-24px;left:66%;right:-14px;border-radius:24px;background:radial-gradient(140% 55% at 50% 0%,rgba(155,190,203,.2),rgba(155,190,203,0) 70%),linear-gradient(180deg,#14244A,#0F1B33 60%);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 0 1px #0F1B33,0 40px 80px -28px rgba(15,27,51,.55),0 0 90px -24px rgba(115,153,198,.6)}
+.c98w .c96t{position:relative;z-index:1;width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0;background:none}
+.c98k{width:17%}.c98a,.c98b{width:24.5%}.c98u{width:34%}
+.c98 th,.c98 td{text-align:left;vertical-align:top}
+.c98 thead th{padding:30px 28px 18px;font-size:14px;line-height:1.3;font-weight:500;color:var(--ink2);vertical-align:bottom}
+.c98 thead th.us{padding:8px 28px 18px;color:#fff}
+.c98h{display:flex;align-items:center;gap:10px;font-size:22px;line-height:1.2;font-weight:600;letter-spacing:-.3px}
+.c98h svg{flex:none;width:26px;height:26px;fill:#fff}
+.c98 tbody th{padding:24px 28px;font-size:15px;line-height:1.4;font-weight:500;color:var(--ink);border-top:1px solid var(--line)}
+.c98 tbody td{padding:24px 28px;border-top:1px solid var(--line)}
+.c98 tbody td.us{border-top-color:rgba(255,255,255,.09)}
+.c98 tbody tr:last-child th,.c98 tbody tr:last-child td{padding-bottom:30px}
+.c98q{display:none;font-style:normal}
+.c98v{display:flex;align-items:flex-start;gap:10px}
+.c98v>svg{flex:none}
+.c98t{min-width:0}
+.c98 td b{display:block;font-size:16px;line-height:1.4;font-weight:400;letter-spacing:-.1px;color:var(--ink2)}
+.c98 td small{display:block;margin-top:6px;font-size:13px;line-height:1.45;color:var(--ink2)}
+.c98x{width:14px;height:14px;margin-top:4px;color:#C4867D}
+.c98c{width:18px;height:18px;margin-top:2px;color:#9BBECB}
+.c98 td.us b{font-size:17px;font-weight:600;color:#fff}
+.c98 td.us small{color:rgba(255,255,255,.68)}
+.c98 .r1 td:not(.us) .c98x{margin-top:12px}
+.c98 .r1 td.us .c98c{margin-top:17px}
+.c98 .r1 td b{font-family:var(--serif);font-size:28px;line-height:1.1;font-weight:300;letter-spacing:-.02em}
+.c98 .r1 td.us b{font-family:var(--sans);font-size:16px;line-height:1.2;font-weight:500;letter-spacing:-.1px;color:rgba(255,255,255,.82)}
+.c98 .r1 td.us b em{font-style:normal;font-family:var(--serif);font-size:clamp(40px,3.9vw,56px);line-height:1;font-weight:400;letter-spacing:-.03em;color:#fff;margin-right:4px;white-space:nowrap}
+.c98 .r1 td.us .c98c{width:22px;height:22px}
+html[lang="zh-CN"] .c98 .r1 td:not(.us) b{font-family:var(--zhserif);font-size:22px;font-weight:500;letter-spacing:0}
+html[lang="zh-CN"] .c98 .r1 td.us b em{margin:0 0 0 4px}
+.c98 td.us .print{margin:16px 0 0}
+.c98 td.ab b{font-weight:500;color:var(--ink)}
+.c98k2{width:16px;height:16px;margin-top:3px;color:var(--ink2)}
+@media (max-width:767px){
+  .c98w{margin:8px 0 18px}
+  .c98w::before,.c98w::after{display:none}
+  .c98w .c96t{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px}
+  .c98 colgroup,.c98 thead td,.c98 tbody th{display:none}
+  .c98 thead,.c98 tbody,.c98 tr{display:contents}
+  .c98 thead th,.c98 tbody td,.c98 tbody tr:last-child td{padding:12px 14px;border:0}
+  .c98 .us{grid-column:1/-1;background:var(--ink)}
+  .c98 thead th.us{grid-row:1;padding:22px 20px 8px;border-radius:22px 22px 0 0;background:radial-gradient(120% 140% at 50% 0%,rgba(155,190,203,.22),rgba(155,190,203,0) 70%),#14244A}
+  .c98 .r1 td.us{grid-row:2;background:linear-gradient(180deg,#14244A,#0F1B33)}
+  .c98 .r2 td.us{grid-row:3}.c98 .r3 td.us{grid-row:4}.c98 .r4 td.us{grid-row:5}
+  .c98 .r5 td.us{grid-row:6;padding-bottom:22px;border-radius:0 0 22px 22px}
+  .c98 tbody td.us{padding:14px 20px;border-top:1px solid rgba(255,255,255,.09)}
+  .c98 .r1 td.us{border-top:0;padding-top:10px}
+  .c98 tbody tr.r5 td.us{padding:14px 20px 22px;border-top:1px solid rgba(255,255,255,.09)}
+  .c98 .r1 td:not(.us) .c98x{margin-top:7px}
+  .c98 .r1 td.us .c98c{margin-top:13px}
+  .c98 thead th.a,.c98 thead th.b{grid-row:7;margin-top:12px;padding:14px 14px 2px;border-radius:16px 16px 0 0;background:#fff;font-size:13px;font-weight:600;color:var(--ink)}
+  .c98 th.a,.c98 td.a{grid-column:1}.c98 th.b,.c98 td.b{grid-column:2}
+  .c98 td.a,.c98 td.b{background:#fff;padding:10px 14px}
+  .c98 .r1 td.a,.c98 .r1 td.b{grid-row:8}.c98 .r2 td.a,.c98 .r2 td.b{grid-row:9}.c98 .r3 td.a,.c98 .r3 td.b{grid-row:10}
+  .c98 .r4 td.a,.c98 .r4 td.b{grid-row:11;padding-bottom:16px;border-radius:0 0 16px 16px}
+  .c98 td.ab{grid-column:1/-1;grid-row:12;margin-top:10px;padding:16px;border-radius:16px;background:var(--gs-ll)}
+  .c98q{display:block;margin-bottom:5px;font-size:11px;line-height:1.3;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .c98 td.us .c98q{font-size:12px;color:rgba(255,255,255,.5)}
+  .c98 td.a .c98v,.c98 td.b .c98v{gap:7px}
+  .c98x{width:12px;height:12px;margin-top:3px}
+  .c98 td b{font-size:14px;line-height:1.35}
+  .c98 td small{font-size:12px;margin-top:3px}
+  .c98 td.us b{font-size:16px}
+  .c98 .r1 td:not(.us) b{font-size:18px}
+  html[lang="zh-CN"] .c98 .r1 td:not(.us) b{font-size:16px}
+  .c98 .r1 td.us b em{font-size:46px}
+  html[lang="zh-CN"] .c98 .r1 td.us b em{font-size:38px}
+  .c98h{font-size:20px}
+}
+/* c99 (Oct 27): read like Linear, Stripe and Vercel's pricing tables. One short line a cell, any note on a muted line
+   under it; every cell in a row shares the first line's baseline (the icon hangs in the left gutter, out of the flow);
+   the same padding on every row; competitor text in full ink, notes in ink2 (6:1 on white, AA). The billing toggle
+   sits in Placetta's header, so the price row is no taller than its neighbours. On a phone: Placetta's card, then the
+   attorney and the expediter as full-width cards, one under the other, their rows in the same order. */
+.c98k{width:19%}.c98a{width:24%}.c98b{width:22%}.c98u{width:35%}
+.c98w::after{left:65%}
+.c98 thead th{padding:28px 24px 16px;font-size:15px;line-height:1.3;font-weight:600;color:var(--ink);vertical-align:bottom}
+.c98 thead th.us{padding:6px 24px 16px;white-space:nowrap}
+.c98 thead th.us .c98h{display:inline-flex;vertical-align:middle;line-height:40px}
+.c98 thead th.us .print{float:right;margin:0}
+.c98 tbody th,.c98 tbody td{padding:22px 24px;vertical-align:baseline}
+.c98 tbody tr:last-child th,.c98 tbody tr:last-child td{padding-bottom:28px}
+.c98 tbody th{font-size:14px;line-height:1.5;font-weight:500;color:var(--ink)}
+.c98v{display:block;position:relative;padding-left:26px}
+.c98v>svg{position:absolute;left:0;top:5px;margin:0!important}
+.c98 td .c98v>.c98c{top:3px}
+.c98 td b{font-size:16px;line-height:1.5;font-weight:400;letter-spacing:-.1px;color:var(--ink)}
+.c98 td small{margin-top:2px;font-size:13px;line-height:1.45;color:var(--ink2)}
+.c98 td.us b{font-size:16px;line-height:1.5;font-weight:600;color:#fff}
+.c98 td.us small{color:rgba(255,255,255,.72)}
+.c98 .r1 td b{font-size:28px;line-height:1.15}
+.c98 .r1 td .c98v>.c98x{top:11px}
+.c98 .r1 td.us b{font-size:16px;line-height:1.2;font-weight:500;color:rgba(255,255,255,.86)}
+.c98 .r1 td.us b em{font-size:48px}
+.c98 .r1 td.us .c98v>.c98c{top:20px;width:20px;height:20px}
+.c98 .r1 td small{margin-top:6px}
+html[lang="zh-CN"] .c98 .r1 td:not(.us) b{font-size:24px;line-height:1.3}
+html[lang="zh-CN"] .c98 .r1 td .c98v>.c98x{top:10px}
+@media (min-width:1200px){.c98 tbody th,.c98 .r1 td b{white-space:nowrap}html[lang="zh-CN"] .c98 .r1 td:not(.us) b{font-size:22px}}
+.c98 td.ab b{font-weight:500}
+.c98 td .c98v>.c98k2{top:4px}
+@media (max-width:767px){
+  .c98 thead th.us{padding:20px 20px 10px;white-space:normal}
+  .c98 thead th.us .c98h{line-height:40px}
+  .c98 th.a,.c98 td.a,.c98 th.b,.c98 td.b{grid-column:1/-1}
+  .c98 thead th.a,.c98 thead th.b{margin-top:14px;padding:18px 20px 4px;font-size:15px}
+  .c98 thead th.b{grid-row:12}
+  .c98 td.a,.c98 td.b{padding:12px 20px;border-top:1px solid var(--line)}
+  .c98 .r1 td.a,.c98 .r1 td.b{border-top:0}
+  .c98 .r1 td.b{grid-row:13}.c98 .r2 td.b{grid-row:14}.c98 .r3 td.b{grid-row:15}
+  .c98 .r4 td.a,.c98 .r4 td.b{padding-bottom:18px}
+  .c98 .r4 td.b{grid-row:16}
+  .c98 td.ab{grid-row:17;margin-top:14px;padding:16px 20px}
+  .c98 tbody td.us{padding:14px 20px}
+  .c98 tbody tr.r5 td.us{padding:14px 20px 22px}
+  .c98q{margin-bottom:4px;font-size:11px;color:var(--ink2)}
+  .c98 td.us .c98q{color:rgba(255,255,255,.66)}
+  .c98v{padding-left:24px}
+  .c98 td b{font-size:15px;line-height:1.45}
+  .c98 td.us b{font-size:16px;line-height:1.45}
+  .c98 td small{font-size:12.5px}
+  .c98 .r1 td:not(.us) b{font-size:22px;line-height:1.2}
+  .c98 .r1 td .c98v>.c98x{top:8px}
+  html[lang="zh-CN"] .c98 .r1 td:not(.us) b{font-size:18px}
+  .c98 .r1 td.us b em{font-size:44px}
+  html[lang="zh-CN"] .c98 .r1 td.us b em{font-size:36px}
+  .c98 .r1 td.us .c98v>.c98c{top:16px}
 }
 .c96p{background:var(--ink)!important}
 .c96p small,.c96p span{color:rgba(255,255,255,.66)!important}
 .c96p b{color:#fff!important}
-@media (max-width:767px){
-  .c96t,.c96t thead,.c96t tbody,.c96t tr,.c96t th,.c96t td{display:block!important}
-  .c96t thead{display:none!important}
-  .c96t tbody tr{display:flex!important;flex-direction:column;gap:0;padding:16px 16px 12px;border-top:1px solid var(--line)}
-  .c96t tbody tr:first-child{border-top:0}
-  .c96t tbody th{order:-2;padding:0 0 10px!important;border:0!important;font-size:12px!important;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)!important}
-  .c96t tbody td{display:flex!important;align-items:baseline;justify-content:space-between;gap:12px;padding:10px 0!important;border:0!important;border-top:1px solid var(--line)!important;background:none!important}
-  .c96t tbody th+td{border-top:0!important}
-  .c96t tbody td.us{order:-1;margin:0 -8px 4px;padding:12px!important;border:0!important;border-radius:12px;background:var(--ink)!important}
-  .c96t tbody td.us+td{border-top:0!important}
-  .c96l{display:block;flex:none;width:38%;font-style:normal;font-size:13px;line-height:1.35;color:var(--muted)}
-  .c96t td.us .c96l{color:rgba(255,255,255,.7)}
-  .c96t td b,.c96t tbody tr:nth-child(-n+2) td b{flex:1;font-family:inherit!important;font-weight:500!important;font-size:15px!important;line-height:1.35!important;letter-spacing:-.1px!important;text-align:right;color:var(--ink2)}
-  .c96t tbody td.us b{color:#fff!important}
-  .c96t td small{display:none}
-  .c96t td.us small{display:block;flex-basis:100%;margin:2px 0 0;text-align:right;color:rgba(255,255,255,.62)}
-  .c96t tbody td.us{flex-wrap:wrap}
-  .c96t tbody td.us .print{margin:10px 0 0 auto;padding:3px}
-  .c96t tbody td.us .print button{padding:6px 14px;font-size:14px}
-  .c96t tr.c96wait td{display:block!important;padding:0!important;border:0!important}
-  .c96t tr.c96wait td b{text-align:left;color:var(--ink)}
-  .c96t tr.c96wait td small{display:block;text-align:left;color:var(--ink2)}
-}
 @media (max-width:767px) and (max-height:740px){.hero h1{font-size:38px!important}.hero .mqt span.lg img{height:22px}.hero .mqt span.lg.tall img{height:27px}}
 @media (min-width:1024px){
   .hero .badge{display:inline-flex;align-self:flex-start;width:auto;gap:8px;padding:6px 14px 6px 10px;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(255,255,255,.08);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
@@ -3780,7 +3844,7 @@ body .ctas .ctah{font-size:clamp(34px,4vw,56px)!important}
 <section class="sec rv" data-rv="up" id="case" aria-labelledby="caseH">
   <div class="ctr">
     <div class="sh"><h2 class="h2" id="caseH" data-i18n="proof.h">品牌借助快哉，更早开业。</h2><p class="sub" data-i18n="proof.sub">听听加盟商怎么说，再看看我们为同类品牌梳理的开店计划。</p></div>
-    <div class="pfrow" id="pfRow" role="list" aria-label="概览" data-i18n-aria="aria.proof" data-forms="775" data-read="2026-10-27">
+    <div class="pfrow" id="pfRow" role="list" aria-label="概览" data-i18n-aria="aria.proof" data-forms="1075" data-read="2026-10-27">
       <div role="listitem"><b>73</b><span>government agencies we handle, across 8 regions</span></div>
       <div role="listitem"><b>50</b><span>US states covered, plus 170+ countries</span></div>
       <div role="listitem"><b>2</b><span>languages for every plan and dashboard: English and Chinese</span></div>
@@ -4027,19 +4091,24 @@ body .ctas .ctah{font-size:clamp(34px,4vw,56px)!important}
     </div>
     <div class="sh c96h"><h2 class="h2" id="priceH" data-i18n="c96.h">更快开始赚钱。<em>花得比找代办公司还少。</em></h2><p class="sub" data-i18n="c96.sub">每次开店需要的执照都一样。不同的是费用、由谁提交，以及由谁持续跟进。</p></div>
     <div class="cmp96" id="cmp">
-      <table class="c96t">
+      <div class="c98w">
+      <table class="c96t c98">
         <caption class="sr" data-i18n="c96.cap">律师、许可代办公司与快哉的对比</caption>
-        <thead><tr><td></td><th scope="col" data-i18n="c96.a">请律师</th><th scope="col" data-i18n="c96.b">许可代办公司</th><th scope="col" class="us" data-i18n="c96.c">快哉</th></tr></thead>
+        <colgroup><col class="c98k"><col class="c98a"><col class="c98b"><col class="c98u"></colgroup>
+        <thead><tr><td></td><th scope="col" class="a" data-i18n="c96.a">请律师</th><th scope="col" class="b" data-i18n="c96.b">许可代办公司</th><th scope="col" class="us"><span class="c98h"><svg viewBox="33.5 2 504 504" aria-hidden="true"><path fill-rule="evenodd" d="M43 51L252 51L252 213.15A82.5 82.5 0 0 0 258.16 368.98L243.12 423.21A145.5 145.5 0 0 1 198 164.2L198 107L103 107L103 458L43 458ZM521 51L312 51L312 213.15A82.5 82.5 0 0 1 305.84 368.98L320.88 423.21A145.5 145.5 0 0 0 366 164.2L366 107L461 107L461 458L521 458Z"/></svg><span data-i18n="c96.c">快哉</span></span><div class="qseg print" id="prInt" role="group" aria-label="计费方式" data-i18n-aria="price.int" hidden><button type="button" data-int="year" aria-pressed="true" data-i18n="price.yr">按年</button><button type="button" data-int="month" aria-pressed="false" data-i18n="price.mo">按月</button></div></th></tr></thead>
         <tbody>
           <!-- The "Your team's time" row (hours of your team's work for each way) is out until Placetta has measured it on
                real customers: bring it back only with time logged on customer openings, each figure sourced, never an
-               estimate shown as a fact. The "How long" row below is the agencies' own clock, from the World Bank. -->
-          <tr><th scope="row" data-i18n="c96.r2">费用</th><td><i class="c96l" aria-hidden="true" data-i18n="c96.a">请律师</i><b data-i18n="c96.a2">每小时 378 美元</b><small data-i18n="c96.a2s">企业设立与合规业务的平均费率</small></td><td><i class="c96l" aria-hidden="true" data-i18n="c96.b">许可代办公司</i><b data-i18n="c96.b2">2,000 至 7,500 美元</b><small data-i18n="c96.b2s">通常只做一个城市</small></td><td class="us"><i class="c96l" aria-hidden="true" data-i18n="c96.c">快哉</i><b id="c96P" data-i18n="c96.c2">每家门店每月 149 美元</b><small id="c96Ps" data-i18n="c96.c2y">按年计费，另加每项执照 299 美元</small><div class="qseg print" id="prInt" role="group" aria-label="计费方式" data-i18n-aria="price.int" hidden><button type="button" data-int="year" aria-pressed="true" data-i18n="price.yr">按年</button><button type="button" data-int="month" aria-pressed="false" data-i18n="price.mo">按月</button></div></td></tr>
-          <tr><th scope="row" data-i18n="c96.r3">由谁提交</th><td><i class="c96l" aria-hidden="true" data-i18n="c96.a">请律师</i><b data-i18n="c96.a3">律师事务所，按小时计费</b></td><td><i class="c96l" aria-hidden="true" data-i18n="c96.b">许可代办公司</i><b data-i18n="c96.b3">代办公司</b></td><td class="us"><i class="c96l" aria-hidden="true" data-i18n="c96.c">快哉</i><b data-i18n="c96.c3">Odelia 替您提交</b></td></tr>
-          <tr><th scope="row" data-i18n="c96.r4">开业之后</th><td><i class="c96l" aria-hidden="true" data-i18n="c96.a">请律师</i><b data-i18n="c96.a4">每次续期另行计费</b></td><td><i class="c96l" aria-hidden="true" data-i18n="c96.b">许可代办公司</i><b data-i18n="c96.b4">开业当天就结束</b></td><td class="us"><i class="c96l" aria-hidden="true" data-i18n="c96.c">快哉</i><b data-i18n="c96.c4">只要门店在营业，续期和检查都替您处理</b></td></tr>
-          <tr class="c96wait"><th scope="row" data-i18n="c96.r5">需要多久</th><td colspan="3"><b data-i18n="c96.w">无论由谁提交，时间都由政府机构决定。</b><small data-i18n="c96.ws">办理一项建筑许可，洛杉矶用时 68 天，纽约市 89 天。</small></td></tr>
+               estimate shown as a fact. The "How long" row is the agencies' own clock, from the World Bank; Placetta's
+               cell there says only what the product does (filed once you approve, followed up until the agency decides). -->
+          <tr class="r1"><th scope="row" data-i18n="c98.q1">费用多少？</th><td class="a"><i class="c98q" aria-hidden="true" data-i18n="c98.q1">费用多少？</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.a2">每小时 378 美元</b><small data-i18n="c96.a2s">企业设立与合规业务的平均费率</small></div></div></td><td class="b"><i class="c98q" aria-hidden="true" data-i18n="c98.q1">费用多少？</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.b2">2,000 至 7,500 美元</b><small data-i18n="c96.b2s">通常只做一个城市</small></div></div></td><td class="us"><i class="c98q" aria-hidden="true" data-i18n="c98.q1">费用多少？</i><div class="c98v"><svg class="c98c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.8 4.8L19.5 7"/></svg><div class="c98t"><b id="c96P" data-i18n="c96.c2">每家门店每月<em>149 美元</em></b><small id="c96Ps" data-i18n="c96.c2y">按年计费，另加每项执照 299 美元</small></div></div></td></tr>
+          <tr class="r2"><th scope="row" data-i18n="c98.q2">谁来提交？</th><td class="a"><i class="c98q" aria-hidden="true" data-i18n="c98.q2">谁来提交？</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c99.a3">律师事务所</b><small data-i18n="c99.a3s">按小时计费</small></div></div></td><td class="b"><i class="c98q" aria-hidden="true" data-i18n="c98.q2">谁来提交？</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.b3">代办公司</b></div></div></td><td class="us"><i class="c98q" aria-hidden="true" data-i18n="c98.q2">谁来提交？</i><div class="c98v"><svg class="c98c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.8 4.8L19.5 7"/></svg><div class="c98t"><b data-i18n="c96.c3">Odelia 替您提交</b></div></div></td></tr>
+          <tr class="r3"><th scope="row" data-i18n="c98.q3">开业之后呢？</th><td class="a"><i class="c98q" aria-hidden="true" data-i18n="c98.q3">开业之后呢？</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.a4">每次续期另行计费</b></div></div></td><td class="b"><i class="c98q" aria-hidden="true" data-i18n="c98.q3">开业之后呢？</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c96.b4">开业当天就结束</b></div></div></td><td class="us"><i class="c98q" aria-hidden="true" data-i18n="c98.q3">开业之后呢？</i><div class="c98v"><svg class="c98c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.8 4.8L19.5 7"/></svg><div class="c98t"><b data-i18n="c99.c4">续期和检查都替您办好</b><small data-i18n="c99.c4s">您只管专心扩张。</small></div></div></td></tr>
+          <tr class="r4"><th scope="row" data-i18n="c98.q4">进度怎么查？</th><td class="a"><i class="c98q" aria-hidden="true" data-i18n="c98.q4">进度怎么查？</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c98.sa">去问律师事务所</b></div></div></td><td class="b"><i class="c98q" aria-hidden="true" data-i18n="c98.q4">进度怎么查？</i><div class="c98v"><svg class="c98x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><div class="c98t"><b data-i18n="c98.sb">去问代办公司</b></div></div></td><td class="us"><i class="c98q" aria-hidden="true" data-i18n="c98.q4">进度怎么查？</i><div class="c98v"><svg class="c98c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.8 4.8L19.5 7"/></svg><div class="c98t"><b data-i18n="c98.su">每项执照的进度，在看板上实时可见</b></div></div></td></tr>
+          <tr class="r5"><th scope="row" data-i18n="c98.q5">要多久？</th><td class="ab" colspan="2"><i class="c98q" aria-hidden="true" data-i18n="c98.q5">要多久？</i><div class="c98v"><svg class="c98k2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18zM12 7.5V12l3 2"/></svg><div class="c98t"><b data-i18n="c96.w">无论由谁提交，时间都由政府机构决定。</b><small data-i18n="c96.ws">办理一项建筑许可，洛杉矶用时 68 天，纽约市 89 天。</small></div></div></td><td class="us"><i class="c98q" aria-hidden="true" data-i18n="c98.q5">要多久？</i><div class="c98v"><svg class="c98c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.8 4.8L19.5 7"/></svg><div class="c98t"><b data-i18n="c98.l">您一批准就提交</b><small data-i18n="c98.ls">Odelia 持续跟进，直到机构作出决定。</small></div></div></td></tr>
         </tbody>
       </table>
+      </div>
       <details class="prmore fold97 calc97" id="calcFold">
         <summary><span><b data-i18n="calc97.h">算一算：典型开店费用，以及早开业值多少</b><small data-i18n="calc97.sub">一家典型餐厅开业的逐项价格，以及按您房租计算的工具。</small></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
       <div class="c96calc" id="cmpCalc">
@@ -4670,6 +4739,13 @@ Object.assign(T.zh, {"hero.see": "免注册，看看实际效果", "cs97.h": "�
   "st.note": "门店方案每家门店每月 149 美元（按年计费），或按月 179 美元，可随时取消。新执照 299 美元起，每项在您批准前显示价格。计划预览免费。",
   "price.sub": "门店方案每家门店每月 149 美元，按年计费，或按月 179 美元。每项新执照 299 美元，酒类执照、建筑图纸审查或进口许可每项 999 美元。每位加盟商为自己的门店付费。"});
 
+/* c98 (Oct 27): the comparison's rows are questions, a status row, Placetta's own line on how long, and the price
+   with its number set large (renderPrice writes it as HTML) */
+Object.assign(T.en, {"c98.q1": "What does it cost?", "c98.q2": "Who files?", "c98.q3": "What happens after opening?", "c98.q4": "How do you see where it stands?", "c98.q5": "How long does it take?", "c96.c2": "<em>$149</em> a store a month", "c96.c2m": "<em>$179</em> a store a month", "c96.c4": "Renewals and inspections handled, so you can focus on scaling.", "c98.sa": "Ask the office", "c98.sb": "Ask the expediter", "c98.su": "Every license, live in your dashboard", "c98.l": "Filed once you approve", "c98.ls": "Odelia follows up until the agency decides."});
+Object.assign(T.zh, {"c98.q1": "费用多少？", "c98.q2": "谁来提交？", "c98.q3": "开业之后呢？", "c98.q4": "进度怎么查？", "c98.q5": "要多久？", "c96.c2": "每家门店每月<em>149 美元</em>", "c96.c2m": "每家门店每月<em>179 美元</em>", "c96.c4": "续期和检查都替您办好，您只管专心扩张。", "c98.sa": "去问律师事务所", "c98.sb": "去问代办公司", "c98.su": "每项执照的进度，在看板上实时可见", "c98.l": "您一批准就提交", "c98.ls": "Odelia 持续跟进，直到机构作出决定。"});
+/* c99 (Oct 27): the comparison reads like a pricing table: one short line a cell, the rest on a muted line under it */
+Object.assign(T.en, {"c99.a3": "The attorney's office", "c99.a3s": "Billed by the hour", "c99.c4": "Renewals and inspections handled", "c99.c4s": "So you can focus on scaling."});
+Object.assign(T.zh, {"c99.a3": "律师事务所", "c99.a3s": "按小时计费", "c99.c4": "续期和检查都替您办好", "c99.c4s": "您只管专心扩张。"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 
 /* furniture variant: placetta.com/furniture or ?for=furniture */
@@ -5074,7 +5150,7 @@ function renderPrice(){ const i = L();
   const pv = document.getElementById("prV"), pps = document.getElementById("prPs"), pin = document.getElementById("prInt"), mo = PR_INT === "month";
   if (pv) pv.textContent = mo ? t("price.mv") : TIERS[0].v[i]; if (pps) pps.textContent = mo ? t("price.mps") : TIERS[0].ps[i];
   const cp = document.getElementById("c96P"), cps = document.getElementById("c96Ps");
-  if (cp) cp.textContent = t(mo ? "c96.c2m" : "c96.c2"); if (cps) cps.textContent = t(mo ? "c96.c2ms" : "c96.c2y");
+  if (cp) cp.innerHTML = t(mo ? "c96.c2m" : "c96.c2"); if (cps) cps.textContent = t(mo ? "c96.c2ms" : "c96.c2y");
   if (pin) { pin.hidden = false; pin.querySelectorAll("[data-int]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.int === PR_INT))); }
   const tierHtml = p => `<div class="plan${p.hl ? " pfeat" : ""}"><p class="pl"><span>${p.l[i]}</span>${p.tag ? `<span class="ptag">${p.tag[i]}</span>` : ""}</p><p class="pv">${p.v[i]}<small>${p.u[i]}</small></p><p class="pps">${p.ps[i]}</p><p class="pn">${p.n[i]}</p><ul class="plist">${p.f.map(f => `<li>${CHECK}<p>${f[i]}</p></li>`).join("")}</ul><div class="pcta">${p.mail ? `<a class="btn b-out" href="mailto:support@placetta.com?subject=Odelia%20for%20franchisors" data-track="price_scale">${p.cta[i]}</a>` : `<button type="button" class="btn ${p.hl ? "b-ink" : "b-out"}" data-open="pricing">${p.cta[i]}</button>`}${p.hl ? `<small>${t("price.risk")}</small>` : ""}</div></div>`;
   if (document.getElementById("tiers2")) document.getElementById("tiers2").innerHTML = TIERS.slice(0, 2).map(tierHtml).join("");

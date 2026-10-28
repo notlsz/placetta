@@ -15,10 +15,9 @@ import { B, type Bi } from "./bi";
 import type { Application, Fee, Workspace } from "./model";
 import { audit } from "./core";
 import { answersHash } from "./forms/versions";
-import { expediteOf, extraFee, spanSay, timingOf, type Expedite } from "./forms/expedite";
+import { expediteOptions, extraFee, spanSay, timingOf, type Expedite, type Option } from "./forms/expedite";
 import { money } from "./time";
 
-type Option = ReturnType<typeof expediteOf>[number];
 
 /** The fee line for a chosen expedite: the agency's extra fee, or "set by the agency" when it has no flat amount. */
 function feeLine(x: Option, fields: Application["fields"]): Fee {
@@ -36,7 +35,7 @@ function lineValue(fill: NonNullable<Expedite["fill"]>, current: string, on: boo
 
 /** The application with the owner's pick: an option id, or null for the agency's standard time. */
 export function withExpedite(a: Application, id: string | null): Application {
-  const opts = expediteOf(a.official);
+  const opts = expediteOptions(a.official);
   const was = a.expedite ? opts.find(o => o.id === a.expedite) : undefined;
   const x = id ? opts.find(o => o.id === id) : undefined;
   if (id && !x) return a;
@@ -69,7 +68,7 @@ export function chooseExpedite(w: Workspace, appId: string, id: string | null): 
   const next = withExpedite(a, id);
   if (next === a) return w;
   const hash = answersHash(next);
-  const x = id ? expediteOf(a.official).find(o => o.id === id) : undefined;
+  const x = id ? expediteOptions(a.official).find(o => o.id === id) : undefined;
   const n: Workspace = {
     ...w,
     apps: w.apps.map(y => (y.id === appId ? next : y)),
@@ -83,7 +82,7 @@ export function chooseExpedite(w: Workspace, appId: string, id: string | null): 
 export type ChoiceLine = { id: string | null; label: Bi; time: Bi; fee: Bi; source?: string; only?: Bi; how?: "form" | "team"; changes: boolean };
 
 export function choices(a: Application): ChoiceLine[] {
-  const opts = expediteOf(a.official);
+  const opts = expediteOptions(a.official);
   if (!opts.length) return [];
   const t = timingOf(a);
   const std = a.fees.filter(f => !f.expedite);
@@ -95,7 +94,7 @@ export function choices(a: Application): ChoiceLine[] {
     out.push({
       id: x.id, label: x.label, time: x.span ? B(`${x.turnaround.en}`, `${x.turnaround.zh}`) : B(`${x.turnaround.en}; the estimate keeps the standard time`, `${x.turnaround.zh}；预计日期仍按标准时间计算`),
       fee: fee == null ? (x.feeNote ?? B("extra fee set by the agency", "加急费由机构核定")) : fee === 0 ? B("no agency fee", "机构不收费") : B(`+${money(fee)} agency fee`, `机构另收 ${money(fee)}`),
-      source: x.source, only: x.only, how: x.how, changes: !!x.span,
+      source: x.source.url, only: x.only, how: x.how, changes: !!x.span,
     });
   }
   return out;
@@ -103,7 +102,7 @@ export function choices(a: Application): ChoiceLine[] {
 
 /** What the filing card adds to its steps when an expedite is chosen: who asks for it and how. */
 export function expediteStep(a: Application): Bi | null {
-  const x = a.expedite ? expediteOf(a.official).find(o => o.id === a.expedite) : undefined;
+  const x = a.expedite ? expediteOptions(a.official).find(o => o.id === a.expedite) : undefined;
   if (!x) return null;
   const line = a.fees.find(f => f.expedite);
   const fee = line ? (line.tbd ? null : line.amount) : extraFee(x, a.fields);

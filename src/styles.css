@@ -1825,6 +1825,11 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 
 /* The first-minute tour: three cards, one idea each */
 .tour-scrim { z-index: 80; }
+/* first load: the tour floats near the top, centred, with no scrim, so the plan behind it stays usable and the composer
+   at the bottom stays free */
+.tour-float { position: fixed; left: 50%; top: 84px; z-index: 70; transform: translateX(-50%); width: min(460px, calc(100vw - 32px)); animation: fade .2s ease-out; }
+.tour-float .tour { width: 100%; box-shadow: var(--lift), 0 0 0 1px var(--line); }
+@media (max-width: 860px) { .tour-float { top: 64px; } .tour-float .tour { padding: 22px 20px 18px; } .tour-float .tour-pic { display: none; } .tour-float .tour h2 { font-size: 20px; } }
 .tour { position: relative; width: min(460px, calc(100vw - 32px)); padding: 28px 28px 24px; border-radius: 26px; background: var(--card); box-shadow: var(--lift); text-align: center; }
 .tour-skip { position: absolute; top: 16px; right: 18px; border: 0; background: none; font: inherit; font-size: 13.5px; color: var(--ink3); cursor: pointer; }
 .tour-pic { height: 150px; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; margin: 6px 0 18px; border-radius: 18px; background: linear-gradient(180deg, var(--sky-wash), var(--mist)); padding: 0 18px; }

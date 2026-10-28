@@ -333,6 +333,14 @@ async function servicesFor(ws: string, run: Run, token: string | null): Promise<
       return { path };
     },
     network: (keys: string[]) => lessonsFor(keys),
+    // ask_specialist (src/escalate.ts): a review in the team's queue, marked as Odelia's, with the job that waits on it.
+    // The database keeps it to one open per application and 3 a day per workspace (migration 20261102090000).
+    async specialist(o) {
+      const { data, error } = await admin.rpc("agent_request_specialist_review", { ws, p_app_id: o.app.slice(0, 120), p_title: o.title, p_note: o.note.slice(0, 500), p_reason: o.reason, p_job: o.job ?? null });
+      if (error) throw new Error(/rate_limited/.test(error.message ?? "") ? "Odelia already asked a specialist 3 times today for this business. Tell the owner plainly what's unsure instead." : "Couldn't reach Placetta's specialists. Tell the owner what's unsure.");
+      const r = (data ?? {}) as { due_at?: string; open?: boolean };
+      return { due_at: String(r.due_at ?? new Date(Date.now() + 864e5).toISOString()), ...(r.open ? { open: true } : {}) };
+    },
     // The agencies' PDFs for filling a form here (src/forms/fill.ts): the two kept with the code are inside agent.js; the
     // rest are the site's own copies under /app/forms/, or the "forms" storage bucket when the site can't be reached.
     formPdf: (file: string) => sitePdf(file),

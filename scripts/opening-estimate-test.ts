@@ -12,8 +12,9 @@ import type { Application, Approval, Store, Workspace } from "../src/model";
 import { estimateSay, hingeSay, openingOf, openingPath, preflight, stepTiming, withOpenings, workspaceEstimate, workspaceOpening } from "../src/smart";
 import { costToOpen } from "../src/cost";
 import { SAMPLE_WS } from "../src/sample";
-import { formById } from "../src/forms/registry";
-import { DEFAULT_TIMING, EXPEDITE, TIMES, calendarDays, expediteOf, hostOf, spanFromWords, spanSay, timingOf } from "../src/forms/expedite";
+import { FORMS, formById } from "../src/forms/registry";
+import { expediteOf as speedTiers } from "../src/forms/speed";
+import { DEFAULT_TIMING, EXPEDITE, TIMES, calendarDays, expediteOptions, hostOf, spanFromWords, spanSay, timingOf } from "../src/forms/expedite";
 import { chooseExpedite, choices, expediteStep, withExpedite } from "../src/expedite";
 import { answersHash, answersOf } from "../src/forms/versions";
 
@@ -159,13 +160,34 @@ export function openingEstimateTests(ok: Ok, eq: Eq) {
     eq(withExpedite(plan, "nope"), plan, "an unknown option changes nothing");
   }
 
+  /* the Secretary of State tiers on the registry rows (src/forms/speed.ts) and this file's options: one list, each once */
+  {
+    const rows = FORMS.filter(f => (f.expedite ?? []).length);
+    ok(rows.length > 0, "the registry rows carry their own expedite tiers", rows.length);
+    let shown = 0;
+    for (const f of rows) {
+      const opts = expediteOptions(f.id, TODAY), current = speedTiers(f, TODAY);
+      ok(new Set(opts.map(o => o.id)).size === opts.length && new Set(opts.map(o => o.label.en)).size === opts.length, `${f.id}: each option once`, opts.map(o => o.id));
+      ok(current.every(c => opts.some(o => o.label.en === c.label.en)), `${f.id}: every current tier is offered`);
+      shown += opts.length;
+    }
+    const sos = rows.find(f => speedTiers(f, TODAY).some(x => x.hours != null));
+    if (sos) {
+      const tier = expediteOptions(sos.id, TODAY).find(o => o.hours != null)!;
+      const before = stepTiming(app("f", sos.id)).days.typical, after = stepTiming(withExpedite(app("f", sos.id), tier.id)).days.typical;
+      ok(after <= before && after === Math.ceil(tier.hours! / 24), `${sos.id}: picking ${tier.label.en} moves the step to its stated turnaround`, [before, after]);
+      eq(choices(app("f", sos.id)).length, expediteOptions(sos.id).length + 1, `${sos.id}: the card offers standard and each tier, once`);
+    }
+    ok(shown > 0, "registry tiers reach the choice", shown);
+  }
+
   /* 7. every time and fee cites the issuing agency */
   {
     const official = (u: string) => /\.gov$/.test(hostOf(u)) || ["houstonhealth.org", "dallascityhall.com"].includes(hostOf(u));
     for (const [id, t] of Object.entries(TIMES)) ok(formById(id) && (t.kind === "default" ? !t.source && /no published time/.test(t.say.en) : t.source && official(t.source)) && t.say.en && t.say.zh && t.fast <= t.typical && t.typical <= t.slow, `${id}: its time cites the agency, fast to slow`, t);
-    for (const [id, list] of Object.entries(EXPEDITE)) for (const x of expediteOf(id)) {
+    for (const [id, list] of Object.entries(EXPEDITE)) for (const x of expediteOptions(id)) {
       ok(formById(id), `${id}: the form is in the library`);
-      ok(official(x.source) && x.turnaround.en && x.turnaround.zh && (x.feeUsd != null || x.feeNote), `${id} ${x.id}: fee, turnaround and an official source`, x);
+      ok(official(x.source.url) && x.source.quote.length > 10 && x.turnaround.en && x.turnaround.zh && (x.feeUsd != null || x.feeNote), `${id} ${x.id}: fee, turnaround and an official source`, x);
       ok(!x.span || (x.span.fast <= x.span.typical && x.span.typical <= x.span.slow), `${id} ${x.id}: its span runs fast to slow`);
       void list;
     }

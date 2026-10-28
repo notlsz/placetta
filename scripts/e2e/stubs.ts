@@ -145,6 +145,9 @@ export const stripeState = {
     price_guarantee: { id: "price_guarantee", object: "price", unit_amount: 250000, currency: "usd", type: "one_time", recurring: null },
     price_entry: { id: "price_entry", object: "price", unit_amount: 29900, currency: "usd", type: "one_time", recurring: null },
     price_pack: { id: "price_pack", object: "price", unit_amount: 4900, currency: "usd", type: "one_time", recurring: null },
+    // the store plan (src/pricing.ts SIMPLE_PRICE_ENV): $149 a store a month billed yearly, or $179 month to month
+    price_store_plan: { id: "price_store_plan", object: "price", unit_amount: 178800, currency: "usd", type: "recurring", recurring: { interval: "year", interval_count: 1 } },
+    price_store_month: { id: "price_store_month", object: "price", unit_amount: 17900, currency: "usd", type: "recurring", recurring: { interval: "month", interval_count: 1 } },
   } as Record<string, any>,
   coupons: new Map<string, any>(),
   subscriptions: new Map<string, any>(),

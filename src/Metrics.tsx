@@ -3,7 +3,7 @@ import { useApp } from "./ctx";
 import { B, type Bi } from "./bi";
 import type { Lang } from "./i18n";
 import { S } from "./i18n";
-import { anything, monthMetrics, type Item, type MonthAcross, type MonthMetrics, type MonthRow } from "./monthly";
+import { anything, filingSpeed, monthMetrics, type Item, type MonthAcross, type MonthMetrics, type MonthRow } from "./monthly";
 import { daysFromNow, fmtAgo, fmtDay, fmtMonth } from "./time";
 import * as api from "./cloud/api";
 import "./recall-metrics.css";
@@ -21,6 +21,8 @@ function dur(ms: number, lang: Lang): string {
   const m = s / 60;
   if (m < 60) { const v = Math.round(m); return zh ? `${v} 分钟` : `${v} min`; }
   const h = Math.round((m / 60) * 10) / 10;
+  // a filing can take days from approval to the agency: past two days, say days
+  if (h >= 48) { const d = Math.round((h / 24) * 10) / 10; return zh ? `${d} 天` : `${d} days`; }
   return zh ? `${h} 小时` : `${h} h`;
 }
 const waitedFor = (iso: string, lang: Lang) => fmtAgo(iso, lang);
@@ -79,6 +81,14 @@ function tilesOf(m: MonthMetrics, lang: Lang, go?: (v: "permits" | "odelia", sub
   if (m.waiting.length) out.push({ id: "waiting", value: n(m.waiting.length), label: B("Approvals waiting for you", "等您批准"), sub: oldest ? (zh ? `最早的 ${waitedFor(oldest, lang)}提出` : `oldest asked ${waitedFor(oldest, lang).toLowerCase()}`) : undefined,
     list: items(m.waiting, x => (x.at ? (zh ? `${waitedFor(x.at, lang)}提出` : `asked ${waitedFor(x.at, lang).toLowerCase()}`) : undefined)) });
   if (m.submitted.length) out.push({ id: "submitted", value: n(m.submitted.length), label: B("Filings submitted this month", "本月已提交"), list: items(m.submitted, x => (x.at ? fmtDay(x.at.slice(0, 10), lang) : undefined)), open: go && { label: B("Open filed", "打开已提交"), go: () => go("permits", "filed") } });
+  // speed to filing, measured: approval to the agency having it, each filing with who sent it and its time from the plan
+  if (m.filed?.length && m.median_filed_ms != null) {
+    const who = (by: "odelia" | "team") => (by === "odelia" ? "Odelia" : zh ? "快哉团队" : "the Placetta team");
+    const split = [m.median_odelia_ms != null ? (zh ? `Odelia ${dur(m.median_odelia_ms, lang)}` : `Odelia ${dur(m.median_odelia_ms, lang)}`) : "", m.median_team_ms != null ? (zh ? `团队 ${dur(m.median_team_ms, lang)}` : `team ${dur(m.median_team_ms, lang)}`) : ""].filter(Boolean).join(zh ? "，" : ", ");
+    out.push({ id: "filed", value: dur(m.median_filed_ms, lang), label: B("Median time from your approval to filed", "从您批准到提交的中位用时"), sub: split || undefined,
+      list: <Rows rows={m.filed.map(x => ({ key: x.id, main: b(x.title), side: [zh ? `${who(x.by)}用时 ${dur(x.ms, lang)}` : `${dur(x.ms, lang)} by ${who(x.by)}`, x.plan_ms != null ? (zh ? `距计划 ${dur(x.plan_ms, lang)}` : `${dur(x.plan_ms, lang)} from the plan`) : ""].filter(Boolean).join(zh ? "，" : ", ") }))} />,
+      open: go && { label: B("Open filed", "打开已提交"), go: () => go("permits", "filed") } });
+  }
   if (m.approved.length) out.push({ id: "approved", value: n(m.approved.length), label: B("Approved by agencies this month", "本月获机构批准"), list: items(m.approved, x => (x.at ? fmtDay(x.at.slice(0, 10), lang) : undefined)), open: go && { label: B("Open filed", "打开已提交"), go: () => go("permits", "filed") } });
   if (m.renewals.length) out.push({ id: "renewals", value: n(m.renewals.length), label: B("Renewals caught before they lapse", "提前盯住的续期"), list: items(m.renewals, x => (x.date ? fmtDay(x.date, lang, true) : undefined)), open: go && { label: B("Open Deadlines", "打开截止日期"), go: () => go("permits", "deadlines") } });
   return out;
@@ -102,7 +112,8 @@ export function HomeMetrics() {
     return () => { on = false; window.clearInterval(t); };
   }, [wsId]);
   const local = useMemo(() => monthMetrics(ws, { today: daysFromNow(0), ...(cloud ? { filings: cloud.filings } : {}) }), [ws, cloud]);
-  const m = server ?? local;
+  // speed to filing is timed here from the filings rows (approved_at, submitted_at, channel), for the server's month too
+  const m = useMemo(() => (server ? { ...server, ...(cloud ? filingSpeed(cloud.filings, server.month, ws.firstPlan?.at) : {}) } : local), [server, local, cloud, ws.firstPlan?.at]);
   if (!anything(m)) return null;
   return <Card title={TITLE} month={m.month} tiles={tilesOf(m, lang, go)} note={NOTE} lang={lang} />;
 }

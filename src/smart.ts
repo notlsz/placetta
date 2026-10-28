@@ -11,7 +11,7 @@ import { filingBlockers, isBlank } from "./core";
 import { formById, placesOf, segmentOf } from "./forms/registry";
 import type { Application, Approval, Deadline, Field, Status, Store, Workspace } from "./model";
 import type { FormStat } from "./plan";
-import { calendarDays, expediteOf, hostOf, timingOf, type Timing } from "./forms/expedite";
+import { calendarDays, expediteOptions, hostOf, timingOf, type Timing } from "./forms/expedite";
 import { BY_HAND, carriesIdentifier, emailsIn, governmentAddress, SECRET_NOTE, secretNumber } from "./guard";
 import { ein as einCheck, latin as latinCheck, premises as premisesCheck, PREMISES_LINE } from "./validate";
 
@@ -259,10 +259,10 @@ const each = (x: Three, f: (n: number) => number): Three => ({ fast: f(x.fast), 
  *  chose (when the agency publishes its time), Placetta's own filings of the form (the median, the slow end at p90), the
  *  agency's published time (src/forms/expedite.ts timingOf), else the 30-day default, said as a default. */
 export function stepTiming(a: Application, ev: Evidence = {}): { timing: Timing; days: Three; expedite?: { id: string; label: Bi } } {
-  const x = a.expedite ? expediteOf(a.official).find(o => o.id === a.expedite) : undefined;
+  const x = a.expedite ? expediteOptions(a.official).find(o => o.id === a.expedite) : undefined;
   const chosen = x ? { expedite: { id: x.id, label: x.label } } : {};
   if (x?.span) {
-    const timing: Timing = { ...x.span, kind: "agency", say: x.turnaround, source: x.source, checked: x.checked };
+    const timing: Timing = { ...x.span, kind: "agency", say: x.turnaround, source: x.source.url, checked: x.source.checked };
     return { timing, days: each(x.span, n => calendarDays(n, x.span!.unit)), ...chosen };
   }
   const st = a.official ? ev.stats?.find(s => s.form === a.official && s.n >= 3) : undefined;

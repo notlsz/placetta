@@ -28,7 +28,7 @@ import { AllowRule } from "./AllowRule";
 import { FilledStatus, OnlineAnswers } from "./FilledForm";
 import { fileable } from "./forms/versions";
 import { ExpeditePick, StepTime } from "./ExpeditePick";
-import { expediteStep } from "./expedite";
+import { choices, expediteStep } from "./expedite";
 import { Corrections } from "./PlanCorrections";
 /* Team review: the permit's comment thread and who it's assigned to (src/Comments.tsx) */
 import { AssignPicker, CommentThread, useItemThread, useTeam } from "./Comments";
@@ -443,7 +443,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
         <span className="m-eyebrow"><I.lock />{t("ap_title")}</span>
         <h2>{b(a.title)}</h2>
         <p>{[a.agency && b(a.agency), app?.form && b(app.form)].filter(Boolean).join(lang === "zh" ? "。" : ". ")}</p>
-        <p className="appr-tx ap-route"><RouteLine a={a} app={app} /></p>
+        <p className="appr-tx ap-route"><RouteLine a={a} app={app} noFaster={!!app && a.kind === "file" && choices(app).length > 0} /></p>
         <button type="button" className="icbtn close" onClick={onClose} aria-label={t("close")}><I.x /></button>
       </header>
       <div className="m-body">

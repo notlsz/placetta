@@ -27,6 +27,12 @@ export function isCompany(facts: Fact[]): boolean {
   return facts.some(f => (/legal (business |entity )?name|registered name/i.test(f.label.en) && /\b(llc|l\.l\.c\.|inc\.?|corp(oration)?|ltd|co\.)\s*$/i.test(f.value.en.trim()))
     || (ABOUT_ENTITY.test(f.label.en) && /(limited liability|llc|corporation|inc\b|公司)/i.test(f.value.en + (f.value.zh ?? ""))));
 }
+/** Whether the company is a corporation (its legal name ends "Inc." or "Corp.", or an entity fact says corporation),
+ *  so its formation or registration is the corporation's, not the LLC's (src/forms/entities.ts). */
+export function isCorporation(facts: Fact[]): boolean {
+  return facts.some(f => (/legal (business |entity )?name|registered name/i.test(f.label.en) && /\b(inc\.?|incorporated|corp\.?|corporation)\s*$/i.test(f.value.en.trim()))
+    || (ABOUT_ENTITY.test(f.label.en) && /\bcorporation\b|\bC[- ]corp|股份公司|有限公司（股份）/i.test(f.value.en + (f.value.zh ?? "")) && !/limited liability/i.test(f.value.en)));
+}
 /** What the company files in a store's state: register there (formed in another state), nothing (formed there),
  *  form one (no company yet), or ask (a company whose home state the facts don't give). */
 export function entityNeed(facts: Fact[], storeState: string): "register" | "none" | "form" | "ask" {

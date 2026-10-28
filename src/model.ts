@@ -74,7 +74,7 @@ export type Application = {
   notes?: { id: string; title: Bi; text: Bi; source: { label: string; url: string; quote: string; checked: string } }[];
   versions?: FormVersion[];  // the agency's own form, filled, each time its answers changed (src/forms/versions.ts); newest last
   filed?: Filed;             // its latest filing as the filings table has it (src/finish.ts stampFilings): the proof a job waits on
-  expedite?: string;         // the agency's expedite option the owner chose (src/forms/expedite.ts expediteOf id); absent: standard
+  expedite?: string;         // the agency's expedite option the owner chose (src/forms/expedite.ts expediteOptions id); absent: standard
 };
 
 /** A line that changed between two filled copies of a form. */

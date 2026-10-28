@@ -140,6 +140,10 @@ try {
   await sql`insert into public.agent_memories (id, workspace_id, topic, entity, attr, value, text_en, text_zh, source_kind, status, trust)
             values (${memId}, ${WA}, 'company', 'entity:e1', 'name', ${"Acme LLC " + MARK}, ${"Acme files as " + MARK}, 'x', 'chat', 'suggested', 'agent')`;
   await sql`insert into public.filings (id, workspace_id, app_id, payload, title) values (${filingId}, ${WA}, 'app-1', ${sql.json({ note: MARK })}, ${sql.json({ en: "Business license " + MARK, zh: "x" })})`;
+  // a human check the portal worker gave the Placetta team (20261102090200_human_checks.sql): its live address is A's
+  const humanCheckId = crypto.randomUUID();
+  await sql`insert into public.human_checks (id, filing_id, workspace_id, live_url, escalate_at, hold_until)
+            values (${humanCheckId}, ${filingId}, ${WA}, ${`https://filer.placetta.test/${MARK}/live/${"A".repeat(32)}`}, now() + interval '15 minutes', now() + interval '20 minutes')`;
   const own = await http(`/rest/v1/documents?select=name&workspace_id=eq.${WA}`, { jwt: A.jwt });
   check("A reads its own document (the test can see a leak)", own.text.includes(MARK), own);
   const ownRun = await http(`/rest/v1/agent_runs?select=prompt&id=eq.${runId}`, { jwt: A.jwt });
@@ -174,7 +178,7 @@ try {
   const recordedBefore = stubs.recorded.length;
   const signedA = `sign/documents/${WA}`, signedCall = `sign/call-recordings/${WA}`;
   const leaks = (r: Res) => r.text.includes(MARK) || r.text.includes(signedA) || r.text.includes(signedCall) || r.text.includes(encodeURIComponent(WA) + "%2F");
-  const ids: [string, string][] = [["workspace", WA], ["user", A.id], ["run", runId], ["filing", filingId], ["document", docId ?? WA], ["token", tokJ.id ?? WA], ["comment", commentId ?? WA], ["call", callId]];
+  const ids: [string, string][] = [["workspace", WA], ["user", A.id], ["run", runId], ["filing", filingId], ["document", docId ?? WA], ["token", tokJ.id ?? WA], ["comment", commentId ?? WA], ["call", callId], ["human_check", humanCheckId]];
 
   /* ---------------- B, then anon, try everything ---------------- */
   const callers: { name: string; jwt?: string; role: "authenticated" | "anon"; sub: string | null }[] = [
