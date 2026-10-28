@@ -55,20 +55,28 @@ export const IDENTITY_MSG = {
 
 /** A business's EIN: 2 digits, a dash, 7 digits. An SSN or ITIN (NNN-NN-NNNN) never has this shape. */
 export const einShaped = (v: string) => /^\d{2}-\d{7}$/.test(v.trim());
-const BIZ_LINE = /\b(f?ein|tin)\b|employer identification/i;
+// SF's live line reads "Business Tax Identification Number (Social Security Number, Tax Identification Number, Federal
+// Employer Identification Number)"; its approved field reads "Business Tax ID (SSN, FEIN, or TIN)".
+const BIZ_LINE = /\b(f?ein|tin)\b|employer identification|business tax ?id(entification)?\b|\btax identification number/i;
 const BIZ_FIELD = /\b(f?ein|employer identification|(business|federal|employer) tax ?id|tax ?id)\b/i;
 const PERSON_FIELD = /\b(ssn|social security|itin|passport|individual)\b/i;
+/** Names a business's own number: an EIN, a FEIN or a business tax ID (it may list an SSN beside them, as SF's does). */
+const BIZ_NAMED = /\b(f?ein|employer identification|business tax ?id(entification)?)\b/i;
+/** A field the approved EIN may come from: a business tax ID field. A field that names a person's number (SSN, ITIN,
+ *  passport) counts only when it also names the business's (SF's "Business Tax ID (SSN, FEIN, or TIN)"); the value's
+ *  shape (NN-NNNNNNN, which an SSN or ITIN never has) is what keeps a person's number out. */
+const einField = (label: string) => BIZ_FIELD.test(label) && (!PERSON_FIELD.test(label) || (BIZ_NAMED.test(label) && !/passport/i.test(label)));
+const approvedEins = (p?: Payload | null) => (p?.fields ?? []).filter((x) => einShaped(x.value) && einField(x.label.en)).map((x) => x.value.trim());
 /** The approved EIN, when the payload has one from a business tax ID field (never a person's SSN or ITIN field). */
 export function approvedEin(p?: Payload | null): string | null {
-  const f = (p?.fields ?? []).find((x) => einShaped(x.value) && BIZ_FIELD.test(x.label.en) && !PERSON_FIELD.test(x.label.en));
-  return f ? f.value.trim() : null;
+  return approvedEins(p)[0] ?? null;
 }
 /** An ID line that also takes a business's FEIN, EIN or TIN ("Business Tax ID (SSN, FEIN, or TIN)"), on a filing whose
  *  approved values hold an EIN from a business tax ID field: the EIN may go in it. A line that asks only for an SSN,
  *  ITIN or passport is still the person's. */
 export const einLine = (c: Control, p?: Payload | null) => SECRET.test(describeControl(c)) && BIZ_LINE.test(describeControl(c)) && !/passport/i.test(describeControl(c)) && !!approvedEin(p);
 /** May this value be typed into this ID line? Only the approved EIN, and only in a line that takes one. */
-export const einFillOk = (c: Control, value: string, p?: Payload | null) => einLine(c, p) && einShaped(value) && value.trim() === approvedEin(p);
+export const einFillOk = (c: Control, value: string, p?: Payload | null) => einLine(c, p) && einShaped(value) && approvedEins(p).includes(value.trim());
 
 /** Why this page must go to the person, or null. Checked before the model sees the page. With the filing's payload, an
  *  ID line that takes the business's EIN (einLine) doesn't stop it. */
@@ -163,6 +171,10 @@ export function optionFor(option: string, p: Payload): { label: string } | null 
   const f = (p.fields ?? []).find((x) => x.value.trim() && norm(x.value) === norm(option));
   return f ? { label: f.label.en } : null;
 }
+
+/** A script link that runs nothing itself: "javascript:;", "javascript:void(0)", "javascript:". Agency sites built on
+ *  GenTax (CDTFA's onlineservices.cdtfa.ca.gov) draw every menu link this way. Any other javascript: link is refused. */
+export const inertScriptLink = (href: string) => /^\s*javascript:\s*(void\s*\(?\s*0\s*\)?)?\s*;?\s*$/i.test(href);
 
 /** Same host as the portal, or one of its subdomains. */
 export function onPortal(url: string, portalHost: string): boolean {

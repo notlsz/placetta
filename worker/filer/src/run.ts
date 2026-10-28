@@ -13,7 +13,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Browser, Page } from "playwright-core";
-import { confirmPattern, einFillOk, fieldFor, secretControl, isFinal, mustStop, paymentControl, onPortal, optionFor, reviewMismatch, staffMay, stopBesidesCard, stopLinesFilled, type PageState } from "./guards.ts";
+import { confirmPattern, einFillOk, fieldFor, inertScriptLink, secretControl, isFinal, mustStop, paymentControl, onPortal, optionFor, reviewMismatch, staffMay, stopBesidesCard, stopLinesFilled, type PageState } from "./guards.ts";
 import { type Model, TOOLS } from "./model.ts";
 import { actionKey, answerTier, guardRefused, pageTier, summarize, tierOf, type Why } from "./cascade.ts";
 import type { CallCost } from "./llm.ts";
@@ -729,9 +729,11 @@ export class Worker {
       ctx.f = await this.c.store.step(ctx.f, log(`Attached ${a.attachment}`, `已上传 ${a.attachment}`, "upload"));
       return { ok: true };
     }
-    // a link to somewhere off the run's hosts, or to a file: or script address, is never clicked
+    // a link to somewhere off the run's hosts, or to a file: or script address, is never clicked. An empty script link
+    // (GenTax's href="javascript:;") goes nowhere by itself: the page's own click handler moves it, as on a button, and
+    // the sandbox still holds any navigation that follows to the run's hosts.
     const href = await loc.evaluate((el) => (el as HTMLAnchorElement).getAttribute?.("href") ?? "").catch(() => "");
-    if (href && !/^(#|\/(?!\/)|\?)/.test(href) && !linkAllowed(new URL(href, page.url()).href, ctx.hosts)) {
+    if (href && !/^(#|\/(?!\/)|\?)/.test(href) && !inertScriptLink(href) && !linkAllowed(new URL(href, page.url()).href, ctx.hosts)) {
       ctx.f = await this.c.store.step(ctx.f, log("Refused a link off the agency's site", "拒绝打开机构网站以外的链接", "refused", href.slice(0, 120)));
       return { ok: false, error: "Refused: that link leaves the agency's site." };
     }

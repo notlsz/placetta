@@ -595,7 +595,8 @@ export const PLAYBOOKS: Playbook[] = [
       "ca-cdtfa": {
         start: "https://onlineservices.cdtfa.ca.gov/",
         steps: [
-          { page: "CDTFA Online Services", do: "open", selector: "link:Register for a Permit, License, or Account", seen: "2026-10-24", note: "Under Registration, click Register for a Permit, License, or Account. Never Login or Sign Up Now." },
+          { page: "Menu", do: "open", selector: "link:Register for a Permit, License, or Account", seen: "2026-10-28", note: "Under Registration, click Register for a Permit, License, or Account. Never Login or Sign Up Now. Its links are href=\"javascript:;\" and stay on onlineservices.cdtfa.ca.gov (the page moves to #1)." },
+          { page: "Registration Options", do: "open", selector: "link:Register a New Business Activity", seen: "2026-10-28", note: "Click Register a New Business Activity (a seller's permit). Never Create My Logon, IFTA, fuel or decal links." },
           { page: "Registration", do: "fill", note: "Not seen yet past the link: the seller's permit for the business activity, owners, location and expected sales, from the approved values; ask the person for anything else. An SSN line goes to the person." },
           { page: "Summary", do: "review", selector: "button:Submit", note: "Not seen yet: the worker compares the last page with the approved values before any Submit. \"There is no charge for a seller's permit.\"" },
           { page: "Confirmation", do: "receipt", note: "Not seen yet: note the confirmation number; Get Registration Status on the public page follows it." },

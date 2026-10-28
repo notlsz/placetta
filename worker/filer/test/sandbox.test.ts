@@ -120,6 +120,19 @@ test("a file: link the model asks to click is refused, and the run carries on", 
   assert.ok(m.seen.every((i) => !i.state.url.startsWith("file:")));
 });
 
+test("an empty script link (CDTFA's GenTax menu) is clicked; a script link that runs code is refused", async () => {
+  const p = await portal({ hostile: "jsLink" }), store = new Mem(), m = new Scripted();
+  m.first = [{ name: "fill_login", input: { selector: "label:Username", which: "username" } }, { name: "fill_login", input: { selector: "label:Password", which: "password" } },
+    { name: "click", input: { selector: "button:Sign in" } }, { name: "click", input: { selector: "link:Register for a Permit, License, or Account" } },
+    { name: "click", input: { selector: "link:Run a script" } }];
+  const r = await worker(store, m, p.url).run(store.f);
+  assert.equal(r?.kind, "submitted");
+  const off = refused(store, "link off");
+  assert.ok(!off.some((e) => e.ref === "javascript:;"), JSON.stringify(off));
+  assert.ok(off.some((e) => e.ref === "javascript:alert(1)"), JSON.stringify(store.f.agent_log.map((e) => e.en)));
+  assert.ok(m.seen.some((i) => i.state.text.includes("Registration Options")), "the page's own handler ran");
+});
+
 test("instructions aimed at the AI, visible or hidden from a person, stop the run before the model reads the page", async () => {
   for (const hostile of ["visible", "hidden"] as const) {
     const p = await portal({ hostile }), store = new Mem(), m = new Scripted();

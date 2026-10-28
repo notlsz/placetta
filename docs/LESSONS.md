@@ -105,3 +105,19 @@ San José permits cited sjeconomy.com, and the state seller's permit cited San F
 4. Never splice a data label into the middle of a sentence. Write a sentence builder and test it on every value.
 5. A button for a channel (voice, the interpreter, calls, texts, iMessage) shows only when the server says it is set up
    (`src/channels.ts`); otherwise it is hidden or says "Coming soon" with nothing to press.
+
+## 2026-10: two portal rehearsals stopped on guards written against the guide's words, not the live page's
+
+**What happened.** San Francisco's rehearsal stopped on Business Identification with "asks for an SSN": the approved
+field "Business Tax ID (SSN, FEIN, or TIN)" names an SSN, so the EIN guard threw the approved EIN out as a person's
+number, and the fix's test used the label "FEIN" instead of the real one. CDTFA's rehearsal refused "Register for a
+Permit, License, or Account": GenTax draws every menu link as `href="javascript:;"`, which the off-site check read as a
+script address.
+
+**The guards that now prevent it.** `approvedEin` takes a field that names the business's number beside an SSN; the
+value's NN-NNNNNNN shape keeps a person's number out (`worker/filer/src/guards.ts`). An empty script link
+(`inertScriptLink`) is clicked like a button; any other `javascript:` link is still refused (`src/run.ts`). Tests use
+the live labels and a GenTax-style link (`test/guards.test.ts`, `test/sandbox.test.ts`, `test/mocks/onlineservices.cdtfa.ca.gov.html`).
+
+**Rule.** A guard's test uses the exact words of the live page and of the approved field, read with the probe, never a
+paraphrase.

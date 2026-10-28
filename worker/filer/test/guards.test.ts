@@ -1,7 +1,7 @@
 // node --experimental-strip-types --test test/guards.test.ts: the hard guards on pages, without a browser.
 import { test } from "node:test";
 import assert from "node:assert";
-import { einFillOk, isFinal, makesAccount, mustStop, type Control, type PageState } from "../src/guards.ts";
+import { einFillOk, inertScriptLink, isFinal, makesAccount, mustStop, type Control, type PageState } from "../src/guards.ts";
 
 const control = (o: Partial<Control>): Control => ({ selector: "", tag: "input", type: "text", label: "", name: "", id: "", autocomplete: "", value: "", ...o });
 const page = (o: Partial<PageState>): PageState => ({ url: "https://inspect.lafd.org/x", title: "", headings: [], controls: [], buttons: [], links: [], text: "", frames: [], markers: [], ...o });
@@ -46,4 +46,35 @@ test("an SSN, ITIN or passport still stops the run, even on a line that also tak
   for (const label of ["Social Security Number", "SSN", "Passport number", "ITIN", "Passport or TIN"]) {
     assert.equal(mustStop(page({ controls: [control({ label })] }), pay("FEIN", "12-3456789"))?.reason, "secret_number", label);
   }
+});
+
+// SF's live page after Organization Type (read 2026-10-28): the line and its approved field each name an SSN beside the
+// FEIN, and the approved value is the test EIN 00-0000000.
+const sfLine = control({ label: "Business Tax Identification Number * (Social Security Number, Tax Identification Number, Federal Employer Identification Number)", id: "businessTaxID" });
+const sfPay = pay("Business Tax ID (SSN, FEIN, or TIN)", "00-0000000");
+
+test("SF's Business Identification page: the approved EIN from \"Business Tax ID (SSN, FEIN, or TIN)\" goes in its tax ID line", () => {
+  const st = page({ url: "https://etaxstatement.sfgov.org/NewBusinessRegistration/application", headings: ["Business Identification"],
+    controls: [control({ label: "Business Name * (as shown on your income tax return)", id: "businessName" }), sfLine, control({ label: "Telephone number *", id: "phone" })] });
+  assert.equal(mustStop(st, sfPay), null);
+  assert.ok(einFillOk(sfLine, "00-0000000", sfPay));
+  assert.ok(einFillOk(taxLine, "00-0000000", sfPay), "the approved field's own wording as the line");
+});
+
+test("SF's Business Identification page: an SSN-shaped value never goes in, and a person's number field never counts", () => {
+  const st = page({ controls: [sfLine] });
+  assert.equal(mustStop(st, pay("Business Tax ID (SSN, FEIN, or TIN)", "123-45-6789"))?.reason, "secret_number");
+  assert.equal(mustStop(st, pay("Business Tax ID (SSN, FEIN, or TIN)", "123456789"))?.reason, "secret_number", "nine bare digits could be an SSN");
+  assert.ok(!einFillOk(sfLine, "123-45-6789", sfPay));
+  assert.ok(!einFillOk(sfLine, "12-3456789", sfPay), "only an approved EIN");
+  for (const label of ["Owner SSN", "Social Security Number", "SSN or ITIN", "Passport or FEIN"]) {
+    assert.equal(mustStop(st, pay(label, "00-0000000"))?.reason, "secret_number", label);
+  }
+  assert.equal(mustStop(page({ controls: [control({ label: "Social Security Number" })] }), sfPay)?.reason, "secret_number", "an SSN-only line");
+  assert.equal(mustStop(page({ controls: [control({ label: "Taxpayer Identification Number (SSN or ITIN)" })] }), sfPay)?.reason, "secret_number", "a person's TIN line");
+});
+
+test("an empty script link (GenTax's javascript:;) may be clicked; any other script link may not", () => {
+  for (const h of ["javascript:;", "javascript:", "javascript:void(0)", "javascript:void(0);", "JavaScript: void 0"]) assert.ok(inertScriptLink(h), h);
+  for (const h of ["javascript:alert(1)", "javascript:location='/x'", "javascript:;alert(1)", "https://x.gov/", "#"]) assert.ok(!inertScriptLink(h), h);
 });
