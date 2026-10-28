@@ -64,6 +64,9 @@ export type Dest = {
   alsoOn?: string[];                                // other hosts the portal's own pages send the browser to (its sign-in
                                                     // service, or the same app under the county's name), as the agency or its guide links them
   noLogin?: boolean;                                // the portal files without an account (the worker opens it with no saved login)
+  captcha?: boolean;                                // the agency's own guide shows a CAPTCHA on the way to submitting: when it
+                                                    // also takes the form by email, fax or mail, Placetta sends it that way
+                                                    // (logic.ts pick), so nobody has to solve one
   account?: "business" | "individual" | "unknown";  // who may make its account, when it differs from its host's row in
                                                     // accounts.ts PORTAL_ACCOUNTS (business: Odelia makes it under agent
                                                     // authority; individual: a person's ID.me or Login.gov; unknown: ask the team)
@@ -323,7 +326,7 @@ export const DEST: Record<string, Dest> = {
     // "Go to boiefiling.fincen.gov"; no account; an hCaptcha before submitting, which the worker hands to the person.
     // Since March 21, 2025 only companies formed under a foreign country's law and registered in a US state file.
     portal: "boiefiling.fincen.gov", portalUrl: "https://boiefiling.fincen.gov/fileboir",
-    noLogin: true,
+    noLogin: true, captcha: true,
     signature: "none",
     payment: "none",
     checked: "2026-10-13",

@@ -127,6 +127,15 @@ Deno.test("pick: portal, email, fax, mail, team in order", () => {
   const noFax = envFrom((k) => (k === "FILER_CHANNELS" ? "fax" : undefined));
   assertEquals(pick(f, dest(), noFax, { hasLogin: false, mailConnected: false }), "team");
 });
+Deno.test("pick: a site with a CAPTCHA in the way loses to a way that needs nobody; the site still files when it's the only way", () => {
+  const f = filing();
+  const both = dest({ portal: "x.gov", email: "a@x.gov", captcha: true });
+  assertEquals(pick(f, both, ENV, { hasLogin: true, mailConnected: true }), "email", "the agency's inbox takes it: nobody solves a CAPTCHA");
+  assertEquals(pick(f, both, ENV, { hasLogin: true, mailConnected: false }), "fax", "or its fax");
+  const only = dest({ portal: "x.gov", email: undefined, fax: undefined, mail: undefined, captcha: true });
+  assertEquals(pick(f, only, ENV, { hasLogin: true, mailConnected: true }), "portal", "the site is the only way: Odelia files and hands the CAPTCHA to a person");
+  assertEquals(pick(f, dest({ portal: "x.gov", email: "a@x.gov" }), ENV, { hasLogin: true, mailConnected: true }), "portal", "no CAPTCHA: the site first, as before");
+});
 Deno.test("pick: a wet signature never goes by email, fax or mail", () => {
   assertEquals(pick(filing(), dest({ signature: "wet", email: "a@x.gov" }), ENV, { hasLogin: false, mailConnected: true }), "team");
 });

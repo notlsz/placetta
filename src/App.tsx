@@ -273,6 +273,16 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   }, [cloud, go, say, lang]);
   const wsRef = useRef(view_);
   useEffect(() => { wsRef.current = view_; }, [view_]);
+  /* One tap from a message to the step: an alert's link (/app/?ws=…&open=<application>, monitor/stage.ts) opens that
+     filing once its workspace has loaded, then drops the parameter so a reload doesn't reopen it. */
+  const openLink = useRef<string | null>((() => { try { return new URLSearchParams(location.search).get("open"); } catch { return null; } })());
+  useEffect(() => {
+    const id = openLink.current;
+    if (!id || !view_.apps.some(a => a.id === id)) return;
+    openLink.current = null;
+    try { const u = new URL(location.href); u.searchParams.delete("open"); window.history.replaceState(null, "", u.pathname + u.search + u.hash); } catch { /* keep the address */ }
+    go("permits"); setDrawer({ id, tab: "progress", edit: false });   // where the step and its one button are (Drawer FinishStep)
+  }, [view_.apps, go]);
   const plan = cloud ? api.planOf(billing) : "monthly";
 
   const [feed, setFeed] = useState<FeedItem[]>(() => (cloud ? [] : initialFeed(view_, daysFromNow(0))));

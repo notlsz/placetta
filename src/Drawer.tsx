@@ -608,6 +608,9 @@ function FinishStep({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>[
   const duplicate = ask?.kind === "needs_you" && ask.ref === "duplicate";
   // the business sends it itself (file function: sentByYou)
   const yours = ask?.kind === "wet_signature" || (ask?.kind === "needs_you" && (ask.ref === "yours" || ask.ref === "owner_packet"));
+  // a live step on the agency's own page (a CAPTCHA, a code, an ID check, the agency's fee): the browser waits there with
+  // everything else filled and notices by itself when the step is done, so opening it is the one button
+  const live = ask?.kind === "need_person" && !!f.handoff_url && !yours;
   const sent = <div className="sent-it">
     <input type="text" className="inp sm" maxLength={60} value={conf} onChange={e => setConf(e.target.value)} disabled={busy}
       placeholder={zh ? "机构确认号（如有）" : "Agency confirmation number (if any)"} aria-label={zh ? "机构确认号" : "Agency confirmation number"} />
@@ -617,8 +620,9 @@ function FinishStep({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>[
     <div className="finish-step" role="status">
       <b>{yours ? (zh ? "请您提交这一份" : "This one is yours to send") : zh ? "完成这一步" : "Finish this step"}</b>
       <p>{ask ? (zh ? ask.zh : ask.en) : zh ? "快哉需要您完成一步。" : "Placetta needs you for one step."}</p>
+      {live && <p className="note">{zh ? "其余内容 Odelia 都已填好。页面一往下走，她就会自动继续。" : "Odelia filled everything else. She carries on by herself the moment the page moves on."}</p>}
       <div className="m-btns">
-        {f.handoff_url && <a className="pill quiet sm" href={f.handoff_url} target="_blank" rel="noopener noreferrer">{yours ? (zh ? "打开机构网站" : "Open the agency's site") : zh ? "打开" : "Open"}<I.ext /></a>}
+        {f.handoff_url && <a className={live ? "pill ink sm" : "pill quiet sm"} href={f.handoff_url} target="_blank" rel="noopener noreferrer">{live ? (zh ? "打开这一步" : "Open the step") : yours ? (zh ? "打开机构网站" : "Open the agency's site") : zh ? "打开" : "Open"}<I.ext /></a>}
         {!cloud?.owner
           // Carrying on, uploading the signed copy and sending again are an owner's; the file function refuses members.
           ? <span className="note">{zh ? "需要工作区所有者完成这一步。" : "An owner of this workspace finishes this step."}</span>
@@ -632,7 +636,7 @@ function FinishStep({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>[
           ? <button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.resumeFiling(f.id, true)}>{zh ? "再次提交" : "Send it again"}</button>
           : yours
           ? <>{kitable && <KitButton f={f} />}{sent}</>
-          : <button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.resumeFiling(f.id)}>{zh ? "我已完成，继续" : "I've done it, carry on"}</button>}
+          : <button type="button" className={live ? "pill quiet sm" : "pill ink sm"} disabled={busy} onClick={() => void cloud?.resumeFiling(f.id)}>{zh ? "我已完成，继续" : "I've done it, carry on"}</button>}
       </div>
     </div>
   );

@@ -1,6 +1,8 @@
 // Stage alerts: the moment a filing reaches a new stage (Placetta starts filing it, it's submitted, the agency asks for
-// something, approves it or returns it, or a step needs the person), the people in charge of it hear right away,
-// instead of in the next morning's sweep.
+// something, approves it or returns it, or a step needs the person), the Update is written at once (the app's timeline).
+// The people in charge are reached personally (a text or an email) only when there's something for them to do now: the
+// agency asks for something, returns it, or a step needs them (PUSHED). Starting, submitting and approval are quiet:
+// they show in the app and in linked team chats, and an approval is in the next morning's digest (quiet.ts).
 //
 // The database calls the monitor ({ action: "stage", filing_id }) from a trigger on filings (migration
 // 20261024120000_stage_alerts). This writes the Update (the app shows it live), then reaches each person in charge the
@@ -17,11 +19,19 @@ export type Bi = { en: string; zh: string };
 export type StageFiling = {
   id: string; workspace_id: string; app_id: string; title: unknown; status: string; agent_state?: string | null; updated_at: string;
   confirmation_number?: string | null; note?: string | null; payment_url?: string | null; approved_by?: string | null; channel?: string | null;
+  handoff_url?: string | null;
 };
 export type StageUpdate = { workspace_id: string; kind: "filing"; app_id: string; title: Bi; body?: Bi; dedupe: string };
 
 /** The stages that are announced. "requested" (the person just approved it) and "canceled" are their own doing. */
 export const STAGES = ["in_progress", "submitted", "needs_info", "accepted", "rejected"] as const;
+/** What reaches a person by text or email right away: something only they can do, or the agency's clock running on
+ *  them. Everything else stays in the app (and in the morning digest when it matters, quiet.ts). */
+export const PUSHED = new Set(["needs_info", "rejected"]);
+export const pushed = (u: Pick<StageUpdate, "dedupe">) => {
+  const [head, , stage] = u.dedupe.split(":");
+  return head === "needs_you" || (head === "filing" && PUSHED.has(stage));
+};
 
 const bi = (v: unknown): Bi => (v && typeof v === "object" && "en" in v ? { en: String((v as Bi).en ?? ""), zh: String((v as Bi).zh ?? (v as Bi).en ?? "") } : { en: String(v ?? ""), zh: String(v ?? "") });
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
@@ -46,7 +56,11 @@ export function stageUpdates(f: StageFiling): StageUpdate[] {
   if (f.agent_state === "needs_you") {
     out.push({ workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, dedupe: `needs_you:${f.id}:${d}`,
       title: { en: `Placetta needs you for a step: ${t.en}`, zh: `需要您完成一步：${t.zh}` },
-      body: { en: "Open the filing to finish it. Placetta carries on right after.", zh: "打开该申请完成这一步，快哉随后继续办理。" } });
+      // a live hand-back (a CAPTCHA, a code, an ID check or the agency's fee on its own page): the browser waits on that
+      // exact page with everything else filled, so say it's one short step and that it's waiting now
+      body: f.handoff_url
+        ? { en: "One short step on the agency's page, open and waiting with everything else filled. Odelia carries on the moment you're done.", zh: "机构网页上只差一小步，页面已打开等候，其余内容均已填好。您完成后 Odelia 立即继续。" }
+        : { en: "Open the filing to finish it. Placetta carries on right after.", zh: "打开该申请完成这一步，快哉随后继续办理。" } });
   }
   return out;
 }
@@ -94,10 +108,10 @@ export type StageOut = {
   /** Sends queued texts now rather than at the next sweep (quiet hours still apply). */
   flush(): Promise<void>;
 };
-export type StageResult = { filing: string; updates: number; emailed: number; texted: number; app_only: number; chats: number; skipped?: string };
+export type StageResult = { filing: string; updates: number; emailed: number; texted: number; app_only: number; chats: number; quiet: number; skipped?: string };
 
 export async function stageAlert(db: StageDb, out: StageOut, o: { app: string; filingId: string }): Promise<StageResult> {
-  const r: StageResult = { filing: o.filingId, updates: 0, emailed: 0, texted: 0, app_only: 0, chats: 0 };
+  const r: StageResult = { filing: o.filingId, updates: 0, emailed: 0, texted: 0, app_only: 0, chats: 0, quiet: 0 };
   const f = await db.filing(o.filingId);
   if (!f) return { ...r, skipped: "no such filing" };
   const ws = await db.workspace(f.workspace_id);
@@ -106,13 +120,16 @@ export async function stageAlert(db: StageDb, out: StageOut, o: { app: string; f
   for (const u of stageUpdates(f)) if (await db.save(u)) fresh.push(u);
   r.updates = fresh.length;
   if (!fresh.length) return { ...r, skipped: f.status === "requested" || f.status === "canceled" ? "not a stage that's announced" : "already announced" };
-  const link = o.app ? `${o.app}/app/?ws=${encodeURIComponent(f.workspace_id)}` : "";
-  const people = stageRecipients(await db.members(f.workspace_id), f.approved_by);
+  // straight to the filing: one tap from the message to the step (App.tsx opens ?open=<application>)
+  const link = o.app ? `${o.app}/app/?ws=${encodeURIComponent(f.workspace_id)}&open=${encodeURIComponent(f.app_id)}` : "";
+  const personal = fresh.filter(pushed);
+  r.quiet = fresh.length - personal.length;
+  const people = personal.length ? stageRecipients(await db.members(f.workspace_id), f.approved_by) : [];
   let texts = 0;
   for (const uid of people) {
     const p = await db.person(uid);
     const how: Channel = channelFor(ws.state, uid, p);
-    for (const u of fresh) {
+    for (const u of personal) {
       if (how === "text") {
         const lang = p.phone?.lang === "zh" ? "zh" : "en";
         if (await out.text({ user_id: uid, workspace_id: f.workspace_id, body: stageText(u, ws.name, lang), link: link || null, dedupe: `stage:${u.dedupe}`.slice(0, 300) })) { r.texted++; texts++; }

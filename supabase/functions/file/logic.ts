@@ -332,8 +332,19 @@ export function pick(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Ro
   if (!d) return "team";
   if (d.owner) return "owner";
   const on = (c: Channel) => env.channels.includes(c);
-  // no saved login: the account is made first, by the worker, when Odelia may make it (worker/filer/src/account.ts)
-  if (d.portal && (facts.hasLogin || d.noLogin || facts.makesAccount) && env.portalWorker && on("portal")) return "portal";
+  // no saved login: the account is made first, by the worker, when Odelia may make it (worker/filer/src/account.ts).
+  // A site known to put a CAPTCHA in the way (Dest.captcha) loses to email, fax or mail when the agency takes one of
+  // those: a person would have to solve the CAPTCHA, and the other way needs nobody.
+  if (d.portal && (facts.hasLogin || d.noLogin || facts.makesAccount) && env.portalWorker && on("portal")) {
+    const paper = d.captcha ? pickPaper(f, d, env, facts) : "team";
+    return paper === "email" || paper === "fax" || paper === "mail" ? paper : "portal";
+  }
+  return pickPaper(f, d, env, facts);
+}
+
+/** pick() without the agency's site: what the agency takes on paper or by email, else the business. */
+function pickPaper(f: Filing, d: Dest, env: Env, facts: Facts): Route {
+  const on = (c: Channel) => env.channels.includes(c);
   if (feeBlocks(f, d)) return checkPays(f, d, env, facts) ? "mail" : "team";
   if (d.signature === "wet") {
     if (!signedCopy(f)) return "team";
