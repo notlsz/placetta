@@ -145,7 +145,8 @@ const f = (label: string, value: string) => ({ id: label, label: same(label), va
   const official = app("o", { status: "needs", est: same("about 2 weeks"), official: "nyc-fse" });
   const so = store({ apps: ["o"], plannedOpen: plus(60) });
   const measured = openingPath(so, ws({ apps: [official] }), TODAY, { stats: [{ form: "nyc-fse", n: 12, median_days: 20, p90_days: 31, rejected_pct: 8 }] });
-  ok(measured.landing === plus(38) && measured.basis.measured === 1 && !/about/.test(openingLine(measured)!.en), "measured times: precise, no 'about'", { measured, line: openingLine(measured) });
+  // the date is the usual time (median 20 days), and the slow end (p90 31 days) is the range's far side
+  ok(measured.landing === plus(27) && measured.range?.slow === plus(38) && measured.basis.measured === 1 && !/about/.test(openingLine(measured)!.en), "measured times: precise, no 'about'", { measured, line: openingLine(measured) });
   const published = openingPath(so, ws({ apps: [official] }), TODAY);
   ok(/about/.test(openingLine(published)!.en) && /agency's published time for 1/.test(basisLine(published)!.en), "published times: said as an estimate, and why", basisLine(published));
   ok(openingPath(so, ws({ apps: [official] }), TODAY, { stats: [{ form: "nyc-fse", n: 2, median_days: 5, p90_days: 6, rejected_pct: 0 }] }).basis.measured === 0, "two filings aren't enough to measure");
