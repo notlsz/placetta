@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isFirstRun } from "./firstRun";
 import { createPortal } from "react-dom";
 import { speakTag } from "./langs";
 import { VoiceBeam, useMicrophone } from "voice-glow";
@@ -92,7 +93,8 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
   const winWaiting = !!firstWin && ws.approvals.some(a => a.app === firstWin);
   const narrow = useNarrow(560);
   const chips = useMemo(() => {
-    if (!starters || !nearlyEmpty || (winWaiting && narrow)) return [] as Bi[];
+    // the first run has its one action on Home already (src/FirstRun.tsx): floating chips would only cover it
+    if (!starters || !nearlyEmpty || (winWaiting && narrow) || isFirstRun(ws)) return [] as Bi[];
     const out: Bi[] = [];
     for (const s of suggestions(ws, daysFromNow(0), STARTERS)) {
       if (asked.some(q => near(q, s.en) || near(q, s.zh)) || out.some(x => near(x.en, s.en) || near(s.en, x.en))) continue;

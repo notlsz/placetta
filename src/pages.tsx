@@ -4,7 +4,7 @@ import { useApp, type PermitsTab, type View } from "./ctx";
 import type { Approval, Application, Deadline, Fact, FactGroup, Level, LicenseHit, Status } from "./model";
 import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn, fmtMonth, fmtStamp, money } from "./time";
 import { FileCard, Footer, I, Modal, Pill, StatusChip, feeText, feeTotal } from "./ui";
-import { withOpenings, workspaceOpening, type Evidence } from "./smart";
+import { isOpeningMilestone, withOpenings, workspaceOpening, type Evidence } from "./smart";
 import { scheduleAppeals } from "./finish";
 import type { Workspace } from "./model";
 import { useEvidence } from "./evidence";
@@ -476,7 +476,7 @@ export function Overview() {
   else if (busy && live) say.push(`${b(taskVerb(live.state))}…`);
   if (filed > 0) say.push(zh ? `已办好 ${approved}/${n} 项许可` : `${approved} of ${n} permits done`);
   if (!say.length) say.push(zh ? `计划中有 ${n} 项许可` : `${n} permit${n === 1 ? "" : "s"} in your plan`);
-  if (landing && !filed) say.push(zh ? `预计 ${fmtDay(landing, lang, true)} 前后开业` : `Opening around ${fmtDay(landing, lang, true)}`);
+  if (landing && !filed && !firstRun) say.push(zh ? `预计 ${fmtDay(landing, lang, true)} 前后开业` : `Opening around ${fmtDay(landing, lang, true)}`);
   const status = say.join(zh ? "，" : ". ");
   const mineCtl = teamOf(team) ? <MineToggle count={mineN} /> : null;
 
@@ -643,15 +643,18 @@ function HomeSide({ soon, landing, n, approved, agency }: { soon: Deadline[]; la
   const zh = lang === "zh";
   const left = n - approved - agency;
   const recent = ws.audit.slice(0, 4);
+  // in the first run the head of Home already carries the opening and the money (src/FirstRun.tsx): one of each, not two
+  const first = isFirstRun(ws);
+  if (first) soon = soon.filter(d => !isOpeningMilestone(d) && !d.id.startsWith("open-"));
   return (
     <aside className="hm-side" aria-label={zh ? "计划概览" : "Plan at a glance"}>
-      <section className="hs-card hs-open">
+      {!first && <section className="hs-card hs-open">
         <p className="hs-k">{zh ? "预计开业" : "Projected opening"}</p>
         <p className="hs-date">{landing ? fmtDay(landing, lang, true) : zh ? "待定" : "Not set yet"}</p>
         <p className="hs-sub">{zh ? `${n} 项许可：已办好 ${approved}，机构审核中 ${agency}，待办 ${left}` : `${n} permits: ${approved} done, ${agency} with the agency, ${left} to do`}</p>
         <span className="hs-bar" aria-hidden="true"><i style={{ width: `${n ? (approved / n) * 100 : 0}%` }} /><i className="b2" style={{ width: `${n ? (agency / n) * 100 : 0}%` }} /></span>
         <CostLine />
-      </section>
+      </section>}
       {recent.length > 0 && (
         <section className="hs-card">
           <div className="hs-h"><h2>{zh ? "最近" : "Recent"}</h2><button type="button" className="lnk" onClick={() => go("settings", "activity")}>{zh ? "全部记录" : "Activity"}<I.chevR /></button></div>

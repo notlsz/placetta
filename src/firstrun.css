@@ -19,6 +19,10 @@
 .fr-pulse { flex: none; align-self: center; width: 8px; height: 8px; border-radius: 2px; background: var(--ink3); }
 .fr-pulse.on { background: var(--blue-ink); animation: fr-pulse 1.2s ease-in-out infinite; }
 @keyframes fr-pulse { 50% { opacity: .35; } }
+.fr-stat .fr-total { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); color: var(--ink2); }
+.fr-stat .fr-total .lnk { padding: 0; border: 0; background: none; font: inherit; color: var(--blue-ink); cursor: pointer; }
+/* nothing sits under the message box at the end of the page */
+.page.home:has(.fr-head) { padding-bottom: 220px; }
 .fr-done { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; font-size: 13.5px; color: var(--ink2); }
 .fr-done svg { width: 15px; height: 15px; color: var(--blue-ink); }
 

@@ -10,6 +10,7 @@ import { CheckList, ChecksSheet } from "./Checks";
 import { TrustShare } from "./TrustShare";
 import { openSettings } from "./Settings";
 import { useTeam } from "./Comments";
+import { CostSheet, useCost } from "./CostToOpen";
 import "./firstrun.css";
 
 /* Home in the first run (src/firstRun.ts): the outcome first, then the one thing to do, then what stands between the
@@ -31,7 +32,7 @@ export function untilSay(iso: string): Bi {
 
 /** The three numbers an owner asks first: what the agencies charge, when it opens, how ready it is. Each from the plan;
  *  a number that isn't known isn't shown. */
-export function FirstStats({ f, lang }: { f: FirstRun; lang: "en" | "zh" }) {
+export function FirstStats({ f, lang, total, onBreakdown }: { f: FirstRun; lang: "en" | "zh"; total?: number; onBreakdown?: () => void }) {
   const zh = lang === "zh";
   const b = (x: Bi) => x[lang];
   return (
@@ -39,7 +40,8 @@ export function FirstStats({ f, lang }: { f: FirstRun; lang: "en" | "zh" }) {
       {f.published > 0 && (
         <div className="fr-stat">
           <dt>{zh ? "机构费用" : "Agency fees"}</dt>
-          <dd><b>{money(f.agencyUSD)}</b><small>{f.unpublished ? (zh ? `另有 ${f.unpublished} 项由机构定价` : `plus ${f.unpublished} set by the agency`) : (zh ? "全部已公布" : "all published")}</small></dd>
+          <dd><b>{money(f.agencyUSD)}</b><small>{f.unpublished ? (zh ? `另有 ${f.unpublished} 项由机构定价` : `plus ${f.unpublished} set by the agency`) : (zh ? "全部已公布" : "all published")}</small>
+            {total != null && total !== f.agencyUSD && <small className="fr-total">{zh ? `含快哉费用${f.unpublished ? "已知" : ""}合计 ${money(total)}` : `Total with Placetta ${money(total)}${f.unpublished ? " known" : ""}`}{onBreakdown && <button type="button" className="lnk" onClick={onBreakdown}>{zh ? "明细" : "Breakdown"}</button>}</small>}</dd>
         </div>
       )}
       {f.opening && (
@@ -66,14 +68,17 @@ export function FirstRunHead() {
   const zh = lang === "zh";
   const open = (ws.stores ?? []).length > 0 && (ws.stores ?? []).every(s => s.stage === "open");
   const can = canFileLine(f), rest = restLine(f);
+  const cost = useCost();
+  const [sheet, setSheet] = useState(false);
   const running = busy && live ? B(`${taskVerb(live.state).en}: ${live.label.en}`, `${taskVerb(live.state).zh}：${live.label.zh}`) : null;
   return (
     <section className="fr-head" aria-labelledby="fr-h" data-first-run="">
       <p className="fr-k">{zh ? "您的开业计划" : "Your opening plan"}{f.ms != null && <span>{zh ? `Odelia 用时 ${(Math.max(1, Math.round(f.ms / 100)) / 10).toString()} 秒梳理` : `Mapped by Odelia in ${(Math.max(1, Math.round(f.ms / 100)) / 10).toString()} seconds`}</span>}</p>
       <h2 id="fr-h">{b(needLine(f, open))}{can && <> <em>{b(can)}</em></>}</h2>
       {rest && <p className="fr-rest">{b(rest)}</p>}
-      <FirstStats f={f} lang={lang} />
+      <FirstStats f={f} lang={lang} total={cost.totalUSD} onBreakdown={() => setSheet(true)} />
       <p className="fr-now" aria-live="polite"><span className={"fr-pulse" + (running ? " on" : "")} aria-hidden="true" /><b>{zh ? "Odelia 现在" : "Odelia right now"}</b><span>{b(nowLine(ws, f, running))}</span></p>
+      {sheet && <CostSheet c={cost} onClose={() => setSheet(false)} />}
       {f.filled > 0 && <p className="fr-done"><I.check />{zh ? `已根据您的注册信息填好 ${f.filled} 栏表格` : `${f.filled} form line${f.filled === 1 ? "" : "s"} already filled from your signup`}</p>}
     </section>
   );

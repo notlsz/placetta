@@ -14,6 +14,7 @@ import { canFileLine, firstRunFacts, isFirstRun, needLine, nowLine, whoFiles, ty
 import { costToOpen } from "../src/cost";
 import { workspaceOpening } from "../src/smart";
 import { readiness } from "../src/stores";
+import { routeOf } from "../src/approvalRoute";
 import { daysFromNow, fmtDay, money } from "../src/time";
 import type { Workspace } from "../src/model";
 
@@ -46,10 +47,17 @@ export function firstRunTests(ok: Ok) {
     const cost = costToOpen(ws, { today });
     const store = ws.stores![0];
     ok(isFirstRun(ws), `${name}: a new plan is a first run`);
-    ok(f.permits === ws.apps.length && f.odelia + f.you + f.confirm === f.permits && f.odelia > 0, `${name}: every application counted once, by who files it`, f);
+    ok(f.permits === ws.apps.length && f.odelia + f.online + f.prepares + f.you + f.confirm === f.permits, `${name}: every application counted once, by who files it`, f);
     ok(f.agencyUSD === cost.agencyUSD && f.unpublished === cost.unpublished, `${name}: agency fees are Cost to open's own total`, [f.agencyUSD, cost.agencyUSD]);
     ok(f.opening === (workspaceOpening(ws, today)?.date ?? null), `${name}: the opening is the date the store card and Deadlines show`, f.opening);
     ok(f.ready?.score === readiness(store, ws).score && f.ready.total === store.apps!.length && f.ready.issued === 0, `${name}: % ready is the store's readiness, nothing issued yet`, f.ready);
+    ok(f.ready!.score === Math.round((100 * f.ready!.issued) / f.ready!.total), `${name}: % ready is exactly the issued count beside it`, f.ready!.score);
+    // who files: the approval card's own route; the portal isn't counted as hers today
+    for (const a of ws.apps) {
+      const w = whoFiles(a), r = routeOf(a);
+      if (w === "odelia") ok(["email", "fax", "mail", "faxSigned"].includes(r), `${name}: ${a.name.en} counts as Odelia's today only on a route she sends on`, r);
+      if (r === "portal" && w !== "confirm" && w !== "you") ok(w === "online", `${name}: ${a.name.en} on the agency's portal waits for online filing`, w);
+    }
     ok(f.ready!.failing.every(c => c.state !== "pass"), `${name}: only failing checks are listed as failing`);
     // a fee the agency sets is never added in
     const tbd = ws.apps.filter(a => whoFiles(a) !== "confirm" && a.fees.some(x => x.tbd)).length;
@@ -63,6 +71,8 @@ export function firstRunTests(ok: Ok) {
       ok(w.includes(nowLine(ws, f)[lang]), `${name} ${lang}: what Odelia is doing right now`);
       ok(!/[·•]/.test(w) && !/(^|[^\d.,:$])0\d/.test(w), `${name} ${lang}: no dot separators, no leading zeros`);
       ok(!/saved|节省/i.test(w), `${name} ${lang}: no savings claimed`);
+      ok(!h.includes("hs-open") && !/Opening around|前后开业|Opening, where the permits put it|开业日（按许可进度）/.test(w), `${name} ${lang}: one opening date on the first screen, not three`);
+      ok(w.includes(lang === "en" ? `Total with Placetta ${money(costToOpen(ws, { today }).totalUSD)}` : `合计 ${money(costToOpen(ws, { today }).totalUSD)}`), `${name} ${lang}: the two money figures are labeled apart`);
     }
   }
   ok(render(skipped, "en").includes('data-do-next="first"'), "skipped the answers: the first action is to fill the first application");
@@ -70,9 +80,10 @@ export function firstRunTests(ok: Ok) {
   ok(!!fa.first && render(answered, "en").includes(`data-do-next="a:${fa.first.approval.id}"`) && /Waiting for your approval/.test(nowLine(answered, fa).en), "answered: the first filing waits for approval, and Odelia says so");
 
   // the sentence builders, at one and at many
-  const one = { ...fa, permits: 1, odelia: 1, you: 0, confirm: 0 } as FirstRun;
-  ok(needLine(one).en === "You need 1 license or permit to open." && canFileLine(one)!.en === "Odelia can file it herself.", "one permit reads as one", [needLine(one).en, canFileLine(one)!.en]);
-  ok(canFileLine({ ...fa, odelia: 0, confirm: 0 }) === null, "nothing Odelia files: no claim that she does");
+  const one = { ...fa, permits: 1, odelia: 1, online: 0, prepares: 0, you: 0, confirm: 0 } as FirstRun;
+  ok(needLine(one).en === "You need 1 license or permit to open." && canFileLine(one)!.en === "Odelia can file it herself today.", "one permit reads as one", [needLine(one).en, canFileLine(one)!.en]);
+  ok(canFileLine({ ...fa, permits: 10, odelia: 3, online: 5 })!.en === "Odelia can file 3 of them herself today. 5 more once online filing is on.", "today and once online filing is on, said apart");
+  ok(canFileLine({ ...fa, odelia: 0, online: 0 }) === null, "nothing Odelia files: no claim that she does");
 
   // filed anything: no longer the first run; the sample isn't one
   const filed: Workspace = { ...answered, apps: answered.apps.map((a, i) => (i === 0 ? { ...a, status: "review" as const } : a)) };

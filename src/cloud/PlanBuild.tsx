@@ -34,7 +34,9 @@ export function PlanBuild({ lang, ws, place, instant, busy, err, onBack, onNext,
     return () => window.clearTimeout(t);
   }, [shown, apps.length]);
   const done = shown >= apps.length;
-  const WHO: Record<Who, string> = { odelia: zh ? "Odelia 提交" : "Odelia files", you: zh ? "您本人办理" : "Yours to do", confirm: zh ? "先向机构确认" : "Confirming first" };
+  // the same route the approval card states (src/approvalRoute.ts)
+  const WHO: Record<Who, string> = { odelia: zh ? "Odelia 提交" : "Odelia files", online: zh ? "在线提交开通后由 Odelia 提交" : "Odelia, once online filing is on", prepares: zh ? "Odelia 准备，您寄出" : "Odelia prepares, you send",
+    you: zh ? "您本人办理" : "Yours to do", confirm: zh ? "先向机构确认" : "Confirming first" };
   const fee = (a: Workspace["apps"][number]) => {
     if (a.abstain) return "";
     const tbd = a.fees.some(x => x.tbd), sum = a.fees.reduce((t, x) => t + x.amount, 0);

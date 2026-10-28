@@ -20,23 +20,31 @@ import { costToOpen } from "./cost";
 import { workspaceOpening, type Evidence } from "./smart";
 import { readiness } from "./stores";
 import { checksFor, type Check } from "./controls";
+import { routeOf } from "./approvalRoute";
 
-/** Who files an application: Odelia herself (Placetta submits it once you approve), you (a certificate staff earn,
- *  insurance, a filing made in person, one only a local professional may make), or not claimed yet (Odelia confirms
- *  with the agency first, or the registry doesn't know how the agency takes it). */
-export type Who = "odelia" | "you" | "confirm";
+/** Who files an application, by the same route the approval card states (src/approvalRoute.ts routeOf, from
+ *  src/forms/filingRoutes.json):
+ *    odelia    Odelia sends it herself today: by email, fax or certified mail (a hand signature first, for some)
+ *    online    the agency's portal: Odelia files it once online filing is on; until then it isn't counted as hers
+ *    prepares  Odelia prepares it and you (or the Placetta team) send it
+ *    you       a certificate staff earn, insurance, a filing in person, one only a local professional may make
+ *    confirm   not claimed yet: Odelia confirms with the agency first */
+export type Who = "odelia" | "online" | "prepares" | "you" | "confirm";
 export function whoFiles(a: Pick<Application, "abstain" | "yours" | "specialist" | "official">): Who {
   if (a.abstain) return "confirm";
   if (a.yours || a.specialist) return "you";
   const f = a.official ? formById(a.official) : undefined;
   if (!f) return "confirm";
   if (f.method === "in_person" || f.method === "insurer" || f.method === "none") return "you";
-  return "odelia";
+  const r = routeOf(a);
+  return r === "email" || r === "fax" || r === "mail" || r === "faxSigned" ? "odelia" : r === "portal" ? "online" : "prepares";
 }
 
 export type FirstRun = {
   permits: number;           // every application in the plan
-  odelia: number;            // Odelia files them herself
+  odelia: number;            // Odelia files them herself, today
+  online: number;            // on the agency's portal: hers once online filing is on
+  prepares: number;          // Odelia prepares them, you send them
   you: number;               // the owner's own steps
   confirm: number;           // Odelia confirms with the agency before claiming them
   agencyUSD: number;         // published agency fees in dollars (the Cost to open's agency total)
@@ -66,7 +74,7 @@ export function firstRunFacts(ws: Workspace, today: string, ev: Evidence = {}): 
   const approval = fp?.win ? ws.approvals.find(a => a.app === fp.win) : undefined;
   const app = approval ? ws.apps.find(a => a.id === approval.app) : undefined;
   return {
-    permits: ws.apps.length, odelia: who.filter(w => w === "odelia").length, you: who.filter(w => w === "you").length, confirm: who.filter(w => w === "confirm").length,
+    permits: ws.apps.length, odelia: who.filter(w => w === "odelia").length, online: who.filter(w => w === "online").length, prepares: who.filter(w => w === "prepares").length, you: who.filter(w => w === "you").length, confirm: who.filter(w => w === "confirm").length,
     agencyUSD: cost.agencyUSD, published: cost.published, unpublished: cost.unpublished, opening: open?.date ?? null, ready,
     filled: fp?.filled ?? 0, first: approval && app ? { approval, app } : null, ms: fp?.ms ?? null,
   };
@@ -83,19 +91,22 @@ export function needLine(f: FirstRun, open = false): Bi {
   return B(`You need ${s(f.permits, "license or permit", "licenses and permits")} to ${open ? "operate" : "open"}.`, `${open ? "经营" : "开业"}需要办 ${f.permits} 项执照和许可。`);
 }
 
-/** "Odelia can file 8 of them herself." with the rest said plainly; empty when she files none yet. */
+/** "Odelia can file 3 of them herself today. 7 more once online filing is on." Only routes she sends on today count as
+ *  hers; the agency's portal waits for online filing. null when there's nothing to claim. */
 export function canFileLine(f: FirstRun): Bi | null {
-  if (!f.odelia) return f.confirm ? B(`Odelia confirms ${f.confirm === 1 ? "it" : `all ${f.confirm}`} with the agencies first.`, `Odelia 会先向机构逐项确认。`) : null;
+  const later = f.online ? B(` ${f.online} more once online filing is on.`, `另有 ${f.online} 项在线提交开通后也由她提交。`) : B("", "");
+  if (!f.odelia) return f.online ? B(`Odelia can file ${f.online === f.permits ? (f.permits === 1 ? "it" : `all ${f.permits}`) : `${f.online} of them`} once online filing is on.`, `在线提交开通后，${f.online === f.permits ? "全部" : `其中 ${f.online} 项`}由 Odelia 提交。`) : null;
   const all = f.odelia === f.permits;
-  return B(all ? (f.permits === 1 ? "Odelia can file it herself." : `Odelia can file all ${f.permits} herself.`) : `Odelia can file ${f.odelia} of them herself.`,
-    all ? (f.permits === 1 ? "Odelia 可以自己提交。" : `${f.permits} 项 Odelia 都能自己提交。`) : `其中 ${f.odelia} 项 Odelia 可以自己提交。`);
+  return B((all ? (f.permits === 1 ? "Odelia can file it herself today." : `Odelia can file all ${f.permits} herself today.`) : `Odelia can file ${f.odelia} of them herself today.`) + later.en,
+    (all ? (f.permits === 1 ? "Odelia 今天就能自己提交。" : `${f.permits} 项 Odelia 今天都能自己提交。`) : `其中 ${f.odelia} 项 Odelia 今天就能自己提交。`) + later.zh);
 }
 
-/** What the rest are: "2 are yours to do (a certificate, insurance or in person). 3 she confirms with the agency first." */
+/** What the rest are: what she prepares for you to send, what's yours, what she confirms first. */
 export function restLine(f: FirstRun): Bi | null {
   const en: string[] = [], zh: string[] = [];
-  if (f.odelia && f.you) { en.push(`${f.you} ${f.you === 1 ? "is" : "are"} yours to do, like a staff certificate or a visit in person.`); zh.push(`${f.you} 项需要您本人办理，例如员工证书或现场办理。`); }
-  if (f.odelia && f.confirm) { en.push(`${f.confirm} she confirms with the agency before counting ${f.confirm === 1 ? "it" : "them"}.`); zh.push(`${f.confirm} 项她会先向机构确认再计入。`); }
+  if (f.prepares) { en.push(`${f.prepares} she prepares for you to send.`); zh.push(`${f.prepares} 项由她准备好，您来寄出或提交。`); }
+  if (f.you) { en.push(`${f.you} ${f.you === 1 ? "is" : "are"} yours to do, like a staff certificate or a visit in person.`); zh.push(`${f.you} 项需要您本人办理，例如员工证书或现场办理。`); }
+  if (f.confirm) { en.push(`${f.confirm} she confirms with the agency before counting ${f.confirm === 1 ? "it" : "them"}.`); zh.push(`${f.confirm} 项她会先向机构确认再计入。`); }
   return en.length ? B(en.join(" "), zh.join("")) : null;
 }
 
