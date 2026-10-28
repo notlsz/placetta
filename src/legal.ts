@@ -178,7 +178,7 @@ Every charge is shown before you approve it. The app shows each license, complex
 
 Fees do not include taxes. You pay any sales, use or similar taxes that apply, other than taxes on Placetta's income.
 
-If a payment fails, we may pause filing work for the workspace after telling you.
+If a payment fails, we tell the owners. Until it is paid, the plan's Odelia allowance and included renewals pause; nothing in the workspace is deleted.
 
 ## Renewal and cancellation
 
@@ -562,7 +562,7 @@ Odelia 是软件，不是真人。
 
 服务费不含税。您须支付适用的销售税、使用税或类似税费，但对快哉所得征收的税除外。
 
-如付款失败，我们在通知您后可以暂停该工作区的申报工作。
+如付款失败，我们会通知所有者。在付款完成前，方案包含的 Odelia 额度和续期将暂停；工作区中的任何内容都不会被删除。
 
 ## 续费与取消
 
