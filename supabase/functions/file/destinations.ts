@@ -6,6 +6,8 @@
 // Placetta team; TEAM_ONLY below says why for the ones that were researched and have no route Placetta can use.
 // docs/FILING_COVERAGE.md is generated from this file by scripts/filing-coverage.mjs.
 
+import { MIDATLANTIC_DEST, MIDATLANTIC_TEAM } from "./dest/midatlantic.ts";
+
 export type Address = { name: string; line1: string; line2?: string; city: string; state: string; zip: string; country?: string };
 
 /** How the agency takes its fee, as its page says. */
@@ -1950,6 +1952,7 @@ export const DEST: Record<string, Dest> = {
     notReady: "HMRC's service needs the business's own Government Gateway sign-in; the pages past sign-in and its rules for agents weren't seen.",
     checked: "2026-10-25", source: "https://www.gov.uk/register-employer",
   },
+  ...MIDATLANTIC_DEST,
 };
 
 /**
@@ -2057,6 +2060,7 @@ export const TEAM_ONLY: Record<string, { why: string; source: string; checked: s
   "sacc-health-permit": { why: "The application to operate goes in with the fees before opening; the county's guide names no inbox or online route.", source: "https://emd.saccounty.gov/EH/Documents/How%20to%20Obtain%20a%20Health%20Permit%2002-6-23.pdf", checked: "2026-10-17" },
   "sf-dbi-building": { why: "Plans and the application go in at the Permit Center, which routes them to Planning, Fire and Health.", source: "https://www.sf.gov/learn-about-our-building-permit-review-processes", checked: "2026-10-10" },
   "chi-plan-review": { why: "Reviewed as part of the building permit by a city sanitarian; Public Health isn't on E-Plan.", source: "https://www.chicago.gov/content/dam/city/depts/cdph/FoodProtection/FP_Plan.Review.Requirements.2020_Feb2021.pdf", checked: "2026-10-17" },
+  ...MIDATLANTIC_TEAM,
 };
 
 const E164 = /^\+[1-9]\d{6,14}$/;

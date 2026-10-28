@@ -10961,5 +10961,145 @@
   "found": true,
   "sha256": "daa39a0f33d3a982",
   "context": " other filing............................................................$60.00 *annual report license tax is $60 or two-tenths of one mill on the dollar ($.0002) whichever is greater based on the company's assets located and employed in the state of wyoming. nonprofit"
+ },
+ {
+  "id": "ny-agm-20c",
+  "read": "https://agriculture.ny.gov/food-business-licensing",
+  "quote": "Article 20-C Food Processing Establishment licenses apply to food manufactures, processing plants, wholesale bakeries,",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "e4e8a2ee8b6bcbed",
+  "context": "ind of establishment you have and what kind of license you need. food processor article 20-c food processing establishment licenses apply to food manufactures, processing plants, wholesale bakeries, and retail food establishments (i.e. grocery stores) that conduct any type of f"
+ },
+ {
+  "id": "ny-agm-28d",
+  "read": "https://agriculture.ny.gov/food-business-licensing",
+  "quote": "If you are a warehouse that stores/distributes food (excluding Raw Agriculture Commodities (RACs), you need a 28-D license.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "e4e8a2ee8b6bcbed",
+  "context": "use facility within new york in which food is held for commercial distribution. if you are a warehouse that stores/distributes food (excluding raw agriculture commodities (racs), you need a 28-d license. read the law relating to warehouse licensing. application for food warehouse li"
+ },
+ {
+  "id": "ny-agm-28a",
+  "read": "https://agriculture.ny.gov/food-business-licensing",
+  "quote": "This license applies to any retail food store within New York where food and food products are offered to the consumer",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "e4e8a2ee8b6bcbed",
+  "context": "ration for 20-c exempt food processing establishment download retail food store this license applies to any retail food store within new york where food and food products are offered to the consumer and intended for off-premises consumption and conducts no food processing as de"
+ },
+ {
+  "id": "nj-doh-f29",
+  "read": "https://www.nj.gov/health/ceohs/phfpp/wfc/",
+  "quote": "To apply for a new license or to renew annually, download and complete application form F-29.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "1af6176b853a9820",
+  "context": "tions wholesale food-cosmetic establishment license: initial and annual renewal to apply for a new license or to renew annually, download and complete application form f-29. submit the application fee online. (checks and all credit cards accepted) after"
+ },
+ {
+  "id": "pa-pda-food-reg",
+  "read": "https://www.pa.gov/agencies/pda/food/food-safety/food-manufacturing-packing-holding-and-distribution/commercial-food-establishments",
+  "quote": "Owners of such food businesses must first get a Food Registration.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "070ef31ce9f09f10",
+  "context": " this includes a building, place, or vehicle used for these purposes.</p>\\r\\n<p>owners of such food businesses must first get a food registration. those approved by the department can label their products with &quot;reg. penna"
+ },
+ {
+  "id": "pa-pda-retail",
+  "read": "https://www.pa.gov/agencies/pda/food/food-safety/retail-food/retail-food-facilities-and-restaurants",
+  "quote": "All retailers are required to obtain a Retail Food Facility License PRIOR to operating a Retail Food Facility.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "5b81b8b475427f0c",
+  "context": "y to a consumer from a physical location or facility.&nbsp;</li>\\r\\n</ul>\\r\\n<p>all retailers are required to obtain a retail food facility license prior to operating a retail food facility. this includes new facilities and change of ownerships for existing businesses. "
+ },
+ {
+  "id": "md-mdh-food-processing",
+  "read": "https://health.maryland.gov/phpa/OEHFP/OFPCHS/Pages/food-processing.aspx",
+  "quote": "licensing and inspecting facilities that make, process, store, hold or distribute food to sell wholesale",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "93c13ddfd26a1efb",
+  "context": "cessing main_content ​ the center for food processing (cfp) is resp​onsible for licensing and inspecting facilities that make, process, store, hold or distribute food to sell wholesale to other businesse​s in the state of maryland. if you have questions, comments,"
+ },
+ {
+  "id": "va-vdacs-mfg",
+  "read": "https://www.vdacs.virginia.gov/dairy-food-and-beverage-manufacturing.shtml",
+  "quote": "It is unlawful to operate as a food manufacturer, food storage warehouse, or retail food establishment until it has been inspected",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "dfbbe4c9869c96a3",
+  "context": "ections of food establishments are required by the virginia food and drink law. it is unlawful to operate as a food manufacturer, food storage warehouse, or retail food establishment until it has been inspected and has been issued a permit for the operation of the food establishment. (note"
+ },
+ {
+  "id": "va-vdacs-retail",
+  "read": "https://www.vdacs.virginia.gov/dairy-food-stores-and-frozen-dessert-shops.shtml",
+  "quote": "It is unlawful to operate as a retail food manufacturer, food storage warehouse, or retail food establishment until it has been inspected",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "79d85ddb188005dd",
+  "context": "ections of food establishments are required by the virginia food and drink law. it is unlawful to operate as a retail food manufacturer, food storage warehouse, or retail food establishment until it has been inspected and has been issued a permit for the operation of the food establishment. retai"
+ },
+ {
+  "id": "de-cra",
+  "read": "https://revenue.delaware.gov/frequently-asked-questions/business-licenses-faqs/",
+  "quote": "Any person or entity conducting a trade or business in the State of Delaware is required to obtain a Delaware business license",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "249c024d5dc64537",
+  "context": "q. who needs to obtain a delaware business license in the state of delaware? a. any person or entity conducting a trade or business in the state of delaware is required to obtain a delaware business license from the delaware division of revenue. this includes entities located in delawa"
+ },
+ {
+  "id": "de-ui",
+  "read": "https://onestop.delaware.gov/Operate_Register",
+  "quote": "If you have employees working in Delaware, you will also need to file Workers' Compensation and Unemployment Insurance forms",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "8982529afdebdf11",
+  "context": " your business with the division of revenue by applying for a business license. if you have employees working in delaware, you will also need to file workers' compensation and unemployment insurance forms, along with registering for a withholding account. delaware one stop will guide"
+ },
+ {
+  "id": "de-food",
+  "read": "https://dhss.delaware.gov/dph/homepage/about/sections/hsp/inspection-services/",
+  "quote": "The Division of Public Health issues permits to almost 4,000 food establishments.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "4b05403f3b778f86",
+  "context": "ce for needy families (tanf) --> inspection services retail food establishments the division of public health issues permits to almost 4,000 food establishments. food establishments are operations that store, prepare, package, serve, vend or"
+ },
+ {
+  "id": "wv-tax",
+  "read": "https://tax.wv.gov/Business/BusinessRegistration/Pages/BusinessRegistrationQuestionsAndAnswers.aspx",
+  "quote": "must register with the West Virginia State Tax Division before commencing business activities",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "540dbf750fea9ef2",
+  "context": "y person who is engaging in any business activity in the state of west virginia must register with the west virginia state tax division before commencing business activities in the state. this includes, but is not limited to, any individual, firm, partn"
+ },
+ {
+  "id": "wv-ui",
+  "read": "https://business4.wv.gov/startmybusiness/Pages/Register-Your-Business.aspx",
+  "quote": "you are required by law to register with WorkForce West Virginia",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "a6c8848b347f9a55",
+  "context": "nership (\"lp\"), limited liability partnership (\"llp\") or voluntary association, you are required by law to register with workforce west virginia. upon completion of your registration, the agency will determine if your busine"
  }
 ]
