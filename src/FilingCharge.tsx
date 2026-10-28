@@ -18,7 +18,7 @@ export const shownCharges = new Map<string, { mode: string; cents: number }>();
 /** On the simple model: the price each filing's card showed, by approval id (src/pricing.ts LicenseQuote). */
 export const shownLicense = new Map<string, { tier: string; cents: number }>();
 
-/* The simple model: every filing's own price, shown to an owner before approving it: a new license $299, a complex one
+/* The simple model: every filing's own price, shown to an owner before approving it: a new license $149, a complex one
    $999, a renewal $99 unless the store plan includes it, free for what staff complete themselves, or included with 10
    or more stores on the plan. The government fee is passed through at cost. Approving sends this exact price and kind;
    the billing function works it out again and refuses any other. Without its Stripe price, the team quotes it. */

@@ -22,19 +22,28 @@ import { configStore, stripeDb } from "../_shared/stripe_db.ts";
 import { chargeStep, isChain, planQuantity, filingFactsOf, filingQuote, hqCheckout, licenseFactsOf, moduleApproval, moduleOf, QUOTE_TTL_S, modulePriceOk, moduleQuote, moduleUnits, ownerPriceOk, planCheckoutParams, planIntervalOf, prorationCents,
   returnOrigins, safeReturn, simpleApproval, simpleQuote, type Store, storesFrom, STRIPE_FAILED, LIVE_SUB, packCheckoutParams, SIMPLE_PACK_CREDIT_USD, syncStep } from "./logic.ts";
 import { moduleById } from "../../../src/modules.ts";
-import { MODULE_PRICES, OWNER_PRICE_ENV, priceModelOf, SIMPLE, SIMPLE_PRICE_ENV, storePlanItemOf, type SimpleItem } from "../../../src/pricing.ts";
+import { chargedOnApproval, MODULE_PRICES, OWNER_PRICE_ENV, priceModelOf, SIMPLE, SIMPLE_PRICE_ENV, storePlanItemOf, type SimpleItem } from "../../../src/pricing.ts";
+import { OUTCOME_NOTICE, stripeRaw, sweep, type Claimed, type Notice } from "../_shared/outcome.ts";
 // The simple model (src/pricing.ts SIMPLE, docs/PRICING.md), for every workspace that wasn't a customer before it shipped
 // (billing.price_model = 'simple'). Customers from before ('legacy') keep the plans above, and the old checkouts stay
 // theirs only. Each simple price is charged only from its own Stripe price (never made by this code), and only when
 // Stripe's amount is exactly the approved one; otherwise the team sends a quote and nothing is charged.
-//   STRIPE_PRICE_LICENSE           $299 one time, a license filed
-//   STRIPE_PRICE_LICENSE_COMPLEX   $999 one time, a license on the complex list (liquor, building plan review, import permits)
+//   STRIPE_PRICE_LICENSE_ON_APPROVAL  $149 one time, a new license, charged on the agency's decision (outcome pricing,
+//                                  the founder's decision of 2026-10-28; placetta_license_on_approval). The $299 price
+//                                  from before (STRIPE_PRICE_LICENSE, placetta_license) is never charged again.
+//   STRIPE_PRICE_LICENSE_COMPLEX   $999 one time, a license on the complex list (liquor, building plan review, import
+//                                  permits), charged the same way
 //   STRIPE_PRICE_RENEWAL           $99 one time, a renewal the plan doesn't include, after the owner's one-tap approval
 //   STRIPE_PRICE_STORE_PLAN        $1,788 a year: the store plan, $149 a store a month, billed yearly
 //   license_quote   what this filing costs, shown before approval: $299, $999, a $99 renewal, free, or included (a
 //                   renewal Odelia files on her own, on the store plan; everything, with 10 or more stores on it)
-//   license_pay     that filing, approved at the price shown: charged to the saved card for a renewal (one tap), else
-//                   Stripe Checkout; once paid, the filing may go in (the database checks, can_file_app)
+//   license_pay     that filing, approved at the price shown. A new or complex license (outcome pricing): the card is
+//                   saved with Stripe (the customer's saved card, or Checkout in setup mode, a SetupIntent) and nothing
+//                   is charged; the filing may go in at once. It's charged by outcome_sweep when the agency approves
+//                   it, or rejects it for a reason that isn't Placetta's fault; rejected through Placetta's fault,
+//                   nothing is charged and anything paid is refunded (_shared/outcome.ts). A renewal: charged to the
+//                   saved card (one tap), else Stripe Checkout; once paid, the filing may go in (can_file_app)
+//   outcome_sweep   x-monitor-key only (pg_cron every minute while something is due): collect or undo those charges
 //   plan_checkout   the store plan for every store in the workspace, billed yearly
 import type { BillTo } from "../../../src/hqPlan.ts";
 // Growth actions, at the owner prices the founder approved on 2026-10-22 (src/pricing.ts, docs/PRICING.md). Each is
@@ -168,15 +177,38 @@ async function licenseQuoteFor(ws: string, ref: unknown, bill: { subscription_st
   if (!facts) return null;
   const { data: st, error } = await admin.rpc("license_state", { p_ws: ws, p_ref: String(ref) });
   if (error) throw new Error(`license_state: ${error.code ?? ""}`);
-  const s = st as { renewal: boolean; paid: { tier: string; cents: number } | null };
+  const s = st as { renewal: boolean; paid: { tier: string; cents: number } | null; authorized?: { tier: string; cents: number } | null };
   const onPlan = bill?.subscription_status === "active" || bill?.subscription_status === "trialing";
   const chain = !!bill?.comped || (onPlan && isChain(Number(bill?.paid_locations) || 0));
   // a renewal is included on the plan when Odelia can file it on her own (its verified destination, src/overage.ts)
   const automated = filingFactsOf((await wsState(ws))?.apps, ref)?.mode === "automated";
   const ids: Partial<Record<SimpleItem, string | null>> = {};
-  for (const i of ["license", "complex", "renewal"] as SimpleItem[]) ids[i] = chain || s.paid ? null : await simplePrice(i);
-  const q = simpleQuote(facts, { renewal: !!s.renewal, paid: s.paid, chain, onPlan, automated, priceOk: (i) => !!ids[i] });
+  for (const i of ["license", "complex", "renewal"] as SimpleItem[]) ids[i] = chain || s.paid || s.authorized ? null : await simplePrice(i);
+  const q = simpleQuote(facts, { renewal: !!s.renewal, paid: s.paid, authorized: s.authorized ?? null, chain, onPlan, automated, priceOk: (i) => !!ids[i] });
   return { q, facts, priceId: q.tier === "license" || q.tier === "complex" || q.tier === "renewal" ? ids[q.tier] ?? null : null };
+}
+
+/** Outcome pricing's sweep: Stripe with its error codes kept, the approved price for each tier, the owner's notices
+ *  (an update; the dunning mark for a refused card) and team tasks. */
+function outcomeDeps() {
+  const usd = (c: number) => "$" + (c / 100).toLocaleString("en-US", { minimumFractionDigits: c % 100 ? 2 : 0 });
+  return {
+    stripe: stripeRaw(() => Deno.env.get("STRIPE_SECRET_KEY") ?? "", STRIPE_VERSION),
+    rpc: async (fn: string, args: Record<string, unknown>) => { const { data, error } = await admin.rpc(fn, args); return { data, error }; },
+    priceId: (tier: Claimed["tier"]) => simplePrice(tier),
+    notify: async (c: Claimed, kind: Notice, url?: string | null) => {
+      const n = OUTCOME_NOTICE[kind];
+      if (kind === "failed") await admin.rpc("billing_payment_apply", { p_ws: c.workspace_id, p_failed: true, p_at: new Date().toISOString(), p_invoice: c.stripe_ref ?? c.id });
+      const dedupe = kind === "failed" && c.stripe_ref ? `payment_failed:${c.stripe_ref}` : `license_${kind}:${c.id}`;
+      const body = n.body(c, usd(c.cents));
+      await admin.from("updates").upsert({ workspace_id: c.workspace_id, kind: "payment", dedupe, title: n.title,
+        body: url ? { en: `${body.en} ${url}`, zh: `${body.zh} ${url}` } : body }, { onConflict: "workspace_id,dedupe", ignoreDuplicates: true });
+      await admin.from("audit_log").insert({ workspace_id: c.workspace_id, actor: "agent", actor_id: null, action: n.title, object: { en: c.title?.en ?? c.ref, zh: c.title?.zh ?? c.ref } });
+    },
+    team: async (c: Claimed, title: string, key: string) => {
+      await admin.from("team_tasks").upsert([{ kind: "billing", workspace_id: c.workspace_id, filing_id: c.filing_id, title, detail: { charge: c.id, tier: c.tier }, dedupe: key }], { onConflict: "dedupe", ignoreDuplicates: true });
+    },
+  };
 }
 
 /** A card the customer saved at an earlier Checkout (setup_future_usage), for a one-tap renewal; else null. */
@@ -300,6 +332,17 @@ Deno.serve(async (req) => {
   const user = auth?.user;
   if (!user) return fail(401, "unauthorized", "Sign in again.");
 
+  // The outcome sweep (pg_cron every minute while a charge is due, and the monitor): no person, the monitor key.
+  if (req.headers.get("x-monitor-key")) {
+    const { data: good } = await admin.rpc("monitor_key_ok", { p_key: req.headers.get("x-monitor-key") });
+    if (good !== true) return fail(401, "unauthorized", "unauthorized");
+    let b: Record<string, unknown> = {};
+    try { b = await req.json(); } catch { /* empty */ }
+    if (b.action !== "outcome_sweep") return fail(400, "bad_request", "Unknown action.");
+    if (!Deno.env.get("STRIPE_SECRET_KEY")) return json(200, { ok: true, skipped: "no_key" });
+    try { return json(200, { ok: true, done: await sweep(outcomeDeps()) }); }
+    catch (e) { console.error("outcome sweep:", (e as Error).message.slice(0, 200)); return fail(502, "upstream_error", "sweep failed"); }
+  }
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return fail(400, "bad_request", "Send JSON."); }
   // Billing health, for staff with two-step: the key, the webhook and its events, the signing secret, the prices by
@@ -369,9 +412,46 @@ Deno.serve(async (req) => {
         return json(200, { ok: true, paid: true, included: true });
       }
       if (q.paid) return json(200, { ok: true, paid: true });
+      // outcome pricing: already approved with a saved card; it's charged on the agency's decision
+      if (q.authorized) return json(200, { ok: true, paid: false, authorized: true, cents: q.cents });
       if (!q.priceOk) {
         await teamQuote(ws, `Quote the ${q.tier} filing ${facts.name}`, { ref, tier: q.tier, by: user.id }, `quote:${ws}:license:${ref}`);
         return fail(409, "quoted", "The team sends you a quote for this filing. Nothing was charged.", "团队会就这份申报向您报价。未收取任何费用。");
+      }
+      // Outcome pricing (the founder's decision of 2026-10-28): a new or complex license. Save the card with Stripe,
+      // charge nothing; the sweep charges it on the agency's decision, once, with the charge id as its idempotency key.
+      if (chargedOnApproval(q.tier)) {
+        const { data: od, error: ode } = await admin.rpc("license_outcome_open", { p_ws: ws, p_ref: ref, p_tier: q.tier, p_cents: q.cents, p_user: user.id });
+        if (ode) throw new Error(`license_outcome_open: ${ode.code}`);
+        const oc = od as { ok: boolean; id?: string; paid?: boolean; authorized?: boolean; code?: string };
+        if (!oc.ok) return fail(409, oc.code ?? "refused", "Nothing was charged.", "未收取任何费用。");
+        if (oc.paid) return json(200, { ok: true, paid: true });
+        if (oc.authorized) return json(200, { ok: true, paid: false, authorized: true, cents: q.cents });
+        const auditO = () => admin.from("audit_log").insert({ workspace_id: ws, actor: "you", actor_id: user.id, action: { en: "Approved a filing, card saved, nothing charged", zh: "批准了申报，已保存银行卡，未收费" }, object: { en: facts.name, zh: facts.name }, detail: q.line });
+        // a card the customer already saved with Stripe: authorized now
+        const pm = customer ? await savedCard(customer).catch(() => null) : null;
+        if (pm) {
+          const { error: ae } = await admin.rpc("license_outcome_authorize", { p_id: oc.id, p_pm: pm, p_customer: customer });
+          if (ae) throw new Error(`license_outcome_authorize: ${ae.code ?? ""}`);
+          await auditO();
+          return json(200, { ok: true, paid: false, authorized: true, cents: q.cents });
+        }
+        // else Stripe Checkout in setup mode (a SetupIntent): Stripe takes and keeps the card; nothing is charged
+        const notReady = await webhookReady();
+        if (notReady) return notReady;
+        let cus = customer ?? null;
+        if (!cus) {
+          const c = await stripe("customers", { ...(user.email ? { email: user.email } : {}), "metadata[workspace_id]": ws }, `customer-${ws}`);
+          cus = String(c.id);
+          await admin.from("billing").update({ stripe_customer_id: cus }).eq("workspace_id", ws).is("stripe_customer_id", null);
+        }
+        const sm = { workspace_id: ws, kind: "license_setup", charge_id: oc.id!, ref, tier: q.tier, approved_by: user.id };
+        const sp: Record<string, string> = { mode: "setup", currency: "usd", customer: cus, client_reference_id: ws,
+          success_url: `${back}?billing=success&session_id={CHECKOUT_SESSION_ID}`, cancel_url: `${back}?billing=cancel` };
+        for (const [k, v] of Object.entries(sm)) { sp[`metadata[${k}]`] = v; sp[`setup_intent_data[metadata][${k}]`] = v; }
+        const ss = await stripe("checkout/sessions", sp, `license-setup-${oc.id}`);
+        await auditO();
+        return json(200, { ok: true, paid: false, authorized: false, url: ss.url, cents: q.cents });
       }
       const { data: opened, error: oe } = await admin.rpc("license_charge_open", { p_ws: ws, p_ref: ref, p_tier: q.tier, p_cents: q.cents, p_user: user.id });
       if (oe) throw new Error(`license_charge_open: ${oe.code}`);
@@ -451,7 +531,7 @@ Deno.serve(async (req) => {
     if (body.action === "confirm") {
       const sid = typeof body.session_id === "string" && /^cs_[A-Za-z0-9_]{8,200}$/.test(body.session_id) ? body.session_id : null;
       if (!sid) return fail(400, "bad_request", "Unknown checkout.");
-      const cs = await stripeGet(`checkout/sessions/${encodeURIComponent(sid)}?expand[]=subscription`);
+      const cs = await stripeGet(`checkout/sessions/${encodeURIComponent(sid)}?expand[]=subscription&expand[]=setup_intent`);
       if (cs?.metadata?.workspace_id !== ws) return fail(404, "not_found", "That checkout isn't for this workspace.");
       if (cs.status !== "complete") return json(200, { ok: true, applied: false, status: cs.status ?? null });
       const db = stripeDb(admin);

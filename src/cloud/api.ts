@@ -4,7 +4,7 @@ import type { Reply, Step } from "../core";
 import type { HqLink, HqRow } from "../hq";
 import type { Quote } from "../overage.ts";
 import type { ModuleQuote } from "../modules.ts";
-import type { LicenseQuote, SIMPLE, SimpleItem } from "../pricing.ts";
+import type { LicenseQuote, RejectionReason, SIMPLE, SimpleItem } from "../pricing.ts";
 import { readSSE } from "../../supabase/functions/_shared/stream.ts";
 import { tempChat } from "../odeliaMemory/tempChat";
 import { humanToken, isCaptchaError } from "./human";
@@ -923,7 +923,7 @@ export const licenseQuote = (ws: string, ref: string) => fn<{ ok: true; quote: L
 /** The filing approved at the price shown: paid now (a renewal on the saved card, free, or included), or a Stripe
  *  Checkout to pay by card; the filing goes in once it's paid. */
 export const licensePay = (ws: string, ref: string, shown: { tier: string; cents: number }) =>
-  fn<{ ok: true; paid: boolean; included?: boolean; url?: string; cents?: number }>("billing", { action: "license_pay", workspace_id: ws, ref, shown_tier: shown.tier, shown_cents: shown.cents, return_url: appHome() });
+  fn<{ ok: true; paid: boolean; included?: boolean; url?: string; cents?: number; /** outcome pricing: card saved, nothing charged; the filing may go in */ authorized?: boolean }>("billing", { action: "license_pay", workspace_id: ws, ref, shown_tier: shown.tier, shown_cents: shown.cents, return_url: appHome() });
 /** The store plan for every store, billed yearly or month to month, after the renewal terms were agreed to next to the button. */
 export const planCheckout = (ws: string, stores: number, interval: "year" | "month" = "year") => fn<{ url: string; stores: number }>("billing", { action: "plan_checkout", workspace_id: ws, shown_stores: stores, interval, renewal_consent: true, return_url: appHome() });
 export const syncLocations = (ws: string) => fn<{ synced: boolean }>("billing", { action: "sync_locations", workspace_id: ws, return_url: appHome() });
@@ -1163,10 +1163,27 @@ export async function passHumanCheck(id: string): Promise<boolean> {
   if (error) throw fromPg(error);
   return data === true;
 }
-export async function updateFiling(id: string, patch: Partial<Pick<Filing, "status" | "requirements_checked" | "confirmation_number" | "fee_paid" | "receipt_path" | "note" | "payment_url">> & { assigned_to?: string | null }) {
+export async function updateFiling(id: string, patch: Partial<Pick<Filing, "status" | "requirements_checked" | "confirmation_number" | "fee_paid" | "receipt_path" | "note" | "payment_url">> & { assigned_to?: string | null; rejection_reason?: RejectionReason | null; rejection_note?: string | null }) {
   const { error } = await supabase().from("filings").update(patch).eq("id", id);
   if (error) throw fromPg(error);
 }
+/* Outcome pricing (migration 20261105091200): why the agency rejected a filing, as the team marked it, and the owner's
+   one-tap dispute. Placetta's fault: nothing is charged and anything paid is refunded; any other reason: the license
+   price is charged when the reason is marked (src/pricing.ts REJECTION_REASONS). */
+export type Rejection = { reason: RejectionReason | null; fault: "placetta" | "not_placetta" | null; note: string | null; marked_at: string | null;
+  dispute: { note: string | null; created_at: string; resolved_at: string | null } | null };
+export async function filingRejection(id: string): Promise<Rejection | null> {
+  const { data, error } = await supabase().from("filings").select("rejection_reason, rejection_fault, rejection_note, rejection_marked_at").eq("id", id).maybeSingle();
+  if (error || !data) return null;
+  const { data: d } = await supabase().from("rejection_disputes").select("note, created_at, resolved_at").eq("filing_id", id).maybeSingle();
+  const r = data as { rejection_reason: RejectionReason | null; rejection_fault: Rejection["fault"]; rejection_note: string | null; rejection_marked_at: string | null };
+  return { reason: r.rejection_reason, fault: r.rejection_fault, note: r.rejection_note, marked_at: r.rejection_marked_at, dispute: (d as Rejection["dispute"]) ?? null };
+}
+export async function disputeRejection(id: string, note?: string): Promise<void> {
+  const { error } = await supabase().rpc("filing_dispute_rejection", { p_id: id, p_note: note ?? null });
+  if (error) throw fromPg(error);
+}
+
 /** Staff add the minutes they spent on a filing (migration 20261025090000_margin_guard); past its budget, a staff alert. */
 export async function addTeamMinutes(id: string, minutes: number): Promise<{ minutes: number; budget: number; tier: string; over: boolean }> {
   const { data, error } = await supabase().rpc("filing_add_team_minutes", { p_id: id, p_minutes: minutes });

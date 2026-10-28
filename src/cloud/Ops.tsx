@@ -9,6 +9,7 @@ import { CompanyMetrics } from "../Metrics";
 import { AskReply } from "./AskReply";
 import { HumanCheckActions } from "./HumanCheck";
 import { OpsMore, OpsTabs, useOpsTab } from "./OpsMore";
+import { REJECTION_REASONS, rejectionReasonOf } from "../pricing";
 
 /* The Placetta team's filing queue. Each request is exactly what the customer approved: the form, the fields,
    the attachments and the agency site. The team checks it against the agency's current requirements, submits it,
@@ -91,6 +92,8 @@ function Detail({ f, me, onChange }: { f: api.QueueRow; me: string; onChange: ()
   const [fee, setFee] = useState(String(f.fee_paid ?? f.fee_estimate ?? ""));
   const [note, setNote] = useState(f.note ?? "");
   const [minutes, setMinutes] = useState("");
+  const [reason, setReason] = useState("");
+  const [rnote, setRnote] = useState("");
   const [checked, setChecked] = useState(f.requirements_checked);
   useEffect(() => setChecked(f.requirements_checked), [f.requirements_checked]);
   useEffect(() => { void api.listLogins(f.workspace_id).then(setLogins).catch(() => setLogins([])); }, [f.workspace_id]);
@@ -161,6 +164,7 @@ function Detail({ f, me, onChange }: { f: api.QueueRow; me: string; onChange: ()
             <b>{f.status === "accepted" ? (lang === "zh" ? "机构已批准" : "Approved by the agency") : f.status === "rejected" ? (lang === "zh" ? "被机构退回" : "Returned by the agency") : (lang === "zh" ? "客户已取消" : "Canceled by the customer")}</b>
             {f.confirmation_number && <span>{(lang === "zh" ? "确认号 " : "Confirmation ") + f.confirmation_number}</span>}
             {f.note && f.status === "rejected" && <span>{f.note}</span>}
+            {f.status === "rejected" && <RejectionFix f={f} act={act} />}
             <span>{f.receipt_path ? (lang === "zh" ? "收据已存入客户文件" : "Receipt is in the customer's documents") : (lang === "zh" ? "尚未上传收据" : "No receipt uploaded yet")}</span>
           </div>
         ) : <>
@@ -195,12 +199,46 @@ function Detail({ f, me, onChange }: { f: api.QueueRow; me: string; onChange: ()
         <div className="q-row">
           {upload}
           <Pill sm onClick={() => void act({ status: "accepted" }, lang === "zh" ? "已标记为批准" : "Marked approved")}>{lang === "zh" ? "机构已批准" : "Agency approved"}</Pill>
-          <Pill sm kind="quiet" onClick={() => { const why = window.prompt(lang === "zh" ? "退回原因（客户可见）" : "Why was it returned? (the customer sees this)"); if (why) void act({ status: "rejected", note: why }); }}>{lang === "zh" ? "被机构退回" : "Agency returned it"}</Pill>
         </div>
+        <form className="q-form" onSubmit={e => { e.preventDefault(); const r = rejectionReasonOf(reason); if (!r) { say(lang === "zh" ? "请选择退回原因" : "Choose why it was returned"); return; } if (!rnote.trim()) { say(lang === "zh" ? "请写一句说明（客户可见）" : "Add a note (the customer sees it)"); return; }
+          void act({ status: "rejected", note: rnote.trim(), rejection_reason: r.id, rejection_note: rnote.trim() }, r.ours ? (lang === "zh" ? "已标记为我们的失误：不收费，已付款项将退还" : "Marked our fault: no charge, anything paid is refunded") : (lang === "zh" ? "已标记：将收取执照费用" : "Marked: the license price is charged")); }}>
+          <b>{lang === "zh" ? "被机构退回" : "Agency returned it"}</b>
+          <select value={reason} onChange={e => setReason(e.target.value)} aria-label={lang === "zh" ? "退回原因" : "Why"}>
+            <option value="">{lang === "zh" ? "选择原因" : "Choose why"}</option>
+            <optgroup label={lang === "zh" ? "快哉的失误：不收费，退还已付款项" : "Placetta's fault: no charge, refund anything paid"}>{REJECTION_REASONS.filter(r => r.ours).map(r => <option key={r.id} value={r.id}>{lang === "zh" ? r.label.zh : r.label.en}</option>)}</optgroup>
+            <optgroup label={lang === "zh" ? "非快哉的失误：收取执照费用" : "Not Placetta's fault: the license price is charged"}>{REJECTION_REASONS.filter(r => !r.ours).map(r => <option key={r.id} value={r.id}>{lang === "zh" ? r.label.zh : r.label.en}</option>)}</optgroup>
+          </select>
+          <input value={rnote} onChange={e => setRnote(e.target.value)} placeholder={lang === "zh" ? "说明（客户可见）" : "Note (the customer sees it)"} aria-label={lang === "zh" ? "说明" : "Note"} />
+          <Pill sm kind="quiet">{lang === "zh" ? "标记退回" : "Mark returned"}</Pill>
+        </form>
         </>}
         {f.status === "accepted" && !f.receipt_path && <div className="q-row">{upload}</div>}
       </section>
     </div>
+  );
+}
+
+/** A rejected filing's reason, as marked (outcome pricing): shown, with any dispute from the owner, and changeable. Changing
+ *  it to Placetta's fault refunds anything paid; to another reason charges the license price (migration 20261105091200). */
+function RejectionFix({ f, act }: { f: api.QueueRow; act: (patch: Parameters<typeof api.updateFiling>[1], done?: string) => Promise<boolean> }) {
+  const { lang } = useApp();
+  const zh = lang === "zh";
+  const [r, setR] = useState<api.Rejection | null>(null);
+  const [pick, setPick] = useState("");
+  const [n, setN] = useState(0);
+  useEffect(() => { void api.filingRejection(f.id).then(setR, () => setR(null)); }, [f.id, f.updated_at, n]);
+  const cur = rejectionReasonOf(r?.reason);
+  const open = !!r?.dispute && !r.dispute.resolved_at;
+  return (
+    <span className="q-reject">
+      <span>{cur ? `${zh ? cur.label.zh : cur.label.en}${cur.ours ? (zh ? "（我们的失误，不收费）" : " (our fault, no charge)") : (zh ? "（已收取执照费用）" : " (license price charged)")}` : (zh ? "尚未标记原因：在标记前不会收费" : "No reason marked yet: nothing is charged until it is")}</span>
+      {open && <span>{zh ? "客户提出异议：" : "The owner disputes it: "}{r?.dispute?.note ?? (zh ? "（未附说明）" : "(no note)")}</span>}
+      <select value={pick} onChange={e => setPick(e.target.value)} aria-label={zh ? "更改原因" : "Change the reason"}>
+        <option value="">{zh ? "更改原因" : "Change the reason"}</option>
+        {REJECTION_REASONS.map(x => <option key={x.id} value={x.id}>{(x.ours ? (zh ? "我们的失误：" : "Our fault: ") : (zh ? "非我们的失误：" : "Not ours: ")) + (zh ? x.label.zh : x.label.en)}</option>)}
+      </select>
+      <button type="button" className="more" disabled={!pick || pick === r?.reason} onClick={() => { const x = rejectionReasonOf(pick); if (x) void act({ rejection_reason: x.id }, x.ours ? (zh ? "已改为我们的失误：将退款" : "Changed to our fault: refunded") : (zh ? "已更改原因" : "Reason changed")).then(() => setN(k => k + 1)); }}>{zh ? "保存" : "Save"}</button>
+    </span>
   );
 }
 

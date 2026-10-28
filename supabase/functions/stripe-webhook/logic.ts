@@ -28,7 +28,9 @@ export async function verified(raw: string, header: string, secret: string, nowS
  *  paid for (it may still record the customer); "async_payment_failed" fulfils nothing. Each event id is applied once
  *  (stripe_events), and completed and async_payment_succeeded can't both fulfil one session: the first is unpaid
  *  whenever the second comes. */
-export type CheckoutEffect = { ws: string | null; paid: boolean; markets: number; license: string | null; packUsd: number; locations: boolean; termYears: number | null; entryCredited: boolean };
+export type CheckoutEffect = { ws: string | null; paid: boolean; markets: number; license: string | null; packUsd: number; locations: boolean; termYears: number | null; entryCredited: boolean;
+  /** outcome pricing: a setup Checkout that saved the owner's card for a license charged on the agency's decision */
+  setup: string | null };
 export function checkoutEffect(type: string, o: Record<string, any>): CheckoutEffect | null {
   if (type !== "checkout.session.completed" && type !== "checkout.session.async_payment_succeeded") return null;
   const ws = typeof o.metadata?.workspace_id === "string" && o.metadata.workspace_id ? o.metadata.workspace_id as string : null;
@@ -43,5 +45,6 @@ export function checkoutEffect(type: string, o: Record<string, any>): CheckoutEf
     locations,
     termYears: locations && o.metadata?.term_years ? Math.max(1, Math.min(3, Number(o.metadata.term_years) || 1)) : null,
     entryCredited: locations && Number(o.metadata?.entry_credit) > 0,
+    setup: type === "checkout.session.completed" && o.mode === "setup" && o.status === "complete" && o.metadata?.kind === "license_setup" && typeof o.metadata?.charge_id === "string" ? o.metadata.charge_id as string : null,
   };
 }

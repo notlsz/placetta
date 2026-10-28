@@ -86,7 +86,7 @@ for (const [where, x] of Object.entries(want)) {
   // the simple model (every new workspace, and the sample): each permit at its list price, complex ones at $999,
   // what staff complete themselves free (src/pricing.ts)
   const tiers = w.apps.filter(a => a.status !== "approved").map(a => licenseTierOf(a.name.en));
-  const simple = tiers.reduce((s, t) => s + (t === "complex" ? SIMPLE.complexUsd : t === "license" ? SIMPLE.licenseUsd : 0), 0) + SIMPLE.planStoreMonthUsd * 12 * Math.max(1, (w.stores ?? []).length);
+  const simple = tiers.reduce((s, t) => s + (t === "complex" ? SIMPLE.complexOnApprovalUsd : t === "license" ? SIMPLE.licenseOnApprovalUsd : 0), 0) + SIMPLE.planStoreMonthUsd * 12 * Math.max(1, (w.stores ?? []).length);
   eq(c.placettaUSD, simple, `${where}: Placetta is each new license at its list price plus the store plan's first year ($${simple})`);
   eq(tiers.includes("complex") && tiers.includes("license"), true, `${where}: a restaurant opening has both standard and complex licenses`);
   eq(c.totalUSD, cents(x.usd + simple), `${where}: the total is what's known, nothing more`);

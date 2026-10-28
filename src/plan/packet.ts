@@ -106,7 +106,7 @@ export function packetForModel(p: Packet, lang: "en" | "zh") {
     markets: p.markets.map(m => ({ place: m.place, country: m.country, permits_in_hand_around: m.opening, steps: m.rows.map(line), ...(m.foreign ? { register_as_foreign_company: line(m.foreign) } : {}) })),
     agency_fees_published: p.fees, fees_not_published: p.unpublished,
     placetta_price: { new_licenses: p.placetta.licenses, complex: p.placetta.complex, tracked_free: p.placetta.free, licenses_usd: p.placetta.usd, store_plan_first_year_usd: p.placetta.storePlanYearUsd,
-      note: `$${SIMPLE.licenseUsd} a license, $${SIMPLE.complexUsd} a complex one, each charged only when approved; $${SIMPLE.planStoreMonthUsd} a store a month on the store plan.` },
+      note: `$${SIMPLE.licenseOnApprovalUsd} a license, $${SIMPLE.complexOnApprovalUsd} a complex one, each charged on the agency's decision: when approved, or when turned down for a reason that isn't Placetta's mistake (nothing if Placetta made the mistake); $${SIMPLE.planStoreMonthUsd} a store a month on the store plan.` },
     note: "Every step is from Placetta's registry with its agency page and the day it was read. A fee the agency doesn't publish stays open: never estimate it. Steps marked confirm aren't stated requirements: say who decides. Prepare each market's applications with prepare_application and that market's store_id.",
   };
 }

@@ -113,7 +113,8 @@ export function stripePriceMatches(p: { unit_amount?: number | null; currency?: 
 
    The model every new workspace sees (the founder's update of 2026-10-22): one subscription, the store plan, at $149 a
    store a month billed yearly, for tracking, renewal monitoring, alerts, the document vault, Odelia's chat and every
-   renewal Odelia files on her own; each new license on top at $299, $999 for a fixed list of complex licenses; a renewal
+   renewal Odelia files on her own; each new license on top at $149, $999 for a fixed list of complex licenses, each
+   charged when the agency decides it (outcome pricing, 2026-10-28, OUTCOME_RULE; before it, $299 paid at approval); a renewal
    that needs Placetta's team, or for a store without the plan, $99 after a one-tap approval; 10 or more stores on the
    plan: every new license included too (the chain plan); the plan preview free; government fees passed through at
    cost. docs/PRICING.md has the Stripe prices to create and the margin math,
@@ -128,8 +129,16 @@ export const SIMPLE = {
   planStoreMonthUsd: 149,   // the store plan, a store a month, billed yearly: tracking, renewal monitoring, alerts, the
                             // document vault, Odelia's chat, and every renewal Odelia files on her own
   planStoreMonthlyUsd: 179, // the same plan month to month, cancel anytime (founder, 2026-10-23)
-  licenseUsd: 299,          // a new license, permit or registration, filed and tracked to approval
-  complexUsd: 999,          // a new license on COMPLEX_LIST
+  /* Outcome pricing, the founder's decision of 2026-10-28, after Sierra and Decagon (pay per resolution), as he
+     corrected it the same day. Approving the filing saves the owner's card with Stripe and charges nothing. Then:
+       approved by the agency (with its confirmation or the license)   charged
+       rejected through Placetta's fault                               not charged; anything paid for it is refunded
+       rejected, not Placetta's fault (REJECTION_REASONS)              charged, when the team marks the reason
+     Off session and once only: one charge per filing, its id the idempotency key, so an approval and a rejection can
+     never both charge. The owner sees the reason and can dispute it with one tap. Before 2026-10-28 a new license was
+     $299, paid when the owner approved the filing; a charge opened at that price keeps it. */
+  licenseOnApprovalUsd: 149, // a new license, permit or registration, filed and tracked, charged on the agency's decision (OUTCOME_RULE)
+  complexOnApprovalUsd: 999, // a new license on COMPLEX_LIST, charged the same way
   renewalUsd: 99,           // a renewal the plan doesn't include (it needs Placetta's team, or the store has no plan), after a one-tap approval
   previewUsd: 0,            // the plan preview: every license a store needs, with fees and timelines, free
   chainMinStores: 10,       // 10 or more stores on the plan: every new license is included too
@@ -188,14 +197,44 @@ export function licenseTierOf(name: string, renewal = false): LicenseTier {
   if (renewal) return "renewal";
   return complexOf(name) ? "complex" : "license";
 }
-export const tierUsd = (t: LicenseTier): number => (t === "complex" ? SIMPLE.complexUsd : t === "renewal" ? SIMPLE.renewalUsd : t === "free" ? 0 : SIMPLE.licenseUsd);
+/** Outcome pricing (2026-10-28): a new license and a complex one are charged on the agency's decision (OUTCOME_RULE),
+ *  never when the owner approves the filing. A renewal the plan doesn't include is still charged when the owner approves it. */
+export const chargedOnApproval = (t: QuoteTier): t is "license" | "complex" => t === "license" || t === "complex";
+
+/** Why an agency rejected a filing, as the Placetta team marks it (filings.rejection_reason). Placetta's fault: nothing
+ *  is charged and anything paid is refunded. Not Placetta's fault: the license price is charged when it's marked. */
+export type RejectionReason = "placetta_wrong_value" | "placetta_wrong_form" | "placetta_missed_document" | "ineligible" | "zoning" | "owner_info" | "owner_withdrew";
+export const REJECTION_REASONS: { id: RejectionReason; ours: boolean; label: { en: string; zh: string } }[] = [
+  { id: "placetta_wrong_value", ours: true, label: { en: "A wrong value in the filing, our mistake", zh: "申报中的数值有误，是我们的失误" } },
+  { id: "placetta_wrong_form", ours: true, label: { en: "The wrong form, our mistake", zh: "表格选错，是我们的失误" } },
+  { id: "placetta_missed_document", ours: true, label: { en: "A document we should have asked for, our mistake", zh: "漏了我们本应提醒的文件，是我们的失误" } },
+  { id: "zoning", ours: false, label: { en: "Zoning doesn't allow it", zh: "分区规定不允许" } },
+  { id: "ineligible", ours: false, label: { en: "The business isn't eligible by law", zh: "依法不符合申请资格" } },
+  { id: "owner_info", ours: false, label: { en: "Information from the business was wrong or incomplete", zh: "企业提供的信息有误或不完整" } },
+  { id: "owner_withdrew", ours: false, label: { en: "The business withdrew it", zh: "企业撤回了申请" } },
+];
+export const rejectionReasonOf = (id: string | null | undefined) => REJECTION_REASONS.find(r => r.id === id) ?? null;
+
+/** The rule in the owner's words, for the approval card, the plans sheet and the landing page. */
+export const OUTCOME_RULE = {
+  short: { en: "when the license is approved. If it's turned down because of a mistake on our side, you pay nothing.",
+    zh: "执照获批时收取。如因我们的失误被退回，您无需付费。" },
+  other: { en: "If the agency turns it down for another reason (zoning, the law, information it was given, or you withdraw it), the price is charged too.",
+    zh: "如机构因其他原因退回（分区规定、法律资格、所提供的信息，或您撤回申请），同样收取该费用。" },
+  card: { en: "Nothing is charged today: Stripe saves your card, and Placetta never sees its number.",
+    zh: "今天不收取任何费用：您的银行卡由 Stripe 保存，快哉看不到卡号。" },
+} as const;
+export const tierUsd = (t: LicenseTier): number => (t === "complex" ? SIMPLE.complexOnApprovalUsd : t === "renewal" ? SIMPLE.renewalUsd : t === "free" ? 0 : SIMPLE.licenseOnApprovalUsd);
 
 /** The Stripe price for each simple item: its env var when set, else the active price with its lookup key. The code
  *  never makes these: until the founder creates one (at exactly this amount), the team sends a quote for that item and
  *  nothing is charged. A price found either way is charged only when Stripe's amount, currency and interval match. */
 export const SIMPLE_PRICE_ENV = {
-  license: { env: "STRIPE_PRICE_LICENSE", lookup: "placetta_license", cents: SIMPLE.licenseUsd * 100, interval: null },
-  complex: { env: "STRIPE_PRICE_LICENSE_COMPLEX", lookup: "placetta_license_complex", cents: SIMPLE.complexUsd * 100, interval: null },
+  /** $149, charged when the agency approves. Its own price and lookup key: the $299 price from before (placetta_license,
+   *  STRIPE_PRICE_LICENSE) is never charged for a new approval. */
+  license: { env: "STRIPE_PRICE_LICENSE_ON_APPROVAL", lookup: "placetta_license_on_approval", cents: SIMPLE.licenseOnApprovalUsd * 100, interval: null },
+  /** $999, the same price as before (the existing placetta_license_complex price), now charged when the agency approves */
+  complex: { env: "STRIPE_PRICE_LICENSE_COMPLEX", lookup: "placetta_license_complex", cents: SIMPLE.complexOnApprovalUsd * 100, interval: null },
   renewal: { env: "STRIPE_PRICE_RENEWAL", lookup: "placetta_renewal", cents: SIMPLE.renewalUsd * 100, interval: null },
   plan: { env: "STRIPE_PRICE_STORE_PLAN", lookup: "placetta_store_plan_year", cents: PLAN_STORE_YEAR_USD * 100, interval: "year" },
   planMonthly: { env: "STRIPE_PRICE_STORE_MONTHLY", lookup: "placetta_store_plan_month", cents: SIMPLE.planStoreMonthlyUsd * 100, interval: "month" },
@@ -231,7 +270,7 @@ export const TYPICAL_OPENING = {
   licenses: 9,   // LLC, statement of information, EIN, seller's permit, business tax certificate, employer registration, fire permit, health permit, sign permit
   complex: 2,    // food facility plan check, building permit for the tenant improvement
 } as const;
-export const typicalOpeningUsd = (): number => TYPICAL_OPENING.licenses * SIMPLE.licenseUsd + TYPICAL_OPENING.complex * SIMPLE.complexUsd;
+export const typicalOpeningUsd = (): number => TYPICAL_OPENING.licenses * SIMPLE.licenseOnApprovalUsd + TYPICAL_OPENING.complex * SIMPLE.complexOnApprovalUsd;
 /** PermitPlace's 2026 range for a restaurant or food service opening: expediter fees only, before municipal fees. */
 export const EXPEDITER_RESTAURANT_USD = { low: 2000, high: 7500, source: "https://permitplace.com/permit-expediter-cost-guide/" } as const;
 
@@ -243,11 +282,13 @@ export type LicenseQuote = {
   priceOk: boolean;
   /** already paid for this filing, so approving files it without charging again */
   paid?: boolean;
+  /** outcome pricing: the owner already approved it with a saved card, so it is charged only when the agency approves */
+  authorized?: boolean;
   line: { en: string; zh: string };
 };
 const usd0 = (n: number) => "$" + n.toLocaleString("en-US");
 /** The words for a quote, shown before approval. govFee: the agency's own fee, passed through at cost, when known. */
-export function licenseQuoteLine(tier: LicenseQuote["tier"], priceOk: boolean, paid = false, govFee?: string | null): { en: string; zh: string } {
+export function licenseQuoteLine(tier: LicenseQuote["tier"], priceOk: boolean, paid = false, govFee?: string | null, authorized = false): { en: string; zh: string } {
   const gov = govFee ? { en: ` The agency's own fee (${govFee}) is passed through at cost, paid to the agency.`, zh: `机构规费（${govFee}）按实际金额代付，直接付给机构。` }
     : { en: " Any agency fee is passed through at cost, paid to the agency.", zh: "如有机构规费，按实际金额代付，直接付给机构。" };
   if (tier === "chain") return { en: `Included: with ${SIMPLE.chainMinStores} or more stores on the plan, every license is.` + gov.en, zh: `已包含：方案内有 ${SIMPLE.chainMinStores} 家及以上门店，每项执照都包含在内。` + gov.zh };
@@ -255,9 +296,11 @@ export function licenseQuoteLine(tier: LicenseQuote["tier"], priceOk: boolean, p
   if (tier === "free") return { en: "Free: Placetta tracks it and your team completes it.", zh: "免费：快哉负责跟踪，由您的团队完成。" };
   const usd = tierUsd(tier);
   if (paid) return { en: `Paid: ${usd0(usd)}. Approve and it's filed.` + gov.en, zh: `已付款：${usd} 美元。批准后即提交。` + gov.zh };
-  const what = tier === "complex" ? { en: `${usd0(usd)}, a complex license (liquor, building plan review or an import permit), filed and tracked to approval.`, zh: `${usd} 美元，复杂执照（酒类、建筑图纸审查或进口许可），提交并跟踪至获批。` }
+  const rule = { en: `${usd0(usd)} ${OUTCOME_RULE.short.en} ${OUTCOME_RULE.other.en}`, zh: `${usd} 美元，${OUTCOME_RULE.short.zh}${OUTCOME_RULE.other.zh}` };
+  if (authorized) return { en: `${rule.en} Your card is saved with Stripe; nothing has been charged yet.` + gov.en, zh: `${rule.zh}您的银行卡已保存在 Stripe，目前尚未收取任何费用。` + gov.zh };
+  const what = tier === "complex" ? { en: `${rule.en} A complex license (liquor, building plan review or an import permit), filed and tracked to a decision. ${OUTCOME_RULE.card.en}`, zh: `${rule.zh}复杂执照（酒类、建筑图纸审查或进口许可），提交并跟踪至机构决定。${OUTCOME_RULE.card.zh}` }
     : tier === "renewal" ? { en: `${usd0(usd)} for this renewal, charged only after you approve it. Renewals Odelia files on her own are included in the $${SIMPLE.planStoreMonthUsd} store plan.`, zh: `本次续期 ${usd} 美元，经您批准后才收费。Odelia 自行提交的续期包含在每月 ${SIMPLE.planStoreMonthUsd} 美元的门店方案中。` }
-    : { en: `${usd0(usd)} for this license, filed and tracked to approval.`, zh: `本项执照 ${usd} 美元，提交并跟踪至获批。` };
+    : { en: `${rule.en} Filed and tracked to a decision. ${OUTCOME_RULE.card.en}`, zh: `${rule.zh}提交并跟踪至机构决定。${OUTCOME_RULE.card.zh}` };
   if (!priceOk) return { en: `${what.en} Online payment isn't set up for it yet, so the team sends a quote. Nothing is charged.`, zh: `${what.zh}该项暂不能在线支付，团队会向您报价，不会收取任何费用。` };
   return { en: what.en + gov.en, zh: what.zh + gov.zh };
 }
@@ -284,5 +327,5 @@ export function priceFacts(model: PriceModel = "simple"): string {
   const s = SIMPLE;
   return model === "legacy"
     ? "This workspace is on a plan it bought before October 2026 and keeps it unchanged; for its price, point the person to Settings, Billing. New customers pay per license."
-    : `Placetta's prices (new customers): the store plan, $${s.planStoreMonthUsd} a store a month billed yearly (or $${s.planStoreMonthlyUsd} a store month to month, cancel anytime), covers tracking, renewal monitoring, alerts, the document vault, chat with you and every renewal you file on your own; each new license, permit or registration filed and tracked to approval $${s.licenseUsd}; complex licenses $${s.complexUsd}, only for ${COMPLEX_LIST.map(c => c.name.en.toLowerCase()).join(", ")}; a renewal that needs Placetta's team, or for a store without the plan, $${s.renewalUsd} after the owner's one-tap approval; ${s.chainMinStores} or more stores on the plan: every new license included too; the plan preview is free; government fees passed through at cost, never marked up. Every charge is shown to an owner before approval and nothing is charged without it. No discounts. Never quote any other number.`;
+    : `Placetta's prices (new customers): the store plan, $${s.planStoreMonthUsd} a store a month billed yearly (or $${s.planStoreMonthlyUsd} a store month to month, cancel anytime), covers tracking, renewal monitoring, alerts, the document vault, chat with you and every renewal you file on your own; each new license, permit or registration filed and tracked to approval $${s.licenseOnApprovalUsd}, charged on the agency's decision: when it's approved, or when it's turned down for a reason that isn't Placetta's mistake (zoning, ineligible by law, wrong or incomplete information from the business, or the business withdrew it); turned down because of a Placetta mistake, nothing is charged and anything paid is refunded; approving the filing saves the owner's card with Stripe and charges nothing that day; complex licenses $${s.complexOnApprovalUsd}, charged the same way, only for ${COMPLEX_LIST.map(c => c.name.en.toLowerCase()).join(", ")}; a renewal that needs Placetta's team, or for a store without the plan, $${s.renewalUsd} after the owner's one-tap approval; ${s.chainMinStores} or more stores on the plan: every new license included too; the plan preview is free; government fees passed through at cost, never marked up. Every charge is shown to an owner before approval and nothing is charged without it. No discounts. Never quote any other number.`;
 }

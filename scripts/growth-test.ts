@@ -176,7 +176,10 @@ export function growthTests(ok: Ok, eq: Eq) {
     eq(inviteLink("https://placetta.com/", "abc"), "https://placetta.com/app/settings/team?hq=abc", "the invite link opens where an owner joins");
     // no public price changed: the landing page still says what it said
     const site = readFileSync("site/index.html", "utf8");
-    ok(["$149", "$299", "$999", "$99"].every(x => site.includes(x)) && !/\$3,500|\$6,500|\$49 pack|Headquarters plans start/.test(site), "the landing page shows the simple model's prices, and none of the old plans");
+    ok(["$149", "$999", "$99"].every(x => site.includes(x)) && !/\$3,500|\$6,500|\$49 pack|Headquarters plans start/.test(site), "the landing page shows the simple model's prices, and none of the old plans");
+    // outcome pricing (2026-10-28): $149 a license when it's approved, nothing if it's turned down because of our mistake
+    ok(!site.includes("$299") && site.includes("If it's turned down because of a mistake on our side, you pay nothing") && site.includes("如因我们的失误被退回，您无需付费")
+      && !/nothing unless (it's )?approved|only when the city approves/i.test(site), "the landing page says $149 when approved, nothing for our mistake, never 'nothing unless approved'");
     ok(!new RegExp(`\\$${APPROVED.personYearUsd} (a|per) (year|person)`).test(site) && !/FOUNDER TO CONFIRM|people past those included/i.test(site), "no proposed price is published");
     ok(!/\$199|\$1,500 (one time|a country|for each)|\$240 (a|per) |\$588|\$79 a|\$500 a month|legal entity in each state|a licensed location|% off/i.test(site), "no owner price is on the landing page");
   }

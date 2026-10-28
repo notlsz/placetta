@@ -29,8 +29,8 @@ function SimplePlans({ reason, prices, onClose }: { reason: "start" | "file"; pr
   const quoted = !!online && !online[planItemOf(interval)];
   const start = async () => { setBusy(true); await cloud.startPlan(n, interval); setBusy(false); };
   const rows: [string, string, string, string][] = [
-    [`${money(SIMPLE.licenseUsd)}`, `${SIMPLE.licenseUsd} 美元`, "Each new license, permit or registration, filed and tracked to approval", "每一项新执照、许可或登记，提交并跟踪至获批"],
-    [`${money(SIMPLE.complexUsd)}`, `${SIMPLE.complexUsd} 美元`, `A complex license: ${COMPLEX_LIST.map(c => c.name.en.toLowerCase()).join(", ")}`, `复杂执照：${COMPLEX_LIST.map(c => c.name.zh).join("、")}`],
+    [`${money(SIMPLE.licenseOnApprovalUsd)}`, `${SIMPLE.licenseOnApprovalUsd} 美元`, "Each new license, permit or registration, filed and tracked. Charged when it's approved; if it's turned down because of a mistake on our side, you pay nothing", "每一项新执照、许可或登记，提交并跟踪。获批时收费；如因我们的失误被退回，您无需付费"],
+    [`${money(SIMPLE.complexOnApprovalUsd)}`, `${SIMPLE.complexOnApprovalUsd} 美元`, `A complex license: ${COMPLEX_LIST.map(c => c.name.en.toLowerCase()).join(", ")}. Charged the same way`, `复杂执照：${COMPLEX_LIST.map(c => c.name.zh).join("、")}。收费方式相同`],
     [`${money(SIMPLE.renewalUsd)}`, `${SIMPLE.renewalUsd} 美元`, "A renewal that needs our team, or for a store without the plan, after your one-tap approval", "需要团队处理的续期，或未开通方案门店的续期，经您一键批准后收费"],
     ["Free", "免费", "Your plan preview: every license a store needs, with agency fees and timelines", "计划预览：门店所需的每一项执照，附机构规费与时间"],
     ["At cost", "按实际金额", "Government fees, paid to each agency, never marked up", "政府规费，直接付给各机构，绝不加价"],
@@ -40,7 +40,7 @@ function SimplePlans({ reason, prices, onClose }: { reason: "start" | "file"; pr
       <header className="m-h">
         <span className="m-eyebrow"><I.card />{b(B("Plans", "方案"))}</span>
         <h2>{reason === "file" ? b(B("Every filing shows its price before you approve it.", "每份申报在您批准前都会显示价格。")) : b(B("One plan per store. Each new license priced on its own.", "每家门店一个方案，每项新执照单独计价。"))}</h2>
-        <p>{b(B(`A permit expediter charges ${money(EXPEDITER_RESTAURANT_USD.low)} to ${money(EXPEDITER_RESTAURANT_USD.high)} for one restaurant opening, before agency fees. On Placetta you see each license's price first, and nothing is charged until you approve it.`, `许可代办公司办一家餐厅开业收费 ${EXPEDITER_RESTAURANT_USD.low.toLocaleString("en-US")} 至 ${EXPEDITER_RESTAURANT_USD.high.toLocaleString("en-US")} 美元，不含政府规费。在快哉，每项执照先显示价格，未经您批准不收任何费用。`))} <a href={EXPEDITER_RESTAURANT_USD.source} target="_blank" rel="noopener noreferrer">{b(B("Source: PermitPlace", "来源：PermitPlace"))}</a></p>
+        <p>{b(B(`A permit expediter charges ${money(EXPEDITER_RESTAURANT_USD.low)} to ${money(EXPEDITER_RESTAURANT_USD.high)} for one restaurant opening, before agency fees. On Placetta you see each license's price first, and a new license is charged when it's approved, never when you approve the filing.`, `许可代办公司办一家餐厅开业收费 ${EXPEDITER_RESTAURANT_USD.low.toLocaleString("en-US")} 至 ${EXPEDITER_RESTAURANT_USD.high.toLocaleString("en-US")} 美元，不含政府规费。在快哉，每项执照先显示价格，新执照在获批时收费，而不是在您批准申报时。`))} <a href={EXPEDITER_RESTAURANT_USD.source} target="_blank" rel="noopener noreferrer">{b(B("Source: PermitPlace", "来源：PermitPlace"))}</a></p>
         <button type="button" className="icbtn close" onClick={onClose} aria-label={t("close")}><I.x /></button>
       </header>
       <div className="m-body plans">
@@ -65,12 +65,12 @@ function SimplePlans({ reason, prices, onClose }: { reason: "start" | "file"; pr
               </div></>}
           </section>
           <section className="plan perloc">
-            <div className="plan-h"><b>{b(B("Each new license", "每项新执照"))}</b><em>{b(B("Shown before you approve", "批准前显示价格"))}</em></div>
+            <div className="plan-h"><b>{b(B("Each new license", "每项新执照"))}</b><em>{b(B("Charged when it's approved", "获批时收费"))}</em></div>
             <ul className="simple-rows">{rows.map(([v, vz, en, z], i) => <li key={i}><b>{zh ? vz : v}</b><span>{zh ? z : en}</span></li>)}</ul>
-            <p className="note">{b(B(`A typical opening, ${TYPICAL_OPENING.where.en}: ${TYPICAL_OPENING.licenses} licenses at ${money(SIMPLE.licenseUsd)} and ${TYPICAL_OPENING.complex} building plan reviews at ${money(SIMPLE.complexUsd)}, ${money(typicalOpeningUsd())} in all, plus agency fees at cost.`, `一次典型开业（${TYPICAL_OPENING.where.zh}）：${TYPICAL_OPENING.licenses} 项执照每项 ${SIMPLE.licenseUsd} 美元，${TYPICAL_OPENING.complex} 项建筑图纸审查每项 ${SIMPLE.complexUsd} 美元，合计 ${typicalOpeningUsd().toLocaleString("en-US")} 美元，另加按实际金额支付的机构规费。`))}</p>
+            <p className="note">{b(B(`A typical opening, ${TYPICAL_OPENING.where.en}: ${TYPICAL_OPENING.licenses} licenses at ${money(SIMPLE.licenseOnApprovalUsd)} and ${TYPICAL_OPENING.complex} building plan reviews at ${money(SIMPLE.complexOnApprovalUsd)}, ${money(typicalOpeningUsd())} in all, plus agency fees at cost. A license turned down because of a mistake on our side costs nothing.`, `一次典型开业（${TYPICAL_OPENING.where.zh}）：${TYPICAL_OPENING.licenses} 项执照每项 ${SIMPLE.licenseOnApprovalUsd} 美元，${TYPICAL_OPENING.complex} 项建筑图纸审查每项 ${SIMPLE.complexOnApprovalUsd} 美元，合计 ${typicalOpeningUsd().toLocaleString("en-US")} 美元，另加按实际金额支付的机构规费。如某项执照因我们的失误被退回，该项不收费。`))}</p>
           </section>
         </div>
-        <p className="note">{b(B("Each filing's price shows in its card before you approve it, and nothing is charged without your approval. Payments are handled by Stripe.", "每份申报的价格会在批准前显示在卡片中，未经您批准不会收取任何费用。付款由 Stripe 处理。"))} <a href="mailto:support@placetta.com?subject=Placetta%20plan">{b(B("Talk to us", "联系我们"))}</a></p>
+        <p className="note">{b(B("Each filing's price shows in its card before you approve it. Approving a new license saves your card with Stripe and charges nothing that day. It's charged when the license is approved, or when the agency turns it down for a reason that isn't our mistake (zoning, eligibility under the law, information it was given, or you withdraw it); you see the reason and can dispute it. Turned down because of a mistake on our side: you pay nothing, and anything paid is refunded. Payments are handled by Stripe, and Placetta never sees your card number.", "每份申报的价格会在批准前显示在卡片中。批准新执照时，您的银行卡保存在 Stripe，当天不收取任何费用。执照获批时收费；机构因非我们失误的原因退回时（分区规定、法律资格、所提供的信息，或您撤回申请）也会收费，您可以查看原因并提出异议。如因我们的失误被退回：您无需付费，已付费用全额退还。付款由 Stripe 处理，快哉看不到您的卡号。"))} <a href="mailto:support@placetta.com?subject=Placetta%20plan">{b(B("Talk to us", "联系我们"))}</a></p>
       </div>
     </Modal>
   );

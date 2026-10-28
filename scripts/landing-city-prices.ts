@@ -1,7 +1,7 @@
 /* npm run landing:cities: the per-city restaurant opening the landing page's pricing table shows when a visitor has
    typed a city in the hero. Each count comes from Placetta's own registry plan for a restaurant in that city
    (src/plan/preview.ts, the same plan the app starts with), priced by src/pricing.ts the way the billing function
-   prices it: licenses at $299, complex ones at $999, the free ones (inspections, staff certificates) not counted.
+   prices it: licenses at $149, complex ones at $999 (outcome pricing, 2026-10-28), the free ones (inspections, staff certificates) not counted.
    Only US cities whose city or county steps are in the registry are written, so the number is never a generic guess.
    Writes CITY_PRICES into site/index.html (between its city-prices markers). Run it after the forms registry changes;
    --check exits 1 when the page is out of date, --print shows the counts and --list every filing. */
@@ -24,7 +24,7 @@ for (const city of cities) {
     if (t === "license") n++; else if (t === "complex") c++;
     if (process.argv.includes("--list")) console.log(city, "|", t, "|", a.name.en);
   }
-  out[city] = { n, c, usd: n * SIMPLE.licenseUsd + c * SIMPLE.complexUsd };
+  out[city] = { n, c, usd: n * SIMPLE.licenseOnApprovalUsd + c * SIMPLE.complexOnApprovalUsd };
 }
 if (process.argv.includes("--print")) console.log(JSON.stringify(out, null, 1));
 else {

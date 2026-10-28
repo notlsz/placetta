@@ -8,6 +8,7 @@ import { CallsList } from "./Calls";
 import { TalkSheet } from "./Talk";
 import { useChannels } from "./channels";
 import { sendingIn, timeLeft } from "./hold";
+import { RejectionReason } from "./RejectionReason";
 
 /* The finished moment (supabase/functions/_shared/carry.ts licenseMoment): once the agency issues it, the license
    itself, one tap away, with its number and when it renews. And what Odelia wrote the agency as the business's agent,
@@ -145,6 +146,7 @@ export function StatusTimeline({ a, filing }: { a: Application; filing: api.Fili
       ) : <p className="tl-soon quiet">{zh ? "致电机构和现场翻译即将推出。" : "Agency calls and the interpreter are coming soon."}</p>)}
       {said && <p className="tl-said" role="status">{said}</p>}
       {t.license && (t.license.path || filing.status === "accepted") && <LicenseCard a={a} filing={filing} lic={t.license} zh={zh} />}
+      {filing.status === "rejected" && <RejectionReason filing={filing} />}
       {t.outbox && <Sends list={t.outbox} zh={zh} acts={acts} now={now} onUndo={id => void undo(id)} />}
       {t.events.length > 0 && (
         <ol className="tl-events">

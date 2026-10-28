@@ -11,7 +11,7 @@
 import { UPDATED } from "../legal";
 import { moreRest, moreRpc, type PreviewKit } from "./previewMore";
 import { trustRpc } from "./previewTrust";
-import { licenseQuoteLine, licenseTierOf, SIMPLE, tierUsd } from "../pricing";
+import { chargedOnApproval, licenseQuoteLine, licenseTierOf, SIMPLE, tierUsd } from "../pricing";
 
 export const PREVIEW_CODE = "123456";
 
@@ -364,9 +364,12 @@ async function rest(req: Request, url: URL, c: { sub: string; aal: string } | nu
         const b = t("billing").find(x => x.workspace_id === it.workspace_id);
         // the database's can_file_app: a paid plan, or on the simple model this filing's own charge paid
         const paidCharge = t("license_charges").find(x => x.workspace_id === it.workspace_id && x.ref === it.app_id && x.status === "paid");
-        const allowed = b?.price_model === "simple" ? !!(b.comped || (b.subscription_status === "active" && Number(b.paid_locations) >= SIMPLE.chainMinStores) || paidCharge) : !!(b?.comped || b?.subscription_status === "active");
+        // outcome pricing: an authorized charge (card saved, nothing charged) lets its filing go in once
+        const authCharge = t("license_charges").find(x => x.workspace_id === it.workspace_id && x.ref === it.app_id && x.status === "authorized" && !x.filing_id);
+        const allowed = b?.price_model === "simple" ? !!(b.comped || (b.subscription_status === "active" && Number(b.paid_locations) >= SIMPLE.chainMinStores) || paidCharge || authCharge) : !!(b?.comped || b?.subscription_status === "active");
         if (!isOwner(String(it.workspace_id), c) || !allowed) return pgErr("new row violates row-level security policy", "42501", 403);
         if (paidCharge) Object.assign(paidCharge, { status: "used" });
+        else if (authCharge) Object.assign(authCharge, { filing_id: row.id });
         if (rows.some(r => r.workspace_id === it.workspace_id && r.app_id === it.app_id && ["requested", "in_progress", "needs_info", "submitted"].includes(String(r.status)))) return pgErr("This application is already with the team.", "23505", 409);
         Object.assign(row, { status: "requested", approved_by: c.sub, approved_at: now(), assigned_to: null, requirements_checked: false, confirmation_number: null, fee_paid: null, receipt_path: null, note: null, payment_url: null, customer_paid_at: null, submitted_at: null, decided_at: null, updated_at: now() });
         audit(String(row.workspace_id), c.sub, "you", "Approved for filing by the Placetta team", "批准由快哉团队提交", row.title as { en: string; zh: string });
@@ -430,15 +433,22 @@ async function functions(name: string, req: Request, c: { sub: string; aal: stri
           if (!app) return fnErr("not_found", "That filing isn't in this workspace. Nothing was charged.", 404);
           const onPlan = bl.subscription_status === "active", covered = bl.comped || (onPlan && Number(bl.paid_locations) >= SIMPLE.chainMinStores);
           const paid = t("license_charges").find(x => x.workspace_id === ws && x.ref === body.ref && x.status === "paid");
+          // outcome pricing: a new or complex license approved with a saved card, charged on the agency's decision
+          const authorized = t("license_charges").find(x => x.workspace_id === ws && x.ref === body.ref && x.status === "authorized");
           const renewal = t("license_charges").some(x => x.workspace_id === ws && x.ref === body.ref && x.status === "used");
           const base = licenseTierOf(app.name.en, renewal);
           // the preview treats every renewal as one Odelia files on her own
           const tier = covered ? "chain" as const : onPlan && base === "renewal" ? "plan" as const : base;
           const cents = tier === "chain" || tier === "plan" ? 0 : tierUsd(tier) * 100;
-          const quote = { tier, cents, priceOk: true, ...(paid ? { paid: true } : {}), line: licenseQuoteLine(tier, true, !!paid) };
+          const quote = { tier, cents, priceOk: true, ...(paid ? { paid: true } : {}), ...(authorized ? { authorized: true } : {}), line: licenseQuoteLine(tier, true, !!paid, null, !!authorized) };
           if (body.action === "license_quote") return json({ ok: true, quote });
           const no = needOwner(); if (no) return no;
           if (body.shown_tier !== tier || body.shown_cents !== cents) return fnErr("price_changed", "The price changed since it was shown. Nothing was charged.", 409);
+          if (chargedOnApproval(tier)) {
+            if (!authorized && !paid) t("license_charges").push({ id: uuid(), workspace_id: ws, ref: body.ref, tier, cents, status: "authorized", collect: "on_approval", created_at: now() });
+            audit(ws, c.sub, "you", "Approved a filing, card saved, nothing charged", "批准了申报，已保存银行卡，未收费", quote.line);
+            save(); return json({ ok: true, paid: !!paid, authorized: !paid, cents });
+          }
           if (tier !== "chain" && !paid) t("license_charges").push({ id: uuid(), workspace_id: ws, ref: body.ref, tier, cents, status: "paid", created_at: now() });
           audit(ws, c.sub, "you", "Approved a filing charge", "批准了申报费用", quote.line);
           save(); return json({ ok: true, paid: true, ...(tier === "chain" ? { included: true } : {}) });

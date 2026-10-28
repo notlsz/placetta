@@ -9,7 +9,7 @@ const price = (id: string, lookup_key: string, cents: number, interval: string |
 /** The live account as the founder left it: the six current prices and the six legacy ones, all active. */
 const LIVE: P[] = [
   price("price_m", "placetta_store_plan_month", 17900, "month"), price("price_y", "placetta_store_plan_year", 178800, "year"),
-  price("price_l", "placetta_license", 29900), price("price_c", "placetta_license_complex", 99900), price("price_r", "placetta_renewal", 9900),
+  price("price_l", "placetta_license_on_approval", 14900), price("price_l299", "placetta_license", 29900), price("price_c", "placetta_license_complex", 99900), price("price_r", "placetta_renewal", 9900),
   price("price_p", "placetta_odelia_pack", 4900),
   price("price_pro", "placetta_pro_year", 358800, "year"), price("price_ess", "placetta_essentials_year", 178800, "year"), price("price_of", "placetta_opening_food", 650000),
   price("price_or", "placetta_opening_retail", 350000), price("price_g", "placetta_guarantee", 250000), price("price_e", "placetta_entry", 29900),
@@ -114,7 +114,7 @@ Deno.test("itemOf and storePlanItemOf know a price by its id or its lookup key",
   assertEquals(storePlanItemOf({ id: "price_m", lookup_key: "placetta_store_plan_month" }, env), "planMonthly");
   assertEquals(storePlanItemOf({ id: "price_y", lookup_key: "placetta_store_plan_year" }, env), "plan");
   assertEquals(storePlanItemOf({ id: "price_env_y" }, env), "plan");
-  assertEquals(storePlanItemOf({ id: "price_l", lookup_key: "placetta_license" }, env), null);
+  assertEquals(storePlanItemOf({ id: "price_l", lookup_key: "placetta_license_on_approval" }, env), null);
 });
 
 Deno.test("the webhook: every event the app relies on", () => {
@@ -180,7 +180,7 @@ Deno.test("billing health: today's live state, then after ensure", async () => {
   assert(!s.calls.some((c) => c.method === "POST" && c.path === "prices"));
 
   // a price missing and one at the wrong amount are named
-  const bad = fakeStripe({ prices: LIVE.filter((p) => p.lookup_key !== "placetta_renewal").map((p) => p.lookup_key === "placetta_license" ? { ...p, unit_amount: 29800 } : p) });
+  const bad = fakeStripe({ prices: LIVE.filter((p) => p.lookup_key !== "placetta_renewal").map((p) => p.lookup_key === "placetta_license_on_approval" ? { ...p, unit_amount: 14800 } : p) });
   const h = await billingHealth(env, memStore(), URL_, { f: bad.f, ensure: true });
-  assert(h.problems.some((p) => p.includes("placetta_renewal")) && h.problems.some((p) => p.includes("placetta_license differs")), h.problems.join("; "));
+  assert(h.problems.some((p) => p.includes("placetta_renewal")) && h.problems.some((p) => p.includes("placetta_license_on_approval differs")), h.problems.join("; "));
 });
