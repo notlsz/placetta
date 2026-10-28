@@ -118,6 +118,8 @@ export type EntityFiling = {
   agent?: { required: boolean; source?: FactSource; note?: Bi };
   /** The recurring report Odelia renews: its name, fee, due-date rule in words, and its source. */
   report?: { name: Bi; feeUsd: number | null; due: Bi; source?: FactSource; feeSource?: FactSource };
+  /** The sentence that states the filing fee, when the entry's proof (from an earlier pass) states the requirement. */
+  feeSource?: FactSource;
   /** Why the row has no proof: the official page refused automated reads (VERIFY_BLOCKED style), for a person to read. */
   blocked?: string;
   /** The portal's flow needs an account login before any form is shown: no playbook is written for it. */
@@ -803,6 +805,9 @@ export const ENTITY_MISSING = [...applyEntities(FORMS, ENTITY_ROWS), ...sElectio
   foreign: ["https://www.irs.gov/instructions/i2553", "It has no nonresident alien shareholders (other than as potential current beneficiaries of an ESBT)."],
   due: ["https://www.irs.gov/instructions/i2553", "Form 2553 generally must be filed no later than 2 months and 15 days after the date entered for item E."],
 })];
+// filings only an LLC makes stay out of a corporation's plan: New York's LLC publication, California's LLC tax and the
+// LLC's Statement of Information (a corporation files its own, src/forms/entity-data.ts)
+for (const id of ["ny-dos-pub", "ca-ftb-3522", "ca-llc-12"]) { const f = FORMS.find(g => g.id === id); if (f && !(f.unless ?? []).includes("corp")) f.unless = [...(f.unless ?? []), "corp"]; }
 // a company row whose official page couldn't be read says what blocked it, as every unverified entry does
 for (const x of ENTITY_ROWS) { const f = FORMS.find(g => g.id === x.form.id); if (f && !f.proof && f.entity?.blocked) VERIFY_BLOCKED[f.id] = f.entity.blocked; }
 
@@ -863,7 +868,10 @@ export function placesOf(place: string): Where[] {
     const c = up?.county ? up : world.city?.state && !outside ? countyFor(world.city.en, world.city.state) : undefined;
     if (c?.county && !c.ownHealth && !out.includes(c.county.code)) out.push(c.county.code);
     if (c?.county?.code === "LAC" && c.unincorporated) out.push("LACU");
-    if (st && /^[A-Z]{2}$/.test(st) && !out.includes(st)) out.push(st);
+    // Louisiana's postal code is the City of Los Angeles's code here ("LA"), so Louisiana's own filings are under "LOU"
+    // and a Louisiana address never picks up Los Angeles's steps
+    const stCode = st === "LA" ? "LOU" : st;
+    if (stCode && /^[A-Z]{2,3}$/.test(stCode) && !out.includes(stCode)) out.push(stCode);
   }
   // A "Las Vegas" address is in the City of Las Vegas or in unincorporated Clark County (the Strip is in Paradise), and
   // each licenses its own businesses; Henderson and North Las Vegas license their own too. The Health District's steps

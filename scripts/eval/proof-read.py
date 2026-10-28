@@ -44,6 +44,10 @@ WEBFETCH_SEEN = {
     "https://aucklandcouncil.govt.nz/en/licences-regulations/business-licences/food-businesses-quality-grading/open-food-business/apply-food-registration.html": "2026-10-23",
     # the verification pass (src/forms/verify.ts): Santa Clara County's DEH answers curl with 403
     "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and": "2026-10-23",
+    # company formation and foreign qualification (src/forms/entities.ts): ilga.gov fails curl's certificate check and
+    # sos.iowa.gov answers curl with 403; each sentence was read word for word with WebFetch
+    "https://ilga.gov/Documents/legislation/ilcs/documents/080501800K50-10.htm": "2026-10-27",
+    "https://sos.iowa.gov/businesses/business-entity-forms-and-fees": "2026-10-27",
 }
 # pages that refused curl and WebFetch alike (a 403, a Cloudflare wall, a page built in script), read by a person in a
 # real browser and the sentence copied as it appears there, by day

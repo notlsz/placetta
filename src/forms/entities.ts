@@ -67,10 +67,15 @@ export type Row = {
   report?: Report | null;
   agent?: Q | null;
   blocked?: string; loginOnly?: boolean;
+  /** the entry's own proof is no longer on its page (a re-read didn't find it): this pass's proof replaces it */
+  replaceProof?: boolean;
 };
 export type Key = "llc-form" | "llc-qualify" | "corp-form" | "corp-qualify";
 export type StateData = {
   st: string; name: T; agency: T;
+  /** the code the library files the state's rows under, when it isn't the postal code (Louisiana: "LOU", since "LA" is
+      the City of Los Angeles in src/forms/registry.ts placesOf) */
+  where?: string;
   /** the office's own site (linked when a row has nothing better) and the filing portal */
   site: string; portal?: string;
   method?: Method; loginOnly?: boolean;
@@ -130,7 +135,7 @@ function report(r: Report | undefined | null): EntityFiling["report"] {
 
 /** What one row is, as built from its state's data: the new entry (when the library has none), or the facts to put on
     the library's own entry. */
-export type Built = { key: Key; st: string; existing?: string; form: OfficialForm };
+export type Built = { key: Key; st: string; existing?: string; form: OfficialForm; replaceProof?: boolean };
 export function buildState(s: StateData): Built[] {
   const out: Built[] = [];
   for (const k of KEYS) {
@@ -155,7 +160,7 @@ export function buildState(s: StateData): Built[] {
     const { needs, unless } = needsOf(k);
     const f: OfficialForm = {
       id: r.id ?? `${s.st.toLowerCase()}-${kind}-${action}`,
-      form: r.form ?? doc[0], title: title(k, s, doc), agency: b(s.agency), level: "state", where: s.st, segments: ALL, needs, ...(unless ? { unless } : {}),
+      form: r.form ?? doc[0], title: title(k, s, doc), agency: b(s.agency), level: "state", where: s.where ?? s.st, segments: ALL, needs, ...(unless ? { unless } : {}),
       method, how: how(method, s.portal, !!(r.loginOnly ?? s.loginOnly), !!blocked), url, info: r.proof?.[0] ?? s.site,
       fee: blocked ? null : r.fee ?? null, currency: "USD", ...(r.feeNote && !blocked ? { feeNote: b(r.feeNote) } : {}),
       ...(p ? { takes: p.standard, takesDays: p.days, takesSource: `${p.source.url} (${p.source.checked})` } : {}),
@@ -164,7 +169,7 @@ export function buildState(s: StateData): Built[] {
       ...(r.proof ? { proof: { read: r.proof[0], quote: r.proof[1], checked: READ_ENT } } : {}),
       ...(p ? { processing: p } : {}), ...(x.length ? { expedite: x } : {}), entity,
     };
-    out.push({ key: k, st: s.st, existing: r.id, form: f });
+    out.push({ key: k, st: s.st, existing: r.id, form: f, ...(r.replaceProof ? { replaceProof: true } : {}) });
   }
   return out;
 }
@@ -201,8 +206,16 @@ export function applyEntities(forms: OfficialForm[], built: Built[]): string[] {
     if (n.processing) { f.processing = n.processing; f.takes = n.takes; f.takesDays = n.takesDays; f.takesSource = n.takesSource; }
     if (n.expedite) f.expedite = n.expedite;
     if (n.renews) f.renews = n.renews;
-    // a proof read in this pass states the fee: it replaces the entry's proof, and the link moves to the page it's on
-    if (n.proof) { f.proof = n.proof; f.info = n.proof.read; if (n.fee != null) f.fee = n.fee; if (n.feeNote) f.feeNote = n.feeNote; f.checked = f.checked === "form" ? "form" : "page"; }
+    // a proof read in this pass states the fee. The entry keeps the proof it had (the requirement, which the accuracy
+    // sets read), and this pass's sentence becomes its fee source; an entry with no proof takes this one
+    if (n.proof) {
+      // the fee read now replaces the entry's old note (which may say the fee wasn't confirmed). A different fee is a
+      // conflict unless the new row's note explains it (e.g. Minnesota: $185 by mail, $205 online)
+      if (n.fee != null) { if (f.fee != null && f.fee !== n.fee && !n.feeNote) missing.push(`${f.id}: had fee ${f.fee}; ${n.fee} was read on ${n.proof.read}`); f.fee = n.fee; if (!n.feeNote) delete f.feeNote; }
+      if (n.feeNote) f.feeNote = n.feeNote;
+      if (f.proof && !x.replaceProof) f.entity = { ...f.entity!, feeSource: { url: n.proof.read, quote: n.proof.quote, checked: n.proof.checked } };
+      else { f.proof = n.proof; f.info = n.proof.read; f.checked = f.checked === "form" ? "form" : "page"; }
+    }
     // an entry with a proof from an earlier pass is verified; this pass's blocked reason (no fee page read) stays as a note
     if (f.proof && f.entity?.blocked) { f.entity = { ...f.entity, blocked: undefined }; delete f.entity.blocked; }
   }
