@@ -22,6 +22,12 @@ import type { Have } from "../forms/lifecycle";
 
 export type PreviewOptions = {
   entity?: string;          // the legal entity, if it exists already (then no formation step)
+  /** where that entity was formed: a two-letter state, or "abroad" (a company from another country). A company formed
+   *  in another state or abroad registers here (foreign qualification) instead of forming again (src/forms/entities.ts). */
+  formedIn?: string;
+  /** the company is (or will be) a corporation, not an LLC: its formation or registration is the corporation's. Read
+   *  from the entity's name ("Inc.", "Corp.") when not given. */
+  corp?: boolean;
   employees?: boolean;      // hires staff (default yes)
   signage?: boolean;        // puts up a sign (default yes)
   buildout?: boolean;       // builds out the space (default yes)
@@ -300,6 +306,19 @@ export function dealsInFood(what: string, segment: Segment = segmentOf(what)): b
     || (!FURNITURE.test(what) && /\b(teas?|coffees?|beverages?|drinks?|juices?|candy|candies|confectionery|spices?|sauces?|seasonings?|noodles?)\b|茶|咖啡|饮料|饮品|糖果|调料|酱/i.test(what));
 }
 
+/** Where an existing company was formed, against the store's state: "here" (nothing to register), "other" (another US
+ *  state: it registers here as a foreign company), "abroad" (another country: the same registration, and the federal
+ *  filings a foreign company owes), or undefined when it isn't known. */
+export function companyHome(formedIn: string | undefined, where: string): "here" | "other" | "abroad" | undefined {
+  const f = (formedIn ?? "").trim();
+  if (!f) return undefined;
+  if (/^(abroad|foreign|overseas|境外|海外)$/i.test(f)) return "abroad";
+  const st = usPlace(where).state ?? stateOf(where);
+  const code = /^[A-Za-z]{2}$/.test(f) && STATES[f.toUpperCase()] ? f.toUpperCase() : stateOf(f);
+  if (!code) return "abroad";   // a country, not a US state
+  return st && code === st ? "here" : "other";
+}
+
 export function previewPlan(what: string, where: string, opening?: string, o: PreviewOptions = {}): PreviewPlan {
   const today = o.today ?? daysFromNow(0);
   const segment = segmentOf(what);
@@ -309,7 +328,11 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
   const employees = o.employees ?? true, buildout = o.buildout ?? !mobile;
   const alcohol = o.alcohol ?? sellsAlcohol(what);
   // a furniture brand: wood goods, upholstered furniture and clothing storage units, read from what it is (src/forms/furniture.ts)
-  const needs = { food, employees, signage: o.signage ?? !mobile, buildout, newEntity: !(o.entity ?? "").trim(), imports: o.imports ?? imports(what), alcohol, terrace: o.terrace ?? terrace(what), ...furnitureNeeds(what), ...sectorNeeds(what),
+  // the company: none yet, it's formed here; one formed in another state or abroad registers here instead
+  const legal = (o.entity ?? "").trim(), home = companyHome(o.formedIn, where);
+  const corp = o.corp ?? /\b(inc|incorporated|corp|corporation)\.?\s*$/i.test(legal);
+  const needs = { food, employees, signage: o.signage ?? !mobile, buildout, newEntity: !legal, imports: o.imports ?? imports(what), alcohol, terrace: o.terrace ?? terrace(what), ...furnitureNeeds(what), ...sectorNeeds(what),
+    ...(legal && home === "abroad" ? { foreignEntity: true } : legal && home === "other" ? { outOfState: true } : {}), ...(corp ? { corp: true } : {}),
     // the intake's answers win over what the words suggest
     ...(o.upholstered !== undefined && FURNITURE.test(what) ? { upholstered: o.upholstered } : {}), ...(o.children !== undefined ? { children: o.children } : {}) };
   const info = placeInfo(where), places = placesOf(where);

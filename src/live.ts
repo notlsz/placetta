@@ -1,5 +1,5 @@
 import { answerFits, prefillFromProfile } from "./filingPlaybooks/fill";
-import { entityNeed } from "./entityHome";
+import { entityNeed, isCorporation } from "./entityHome";
 import { PUBLIC_BUNDLE } from "./publicBundle";
 import { inspectionsFor } from "./inspections/forStore";
 import { bookingWay, callScript, isWindow, METHOD_WORDS, slotText } from "./inspections/booking";
@@ -508,6 +508,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         hires_staff: { type: "boolean" }, imports_goods: { type: "boolean" }, new_us_company: { type: "boolean", description: "They still need to form the US company" },
         formed_in_another_us_state: { type: "boolean", description: "The company exists, formed in another US state: it registers here (set from the facts when they say)" },
         foreign_company_registers: { type: "boolean", description: "A company formed in another country registers to do business here" },
+        is_corporation: { type: "boolean", description: "The company is (or will be) a corporation, not an LLC: its formation or registration is the corporation's" },
         builds_out: { type: "boolean", description: "Construction or remodeling of the space" }, exterior_sign: { type: "boolean" },
         hazmat_or_batteries: { type: "boolean" }, sells_cosmetics: { type: "boolean" }, food_warehouse: { type: "boolean" }, manhattan_below_96th: { type: "boolean" },
         serves_alcohol: { type: "boolean", description: "Sells or serves beer, wine or spirits" },
@@ -520,7 +521,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
       execute(i) {
         const segment = segmentOf(str(i.business) || get().business.en);
         const place = str(i.place) || get().locations.map(l => `${l.name.en}, ${l.county.en}`).join("; ");
-        const needs = { ...(i.hires_staff ? { employees: true } : {}), ...(i.imports_goods ? { imports: true } : {}), ...(i.new_us_company ? { newEntity: true } : {}), ...(i.foreign_company_registers ? { foreignEntity: true } : {}), ...(i.formed_in_another_us_state || placeState(place) && entityNeed(get().facts, placeState(place)) === "register" ? { outOfState: true } : {}),
+        const needs = { ...(i.hires_staff ? { employees: true } : {}), ...(i.imports_goods ? { imports: true } : {}), ...(i.new_us_company ? { newEntity: true } : {}), ...(i.foreign_company_registers ? { foreignEntity: true } : {}), ...(i.is_corporation || (i.is_corporation === undefined && isCorporation(get().facts)) ? { corp: true } : {}), ...(i.formed_in_another_us_state || placeState(place) && entityNeed(get().facts, placeState(place)) === "register" ? { outOfState: true } : {}),
           ...(i.builds_out ? { buildout: true } : {}), ...(i.exterior_sign ? { signage: true } : {}), ...(i.hazmat_or_batteries ? { hazmat: true } : {}), ...(i.sells_cosmetics ? { cosmetics: true } : {}),
           ...(i.food_warehouse || dealsInFood(str(i.business) || get().business.en, segment) ? { food: true } : {}), ...(i.manhattan_below_96th ? { manhattan: true } : {}), ...(i.serves_alcohol ? { alcohol: true } : {}), ...(i.outdoor_seating ? { terrace: true } : {}),
           // a furniture brand: wood goods, upholstered furniture, dressers and chests (src/forms/furniture.ts)
@@ -2107,7 +2108,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           if (entity === "ask") { add(ask, "State the company was formed in", s.name.en); out.push({ store: s.name.en, form: null, note: "The company exists, but the facts don't say which state it was formed in: ask, then call follow_playbook again with that answer. Never prepare a new company's formation for it." }); continue; }
           // every form of this kind the store needs (Miami: the city's business tax receipt and the county's)
           const formsHere = formsFor({ segment, where: s.address, needs: { food: dealsInFood(what, segment), employees: true, signage: true, buildout: true, alcohol: pb.id === "liquor",
-            ...(entity === "register" ? { outOfState: true } : entity === "form" ? { newEntity: true } : {}) } })
+            ...(entity === "register" ? { outOfState: true } : entity === "form" ? { newEntity: true } : {}), ...(isCorporation(w.facts) ? { corp: true } : {}) } })
             .filter(f => pb.match(f) && (entity !== "register" || !!f.needs?.foreignEntity) && (entity !== "form" || !f.needs?.foreignEntity));
           if (!formsHere.length) { out.push({ store: s.name.en, form: null, note: `No separate ${pb.name.en.toLowerCase()} is listed in the library for ${s.address}; another filing may cover it there (find_official_forms lists what this place needs).` }); continue; }
           for (const form of formsHere) {

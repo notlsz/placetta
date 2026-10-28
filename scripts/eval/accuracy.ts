@@ -42,6 +42,7 @@ import { UNREAD, formProof, logStats, planRowProof, proofProblems } from "./proo
 import { MAX_PROOF_AGE } from "../../src/plan/ask";
 import { strictProblems } from "./strict";
 import { failClosedChecks } from "./failclosed";
+import { entityChecks } from "./entity";
 
 import type { Gold } from "./strict";
 type Row = { id: string; name: string; agency: string; level: Level; source?: string; fee: number | null; abstain: boolean; quote?: string };
@@ -340,6 +341,15 @@ if (!GENERAL) {
   console.log(`\nFail closed: ${fc.plans} plans, ${fc.rows} rows (${fc.claims} claims, every one quoted from an official page seen within ${MAX_PROOF_AGE} days; ${fc.abstentions} abstentions, every one naming who to ask with an official link); ${fc.checks.filter(c => c.pass).length} of ${fc.checks.length} checks pass`);
   for (const c of fc.checks) console.log(`${c.pass ? "ok  " : "FAIL"} ${c.name}${c.pass ? "" : `\n     ${c.detail}`}`);
   for (const c of fc.checks) if (!c.pass) fails.push(`fail-closed: ${c.name}`);
+}
+
+// company formation and foreign qualification (scripts/eval/entity.ts): an LLC in DE, CA, NY, TX and FL, a Delaware LLC
+// registering in California and a corporation from abroad registering in New York, on both paths
+if (!GENERAL) {
+  const ent = entityChecks(TODAY);
+  console.log(`\nCompany filings (formation and foreign qualification): ${ent.filter(c => c.pass).length} of ${ent.length} cases pass`);
+  for (const c of ent) console.log(`${c.pass ? "ok  " : "FAIL"} ${c.name}${c.pass ? "" : `\n     ${c.detail}`}`);
+  for (const c of ent) if (!c.pass) fails.push(c.name);
 }
 
 // her written answers: sample mode and the server's grounding (scripts/eval/answers.ts)

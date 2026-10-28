@@ -44,6 +44,16 @@ export function speedCard(f: OfficialForm | undefined, today: string): { standar
   };
 }
 
+/** The approval card's one line about going faster: each current tier, fastest first, as "24-hour $350; same day
+ *  $750 (agency fees, on top of the filing fee)". null when the agency offers none that's current. */
+export function fasterLine(f: OfficialForm | undefined, today: string): Bi | null {
+  const xs = expediteOf(f, today);
+  if (!xs.length) return null;
+  const fee = (x: Expedite, zh: boolean) => (x.feeUsd == null ? (zh ? "费用待定" : "fee set by the agency") : zh ? `${x.feeUsd} 美元` : `$${x.feeUsd.toLocaleString("en-US")}`);
+  return B(`Faster, for an agency fee on top of the filing fee: ${xs.map(x => `${x.label.en} ${fee(x, false)}`).join("; ")}.`,
+    `可付费加急（在申请费之外另付机构费用）：${xs.map(x => `${x.label.zh} ${fee(x, true)}`).join("；")}。`);
+}
+
 /** Every fact source on the library's forms, for the proof re-read (scripts/eval/proof-dump.ts). */
 export function speedSources(forms: OfficialForm[]): { id: string; read: string; quote: string }[] {
   const out: { id: string; read: string; quote: string }[] = [];
@@ -52,6 +62,7 @@ export function speedSources(forms: OfficialForm[]): { id: string; read: string;
     (f.expedite ?? []).forEach((x, k) => out.push({ id: `${f.id}:expedite:${k}`, read: x.source.url, quote: x.source.quote }));
     if (f.entity?.agent?.source) out.push({ id: `${f.id}:agent`, read: f.entity.agent.source.url, quote: f.entity.agent.source.quote });
     if (f.entity?.report?.source) out.push({ id: `${f.id}:report`, read: f.entity.report.source.url, quote: f.entity.report.source.quote });
+    if (f.entity?.feeSource) out.push({ id: `${f.id}:fee`, read: f.entity.feeSource.url, quote: f.entity.feeSource.quote });
     if (f.entity?.eligibility) out.push({ id: `${f.id}:eligibility`, read: f.entity.eligibility.source.url, quote: f.entity.eligibility.source.quote });
     if (f.entity?.report?.feeSource) out.push({ id: `${f.id}:report-fee`, read: f.entity.report.feeSource.url, quote: f.entity.report.feeSource.quote });
   }

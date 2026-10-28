@@ -1,6 +1,7 @@
 import { B, type Bi } from "./bi";
 import type { Application, Approval } from "./model";
 import { formById } from "./forms/registry";
+import { fasterLine } from "./forms/speed";
 import ROUTES from "./forms/filingRoutes.json";
 import STEPS from "./forms/filingSteps.json";
 
@@ -96,10 +97,12 @@ export function expectedTime(app?: Pick<Application, "official" | "est">): Bi | 
 
 /** What an approval card says under its title about who acts and how long it takes. null: a card with no filing (an
  *  upload is the owner's own step). */
-export function approvalRoute(a: Pick<Approval, "kind">, app?: Pick<Application, "official" | "est">): { who: Bi; time?: Bi; steps?: Bi[] } | null {
+export function approvalRoute(a: Pick<Approval, "kind">, app?: Pick<Application, "official" | "est">, today = new Date().toISOString().slice(0, 10)): { who: Bi; time?: Bi; steps?: Bi[]; faster?: Bi } | null {
   if (a.kind === "file") {
     const steps = personSteps(app);
-    return { who: WHO[routeOf(app)], time: expectedTime(app), ...(steps.length ? { steps } : {}) };
+    // the agency's paid expedite tiers, when its own page states them and the quote is current (src/forms/speed.ts)
+    const faster = fasterLine(app?.official ? formById(app.official) : undefined, today);
+    return { who: WHO[routeOf(app)], time: expectedTime(app), ...(steps.length ? { steps } : {}), ...(faster ? { faster } : {}) };
   }
   if (a.kind === "send") return { who: B("Odelia sends it once you approve", "您批准后由 Odelia 发送") };
   if (a.kind === "pay") return { who: B("You pay the agency on its own page", "您在机构官网直接付款") };

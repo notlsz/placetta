@@ -20,6 +20,8 @@ export type FirstInput = {
   months?: number | null;    // when they want to open, in months from now; 0 when already open; null when not sure
   legal?: string;            // the legal business name, when formed
   notFormed?: boolean;       // they said the company isn't formed yet
+  formedIn?: string;         // where the existing company was formed: a state ("DE", "Delaware") or "abroad"
+  corp?: boolean;            // the company is a corporation (or will be one), not an LLC
   owner?: string;            // the owner's full name
   address?: string;          // the store's address as typed
   intake?: Intake;           // the intake's yes-or-no answers (src/plan/intake.ts), only the ones asked
@@ -55,7 +57,7 @@ export function firstWorkspace(o: FirstInput): First {
   // this place, in order, with fees and times, so the first screen already shows the work. Odelia verifies each one
   // against the agency when the plan starts; the rows stay, marked preview until then.
   const ans = o.intake ? intakeAnswers(what, o.intake) : {};
-  const plan = previewPlan(what, place, store.plannedOpen, { entity: legal, storeId: store.id, ...ans });
+  const plan = previewPlan(what, place, store.plannedOpen, { entity: legal, storeId: store.id, ...ans, ...(legal && o.formedIn ? { formedIn: o.formedIn } : {}), ...(o.corp !== undefined ? { corp: o.corp } : {}) });
   // Then every line the answers settle, on every form, and the first win put up for approval (src/plan/prefill.ts).
   const filled = prefill(plan.apps, { what, where: place, legal, owner, address: addressText, brand: o.brand?.trim() ?? "", open });
   store.apps = filled.apps.map(a => a.id);
@@ -68,6 +70,8 @@ export function firstWorkspace(o: FirstInput): First {
       also: plan.also.map(r => ({ id: r.id, group: r.group, line: r.line, verified: r.verified, sources: r.sources })), why: plan.have.manufactures ? "manufactures" : plan.have.imports ? "imports" : "sells" },
     facts: [
       ...(legal ? [{ id: "f-name", group: "business" as const, label: B("Legal name", "法定名称"), value: same(legal), source: FROM_SIGNUP }] : []),
+      // the state the company was formed in: the fact entityNeed reads (src/entityHome.ts) for every later store
+      ...(legal && o.formedIn ? [{ id: "f-formed-in", group: "business" as const, label: B("State of formation", "成立州"), value: same(o.formedIn), source: FROM_SIGNUP }] : []),
       ...(o.notFormed ? [{ id: "f-formed", group: "business" as const, label: B("Company formed", "公司是否已成立"), value: B("Not yet", "尚未成立"), source: FROM_SIGNUP }] : []),
       ...(owner ? [{ id: "f-owner", group: "business" as const, label: B("Owner", "所有人"), value: same(owner), source: FROM_SIGNUP }] : []),
       { id: "f-sell", group: "operations", label: B("What you sell", "销售内容"), value: same(what), source: B("You told me", "您告诉我的") },
