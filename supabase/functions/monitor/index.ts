@@ -34,7 +34,7 @@ import { weekDone, weekDoneUpdate, type WeekAudit } from "../../../src/weekDone.
 import { wsDailyLimit } from "../_shared/ai_gate.ts";
 import { weeklyGovernance } from "./governance.ts";
 import { dueNotices, noticeFor, type RenewalRow } from "./renewal_notice.ts";
-import { billingHealth } from "../_shared/stripe_catalog.ts";
+import { billingHealth, issuingOn } from "../_shared/stripe_catalog.ts";
 import { configStore } from "../_shared/stripe_db.ts";
 // any vendor that may take a conversation (a Gemini key without GEMINI_PAID may not), not just Anthropic or Gemini
 import { canConverse } from "../_shared/llm.ts";
@@ -1141,6 +1141,13 @@ Deno.serve(async (req) => {
     method: "POST", headers: { "Content-Type": "application/json", "x-monitor-key": req.headers.get("x-monitor-key") ?? "" }, body: "{}",
   }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (!sweep) console.error("self-filing sweep did not run");
+  // Single-use cards (STRIPE_ISSUING_ON=1): a card nobody used within its 24 hours is canceled and its charge refunded.
+  if (issuingOn((k) => Deno.env.get(k))) {
+    await fetch(`${SUPABASE_URL}/functions/v1/spend`, {
+      method: "POST", body: JSON.stringify({ action: "sweep_cards" }),
+      headers: { "Content-Type": "application/json", "x-monitor-key": req.headers.get("x-monitor-key") ?? "", Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""}` },
+    }).then((r) => { if (!r.ok) console.error("card sweep", r.status); return r.body?.cancel(); }).catch(() => console.error("card sweep did not run"));
+  }
 
   // Team review (_shared/notices.ts): mentions, assignments and headquarters' questions the app didn't send yet, and
   // the reminders set for today, each by the person's own channel.

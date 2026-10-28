@@ -10,7 +10,7 @@ import type { Address } from "./destinations.ts";
 
 export type Bi = { en: string; zh: string };
 
-const lobAddress = (a: Address & { name: string }) => ({
+export const lobAddress = (a: Address & { name: string }) => ({
   name: a.name.slice(0, 40), address_line1: a.line1, ...(a.line2 ? { address_line2: a.line2 } : {}), address_city: a.city, address_state: a.state, address_zip: a.zip,
   address_country: a.country ?? "US",
 });

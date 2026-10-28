@@ -66,6 +66,9 @@ export type Dest = {
                                                     // Metadata only: activation is still FILER_AGENCIES
   signature: "none" | "typed" | "drawn" | "wet";    // what the agency accepts on this form
   payment?: Payment;                                // how its fee is paid; any fee sends email, fax and mail to the team
+                                                    // (with Placetta paying fees on and the fee authorized, a
+                                                    // "with_filing" fee goes by a Lob check mailed with the form)
+  payTo?: string;                                   // whom a check for its fee is made out to, as the agency writes it
   onBehalf?: "allowed" | "authorization" | "unstated";   // whether a filer may submit it for the business
   authorization?: string;                           // with "authorization": the signed document the agency asks for
   attach?: string[];                                // what the agency says goes with it, as it prints them

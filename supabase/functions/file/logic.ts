@@ -31,6 +31,7 @@ export type Filing = {
   fee_estimate?: number | string | null;            // the agency fee; paid by the person, so never sent by email, fax or mail
   send_after?: string | null;                       // while agent_state is "held": when it goes, unless the person undoes it
   agent_auth?: string | null;                       // sent by Placetta as the business's agent, under this signed packet
+  autopilot_grant?: string | null;                  // filed under this Autopilot grant (its caps hold the fee)
 };
 
 /** Placetta sends this one as the business's named agent (the owner's signed packet, checked by the database's
@@ -47,6 +48,9 @@ export type Env = {
   fax: boolean;              // TELNYX_API_KEY, TELNYX_FAX_CONNECTION_ID and TELNYX_FAX_FROM set
   mail: boolean;             // LOB_API_KEY and LOB_FROM set
   holdMinutes: number;       // SEND_HOLD_MINUTES: the undo window before anything leaves (default 10, 0 turns it off)
+  /** A fee that goes with a mailed filing is paid by a Lob check mailed with the form: STRIPE_ISSUING_ON (Placetta pays
+   *  agency fees at all), the mail set up, and LOB_CHECK_BANK_ACCOUNT (Placetta's verified bank account in Lob). */
+  checks?: boolean;
 };
 
 /** The undo window, from SEND_HOLD_MINUTES: 10 when it isn't set or isn't a number, 0 to switch it off, at most a day. */
@@ -83,6 +87,7 @@ export function envFrom(get: (k: string) => string | undefined): Env {
     fax: !!(get("TELNYX_API_KEY") && get("TELNYX_FAX_CONNECTION_ID") && get("TELNYX_FAX_FROM")),
     mail: !!(get("LOB_API_KEY") && get("LOB_FROM")),
     holdMinutes: holdMinutes(get("SEND_HOLD_MINUTES")),
+    checks: ["1", "on", "true"].includes((get("STRIPE_ISSUING_ON") ?? "").trim().toLowerCase()) && !!(get("LOB_API_KEY") && get("LOB_FROM") && /^bank_\w+$/.test(get("LOB_CHECK_BANK_ACCOUNT") ?? "")),
   };
 }
 
@@ -242,8 +247,10 @@ export function check(f: Filing, d: Dest | undefined, ctx: { docPaths: Set<strin
 
 /** makesAccount: no saved login, but Odelia may make the business's own account on the portal first (accounts.ts
     "business", and the business signed Placetta as its agent with account making switched on: account_authority in
-    20261105090000_agent_accounts.sql). */
-export type Facts = { hasLogin: boolean; mailConnected: boolean; makesAccount?: boolean };
+    20261105090000_agent_accounts.sql). feeAuthority: the filing's fee may be paid by Placetta (a live Autopilot grant
+    behind it, or an owner's approval of this fee; _shared/issuing.ts feeAuthority), checked only when checks are on and
+    a fee goes with the filing. */
+export type Facts = { hasLogin: boolean; mailConnected: boolean; makesAccount?: boolean; feeAuthority?: boolean };
 
 /** The worker goes to make this portal's account for the business: the business's agent authority covers making
     accounts, and the site takes a business's own account ("business"), or nobody has said yet ("unknown": the worker
@@ -263,6 +270,35 @@ export const feeDue = (f: Filing): boolean => Number(f.fee_estimate ?? 0) > 0;
     the business (or its accounts-payable email), so its fee doesn't keep the form off email, fax or mail. */
 export const feeBlocks = (f: Filing, d: Dest | undefined): boolean =>
   d?.payment === "with_filing" || d?.payment === "in_person" || (feeDue(f) && d?.payment !== "invoice");
+
+/** The fee goes with the filing by a Lob check mailed with the form, under the same authority and cap as a card: checks
+    on, the filing's fee authority, an agency that takes the fee with a mailed filing (payment "with_filing", a mailing
+    address), a known fee, nothing but the form to send, and no handwritten signature. Anything else stays with the
+    team, as before. */
+export function checkPays(f: Filing, d: Dest | undefined, env: Env, facts: Facts): boolean {
+  return !!env.checks && facts.feeAuthority === true && !!d?.mail && env.mail && env.channels.includes("mail") && d.payment === "with_filing" &&
+    feeDue(f) && d.signature !== "wet" && !d.owner && extraFiles(f) === 0;
+}
+
+/** The fee in cents a check for this filing is made out for: the registry's fee exactly (an agency wants the exact
+    amount on a check), never above the cap. Null when it can't be. */
+export function checkCents(f: Filing, capCents: number): number | null {
+  const c = Math.round(Number(f.fee_estimate ?? 0) * 100);
+  return c > 0 && c <= capCents && c <= 99_999_999 ? c : null;
+}
+
+/** Lob's POST /v1/checks body: drawn on Placetta's bank account in Lob, to the agency's mailing address with the payee
+    the agency names, first class (Lob mails checks first class only), the filled form attached so check and form go in
+    one envelope, and the filing and purchase in its metadata. */
+export function lobCheckBody(o: { filing: Filing; purchase: string; to: Record<string, string>; payee: string; from: unknown; bank: string; cents: number; file: string; business: string }) {
+  const form = o.filing.payload.form?.en ?? o.filing.payload.official ?? "filing";
+  return {
+    description: `Placetta fee ${o.filing.payload.official ?? ""} ${o.filing.id}`.slice(0, 255),
+    to: { ...o.to, name: o.payee.slice(0, 40) }, from: o.from, bank_account: o.bank, amount: Number((o.cents / 100).toFixed(2)),
+    memo: `${form}`.slice(0, 40), message: `Fee for ${form}, for ${o.business}. The filled form is enclosed. Sent by Placetta on the applicant's behalf.`.slice(0, 400),
+    attachment: o.file, mail_type: "usps_first_class", use_type: "operational", metadata: { filing: o.filing.id, purchase: o.purchase },
+  };
+}
 
 /** "Show Odelia how" (teach mode, worker/filer/src/teach.ts): why it can't start on this filing, or null. The form's
     destination is an agency site, the portal worker is on, and the filing isn't sent, finished or already running.
@@ -298,7 +334,7 @@ export function pick(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Ro
   const on = (c: Channel) => env.channels.includes(c);
   // no saved login: the account is made first, by the worker, when Odelia may make it (worker/filer/src/account.ts)
   if (d.portal && (facts.hasLogin || d.noLogin || facts.makesAccount) && env.portalWorker && on("portal")) return "portal";
-  if (feeBlocks(f, d)) return "team";
+  if (feeBlocks(f, d)) return checkPays(f, d, env, facts) ? "mail" : "team";
   if (d.signature === "wet") {
     if (!signedCopy(f)) return "team";
     if (canFaxSignedFor(f, d, env)) return "fax";
@@ -319,6 +355,7 @@ export function whyYours(f: Filing, d: Dest | undefined, env: Env, facts: Facts)
     return t ? { en: `Odelia can't send this one for you: ${t.why}`, zh: `Odelia 无法代您提交这一份：${t.why}` }
       : { en: "Placetta doesn't have a checked way to send this form to the agency yet.", zh: "快哉尚未核实这份表格的提交方式。" };
   }
+  if (feeBlocks(f, d) && env.checks && !facts.feeAuthority && d.payment === "with_filing" && d.mail) return { en: "The agency's fee goes with this filing, and nobody has authorized Placetta to pay it (Autopilot, or your approval of the fee).", zh: "这份申请需随附机构费用，但尚未授权快哉代付（自动驾驶，或您对该费用的批准）。" };
   // the agency's site would have taken it, but it needs an account nobody has saved: say whose account it is
   if (d.portal && !facts.hasLogin && !d.noLogin && env.portalWorker && env.channels.includes("portal")) {
     const kind = accountOf(d);

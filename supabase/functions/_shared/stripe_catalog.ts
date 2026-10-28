@@ -30,10 +30,12 @@ export const WEBHOOK_EVENTS = [
   "invoice.paid", "invoice.payment_failed", "charge.refunded",
 ];
 export const VERSION = "2025-03-31.basil";
-/** Single-use cards (_shared/issuing.ts) are on only with STRIPE_ISSUING=on; then the webhook also needs these (the
- *  authorization request goes to the real-time endpoint set in Stripe's Issuing settings, this same function). */
-export const ISSUING_EVENTS = ["issuing_transaction.created"];
-export const issuingOn = (env: (k: string) => string | undefined) => env("STRIPE_ISSUING") === "on";
+/** Single-use cards (_shared/issuing.ts) are on only with STRIPE_ISSUING_ON=1 (or the older STRIPE_ISSUING=on); then the
+ *  webhook also needs these (the authorization request goes to the real-time endpoint set in Stripe's Issuing settings,
+ *  this same function): an approved authorization freezes its card, a settled transaction is reconciled. */
+export const ISSUING_EVENTS = ["issuing_authorization.created", "issuing_transaction.created"];
+export const issuingOn = (env: (k: string) => string | undefined) =>
+  ["1", "on", "true"].includes((env("STRIPE_ISSUING_ON") ?? "").trim().toLowerCase()) || env("STRIPE_ISSUING") === "on";
 
 type Env = (k: string) => string | undefined;
 type Fetch = typeof fetch;

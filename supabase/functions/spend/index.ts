@@ -11,7 +11,7 @@
 //   paid {id, receipt_path?}              members: an approved purchase was paid on the payee's page
 //   cancel {id}                           owners: drops a purchase that isn't paid yet (a single-use card is closed and
 //                                         its charge refunded)
-// Under Autopilot, with single-use cards on (STRIPE_ISSUING=on and app_settings.issuing_on; _shared/issuing.ts), Odelia's
+// Under Autopilot, with single-use cards on (STRIPE_ISSUING_ON=1 and app_settings.issuing_on; _shared/issuing.ts), Odelia's
 // server asks with the monitor key, never a person's session:
 //   autopilot_card {workspace_id, grant_id, app_id, payee, payee_url, amount_cents, why}
 //                                         an agency fee inside the owner's signed Autopilot grant (the database's
@@ -21,18 +21,29 @@
 //   bill {workspace_id, grant_id?, app_id, payee, payee_url?, amount_cents, link?}
 //                                         an agency's bill: paid the same way when cards are on and it fits the grant,
 //                                         otherwise forwarded to the business's accounts-payable email.
-//   card {workspace_id, purchase_id}      the portal worker types the card on the agency's own checkout: its number,
-//                                         only while the purchase is approved and unpaid and the card is open. Never
-//                                         to the model, a log or the app.
+//   sweep_cards                           the monitor's run: a card nobody used within 24 hours is canceled and its
+//                                         charge refunded.
+// The portal worker, on an agency's payment page, with its run token (x-filer-run: live for that one filing only,
+// filer_run_live), never a person's session or the monitor key:
+//   filer_fee {filing_id, page_cents?}    may Odelia pay this filing's fee, and up to how much (no card is made)
+//   filer_card {filing_id, page_cents?}   the card, made now (the last moment): the business's card on file charged the
+//                                         limit, a single-use card for it, and its lines returned to the worker alone.
+//                                         Asked again in the same run, the same card. Never to the model, a log or the
+//                                         app; never stored by Placetta.
+//   filer_card_done {filing_id, outcome: used | unused | unsure, receipt_path?, receipt_cents?, confirmation?}
+//                                         used: the card is frozen and the agency's receipt attached for reconciling;
+//                                         unused: the card is canceled and the charge refunded; unsure: frozen, and the
+//                                         team checks with the agency.
 import { decide, isGovernment, policyProblems, DEFAULT_POLICY, SPEND_CATEGORIES, type Purchase, type SpendCategory, type SpendPolicy } from "../../../src/spend.ts";
-import { apForward, cardParams, issuingOn, STRIPE_VERSION } from "../_shared/issuing.ts";
+import { apForward, cardLimit, cardParams, feeAuthority, filerCard, issuingOn, STRIPE_VERSION, type Authority } from "../_shared/issuing.ts";
 import { admin, audit, HttpError, ok, readBody, requireAccess, requireUser, serve, text, uuidParam, type L10n } from "./shared.ts";
 
 type Row = {
   id: string; workspace_id: string; category: string; payee: string; payee_url: string | null; amount_cents: number; store_id: string | null;
   app_id: string | null; filing_id: string | null; why: L10n; status: Purchase["status"]; by_agent: boolean; approvals: { who: string; at: string }[];
-  approvers_needed: number; reasons: L10n[] | null; method: "link" | "card" | null; receipt_path: string | null; created_at: string; paid_at: string | null;
+  approvers_needed: number; reasons: L10n[] | null; method: "link" | "card" | "check" | null; receipt_path: string | null; created_at: string; paid_at: string | null;
   charge_id?: string | null; card_id?: string | null; card_last4?: string | null; autopilot_grant?: string | null;
+  fee_cents?: number | null; authorization_id?: string | null; authorized_cents?: number | null; expires_at?: string | null;
 };
 const toPurchase = (r: Row): Purchase => ({
   id: r.id, at: r.created_at, category: r.category as SpendCategory, payee: r.payee, payeeUrl: r.payee_url ?? undefined, amount: r.amount_cents / 100,
@@ -40,7 +51,7 @@ const toPurchase = (r: Row): Purchase => ({
   method: r.method === "link" ? "link" : undefined, receipt: r.receipt_path ?? undefined, reasons: r.reasons ?? undefined,
 });
 
-/* ------------------------------------------------------------------ single-use cards (off until STRIPE_ISSUING=on) */
+/* ------------------------------------------------------------------ single-use cards (off until STRIPE_ISSUING_ON=1) */
 
 const env = (k: string) => Deno.env.get(k);
 async function stripe(path: string, params: Record<string, string> = {}, method = "POST", idem?: string) {
@@ -68,6 +79,42 @@ async function cardOnFile(ws: string): Promise<{ customer: string; pm: string } 
 }
 const dbReason = (m: string) => (/\b(autopilot_\w+|cards_off):\s*([^\n]{1,200})/.exec(m)?.[2] ?? "Placetta's check refused it.").replace(/^./, (c) => c.toUpperCase());
 
+const holderOf = async (ws: string) => env("STRIPE_ISSUING_CARDHOLDER") ?? (await admin.from("spend_policies").select("card_holder").eq("workspace_id", ws).maybeSingle()).data?.card_holder as string | undefined;
+
+/** Top-up, then the card: the business's card on file is charged the card's limit (Placetta never fronts the fee), then
+ *  a single-use card is made for that limit on Placetta's Issuing balance. On a decline nothing is paid; if the card
+ *  can't be made the charge is refunded. Returns the purchase with its card. */
+async function fundAndIssue(r: Row, holder: string, label: L10n): Promise<Row> {
+  const ws = r.workspace_id;
+  const fail = async (en: string, zh: string) => {
+    const { data } = await admin.from("purchases").update({ status: "failed", reasons: [{ en, zh }] }).eq("id", r.id).eq("workspace_id", ws).select("*").single();
+    await tell(data as Row, { en: `Couldn't pay ${r.payee}: ${en}`, zh: `未能向 ${r.payee} 付款：${zh}` });
+    return data as Row;
+  };
+  const file = await cardOnFile(ws).catch(() => null);
+  if (!file) return await fail("there's no card on file for the business.", "企业没有登记银行卡。");
+  const pi = await stripe("payment_intents", {
+    amount: String(r.amount_cents), currency: "usd", customer: file.customer, payment_method: file.pm, off_session: "true", confirm: "true",
+    description: `Agency fee to ${r.payee}, paid by Placetta (${label.en})`.slice(0, 200), "metadata[purchase_id]": r.id, "metadata[workspace_id]": ws,
+    ...(r.filing_id ? { "metadata[filing_id]": r.filing_id } : {}),
+  }, "POST", `spend-charge-${r.id}`).catch(() => null);
+  if (!pi || pi.status !== "succeeded") return await fail("the card on file was declined, so nothing was paid.", "登记的银行卡被拒，未付款。");
+  const now = Date.now();
+  let card;
+  try { card = await stripe("issuing/cards", cardParams({ holder, cents: r.amount_cents, purchase: r.id, workspace: ws, now, filing: r.filing_id }), "POST", `spend-card-${r.id}`); }
+  catch (e) { await stripe("refunds", { payment_intent: pi.id }, "POST", `spend-refund-${r.id}`).catch(() => {}); await fail("the single-use card couldn't be made; the charge was refunded.", "一次性卡未能生成，已退款。"); throw e; }
+  const { data: upd } = await admin.from("purchases").update({ charge_id: pi.id, card_id: card.id, card_last4: card.last4, expires_at: card.metadata?.expires ?? new Date(now + 864e5).toISOString() })
+    .eq("id", r.id).eq("workspace_id", ws).select("*").single();
+  const out = upd as Row;
+  await audit({ workspace_id: ws, actor: "agent", actor_id: null, action: { en: `Paying an agency fee (${label.en})`, zh: `支付机构费用（${label.zh}）` }, object: what(out),
+    detail: { en: `Single-use card ending ${card.last4}, for this fee only, up to ${money(out.amount_cents)}, for 24 hours`, zh: `尾号 ${card.last4} 的一次性卡，仅限此笔费用，最高 ${money(out.amount_cents)}，24 小时内有效` } });
+  await tell(out, { en: `Paying ${r.payee} up to ${money(out.amount_cents)} from a single-use card (${label.en})`, zh: `正用一次性卡向 ${r.payee} 支付最多 ${money(out.amount_cents)}（${label.zh}）` }, r.why);
+  return out;
+}
+
+const AUTOPILOT: L10n = { en: "Autopilot", zh: "自动驾驶" };
+const APPROVED: L10n = { en: "you approved it", zh: "您已批准" };
+
 /** Pays one agency fee inside the owner's Autopilot grant with a single-use card. Returns the purchase. */
 async function payByCard(ws: string, q: { grant: string; app: string | null; filing: string | null; payee: string; payeeUrl: string | null; cents: number; why: L10n }): Promise<Row> {
   // the database decides: cards switched on, the grant this workspace's and live, within both caps
@@ -77,38 +124,170 @@ async function payByCard(ws: string, q: { grant: string; app: string | null; fil
   // the same fee asked twice: one purchase, one card
   const { data: dup } = await admin.from("purchases").select("*").eq("workspace_id", ws).eq("autopilot_grant", q.grant).eq("app_id", q.app ?? "").eq("amount_cents", q.cents).in("status", ["approved", "paid"]).maybeSingle();
   if (dup) return dup as Row;
-  const holder = env("STRIPE_ISSUING_CARDHOLDER") ?? (await admin.from("spend_policies").select("card_holder").eq("workspace_id", ws).maybeSingle()).data?.card_holder;
+  const holder = await holderOf(ws);
   if (!holder) throw new HttpError("not_configured", "No Issuing cardholder (STRIPE_ISSUING_CARDHOLDER).");
   const { data: ins, error } = await admin.from("purchases").insert({
     workspace_id: ws, category: "gov_fees", payee: q.payee, payee_url: q.payeeUrl, amount_cents: q.cents, app_id: q.app, filing_id: q.filing, why: q.why, status: "approved",
     by_agent: true, approvals: [{ who: `autopilot:${q.grant}`, at: new Date().toISOString() }], approvers_needed: 1, method: "card", autopilot_grant: q.grant, decided_at: new Date().toISOString(),
   }).select("*").single();
   if (error) throw new Error(`purchase insert: ${error.code ?? ""}`);
-  let r = ins as Row;
-  const file = await cardOnFile(ws).catch(() => null);
-  const fail = async (en: string, zh: string) => {
-    const { data } = await admin.from("purchases").update({ status: "failed", reasons: [{ en, zh }] }).eq("id", r.id).eq("workspace_id", ws).select("*").single();
-    await tell(data as Row, { en: `Couldn't pay ${q.payee}: ${en}`, zh: `未能向 ${q.payee} 付款：${zh}` });
-    return data as Row;
-  };
-  if (!file) return await fail("there's no card on file for the business.", "企业没有登记银行卡。");
-  const pi = await stripe("payment_intents", {
-    amount: String(q.cents), currency: "usd", customer: file.customer, payment_method: file.pm, off_session: "true", confirm: "true",
-    description: `Agency fee to ${q.payee}, paid by Placetta under Autopilot`.slice(0, 200), "metadata[purchase_id]": r.id, "metadata[workspace_id]": ws,
-  }, "POST", `spend-charge-${r.id}`).catch(() => null);
-  if (!pi || pi.status !== "succeeded") return await fail("the card on file was declined, so nothing was paid.", "登记的银行卡被拒，未付款。");
-  let card;
-  try { card = await stripe("issuing/cards", cardParams({ holder, cents: q.cents, purchase: r.id, workspace: ws, now: Date.now() }), "POST", `spend-card-${r.id}`); }
-  catch (e) { await stripe("refunds", { payment_intent: pi.id }, "POST", `spend-refund-${r.id}`).catch(() => {}); await fail("the single-use card couldn't be made; the charge was refunded.", "一次性卡未能生成，已退款。"); throw e; }
-  const { data: upd } = await admin.from("purchases").update({ charge_id: pi.id, card_id: card.id, card_last4: card.last4 }).eq("id", r.id).eq("workspace_id", ws).select("*").single();
-  r = upd as Row;
-  await audit({ workspace_id: ws, actor: "agent", actor_id: null, action: { en: "Paying an agency fee under Autopilot", zh: "在自动驾驶下支付机构费用" }, object: what(r), detail: { en: `Single-use card ending ${card.last4}, for this fee only, within your signed caps`, zh: `尾号 ${card.last4} 的一次性卡，仅限此笔费用，在您签署的上限内` } });
-  await tell(r, { en: `Paying ${q.payee} ${money(q.cents)} from a single-use card (Autopilot)`, zh: `正用一次性卡向 ${q.payee} 支付 ${money(q.cents)}（自动驾驶）` }, q.why);
-  return r;
+  return await fundAndIssue(ins as Row, holder, AUTOPILOT);
 }
 async function closeCard(r: Row, refund: boolean) {
   if (r.card_id) await stripe(`issuing/cards/${encodeURIComponent(r.card_id)}`, { status: "canceled" }).catch(() => console.error("card close failed"));
   if (refund && r.charge_id) await stripe("refunds", { payment_intent: r.charge_id }, "POST", `spend-refund-${r.id}`).catch(() => console.error("refund failed"));
+}
+/** Freeze: the card takes no new authorization; Stripe still settles what it already approved. */
+async function freezeCard(r: Row) {
+  if (r.card_id) await stripe(`issuing/cards/${encodeURIComponent(r.card_id)}`, { status: "inactive" }).catch(() => console.error("card freeze failed"));
+}
+async function teamTask(r: Pick<Row, "workspace_id" | "filing_id" | "id">, kind: string, title: string, detail?: unknown) {
+  const { error } = await admin.from("team_tasks").upsert({ kind, workspace_id: r.workspace_id, filing_id: r.filing_id, title: title.slice(0, 300), detail: detail ?? null, dedupe: `${kind}:purchase:${r.id}` },
+    { onConflict: "dedupe", ignoreDuplicates: true });
+  if (error) console.error("team task insert failed:", error.code ?? "");
+}
+
+/* ------------------------------------------------------------------ the portal worker on an agency's payment page */
+
+type FilingRow = { id: string; workspace_id: string; app_id: string; title: L10n; agency: L10n | null; portal_url: string | null; fee_estimate: number | string | null;
+  autopilot_grant: string | null; agent_state: string | null };
+
+/** The filing this run's token is live for, or a refusal: a card goes only to the run working on that one filing. */
+async function runFiling(req: Request, body: Record<string, unknown>): Promise<FilingRow> {
+  const token = (req.headers.get("x-filer-run") ?? "").trim();
+  const fid = uuidParam(body.filing_id, "filing_id");
+  const { data: live, error } = await admin.rpc("filer_run_live", { p_token: token, p_filing: fid });
+  if (error || live !== true) throw new HttpError("unauthorized", "This run can't pay for that filing.");
+  const { data: f } = await admin.from("filings").select("id, workspace_id, app_id, title, agency, portal_url, fee_estimate, autopilot_grant, agent_state").eq("id", fid).maybeSingle();
+  if (!f || f.agent_state !== "running") throw new HttpError("not_found", "That filing isn't running.");
+  return f as FilingRow;
+}
+
+/** The filing's fee authority and any card already made for it. */
+async function authorityFor(f: FilingRow): Promise<{ auth: Authority | null; card: Row | null }> {
+  const [{ data: rows }, grant] = await Promise.all([
+    admin.from("purchases").select("*").eq("workspace_id", f.workspace_id).eq("filing_id", f.id).in("status", ["approved", "paid"]).order("created_at", { ascending: false }),
+    f.autopilot_grant ? (async () => {
+      const [{ data: g }, { data: live }] = await Promise.all([
+        admin.from("autopilot_grants").select("id, cap_per_filing").eq("id", f.autopilot_grant!).eq("workspace_id", f.workspace_id).maybeSingle(),
+        admin.rpc("autopilot_live", { p_grant: f.autopilot_grant }),
+      ]);
+      return g ? { id: String(g.id), live: live === true, capPerFiling: Number(g.cap_per_filing) } : null;
+    })() : Promise.resolve(null),
+  ]);
+  const list = (rows ?? []) as (Row & { authorization_id?: string | null })[];
+  const card = list.find((r) => r.method === "card") ?? null;
+  const approved = list.find((r) => r.method !== "card" && r.method !== "check" && r.status === "approved" && r.category === "gov_fees") ?? null;
+  return { auth: feeAuthority({ grant, approved }), card };
+}
+
+const cardsOnInDb = async () => !!(await admin.from("app_settings").select("issuing_on").eq("id", true).maybeSingle()).data?.issuing_on;
+const pageCents = (v: unknown) => { const n = Math.round(Number(v)); return n > 0 && n <= 10_000_000 ? n : null; };
+const feeCentsOf = (f: FilingRow) => { const n = Math.round(Number(f.fee_estimate ?? 0) * 100); return n > 0 ? n : null; };
+type Decision = { ok: true; auth: Authority; limit: number; base: number; card: Row | null } | { ok: false; why: string };
+
+/** May the worker pay this filing's fee now, and up to how much: cards on (here and in the database), a fee authority,
+ *  a limit the page fits, and no card already used for it. */
+async function feeDecision(f: FilingRow, page: number | null): Promise<Decision> {
+  if (!issuingOn(env) || !(await cardsOnInDb())) return { ok: false, why: "single-use cards aren't switched on" };
+  const { auth, card } = await authorityFor(f);
+  if (card) {
+    const c = card as Row & { authorization_id?: string | null };
+    if (c.status !== "approved" || c.authorization_id) return { ok: false, why: "this filing's fee was already paid" };
+    if (page && page > c.amount_cents) return { ok: false, why: `the agency asks ${money(page)}, more than the ${money(c.amount_cents)} card` };
+    return { ok: true, auth: auth ?? { kind: "approval", purchase: c.id, capCents: c.amount_cents }, limit: c.amount_cents, base: c.amount_cents, card };
+  }
+  if (!auth) return { ok: false, why: "nobody authorized Placetta to pay this fee" };
+  const l = cardLimit({ feeCents: feeCentsOf(f), capCents: auth.capCents, pageCents: page, kind: auth.kind });
+  if (!l.ok) return l;
+  if (auth.kind === "autopilot") {
+    const { error: no } = await admin.rpc("autopilot_spend_ok", { p_ws: f.workspace_id, p_grant: auth.grant, p_cents: l.limitCents });
+    if (no) return { ok: false, why: dbReason(no.message ?? "") };
+  }
+  return { ok: true, auth, limit: l.limitCents, base: l.baseCents, card: null };
+}
+
+/** The card for this filing, made now: a new purchase under Autopilot, or the owner's approved purchase turned into a
+ *  card payment. One per filing (purchases_one_live_per_filing). */
+async function cardFor(f: FilingRow, d: Extract<Decision, { ok: true }>): Promise<Row> {
+  if (d.card) return d.card;
+  const payee = String(f.agency?.en ?? "").trim() || (f.portal_url ? new URL(f.portal_url).hostname : "the agency");
+  if (!isGovernment(payee, f.portal_url ?? undefined)) throw new HttpError("bad_request", "Single-use cards pay government agencies only.");
+  const holder = await holderOf(f.workspace_id);
+  if (!holder) throw new HttpError("not_configured", "No Issuing cardholder (STRIPE_ISSUING_CARDHOLDER).");
+  const now = new Date().toISOString();
+  const why: L10n = { en: `The agency's fee for ${f.title?.en ?? "a filing"}`, zh: `${f.title?.zh ?? "申报"}的机构费用` };
+  let r: Row | null = null;
+  if (d.auth.kind === "approval") {
+    const { data } = await admin.from("purchases").update({ method: "card", amount_cents: d.limit, fee_cents: d.base }).eq("id", d.auth.purchase).eq("workspace_id", f.workspace_id)
+      .eq("status", "approved").is("card_id", null).select("*").maybeSingle();
+    r = data as Row | null;
+  } else {
+    const { data, error } = await admin.from("purchases").insert({
+      workspace_id: f.workspace_id, category: "gov_fees", payee, payee_url: f.portal_url, amount_cents: d.limit, fee_cents: d.base, app_id: f.app_id, filing_id: f.id, why, status: "approved",
+      by_agent: true, approvals: [{ who: `autopilot:${d.auth.grant}`, at: now }], approvers_needed: 1, method: "card", autopilot_grant: d.auth.grant, decided_at: now,
+    }).select("*").single();
+    if (error && error.code !== "23505") throw new Error(`purchase insert: ${error.code ?? ""}`);
+    r = data as Row | null;
+  }
+  // a second call raced this one: its purchase (and card) is the filing's
+  if (!r) { const again = (await authorityFor(f)).card; if (again) return again; throw new HttpError("bad_request", "That approval was already used."); }
+  return await fundAndIssue(r, holder, d.auth.kind === "autopilot" ? AUTOPILOT : APPROVED);
+}
+
+/** The worker's three actions. The answer never names Stripe's error, only what the worker needs to hand back. */
+async function filer(req: Request, body: Record<string, unknown>): Promise<Response> {
+  const f = await runFiling(req, body);
+  const action = String(body.action ?? "");
+  if (action === "filer_fee" || action === "filer_card") {
+    const d = await feeDecision(f, pageCents(body.page_cents));
+    if (!d.ok) return ok({ authorized: false, why: d.why });
+    if (action === "filer_fee") return ok({ authorized: true, limit_cents: d.limit, kind: d.auth.kind });
+    const r = await cardFor(f, d);
+    if (r.status !== "approved" || !r.card_id) return ok({ authorized: false, why: (r.reasons?.[0]?.en ?? "the card couldn't be made").slice(0, 200) });
+    const c = await stripe(`issuing/cards/${encodeURIComponent(r.card_id)}?expand[]=number&expand[]=cvc`, {}, "GET");
+    const card = filerCard(r, c);
+    if (!card) return ok({ authorized: false, why: "the card is closed" });
+    return ok({ authorized: true, card });
+  }
+  if (action === "filer_card_done") {
+    const { card } = await authorityFor(f);
+    if (!card) return ok({ settled: false });
+    const r = card as Row & { authorization_id?: string | null; authorized_cents?: number | null };
+    const outcome = String(body.outcome ?? "");
+    const receipt = body.receipt_path ? String(body.receipt_path).slice(0, 300) : null;
+    if (receipt && (!receipt.startsWith(`${f.workspace_id}/`) || receipt.split("/").some((p) => p === ".." || p === "."))) throw new HttpError("bad_request", "That receipt isn't in this workspace.");
+    const cents = pageCents(body.receipt_cents);
+    const confirmation = body.confirmation ? String(body.confirmation).slice(0, 80) : null;
+    if (outcome === "unused" && !r.authorization_id && r.status === "approved") {
+      await closeCard(r, true);
+      await admin.from("purchases").update({ status: "canceled", decided_at: new Date().toISOString(), reasons: [{ en: "The card wasn't used; the charge was refunded.", zh: "卡未使用，已退款。" }] }).eq("id", r.id);
+      await audit({ workspace_id: r.workspace_id, actor: "agent", actor_id: null, action: { en: "Closed an unused single-use card and refunded it", zh: "关闭未使用的一次性卡并退款" }, object: what(r) });
+      return ok({ settled: true, outcome: "unused" });
+    }
+    await freezeCard(r);
+    const flags: string[] = [];
+    if (cents && r.authorized_cents && Math.abs(cents - r.authorized_cents) > 100) flags.push(`the agency's receipt says ${money(cents)}, the card authorized ${money(r.authorized_cents)}`);
+    await admin.from("purchases").update({ ...(receipt ? { receipt_path: receipt } : {}), ...(cents ? { receipt_cents: cents } : {}), ...(confirmation ? { confirmation } : {}),
+      ...(flags.length ? { flags } : {}) }).eq("id", r.id);
+    if (outcome !== "used") await teamTask(r, "fee_check", `A single-use card may have been charged by ${r.payee} without a confirmation. Check with the agency before anything is paid again.`);
+    if (flags.length) await teamTask(r, "fee_mismatch", `Fee to ${r.payee} doesn't reconcile: ${flags.join("; ")}`);
+    return ok({ settled: true, outcome: outcome === "used" ? "used" : "unsure" });
+  }
+  throw new HttpError("bad_request", "Unknown action.");
+}
+
+/** The monitor's run: cards nobody used before they lapsed are canceled and their charges refunded. */
+async function sweepCards(): Promise<number> {
+  const { data } = await admin.from("purchases").select("*").eq("method", "card").eq("status", "approved").is("authorization_id", null).lt("expires_at", new Date().toISOString()).limit(100);
+  let n = 0;
+  for (const r of (data ?? []) as Row[]) {
+    await closeCard(r, true);
+    const { data: done } = await admin.from("purchases").update({ status: "canceled", decided_at: new Date().toISOString(), reasons: [{ en: "The card lapsed unused after 24 hours; the charge was refunded.", zh: "卡在 24 小时内未使用已失效，已退款。" }] })
+      .eq("id", r.id).eq("status", "approved").is("authorization_id", null).select("id");
+    if (done?.length) n++;
+  }
+  return n;
 }
 /** An agency bill no card pays: forwarded to the business's accounts-payable email, and the owners told. */
 async function forwardBill(ws: string, q: { app: string | null; payee: string; cents: number; link: string | null; why: L10n }): Promise<{ forwarded: string | null }> {
@@ -174,13 +353,16 @@ function readPurchase(v: unknown) {
 }
 
 serve(async (req) => {
-  // Odelia's server and the portal worker, with the monitor key: Autopilot's agency fees (single-use cards off until
-  // STRIPE_ISSUING=on, and the database's issuing_on)
+  // The portal worker on an agency's payment page, with its run token for one filing (never the monitor key)
+  if (req.headers.get("x-filer-run")) return await filer(req, await readBody(req));
+  // Odelia's server and the monitor, with the monitor key: Autopilot's agency fees (single-use cards off until
+  // STRIPE_ISSUING_ON=1, and the database's issuing_on)
   if (req.headers.get("x-monitor-key")) {
     const body = await readBody(req);
-    const ws = uuidParam(body.workspace_id, "workspace_id");
     const { data: good } = await admin.rpc("monitor_key_ok", { p_key: req.headers.get("x-monitor-key") });
     if (!good) throw new HttpError("unauthorized", "Bad key.");
+    if (body.action === "sweep_cards") return ok({ canceled: issuingOn(env) ? await sweepCards() : 0 });
+    const ws = uuidParam(body.workspace_id, "workspace_id");
     const action = String(body.action ?? "");
     const why = (body.why ?? {}) as Partial<L10n>;
     const q = { grant: body.grant_id ? uuidParam(body.grant_id, "grant_id") : "", app: body.app_id ? String(body.app_id).slice(0, 80) : null, filing: body.filing_id ? uuidParam(body.filing_id, "filing_id") : null,
@@ -198,15 +380,7 @@ serve(async (req) => {
       }
       return ok({ paid_by: "accounts_payable", ...(await forwardBill(ws, { app: q.app, payee: q.payee, cents: q.cents, link: httpsOrNull(body.link), why: q.why })) });
     }
-    if (action === "card") {
-      if (!issuingOn(env)) throw new HttpError("not_configured", "Single-use cards aren't switched on.");
-      const pid = uuidParam(body.purchase_id, "purchase_id");
-      const { data: r } = await admin.from("purchases").select("*").eq("workspace_id", ws).eq("id", pid).maybeSingle();
-      if (!r || r.status !== "approved" || r.method !== "card" || !r.card_id) throw new HttpError("not_found", "No approved card purchase.");
-      const c = await stripe(`issuing/cards/${encodeURIComponent(r.card_id)}?expand[]=number&expand[]=cvc`, {}, "GET");
-      if (c.status !== "active") throw new HttpError("forbidden", "That card is closed.");
-      return ok({ amount_cents: r.amount_cents, payee: r.payee, number: c.number, cvc: c.cvc, exp_month: c.exp_month, exp_year: c.exp_year });
-    }
+    // (the card's lines go only to the portal run working on that filing: filer_card, with its run token)
     throw new HttpError("bad_request", "Unknown action.");
   }
 

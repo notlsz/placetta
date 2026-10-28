@@ -19,6 +19,7 @@ import { dbKey, SupabaseStore } from "./store.ts";
 import { assertNotRoot } from "./sandbox.ts";
 import { startServer, type Health } from "./server.ts";
 import { KeyLock } from "./heal.ts";
+import { cardsOn } from "./card.ts";
 import { Waker } from "./wake.ts";
 import { AnthropicStatusModel, runStatusCheck, sessionPage, type StatusModel, type StatusStore } from "./status.ts";
 
@@ -152,7 +153,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const loop = async () => {
     const store = new SupabaseStore(process.env.SUPABASE_URL!, dbKey(process.env, () => undefined));
     const w = new Worker({ store, model: new AnthropicModel(process.env.ANTHROPIC_API_KEY!), open, portalOf: (id) => DEST[id]?.portal ?? null,
-      routeOf, playbookOf: playbookFor, lock, labeler: new AnthropicLabeler(process.env.ANTHROPIC_API_KEY!).label, live, ...settings() });
+      routeOf, playbookOf: playbookFor, lock, labeler: new AnthropicLabeler(process.env.ANTHROPIC_API_KEY!).label, live, cards: cardsOn(process.env), ...settings() });
     for (;;) {
       try {
         health.running++;

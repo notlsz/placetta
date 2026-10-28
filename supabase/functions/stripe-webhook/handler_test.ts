@@ -290,3 +290,29 @@ Deno.test("single-use cards: off by default, then only the card made for an Auto
   assertEquals((await post(cardsOn(), tx)).status, 200);
   assertEquals(paid, ["ic_1Fee"]);
 });
+
+Deno.test("single-use cards: an approved authorization freezes the card; a settled one is reconciled; off, both are ignored", async () => {
+  const db = fakeDb();
+  const seen: { authorized: string[]; settled: number[] } = { authorized: [], settled: [] };
+  const issuing = {
+    purchaseForCard: async () => null, paid: async () => { throw new Error("settled replaces paid"); },
+    authorized: async (a: Record<string, unknown>) => { seen.authorized.push(String(a.id)); },
+    settled: async (t: Record<string, unknown>) => { seen.settled.push(Number(t.amount)); },
+  };
+  const on: Deps = { ...deps(db), env: env({ STRIPE_ISSUING_ON: "1" }), issuing };
+  const authEv = (approved: boolean) => event("issuing_authorization.created", { id: approved ? "iauth_ok" : "iauth_no", object: "issuing.authorization", approved, amount: 44500,
+    card: { id: "ic_1Fee", object: "issuing.card" }, merchant_data: { category: "government_services", name: "CITY OF SAN JOSE" } });
+  const tx = event("issuing_transaction.created", { id: "ipi_2", object: "issuing.transaction", amount: -44500, card: "ic_1Fee", merchant_data: { category: "government_services" } });
+  // off (no STRIPE_ISSUING_ON): acknowledged, nothing done
+  for (const ev of [authEv(true), tx]) assertEquals((await post({ ...deps(db), issuing }, ev)).status, 200);
+  assertEquals(seen, { authorized: [], settled: [] });
+  // on: only an approved authorization freezes; the transaction is reconciled once
+  assertEquals((await post(on, authEv(false))).status, 200);
+  assertEquals((await post(on, authEv(true))).status, 200);
+  assertEquals((await post(on, tx)).status, 200);
+  assertEquals((await post(on, tx)).status, 200);
+  assertEquals(seen, { authorized: ["iauth_ok"], settled: [-44500] });
+  // a failure is answered 500, so Stripe retries it
+  const failing: Deps = { ...on, issuing: { ...issuing, settled: async () => { throw new Error("db down"); } } };
+  assertEquals((await post(failing, event("issuing_transaction.created", { id: "ipi_3", amount: -100, card: "ic_x" }))).status, 500);
+});

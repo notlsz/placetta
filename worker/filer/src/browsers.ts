@@ -15,11 +15,15 @@
 // worker's own covered view (live.ts, page.ts staffGuard), or no picture at all. A provider address that isn't https,
 // or that carries the API key, is never used as a view.
 //
+// Recordings: Steel records every session, so a Steel session says recorded and never gets Placetta's single-use card
+// (run.ts hands the fee to a person). Browserbase sessions are made with recording off while cards are on.
+//
 // The API key never leaves this module in an error: a refusal says "steel 401", not the address it went to.
 // Tests: worker/filer/test/providers.test.ts (a mock Steel and Browserbase API in front of a real Chromium over CDP).
 import type { Browser } from "playwright-core";
 import type { Session } from "./run.ts";
 import { providerOf, wantsHostedBrowser, type Provider } from "./env.ts";
+import { cardsOn } from "./card.ts";
 
 export type Deps = {
   env: Record<string, string | undefined>;
@@ -57,8 +61,10 @@ export function steelBody(ms: number) {
 }
 
 /** The body Browserbase's sessions API gets. keepAlive so a dropped connection doesn't lose the page mid-filing; the
- *  session is released when the run ends. No saved context. */
-export const browserbaseBody = (project: string) => ({ projectId: project, keepAlive: true, browserSettings: { solveCaptchas: false } });
+ *  session is released when the run ends. No saved context. With single-use cards on (STRIPE_ISSUING_ON), record is
+ *  false: Browserbase keeps no replay of a session that may type Placetta's card (card.ts). */
+export const browserbaseBody = (project: string, record = true) =>
+  ({ projectId: project, keepAlive: true, browserSettings: { solveCaptchas: false, ...(record ? {} : { recordSession: false }) } });
 
 /** A provider's viewer address, if it's one the owner may be given: https, and never carrying the key. */
 export function viewerUrl(raw: unknown, key: string, params = ""): string | null {
@@ -112,7 +118,7 @@ export async function openSteel(d: Deps): Promise<Session> {
     const page = await firstPage(browser);
     // interactive for the owner's hand-back; no address bar (showControls), so the viewer can't be pointed elsewhere
     const liveUrl = viewerUrl(s.debugUrl, key, "interactive=true&showControls=false");
-    return { browser, page, liveUrl, close: async () => { await browser.close().catch(() => undefined); await release(); } };
+    return { browser, page, liveUrl, recorded: true, close: async () => { await browser.close().catch(() => undefined); await release(); } };
   } catch (e) {
     await browser.close().catch(() => undefined); await release();
     throw new Error(`steel: ${e instanceof Error ? e.message.replaceAll(key, "•••").slice(0, 120) : "error"}`);
@@ -124,7 +130,7 @@ export async function openBrowserbase(d: Deps): Promise<Session> {
   const key = (d.env.BROWSERBASE_API_KEY ?? "").trim(), project = (d.env.BROWSERBASE_PROJECT_ID ?? "").trim();
   if (!key || !project) throw new Error("browserbase: BROWSERBASE_API_KEY and BROWSERBASE_PROJECT_ID are both needed");
   const api = (d.env.BROWSERBASE_API_URL || BB_API).replace(/\/+$/, "");
-  const res = await d.fetch(`${api}/v1/sessions`, { method: "POST", headers: { "X-BB-API-Key": key, "Content-Type": "application/json" }, body: JSON.stringify(browserbaseBody(project)), signal: AbortSignal.timeout(30_000) }).catch(() => null);
+  const res = await d.fetch(`${api}/v1/sessions`, { method: "POST", headers: { "X-BB-API-Key": key, "Content-Type": "application/json" }, body: JSON.stringify(browserbaseBody(project, !cardsOn(d.env))), signal: AbortSignal.timeout(30_000) }).catch(() => null);
   if (!res?.ok) throw new Error(`browserbase ${res?.status ?? "unreachable"}`);
   const s = await res.json().catch(() => ({})) as { id?: string; connectUrl?: string };
   if (!s.id || !/^[\w-]{8,80}$/.test(s.id) || typeof s.connectUrl !== "string" || !/^wss?:\/\//.test(s.connectUrl)) throw new Error("browserbase: no session");
@@ -138,7 +144,7 @@ export async function openBrowserbase(d: Deps): Promise<Session> {
     const page = await firstPage(browser);
     const live = await d.fetch(`${api}/v1/sessions/${encodeURIComponent(id)}/debug`, { headers: { "X-BB-API-Key": key }, signal: AbortSignal.timeout(15_000) })
       .then((r) => r.json(), () => ({})).catch(() => ({})) as { debuggerFullscreenUrl?: string };
-    return { browser, page, liveUrl: viewerUrl(live.debuggerFullscreenUrl, key), close: async () => { await browser.close().catch(() => undefined); await release(); } };
+    return { browser, page, liveUrl: viewerUrl(live.debuggerFullscreenUrl, key), recorded: !cardsOn(d.env), close: async () => { await browser.close().catch(() => undefined); await release(); } };
   } catch (e) {
     await browser.close().catch(() => undefined); await release();
     throw new Error(`browserbase: ${e instanceof Error ? e.message.replaceAll(key, "•••").slice(0, 120) : "error"}`);
@@ -151,7 +157,7 @@ export async function openLocal(d: Deps): Promise<Session> {
   // no downloads, no service workers: the run's own throwaway context (sandbox.ts locks the rest down)
   const page = await (await browser.newContext({ acceptDownloads: false, serviceWorkers: "block", viewport: { width: 1280, height: 900 } })).newPage();
   // no hosted view: the worker serves its own live browser for a hand-back (live.ts, run.ts handBack)
-  return { browser, page, liveUrl: null, close: () => browser.close() };
+  return { browser, page, liveUrl: null, recorded: false, close: () => browser.close() };
 }
 
 /** The opener the worker uses for each run (run.ts Config.open). An unknown provider opens nothing. */

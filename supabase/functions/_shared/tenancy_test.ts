@@ -18,7 +18,8 @@ const PROOF: Record<string, RegExp[]> = {
   "file": [/requireUser\(req\)/, /requireAccess\(ws, user, jwt/, /monitor_key_ok/, /Ed25519/, /if \(!good\) throw new HttpError\("unauthorized", "Bad webhook signature\."\)/, /await lobSigned\(/],
   "integrations": [/requireUser\(req\)/, /requireAccess\(ws, user, jwt/, /monitor_key_ok/],
   "logins": [/requireUser\(req\)/, /requireAccess\(ws, user, jwt/, /requireStaffTwoStep/],
-  "spend": [/requireUser\(req\)/, /requireAccess\(ws, user, jwt/],
+  // and the portal worker's run token, live for the one filing it names (filer_run_live)
+  "spend": [/requireUser\(req\)/, /requireAccess\(ws, user, jwt/, /monitor_key_ok/, /filer_run_live/],
   "sso": [/requireUser\(req\)/, /requireAccess\(ws, user, jwt, "admin"\)/],
   "team": [/requireUser\(req\)/, /requireAccess\(ws, user, jwt/],
   "tts": [/auth\.getUser\(/, /accessFor\(/],

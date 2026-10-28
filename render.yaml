@@ -68,6 +68,9 @@ services:
       #                                    sanjoseca.gov: worker/filer/src/env.ts)
       # FILER_BROWSERBASE_HOSTS            more hosts for Browserbase with BROWSER_PROVIDER local, or "*" for every filing
       # STEEL_SESSION_MS                   how long a Steel session may live (default 1800000, 30 minutes; your Steel plan caps it)
+      # STRIPE_ISSUING_ON                  1 once Stripe approves Issuing (SETUP.md "Stripe Issuing"): Odelia pays authorized
+      #                                    agency fees with a single-use card. Steel records sessions, so it never pays
+      #                                    there: use local or browserbase
       # FILER_PROBE=1                      the nightly re-check with a remote browser too (spends the provider's minutes)
       # FILER_KEEP_AWAKE=0                 don't ask for its own /healthz while a filing runs (only for a plan that never sleeps)
       # FILER_DRY_RUN=1                    every filing stops at the agency's review page; nothing is sent
