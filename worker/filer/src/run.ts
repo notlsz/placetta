@@ -865,6 +865,17 @@ export class Worker {
       const g = await this.c.store.step(cur, log("The run stopped after pressing submit, so nothing more is sent until it's checked with the agency.", "运行在点击提交后中断，在向机构确认之前不会再提交。", "handoff", "maybe_submitted"), { agent_state: "handoff", channel: "team" });
       console.error("filer: stopped after submit:", msg);
       await this.c.store.teamTask(g, "check_agency", "Run stopped after submit was pressed. Check the agency first.");
+    } else if (/^(steel|browserbase)\b/.test(msg)) {
+      // Placetta's own browser didn't start (the provider refused the session): the agency was never reached, so this is
+      // ours to fix. Wait (2, 10, 30 minutes); after 3 tries the filing is held for the team, never handed to the owner.
+      if (cur.attempts >= 3) {
+        const g = await this.c.store.step(cur, log("Odelia's browser didn't start, so the agency's site wasn't opened. The Placetta team is fixing it; nothing for you to do.", "Odelia 的浏览器未能启动，因此未打开机构网站。快哉团队正在处理，您无需操作。", "retry", msg), { agent_state: "held" });
+        await this.c.store.teamTask(g, "browser_down", `The browser provider refused the session 3 times: ${msg}`);
+      } else {
+        const mins = backoffMinutes(cur.attempts), at = new Date(Date.now() + mins * 60_000).toISOString();
+        await this.c.store.step(cur, log(`Odelia's browser didn't start. Trying again in ${mins} minutes.`, `Odelia 的浏览器未能启动，${mins} 分钟后重试。`, "retry", msg), { agent_state: "queued", provider_ref: `retry-after:${at}` });
+      }
+      console.error("filer: browser provider:", msg);
     } else if (cur.attempts >= 3) {
       // ref portal_failed: the file function's sweep tries another way the agency takes (email, fax, certified mail, or
       // the business's packet) (supabase/functions/file handBacks)

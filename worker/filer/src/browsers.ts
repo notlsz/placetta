@@ -83,9 +83,21 @@ export async function openSteel(d: Deps): Promise<Session> {
   const key = (d.env.STEEL_API_KEY ?? "").trim();
   if (!key) throw new Error("steel: STEEL_API_KEY is not set");
   const api = (d.env.STEEL_API_URL || STEEL_API).replace(/\/+$/, "");
-  const res = await d.fetch(`${api}/v1/sessions`, { method: "POST", headers: { "steel-api-key": key, "Content-Type": "application/json" },
-    body: JSON.stringify(steelBody(d.sessionMs ?? Number(d.env.STEEL_SESSION_MS || 30 * 60_000))), signal: AbortSignal.timeout(30_000) }).catch(() => null);
-  if (!res?.ok) throw new Error(`steel ${res?.status ?? "unreachable"}`);
+  // A plan caps how long a session may live (Steel's free plan is shorter than the 30 minutes asked for), and a timeout
+  // over the cap is refused with a 400. Ask for the configured length, then the free plan's 15 minutes, then 5.
+  const want = d.sessionMs ?? Number(d.env.STEEL_SESSION_MS || 30 * 60_000);
+  const create = (ms: number) => d.fetch(`${api}/v1/sessions`, { method: "POST", headers: { "steel-api-key": key, "Content-Type": "application/json" },
+    body: JSON.stringify(steelBody(ms)), signal: AbortSignal.timeout(30_000) }).catch(() => null);
+  let res = await create(want), why = "";
+  for (const ms of [15 * 60_000, 5 * 60_000].filter((m) => m < want)) {
+    if (res?.status !== 400) break;
+    why = (await res.text().catch(() => "")).replaceAll(key, "•••").replace(/\s+/g, " ").slice(0, 160);
+    res = await create(ms);
+  }
+  if (!res?.ok) {
+    if (res && !why) why = (await res.text().catch(() => "")).replaceAll(key, "•••").replace(/\s+/g, " ").slice(0, 160);
+    throw new Error(`steel ${res?.status ?? "unreachable"}${why ? `: ${why}` : ""}`);
+  }
   const s = await res.json().catch(() => ({})) as { id?: string; debugUrl?: string; sessionViewerUrl?: string };
   if (!s.id || !/^[\w-]{8,80}$/.test(s.id)) throw new Error("steel: no session id");
   const id = s.id;
