@@ -29,7 +29,7 @@ import {
   verifyTelnyx, voiceReady,
 } from "../_shared/odelia.ts";
 import { currentWorkspace, criticalLines, DOC_MAX, DOC_TYPES, forgetCriticalLines, storeDocs, type Link, linkByNumber, linkOf, logMessage, sendText, textingReady, textUser } from "../_shared/odelia_db.ts";
-import { mailReady, odeliaEmail } from "../_shared/mail.ts";
+import { mailReady, odeliaEmail, odeliaReplyTo } from "../_shared/mail.ts";
 import { parseWhatsApp, subscribeChallenge, verifyWhatsApp, waMedia, waMediaHost, waTyping, whatsappNumber, whatsappReady, type WaEvent } from "../_shared/whatsapp.ts";
 import { hashLine, linqLineHealth, linqLines, linqReady, linqTyping, parseLinq, verifyLinq, type LinqEvent } from "../_shared/linq.ts";
 import { sendStartReminders, startForStranger, textStartOn } from "../_shared/text_start_db.ts";
@@ -479,7 +479,7 @@ export async function handle(req: Request): Promise<Response> {
     // ODELIA_PUBLIC_WHATSAPP; text_start.ts publicStart)
     return json(200, { configured: textingReady(env), imessage, sms: smsReady(env), voice: voiceReady(env), number: n, display: n ? prettyPhone(n) : null,
       call_number: callN, call_display: callN ? prettyPhone(callN) : null,
-      whatsapp: whatsappReady(env) ? whatsappNumber(env) : null, email: mailReady(env) ? odeliaEmail(env) : null, start: publicStart(env) });
+      whatsapp: whatsappReady(env) ? whatsappNumber(env) : null, email: mailReady(env) ? (odeliaReplyTo(env) || odeliaEmail(env)) : null, start: publicStart(env) });
   }
   if (!(await monitorKeyOk(req.headers.get("x-monitor-key")))) return fail(401, "unauthorized", "unauthorized");
   if (body.action === "send_code") return await sendCode(String(body.code_id ?? ""));
