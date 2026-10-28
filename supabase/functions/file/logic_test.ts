@@ -3,7 +3,8 @@ import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
 import { DEST, destinationProblems, staleDestinations, TO_VERIFY, type Dest } from "./destinations.ts";
 import {
   afterHold, askedToResubmit, canFaxSigned, canFaxSignedFor, check, emailFor, envFrom, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holdMinutes,
-  fallback, holds, isForeign, killSwitchOn, mailOutcome, mailTo, ownerPacket, pick, PORTAL_FAILED, refusalOf, rerouteDue, signedCopy, teachRefusal, teamApproved,
+  fallback, handBackDue, handoffPacket, holds, isForeign, killSwitchOn, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, PORTAL_FAILED, refusalOf, REVIEW_HOURS, rerouteDue,
+  sentByYou, signedCopy, teachRefusal, teamApproved, waysToSend, whyYours, YOURS_REF,
 } from "./logic.ts";
 
 const WS = "11111111-1111-1111-1111-111111111111";
@@ -211,7 +212,7 @@ Deno.test("the owner packet says why, where and what goes with it, in English an
   const d = dest({ fax: undefined, mail: undefined, signature: "wet", payment: "with_filing", attach: ["Check payable to the City"],
     owner: { why: "The form must be notarized.", url: "https://www.boston.gov/permitting/permits/business-certificate", mail: { name: "City Clerk's Office", line1: "Room 601", line2: "1 City Hall Square", city: "Boston", state: "MA", zip: "02201" } } });
   const p = ownerPacket(filing({ form: { en: "Business Certificate", zh: "营业证明" } }, { fee_estimate: 65 }), d);
-  assert(p.en.includes("notarized") && p.en.includes("owner-packet.pdf") && p.en.includes("$65"));
+  assert(p.en.includes("notarized") && p.en.includes("owner-packet.pdf") && p.en.includes("$65") && p.en.includes("I've sent it") && !/team/i.test(p.en));
   assert(p.zh.includes("营业证明") && p.zh.includes("65 美元"));
   assert(p.lines.some((l) => l.includes("Room 601")) && p.lines.some((l) => l.includes("Check payable")) && p.lines.every((l) => l.length <= 90 || !l.includes(" ")));
   assertEquals(p.link, "https://www.boston.gov/permitting/permits/business-certificate");
@@ -280,7 +281,7 @@ const handedBack = (ref: string, f: Partial<Filing> = {}): Filing => filing({}, 
 Deno.test("a portal run that failed before submitting is due for another way, once", () => {
   for (const ref of ["limit", "left_portal", "no_portal", "portal_failed"]) assert(rerouteDue(handedBack(ref)), ref);
   // another reason for the hand-back (the review page differs, a playbook's first run) stays the team's
-  assert(!rerouteDue(handedBack("review_differs")) && !rerouteDue(handedBack("unverified_playbook")) && !rerouteDue(handedBack("maybe_submitted")));
+  assert(rerouteDue(handedBack("review_differs")) && rerouteDue(handedBack("unverified_playbook")) && !rerouteDue(handedBack("maybe_submitted")));
   // anything that may have been submitted, or is finished, is never sent another way
   assert(!rerouteDue(handedBack("limit", { submit_clicked_at: "2026-10-21T00:00:00Z" })));
   for (const status of ["canceled", "submitted", "accepted", "rejected"]) assert(!rerouteDue(handedBack("limit", { status })), status);
@@ -309,5 +310,117 @@ Deno.test("the other way follows the same rules as the first, without the site",
   assertEquals(fallback(signed, undefined, ENV, facts), "team");
   // what goes by paper gets the paper checks: the filled form must be in Documents
   assert(check(filing({ pdf_path: undefined }), dest({ portal: "x.gov" }), { docPaths: docs }, "mail").some((p) => p.kind === "file"));
-  assertEquals([...PORTAL_FAILED].sort(), ["left_portal", "limit", "no_portal", "portal_failed"]);
+  assertEquals([...PORTAL_FAILED].sort(), ["left_portal", "limit", "no_live_view", "no_portal", "page_injection", "portal_failed", "review_differs", "teach_incomplete", "unverified_playbook"]);
+});
+
+Deno.test("a filing Odelia can't send goes to the business with a packet: why, where, signature, fee, and I've sent it", () => {
+  const d = dest({ signature: "wet", payment: "with_filing", portal: "permits.city.gov", portalUrl: "https://permits.city.gov/apply", email: "permits@city.gov", attach: ["Site plan"] });
+  const p = handoffPacket(filing({ form: { en: "Sign Permit", zh: "招牌许可" } }, { fee_estimate: 120 }), d, b("The agency's fee goes with this filing."));
+  assert(p.en.startsWith("The agency's fee goes with this filing.") && p.en.includes("filing-packet.pdf") && p.en.includes("sign it by hand") && p.en.includes("$120"));
+  assert(p.en.includes("https://permits.city.gov/apply") && p.en.includes("I've sent it") && p.en.includes("confirmation number") && !/team/i.test(p.en));
+  assert(p.zh.includes("filing-packet.pdf") && p.zh.includes("120 美元") && p.zh.includes("我已发出") && !p.zh.includes("团队"));
+  for (const want of ["permits@city.gov", "+1304", "2 Main St", "Site plan", "sign by hand", "a check or money order goes with it"]) assert(p.lines.some((l) => l.includes(want)), want);
+  assert(p.lines.every((l) => l.length <= 90 || !l.includes(" ")));
+  assertEquals(p.link, "https://permits.city.gov/apply");
+  // check first when something may already have gone
+  const c = handoffPacket(filing(), dest(), b("Odelia can't tell whether the email reached the agency."), { check: true });
+  assert(c.en.includes("First check whether the agency already has it") && c.lines.includes("First:"));
+  // no destination: the agency's own page when Placetta researched one, else ask the agency
+  const t = handoffPacket(filing(), undefined, b("x"), { agencyWhy: "Filed in person with the Fire Marshal's Office.", agencySource: "https://agency.gov/fire" });
+  assert(t.en.includes("https://agency.gov/fire") && t.lines.some((l) => l.includes("Fire Marshal")));
+  assert(handoffPacket(filing(), undefined, b("x")).en.includes("doesn't have the agency's address"));
+  // an owner-only form keeps its owner packet
+  assert(handoffPacket(filing(), dest({ owner: { why: "Only the owner.", url: "https://a.gov" } }), b("ignored")).en.includes("owner-packet.pdf"));
+});
+
+Deno.test("the ways to send follow the agency: its site, email, fax, mail, the foreign fax and address for a foreign owner", () => {
+  const w = waysToSend(dest({ portal: "x.gov", tenant: "/agency", email: "a@x.gov" }), filing().payload);
+  assertEquals(w.en.length, 4);
+  assert(w.en[0].includes("https://x.gov/agency") && w.en[2].includes("+13045550100") && w.en[3].includes("Agency Intl"));
+  assertEquals(waysToSend(undefined, filing().payload).en, []);
+  assertEquals(waysToSend(dest({ fax: undefined, mail: undefined }), filing().payload).link, null);
+});
+
+Deno.test("why Odelia isn't sending it, in pick()'s order", () => {
+  const f = { hasLogin: false, mailConnected: true };
+  assert(whyYours(filing(), undefined, ENV, f).en.includes("checked way"));
+  assert(whyYours(filing({ official: "hou-fire" }), undefined, ENV, f).en.includes("Fire Marshal"));
+  assert(whyYours(filing({}, { fee_estimate: 10 }), dest(), ENV, f).en.includes("never sends money"));
+  assert(whyYours(filing(), dest({ signature: "wet" }), ENV, f).en.includes("handwritten"));
+  const many = filing({ attachments: [1, 2, 3, 4, 5].map((i) => ({ name: `a${i}`, path: `${WS}/a${i}` })) });
+  assert(whyYours(many, dest({ email: "a@x.gov" }), ENV, f).en.includes("attachments"));
+  assert(whyYours(filing({ attachments: [{ name: "a", path: `${WS}/a` }] }), dest(), ENV, f).en.includes("only the form"));
+  assert(whyYours(filing(), dest({ email: "a@x.gov", fax: undefined, mail: undefined }), ENV, { hasLogin: false, mailConnected: false }).en.includes("Connect one in Settings"));
+  for (const x of [whyYours(filing(), dest(), ENV, f)]) assert(!/team/i.test(x.en) && !x.zh.includes("团队"));
+});
+
+Deno.test("I've sent it: the owner packet, the business's packet and a hand-signed form; nothing else", () => {
+  assert(sentByYou({ kind: "needs_you", ref: OWNER_REF }));
+  assert(sentByYou({ kind: "needs_you", ref: YOURS_REF }));
+  assert(sentByYou({ kind: "wet_signature", ref: "upload" }));
+  assert(sentByYou({ kind: "wet_signature" }));
+  assert(!sentByYou({ kind: "needs_you", ref: "duplicate" }));
+  assert(!sentByYou({ kind: "needs_you" }));
+  assert(!sentByYou({ kind: "need_person" }));
+  assert(!sentByYou(undefined));
+});
+
+Deno.test("the sweep: reroute a failed site, check first when it may have gone, the business's packet otherwise, Placetta's check for a day", () => {
+  const now = Date.parse("2026-11-01T12:00:00Z");
+  const h = (log: { kind: string; ref?: string; at?: string }[], over: Partial<Filing> = {}) =>
+    handBackDue(filing({}, { channel: "team", agent_state: "handoff", agent_log: log.map((e) => ({ en: "", zh: "", ...e })), ...over }), now);
+  for (const ref of PORTAL_FAILED) assertEquals(h([{ kind: "handoff", ref }]), "reroute");
+  assertEquals(h([{ kind: "handoff", ref: "maybe_submitted" }]), "check");
+  assertEquals(h([{ kind: "handoff", ref: "limit" }], { submit_clicked_at: "2026-11-01T00:00:00Z" }), "check");
+  assertEquals(h([{ kind: "handoff" }]), "yours");
+  assertEquals(h([{ kind: "retry" }]), "yours");
+  // the Placetta team took it over by hand: theirs
+  assertEquals(h([{ kind: "take_over" }]), null);
+  // Placetta's check keeps its channel and waits REVIEW_HOURS
+  const fresh = new Date(now - 3600e3).toISOString(), late = new Date(now - REVIEW_HOURS * 3600e3).toISOString();
+  assertEquals(h([{ kind: "review_wait", at: fresh }], { channel: "email" }), null);
+  assertEquals(h([{ kind: "review_wait", at: late }], { channel: "email" }), "review_late");
+  assertEquals(h([{ kind: "review_page", at: late }], { channel: "portal" }), "review_late");
+  assertEquals(h([{ kind: "review_page", at: late }], { channel: "portal", submit_clicked_at: late }), null);
+  // not with Placetta, or finished
+  assertEquals(h([{ kind: "handoff" }], { agent_state: "needs_you" }), null);
+  assertEquals(h([{ kind: "handoff" }], { status: "submitted" }), null);
+  assertEquals(h([{ kind: "handoff" }], { channel: "fax" }), null);
+  assertEquals(h([]), null);
+});
+
+Deno.test("every shipped destination: with all four channels on, Placetta sends only a way the agency lists and allows, else the business gets a packet that says where", () => {
+  const all = { hasLogin: true, mailConnected: true };
+  const seen = { email: 0, fax: 0, mail: 0, portal: 0, owner: 0, team: 0 } as Record<string, number>;
+  for (const [id, d] of Object.entries(DEST)) {
+    for (const signed of [false, true]) {
+      // signed: the card's signature, and for a wet-signature form the hand-signed copy uploaded to Documents
+      const copy = `${WS}/receipts/signed.pdf`;
+      const f = filing({ official: id, ...(signed ? { signature: { name: "A", signed_at: "n", kind: "drawn" as const } } : {}) },
+        signed && d.signature === "wet" ? { agent_log: [{ en: "", zh: "", kind: "signed_copy", ref: copy }] } : {});
+      const r = pick(f, d, ENV, all);
+      seen[r]++;
+      if (r === "email") assert(!!d.email && d.signature !== "wet" && !feeBlocks(f, d), id);
+      if (r === "fax") assert(!!d.fax && !feeBlocks(f, d) && (d.signature !== "wet" || canFaxSignedFor(f, d, ENV)), id);
+      if (r === "mail") assert(!!d.mail && d.signature !== "wet" && !feeBlocks(f, d), id);
+      if (r === "portal") assert(!!d.portal, id);
+      if (r === "owner") assert(!!d.owner, id);
+      // a wet signature never goes by email or mail
+      if (d.signature === "wet") assert(!["email", "mail"].includes(r), `${id}: wet`);
+      if (r === "team") {
+        const p = handoffPacket(f, d, whyYours(f, d, ENV, all));
+        assert(waysToSend(d, f.payload).en.length > 0 || !!d.owner, `${id}: the packet says where it goes`);
+        assert(!/\bteam\b/i.test(p.en) && !p.zh.includes("团队"), `${id}: no team in the packet`);
+        assert(p.lines.length > 6, id);
+      }
+      // a paper send passes the checks once the filled form and signature are there (an authorization letter aside)
+      if ((r === "email" || r === "fax" || r === "mail") && signed) {
+        const problems = check(f, d, { docPaths: new Set([...docs, `${WS}/receipts/signed.pdf`]) }, r).filter((x) => !/authorization|授权/.test(x.en));
+        assertEquals(problems.map((x) => x.en), [], id);
+      }
+    }
+  }
+  // certified mail carries Placetta's own copy, so it never takes a wet-signature form (a printed scan isn't the
+  // original signature); the shipped mail-only agencies all want a wet signature or a fee, so they're the business's
+  for (const c of ["email", "fax", "portal", "owner"]) assert(seen[c] > 0, `${c} is used by some destination`);
 });

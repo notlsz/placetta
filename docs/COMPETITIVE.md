@@ -168,6 +168,7 @@ something, it scores 1.
 | **Odelia, before** | 4 | 6 | 1 | 3 | 3.5 |
 | **Odelia, after** | 8 | 8 | 7 | 7 | 7.5 |
 | **Odelia, second pass (2026-10-22)** | 8.5 | 8 | 8.5 | 8 | 8.3 |
+| **Odelia, third pass (2026-10-24, below)** | 9 | 8 | 8.8 | 8 | 8.5 |
 | CompuLaw and Clio court-rules calendaring (deadline engines) | 1 | 1 | 5 | 1 | 2.0 |
 | Harbor Compliance | 6 | 5 | 1 | 1 | 3.3 |
 | LicenseLogix (CT Corporation since 2021) | 5 | 6 | 1 | 1 | 3.3 |
@@ -268,6 +269,23 @@ Copied, and from whom: rule-by-trigger deadlines with the counting shown (CompuL
 Open data, each queried live by a real record's number: Chicago building permits and business licenses, Austin permits, Seattle permits, Boston approved permits, Philadelphia permits and business licenses, NYC DCWP license applications. Not used: Dallas (no status column, ends 2018), Denver (residential construction only), NYC DOHMH (inspections, not permit status).
 
 Inspection booking on the agency's own site with the owner's existing login: San Francisco (PermitSF; numeric permits by phone), Austin (AB+C, with a playbook), Dallas, Fort Worth and San Diego (Accela), Irvine, Phoenix (the web inspection key held like a login), alongside LADBS, LAFD, FDNY and SJPermits.
+
+## Third lifecycle pass (2026-10-24): tracking, renewals and appeals toward 9.5
+
+The weakest points left by the second pass, from the code: the liquor license, the permit that decides a food and
+beverage opening, was checked by the model in New York and Texas (its lookups were pages marked UNVERIFIED); a renewal
+date came only from a cycle Placetta computed, never from the agency's own record; 65 of the 118 renewal cycles the
+registry states produced no date; appeals covered three states.
+
+| Dimension | Before | After | What changed, with its test | Still short of 9.5 |
+|---|---:|---:|---|---|
+| Tracking | 8.5 | 9 | The state liquor authorities' own open data, read in code: New York SLA (pending applications f8i8-k2gm, active licenses 9s3h-dpkz, inactive 6dg3-2z7i on data.ny.gov) and Texas TABC (licenses 7hf9-qc9f and pending applications mxm5-tdpj on data.texas.gov, joined by the license id TABC assigns at filing). Each queried live on 2026-10-24 by real records' numbers and parsed from the rows returned; one filing is followed from intake to issued, then weekly for good standing. A suspension is its own state, out of good standing. A record that leaves the feed (a New York application once decided) is said once, asking for the license number. A lookup can now ask several datasets for one number (`urls` in `src/filingPlaybooks/status.ts`). `supabase/functions/monitor/status_checks_test.ts`, 7 new tests | California ABC still has no feed (its License Query System posts a nonce), so its checks stay Odelia's; health permits in most cities have no status feed; no live pilot has measured the feeds on real filings |
+| Renewals | 8.5 | 9 | The agency's expiration date governs: when a license's record publishes one (NY and TX liquor so far; any feed can), a calendar renewal that differs, or a missing one, is told to the owner once per date with both dates and the source (`expiryDrift` in `src/tracking/index.ts`). The renewal reader turns 90 of the registry's 118 stated cycles into dates, up from 53: terms counted from the approval ("Valid for 5 years", "Every 3 years, with 4 hours of continuing education"), dates the agency fixes ("all certificates expire December 31", "receipts run October 1 to September 30"), every few years ("December 31 of the fifth year"), even years only with a renewal window (FDA's biennial food facility registration). Wordings that depend on the kind of license, a district, the tax year or a choice still give no date (`src/renewal.ts`; `scripts/agent-test.ts`, 5 new checks) | 571 registry forms state no renewal cycle at all (many are one-time filings; the rest need the registry's own research); the calendar isn't moved automatically to the agency's date, the owner is told to move it |
+| Appeals | 8.5 | 8.8 | Two states added, each rule confirmed on an official page on 2026-10-24: Massachusetts ABCC, 5 business days from receipt of the local board's written decision (the ABCC's page; M.G.L. c.138 §67 says five days following notice), filed by mail or fax to Chelsea; New Jersey Division of ABC, 30 days from personal service or registered mailing of the municipal notice, $100 fee, Notice and Petition of Appeal to Trenton. Both attorney-advised in the agencies' own words. 25 playbooks, every deadline rule confirmed on an official source (`scripts/agent-test.ts`) | No attorney has reviewed the playbooks; no real denial has gone through one end to end; Illinois (ILGA disallows fetching) and Washington (RCW 66.24.010 gives a hearing but no period) aren't covered |
+
+Overall, the lifecycle moves from 8.3 to 8.5, and "Tracking, renewals, appeals" in the incumbents table from 8.7 to
+about 8.9. What 9.5 needs is the same founder list as before: a live pilot (real filings, real denials, real
+renewals through the feeds), an attorney's review of the playbooks, and a way to read California ABC's record.
 
 ## The filing robot against browser and computer-use agents
 

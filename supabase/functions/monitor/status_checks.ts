@@ -12,7 +12,7 @@ import type { Bi } from "../../../src/bi.ts";
 import { lookupFor, cleanKey, type Lookup, type Parsed } from "../../../src/filingPlaybooks/status.ts";
 // @deno-types="../_shared/opening.d.ts"
 import { publishedDays } from "../_shared/opening.js";
-import { due, escalate, hashOf, hotReason, inScope, inStanding, nextCheckAt, NORM_WORDS, pageText, realChange, sla, standingChange, type CheckKind, type Tracking } from "../../../src/tracking/index.ts";
+import { due, escalate, expiryDrift, hashOf, hotReason, inScope, inStanding, nextCheckAt, NORM_WORDS, pageText, realChange, sla, standingChange, type CheckKind, type Tracking } from "../../../src/tracking/index.ts";
 
 export type StatusFiling = { id: string; workspace_id: string; app_id: string; title: Bi; status: string; submitted_at?: string | null; updated_at: string; confirmation_number?: string | null };
 type App = { id: string; name?: Bi; agency?: Bi; est?: Bi };
@@ -40,6 +40,9 @@ export type StatusRun = { checked: number; code: number; pages: number; model: n
 const addressOf = (st: WsState, appId: string) => (st?.stores ?? []).find((s) => Array.isArray(s.apps) && s.apps.includes(appId))?.address
   ?? [st?.meta?.city, st?.meta?.region].filter(Boolean).join(", ");
 const lower = (s: string) => (/^[A-Z][a-z]/.test(s) && !/^[A-Z][a-z]+ [A-Z]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
+/** The renewal on the workspace's calendar for an application: the soonest one from today. */
+const calendarRenewal = (st: WsState, appId: string, today: string) => ((st?.deadlines ?? []) as { app?: unknown; kind?: unknown; date?: unknown }[])
+  .filter((d) => d?.app === appId && d.kind === "renewal" && typeof d.date === "string" && d.date >= today).map((d) => d.date as string).sort()[0] ?? null;
 
 /** The narrow job for a model check: one filing, one agency page, one line back. The page text, when there is one, goes
  *  in as data. */
@@ -95,7 +98,9 @@ export async function runStatusChecks(o: { filings: StatusFiling[]; states: Map<
     budget--;
     const lk = lookupFor(app ?? { name: f.title }, addressOf(st, f.app_id));
     const key = cleanKey(f.confirmation_number);
-    const url = lk?.kind === "open_data" && key ? lk.url(key) : null;
+    // an agency with several datasets is asked in each of them for the same number
+    const urls = lk?.kind === "open_data" && key ? (lk.urls ? lk.urls(key) : [lk.url(key)]).filter((u): u is string => !!u) : [];
+    const url = urls[0] ?? null;
     const lookupUrl = t.lookup_url && /^https:\/\//.test(t.lookup_url) ? t.lookup_url : null;
     const kind: CheckKind = url ? "open_data" : lookupUrl ? "page" : "model";
     const unchanged = t.unchanged_checks ?? 0, errors = t.check_errors ?? 0;
@@ -116,7 +121,7 @@ export async function runStatusChecks(o: { filings: StatusFiling[]; states: Map<
     }
     let body: unknown, text = "";
     try {
-      if (kind === "open_data") body = await o.io.fetchJson(url!);
+      if (kind === "open_data") body = lk!.urls ? await Promise.all(urls.map((u) => o.io.fetchJson(u))) : await o.io.fetchJson(url!);
       else text = pageText(await o.io.fetchText(lookupUrl!));
     } catch (e) {
       r.errors++;
@@ -130,6 +135,37 @@ export async function runStatusChecks(o: { filings: StatusFiling[]; states: Map<
       const hash = await hashOf(JSON.stringify(p ?? { none: key }));
       const changed = hash !== t.last_hash;
       await o.io.check({ workspace_id: f.workspace_id, filing_id: f.id, source: "open_data", url: url!, content_hash: hash, status_seen: p?.status ?? null, changed, confidence: p?.confidence ?? null, model_used: false, run_id: null, cost_usd: 0, error: null });
+      // the agency's own expiration date, once the license is in force, against the renewal on the calendar: said once
+      // per date the agency publishes (the update's dedupe), whether or not the status moved
+      const exp = p && (p.norm === "issued" || p.norm === "approved") ? expiryDrift(p.expires, calendarRenewal(st, f.app_id, o.today), o.today) : null;
+      if (exp) {
+        const name = app?.name ?? f.title;
+        if (await o.io.update({ workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, dedupe: `agency-expires:${f.id}:${exp.agency}`,
+          title: { en: `${name.en} expires ${exp.agency} on the agency's record`, zh: `机构记录显示${name.zh}于 ${exp.agency} 到期` },
+          body: exp.kind === "differs"
+            ? { en: `${lk!.agency.en}'s own record says it expires ${exp.agency}; your Deadlines have the renewal on ${exp.calendar}. The agency's date governs: move the renewal to ${exp.agency}, and Placetta starts it 60 days before. See it: ${lk!.see}`,
+                zh: `${lk!.agency.zh}的官方记录显示到期日为 ${exp.agency}；您的截止日期中续办日为 ${exp.calendar}。以机构日期为准：请将续办改为 ${exp.agency}，快哉会提前 60 天开始续办。查看：${lk!.see}` }
+            : { en: `${lk!.agency.en}'s own record says it expires ${exp.agency}, and there's no renewal on your Deadlines yet. Add it for ${exp.agency}, and Placetta starts it 60 days before. See it: ${lk!.see}`,
+                zh: `${lk!.agency.zh}的官方记录显示到期日为 ${exp.agency}，您的截止日期中还没有续办。请添加 ${exp.agency} 的续办，快哉会提前 60 天开始。查看：${lk!.see}` } })) {
+          r.notified++;
+          await o.io.event({ workspace_id: f.workspace_id, filing_id: f.id, kind: "agency", status: p!.status, source: "open_data", confidence: p!.confidence, url: lk!.see, dedupe: `agency-expires:${exp.agency}`,
+            title: { en: `${lk!.agency.en} shows it expires ${exp.agency}`, zh: `${lk!.agency.zh}显示到期日 ${exp.agency}` } });
+        }
+      }
+      // a record the feed showed before and no longer has: a pending application leaves the list once it's decided (New
+      // York's SLA then issues the license under its own number), so the owner hears once and is asked for the number
+      if (changed && !p && t.agency_status) {
+        r.changed++;
+        const name = app?.name ?? f.title;
+        if (await o.io.update({ workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, dedupe: `agency-gone:${f.id}:${hash.slice(0, 16)}`,
+          title: { en: `${name.en} is no longer on ${lk!.agency.en}'s list`, zh: `${name.zh}已不在${lk!.agency.zh}的列表中` },
+          body: { en: `It last showed "${t.agency_status}". A pending application leaves the list once it's decided, and an issued license carries its own number. If you have a letter or a license number from the agency, add it to this filing and Placetta follows it from there. See it: ${lk!.see}`,
+            zh: `上次显示为“${t.agency_status}”。待审申请一经决定就会从列表中移除，发出的执照另有编号。如果您收到了机构的信函或执照编号，请添加到这份申请，快哉将据此继续跟进。查看：${lk!.see}` } })) r.notified++;
+        await o.io.event({ workspace_id: f.workspace_id, filing_id: f.id, kind: "agency", status: null, source: "open_data", confidence: 0.6, url: lk!.see, dedupe: `agency-gone:${hash.slice(0, 16)}`,
+          title: { en: `No longer on ${lk!.agency.en}'s list (last: ${t.agency_status})`, zh: `已不在${lk!.agency.zh}的列表中（上次：${t.agency_status}）` } });
+        await save({ changed: true, error: false, last_hash: hash, agency_status: null, agency_norm: null, agency_status_at: new Date(o.now).toISOString(), last_movement_at: new Date(o.now).toISOString() });
+        continue;
+      }
       if (!changed || !p) { await save({ changed: false, error: false, last_hash: hash }); continue; }
       r.changed++;
       // an approved license: news only when it leaves good standing on the agency's record, or comes back

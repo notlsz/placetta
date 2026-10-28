@@ -1,8 +1,10 @@
 // The dispatcher's decisions, kept free of I/O so they can be tested: is this agency switched on, is the filing
 // complete, which channel sends it, and is the owner foreign. index.ts does the sending.
-import { type Dest, loginMatches } from "./destinations.ts";
+import { type Dest, loginMatches, TEAM_ONLY } from "./destinations.ts";
 
 export type Bi = { en: string; zh: string };
+/** "team" is the database's name for "not sent by Placetta": the business sends it with the packet Odelia prepares
+    (or, during Placetta's check of a form's first self-filings, it waits for that check). */
 export type Channel = "email" | "fax" | "mail" | "portal" | "team";
 /** Where a filing goes: a channel, or "owner" when the agency takes it only from the business itself (Odelia
     prepares the packet and nothing is sent; the filing's channel column says "team"). */
@@ -189,7 +191,7 @@ export function teachRefusal(f: Filing, d: Dest | undefined, env: Env): TeachRef
 }
 export const TEACH_REFUSED: Record<TeachRefusal, Bi> = {
   no_portal: { en: "This form isn't filed on an agency website, so there's nothing to show Odelia.", zh: "这份表格不在机构网站上提交，无需向 Odelia 演示。" },
-  worker_off: { en: "Filing on agency websites isn't switched on yet. The Placetta team files this one.", zh: "机构网站提交功能尚未开启，这一份由快哉团队提交。" },
+  worker_off: { en: "Filing on agency websites isn't switched on yet. Send this one with the packet in Documents.", zh: "机构网站提交功能尚未开启。请用“文件”中的材料包自行提交这一份。" },
   finished: { en: "This filing has already gone to the agency.", zh: "这份申请已提交给机构。" },
   busy: { en: "Odelia is already working on this filing. Wait for it to finish or stop it first.", zh: "Odelia 正在办理这份申请，请等待完成或先停止。" },
 };
@@ -216,10 +218,62 @@ export function pick(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Ro
   return "team";
 }
 
+/** Why pick() didn't choose a channel Placetta sends on: one plain sentence for the business, in the same order pick()
+    decides. */
+export function whyYours(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Bi {
+  if (!d) {
+    const t = TEAM_ONLY[f.payload.official ?? ""];
+    return t ? { en: `Odelia can't send this one for you: ${t.why}`, zh: `Odelia 无法代您提交这一份：${t.why}` }
+      : { en: "Placetta doesn't have a checked way to send this form to the agency yet.", zh: "快哉尚未核实这份表格的提交方式。" };
+  }
+  if (feeBlocks(f, d)) return { en: "The agency's fee goes with this filing, and Placetta never sends money.", zh: "这份申请需随附机构费用，快哉从不代付款项。" };
+  if (d.signature === "wet") return { en: "The agency needs a handwritten signature on this form.", zh: "该机构要求在表格上手写签名。" };
+  if (d.email && facts.mailConnected && env.channels.includes("email") && extraFiles(f) > EMAIL_ATTACHMENTS) {
+    return { en: `It has more than ${EMAIL_ATTACHMENTS} attachments, more than Placetta sends in one email.`, zh: `附件超过 ${EMAIL_ATTACHMENTS} 个，超出快哉单封邮件可发送的数量。` };
+  }
+  if (extraFiles(f) && (d.fax || d.mail) && !d.email) return { en: "A fax or letter from Placetta carries only the form, and this one has attachments.", zh: "快哉的传真或信件只能附带表格本身，而这份申请有附件。" };
+  if (d.email && !facts.mailConnected && env.channels.includes("email")) return { en: "This agency takes it by email, and no mailbox is connected to send it from. Connect one in Settings, or send it yourself.", zh: "该机构通过邮件受理，但尚未连接可用于发送的邮箱。可在“设置”中连接，或自行发送。" };
+  return { en: "Placetta doesn't send to this agency by itself yet.", zh: "快哉暂时无法自动向该机构提交。" };
+}
+
 /** Why a portal run handed a filing back without submitting anything: it couldn't finish on the agency's site (limit),
     the site sent it elsewhere (left_portal), there's no approved portal for the form (no_portal), it failed three
-    times (portal_failed), or the agency's bot protection refused the worker's server (portal_blocked). The worker writes these as the hand-back's ref (worker/filer/src/run.ts). */
-export const PORTAL_FAILED = new Set(["limit", "left_portal", "no_portal", "portal_failed", "portal_blocked"]);
+    times (portal_failed), the agency's review page didn't match what was approved (review_differs), the page had text
+    aimed at an AI (page_injection), the agency's bot protection refused the worker's server (portal_blocked), the steps for the site haven't had their first supervised run
+    (unverified_playbook), or a "Show Odelia how" run ended without a filing (no_live_view, teach_incomplete). The
+    worker writes these as the hand-back's ref (worker/filer/src/run.ts). Each is tried another way the agency takes,
+    else handed to the business with its packet. */
+export const PORTAL_FAILED = new Set(["limit", "left_portal", "no_portal", "portal_failed", "review_differs", "page_injection", "unverified_playbook", "no_live_view", "teach_incomplete", "portal_blocked"]);
+
+/** Hand-backs after which something may already have reached the agency: the business checks before anything else. */
+export const MAYBE_SENT = new Set(["maybe_submitted"]);
+
+/** Placetta checks a form's first FILER_TWO_KEY self-filings before they leave. If that check hasn't happened within
+    this many hours, the business gets the packet instead of waiting on Placetta. */
+export const REVIEW_HOURS = 24;
+
+/** What the sweep does with a filing sitting with Placetta (agent state "handoff", not finished; channel "team" except
+    during Placetta's check, which keeps the channel it would send on): reroute (the agency's site failed: try another way), check (something may have reached the
+    agency: the business checks first), review_late (Placetta's check took longer than REVIEW_HOURS), yours (any other
+    hand-back: the business gets the packet), or null (leave it: Placetta's check is still within its window, or the
+    Placetta team took it over by hand). */
+export type HandBack = "reroute" | "check" | "review_late" | "yours";
+export function handBackDue(f: Pick<Filing, "channel" | "agent_state" | "submit_clicked_at" | "status" | "agent_log">, nowMs: number): HandBack | null {
+  if (f.agent_state !== "handoff") return null;
+  if (["canceled", "submitted", "accepted", "rejected"].includes(f.status)) return null;
+  const last = f.agent_log[f.agent_log.length - 1];
+  if (!last || last.kind === "take_over") return null;
+  // Placetta's check keeps the channel it would send on (email, fax, mail, or the agency's site)
+  if (last.kind === "review_wait" || last.kind === "review_page") {
+    if (f.submit_clicked_at) return null;
+    const at = Date.parse(last.at ?? "");
+    return Number.isFinite(at) && nowMs - at >= REVIEW_HOURS * 3600e3 ? "review_late" : null;
+  }
+  if (f.channel !== "team") return null;
+  if (f.submit_clicked_at || MAYBE_SENT.has(last.ref ?? "")) return "check";
+  if (last.kind === "handoff" && PORTAL_FAILED.has(last.ref ?? "")) return "reroute";
+  return "yours";
+}
 
 /** A filing the agency's site failed and nobody has acted on since: with the team, nothing submitted, not finished, and
     the last thing in its log is the portal run's hand-back. Placetta then tries another way before the team does it by
@@ -285,8 +339,8 @@ export function ownerPacket(f: Filing, d: Dest): { en: string; zh: string; lines
   const feeZh = feeDue(f) ? `机构费用（约 ${Number(f.fee_estimate)} 美元）由您支付。` : "";
   const link = o.url && /^https:\/\//.test(o.url) ? o.url : null;
   return {
-    en: `${form} is one you do yourself: ${o.why} Odelia put a packet in Documents (owner-packet.pdf) with what to send and where. Send it ${where}.${fee} Tap "I've done it" once it's sent.`,
-    zh: `${formZh}需要由您本人办理。快哉已把材料包放在“文件”中（owner-packet.pdf），写明要提交什么、交到哪里。请${whereZh}。${feeZh}办完后点击“我已完成”。`,
+    en: `${form} is one you do yourself: ${o.why} Odelia put a packet in Documents (owner-packet.pdf) with what to send and where. Send it ${where}.${fee} Then tap "I've sent it" and add the agency's confirmation number if it gave you one. Odelia tracks it from there.`,
+    zh: `${formZh}需要由您本人办理。快哉已把材料包放在“文件”中（owner-packet.pdf），写明要提交什么、交到哪里。请${whereZh}。${feeZh}发出后点击“我已发出”，如机构给了确认号请一并填写。之后由 Odelia 跟进进度。`,
     lines: [
       `Owner packet: ${form}`,
       `For: ${f.payload.fields?.find((x) => x.id === "l1")?.value || f.title.en}`,
@@ -307,6 +361,76 @@ export function ownerPacket(f: Filing, d: Dest): { en: string; zh: string; lines
       ...wrap(`The agency's page: ${d.source} (checked ${d.checked})`),
     ],
     link,
+  };
+}
+
+/** The hand-back that gives a filing to the business to send itself, with the packet Odelia prepared. */
+export const YOURS_REF = "yours";
+
+/** A hand-back the business finishes by sending it themselves: "I've sent it" (with the agency's confirmation number
+    when there is one) marks it submitted, and Odelia tracks it from there. */
+export const sentByYou = (e: Pick<LogEntry, "kind" | "ref"> | undefined): boolean =>
+  !!e && ((e.kind === "needs_you" && (e.ref === OWNER_REF || e.ref === YOURS_REF)) || e.kind === "wet_signature");
+
+/** Where the business sends a form itself, in the order the agency's page gives the ways: its site, email, fax, mail. */
+export function waysToSend(d: Dest | undefined, p: Payload): { en: string[]; zh: string[]; link: string | null } {
+  if (!d) return { en: [], zh: [], link: null };
+  const site = d.portalUrl ?? (d.portal ? `https://${d.portal}${d.tenant ?? ""}` : null);
+  const m = mailTo(d, p), fax = faxTo(d, p);
+  const addr = m ? [m.name, m.line1, m.line2, `${m.city}, ${m.state} ${m.zip}`].filter(Boolean).join(", ") : "";
+  const en: string[] = [], zh: string[] = [];
+  if (site) { en.push(`On the agency's site: ${site}`); zh.push(`在机构网站：${site}`); }
+  if (d.email) { en.push(`By email to ${d.email}`); zh.push(`发送邮件至 ${d.email}`); }
+  if (fax) { en.push(`By fax to ${fax}`); zh.push(`传真至 ${fax}`); }
+  if (addr) { en.push(`By mail to ${addr}`); zh.push(`邮寄至 ${addr}`); }
+  const link = site && /^https:\/\//.test(site) ? site : null;
+  return { en, zh, link };
+}
+
+/** The packet for a filing Odelia hands to the business: why she isn't sending it, how the agency takes it, the
+    signature and the fee, and what goes with it. check: something may already have reached the agency, so the first
+    step is to look before sending it again. Plain ASCII lines for the packet's cover page; the log entry carries the
+    same in English and Chinese. */
+export function handoffPacket(f: Filing, d: Dest | undefined, why: Bi, opts: { check?: boolean; agencyWhy?: string; agencySource?: string } = {}):
+  { en: string; zh: string; lines: string[]; link: string | null } {
+  if (d?.owner) return ownerPacket(f, d);
+  const form = f.payload.form?.en || f.title.en;
+  const ways = waysToSend(d, f.payload);
+  const wet = d?.signature === "wet";
+  const fee = feeDue(f) ? Number(f.fee_estimate) : 0;
+  const paySaid = PAYMENT_SAID[d?.payment ?? ""];
+  const howEn = ways.en.length ? ` Send it ${ways.en[0].replace(/^On/, "on").replace(/^By/, "by")}${ways.en.length > 1 ? " (other ways the agency takes are in the packet)" : ""}.`
+    : opts.agencySource ? ` Follow the agency's page: ${opts.agencySource}.` : " Placetta doesn't have the agency's address for this form yet; the agency's office tells you where it goes.";
+  const howZh = ways.zh.length ? `请${ways.zh[0]}${ways.zh.length > 1 ? "（机构接受的其他方式见材料包）" : ""}。`
+    : opts.agencySource ? `请按机构页面办理：${opts.agencySource}。` : "快哉暂时没有这份表格的机构地址，请向机构办公室确认提交方式。";
+  const first = opts.check ? { en: " First check whether the agency already has it (its site, your email's Sent folder, or a call), so it isn't sent twice.", zh: "请先确认机构是否已收到（机构网站、邮箱的已发送、或致电），避免重复提交。" } : { en: "", zh: "" };
+  const signEn = wet ? " Print it and sign it by hand." : "";
+  const signZh = wet ? "请打印后手写签名。" : "";
+  const feeEn = fee ? ` The agency's fee is about $${fee}${paySaid ? `, ${paySaid}` : ""}.` : d?.payment === "with_filing" || d?.payment === "in_person" ? ` The agency's fee: ${paySaid}.` : "";
+  const feeZh = fee ? `机构费用约 ${fee} 美元。` : d?.payment === "with_filing" ? "需随申请附上支票或汇票。" : d?.payment === "in_person" ? "费用需当面缴纳。" : "";
+  return {
+    en: `${why.en} It's ready for you to send: the filled form and a packet (filing-packet.pdf) are in Documents.${first.en}${signEn}${howEn}${feeEn} Then tap "I've sent it" and add the agency's confirmation number if it gave you one. Odelia tracks it from there.`.slice(0, 1500),
+    zh: `${why.zh}已为您准备好：填好的表格和材料包（filing-packet.pdf）在“文件”中。${first.zh}${signZh}${howZh}${feeZh}发出后点击“我已发出”，如机构给了确认号请一并填写。之后由 Odelia 跟进进度。`.slice(0, 1500),
+    lines: [
+      `Filing packet: ${form}`,
+      `For: ${f.payload.fields?.find((x) => x.id === "l1")?.value || f.title.en}`,
+      "",
+      "Why you send this one:",
+      ...wrap(why.en),
+      ...(opts.check ? ["", "First:", ...wrap("Check whether the agency already has it (its site, your email's Sent folder, or a call) so it isn't sent twice.")] : []),
+      "",
+      "Where it goes:",
+      ...(ways.en.length ? ways.en.flatMap((w) => wrap(w)) : opts.agencyWhy ? wrap(opts.agencyWhy) : ["Ask the agency's office how it takes this form."]),
+      "",
+      `Signature: ${wet ? "sign by hand" : d?.signature === "none" ? "none" : d ? "electronic signature accepted" : "as the agency asks"}`,
+      `Fee: ${fee ? `about $${fee}, ` : ""}${paySaid ?? "as the agency asks"}`,
+      ...(d?.attach?.length ? ["", "What goes with it:", ...d.attach.flatMap((a) => wrap(a))] : []),
+      "",
+      "Your filled form and documents are in Placetta's Documents.",
+      "When it's sent, tap \"I've sent it\" in Placetta and add the agency's confirmation number.",
+      ...(d ? wrap(`The agency's page: ${d.source} (checked ${d.checked})`) : opts.agencySource ? wrap(`The agency's page: ${opts.agencySource}`) : []),
+    ],
+    link: ways.link,
   };
 }
 

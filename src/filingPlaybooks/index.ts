@@ -73,7 +73,7 @@ const R = {
   readback: { why: B("A line on the PDF doesn't say what was approved", "PDF 上的某一行与批准内容不一致"), check: "readback" } as Rejection,
 };
 const COMMON_STEPS: Step[] = ["find_form", "prefill", "reuse_documents", "validate", "ask_once", "approve", "send", "track"];
-const TEAM = B("Placetta's team files it when the agency needs a wet signature, a payment with the filing, or has no route Odelia can use; the approval card says so before anything is charged.", "当机构要求亲笔签名、随件缴费或没有 Odelia 可用的途径时，由快哉团队提交；批准卡片会在收费前说明。");
+const TEAM = B("When the agency needs a wet signature, a payment with the filing, or has no route Odelia can use, Odelia prepares it with a packet and the business sends it; the approval card says so before anything is charged.", "当机构要求亲笔签名、随件缴费或没有 Odelia 可用的途径时，Odelia 会准备好材料包，由企业自行提交；批准卡片会在收费前说明。");
 
 export const PLAYBOOKS: Playbook[] = [
   {

@@ -74,8 +74,8 @@ const PAY = {
 /** The agency's site refused the worker's server (env.ts blockedPage). The file function's sweep tries another way the
  *  agency takes before the team (logic.ts PORTAL_FAILED). */
 const BLOCKED_MSG = {
-  en: "The agency's site refused Placetta's server before anything was entered. Placetta tries another way the agency takes, or the team files it.",
-  zh: "机构网站在填写任何内容前拒绝了快哉的服务器。快哉会改用机构接受的其他方式，否则由团队提交。",
+  en: "The agency's site refused Placetta's server before anything was entered. Odelia tries another way the agency takes, or gives it to you to send.",
+  zh: "机构网站在填写任何内容前拒绝了快哉的服务器。Odelia 会改用机构接受的其他方式，否则交由您自行提交。",
 };
 /** Hand-backs a person finishes on the page itself: once the page no longer needs them, Odelia carries on by herself. */
 const SELF_CLEARING = new Set(["captcha", "code", "identity", "account", "secret_number", "payment"]);
@@ -171,7 +171,7 @@ export class Worker {
     if (!host) { await this.finish(f, { kind: "handoff", reason: "no_portal", message: { en: "No approved portal for this form.", zh: "该表格没有经核准的网站。" }, trace: [] }); return null; }
     if (f.submit_clicked_at) {
       await this.finish(f, { kind: "handoff", reason: "maybe_submitted", task: "check_agency", trace: [],
-        message: { en: "An earlier run may have submitted this. The team checks the agency before anything else.", zh: "之前的运行可能已提交，团队会先向机构核实。" } });
+        message: { en: "An earlier run may have submitted this, so nothing more is sent until it's checked with the agency.", zh: "之前的运行可能已提交，在向机构确认之前不会再提交。" } });
       return null;
     }
     // A playbook written from the agency's guide but never run on the live site waits for staff to watch its first run.
@@ -190,7 +190,7 @@ export class Worker {
     }
     if (pb && !pb.playbook.verified && !this.c.allowUnverified && !taught && !teaching) {
       await this.finish(f, { kind: "handoff", reason: "unverified_playbook", task: "first_run", trace: [],
-        message: { en: `Placetta's steps for ${pb.playbook.name} come from the agency's published guide and haven't had their supervised first run. The Placetta team files this one and watches the steps.`, zh: `快哉在${pb.playbook.name}上的操作步骤来自机构公布的指南，尚未经过有人监督的首次运行。这一份由快哉团队提交，并核对这些步骤。` } });
+        message: { en: `Placetta's steps for ${pb.playbook.name} come from the agency's published guide and haven't had their supervised first run, so Odelia doesn't use them on her own yet.`, zh: `快哉在${pb.playbook.name}上的操作步骤来自机构公布的指南，尚未经过有人监督的首次运行，Odelia 暂不独自使用。` } });
       return null;
     }
     const route = this.c.routeOf?.(official) ?? null;
@@ -387,16 +387,16 @@ export class Worker {
     const missing = this.unconfirmed(ctx, st);
     if (missing.length) {
       return { kind: "handoff", reason: "review_differs", task: "handoff", trace: ctx.trace,
-        message: { en: `The agency's review page doesn't match what you approved (${missing.join(", ")}). Nothing was submitted; the team is checking.`, zh: `机构的核对页面与您批准的内容不一致（${missing.join("、")}），未提交，团队正在核查。` } };
+        message: { en: `The agency's review page doesn't match what you approved (${missing.join(", ")}). Nothing was submitted.`, zh: `机构的核对页面与您批准的内容不一致（${missing.join("、")}），未提交。` } };
     }
     const official = ctx.f.payload.official!;
     const approved = ctx.f.agent_log.some((e) => e.kind === "two_key_ok");
     // A playbook's supervised first run always stops here for the team, whatever the two-key count says.
     const firstRun = !!ctx.pb && !ctx.pb.playbook.verified;
     if (this.c.dryRun || (!approved && (firstRun || (await this.c.store.selfFiled(official)) < this.c.twoKey))) {
-      ctx.f = await this.c.store.step(ctx.f, log(this.c.dryRun ? "Dry run: stopped at the final submit" : "With the Placetta team for a final check before submitting",
-        this.c.dryRun ? "演练：停在最终提交前" : "快哉团队正在提交前做最后核对", "review_page", path ?? undefined));
-      return { kind: "review", trace: ctx.trace, message: { en: "Ready to submit. The team reviews the agency's review page first.", zh: "已准备提交，团队先核对机构的核对页面。" } };
+      ctx.f = await this.c.store.step(ctx.f, log(this.c.dryRun ? "Dry run: stopped at the final submit" : "Placetta checks the agency's review page for the first filings of each form before Odelia submits on her own, and this one is in that check. Nothing for you to do: it goes once checked. If it takes longer than a day, Odelia gives it to you to send.",
+        this.c.dryRun ? "演练：停在最终提交前" : "Odelia 自动提交每种表格的前几份时，快哉会先核对机构的核对页面，这一份正在核对中。您无需操作：核对后即提交。若超过一天，Odelia 会把材料交给您自行提交。", "review_page", path ?? undefined));
+      return { kind: "review", trace: ctx.trace, message: { en: "Ready to submit once Placetta checks the agency's review page.", zh: "快哉核对机构的核对页面后即可提交。" } };
     }
     ctx.f = await this.c.store.step(ctx.f, log("Checked the review page against what you approved. Submitting.", "已核对页面与您批准的内容一致，正在提交。", "submit", path ?? undefined),
       { submit_clicked_at: new Date().toISOString() });
@@ -502,7 +502,7 @@ export class Worker {
       const st = await pageState(ctx.page);
       // page text is data: a page with instructions aimed at an AI ends the replay for the team, as it ends a drive
       const inj = pageInjection(st);
-      if (inj) return { end: { kind: "handoff", reason: "page_injection", trace: ctx.trace, message: { en: `The agency's page had text aimed at an AI (${inj}), so Placetta stopped. The team takes this filing from here.`, zh: "机构页面中含有针对 AI 的文字，快哉已停止，由团队接手这份申请。" } } };
+      if (inj) return { end: { kind: "handoff", reason: "page_injection", trace: ctx.trace, message: { en: `The agency's page had text aimed at an AI (${inj}), so Placetta stopped.`, zh: "机构页面中含有针对 AI 的文字，快哉已停止。" } } };
       // a taught step names this customer's own values by placeholder ({fact:legal_name} in a link's words)
       const s0 = { ...r0, heading: fillFacts(r0.heading, p), selector: fillFacts(r0.selector, p) } as TraceStep;
       if (headingOf(st) !== s0.heading) return { ok: false, error: "page changed" };
@@ -567,7 +567,7 @@ export class Worker {
       if (blockedPage(st)) return { kind: "handoff", reason: "portal_blocked", task: "handoff", trace: ctx.trace, message: BLOCKED_MSG };
       const inj = pageInjection(st);
       if (inj) return { kind: "handoff", reason: "page_injection", trace: ctx.trace,
-        message: { en: `The agency's page had text aimed at an AI (${inj}), so Placetta stopped before reading it. The team takes this filing from here.`, zh: "机构页面中含有针对 AI 的文字，快哉在读取前已停止，由团队接手这份申请。" } };
+        message: { en: `The agency's page had text aimed at an AI (${inj}), so Placetta stopped before reading it.`, zh: "机构页面中含有针对 AI 的文字，快哉在读取前已停止。" } };
       // After the submit, the guide's confirmation pattern finds the agency's number without asking the model.
       const pattern = ctx.f.submit_clicked_at && ctx.pb?.playbook.confirm ? new RegExp(ctx.pb.playbook.confirm, "i").exec(st.text) : null;
       if (pattern?.[1]) return await this.done(ctx, pattern[1], `Submitted following the published guide for ${ctx.pb!.playbook.name}`, false);
@@ -599,7 +599,7 @@ export class Worker {
       if ("end" in r) { if (r.end.kind === "needs_you" && r.end.reason === "resumed") continue; return r.end; }
       recent.push(`${call.name} ${x.selector ?? ""}${r.ok ? "" : ` (failed: ${r.error})`}`);
     }
-    return { kind: "handoff", reason: "limit", trace: ctx.trace, message: { en: "Placetta couldn't finish on the agency's site. The team takes it from here.", zh: "快哉未能在机构网站上完成，由团队接手。" } };
+    return { kind: "handoff", reason: "limit", trace: ctx.trace, message: { en: "Placetta couldn't finish on the agency's site.", zh: "快哉未能在机构网站上完成。" } };
   }
 
   // ---------------------------------------------------------------- teach mode
@@ -611,7 +611,7 @@ export class Worker {
     const missing = this.unconfirmed(ctx, st);
     if (missing.length) {
       return { kind: "handoff", reason: "review_differs", task: "handoff", trace: ctx.trace,
-        message: { en: `The agency's review page doesn't match what you approved (${missing.join(", ")}). Nothing was submitted; the team is checking.`, zh: `机构的核对页面与您批准的内容不一致（${missing.join("、")}），未提交，团队正在核查。` } };
+        message: { en: `The agency's review page doesn't match what you approved (${missing.join(", ")}). Nothing was submitted.`, zh: `机构的核对页面与您批准的内容不一致（${missing.join("、")}），未提交。` } };
     }
     const shot = await ctx.page.screenshot({ fullPage: true }).catch(() => null);
     const path = shot ? await this.c.store.saveDoc(ctx.f, "review-page.png", shot, "image/png") : null;
@@ -625,7 +625,7 @@ export class Worker {
     const conf = pattern ?? confirmationIn(now.text);
     if (conf && now.text.includes(conf)) return await this.done(ctx, conf, "You pressed submit after Odelia filled every page", false);
     return { kind: "handoff", reason: "maybe_submitted", task: "check_agency", trace: ctx.trace,
-      message: { en: "You pressed submit, but Placetta didn't see the agency's confirmation. The team checks with the agency.", zh: "您已点击提交，但快哉没有看到机构的确认信息。团队会向机构核实。" } };
+      message: { en: "You pressed submit, but Placetta didn't see the agency's confirmation.", zh: "您已点击提交，但快哉没有看到机构的确认信息。" } };
   }
 
   /** "Show Odelia how": the person files in the live browser while the recorder (recorder.ts) writes down each step.
@@ -638,7 +638,7 @@ export class Worker {
     const ownView = !ctx.session.liveUrl ? this.c.live?.open(ctx.page as unknown as Parameters<LiveViews["open"]>[0], span0) ?? null : null;
     const teachUrl = ctx.session.liveUrl ?? ownView?.url ?? null;
     if (!teachUrl && !this.c.teachWithoutLive) {
-      return { kind: "handoff", reason: "no_live_view", trace: [], message: { en: "The live browser isn't available right now, so Odelia can't watch this filing. The Placetta team files it.", zh: "实时浏览器暂时不可用，Odelia 无法观看这次提交，由快哉团队提交。" } };
+      return { kind: "handoff", reason: "no_live_view", trace: [], message: { en: "The live browser isn't available right now, so Odelia can't watch this filing.", zh: "实时浏览器暂时不可用，Odelia 无法观看这次提交。" } };
     }
     const official = ctx.f.payload.official ?? "";
     const span = this.c.teachMs ?? this.c.holdMs, settle = this.c.teachSettleMs ?? 3000;
@@ -693,8 +693,8 @@ export class Worker {
       ? log(`Odelia learned the ${recording.steps.length} steps on ${ctx.host}. The Placetta team checks them; then she files this form there for every business, and you still approve each filing.`, `Odelia 学会了 ${ctx.host} 上的 ${recording.steps.length} 个步骤。快哉团队核对后，她会为每家企业在该网站提交这份表格，每次提交仍需您批准。`, "taught", String(recording.steps.length))
       : log("Odelia couldn't learn the steps from this run. The Placetta team looks at it.", "Odelia 未能从这次操作中学会步骤，快哉团队会查看。", "taught", "0"), { handoff_url: null });
     if (confirmation) return await this.done(ctx, confirmation, "You submitted it while Odelia watched", false);
-    if (ctx.f.submit_clicked_at) return { kind: "handoff", reason: "maybe_submitted", task: "check_agency", trace: [], message: { en: "You pressed submit, but Placetta didn't see the agency's confirmation. The team checks with the agency.", zh: "您已点击提交，但快哉没有看到机构的确认信息。团队会向机构核实。" } };
-    return { kind: "handoff", reason: "teach_incomplete", trace: [], message: { en: "Odelia didn't see the filing sent, so the Placetta team takes it from here.", zh: "Odelia 没有看到申请被提交，由快哉团队接手。" } };
+    if (ctx.f.submit_clicked_at) return { kind: "handoff", reason: "maybe_submitted", task: "check_agency", trace: [], message: { en: "You pressed submit, but Placetta didn't see the agency's confirmation.", zh: "您已点击提交，但快哉没有看到机构的确认信息。" } };
+    return { kind: "handoff", reason: "teach_incomplete", trace: [], message: { en: "Odelia didn't see the filing sent.", zh: "Odelia 没有看到申请被提交。" } };
   }
 
   private async done(ctx: Ctx, confirmation: string, summary: string, replayed: boolean): Promise<Result> {
@@ -728,8 +728,11 @@ export class Worker {
       const g = await store.step(f, null, { agent_state: "handoff" });
       await store.teamTask(g, "review", `Review the agency's review page for ${f.payload.official} before Placetta submits (Documents, review-page.png).`);
     } else {
+      // The file function's sweep decides what happens next (another way the agency takes, or the business's packet);
+      // Placetta keeps a task only for what it must look into itself (a submit it can't confirm, a first run to watch).
       const g = await store.step(f, { ...res.message, kind: "handoff", ref: res.reason }, { agent_state: "handoff", channel: "team", handoff_url: null });
-      await store.teamTask(g, res.task ?? "handoff", res.message.en);
+      // (and text aimed at an AI on an agency's page, which Placetta always looks at)
+      if ((res.task && res.task !== "handoff") || res.reason === "page_injection") await store.teamTask(g, res.task ?? "handoff", res.message.en);
     }
   }
 
@@ -748,13 +751,14 @@ export class Worker {
     const cur = await this.c.store.reload(f.id).catch(() => f);
     if (cur.status === "canceled") return;   // stopped by the customer: nothing to retry
     if (cur.submit_clicked_at) {
-      const g = await this.c.store.step(cur, log("The run stopped after pressing submit. The team checks with the agency.", "运行在点击提交后中断，团队会向机构核实。", "handoff", msg), { agent_state: "handoff", channel: "team" });
+      const g = await this.c.store.step(cur, log("The run stopped after pressing submit, so nothing more is sent until it's checked with the agency.", "运行在点击提交后中断，在向机构确认之前不会再提交。", "handoff", "maybe_submitted"), { agent_state: "handoff", channel: "team" });
+      console.error("filer: stopped after submit:", msg);
       await this.c.store.teamTask(g, "check_agency", "Run stopped after submit was pressed. Check the agency first.");
     } else if (cur.attempts >= 3) {
       // ref portal_failed: the file function's sweep tries another way the agency takes (email, fax, certified mail, or
-      // the owner's packet) before the team files it by hand (supabase/functions/file reroute); the error is in the task
-      const g = await this.c.store.step(cur, log("The agency's site failed 3 times. Placetta tries another way the agency takes, or the team files it.", "机构网站 3 次未能完成。快哉会改用机构接受的其他方式，否则由团队提交。", "handoff", "portal_failed"), { agent_state: "handoff", channel: "team" });
-      await this.c.store.teamTask(g, "handoff", `Portal run failed 3 times: ${msg}`);
+      // the business's packet) (supabase/functions/file handBacks)
+      await this.c.store.step(cur, log("The agency's site failed 3 times. Odelia tries another way the agency takes, or gives it to you to send.", "机构网站 3 次未能完成。Odelia 会改用机构接受的其他方式，否则交由您自行提交。", "handoff", "portal_failed"), { agent_state: "handoff", channel: "team" });
+      console.error("filer: portal failed 3 times:", msg);
     } else if (portalDown(msg)) {
       // the agency's site is down or slow: wait before the next try (2, 10, 30 minutes), not straight back into it
       const mins = backoffMinutes(cur.attempts), at = new Date(Date.now() + mins * 60_000).toISOString();
