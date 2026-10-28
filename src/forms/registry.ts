@@ -85,6 +85,40 @@ export type OfficialForm = {
   /** Internal only, never shown or cited: a secondary source (a law firm, a blog, an aggregator) that named this filing
       when no official page could be read to confirm it. Staff follow it up; the entry stays unverified (no proof). */
   lead?: string;
+  /** The agency's standard processing time, from its own page (src/forms/speed.ts). */
+  processing?: Processing;
+  /** Paid faster service the agency offers for this filing, each tier from its own page (src/forms/speed.ts). */
+  expedite?: Expedite[];
+  /** A company filing (src/forms/entities.ts): what it does for which kind of company. */
+  entity?: EntityFiling;
+};
+
+/* ------------------------------------------------------------------ speed and company filings (shared types)
+   Read by the plan (src/plan.ts, src/plan/preview.ts), the price (src/pricing.ts), the approval card and the licenses'
+   expedite UX. Each fact carries the official page's own sentence (under 25 words), its URL and the day it was read,
+   checked by scripts/eval/proof-read.py like every proof. No tier, fee or time is stated that a page didn't state. */
+
+/** An official page's own sentence backing one fact. */
+export type FactSource = { url: string; quote: string; checked: string };
+/** One paid expedite tier: "24-hour", "Same day", "2-hour". feeUsd is on top of the filing fee. hours: the turnaround
+ *  in hours when the page states one (24, 2, 1; same day = 8), else null. */
+export type Expedite = { label: Bi; feeUsd: number | null; turnaround: Bi; hours: number | null; source: FactSource; note?: Bi };
+/** The standard (unexpedited) processing time. days: calendar days when the page states a number, else null. */
+export type Processing = { standard: Bi; days: number | null; source: FactSource };
+export type EntityKind = "llc" | "corp";
+/** form: creates a new company in the state. qualify: registers a company formed elsewhere (another state or country)
+ *  to do business in the state. election: a federal tax election for an existing company (IRS Form 2553). */
+export type EntityAction = "form" | "qualify" | "election";
+export type EntityFiling = {
+  kind: EntityKind; action: EntityAction;
+  /** Must the company keep a registered (or statutory, or resident) agent in the state? With its source. */
+  agent?: { required: boolean; source?: FactSource };
+  /** The recurring report Odelia renews: its name, fee, due-date rule in words, and its source. */
+  report?: { name: Bi; feeUsd: number | null; due: Bi; source?: FactSource };
+  /** Why the row has no proof: the official page refused automated reads (VERIFY_BLOCKED style), for a person to read. */
+  blocked?: string;
+  /** The portal's flow needs an account login before any form is shown: no playbook is written for it. */
+  loginOnly?: boolean;
 };
 
 const F = (id: string, line: string, en: string, zh: string, options?: string[], hint?: Bi): FormField => ({ id, line, label: B(en, zh), ...(options ? { options } : {}), ...(hint ? { hint } : {}) });
