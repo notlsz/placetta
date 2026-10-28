@@ -59,7 +59,7 @@ export function firstRunTests(ok: Ok) {
     // who files: the approval card's own route; the portal isn't counted as hers today
     for (const a of ws.apps) {
       const w = whoFiles(a), r = routeOf(a);
-      if (w === "odelia") ok(["email", "fax", "mail", "faxSigned"].includes(r), `${name}: ${a.name.en} counts as Odelia's today only on a route she sends on`, r);
+      if (w === "odelia") ok(["email", "fax", "mail", "faxSigned", "emailSigned"].includes(r), `${name}: ${a.name.en} counts as Odelia's today only on a route she sends on`, r);
       if (r === "portal" && w !== "confirm" && w !== "you") ok(w === "online", `${name}: ${a.name.en} on the agency's portal waits for online filing`, w);
     }
     ok(f.ready!.failing.every(c => c.state !== "pass"), `${name}: only failing checks are listed as failing`);

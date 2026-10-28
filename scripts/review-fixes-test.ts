@@ -144,7 +144,7 @@ export function reviewFixTests(ok: Ok, eq: Eq) {
   const team = approvalRoute({ kind: "file" }, { official: undefined, est: B("To be confirmed", "待确认") })!;
   ok(team.who.en === "Odelia prepares it and you send it" && !team.time, "a form with no route is prepared for the business to send, and no time is invented", team);
   ok(approvalRoute({ kind: "upload" }) === null, "an upload card is the owner's own step: no route line");
-  for (const [form, kind] of Object.entries(ROUTES as Record<string, string>)) if (!["portal", "email", "fax", "mail", "owner", "faxSigned", "ownerSigns", "notReady", "team"].includes(kind)) ok(false, `${form}: unknown route ${kind}`);
+  for (const [form, kind] of Object.entries(ROUTES as Record<string, string>)) if (!["portal", "email", "fax", "mail", "owner", "faxSigned", "emailSigned", "kitReturn", "ownerSigns", "notReady", "team"].includes(kind)) ok(false, `${form}: unknown route ${kind}`);
   ok(!rs.steps, "a portal route with no fee on the site lists no step of the person's", rs.steps);
 
   console.log("\n# M3: route lines for forms abroad, the person's steps, and conservative defaults");

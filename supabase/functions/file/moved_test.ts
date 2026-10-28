@@ -101,10 +101,12 @@ Deno.test("by state: the IRS service center comes from the form's own address li
   // no state on the form: no address, so it stays with the team
   assertEquals(destFor("irs-8832", { fields: [{ id: "citystatezip", value: "somewhere" }] })?.mail, undefined);
   assertEquals(pick(filing({ official: "irs-8832", fields: [] }), destFor("irs-8832", { fields: [] }), ENV, facts), "team");
-  // the 8832 by hand: the owner signs and mails it (no fax or online route), the dispatcher hands it back with the address
+  // the 8832: the IRS takes an e-signature on it (its e-signature list), so the owner's adopted signature goes on it
+  // and Placetta mails it by certified mail to the center for the form's own address (no fax or online route)
   const p8832 = { official: "irs-8832", fields: fieldsOf([{ id: "citystatezip", value: "Irvine, CA 92604" }]) };
   const d8832 = destFor("irs-8832", p8832)!;
-  assertEquals([pick(filing(p8832), d8832, ENV, facts), d8832.signature, d8832.mail?.zip], ["team", "wet", "84201"]);
+  assertEquals([pick(filing(p8832), d8832, ENV, facts), d8832.signature, d8832.mail?.zip], ["mail", "drawn", "84201"]);
+  assert((d8832.also ?? []).some((u) => u.includes("e-signatures-for-certain-forms")), "the IRS page that says so is cited");
   // the 2553 by fax: Kansas City's or Ogden's number, after the owner's signed copy
   assertEquals(destFor("irs-2553", { fields: [{ id: "citystatezip", value: "Flushing, NY 11354" }] })?.fax?.us, "+18558877734");
   const p2553 = { official: "irs-2553", fields: fieldsOf([{ id: "citystatezip", value: "Irvine, CA 92604" }]) };

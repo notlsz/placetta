@@ -3,7 +3,11 @@
 // POST { workspace_id, filing_id, action }
 //   start   the customer just approved it: check it, pick the channel, send (or queue it for the portal worker)
 //   resume  "I've done my part, carry on" after a hand-back
-//   signed  { path } the hand-signed copy of a wet-signature form, uploaded to Documents: Placetta faxes it
+//   signed  { path } the hand-signed copy of a wet-signature form, uploaded to Documents: Placetta faxes it, or emails it
+//           to an agency that takes the form by email
+//   kit     { address } "Mail me the page": Placetta prints the form to sign and mails it to the owner (Lob, first
+//           class), with a return envelope addressed to the agency when the agency wants the original by mail. Held
+//           for the undo window (Lob's send_date); kit_undo cancels it before it's printed
 //   status  refresh a fax or letter that's on its way
 //   stop    the customer stops it before anything has left for the agency (refused once submit_clicked_at is set)
 //   undo    the customer takes it back during the undo window (SEND_HOLD_MINUTES, 10 by default), while it's held
@@ -18,7 +22,10 @@
 //   database let in under the owner's Autopilot authorization (autopilot_file); refused unless that grant is still live.
 //   The sweep also starts any it finds unstarted after two minutes. Everything after is the same as an approved filing:
 //   the undo window, the two-key team check of a form's first filings, CAPTCHAs, fees and wet signatures to a person.
-// POST ?provider=telnyx: Telnyx fax webhooks, verified with TELNYX_PUBLIC_KEY.
+// POST ?provider=telnyx: Telnyx fax webhooks, verified with TELNYX_PUBLIC_KEY: every fax status goes on the timeline.
+// POST ?provider=lob: Lob letter webhooks, verified with LOB_WEBHOOK_SECRET: every tracking event of a certified letter
+//   or a signing kit goes on its filing's timeline; a certified delivery is saved, and a return envelope's first scan
+//   marks the owner's signed original as sent.
 //
 // Ground rules: one approval, one submission (only filings.payload, which the database keeps frozen); submit_clicked_at
 // is written before anything leaves, and a filing with it set is never sent again; CAPTCHAs, identity checks, payments
@@ -37,7 +44,9 @@ import { asAgent,
   handBackDue, handoffPacket, hasLoginFor, holds, isForeign, type LogEntry, mailOutcome, mailTo, OWNER_REF, pick, type Refusal, refusalOf, sentByYou, signedCopy,
   TEACH_REFUSED, teachRefusal, teamApproved, whyYours, YOURS_REF, selfFileScope, workerOn, workerState,
   type Beat, rerouteLead, wakeable, wakeConfig, wakeMs, wakePlan, waitsOnWorker, WORKER_ASLEEP,
+  canEmailSignedFor, kitAddress, paperFile, signKit, wetAsk, wetPath, type WetPath,
 } from "./logic.ts";
+import { agencyLetter, faxEvent, kitLetter, kitSendAt, lobEvent, lobSigned, type MailEvent } from "./paper.ts";
 import { pingWorker } from "./wake.ts";
 
 const env = () => envFrom((k) => Deno.env.get(k));
@@ -303,7 +312,8 @@ async function sendEmail(f: Filing, d: Dest) {
   const claimed = await claimOrTeam(f, `Emailing it to ${d.email}`, `正在发送邮件至 ${d.email}`);
   if (isView(claimed)) return claimed;
   const g = claimed;
-  const files = [f.payload.pdf_path, ...(f.payload.attachments ?? []).map((a) => a.path)].filter(Boolean).slice(0, 5).map((path) => ({ path }));
+  // the hand-signed copy, when the agency needed ink and takes a scan by email; otherwise the filled (e-signed) form
+  const files = [paperFile(f), ...(f.payload.attachments ?? []).map((a) => a.path)].filter(Boolean).slice(0, 5).map((path) => ({ path }));
   let res: Response | null = null;
   try {
     res = await fetch(`${SUPABASE_URL}/functions/v1/integrations`, {
@@ -362,7 +372,15 @@ async function sendFax(f: Filing, d: Dest, retry = false) {
     console.error("telnyx refused:", res?.status, JSON.stringify(body?.errors ?? "").slice(0, 200));
     return await toYou(g, bi("The fax service didn't take the fax, so nothing was sent.", "传真服务未接收，未发出任何内容。"));
   }
+  await paperPiece(id, "telnyx", "filing", g);
   return view(await step(g, log("Fax queued with the fax service", "传真已进入发送队列", "fax_queued", id), { provider_ref: id, agent_state: "running", channel: "fax" }));
+}
+
+/** A letter or fax Placetta just sent, so its provider's webhooks find the filing. Never fails the send: the sweep's
+    status refresh still finds a letter by the filing's provider_ref. */
+async function paperPiece(id: string, provider: "lob" | "telnyx", purpose: "filing" | "sign_kit", f: Filing) {
+  const { error } = await admin.from("paper_pieces").upsert({ id, provider, purpose, workspace_id: f.workspace_id, filing_id: f.id }, { onConflict: "id", ignoreDuplicates: true });
+  if (error && error.code !== "42P01" && error.code !== "PGRST205") console.error("paper piece:", error.code ?? "");
 }
 
 /** Apply a fax status from the API or a webhook. The webhook, the monitor's sweep and a member's "status" can all see
@@ -405,9 +423,6 @@ async function refreshFax(f: Filing) {
 
 const LOB = "https://api.lob.com/v1";
 const lobAuth = () => `Basic ${btoa(`${Deno.env.get("LOB_API_KEY")}:`)}`;
-const lobAddress = (a: { name: string; line1: string; line2?: string; city: string; state: string; zip: string; country?: string }) => ({
-  name: a.name.slice(0, 40), address_line1: a.line1, ...(a.line2 ? { address_line2: a.line2 } : {}), address_city: a.city, address_state: a.state, address_zip: a.zip, address_country: a.country ?? "US",
-});
 
 async function sendMail(f: Filing, d: Dest) {
   const held = await holdForTeam(f, d);
@@ -423,10 +438,8 @@ async function sendMail(f: Filing, d: Dest) {
   const res = await fetch(`${LOB}/letters`, {
     method: "POST",
     headers: { Authorization: lobAuth(), "Content-Type": "application/json", "Idempotency-Key": f.id },
-    body: JSON.stringify({
-      description: `Placetta ${f.payload.official} ${f.id}`.slice(0, 255), to: lobAddress(to), from, file, color: false,
-      extra_service: "certified", use_type: "operational", address_placement: "insert_blank_page", metadata: { filing: f.id },
-    }),
+    // certified with return receipt; the undo window already ran before this (holds), so it prints now
+    body: JSON.stringify(agencyLetter({ filingId: f.id, official: f.payload.official ?? "", to, from, file })),
     signal: AbortSignal.timeout(30000),
   }).catch((e) => { console.error("lob:", describe(e)); return null; });
   const body = res ? await res.json().catch(() => ({})) : {};
@@ -436,6 +449,7 @@ async function sendMail(f: Filing, d: Dest) {
     return await toYou(g, bi("The mail service didn't confirm the letter.", "邮寄服务未确认收到信件。"), { check: true });
   }
   const tracking = String(body.tracking_number ?? "");
+  await paperPiece(String(body.id), "lob", "filing", g);
   const h = await step(g, log(`Sent by certified mail to ${to.name}${tracking ? `. Tracking ${tracking}` : ""}${body.expected_delivery_date ? `, expected ${body.expected_delivery_date}` : ""}`,
     `已以挂号信寄往 ${to.name}${tracking ? `，追踪号 ${tracking}` : ""}${body.expected_delivery_date ? `，预计 ${body.expected_delivery_date} 送达` : ""}`, "submitted", body.id),
     { provider_ref: body.id, status: "submitted", agent_state: "done", requirements_checked: true, ...(tracking ? { confirmation_number: tracking } : {}) });
@@ -534,17 +548,20 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
       { channel: channel === "owner" ? "team" : channel, requirements_checked: true, agent_state: "done" }));
   }
   if (channel === "owner") return await toOwner(f, d!);
-  // Self-filing is on for this form, but no channel Placetta sends on fits this filing: the business sends it. A wet
-  // signature on a form Placetta can fax asks for the signed copy instead.
-  if (channel === "team" && !(d?.signature === "wet" && !d.portal && canFaxSignedFor(f, d, e))) {
+  // Self-filing is on for this form, but no channel Placetta sends on fits this filing: the business sends it. A form
+  // that needs an ink signature goes the honest way for its agency instead (logic.ts wetPath): a copy of the signed page
+  // Placetta faxes or emails, or the original mailed back in Placetta's return envelope. Either way the owner taps
+  // "Mail me the page" and never prints or addresses anything.
+  const wp: WetPath = channel === "team" && d && !d.portal ? wetPath(f, d, e, fx) : { path: "yours" };
+  if (channel === "team" && wp.path === "yours") {
     return await toYou(await step(f, null, { requirements_checked: true }, false), whyYours(f, d, e, fx));
   }
   if (channel === "team") {
-    // ref "upload": the app shows an upload button for the signed copy, and "I've sent it" if they send it themselves.
-    return view(await step(f, log(
-      "This agency needs a handwritten signature. Download the filled form from Documents, sign it by hand, then upload a scan or a clear photo of the signed page here. Placetta faxes it to the agency and saves the confirmation. Or send it yourself and tap \"I've sent it\".",
-      "该机构要求手写签名。请从“文件”下载已填写的表格，手写签名后，在此上传签名页的扫描件或清晰照片。快哉会将其传真给机构并保存送达确认。也可自行发送后点击“我已发出”。",
-      "wet_signature", "upload"), { channel: "team", requirements_checked: true, agent_state: "needs_you", handoff_url: null }));
+    // ref "upload": the app shows "Mail me the page", the upload button for the signed copy, and "I've sent it";
+    // ref "kit_return": "Mail me the page" (with the return envelope) and "I've sent it".
+    const ask = wetAsk(f, d!, wp as Exclude<WetPath, { path: "yours" }>);
+    return view(await step(f, log(ask.en, ask.zh, "wet_signature", wp.path === "photo" ? "upload" : "kit_return"),
+      { channel: "team", requirements_checked: true, agent_state: "needs_you", handoff_url: null }));
   }
   f = await step(f, log("Checked against the agency's requirements", "已按机构要求核对", "check"),
     { channel, agent_state: "running", requirements_checked: true, status: "in_progress" });
@@ -626,7 +643,9 @@ async function signed(f: Filing, path: string, by: string) {
   const last = [...f.agent_log].reverse().find((e) => ["needs_you", "wet_signature", "need_person"].includes(e.kind));
   if (last?.kind !== "wet_signature") throw new HttpError("bad_request", "This filing isn't waiting for a signed copy.");
   const d = destFor(f.payload.official, f.payload);
-  if (!canFaxSignedFor(f, d, env())) throw new HttpError("bad_request", "Placetta can't fax this form yet. Send it yourself, then tap \"I've done it\".", "快哉暂时无法传真这份表格。请您自行提交，然后点击“我已完成”。");
+  if (!canFaxSignedFor(f, d, env()) && !canEmailSignedFor(f, d, env(), await facts(f, d))) {
+    throw new HttpError("bad_request", "Placetta can't fax or email this form. Send it yourself, then tap \"I've sent it\".", "快哉无法传真或通过邮件发送这份表格。请您自行提交，然后点击“我已发出”。");
+  }
   if (!path.startsWith(`${f.workspace_id}/`) || path.split("/").some((p) => p === ".." || p === ".")) throw new HttpError("bad_request", "That file isn't in this workspace.");
   const { data: doc, error } = await admin.from("documents").select("path, name, mime").eq("workspace_id", f.workspace_id).eq("path", path).maybeSingle();
   if (error) throw new Error(`documents lookup failed: ${error.code ?? ""}`);
@@ -649,10 +668,92 @@ async function signed(f: Filing, path: string, by: string) {
     if (!saved) throw new Error("Couldn't save the signed copy as a PDF.");
     faxPath = saved;
   }
-  const g = await step(f, log("You signed it by hand and uploaded it. Placetta faxes it to the agency.", "您已手写签名并上传，快哉将传真给机构。", "signed_copy", faxPath),
+  const g = await step(f, log("You signed it by hand and uploaded it. Placetta sends it to the agency.", "您已手写签名并上传，快哉将发送给机构。", "signed_copy", faxPath),
     { expect_agent_state: "needs_you", agent_state: null, handoff_url: null });
   console.log("signed copy uploaded by", by.slice(0, 120));
   return await startAgain(g);
+}
+
+// ------------------------------------------------------------------ the signing kit
+// "Mail me the page": for a form that needs ink, Placetta prints the filled form with a cover page saying what to do
+// and mails it to the owner (Lob, first class). Where the agency wants the original by mail, a return envelope comes with
+// it, and the kit's last page is a tear-off slip whose agency address shows through its window. The letter is held for
+// the undo window with Lob's send_date, and kit_undo cancels it until then.
+
+/** The kit on its way for this filing (its Lob letter id), unless it was canceled. */
+function kitSent(f: Filing): string | null {
+  for (const e of [...f.agent_log].reverse()) {
+    if (e.kind === "sign_kit_canceled") return null;
+    if (e.kind === "sign_kit" && e.ref) return e.ref;
+    if (e.kind === "wet_signature") return null;
+  }
+  return null;
+}
+
+async function kitPdf(f: Filing, d: Dest, path: Exclude<WetPath, { path: "yours" }>): Promise<{ bytes: Uint8Array; pages: number }> {
+  const k = signKit(f, d, path);
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const cover = doc.addPage([612, 792]);
+  k.cover.slice(0, 38).forEach((l, i) => cover.drawText(l.replace(/[^\x20-\x7e]/g, " "), { x: 56, y: 720 - i * 17, size: i === 0 ? 14 : 10, font }));
+  const dl = await admin.storage.from("documents").download(f.payload.pdf_path!);
+  if (dl.error || !dl.data) throw new Error("Couldn't read the filled form.");
+  const form = await PDFDocument.load(new Uint8Array(await dl.data.arrayBuffer()));
+  for (const p of await doc.copyPages(form, form.getPageIndices())) doc.addPage(p);
+  if (k.slip) {
+    // the perforated slip: the agency's address in the lower third, where the #9 return envelope's window falls
+    const slip = doc.addPage([612, 792]);
+    slip.drawText("Tear here and put this part in the return envelope, address facing out.", { x: 56, y: 300, size: 9, font });
+    k.slip.forEach((l, i) => slip.drawText(l.replace(/[^\x20-\x7e]/g, " "), { x: 72, y: 190 - i * 15, size: 12, font }));
+  }
+  return { bytes: await doc.save(), pages: doc.getPageCount() };
+}
+
+async function kit(f: Filing, raw: unknown, by: string) {
+  if (f.agent_state !== "needs_you") throw new HttpError("bad_request", "This filing isn't waiting for your signature.", "这份申请没有在等待您的签名。");
+  const last = [...f.agent_log].reverse().find((e) => ["needs_you", "wet_signature", "need_person"].includes(e.kind));
+  if (last?.kind !== "wet_signature") throw new HttpError("bad_request", "This filing isn't waiting for your signature.", "这份申请没有在等待您的签名。");
+  if (kitSent(f)) throw new HttpError("bad_request", "The page is already on its way to you.", "表格已在寄给您的路上。");
+  const e = env(), d = destFor(f.payload.official, f.payload);
+  if (!e.mail) throw new HttpError("not_configured", "Placetta's mail isn't set up yet. Print the form from Documents instead.", "快哉的邮寄服务尚未配置，请从“文件”自行打印表格。");
+  const path = wetPath(f, d, e, await facts(f, d));
+  if (path.path === "yours" || !d) throw new HttpError("bad_request", "This form can't be signed by post. Send it with the packet in Documents.", "这份表格无法通过邮寄签署，请用“文件”中的材料包自行提交。");
+  if (!f.payload.pdf_path) throw new HttpError("bad_request", "The filled form is missing. Approve it again from the application.", "缺少已填写的表格，请在申请中重新批准。");
+  const to = kitAddress(raw);
+  if (!to) throw new HttpError("bad_request", "Type the name, street, city, state and ZIP code to mail it to.", "请填写收件人姓名、街道、城市、州和邮编。");
+  let from: Record<string, string>;
+  try { from = JSON.parse(Deno.env.get("LOB_FROM") ?? ""); } catch { throw new HttpError("not_configured", "Placetta's mail isn't set up yet. Print the form from Documents instead.", "快哉的邮寄服务尚未配置，请从“文件”自行打印表格。"); }
+  const pdf = await kitPdf(f, d, path);
+  const saved = await saveReceipt(f, "signing-kit.pdf", pdf.bytes, "application/pdf");
+  if (!saved) throw new Error("Couldn't save the signing kit.");
+  const tries = f.agent_log.filter((x) => x.kind === "sign_kit").length;
+  const res = await fetch(`${LOB}/letters`, {
+    method: "POST",
+    headers: { Authorization: lobAuth(), "Content-Type": "application/json", "Idempotency-Key": `kit-${f.id}-${tries}` },
+    body: JSON.stringify(kitLetter({ filingId: f.id, official: f.payload.official ?? "", to, from, file: await signedUrl(saved), pages: pdf.pages,
+      sendAt: kitSendAt(Date.now(), e.holdMinutes), returnKit: path.path === "return", returnEnvelope: Deno.env.get("LOB_RETURN_ENVELOPE") })),
+    signal: AbortSignal.timeout(30000),
+  }).catch((x) => { console.error("lob kit:", describe(x)); return null; });
+  const body = res ? await res.json().catch(() => ({})) : {};
+  if (!res || !res.ok || !body?.id) {
+    console.error("lob kit refused:", res?.status, JSON.stringify(body?.error ?? "").slice(0, 200));
+    throw new HttpError("upstream_error", "The mail service didn't take it, so nothing was mailed. Try again, or print it from Documents.", "邮寄服务未接收，未寄出任何内容。请重试，或从“文件”自行打印。");
+  }
+  await paperPiece(String(body.id), "lob", "sign_kit", f);
+  const k = signKit(f, d, path);
+  console.log("signing kit ordered by", by.slice(0, 120));
+  return view(await step(f, log(`${k.en} You can cancel it for ${Math.max(5, e.holdMinutes)} minutes.`, `${k.zh}${Math.max(5, e.holdMinutes)} 分钟内可取消。`, "sign_kit", String(body.id)),
+    { expect_agent_state: "needs_you" }));
+}
+
+/** Cancel the kit before Lob prints it (its send_date). Lob refuses once it's printing: then it's on its way. */
+async function kitUndo(f: Filing, by: string) {
+  const id = kitSent(f);
+  if (!id) throw new HttpError("bad_request", "No page is on its way to you.", "没有正在寄给您的表格。");
+  const res = await fetch(`${LOB}/letters/${encodeURIComponent(id)}`, { method: "DELETE", headers: { Authorization: lobAuth() }, signal: AbortSignal.timeout(15000) }).catch(() => null);
+  if (!res?.ok) throw new HttpError("too_late", "It's already being printed, so it can't be canceled now.", "已开始打印，现在无法取消。");
+  console.log("signing kit canceled by", by.slice(0, 120));
+  return view(await step(f, log("You canceled the page before it was printed. Nothing was mailed.", "您已在打印前取消，未寄出任何内容。", "sign_kit_canceled", id), { expect_agent_state: "needs_you" }, true));
 }
 
 // ------------------------------------------------------------------ the undo window
@@ -770,7 +871,8 @@ async function telnyxWebhook(req: Request) {
   const ev = JSON.parse(raw)?.data ?? {};
   const type = String(ev.event_type ?? ""), p = ev.payload ?? {};
   const id = String(p.fax_id ?? p.id ?? "");
-  if (!id || !/^fax\.(delivered|failed)$/.test(type)) return ok({});
+  const said = faxEvent(type);
+  if (!id || !said) return ok({});
   // Each event once: Telnyx redelivers until it gets a 2xx, and a redelivery must not resend a failed fax.
   const eventId = String(ev.id ?? "").slice(0, 200);
   if (eventId) {
@@ -780,7 +882,10 @@ async function telnyxWebhook(req: Request) {
   }
   try {
     const { data } = await admin.from("filings").select(COLS).eq("provider_ref", id).eq("channel", "fax").maybeSingle();
-    if (data) await applyFax(data as unknown as Filing, type.slice(4), { pages: p.page_count, reason: p.failure_reason });
+    if (data && said.settle) await applyFax(data as unknown as Filing, said.settle, { pages: p.page_count, reason: p.failure_reason });
+    // a step on the way (queued, prepared, dialing): on the filing's timeline, nothing else changes
+    else if (data) await step(data as unknown as Filing, log(said.en, said.zh, "fax_event", id), {}, false);
+    if (data) await admin.from("paper_pieces").update({ status: type, last_event_at: new Date().toISOString() }).eq("id", id).eq("provider", "telnyx");
   } catch (e) {
     if (e instanceof Refused) return ok({});      // the sweep or a status check got there first
     // Forget the event so Telnyx's retry is applied.
@@ -788,6 +893,55 @@ async function telnyxWebhook(req: Request) {
     throw e;
   }
   return ok({});
+}
+
+/** Lob's letter webhooks: every tracking event of a certified letter to an agency, or of a signing kit and its return
+    envelope, on the filing's timeline. Verified with LOB_WEBHOOK_SECRET (paper.ts lobSigned); each event once. */
+async function lobWebhook(req: Request) {
+  const raw = await req.text();
+  const good = await lobSigned(Deno.env.get("LOB_WEBHOOK_SECRET") ?? "", req.headers.get("lob-signature-timestamp") ?? "", raw, req.headers.get("lob-signature") ?? "");
+  if (!good) throw new HttpError("unauthorized", "Bad webhook signature.");
+  let ev: Record<string, unknown>;
+  try { ev = JSON.parse(raw); } catch { throw new HttpError("bad_request", "Not JSON."); }
+  const letter = String(((ev.body ?? {}) as { id?: string }).id ?? ev.reference_id ?? "");
+  const { data: piece } = await admin.from("paper_pieces").select("filing_id, workspace_id, purpose").eq("id", letter).eq("provider", "lob").maybeSingle();
+  if (!piece) return ok({});                       // not one of Placetta's filings (a test letter, another product)
+  const me = lobEvent(ev, piece.purpose as "filing" | "sign_kit");
+  if (!me) return ok({});
+  const { error } = await admin.from("webhook_events").insert({ provider: "lob", id: me.event.slice(0, 200) });
+  if (error?.code === "23505") return ok({ duplicate: true });
+  if (error) throw new Error(`webhook event insert failed: ${error.code ?? ""}`);
+  try {
+    const f = await loadFiling(String(piece.workspace_id), String(piece.filing_id));
+    // the tracking event's own id when the letter carries one, so the sweep's status refresh doesn't log it twice
+    const tracks = ((ev.body ?? {}) as { tracking_events?: { id?: string }[] }).tracking_events ?? [];
+    const ref = String(tracks.at(-1)?.id ?? me.event);
+    await applyMailEvent(f, me, piece.purpose as "filing" | "sign_kit", ref);
+    await admin.from("paper_pieces").update({ status: me.type, last_event_at: new Date().toISOString() }).eq("id", letter).eq("provider", "lob");
+  } catch (e) {
+    if (e instanceof Refused) return ok({});
+    await admin.from("webhook_events").delete().eq("provider", "lob").eq("id", me.event.slice(0, 200));
+    throw e;
+  }
+  return ok({});
+}
+
+/** One Lob event on a filing: logged once; a return envelope's first scan marks the owner's signed original as sent (as
+    "I've sent it" would); a letter that came back, or a USPS problem, tells the owner. */
+async function applyMailEvent(f: Filing, me: MailEvent, purpose: "filing" | "sign_kit", ref: string) {
+  if (f.agent_log.some((e) => e.kind === "mail_event" && e.ref === ref)) return;
+  let g = await step(f, log(me.en, me.zh, "mail_event", ref), {}, false);
+  if (me.done === "posted_back" && purpose === "sign_kit" && g.agent_state === "needs_you" && kitSent(g)) {
+    g = await step(g, log("USPS scanned your return envelope on its way to the agency, so it's sent. Odelia checks its status from here.",
+      "美国邮政已扫描寄往机构的回邮信封，表示已寄出。之后由 Odelia 跟进进度。", "you_sent"),
+      { expect_agent_state: "needs_you", status: "submitted", agent_state: "done", requirements_checked: true, handoff_url: null });
+  }
+  if (me.problem) {
+    await admin.from("updates").upsert({
+      workspace_id: f.workspace_id, kind: "filing", app_id: f.app_id, dedupe: `mail-${me.problem}:${f.id}:${ref}`.slice(0, 200),
+      title: { en: `Mail problem: ${f.title.en}`, zh: `邮寄问题：${f.title.zh}` }, body: { en: me.en, zh: me.zh },
+    }, { onConflict: "workspace_id,dedupe", ignoreDuplicates: true });
+  }
 }
 
 /** Runs that stopped partway (the function was killed between steps): a start that never picked a channel, a fax
@@ -965,6 +1119,7 @@ async function sweep() {
 serve(async (req) => {
   const url = new URL(req.url);
   if (url.searchParams.get("provider") === "telnyx") return await telnyxWebhook(req);
+  if (url.searchParams.get("provider") === "lob") return await lobWebhook(req);
   const mk = req.headers.get("x-monitor-key");
   if (mk) {
     const { data: good } = await admin.rpc("monitor_key_ok", { p_key: mk });
@@ -1012,8 +1167,8 @@ serve(async (req) => {
     const f = await loadFiling(ws, filingId);
     return await settled(() => teach(f, by));
   }
-  if (!["start", "resume", "signed", "stop", "status", "undo", "send_now", "confirmation"].includes(action)) {
-    throw new HttpError("bad_request", "action must be start, resume, signed, stop, undo, send_now, confirmation, teach, status or worker.");
+  if (!["start", "resume", "signed", "kit", "kit_undo", "stop", "status", "undo", "send_now", "confirmation"].includes(action)) {
+    throw new HttpError("bad_request", "action must be start, resume, signed, kit, kit_undo, stop, undo, send_now, confirmation, teach, status or worker.");
   }
   // Sending, carrying on, and stopping are an owner's, as in the database (only owners approve or cancel filings);
   // any member can check on one.
@@ -1026,6 +1181,8 @@ serve(async (req) => {
     if (action === "confirmation") return addConfirmation(f, body.confirmation, by);
     if (action === "start") return start(f, req, by, resubmit);
     if (action === "signed") return signed(f, String(body.path ?? "").slice(0, 500), by);
+    if (action === "kit") return kit(f, body.address, by);
+    if (action === "kit_undo") return kitUndo(f, by);
     if (action === "undo") return undo(f, by);
     if (action === "send_now") return sendNow(f);
     return stop(f, by);

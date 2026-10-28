@@ -32,8 +32,12 @@ import { LINES } from "./lines";
  * a wet-signature form is always a printed packet the owner signs.
  * ------------------------------------------------------------------ */
 
-type Row = { s: "none" | "typed" | "drawn" | "wet"; p?: string; site?: string; open?: boolean; owner?: boolean; src: string; chk: string };
+/** f: the form's signature flag (supabase/functions/file/destinations.ts signFlag): originals in ink (wet), the owner's
+ *  adopted signature, once (esign), Placetta's named agent signs (agent), or nothing to sign (none). */
+type Row = { s: "none" | "typed" | "drawn" | "wet"; f?: "wet" | "esign" | "agent" | "none"; p?: string; site?: string; open?: boolean; owner?: boolean; src: string; chk: string };
 const ROWS = SIGN as Record<string, Row>;
+/** The signature flag for one form, or null when no verified destination says (it goes the way it did). */
+export const signFlagOf = (formId: string | undefined): Row["f"] | null => (formId && Object.prototype.hasOwnProperty.call(ROWS, formId) ? ROWS[formId].f ?? null : null);
 
 export type Attest = "sworn" | "plain" | "unknown";
 export type SignRule = {
@@ -100,8 +104,8 @@ export function signPath(formId: string | undefined, plain: Record<string, strin
 export const SIGN_WHY: Record<Exclude<SignPath, "none" | "adopted" | "unknown">, Bi> = {
   tap: B("The agency takes an electronic signature, but you sign this one yourself: its signature is a declaration (under penalty of perjury, or one Placetta can't confirm isn't), and only the person declaring can make it. One tap places your saved signature after you've read it.",
     "该机构接受电子签名，但这一份需要您亲自签署：签名即声明（以伪证罪处罚为前提，或快哉无法确认不是），只有声明人本人才能作出。您阅读后点一下，即可加上您保存的签名。"),
-  wet: B("The agency needs a handwritten signature. Odelia prints the packet; you sign it by hand and send it, or upload a photo and Placetta faxes it where the agency takes faxes.",
-    "该机构要求手写签名。Odelia 准备好打印材料包，由您亲笔签名后寄出；如机构接受传真，也可上传照片由快哉传真。"),
+  wet: B("The agency needs a handwritten signature. With one tap Placetta mails you the page to sign. Where the agency takes a copy, you upload a photo and Placetta faxes or emails it; where it wants the original, you post it back in the return envelope, already addressed to the agency.",
+    "该机构要求手写签名。点一下，快哉就会把要签的表格寄给您。机构接受复印件的，您上传照片，由快哉传真或通过邮件提交；机构要求原件的，您用已写好机构地址的回邮信封寄回即可。"),
 };
 
 /** How the agency takes its fee on this form, from the same verified destination. */

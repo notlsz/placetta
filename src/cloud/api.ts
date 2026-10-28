@@ -684,6 +684,11 @@ export const addConfirmation = (ws: string, filingId: string, confirmation: stri
 export const teachFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "teach" });
 /** The hand-signed copy of a wet-signature form, already in Documents: Placetta faxes it. */
 export const signedCopy = (ws: string, filingId: string, path: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "signed", path });
+/** "Mail me the page": Placetta prints a form that needs ink and mails it to this address (with a return envelope to
+ *  the agency when it wants the original). Held for the undo window; kitUndo cancels it before it's printed. */
+export type KitAddress = { name: string; line1: string; line2?: string; city: string; state: string; zip: string };
+export const kitFiling = (ws: string, filingId: string, address: KitAddress) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "kit", address });
+export const kitUndo = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "kit_undo" });
 /** Stop a filing before anything has left for the agency. Refused once Placetta has pressed submit or sent it. */
 export const stopFiling = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "stop" });
 export const filingStatus = (ws: string, filingId: string) => fn<FileView>("file", { workspace_id: ws, filing_id: filingId, action: "status" });
@@ -1174,6 +1179,36 @@ export async function agentAuthorize(ws: string, o: { name: string; title?: stri
     throw fromPg(error);
   }
   return data as AgentRow;
+}
+/* Sign once (20261105090200_sign_once_paper.sql, src/esignDisclosure.ts): an owner adopts one signature, typed or drawn,
+   with the disclosure version they read and the three consents; the database keeps it in the vault and returns the
+   workspace's copy (never the image). signatureMine gives the signer alone their own image, for the one-tap approval
+   card; signatureStamped records each placement. */
+export async function signatureAdopt(ws: string, o: { name: string; title?: string; kind: "typed" | "drawn"; drawn?: string; version: string; records: boolean; sign: boolean; apply: boolean; demonstrated: boolean }) {
+  const { data, error } = await supabase().rpc("signature_adopt", { p_ws: ws, p_name: o.name, p_title: o.title ?? null, p_kind: o.kind, p_signature: o.kind === "drawn" ? o.drawn ?? null : null,
+    p_version: o.version, p_records: o.records, p_sign: o.sign, p_apply: o.apply, p_demonstrated: o.demonstrated });
+  if (error) {
+    if (/esign_version/.test(error.message ?? "")) throw err("esign_version", "The electronic records disclosure was just updated. Reload to read the current version.");
+    const m = /esign_\w+:\s*(.+)$/.exec(error.message ?? "");
+    if (m) throw err("esign", m[1].charAt(0).toUpperCase() + m[1].slice(1));
+    throw fromPg(error);
+  }
+  return data as import("../esignDisclosure").AdoptedSignature;
+}
+export async function signatureMine(ws: string): Promise<(import("../esignDisclosure").AdoptedSignature & { image?: string }) | null> {
+  const { data, error } = await supabase().rpc("signature_mine", { p_ws: ws });
+  if (error) { if (error.code === "PGRST202") return null; throw fromPg(error); }
+  return (data as (import("../esignDisclosure").AdoptedSignature & { image?: string }) | null) ?? null;
+}
+export async function signatureWithdraw(ws: string): Promise<boolean> {
+  const { data, error } = await supabase().rpc("signature_withdraw", { p_ws: ws, p_why: "withdrawn in Settings" });
+  if (error) throw fromPg(error);
+  return data === true;
+}
+/** One placement of the adopted signature, after the owner's tap on the approval card. Never blocks the filing. */
+export async function signatureStamped(ws: string, o: { signature: string; filing: string; form: string; sha256: string }) {
+  const { error } = await supabase().rpc("signature_stamp_log", { p_ws: ws, p_signature: o.signature, p_filing: o.filing, p_form: o.form, p_pdf_sha256: o.sha256, p_asked_by: "owner_tap" });
+  if (error && error.code !== "PGRST202") console.warn("signature stamp log:", error.code ?? "");
 }
 export async function agentRevoke(ws: string): Promise<{ revoked: boolean; stopped: number }> {
   const { data, error } = await supabase().rpc("agent_revoke", { p_ws: ws, p_why: "revoked in Settings" });

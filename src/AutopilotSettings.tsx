@@ -50,7 +50,7 @@ export function AutopilotPlanList({ rows }: { rows: PlanRow[] }) {
 }
 
 /** A small pad for a drawn signature, as a PNG. Its own canvas, inside a quiet boundary like every canvas. */
-function DrawPad({ onChange }: { onChange: (png: string | null) => void }) {
+export function DrawPad({ onChange }: { onChange: (png: string | null) => void }) {
   const ref = useRef<HTMLCanvasElement | null>(null);
   const drawing = useRef(false), drew = useRef(false);
   const { b } = useApp();

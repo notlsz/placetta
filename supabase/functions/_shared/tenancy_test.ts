@@ -15,7 +15,7 @@ const PROOF: Record<string, RegExp[]> = {
   "agent": [/auth\.getUser\(/, /accessFor\(ws, user, jwt\)/],
   "agent-run": [/auth\.getUser\(/, /accessRpc\(admin, ws, user\.id, jwt\)/, /monitor_key_ok|monitorKeyOk/],
   "billing": [/auth\.getUser\(/, /accessFor\(ws, user, jwt\)/],
-  "file": [/requireUser\(req\)/, /requireAccess\(ws, user, jwt/, /monitor_key_ok/, /Ed25519/],
+  "file": [/requireUser\(req\)/, /requireAccess\(ws, user, jwt/, /monitor_key_ok/, /Ed25519/, /if \(!good\) throw new HttpError\("unauthorized", "Bad webhook signature\."\)/, /await lobSigned\(/],
   "integrations": [/requireUser\(req\)/, /requireAccess\(ws, user, jwt/, /monitor_key_ok/],
   "logins": [/requireUser\(req\)/, /requireAccess\(ws, user, jwt/, /requireStaffTwoStep/],
   "spend": [/requireUser\(req\)/, /requireAccess\(ws, user, jwt/],

@@ -20,6 +20,30 @@ export type Payment =
     prepares the packet. Each says why, in the agency's words where it has them, and where it goes. */
 export type OwnerRoute = { why: string; url?: string; email?: string; mail?: Address };
 
+/** Why an owner packet stays the owner's, in a word: a course and exam the person sits themselves (exam), a card that
+    is the certified person's own, applied for with their own ID (id), a signature made in front of a notary or clerk
+    (notary), the agency's own office with the signers there in person (office), or a payment, which Placetta never
+    makes (payment). Each owner-only form in DEST has one (destinationProblems checks it). Reviewed 2026-10-28: every
+    other owner packet was turned into a route Placetta sends on where the agency allows it (California ABC). */
+export type OwnerKind = "exam" | "id" | "notary" | "office" | "payment";
+export const OWNER_KIND: Record<string, OwnerKind> = {
+  "tx-food-manager": "exam", "tx-food-handler": "exam", "fl-food-manager": "exam", "chi-sanitation": "exam", "ga-food-manager": "exam",
+  "mn-cfpm": "exam", "oh-pic": "exam", "ca-food-manager": "exam", "nyc-fpc": "exam", "ma-food-manager": "exam", "ma-allergen": "exam",
+  "va-food-manager": "exam", "wa-food-worker": "exam", "snhd-food-handler": "exam", "ca-food-handler": "exam", "snhd-cfsm": "exam",
+  "phl-food-safety": "id", "dc-food-manager": "id",
+  "bos-cert": "notary",
+  "ca-abc-217": "office", "ca-abc-258": "office", "ca-abc-247": "office", "ca-abc-243": "office", "ca-abc-256": "office", "ca-abc-244": "office",
+  "ca-ftb-3522": "payment",
+};
+/** The plain sentence for each, in English and Chinese: what an owner packet's card and cover page say first. */
+export const OWNER_KIND_SAID: Record<OwnerKind, { en: string; zh: string }> = {
+  exam: { en: "It's a course and an exam the person being certified takes themselves. Nobody, Placetta included, can sit it for them.", zh: "这是需要被认证者本人参加的课程和考试，任何人（包括快哉）都不能代考。" },
+  id: { en: "It's the certified person's own card: they apply for it with their own certificate and ID.", zh: "这是被认证者本人的证卡，须由本人凭自己的证书和身份证件申请。" },
+  notary: { en: "Every signer signs in front of a notary or the clerk, with their ID, so it can't be signed or sent for you.", zh: "每位签署人都须携带身份证件在公证人或办事员面前签字，因此无法代签或代交。" },
+  office: { en: "The agency takes it only at its own office, with the signers there in person and their ID.", zh: "机构只在其办公室受理，签署人须携带身份证件亲自到场。" },
+  payment: { en: "It's a payment, not an application, and Placetta never pays an agency for you.", zh: "这是一笔付款而不是申请，快哉从不代您向机构付款。" },
+};
+
 export type Dest = {
   email?: string;                                   // agency inbox that accepts this form
   fax?: { us: string; foreign?: string };           // E.164; foreign = owner with no US address
@@ -32,6 +56,8 @@ export type Dest = {
   noLogin?: boolean;                                // the portal files without an account (the worker opens it with no saved login)
   faxQuality?: "high" | "very_high";                // when the agency asks for a finer fax (the IRS asks for 300 DPI or more)
   owner?: OwnerRoute;                               // only the business can submit it: an owner packet, never a send
+  ids?: string;                                     // the signer's own identity documents go with it (originals or
+                                                    // certified copies): it stays the owner's to send, and this says why
   notReady?: string;                                // why automatic filing must not be switched on yet (an unconfirmed
                                                     // sign-off or on-behalf rule): approval cards say the person sends it.
                                                     // Metadata only: activation is still FILER_AGENCIES
@@ -271,6 +297,7 @@ export const DEST: Record<string, Dest> = {
   "irs-w7": {
     // Mailed with original or certified identity documents, so the person or the team always sends it.
     mail: { name: "Internal Revenue Service, Austin Service Center", line1: "ITIN Operation", line2: "P.O. Box 149342", city: "Austin", state: "TX", zip: "78714-9342" },
+    ids: "Your original identity documents (or copies certified by the agency that issued them) go in the envelope with it.",
     signature: "wet",
     payment: "none",
     checked: "2026-10-13",
@@ -1480,12 +1507,24 @@ export const DEST: Record<string, Dest> = {
     also: ["https://www.chicago.gov/city/en/depts/bacp/supp_info/retailfoodestablishment0.html"],
   },
   "ca-abc": {
-    owner: {
-      why: "ABC takes a new license application at the district office for the premises, where each applicant signs before an ABC employee and shows state ID (or signs ABC-211-SIG before a notary); the page names no mail or online route.",
-      url: "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
-    },
-    signature: "wet", payment: "in_person",
-    checked: "2026-10-18", source: "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+    // ABC now takes an original retail license online. Its FAQ: "only applications for an original retail or non-retail
+    // license can be submitted online" (anything else goes to the district office), applications go "online, in person,
+    // or by mail", and every applicant's signature is "NOTARIZED". Its online application instructions (services.abc.ca.gov,
+    // August 2026): "Upload a signed and NOTARIZED Application Signature Sheet (Form ABC211Sig)" for each signer, the
+    // notarized personal and financial affidavits, the premises diagram (ABC-257), the tied-house certification (ABC-140)
+    // and optionally the zoning affidavit (ABC-255); the contact person enters a title "such as "Applicant" or
+    // "Consultant""; fees are due "within 24 hours of submitting your application" and are paid online. So Placetta files
+    // it there as the business's consultant, and the owner pays on the site. Each signer still signs before a notary, in
+    // person with ID: that stays theirs.
+    portal: "services.abc.ca.gov",
+    signature: "wet", payment: "portal", onBehalf: "allowed",
+    attach: [
+      "A signed and notarized Application Signature Sheet (ABC-211-SIG) for each applicant",
+      "A notarized Individual Personal Affidavit (ABC-208-A) for each person and spouse listed",
+      "A notarized Individual Financial Affidavit (ABC-208-B) for each person making a financial contribution",
+    ],
+    checked: "2026-10-28", source: "https://www.abc.ca.gov/wp-content/uploads/2026/08/online_application_instructions.pdf",
+    also: ["https://www.abc.ca.gov/licensing/apply-for-a-new-license/online-license-application/frequently-asked-questions/", "https://www.abc.ca.gov/licensing/license-forms/new-license-application/"],
   },
   "ca-food-handler": {
     owner: {
@@ -1512,16 +1551,30 @@ export const DEST: Record<string, Dest> = {
     checked: "2026-10-18", source: "https://ttc.lacounty.gov/business-license-requirements-2/",
   },
 
-  // California ABC's new retail license packet: the applicants sign before an ABC employee at the district office (with
-  // state ID), or on a notarized ABC-211-SIG; the page names no mail or online route ("contact your local district office").
+  // California ABC's new retail license packet. The online application's instructions (August 2026) have these uploaded
+  // inside the one application (ca-abc): the notarized signature sheet (ABC-211-SIG), the premises diagram (ABC-257), the
+  // tied-house certification (ABC-140) and the zoning affidavit (ABC-255). They go with it on services.abc.ca.gov, never
+  // as filings of their own.
   ...Object.fromEntries(
-    ["ca-abc-217", "ca-abc-258", "ca-abc-255", "ca-abc-140", "ca-abc-247", "ca-abc-257", "ca-abc-211", "ca-abc-243", "ca-abc-256"].map((id): [string, Dest] => [id, {
+    ["ca-abc-211", "ca-abc-257", "ca-abc-255", "ca-abc-140"].map((id): [string, Dest] => [id, {
+      portal: "services.abc.ca.gov",
+      notReady: "Uploaded inside ABC's online application (ca-abc), not filed on its own: Odelia adds it to that application.",
+      signature: "wet", payment: "portal", onBehalf: "allowed",
+      checked: "2026-10-28", source: "https://www.abc.ca.gov/wp-content/uploads/2026/08/online_application_instructions.pdf",
+      also: ["https://www.abc.ca.gov/licensing/license-forms/new-license-application/"],
+    }]),
+  ),
+  // The rest of the old in-person packet: the online instructions don't name these, so Placetta hasn't confirmed they go
+  // online, and the in-person packet is still the only route a page names for them.
+  ...Object.fromEntries(
+    ["ca-abc-217", "ca-abc-258", "ca-abc-247", "ca-abc-243", "ca-abc-256"].map((id): [string, Dest] => [id, {
       owner: {
-        why: "ABC takes a new license application at the district office for the premises, where each applicant signs before an ABC employee and shows state ID (or signs ABC-211-SIG before a notary); the page names no mail or online route.",
+        why: "ABC takes this form at the district office for the premises, where each applicant signs before an ABC employee and shows state ID (or signs ABC-211-SIG before a notary). ABC's online application instructions (August 2026) don't name it, so Placetta hasn't confirmed it can go online.",
         url: "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
       },
       signature: "wet", payment: "in_person",
-      checked: "2026-10-18", source: "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+      checked: "2026-10-28", source: "https://www.abc.ca.gov/licensing/license-forms/new-license-application/",
+      also: ["https://www.abc.ca.gov/wp-content/uploads/2026/08/online_application_instructions.pdf"],
     }]),
   ),
   "ca-abc-244": {
@@ -1618,7 +1671,9 @@ export const DEST: Record<string, Dest> = {
   // dispatcher reads the state from the form's own address line (destFor), and a filing without one goes to the team.
   "irs-8832": {
     // "If you are located in... Address to mail form to IRS"; "A foreign country or U.S. possession": Ogden 84201-0023.
-    // No fax or online route, so the owner signs it and mails it with the filled form Placetta prepared.
+    // No fax or online route. The IRS takes an electronic signature on Form 8832 ("Form 8832, Entity Classification
+    // Election;" is on its list of paper forms that may be e-signed, "Electronic Signature Extended Indefinitely" into IRM
+    // 10.10.1), so the owner's adopted signature goes on it and Placetta mails it by certified mail.
     byState: {
       from: ["citystatezip", "street"],
       groups: [
@@ -1629,8 +1684,9 @@ export const DEST: Record<string, Dest> = {
       ],
       abroad: { mail: { name: "Department of the Treasury", line1: "Internal Revenue Service", city: "Ogden", state: "UT", zip: "84201-0023" } },
     },
-    signature: "wet", payment: "none",
-    checked: "2026-10-24", source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-8832",
+    signature: "drawn", payment: "none",
+    checked: "2026-10-28", source: "https://www.irs.gov/filing/where-to-file-your-taxes-for-form-8832",
+    also: ["https://www.irs.gov/newsroom/details-on-using-e-signatures-for-certain-forms"],
   },
   "irs-2553": {
     // "If the corporation's principal business, office, or agency is located in... Use the following IRS Center address
@@ -2098,6 +2154,7 @@ export function destinationProblems(dest: Record<string, Dest> = DEST): string[]
       // An owner packet is never sent by Placetta, so it carries no channel the dispatcher would send on.
       if (d.email || d.fax || d.mail || d.portal) out.push(`${id}: an owner-only form has no channel Placetta sends on`);
       if (!d.owner.why?.trim()) out.push(`${id}: say why only the owner can submit it`);
+      if (dest === DEST && !OWNER_KIND[id]) out.push(`${id}: say what kind of owner step it is (OWNER_KIND: exam, id, notary, office or payment)`);
       if (!d.owner.url && !d.owner.email && !d.owner.mail) out.push(`${id}: say where the owner sends it`);
       if (d.owner.url && (!/^https?:\/\//.test(d.owner.url) || !urlOf(d.owner.url))) out.push(`${id}: the owner's link must be a web address`);
       if (d.owner.email && !EMAIL.test(d.owner.email)) out.push(`${id}: the owner's email is not an address`);
@@ -2116,7 +2173,31 @@ export function destinationProblems(dest: Record<string, Dest> = DEST): string[]
     const segments = new Set(list.map(([, d]) => firstSegment(d.portalUrl)));
     if (segments.size > 1) for (const [id, d] of list) if (!d.tenant) out.push(`${id}: ${host} serves several agencies, so this entry needs its tenant path`);
   }
+  if (dest === DEST) for (const id of Object.keys(OWNER_KIND)) if (!DEST[id]?.owner) out.push(`${id}: in OWNER_KIND but not an owner-only form`);
+  for (const id of Object.keys(SIGN_FLAG_SEED)) if (dest === DEST && !DEST[id]) out.push(`${id}: a signature flag for a form with no destination`);
   return out;
+}
+
+/** What a form's signature takes, in one word: originals signed in ink (wet), an electronic or reproduced signature
+    the owner adopts once (esign), or a typed signature by Placetta's named agent (agent). Derived from what each
+    destination says the agency accepts (signature: "wet", or "typed"/"drawn"), except where a cited page says more:
+    those are seeded here. A form with no signature line has none, and a form with no destination stays unknown, as
+    before, and goes the way it went. */
+export type SignFlag = "wet" | "esign" | "agent";
+export const SIGN_FLAG_SEED: Record<string, { flag: SignFlag; why: string; source: string; checked: string }> = {
+  "sj-building-ti": {
+    flag: "agent",
+    why: "San José lets an authorized agent sign a plan-review building permit application once the principal signs Section C (or gives a notarized letter dated within 12 months).",
+    source: "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/bulding-permit-application-instructions",
+    checked: "2026-10-27",
+  },
+};
+export function signFlag(official: string | undefined, d: Dest | undefined): SignFlag | "none" | null {
+  const seed = official && Object.prototype.hasOwnProperty.call(SIGN_FLAG_SEED, official) ? SIGN_FLAG_SEED[official] : undefined;
+  if (seed) return seed.flag;
+  if (!d) return null;
+  if (d.signature === "none") return "none";
+  return d.signature === "wet" ? "wet" : "esign";
 }
 
 /** Entries last checked more than `days` ago. */

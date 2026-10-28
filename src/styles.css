@@ -1256,6 +1256,9 @@ a.pill.ink, a.pill.ink:hover { color: var(--on-ink); }
 .finish-step { margin: 14px 0; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--accent, #c2410c); background: color-mix(in srgb, var(--accent, #c2410c) 8%, transparent); }
 .finish-step p { margin: 6px 0 10px; }
 .sent-it { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+/* "Mail me the page": where to mail the page to sign, one short form */
+.kit-addr { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; width: 100%; }
+.kit-addr .inp { flex: 1 1 140px; min-width: 0; height: 34px; padding: 0 12px; border: 1px solid var(--line, #d6d3d1); border-radius: 999px; background: var(--bg, #fff); color: inherit; font: inherit; font-size: 14px; }
 .sent-it .inp { flex: 1 1 200px; min-width: 0; max-width: 320px; height: 34px; padding: 0 12px; border: 1px solid var(--line, #d6d3d1); border-radius: 999px; background: var(--bg, #fff); color: inherit; font: inherit; font-size: 14px; }
 .pg-log { margin-top: 14px; }
 .pg-log ol { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; }
