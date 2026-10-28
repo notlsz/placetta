@@ -331,6 +331,42 @@ infoPage({
 <p>如发现错误，请发邮件至 <a href="mailto:support@placetta.com">support@placetta.com</a>，注明页面和机构来源。</p>
 <p><a href="/guides/zh/">开店许可指南</a>、<a href="/about.html">关于快哉</a>、<a href="/ai.html">快哉的 AI 如何工作</a>。</p>`,
 });
+/* The partner channel (src/Partner.tsx), sold on the problem: a signed lease is where a store's licensing starts. No
+   numbers but the program's own terms. */
+infoPage({
+  file: "site/partners.html", path: "/partners.html", title: "Every lease your tenants sign needs licenses", titleZh: "租户签下的每份租约，都需要执照", type: "WebPage",
+  desc: "For brokers, landlords, franchisors, accountants, chambers of commerce and market-entry consultancies: hand your clients' licenses to Odelia, Placetta's AI agent, and see every store's licensing status in one view.",
+  en: `<p><strong>Hand them to Odelia.</strong></p>
+<p>A signed lease is where the waiting starts. Before a store can open it needs a business license, a seller's permit, a health permit, a sign permit, a fire inspection and often more, each from a different agency with its own forms, fees and order. A tenant who doesn't know that pays rent on a dark storefront. A franchisor finds out when a location misses its opening date. An accountant finds out when a client is fined.</p>
+<h2>What Odelia does for your clients</h2>
+<p>Odelia, Placetta's AI agent, maps every federal, state, county and city license a store needs, fills in each agency's own forms, files them once the owner approves, tracks each one with the agency and renews it before it lapses. In English and Chinese.</p>
+<h2>What you see</h2>
+<p>With each business's consent, which it can take back at any time, you see its stage, the permits approved, its opening date, and each store's licensing status and what's due. A franchisor or landlord sees every location in one view, with the ones that need attention first. You never see documents, tax IDs, addresses of record or anyone's personal details.</p>
+<p>Each store can also share a status page of its own: a link and a QR code for the window that show each license, its agency and expiry, and "Fully licensed" only when every license in the plan is active.</p>
+<h2>Who it's for</h2>
+<p>Commercial real-estate brokers and landlords. Franchisors and master franchisees. Accountants and bookkeepers. Chinese chambers of commerce and market-entry consultancies.</p>
+<h2>How it works</h2>
+<p>Apply with your organization's details; the Placetta team reviews every partner by hand. Once approved you get a referral link, a code and a plan box for your own site. A business counts as yours when it first arrives through your link or code and signs up within 90 days.</p>
+<h2>Commission</h2>
+<p>The standard commission is 15% of what each business you refer pays for its plan and 10% of its license fees, for its first 12 months. It's recorded in your partner dashboard as it's earned and paid by bank transfer after each month closes, on terms agreed with you in writing first. It never changes what your clients pay.</p>
+<p><a href="/app/partner">Apply to be a partner</a>, or write to <a href="mailto:support@placetta.com">support@placetta.com</a>.</p>
+<p><a href="/about.html">About Placetta</a>, <a href="/trust">Trust and security</a>, <a href="/privacy.html">Privacy Policy</a>.</p>`,
+  zh: `<p><strong>交给 Odelia。</strong></p>
+<p>签下租约，等待才刚开始。门店开业前需要营业执照、销售许可、卫生许可、招牌许可、消防检查，往往还有更多，每一项来自不同机构，表格、费用和顺序各不相同。不了解这些的租户，要为一间无法开门的店面付租金；加盟总部在门店错过开业日期时才发现；会计师在客户被罚款时才知道。</p>
+<h2>Odelia 为您的客户做什么</h2>
+<p>快哉的 AI 助手 Odelia 会列出门店所需的全部联邦、州、县和市级执照，填写各机构的官方表格，经业主批准后提交，跟进每一项的审核，并在到期前续期。支持中文和英文。</p>
+<h2>您能看到什么</h2>
+<p>在每家商家同意后（可随时撤回），您可以看到其阶段、已批准许可、开业日期，以及每家门店的执照状态和待办事项。加盟总部或业主可以在一个视图中看到所有门店，需要处理的排在最前。您看不到任何文件、税号、登记地址或个人信息。</p>
+<p>每家门店还可以共享自己的状态页：一个链接和一张贴在橱窗的二维码，显示每项执照、签发机构和到期日；只有计划中的每项执照都有效时，才显示“执照齐全”。</p>
+<h2>适合谁</h2>
+<p>商业地产经纪与业主。特许经营品牌方与区域总代理。会计师与记账师。华人商会与出海咨询公司。</p>
+<h2>如何运作</h2>
+<p>提交机构信息申请，快哉团队会人工审核每一位合作伙伴。获批后，您会得到推荐链接、推荐码和可放在自己网站上的计划框。商家首次通过您的链接或推荐码到达，并在 90 天内注册，即记为您推荐。</p>
+<h2>佣金</h2>
+<p>标准佣金为您推荐的每家商家前 12 个月方案费用的 15% 和执照服务费的 10%。佣金按发生记录在合作伙伴面板中，每月结束后通过银行转账支付，具体条款会先与您书面确认。佣金不会改变您客户支付的价格。</p>
+<p><a href="/app/partner">申请成为合作伙伴</a>，或发邮件至 <a href="mailto:support@placetta.com">support@placetta.com</a>。</p>
+<p><a href="/about.html">关于快哉</a>、<a href="/trust">信任与安全</a>、<a href="/privacy.html">隐私政策</a>。</p>`,
+});
 
 /* ------------------------------------------------------------ measured results (site/stats.js fills them in) */
 // Every number on this page is measured on real filings and shown only with 20 or more behind it (public_outcomes in
@@ -368,7 +404,7 @@ infoPage({
 });
 
 /* ------------------------------------------------------------ sitemaps, robots, llms.txt */
-const PAGES = ["/", "/zh", "/about.html", "/editorial.html", "/stats.html", "/help/", ...[...out.keys()].filter(f => /^site\/help\/.+\/index\.html$/.test(f)).map(f => f.slice(4).replace(/index\.html$/, "")), "/trust", "/ai.html", "/privacy.html", "/terms.html", "/authorization.html"];
+const PAGES = ["/", "/zh", "/about.html", "/editorial.html", "/stats.html", "/partners.html", "/help/", ...[...out.keys()].filter(f => /^site\/help\/.+\/index\.html$/.test(f)).map(f => f.slice(4).replace(/index\.html$/, "")), "/trust", "/ai.html", "/privacy.html", "/terms.html", "/authorization.html"];
 const pagesXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${PAGES.map(p => `<url><loc>${ORIGIN}${p}</loc><lastmod>${NEXT[p]?.d ?? TODAY}</lastmod></url>`).join("\n")}\n</urlset>\n`;
 put("site/sitemaps/pages.xml", pagesXml);
 const maps = [...new Set(["pages.xml", ...readdirSync("site/sitemaps").filter(f => f.endsWith(".xml"))])].sort();

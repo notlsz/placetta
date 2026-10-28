@@ -7,20 +7,28 @@ import { I } from "./ui";
 import { useApp } from "./ctx";
 import * as api from "./cloud/api";
 import * as pa from "./cloud/partnersApi";
-import { clearTouch, readTouch } from "./referral";
+import { addCode, clearTouch, firstValid, readStatusTouch, readTouches } from "./referral";
+import { trustSignupClaim } from "./cloud/trustApi";
 import "./ode.css";
 
-/* Partners: franchisors, master franchisees, commercial real-estate brokers, landlords, investors and accountants who
-   bring Chinese brands to the US. A partner signs up here, the Placetta team approves them, and they share a link or
-   put Placetta's plan box on their own site. Businesses that come through them say, once, whether the partner may see
-   their progress: business name, stage, permits approved out of the total, opening date. Nothing else.
+/* Partners, copied from Vanta's auditor channel: the people a business already trusts when it opens a store.
+   Commercial real-estate brokers and landlords, franchisors and master franchisees, accountants and bookkeepers,
+   Chinese chambers of commerce and market-entry consultancies, investors. A partner signs up here, the Placetta team
+   approves them, and they share a link or a code, or put Placetta's plan box on their own site. Businesses that come
+   through them say, once, whether the partner may see their progress: business name, stage, permits approved out of
+   the total, opening date, and each store's licensing status and what's due. Nothing else, and they can stop any time.
+   A franchisor or landlord sees every location in one view. Commission is a stored ledger (15% of the plan and 10% of
+   license fees for the first year by default); payouts are made by hand.
    The page works inside the app (a nav entry) and on its own, for a partner with no workspace. */
 
 export const KIND: Record<pa.PartnerKind, Bi> = {
   franchisor: B("Franchisor", "特许经营品牌方"), master_franchisee: B("Master franchisee", "区域总代理"),
   broker: B("Commercial real-estate broker", "商业地产经纪"), landlord: B("Landlord", "业主"),
-  investor: B("Investor", "投资人"), accountant: B("Accountant", "会计师"), other: B("Other", "其他"),
+  accountant: B("Accountant", "会计师"), bookkeeper: B("Bookkeeper", "记账师"),
+  chamber: B("Chamber of commerce", "商会"), consultancy: B("Market-entry consultancy", "出海咨询公司"),
+  investor: B("Investor", "投资人"), other: B("Other", "其他"),
 };
+const termsOf = (me: pa.PartnerMe): pa.PartnerTerms => me.terms ?? { ...pa.DEFAULT_TERMS, plan_pct: me.share_pct ?? pa.DEFAULT_TERMS.plan_pct, months: me.share_months || 12 };
 const KINDS = Object.keys(KIND) as pa.PartnerKind[];
 const BASE = api.LEGAL_BASE.replace(/\/+$/, "");
 const usd = (n: number) => "$" + Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -30,7 +38,10 @@ const copy = (t: string) => { void navigator.clipboard?.writeText(t).catch(() =>
 
 const SAMPLE: { me: pa.PartnerMe; dash: pa.PartnerDashboard; refs: pa.ReferralLine[]; keys: pa.ApiKeyRow[] } = (() => {
   const me: pa.PartnerMe = { id: "sample", org_name: "Bay Bridge Realty", kind: "broker", contact_name: "Ann Lee", website: "https://baybridge.example", status: "approved",
-    code: "BAYB2345", share_pct: 10, share_months: 12, created_at: "2026-08-02T16:00:00Z", approved_at: "2026-08-04T17:30:00Z" };
+    code: "BAYB2345", share_pct: 10, share_months: 12, created_at: "2026-08-02T16:00:00Z", approved_at: "2026-08-04T17:30:00Z",
+    terms: { plan_pct: 10, fee_pct: 10, months: 12, plan_default: false, fee_default: true } };
+  const store = (id: string, en: string, zh: string, o: Partial<pa.ReferralStore>): pa.ReferralStore =>
+    ({ id, name: { en, zh }, stage: "opening", status: "current", licensed: false, current: 0, due_30: 0, overdue: 0, pending: 0, next: null, ...o });
   return {
     me,
     // 10% of $149 a location: four locations in September and October, two in August; August paid in September
@@ -38,9 +49,12 @@ const SAMPLE: { me: pa.PartnerMe; dash: pa.PartnerDashboard; refs: pa.ReferralLi
       months: [{ month: "2026-10-01", paying: 3, share_usd: 59.6, closed: false }, { month: "2026-09-01", paying: 3, share_usd: 59.6, closed: true }, { month: "2026-08-01", paying: 2, share_usd: 29.8, closed: true }],
       payouts: [{ amount_usd: 29.8, paid_on: "2026-09-05", reference: "ACH 1029" }] },
     refs: [
-      { id: "r1", attributed_at: "2026-08-11T10:00:00Z", business_name: "Lucky Leaf Tea", stage: "opening", permits_done: 5, permits_total: 9, opening_date: "2027-01-15", progress_at: "2026-10-16T22:10:00Z" },
-      { id: "r2", attributed_at: "2026-08-20T10:00:00Z", business_name: "Golden Ox Hot Pot", stage: "opening", permits_done: 2, permits_total: 11, opening_date: "2027-03-01", progress_at: "2026-10-15T18:40:00Z" },
-      { id: "r3", attributed_at: "2026-09-02T10:00:00Z", business_name: "Moon Cake House", stage: "open", permits_done: 8, permits_total: 8, opening_date: "2026-09-28", progress_at: "2026-10-12T15:00:00Z" },
+      { id: "r1", attributed_at: "2026-08-11T10:00:00Z", business_name: "Lucky Leaf Tea", stage: "opening", permits_done: 5, permits_total: 9, opening_date: "2027-01-15", progress_at: "2026-10-16T22:10:00Z", consent_scope: 2,
+        stores: [store("r1a", "Bay Street", "湾街店", { pending: 4, current: 5, next: { kind: "due", title: { en: "Health plan check", zh: "卫生平面图审查" }, date: "2026-11-20" } })] },
+      { id: "r2", attributed_at: "2026-08-20T10:00:00Z", business_name: "Golden Ox Hot Pot", stage: "opening", permits_done: 2, permits_total: 11, opening_date: "2027-03-01", progress_at: "2026-10-15T18:40:00Z", consent_scope: 1, stores: null },
+      { id: "r3", attributed_at: "2026-09-02T10:00:00Z", business_name: "Moon Cake House", stage: "open", permits_done: 8, permits_total: 8, opening_date: "2026-09-28", progress_at: "2026-10-12T15:00:00Z", consent_scope: 2,
+        stores: [store("r3a", "Market Street", "市场街店", { stage: "open", licensed: true, current: 7, due_30: 1, status: "due", next: { kind: "renewal", title: { en: "Sign permit renewal", zh: "招牌许可续期" }, date: "2026-11-09" } }),
+          store("r3b", "Pier 39", "39 号码头店", { stage: "open", licensed: true, current: 8 })] },
     ],
     keys: [{ id: "k1", label: "Our CRM", prefix: "0a1b2c3d", created_at: "2026-09-10T16:00:00Z", last_used_at: "2026-10-16T09:00:00Z", revoked_at: null }],
   };
@@ -63,8 +77,8 @@ function Apply({ lang, me, onDone }: { lang: Lang; me: pa.PartnerMe | null; onDo
   return (
     <section className="pt-card">
       <h2>{L(B("Become a Placetta partner", "成为快哉合作伙伴"))}</h2>
-      <p className="pt-sub">{L(B("For franchisors, brokers, landlords, investors and accountants who bring brands from China to the US. Your clients get their permit plan in minutes; you see how each opening is going, when they agree to share it.",
-        "适合把中国品牌带到美国的特许经营品牌方、经纪、业主、投资人和会计师。您的客户几分钟拿到许可计划；在他们同意共享后，您可以看到每家店的开业进展。"))}</p>
+      <p className="pt-sub">{L(B("For brokers and landlords, franchisors, accountants and bookkeepers, chambers of commerce and market-entry consultancies who bring brands to US storefronts. Every lease your tenants sign needs licenses; Odelia gets them. You see each store's licensing status and what's due, when the business agrees to share it.",
+        "适合把品牌带进美国门店的商业地产经纪与业主、特许经营品牌方、会计与记账师、商会和出海咨询公司。租户签下的每份租约都需要执照，交给 Odelia 办。在商家同意共享后，您可以看到每家门店的执照状态和待办事项。"))}</p>
       {me?.status === "declined" && <p className="pt-warn">{L(B("Your last application wasn't approved. You can update it and send it again.", "您上次的申请未获批准。可以修改后重新提交。"))}</p>}
       <form className="pt-form" onSubmit={e => { e.preventDefault(); void send(); }}>
         <label><span>{L(B("Organization", "机构名称"))}</span><input value={f.org} onChange={e => setF({ ...f, org: e.target.value })} maxLength={120} autoComplete="organization" placeholder="Bay Bridge Realty" /></label>
@@ -79,7 +93,8 @@ function Apply({ lang, me, onDone }: { lang: Lang; me: pa.PartnerMe | null; onDo
         <div className="pt-act"><button type="submit" className="sbtn ink" disabled={busy}>{busy ? "…" : L(B("Send for review", "提交审核"))}</button></div>
       </form>
       {err && <p className="pt-warn" role="alert">{err}</p>}
-      <p className="note">{L(B("The Placetta team reviews every partner by hand. The revenue share and its terms are agreed with you in writing before any is paid.", "快哉团队会人工审核每一位合作伙伴。分成比例和条款会在付款前与您书面确认。"))}</p>
+      <p className="note">{L(B("The Placetta team reviews every partner by hand. The standard commission is 15% of what each business you refer pays for its plan and 10% of its license fees, for its first 12 months. It's recorded here as it's earned and paid by bank transfer after each month closes, on terms agreed with you in writing first.",
+        "快哉团队会人工审核每一位合作伙伴。标准佣金为您推荐的每家商家前 12 个月方案费用的 15% 和执照服务费的 10%。佣金在此按发生记录，每月结束后通过银行转账支付，具体条款会先与您书面确认。"))}</p>
     </section>
   );
 }
@@ -133,6 +148,40 @@ function Keys({ lang, sample }: { lang: Lang; sample: boolean }) {
   );
 }
 
+/** Every location of every business that shares it, in one view: a franchisor's or landlord's whole portfolio, those
+    with something overdue first. "Fully licensed" only when nothing is pending or overdue; a business that agreed to
+    share before the store view existed shows as not sharing it yet. */
+function Locations({ lang, refs }: { lang: Lang; refs: pa.ReferralLine[] }) {
+  const L = (x: Bi) => x[lang];
+  const zh = lang === "zh";
+  const rank = { overdue: 0, due: 1, current: 2 } as const;
+  const rows = refs.flatMap(r => (Array.isArray(r.stores) ? r.stores : []).map(s => ({ ...s, business: r.business_name ?? "", ref: r.id })))
+    .sort((a, b) => rank[a.status] - rank[b.status] || Number(a.licensed) - Number(b.licensed) || String(a.next?.date ?? "9").localeCompare(String(b.next?.date ?? "9")));
+  const older = refs.filter(r => !Array.isArray(r.stores)).length;
+  const full = rows.filter(s => s.licensed).length;
+  if (!rows.length && !older) return null;
+  return (
+    <section className="sec">
+      <div className="sec-h"><h2>{L(B("Locations", "门店"))}{rows.length ? <em className="pt-n">{rows.length}</em> : null}</h2></div>
+      {rows.length > 0 && <p className="pt-sub">{zh ? `${rows.length} 家门店中 ${full} 家执照齐全。` : `${full} of ${rows.length} location${rows.length === 1 ? "" : "s"} fully licensed.`}</p>}
+      {rows.length > 0 && (
+        <div className="table pt-t" role="table">
+          <div className="tr th" role="row"><span>{L(B("Location", "门店"))}</span><span>{L(B("Licensing", "执照"))}</span><span>{L(B("Due", "待办"))}</span><span>{L(B("Next", "下一项"))}</span></div>
+          <div className="tray">{rows.map(s => (
+            <div key={s.ref + s.id} className="tr row" role="row">
+              <span className="c-name"><b>{L(s.name)}</b><small>{s.business}</small></span>
+              <span className="c-stage">{s.licensed ? <b>{L(B("Fully licensed", "执照齐全"))}</b> : <span>{zh ? `${s.pending} 项办理中` : `${s.pending} pending`}</span>}</span>
+              <span>{s.overdue ? (zh ? `${s.overdue} 项逾期` : `${s.overdue} overdue`) : s.due_30 ? (zh ? `30 天内 ${s.due_30} 项` : `${s.due_30} within 30 days`) : L(B("Nothing due", "暂无"))}</span>
+              <span className="c-due">{s.next?.date ? <><b>{fmtDay(s.next.date, lang, true)}</b><small>{L(s.next.title)}</small></> : <small>{L(B("None", "无"))}</small>}</span>
+            </div>
+          ))}</div>
+        </div>
+      )}
+      {older > 0 && <p className="note">{zh ? `另有 ${older} 家商家同意共享进展时还没有门店视图，需要他们再确认一次才能看到每家门店的执照状态。` : `${older} more business${older === 1 ? " agreed" : "es agreed"} to share before the store view existed; each store's licensing status shows once they confirm it in Settings.`}</p>}
+    </section>
+  );
+}
+
 function Dashboard({ lang, me, sample }: { lang: Lang; me: pa.PartnerMe; sample: boolean }) {
   const L = (x: Bi) => x[lang];
   const zh = lang === "zh";
@@ -150,11 +199,12 @@ function Dashboard({ lang, me, sample }: { lang: Lang; me: pa.PartnerMe; sample:
   const snippet = `<div data-placetta-plan></div>\n<script src="${BASE}/embed.js" data-ref="${code}" async></script>`;
   const doCopy = (t: string, k: string) => { copy(t); setCopied(k); setTimeout(() => setCopied(""), 1800); };
   const hidden = Math.max(0, (dash?.referred ?? 0) - (refs?.length ?? 0));
+  const terms = termsOf(dash?.partner ?? me);
   return (<>
     <dl className="hq-tot pt-tot">
       <div><dt>{L(B("Businesses referred", "推荐的商家"))}</dt><dd>{dash?.referred ?? "-"}</dd></div>
       <div><dt>{L(B("Sharing progress", "共享进展"))}</dt><dd>{dash?.sharing ?? "-"}</dd></div>
-      <div><dt>{L(B("Share earned", "已获分成"))}</dt><dd>{dash ? usd(dash.earned_usd) : "-"}</dd></div>
+      <div><dt>{L(B("Commission earned", "已获佣金"))}</dt><dd>{dash ? usd(dash.earned_usd) : "-"}</dd></div>
       <div className={dash && dash.owed_usd > 0 ? "warn" : ""}><dt>{L(B("To be paid", "待支付"))}</dt><dd>{dash ? usd(dash.owed_usd) : "-"}</dd><small>{L(B("Closed months, less payouts", "已结月份减去已付"))}</small></div>
     </dl>
     {err && <p className="pt-warn">{err}</p>}
@@ -190,19 +240,21 @@ function Dashboard({ lang, me, sample }: { lang: Lang; me: pa.PartnerMe; sample:
           })}</div>
         </div>
       )}
-      <p className="note">{hidden > 0 ? L(B(`${hidden} more referred business${hidden === 1 ? " chose" : "es chose"} not to share progress. They still count toward your share.`, `另有 ${hidden} 家推荐的商家选择不共享进展，仍计入您的分成。`)) + " " : ""}{L(B("Each business decides what you see: its name, stage, permits approved and opening date. Nothing else, and it can stop sharing any time.", "每家商家自己决定您能看到什么：名称、阶段、已批准许可和开业日期，仅此而已，并可随时停止共享。"))}</p>
+      <p className="note">{hidden > 0 ? L(B(`${hidden} more referred business${hidden === 1 ? " chose" : "es chose"} not to share progress. They still count toward your commission.`, `另有 ${hidden} 家推荐的商家选择不共享进展，仍计入您的佣金。`)) + " " : ""}{L(B("Each business decides what you see: its name, stage, permits approved, opening date, and each store's licensing status and what's due. Nothing else, and it can stop sharing any time.", "每家商家自己决定您能看到什么：名称、阶段、已批准许可、开业日期，以及每家门店的执照状态和待办事项，仅此而已，并可随时停止共享。"))}</p>
     </section>
 
+    <Locations lang={lang} refs={refs ?? []} />
+
     <section className="sec">
-      <div className="sec-h"><h2>{L(B("Revenue share", "收入分成"))}</h2></div>
-      <p className="pt-sub">{me.share_pct == null ? L(B("Not set yet. The Placetta team agrees it with you before any is paid.", "尚未设定。快哉团队会在付款前与您确认。"))
-        : L(B(`${me.share_pct}% of what each referred business pays for its plan, for its first ${me.share_months} months. Worked out from billing every day; paid by bank transfer after each month closes.`,
-          `每家推荐商家前 ${me.share_months} 个月方案费用的 ${me.share_pct}%。每天根据账单计算；每月结束后通过银行转账支付。`))}</p>
+      <div className="sec-h"><h2>{L(B("Commission", "佣金"))}</h2></div>
+      <p className="pt-sub">{L(B(`${terms.plan_pct}% of what each referred business pays for its plan and ${terms.fee_pct}% of its license fees, for its first ${terms.months} months. Worked out from billing every day and recorded here; paid by bank transfer after each month closes. Nothing is paid automatically.`,
+          `每家推荐商家前 ${terms.months} 个月方案费用的 ${terms.plan_pct}% 和执照服务费的 ${terms.fee_pct}%。每天根据账单计算并记录在此；每月结束后通过银行转账支付，不会自动付款。`))}</p>
       {dash && dash.months.length > 0 && (
         <table className="pt-months">
-          <thead><tr><th>{L(B("Month", "月份"))}</th><th>{L(B("Paying businesses", "付费商家"))}</th><th>{L(B("Your share", "您的分成"))}</th></tr></thead>
+          <thead><tr><th>{L(B("Month", "月份"))}</th><th>{L(B("Paying businesses", "付费商家"))}</th><th>{L(B("Plans", "方案"))}</th><th>{L(B("License fees", "执照服务费"))}</th><th>{L(B("Your commission", "您的佣金"))}</th></tr></thead>
           <tbody>{dash.months.map(m => (
-            <tr key={m.month}><td>{zh ? `${m.month.slice(0, 4)} 年 ${Number(m.month.slice(5, 7))} 月` : new Date(m.month + "T12:00:00Z").toLocaleDateString("en-US", { month: "long", year: "numeric" })}{!m.closed && <small>{L(B(" so far", "（进行中）"))}</small>}</td><td>{m.paying}</td><td>{usd(m.share_usd)}</td></tr>
+            <tr key={m.month}><td>{zh ? `${m.month.slice(0, 4)} 年 ${Number(m.month.slice(5, 7))} 月` : new Date(m.month + "T12:00:00Z").toLocaleDateString("en-US", { month: "long", year: "numeric" })}{!m.closed && <small>{L(B(" so far", "（进行中）"))}</small>}</td>
+              <td>{m.paying}</td><td>{usd(m.share_usd)}</td><td>{usd(m.fee_usd ?? 0)}</td><td>{usd(m.total_usd ?? m.share_usd)}</td></tr>
           ))}</tbody>
         </table>
       )}
@@ -290,18 +342,40 @@ export function usePartnerMe(on: boolean): pa.PartnerMe | null {
 export function ReferralConsent({ lang, checked, onChange, onPartner }: { lang: Lang; checked: boolean; onChange: (v: boolean) => void; onPartner?: (org: string | null) => void }) {
   const L = (x: Bi) => x[lang];
   const [org, setOrg] = useState<string | null>(null);
-  useEffect(() => {
-    const t = readTouch();
-    if (!t) { onPartner?.(null); return; }
-    void pa.partnerLookup(t.code).then(p => { setOrg(p?.org_name ?? null); onPartner?.(p?.org_name ?? null); }).catch(() => onPartner?.(null));
+  const [typing, setTyping] = useState(false);
+  const [code, setCode] = useState("");
+  const [miss, setMiss] = useState(false);
+  const find = useCallback(async () => {
+    const hit = await firstValid(readTouches(), c => pa.partnerLookup(c));
+    setOrg(hit?.partner.org_name ?? null);
+    onPartner?.(hit?.partner.org_name ?? null);
+    return hit;
   }, [onPartner]);
-  if (!org) return null;
+  useEffect(() => { void find(); }, [find]);
+  const tryCode = async () => {
+    const c = code.trim().toUpperCase();
+    if (!/^[A-Z2-9]{8}$/.test(c)) { setMiss(true); return; }
+    addCode(c);
+    const hit = await find();
+    setMiss(!hit);
+  };
+  if (!org) return (
+    <div className="pt-code-in">
+      {!typing ? <button type="button" className="lnk" onClick={() => setTyping(true)}>{L(B("Have a partner code?", "有合作伙伴推荐码？"))}</button> : (
+        <form className="pt-inline" onSubmit={e => { e.preventDefault(); void tryCode(); }}>
+          <input value={code} onChange={e => { setCode(e.target.value); setMiss(false); }} maxLength={8} autoCapitalize="characters" aria-label={L(B("Partner code", "推荐码"))} placeholder={L(B("8-character code", "8 位推荐码"))} />
+          <button type="submit" className="sbtn line">{L(B("Add", "添加"))}</button>
+          {miss && <small className="pt-warn" role="alert">{L(B("That code isn't an active partner's. Check it with whoever gave it to you.", "该推荐码不属于有效的合作伙伴，请向提供者确认。"))}</small>}
+        </form>
+      )}
+    </div>
+  );
   return (
     <div className={"terms-check pt-consent" + (checked ? " on" : "")}>
       <input id="onb-share" type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} />
       <label htmlFor="onb-share">{lang === "zh"
-        ? `您是通过 ${org} 来到快哉的。允许 ${org} 查看您的开业进展：企业名称、阶段、已批准许可数和开业日期，仅此而已。可随时在“设置”中停止共享。`
-        : `You came to Placetta through ${org}. Let ${org} see your opening progress: business name, stage, permits approved and opening date. Nothing else. You can stop sharing any time in Settings.`}</label>
+        ? `您是通过 ${org} 来到快哉的。允许 ${org} 查看您的开业进展：企业名称、阶段、已批准许可数、开业日期，以及每家门店的执照状态和待办事项，仅此而已。看不到文件、地址、税号或任何人的姓名。可随时在“设置”中停止共享。`
+        : `You came to Placetta through ${org}. Let ${org} see your opening progress: business name, stage, permits approved, opening date, and each store's licensing status and what's due. Nothing else: never your documents, addresses, tax IDs or anyone's name. You can stop sharing any time in Settings.`}</label>
       <span className="sr">{L(B("Optional", "选填"))}</span>
     </div>
   );
@@ -327,8 +401,12 @@ export function PartnerSharing() {
   return (
     <section className="sg" id="set-partner">
       <h2>{L(B("Partner", "合作伙伴"))}</h2>
-      <p className="sg-note">{zh ? `${r.org_name} 把您推荐给了快哉（${fmtDay(r.attributed_at, lang, true)}）。共享时，他们只能看到企业名称、阶段、已批准许可数和开业日期，看不到文件、表格内容、登录信息或对话。`
-        : `${r.org_name} referred you to Placetta on ${fmtDay(r.attributed_at, lang, true)}. While you share, they see your business name, stage, permits approved and opening date. Never your documents, form answers, logins or chats.`}</p>
+      <p className="sg-note">{zh ? `${r.org_name} 把您推荐给了快哉（${fmtDay(r.attributed_at, lang, true)}）。共享时，他们只能看到企业名称、阶段、已批准许可数、开业日期，以及每家门店的执照状态和待办事项，看不到文件、地址、表格内容、登录信息或对话。`
+        : `${r.org_name} referred you to Placetta on ${fmtDay(r.attributed_at, lang, true)}. While you share, they see your business name, stage, permits approved, opening date, and each store's licensing status and what's due. Never your documents, addresses, form answers, logins or chats.`}</p>
+      {r.consent && (r.scope ?? 2) < 2 && cloud.owner && (
+        <p className="sg-note">{zh ? `您同意共享时还没有门店视图，所以 ${r.org_name} 目前看不到各门店的执照状态。` : `You agreed to share before the store view existed, so ${r.org_name} doesn't see each store's licensing status yet.`}{" "}
+          <button type="button" className="lnk" disabled={busy} onClick={() => void set(true)}>{zh ? "也共享门店执照状态" : "Share store licensing too"}</button></p>
+      )}
       <ul className="sg-list">
         <li className="sg-row">
           <span className="sg-ico"><I.user /></span>
@@ -342,12 +420,17 @@ export function PartnerSharing() {
   );
 }
 
-/** After a workspace is created: record the partner this browser came through (first touch, within 90 days) with the
-    owner's answer about sharing. Nothing happens without a partner link; a refusal (an old link, their own business)
-    is quiet. The touch is used up either way. */
+/** After a workspace is created: record the partner this browser came through (the first valid one, within 90 days)
+    with the owner's answer about sharing, and the status page whose footer brought it, if any. Nothing happens without
+    a link; a refusal (an old link, their own business) is quiet and the next valid code is tried. The touches are used
+    up either way. */
 export async function claimReferral(ws: string, consent: boolean) {
-  const t = readTouch();
-  if (!t) return;
-  await pa.referralClaim(ws, t.code, new Date(t.at).toISOString(), consent).catch(() => null);
+  const touches = readTouches(), st = readStatusTouch();
+  if (!touches.length && !st) return;
+  for (const t of touches) {
+    const r = await pa.referralClaim(ws, t.code, new Date(t.at).toISOString(), consent).catch(() => null);
+    if (r) break;
+  }
+  if (st) await trustSignupClaim(ws, st.ref, new Date(st.at).toISOString()).catch(() => false);
   clearTouch();
 }
