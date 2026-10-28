@@ -37,6 +37,7 @@ services:
         - supabase/functions/_shared/zdr.ts
         - supabase/functions/file/accounts.ts
         - supabase/functions/file/destinations.ts
+        - supabase/functions/file/dest/midwest.ts
     envVars:
       # ---- the four values to paste when Render asks ----
       - key: SUPABASE_SERVICE_ROLE_KEY

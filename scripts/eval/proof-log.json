@@ -10961,5 +10961,275 @@
   "found": true,
   "sha256": "daa39a0f33d3a982",
   "context": " other filing............................................................$60.00 *annual report license tax is $60 or two-tenths of one mill on the dollar ($.0002) whichever is greater based on the company's assets located and employed in the state of wyoming. nonprofit"
+ },
+ {
+  "id": "il-idph-food",
+  "read": "https://dph.illinois.gov/topics-services/food-safety/manufactured-food.html",
+  "quote": "Food processing plants and food storage facilities are required to obtain a permit and inspection from IDPH to operate.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "8c3ab4dd75abc3e0",
+  "context": "se requirements for manufactured food firms. permit and inspection requirements food processing plants and food storage facilities are required to obtain a permit and inspection from idph to operate. new operations/facilities to obtain a permit for a new food processing plant or"
+ },
+ {
+  "id": "in-sales",
+  "read": "https://www.in.gov/dor/i-am-a/business-corp/sales-tax/",
+  "quote": "This registration allows you to legally conduct retail sales in the state of Indiana.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "83273185bf12a764",
+  "context": "ersonal property, you'll need to register to collect a seven percent sales tax. this registration allows you to legally conduct retail sales in the state of indiana. once your registration is completed and processed, you'll be issued a registere"
+ },
+ {
+  "id": "in-withholding",
+  "read": "https://www.in.gov/dor/i-am-a/business-corp/business-faq/",
+  "quote": "A business that has employees will need to register for withholding tax.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "439d6cafa5f2cf04",
+  "context": "r example, a business that sells a product will need to register for sales tax. a business that has employees will need to register for withholding tax. for more information, visit the business owner's guide and dor's new and small "
+ },
+ {
+  "id": "in-ui",
+  "read": "https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/accessing-ess/",
+  "quote": "The organization should register online using the Uplink Employer Self Service (ESS) website",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "f04cb85f9c66f730",
+  "context": "gister with dwd in the 1 st quarter it qualifies for an account, under the act. the organization should register online using the uplink employer self service (ess) website, at https://uplink.in.gov/ess/esslogon.htm. electronic report filing and paymen"
+ },
+ {
+  "id": "in-idoh-food",
+  "read": "https://secure.in.gov/health/food-protection/wholesale-manufactured-foods-program/starting-a-wholesale-food-business-in-indiana/",
+  "quote": "requires any manufacturer, processor, repackager, or wholesale distributor of food, drugs, or cosmetics that maintains a place of business in Indiana to register",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "4935a23dc57b54a7",
+  "context": "ey processor sorghum processor business registration indiana law (ic 16-42-1-6) requires any manufacturer, processor, repackager, or wholesale distributor of food, drugs, or cosmetics that maintains a place of business in indiana to register with the indiana department of health. this registration ensures that all facil"
+ },
+ {
+  "id": "oh-vendor-state",
+  "read": "https://tax.ohio.gov/business/sales-and-use-tax",
+  "quote": "Ohio law requires any person or business making taxable sales or providing taxable services to first obtain a vendor license.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "195da1b2ef6b4db4",
+  "context": "ng: email: thefinderhelp@tax.ohio.gov sales and use tax – 888-405-4039 register ohio law requires any person or business making taxable sales or providing taxable services to first obtain a vendor license. registration is available through the following: oh|tax eservices — prospective"
+ },
+ {
+  "id": "oh-withholding",
+  "read": "https://tax.ohio.gov/business/employer-withholding",
+  "quote": "All employers required to withhold Ohio income taxes must register within 15 days of when such liability begins.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "f403da3fb14150bb",
+  "context": "or pay the tax as required by law. see orc 5747.07, oac 5703-7-15. registration all employers required to withhold ohio income taxes must register within 15 days of when such liability begins. register online through oh|tax eservices. the federal employer identification n"
+ },
+ {
+  "id": "oh-oda-food",
+  "read": "https://codes.ohio.gov/ohio-revised-code/section-3715.041",
+  "quote": "A person that operates a food processing establishment shall register the establishment annually with the director of agriculture.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "f5162c507821acba",
+  "context": "blishment\" has the same meaning as in section 3715.021 of the revised code. (2) a person that operates a food processing establishment shall register the establishment annually with the director of agriculture. the person shall submit an application for registration or renewal on a form pr"
+ },
+ {
+  "id": "mi-sales",
+  "read": "https://www.michigan.gov/taxes/business-taxes/new-biz/registration-faqs",
+  "quote": "Individuals or businesses that sell tangible personal property to the final consumer also need a sales tax license.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "b4179283871223db",
+  "context": " for information or city tax forms (michigan cities that impose an income tax). individuals or businesses that sell tangible personal property to the final consumer also need a sales tax license. in order to register for sales tax, please follow the application process outli"
+ },
+ {
+  "id": "mi-withholding",
+  "read": "https://www.michigan.gov/taxes/business-taxes/new-biz/registration-faqs",
+  "quote": "All new businesses that have Michigan employees must register with the Internal Revenue Service (IRS) and the Michigan Department of Treasury",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "b4179283871223db",
+  "context": "stration registration faqs new business registration frequently asked questions all new businesses that have michigan employees must register with the internal revenue service (irs) and the michigan department of treasury for social security tax (federal) and income tax withholding (federal and state"
+ },
+ {
+  "id": "mi-uia",
+  "read": "https://www.michigan.gov/en/leo/bureaus-agencies/uia/employers",
+  "quote": "If you have employees covered by Michigan UI law, you must register for an employer account.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "b7a90c1ab6e67f65",
+  "context": "n which system to log in to and when on our two-system transition period guide. if you have employees covered by michigan ui law, you must register for an employer account. register for most michigan business taxes, and/or a sales tax license using an "
+ },
+ {
+  "id": "mi-mdard-food",
+  "read": "https://www.michigan.gov/mdard/licensing/food/food-establishment-license/food-establishment-licensing-step-by-step-guide",
+  "quote": "For example, grocery stores, food warehouses, and bakeries need food establishment licenses.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "b1092912ff411bed",
+  "context": "nt licenses are for businesses that primarily sell, store, or manufacture food. for example, grocery stores, food warehouses, and bakeries need food establishment licenses. these licenses fall directly under mdard jurisdiction. if you primarily serve f"
+ },
+ {
+  "id": "wi-seller",
+  "read": "https://www.revenue.wi.gov/Pages/FAQS/pcs-seller.aspx",
+  "quote": "A seller's permit is required for every individual, partnership, corporation, or other organization with a Wisconsin sales location making retail sales",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "225d9e7b167444c6",
+  "context": "what type of permits do i need if i am starting a new business? seller's permit a seller's permit is required for every individual, partnership, corporation, or other organization with a wisconsin sales location making retail sales, including leases, licenses, or rentals, of taxable products in wisconsin, unle"
+ },
+ {
+  "id": "wi-withholding",
+  "read": "https://www.revenue.wi.gov/Pages/FAQS/pcs-with.aspx",
+  "quote": "Every employer who is required to withhold Wisconsin income tax must register with the Wisconsin Department of Revenue",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "292716fca7fdc895",
+  "context": "s business in wisconsin do i need to register to withhold wisconsin income tax? every employer who is required to withhold wisconsin income tax must register with the wisconsin department of revenue for a wisconsin withholding tax account number. however, you do not need a wisc"
+ },
+ {
+  "id": "wi-ui",
+  "read": "https://www.dwd.wisconsin.gov/ui201/t1201.htm",
+  "quote": "You are required to pay UI contributions on your payroll after you've met a statutory coverage liability condition.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "b43afb27c1dcfe05",
+  "context": " to establish if you are a covered employer and/or your contribution liability. you are required to pay ui contributions on your payroll after you've met a statutory coverage liability condition. coverage is retroactive to jan. 1 of the year in which you first met a liabilit"
+ },
+ {
+  "id": "wi-datcp-plant",
+  "read": "https://datcp.wi.gov/Documents/WIFoodProcessingFoodSalesRequirements.pdf",
+  "quote": "If you plan to sell primarily through wholesale distribution, you will need a food processing plant license issued by our Department.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "5ee1b20bed99e569",
+  "context": "ou will need a retail food license. internet sales are considered retail sales. if you plan to sell primarily through wholesale distribution, you will need a food processing plant license issued by our department. wholesaling under a food processing plant license allows you to sell your produ"
+ },
+ {
+  "id": "wi-datcp-warehouse",
+  "read": "https://datcp.wi.gov/Documents/FoodProcLicenseFeeSchedule.pdf",
+  "quote": "FOOD WAREHOUSE: License expires annually, June 30",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "ffee26dfd6555f98",
+  "context": " $25,000 in annual $320 - $64 - production (additional to initial license fee). food warehouse: license expires annually, june 30 wis. admin. code ch. atcp 71 & wis. stat. § 97.27 a food warehouse operating as"
+ },
+ {
+  "id": "mn-withholding",
+  "read": "https://www.revenue.state.mn.us/sites/default/files/2025-12/wh-inst-26.pdf",
+  "quote": "You must register to file withholding tax if any of these apply:",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "d36a15451ef1d780",
+  "context": " our website at www.revenue.state.mn.us. register for a minnesota tax id number you must register to file withholding tax if any of these apply: • you have employees and anticipate withholding tax from their wages in the nex"
+ },
+ {
+  "id": "mn-mda-food",
+  "read": "https://www.mda.state.mn.us/food-feed/wholesale-food-handler-license",
+  "quote": "If you would like to operate as a wholesale food handler or manufacturer, you will need a Food Handler License.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "eb319cdd4aa90ecd",
+  "context": " frequently asked questions how do i obtain a food handler license application? if you would like to operate as a wholesale food handler or manufacturer, you will need a food handler license. first, you must complete an applicant form. contact the mda licensing liaison o"
+ },
+ {
+  "id": "mn-mda-retail-food",
+  "read": "https://www.mda.state.mn.us/food-feed/food-licenses",
+  "quote": "I want to operate a grocery store, convenience store, meat market, bakery, vending machine, or food warehouse.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "9487422b19218497",
+  "context": "agriculture, or contact licensing at 651-201-6062 or mda.licensing@state.mn.us. i want to operate a grocery store, convenience store, meat market, bakery, vending machine, or food warehouse. submit a pre-consultation questionnaire to the minnesota department of agricult"
+ },
+ {
+  "id": "ia-sales",
+  "read": "https://revenue.iowa.gov/taxes/business-permit-registration",
+  "quote": "Your business must register for a separate permit number for the following tax types:",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "1d1afb13d39ea6d7",
+  "context": "nd retail use business registrations data.iowa.gov permit registration overview your business must register for a separate permit number for the following tax types: sales and use tax automobile rental hotel and motel construction equipment 911 "
+ },
+ {
+  "id": "ia-withholding",
+  "read": "https://revenue.iowa.gov/taxes/business-permit-registration",
+  "quote": "Your business must register for a separate permit number for the following tax types:",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "1d1afb13d39ea6d7",
+  "context": "nd retail use business registrations data.iowa.gov permit registration overview your business must register for a separate permit number for the following tax types: sales and use tax automobile rental hotel and motel construction equipment 911 "
+ },
+ {
+  "id": "ia-ui",
+  "read": "https://workforce.iowa.gov/employers/unemployment-insurance/unemployment-insurance-employer-handbook/employing-units",
+  "quote": "all employers must register a UI tax account with Iowa Workforce Development (IWD)",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "908515afaf232b2a",
+  "context": "ages are paid to employees working in iowa or an existing business is acquired, all employers must register a ui tax account with iowa workforce development (iwd) at myiowaui.org. based on the information provided, you will find out if you ar"
+ },
+ {
+  "id": "ia-dial-food",
+  "read": "https://dial.iowa.gov/licenses/food-establishments-hotels/apply-food-license",
+  "quote": "A separate license must be applied for each location where food production, sales or service will take place.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "dd2812f5dae7a468",
+  "context": "mpleted properly will be returned and will delay processing and approval times. a separate license must be applied for each location where food production, sales or service will take place. food licenses are nontransferable between locations or owners. the approved lic"
+ },
+ {
+  "id": "mo-sales",
+  "read": "https://dor.mo.gov/taxation/business/registration/requirements.html",
+  "quote": "A business must obtain a sales tax license by registering with the Department of Revenue if it’s making sales of tangible personal property",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "e1ac87937f0c4326",
+  "context": "shine request candidate tax affidavit new to missouri business tax registration a business must obtain a sales tax license by registering with the department of revenue if it's making sales of tangible personal property and taxable services (such as telephone service and fees paid into places of am"
+ },
+ {
+  "id": "mo-withholding",
+  "read": "https://dor.mo.gov/faq/taxation/business/registration.html",
+  "quote": "making payment of wages to a resident or nonresident individual must obtain a Missouri Employer Tax Identification Number",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "f1b79c30232dcd52",
+  "context": "ntaining an office or transacting any business within the state of missouri and making payment of wages to a resident or nonresident individual must obtain a missouri employer tax identification number. if registering for transient employer, please submit a tax liability bond. the"
+ },
+ {
+  "id": "mo-ui",
+  "read": "https://labor.mo.gov/des/employers/liability",
+  "quote": "An employing unit needs to notify the Division when it becomes liable to pay taxes as an employer.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "42c6dede0a75bdf5",
+  "context": "rt the wages of agricultural workers also must report general business workers. an employing unit needs to notify the division when it becomes liable to pay taxes as an employer. this notification needs to be submitted to the division within 30 days from the"
  }
 ]

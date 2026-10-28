@@ -5,6 +5,7 @@
 // Keys are official form ids from src/forms/registry.ts, local-us.ts and world.ts. A form that isn't here goes to the
 // Placetta team; TEAM_ONLY below says why for the ones that were researched and have no route Placetta can use.
 // docs/FILING_COVERAGE.md is generated from this file by scripts/filing-coverage.mjs.
+import { MIDWEST_DEST } from "./dest/midwest.ts";
 
 export type Address = { name: string; line1: string; line2?: string; city: string; state: string; zip: string; country?: string };
 
@@ -1950,6 +1951,7 @@ export const DEST: Record<string, Dest> = {
     notReady: "HMRC's service needs the business's own Government Gateway sign-in; the pages past sign-in and its rules for agents weren't seen.",
     checked: "2026-10-25", source: "https://www.gov.uk/register-employer",
   },
+  ...MIDWEST_DEST,
 };
 
 /**
