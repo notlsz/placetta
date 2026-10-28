@@ -18,6 +18,7 @@ hardening.sql	documents bucket takes PDFs, images and office files only
 filer_role.sql	adds a receipt for a filing it was given
 filer_role.sql	reads only files of workspaces with a running filing
 security_audit.sql	a signed-in person can still add to their own workspace's documents
+voice_calls.sql	the recordings bucket is private
 # GraphQL: the graphql_public schema the API serves lives outside public, which the copy leaves out, so the restored
 # database gets the stub's open schema back; applying the migrations to the recovered project (20261026100000) closes it again.
 graphql_closed.sql	anon cannot reach GraphQL

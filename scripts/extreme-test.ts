@@ -813,6 +813,7 @@ async function toolMatrix() {
         ["review_documents", { documents: ["permit.txt"] }], bad("review_documents", { documents: ["ghost.pdf"] }),
         ["address_rules", { official_form_id: "tx-205" }], bad("address_rules", { official_form_id: "ghost" }),
         ["inspection_guide", { store_id: "st1" }], bad("inspection_guide", { store_id: "ghost" }),
+        ["ask_specialist", { question: "Does the city want a change-of-use review for a tea shop in a former bank?", why: "agency_unclear" }], bad("ask_specialist", { why: "agency_unclear" }),
         ["request_purchase", { category: "gov_fees", payee: "NYC Department of Health", amount: 100, why: "Permit fee" }], bad("request_purchase", { category: "gov_fees", payee: "x", amount: -5, why: "x" }),
         ["set_budgets", {}], bad("set_budgets", { budgets: [{ store_id: "ghost", period: "month", amount: 10 }] }),
         ["search_email", { query: "from:health.nyc.gov" }], bad("search_email", {}),
