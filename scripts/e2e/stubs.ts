@@ -457,6 +457,16 @@ function dns(_req: Request, u: URL): Response {
 
 const HOSTS: Record<string, Rec["service"]> = { "cloudflare-dns.com": "dns", "dns.google": "dns", "api.anthropic.com": "anthropic", "api.telnyx.com": "telnyx", "media.telnyx.com": "telnyx", "api.linqapp.com": "linq", "cdn.linqapp.com": "linq", "graph.facebook.com": "whatsapp", "lookaside.fbsbx.com": "whatsapp", "api.postmarkapp.com": "postmark", "files.resend.test": "resend", "api.stripe.com": "stripe", "api.resend.com": "resend", "api.telegram.org": "telegram" };
 
+/** GET https://app.placetta.test/app/forms/<file>.pdf: the copy the site serves, from public/forms/; 404 otherwise. */
+async function siteForm(path: string): Promise<Response> {
+  const m = /^\/app\/forms\/([\w.-]+\.pdf)$/.exec(path);
+  if (!m) return new Response("Not found", { status: 404 });
+  try {
+    const bytes = await Deno.readFile(new URL(`../../public/forms/${m[1]}`, import.meta.url));
+    return new Response(bytes, { status: 200, headers: { "content-type": "application/pdf" } });
+  } catch { return new Response("Not found", { status: 404 }); }
+}
+
 export function patchFetch(local: (u: URL) => boolean) {
   const realFetch = globalThis.fetch.bind(globalThis);
   globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -472,6 +482,9 @@ export function patchFetch(local: (u: URL) => boolean) {
       return res;
     }
     if (local(u)) return realFetch(req);
+    // The app's own site: agent-run fetches the agencies' PDFs from APP_ORIGINS/app/forms/ (sitePdf), the SS-4 and CBP
+    // 5106 included since they left agent.js. The site serves public/forms/ there, so the stand-in does too.
+    if (u.hostname === "app.placetta.test" && req.method === "GET") return siteForm(u.pathname);
     blockedHosts.push(u.host);
     throw new TypeError(`e2e: outbound network to ${u.host} is blocked`);
   };

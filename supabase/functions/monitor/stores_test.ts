@@ -50,12 +50,13 @@ Deno.test("a store slipping past its opening date: one update per change, a late
   const { openingUpdates } = await import("./index.ts");
   const { urgency } = await import("../_shared/odelia.ts");
   const today = "2026-10-13";
-  const app = (id: string, status: string, extra: Record<string, unknown> = {}) => ({ id, name: { en: id, zh: id }, agency: { en: "DOHMH", zh: "DOHMH" }, level: "city", status, fees: [], est: { en: "about 3 weeks", zh: "" }, source: { label: "", url: "" }, fields: [], checklist: [], ...extra });
+  const app = (id: string, status: string, extra: Record<string, unknown> = {}) => ({ id, name: { en: id, zh: id }, agency: { en: "DOHMH", zh: "DOHMH" }, level: "city", status, fees: [], est: { en: "about 3 weeks", zh: "" }, source: { label: "nyc.gov", url: "https://www.nyc.gov/site/doh/business/food-operators.page" }, fields: [], checklist: [], ...extra });
   const state = (planned: string) => ({
     apps: [app("health", "needs", { checklist: [{ id: "c", label: { en: "Signed lease", zh: "租约" }, state: "missing" }] })],
     stores: [{ id: "s1", name: { en: "Main St", zh: "主街店" }, address: "1 Main St, Flushing, NY", stage: "opening", plannedOpen: planned, apps: ["health"], rules: [], logs: [], certs: [], value: { closures: 0, fines: 0, caught: 0 } }],
   });
-  // 21 days of agency time + a week: permits in hand Nov 10
+  // 21 days of the agency's published time (an estimate with no source would be the 30-day default, src/forms/expedite.ts
+  // timingOf) + a week: permits in hand Nov 10. "today" is passed in, so the result doesn't depend on the clock.
   eq(openingUpdates("w", state("2026-12-31"), today), []);
   const late = openingUpdates("w", state("2026-11-01"), today);
   ok(late.length === 1 && late[0].dedupe === "opening:s1:late:health:needs" && /9 days behind/.test(late[0].title.en) && /Signed lease/.test(late[0].title.en), JSON.stringify(late));

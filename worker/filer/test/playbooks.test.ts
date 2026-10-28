@@ -16,6 +16,10 @@ const VIDEO_ONLY = new Set(["plus.fairfaxcounty.gov"]);
 // every form there is marked notReady (M5, 2026-10-25): there's no one portal to write a playbook for, and nothing past
 // sign-in was seen. The exemption ends the moment any form on the host loses notReady (checked below).
 const SHARED_SIGN_IN = new Set(["www.tax.service.gov.uk"]);
+// Portals with no step-by-step written guide to write a playbook from, whose forms are filed in teach mode first ("Show
+// Odelia how", src/teach.ts) and then from the steps the team reviewed (run.ts, store.taught). New Jersey's Business
+// Formation and Registration services on njportal.com (commit 550ac4e19, 2026-10-27). Remove a host once it has a playbook.
+const TEACH_FIRST = new Set(["www.njportal.com"]);
 
 test("every portal three or more forms use has a playbook, and the state formation portals with written guides too", () => {
   assert.equal(PLAYBOOKS.length, 15);
@@ -23,7 +27,7 @@ test("every portal three or more forms use has a playbook, and the state formati
   const count = new Map<string, number>();
   for (const d of Object.values(DEST)) if (d.portal) count.set(d.portal, (count.get(d.portal) ?? 0) + 1);
   for (const [host, n] of count) {
-    if (n >= 3 && !VIDEO_ONLY.has(host) && !SHARED_SIGN_IN.has(host)) assert.ok(PLAYBOOKS.some((p) => p.host === host), `${host} has ${n} forms and no playbook`);
+    if (n >= 3 && !VIDEO_ONLY.has(host) && !SHARED_SIGN_IN.has(host) && !TEACH_FIRST.has(host)) assert.ok(PLAYBOOKS.some((p) => p.host === host), `${host} has ${n} forms and no playbook`);
   }
   // the shared sign-in exemption holds only while every form on that host is notReady, each on its own path
   for (const host of SHARED_SIGN_IN) {
@@ -31,6 +35,8 @@ test("every portal three or more forms use has a playbook, and the state formati
     assert.ok(forms.length > 0 && forms.every(([, d]) => !!d.notReady && !d.noLogin && !!d.tenant), `${host}: every form not ready, signed in, on its own path`);
     assert.equal(new Set(forms.map(([, d]) => d.tenant)).size, forms.length, `${host}: one path per service`);
   }
+  // the teach-first exemption is only for a portal that still has no playbook
+  for (const host of TEACH_FIRST) assert.ok(count.has(host) && !PLAYBOOKS.some((p) => p.host === host), `${host}: has a playbook now, so drop it from TEACH_FIRST`);
   for (const p of PLAYBOOKS) assert.ok(Object.keys(p.forms).length >= 1 && (count.get(p.host) ?? 0) >= Object.keys(p.forms).length, p.host);
 });
 

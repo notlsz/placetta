@@ -1551,17 +1551,29 @@ try {
     const filing = ins.data?.[0]?.id;
     mark = recorded.length;
     const f = await call("file", { action: "start", workspace_id: ws, filing_id: filing }, { jwt: owner.jwt });
-    check("file start hands it to the team (self-filing is off for this agency)", f.status === 200 && f.data?.filing?.agent_state === "handoff" && f.data?.filing?.channel === "team", f);
-    const tasks = await sql`select id, kind, title from public.team_tasks where filing_id = ${filing}`;
-    check("one team task", tasks.length === 1 && tasks[0].kind === "handoff", tasks);
-    const m = emails(mark);
-    check("one email to the Placetta team", m.length === 1 && JSON.stringify(m[0].body.to) === JSON.stringify([staff.email]) && /New for the team: Food service establishment permit \(Golden Ox Noodle\)/.test(m[0].body.subject), m.map((x) => x.body));
+    // Self-filing is off for this agency, so the business sends it: the filled form and a packet go in Documents, and
+    // nothing goes to a Placetta queue (migration 20261101090000_handoffs_to_business).
+    const lastOf = (x: { agent_log?: { kind: string; ref?: string; en: string }[] }) => x?.agent_log?.at(-1);
+    check("file start gives it to the business with a packet (self-filing is off for this agency)", f.status === 200 && f.data?.filing?.agent_state === "needs_you" && f.data?.filing?.channel === "team"
+      && f.data?.filing?.status === "requested" && lastOf(f.data?.filing)?.kind === "needs_you" && lastOf(f.data?.filing)?.ref === "yours"
+      && /doesn't send this form to the agency by itself yet/.test(lastOf(f.data?.filing)?.en ?? "") && /filing-packet\.pdf/.test(lastOf(f.data?.filing)?.en ?? "") && /I've sent it/.test(lastOf(f.data?.filing)?.en ?? ""), f);
+    const packets = await sql`select name, path, source from public.documents where filing_id = ${filing}`;
+    check("the packet is in Documents, from Odelia", packets.length === 1 && packets[0].name === "filing-packet.pdf" && packets[0].source === "agent" && gw.files.has(`documents/${packets[0].path}`), packets);
+    check("no task for the Placetta team, and no email to it", (await sql`select count(*)::int n from public.team_tasks where filing_id = ${filing}`)[0].n === 0 && emails(mark).length === 0, { tasks: await sql`select kind, title from public.team_tasks where filing_id = ${filing}`, mails: emails(mark).map((x) => x.body.subject) });
     const again = await call("file", { action: "start", workspace_id: ws, filing_id: filing }, { jwt: owner.jwt });
-    check("starting again is a no-op", again.status === 200 && (await sql`select count(*)::int n from public.team_tasks where filing_id = ${filing}`)[0].n === 1 && emails(mark).length === 1);
+    check("starting again is a no-op", again.status === 200 && again.data?.filing?.agent_state === "needs_you" && (await sql`select count(*)::int n from public.documents where filing_id = ${filing}`)[0].n === 1 && emails(mark).length === 0, again.data);
     const sw = await call("file", {}, { headers: MK, jwt: SERVICE_KEY });
-    check("the monitor's sweep adds no second task for it", sw.status === 200 && (await sql`select count(*)::int n from public.team_tasks where filing_id = ${filing}`)[0].n === 1, { sw, tasks: await sql`select kind, title, dedupe from public.team_tasks where filing_id = ${filing}` });
+    const [left] = await sql`select agent_state, channel, jsonb_array_length(agent_log) n from public.filings where id = ${filing}`;
+    check("the monitor's sweep leaves it with the business", sw.status === 200 && left.agent_state === "needs_you" && left.channel === "team" && left.n === f.data?.filing?.agent_log?.length
+      && (await sql`select count(*)::int n from public.team_tasks where filing_id = ${filing}`)[0].n === 0, { sw: sw.data, left });
+
+    // the team's queue, with what it still keeps: a check on the agency when something may already have reached it
+    // (requeue_stuck_filings, file's lostRuns), here put in as the database would
+    const [task] = await sql`insert into public.team_tasks (kind, filing_id, workspace_id, title, dedupe)
+      values ('check_agency', ${filing}, ${ws}, 'Run stopped after submit was pressed; the business was asked to check the agency before sending again.', ${"check_agency:" + filing}) returning id`;
+    const tasks = [task];
     const open = await rpc("team_tasks_open", {}, staff.jwt);
-    check("team_tasks_open lists it for staff (two-step)", open.status === 200 && open.data.some((t: { filing_id: string; business: string }) => t.filing_id === filing && t.business === "Golden Ox Noodle"), open);
+    check("team_tasks_open lists the team's task for staff (two-step)", open.status === 200 && open.data.some((t: { filing_id: string; business: string; kind: string }) => t.filing_id === filing && t.kind === "check_agency" && t.business === "Golden Ox Noodle"), open);
     const asOwner = await rpc("team_tasks_open", {}, owner.jwt);
     const asStaff1 = await rpc("team_tasks_open", {}, staffAal1);
     check("not for a customer, nor for staff without two-step", asOwner.status >= 400 && /team only/.test(asOwner.data?.message) && asStaff1.status >= 400, { asOwner, asStaff1 });
