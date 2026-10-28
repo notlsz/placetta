@@ -203,6 +203,13 @@ export const shown = (label: string, value: string) => {
 const STOPPED: Result = { kind: "stopped", trace: [] };
 
 /** A session another run (or anything else) has used is refused: a new run starts with no cookies and one blank page. */
+/** A browser comparison run (docs/browser-bench.md): a rehearsal filing in a synthetic workspace may name the one provider
+ *  it runs on (payload.bench_browser), so the same filings can be timed on each. Ignored for every real filing. */
+export function benchBrowser(f: Filing, synthetic: boolean): { only?: "local" | "steel" | "browserbase" } {
+  const b = (f.payload as { bench_browser?: unknown }).bench_browser;
+  return synthetic && (b === "steel" || b === "browserbase" || b === "local") ? { only: b } : {};
+}
+
 export async function assertFresh(session: Session): Promise<void> {
   const ctx = session.page.context();
   const cookies = await ctx.cookies();
@@ -372,7 +379,7 @@ export class Worker {
       }
       // a browser that records its user isn't opened where a person handed the page hasn't agreed to it
       if (resumed) { this.c.live?.close(resumed.liveToken); session = resumed.session; }
-      else session = await this.c.open(host, screenOk(privacy) ? {} : { unrecorded: true });
+      else session = await this.c.open(host, { ...(screenOk(privacy) ? {} : { unrecorded: true }), ...benchBrowser(f, privacy.synthetic) });
       track.session = session;
       if (!resumed) await assertFresh(session);
       const page = session.page;

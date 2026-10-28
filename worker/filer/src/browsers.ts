@@ -177,7 +177,10 @@ export async function openLocal(d: Deps): Promise<Session> {
   return { browser, page, liveUrl: null, recorded: false, provider: "local", close: () => browser.close() };
 }
 
-export type OpenOpts = { /** A person may be handed this page without having agreed to a recording. */ unrecorded?: boolean };
+export type OpenOpts = { /** A person may be handed this page without having agreed to a recording. */ unrecorded?: boolean;
+  /** A browser comparison (rehearsals only, run.ts benchBrowser): this provider and no other, still under the California
+   *  rule, so a run that may not be recorded never opens on Steel. */
+  only?: Provider };
 
 /** The providers a run tries, in order (pure, for the tests):
  *   - BROWSER_PROVIDER's order (env.ts providersOf); local alone sends the hosts that refuse a cloud server's address
@@ -195,6 +198,10 @@ export function orderFor(env: Record<string, string | undefined>, host: string, 
     if (bb && !order.includes("browserbase")) order.unshift("browserbase");
     if (!order.includes("local")) order.push("local");
   }
+  if (o.only) {
+    const keyed = o.only === "local" || (o.only === "steel" ? !!env.STEEL_API_KEY?.trim() : bb);
+    order = keyed && !(o.unrecorded && o.only === "steel") ? [o.only] : [];
+  }
   return order;
 }
 
@@ -204,6 +211,7 @@ export function orderFor(env: Record<string, string | undefined>, host: string, 
 export function opener(d: Deps): (host?: string, o?: OpenOpts) => Promise<Session> {
   return async (host = "", o: OpenOpts = {}) => {
     const order = orderFor(d.env, host, o);
+    if (!order.length && o.only) throw new Error(`browsers: ${o.only} can't serve this comparison run (no key, or Steel on a run that may not be recorded)`);
     if (!order.length) throw new Error("BROWSER_PROVIDER must be local, steel or browserbase, or an order of them such as browserbase,steel,local");
     const failed: string[] = [];
     for (const p of order) {

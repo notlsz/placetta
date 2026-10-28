@@ -394,3 +394,17 @@ test("California with everyone's opt-in, or outside California: Steel's viewer, 
     assert.ok(asked?.zh.includes("录制"));
   }
 });
+
+test("a browser comparison run opens on the one provider it names, never on Steel where it may not be recorded", async () => {
+  const { orderFor } = await import("../src/browsers.ts");
+  const { benchBrowser } = await import("../src/run.ts");
+  const env = { BROWSER_PROVIDER: "browserbase,steel", BROWSERBASE_API_KEY: "k", BROWSERBASE_PROJECT_ID: "p", STEEL_API_KEY: "s" };
+  assert.deepEqual(orderFor(env, "", { only: "steel" }), ["steel"]);
+  assert.deepEqual(orderFor(env, "", { only: "browserbase" }), ["browserbase"]);
+  assert.deepEqual(orderFor(env, "", { only: "steel", unrecorded: true }), [], "the California rule still holds");
+  assert.deepEqual(orderFor({ ...env, BROWSERBASE_API_KEY: "" }, "", { only: "browserbase" }), [], "no key, no run");
+  const f = (b: unknown) => ({ payload: { bench_browser: b } }) as never;
+  assert.deepEqual(benchBrowser(f("steel"), true), { only: "steel" });
+  assert.deepEqual(benchBrowser(f("steel"), false), {}, "a real filing ignores it");
+  assert.deepEqual(benchBrowser(f("kernel"), true), {});
+});
