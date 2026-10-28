@@ -10,6 +10,7 @@ import { PLAINS_DEST } from "./dest/plains.ts";
 import { MIDATLANTIC_DEST, MIDATLANTIC_TEAM } from "./dest/midatlantic.ts";
 
 import { WEST_DEST, WEST_TEAM_ONLY } from "./dest/west.ts";
+import { MIDWEST_DEST } from "./dest/midwest.ts";
 
 export type Address = { name: string; line1: string; line2?: string; city: string; state: string; zip: string; country?: string };
 
@@ -1958,6 +1959,7 @@ export const DEST: Record<string, Dest> = {
   ...MIDATLANTIC_DEST,
   ...PLAINS_DEST,
   ...WEST_DEST,
+  ...MIDWEST_DEST,
 };
 
 /**

@@ -22,6 +22,7 @@ import { WEST_FORMS } from "./states/west";
 import { EXPANSION_FIXES, EXPANSION_FORMS } from "./expansion";
 import { VERIFY_BLOCKED, VERIFY_FIXES, VERIFY_FORMS, VERIFY_REFERENCE } from "./verify";
 import { NATIONS_FIXES, NATIONS_FORMS } from "./nations";
+import { MIDWEST_FORMS } from "./states/midwest";
 import { applyEntities, buildState, sElection } from "./entities";
 import { ENTITY_STATES } from "./entity-data";
 import { MIDATLANTIC_FORMS } from "./states/midatlantic";
@@ -747,6 +748,7 @@ FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD,
 FORMS.push(...MIDATLANTIC_FORMS);
 FORMS.push(...PLAINS_FORMS);
 FORMS.push(...WEST_FORMS);
+FORMS.push(...MIDWEST_FORMS);
 
 /** A step that isn't a filing Placetta makes for the business: insurance bought from an insurer (workers' compensation)
  *  or a certificate a person earns with a course or an exam (food handler cards, the food protection or food safety
