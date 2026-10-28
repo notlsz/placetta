@@ -1,8 +1,8 @@
 # Filing Authorization
 
-Last updated: 2026-10-13
+Last updated: 2026-10-22
 
-Effective date: 2026-10-13.
+Effective date: 2026-10-22.
 
 This authorization sets out the limited authority you give Placetta Inc. ("Placetta") to file license, permit and registration applications for your business. You grant it when you create a workspace. It is part of our Terms of Service.
 
@@ -13,8 +13,9 @@ You appoint Placetta as your authorized agent for one limited purpose:
 - to prepare license, permit and registration applications for your business
 - to submit the applications you approve, on your behalf, by email from your connected mailbox, by fax, by certified mail or on the agency's website
 - to follow up with the agency on those applications, such as checking their status
+- to book the inspections those permits need, at the time an owner approves, on the agency's website with your saved login or by the agency's phone or email
 
-This authority covers only the filings you approve in the app, exactly as you approved them. Each approval covers that one filing. It covers nothing else. It is not a general power of attorney.
+This authority covers only the filings and inspection bookings an owner approves in the app, exactly as approved. Each approval covers that one filing or booking. It covers nothing else. It is not a general power of attorney.
 
 ## How a filing happens
 
@@ -36,6 +37,8 @@ This authority covers only the filings you approve in the app, exactly as you ap
 - We never submit an application you have not approved in the app.
 - We never pay government fees. You pay each agency directly, using the payment link we send you.
 - We never appear in person for you where an agency requires you to. You do that yourself.
+- We never create an agency account in your name.
+- We never file an appeal or appear at a hearing for you.
 
 ## We may decline a filing
 
@@ -51,7 +54,7 @@ By granting this authorization, and each time you approve a filing, you confirm 
 
 ## Agency portal logins
 
-If you save logins for agency websites, they are encrypted in a vault. Placetta's filing software, and our filing team when it takes over, open them only to file for you, and every opening is recorded in your audit trail.
+If you save logins for agency websites, they are encrypted in a vault. Placetta's filing software, and our filing team when it takes over, open them only to submit a filing or book an inspection an owner approved, and every opening is recorded in your audit trail. The software types the login itself; the AI model never sees the password. When an agency website asks for a CAPTCHA or an identity check, Placetta stops and asks you to complete it.
 
 ## Agencies decide
 
@@ -71,9 +74,9 @@ Email: support@placetta.com
 
 # 申报授权书
 
-最后更新：2026-10-13
+最后更新：2026-10-22
 
-生效日期：2026-10-13。
+生效日期：2026-10-22。
 
 本授权书说明您授予 Placetta Inc.（下称“快哉”）的有限权限，用于为您的企业申报执照、许可和登记。您在创建工作区时即授予本授权。本授权书是我们《服务条款》的一部分。
 
@@ -84,8 +87,9 @@ Email: support@placetta.com
 - 为您的企业准备执照、许可和登记申请
 - 代表您提交经您批准的申请，方式包括通过您连接的邮箱发送邮件、发送传真、寄送挂号信，或在机构网站上提交
 - 就这些申请与机构跟进，例如查询办理状态
+- 在所有者批准的时间，为这些许可预约所需的检查，方式为使用您保存的登录信息在机构网站上预约，或通过机构的电话或邮件预约
 
-本授权仅涵盖您在应用中批准的申报，且以您批准的内容为准。每次批准只涵盖该项申报。本授权不涵盖其他任何事项，也不是一般性的授权委托书。
+本授权仅涵盖所有者在应用中批准的申报和检查预约，且以批准的内容为准。每次批准只涵盖该项申报或预约。本授权不涵盖其他任何事项，也不是一般性的授权委托书。
 
 ## 申报流程
 
@@ -107,6 +111,8 @@ Email: support@placetta.com
 - 绝不提交未经您在应用中批准的申请。
 - 绝不代付政府规费。您通过我们发送的付款链接，直接向各机构付款。
 - 机构要求您本人到场时，绝不代您到场。这些步骤由您自行完成。
+- 绝不以您的名义开设机构账户。
+- 绝不代您提起申诉或出席听证。
 
 ## 我们可以拒绝申报
 
@@ -122,7 +128,7 @@ Email: support@placetta.com
 
 ## 机构网站登录信息
 
-如您保存了机构网站的登录信息，这些信息会加密存放在保险库中。快哉的申报软件，以及接手处理时的申报团队，只会在为您办理申报时打开这些信息，每次打开都会记入您的审计记录。
+如您保存了机构网站的登录信息，这些信息会加密存放在保险库中。快哉的申报软件，以及接手处理时的申报团队，只会在提交所有者已批准的申报或预约所有者已批准的检查时打开这些信息，每次打开都会记入您的审计记录。登录信息由软件自行输入，AI 模型看不到密码。如机构网站要求验证码（CAPTCHA）或身份核验，快哉会暂停并请您本人完成。
 
 ## 审批由机构决定
 

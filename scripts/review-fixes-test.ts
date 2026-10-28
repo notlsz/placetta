@@ -12,12 +12,12 @@ import { openingOf, openingPath, withOpenings, workspaceOpening } from "../src/s
 import { costToOpen } from "../src/cost";
 import { todos, headline } from "../src/doNext";
 import { standing } from "../src/feed";
-import { FORMS } from "../src/forms/registry";
+import { FORMS, formById } from "../src/forms/registry";
 import { PROOF } from "../src/forms/proof";
 import { SAMPLE_WS } from "../src/sample";
 import { APPEALS, appealSay, namesBody } from "../src/appeals";
 import { denialAppeal, scheduleAppeals } from "../src/finish";
-import { approvalRoute } from "../src/approvalRoute";
+import { approvalRoute, planSplit, planSplitLine, routeOf } from "../src/approvalRoute";
 import ROUTES from "../src/forms/filingRoutes.json";
 import { channelsFrom } from "../src/channelsRule";
 import { B } from "../src/bi";
@@ -140,7 +140,49 @@ export function reviewFixTests(ok: Ok, eq: Eq) {
   const team = approvalRoute({ kind: "file" }, { official: undefined, est: B("To be confirmed", "待确认") })!;
   ok(team.who.en === "Odelia prepares it and you send it" && !team.time, "a form with no route is prepared for the business to send, and no time is invented", team);
   ok(approvalRoute({ kind: "upload" }) === null, "an upload card is the owner's own step: no route line");
-  for (const [form, kind] of Object.entries(ROUTES as Record<string, string>)) if (!["portal", "email", "fax", "mail", "owner", "faxSigned", "ownerSigns", "team"].includes(kind)) ok(false, `${form}: unknown route ${kind}`);
+  for (const [form, kind] of Object.entries(ROUTES as Record<string, string>)) if (!["portal", "email", "fax", "mail", "owner", "faxSigned", "ownerSigns", "notReady", "team"].includes(kind)) ok(false, `${form}: unknown route ${kind}`);
+  ok(!rs.steps, "a portal route with no fee on the site lists no step of the person's", rs.steps);
+
+  console.log("\n# M3: route lines for forms abroad, the person's steps, and conservative defaults");
+  // an existing US route that Odelia files, where the agency takes its fee on its own site: she files, the person pays
+  const llc = approvalRoute({ kind: "file" }, { official: "ca-llc-5", est: undefined })!;
+  ok(llc.who.en === "Odelia files online" && !!llc.steps?.some(s => s.en === "You pay the agency's fee on its site" && s.zh.length > 0), "California's foreign LLC: Odelia files online, you pay the fee on the site", llc);
+  // gb-food while disabled: never an automatic-filing claim, and it says why
+  const gb = approvalRoute({ kind: "file" }, { official: "gb-food", est: undefined })!;
+  ok(gb.who.en === "Odelia prepares it and you submit it on the agency's site" && !/Odelia files|Odelia faxes|Odelia mails/.test(gb.who.en), "gb-food: prepared, you submit it on the site", gb);
+  ok(!!gb.steps?.some(s => /isn't switched on/.test(s.en)) && gb.steps!.every(s => s.zh.length > 0), "gb-food: says automatic filing isn't switched on, in both languages", gb.steps);
+  ok(!/sign|on behalf|authoriz/i.test(JSON.stringify(gb)), "gb-food: claims nothing about its sign-off or on-behalf rule", gb);
+  // a form abroad the person submits (no route Odelia sends): the default
+  const mx = approvalRoute({ kind: "file" }, { official: "mx-rfc", est: undefined })!;
+  ok(mx.who.en === "Odelia prepares it and you send it" && !mx.steps, "Mexico's RFC: prepared, you send it", mx);
+  // missing or unknown route data: conservative, never automatic
+  const none = approvalRoute({ kind: "file" }, { official: "no-such-form", est: undefined })!;
+  ok(none.who.en === "Odelia prepares it and you send it" && !none.steps, "an unknown form: prepared, you send it", none);
+  const blank = approvalRoute({ kind: "file" }, { official: "", est: undefined })!;
+  ok(blank.who.en === "Odelia prepares it and you send it", "an empty form id: prepared, you send it", blank);
+  ok(routeOf({ official: "__proto__" }) === "team" && routeOf({ official: "constructor" }) === "team", "inherited object keys aren't routes");
+  // every form abroad in the route data is either notReady or a kind the card knows; none abroad claims a send today
+  const abroad = Object.entries(ROUTES as Record<string, string>).filter(([id]) => (formById(id)?.currency ?? "USD") !== "USD");
+  ok(abroad.every(([, k]) => k === "notReady"), "forms abroad: only notReady entries (none is switched on)", abroad);
+
+  console.log("\n# M6: the plan card says who acts on what's left, from the route data only");
+  const app = (official: string, o: Record<string, unknown> = {}) => ({ official, status: "todo", ...o }) as never;
+  const sp = planSplit([app("sj-sign"), app("ca-llc-5"), app("gb-food"), app("mx-rfc"), app("no-such-form"), app("sj-sign", { abstain: true }),
+    app("sj-sign", { status: "approved" }), app("x", { yours: "insurance" }), app("sj-sign", { specialist: B("A notary files it", "公证员提交") })]);
+  eq(sp, { sends: 2, yours: 4, unsure: 1 }, "portal routes count as Odelia's; gb-food (not switched on), a form abroad, an unknown form and a specialist's are yours; an abstained step is unsure; approved and owner-only steps aren't counted");
+  const line = planSplitLine(sp)!;
+  ok(/^Odelia can submit 2 for you once you approve; 4 she prepares for you to send; 1 she can't confirm yet/.test(line.en) && line.zh.includes("2 项") && line.zh.includes("4 项") && line.zh.includes("1 项"), "the line says it in both languages", line);
+  ok(!/automatic|guarantee|ready to open|save|hours|%/i.test(line.en), "no automation, savings, readiness or percentage claim", line.en);
+  ok(planSplitLine(planSplit([app("sj-sign", { status: "approved" })])) === null, "nothing open: no line");
+  eq(planSplit([app("gb-food")]), { sends: 0, yours: 1, unsure: 0 }, "gb-food alone: never counted as Odelia's");
+
+  console.log("\n# M5: the three GOV.UK services say the person submits them; nothing claims automatic filing");
+  for (const id of ["gb-incorporate", "gb-vat", "gb-paye"]) {
+    const r = approvalRoute({ kind: "file" }, { official: id, est: undefined })!;
+    ok(r.who.en === "Odelia prepares it and you submit it on the agency's site" && !!r.steps?.some(x => /isn't switched on/.test(x.en)), `${id}: prepared, you submit it, not switched on`, r);
+    ok(!r.steps?.some(x => /pay the agency's fee/.test(x.en)), `${id}: no fee step while it isn't switched on`, r.steps);
+  }
+  eq(planSplit([app("gb-incorporate"), app("gb-vat"), app("gb-paye")]), { sends: 0, yours: 3, unsure: 0 }, "the plan card counts all three as the person's");
 
   console.log("\n# Gap: channels that aren't set up show nothing to press");
   eq(channelsFrom(null, null), { talk: false, interpreter: false, rehearse: false, calls: false, texts: false, imessage: false }, "with no answer, nothing is set up");

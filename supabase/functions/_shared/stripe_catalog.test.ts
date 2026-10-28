@@ -118,7 +118,7 @@ Deno.test("itemOf and storePlanItemOf know a price by its id or its lookup key",
 });
 
 Deno.test("the webhook: every event the app relies on", () => {
-  assertEquals(WEBHOOK_EVENTS, ["checkout.session.completed", "customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted", "invoice.paid", "invoice.payment_failed", "charge.refunded"]);
+  assertEquals(WEBHOOK_EVENTS, ["checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.async_payment_failed", "customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted", "invoice.paid", "invoice.payment_failed", "charge.refunded"]);
 });
 
 Deno.test("the webhook: env secret, made and kept, events brought up to date, made again if deleted, a lost one replaced, a hand-made one left alone", async () => {

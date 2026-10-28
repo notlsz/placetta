@@ -47,6 +47,9 @@ const ABROAD = new RegExp("(^|\\.)(" + [
   // Québec's government portal and ministries, Revenu Québec, and the City of Montréal
   "quebec\\.ca", "gouv\\.qc\\.ca", "revenuquebec\\.ca", "montreal\\.ca",
   "u\\.ae", "gov\\.ae", "gov\\.tr", "bel\\.tr", "ibb\\.istanbul", "gov\\.sa", "gov\\.qa",
+  // added 2026-10-27 with the other nations' pass (src/forms/nations.ts): Kuwait's and Israel's government domains
+  // (kdipa.gov.kw, the Tel Aviv-Yafo Municipality's tel-aviv.gov.il), each reserved to the state
+  "gov\\.kw", "gov\\.il",
   // Germany's federal law site (the Federal Ministry of Justice's gesetze-im-internet.de)
   "gesetze-im-internet\\.de",
   "gov\\.pl", "warszawa19115\\.pl", "um\\.warszawa\\.pl", "socialsecurity\\.be", "seg-social\\.pt",

@@ -1,0 +1,197 @@
+{
+ "id": "cdmx-shop",
+ "title": "A gift shop in Mexico City",
+ "read": "2026-10-27",
+ "input": {
+  "what": "Gift shop",
+  "where": "Mexico City, Mexico",
+  "lang": "en"
+ },
+ "assumptions": "A new Mexican company opening a gift shop with staff, a fit-out and a sign; no food, no alcohol.",
+ "items": [
+  {
+   "key": "mx-sociedad",
+   "name": "Company incorporation before a Mexican notary (fedatario público)",
+   "agency": "Notario or corredor público, then the Registro Público de Comercio",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.sat.gob.mx/gobmx/Paginas/Ficha_43_cff.html",
+   "quote": "Documento constitutivo protocolizado (copia certificada).",
+   "quoteEn": "Notarised deed of incorporation (certified copy).",
+   "read": "2026-10-21",
+   "match": "\\bmx-sociedad\\b",
+   "agencyMatch": "Notario or corredor público"
+  },
+  {
+   "key": "mx-rfc",
+   "name": "Federal taxpayer registration (RFC) with the SAT",
+   "agency": "Servicio de Administración Tributaria (SAT)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.sat.gob.mx/gobmx/Paginas/Ficha_43_cff.html",
+   "quote": "Personas morales de nueva creación a través de sus representantes legales",
+   "quoteEn": "Newly created companies, through their legal representatives",
+   "read": "2026-10-21",
+   "match": "\\bmx-rfc\\b",
+   "agencyMatch": "Servicio de Administración Tributaria"
+  },
+  {
+   "key": "mx-efirma",
+   "name": "Advanced electronic signature (e.firma) with the SAT",
+   "agency": "Servicio de Administración Tributaria (SAT)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.sat.gob.mx/gobmx/Paginas/ficha_105_cff.html",
+   "quote": "Es necesario que el representante legal de la persona moral haya tramitado previamente su certificado de e.firma",
+   "quoteEn": "The company's legal representative must first have obtained their own e.firma certificate",
+   "read": "2026-10-27",
+   "match": "\\bmx\\-efirma\\b",
+   "agencyMatch": "Servicio\\ de\\ Administración\\ Tributaria"
+  },
+  {
+   "key": "mx-cdmx-zonificacion",
+   "name": "Land use certificate for the activity (uso de suelo)",
+   "agency": "Secretaría de Desarrollo Urbano y Vivienda (SEDUVI)",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.congresocdmx.gob.mx/media/documentos/674707c7d7b1fd7d269dc81619514990e9551158.pdf",
+   "quote": "Certificado de Zonificación de uso del suelo para el giro que se pretende operar",
+   "quoteEn": "Land use zoning certificate for the activity to be operated",
+   "read": "2026-10-21",
+   "match": "\\bmx-cdmx-zonificacion\\b",
+   "agencyMatch": "Secretaría de Desarrollo Urbano y Vivienda"
+  },
+  {
+   "key": "mx-cdmx-bajo",
+   "name": "Notice of operation for a low-impact business",
+   "agency": "Mexico City alcaldía, through SEDECO's SIAPEM system",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.congresocdmx.gob.mx/media/documentos/674707c7d7b1fd7d269dc81619514990e9551158.pdf",
+   "quote": "Para el funcionamiento de los establecimientos a que se refiere este Título, los titulares deberán ingresar el Aviso correspondiente al Sistema",
+   "quoteEn": "For the establishments this Title covers to operate, the holders must file the corresponding Notice in the System",
+   "read": "2026-10-22",
+   "match": "\\bmx\\-cdmx\\-bajo\\b",
+   "agencyMatch": "Mexico\\ City\\ alcaldía"
+  },
+  {
+   "key": "mx-siem",
+   "name": "Business registry entry for each establishment (SIEM)",
+   "agency": "Secretaría de Economía, through an authorised business chamber",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LCEC_120419.pdf",
+   "quote": "Todos los Comerciantes e Industriales, sin excepción y obligatoriamente, deberán de registrar y actualizar anualmente cada uno de sus establecimientos en el SIEM.",
+   "quoteEn": "All merchants and industrialists, without exception, must register and update every year each of their establishments in the SIEM.",
+   "read": "2026-10-27",
+   "match": "\\bmx\\-siem\\b",
+   "agencyMatch": "Secretaría\\ de\\ Economía"
+  },
+  {
+   "key": "mx-imss",
+   "name": "Employer registration with the IMSS",
+   "agency": "Instituto Mexicano del Seguro Social (IMSS)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://ventanillamipymes.economia.gob.mx/inscripcion-al-imss-persona-moral/",
+   "quote": "Este trámite te permite registrarte ante el Instituto Mexicano del Seguro Social (IMSS) para cumplir con tus obligaciones patronales.",
+   "quoteEn": "This procedure registers you with the Mexican Social Security Institute (IMSS) to meet your obligations as an employer.",
+   "read": "2026-10-22",
+   "match": "\\bmx\\-imss\\b",
+   "agencyMatch": "Instituto\\ Mexicano\\ del\\ Seguro\\ Social"
+  },
+  {
+   "key": "mx-infonavit",
+   "name": "Employer registration with the workers' housing fund (INFONAVIT)",
+   "agency": "Instituto del Fondo Nacional de la Vivienda para los Trabajadores (INFONAVIT)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LIFNVT.pdf",
+   "quote": "Proceder a inscribirse e inscribir a sus trabajadores en el Instituto y dar los avisos a que se refiere el Artículo 31",
+   "quoteEn": "Register with the Institute and register its workers, and give the notices article 31 requires",
+   "read": "2026-10-27",
+   "match": "\\bmx\\-infonavit\\b",
+   "agencyMatch": "Instituto\\ del\\ Fondo\\ Nacional\\ de\\ la\\ Vivienda\\ para\\ los\\ Trabajadores"
+  },
+  {
+   "key": "mx-mx-cmx-isn",
+   "name": "State payroll tax registration (Mexico City)",
+   "agency": "Secretaría de Administración y Finanzas de la Ciudad de México",
+   "level": "state",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://innovacion.finanzas.cdmx.gob.mx/siscon/archivos/manuales/MANUAL_DE_USUARIO_NOMINAS_VER1_1.pdf",
+   "quote": "Si a la fecha no se encuentra registrado en el Padrón del Impuesto Sobre Nóminas, le aparecera la opción de Alta al Padrón.",
+   "quoteEn": "If you are not yet registered in the Payroll Tax Register, the option to register appears.",
+   "read": "2026-10-27",
+   "match": "\\bmx\\-mx\\-cmx\\-isn\\b",
+   "agencyMatch": "Secretaría\\ de\\ Administración\\ y\\ Finanzas\\ de\\ la\\ Ciudad\\ de\\ México"
+  },
+  {
+   "key": "mx-cdmx-pc",
+   "name": "Internal civil protection program: We'll confirm with the Secretaría de Gestión Integral de Riesgos y Protección Civil de la Ciudad de México",
+   "agency": "Secretaría de Gestión Integral de Riesgos y Protección Civil de la Ciudad de México",
+   "level": "city",
+   "required": true,
+   "verified": false,
+   "fee": null,
+   "source": "https://www.proteccioncivil.cdmx.gob.mx/",
+   "note": "No sentence on the agency's page could be read in this pass: the row abstains and names the office; set aside.",
+   "match": "\\bmx\\-cdmx\\-pc\\b",
+   "agencyMatch": "Secretaría\\ de\\ Gestión\\ Integral\\ de\\ Riesgos\\ y\\ Protección\\ Civil\\ de\\ la\\ Ciudad\\ de\\ México"
+  },
+  {
+   "key": "mx-cdmx-anuncio",
+   "name": "Sign licence or notice (Mexico City): We'll confirm with the Secretaría de Desarrollo Urbano y Vivienda (SEDUVI)",
+   "agency": "Secretaría de Desarrollo Urbano y Vivienda (SEDUVI)",
+   "level": "city",
+   "required": true,
+   "verified": false,
+   "fee": null,
+   "source": "https://www.seduvi.cdmx.gob.mx",
+   "note": "No sentence on the agency's page could be read in this pass: the row abstains and names the office; set aside.",
+   "match": "\\bmx\\-cdmx\\-anuncio\\b",
+   "agencyMatch": "Secretaría\\ de\\ Desarrollo\\ Urbano\\ y\\ Vivienda"
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "US filings",
+   "why": "Not in the US.",
+   "match": "irs-|cbp-|fincen|\\bEIN\\b|secretary of state"
+  },
+  {
+   "name": "EU-wide rules",
+   "why": "Not in the EU.",
+   "match": "\\beu-"
+  },
+  {
+   "name": "Food and restaurant steps",
+   "why": "A gift shop sells no food.",
+   "match": "cofepris|mx-cdmx-vecinal"
+  },
+  {
+   "name": "Other cities' steps",
+   "why": "Not in Monterrey.",
+   "match": "mx-mty|mx-nle"
+  }
+ ]
+}

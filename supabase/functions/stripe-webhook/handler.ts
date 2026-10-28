@@ -8,7 +8,10 @@
 //                                         created later was already applied (Stripe doesn't deliver in order)
 //   invoice.payment_failed / invoice.paid the dunning notice, and clearing it
 //   charge.refunded                       a license charge let go, a pack's credit taken back
+//   checkout.session.async_payment_succeeded / _failed
+//                                         a delayed method (a bank debit) cleared: fulfilled now; or failed: nothing
 import { applyCheckoutSession, applyInvoice, applyRefund, applySubscription, type Db, type Obj } from "../_shared/stripe_apply.ts";
+import { verified } from "./logic.ts";
 
 export type Deps = {
   db: Db & {
@@ -25,26 +28,16 @@ export type Deps = {
 
 const reply = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 const hex = (buf: ArrayBuffer) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
-function same(a: string, b: string) {
-  if (a.length !== b.length) return false;
-  let d = 0;
-  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return d === 0;
-}
-/** Stripe's signature: t=<seconds>,v1=<hex HMAC-SHA256 of "t.raw"> (any v1 may match, for a secret being rolled). */
+/** Stripe's signature: t=<seconds>,v1=<hex HMAC-SHA256 of "t.raw">, as Stripe makes it (for tests and fixtures). The
+ *  check is logic.ts verified: exactly one timestamp, five minutes' tolerance, any v1 may match (a secret being rolled). */
 export async function sign(raw: string, secret: string, t: number): Promise<string> {
   const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   return hex(await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(`${t}.${raw}`)));
 }
-export async function verified(raw: string, header: string, secret: string, nowS: number, tolerance = 300) {
-  const parts = Object.fromEntries(header.split(",").map((kv) => kv.split("=") as [string, string]).filter((p) => p.length === 2));
-  const t = Number(parts.t);
-  if (!t || Math.abs(nowS - t) > tolerance) return false;
-  const sig = await sign(raw, secret, t);
-  return header.split(",").filter((p) => p.startsWith("v1=")).some((p) => same(p.slice(3), sig));
-}
+export { verified };
 
-export const HANDLED = new Set(["checkout.session.completed", "customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted", "invoice.paid", "invoice.payment_failed", "charge.refunded"]);
+export const HANDLED = new Set(["checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.async_payment_failed",
+  "customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted", "invoice.paid", "invoice.payment_failed", "charge.refunded"]);
 
 export async function handle(req: Request, d: Deps): Promise<Response> {
   if (req.method !== "POST") return reply(405, { error: "POST only" });
@@ -66,7 +59,11 @@ export async function handle(req: Request, d: Deps): Promise<Response> {
   const createdAt = new Date((Number(event.created) || nowS) * 1000).toISOString();
   try {
     const o = event.data.object;
-    if (event.type === "checkout.session.completed") await applyCheckoutSession(d.db, o);
+    if (event.type === "checkout.session.async_payment_failed") {
+      // a delayed payment (a bank debit) that never cleared: nothing is fulfilled, and the owner can pay again
+      const ws = o.metadata?.workspace_id;
+      if (typeof ws === "string" && ws) await d.db.insert("audit_log", { workspace_id: ws, actor: "you", actor_id: null, action: { en: "A payment didn't go through", zh: "一笔付款未成功" }, object: { en: String(o.metadata?.ref ?? o.id ?? ""), zh: String(o.metadata?.ref ?? o.id ?? "") } });
+    } else if (event.type.startsWith("checkout.session.")) await applyCheckoutSession(d.db, o, event.type);
     else if (event.type.startsWith("customer.subscription.")) await applySubscription(d.db, o, event.type, createdAt, d.env);
     else if (event.type.startsWith("invoice.")) await applyInvoice(d.db, o, event.type, createdAt);
     else if (event.type === "charge.refunded") await applyRefund(d.db, o, d.paymentIntentMeta);

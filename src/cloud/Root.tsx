@@ -812,14 +812,15 @@ export function CloudRoot() {
         catch (e) { notice = (e as api.ApiError).message; }
       }
       if (params.get("connect_error")) notice = lang === "zh" ? "连接未完成，请重试。" : "That connection didn't finish. Try again.";
+      // Stripe sends people back before its webhook lands, and a delayed method (a bank debit) can still be unpaid: say
+      // only that checkout finished, never that the plan is on. Subscription checkouts come back with billing=canceled
+      // and one-time ones with billing=cancel: both are a cancel.
       if (params.get("billing") === "success") {
-        notice = lang === "zh" ? "付款成功。几秒后方案会自动生效。" : "Payment received. Your plan switches on in a few seconds.";
-        // apply what Stripe says now, before billing is read below, so the plan shows at once (the webhook may be late)
+        notice = lang === "zh" ? "结账已完成。付款确认后方案会自动生效，通常只需几秒。" : "Checkout complete. Your plan switches on once the payment is confirmed, usually within seconds.";
+        // apply what Stripe says now, before billing is read below (the webhook may be late). It writes only what Stripe
+        // has: an unpaid delayed payment or an incomplete subscription stays off until it's paid.
         const sid = params.get("session_id");
-        if (sid && /^cs_[A-Za-z0-9_]+$/.test(sid)) {
-          const done = await api.confirmCheckout(row.id, sid).catch(() => null);
-          if (done?.applied) notice = lang === "zh" ? "付款成功，已生效。" : "Payment received. You're all set.";
-        }
+        if (sid && /^cs_[A-Za-z0-9_]+$/.test(sid)) await api.confirmCheckout(row.id, sid).catch(() => null);
       }
       if (params.get("billing") === "cancel" || params.get("billing") === "canceled") notice = lang === "zh" ? "已取消付款。" : "Checkout canceled.";
       // a brand's invite link (src/hqPlan.ts inviteLink): kept for Settings, Team, Headquarters, where an owner joins

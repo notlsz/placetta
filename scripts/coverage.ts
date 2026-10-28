@@ -19,6 +19,7 @@ import { FINISH_FIXES, FINISH_FORMS } from "../src/forms/finish";
 import { LIFECYCLE, READ_LIFE, type LifeItem } from "../src/forms/lifecycle";
 import { KIND_FACTS } from "../src/forms/kinds";
 import { READ_VER, VERIFY_BLOCKED, VERIFY_FIXES, VERIFY_FORMS, VERIFY_REFERENCE } from "../src/forms/verify";
+import { NATIONS_FIXES, NATIONS_FORMS, READ_NAT } from "../src/forms/nations";
 import { previewPlan } from "../src/plan/preview";
 import { proofCurrent } from "../src/plan/ask";
 
@@ -253,6 +254,17 @@ function main() {
   // the verification pass of 2026-10-23 (src/forms/verify.ts): before it the registry held 683 entries, 568 verified and
   // 115 unverified (54 of them in the United States)
   const usd = (f: OfficialForm) => (f.currency ?? "USD") === "USD";
+  // the other nations' pass of 2026-10-27 (src/forms/nations.ts): Mexico, Saudi Arabia, the EU's EORI and the cities left short
+  p(`### Other nations' pass (${READ_NAT}): proofs added (${NATIONS_FIXES.length})`);
+  p();
+  p("Mexico first (the federal, state and municipal steps of the ten cities a brand opens in first), then Saudi Arabia, the EU's import registration and the cities the earlier passes left short. Every quote was matched on the page as fetched that day (scripts/eval/proof-log.json); none was read through WebFetch or a browser.");
+  p();
+  for (const x of NATIONS_FIXES) p(`- \`${x.id}\`: ${x.why}`);
+  p();
+  p(`### Other nations' pass: added (${NATIONS_FORMS.length}, ${NATIONS_FORMS.filter(f => f.proof).length} verified)`);
+  p();
+  for (const f of NATIONS_FORMS) p(`- \`${f.id}\` (${f.where}, ${f.level}) ${f.title.en}: ${f.agency.en}${f.proof ? "" : " **UNVERIFIED**"}`);
+  p();
   p(`### Verification pass (${READ_VER}): proofs added and links fixed (${VERIFY_FIXES.length})`);
   p();
   p(`Every UNVERIFIED row taken back to the government's own page, the beachhead metros first. Before: 683 entries, 568 verified, 115 unverified (United States: 54 unverified). After: ${total} entries, ${proved} verified, ${total - proved} unverified (United States: ${FORMS.filter(f => usd(f) && !f.proof).length} unverified of ${FORMS.filter(usd).length}). Each quote was matched on the page as fetched that day (scripts/eval/proof-log.json). Made library references, no longer added to plans: ${VERIFY_REFERENCE.map(id => `\`${id}\``).join(", ")}.`);
@@ -302,7 +314,7 @@ function main() {
   }
   for (const [c, fs] of [...byCountry].sort((a, b) => b[1].length - a[1].length)) p(`- ${c} (${fs.length}): ${fs.map(f => `\`${f.id}\``).join(", ")}`);
   p();
-  p(`What blocked each one when it was read again on ${READ_VER} (src/forms/verify.ts):`);
+  p(`What blocked each one when it was read again on ${READ_VER} or ${READ_NAT} (src/forms/verify.ts, src/forms/nations.ts):`);
   p();
   for (const f of FORMS.filter(f => !f.proof)) p(`- \`${f.id}\`: ${VERIFY_BLOCKED[f.id] ?? "not read again"}`);
   p();

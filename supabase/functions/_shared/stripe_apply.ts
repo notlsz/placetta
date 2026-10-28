@@ -3,6 +3,7 @@
 // database function that is safe to apply twice: a subscription older than the last one applied is ignored, a license
 // charge is settled once, a pack's credit is added once per Checkout session and taken back once per refund.
 import { itemOf } from "./stripe_catalog.ts";
+import { checkoutEffect } from "../stripe-webhook/logic.ts";
 import { storePlanItemOf, TERM_PRICE_ENV } from "../../../src/pricing.ts";
 
 type Env = (k: string) => string | undefined;
@@ -44,32 +45,28 @@ export const NOTICE = {
 } as const;
 
 /** A paid Checkout: the customer, a license charge paid, a pack's credit, and (older plans) entry markets and stores. */
-export async function applyCheckoutSession(db: Db, o: Obj): Promise<void> {
-  const ws = o.metadata?.workspace_id as string | undefined;
-  if (!ws) return;
-  const paid = o.payment_status === "paid" || o.payment_status === "no_payment_required";
-  let markets = 0;
-  if (o.mode === "payment" && o.metadata?.plan === "entry" && paid) markets = Math.max(1, Math.min(20, Number(o.metadata?.markets) || 1));
+export async function applyCheckoutSession(db: Db, o: Obj, type = "checkout.session.completed"): Promise<void> {
+  // what this event may fulfil (stripe-webhook/logic.ts checkoutEffect): "completed" when paid then, or
+  // "async_payment_succeeded" when a delayed method (a bank debit) clears; unpaid or failed fulfils nothing paid for
+  const c = checkoutEffect(type, o);
+  if (!c?.ws) return;
+  const ws = c.ws;
   // a license or renewal on the simple model, paid at the price the owner approved: its filing may now go in
-  if (o.mode === "payment" && o.metadata?.kind === "license" && paid && typeof o.metadata?.charge_id === "string") {
-    const settled = await must(db.rpc("license_charge_settle", { p_id: o.metadata.charge_id, p_ok: true, p_stripe: String(o.id ?? "") || null }));
-    if (settled === true) await log(db, ws, { en: "Paid for a filing", zh: "已支付申报费用" }, { en: String(o.metadata.ref ?? ""), zh: String(o.metadata.ref ?? "") });
+  if (c.license) {
+    const settled = await must(db.rpc("license_charge_settle", { p_id: c.license, p_ok: true, p_stripe: String(o.id ?? "") || null }));
+    if (settled === true) await log(db, ws, { en: "Paid for a filing", zh: "已支付申报费用" }, { en: String(o.metadata?.ref ?? ""), zh: String(o.metadata?.ref ?? "") });
   }
-  if (o.mode === "payment" && o.metadata?.kind === "pack" && paid) {
-    // the credit was set by the billing function when it made this checkout; added once per session
-    const usd = Math.max(0, Math.min(1000, Number(o.metadata?.credit_usd) || 0));
-    if (usd > 0) {
-      const added = await must(db.rpc("ai_credit_once", { p_ws: ws, p_usd: usd, p_key: `pack:${o.id}` }));
-      if (added === true) await log(db, ws, { en: "Added an Odelia pack", zh: "购买 Odelia 加量包" }, { en: `$${usd} of Odelia allowance`, zh: `$${usd} Odelia 额度` });
-    }
-  }
-  const locations = o.mode === "subscription" && o.metadata?.plan === "locations";
   await must(db.rpc("billing_checkout_completed", {
-    p_ws: ws, p_customer: typeof o.customer === "string" ? o.customer : (o.customer?.id ?? null), p_add_markets: markets,
-    p_locations: locations, p_entry_credited: locations && Number(o.metadata?.entry_credit) > 0,
+    p_ws: ws, p_customer: typeof o.customer === "string" ? o.customer : (o.customer?.id ?? null), p_add_markets: c.markets,
+    p_locations: c.locations, p_entry_credited: c.entryCredited,
   }));
-  if (markets) await log(db, ws, { en: "Paid", zh: "已付款" }, PLAN_NAME.entry);
-  if (locations && o.metadata?.term_years) await must(db.rpc("billing_term_apply", { p_ws: ws, p_years: Math.max(1, Math.min(3, Number(o.metadata.term_years) || 1)) }));
+  if (c.markets) await log(db, ws, { en: "Paid", zh: "已付款" }, PLAN_NAME.entry);
+  if (c.termYears) await must(db.rpc("billing_term_apply", { p_ws: ws, p_years: c.termYears }));
+  // a pack's credit last, and once per session (the webhook and the return from Checkout may both see it)
+  if (c.packUsd > 0) {
+    const added = await must(db.rpc("ai_credit_once", { p_ws: ws, p_usd: c.packUsd, p_key: `pack:${o.id}` }));
+    if (added === true) await log(db, ws, { en: "Added an Odelia pack", zh: "购买 Odelia 加量包" }, { en: `$${c.packUsd} of Odelia allowance`, zh: `$${c.packUsd} Odelia 额度` });
+  }
 }
 
 /** What a subscription pays for: the plan name, the stores (locations) paid for, which size Odelia's allowance. */

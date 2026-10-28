@@ -1,0 +1,146 @@
+{
+ "id": "paris-restaurant",
+ "title": "A restaurant in Paris",
+ "read": "2026-10-27",
+ "input": {
+  "what": "Restaurant",
+  "where": "Paris, France",
+  "lang": "en"
+ },
+ "assumptions": "A new French company opening a restaurant with staff, a fit-out and a sign; no alcohol asked.",
+ "items": [
+  {
+   "key": "fr-guichet",
+   "name": "Company or branch registration (one-stop formalities portal)",
+   "agency": "INPI, Guichet unique des formalités des entreprises",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://formalites.entreprises.gouv.fr/cadre-juridique.php",
+   "quote": "l’ensemble des formalités d’entreprise doit être déposé en ligne auprès d’un organisme unique.",
+   "quoteEn": "all business formalities must be filed online with a single body.",
+   "read": "2026-10-21",
+   "match": "\\bfr-guichet\\b",
+   "agencyMatch": "INPI"
+  },
+  {
+   "key": "fr-tva",
+   "name": "VAT number and the business tax office (SIE)",
+   "agency": "Service des impôts des entreprises (DGFiP)",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://entreprendre.service-public.fr/vosdroits/F23570",
+   "quote": "Le service des impôts des entreprises (SIE) transmet automatiquement le numéro de TVA intracommunautaire à l'entreprise au moment de son immatriculation.",
+   "quoteEn": "The business tax office (SIE) automatically sends the company its intra-EU VAT number when it registers.",
+   "read": "2026-10-21",
+   "match": "\\bfr-tva\\b",
+   "agencyMatch": "Service des impôts des entreprises"
+  },
+  {
+   "key": "fr-dpae",
+   "name": "Pre-hiring declaration for each employee (DPAE)",
+   "agency": "Urssaf",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://entreprendre.service-public.fr/vosdroits/F23107",
+   "quote": "au plus tôt dans les 8 jours précédant la date de l’embauche",
+   "quoteEn": "no earlier than 8 days before the hiring date",
+   "read": "2026-10-21",
+   "match": "\\bfr-dpae\\b",
+   "agencyMatch": "Urssaf"
+  },
+  {
+   "key": "fr-par-erp",
+   "name": "Works permit for a shop open to the public (ERP), Paris",
+   "agency": "Préfecture de police de Paris, with the Ville de Paris urban planning office",
+   "level": "city",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://entreprendre.service-public.fr/vosdroits/F31687",
+   "quote": "Pour les démarches concernant des ERP à Paris, nous vous invitions à consulter le site internet de la préfecture de police",
+   "quoteEn": "For procedures about ERPs in Paris, we invite you to consult the Préfecture de police's website",
+   "read": "2026-10-21",
+   "match": "\\bfr-par-erp\\b",
+   "agencyMatch": "Préfecture de police de Paris"
+  },
+  {
+   "key": "fr-par-enseigne",
+   "name": "Shop sign permit, Ville de Paris",
+   "agency": "Ville de Paris, Direction de l'urbanisme",
+   "level": "city",
+   "required": false,
+   "verified": true,
+   "fee": null,
+   "source": "https://www.paris.fr/pages/enseignes-et-publicites-3514",
+   "quote": "Toutes les demandes d'enseignes (permanentes ou temporaires) doivent désormais être effectuées via le téléservice",
+   "quoteEn": "All sign applications (permanent or temporary) must now be made through the online service",
+   "read": "2026-10-21",
+   "match": "\\bfr-par-enseigne\\b",
+   "agencyMatch": "Ville de Paris",
+   "condition": "Only when it applies to this opening (see the assumptions)."
+  },
+  {
+   "key": "fr-hygiene-training",
+   "name": "Food hygiene training (the operator and at least one staff member)",
+   "agency": "Direction départementale de la protection des populations (DDPP)",
+   "level": "county",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://entreprendre.service-public.fr/vosdroits/F22387",
+   "quote": "Formation aux règles d'hygiène alimentaire (l'exploitant et au moins un membre du personnel).",
+   "quoteEn": "Training in food hygiene rules (the operator and at least one staff member).",
+   "read": "2026-10-21",
+   "match": "\\bfr-hygiene-training\\b",
+   "agencyMatch": "Direction départementale de la protection des populations"
+  },
+  {
+   "key": "fr-ddpp",
+   "name": "Food establishment declaration to the DDPP",
+   "agency": "Direction départementale de la protection des populations (DDPP)",
+   "level": "county",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://entreprendre.service-public.fr/vosdroits/F22387",
+   "quote": "Une déclaration doit être effectuée pour toute activité manipulant des denrées d'origine animale destinées à des consommateurs.",
+   "quoteEn": "A declaration must be made for any business handling food of animal origin intended for consumers.",
+   "read": "2026-10-21",
+   "match": "\\bfr-ddpp\\b",
+   "agencyMatch": "Direction départementale de la protection des populations"
+  },
+  {
+   "key": "eu-food-hygiene",
+   "name": "EU food hygiene rules (Regulation (EC) 852/2004)",
+   "agency": "European Union (Regulation (EC) 852/2004), checked by the national food inspectors",
+   "level": "federal",
+   "required": true,
+   "verified": true,
+   "fee": null,
+   "source": "https://food.ec.europa.eu/food-safety/biological-safety/food-hygiene_en",
+   "quote": "All food businesses operating in the EU, regardless of their size or type, must comply with basic hygiene requirements.",
+   "read": "2026-10-21",
+   "match": "\\beu-food-hygiene\\b",
+   "agencyMatch": "European Union"
+  }
+ ],
+ "order": [],
+ "mustNotInclude": [
+  {
+   "name": "US filings",
+   "why": "Not in the US.",
+   "match": "irs-|cbp-|fincen|\\bEIN\\b"
+  },
+  {
+   "name": "Lyon's steps",
+   "why": "Not in Lyon.",
+   "match": "fr-lyon"
+  }
+ ]
+}

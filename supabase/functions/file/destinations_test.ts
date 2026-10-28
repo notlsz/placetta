@@ -78,6 +78,12 @@ Deno.test("an agency that wants a signed authorization names it", () => {
   for (const [id, d] of Object.entries(DEST)) if (d.onBehalf === "authorization") assert(!!d.authorization, id);
 });
 
+Deno.test("a destination not ready for automatic filing says why, and it changes nothing the dispatcher does", () => {
+  assert(destinationProblems({ x: base({ portal: "agency.gov", notReady: "short" }) }).some((p) => p.includes("isn't ready")));
+  assertEquals(destinationProblems({ x: base({ portal: "agency.gov", notReady: "The sign-off step wasn't confirmed." }) }), []);
+  assert(DEST["gb-food"].notReady && DEST["gb-food"].notReady.length > 10, "gb-food says why it isn't ready");
+});
+
 Deno.test("team-only and unverified forms are never sent anywhere", () => {
   for (const id of Object.keys(TO_VERIFY)) assertEquals(DEST[id], undefined, id);
   for (const [id, t] of Object.entries(TEAM_ONLY)) {

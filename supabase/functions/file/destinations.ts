@@ -32,6 +32,9 @@ export type Dest = {
   noLogin?: boolean;                                // the portal files without an account (the worker opens it with no saved login)
   faxQuality?: "high" | "very_high";                // when the agency asks for a finer fax (the IRS asks for 300 DPI or more)
   owner?: OwnerRoute;                               // only the business can submit it: an owner packet, never a send
+  notReady?: string;                                // why automatic filing must not be switched on yet (an unconfirmed
+                                                    // sign-off or on-behalf rule): approval cards say the person sends it.
+                                                    // Metadata only: activation is still FILER_AGENCIES
   signature: "none" | "typed" | "drawn" | "wet";    // what the agency accepts on this form
   payment?: Payment;                                // how its fee is paid; any fee sends email, fax and mail to the team
   onBehalf?: "allowed" | "authorization" | "unstated";   // whether a filer may submit it for the business
@@ -1379,6 +1382,70 @@ export const DEST: Record<string, Dest> = {
     signature: "wet", payment: "in_person",
     checked: "2026-10-18", source: "https://www.abc.ca.gov/wp-content/uploads/forms/ABC-244.pdf",
   },
+  // England, Wales and Northern Ireland: the Food Standards Agency's "Register a Food Business" service, which sends the
+  // registration to the local authority for the address. GOV.UK's guidance links it as "Apply now: Register with your
+  // local authority" (https://register.food.gov.uk/new) and says to register "at least 28 days before trading".
+  // Read with curl on 2026-10-25: the start page answered 200 on register.food.gov.uk itself, with no redirect to a
+  // sign-in (HMRC's services redirect to Government Gateway; this one doesn't), and says it "uses a cookie to create the
+  // registration": so noLogin. The pages past the start were not walked, and no run has filed on it: there is no
+  // playbook, so the first filings stop at the agency's review page for the two-key check like any new form, and the
+  // worker hands back on any account, identity, code or payment page (guards.ts).
+  // Fee: none. The Food Standards Agency's own guidance says "Registration of your food business is free and can't be
+  // refused." (read with curl on 2026-10-25, the `also` page below).
+  // Signature: NOT CONFIRMED. The service's start page names no declaration, and the pages after "Begin registration"
+  // weren't walked, so whether it asks for a declaration, and in whose name, isn't known. "typed" is the closest value
+  // the schema has for a declaration ticked on the site; it is only safe because a portal filing never sends Placetta's
+  // own signed copy (check() in logic.ts skips the signature for a portal route). Whether a filer may submit it for the
+  // business isn't stated either (onBehalf "unstated"). Until both are seen on the live pages, gb-food stays out of
+  // FILER_AGENCIES: not ready for activation.
+  "gb-food": {
+    portal: "register.food.gov.uk",
+    portalUrl: "https://register.food.gov.uk/new",
+    noLogin: true,
+    signature: "typed",
+    payment: "none",
+    onBehalf: "unstated",
+    notReady: "The service's sign-off step and whether a filer may submit for the business weren't confirmed on the live pages.",
+    checked: "2026-10-25",
+    source: "https://www.gov.uk/guidance/food-business-registration",
+    also: ["https://register.food.gov.uk/new", "https://www.food.gov.uk/business-guidance/getting-ready-to-start-your-food-business"],
+  },
+  // M5 (owner-approved batch, 2026-10-25): three GOV.UK services, each NOT ready for automatic filing (notReady) and
+  // out of FILER_AGENCIES. Read with curl on 2026-10-25: each GOV.UK guide's start link, and where it lands.
+  // - Companies House incorporation: "Use this service to register your company with Companies House." The start link
+  //   (tax.service.gov.uk/register-your-company/setting-up-new-limited-company) answered 200 with "Are you starting a
+  //   new application?". The guide says "It costs £100 and can be paid by debit or credit card", that each director
+  //   may need "the Companies House personal code you received after verifying your identity", and "You'll need to
+  //   create a Government Gateway user ID and password for your company when you register it."
+  // - HMRC VAT: "You need to sign in to register for VAT". The start link redirected to "Sign in with Government
+  //   Gateway". No fee is stated on the pages read.
+  // - HMRC PAYE: "Most limited companies can register online". The start link redirected to the same Government
+  //   Gateway sign-in. No fee is stated on the pages read.
+  // Each needs an account and identity checks (Government Gateway, GOV.UK One Login, a director's personal code) that
+  // are the person's own. Placetta never creates an account (worker/filer/src/guards.ts makesAccount, identity), and
+  // whether an agent may submit for the business, and its sign-off, weren't seen. So: notReady, and no fee unless the
+  // page states one.
+  "gb-incorporate": {
+    portal: "www.tax.service.gov.uk",
+    portalUrl: "https://www.tax.service.gov.uk/register-your-company/setting-up-new-limited-company", tenant: "/register-your-company",
+    signature: "typed", payment: "portal", onBehalf: "unstated",
+    notReady: "Each director's GOV.UK One Login identity check and the company's new Government Gateway account are the person's own; the service's sign-off and whether an agent may submit weren't seen.",
+    checked: "2026-10-25", source: "https://www.gov.uk/limited-company-formation/register-your-company",
+  },
+  "gb-vat": {
+    portal: "www.tax.service.gov.uk",
+    portalUrl: "https://www.tax.service.gov.uk/register-for-vat", tenant: "/register-for-vat",
+    signature: "typed", onBehalf: "unstated",
+    notReady: "HMRC's service needs the business's own Government Gateway sign-in; the pages past sign-in and its rules for agents weren't seen.",
+    checked: "2026-10-25", source: "https://www.gov.uk/register-for-vat/how-register-for-vat",
+  },
+  "gb-paye": {
+    portal: "www.tax.service.gov.uk",
+    portalUrl: "https://www.tax.service.gov.uk/register-for-paye/start-pay-as-you-earn", tenant: "/register-for-paye",
+    signature: "typed", onBehalf: "unstated",
+    notReady: "HMRC's service needs the business's own Government Gateway sign-in; the pages past sign-in and its rules for agents weren't seen.",
+    checked: "2026-10-25", source: "https://www.gov.uk/register-employer",
+  },
 };
 
 /**
@@ -1553,6 +1620,7 @@ export function destinationProblems(dest: Record<string, Dest> = DEST): string[]
     if (d.alsoOn?.length && !d.portal) out.push(`${id}: other portal hosts without a portal`);
     if (d.payment !== undefined && !PAYMENTS.has(d.payment)) out.push(`${id}: payment must be one of ${[...PAYMENTS].join(", ")}`);
     if (d.onBehalf === "authorization" && !d.authorization?.trim()) out.push(`${id}: name the authorization the agency asks for`);
+    if (d.notReady !== undefined && d.notReady.trim().length < 10) out.push(`${id}: say why it isn't ready for automatic filing`);
     if (d.attach && (!Array.isArray(d.attach) || d.attach.some((a) => !a.trim()))) out.push(`${id}: attachments must be named`);
     if (d.owner) {
       // An owner packet is never sent by Placetta, so it carries no channel the dispatcher would send on.

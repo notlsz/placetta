@@ -8,7 +8,7 @@ import { withOpenings, workspaceOpening, type Evidence } from "./smart";
 import { scheduleAppeals } from "./finish";
 import type { Workspace } from "./model";
 import { useEvidence } from "./evidence";
-import { approvalRoute } from "./approvalRoute";
+import { approvalRoute, planSplit, planSplitLine } from "./approvalRoute";
 import { oneTap } from "./today";
 import { audit } from "./core";
 import { firstPlanClock, secondsSay } from "./plan/prefill";
@@ -153,7 +153,7 @@ export function RouteLine({ a, app }: { a: Approval; app?: Application }) {
   const { b } = useApp();
   const r = approvalRoute(a, app);
   if (!r) return null;
-  return <span className="appr-route"><em>{b(r.who)}</em>{r.time && <span className="appr-time"><I.clock />{b(r.time)}</span>}</span>;
+  return <span className="appr-route"><em>{b(r.who)}</em>{r.steps?.map((s, i) => <span key={i} className="appr-time">{b(s)}</span>)}{r.time && <span className="appr-time"><I.clock />{b(r.time)}</span>}</span>;
 }
 
 /** One thing only you can do, with its one tap: Approve opens the approval (you confirm there), Upload opens the file
@@ -444,6 +444,8 @@ export function Overview() {
   /* behind the tabs: the plan, the dates, the updates, this month, the stores, and what else a business may need */
   const nextAll = [...ws.apps].filter(a => a.status !== "approved" && (!mine || mineApp(team, a.id))).sort(byPriority);
   const nextUp = nextAll.slice(0, 3);
+  /* who acts on what's left (src/approvalRoute.ts planSplit): from the same route data as every approval card */
+  const split = planSplitLine(planSplit(nextAll));
   const biz = b(ws.business), place = ws.locations[0] ? b(ws.locations[0].name) : "", goal = b(ws.goal);
   const at = (ws.stores ?? []).length === 1 && /^\d/.test(ws.stores![0].address ?? "") ? ws.stores![0].address! : "";
   const base = place ? biz.replace(` in ${place}`, "").replace(place, "").trim() : biz;
@@ -548,6 +550,7 @@ export function Overview() {
                     </ol>
                   </>
                 )}
+                {split && <p className="plan-note" data-plan-split><I.check />{b(split)}</p>}
                 {previews > 0 && <p className="plan-note"><I.spark />{t("hm_preview")}</p>}
                 <div className="plan-act">
                   <button type="button" className="pill quiet sm" onClick={() => go("permits")}>{zh ? "全部许可" : "All permits"}<I.chevR /></button>

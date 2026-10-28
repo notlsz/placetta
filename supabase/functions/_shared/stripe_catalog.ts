@@ -21,9 +21,12 @@ export const CATALOG: Record<Item, Def> = {
   pack: { env: "STRIPE_PRICE_PACK", lookup: "placetta_odelia_pack", cents: 4900 },
 };
 
-/** Every event the app relies on (supabase/functions/stripe-webhook/handler.ts). */
+/** Every event the app relies on (supabase/functions/stripe-webhook/handler.ts). async_payment_succeeded: a checkout
+ *  paid by a delayed method (a bank debit) completes unpaid and is fulfilled only when this arrives; _failed lets its
+ *  charge go. ensureWebhook brings an endpoint Placetta made up to this list; one made by hand needs them added. */
 export const WEBHOOK_EVENTS = [
-  "checkout.session.completed", "customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted",
+  "checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.async_payment_failed",
+  "customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted",
   "invoice.paid", "invoice.payment_failed", "charge.refunded",
 ];
 export const VERSION = "2025-03-31.basil";

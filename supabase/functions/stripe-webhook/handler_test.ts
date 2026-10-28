@@ -227,6 +227,23 @@ Deno.test("license: paid once at Checkout; a full refund lets it go; one already
   assertEquals(db.charges.get("c-3"), "paid");
 });
 
+Deno.test("a delayed payment: completed unpaid fulfils nothing; fulfilled once when it clears; a failure fulfils nothing", async () => {
+  const db = fakeDb(), d = deps(db);
+  const cs = { id: "cs_test_ach", object: "checkout.session", mode: "payment", status: "complete", payment_status: "unpaid", customer: "cus_1",
+    metadata: { workspace_id: WS, kind: "license", charge_id: "c-1", ref: "sj-sign" } };
+  await post(d, event("checkout.session.completed", cs));
+  assertEquals(db.charges.get("c-1"), "pending", "not paid yet, not fulfilled");
+  await post(d, event("checkout.session.async_payment_succeeded", { ...cs, payment_status: "paid" }));
+  assertEquals(db.charges.get("c-1"), "paid");
+  // a pack paid by a debit that fails: no credit
+  const pack = { id: "cs_test_ach_p", object: "checkout.session", mode: "payment", status: "complete", payment_status: "unpaid", metadata: { workspace_id: WS, kind: "pack", credit_usd: "25" } };
+  await post(d, event("checkout.session.completed", pack));
+  const failed = await post(d, event("checkout.session.async_payment_failed", pack));
+  assertEquals(failed.status, 200);
+  assertEquals(db.billing.get(WS)!.ai_credit_usd, 0);
+  assert(db.rows.some((r) => r.table === "audit_log" && (r.row.action as { en: string }).en === "A payment didn't go through"));
+});
+
 Deno.test("a refunded pack takes its credit back, once, never below zero", async () => {
   const db = fakeDb(), d = deps(db, { pi_pack: { workspace_id: WS, kind: "pack", credit_usd: "25" } });
   await post(d, event("checkout.session.completed", { id: "cs_p", object: "checkout.session", mode: "payment", payment_status: "paid", metadata: { workspace_id: WS, kind: "pack", credit_usd: "25" } }));

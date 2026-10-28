@@ -20,6 +20,7 @@ import { FINISH_FIXES, FINISH_FORMS } from "./finish";
 import { SECTOR_FORMS } from "./sectors";
 import { EXPANSION_FIXES, EXPANSION_FORMS } from "./expansion";
 import { VERIFY_FIXES, VERIFY_FORMS, VERIFY_REFERENCE } from "./verify";
+import { NATIONS_FIXES, NATIONS_FORMS } from "./nations";
 
 /* The official forms library: the real government forms, by number, with the agency, how it's filed, the official
    links and fee, and (for the forms Placetta fills) the fields line by line as printed. Sources are the agencies' own
@@ -678,7 +679,7 @@ export const FORMS: OfficialForm[] = [
   },
 ];
 
-FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES, ...FURNITURE_FORMS, ...US_GAPS, ...INTL_FORMS, ...FINISH_FORMS, ...SECTOR_FORMS, ...EXPANSION_FORMS, ...VERIFY_FORMS);
+FORMS.push(...WORLD_FORMS, ...LOCAL_US, ...MORE_US, ...MARKETS_US, ...BEACHHEAD, ...TOP_CITIES, ...FURNITURE_FORMS, ...US_GAPS, ...INTL_FORMS, ...FINISH_FORMS, ...SECTOR_FORMS, ...EXPANSION_FORMS, ...VERIFY_FORMS, ...NATIONS_FORMS);
 
 /** A step that isn't a filing Placetta makes for the business: insurance bought from an insurer (workers' compensation)
  *  or a certificate a person earns with a course or an exam (food handler cards, the food protection or food safety
@@ -748,7 +749,7 @@ for (const f of FORMS) { const p = PROOF[f.id]; if (p && !f.proof) { f.proof = p
 // then the finishing pass's proofs for entries already in the library (src/forms/finish.ts)
 // and last the verification pass of 2026-10-23 (src/forms/verify.ts): proofs for rows that had none, and links that
 // pointed at another city's page; a filing that applies only to some businesses becomes a library reference
-export const AUDIT_MISSING = [...applyFixes(FORMS), ...applyFixes(FORMS, FINISH_FIXES), ...applyFixes(FORMS, EXPANSION_FIXES), ...applyFixes(FORMS, VERIFY_FIXES),
+export const AUDIT_MISSING = [...applyFixes(FORMS), ...applyFixes(FORMS, FINISH_FIXES), ...applyFixes(FORMS, EXPANSION_FIXES), ...applyFixes(FORMS, VERIFY_FIXES), ...applyFixes(FORMS, NATIONS_FIXES),
   ...VERIFY_REFERENCE.filter(id => { const f = FORMS.find(x => x.id === id); if (f) f.needs = { ...f.needs, reference: true }; return !f; })];
 
 export const formById = (id: string) => FORMS.find(f => f.id === id);

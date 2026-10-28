@@ -35,7 +35,7 @@ export type Playbook = {
   final: Final[];
   /** Buttons the guide shows only opening the next form, on the page it names ("Schedule Inspection" on AB+C's My
       Inspections opens the request; "Request Inspection" sends it). Never a button `final` names. */
-  nav?: { page: string; button: string }[];
+  nav?: { page: string; button: string; path?: string }[];   // path: the nav page's own address path, when the guide shows it
   pay: string[];                                          // words in the heading of a page where the agency takes its fee
   receipt: string[];                                      // words in the heading of the page that confirms it
   confirm?: string;                                       // a pattern whose first group is the confirmation number, when the guide shows one
@@ -311,6 +311,11 @@ export const PLAYBOOKS: Playbook[] = [
     // Help guide 11.1.8 (File Document): "Choose File Online to send the document to the Shopping Cart"; the Shopping
     // Cart then takes the fee. The other choice there, Print and Mail, is never used.
     final: [{ page: "File Document", button: "File Online" }],
+    // On the Forms page the same words only open the form: "a pop-up window will describe the form and fee, and select
+    // File Online" (7.1). The guides don't print the address, so the exception holds only on a page whose main heading
+    // is exactly "Forms" and which names neither File Document nor a fee page (navOn); anywhere else "File Online" is a
+    // send and the final-submit guard runs. Found by worker/filer/test/cafllc.test.ts; not yet seen on the live site.
+    nav: [{ page: "Forms", button: "File Online" }],
     pay: ["Shopping Cart", "Checkout", "Payment"],
     receipt: ["My Work Queue", "Receipt"],
     forms: Object.fromEntries(([
@@ -466,11 +471,56 @@ export function finalOn(p: Playbook | undefined, s: PageState, buttonText: strin
 }
 
 /** This button, on this page, only opens the next form, as the guide shows: the generic send words ("Schedule") don't
- *  make it a send. A button the guide's `final` names is always a send. */
+ *  make it a send. A button the guide's `final` names is always a send on its own page.
+ *
+ *  A nav button may carry the same words as a send button (bizfile Online's "File Online" opens the form on Forms and
+ *  sends it on File Document) only when both are scoped to different pages (navProblems). The exception then applies
+ *  only when the page is unambiguously the nav page, read from the page itself (pageState: the DOM's visible h1-h3
+ *  and its address, never the model's say-so): it has a parseable address, on the nav entry's `path` when the entry
+ *  names one; its first visible heading is exactly the nav page (the <title> alone never counts: a page with no
+ *  heading gets no exception); exactly one button or link on the page carries the words; and nothing on the page
+ *  (headings, title or visible text) names the send page or any fee page. Anything else gets no exception, so the
+ *  final-submit guard runs and the run hands back: fail closed, never navigation. The worker (run.ts exec) also
+ *  refuses the exception once a submit has been pressed, and reads the page again just before the click. */
 export function navOn(p: Playbook | undefined, s: PageState, buttonText: string): boolean {
   if (!p?.nav?.length || !buttonText.trim() || finalOn(p, s, buttonText)) return false;
-  const on = headings(s);
-  return p.nav.some((n) => on.includes(norm(n.page)) && norm(buttonText) === norm(n.button));
+  const all = [s.title, ...s.headings].map(norm).filter(Boolean);
+  const main = norm(s.headings[0] ?? "");
+  let path: string | null = null;
+  try { path = new URL(s.url).pathname.toLowerCase(); } catch { path = null; }
+  return p.nav.some((n) => {
+    if (norm(buttonText) !== norm(n.button)) return false;
+    const shared = p.final.some((f) => f.button && norm(f.button) === norm(n.button));
+    if (!shared) return all.join(" | ").includes(norm(n.page));
+    // the shared-word case: an address, the nav page's own path when named, the exact first heading, no other guide page
+    if (path === null || !main || main !== norm(n.page)) return false;
+    if (n.path && !path.startsWith(n.path.toLowerCase())) return false;
+    // exactly one control on the page carries these words: two or more is ambiguous
+    if ([...s.buttons.map((x) => x.text), ...s.links.map((x) => x.text)].filter((t) => norm(t) === norm(n.button)).length !== 1) return false;
+    // the heading never outweighs the rest of the page: the send page or a fee page named anywhere on it is a conflict
+    const others = [...p.final.map((f) => f.page), ...p.pay].map((x) => norm(x ?? "")).filter((x) => x && x !== norm(n.page));
+    const seen = [...all, norm(s.text ?? "")];
+    return !seen.some((h) => others.some((o) => h.includes(o)));
+  });
+}
+
+/** Every reason the playbook's nav entries could let a send through. A nav button may share its words with a send
+ *  button only when both name a page and the pages differ; a nav entry with no page, or on the send's own page, or
+ *  sharing words with a send that names no page, is refused. */
+export function navProblems(p: Playbook): string[] {
+  const out: string[] = [];
+  for (const n of p.nav ?? []) {
+    if (!n.page.trim() || !n.button.trim()) out.push(`${p.host}: a nav entry needs a page and a button`);
+    for (const f of p.final) {
+      if (!f.button || norm(f.button) !== norm(n.button)) continue;
+      if (!f.page?.trim()) out.push(`${p.host}: "${n.button}" is a send on every page, so it can't also open a form`);
+      else if (norm(f.page) === norm(n.page) || norm(f.page).includes(norm(n.page)) || norm(n.page).includes(norm(f.page))) {
+        out.push(`${p.host}: "${n.button}" opens on "${n.page}" and sends on "${f.page}": the pages overlap`);
+      }
+    }
+    if (p.pay.some((w) => norm(n.page).includes(norm(w)) || norm(w).includes(norm(n.page)))) out.push(`${p.host}: "${n.page}" is also a fee page`);
+  }
+  return out;
 }
 
 /** This page is where the agency takes its fee: the person pays it. */

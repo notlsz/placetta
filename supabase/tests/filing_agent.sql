@@ -102,8 +102,14 @@ begin
   update public.filings set agent_state = 'running', attempts = 3, updated_at = now() - interval '20 minutes' where id = f2;
   alter table public.filings enable trigger filings_guard;
   perform public.requeue_stuck_filings();
-  res := res || jsonb_build_object('after 3 tries the team takes it', (select agent_state = 'handoff' and channel = 'team' from public.filings where id = f2)
-    and exists (select 1 from public.team_tasks where filing_id = f2 and kind = 'handoff'));
+  -- Since 20261101090000_handoffs_to_business: the third failure hands the filing back (handoff, team channel) with a
+  -- portal_failed entry, and the file function's sweep tries another way the agency takes or gives the business its
+  -- packet. It no longer opens a Placetta team task (the old assertion required one and went stale with that change).
+  res := res || jsonb_build_object('after 3 tries it is handed back for another way, with no team task',
+    (select agent_state = 'handoff' and channel = 'team'
+       and exists (select 1 from jsonb_array_elements(agent_log) e where e->>'kind' = 'handoff' and e->>'ref' = 'portal_failed')
+     from public.filings where id = f2)
+    and not exists (select 1 from public.team_tasks where filing_id = f2 and kind = 'handoff'));
 
   -- A fax waiting on delivery isn't treated as lost.
   insert into public.filings (workspace_id, app_id, title, payload, approved_by) values (w, 'fax', '{"en":"SS-4","zh":"SS-4"}', '{"official":"irs-ss4"}', a) returning id into f3;
