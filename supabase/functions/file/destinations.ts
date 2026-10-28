@@ -9,6 +9,8 @@ import { PLAINS_DEST } from "./dest/plains.ts";
 
 import { MIDATLANTIC_DEST, MIDATLANTIC_TEAM } from "./dest/midatlantic.ts";
 
+import { WEST_DEST, WEST_TEAM_ONLY } from "./dest/west.ts";
+
 export type Address = { name: string; line1: string; line2?: string; city: string; state: string; zip: string; country?: string };
 
 /** How the agency takes its fee, as its page says. */
@@ -1955,6 +1957,7 @@ export const DEST: Record<string, Dest> = {
   },
   ...MIDATLANTIC_DEST,
   ...PLAINS_DEST,
+  ...WEST_DEST,
 };
 
 /**
@@ -2063,6 +2066,7 @@ export const TEAM_ONLY: Record<string, { why: string; source: string; checked: s
   "sf-dbi-building": { why: "Plans and the application go in at the Permit Center, which routes them to Planning, Fire and Health.", source: "https://www.sf.gov/learn-about-our-building-permit-review-processes", checked: "2026-10-10" },
   "chi-plan-review": { why: "Reviewed as part of the building permit by a city sanitarian; Public Health isn't on E-Plan.", source: "https://www.chicago.gov/content/dam/city/depts/cdph/FoodProtection/FP_Plan.Review.Requirements.2020_Feb2021.pdf", checked: "2026-10-17" },
   ...MIDATLANTIC_TEAM,
+  ...WEST_TEAM_ONLY,
 };
 
 const E164 = /^\+[1-9]\d{6,14}$/;

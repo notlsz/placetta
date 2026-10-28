@@ -1,0 +1,2375 @@
+[
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "or-oda-retail",
+  "form": "Retail food establishment license (ODA Food Safety Program)",
+  "title": {
+   "en": "Oregon retail food establishment license",
+   "zh": "俄勒冈州零售食品经营执照"
+  },
+  "agency": {
+   "en": "Oregon Department of Agriculture, Food Safety Program",
+   "zh": "俄勒冈州农业厅食品安全项目"
+  },
+  "where": "OR",
+  "segments": [
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "in_person",
+  "order": 76,
+  "how": {
+   "en": "At least two weeks before opening, call the ODA food safety inspector for the area to arrange the approval inspection. The inspector hands over the license application at that visit and can take the fee; the license arrives by mail in 6 to 8 weeks.",
+   "zh": "开业前至少两周，致电当地的俄勒冈州农业厅食品安全检查员预约审批检查。检查员会在检查时提供执照申请表并可当场收费；执照约 6 至 8 周后邮寄送达。"
+  },
+  "url": "https://www.oregon.gov/oda/food-safety/fs-licensing/Pages/application.aspx",
+  "info": "https://www.oregon.gov/oda/food-safety/fs-licensing/Pages/default.aspx",
+  "fee": null,
+  "feeNote": {
+   "en": "$159 to $824 a year, set by gross annual sales on ODA's 2026-2027 fee schedule. Restaurants and food carts are licensed by the county health department instead.",
+   "zh": "每年 159 至 824 美元，按农业厅 2026-2027 年度收费表依年销售总额确定。餐厅和流动餐车改由县卫生部门发照。"
+  },
+  "renews": {
+   "en": "Every year; ODA licenses expire June 30.",
+   "zh": "每年续期；农业厅执照于 6 月 30 日到期。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Licensee",
+    "label": {
+     "en": "Licensee (owner or operator) legal name",
+     "zh": "持照人（业主或经营者）法定名称"
+    }
+   },
+   {
+    "id": "establishment",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment name",
+     "zh": "经营场所名称"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment address, city, ZIP and county",
+     "zh": "经营场所地址、城市、邮编及县"
+    }
+   },
+   {
+    "id": "mailing",
+    "line": "Establishment",
+    "label": {
+     "en": "Mailing address, if different",
+     "zh": "邮寄地址（如不同）"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "Contact",
+    "label": {
+     "en": "Phone and email",
+     "zh": "电话和电子邮箱"
+    }
+   },
+   {
+    "id": "foods",
+    "line": "Operation",
+    "label": {
+     "en": "Foods handled and how (stored, processed, packaged, sold)",
+     "zh": "经营的食品及方式（储存、加工、包装、销售）"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners, partners or officers: 'name, title'",
+     "zh": "所有者、合伙人或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "The state license a store selling packaged or bulk food needs in Oregon.",
+   "zh": "在俄勒冈州销售包装或散装食品的商店须持有的州执照。"
+  },
+  "proof": {
+   "quote": "Retail : Stores with packaged foods or bulk foods.",
+   "checked": "2026-10-28",
+   "read": "https://www.oregon.gov/oda/food-safety/fs-licensing/Pages/default.aspx",
+   "en": "ODA's license types include Retail: stores with packaged foods or bulk foods."
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "or-oda-processing-warehouse",
+  "form": "Food processing or food storage warehouse license (ODA Food Safety Program)",
+  "title": {
+   "en": "Oregon food processor or food warehouse license",
+   "zh": "俄勒冈州食品加工或食品仓储执照"
+  },
+  "agency": {
+   "en": "Oregon Department of Agriculture, Food Safety Program",
+   "zh": "俄勒冈州农业厅食品安全项目"
+  },
+  "where": "OR",
+  "segments": [
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "in_person",
+  "order": 76,
+  "how": {
+   "en": "At least two weeks before opening, call the ODA food safety inspector for the area to arrange the approval inspection. The inspector hands over the license application at that visit and can take the fee; the license arrives by mail in 6 to 8 weeks.",
+   "zh": "开业前至少两周，致电当地的俄勒冈州农业厅食品安全检查员预约审批检查。检查员会在检查时提供执照申请表并可当场收费；执照约 6 至 8 周后邮寄送达。"
+  },
+  "url": "https://www.oregon.gov/oda/food-safety/fs-licensing/Pages/application.aspx",
+  "info": "https://www.oregon.gov/oda/food-safety/fs-licensing/Pages/default.aspx",
+  "fee": null,
+  "feeNote": {
+   "en": "Set by gross annual sales on ODA's fee schedule. A processor that stores its own finished product at the plant needs no separate warehouse license.",
+   "zh": "按农业厅收费表依年销售总额确定。在加工厂内储存自产成品的加工商无需另办仓储执照。"
+  },
+  "renews": {
+   "en": "Every year; ODA licenses expire June 30.",
+   "zh": "每年续期；农业厅执照于 6 月 30 日到期。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Licensee",
+    "label": {
+     "en": "Licensee (owner or operator) legal name",
+     "zh": "持照人（业主或经营者）法定名称"
+    }
+   },
+   {
+    "id": "establishment",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment name",
+     "zh": "经营场所名称"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment address, city, ZIP and county",
+     "zh": "经营场所地址、城市、邮编及县"
+    }
+   },
+   {
+    "id": "mailing",
+    "line": "Establishment",
+    "label": {
+     "en": "Mailing address, if different",
+     "zh": "邮寄地址（如不同）"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "Contact",
+    "label": {
+     "en": "Phone and email",
+     "zh": "电话和电子邮箱"
+    }
+   },
+   {
+    "id": "foods",
+    "line": "Operation",
+    "label": {
+     "en": "Foods handled and how (stored, processed, packaged, sold)",
+     "zh": "经营的食品及方式（储存、加工、包装、销售）"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners, partners or officers: 'name, title'",
+     "zh": "所有者、合伙人或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "The state license for a place in Oregon that makes, packs or stores food for sale.",
+   "zh": "在俄勒冈州生产、包装或储存待售食品的场所须持有的州执照。"
+  },
+  "proof": {
+   "quote": "Food processing and warehousing : Production or storage and distribution of food.",
+   "checked": "2026-10-28",
+   "read": "https://www.oregon.gov/oda/food-safety/fs-licensing/Pages/default.aspx",
+   "en": "ODA licenses food processing and warehousing: production or storage and distribution of food."
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "wa-wsda-warehouse",
+  "form": "AGR-2060 (R/3/26), Food Storage Warehouse New License Application",
+  "title": {
+   "en": "Washington food storage warehouse license",
+   "zh": "华盛顿州食品仓储执照"
+  },
+  "agency": {
+   "en": "Washington State Department of Agriculture, Food Safety Program",
+   "zh": "华盛顿州农业厅食品安全项目"
+  },
+  "where": "WA",
+  "segments": [
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 76,
+  "how": {
+   "en": "Mail Form AGR-2060 with a check or money order for the $200 fee to the WSDA Food Safety Program, PO Box 42560, Olympia. A WSDA inspector then inspects the warehouse; a company based out of state names a Washington resident to accept legal notices.",
+   "zh": "将 AGR-2060 表连同 200 美元支票或汇票邮寄至华盛顿州农业厅食品安全项目（PO Box 42560, Olympia）。随后由农业厅检查员检查仓库；州外公司须指定一名华盛顿州居民接收法律文书。"
+  },
+  "url": "https://cms.agr.wa.gov/WSDAKentico/Documents/Forms/2060-FoodStorageWarehouseLicenseApplication.pdf",
+  "pdf": "https://cms.agr.wa.gov/WSDAKentico/Documents/Forms/2060-FoodStorageWarehouseLicenseApplication.pdf",
+  "info": "https://agr.wa.gov/Services/Licenses-Permits-and-Certificates/Summary-Descriptions/Food-Storage-Warehouse",
+  "fee": 200,
+  "feeNote": {
+   "en": "$200 a year; $25 with a federal inspection report from the past year.",
+   "zh": "每年 200 美元；附过去一年内联邦检查报告的为 25 美元。"
+  },
+  "takes": {
+   "en": "Four to six weeks after a complete application.",
+   "zh": "提交完整申请后四至六周。"
+  },
+  "renews": {
+   "en": "Every year; licenses expire March 31.",
+   "zh": "每年续期；执照于 3 月 31 日到期。"
+  },
+  "fields": [
+   {
+    "id": "firm",
+    "line": "Applicant Information",
+    "label": {
+     "en": "Firm name and Uniform Business Identifier (UBI)",
+     "zh": "企业名称及统一企业识别号（UBI）"
+    }
+   },
+   {
+    "id": "applicant",
+    "line": "Applicant Information",
+    "label": {
+     "en": "Applicant name",
+     "zh": "申请人姓名"
+    }
+   },
+   {
+    "id": "mailing",
+    "line": "Applicant Information",
+    "label": {
+     "en": "Mailing address",
+     "zh": "邮寄地址"
+    }
+   },
+   {
+    "id": "site",
+    "line": "Applicant Information",
+    "label": {
+     "en": "Physical plant location (site address)",
+     "zh": "仓库实际地址"
+    }
+   },
+   {
+    "id": "owner",
+    "line": "Applicant Information",
+    "label": {
+     "en": "Owner name, phone, email and county",
+     "zh": "业主姓名、电话、电子邮箱及所在县"
+    }
+   },
+   {
+    "id": "manager",
+    "line": "Applicant Information",
+    "label": {
+     "en": "Onsite manager name, phone and email",
+     "zh": "现场经理姓名、电话和电子邮箱"
+    }
+   },
+   {
+    "id": "structure",
+    "line": "Business Structure Information",
+    "label": {
+     "en": "Firm operates as",
+     "zh": "企业形式"
+    },
+    "options": [
+     "Individual",
+     "Partnership",
+     "Cooperative",
+     "Corporation",
+     "LLC"
+    ]
+   },
+   {
+    "id": "officers",
+    "line": "Business Structure Information",
+    "label": {
+     "en": "Partners or officers: name, title, address, email",
+     "zh": "合伙人或高管：姓名、职务、地址、电子邮箱"
+    }
+   },
+   {
+    "id": "wa_agent",
+    "line": "Business Structure Information",
+    "label": {
+     "en": "If out of state: a Washington resident who accepts service of legal notices",
+     "zh": "如为州外企业：在华盛顿州接收法律文书的居民"
+    }
+   },
+   {
+    "id": "foods",
+    "line": "2",
+    "label": {
+     "en": "Types of food warehoused",
+     "zh": "仓储的食品种类"
+    }
+   },
+   {
+    "id": "temps",
+    "line": "3",
+    "label": {
+     "en": "Holding temperatures",
+     "zh": "储存温度"
+    },
+    "options": [
+     "Ambient",
+     "Refrigerated",
+     "Frozen"
+    ]
+   }
+  ],
+  "plain": {
+   "en": "The state license for a warehouse in Washington that stores food for stores and restaurants.",
+   "zh": "在华盛顿州为商店和餐厅储存食品的仓库须持有的州执照。"
+  },
+  "proof": {
+   "quote": "Facilities where food is stored, kept, or held for distribution to wholesale facilities, retail outlets and restaurants",
+   "checked": "2026-10-28",
+   "read": "https://agr.wa.gov/Services/Licenses-Permits-and-Certificates/Summary-Descriptions/Food-Storage-Warehouse",
+   "en": "Who needs the license: facilities where food is stored, kept or held for distribution to wholesale facilities, retail outlets and restaurants."
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "wa-wsda-processor",
+  "form": "Food Processor License application (WSDA Food Safety Program)",
+  "title": {
+   "en": "Washington food processor license",
+   "zh": "华盛顿州食品加工执照"
+  },
+  "agency": {
+   "en": "Washington State Department of Agriculture, Food Safety Program",
+   "zh": "华盛顿州农业厅食品安全项目"
+  },
+  "where": "WA",
+  "segments": [
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true,
+   "manufactures": true
+  },
+  "method": "pdf_mail",
+  "order": 76,
+  "how": {
+   "en": "Mail the Food Processor's Application with Attachments A to E and a check or money order for the fee to WSDA Food Safety and Consumer Services, PO Box 42591, Olympia. A WSDA inspector then inspects the facility before the license is approved.",
+   "zh": "将食品加工商申请表及附件 A 至 E，连同支票或汇票邮寄至华盛顿州农业厅食品安全与消费者服务处（PO Box 42591, Olympia）。批准执照前，农业厅检查员会检查加工场所。"
+  },
+  "url": "https://agr.wa.gov/departments/food-safety/food-safety/food-processors",
+  "info": "https://agr.wa.gov/departments/food-safety/food-safety/food-processors",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page doesn't state a fee; it confirms any fee when it takes the filing.",
+   "zh": "该机构页面未注明费用；如有费用，受理时由其确认。"
+  },
+  "renews": {
+   "en": "Every year; licenses expire June 30.",
+   "zh": "每年续期；执照于 6 月 30 日到期。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Licensee",
+    "label": {
+     "en": "Licensee (owner or operator) legal name",
+     "zh": "持照人（业主或经营者）法定名称"
+    }
+   },
+   {
+    "id": "establishment",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment name",
+     "zh": "经营场所名称"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment address, city, ZIP and county",
+     "zh": "经营场所地址、城市、邮编及县"
+    }
+   },
+   {
+    "id": "mailing",
+    "line": "Establishment",
+    "label": {
+     "en": "Mailing address, if different",
+     "zh": "邮寄地址（如不同）"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "Contact",
+    "label": {
+     "en": "Phone and email",
+     "zh": "电话和电子邮箱"
+    }
+   },
+   {
+    "id": "foods",
+    "line": "Operation",
+    "label": {
+     "en": "Foods handled and how (stored, processed, packaged, sold)",
+     "zh": "经营的食品及方式（储存、加工、包装、销售）"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners, partners or officers: 'name, title'",
+     "zh": "所有者、合伙人或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "The state license for a place in Washington that cooks, packages or repackages food for sale.",
+   "zh": "在华盛顿州烹制、包装或重新包装待售食品的场所须持有的州执照。"
+  },
+  "proof": {
+   "quote": "You need a Food Processor License if your process falls into the following categories",
+   "checked": "2026-10-28",
+   "read": "https://agr.wa.gov/departments/food-safety/food-safety/food-processors",
+   "en": "You need a Food Processor License if you cook, bake, freeze, slice, package or repackage food, among other processes."
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "ut-udaf-retail-plan",
+  "form": "UDAF Form PRA 101 (Rev. 07/2026), Retail Food Establishment Plan Review Application",
+  "title": {
+   "en": "Utah retail food plan review",
+   "zh": "犹他州零售食品图纸审查"
+  },
+  "agency": {
+   "en": "Utah Department of Agriculture and Food",
+   "zh": "犹他州农业与食品厅"
+  },
+  "where": "UT",
+  "segments": [
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 70,
+  "how": {
+   "en": "Email the plan review application to UDAF's support services staff at udaf-planreview@utah.gov at least 30 days before opening. Plans are reviewed once the fee is paid; a pre-operational inspection follows the build.",
+   "zh": "开业前至少 30 天，将图纸审查申请表发送至犹他州农业与食品厅支持服务人员邮箱 udaf-planreview@utah.gov。缴费后才开始审查；施工完成后进行开业前检查。"
+  },
+  "url": "https://ag.utah.gov/wp-content/uploads/PRA101-UDAF-Form-Rev-07_2026.pdf",
+  "pdf": "https://ag.utah.gov/wp-content/uploads/PRA101-UDAF-Form-Rev-07_2026.pdf",
+  "info": "https://ag.utah.gov/regulatory-services/retail-food-regulatory-program/",
+  "fee": null,
+  "feeNote": {
+   "en": "A plan review fee applies; it's non-refundable, and plans aren't reviewed until it's paid.",
+   "zh": "须缴纳图纸审查费，不予退还；缴费后才开始审查。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Licensee",
+    "label": {
+     "en": "Licensee (owner or operator) legal name",
+     "zh": "持照人（业主或经营者）法定名称"
+    }
+   },
+   {
+    "id": "establishment",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment name",
+     "zh": "经营场所名称"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment address, city, ZIP and county",
+     "zh": "经营场所地址、城市、邮编及县"
+    }
+   },
+   {
+    "id": "mailing",
+    "line": "Establishment",
+    "label": {
+     "en": "Mailing address, if different",
+     "zh": "邮寄地址（如不同）"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "Contact",
+    "label": {
+     "en": "Phone and email",
+     "zh": "电话和电子邮箱"
+    }
+   },
+   {
+    "id": "foods",
+    "line": "Operation",
+    "label": {
+     "en": "Foods handled and how (stored, processed, packaged, sold)",
+     "zh": "经营的食品及方式（储存、加工、包装、销售）"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners, partners or officers: 'name, title'",
+     "zh": "所有者、合伙人或高管：“姓名、职务”"
+    }
+   },
+   {
+    "id": "opening",
+    "line": "Dates",
+    "label": {
+     "en": "Construction start and planned opening dates",
+     "zh": "施工开始日期和计划开业日期"
+    }
+   },
+   {
+    "id": "area",
+    "line": "Facility",
+    "label": {
+     "en": "Total and inspectable square footage",
+     "zh": "总面积和需检查的面积（平方英尺）"
+    }
+   },
+   {
+    "id": "processes",
+    "line": "Processing",
+    "label": {
+     "en": "Processing methods (cold holding, cooking, packaging)",
+     "zh": "加工方式（冷藏、烹饪、包装）"
+    }
+   }
+  ],
+  "plain": {
+   "en": "Utah's review of a new food store's layout and equipment before it's built and registered.",
+   "zh": "犹他州在新食品商店施工和登记前，对其布局和设备进行的审查。"
+  },
+  "proof": {
+   "quote": "All prospective, converted, or remodeled food establishments must complete and submit a plan review application at least thirty (30) calendar days prior to operating.",
+   "checked": "2026-10-28",
+   "read": "https://ag.utah.gov/regulatory-services/retail-food-regulatory-program/"
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "ut-udaf-retail",
+  "form": "Food establishment registration (retail food)",
+  "title": {
+   "en": "Utah retail food establishment registration",
+   "zh": "犹他州零售食品经营场所登记"
+  },
+  "agency": {
+   "en": "Utah Department of Agriculture and Food",
+   "zh": "犹他州农业与食品厅"
+  },
+  "where": "UT",
+  "segments": [
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "in_person",
+  "order": 76,
+  "how": {
+   "en": "UDAF completes the food establishment registration with you at the pre-operational inspection, after the plans are approved; every plan review and registration fee is paid before it's issued. Restaurants are permitted by the local health department instead.",
+   "zh": "图纸获批后，犹他州农业与食品厅在开业前检查时与您一起完成食品经营场所登记；所有图纸审查费和登记费须在发证前缴清。餐厅改由当地卫生部门发证。"
+  },
+  "url": "https://ag.utah.gov/applications-and-payments/applications-for-new-licenses-permits-and-registrations/",
+  "info": "https://ag.utah.gov/regulatory-services/retail-food-regulatory-program/",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page doesn't state a fee; it confirms any fee when it takes the filing.",
+   "zh": "该机构页面未注明费用；如有费用，受理时由其确认。"
+  },
+  "after": [
+   {
+    "form": "ut-udaf-retail-plan",
+    "label": {
+     "en": "Plan review approved",
+     "zh": "图纸审查获批"
+    }
+   }
+  ],
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Licensee",
+    "label": {
+     "en": "Licensee (owner or operator) legal name",
+     "zh": "持照人（业主或经营者）法定名称"
+    }
+   },
+   {
+    "id": "establishment",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment name",
+     "zh": "经营场所名称"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment address, city, ZIP and county",
+     "zh": "经营场所地址、城市、邮编及县"
+    }
+   },
+   {
+    "id": "mailing",
+    "line": "Establishment",
+    "label": {
+     "en": "Mailing address, if different",
+     "zh": "邮寄地址（如不同）"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "Contact",
+    "label": {
+     "en": "Phone and email",
+     "zh": "电话和电子邮箱"
+    }
+   },
+   {
+    "id": "foods",
+    "line": "Operation",
+    "label": {
+     "en": "Foods handled and how (stored, processed, packaged, sold)",
+     "zh": "经营的食品及方式（储存、加工、包装、销售）"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners, partners or officers: 'name, title'",
+     "zh": "所有者、合伙人或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "The state registration a grocery or other food store needs in Utah.",
+   "zh": "在犹他州经营杂货店或其他食品商店须办理的州登记。"
+  },
+  "proof": {
+   "quote": "An application for food establishment registration will be completed during the pre-operational inspection.",
+   "checked": "2026-10-28",
+   "read": "https://ag.utah.gov/regulatory-services/retail-food-regulatory-program/"
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "ut-udaf-manufactured-plan",
+  "form": "UDAF Form PRA 102 (Rev. 07/2026), Manufactured Food Establishment Plan Review Application",
+  "title": {
+   "en": "Utah manufactured food plan review",
+   "zh": "犹他州加工食品图纸审查"
+  },
+  "agency": {
+   "en": "Utah Department of Agriculture and Food",
+   "zh": "犹他州农业与食品厅"
+  },
+  "where": "UT",
+  "segments": [
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "pdf_mail",
+  "order": 70,
+  "how": {
+   "en": "Email the plan review application to UDAF's support services staff at udaf-planreview@utah.gov at least 30 days before opening. Plans are reviewed once the fee is paid; a pre-operational inspection follows the build.",
+   "zh": "开业前至少 30 天，将图纸审查申请表发送至犹他州农业与食品厅支持服务人员邮箱 udaf-planreview@utah.gov。缴费后才开始审查；施工完成后进行开业前检查。"
+  },
+  "url": "https://ag.utah.gov/wp-content/uploads/PRA102-UDAF-Form-Rev-07_2026.pdf",
+  "pdf": "https://ag.utah.gov/wp-content/uploads/PRA102-UDAF-Form-Rev-07_2026.pdf",
+  "info": "https://ag.utah.gov/regulatory-services/manufactured-food/",
+  "fee": null,
+  "feeNote": {
+   "en": "$250 to $1,250, by the facility's square footage (Form PRA 102).",
+   "zh": "250 至 1,250 美元，按场所面积确定（PRA 102 表）。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Licensee",
+    "label": {
+     "en": "Licensee (owner or operator) legal name",
+     "zh": "持照人（业主或经营者）法定名称"
+    }
+   },
+   {
+    "id": "establishment",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment name",
+     "zh": "经营场所名称"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment address, city, ZIP and county",
+     "zh": "经营场所地址、城市、邮编及县"
+    }
+   },
+   {
+    "id": "mailing",
+    "line": "Establishment",
+    "label": {
+     "en": "Mailing address, if different",
+     "zh": "邮寄地址（如不同）"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "Contact",
+    "label": {
+     "en": "Phone and email",
+     "zh": "电话和电子邮箱"
+    }
+   },
+   {
+    "id": "foods",
+    "line": "Operation",
+    "label": {
+     "en": "Foods handled and how (stored, processed, packaged, sold)",
+     "zh": "经营的食品及方式（储存、加工、包装、销售）"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners, partners or officers: 'name, title'",
+     "zh": "所有者、合伙人或高管：“姓名、职务”"
+    }
+   },
+   {
+    "id": "opening",
+    "line": "Dates",
+    "label": {
+     "en": "Construction start and planned opening dates",
+     "zh": "施工开始日期和计划开业日期"
+    }
+   },
+   {
+    "id": "area",
+    "line": "Facility",
+    "label": {
+     "en": "Total and inspectable square footage",
+     "zh": "总面积和需检查的面积（平方英尺）"
+    }
+   },
+   {
+    "id": "processes",
+    "line": "Processing",
+    "label": {
+     "en": "Processing methods (cold holding, cooking, packaging)",
+     "zh": "加工方式（冷藏、烹饪、包装）"
+    }
+   }
+  ],
+  "plain": {
+   "en": "Utah's review of a food plant's or food warehouse's layout before it's registered.",
+   "zh": "犹他州在食品加工厂或食品仓库登记前对其布局进行的审查。"
+  },
+  "proof": {
+   "quote": "All prospective, converted, or remodeled food establishments must complete and submit a plan review application at least thirty (30) calendar days prior to operating.",
+   "checked": "2026-10-28",
+   "read": "https://ag.utah.gov/regulatory-services/manufactured-food/"
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "ut-udaf-manufactured",
+  "form": "Food establishment registration (manufactured food: processors and warehouses)",
+  "title": {
+   "en": "Utah food processor or warehouse registration",
+   "zh": "犹他州食品加工或仓储登记"
+  },
+  "agency": {
+   "en": "Utah Department of Agriculture and Food",
+   "zh": "犹他州农业与食品厅"
+  },
+  "where": "UT",
+  "segments": [
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "in_person",
+  "order": 76,
+  "how": {
+   "en": "UDAF completes the food establishment registration with you at the pre-operational inspection, after the plans are approved; every plan review and registration fee is paid before it's issued. Restaurants are permitted by the local health department instead.",
+   "zh": "图纸获批后，犹他州农业与食品厅在开业前检查时与您一起完成食品经营场所登记；所有图纸审查费和登记费须在发证前缴清。餐厅改由当地卫生部门发证。"
+  },
+  "url": "https://ag.utah.gov/applications-and-payments/applications-for-new-licenses-permits-and-registrations/",
+  "info": "https://ag.utah.gov/regulatory-services/manufactured-food/",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page doesn't state a fee; it confirms any fee when it takes the filing.",
+   "zh": "该机构页面未注明费用；如有费用，受理时由其确认。"
+  },
+  "after": [
+   {
+    "form": "ut-udaf-manufactured-plan",
+    "label": {
+     "en": "Plan review approved",
+     "zh": "图纸审查获批"
+    }
+   }
+  ],
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Licensee",
+    "label": {
+     "en": "Licensee (owner or operator) legal name",
+     "zh": "持照人（业主或经营者）法定名称"
+    }
+   },
+   {
+    "id": "establishment",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment name",
+     "zh": "经营场所名称"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment address, city, ZIP and county",
+     "zh": "经营场所地址、城市、邮编及县"
+    }
+   },
+   {
+    "id": "mailing",
+    "line": "Establishment",
+    "label": {
+     "en": "Mailing address, if different",
+     "zh": "邮寄地址（如不同）"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "Contact",
+    "label": {
+     "en": "Phone and email",
+     "zh": "电话和电子邮箱"
+    }
+   },
+   {
+    "id": "foods",
+    "line": "Operation",
+    "label": {
+     "en": "Foods handled and how (stored, processed, packaged, sold)",
+     "zh": "经营的食品及方式（储存、加工、包装、销售）"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners, partners or officers: 'name, title'",
+     "zh": "所有者、合伙人或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "The state registration for a place in Utah that makes, distributes or stores food sold to other businesses.",
+   "zh": "在犹他州生产、分销或储存供应其他企业的食品的场所须办理的州登记。"
+  },
+  "proof": {
+   "quote": "An application for food establishment registration will be completed during the pre-operational inspection.",
+   "checked": "2026-10-28",
+   "read": "https://ag.utah.gov/regulatory-services/manufactured-food/"
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "id-ibr",
+  "form": "Idaho Business Registration (IBR): seller's permit (sales and use tax)",
+  "title": {
+   "en": "Idaho seller's permit (sales and use tax)",
+   "zh": "爱达荷州销售许可（销售税和使用税）"
+  },
+  "agency": {
+   "en": "Idaho State Tax Commission (Idaho Business Registration)",
+   "zh": "爱达荷州税务委员会（爱达荷州企业登记）"
+  },
+  "where": "ID",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller"
+  ],
+  "method": "online",
+  "order": 20,
+  "how": {
+   "en": "File the Idaho Business Registration online (the permit comes in 10 to 15 business days), or mail the paper form to PO Box 36, Boise (up to four weeks). One application opens every state account the business needs.",
+   "zh": "在线提交爱达荷州企业登记（IBR），10 至 15 个工作日内取得许可；或将纸质表格邮寄至 PO Box 36, Boise（最长约四周）。一份申请即可开立企业所需的全部州账户。"
+  },
+  "url": "https://www2.labor.idaho.gov/IBRS",
+  "pdf": "https://tax.idaho.gov/document-mngr/forms_EFO00147",
+  "info": "https://tax.idaho.gov/business-registration/",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page doesn't state a fee; it confirms any fee when it takes the filing.",
+   "zh": "该机构页面未注明费用；如有费用，受理时由其确认。"
+  },
+  "takes": {
+   "en": "10 to 15 business days online; up to four weeks by mail.",
+   "zh": "在线 10 至 15 个工作日；邮寄最长约四周。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Business",
+    "label": {
+     "en": "Legal name of the business",
+     "zh": "企业法定名称"
+    }
+   },
+   {
+    "id": "dba",
+    "line": "Business",
+    "label": {
+     "en": "Trade name (DBA), if any",
+     "zh": "商号（DBA），如有"
+    }
+   },
+   {
+    "id": "fein",
+    "line": "Business",
+    "label": {
+     "en": "Federal EIN",
+     "zh": "联邦雇主识别号（EIN）"
+    }
+   },
+   {
+    "id": "organization",
+    "line": "Business",
+    "label": {
+     "en": "Type of organization",
+     "zh": "组织类型"
+    },
+    "options": [
+     "LLC",
+     "Corporation",
+     "Partnership",
+     "Sole proprietorship"
+    ]
+   },
+   {
+    "id": "mailing",
+    "line": "Addresses",
+    "label": {
+     "en": "Mailing address",
+     "zh": "邮寄地址"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Addresses",
+    "label": {
+     "en": "Physical location in the state",
+     "zh": "在该州的营业地点"
+    }
+   },
+   {
+    "id": "first_sale",
+    "line": "Activity",
+    "label": {
+     "en": "Date of first sale in the state (MM/DD/YYYY)",
+     "zh": "在该州首次销售的日期（月/日/年）"
+    }
+   },
+   {
+    "id": "products",
+    "line": "Activity",
+    "label": {
+     "en": "Products sold and NAICS code",
+     "zh": "销售的产品及 NAICS 代码"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners, members or officers: 'name, title'",
+     "zh": "所有者、成员或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "Idaho's permit to collect sales tax on what the business sells there.",
+   "zh": "爱达荷州允许企业就其在当地销售的商品代收销售税的许可。"
+  },
+  "proof": {
+   "quote": "Idaho requires businesses to register for certain tax permits using the Idaho Business Registration (IBR) process.",
+   "checked": "2026-10-28",
+   "read": "https://tax.idaho.gov/business-registration/"
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "id-ibr-employer",
+  "form": "Idaho Business Registration (IBR): withholding, unemployment insurance and workers' compensation accounts",
+  "title": {
+   "en": "Idaho employer registration (withholding and unemployment insurance)",
+   "zh": "爱达荷州雇主登记（预扣税和失业保险）"
+  },
+  "agency": {
+   "en": "Idaho State Tax Commission (Idaho Business Registration)",
+   "zh": "爱达荷州税务委员会（爱达荷州企业登记）"
+  },
+  "where": "ID",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 60,
+  "how": {
+   "en": "File the Idaho Business Registration online (the permit comes in 10 to 15 business days), or mail the paper form to PO Box 36, Boise (up to four weeks). One application opens every state account the business needs.",
+   "zh": "在线提交爱达荷州企业登记（IBR），10 至 15 个工作日内取得许可；或将纸质表格邮寄至 PO Box 36, Boise（最长约四周）。一份申请即可开立企业所需的全部州账户。"
+  },
+  "url": "https://www2.labor.idaho.gov/IBRS",
+  "pdf": "https://tax.idaho.gov/document-mngr/forms_EFO00147",
+  "info": "https://tax.idaho.gov/business-registration/",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page doesn't state a fee; it confirms any fee when it takes the filing.",
+   "zh": "该机构页面未注明费用；如有费用，受理时由其确认。"
+  },
+  "takes": {
+   "en": "10 to 15 business days online; up to four weeks by mail.",
+   "zh": "在线 10 至 15 个工作日；邮寄最长约四周。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Employer",
+    "label": {
+     "en": "Legal name of the business",
+     "zh": "企业法定名称"
+    }
+   },
+   {
+    "id": "fein",
+    "line": "Employer",
+    "label": {
+     "en": "Federal EIN",
+     "zh": "联邦雇主识别号（EIN）"
+    }
+   },
+   {
+    "id": "address",
+    "line": "Employer",
+    "label": {
+     "en": "Business location address",
+     "zh": "营业地址"
+    }
+   },
+   {
+    "id": "first_wages",
+    "line": "Wages",
+    "label": {
+     "en": "Date wages were first paid in the state (MM/DD/YYYY)",
+     "zh": "在该州首次支付工资的日期（月/日/年）"
+    }
+   },
+   {
+    "id": "employees",
+    "line": "Wages",
+    "label": {
+     "en": "Number of employees",
+     "zh": "员工人数"
+    }
+   },
+   {
+    "id": "naics",
+    "line": "Activity",
+    "label": {
+     "en": "NAICS code or business activity",
+     "zh": "NAICS 代码或业务活动"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners or officers: 'name, title'",
+     "zh": "所有者或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "The registration that opens an Idaho employer's withholding tax and unemployment insurance accounts.",
+   "zh": "为爱达荷州雇主开立预扣税和失业保险账户的登记。"
+  },
+  "proof": {
+   "quote": "If you have employees, you’ll also get a income tax withholding account and permits from the Idaho Department of Labor and the Industrial Commission.",
+   "checked": "2026-10-28",
+   "read": "https://tax.idaho.gov/business-registration/"
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "mt-withholding",
+  "form": "Montana Department of Revenue Business Registration (Form GenReg): withholding tax account",
+  "title": {
+   "en": "Montana withholding tax account",
+   "zh": "蒙大拿州预扣税账户"
+  },
+  "agency": {
+   "en": "Montana Department of Revenue",
+   "zh": "蒙大拿州税务局"
+  },
+  "where": "MT",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 55,
+  "how": {
+   "en": "Register online in the TransAction Portal (TAP), or fax or mail Form GenReg to the department's Registration Unit, PO Box 5805, Helena. Montana has no sales tax.",
+   "zh": "在 TransAction Portal（TAP）在线登记，或将 GenReg 表传真或邮寄至税务局登记组（PO Box 5805, Helena）。蒙大拿州不征收销售税。"
+  },
+  "url": "https://tap.dor.mt.gov/",
+  "pdf": "https://revenuefiles.mt.gov/files/Forms/Montana_Department_of_Revenue_Business_Registration_Form_GenReg.pdf",
+  "info": "https://revenuefiles.mt.gov/taxes/withholding-tax/accounts",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page doesn't state a fee; it confirms any fee when it takes the filing.",
+   "zh": "该机构页面未注明费用；如有费用，受理时由其确认。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Employer",
+    "label": {
+     "en": "Legal name of the business",
+     "zh": "企业法定名称"
+    }
+   },
+   {
+    "id": "fein",
+    "line": "Employer",
+    "label": {
+     "en": "Federal EIN",
+     "zh": "联邦雇主识别号（EIN）"
+    }
+   },
+   {
+    "id": "address",
+    "line": "Employer",
+    "label": {
+     "en": "Business location address",
+     "zh": "营业地址"
+    }
+   },
+   {
+    "id": "first_wages",
+    "line": "Wages",
+    "label": {
+     "en": "Date wages were first paid in the state (MM/DD/YYYY)",
+     "zh": "在该州首次支付工资的日期（月/日/年）"
+    }
+   },
+   {
+    "id": "employees",
+    "line": "Wages",
+    "label": {
+     "en": "Number of employees",
+     "zh": "员工人数"
+    }
+   },
+   {
+    "id": "naics",
+    "line": "Activity",
+    "label": {
+     "en": "NAICS code or business activity",
+     "zh": "NAICS 代码或业务活动"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners or officers: 'name, title'",
+     "zh": "所有者或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "Montana's account for the state income tax withheld from employees' pay.",
+   "zh": "蒙大拿州用于申报从员工工资中预扣的州所得税的账户。"
+  },
+  "proof": {
+   "quote": "You must register for a Montana withholding tax account if you: Issue Montana wages",
+   "checked": "2026-10-28",
+   "read": "https://revenuefiles.mt.gov/taxes/withholding-tax/accounts"
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "mt-ui",
+  "form": "Unemployment insurance employer registration (UI eServices)",
+  "title": {
+   "en": "Montana unemployment insurance employer registration",
+   "zh": "蒙大拿州失业保险雇主登记"
+  },
+  "agency": {
+   "en": "Montana Department of Labor and Industry, Unemployment Insurance Division",
+   "zh": "蒙大拿州劳工与工业厅失业保险处"
+  },
+  "where": "MT",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 60,
+  "how": {
+   "en": "Register online at UI eServices for Employers. The division then sends a notice of coverage the business posts for its employees.",
+   "zh": "在 UI eServices for Employers 在线登记。登记后失业保险处会寄发投保通知，企业须张贴供员工查看。"
+  },
+  "url": "https://uieservices.mt.gov/",
+  "info": "https://uid.dli.mt.gov/employer-handbook.pdf",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page doesn't state a fee; it confirms any fee when it takes the filing.",
+   "zh": "该机构页面未注明费用；如有费用，受理时由其确认。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Employer",
+    "label": {
+     "en": "Legal name of the business",
+     "zh": "企业法定名称"
+    }
+   },
+   {
+    "id": "fein",
+    "line": "Employer",
+    "label": {
+     "en": "Federal EIN",
+     "zh": "联邦雇主识别号（EIN）"
+    }
+   },
+   {
+    "id": "address",
+    "line": "Employer",
+    "label": {
+     "en": "Business location address",
+     "zh": "营业地址"
+    }
+   },
+   {
+    "id": "first_wages",
+    "line": "Wages",
+    "label": {
+     "en": "Date wages were first paid in the state (MM/DD/YYYY)",
+     "zh": "在该州首次支付工资的日期（月/日/年）"
+    }
+   },
+   {
+    "id": "employees",
+    "line": "Wages",
+    "label": {
+     "en": "Number of employees",
+     "zh": "员工人数"
+    }
+   },
+   {
+    "id": "naics",
+    "line": "Activity",
+    "label": {
+     "en": "NAICS code or business activity",
+     "zh": "NAICS 代码或业务活动"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners or officers: 'name, title'",
+     "zh": "所有者或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "The account a Montana employer pays unemployment insurance tax through.",
+   "zh": "蒙大拿州雇主缴纳失业保险税的账户。"
+  },
+  "proof": {
+   "quote": "An employer who meets the above criteria is subject to Unemployment Insurance and must register.",
+   "checked": "2026-10-28",
+   "read": "https://uid.dli.mt.gov/employer-handbook.pdf"
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "mt-wholesale-food",
+  "form": "Wholesale Food License Application (manufacturer, processor or warehouse)",
+  "title": {
+   "en": "Montana wholesale food license",
+   "zh": "蒙大拿州食品批发执照"
+  },
+  "agency": {
+   "en": "Montana Department of Public Health and Human Services, Food and Consumer Safety Section",
+   "zh": "蒙大拿州公共卫生与公众服务部食品与消费者安全科"
+  },
+  "where": "MT",
+  "segments": [
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "in_person",
+  "order": 76,
+  "how": {
+   "en": "Fill in the license application and give it with the fee to the local county sanitarian, who inspects the establishment and sends the application to DPHHS; DPHHS doesn't take applications directly from businesses.",
+   "zh": "填写执照申请表，连同费用交给所在县的卫生检查员；检查员检查经营场所后将申请转交州公共卫生与公众服务部。该部门不直接受理企业的申请。"
+  },
+  "url": "https://dphhs.mt.gov/assets/publichealth/FCS/SanitarianResourcePage/FCSForms/Wholesale/WholesaleFoodLicenseApplicationFB.pdf",
+  "pdf": "https://dphhs.mt.gov/assets/publichealth/FCS/SanitarianResourcePage/FCSForms/Wholesale/WholesaleFoodLicenseApplicationFB.pdf",
+  "info": "https://dphhs.mt.gov/assets/publichealth/FCS/Wholesale/LicenseGuide.pdf",
+  "fee": 115,
+  "feeNote": {
+   "en": "$115, as printed on the application.",
+   "zh": "115 美元，按申请表所列。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Licensee",
+    "label": {
+     "en": "Licensee (owner or operator) legal name",
+     "zh": "持照人（业主或经营者）法定名称"
+    }
+   },
+   {
+    "id": "establishment",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment name",
+     "zh": "经营场所名称"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment address, city, ZIP and county",
+     "zh": "经营场所地址、城市、邮编及县"
+    }
+   },
+   {
+    "id": "mailing",
+    "line": "Establishment",
+    "label": {
+     "en": "Mailing address, if different",
+     "zh": "邮寄地址（如不同）"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "Contact",
+    "label": {
+     "en": "Phone and email",
+     "zh": "电话和电子邮箱"
+    }
+   },
+   {
+    "id": "foods",
+    "line": "Operation",
+    "label": {
+     "en": "Foods handled and how (stored, processed, packaged, sold)",
+     "zh": "经营的食品及方式（储存、加工、包装、销售）"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners, partners or officers: 'name, title'",
+     "zh": "所有者、合伙人或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "Montana's license for a business that makes, stores or distributes food sold to stores and other businesses.",
+   "zh": "蒙大拿州为向商店和其他企业供应食品的生产、储存或分销企业颁发的执照。"
+  },
+  "proof": {
+   "quote": "If I sell or distribute food to grocery stores or other businesses, do I need a wholesale food license? A: Yes",
+   "checked": "2026-10-28",
+   "read": "https://dphhs.mt.gov/assets/publichealth/FCS/Wholesale/LicenseGuide.pdf",
+   "en": "Selling or distributing food to grocery stores or other businesses needs a wholesale food license, with some exceptions."
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "mt-retail-food",
+  "form": "Retail Food License Application",
+  "title": {
+   "en": "Montana retail food license",
+   "zh": "蒙大拿州零售食品执照"
+  },
+  "agency": {
+   "en": "Montana Department of Public Health and Human Services, Food and Consumer Safety Section",
+   "zh": "蒙大拿州公共卫生与公众服务部食品与消费者安全科"
+  },
+  "where": "MT",
+  "segments": [
+   "restaurant",
+   "retail"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "in_person",
+  "order": 76,
+  "how": {
+   "en": "Fill in the license application and give it with the fee to the local county sanitarian, who inspects the establishment and sends the application to DPHHS; DPHHS doesn't take applications directly from businesses.",
+   "zh": "填写执照申请表，连同费用交给所在县的卫生检查员；检查员检查经营场所后将申请转交州公共卫生与公众服务部。该部门不直接受理企业的申请。"
+  },
+  "url": "https://dphhs.mt.gov/assets/publichealth/FCS/SanitarianResourcePage/FCSForms/RetailFood/RFLicenseAppRev3.12.21front.back.pdf",
+  "pdf": "https://dphhs.mt.gov/assets/publichealth/FCS/SanitarianResourcePage/FCSForms/RetailFood/RFLicenseAppRev3.12.21front.back.pdf",
+  "info": "https://dphhs.mt.gov/assets/publichealth/FCS/Wholesale/LicenseGuide.pdf",
+  "fee": null,
+  "feeNote": {
+   "en": "$85 with 2 or fewer employees working at any one time, $115 with more, as printed on the application.",
+   "zh": "同一时间在岗员工不超过 2 人的为 85 美元，超过 2 人的为 115 美元，按申请表所列。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Licensee",
+    "label": {
+     "en": "Licensee (owner or operator) legal name",
+     "zh": "持照人（业主或经营者）法定名称"
+    }
+   },
+   {
+    "id": "establishment",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment name",
+     "zh": "经营场所名称"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment address, city, ZIP and county",
+     "zh": "经营场所地址、城市、邮编及县"
+    }
+   },
+   {
+    "id": "mailing",
+    "line": "Establishment",
+    "label": {
+     "en": "Mailing address, if different",
+     "zh": "邮寄地址（如不同）"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "Contact",
+    "label": {
+     "en": "Phone and email",
+     "zh": "电话和电子邮箱"
+    }
+   },
+   {
+    "id": "foods",
+    "line": "Operation",
+    "label": {
+     "en": "Foods handled and how (stored, processed, packaged, sold)",
+     "zh": "经营的食品及方式（储存、加工、包装、销售）"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners, partners or officers: 'name, title'",
+     "zh": "所有者、合伙人或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "Montana's license for a restaurant or store that sells food to the public.",
+   "zh": "蒙大拿州为向公众销售食品的餐厅或商店颁发的执照。"
+  },
+  "proof": {
+   "quote": "you will likely need a retail food license, which may be obtained through your local sanitarian.",
+   "checked": "2026-10-28",
+   "read": "https://dphhs.mt.gov/assets/publichealth/FCS/Wholesale/LicenseGuide.pdf"
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "wy-sales-tax",
+  "form": "Sales/Use Tax License Application (Rev 5/04/2023)",
+  "title": {
+   "en": "Wyoming sales and use tax license",
+   "zh": "怀俄明州销售税和使用税执照"
+  },
+  "agency": {
+   "en": "Wyoming Department of Revenue, Excise Tax Division",
+   "zh": "怀俄明州税务局消费税处"
+  },
+  "where": "WY",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller"
+  ],
+  "method": "online",
+  "order": 20,
+  "how": {
+   "en": "Open a WYIFS account online, then apply for the license on the same site (about two weeks in all), or mail the paper application with the $60 fee to the Department of Revenue in Cheyenne. Every owner signs: originals on paper.",
+   "zh": "先在线开立 WYIFS 账户，再在同一网站申请执照（共约两周）；或将纸质申请表连同 60 美元费用邮寄至夏延市的州税务局。所有业主均须签字，纸质申请须亲笔原签。"
+  },
+  "url": "https://excise-wyifs.wy.gov/",
+  "info": "https://excise-tax-div.wyo.gov/general-administrative/excise-tax-faqs",
+  "fee": 60,
+  "feeNote": {
+   "en": "$60, non-refundable.",
+   "zh": "60 美元，不予退还。"
+  },
+  "takes": {
+   "en": "About two weeks online; longer by mail.",
+   "zh": "在线约两周；邮寄需更久。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Business",
+    "label": {
+     "en": "Legal name of the business",
+     "zh": "企业法定名称"
+    }
+   },
+   {
+    "id": "dba",
+    "line": "Business",
+    "label": {
+     "en": "Trade name (DBA), if any",
+     "zh": "商号（DBA），如有"
+    }
+   },
+   {
+    "id": "fein",
+    "line": "Business",
+    "label": {
+     "en": "Federal EIN",
+     "zh": "联邦雇主识别号（EIN）"
+    }
+   },
+   {
+    "id": "organization",
+    "line": "Business",
+    "label": {
+     "en": "Type of organization",
+     "zh": "组织类型"
+    },
+    "options": [
+     "LLC",
+     "Corporation",
+     "Partnership",
+     "Sole proprietorship"
+    ]
+   },
+   {
+    "id": "mailing",
+    "line": "Addresses",
+    "label": {
+     "en": "Mailing address",
+     "zh": "邮寄地址"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Addresses",
+    "label": {
+     "en": "Physical location in the state",
+     "zh": "在该州的营业地点"
+    }
+   },
+   {
+    "id": "first_sale",
+    "line": "Activity",
+    "label": {
+     "en": "Date of first sale in the state (MM/DD/YYYY)",
+     "zh": "在该州首次销售的日期（月/日/年）"
+    }
+   },
+   {
+    "id": "products",
+    "line": "Activity",
+    "label": {
+     "en": "Products sold and NAICS code",
+     "zh": "销售的产品及 NAICS 代码"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners, members or officers: 'name, title'",
+     "zh": "所有者、成员或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "Wyoming's license to collect sales tax on goods sold there.",
+   "zh": "怀俄明州允许企业就当地销售的商品代收销售税的执照。"
+  },
+  "proof": {
+   "quote": "If you are selling tangible personal property, the answer is yes.",
+   "checked": "2026-10-28",
+   "read": "https://excise-tax-div.wyo.gov/general-administrative/excise-tax-faqs",
+   "en": "Asked whether a storefront needs a Wyoming sales tax license, the department answers that a seller of tangible personal property does."
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "wy-dws",
+  "form": "Joint business registration with DWS on WYUI (unemployment insurance and workers' compensation)",
+  "title": {
+   "en": "Wyoming employer registration (unemployment insurance and workers' compensation)",
+   "zh": "怀俄明州雇主登记（失业保险和工伤保险）"
+  },
+  "agency": {
+   "en": "Wyoming Department of Workforce Services",
+   "zh": "怀俄明州劳动力服务厅"
+  },
+  "where": "WY",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 60,
+  "how": {
+   "en": "Register on WYUI under Employer Services, Register New Business with DWS. DWS uses it to open the unemployment insurance account and decide the state workers' compensation coverage, which employers subject to the Act must have before work starts. Wyoming has no state income tax to withhold.",
+   "zh": "在 WYUI 的 Employer Services 中选择 Register New Business with DWS 进行登记。劳动力服务厅据此开立失业保险账户并确定州工伤保险的投保要求；受该法约束的雇主须在开工前取得承保。怀俄明州没有须预扣的州所得税。"
+  },
+  "url": "https://wyui.wyo.gov/",
+  "info": "https://dws.wyo.gov/dws-division/workers-compensation/new-employers/",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page doesn't state a fee; it confirms any fee when it takes the filing.",
+   "zh": "该机构页面未注明费用；如有费用，受理时由其确认。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Employer",
+    "label": {
+     "en": "Legal name of the business",
+     "zh": "企业法定名称"
+    }
+   },
+   {
+    "id": "fein",
+    "line": "Employer",
+    "label": {
+     "en": "Federal EIN",
+     "zh": "联邦雇主识别号（EIN）"
+    }
+   },
+   {
+    "id": "address",
+    "line": "Employer",
+    "label": {
+     "en": "Business location address",
+     "zh": "营业地址"
+    }
+   },
+   {
+    "id": "first_wages",
+    "line": "Wages",
+    "label": {
+     "en": "Date wages were first paid in the state (MM/DD/YYYY)",
+     "zh": "在该州首次支付工资的日期（月/日/年）"
+    }
+   },
+   {
+    "id": "employees",
+    "line": "Wages",
+    "label": {
+     "en": "Number of employees",
+     "zh": "员工人数"
+    }
+   },
+   {
+    "id": "naics",
+    "line": "Activity",
+    "label": {
+     "en": "NAICS code or business activity",
+     "zh": "NAICS 代码或业务活动"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners or officers: 'name, title'",
+     "zh": "所有者或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "The one Wyoming registration that sets up an employer's unemployment insurance and state workers' comp.",
+   "zh": "怀俄明州为雇主同时办理失业保险和州工伤保险的统一登记。"
+  },
+  "proof": {
+   "quote": "Even if a business may be non-liable or optional under Wyoming’s Workers’ Compensation fund, registration is still required so DWS can make that determination.",
+   "checked": "2026-10-28",
+   "read": "https://dws.wyo.gov/dws-division/workers-compensation/new-employers/"
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "wy-wda-food",
+  "form": "Food establishment or processing plant license (Consumer Health Services)",
+  "title": {
+   "en": "Wyoming food license",
+   "zh": "怀俄明州食品执照"
+  },
+  "agency": {
+   "en": "Wyoming Department of Agriculture, Consumer Health Services",
+   "zh": "怀俄明州农业厅消费者健康服务处"
+  },
+  "where": "WY",
+  "segments": [
+   "restaurant",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "in_person",
+  "order": 76,
+  "how": {
+   "en": "The application isn't online: the local Consumer Health Services inspector (or, in a city or county with its own program, the local health department) provides it and inspects before the license is issued.",
+   "zh": "申请表不在网上提供：由当地消费者健康服务处检查员（或在设有自身项目的市县，由当地卫生部门）提供，并在发照前进行检查。"
+  },
+  "url": "https://agriculture.wy.gov/chs-information",
+  "info": "https://agriculture.wy.gov/chs-information",
+  "fee": 200,
+  "feeNote": {
+   "en": "$200 for a new establishment, new owner or new location, then $100 a year.",
+   "zh": "新开业、业主变更或迁址的首次费用为 200 美元，之后每年 100 美元。"
+  },
+  "renews": {
+   "en": "Every year ($100).",
+   "zh": "每年续期（100 美元）。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Licensee",
+    "label": {
+     "en": "Licensee (owner or operator) legal name",
+     "zh": "持照人（业主或经营者）法定名称"
+    }
+   },
+   {
+    "id": "establishment",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment name",
+     "zh": "经营场所名称"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment address, city, ZIP and county",
+     "zh": "经营场所地址、城市、邮编及县"
+    }
+   },
+   {
+    "id": "mailing",
+    "line": "Establishment",
+    "label": {
+     "en": "Mailing address, if different",
+     "zh": "邮寄地址（如不同）"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "Contact",
+    "label": {
+     "en": "Phone and email",
+     "zh": "电话和电子邮箱"
+    }
+   },
+   {
+    "id": "foods",
+    "line": "Operation",
+    "label": {
+     "en": "Foods handled and how (stored, processed, packaged, sold)",
+     "zh": "经营的食品及方式（储存、加工、包装、销售）"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners, partners or officers: 'name, title'",
+     "zh": "所有者、合伙人或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "Wyoming's license for any place that makes, stores, sells or serves food.",
+   "zh": "怀俄明州为生产、储存、销售或供应食品的场所颁发的执照。"
+  },
+  "proof": {
+   "quote": "No establishment or processing plant shall serve, hold for sale or sell food to the public without a valid license.",
+   "checked": "2026-10-28",
+   "read": "https://agriculture.wy.gov/chs-information"
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "ak-business-license",
+  "form": "Business License: NEW Application (Form 08-4181)",
+  "title": {
+   "en": "Alaska business license",
+   "zh": "阿拉斯加州营业执照"
+  },
+  "agency": {
+   "en": "Alaska Division of Corporations, Business and Professional Licensing",
+   "zh": "阿拉斯加州公司、商业与专业执照处"
+  },
+  "where": "AK",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "method": "online",
+  "order": 20,
+  "how": {
+   "en": "Apply online, or mail Form 08-4181 with the fee to Business Licensing, PO Box 110806, Juneau (up to 3 weeks; no email). A company must be in good standing with the Corporations Section first. Alaska has no state sales tax; some boroughs and cities levy their own.",
+   "zh": "在线申请，或将 08-4181 表连同费用邮寄至 Business Licensing（PO Box 110806, Juneau），最长约 3 周，不接受电子邮件。公司须先在公司科处于良好存续状态。阿拉斯加州不征收州销售税，部分自治市镇和城市自行征收。"
+  },
+  "url": "https://www.commerce.alaska.gov/cbp/businesslicense/new/",
+  "pdf": "https://www.commerce.alaska.gov/web/Portals/5/pub/bus4181.pdf",
+  "info": "https://www.commerce.alaska.gov/web/cbpl/BusinessLicensing/ObtainBusinessLicenseNumber.aspx",
+  "fee": 50,
+  "feeNote": {
+   "en": "$50 for one year or $100 for two years.",
+   "zh": "一年 50 美元，两年 100 美元。"
+  },
+  "takes": {
+   "en": "Up to 3 weeks by mail from March to September; longer from October to February.",
+   "zh": "3 月至 9 月邮寄最长约 3 周；10 月至次年 2 月更久。"
+  },
+  "renews": {
+   "en": "Every one or two years.",
+   "zh": "每一年或两年续期。"
+  },
+  "fields": [
+   {
+    "id": "entity",
+    "line": "Part I",
+    "label": {
+     "en": "Owner: the company's legal name and Alaska Entity Number",
+     "zh": "持有人：公司法定名称及阿拉斯加州实体编号"
+    }
+   },
+   {
+    "id": "business_name",
+    "line": "Part II",
+    "label": {
+     "en": "Business name it operates and advertises under",
+     "zh": "经营和宣传所用的商号"
+    }
+   },
+   {
+    "id": "mailing",
+    "line": "Part III",
+    "label": {
+     "en": "Mailing address",
+     "zh": "邮寄地址"
+    }
+   },
+   {
+    "id": "physical",
+    "line": "Part III",
+    "label": {
+     "en": "Physical address",
+     "zh": "实际地址"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "Part III",
+    "label": {
+     "en": "Email and phone",
+     "zh": "电子邮箱和电话"
+    }
+   },
+   {
+    "id": "naics",
+    "line": "Part IV",
+    "label": {
+     "en": "Primary line of business (NAICS)",
+     "zh": "主要业务（NAICS）"
+    }
+   },
+   {
+    "id": "term",
+    "line": "Part V",
+    "label": {
+     "en": "License term",
+     "zh": "执照期限"
+    },
+    "options": [
+     "1 year",
+     "2 years"
+    ]
+   },
+   {
+    "id": "signer",
+    "line": "Signature",
+    "label": {
+     "en": "Authorized representative's name and title",
+     "zh": "授权代表姓名和职务"
+    }
+   }
+  ],
+  "plain": {
+   "en": "The general license every business working in Alaska needs from the state.",
+   "zh": "在阿拉斯加州经营的所有企业都须向州政府申领的一般营业执照。"
+  },
+  "proof": {
+   "quote": "or another business activity must obtain an Alaska Business License.",
+   "checked": "2026-10-28",
+   "read": "https://www.commerce.alaska.gov/web/cbpl/BusinessLicensing/ObtainBusinessLicenseNumber.aspx",
+   "en": "Any for-profit or non-profit business that engages in a trade, service, profession or other business activity must obtain an Alaska Business License."
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "ak-esd-ui",
+  "form": "Alaska Employer Registration Form (Form TREG, Rev. 2/19)",
+  "title": {
+   "en": "Alaska employer registration (unemployment insurance)",
+   "zh": "阿拉斯加州雇主登记（失业保险）"
+  },
+  "agency": {
+   "en": "Alaska Department of Labor and Workforce Development, Employment Security Tax",
+   "zh": "阿拉斯加州劳工与劳动力发展厅就业保障税处"
+  },
+  "where": "AK",
+  "segments": [
+   "restaurant",
+   "retail",
+   "seller",
+   "warehouse"
+  ],
+  "needs": {
+   "employees": true
+  },
+  "method": "online",
+  "order": 60,
+  "how": {
+   "en": "Register online through myAlaska (Employment Security Tax, New Registration), or send the signed Form TREG by fax, email or mail to Employment Security Tax in Juneau. Alaska has no state income tax to withhold.",
+   "zh": "通过 myAlaska 在线登记（Employment Security Tax 下的 New Registration），或将签字的 TREG 表以传真、电子邮件或邮寄方式发送至朱诺的就业保障税处。阿拉斯加州没有须预扣的州所得税。"
+  },
+  "url": "https://my.alaska.gov/",
+  "pdf": "https://www.labor.state.ak.us/estax/forms/AER.pdf",
+  "info": "https://www.labor.state.ak.us/estax/forms/AER.pdf",
+  "fee": null,
+  "feeNote": {
+   "en": "The agency's page doesn't state a fee; it confirms any fee when it takes the filing.",
+   "zh": "该机构页面未注明费用；如有费用，受理时由其确认。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Employer",
+    "label": {
+     "en": "Legal name of the business",
+     "zh": "企业法定名称"
+    }
+   },
+   {
+    "id": "fein",
+    "line": "Employer",
+    "label": {
+     "en": "Federal EIN",
+     "zh": "联邦雇主识别号（EIN）"
+    }
+   },
+   {
+    "id": "address",
+    "line": "Employer",
+    "label": {
+     "en": "Business location address",
+     "zh": "营业地址"
+    }
+   },
+   {
+    "id": "first_wages",
+    "line": "Wages",
+    "label": {
+     "en": "Date wages were first paid in the state (MM/DD/YYYY)",
+     "zh": "在该州首次支付工资的日期（月/日/年）"
+    }
+   },
+   {
+    "id": "employees",
+    "line": "Wages",
+    "label": {
+     "en": "Number of employees",
+     "zh": "员工人数"
+    }
+   },
+   {
+    "id": "naics",
+    "line": "Activity",
+    "label": {
+     "en": "NAICS code or business activity",
+     "zh": "NAICS 代码或业务活动"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners or officers: 'name, title'",
+     "zh": "所有者或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "The account an Alaska employer pays unemployment insurance through, once it has paid anyone in the state.",
+   "zh": "阿拉斯加州雇主在该州支付工资后，用于缴纳失业保险的账户。"
+  },
+  "proof": {
+   "quote": "has employed one or more persons is required by law to register.",
+   "checked": "2026-10-28",
+   "read": "https://www.labor.state.ak.us/estax/forms/AER.pdf",
+   "en": "Any person, firm, corporation or other organization that has employed one or more persons for some portion of a day is required by law to register."
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "ak-dec-food",
+  "form": "Food Establishment Permit Application (DEC Food Safety and Sanitation)",
+  "title": {
+   "en": "Alaska food establishment permit",
+   "zh": "阿拉斯加州食品经营场所许可证"
+  },
+  "agency": {
+   "en": "Alaska Department of Environmental Conservation, Food Safety and Sanitation Program",
+   "zh": "阿拉斯加州环境保护厅食品安全与卫生项目"
+  },
+  "where": "AK",
+  "segments": [
+   "restaurant",
+   "retail",
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "in_person",
+  "order": 76,
+  "how": {
+   "en": "Submit DEC's Food Establishment Permit Application (with a plan review application for new construction) before opening; DEC covers restaurants, markets and food processors, including warehousing. In Anchorage, the Anchorage Health Department's food safety program applies instead.",
+   "zh": "开业前提交环境保护厅的食品经营场所许可申请（新建场所另附图纸审查申请）；该厅负责餐厅、食品商店及食品加工（包括仓储）。在安克雷奇，改由安克雷奇卫生局的食品安全项目负责。"
+  },
+  "url": "https://dec.alaska.gov/eh/fss/food/establishments/",
+  "info": "https://dec.alaska.gov/eh/fss/food/opening/",
+  "fee": null,
+  "feeNote": {
+   "en": "Set on DEC's permit fee schedule.",
+   "zh": "按环境保护厅许可收费标准确定。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Licensee",
+    "label": {
+     "en": "Licensee (owner or operator) legal name",
+     "zh": "持照人（业主或经营者）法定名称"
+    }
+   },
+   {
+    "id": "establishment",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment name",
+     "zh": "经营场所名称"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment address, city, ZIP and county",
+     "zh": "经营场所地址、城市、邮编及县"
+    }
+   },
+   {
+    "id": "mailing",
+    "line": "Establishment",
+    "label": {
+     "en": "Mailing address, if different",
+     "zh": "邮寄地址（如不同）"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "Contact",
+    "label": {
+     "en": "Phone and email",
+     "zh": "电话和电子邮箱"
+    }
+   },
+   {
+    "id": "foods",
+    "line": "Operation",
+    "label": {
+     "en": "Foods handled and how (stored, processed, packaged, sold)",
+     "zh": "经营的食品及方式（储存、加工、包装、销售）"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners, partners or officers: 'name, title'",
+     "zh": "所有者、合伙人或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "Alaska's permit for a restaurant, food store or food plant.",
+   "zh": "阿拉斯加州为餐厅、食品商店或食品加工厂颁发的许可证。"
+  },
+  "proof": {
+   "quote": "No matter what you are planning on doing you will need to submit a Food Establishment Application.",
+   "checked": "2026-10-28",
+   "read": "https://dec.alaska.gov/eh/fss/food/opening/"
+  }
+ },
+ {
+  "level": "state",
+  "checked": "page",
+  "id": "hi-food-warehouse",
+  "form": "Food establishment permit: food manufacturer or food warehouse (HAR 11-50)",
+  "title": {
+   "en": "Hawaii food manufacturer or warehouse permit",
+   "zh": "夏威夷州食品加工或仓储许可证"
+  },
+  "agency": {
+   "en": "Hawaii Department of Health, Food Safety Branch",
+   "zh": "夏威夷州卫生局食品安全处"
+  },
+  "where": "HI",
+  "segments": [
+   "warehouse"
+  ],
+  "needs": {
+   "food": true
+  },
+  "method": "in_person",
+  "order": 76,
+  "how": {
+   "en": "Apply to the Department of Health's Food Safety Branch for the island; a place that stores, manufactures or packages food for wholesale is a food establishment and is inspected and permitted like a restaurant.",
+   "zh": "向所在岛屿的州卫生局食品安全处申请；储存、加工或包装批发食品的场所属于食品经营场所，与餐厅一样须接受检查并取得许可。"
+  },
+  "url": "https://health.hawaii.gov/san/",
+  "info": "https://health.hawaii.gov/san/files/2025/09/HAR-11-50-2025-searchable.pdf",
+  "fee": null,
+  "feeNote": {
+   "en": "Set by HAR 11-50-7 by the operation's size and risk category.",
+   "zh": "按《夏威夷行政规则》11-50-7 依经营规模和风险类别确定。"
+  },
+  "renews": {
+   "en": "Every year.",
+   "zh": "每年。"
+  },
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "Licensee",
+    "label": {
+     "en": "Licensee (owner or operator) legal name",
+     "zh": "持照人（业主或经营者）法定名称"
+    }
+   },
+   {
+    "id": "establishment",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment name",
+     "zh": "经营场所名称"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Establishment",
+    "label": {
+     "en": "Establishment address, city, ZIP and county",
+     "zh": "经营场所地址、城市、邮编及县"
+    }
+   },
+   {
+    "id": "mailing",
+    "line": "Establishment",
+    "label": {
+     "en": "Mailing address, if different",
+     "zh": "邮寄地址（如不同）"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "Contact",
+    "label": {
+     "en": "Phone and email",
+     "zh": "电话和电子邮箱"
+    }
+   },
+   {
+    "id": "foods",
+    "line": "Operation",
+    "label": {
+     "en": "Foods handled and how (stored, processed, packaged, sold)",
+     "zh": "经营的食品及方式（储存、加工、包装、销售）"
+    }
+   },
+   {
+    "id": "owners",
+    "line": "Owners",
+    "label": {
+     "en": "Owners, partners or officers: 'name, title'",
+     "zh": "所有者、合伙人或高管：“姓名、职务”"
+    }
+   }
+  ],
+  "plain": {
+   "en": "Hawaii's health permit for a food plant or food warehouse.",
+   "zh": "夏威夷州为食品加工厂或食品仓库颁发的卫生许可证。"
+  },
+  "proof": {
+   "quote": "No person may operate a food establishment without a valid permit issued by the director",
+   "checked": "2026-10-28",
+   "read": "https://health.hawaii.gov/san/files/2025/09/HAR-11-50-2025-searchable.pdf"
+  }
+ }
+]

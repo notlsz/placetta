@@ -1,4 +1,6 @@
 {
+"ak-business-license": {"s":"typed","f":"esign","p":"with_filing","site":"www.commerce.alaska.gov","src":"https://www.commerce.alaska.gov/web/Portals/5/pub/bus4181.pdf","chk":"2026-10-28"},
+"ak-esd-ui": {"s":"wet","f":"wet","p":"none","site":"my.alaska.gov","src":"https://www.labor.state.ak.us/estax/forms/AER.pdf","chk":"2026-10-28"},
 "alh-license": {"s":"typed","f":"esign","site":"secure.alhambraca.gov","open":true,"src":"https://secure.alhambraca.gov/BusinessLicenseApplication/","chk":"2026-10-24"},
 "appeal-sf-boa": {"s":"typed","f":"esign","p":"invoice","src":"https://sf.gov/file-appeal-permit-or-decision","chk":"2026-10-22"},
 "appeal-tx-tabc-hearing": {"s":"typed","f":"esign","p":"none","src":"https://www.tabc.texas.gov/static/f6f628258b7ae843925c2025de0a3ff6/tabc-administrative-rules.pdf","chk":"2026-10-22"},
@@ -105,6 +107,8 @@
 "hi-ui": {"s":"typed","f":"esign","p":"none","site":"huiclaims3.hawaii.gov","src":"https://labor.hawaii.gov/ui/employer-registration/","chk":"2026-10-18"},
 "hou-co": {"s":"wet","f":"wet","p":"invoice","src":"https://www.houstonpermittingcenter.org/media/941/download","chk":"2026-10-13"},
 "hou-food-dealer": {"s":"none","f":"none","src":"https://www.houstonhealth.org/media/14901/download","chk":"2026-10-13"},
+"id-ibr": {"s":"wet","f":"wet","site":"www2.labor.idaho.gov","src":"https://tax.idaho.gov/business-registration/","chk":"2026-10-28"},
+"id-ibr-employer": {"s":"wet","f":"wet","site":"www2.labor.idaho.gov","src":"https://tax.idaho.gov/business-registration/","chk":"2026-10-28"},
 "il-ides": {"s":"typed","f":"esign","p":"none","site":"mytax.illinois.gov","src":"https://ides.illinois.gov/employer-resources/tax-employer-information.html","chk":"2026-10-18"},
 "il-tax": {"s":"typed","f":"esign","p":"none","site":"mytax.illinois.gov","open":true,"src":"https://tax.illinois.gov/businesses/registration.html","chk":"2026-10-18"},
 "insp-aus-building-final": {"s":"none","f":"none","p":"none","site":"abc.austintexas.gov","src":"https://www.austintexas.gov/development-services/schedule-building-inspection","chk":"2026-10-22"},
@@ -159,6 +163,8 @@
 "mn-ui": {"s":"typed","f":"esign","p":"none","site":"www1.ui.mn.gov","src":"https://ui.mn.gov/employers/help-and-support/emp-hbook/new-registration.jsp","chk":"2026-10-18"},
 "moco-food-license": {"s":"wet","f":"wet","p":"with_filing","site":"www.civicgov4.com","src":"https://www.montgomerycountymd.gov/department-health-human-services/about-us/licensure-regulatory-services/environmental-health-unit/food-service-facility-license","chk":"2026-10-18"},
 "mpls-plan-review": {"s":"wet","f":"wet","src":"https://www.minneapolismn.gov/business-services/business-assistance/run/food-safety/food-plan-review/","chk":"2026-10-18"},
+"mt-ui": {"s":"typed","f":"esign","site":"uieservices.mt.gov","src":"https://uid.dli.mt.gov/employer-handbook.pdf","chk":"2026-10-28"},
+"mt-withholding": {"s":"wet","f":"wet","site":"tap.dor.mt.gov","src":"https://revenuefiles.mt.gov/taxes/withholding-tax/accounts","chk":"2026-10-28"},
 "nd-jsnd-ui": {"s":"typed","f":"esign","site":"apps.nd.gov","src":"https://www.jobsnd.com/unemployment-business-tax/file-reports","chk":"2026-10-28"},
 "nd-tax-sales": {"s":"typed","f":"esign","site":"tap.tax.nd.gov","src":"https://www.tax.nd.gov/starting-new-business","chk":"2026-10-28"},
 "nd-tax-withholding": {"s":"typed","f":"esign","site":"tap.tax.nd.gov","src":"https://www.tax.nd.gov/income-tax-withholding","chk":"2026-10-28"},
@@ -257,6 +263,8 @@
 "tx-twc": {"s":"typed","f":"esign","p":"none","site":"apps.twc.texas.gov","src":"https://www.twc.texas.gov/services/register-tax","chk":"2026-10-18"},
 "ut-llc": {"s":"typed","f":"esign","p":"portal","site":"businessregistration.utah.gov","src":"https://commerce.utah.gov/corporations/business-entities/domestic-limited-liability-company/","chk":"2026-10-18"},
 "ut-tax": {"s":"typed","f":"esign","p":"none","site":"tap.tax.utah.gov","src":"https://tax.utah.gov/business/create-manage/tax-info-business/","chk":"2026-10-18"},
+"ut-udaf-manufactured-plan": {"s":"wet","f":"wet","src":"https://ag.utah.gov/regulatory-services/manufactured-food/","chk":"2026-10-28"},
+"ut-udaf-retail-plan": {"s":"wet","f":"wet","src":"https://ag.utah.gov/regulatory-services/retail-food-regulatory-program/","chk":"2026-10-28"},
 "ut-ui": {"s":"typed","f":"esign","p":"none","site":"jobs.utah.gov","src":"https://jobs.utah.gov/ui/employer/public/osbr.aspx","chk":"2026-10-18"},
 "va-food-manager": {"s":"none","f":"none","p":"in_person","owner":true,"src":"https://www.vdh.virginia.gov/environmental-health/food-safety-in-virginia/cfpm/","chk":"2026-10-18"},
 "va-foreign-registration": {"s":"typed","f":"esign","p":"portal","site":"cis.scc.virginia.gov","src":"https://www.scc.virginia.gov/businesses/forms-and-fees/foreign-limited-liability-companies/","chk":"2026-10-24"},
@@ -272,6 +280,10 @@
 "wa-lcb": {"s":"typed","f":"esign","p":"portal","site":"secure.dor.wa.gov","src":"https://lcb.wa.gov/licensing/apply-liquor-license","chk":"2026-10-24"},
 "wa-sos": {"s":"typed","f":"esign","p":"portal","site":"ccfs.sos.wa.gov","src":"https://www.sos.wa.gov/corporations-charities/business-entities/online-filing-instructions/start-domestic-wa-limited-liability-company-llc-online","chk":"2026-10-18"},
 "wa-sos-foreign": {"s":"typed","f":"esign","p":"portal","site":"ccfs.sos.wa.gov","src":"https://www.sos.wa.gov/corporations-charities/business-entities/online-filing-instructions/register-foreign-non-wa-limited-liability-company-llc-online","chk":"2026-10-24"},
+"wa-wsda-processor": {"s":"wet","f":"wet","p":"with_filing","src":"https://agr.wa.gov/departments/food-safety/food-safety/food-processors","chk":"2026-10-28"},
+"wa-wsda-warehouse": {"s":"wet","f":"wet","p":"with_filing","src":"https://agr.wa.gov/Services/Licenses-Permits-and-Certificates/Summary-Descriptions/Food-Storage-Warehouse","chk":"2026-10-28"},
 "wv-tax": {"s":"typed","f":"esign","p":"portal","site":"onestop.wv.gov","src":"https://business4.wv.gov/Documents/OneStopBizRegInstr.pdf","chk":"2026-10-28"},
-"wv-ui": {"s":"wet","f":"wet","p":"none","src":"https://workforcewv.org/businesses/unemployment-tax-information/navigate-the-unemployment-process/","chk":"2026-10-28"}
+"wv-ui": {"s":"wet","f":"wet","p":"none","src":"https://workforcewv.org/businesses/unemployment-tax-information/navigate-the-unemployment-process/","chk":"2026-10-28"},
+"wy-dws": {"s":"typed","f":"esign","site":"wyui.wyo.gov","src":"https://dws.wyo.gov/dws-division/workers-compensation/new-employers/","chk":"2026-10-28"},
+"wy-sales-tax": {"s":"wet","f":"wet","p":"with_filing","site":"excise-wyifs.wy.gov","src":"https://excise-tax-div.wyo.gov/salesuselodging-tax/salesuselodging-registration","chk":"2026-10-28"}
 }
