@@ -2,6 +2,7 @@
 // person files in the run's browser while Odelia records; the recording becomes a draft playbook; a draft runs only
 // in assist mode (Odelia fills, a person presses submit); a reviewed one replays for every customer and still stops
 // at the approval; nothing of one customer's travels to the next; a page that talks to the AI changes nothing.
+import { policyOf, type RecordingPolicy } from "../src/privacy.ts";
 import { test, after } from "node:test";
 import assert from "node:assert";
 import { readFileSync } from "node:fs";
@@ -38,6 +39,8 @@ const filing = (who: "a" | "b", teach = false): Filing => ({
 class Mem implements Store {
   f: Filing; tasks: string[] = []; docs: string[] = []; filed = 99; held = false; saved: Draft[] = []; results: { ok: boolean; drift?: string[] }[] = [];
   playbook: Taught | null = null; onNeed?: (ref: string) => void;
+  privacy: RecordingPolicy = { synthetic: false, strict: false, screen: false, teach: false };   // a business outside California
+  async recordingPolicy() { return this.privacy; }
   constructor(f: Filing) { this.f = f; }
   async claim() { return null; }
   async reload() { return this.f; }
@@ -106,8 +109,9 @@ async function personFiles(page: Page, who: "a", o: { ssn?: boolean } = {}) {
 }
 
 /** A run on the sample portal while the person files: the draft it saved. */
-async function teachRun(v: TeachVariant = {}, o: { ssn?: boolean; label?: (i: LabelIn) => Promise<unknown> } = {}) {
+async function teachRun(v: TeachVariant = {}, o: { ssn?: boolean; label?: (i: LabelIn) => Promise<unknown>; privacy?: RecordingPolicy } = {}) {
   const p = await portal(v), store = new Mem(filing("a", true));
+  if (o.privacy) store.privacy = o.privacy;
   const { w, box } = worker(store, p.url, o.label ? { labeler: o.label } : {});
   const run = w.run(store.f);
   await until(() => !!box.page && /^http:\/\/127/.test(box.page.url()));
@@ -176,6 +180,49 @@ test("a real teach run: the person files, Odelia records, the filing keeps its c
   assert.ok(d.trace.some((t) => t.action === "fill" && t.person === "ssn"), "the SSN line is the person's on every run");
   assert.ok(store.f.agent_log.some((e) => e.kind === "taught" && Number(e.ref) > 5));
   assert.ok(store.f.agent_log.some((e) => e.kind === "need_person" && e.ref === "teach"), "the person was asked to file in the live view");
+});
+
+test("California (or nowhere known) without the person's opt-in: teach mode records nothing and opens no browser", async () => {
+  const p = await portal({}), store = new Mem(filing("a", true));
+  store.privacy = { synthetic: false, strict: true, screen: false, teach: false };
+  let opened = 0;
+  const { w } = worker(store, p.url, { open: async () => { opened++; throw new Error("no browser should open"); } });
+  const r = await w.run(store.f);
+  assert.equal(r?.kind, "handoff");
+  assert.equal((r as { reason: string }).reason, "teach_consent");
+  assert.match((r as { message: { en: string; zh: string } }).message.en, /nothing was recorded/);
+  assert.ok((r as { message: { zh: string } }).message.zh.includes("教学模式"));
+  assert.equal(opened, 0, "no browser, so no recorder");
+  assert.equal(store.saved.length, 0, "no draft");
+  assert.equal(p.submissions, 0);
+});
+
+test("a store that can't say (the policy call fails): the strict side, teach mode records nothing", async () => {
+  const p = await portal({}), store = new Mem(filing("a", true));
+  store.recordingPolicy = async () => { throw new Error("database down"); };
+  const { w } = worker(store, p.url, { open: async () => { throw new Error("no browser should open"); } });
+  const r = await w.run(store.f);
+  assert.equal((r as { reason: string }).reason, "teach_consent");
+});
+
+test("the run tells the model whether it's a rehearsal from the database's answer only, and resets it after", async () => {
+  const p = await portal({}), store = new Mem(filing("a", true));
+  const seen: boolean[] = [];
+  const spy = { calls: 0, next: async () => { throw new Error("unused"); }, rehearsal: (on: boolean) => { seen.push(on); } };
+  store.privacy = { synthetic: true, strict: true, screen: false, teach: false };
+  const { w } = worker(store, p.url, { model: spy, open: async () => { throw new Error("no browser"); } });
+  await w.run(store.f);
+  assert.deepEqual(seen, [true, false], "on for the synthetic run, off when it ends");
+  // the parser: anything odd is the strict side, and a filing can't make itself synthetic
+  assert.deepEqual(policyOf(null), { synthetic: false, strict: true, screen: false, teach: false });
+  assert.deepEqual(policyOf({ synthetic: "true", strict: "no", screen: 1 }), { synthetic: false, strict: true, screen: false, teach: false });
+  assert.deepEqual(policyOf({ synthetic: true, strict: false, screen: true, teach: true }), { synthetic: true, strict: false, screen: true, teach: true });
+});
+
+test("California with the person's opt-in to teach mode: Odelia records as before", async () => {
+  const { r, store } = await teachRun({}, { privacy: { synthetic: false, strict: true, screen: false, teach: true } });
+  assert.equal(r?.kind, "submitted");
+  assert.equal(store.saved.length, 1);
 });
 
 // ---------------------------------------------------------------- generalize

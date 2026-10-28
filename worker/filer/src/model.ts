@@ -11,7 +11,7 @@ export type { ToolCall };
 /** account: while the worker makes the business's account on the site (account.ts accountNote): what to do, with no
  *  password and nothing from the inbox. */
 export type StepInput = { filing: Filing; agency: string; state: PageState; recent: string[]; note?: string; guide?: string[]; account?: string };
-export interface Model { calls: number; next(i: StepInput): Promise<ToolCall> }
+export interface Model { calls: number; next(i: StepInput): Promise<ToolCall>; rehearsal?(on: boolean): void }
 
 const str = { type: "string" } as const;
 export const TOOLS = [
@@ -57,6 +57,8 @@ export class FilerModel implements Model {
   readonly router: Router;
   get calls() { return this.router.calls; }
   constructor(router = new Router()) { this.router = router; }
+  /** run.ts, at the start and end of each run: a synthetic workspace may rehearse on a free Gemini key (llm.ts). */
+  rehearsal(on: boolean) { this.router.synthetic = on; }
   next(i: StepInput): Promise<ToolCall> { return this.router.ask({ prompt: () => prompt(i), tools: TOOLS, maxTokens: 800 }); }
 }
 

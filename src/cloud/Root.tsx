@@ -11,6 +11,7 @@ import * as api from "./api";
 import { normalize, type CloudSession } from "./session";
 import { consumeHandoff, readHandoff } from "./handoff";
 import { TwoStepCode } from "./TwoStep";
+import { AgeGate, AgeRefused } from "./AgeGate";
 import { HqHome } from "../Headquarters";
 import { applyTheme, readTheme } from "../hooks";
 import type { HqRow } from "../hq";
@@ -747,7 +748,7 @@ function SetPassword({ lang, onDone, onCancel }: { lang: Lang; onDone: () => voi
   );
 }
 
-type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "sso"; email: string; method: string } | { k: "onboard"; email: string; back?: string; agreed?: boolean } | { k: "claim"; email: string; token: string; peek: StartPeek } | { k: "hq"; email: string; rows: HqRow[] } | { k: "partner"; email: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string }
+type Phase = { k: "loading" } | { k: "signin" } | { k: "recover" } | { k: "twostep"; factorId: string } | { k: "age" } | { k: "age_refused" } | { k: "sso"; email: string; method: string } | { k: "onboard"; email: string; back?: string; agreed?: boolean } | { k: "claim"; email: string; token: string; peek: StartPeek } | { k: "hq"; email: string; rows: HqRow[] } | { k: "partner"; email: string } | { k: "app"; s: CloudSession } | { k: "error"; msg: string }
   | { k: "mcp"; email: string; req: api.McpAuthRequest; rows: { id: string; name: string }[]; start: string };
 
 export function CloudRoot() {
@@ -784,6 +785,12 @@ export function CloudRoot() {
         const rule = await api.ssoForEmail(email);
         if (!api.meetsSso(rule, await api.sessionMethods())) { setPhase({ k: "sso", email, method: rule.method ?? "saml" }); return; }
       }
+      // 18 or older (src/age.ts): asked once, at sign-up or the next sign-in; the database refuses every workspace
+      // until it's answered, so this is the app's question for a rule the server already enforces
+      const age = await api.ageStatus();
+      if (age && !age.confirmed) { setPhase({ k: "age" }); return; }
+      // where this person is (country and state), for the recording rules; best effort, never blocks
+      void api.noteRegion();
       const joined = await api.acceptInvites().catch(() => 0);
       void api.recordSignIn();
       // Agreed at sign-up (the checkbox), before there was a session: record it now, if it's still the current version.
@@ -904,6 +911,10 @@ export function CloudRoot() {
           <button type="button" className="lnk" onClick={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }}>{L(B("Sign out", "退出登录"))}</button>
         </div>
       )}
+      {phase.k === "age" && <AgeGate lang={lang} onDone={() => void open(lastWs.get())}
+        onRefused={() => { void api.signOut().catch(() => undefined).then(() => setPhase({ k: "age_refused" })); }}
+        onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
+      {phase.k === "age_refused" && <AgeRefused lang={lang} onBack={() => setPhase({ k: "signin" })} />}
       {phase.k === "twostep" && <TwoStepCode lang={lang} factorId={phase.factorId} onDone={() => void open(lastWs.get())} onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
       {phase.k === "mcp" && <McpConsent lang={lang} email={phase.email} req={phase.req} rows={phase.rows} start={phase.start} onDone={() => void open(phase.start)} />}
       {phase.k === "onboard" && <Onboard lang={lang} email={phase.email} agreedAtSignup={!!phase.agreed} onCreated={id => void open(id)} onCancel={phase.back !== undefined ? () => void open(phase.back!) : undefined} />}

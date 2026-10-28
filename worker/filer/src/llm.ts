@@ -19,7 +19,9 @@
 //   - zero data retention (supabase/functions/_shared/zdr.ts): with AI_ZDR_REQUIRED=1, only providers and models on
 //     AI_ZDR_PROVIDERS; OpenRouter then also asks for zero-retention hosts only (provider.zdr)
 //   - Gemini only with GEMINI_PAID=1, the same rule as the server (_shared/llm.ts vendorOk): Google's free tier may use
-//     prompts to improve its products, the paid tier doesn't
+//     prompts to improve its products, the paid tier doesn't. The one exception, for rehearsals: with
+//     GEMINI_FREE_SYNTHETIC=1 a free key may take a run on a synthetic workspace (a probe or test, set by the service
+//     role only; filer_recording_policy tells the worker). Never a real customer's.
 //   - OpenRouter always with provider.data_collection "deny": only hosts that don't keep or train on prompts
 //   - Muse never on a "-contributor" model: Meta may train on those; standard mode isn't used for training
 // The log says which seat answered; never a key (redact below scrubs every key from any error text).
@@ -64,17 +66,17 @@ export function seatsOf(env: Env): Seat[] {
 }
 
 /** Why a seat may not take customer data, or null when it may. Checked before anything is sent. */
-export function refusal(env: Env, s: Seat): "no_key" | "zdr" | "gemini_unpaid" | "contributor" | null {
+export function refusal(env: Env, s: Seat, o: { synthetic?: boolean } = {}): "no_key" | "zdr" | "gemini_unpaid" | "contributor" | null {
   if (!env(KEY_OF[s.vendor])?.trim()) return "no_key";
   if (!zdrAllows(env, s.vendor, s.model)) return "zdr";
-  if (s.vendor === "gemini" && env("GEMINI_PAID") !== "1") return "gemini_unpaid";
+  if (s.vendor === "gemini" && env("GEMINI_PAID") !== "1" && !(env("GEMINI_FREE_SYNTHETIC") === "1" && o.synthetic === true)) return "gemini_unpaid";
   if (s.vendor === "muse" && /contributor/i.test(s.model)) return "contributor";
   if (s.vendor === "openrouter" && /^meta\/.*contributor/i.test(s.model)) return "contributor";
   return null;
 }
 
 /** The seats this worker can use right now, in order. */
-export const usableSeats = (env: Env) => seatsOf(env).filter((s) => refusal(env, s) === null);
+export const usableSeats = (env: Env, o: { synthetic?: boolean } = {}) => seatsOf(env).filter((s) => refusal(env, s, o) === null);
 
 /** Every key, and the shapes keys take, out of a line of text. */
 export function redact(text: string, env: Env): string {
@@ -210,6 +212,9 @@ export class Router {
   calls = 0;
   /** The seat that gave the last answer ("gemini:gemini-3.8-flash"), for the log. */
   by: string | null = null;
+  /** This run is on a synthetic workspace (run.ts sets it from filer_recording_policy, never from the filing's own
+   *  data): only then may a free Gemini key take it, with GEMINI_FREE_SYNTHETIC=1. False between runs. */
+  synthetic = false;
   private benched = new Map<string, number>();
   private env: Env; private f: Fetch; private now: () => number; private log: (line: string) => void;
   constructor(o: { env?: Env; fetch?: Fetch; now?: () => number; log?: (line: string) => void } = {}) {
@@ -220,9 +225,10 @@ export class Router {
   }
   async ask(q: AskIn): Promise<ToolCall> {
     const all = seatsOf(this.env);
-    const ok = all.filter((s) => refusal(this.env, s) === null);
+    const o = { synthetic: this.synthetic };
+    const ok = all.filter((s) => refusal(this.env, s, o) === null);
     if (!ok.length) {
-      if (zdrRequired(this.env) && all.some((s) => refusal(this.env, s) === "zdr")) throw new Error(ZDR_REFUSED);
+      if (zdrRequired(this.env) && all.some((s) => refusal(this.env, s, o) === "zdr")) throw new Error(ZDR_REFUSED);
       throw new Error("model error: no model key is set (ANTHROPIC_API_KEY, GEMINI_API_KEY with GEMINI_PAID=1, OPENROUTER_API_KEY or MUSE_API_KEY)");
     }
     const cool = Math.max(0, Number(this.env("FILER_MODEL_COOLDOWN_S") ?? "120") || 0) * 1000;

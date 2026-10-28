@@ -86,6 +86,7 @@ import { reviewFixTests } from "./review-fixes-test";
 import { openingEstimateTests } from "./opening-estimate-test";
 import { filingProgressTests } from "./filing-progress-test";
 import { initiativeTests } from "./initiative-test";
+import { privacyTests } from "./privacy-test";
 
 /* ------------------------------------------------------------------ checks */
 
@@ -3315,6 +3316,7 @@ reviewFixTests(ok, eq);
 openingEstimateTests(ok, eq);
 filingProgressTests(ok, eq);
 await initiativeTests(ok, eq);
+privacyTests(ok, eq);
 await autopilotTests(ok, eq);
 await agentAuthorityTests(ok, eq);
 

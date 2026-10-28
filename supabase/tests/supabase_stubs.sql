@@ -51,3 +51,14 @@ create function graphql_public.graphql("operationName" text default null, query 
   returns jsonb language sql as $$ select '{}'::jsonb $$;
 grant usage on schema graphql_public to anon, authenticated, service_role;
 grant execute on function graphql_public.graphql(text, text, jsonb, jsonb) to anon, authenticated, service_role;
+-- Test fixture, never in a migration: every account a test makes belongs to an adult who confirmed their age at sign-in
+-- (20261105090600_privacy_recording_age.sql gates every workspace check on it). privacy_recording_age.sql removes the
+-- confirmation to test the gate itself.
+create function auth.test_adult() returns trigger language plpgsql as $$
+begin
+  if to_regclass('public.age_confirmations') is not null then
+    execute 'insert into public.age_confirmations (user_id, method) values ($1, ''attest'') on conflict do nothing' using new.id;
+  end if;
+  return new;
+end $$;
+create trigger test_adult after insert on auth.users for each row execute function auth.test_adult();

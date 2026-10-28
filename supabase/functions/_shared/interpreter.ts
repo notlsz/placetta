@@ -114,8 +114,8 @@ export function interpreterInstructions(o: { business: string; terms: Term[]; pl
 }
 
 /** The first thing said, in both languages: an AI interpreter, for whom. */
-export const interpreterGreeting = (business: string) =>
-  `Hi, I'm Odelia, an AI interpreter for ${business}. I'll translate between English and Mandarin. 您好，我是 Odelia，为${business}提供中英翻译的 AI 助理。`;
+export const interpreterGreeting = (business: string, recorded = false) =>
+  `Hi, I'm Odelia, an AI interpreter for ${business}. I'll translate between English and Mandarin.${recorded ? " This call is recorded and transcribed; if you'd rather it isn't, just say so." : ""} 您好，我是 Odelia，为${business}提供中英翻译的 AI 助理。${recorded ? "本次通话会录音和转录，如您不同意录音请直接说。" : ""}`;
 
 /** One line of a bilingual transcript: who spoke, when, what they said, and Odelia's translation. */
 export type BiLine = { who: "owner" | "clerk"; at: number; lang: Lang; said: string; translated: string; missing_terms?: string[] };

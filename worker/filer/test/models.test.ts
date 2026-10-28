@@ -214,3 +214,35 @@ test("env: any one model key runs the worker, one alone is warned about, and an 
   assert.ok(!two.warnings.some((w) => /Only one model/.test(w)));
   assert.equal(redact(`x-api-key sk-ant-abc123 Bearer sk-or-v1-zzz AIzaSyAAAAAAAAAAAAAAAAAAAAAAAA ${KEYS.MUSE_API_KEY}`, envOf(KEYS)).includes("sk-"), false);
 });
+
+test("a free Gemini key (no GEMINI_PAID): only a synthetic workspace's run with GEMINI_FREE_SYNTHETIC=1, never a customer's", async () => {
+  const free = { GEMINI_API_KEY: KEYS.GEMINI_API_KEY };
+  const gem = { vendor: "gemini" as const, model: "gemini-3.8-flash" };
+  assert.equal(refusal(envOf(free), gem), "gemini_unpaid", "a customer's run: refused");
+  assert.equal(refusal(envOf(free), gem, { synthetic: true }), "gemini_unpaid", "a rehearsal without the switch: refused");
+  assert.equal(refusal(envOf({ ...free, GEMINI_FREE_SYNTHETIC: "1" }), gem), "gemini_unpaid", "the switch alone never opens it to a customer");
+  assert.equal(refusal(envOf({ ...free, GEMINI_FREE_SYNTHETIC: "1" }), gem, { synthetic: true }), null, "a rehearsal with the switch: allowed");
+  assert.equal(refusal(envOf({ ...free, GEMINI_PAID: "1" }), gem), null, "the paid tier as before");
+
+  const m = mock({ gemini: () => geminiSays("wait", { ms: 1 }) });
+  const router = new Router({ env: envOf({ ...free, GEMINI_FREE_SYNTHETIC: "1" }), fetch: m.f, ...quiet });
+  const model = new FilerModel(router);
+  const st = { url: "https://portal.example.gov/x", title: "t", headings: [], text: "", controls: [], buttons: [], links: [] } as any;
+  const filing = { payload: { official: "x", fields: [] } } as any;
+  await assert.rejects(model.next({ filing, agency: "a", state: st, recent: [] }), /no model key/, "a customer's step: no seat, nothing sent");
+  assert.equal(m.sent.length, 0, "nothing reached Google");
+  model.rehearsal(true);
+  assert.equal((await model.next({ filing, agency: "a", state: st, recent: [] })).name, "wait", "a rehearsal: Gemini answers");
+  assert.deepEqual(m.order(), ["gemini"]);
+  model.rehearsal(false);
+  await assert.rejects(model.next({ filing, agency: "a", state: st, recent: [] }), /no model key/, "the next customer's run: refused again");
+  assert.equal(m.sent.length, 1);
+});
+
+test("env: a free Gemini key with GEMINI_FREE_SYNTHETIC=1 starts the worker for rehearsals, and says customers wait", () => {
+  const base = { SUPABASE_URL: "https://esquxzcfsylffuijvzec.supabase.co", SUPABASE_SERVICE_ROLE_KEY: "x", RENDER_EXTERNAL_URL: "https://placetta-filer.onrender.com" };
+  const e = checkEnv({ ...base, GEMINI_API_KEY: "g", GEMINI_FREE_SYNTHETIC: "1" });
+  assert.deepEqual(e.missing, []);
+  assert.ok(e.warnings.some((w) => /rehearsals on synthetic workspaces only/.test(w)));
+  assert.deepEqual(checkEnv({ ...base, GEMINI_API_KEY: "g" }).missing.map((m) => m.key), ["ANTHROPIC_API_KEY"], "without the switch, as before");
+});

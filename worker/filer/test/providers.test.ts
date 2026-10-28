@@ -6,6 +6,7 @@
 //   - the API key never reaches an error, a log line or a live-view address
 //   - hand-backs: the owner gets the provider's viewer; a CAPTCHA for the Placetta team gets the worker's own covered
 //     view, never the provider's
+import type { RecordingPolicy } from "../src/privacy.ts";
 import { test, after } from "node:test";
 import assert from "node:assert";
 import { spawn, type ChildProcess } from "node:child_process";
@@ -244,6 +245,8 @@ const filing = (): Filing => ({ id: "f1", workspace_id: "w", app_id: "llc", titl
 class Mem implements Store {
   f = filing(); skills = new Map<string, Skill>(); notes: string[] = []; checks: { id: string; url: string; escalate_at: string; state: string; opened_at: string | null; closed?: string }[] = [];
   handoffs: (string | null)[] = [];
+  privacy: RecordingPolicy = { synthetic: false, strict: false, screen: false, teach: false };   // a business outside California
+  async recordingPolicy() { return this.privacy; }
   async claim() { return null; }
   async reload() { return this.f; }
   async step(_f: Filing, e: LogEntry | null, patch: Record<string, unknown> = {}) {
@@ -334,4 +337,60 @@ test("Steel refuses a session longer than the plan allows: the worker asks again
   }) as typeof globalThis.fetch;
   await assert.rejects(openSteel({ env: { STEEL_API_KEY: KEY }, fetch } as never), (e: Error) => /^steel 400: .*limit/.test(e.message) && !e.message.includes(KEY));
   assert.deepEqual(asked, [30 * 60_000, 15 * 60_000, 5 * 60_000]);
+});
+
+// ---------------------------------------------------------------- recording a person (privacy.ts, CIPA)
+
+const CA = { synthetic: false, strict: true, screen: false, teach: false };
+const steelRun = async (o: { privacy: RecordingPolicy; env?: Record<string, string>; launch?: () => Promise<Browser> }) => {
+  const api = await fresh();
+  const portal = await startPortal({ captchaToken: true }); portals.push(portal);
+  const store = new Mem(); store.privacy = o.privacy;
+  const live = new LiveViews("https://filer.placetta.test");
+  const d = deps(api, { BROWSER_PROVIDER: "steel", STEEL_API_KEY: KEY, ...(o.env ?? {}) });
+  if (o.launch) d.launch = o.launch;
+  const w = new Worker({ store, model: new Scripted(), portalOf: () => "127.0.0.1", startUrl: () => portal.url + "/", live, open: opener(d),
+    dryRun: false, twoKey: 10, maxSteps: 80, maxMs: 120000, holdMs: 400, pollMs: 100, staffHoldMs: 300 });
+  const r = await w.run(store.f);
+  return { r, store, api, portal };
+};
+
+test("California, nobody opted in, Steel and nothing else: the recorded browser never goes to the owner", async () => {
+  const { r, store, api, portal } = await steelRun({ privacy: CA });
+  assert.equal(r?.kind, "handoff");
+  assert.equal((r as { reason: string }).reason, "recording_consent");
+  assert.match((r as { message: { en: string } }).message.en, /doesn't record anyone in California without their OK/);
+  assert.ok(!store.handoffs.some((u) => u?.includes("steel")), "Steel's viewer was never handed out");
+  assert.ok(!store.f.agent_log.some((e) => e.kind === "need_person"), "the owner wasn't asked into the page");
+  assert.ok(store.f.agent_log.some((e) => e.kind === "privacy"), "the log says why");
+  assert.equal(api.creates().length, 1, "Steel was the only browser there was");
+  assert.equal(portal.submissions, 0);
+});
+
+test("California, nobody opted in, Browserbase keys set: the run opens on Browserbase with recording off, not Steel", async () => {
+  const { r, store, api } = await steelRun({ privacy: CA, env: { BROWSERBASE_API_KEY: "bb_live_test_key_000000", BROWSERBASE_PROJECT_ID: "proj-1" } });
+  const made = api.creates();
+  assert.equal(made.length, 1);
+  assert.equal(made[0].headers["x-bb-api-key"], "bb_live_test_key_000000", "Browserbase, not Steel");
+  assert.equal((made[0].body as { browserSettings: { recordSession?: boolean } }).browserSettings.recordSession, false, "with recording off");
+  assert.equal(r?.kind, "needs_you", "an unrecorded browser goes to the owner as before");
+  assert.ok(store.f.agent_log.some((e) => e.kind === "need_person" && !e.en.includes("is recorded")), "with no recording notice: nothing records");
+});
+
+test("California, nobody opted in, local Chromium here: the run opens locally and the owner gets the worker's own view", async () => {
+  const { r, store, api } = await steelRun({ privacy: CA, launch: () => chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH || undefined, args: process.env.CHROMIUM_PATH ? ["--no-sandbox"] : [] }) });
+  assert.equal(api.creates().length, 0, "no Steel session at all");
+  assert.equal(r?.kind, "needs_you");
+  assert.match(store.handoffs.find((u) => u) ?? "", /^https:\/\/filer\.placetta\.test\/live\//, "the worker's own live view");
+});
+
+test("California with everyone's opt-in, or outside California: Steel's viewer, with the notice before it opens", async () => {
+  for (const privacy of [{ ...CA, screen: true }, { ...CA, strict: false }]) {
+    const { r, store } = await steelRun({ privacy });
+    assert.equal(r?.kind, "needs_you");
+    assert.ok(store.handoffs.some((u) => u?.startsWith("https://api.steel.dev/")), "Steel's viewer");
+    const asked = store.f.agent_log.find((e) => e.kind === "need_person");
+    assert.ok(asked?.en.includes("This browser is recorded by Placetta's browser provider"), "the notice comes before the person opens it");
+    assert.ok(asked?.zh.includes("录制"));
+  }
 });

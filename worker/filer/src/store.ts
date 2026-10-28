@@ -6,6 +6,7 @@ import { type InboxMail, type MailWait, pickVerification, type Verification } fr
 import type { Draft } from "./teach.ts";
 import type { StatusJob, StatusResult, StatusStore } from "./status.ts";
 import type { Filing, LogEntry, Login, Skill } from "./types.ts";
+import { policyOf, STRICT, type RecordingPolicy } from "./privacy.ts";
 
 /** A portal's taught playbook (teach.ts), shared by every workspace: structure only. "draft" runs only in assist mode
  *  (Odelia fills, a person presses submit); "approved" runs like any playbook. */
@@ -35,6 +36,9 @@ export interface Store {
   begin?(f: Filing): Promise<void>;
   /** The run is over: its token stops working. */
   end?(): Promise<void>;
+  /** What this run may record of a person, and whether the workspace is synthetic (privacy.ts,
+   *  20261105090600_privacy_recording_age.sql). Without it, or when it fails, the run takes the strict side. */
+  recordingPolicy?(f: Filing): Promise<RecordingPolicy>;
   /** Teach mode (20261030174100_teach_mode.sql): the portal's taught playbook, a new draft from a recorded run (the
    *  database refuses one carrying the teaching customer's values), and each run's result (three failures in a row,
    *  or a success rate under 60% after five runs, sends an approved one back to review; drift goes to the Quality tab). */
@@ -191,6 +195,14 @@ export class SupabaseStore implements Store, StatusStore {
   }
   async skillFailed(key: string) {
     return { disabled: (await this.call<boolean>("filer_skill_failed", { p_key: key }, "skill update")) === true };
+  }
+  async recordingPolicy(f: Filing) {
+    const { data, error } = await this.db.rpc("filer_recording_policy", { p_filing: f.id });
+    if (error) {
+      console.warn(`filer: recording policy unavailable (${error.code ?? "error"}): nothing that records a person runs this time`);
+      return { ...STRICT };
+    }
+    return policyOf(data);
   }
   async taught(host: string, official: string) {
     const rows = await this.call<Taught[] | null>("filer_taught_playbook", { p_host: host, p_official: official }, "taught lookup");

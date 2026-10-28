@@ -1,6 +1,7 @@
 // Odelia pays the agency's fee with Placetta's single-use card (src/card.ts): only with fee authority, only on the
 // agency's payment page, typed by a tool whose values the model never sees, and never in a log, a trace, a recording, a
 // picture's page or the model's prompt. Needs a Chromium, like filer.test.ts.
+import type { RecordingPolicy } from "../src/privacy.ts";
 import { test, after } from "node:test";
 import assert from "node:assert";
 import { openBrowser } from "../src/main.ts";
@@ -29,6 +30,8 @@ class Mem implements Store {
   f = filing(); skills = new Map<string, Skill>(); tasks: unknown[] = []; docs: string[] = []; notices: unknown[] = []; filed = 99;
   decision: FeeDecision = { ok: true, limitCents: 15450 }; feeAsked: (number | null)[] = []; cardCalls = 0; done: { outcome: CardOutcome; receipt?: string | null; cents?: number | null; confirmation?: string | null }[] = [];
   onNotify?: () => Promise<void>;
+  privacy: RecordingPolicy = { synthetic: false, strict: false, screen: false, teach: false };   // a business outside California
+  async recordingPolicy() { return this.privacy; }
   async claim() { return null; }
   async reload() { return this.f; }
   async step(_f: Filing, e: LogEntry | null, patch: Record<string, unknown> = {}) {

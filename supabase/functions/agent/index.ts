@@ -97,6 +97,7 @@ Deno.serve(async (req) => {
   const access = await accessFor(ws, user, jwt);
   if (access === "mfa_required" || access === "staff_mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
   if (access === "sso_required") return fail(401, "sso_required", "Your company requires single sign-on. Sign in with SSO to continue.");
+  if (access === "age_required") return fail(403, "age_required", "Confirm you are 18 or older to continue. Sign in again to answer.");
   if (access === "none") return fail(403, "forbidden", "This isn't your workspace.");
   // Odelia changes the workspace: viewers read it but don't ask her to work
   if (access !== "staff" && !WORKS.has(access)) return fail(403, "forbidden", "You can view this workspace but not change it. Ask an admin for member access.");

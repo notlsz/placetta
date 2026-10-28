@@ -67,6 +67,7 @@ async function transcribe(req: Request): Promise<Response> {
   const access = await accessFor(ws, user, jwt);
   if (access === "mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
   if (access === "sso_required") return fail(401, "sso_required", "Your company requires single sign-on. Sign in with SSO to continue.");
+  if (access === "age_required") return fail(403, "age_required", "Confirm you are 18 or older to continue. Sign in again to answer.");
   if (!WORKS.has(access)) return fail(403, "forbidden", "This isn't your workspace.");
   const today = new Date().toISOString().slice(0, 10);
   const { data: usage } = await admin.from("agent_usage").select("tts_chars").eq("workspace_id", ws).eq("day", today).maybeSingle();
@@ -113,6 +114,7 @@ Deno.serve(async (req) => {
   const access = await accessFor(ws, user, jwt);
   if (access === "mfa_required") return fail(401, "mfa_required", "Finish two-step sign-in to continue.");
   if (access === "sso_required") return fail(401, "sso_required", "Your company requires single sign-on. Sign in with SSO to continue.");
+  if (access === "age_required") return fail(403, "age_required", "Confirm you are 18 or older to continue. Sign in again to answer.");
   if (!WORKS.has(access)) return fail(403, "forbidden", "This isn't your workspace.");
   const today = new Date().toISOString().slice(0, 10);
   const { data: usage } = await admin.from("agent_usage").select("tts_chars").eq("workspace_id", ws).eq("day", today).maybeSingle();

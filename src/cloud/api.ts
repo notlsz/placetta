@@ -317,6 +317,59 @@ export async function createWorkspace(name: string, state: Workspace): Promise<s
   return data as string;
 }
 
+/* ------------------------------ age (18 or older; src/age.ts) ------------------------------ */
+
+/** Whether this person confirmed they are 18 or older. null before the privacy migration is applied (nothing to ask). */
+export async function ageStatus(): Promise<{ confirmed: boolean; at: string | null } | null> {
+  const { data, error } = await supabase().rpc("age_status");
+  if (error) { if (error.code === "PGRST202") return null; throw fromPg(error); }
+  return data as { confirmed: boolean; at: string | null };
+}
+/** An adult's date of birth: checked again by the server, which keeps only that they confirmed, and when. */
+export async function confirmAge(birthdate: string): Promise<{ ok: boolean; code?: string; deleted?: boolean }> {
+  const { data, error } = await supabase().rpc("confirm_age", { p_birthdate: birthdate });
+  if (error) throw fromPg(error);
+  return data as { ok: boolean; code?: string; deleted?: boolean };
+}
+/** Under 18: no date is sent. The account made at sign-in is deleted with nothing kept (or, if it already belongs to a
+ *  workspace, left with no access). */
+export async function ageRefused(): Promise<{ deleted: boolean }> {
+  const { data, error } = await supabase().rpc("age_refused");
+  if (error) throw fromPg(error);
+  return data as { deleted: boolean };
+}
+
+/* ------------------------------ recording a person (src/recordingConsent.ts) ------------------------------ */
+
+/** Where this person opens the app from (country and state only), for the recording rules. The site's middleware reads
+ *  Vercel's x-vercel-ip-country and x-vercel-ip-country-region (middleware.js, /app/region.json). Best effort. */
+export async function noteRegion(): Promise<void> {
+  if (PREVIEW) return;
+  try {
+    const r = await fetch("/app/region.json", { cache: "no-store" });
+    if (!r.ok) return;
+    const j = await r.json() as { country?: string | null; region?: string | null };
+    if (!j.country) return;
+    await supabase().rpc("note_my_region", { p_country: j.country, p_region: j.region ?? null });
+  } catch { /* nothing to note */ }
+}
+export type RecordingPolicy = { states: string[]; strict: boolean; version: string; consents: Partial<Record<"screen" | "teach" | "call", string>> };
+/** null before the privacy migration is applied. */
+export async function recordingPolicy(ws: string): Promise<RecordingPolicy | null> {
+  const { data, error } = await supabase().rpc("recording_policy", { p_ws: ws });
+  if (error) { if (error.code === "PGRST202") return null; throw fromPg(error); }
+  return data as RecordingPolicy | null;
+}
+/** The server stores its own copy of the words for this kind and language, with the time. */
+export async function giveRecordingConsent(ws: string, kind: "screen" | "teach" | "call", lang: "en" | "zh"): Promise<void> {
+  const { error } = await supabase().rpc("give_recording_consent", { p_ws: ws, p_kind: kind, p_lang: lang });
+  if (error) throw fromPg(error);
+}
+export async function withdrawRecordingConsent(ws: string, kind: "screen" | "teach" | "call"): Promise<void> {
+  const { error } = await supabase().rpc("withdraw_recording_consent", { p_ws: ws, p_kind: kind });
+  if (error) throw fromPg(error);
+}
+
 /* ------------------------------ terms acceptance (clickwrap) ------------------------------ */
 
 /** Which version of the Terms of Service and Privacy Policy this person last accepted, and the current one. */

@@ -7,7 +7,7 @@ import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
 import { signLinq, verifyLinq as verifyStandardWebhook } from "./linq.ts";
 import { signCallToken, verifyCallToken, verifyTelnyx } from "./odelia.ts";
 import { AGENCY_LINES, lineForForm, officialNumbers } from "./agency_phones.ts";
-import { agencyOpen, ALL_PARTY_STATES, callSteps, commitAsked, commitmentsSaid, disclosesFirst, disclosure, federalHolidays, heardAsData, mayDial, mergeTurns, objectsToRecording, recapEvent, recapEscalates, redactForVoice, splitStereoWav } from "./voice_rules.ts";
+import { agencyOpen, ALL_PARTY_STATES, callRecordingAllowed, callSteps, commitAsked, commitmentsSaid, disclosesFirst, disclosure, federalHolidays, heardAsData, mayDial, mergeTurns, objectsToRecording, recapEvent, recapEscalates, redactForVoice, splitStereoWav } from "./voice_rules.ts";
 import { AGENCY_TOOLS, agencyTool, mcpAnswer, OWNER_TOOLS, planAgencyCall, sipToken, type FilingRow } from "./voice_calls.ts";
 import { BRAINS, HEAVY_MONTH, perMinute, pickBrain, sessionConfig, storeMonth, TELNYX, telephonyPerMin, TTS, TYPICAL_MONTH } from "./voice_brain.ts";
 import { bilingualTranscript, GLOSSARY, interpreterGreeting, interpreterInstructions, registryTerms, termCheck } from "./interpreter.ts";
@@ -93,7 +93,23 @@ Deno.test("every call opens by saying it's Odelia, an AI, and for whom, before a
     const g = greeting(lang, "Mei", mode, "Lucky Leaf");
     assert(disclosesFirst(g), g);
     assert(lang === "zh" ? /录音/.test(g) : /recorded/.test(g), "owners hear the recording announced too");
+    // a call that isn't recorded (California without the owner's opt-in) says it's an AI and never that it's recorded
+    const quiet = greeting(lang, "Mei", mode, "Lucky Leaf", false);
+    assert(disclosesFirst(quiet), quiet);
+    assert(!/录音|recorded/.test(quiet), quiet);
   }
+});
+
+Deno.test("calls with the owner on the line: recorded in California only with their opt-in, and announced when they are", () => {
+  // recording_policy_for's answer (20261105090600_privacy_recording_age.sql)
+  assert(!callRecordingAllowed({ strict: true, call: false }), "California, no opt-in: not recorded");
+  assert(callRecordingAllowed({ strict: true, call: true }), "California with the opt-in");
+  assert(callRecordingAllowed({ strict: false, call: false }), "elsewhere: recorded, announced at the start");
+  for (const odd of [null, undefined, {}, { strict: "false" }, { call: "true", strict: true }, "yes"]) assert(!callRecordingAllowed(odd), `odd answer ${JSON.stringify(odd)}: not recorded`);
+  // the interpreter announces a recording in both languages only when there is one
+  const rec = interpreterGreeting("Lucky Leaf", true), not = interpreterGreeting("Lucky Leaf");
+  assert(disclosesFirst(rec) && /recorded/.test(rec) && /录音/.test(rec));
+  assert(disclosesFirst(not) && !/recorded|录音/.test(not));
 });
 
 /* ------------------------------ nothing committed by voice ------------------------------ */

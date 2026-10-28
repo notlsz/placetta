@@ -20,13 +20,14 @@ export function userClient(jwt: string): SupabaseClient {
 // ------------------------------------------------------------------ responses
 
 export type Code =
-  | "unauthorized" | "mfa_required" | "sso_required" | "forbidden" | "bad_request" | "not_found" | "not_connected" | "not_configured" | "upstream_error"
+  | "unauthorized" | "mfa_required" | "sso_required" | "age_required" | "forbidden" | "bad_request" | "not_found" | "not_connected" | "not_configured" | "upstream_error"
   | "too_late" | "rate_limited" | "too_large";
 
 const STATUS: Record<Code, number> = {
   unauthorized: 401,
   mfa_required: 401,
   sso_required: 401,
+  age_required: 403,
   forbidden: 403,
   bad_request: 400,
   not_found: 404,
@@ -158,7 +159,7 @@ export function aalOf(jwt: string): string {
 /** Workspace roles, lowest to highest. Viewers read; members work; admins manage people and sign-in; owners also approve. */
 export type Role = "viewer" | "member" | "admin" | "owner";
 export const ROLE_RANK: Record<Role, number> = { viewer: 1, member: 2, admin: 3, owner: 4 };
-export type Access = Role | "staff" | "mfa_required" | "staff_mfa_required" | "sso_required" | "none";
+export type Access = Role | "staff" | "mfa_required" | "staff_mfa_required" | "sso_required" | "age_required" | "none";
 
 /** What this user may do in this workspace: their role, staff (with two-step), or why not. Same rules as the database
  *  (access_for), including the email domain's SSO rule, checked against how this session signed in. */
@@ -193,6 +194,8 @@ export async function requireAccess(ws: string, user: User, jwt: string, need: R
   const a = await accessFor(ws, user, jwt);
   if (a === "mfa_required") throw new HttpError("mfa_required", "Finish two-step sign-in to continue.");
   if (a === "sso_required") throw new HttpError("sso_required", "Your company requires single sign-on. Sign in with SSO to continue.", "您的公司要求单点登录。请用单点登录继续。");
+  // the account hasn't confirmed its holder is 18 or older (20261105090600_privacy_recording_age.sql)
+  if (a === "age_required") throw new HttpError("age_required", "Confirm you are 18 or older to continue. Sign in again to answer.", "请先确认您已年满 18 岁。重新登录即可回答。");
   if (roleMeets(a, need)) return a;
   if (a in ROLE_RANK) {
     if (need === "owner") throw new HttpError("forbidden", "Only an owner of this workspace can do that.");

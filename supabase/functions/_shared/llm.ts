@@ -31,7 +31,9 @@
 //                              products; the paid tier doesn't). Without it, Gemini gets no customer files and no
 //                              conversations, only calls marked publicOnly (a scan of public pages with nothing of the
 //                              customer's in it). Today every call carries the workspace, so without GEMINI_PAID a
-//                              Gemini key goes unused.
+//                              Gemini key goes unused. One exception, for rehearsals: with GEMINI_FREE_SYNTHETIC=1 a
+//                              free key may take a call marked synthetic (a probe or test workspace, workspaces.synthetic,
+//                              set by the service role only). Never a real customer's.
 //   DeepSeek                   PRC-hosted: only with ALLOW_DEEPSEEK=1, and never files
 //   Groq, Cerebras, OpenRouter the gpt-oss-120b backups: on when their key is set, last in every route, never files
 //   Muse                       Meta Model API standard mode ("your content is not used to train Meta models"): on when
@@ -65,6 +67,9 @@ export type Call = {
   region?: string;
   /** Nothing of the customer's in the call (a scan of public pages): the one thing an unpaid Gemini tier may see. */
   publicOnly?: boolean;
+  /** The call is for a synthetic workspace (workspaces.synthetic: a probe or test, never a customer). Only then may a free
+   *  Gemini key take it, and only with GEMINI_FREE_SYNTHETIC=1. Set from the database, never from a request. */
+  synthetic?: boolean;
 };
 export type Result = { ok: boolean; status: number; data?: Record<string, unknown>; text: string; model: string };
 type Env = (k: string) => string | undefined;
@@ -85,7 +90,8 @@ export const PROVIDERS = ["anthropic", ...Object.keys(OPENAI_STYLE)];
 export const PROVIDER_KEYS: Record<string, string> = { anthropic: "ANTHROPIC_API_KEY", ...Object.fromEntries(Object.entries(OPENAI_STYLE).map(([p, c]) => [p, c.key])) };
 /** Whether any vendor with a key may take a customer's conversation (vendorOk below): what decides if Odelia can run at
  *  all. A Gemini key without GEMINI_PAID doesn't count, since no conversation may go to Google's free tier. */
-export const canConverse = (env: Env) => Object.entries(PROVIDER_KEYS).some(([p, k]) => !!env(k) && vendorOk(env, p, { hasFiles: false, role: "plan" }));
+export const canConverse = (env: Env, o: { synthetic?: boolean } = {}) =>
+  Object.entries(PROVIDER_KEYS).some(([p, k]) => !!env(k) && vendorOk(env, p, { hasFiles: false, role: "plan", synthetic: o.synthetic === true }));
 
 /** The Anthropic models by size. The repo's defaults; AGENT_MODEL, AGENT_MODEL_DEEP and AGENT_MODEL_FAST change them. */
 export const ANTHROPIC_MODELS = { plan: "claude-sonnet-5-5", deep: "claude-opus-5-5", fast: "claude-haiku-4-5-20251001" };
@@ -151,16 +157,22 @@ const hasDocs = (messages: Block[]) => messages.some((m) => Array.isArray(m.cont
  * three ever gets a customer's files. region is kept for rules that depend on where the customer is; today every
  * customer is treated the same.
  */
-export function vendorOk(env: Env, provider: string, o: { hasFiles: boolean; role?: Role; region?: string; publicOnly?: boolean }): boolean {
+export function vendorOk(env: Env, provider: string, o: { hasFiles: boolean; role?: Role; region?: string; publicOnly?: boolean; synthetic?: boolean }): boolean {
   if (!zdrAllows(env, provider)) return false;
   switch (provider) {
     case "anthropic": case "openai": return true;
-    case "gemini": return env("GEMINI_PAID") === "1" || (!o.hasFiles && o.role === "watch" && o.publicOnly === true);
+    case "gemini": return env("GEMINI_PAID") === "1" || geminiFreeRehearsal(env, o.synthetic) || (!o.hasFiles && o.role === "watch" && o.publicOnly === true);
     case "deepseek": return env("ALLOW_DEEPSEEK") === "1" && !o.hasFiles;
     // the open-model backups: on when their key is set (paid API tiers don't train on traffic), never with files
     case "openrouter": case "groq": case "cerebras": case "muse": return !o.hasFiles;
     default: return false;
   }
+}
+
+/** A free-tier Gemini key for rehearsals: only with GEMINI_FREE_SYNTHETIC=1 and only for a call on a synthetic
+ *  workspace. Google may use free-tier prompts to improve its products, so a real customer's call never goes there. */
+export function geminiFreeRehearsal(env: Env, synthetic: boolean | undefined): boolean {
+  return env("GEMINI_FREE_SYNTHETIC") === "1" && synthetic === true;
 }
 
 /* ---------- Anthropic Messages -> OpenAI chat ---------- */
@@ -301,7 +313,7 @@ export function candidates(env: Env, call: Call, fallbackModel: string): [string
   // a contributor model trades a lower price for the vendor training on the prompts (Meta's Muse Spark contributor tier)
   route = route.filter(([, m]) => !/contributor/i.test(m));
   if (docs) route = route.filter(([p]) => p === "anthropic" || p === "gemini" || p === "openrouter");   // PDFs need a model that reads them
-  route = route.filter(([p, m]) => vendorOk(env, p, { hasFiles: files, role, region: call.region, publicOnly: call.publicOnly }) && zdrAllows(env, p, m));
+  route = route.filter(([p, m]) => vendorOk(env, p, { hasFiles: files, role, region: call.region, publicOnly: call.publicOnly, synthetic: call.synthetic }) && zdrAllows(env, p, m));
   if (call.research && RESEARCH_FIRST.has(role)) route = [...route.filter(([p]) => p === "anthropic"), ...route.filter(([p]) => p !== "anthropic")];
   return route;
 }

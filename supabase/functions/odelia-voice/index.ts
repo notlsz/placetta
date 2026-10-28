@@ -39,7 +39,7 @@ import { verifyLinq as verifyStandardWebhook } from "../_shared/linq.ts";
 import { OWNER_TOOLS, SEND_TEXT_TOOL, VERIFY_TOOL, mcpAnswer, sipToken } from "../_shared/voice_calls.ts";
 import { pickBrain, sessionConfig, type SessionSpec } from "../_shared/voice_brain.ts";
 import { redactForVoice } from "../_shared/voice_rules.ts";
-import { agencyCall, agencyToolCall, bridgeToBrain, callsEvent, interpretCall, ownerCallStarted, purgeRecordings, setupCalls, specForToken, type SpecWithBrain } from "./calls.ts";
+import { agencyCall, agencyToolCall, bridgeToBrain, callRecorded, callsEvent, interpretCall, mayRecordCall, ownerCallStarted, purgeRecordings, setupCalls, specForToken, type SpecWithBrain } from "./calls.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
@@ -86,14 +86,15 @@ const LINES = {
   idle: { en: "I'll let you go. Text me anytime. Goodbye.", zh: "那我先挂了，有需要随时发短信给我。再见。" },
 };
 
-export function greeting(lang: Lang, name: string | null, mode: "verified" | "code" | "outbound", business: string) {
+export function greeting(lang: Lang, name: string | null, mode: "verified" | "code" | "outbound", business: string, record = true) {
   if (lang === "zh") {
-    // Every call opens by saying Odelia is an AI and the call is recorded and transcribed (California's bot and recording rules, the FCC's AI-voice ruling).
-    const hi = `您好${name ? `，${name}` : ""}，我是快哉的 AI 助理 Odelia。本次通话会录音和转录，以便为您办理；如您不同意录音请直接说。`;
+    // Every call opens by saying Odelia is an AI, and, when it's recorded, that it is (California's bot and recording
+    // rules, the FCC's AI-voice ruling). In California a call is recorded only with the person's opt-in (mayRecordCall).
+    const hi = `您好${name ? `，${name}` : ""}，我是快哉的 AI 助理 Odelia。${record ? "本次通话会录音和转录，以便为您办理；如您不同意录音请直接说。" : ""}`;
     return mode === "code" ? `${hi}为了保护您的账户，我刚把 4 位验证码发到了您账户上的手机号。请告诉我验证码。`
       : mode === "outbound" ? `${hi}我打电话是为了${business}的一件急事。现在方便说两句吗？` : `${hi}有什么可以帮您？`;
   }
-  const hi = `Hi${name ? ` ${name}` : ""}, it's Odelia, Placetta's AI assistant. This call is recorded and transcribed so I can help; say so if you'd rather it isn't.`;
+  const hi = `Hi${name ? ` ${name}` : ""}, it's Odelia, Placetta's AI assistant.${record ? " This call is recorded and transcribed so I can help; say so if you'd rather it isn't." : ""}`;
   return mode === "code" ? `${hi} To keep your account safe, I just texted a 4-digit code to the phone number on your account. What's the code?`
     : mode === "outbound" ? `${hi} I'm calling about something urgent at ${business}. Is now a good time?` : `${hi} What can I do for you?`;
 }
@@ -140,7 +141,7 @@ async function briefFor(ws: string, lang: Lang) {
 }
 
 /** The assistant for one call: per-call instructions, greeting, voice, speech recognition and tools that call back here. */
-async function assistantFor(o: { ccid: string; lang: Lang; name: string | null; ws: { id: string; name: string }; verified: boolean; outbound?: string }) {
+async function assistantFor(o: { ccid: string; lang: Lang; name: string | null; ws: { id: string; name: string }; verified: boolean; outbound?: string; record: boolean }) {
   const token = await signCallToken(await monitorKey(), o.ccid, Math.floor(Date.now() / 1000) + 2 * 3600);
   const headers = [{ name: "x-odelia-call", value: token }];
   const tool = (name: string, description: string, properties: Record<string, unknown>, required: string[]) => ({
@@ -165,7 +166,7 @@ async function assistantFor(o: { ccid: string; lang: Lang; name: string | null; 
     id: env("TELNYX_ASSISTANT_ID"),
     ...(model ? { model } : {}),
     instructions: instructions({ lang: o.lang, name: o.name, business: o.ws.name, verified: o.verified, brief, outbound: o.outbound, today: new Date().toISOString().slice(0, 10) }),
-    greeting: greeting(o.lang, o.name, o.outbound ? "outbound" : o.verified ? "verified" : "code", o.ws.name),
+    greeting: greeting(o.lang, o.name, o.outbound ? "outbound" : o.verified ? "verified" : "code", o.ws.name, o.record),
     voice_settings: { voice: ASSISTANT_VOICE[o.lang] },
     transcription: transcriptionFor(o.lang, o.ws.name),
     tools,
@@ -174,13 +175,13 @@ async function assistantFor(o: { ccid: string; lang: Lang; name: string | null; 
 
 /** The same conversation for a speech-to-speech brain (OpenAI over SIP): the same instructions, greeting and tools,
  *  served over MCP with the same per-call token. */
-async function ownerSpec(o: { ccid: string; lang: Lang; name: string | null; ws: { id: string; name: string }; verified: boolean; outbound?: string }): Promise<SessionSpec> {
+async function ownerSpec(o: { ccid: string; lang: Lang; name: string | null; ws: { id: string; name: string }; verified: boolean; outbound?: string; record: boolean }): Promise<SessionSpec> {
   const brief = o.verified ? redactForVoice(await briefFor(o.ws.id, o.lang)) : "";
   const rec = OWNER_TOOLS_REC;
   return {
     lang: o.lang,
     instructions: instructions({ lang: o.lang, name: o.name, business: o.ws.name, verified: o.verified, brief, outbound: o.outbound, today: new Date().toISOString().slice(0, 10) }),
-    greeting: greeting(o.lang, o.name, o.outbound ? "outbound" : o.verified ? "verified" : "code", o.ws.name),
+    greeting: greeting(o.lang, o.name, o.outbound ? "outbound" : o.verified ? "verified" : "code", o.ws.name, o.record),
     tools: o.verified ? [...OWNER_TOOLS, SEND_TEXT_TOOL, rec] : [VERIFY_TOOL, rec],
     toolUrl: `${SELF}?mcp=1`,
     token: await signCallToken(await monitorKey(), o.ccid, Math.floor(Date.now() / 1000) + 2 * 3600),
@@ -240,14 +241,15 @@ async function incoming(p: CallPayload) {
     if (!sent) { await answerThen("unverifiable"); return; }
   }
   const pick = pickBrain({ surface: "owner_phone", lang, env });
-  await ownerCallStarted({ ccid, workspace_id: ws.id, user_id: link.user_id, number: from, brain: pick.brain, lang, direction: "in" });
+  const record = await mayRecordCall(ws.id, link.user_id);
+  await ownerCallStarted({ ccid, workspace_id: ws.id, user_id: link.user_id, number: from, brain: pick.brain, lang, direction: "in", record });
   if (pick.brain !== "telnyx") {
     // answered on Telnyx, then bridged to the speech-to-speech brain once the line is up (call.answered, k "bridge")
     const b = await cmd(ccid, "answer", { client_state: clientState({ k: "bridge", l: lang }), command_id: `answer-${ccid}`.slice(0, 120) });
     if (b.ok) return;
     console.error("answer for bridge", b.status, b.code, b.detail);
   }
-  const assistant = await assistantFor({ ccid, lang, name: await firstName(link.user_id, ws?.id), ws, verified });
+  const assistant = await assistantFor({ ccid, lang, name: await firstName(link.user_id, ws?.id), ws, verified, record });
   const r = await cmd(ccid, "answer", { assistant, client_state: clientState({ k: "talk", l: lang }), command_id: `answer-${ccid}`.slice(0, 120) });
   if (!r.ok) {
     console.error("answer with assistant", r.status, r.code, r.detail);
@@ -283,9 +285,9 @@ async function event(type: string, p: CallPayload) {
     else if (cs.k === "unverifiable") await sayAndHangUp(ccid, lang, LINES.unverifiable[lang]);
     else if (cs.k === "bridge") {
       const call = await callOf(ccid);
-      if (call) await bridgeToBrain({ peer: ccid, token: ccid, lang: call.lang, record: true });
+      if (call) await bridgeToBrain({ peer: ccid, token: ccid, lang: call.lang, record: await callRecorded(ccid) });
     }
-    else if (cs.k === "talk") await cmd(ccid, "record_start", { format: "wav", channels: "dual", play_beep: false, client_state: clientState({ k: "rec", l: lang }) });
+    else if (cs.k === "talk" && await callRecorded(ccid)) await cmd(ccid, "record_start", { format: "wav", channels: "dual", play_beep: false, client_state: clientState({ k: "rec", l: lang }) });
     else if (cs.k === "sorry") {
       await sayAndHangUp(ccid, lang, LINES.sorry[lang]);
       const from = normalizePhone(p.from), link = cs.t && from ? await linkByNumber(admin, from) : null;
@@ -306,11 +308,12 @@ async function event(type: string, p: CallPayload) {
     ]);
     if (!w) { await cmd(ccid, "hangup", {}); return; }
     const pick = pickBrain({ surface: "owner_phone", lang: call.lang, env });
-    await ownerCallStarted({ ccid, workspace_id: w.id, user_id: call.user_id, number: call.number, brain: pick.brain, lang: call.lang, direction: "out" });
-    if (pick.brain !== "telnyx" && (await bridgeToBrain({ peer: ccid, token: ccid, lang: call.lang, record: true })).ok) return;
-    const assistant = await assistantFor({ ccid, lang: call.lang, name: await firstName(call.user_id, w.id), ws: { id: w.id, name: String(w.name ?? "") }, verified: true, outbound: String(o?.body ?? "") });
+    const record = await mayRecordCall(w.id, call.user_id);
+    await ownerCallStarted({ ccid, workspace_id: w.id, user_id: call.user_id, number: call.number, brain: pick.brain, lang: call.lang, direction: "out", record });
+    if (pick.brain !== "telnyx" && (await bridgeToBrain({ peer: ccid, token: ccid, lang: call.lang, record })).ok) return;
+    const assistant = await assistantFor({ ccid, lang: call.lang, name: await firstName(call.user_id, w.id), ws: { id: w.id, name: String(w.name ?? "") }, verified: true, outbound: String(o?.body ?? ""), record });
     const r = await cmd(ccid, "ai_assistant_start", { assistant, client_state: clientState({ k: "talk", l: call.lang }) });
-    if (r.ok) await cmd(ccid, "record_start", { format: "wav", channels: "dual", play_beep: false, client_state: clientState({ k: "rec", l: call.lang }) });
+    if (r.ok && record) await cmd(ccid, "record_start", { format: "wav", channels: "dual", play_beep: false, client_state: clientState({ k: "rec", l: call.lang }) });
     if (!r.ok) { console.error("assistant start", r.status, r.code, r.detail); await sayAndHangUp(ccid, call.lang, LINES.sorry[call.lang]); await textInstead(call); }
     return;
   }
@@ -493,7 +496,7 @@ setupCalls({ admin, env, self: SELF, monitorKey, cmd, ownerSpec: async (ccid) =>
   const { data: w } = await admin.from("workspaces").select("id, name").eq("id", call.workspace_id).maybeSingle();
   if (!w) return null;
   const o = call.outbox_id ? (await admin.from("odelia_outbox").select("body").eq("id", call.outbox_id).maybeSingle()).data : null;
-  return { ...(await ownerSpec({ ccid, lang: call.lang, name: await firstName(call.user_id, w.id), ws: { id: w.id, name: String(w.name ?? "") }, verified: !!call.verified_at, outbound: o ? String(o.body ?? "") : undefined })), brain: pickBrain({ surface: "owner_phone", lang: call.lang, env }).brain };
+  return { ...(await ownerSpec({ ccid, lang: call.lang, name: await firstName(call.user_id, w.id), ws: { id: w.id, name: String(w.name ?? "") }, verified: !!call.verified_at, outbound: o ? String(o.body ?? "") : undefined, record: await callRecorded(ccid) })), brain: pickBrain({ surface: "owner_phone", lang: call.lang, env }).brain };
 } });
 
 /* ------------------------------ requests ------------------------------ */
