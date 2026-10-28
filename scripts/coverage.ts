@@ -27,7 +27,7 @@ import { proofCurrent } from "../src/plan/ask";
 
 const STAGE: Record<LifeItem["stage"], string> = { start: "A. Start", open: "B. Open", employ: "C. Employ", sell: "D. Sell products", online: "E. Online and retailers" };
 const KIND: Record<LifeItem["kind"], string> = { filing: "filing", checklist: "label or design checklist", advisory: "an agency decides" };
-const TRIGGER: Record<string, string> = { newEntity: "no company yet", foreignEntity: "formed abroad", employees: "has employees", manufactures: "manufactures", imports: "imports",
+const TRIGGER: Record<string, string> = { newEntity: "no company yet", foreignEntity: "formed abroad", foreignOwned: "a US company 25%+ owned from abroad", corp: "a corporation", employees: "has employees", manufactures: "manufactures", imports: "imports",
   upholstered: "sells upholstered", children: "children's products", online: "sells online", food: "food", packagedFood: "packaged food", cosmetics: "cosmetics", furniture: "furniture",
   clothingStorage: "dressers and chests", textile: "textiles", consumer: "consumer products", premises: "a store open to the public" };
 const md = (s: string) => s.replace(/\|/g, "\\|");

@@ -8,7 +8,7 @@ import type { Store, Workspace } from "../model";
 import { nowIso } from "../time";
 import { NYC, STATES, ZH_CITIES } from "./line";
 import { FROM_SIGNUP, parseAddress, prefill, type Prefilled } from "./prefill";
-import { previewPlan, type PreviewPlan } from "./preview";
+import { companyHome, FOREIGN_OWNED_LABEL, previewPlan, type PreviewPlan } from "./preview";
 import { intakeAnswers, type Intake } from "./intake";
 
 export type FirstInput = {
@@ -73,6 +73,9 @@ export function firstWorkspace(o: FirstInput): First {
       // the state the company was formed in: the fact entityNeed reads (src/entityHome.ts) for every later store
       ...(legal && o.formedIn ? [{ id: "f-formed-in", group: "business" as const, label: B("State of formation", "成立州"), value: same(o.formedIn), source: FROM_SIGNUP }] : []),
       ...(o.notFormed ? [{ id: "f-formed", group: "business" as const, label: B("Company formed", "公司是否已成立"), value: B("Not yet", "尚未成立"), source: FROM_SIGNUP }] : []),
+      // who owns it, when the intake asked or the words said: what find_official_forms reads for Form 5472 later
+      ...(ans.foreignOwned !== undefined && !(legal && o.formedIn && companyHome(o.formedIn, place) === "abroad") ? [{ id: "f-foreign-owned", group: "business" as const, label: FOREIGN_OWNED_LABEL,
+        value: ans.foreignOwned ? B("Yes, 25% or more is owned outside the US", "是，25% 或以上由美国境外持有") : B("No", "否"), source: o.intake?.foreignOwned !== undefined ? FROM_SIGNUP : B("You told me", "您告诉我的") }] : []),
       ...(owner ? [{ id: "f-owner", group: "business" as const, label: B("Owner", "所有人"), value: same(owner), source: FROM_SIGNUP }] : []),
       { id: "f-sell", group: "operations", label: B("What you sell", "销售内容"), value: same(what), source: B("You told me", "您告诉我的") },
       { id: "f-addr", group: "location", label: B("Storefront", "门店"), value: same(store.address), source: street ? FROM_SIGNUP : B("You told me", "您告诉我的") },

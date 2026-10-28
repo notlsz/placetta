@@ -29,6 +29,9 @@ export type PreviewOptions = {
   /** the company is (or will be) a corporation, not an LLC: its formation or registration is the corporation's. Read
    *  from the entity's name ("Inc.", "Corp.") when not given. */
   corp?: boolean;
+  /** a person or company outside the US owns 25% or more of the US company (Form 5472). Read from the words ("a Chinese
+   *  parent", "中资") when not given; never set for a company formed abroad (formedIn "abroad" is foreignEntity). */
+  foreignOwned?: boolean;
   employees?: boolean;      // hires staff (default yes)
   signage?: boolean;        // puts up a sign (default yes)
   buildout?: boolean;       // builds out the space (default yes)
@@ -321,6 +324,19 @@ export function companyHome(formedIn: string | undefined, where: string): "here"
   return st && code === st ? "here" : "other";
 }
 
+/** Whether the words say the US company has an owner outside the US: a Chinese, foreign or overseas parent, owner or
+ *  investor ("US subsidiary of a Chinese company", "中资", "海外母公司"). Ownership words only: a "Chinese restaurant",
+ *  "imports from China" or a "foreign film" says nothing about who owns the company. */
+const OWNED_ABROAD = /\b(chinese|china|foreign|overseas|offshore|non-us|non-u\.s\.)[- ](owned|parent|parent company|company|corporation|holding|shareholders?|owners?|investors?|headquarter(s|ed)|hq)\b|\b(foreign|overseas)[- ]invested\b|\b(subsidiary|branch|arm) of (a |an |the )?(chinese|china|foreign|overseas)\b|\bowned by (a |an )?(chinese|china|foreign|overseas)\b|\b(parent|headquarters|hq)( company)? (is )?(in|from) (china|abroad|overseas)\b|中资|外资|港资|台资|中国(公司|企业|集团)|海外母公司|境外母公司|中国母公司|国内母公司|母公司在(中国|国内|海外|境外)|总部在(中国|国内|海外|境外)|境外股东|外国股东|海外股东|中国股东|境外投资|外商投资|外商独资/i;
+export const ownedAbroad = (what: string) => OWNED_ABROAD.test(what);
+/** The business fact the first workspace keeps for the intake's ownership answer (src/plan/start.ts). */
+export const FOREIGN_OWNED_LABEL = B("Owned 25% or more from outside the US", "25% 或以上股份由美国境外持有");
+/** That fact, read back: true or false when it is on file, undefined when it isn't. */
+export function ownedAbroadFact(facts: { label: { en: string }; value: { en: string } }[]): boolean | undefined {
+  const f = facts.find(x => x.label.en === FOREIGN_OWNED_LABEL.en);
+  return f ? /^yes\b/i.test(f.value.en.trim()) : undefined;
+}
+
 export function previewPlan(what: string, where: string, opening?: string, o: PreviewOptions = {}): PreviewPlan {
   const today = o.today ?? daysFromNow(0);
   const segment = segmentOf(what);
@@ -335,6 +351,9 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
   const corp = o.corp ?? /\b(inc|incorporated|corp|corporation)\.?\s*$/i.test(legal);
   const needs = { food, employees, signage: o.signage ?? !mobile, buildout, newEntity: !legal, imports: o.imports ?? imports(what), alcohol, terrace: o.terrace ?? terrace(what), ...furnitureNeeds(what), ...sectorNeeds(what), ...productNeeds(what),
     ...(legal && home === "abroad" ? { foreignEntity: true } : legal && home === "other" ? { outOfState: true } : {}), ...(corp ? { corp: true } : {}),
+    // a US company (new, or formed in a state) with an owner outside the US: Form 5472 each year. A company formed abroad
+    // is foreignEntity instead, which carries its own 5472 and 1120-F
+    ...(!(legal && home === "abroad") && (o.foreignOwned ?? ownedAbroad(what)) ? { foreignOwned: true } : {}),
     // the intake's answers win over what the words suggest
     ...(o.upholstered !== undefined && FURNITURE.test(what) ? { upholstered: o.upholstered } : {}), ...(o.children !== undefined ? { children: o.children } : {}),
     ...(o.antimicrobial !== undefined && sellsCleaning(what) ? { antimicrobial: o.antimicrobial } : {}) };
@@ -617,9 +636,12 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
     model passes: for each library form whether Odelia may claim it (a current quote from its page, and no conflict), and
     the steps the library has no form for, as the instant plan lists them (claims with their quote, or abstentions that
     name who to ask with that office's own link). One source of truth with the instant plan. */
-export function libraryAnswer(what: string, where: string, needs: { employees?: boolean; buildout?: boolean; signage?: boolean; newEntity?: boolean; imports?: boolean; alcohol?: boolean; manufactures?: boolean; online?: boolean; upholstered?: boolean; children?: boolean }, today = daysFromNow(0)) {
+export function libraryAnswer(what: string, where: string, needs: { employees?: boolean; buildout?: boolean; signage?: boolean; newEntity?: boolean; imports?: boolean; alcohol?: boolean; manufactures?: boolean; online?: boolean; upholstered?: boolean; children?: boolean;
+  foreignEntity?: boolean; foreignOwned?: boolean; corp?: boolean }, today = daysFromNow(0)) {
   const p = previewPlan(what, where, undefined, { entity: needs.newEntity ? undefined : "existing", employees: !!needs.employees, buildout: !!needs.buildout, signage: !!needs.signage, imports: !!needs.imports, alcohol: !!needs.alcohol,
-    manufactures: needs.manufactures, online: needs.online, upholstered: needs.upholstered, children: needs.children, today });
+    manufactures: needs.manufactures, online: needs.online, upholstered: needs.upholstered, children: needs.children, today,
+    // who owns the company and where it was formed: the yearly federal returns (Form 5472, 1120-F, the pro forma 1120)
+    ...(needs.foreignEntity && !needs.newEntity ? { formedIn: "abroad" } : {}), ...(needs.foreignOwned !== undefined ? { foreignOwned: needs.foreignOwned } : {}), ...(needs.corp ? { corp: true } : {}) });
   const byForm = new Map(p.apps.filter(a => a.official).map(a => [a.official!, a]));
   return {
     claim: (f: OfficialForm) => { const a = byForm.get(f.id); return a ? !a.abstain : !!(f.proof && proofCurrent(f.proof, today)); },

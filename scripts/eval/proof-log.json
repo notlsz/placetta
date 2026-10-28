@@ -13,7 +13,7 @@
     "id": "fincen-boir",
     "read": "https://www.fincen.gov/boi",
     "quote": "U.S. companies are exempt from the Beneficial Ownership Information (BOI) reporting requirements",
-    "checked": "2026-10-22",
+    "checked": "2026-10-28",
     "method": "curl",
     "found": true,
     "sha256": "156cefacacef2a51",
@@ -5809,7 +5809,7 @@
     "id": "life:life-boi",
     "read": "https://www.fincen.gov/boi",
     "quote": "U.S. companies are exempt from BOI reporting requirements and therefore, are no longer required to file BOI reports.",
-    "checked": "2026-10-23",
+    "checked": "2026-10-28",
     "method": "curl",
     "found": true,
     "sha256": "156cefacacef2a51",
@@ -6637,6 +6637,16 @@
     "found": true,
     "sha256": "30a9c42da6e7db81",
     "context": "ications help with forms and instructions comment on tax forms and publications corporations file form 5472 to provide information required under sections 6038a and 6038c when reportable transactions occur with a foreign or domestic related party. current revision form 5472 pdf instructions for form 5472 ( print version pdf) "
+  },
+  {
+    "id": "irs-5472",
+    "read": "https://www.irs.gov/instructions/i5472",
+    "quote": "A reporting corporation is either: A 25% foreign-owned U.S. corporation (including a foreign-owned U.S. disregarded entity (DE))",
+    "checked": "2026-10-28",
+    "method": "curl",
+    "found": true,
+    "sha256": "4d6d7aca7a09b9a8",
+    "context": "on with a foreign or domestic related party. definitions reporting corporation. a reporting corporation is either: a 25% foreign-owned u.s. corporation (including a foreign-owned u.s. disregarded entity (de)), or a foreign corporation engaged in a trade or business within the united stat"
   },
   {
     "id": "irs-w7",

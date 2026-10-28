@@ -53,14 +53,14 @@ export const MORE_US: OfficialForm[] = [
   },
   {
     id: "irs-7004", form: "Form 7004 (Rev. December 2025)", title: B("Automatic extension of time to file business returns", "营业申报自动延期申请"),
-    agency: IRS, level: "federal", where: "US", segments: ALL, needs: { foreignEntity: true, reference: true }, method: "pdf_fax", order: 89,
+    agency: IRS, level: "federal", where: "US", segments: ALL, needs: { foreignOwned: true, reference: true }, method: "pdf_fax", order: 89,
     how: B("Extends the time to file the pro forma Form 1120 and the Form 5472 a foreign-owned single-member LLC files with it by six months; it does not extend the time to pay. Filed by the return's due date with \"Foreign-owned U.S. DE\" across the top, faxed or mailed to the IRS PIN Unit in Ogden (not the regular Form 7004 address).", "将外资单一成员 LLC 的形式 1120 表及随附 5472 表的申报期限延长六个月，但不延长缴税期限。须在原申报截止日前提交，顶部写上 \"Foreign-owned U.S. DE\"，传真或邮寄至 IRS 位于 Ogden 的 PIN 部门（不使用 7004 表的常规地址）。"),
     url: "https://www.irs.gov/pub/irs-pdf/f7004.pdf", pdf: "https://www.irs.gov/pub/irs-pdf/f7004.pdf", info: "https://www.irs.gov/forms-pubs/about-form-7004",
     fee: 0, checked: "page", fields: [],
   },
   {
     id: "irs-1120", form: "Form 1120 (2025), pro forma", title: B("Pro forma Form 1120 for a foreign-owned U.S. LLC", "外资美国 LLC 的形式 1120 表"),
-    agency: IRS, level: "federal", where: "US", segments: ALL, needs: { foreignEntity: true, reference: true }, method: "pdf_fax", order: 90,
+    agency: IRS, level: "federal", where: "US", segments: ALL, needs: { foreignOwned: true }, unless: ["foreignEntity", "corp"], method: "pdf_fax", order: 90,
     how: B("A foreign-owned single-member LLC files Form 5472 attached to a pro forma Form 1120 with only its name, address, EIN and item E, and \"Foreign-owned U.S. DE\" across the top; it is faxed or mailed, never e-filed.", "外资单一成员 LLC 将 5472 表附在形式 1120 表上提交，1120 表只填名称、地址、EIN 和 E 项，并在顶部写上 \"Foreign-owned U.S. DE\"；以传真或邮寄提交，不能电子申报。"),
     url: "https://www.irs.gov/pub/irs-pdf/f1120.pdf", pdf: "https://www.irs.gov/pub/irs-pdf/f1120.pdf", info: "https://www.irs.gov/instructions/i5472",
     fee: 0, feeNote: B("No fee. The penalty for not filing Form 5472 starts at $25,000.", "不收费。未申报 5472 表罚款起点为 25,000 美元。"),

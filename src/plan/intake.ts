@@ -8,9 +8,9 @@ import { isFurniture } from "../forms/furniture";
 import { productNeeds, sellsCleaning } from "../forms/states/products";
 import { segmentOf } from "../forms/registry";
 import { childrensProducts, makesProducts, sellsCosmetics, sellsOnline } from "./also";
-import { dealsInFood, imports } from "./preview";
+import { dealsInFood, imports, ownedAbroad } from "./preview";
 
-export type IntakeKey = "employees" | "manufactures" | "imports" | "upholstered" | "children" | "online" | "antimicrobial";
+export type IntakeKey = "employees" | "manufactures" | "imports" | "upholstered" | "children" | "online" | "antimicrobial" | "foreignOwned";
 export type Intake = Partial<Record<IntakeKey, boolean>>;
 export type IntakeQuestion = { key: IntakeKey; q: Bi; hint: Bi };
 
@@ -24,6 +24,7 @@ const Q: Record<IntakeKey, { q: Bi; hint: Bi }> = {
   upholstered: { q: B("Do you sell upholstered furniture, like sofas or upholstered chairs?", "您销售沙发、软包椅等软体家具吗？"), hint: B("Upholstered furniture has its own licenses and law labels in some states.", "部分州对软体家具有专门的执照和法定标签要求。") },
   children: { q: B("Are any of your products made for children 12 or younger?", "您有专为 12 岁及以下儿童设计的产品吗？"), hint: B("Children's products need lab testing, a certificate and tracking labels.", "儿童产品须经实验室检测、出具证书并加贴追踪标签。") },
   antimicrobial: { q: B("Do any of your products claim to disinfect, sanitize or kill germs?", "您有宣称消毒、除菌或杀菌的产品吗？"), hint: B("A germ-killing claim makes it a pesticide: EPA registers it, and so does almost every state.", "宣称杀菌的产品属于农药：须在 EPA 登记，几乎每个州也要求登记。") },
+  foreignOwned: { q: B("Is 25% or more of the company owned by a person or company outside the US?", "公司是否有 25% 或以上的股份由美国境外的个人或公司持有？"), hint: B("A US company with an owner abroad files Form 5472 with the IRS every year.", "有境外股东的美国公司每年须向美国国税局申报 5472 表。") },
   online: { q: B("Will you sell online?", "您会在网上销售吗？"), hint: B("Sales tax in other states, marketplace rules and what marketplaces ask for.", "涉及其他州的销售税、平台规则以及平台要求的文件。") },
 };
 
@@ -36,11 +37,15 @@ export function intakeFromWords(what: string): Intake {
   if (isFurniture(what) && UPHOLSTERY_NAMED.test(what)) out.upholstered = true;
   if (childrensProducts(what)) out.children = true;
   if (productNeeds(what).antimicrobial) out.antimicrobial = true;
+  // "a US subsidiary of a Chinese company", "中资": an owner outside the US
+  if (ownedAbroad(what)) out.foreignOwned = true;
   return out;
 }
 
-/** The questions to ask for this business, in order, skipping any the words answer or that can't apply. */
-export function intakeQuestions(what: string): IntakeQuestion[] {
+/** The questions to ask for this business, in order, skipping any the words answer or that can't apply. formedAbroad:
+ *  the company itself was formed in another country, so it is a foreign company (foreignEntity), not a foreign-owned US
+ *  one, and who owns it isn't asked. */
+export function intakeQuestions(what: string, o: { formedAbroad?: boolean } = {}): IntakeQuestion[] {
   const segment = segmentOf(what), known = intakeFromWords(what);
   const food = dealsInFood(what, segment), furniture = isFurniture(what), cosmetics = !furniture && sellsCosmetics(what);
   const restaurant = segment === "restaurant";
@@ -54,6 +59,8 @@ export function intakeQuestions(what: string): IntakeQuestion[] {
   if (!restaurant) ask.push("online");
   // detergent and cleaning products: whether any claims to kill germs decides EPA's and every state's pesticide registration
   if (sellsCleaning(what)) ask.push("antimicrobial");
+  // who owns the US company: an owner outside the US with 25% or more means Form 5472 every year
+  if (!o.formedAbroad) ask.push("foreignOwned");
   return ask.filter(k => known[k] === undefined).map(key => ({ key, ...Q[key] }));
 }
 

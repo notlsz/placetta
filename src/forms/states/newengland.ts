@@ -43,17 +43,25 @@ const AGENT: Record<string, FactSource> = {
 
 /** The federal audit's fixes to existing rows, and the agent sources above. Applied once every layer is in FORMS.
  *  Returns the ids it didn't find. */
+const I5472 = "https://www.irs.gov/instructions/i5472";
+
 export function applyNewEngland(forms: OfficialForm[]): string[] {
   const missing: string[] = [];
   const get = (id: string) => { const f = forms.find(x => x.id === id); if (!f) missing.push(id); return f; };
   // ISF (19 CFR 149) stays as it is: it is owed for ocean shipments only, the intake doesn't ask how goods ship, and the
   // lifecycle list (src/forms/lifecycle.ts life-isf) already names it for every importer. Form 5472 goes with the company's own return: Form 1120-F for a foreign corporation (the row's foreignEntity
-  // case), a pro forma Form 1120 only for a foreign-owned U.S. single-member LLC.
+  // case), a pro forma Form 1120 only for a foreign-owned U.S. single-member LLC. It is owed by a U.S. company 25% or more
+  // foreign-owned as well (the row's foreignOwned case, src/forms/registry.ts anyOf): the proof is the instructions'
+  // definition of a reporting corporation, which names both, in place of the About page's sentence, which names neither.
   const f5472 = get("irs-5472");
-  if (f5472) f5472.how = {
-    en: "Filed each year with the company's income tax return: a foreign corporation doing business in the U.S. attaches it to Form 1120-F, and a foreign-owned single-member U.S. LLC attaches it to a pro forma Form 1120, faxed or mailed, never e-filed.",
-    zh: "每年随公司所得税申报表一同提交：在美国开展业务的外国公司附在 1120-F 表上；外资单一成员美国 LLC 附在形式 1120 表上，以传真或邮寄提交，不能电子申报。",
-  };
+  if (f5472) {
+    f5472.how = {
+      en: "Filed each year with the company's income tax return: a U.S. corporation 25% or more foreign-owned attaches it to its Form 1120, a foreign-owned single-member U.S. LLC to a pro forma Form 1120 (faxed or mailed, never e-filed), and a foreign corporation doing business in the U.S. to Form 1120-F.",
+      zh: "每年随公司所得税申报表一同提交：外资持股 25% 以上的美国公司附在其 1120 表上；外资单一成员美国 LLC 附在形式 1120 表上（以传真或邮寄提交，不能电子申报）；在美国开展业务的外国公司附在 1120-F 表上。",
+    };
+    f5472.info = I5472;
+    f5472.proof = { read: I5472, quote: "A reporting corporation is either: A 25% foreign-owned U.S. corporation (including a foreign-owned U.S. disregarded entity (DE))", checked: "2026-10-28" };
+  }
   for (const [id, source] of Object.entries(AGENT)) {
     const f = get(id);
     if (f?.entity) f.entity.agent = { ...f.entity.agent, required: true, source };

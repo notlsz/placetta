@@ -52,7 +52,7 @@ import { anthropicMessage } from "../supabase/functions/_shared/stream.ts";
 import { FORMS, METHOD, formById, formsFor, placeInfo, placesOf, searchForms, segmentOf, selfStep, type OfficialForm } from "./forms/registry";
 /** The US state of an address or place ("Flushing, NY" is NY), or "" outside the US. */
 const placeState = (where: string) => (placesOf(where.split(";")[0]).find((c, k, all) => all[0] === "US" && k > 0 && /^[A-Z]{2}$/.test(c)) ?? "");
-import { dealsInFood, libraryAnswer } from "./plan/preview";
+import { dealsInFood, libraryAnswer, ownedAbroad, ownedAbroadFact } from "./plan/preview";
 import { alsoText, heading } from "./plan/also";
 import { entryPacket, packetForModel } from "./plan/packet";
 import { PLAYBOOKS, playbookById } from "./filingPlaybooks";
@@ -514,6 +514,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         hires_staff: { type: "boolean" }, imports_goods: { type: "boolean" }, new_us_company: { type: "boolean", description: "They still need to form the US company" },
         formed_in_another_us_state: { type: "boolean", description: "The company exists, formed in another US state: it registers here (set from the facts when they say)" },
         foreign_company_registers: { type: "boolean", description: "A company formed in another country registers to do business here" },
+        foreign_owned: { type: "boolean", description: "The US company (new, or formed in a US state) is 25% or more owned by a person or company outside the US, such as a Chinese parent forming a US LLC: Form 5472 every year. Leave it out when the company itself was formed abroad (foreign_company_registers covers that)" },
         is_corporation: { type: "boolean", description: "The company is (or will be) a corporation, not an LLC: its formation or registration is the corporation's" },
         builds_out: { type: "boolean", description: "Construction or remodeling of the space" }, exterior_sign: { type: "boolean" },
         hazmat_or_batteries: { type: "boolean" }, sells_cosmetics: { type: "boolean" }, food_warehouse: { type: "boolean" }, manhattan_below_96th: { type: "boolean" },
@@ -532,7 +533,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
       execute(i) {
         const segment = segmentOf(str(i.business) || get().business.en);
         const place = str(i.place) || get().locations.map(l => `${l.name.en}, ${l.county.en}`).join("; ");
-        const needs = { ...(i.hires_staff ? { employees: true } : {}), ...(i.imports_goods ? { imports: true } : {}), ...(i.new_us_company ? { newEntity: true } : {}), ...(i.foreign_company_registers ? { foreignEntity: true } : {}), ...(i.is_corporation || (i.is_corporation === undefined && isCorporation(get().facts)) ? { corp: true } : {}), ...(i.formed_in_another_us_state || placeState(place) && entityNeed(get().facts, placeState(place)) === "register" ? { outOfState: true } : {}),
+        const needs = { ...(i.hires_staff ? { employees: true } : {}), ...(i.imports_goods ? { imports: true } : {}), ...(i.new_us_company ? { newEntity: true } : {}), ...(i.foreign_company_registers ? { foreignEntity: true } : {}),
+          // a US company with an owner outside the US (said, or in the words: "a Chinese parent's US LLC"); never as well as one formed abroad
+          ...(!i.foreign_company_registers && (i.foreign_owned ?? ownedAbroadFact(get().facts) ?? ownedAbroad(str(i.business) || get().business.en)) ? { foreignOwned: true } : {}), ...(i.is_corporation || (i.is_corporation === undefined && isCorporation(get().facts)) ? { corp: true } : {}), ...(i.formed_in_another_us_state || placeState(place) && entityNeed(get().facts, placeState(place)) === "register" ? { outOfState: true } : {}),
           ...(i.builds_out ? { buildout: true } : {}), ...(i.exterior_sign ? { signage: true } : {}), ...(i.hazmat_or_batteries ? { hazmat: true } : {}), ...(i.sells_cosmetics ? { cosmetics: true } : {}),
           ...(i.food_warehouse || dealsInFood(str(i.business) || get().business.en, segment) ? { food: true } : {}), ...(i.manhattan_below_96th ? { manhattan: true } : {}), ...(i.serves_alcohol ? { alcohol: true } : {}), ...(i.outdoor_seating ? { terrace: true } : {}),
           // a furniture brand: wood goods, upholstered furniture, dressers and chests (src/forms/furniture.ts)

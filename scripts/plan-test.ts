@@ -173,10 +173,10 @@ import { officialSource } from "./eval/official";
 
   // the intake: one question at a time, only those that apply
   const keys = (w: string) => intakeQuestions(w).map(q => q.key);
-  eq(keys("Milk tea shop"), ["employees"], "a tea shop is asked only about staff");
-  eq(keys("Furniture importer"), ["employees", "manufactures", "upholstered", "children", "online"], "a furniture importer isn't asked whether it imports");
-  eq(keys("Dresser brand"), ["employees", "manufactures", "imports", "children", "online"], "a dresser brand isn't asked about upholstery");
-  eq(keys("Cosmetics brand selling online"), ["employees", "manufactures", "imports"], "a cosmetics brand isn't asked about children's products or selling online");
+  eq(keys("Milk tea shop"), ["employees", "foreignOwned"], "a tea shop is asked only about staff and who owns it");
+  eq(keys("Furniture importer"), ["employees", "manufactures", "upholstered", "children", "online", "foreignOwned"], "a furniture importer isn't asked whether it imports");
+  eq(keys("Dresser brand"), ["employees", "manufactures", "imports", "children", "online", "foreignOwned"], "a dresser brand isn't asked about upholstery");
+  eq(keys("Cosmetics brand selling online"), ["employees", "manufactures", "imports", "foreignOwned"], "a cosmetics brand isn't asked about children's products or selling online");
   const no = previewPlan("Furniture store", "San Francisco, CA", "2027-04-01", { today: T, upholstered: false });
   eq([no.apps.some(a => a.official === "ca-bhgs-retail"), no.also.some(a => a.id === "life-law-label")], [false, false], "answering no to upholstery drops the BHGS license and the law label");
 }

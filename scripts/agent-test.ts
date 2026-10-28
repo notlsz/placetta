@@ -7,6 +7,9 @@ import { pairServerTools } from "../src/serverTools";
 import { entityNeed, homeStateOf } from "../src/entityHome";
 import { answerFits, prefillFromProfile } from "../src/filingPlaybooks/fill";
 import { formsFor as formsForReg, segmentOf as segmentOfReg, selfStep } from "../src/forms/registry";
+import { ownedAbroad, previewPlan as previewPlanFor } from "../src/plan/preview";
+import { intakeQuestions as intakeQuestionsFor } from "../src/plan/intake";
+import { firstWorkspace as firstWorkspaceFor } from "../src/plan/start";
 import { licenseTierOf } from "../src/pricing";
 import { DEFAULT_POLICY } from "../src/spend.ts";
 import { channelHint, channelNote, channelRefuses, guardPatch, runRounds, startState, TOKEN_CAP, tokensUsed, type Channel, type ChildResult, type RunState, type Send } from "../src/serverRun";
@@ -3140,6 +3143,42 @@ console.log("\n# Filing playbooks: one call per kind, every store, one question"
   ok(!ny.some(f => f.level === "federal" && f.needs?.foreignEntity), "and no filing that's only for a company from another country (Form 5472, the BOIR)", ny.map(f => f.id));
   for (const [where, id] of [["Phoenix, AZ", "az-acc-foreign"], ["Chicago, IL", "il-sos-foreign-llc"], ["Houston, TX", "tx-304"], ["Miami, FL", "fl-sunbiz-foreign-llc"], ["Seattle, WA", "wa-sos-foreign"]] as const)
     ok(formsForReg({ segment: "restaurant", where, needs: { outOfState: true } }).some(f => f.id === id), `${where}: ${id}`);
+
+  console.log("\n# Who owns it: a US company 25% or more owned from abroad files Form 5472 (the federal audit's gap)");
+  {
+    const T = "2026-10-28";
+    const yearly = (p: ReturnType<typeof previewPlanFor>) => p.also.filter(a => /^life-(5472|1120)/.test(a.id)).map(a => `${a.id}${a.verified ? "" : "?"}`).sort();
+    const reg = (needs: Parameters<typeof formsForReg>[0]["needs"]) => formsForReg({ segment: "retail", where: "Flushing, NY", needs }).map(f => f.id).filter(id => /^(irs-5472|irs-1120|irs-1120f|fincen-boir|irs-ss4)$/.test(id)).sort();
+    // a Chinese-owned Delaware LLC opening a store in New York
+    const de = previewPlanFor("Lifestyle retail store", "Flushing, NY", "2027-04-01", { entity: "Golden Leaf Home LLC", formedIn: "DE", foreignOwned: true, today: T });
+    eq(yearly(de), ["life-1120-pro-forma", "life-5472"], "a Chinese-owned Delaware LLC: Form 5472 on a pro forma 1120, both claimed with a current quote, and no 1120-F");
+    eq(reg({ outOfState: true, foreignOwned: true }), ["irs-1120", "irs-5472", "irs-ss4"], "find_official_forms for it: 5472, the pro forma 1120 and the EIN by SS-4, no 1120-F and no BOIR (FinCEN exempts US-formed companies)");
+    ok(de.apps.some(a => a.official === "irs-ss4") && !de.apps.some(a => a.official === "fincen-boir"), "its plan has the EIN by SS-4 and no BOIR", de.apps.map(a => a.official));
+    ok(/no SSN or ITIN/.test(formById("irs-ss4")?.foreign?.en ?? "") || /"Foreign"/.test(formById("irs-ss4")?.foreign?.en ?? ""), "the SS-4 says what a foreign responsible party writes on line 7b");
+    // a new US LLC its Chinese parent is forming, said in the words or answered in the intake
+    const fresh = previewPlanFor("US subsidiary of a Chinese company opening a milk tea shop", "Flushing, NY", "2027-04-01", { today: T });
+    eq(yearly(fresh), ["life-1120-pro-forma", "life-5472"], "a Chinese parent forming a US LLC: read from the words");
+    eq(yearly(previewPlanFor("奶茶店，中资", "Flushing, NY", "2027-04-01", { today: T })), ["life-1120-pro-forma", "life-5472"], "and in Chinese (中资)");
+    // a US corporation with a foreign owner files 5472 with its own Form 1120, not a pro forma one
+    eq(yearly(previewPlanFor("Lifestyle retail store", "Flushing, NY", "2027-04-01", { entity: "Golden Leaf Home Inc.", formedIn: "DE", foreignOwned: true, today: T })), ["life-5472"], "a foreign-owned US corporation: 5472, no pro forma 1120");
+    // a company formed abroad: 1120-F and 5472, never the pro forma 1120
+    const cn = previewPlanFor("Lifestyle retail store", "Flushing, NY", "2027-04-01", { entity: "Shanghai Golden Leaf Co., Ltd.", formedIn: "abroad", foreignOwned: true, today: T });
+    eq(yearly(cn), ["life-1120f", "life-5472"], "a company formed abroad: Form 1120-F and Form 5472, no pro forma 1120");
+    eq(reg({ foreignEntity: true }), ["fincen-boir", "irs-1120f", "irs-5472", "irs-ss4"], "find_official_forms for it: 1120-F, 5472, the BOIR and the EIN");
+    ok(cn.apps.some(a => a.official === "fincen-boir"), "its plan keeps the BOIR, which FinCEN still asks of a foreign company registered in a state");
+    // a US-owned LLC: neither
+    const us = previewPlanFor("Lifestyle retail store", "Flushing, NY", "2027-04-01", { entity: "Golden Leaf Home LLC", formedIn: "NY", today: T });
+    eq(yearly(us), [], "a US-owned LLC: no 5472, no pro forma 1120, no 1120-F");
+    eq(reg({}), ["irs-ss4"], "find_official_forms for it: the EIN only");
+    eq(yearly(previewPlanFor("Chinese restaurant", "Flushing, NY", "2027-04-01", { today: T })), [], "a Chinese restaurant says nothing about who owns it");
+    eq([ownedAbroad("Imports tea from China"), ownedAbroad("Chinese-owned furniture brand"), ownedAbroad("our parent company is in China"), ownedAbroad("海外母公司在深圳"), ownedAbroad("Foreign film rental")], [false, true, true, true, false], "ownership words only");
+    // the intake asks it, in English and Chinese, unless the words said it or the company was formed abroad
+    const q = intakeQuestionsFor("Milk tea shop").find(x => x.key === "foreignOwned");
+    eq([q?.q.en, q?.q.zh], ["Is 25% or more of the company owned by a person or company outside the US?", "公司是否有 25% 或以上的股份由美国境外的个人或公司持有？"], "the intake asks who owns it");
+    eq([intakeQuestionsFor("Milk tea shop", { formedAbroad: true }).some(x => x.key === "foreignOwned"), intakeQuestionsFor("Chinese-owned milk tea shop").some(x => x.key === "foreignOwned")], [false, false], "not asked of a company formed abroad, or when the words already say it");
+    const first = firstWorkspaceFor({ what: "Milk tea shop", city: "Flushing", state: "NY", lang: "en", intake: { foreignOwned: true }, now: new Date("2026-10-28T12:00:00Z") });
+    ok(first.plan.also.some(a => a.id === "life-5472") && first.state.facts.some(f => f.id === "f-foreign-owned" && /^Yes/.test(f.value.en)), "the intake's yes reaches the plan and is kept as a fact for Odelia");
+  }
 
   console.log("\n# Playbooks fill from the profile and take answers by any form of the line's label");
   const facts = F([["Legal name", "Golden Leaf Foods LLC"], ["Entity", "California limited liability company"], ["EIN", "88-1234471"], ["Owner", "Mei Lin, managing member"], ["Business phone", "408-555-0142"], ["Contact email", "mei@goldenleaf.example"], ["Mailing address", "100 N First St, San Jose, CA 95113"]]);

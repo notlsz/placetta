@@ -41,12 +41,12 @@ export type Segment = "restaurant" | "retail" | "seller" | "warehouse";
 export type Where = string;
 export type Method = "online" | "pdf_mail" | "pdf_fax" | "portal" | "in_person" | "insurer" | "none";
 export type FormField = { id: string; line: string; label: Bi; hint?: Bi; options?: string[] };
-export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; alcohol?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; outOfState?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean; reference?: boolean;
+export type Needs = { food?: boolean; employees?: boolean; imports?: boolean; alcohol?: boolean; hazmat?: boolean; signage?: boolean; buildout?: boolean; newEntity?: boolean; foreignEntity?: boolean; foreignOwned?: boolean; outOfState?: boolean; manhattan?: boolean; cosmetics?: boolean; children?: boolean; forwarder?: boolean; reference?: boolean;
   wood?: boolean; upholstered?: boolean; clothingStorage?: boolean;
   bedding?: boolean; cleaning?: boolean; antimicrobial?: boolean; meat?: boolean; canned?: boolean;   // what it makes, imports or sells (src/forms/states/products.ts)
   salon?: boolean; autoRepair?: boolean; devices?: boolean; manufactures?: boolean; office?: boolean;   // the landing page's sectors (src/forms/sectors.ts)
   terrace?: boolean;
-  corp?: boolean };   // corp: the company is (or will be) a corporation, not an LLC (src/forms/entities.ts)   // terrace: tables and chairs outside on the street (a pavement licence, a terrasse, a Sondernutzung)   // furniture: wood goods, upholstered furniture, clothing storage units (src/forms/furniture.ts)   // reference: listed in the library and answers, never added to a plan
+  corp?: boolean };   // foreignOwned: a US company (formed in a US state) that a person or company outside the US owns 25% or more of (Form 5472; foreignEntity is a company formed abroad)   // corp: the company is (or will be) a corporation, not an LLC (src/forms/entities.ts)   // terrace: tables and chairs outside on the street (a pavement licence, a terrasse, a Sondernutzung)   // furniture: wood goods, upholstered furniture, clothing storage units (src/forms/furniture.ts)   // reference: listed in the library and answers, never added to a plan
 
 export type SignSpot = { page: number; x: number; y: number; w: number; h: number; date?: { x: number; y: number; size: number } };
 
@@ -202,7 +202,7 @@ export const FORMS: OfficialForm[] = [
   },
   {
     id: "irs-5472", form: "Form 5472", title: B("Information Return of a 25% Foreign-Owned U.S. Corporation or a Foreign Corporation Engaged in a U.S. Trade or Business", "外资持股 25% 以上美国公司信息申报表"),
-    agency: B("Internal Revenue Service", "美国国税局（IRS）"), level: "federal", where: "US", segments: ALL, needs: { foreignEntity: true }, method: "pdf_mail", order: 90,
+    agency: B("Internal Revenue Service", "美国国税局（IRS）"), level: "federal", where: "US", segments: ALL, anyOf: ["foreignEntity", "foreignOwned"], method: "pdf_mail", order: 90,
     how: B("Filed each year with Form 1120 (a foreign-owned single-member LLC attaches it to a pro forma 1120). Not filed electronically for a disregarded entity.", "每年随 1120 表一同申报（外资单一成员 LLC 附在形式 1120 表上），视为非独立实体的需纸质邮寄或传真。"),
     url: "https://www.irs.gov/pub/irs-pdf/f5472.pdf", pdf: "https://www.irs.gov/pub/irs-pdf/f5472.pdf", info: "https://www.irs.gov/forms-pubs/about-form-5472",
     fee: 0, feeNote: B("No fee. The penalty for not filing starts at $25,000.", "不收费。未申报罚款起点为 25,000 美元。"), renews: B("Every year, by the tax return due date.", "每年在报税截止日前。"), checked: "page", fields: [],

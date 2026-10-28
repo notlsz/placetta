@@ -33,6 +33,7 @@ export type Have = {
   food?: boolean; packagedFood?: boolean; cosmetics?: boolean; furniture?: boolean; upholstered?: boolean; clothingStorage?: boolean; children?: boolean;
   textile?: boolean; consumer?: boolean; employees?: boolean; imports?: boolean; manufactures?: boolean; online?: boolean; premises?: boolean;
   newEntity?: boolean; foreignEntity?: boolean;
+  foreignOwned?: boolean; corp?: boolean;   // a US company 25% or more owned from outside the US (Form 5472); a corporation, not an LLC
 };
 export type LifeItem = {
   id: string;
@@ -150,6 +151,30 @@ export const LIFECYCLE: LifeItem[] = [
     why: L("FinCEN decides who reports. Under its current rule a US company files nothing.", "由 FinCEN 决定谁须申报。按现行规定，美国公司无需申报。"),
     agency: L("Financial Crimes Enforcement Network (FinCEN)", "美国金融犯罪执法网络（FinCEN）"), decides: L("FinCEN", "FinCEN"), url: "https://www.fincen.gov/boi",
     source: { url: "https://www.fincen.gov/boi", quote: "U.S. companies are exempt from BOI reporting requirements and therefore, are no longer required to file BOI reports." },
+  },
+  // the yearly federal returns of a foreign-owned company (the federal audit's gap): Form 5472 for a company formed abroad
+  // and for a US company a foreign person owns 25% or more of; it rides on Form 1120-F for the first and, for a
+  // single-member LLC, on a pro forma Form 1120 (Instructions for Form 5472, "Reporting corporation")
+  {
+    id: "life-5472", stage: "start", kind: "filing", level: "federal", any: ["foreignEntity", "foreignOwned"], refs: ["irs-5472"],
+    title: L("Foreign ownership information return (Form 5472)", "外资持股信息申报（5472 表）"),
+    when: L("every year with the tax return: a US corporation 25% or more foreign-owned, an LLC with one owner outside the US, or a company formed abroad doing business here", "每年随所得税申报表提交：适用于外资持股 25% 以上的美国公司、由一位境外股东持有的 LLC，或在美国开展业务的外国公司"),
+    why: L("Reports the foreign owner and the company's dealings with related parties, the owner included. The penalty for not filing starts at $25,000.", "申报境外股东，以及公司与关联方（包括股东本人）之间的往来。未申报罚款起点为 25,000 美元。"),
+    agency: L("Internal Revenue Service", "美国国税局（IRS）"),
+  },
+  {
+    id: "life-1120-pro-forma", stage: "start", kind: "filing", level: "federal", needs: ["foreignOwned"], unless: ["foreignEntity", "corp"], refs: ["irs-1120"],
+    title: L("Pro forma Form 1120 that carries Form 5472", "附 5472 表的形式 1120 表"),
+    when: L("every year, if one owner outside the US owns the whole LLC", "如果 LLC 由一位境外股东全资持有，则每年提交"),
+    why: L("An LLC with one foreign owner files no income tax return of its own, so it files Form 5472 on a pro forma Form 1120, faxed or mailed.", "由一位境外股东持有的 LLC 本身不申报所得税，因此须将 5472 表附在形式 1120 表上，以传真或邮寄提交。"),
+    agency: L("Internal Revenue Service", "美国国税局（IRS）"),
+  },
+  {
+    id: "life-1120f", stage: "start", kind: "filing", level: "federal", needs: ["foreignEntity"], refs: ["irs-1120f"],
+    title: L("US income tax return of a foreign corporation (Form 1120-F)", "外国公司美国所得税申报（1120-F 表）"),
+    when: L("every year, for a company formed abroad that does business in the US", "在美国开展业务的外国公司每年申报"),
+    why: L("A company formed abroad reports its US business to the IRS each year, with Form 5472 attached when it has dealings with related parties.", "在外国成立的公司每年须向 IRS 申报其在美业务；与关联方有往来的须附 5472 表。"),
+    agency: L("Internal Revenue Service", "美国国税局（IRS）"),
   },
   {
     id: "life-dba", stage: "start", kind: "filing", level: "county", refs: ["fl-fictitious", "ny-assumed-name", "lac-fbn", "scc-fbn"],

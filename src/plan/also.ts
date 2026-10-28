@@ -44,7 +44,7 @@ export const sellsOnline = (what: string) => ONLINE.test(what);
 export const childrensProducts = (what: string) => KIDS.test(what);
 
 /** What the business does for the lifecycle's triggers: the plan's needs, the words, and the intake's answers. */
-export function haveOf(what: string, segment: Segment, needs: { food?: boolean; employees?: boolean; imports?: boolean; newEntity?: boolean; foreignEntity?: boolean; upholstered?: boolean; clothingStorage?: boolean; children?: boolean; buildout?: boolean },
+export function haveOf(what: string, segment: Segment, needs: { food?: boolean; employees?: boolean; imports?: boolean; newEntity?: boolean; foreignEntity?: boolean; foreignOwned?: boolean; corp?: boolean; upholstered?: boolean; clothingStorage?: boolean; children?: boolean; buildout?: boolean },
   o: { manufactures?: boolean; online?: boolean; mobile?: boolean } = {}): Have {
   const furniture = isFurniture(what), cosmetics = !furniture && sellsCosmetics(what), food = !!needs.food && !cosmetics;
   const manufactures = o.manufactures ?? makesProducts(what), online = o.online ?? sellsOnline(what);
@@ -55,6 +55,8 @@ export function haveOf(what: string, segment: Segment, needs: { food?: boolean; 
     upholstered: !!needs.upholstered, clothingStorage: !!needs.clothingStorage, children: !!needs.children || (!food && !cosmetics && childrensProducts(what)),
     textile: !food && !furniture && TEXTILE.test(what), consumer: !food && !cosmetics && segment !== "restaurant",
     employees: !!needs.employees, premises: segment !== "seller" && !o.mobile, newEntity: !!needs.newEntity, foreignEntity: !!needs.foreignEntity,
+    // a US company owned 25% or more from abroad (never also a company formed abroad: that one is foreignEntity)
+    foreignOwned: !!needs.foreignOwned && !needs.foreignEntity, corp: !!needs.corp,
   };
 }
 
