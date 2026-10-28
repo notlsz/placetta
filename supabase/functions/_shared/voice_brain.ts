@@ -15,7 +15,11 @@
 // (VOICE_BRIDGE_URL, not built); in the app they take a short-lived token like OpenAI's. Their configs are here so a
 // switch is one setting.
 //
-// Prices are list prices read on 2026-10-23 (docs/CHANNELS.md has the links). Pure: unit tested in voice_brain_test.ts.
+// Prices are list prices read on 2026-10-23 (docs/CHANNELS.md has the links), OpenAI's and Telnyx's checked again on
+// 2026-10-28: gpt-realtime-2.1 and gpt-realtime-2.1-mini (July 2026) keep the per-token prices of the models before them,
+// and are the defaults now (OPENAI_REALTIME_MODEL and OPENAI_REALTIME_MINI_MODEL override). Pure: unit tested in
+// voice_test.ts. An agency call parked on hold costs the carrier leg and a speech-to-text stream, not the brain
+// (voice_hold.ts): holdPerMinute and callCost below.
 
 export type Lang = "en" | "zh";
 export type BrainId = "openai" | "openai_mini" | "telnyx" | "gemini" | "grok";
@@ -41,21 +45,21 @@ export type Brain = {
 
 export const BRAINS: Record<BrainId, Brain> = {
   openai: {
-    id: "openai", label: "OpenAI gpt-realtime",
-    // $32 a million audio tokens in ($0.40 cached), $64 out; 600 tokens a minute heard, 1,200 a minute spoken. Fora Soft's
+    id: "openai", label: "OpenAI gpt-realtime-2.1",
+    // gpt-realtime-2.1: $32 a million audio tokens in ($0.40 cached), $64 out; 600 tokens a minute heard, 1,200 a minute spoken. Fora Soft's
     // planning range with the prompt cache working is $0.06 to $0.11 a minute.
     usdPerMin: { low: 0.06, high: 0.11, typical: 0.08 },
     firstAudioMs: { ms: 300, by: "Fora Soft's comparison (one model, no cascade)" },
     phone: "sip", browser: true, bargeIn: "native: semantic VAD, interrupt_response", zh: "default for Mandarin (founder's own use); quality check in docs/CHANNELS.md runs as a test, not a gate",
-    sources: ["https://developers.openai.com/api/docs/models/gpt-realtime", "https://www.forasoft.com/blog/article/openai-realtime-api-pricing", "https://developers.openai.com/api/docs/guides/realtime-sip"],
+    sources: ["https://developers.openai.com/api/docs/models/gpt-realtime-2.1", "https://community.openai.com/t/new-realtime-models-on-the-api-gpt-realtime-2-1-and-gpt-realtime-2-1-mini/1385896", "https://www.forasoft.com/blog/article/openai-realtime-api-pricing", "https://developers.openai.com/api/docs/guides/realtime-sip"],
   },
   openai_mini: {
-    id: "openai_mini", label: "OpenAI gpt-realtime mini",
-    // $10 a million audio tokens in, $20 out: $0.02 to $0.05 a minute (Fora Soft).
+    id: "openai_mini", label: "OpenAI gpt-realtime-2.1-mini",
+    // gpt-realtime-2.1-mini: $10 a million audio tokens in ($0.30 cached), $20 out: $0.02 to $0.05 a minute (Fora Soft).
     usdPerMin: { low: 0.02, high: 0.05, typical: 0.035 },
     firstAudioMs: { ms: 300, by: "Fora Soft's comparison" },
     phone: "sip", browser: true, bargeIn: "native", zh: "same family as gpt-realtime",
-    sources: ["https://cloudprice.net/models/gpt-realtime-mini", "https://www.forasoft.com/blog/article/openai-realtime-api-pricing"],
+    sources: ["https://developers.openai.com/api/docs/models/gpt-realtime-2.1-mini", "https://cloudprice.net/models/gpt-realtime-mini", "https://www.forasoft.com/blog/article/openai-realtime-api-pricing"],
   },
   telnyx: {
     id: "telnyx", label: "Telnyx voice AI engine (cascaded)",
@@ -105,7 +109,11 @@ export const ODELIA_CHARS_PER_MIN = 400;
 /** Placetta's Telnyx account, a minute (https://telnyx.com/pricing/voice-api.md): the PSTN leg is the Voice API fee
  *  ($0.002) plus SIP trunking ($0.0032 in, $0.005 out); bridging to OpenAI's SIP endpoint is a second leg (Voice API
  *  $0.002 plus the SIP interface $0.002); recording $0.002; a conference $0.002 a participant. $1 a number a month. */
-export const TELNYX = { voiceApi: 0.002, inbound: 0.0032, outbound: 0.005, sipLeg: 0.004, recording: 0.002, conferencePerParty: 0.002, numberMonth: 1, amdPerCall: 0.002 };
+export const TELNYX = { voiceApi: 0.002, inbound: 0.0032, outbound: 0.005, sipLeg: 0.004, recording: 0.002, conferencePerParty: 0.002, numberMonth: 1, amdPerCall: 0.002,
+  /** speech to text on a live call, a minute (Soniox on Telnyx; Deepgram Nova-3 is $0.005): the hold listener */
+  holdStt: 0.002,
+  /** Telnyx speak, a character (Amazon Polly neural): the re-entry line after a hold */
+  speakPerChar: 0.000024 };
 
 export function telephonyPerMin(o: { direction: "in" | "out"; brain: BrainId; recorded: boolean; parties?: number }): number {
   if (o.parties && o.parties > 2) {
@@ -114,6 +122,21 @@ export function telephonyPerMin(o: { direction: "in" | "out"; brain: BrainId; re
   }
   const pstn = TELNYX.voiceApi + (o.direction === "in" ? TELNYX.inbound : TELNYX.outbound);
   return pstn + (BRAINS[o.brain].phone === "sip" ? TELNYX.sipLeg : 0) + (o.recorded ? TELNYX.recording : 0);
+}
+
+/** One minute of an agency call parked on hold: the PSTN leg and the hold listener, no brain, no SIP leg, recording
+ *  paused. */
+export function holdPerMinute(o: { direction?: "in" | "out" } = {}): number {
+  return round4(TELNYX.voiceApi + (o.direction === "in" ? TELNYX.inbound : TELNYX.outbound) + TELNYX.holdStt);
+}
+
+/** A whole call: minutes with the brain on at perMinute, minutes parked at holdPerMinute, the re-entry lines spoken, and the
+ *  answering-machine check on an agency call. What voice_calls.cost_usd records. */
+export function callCost(o: { brain: BrainId; tts?: TtsId; surface: Surface; recorded?: boolean; talkSecs: number; heldSecs?: number; holds?: number }): number {
+  const talk = Math.ceil(Math.max(0, o.talkSecs) / 60) * perMinute(o);
+  const held = Math.ceil(Math.max(0, o.heldSecs ?? 0) / 60) * holdPerMinute({ direction: o.surface === "owner_phone" ? "in" : "out" });
+  const reentry = (o.holds ?? 0) * 120 * TELNYX.speakPerChar;
+  return round4(talk + held + reentry + (o.surface === "agency_phone" ? TELNYX.amdPerCall : 0));
 }
 
 /** One minute of a call, all in: the brain, the TTS voice on the cascaded path, and Telnyx. */
@@ -126,16 +149,17 @@ export function perMinute(o: { brain: BrainId; tts?: TtsId; surface: Surface; re
 const round4 = (n: number) => Math.round(n * 10000) / 10000;
 
 /** A store-month of voice: minutes by surface, and what it costs all in, with the number's $1 shared across stores. */
-export type VoiceMonth = { ownerPhoneMin: number; appTalkMin: number; agencyCalls: number; agencyCallMin: number; interpreterMin: number; stores?: number };
-export const TYPICAL_MONTH: VoiceMonth = { ownerPhoneMin: 10, appTalkMin: 15, agencyCalls: 4, agencyCallMin: 12, interpreterMin: 20 };
-export const HEAVY_MONTH: VoiceMonth = { ownerPhoneMin: 60, appTalkMin: 60, agencyCalls: 12, agencyCallMin: 25, interpreterMin: 120 };
+/** agencyCallMin is talk (the brain on); agencyHoldMin is the time an agency call waits on hold, parked. */
+export type VoiceMonth = { ownerPhoneMin: number; appTalkMin: number; agencyCalls: number; agencyCallMin: number; agencyHoldMin?: number; interpreterMin: number; stores?: number };
+export const TYPICAL_MONTH: VoiceMonth = { ownerPhoneMin: 10, appTalkMin: 15, agencyCalls: 4, agencyCallMin: 6, agencyHoldMin: 15, interpreterMin: 20 };
+export const HEAVY_MONTH: VoiceMonth = { ownerPhoneMin: 60, appTalkMin: 60, agencyCalls: 12, agencyCallMin: 10, agencyHoldMin: 25, interpreterMin: 120 };
 
 export function storeMonth(m: VoiceMonth, pick: (s: Surface) => { brain: BrainId; tts?: TtsId } = defaultPick): { usd: number; lines: Record<string, number> } {
   const line = (s: Surface, min: number, recorded = false) => min * perMinute({ ...pick(s), surface: s, recorded });
   const lines = {
     owner_phone: line("owner_phone", m.ownerPhoneMin, true),
     app_talk: line("app_talk", m.appTalkMin),
-    agency_phone: line("agency_phone", m.agencyCalls * m.agencyCallMin, true) + m.agencyCalls * TELNYX.amdPerCall,
+    agency_phone: line("agency_phone", m.agencyCalls * m.agencyCallMin, true) + m.agencyCalls * (TELNYX.amdPerCall + (m.agencyHoldMin ?? 0) * holdPerMinute() + (m.agencyHoldMin ? 120 * TELNYX.speakPerChar : 0)),
     interpreter: line("app_interpreter", m.interpreterMin),
     number: TELNYX.numberMonth / Math.max(1, m.stores ?? 1),
   };
@@ -190,6 +214,16 @@ export function pickBrain(o: { surface: Surface; lang: Lang; env: Env }): { brai
   return { brain, ...(tts ? { tts } : {}), why };
 }
 
+/** The next brain when one fails mid-call (its leg was refused, errored or dropped): down the same list, skipping the ones
+ *  already tried and any not set up here. Null when none is left. The agency call starts from the mini, an owner's from
+ *  the full model. */
+export function failoverBrain(o: { surface: Surface; tried: BrainId[]; env: Env }): BrainId | null {
+  const phone = o.surface.endsWith("_phone");
+  const order: BrainId[] = o.surface === "agency_phone" ? ["openai_mini", "openai"] : ["openai", "openai_mini"];
+  if (phone) order.push("telnyx");
+  return order.find((b) => !o.tried.includes(b) && (phone ? phoneReady(b, o.env) : brainReady(b, o.env))) ?? null;
+}
+
 /** The cascaded path's voice, per language: ElevenLabs Flash where its key is set (the most human in the founder's
  *  research), else Telnyx's included voices. Cartesia needs the bridge, so it's only used when that's set. */
 export function pickTts(lang: Lang, env: Env): TtsId {
@@ -217,18 +251,23 @@ export type SessionSpec = {
   interpret?: boolean;
   /** A session in the app: the tools are function calls the app answers (each through Placetta's server), not MCP. */
   client?: boolean;
+  /** The brain joins a call already under way (after a hold, or a failover): what was said for it just now, if anything,
+   *  and what happened so far. It doesn't greet again. */
+  resume?: { said: string | null; context: string };
 };
 
 const VOICES = { openai: { en: "marin", zh: "marin" }, grok: { en: "Ara", zh: "Ara" } };
 
 /** The session body each brain takes. The greeting is the first thing said, always: the AI disclosure is in it. */
 export function sessionConfig(brain: BrainId, s: SessionSpec, env: Env, tts?: TtsId): Record<string, unknown> {
-  const opening = `Start the conversation by saying exactly this, then wait: "${s.greeting}"`;
+  const opening = s.resume
+    ? `You are rejoining a call already under way.${s.resume.said ? ` Placetta just said this for you: "${s.resume.said}" Don't say it again.` : ""} Don't greet again; listen, then carry on from where the call was. If you're asked, you are Odelia, an AI assistant.\n${s.resume.context}`
+    : `Start the conversation by saying exactly this, then wait: "${s.greeting}"`;
   const instructions = `${opening}\n\n${s.instructions}`;
   if (brain === "openai" || brain === "openai_mini") {
     return {
       type: "realtime",
-      model: brain === "openai" ? env("OPENAI_REALTIME_MODEL") ?? "gpt-realtime" : env("OPENAI_REALTIME_MINI_MODEL") ?? "gpt-realtime-mini",
+      model: brain === "openai" ? env("OPENAI_REALTIME_MODEL") ?? "gpt-realtime-2.1" : env("OPENAI_REALTIME_MINI_MODEL") ?? "gpt-realtime-2.1-mini",
       instructions,
       audio: {
         // semantic VAD ends a turn when the words sound finished, not after a fixed silence; a person talking over Odelia stops her
@@ -253,7 +292,7 @@ export function sessionConfig(brain: BrainId, s: SessionSpec, env: Env, tts?: Tt
   // Telnyx's engine: the assistant body odelia-voice starts with ai_assistant_start, tools as webhooks back to Placetta
   const voice = ttsVoice(tts ?? "telnyx_included", s.lang, env);
   return {
-    id: env("TELNYX_ASSISTANT_ID"), instructions: `${s.instructions}\n\n${NATURAL}`, greeting: s.greeting,
+    id: env("TELNYX_ASSISTANT_ID"), instructions: `${s.resume ? `${opening}\n\n` : ""}${s.instructions}\n\n${NATURAL}`, ...(s.resume ? {} : { greeting: s.greeting }),
     voice_settings: { voice, ...(voice.startsWith("elevenlabs.") && env("TELNYX_ELEVENLABS_KEY_REF") ? { api_key_ref: env("TELNYX_ELEVENLABS_KEY_REF") } : {}) },
     tools: [...s.tools.map((t) => ({ type: "webhook", timeout_ms: 8000, webhook: { name: t.name, description: t.description, url: `${s.toolUrl}?tool=${t.name}`, method: "POST",
       headers: [{ name: "x-odelia-call", value: s.token }], body_parameters: { type: "object", properties: t.properties, required: t.required } } })),

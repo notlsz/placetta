@@ -279,12 +279,13 @@ Deno.test("cost: all in, a minute and a store-month, inside the $50 ceiling", ()
   assertEquals(perMinute({ brain: "telnyx", tts: "elevenlabs_flash", surface: "agency_phone", recorded: true }), 0.085);
   assertEquals(perMinute({ brain: "openai_mini", surface: "app_talk" }), 0.035);
   const typical = storeMonth(TYPICAL_MONTH), heavy = storeMonth(HEAVY_MONTH);
-  // typical: about $7 a store-month; with the typical month's AI and running cost ($6.40, docs/UNIT-ECONOMICS.md) about $13
-  assertEquals(typical.usd, 7.02);
+  // typical: about $6.40 a store-month (agency calls: 6 min talk, 15 min parked on hold); with the typical month's AI and
+  // running cost ($6.40, docs/UNIT-ECONOMICS.md) about $13
+  assertEquals(typical.usd, 6.42);
   assert(typical.usd + 6.40 < 50);
-  // a heavy month, uncapped, now just fits with the rest of the heavy month ($8.91 AI, $5.48 running cost), because agency
-  // calls run on the mini; voice_gate still holds voice to half the store's $44 AI allowance, $22, for margin
-  assertEquals(heavy.usd, 35.3);
+  // a heavy month, uncapped, fits with the rest of the heavy month ($8.91 AI, $5.48 running cost), because agency calls run
+  // on the mini and hold is parked; voice_gate still holds voice to half the store's $44 AI allowance, $22, for margin
+  assertEquals(heavy.usd, 29.39);
   assert(heavy.usd + 8.91 + 5.48 < 50, "uncapped, it fits");
   assert(Math.min(heavy.usd, 0.5 * 44) + 8.91 + 5.48 < 50, "capped by voice_gate, it does");
   for (const b of Object.values(BRAINS)) assert(b.sources.length && b.usdPerMin.low <= b.usdPerMin.typical && b.usdPerMin.typical <= b.usdPerMin.high, b.id);

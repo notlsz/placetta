@@ -27,7 +27,8 @@
 //
 // POST, Standard Webhooks signed by OpenAI   realtime.call.incoming: accept with the call's session, or reject
 // POST ?mcp=1, x-odelia-call: <token>         the brain's tools over MCP (JSON-RPC)
-// POST {action: "agency_call" | "interpret_call" | "purge_recordings"} (monitor key): see ./calls.ts
+// POST {action: "agency_call" | "interpret_call" | "purge_recordings" | "hold_sweep"} (monitor key): see ./calls.ts
+//   (hold_sweep: agency calls past their hold or talk limit wrapped up, retries placed; pg_cron while one is due)
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import {
   appLink, appOrigin, callerAttested, clientState, type Lang, normalizePhone, odeliaNumber, randomCode, readClientState, SAY, signCallToken, splitSms, spokenDigits, telnyx,
@@ -39,7 +40,7 @@ import { verifyLinq as verifyStandardWebhook } from "../_shared/linq.ts";
 import { OWNER_TOOLS, SEND_TEXT_TOOL, VERIFY_TOOL, mcpAnswer, sipToken } from "../_shared/voice_calls.ts";
 import { pickBrain, sessionConfig, type SessionSpec } from "../_shared/voice_brain.ts";
 import { redactForVoice } from "../_shared/voice_rules.ts";
-import { agencyCall, agencyToolCall, bridgeToBrain, callRecorded, callsEvent, interpretCall, mayRecordCall, ownerCallStarted, purgeRecordings, setupCalls, specForToken, type SpecWithBrain } from "./calls.ts";
+import { agencyCall, agencyToolCall, bridgeToBrain, callRecorded, callsEvent, holdSweep, interpretCall, mayRecordCall, ownerCallStarted, purgeRecordings, setupCalls, specForToken, type SpecWithBrain } from "./calls.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
@@ -285,7 +286,8 @@ async function event(type: string, p: CallPayload) {
     else if (cs.k === "unverifiable") await sayAndHangUp(ccid, lang, LINES.unverifiable[lang]);
     else if (cs.k === "bridge") {
       const call = await callOf(ccid);
-      if (call) await bridgeToBrain({ peer: ccid, token: ccid, lang: call.lang, record: await callRecorded(ccid) });
+      // the speech-to-speech brain's leg couldn't be placed: Telnyx's assistant takes the call instead of dropping it
+      if (call && !(await bridgeToBrain({ peer: ccid, token: ccid, lang: call.lang, record: await callRecorded(ccid) })).ok && !(await ownerFallback(ccid))) await sayAndHangUp(ccid, call.lang, LINES.sorry[call.lang]);
     }
     else if (cs.k === "talk" && await callRecorded(ccid)) await cmd(ccid, "record_start", { format: "wav", channels: "dual", play_beep: false, client_state: clientState({ k: "rec", l: lang }) });
     else if (cs.k === "sorry") {
@@ -490,7 +492,24 @@ async function acceptOrReject(callId: string, spec: SpecWithBrain | null) {
   if (!r.ok) console.error("openai accept", r.status, (await r.text()).slice(0, 200));
 }
 
-setupCalls({ admin, env, self: SELF, monitorKey, cmd, ownerSpec: async (ccid) => {
+/** An owner's call whose speech-to-speech brain failed or couldn't be reached: Telnyx's own assistant (the last brain in
+ *  voice_brain's list) takes it, with the same instructions and tools. False when it isn't set up or won't start. */
+async function ownerFallback(ccid: string): Promise<boolean> {
+  if (!env("TELNYX_ASSISTANT_ID")) return false;
+  const call = await callOf(ccid);
+  if (!call || call.ended_at || !call.workspace_id || !call.user_id) return false;
+  const { data: w } = await admin.from("workspaces").select("id, name").eq("id", call.workspace_id).maybeSingle();
+  if (!w) return false;
+  const o = call.outbox_id ? (await admin.from("odelia_outbox").select("body").eq("id", call.outbox_id).maybeSingle()).data : null;
+  const record = await callRecorded(ccid);
+  const assistant = await assistantFor({ ccid, lang: call.lang, name: await firstName(call.user_id, w.id), ws: { id: w.id, name: String(w.name ?? "") }, verified: !!call.verified_at, outbound: o ? String(o.body ?? "") : undefined, record });
+  const r = await cmd(ccid, "ai_assistant_start", { assistant, client_state: clientState({ k: "talk", l: call.lang }) });
+  if (r.ok) await admin.from("voice_calls").update({ brain: "telnyx" }).eq("call_control_id", ccid);
+  else console.error("owner fallback", r.status, r.code);
+  return r.ok;
+}
+
+setupCalls({ admin, env, self: SELF, monitorKey, cmd, ownerFallback, ownerSpec: async (ccid) => {
   const call = await callOf(ccid);
   if (!call || call.ended_at || !call.workspace_id || !call.user_id) return null;
   const { data: w } = await admin.from("workspaces").select("id, name").eq("id", call.workspace_id).maybeSingle();
@@ -543,6 +562,7 @@ export async function handle(req: Request): Promise<Response> {
     return json(r.ok ? 200 : 409, r);
   }
   if (body.action === "purge_recordings") return json(200, await purgeRecordings());
+  if (body.action === "hold_sweep") return json(200, await holdSweep());
   return fail(400, "bad_request", "Unknown action.");
 }
 

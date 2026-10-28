@@ -12,7 +12,8 @@ import { answerTool, pairLines, readEvent, type Heard } from "../src/voice/realt
 import { agencyTool, planAgencyCall, type Effect, type FilingRow } from "../supabase/functions/_shared/voice_calls";
 import { callSteps, commitAsked, commitmentsSaid, disclosesFirst, mergeTurns } from "../supabase/functions/_shared/voice_rules";
 import { bilingualTranscript, GLOSSARY, interpreterInstructions, registryTerms } from "../supabase/functions/_shared/interpreter";
-import { sessionConfig } from "../supabase/functions/_shared/voice_brain";
+import { callCost, sessionConfig } from "../supabase/functions/_shared/voice_brain";
+import { callLimits, holdStep, newHold } from "../supabase/functions/_shared/voice_hold";
 
 type Ok = (cond: unknown, m: string, detail?: unknown) => void;
 type Eq = (a: unknown, b: unknown, m: string) => void;
@@ -67,7 +68,7 @@ export async function voiceJourneys(ok: Ok, eq: Eq) {
     const cfg = sessionConfig("openai", { ...plan.spec, toolUrl: "https://placetta.test/functions/v1/odelia-voice?mcp=1", token: "tok" }, env) as { instructions: string; tools: { allowed_tools: string[] }[] };
     ok(cfg.instructions.startsWith("Start the conversation by saying exactly this") && /B T - 7 7 8 8 1 2/.test(cfg.instructions), "the playbook's script, with the confirmation number spelled out", cfg.instructions.slice(0, 400));
     eq(callSteps({ lang: "en", business: "x", filing: { title: "t", agency: "a", confirmation: "1", submitted: null, status: "submitted" } }).map(s => s.step), ["greet", "identify", "ask", "recap"], "greet, identify, ask, recap");
-    eq(cfg.tools[0].allowed_tools, ["send_digits", "log_status", "need_owner", "hand_to_team", "recording_refused", "save_recap"], "and only the call's own tools");
+    eq(cfg.tools[0].allowed_tools, ["send_digits", "on_hold", "log_status", "need_owner", "hand_to_team", "recording_refused", "save_recap"], "and only the call's own tools");
 
     // the conversation, as the brain would drive it; each tool's effects as odelia-voice applies them
     const timeline: { source: string; title: string }[] = [], approvals: string[] = [], team: string[] = [], pressed: string[] = [];
@@ -79,8 +80,27 @@ export async function voiceJourneys(ok: Ok, eq: Eq) {
       if (e.kind === "owner") approvals.push(e.title.en);
       if (e.kind === "team") team.push(e.reason);
     } };
-    const ctx = { agency: "City of San José, Business Tax", now: at, lang: "en" as const };
+    const ctx = { agency: "City of San José, Business Tax", now: at, lang: "en" as const, menu: plan.menu };
+    eq(agencyTool("send_digits", { digits: "1", heard_option: "To pay your business tax by phone, press 1." }, ctx).effects, [], "the menu's pay option is never pressed");
     apply(agencyTool("send_digits", { digits: "2" }, ctx).effects);
+
+    // the clerk puts Odelia on hold for 25 minutes: the brain is let go, the hold listener waits, the brain comes back
+    const hold = agencyTool("on_hold", { heard: "Please hold while I pull that up" }, ctx);
+    eq(hold.effects, [{ kind: "hold", heard: "Please hold while I pull that up" }], "the brain says it's on hold");
+    const hctx = { lang: "en" as const, business: "Lucky Leaf Tea", about: "application BT-778812", recorded: true };
+    let hs = newHold(callLimits(() => undefined), at.getTime());
+    const kinds: string[] = [];
+    const step = (e: Parameters<typeof holdStep>[1]) => { const r = holdStep(hs, e, hctx); hs = r.state; kinds.push(...r.cmds.map(c => c.kind)); return r; };
+    step({ type: "brain_attached", at: at.getTime() + 1000 });
+    step({ type: "brain_hold", at: at.getTime() + 90e3 });
+    for (let m = 0; m < 25; m++) step({ type: "heard", at: at.getTime() + 90e3 + m * 60e3 + 5e3, text: "Your call is important to us. Please stay on the line and the next available representative will be with you.", final: true });
+    const back = step({ type: "heard", at: at.getTime() + 90e3 + 25 * 60e3, text: "Okay, sorry about the wait, I have your file here.", final: true });
+    step({ type: "brain_attached", at: at.getTime() + 90e3 + 25 * 60e3 + 2500 });
+    eq(kinds, ["detach_brain", "record_pause", "stt_start", "stt_stop", "record_resume", "speak", "attach_brain"], "parked for the hold, recording paused, back when the clerk speaks");
+    ok(disclosesFirst((back.cmds.find(c => c.kind === "speak") as { text: string }).text), "the re-entry line says she's an AI first");
+    ok(hs.phase === "talk" && Math.round(hs.heldMs / 60e3) === 25, "talking again after 25 minutes held", hs);
+    const parkedCost = callCost({ brain: "openai_mini", surface: "agency_phone", recorded: true, talkSecs: 300, heldSecs: hs.heldMs / 1000, holds: 1 });
+    ok(parkedCost < 0.5, `the call costs $${parkedCost.toFixed(2)} with the hold parked`);
     const clerk = ["Business tax, this is Dana.", "Let me look that up. BT-778812 is in review; we still need the copy of your seller's permit. Can you pay the $195 balance over the phone today?", "Okay. Anything else?"];
     eq(commitAsked(clerk[1]), "payment", "the clerk asks for a payment");
     const owner = agencyTool("need_owner", { kind: "payment", detail: "The city asks for the $195 business tax balance" }, ctx);

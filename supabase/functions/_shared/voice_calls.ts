@@ -4,6 +4,7 @@
 import { type AgencyLine, AGENCY_LINES, lineForForm, officialNumbers } from "./agency_phones.ts";
 import { agencyInstructions, agencyOpen, COMMIT_LINE, type CommitKind, disclosesFirst, disclosure, heardAsData, mayDial, NORM, type Norm, type Recap, recapEscalates, recapEvent, redactForVoice } from "./voice_rules.ts";
 import { type BrainId, type Env, type Lang, perMinute, pickBrain, type SessionSpec, type TtsId } from "./voice_brain.ts";
+import { mayPress } from "./voice_hold.ts";
 
 /* ------------------------------ placing an agency call ------------------------------ */
 
@@ -56,7 +57,13 @@ const T = (name: string, description: string, properties: Record<string, unknown
 /** An agency call's tools: they only record what was said, press keys, and ask the owner or the team. None sends, pays,
  *  files, dials another number or changes the workspace beyond the filing's timeline. */
 export const AGENCY_TOOLS: ToolDef[] = [
-  T("send_digits", "Press keys on the phone menu.", { digits: { type: "string", description: "Digits, * or #, e.g. 13" } }, ["digits"]),
+  T("send_digits", "Press keys on the phone menu: only the agency's published option, or an option the recording just read out (quote it in heard_option). Never an option that pays, cancels or changes anything.", {
+    digits: { type: "string", description: "Digits, * or #, e.g. 13" },
+    heard_option: { type: "string", description: "The menu sentence exactly as the recording said it, e.g. \"For business tax, press 2\". Leave empty only for the published option." },
+  }, ["digits"]),
+  T("on_hold", "You've been put on hold or into a queue (hold music, a repeating message, \"please hold\", an estimated wait). Call it and say nothing: Placetta waits on the line for you and brings you back the moment a person speaks.", {
+    heard: { type: "string", description: "What told you it's a hold, briefly" },
+  }, []),
   T("log_status", "Record what the agency said about the filing's status.", {
     status: { type: "string", enum: [...NORM] }, said: { type: "string", description: "Their words, briefly" },
     missing: { type: "array", items: { type: "string" } }, next_date: { type: "string", description: "YYYY-MM-DD, if they gave one" }, reference: { type: "string" },
@@ -88,9 +95,10 @@ export type Effect =
   | { kind: "team"; reason: string }
   | { kind: "stop_recording" }
   | { kind: "recap"; recap: Recap; event: ReturnType<typeof recapEvent>; escalate: boolean }
-  | { kind: "flag"; why: string };
+  | { kind: "flag"; why: string }
+  | { kind: "hold"; heard: string };
 
-export function agencyTool(name: string, args: Record<string, unknown>, ctx: { agency: string; now: Date; lang: Lang }): { effects: Effect[]; reply: string } {
+export function agencyTool(name: string, args: Record<string, unknown>, ctx: { agency: string; now: Date; lang: Lang; menu?: string | null }): { effects: Effect[]; reply: string } {
   const s = (k: string, n = 400) => String(args[k] ?? "").slice(0, n);
   const heard = heardAsData([s("said"), s("detail"), s("reason"), s("summary_en"), s("summary_zh"), ...(Array.isArray(args.missing) ? args.missing.map(String) : [])].join("\n"));
   const flags: Effect[] = heard.verdict === "clean" ? [] : [{ kind: "flag", why: `heard on the call: ${heard.hits.slice(0, 2).join("; ")}` }];
@@ -103,9 +111,10 @@ export function agencyTool(name: string, args: Record<string, unknown>, ctx: { a
   });
   switch (name) {
     case "send_digits": {
-      const d = s("digits", 20);
-      return /^[0-9*#]{1,12}$/.test(d) ? { effects: [{ kind: "dtmf", digits: d }], reply: "Pressed." } : { effects: [], reply: "Only digits, * and # can be pressed." };
+      const p = mayPress(s("digits", 20), { published: ctx.menu ?? null, heard: s("heard_option", 600) || null });
+      return p.ok ? { effects: [{ kind: "dtmf", digits: p.digits }], reply: "Pressed." } : { effects: [], reply: p.why };
     }
+    case "on_hold": return { effects: [{ kind: "hold", heard: s("heard", 200) }], reply: "Holding for you. Say nothing; you'll be brought back when a person answers." };
     case "log_status": {
       const r = recap(), ev = recapEvent(r, ctx.agency, ctx.now);
       return { effects: [...flags, { kind: "event", event: ev, norm: r.status, escalate: recapEscalates(r) }], reply: "Logged on the filing's timeline." };
