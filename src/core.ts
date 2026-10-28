@@ -247,6 +247,8 @@ export const applyChange = (c: Change): P => w => {
   if (c.op === "mcp_call") return w;
   // held changes and plans are run by the app when an owner approves them (src/held.ts), not here
   if (c.op === "held" || c.op === "plan") return w;
+  // opening replicated stores is done by src/replicate.ts openLocations, which the app runs on an owner's approval
+  if (c.op === "replicate") return w;
   // removed with the owner's confirmation: it doesn't apply, so it's remembered and never suggested again
   const gone = w.apps.find(a => a.id === c.app);
   const store = (w.stores ?? []).find(x => (x.apps ?? []).includes(c.app))?.id;

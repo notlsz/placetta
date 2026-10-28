@@ -136,6 +136,9 @@ export function stateAgency(code: string): { en: string; zh: string; url: string
   return st?.tax ? { en: st.tax[0], zh: st.tax[1], url: st.tax[2], state: st.en, stateZh: st.zh } : undefined;
 }
 
+/** A US state's name in English and Chinese, by its two-letter code. */
+export const stateName = (code: string): { en: string; zh: string } | undefined => { const s = STATES[code.toUpperCase()]; return s ? { en: s.en, zh: s.zh } : undefined; };
+
 /** The two-letter state in "Flushing, NY", "Columbus, Ohio 43215" or "俄亥俄州哥伦布". */
 export function stateOf(where: string): string | undefined {
   const t = where.trim();

@@ -151,7 +151,9 @@ export type Change =
   /* Owner controls (src/autonomy.ts): changes held under Ask me first, run once an owner approves; a plan written under
      Plan first, which an owner approves before Odelia starts it. */
   | { op: "held"; calls: HeldCall[] }
-  | { op: "plan"; job: string };
+  | { op: "plan"; job: string }
+  /** Replicate a store (src/replicate.ts): open a new location like `source` in each place, on one approval. */
+  | { op: "replicate"; source: string; targets: { place: string; address?: string; sqft?: string; opening?: string }[] };
 
 /** Something that changed or is coming up, found by the daily monitor (or, in the sample, worked out from the deadlines). */
 export type UpdateItem = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team" | "mail" | "purchase" | "mention"; title: Bi; body?: Bi; app?: string; at: string; read: boolean; prompt?: Bi };
@@ -206,6 +208,9 @@ export type Store = {
   permits?: { name: Bi; expires: string }[];   // permits on file for an open store
   ready?: Record<string, boolean>;               // the city's inspection checklists: "<inspection id>:<item id>" ticked when it's in place
   notices?: AgencyNotice[];                      // notices an agency sent this store, each with its document (src/value.ts)
+  /** Opened as a copy of another store (src/replicate.ts): the source, the company's applications it relies on by
+   *  reference (never copies), and the square footage the owner gave. */
+  replica?: { source: string; at: string; reused: string[]; sqft?: string };
 };
 
 export type Workspace = {

@@ -55,6 +55,8 @@ export const TOOL_SCOPES: Record<string, Scope> = {
   memory_save: "write", review_documents: "write", draft_document: "write", import_file: "write", add_calendar_event: "write", set_budgets: "write",
   // agent memory (src/odeliaMemory/context.ts): a suggestion only waits for an owner or admin, so it is a draft
   memory_suggest: "draft",
+  // src/replicate.ts: plans new locations like a store and puts one card up; nothing opens until an owner approves it
+  replicate_store: "draft",
   // src/escalate.ts: a question for Placetta's own specialists; it changes nothing but the job's wait
   ask_specialist: "draft",
   draft_message: "send", send_email: "send",

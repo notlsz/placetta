@@ -10,7 +10,7 @@ import type { Tool } from "./live";
 export type Group = "stores" | "inspections" | "documents" | "mail" | "routines" | "spending";
 export const GROUPS: Record<Group, { tools: string[]; about: string; words: RegExp }> = {
   stores: {
-    tools: ["add_store", "update_store", "remove_store", "split_job", "plan_markets", "connected_locations", "company_profile"],
+    tools: ["add_store", "update_store", "remove_store", "replicate_store", "split_job", "plan_markets", "connected_locations", "company_profile"],
     about: "add, change or remove stores, split a job across stores, plan several markets at once, the stores and company details the business's own apps keep",
     words: /\b(stores?|locations?|markets|cities|expan(d|ding|sion)|branch(es)?|outlets?|franchis\w*|each store|every store|all stores)\b|门店|分店|店铺|加盟/i,
   },

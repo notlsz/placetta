@@ -55,6 +55,7 @@ const placeState = (where: string) => (placesOf(where.split(";")[0]).find((c, k,
 import { dealsInFood, libraryAnswer, ownedAbroad, ownedAbroadFact } from "./plan/preview";
 import { alsoText, heading } from "./plan/also";
 import { entryPacket, packetForModel } from "./plan/packet";
+import { compareTable, coveredCities, daysSay, feesSay, openDoes, parseTargets, replicate, replicationForModel } from "./replicate";
 import { PLAYBOOKS, playbookById } from "./filingPlaybooks";
 import { proofCurrent } from "./plan/ask";
 import { addUsed, citedPages, sourceLinks, sourcesLine, type Used, usedBy } from "./sources";
@@ -217,7 +218,8 @@ How you work:
 - Refuse anything that breaks the law or deceives an agency (faking a document, a signature or an inspection record, hiding something from an inspector, dodging a required license), even if asked.${tools ? `
 ${can("prepare_application") ? `- To file one of these, use follow_playbook, never the step-by-step tools: ${PLAYBOOKS.map(p => p.name.en.toLowerCase()).join("; ")}. One call does every store; ask for everything it lists in one message, then call it once more with the answers.\n` : ""}- Use the agencies' real forms, never a template. find_official_forms returns the official form for each filing (form number, agency, how it's filed, official link, fee and the form's own fields by line). When a form is there, prepare_application with its official_form_id and fill its fields with the form's own labels. Only when the library has nothing for a filing, ${research ? "research the agency's official page and name the exact form or online service it uses" : "name the form only if you are sure of it and say it's to be confirmed with the agency"}.
 - Chain the tools. To map a business or a new store: ${can("add_store") ? "add_store if it isn't in Stores yet and, in the same turn (they don't wait on each other), " : ""}find_official_forms for its business and place, then prepare_application once for each license it needs (with the store_id when there's more than one store), fill each from the workspace facts, memory and documents, add_deadline for the dates that matter (the opening date, each filing's file-by date, renewals), then request_filing_approval for each one that's complete. request_filing_approval refuses an incomplete application and says what's missing: that's expected, not a failure. For progress or "what's next": check_progress first${mail ? ", then search_email (query, days) for recent mail from the agencies and read_email (id and kind, both from search_email's results) what matters" : ""}, then give the status and the one next step. For a missing document, draft_document it when you can write it yourself (letters, narratives, statements)${drives ? ", or find_files and import_file it from their drive" : ""}. When documents are uploaded, review_documents them to build the registry and renewal reminders. Values read from documents come with the document's own words ("quote"); when you report one, give those words, and never state a value from a document that has no quote.
-${w.apps.some(a => a.preview) ? `- Applications marked preview (${w.apps.filter(a => a.preview).length} of them) were listed from Placetta's registry the moment the workspace was created, before anyone checked them against the agency: the right agency and form as the library knows them, with the lines empty. They are the plan the person already sees, so refine them, never re-map: keep their ids. prepare_application with the same official_form_id (or the same name) returns that application instead of adding a second one and fills it; fill_fields and update_application work on it directly. For each: verify it against the agency's current page or form (find_official_forms, or the official link), fill its fields and checklist from the facts, memory and documents, correct the fee or time when the agency says otherwise, add what the registry missed with prepare_application, remove what doesn't apply with remove_application, and clear the preview mark (filling it or preparing it does; update_application verified true does when nothing else changed). Say "verified" only after you checked the agency's own page.
+${can("replicate_store") ? `- To copy a store that works to new places ("open 3 more like our San Jose store in Texas", "same as Flushing in Dallas and Toronto"), call replicate_store once with every place: it shows the comparison and puts up the one approval that opens them all. Don't add_store or prepare_application for those places yourself, and never say the stores are open until an owner approves the card.
+` : ""}${w.apps.some(a => a.preview) ? `- Applications marked preview (${w.apps.filter(a => a.preview).length} of them) were listed from Placetta's registry the moment the workspace was created, before anyone checked them against the agency: the right agency and form as the library knows them, with the lines empty. They are the plan the person already sees, so refine them, never re-map: keep their ids. prepare_application with the same official_form_id (or the same name) returns that application instead of adding a second one and fills it; fill_fields and update_application work on it directly. For each: verify it against the agency's current page or form (find_official_forms, or the official link), fill its fields and checklist from the facts, memory and documents, correct the fee or time when the agency says otherwise, add what the registry missed with prepare_application, remove what doesn't apply with remove_application, and clear the preview mark (filling it or preparing it does; update_application verified true does when nothing else changed). Say "verified" only after you checked the agency's own page.
 ` : ""}${can("set_plan") ? `- Work like an engineer on a ticket. For any job of three or more steps (mapping a store, a renewal, getting ready for an inspection, answering an agency's request), set_plan first, then work the plan in order and set_plan again as each step finishes. One plan per job: when a job in the workspace's jobs is still open, pick it up with its job_id instead of starting another. Blocked on something only someone else can give? Finish every other step first, then set the job to waiting and say exactly what you need and from whom.
 ${can("split_job") ? `- When they ask for the same work across several stores (get every store ready for its inspection, renew everything due this quarter at every location), split_job it instead of doing the stores one by one: each store's own bot works its part at the same time, a separate reviewer checks each, and you write one summary when they're all back.
 ` : ""}- Do the whole job, not only the forms: chase what a filing needs from other people (the landlord's authorization letter, the contractor's license, the architect's stamped plans) with draft_message, get a store ready for each inspection, write status reports for the owner or headquarters with draft_document, compare cities by the permits, fees and time to open, and keep staff certificates and renewals current.${can("schedule_routine") ? " When they want something done on a schedule ('every Monday', 'each month', 'until it's approved'), schedule_routine it." : ""}
@@ -608,6 +610,48 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         S("searching", L(`Planning ${places.length} markets side by side`, `同时规划 ${places.length} 个市场`));
         mark();
         return packetForModel(entryPacket(str(i.business, 120) || get().business.en, places, { opening: opening || undefined, entity: str(i.company, 160) || undefined, today: daysFromNow(0) }), lang);
+      },
+    },
+    {
+      name: "replicate_store",
+      description: "Replicate a store that works to new places: 'open 3 more like our San Jose store in Texas', 'copy Flushing to Dallas, Houston and Toronto'. For each place it plans the same business from Placetta's registry with the source store's facts (what it sells, the company, where it was formed, foreign ownership): what carries over, what the company already covers, what's new there and what isn't needed, with agency fees, the opening estimate, Placetta's price and the owner's touches, shown to the person as a comparison table. It then puts up ONE approval card, 'Open all N locations': once an owner approves it in the app, the new stores and their applications are created, prefilled from the source's approved facts; the app asks for each location's address, square footage and opening date in one form. Nothing is filed: each filing still needs its own approval (or Autopilot within its caps). Use it instead of add_store plus find_official_forms when a request copies an existing store.",
+      inputSchema: { type: "object", properties: {
+        store_id: { type: "string", description: "The store to copy (from the workspace's stores). Leave out when there's only one, or the one open store" },
+        places: { type: "array", items: { type: "string" }, maxItems: 12, description: "Each new place: a city ('Dallas', 'Austin, TX', 'Toronto'), a state or a country" },
+        region: { type: "string", description: "A US state when the person gives a count but no cities ('3 more in Texas'): the places become the state's cities Placetta's registry covers, which you name and offer to swap" },
+        count: { type: "number", description: "With region: how many locations" },
+      } },
+      execute(i) {
+        const all = get().stores ?? [];
+        if (!all.length) throw new Error("There are no stores to copy yet: add_store first.");
+        const src = str(i.store_id) ? findStore(i.store_id) : all.length === 1 ? all[0] : all.filter(s => s.stage === "open").length === 1 ? all.find(s => s.stage === "open")! : null;
+        if (!src) throw new Error(`Which store should be copied? Stores: ${all.map(s => `"${s.id}" (${s.name.en})`).join(", ")}.`);
+        const region = str(i.region, 40), regionState = region ? stateFromAny(region) : "";
+        const parsed = parseTargets(arr(i.places).map(v => str(v, 120)).filter(Boolean).join("; "), regionState || undefined);
+        let places = parsed.places, picked = false;
+        const n = Math.max(1, Math.min(12, Math.floor(Number(i.count) || 0)));
+        if (!places.length && regionState) { places = coveredCities(regionState).slice(0, Number(i.count) ? n : 3); picked = true; }
+        if (!places.length) throw new Error(parsed.unknown.length ? `Couldn't tell where ${parsed.unknown.map(u => `"${u}"`).join(", ")} ${parsed.unknown.length === 1 ? "is" : "are"}: give the city with its state or country ("Fremont, CA", "Lagos, Nigeria").` : "Give the places (cities, a state or a country), or a region and a count.");
+        S("searching", L(`Planning ${places.length} location${places.length === 1 ? "" : "s"} like ${src.name.en}`, `按${src.name.zh}规划 ${places.length} 家新门店`));
+        const r = replicate(get(), src.id, places, { today: daysFromNow(0) });
+        if (!r) throw new Error(`No store "${src.id}".`);
+        r.unknown = parsed.unknown;
+        const t = compareTable(r);
+        made.table = { title: t.title, columns: t.columns, rows: t.rows[lang] };
+        const change: Change = { op: "replicate", source: src.id, targets: places.map(place => ({ place })) };
+        const key = (c: Change) => c.op === "replicate" && c.source === src.id && JSON.stringify(c.targets.map(x => x.place)) === JSON.stringify(places);
+        const twin = pendingChange(key);
+        let id = twin?.id;
+        if (!id) {
+          id = freshId(get(), "ap-rep");
+          const ap = { id, kind: "change" as const, change, title: L(`Open all ${places.length} location${places.length === 1 ? "" : "s"} like ${src.name.en}`, `按${src.name.zh}开设全部 ${places.length} 家新门店`),
+            action: L(`Open all ${places.length}`, `开设全部 ${places.length} 家`), does: openDoes(r),
+            data: r.targets.map(x => ({ id: x.storeId, label: x.label, value: `${x.counts.new} new, ${feesSay(x.fees).en}, ${daysSay(x).en}` })) };
+          apply(w => audit("agent", L("Planned new locations like a store", "按现有门店规划新门店"), src.name, same(places.join("; ")))(addApproval(ap)(w)));
+        }
+        made.approvals.push(id); mark();
+        return { ...replicationForModel(r, lang), approval_id: id, ...(picked ? { picked_cities: places, note_cities: `No cities were named, so these are the ${regionState} cities Placetta's registry covers in full. Say so and offer to swap any.` } : {}),
+          note: "The comparison table is shown to the person. Lead with one line per place (new filings, agency fees, days to open), say what carries over and what the company already covers, and that one approval in the app opens them all; nothing is filed until each filing's own approval. A place whose coverage says 'not covered yet' gets that said plainly. Never state a fee that isn't published." };
       },
     },
     {

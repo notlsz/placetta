@@ -7,6 +7,7 @@ import { expediteOptions, extraFee } from "./forms/expedite";
 import { speakTag } from "./langs";
 import { audit, demoAgent, dropApproval, setApp, setFact, setField, type AgentBackend, type AgentEvent, type Reply, type Request, type Step } from "./agent";
 import { blockersSay, confirmChange, readyToFile } from "./core";
+import { openLocations } from "./replicate";
 import { emptyBook } from "./memory";
 import { chipsOf, keepRecall, recallFrom, SAMPLE_ME } from "./recall";
 import { AgentPanel } from "./AgentPanel";
@@ -1036,6 +1037,15 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         if (er.code === "too_late" || er.code === "changed") setWs(dropApproval(id));
         say((lang === "zh" && er.message_zh) || er.message);
       }
+      return;
+    }
+    if (a.kind === "change" && a.change?.op === "replicate") {
+      // one approval opens every new location (src/replicate.ts); an account records it, and only an owner may
+      if (cloud && !ownerOk()) return;
+      const c = a.change, today = daysFromNow(0);
+      setWs(x => audit("you", B("Opened new locations like a store", "按现有门店开设新门店"), a.title, same(c.targets.map(t => t.place).join("; ")))(dropApproval(a.id)(openLocations(x, c.source, c.targets, today))));
+      if (cloud) void api.recordReplication(cloud.wsId, c.source, c.targets.map(t => t.place)).catch(() => {});
+      say(lang === "zh" ? "新门店已开设。请在“门店”中一次性填写各店的地址、面积和开业日期。在每项申请获批之前，什么都不会提交。" : "The new locations are open in Stores. Add each one's address, square footage and opening date there in one form. Nothing is filed until each filing is approved.");
       return;
     }
     if (a.kind === "change" && a.change) {

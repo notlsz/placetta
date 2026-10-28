@@ -7,6 +7,7 @@ import { ownWords, readLine } from "./plan/line";
 import { appealFor, appealSay } from "./appeals";
 import { hingeSay, openingOf, openingPath } from "./smart";
 import { headline, todos } from "./doNext";
+import { compareTable, daysSay, feesSay, openDoes, priceSay, readReplicateAsk, replicate, REPLICATE_ASK } from "./replicate";
 
 /* ------------------------------------------------------------------ *
  * The contract between the workspace and whatever runs the agent.
@@ -620,8 +621,44 @@ function findIt(_ctx: Context, text: string): Plan {
   };
 }
 
+/** "Open 3 more like our San Jose store in Texas": the comparison, and the one card that opens them all (src/replicate.ts). */
+function replicateIt(ctx: Context, text: string): Plan {
+  const w = ctx.current, L = ctx.lang;
+  const ask = readReplicateAsk(w, text);
+  if (!ask.source) return { steps: [], reply: { text: [B("There's no store to copy yet. Add your first store and I'll copy it from there.", "还没有可复制的门店。先添加第一家门店，我再按它复制。")] } };
+  if (!ask.places.length) return { steps: [], reply: { text: [ask.unknown.length
+    ? B(`I couldn't tell where ${ask.unknown.join(", ")} ${ask.unknown.length === 1 ? "is" : "are"}. Give each place with its state or country, like "Fremont, CA" or "Toronto, Canada".`, `我无法确定${ask.unknown.join("、")}在哪里。请写上州或国家，例如“Fremont, CA”或“Toronto, Canada”。`)
+    : B(`Which places should I copy ${ask.source.name.en} to? Name the cities, a state or a country.`, `要把${ask.source.name.zh}复制到哪些地方？请写出城市、州或国家。`)] } };
+  const r = replicate(w, ask.source.id, ask.places, { today: inDays(0) })!;
+  const t = compareTable(r), n = r.targets.length, id = "ap-rep-" + seq++;
+  const ap: Approval = {
+    id, kind: "change", title: B(`Open all ${n} location${n === 1 ? "" : "s"} like ${r.source.store.name.en}`, `按${r.source.store.name.zh}开设全部 ${n} 家新门店`),
+    action: B(`Open all ${n}`, `开设全部 ${n} 家`), does: openDoes(r),
+    change: { op: "replicate", source: r.source.store.id, targets: r.targets.map(x => ({ place: x.place })) },
+  };
+  const each = r.targets.map(x => B(`${x.label.en}: ${x.counts.new} new filing${x.counts.new === 1 ? "" : "s"}, ${feesSay(x.fees).en} in agency fees, ${daysSay(x).en} to open${x.coverage === "none" ? " (not covered yet: each step names who to ask)" : ""}.`,
+    `${x.label.zh}：新申请 ${x.counts.new} 项，机构规费 ${feesSay(x.fees).zh}，开业约需 ${daysSay(x).zh}${x.coverage === "none" ? "（尚未覆盖：每一步列出应咨询的机构）" : ""}。`));
+  const carried = r.targets[0]?.rows.filter(x => x.kind === "same" || x.kind === "covered").map(x => x.name) ?? [];
+  return {
+    steps: [S("searching", `Reading ${r.source.store.name.en}'s approved facts`, `读取${r.source.store.name.zh}已确认的资料`), S("weaving", `Planning ${n} location${n === 1 ? "" : "s"} from Placetta's registry`, `按快哉登记库规划 ${n} 家新门店`)],
+    updates: [addApproval(ap)],
+    reply: {
+      text: [
+        ask.picked ? B(`No cities were named, so these are the ones Placetta's registry covers in full: ${r.targets.map(x => x.label.en).join(", ")}. Tell me any to swap.`, `您没有指定城市，所以选了快哉登记库完整覆盖的城市：${r.targets.map(x => x.label.zh).join("、")}。如需更换请告诉我。`) : B(`Here's ${r.source.store.name.en} copied to ${n} place${n === 1 ? "" : "s"}.`, `这是把${r.source.store.name.zh}复制到 ${n} 个地方的规划。`),
+        ...each,
+        ...(carried.length ? [B(`Carried over or already covered by the company: ${carried.map(x => x.en).join(", ")}.`, `沿用或公司已覆盖：${carried.map(x => x.zh).join("、")}。`)] : []),
+        priceSay(r),
+        B("One approval opens them all. Nothing is filed until each filing has its own approval.", "一次批准即可全部开设。每项申请经单独批准后才会提交。"),
+      ],
+      table: { title: t.title, columns: t.columns, rows: t.rows[L] },
+      approvals: [id],
+    },
+  };
+}
+
 const PROMISES: { match: RegExp; plan: (ctx: Context, text: string) => Plan }[] = [
   { match: /^Find (this|these) for the |^为.+找到(这些|这一项)/, plan: findIt },
+  { match: REPLICATE_ASK, plan: replicateIt },
   { match: /\bwhere (does|do|is|are)\b.*\bstand|\bstatus of\b|\bhow is\b.*\bgoing|进展|进度|怎么样了/i, plan: where },
   { match: /waiting (for|on) (my|me)\b|needs? (my )?approval|what (do|does) .*need from me|等我(批准|处理)|待(我)?批准|需要我(批准|做)/i, plan: (ctx) => waiting(ctx) },
   { match: /\bappeal|\bdenied\b|\breject(ed|ion)\b|申诉|驳回|被拒/i, plan: appeal },
