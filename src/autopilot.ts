@@ -5,6 +5,7 @@ import { routeOf } from "./approvalRoute";
 import { ownerOnly, paymentOf, signPath, siteOf, SIGN_WHY, type SignPath } from "./forms/esign";
 import { detectInjection } from "./security/detect";
 import { preflight } from "./smart";
+import { agentCheck, agentOf, agentState, presigned } from "./agentPacket";
 import type { Application, Approval, Workspace } from "./model";
 
 /* ------------------------------------------------------------------ *
@@ -93,14 +94,17 @@ export function monthUsed(w: Workspace, now: string): number {
 
 /* ------------------------------------------------------------------ what still needs a person */
 
-export type NeedKind = "law" | "wet" | "card" | "invoice" | "login" | "check" | "scope" | "cap" | "off";
+export type NeedKind = "law" | "wet" | "card" | "invoice" | "login" | "check" | "scope" | "cap" | "off" | "contractor";
 /** One reason a filing isn't done alone. after: it's filed without a tap, and this comes later (a bill). */
 export type Need = { kind: NeedKind; why: Bi; after?: boolean };
 export const NEED_LABEL: Record<NeedKind, Bi> = {
   law: B("The law", "法律要求"), wet: B("Handwritten signature", "手写签名"), card: B("Card payment", "刷卡付款"), invoice: B("A bill later", "之后的账单"),
   login: B("Your login, once", "您的登录信息（一次）"), check: B("A check didn't pass", "核对未通过"), scope: B("Outside your authorization", "超出授权范围"),
-  cap: B("Over your fee cap", "超过费用上限"), off: B("Autopilot isn't on", "自动驾驶未开启"),
+  cap: B("Over your fee cap", "超过费用上限"), off: B("Autopilot isn't on", "自动驾驶未开启"), contractor: B("Your contractor applies", "由您的承包商申请"),
 };
+/** Needs that keep a filing from going in under Autopilot but aren't the owner's: a bill that comes later, or the
+ *  business's licensed contractor applying (Odelia sends them the packet). */
+export const notOwners = (n: Need) => !!n.after || n.kind === "contractor";
 
 const SECRET = /\b\d{3}-?\d{2}-?\d{4}\b|\b9\d{2}-?[78]\d-?\d{4}\b/;
 const BY_HAND = /^\s*(by hand|手写)\s*$/i;
@@ -127,6 +131,8 @@ export type CheckCtx = {
   month?: number;
   /** Override the plain-signature table (tests). */
   plain?: Record<string, string>;
+  /** Placetta pays agency fees from single-use cards within the caps (Stripe Issuing; the server says whether it's on). */
+  issuing?: boolean;
 };
 
 /** Every automated check for one filing card under Autopilot. Nothing here reads text from outside as an instruction:
@@ -156,8 +162,12 @@ export function autopilotCheck(w: Workspace, ap: Approval, o: CheckCtx): Autopil
     if (!g.scope.stores.includes(store)) needs.push({ kind: "scope", why: B("This store isn't in your Autopilot authorization.", "这家门店不在您的自动驾驶授权内。") });
     if (!g.scope.agencies.some(x => lc(x) === lc(agency))) needs.push({ kind: "scope", why: B(`${agency || "This agency"} isn't in your Autopilot authorization.`, `${app.agency.zh || "该机构"}不在您的自动驾驶授权内。`) });
     if (!needs.some(n => n.kind === "scope")) passed.push("scope");
-    // the fee: known, within the per-filing cap and this month's
-    if (fee === null) needs.push({ kind: "cap", why: B("The agency's fee isn't known yet, so it can't be held to your cap.", "机构费用尚未确定，无法对照您的上限。") });
+    // the fee: known, within the per-filing cap and this month's. With single-use cards on, a fee the agency only states
+    // later still fits: the card can't spend past the per-filing cap, and the database reserves the cap toward the month
+    if (fee === null && o.issuing && !!paymentOf(form) && !["none", "in_person"].includes(paymentOf(form)!)) {
+      if ((o.month ?? monthUsed(w, o.now)) + g.capFiling > g.capMonth) needs.push({ kind: "cap", why: B(`Its fee isn't known yet, and your ${money(g.capFiling)} per-filing cap would take this month past your ${money(g.capMonth)} monthly cap.`, `费用尚未确定，按单项上限 ${money(g.capFiling)} 计将超过每月上限 ${money(g.capMonth)}。`) });
+      else passed.push("fee cap (held by the card)");
+    } else if (fee === null) needs.push({ kind: "cap", why: B("The agency's fee isn't known yet, so it can't be held to your cap.", "机构费用尚未确定，无法对照您的上限。") });
     else if (fee > g.capFiling) needs.push({ kind: "cap", why: B(`The fee (${money(fee)}) is over your ${money(g.capFiling)} per-filing cap.`, `费用（${money(fee)}）超过您的单项上限 ${money(g.capFiling)}。`) });
     else if ((o.month ?? monthUsed(w, o.now)) + fee > g.capMonth) needs.push({ kind: "cap", why: B(`It would take this month's Autopilot fees past your ${money(g.capMonth)} monthly cap.`, `会使本月自动驾驶费用超过您的每月上限 ${money(g.capMonth)}。`) });
     else passed.push("fee cap");
@@ -185,30 +195,54 @@ export function autopilotCheck(w: Workspace, ap: Approval, o: CheckCtx): Autopil
   if (ap.second || (w.controls?.business ?? []).some(r => r.on !== false && r.then.action === "second_owner" && (r.when.event === "filing_approval" || (r.when.event === "fee_over" && (fee ?? Infinity) > Number(r.when.amount ?? 0)))))
     needs.push({ kind: "law", why: B("Your business rule wants two owners to approve it.", "您的业务规则要求两位所有者批准。") });
 
-  // the route: Odelia sends it on the agency's site, by email, fax or mail; or the business sends it
+  // the route: Odelia sends it on the agency's site, by email, fax or mail; Placetta sends it as the business's named
+  // agent where the agency lets an agent (src/agentPacket.ts, cited in src/forms/agentAuthority.ts); the business's
+  // licensed contractor applies where only a contractor or the property owner may; or the business sends it
   const route = routeOf(app);
-  if (ownerOnly(form) || route === "owner" || route === "ownerSigns") needs.push({ kind: "law", why: B("The agency takes this one only from the business itself. Odelia prepares the packet; you send it.", "该机构只接受企业本人提交。Odelia 准备好材料包，由您提交。") });
+  const ag = agentCheck(w, app, o.now);
+  const asAgent = ag.ok && ag.row?.sends === "placetta";
+  const contractor = ag.row?.sends === "contractor" && !!w.controls?.agent;
+  // signed in the one signup session, every fact on it still the same (the line check above re-read them)
+  const pre = presigned(w, app, o.now);
+  if (contractor) needs.push({ kind: "contractor", why: ag.row!.note });
+  else if (asAgent) passed.push("agent authority");
+  else if (ownerOnly(form) || route === "owner" || route === "ownerSigns") needs.push({ kind: "law", why: B("The agency takes this one only from the business itself. Odelia prepares the packet; you send it.", "该机构只接受企业本人提交。Odelia 准备好材料包，由您提交。") });
   else if (route === "team" || route === "notReady") needs.push({ kind: "check", why: route === "notReady" ? B("Automatic filing isn't switched on for this form yet. Odelia prepares it; you submit it.", "这份表格尚未开通自动提交。Odelia 准备好，由您提交。") : B("Placetta has no checked way to send this form to the agency yet. Odelia prepares it; you send it.", "快哉尚未核实这份表格的提交方式。Odelia 准备好，由您提交。") });
   else passed.push("route");
+  // signed the packet, but this act isn't covered (wrong agency, expired, revoked): say why
+  if (!asAgent && !contractor && ag.row?.agentOk && w.controls?.agent) needs.push({ kind: "check", why: ag.why[0] });
 
-  // the signature
-  if (sign === "tap") needs.push({ kind: "law", why: SIGN_WHY.tap });
-  if (sign === "wet" || route === "faxSigned") { if (!needs.some(n => n.kind === "wet")) needs.push({ kind: "wet", why: SIGN_WHY.wet }); }
-  if (sign === "adopted" || sign === "none") passed.push("signature");
+  // the signature: the owner's own, made in the signup session where every fact on it was known; a later one stays theirs
+  const ownerLater = (ag.row?.owner ?? []).filter(x => x.when === "later");
+  if (asAgent || contractor) {
+    for (const x of ownerLater) needs.push({ kind: x.why === "law" ? "law" : x.sig === "hand" ? "wet" : "check", why: B(`${x.what.en}. ${x.later?.en ?? ""}`.trim(), `${x.what.zh}。${x.later?.zh ?? ""}`) });
+    if (!ownerLater.length && (pre || contractor || !(ag.row?.owner ?? []).length)) passed.push("signature");
+    else if (!ownerLater.length) needs.push({ kind: "wet", why: B("Your signature from the signup session isn't on file for it. Sign it once and Placetta carries on.", "注册时的签名尚未存档。签署一次后快哉即可继续。") });
+  } else {
+    if (sign === "tap") needs.push({ kind: "law", why: SIGN_WHY.tap });
+    if (sign === "wet" || route === "faxSigned") { if (!needs.some(n => n.kind === "wet")) needs.push({ kind: "wet", why: SIGN_WHY.wet }); }
+    if (sign === "adopted" || sign === "none") passed.push("signature");
+  }
 
-  // the fee: who pays, and when
+  // the fee: who pays, and when. With single-use cards on, Placetta pays a known fee within both caps from a card made
+  // for that one filing (the spend function); a contractor's application carries the contractor's fee
   const pay = paymentOf(form);
-  if (fee !== null && fee > 0 && (pay === "portal" || pay === undefined) && route === "portal") needs.push({ kind: "card", why: B(`The agency takes its fee (${money(fee)}) by card on its own site, and Placetta never types a card number: you pay it when Odelia reaches that page.`, `机构在其网站上刷卡收取费用（${money(fee)}），快哉从不输入卡号：Odelia 到达付款页面时由您支付。`) });
+  const cardOk = !!o.issuing && state === "live" && !needs.some(n => n.kind === "cap") && !!pay && pay !== "none" && pay !== "in_person";
+  if (contractor) { /* the contractor's own application and fee */ }
+  else if (cardOk) { if (fee! > 0 || pay === "invoice") passed.push("single-use card"); }
+  else if (fee !== null && fee > 0 && (pay === "portal" || pay === undefined) && route === "portal") needs.push({ kind: "card", why: B(`The agency takes its fee (${money(fee)}) by card on its own site, and Placetta never types a card number: you pay it when Odelia reaches that page.`, `机构在其网站上刷卡收取费用（${money(fee)}），快哉从不输入卡号：Odelia 到达付款页面时由您支付。`) });
   else if (pay === "portal" && route === "portal" && fee === null) needs.push({ kind: "card", why: B("The agency takes its fee by card on its own site: you pay it when Odelia reaches that page.", "机构在其网站上刷卡收费：Odelia 到达付款页面时由您支付。") });
-  if (pay === "with_filing" || pay === "in_person") needs.push({ kind: "card", why: pay === "in_person" ? B("The agency takes its fee in person.", "机构要求当面缴费。") : B("A check or card form has to go with the filing, and Placetta never sends money.", "申请须随附支票或刷卡授权表，快哉从不代付款项。") });
-  if (pay === "invoice") needs.push({ kind: "invoice", after: true, why: B("The agency bills after it has the filing: Odelia files it, and you pay the bill when it comes.", "机构收到申请后才开账单：Odelia 提交后，账单到了由您支付。") });
+  if (!contractor && !cardOk && (pay === "with_filing" || pay === "in_person")) needs.push({ kind: "card", why: pay === "in_person" ? B("The agency takes its fee in person.", "机构要求当面缴费。") : B("A check or card form has to go with the filing, and Placetta never sends money.", "申请须随附支票或刷卡授权表，快哉从不代付款项。") });
+  if (!contractor && !cardOk && pay === "invoice") needs.push({ kind: "invoice", after: true, why: B("The agency bills after it has the filing: Odelia files it, and you pay the bill when it comes.", "机构收到申请后才开账单：Odelia 提交后，账单到了由您支付。") });
 
   // the agency's site: the owner's own account, saved once (never created by Placetta)
   const site = siteOf(form);
-  if (route === "portal" && site.site && !site.open && o.logins && !o.logins.some(h => h === site.site || h.endsWith("." + site.site) || site.site!.endsWith("." + h)))
+  if (!asAgent && !contractor && route === "portal" && site.site && !site.open && o.logins && !o.logins.some(h => h === site.site || h.endsWith("." + site.site) || site.site!.endsWith("." + h)))
     needs.push({ kind: "login", why: B(`Save your ${site.site} login once in Settings. Placetta never creates an account on an agency's site.`, `请在设置中保存一次您的 ${site.site} 登录信息。快哉从不在机构网站上开设账户。`) });
 
   // the team's own touch: never the owner's
+  if (asAgent && ag.row?.signsAsAgent === "person") team.push(B("Placetta's named agent signs it as your agent (a person, never Odelia).", "由快哉指定的代理人以您代理人的身份签署（是真人，不是 Odelia）。"));
+  if (asAgent && !["portal", "email", "fax", "mail"].includes(route)) team.push(B("The Placetta team sends it as your agent, with the pages you signed.", "快哉团队以您代理人的身份，连同您签好的页面一并提交。"));
   if (route === "portal" || route === "email" || route === "fax" || route === "mail") team.push(B("The Placetta team checks the first filings of each form (and watches the first run on each agency site) before they go.", "快哉团队会先核对每种表格的前几份申报（并在每个机构网站的首次提交时在旁监看），然后再发出。"));
 
   const blocking = needs.filter(n => !n.after);
@@ -227,7 +261,7 @@ export function autopilotPlan(w: Workspace, o: CheckCtx & { as?: AutopilotGrant 
     // a card that isn't up yet: its lines are checked when Odelia fills them, so only what the plan already knows counts
     const c = autopilotCheck(ws, ap, o);
     const needs = ws.approvals.some(x => x.id === ap.id) ? c.needs : c.needs.filter(n => !(n.kind === "check" && /line check|empty|missing|未填写|缺少|逐行/.test(n.why.en + n.why.zh)));
-    return { app: a.id, name: a.name, agency: a.agency, alone: !needs.some(n => !n.after), needs, team: c.team, sign: c.sign };
+    return { app: a.id, name: a.name, agency: a.agency, alone: needs.every(notOwners), needs, team: c.team, sign: c.sign };
   });
 }
 
@@ -282,8 +316,11 @@ export const putGrant = (g: AutopilotGrant): P => w => audit("you", B("Signed th
 export const revokeGrant = (now: string): P => w => {
   const g = grantOf(w);
   if (!g || g.revokedAt) return w;
+  // the owner's revocation stops everything: Placetta's authority to act as the business's agent ends with it
+  const ag = w.controls?.agent;
   return audit("you", B("Turned off Autopilot", "关闭了自动驾驶"), same(g.by))({
-    ...w, controls: { ...(w.controls ?? {}), autopilot: { ...g, revokedAt: now }, autonomy: w.controls?.autonomy === "autopilot" ? "usual" : w.controls?.autonomy },
+    ...w, controls: { ...(w.controls ?? {}), autopilot: { ...g, revokedAt: now }, autonomy: w.controls?.autonomy === "autopilot" ? "usual" : w.controls?.autonomy,
+      ...(ag && !ag.revokedAt ? { agent: { ...ag, revokedAt: now } } : {}) },
     approvals: w.approvals.map(a => (a.autopilot && !a.autopilot.filing ? { ...a, autopilot: undefined, autopilotWhy: [B("Autopilot was turned off before this was sent. Approve it yourself if you still want it filed.", "发送前自动驾驶已关闭。如仍要提交，请您亲自批准。")] } : a)),
   });
 };
@@ -305,5 +342,5 @@ export const whyNotAutopilot = (apId: string, c: AutopilotCheck): P => w => ({
 export function autopilotBrief(w: Workspace, now: string): string {
   const g = grantOf(w);
   if (!g || grantState(g, now) !== "live") return `\n\nAutopilot is the setting but the authorization isn't live (${grantState(g, now)}), so every filing goes on a card for an owner, as usual. Say so once if a filing comes up.`;
-  return `\n\nAutopilot is on (the owner signed a standing authorization on ${g.at.slice(0, 10)}, until ${g.expires.slice(0, 10)}): a filing you put up with request_filing_approval that passes every automated check (in its scope of stores, agencies and filing types, its fee known and within ${money(g.capFiling)} a filing and ${money(g.capMonth)} a month, the line check, no SSN, the right agency, a route Placetta sends on, no sworn or handwritten signature) is filed for the owner without a tap, and they get a "Filed for you" update with Undo while it's held. The tool's answer says whether it went under Autopilot or why it waits for the owner; say that in one sentence and carry on. Never try to make a filing pass: the checks are Placetta's, not yours. Everything else stays as it was: payments, texts, anything to an agency other than a filing, CAPTCHAs and signatures are a person's. When a filing only needs a fact, look in business facts and memory first; ask the person for everything still missing in one short list, once, and save each answer with remember (its label the form line's question) so it is never asked again.`;
+  return `\n\nAutopilot is on (the owner signed a standing authorization on ${g.at.slice(0, 10)}, until ${g.expires.slice(0, 10)}): a filing you put up with request_filing_approval that passes every automated check (in its scope of stores, agencies and filing types, its fee known and within ${money(g.capFiling)} a filing and ${money(g.capMonth)} a month, the line check, no SSN, the right agency, a route Placetta sends on, no sworn or handwritten signature) is filed for the owner without a tap, and they get a "Filed for you" update with Undo while it's held. The tool's answer says whether it went under Autopilot or why it waits for the owner; say that in one sentence and carry on. Never try to make a filing pass: the checks are Placetta's, not yours. Everything else stays as it was: payments, texts, anything to an agency other than a filing, CAPTCHAs and signatures are a person's. When a filing only needs a fact, look in business facts and memory first; ask the person for everything still missing in one short list, once, and save each answer with remember (its label the form line's question) so it is never asked again.${agentOf(w) && agentState(agentOf(w), now) === "live" ? ` The owner also signed Placetta as the business's agent (${agentOf(w)!.at.slice(0, 10)}): a filing whose agency lets an agent submit it goes as the business's agent, sent by Placetta's team or its software in Placetta's own name. You never sign anything, never claim to be the owner or Placetta's agent of record, and never tell the owner a sworn or hand signature can be skipped: the check says which are still theirs and why.` : ""}`;
 }

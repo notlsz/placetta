@@ -153,3 +153,15 @@ html[lang="zh-CN"] .house-text { font-family: var(--zh); }
 .house-warn ul { list-style: none; margin: 0; padding: 0; }
 .house-warn li { padding: 2px 0; color: var(--ink); overflow-wrap: anywhere; }
 .house-order { margin: 12px 0 0; font-size: 12.5px; color: var(--ink3); }
+
+/* Sign once (src/SignOnce.tsx) and the Done screen (src/DoneScreen.tsx) */
+.so-rows li { display: grid; gap: 4px; }
+.so-rows a { font-size: 13px; }
+.so-up { justify-self: start; margin-top: 4px; cursor: pointer; }
+.done-card { border: 1px solid var(--line, #e3e6ec); border-radius: 12px; padding: 20px; margin: 0 0 20px; background: var(--card, #fff); }
+.done-card h2 { margin: 0 0 6px; font-size: 22px; }
+.done-card h3 { margin: 16px 0 6px; font-size: 15px; }
+.done-list { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 8px; }
+.done-list li { display: grid; gap: 2px; }
+.done-list small { color: var(--muted, #5b6474); }
+.done-card .sbtn { margin: 8px 8px 0 0; }

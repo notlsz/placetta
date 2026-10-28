@@ -41,6 +41,7 @@ import { readPasted, type Read } from "./intakeParse";
 /* The incumbents' deliverables, filled (docs/COMPETITIVE.md, "The incumbents"): the license report and the renewal runway */
 import { ReportButton } from "./LicenseReport";
 import { RenewalRunway } from "./RenewalRunway";
+import { DoneScreen } from "./DoneScreen";
 
 /** What the Mine filter keeps: an application or job assigned to this person, or a job about one that is. */
 const mineApp = (team: Collab, id?: string) => !!id && team.isMine({ kind: "app", id });
@@ -489,6 +490,7 @@ export function Overview() {
   return (
     <div className="page home">
       {firstRun && <FirstRunHead />}
+      <DoneScreen />
       {top ? <DoNextCard x={top} n={ordered.length} docs={docAt} title={biz} onLater={() => setLater(l => [...l.filter(k => k !== top.key), top.key])} /> : firstRun && !mine ? <FirstAction title={biz} /> : (
         <section className="hm-calm" aria-live="polite">
           <h1 className="vh">{biz}</h1>

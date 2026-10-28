@@ -8,6 +8,7 @@ import type { Tool } from "./live";
 import { MCP_PREFIX, mcpApp, mcpReads } from "./mcp";
 import { agencyAddress, workspaceContacts } from "./initiative";
 import { autopilotBrief, autopilotCheck, grantState, markAutopilot, whyNotAutopilot, type AutopilotGrant, type AutopilotUse } from "./autopilot";
+import type { AgentAuth } from "./agentPacket";
 
 /* ------------------------------------------------------------------ *
  * The owner's controls over Odelia, the way Claude Code has permission
@@ -51,6 +52,8 @@ export type Controls = {
    *  filings made under it (for the monthly cap the app shows; the database counts its own). */
   autopilot?: AutopilotGrant;
   autopilotUsed?: AutopilotUse[];
+  /** "Placetta as your agent" (src/agentPacket.ts): the packet an owner signed once, as the database recorded it. */
+  agent?: AgentAuth;
 };
 
 export const AUTONOMY: { id: Autonomy; label: Bi; sub: Bi }[] = [

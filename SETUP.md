@@ -57,7 +57,7 @@ Everything else is built and deployed. These need your accounts, so no one else 
 
 An owner signs one standing authorization in Settings, Odelia (scope, fee caps, 12 months, off in one tap), and every
 filing inside it that passes every automated check is filed without asking (`src/autopilot.ts`, migration
-`20261103090000_autopilot.sql`). It ships with the Filing Authorization's Autopilot section (version 2026-10-27, in
+`20261103090000_autopilot.sql`). It ships with the Filing Authorization's Autopilot section (version 2026-10-27, now 2026-10-28, in
 `src/legal.ts`): **counsel reviews that section before the migration is applied**, as with every version.
 
 What stays with a person, by design: a declaration under penalty of perjury (or any certification) on a form, a
@@ -66,12 +66,86 @@ owner's own agency logins, and paying agency fees. The adopted signature is plac
 `PLAIN` in `src/forms/esign.ts`, each with the agency page that shows its signature swears to nothing; the list starts
 empty, so until someone reads and cites one, every e-signature form is one tap ("Sign") for the owner.
 
-**Founder decision: zero-touch fees.** Today the owner pays every agency fee on the agency's site (or its bill). The
-clean path to paying them without a touch is Stripe Issuing single-use virtual cards: one card per filing, limited to
-that agency's fee and merchant, created when the filing is approved and closed after, so no card number is ever stored
-and the model never sees one. The WIP is on the `spend-wip` branch (spend function and single-use card events). It
-needs Stripe's approval for Issuing, a funding source, and an update to the Terms (Placetta paying on the business's
-behalf). Nothing in Autopilot builds or types card numbers until that's decided.
+Zero-touch fees are built behind a flag that is off: see "Stripe Issuing" below.
+
+## Placetta as your agent ("Sign once, 2 minutes")
+
+With Autopilot, an owner signs one packet in one sitting (Settings, Odelia, "Sign once"): Placetta's own agent
+authorization, each agency's own authorization form (San José's Section C, the SS-4's third party designee line), and
+every owner signature whose facts are already known. Afterwards Placetta acts as the business's named agent wherever the
+agency allows it, cited per form in `src/forms/agentAuthority.ts` (`agentOk`, the agency page or statute, the day read).
+Code: `src/agentPacket.ts`, `src/SignOnce.tsx`, migration `20261103090100_agent_authority.sql` (the packet, the
+append-only `agent_acts` log, `agent_act_ok` on every insert and submit, revoking with Autopilot). It ships with the
+Filing Authorization's "Placetta as your agent" section (version 2026-10-28): **counsel reviews it before the migration
+is applied.**
+
+San José milk tea opening (8 filings), counted in `scripts/agent-authority-test.ts`: 23 owner touches before Autopilot,
+16 with it; with the packet, 4 at signup in one session (2 e-signatures, 2 by hand) and 3 during the process (4 with
+cards off, plus 2 county bills forwarded to accounts payable). What stays the owner's by law: the SS-4 signature
+(signed at signup) and the DE 1 declaration (signed after the first payroll). The other two during-process touches go
+if the agencies answer yes to the questions below.
+
+### Agent of record (once)
+
+Name the Placetta employee who acts as agent. Never Odelia: a declaration is a person's act. Until it's set, no packet
+that names an agent can be signed.
+
+```sql
+update public.app_settings set agent_of_record = '{"name":"<full name>","title":"Filing agent","phone":"<phone>","fax":"<fax>","email":"<email>"}';
+```
+
+That person is the IRS third party designee on line 18 of each SS-4 (answers the IRS's questions and receives the EIN;
+the authority ends when the EIN is released, https://www.irs.gov/instructions/iss4; the designee's fax must not be the
+business's), signs San José building applications as authorized agent when the business's licensed contractor doesn't,
+and works the team queue's "Send as the business's agent" tasks (the dispatcher puts filings marked as agent there).
+
+### Accounts the founder creates once (Odelia never creates one)
+
+| Agency | Account, in Placetta's name | What it replaces | Source |
+|---|---|---|---|
+| California EDD | e-Services for Business, "Other Enrollment" as an employer representative / payroll agent | the owner's EDD login; Placetta holds the payroll tax account after the DE 1 is in | https://edd.ca.gov/en/payroll_taxes/Enroll_Employer_Representative_Payroll_Agent_e-Services_Business |
+| City of San José | an authorized agent's account on SJePlans and SJPermits.org | the owner's sjpermits.org login for plan-review building permits | https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/who-can-apply-for-a-permit |
+| California Secretary of State | bizfile Online; for a Statement of Information the business grants it Full Access with its entity PIN | the owner's bizfile login (not in the San José plan) | bizfileonline.sos.ca.gov (confirm the Full Access steps there) |
+| IRS | none for the SS-4 (faxed, designee). Only if Placetta later needs tax transcripts: an IRS account for "Submit Forms 2848 and 8821 Online". Form 2848 can't name Placetta (individuals eligible to practice only) | nothing in an opening | https://www.irs.gov/instructions/i8821, https://www.irs.gov/instructions/i2848 |
+
+SJPermits.org's simple permits (the sign permit among them) take only a licensed contractor or the property owner as
+applicant, so the business's sign contractor applies there; Odelia sends them the packet.
+
+### Questions for the agencies (each yes removes a touch)
+
+- Santa Clara County DEH (dehplancheck@deh.sccgov.org): may an authorized agent sign the plan check application's
+  "Applicant Signature" line? Is a health permit certification signed at signup accepted, unchanged, months later?
+- San José Finance, Business Tax: may a preparer register a business for its Business Tax Certificate, and on which site?
+- San José Permit Center: is Section C signed at signup accepted with the application filed later (the alternative is a
+  notarized letter dated within 12 months)?
+
+Record each answer in `src/forms/agentAuthority.ts` (the row's `agentOk`, `owner` and `confirm`), with the page or the
+email as its citation.
+
+## Stripe Issuing (zero-touch agency fees, off until approved)
+
+Built on the current spend function from the parked `spend-wip` branch, behind `STRIPE_ISSUING=on` and
+`app_settings.issuing_on` (both off). Each agency fee inside an owner's Autopilot caps gets one single-use virtual card:
+the workspace's card on file is charged the exact amount, the card can spend that amount once at government merchant
+categories within 7 days, the real-time authorization approves only that card while the purchase waits and the grant is
+live, and the settled payment closes it (`supabase/functions/_shared/issuing.ts`, `spend` actions `autopilot_card`,
+`bill`, `card`, `stripe-webhook`). The card number goes only to the portal worker; wiring the worker to call `card` is
+left to the worker's owner. Bills no card pays go to the owner's accounts-payable email.
+
+1. Test mode now: Stripe Dashboard, Issuing, **Get started** (US accounts get test access at once).
+2. Apply for live: dashboard.stripe.com/issuing/overview, the "Cards for your own business" use case (Placetta's own
+   virtual cards to pay government fees for customers who authorize it). Stripe reviews it and gets in touch; it
+   publishes no timeline (https://support.stripe.com/questions/how-to-apply-for-issuing).
+3. Counsel, before switching on: whether charging the customer and paying the agency is money transmission that needs a
+   license in California, and the Terms and Filing Authorization "Fees" lines (today they say Placetta doesn't pay
+   fees). Then a new terms version.
+4. Fund the Issuing balance (an authorization with too little balance is declined before it reaches Placetta).
+5. Create one company cardholder for Placetta; set `STRIPE_ISSUING_CARDHOLDER` to its id.
+6. Issuing settings: set the real-time authorization endpoint to the `stripe-webhook` function's URL and save its signing
+   secret as `STRIPE_ISSUING_AUTH_SECRET` (Stripe waits 2 seconds, then uses its timeout setting: set that to decline).
+7. Secrets: `STRIPE_ISSUING=on`, then `update public.app_settings set issuing_on = true;`. The next Billing health
+   check adds `issuing_transaction.created` to the webhook.
+8. Bill forwarding: `RESEND_API_KEY` and `BILLS_FROM` (or point it at the SES sender once that lands).
 
 ## The fast way: one command
 
