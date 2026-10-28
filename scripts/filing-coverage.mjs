@@ -36,7 +36,7 @@ try {
   await build({
     stdin: {
       contents: [
-        `export { FORMS } from ${JSON.stringify(join(root, "src/forms/registry.ts"))};`,
+        `export { FORMS, selfStep } from ${JSON.stringify(join(root, "src/forms/registry.ts"))};`,
         `export * as D from ${JSON.stringify(join(destDir, "destinations.ts"))};`,
         `export * as L from ${JSON.stringify(join(destDir, "logic.ts"))};`,
       ].join("\n"),
@@ -45,8 +45,8 @@ try {
     bundle: true, platform: "node", format: "esm", outfile: join(tmp, "coverage.mjs"), logLevel: "error",
     external: ["*.pdf?inline"],
   });
-  const { FORMS, D, L } = await import(join(tmp, "coverage.mjs"));
-  const result = report(FORMS, D, L);
+  const { FORMS, selfStep, D, L } = await import(join(tmp, "coverage.mjs"));
+  const result = report(FORMS, D, L, selfStep);
   if (at >= 0) { console.log(JSON.stringify(result.counts)); process.exit(0); }
   if (check) {
     const problems = [...result.problems];
@@ -67,7 +67,7 @@ try {
   rmSync(tmp, { recursive: true, force: true });
 }
 
-function report(FORMS, D, L) {
+function report(FORMS, D, L, selfStep = () => undefined) {
   const DEST = D.DEST, TEAM_ONLY = D.TEAM_ONLY ?? {}, TO_VERIFY = D.TO_VERIFY ?? {};
   const us = FORMS.filter((f) => !f.currency || f.currency === "USD");
   const ids = new Set(FORMS.map((f) => f.id));
@@ -97,8 +97,16 @@ function report(FORMS, D, L) {
     return r;
   };
 
+  // A form the agency routes by state (byState: the IRS's service centers) is counted as its route for a business with a
+  // US address: every state has one (destinationProblems checks that), so the first group's first state stands in.
+  const resolved = (id) => {
+    const d = DEST[id];
+    if (!d?.byState || !D.destFor) return d;
+    const st = d.byState.groups[0].states[0];
+    return D.destFor(id, { fields: d.byState.from.map((x) => ({ id: x, value: `City, ${st} 00000` })) });
+  };
   const rows = us.map((f) => {
-    const d = DEST[f.id];
+    const d = resolved(f.id);
     const channels = d ? ["email", "fax", "mail", "portal", "owner"].filter((c) => d[c]) : [];
     return { f, d, channels, route: routeOf(f, d) };
   });
@@ -127,6 +135,10 @@ function report(FORMS, D, L) {
   md.push(`| Route | Before (${BASELINE.date}) | Now |`, "|---|---:|---:|");
   for (const k of routeKeys) md.push(`| ${RT[k]} | ${BASELINE.routes[k]} | ${routes[k]} |`);
   md.push("");
+  // Workers' compensation is a policy bought from an insurer (selfStep in src/forms/registry.ts): the plan keeps it as the
+  // owner's step and never puts it up for filing, so the team row above counts it but no one files it.
+  const insurance = rows.filter((r) => r.route === "team" && selfStep(r.f) === "insurance").length;
+  md.push(`Of the ${routes.team} forms with the team, ${insurance} are insurance the owner buys from an insurer (workers' compensation), which the plan keeps as the owner's step: nothing is filed, so ${routes.team - insurance} are forms the team files.`, "");
 
   const PLACE = {
     US: "Federal", NY: "New York State", NYC: "New York City", CA: "California", LA: "Los Angeles", LAC: "Los Angeles County", TX: "Texas", HOU: "Houston",
@@ -151,8 +163,10 @@ function report(FORMS, D, L) {
   md.push("## Forms Placetta can route", "");
   md.push("| Place | Form | Channels | First try | Signature | Fee | Source (checked) |", "|---|---|---|---|---|---|---|");
   for (const r of rows.filter((x) => x.d)) {
-    const d = r.d;
-    const where = [d.email, d.portal, d.fax?.us, d.mail ? `${d.mail.name}, ${d.mail.city}` : null].filter(Boolean).join(", ");
+    const d = r.d, byState = DEST[r.f.id]?.byState;
+    const where = byState
+      ? `by the business's state: ${byState.groups.map((g) => [g.fax ? `fax ${g.fax}` : null, g.mail ? `${g.mail.city}, ${g.mail.state}` : null].filter(Boolean).join(" or ")).join("; ")}${byState.abroad?.mail ? `; abroad: ${byState.abroad.mail.city}, ${byState.abroad.mail.state} ${byState.abroad.mail.zip}` : ""}`
+      : [d.email, d.portal, d.fax?.us, d.mail ? `${d.mail.name}, ${d.mail.city}` : null].filter(Boolean).join(", ");
     md.push(`| ${place(r.f.where)} | ${cell(r.f.title.en)} (\`${r.f.id}\`) | ${r.channels.map((c) => CHN[c]).join(", ")}${where ? `: ${cell(where)}` : ""} | ${RT[r.route]} | ${SIG[d.signature] ?? d.signature} | ${PAY[d.payment] ?? "not stated"} | [page](${d.source}) (${d.checked}) |`);
   }
   md.push("");

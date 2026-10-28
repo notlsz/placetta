@@ -22,8 +22,9 @@ export type Box =
     line1..line9: one line of a multi-line answer (one person or item per line). head: before the first comma or " - ";
     tail: after it. first/middle/last: parts of a person's name. mm/dd/yyyy/date: parts of a date (yy: the year's last two digits; last1: the last character, for a box after a printed part). phone: a US number as
     408-555-0142 (phone1, phone2, phone3: its three parts; phonelocal: 555-0142 after a printed area code), ein: an EIN
-    as 12-3456789 (for boxes printed with the dashes in place). */
-export type Pick = "street" | "city" | "state" | "zip" | "country" | "citystatezip" | "statezip" | "streetno" | "streetname" | "first" | "last" | "middle" | "mi" | "digits" | "head" | "tail" | "mm" | "dd" | "yyyy" | "yy" | "last1" | "date" | "phone" | "ein" | "phone1" | "phone2" | "phone3" | "phonelocal" | "ein1" | "ein2" | "zip5" | "zip4" | `line${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
+    as 12-3456789 (for boxes printed with the dashes in place). d1..d9: one digit of a number, for a form that prints
+    each digit in its own box (the EIN and account numbers on Georgia's DOL-1N). */
+export type Pick = "street" | "city" | "state" | "zip" | "country" | "citystatezip" | "statezip" | "streetno" | "streetname" | "first" | "last" | "middle" | "mi" | "digits" | "head" | "tail" | "mm" | "dd" | "yyyy" | "yy" | "last1" | "date" | "phone" | "ein" | "phone1" | "phone2" | "phone3" | "phonelocal" | "ein1" | "ein2" | "zip5" | "zip4" | `line${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}` | `d${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
 
 /** One line of a form as printed on its PDF: what Placetta asks, in English and Chinese. */
 export type MapLine = { id: string; line: string; en: string; zh: string; options?: string[]; hint?: { en: string; zh: string } };
@@ -177,6 +178,8 @@ function pick1(v: string, p: Pick): string {
     case "phonelocal": { const d = v.replace(/\D/g, "").replace(/^1(?=\d{10}$)/, ""); return d.length === 10 ? `${d.slice(3, 6)}-${d.slice(6)}` : ""; }
     case "ein1": case "ein2": { const d = v.replace(/\D/g, ""); return d.length === 9 ? (p === "ein1" ? d.slice(0, 2) : d.slice(2)) : ""; }
     case "zip5": case "zip4": { const z = /(\d{5})(?:-(\d{4}))?\s*$/.exec(v.trim()); return z ? (p === "zip5" ? z[1] : z[2] ?? "") : ""; }
+    // one digit of a number printed a digit to a box: empty when the number is shorter
+    case "d1": case "d2": case "d3": case "d4": case "d5": case "d6": case "d7": case "d8": case "d9": return v.replace(/\D/g, "")[Number(p.slice(1)) - 1] ?? "";
     case "line1": case "line2": case "line3": case "line4": case "line5": case "line6": case "line7": case "line8": case "line9":
       return v.split(/\n|;\s*/).map(x => x.trim()).filter(Boolean)[Number(p.slice(-1)) - 1] ?? "";
     case "mm": case "dd": case "yyyy": return date(v)?.[p] ?? "";

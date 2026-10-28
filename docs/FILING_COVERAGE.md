@@ -10,13 +10,13 @@ A form can have more than one channel. Team only means Placetta has no route it 
 
 | Channel | Before (2026-10-17) | Now |
 |---|---:|---:|
-| Team only | 231 | 216 |
+| Team only | 231 | 184 |
 | Email | 5 | 14 |
-| Fax | 4 | 12 |
-| Certified mail | 13 | 30 |
-| Agency portal | 16 | 121 |
+| Fax | 4 | 14 |
+| Certified mail | 13 | 35 |
+| Agency portal | 16 | 151 |
 | Owner packet | 0 | 31 |
-| Any route Placetta sends on | 162 | 146 |
+| Any route Placetta sends on | 162 | 178 |
 
 ## How each form would go on its first try
 
@@ -24,14 +24,16 @@ With every channel switched on, a saved login for each portal and a connected ma
 
 | Route | Before (2026-10-17) | Now |
 |---|---:|---:|
-| On the agency's portal | 16 | 121 |
+| On the agency's portal | 16 | 151 |
 | By email | 1 | 1 |
 | By fax | 0 | 0 |
 | By certified mail | 0 | 0 |
 | Owner packet: the owner sends it | 0 | 31 |
-| Signed by hand, then Placetta faxes it | 3 | 4 |
-| Signed by hand and sent by the owner | 6 | 17 |
-| The Placetta team | 233 | 219 |
+| Signed by hand, then Placetta faxes it | 3 | 6 |
+| Signed by hand and sent by the owner | 6 | 19 |
+| The Placetta team | 233 | 185 |
+
+Of the 185 forms with the team, 18 are insurance the owner buys from an insurer (workers' compensation), which the plan keeps as the owner's step: nothing is filed, so 167 are forms the team files.
 
 ## Forms Placetta can route
 
@@ -64,9 +66,9 @@ With every channel switched on, a saved login for each portal and a connected ma
 | Los Angeles | City of Los Angeles business tax registration (`la-btrc`) | email, portal: Finance.CustomerService@lacity.org, latax.lacity.org | On the agency's portal | drawn | no fee | [page](https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc) (2026-10-18) |
 | Los Angeles | Building permit and Certificate of Occupancy (`la-ladbs`) | portal: eplanla.lacity.org | On the agency's portal | typed | not stated | [page](https://dbs.lacity.gov/) (2026-10-13) |
 | Los Angeles | Hazardous materials business plan (`la-cupa-hmbp`) | portal: cersbusiness3.calepa.ca.gov | On the agency's portal | typed | not stated | [page](https://lafd.org/fire-prevention/cupa/hazardous-materials) (2026-10-18) |
-| Texas | Certificate of Formation (Texas LLC) (`tx-205`) | mail: Secretary of State, Corporations Section, Austin | The Placetta team | drawn | sent with it | [page](https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml) (2026-10-13) |
+| Texas | Certificate of Formation (Texas LLC) (`tx-205`) | mail, portal: webservices.sos.state.tx.us, Secretary of State, Corporations Section, Austin | On the agency's portal | drawn | sent with it | [page](https://www.sos.state.tx.us/corp/instructions/205.shtml) (2026-10-24) |
 | Texas | Application for Registration of a Foreign LLC (`tx-304`) | mail: Secretary of State, Corporations Section, Austin | The Placetta team | drawn | sent with it | [page](https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml) (2026-10-13) |
-| Texas | Assumed Name Certificate (DBA) (`tx-503`) | mail: Secretary of State, Corporations Section, Austin | The Placetta team | drawn | sent with it | [page](https://www.sos.state.tx.us/corp/filingandothergeneralfaqs.shtml) (2026-10-13) |
+| Texas | Assumed Name Certificate (DBA) (`tx-503`) | mail, portal: webservices.sos.state.tx.us, Secretary of State, Corporations Section, Austin | On the agency's portal | drawn | sent with it | [page](https://www.sos.state.tx.us/corp/instructions/503.shtml) (2026-10-24) |
 | Texas | Texas Sales and Use Tax Permit Application (`tx-ap201`) | email, fax, portal: sales.applications@cpa.texas.gov, security.app.cpa.state.tx.us, +15129360010 | On the agency's portal | by hand | no fee | [page](https://comptroller.texas.gov/taxes/permit/) (2026-10-18) |
 | Texas | Franchise tax annual report (`tx-franchise`) | portal: security.app.cpa.state.tx.us | On the agency's portal | none | on the portal | [page](https://comptroller.texas.gov/taxes/franchise/) (2026-10-18) |
 | Texas | Unemployment tax account (`tx-twc`) | portal: apps.twc.texas.gov | On the agency's portal | typed | no fee | [page](https://www.twc.texas.gov/services/register-tax) (2026-10-18) |
@@ -102,6 +104,7 @@ With every channel switched on, a saved login for each portal and a connected ma
 | Hillsborough County | Hillsborough County local business tax receipt (`hc-business-tax`) | portal: county-taxes.net | On the agency's portal | typed | billed after | [page](https://www.hillstaxfl.gov/taxes/business-tax-services/new-regulated-businesses/) (2026-10-18) |
 | Tampa | City of Tampa business tax receipt (`tpa-business-tax`) | portal: apps.tampagov.net | On the agency's portal | typed | not stated | [page](https://www.tampa.gov/service/new-business-tax-receipt-application) (2026-10-18) |
 | San Diego | City of San Diego Business Tax Certificate (`sdg-business-tax`) | mail, portal: pay.sandiego.gov, Office of the City Treasurer, San Diego | On the agency's portal | by hand | sent with it | [page](https://www.sandiego.gov/treasurer/taxesfees/btax/btaxhow) (2026-10-18) |
+| Irvine | City of Irvine business license (`irv-license`) | portal: prism.cityofirvine.gov | On the agency's portal | typed | not stated | [page](https://cityofirvine.gov/community-development/business-licensing) (2026-10-24) |
 | Orange County, CA | Food facility plan check (`oc-plan-check`) | portal: myhealthdepartment.com | On the agency's portal | typed | billed after | [page](https://www.ochealthinfo.com/services-programs/environmental-health/plan-check) (2026-10-18) |
 | Orlando | City of Orlando business tax receipt and certificate of use (`orl-business-tax`) | portal: orlando.opencounter.com | On the agency's portal | typed | billed after | [page](https://www.orlando.gov/Building-Development/Permits-Inspections/Other/Get-a-Permit-for-Your-Business/Get-a-Business-Tax-Receipt) (2026-10-18) |
 | Orange County, FL | Orange County (FL) local business tax receipt (`ocfl-business-tax`) | portal: county-taxes.net | On the agency's portal | typed | billed after | [page](https://www.octaxcol.com/taxes/business-taxes/obtain-new-business-tax-receipt/) (2026-10-18) |
@@ -132,6 +135,7 @@ With every channel switched on, a saved login for each portal and a connected ma
 | Seattle | Construction permit for the tenant improvement (`sea-building`) | portal: services.seattle.gov | On the agency's portal | typed | on the portal | [page](https://www.seattle.gov/construction-and-inspections/permits/how-do-you-get-a-permit) (2026-10-18) |
 | Nevada | Nevada sales tax permit (`nv-tax`) | mail, portal: mynvtax.nv.gov, Department of Taxation, Carson City | On the agency's portal | by hand | sent with it | [page](https://tax.nv.gov/faqs/register-a-business/) (2026-10-18) |
 | City of Las Vegas | City of Las Vegas business license (`lv-license`) | portal: www.lasvegasnevada.gov | On the agency's portal | typed | not stated | [page](https://www.lasvegasnevada.gov/Business/Business-License/Apply-For-A-Business-License) (2026-10-18) |
+| Clark County (unincorporated) | Clark County business license (`cc-business-license`) | mail, portal: blepay.clarkcountynv.gov, Clark County Department of Business License, Las Vegas | On the agency's portal | by hand | sent with it | [page](https://www.clarkcountynv.gov/business/doing_business_with_clark_county/divisions/general_business/general-license-guide) (2026-10-24) |
 | Southern Nevada Health District | Food handler cards for staff (`snhd-food-handler`) | owner packet | Owner packet: the owner sends it | none | in person | [page](https://www.southernnevadahealthdistrict.org/?p=3661) (2026-10-17) |
 | Southern Nevada Health District | Certified food safety manager (`snhd-cfsm`) | owner packet | Owner packet: the owner sends it | none | in person | [page](https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf) (2026-10-18) |
 | Southern Nevada Health District | Food establishment plan review (`snhd-plan-review`) | email: FOODREV@SNHD.ORG | Signed by hand and sent by the owner | by hand | billed after | [page](https://media.southernnevadahealthdistrict.org/download/eh/2022/plan-review/applications/snhd-application-packet-food-202207.pdf) (2026-10-18) |
@@ -183,6 +187,9 @@ With every channel switched on, a saved login for each portal and a connected ma
 | Portland | Portland business tax registration (`pdx-tax`) | fax, mail, portal: pro.portland.gov, +15038235192, Revenue Division, Portland | On the agency's portal | by hand | no fee | [page](https://www.portland.gov/revenue/register-tax-account) (2026-10-18) |
 | Federal | Tax Information Authorization (`irs-8821`) | portal: connect.irs.gov | On the agency's portal | typed | no fee | [page](https://www.irs.gov/tax-professionals/submit-forms-2848-and-8821-online) (2026-10-18) |
 | Federal | Power of Attorney and Declaration of Representative (`irs-2848`) | portal: connect.irs.gov | On the agency's portal | typed | no fee | [page](https://www.irs.gov/tax-professionals/submit-forms-2848-and-8821-online) (2026-10-18) |
+| Federal | Entity Classification Election (`irs-8832`) | mail: by the business's state: Kansas City, MO; Ogden, UT; abroad: Ogden, UT 84201-0023 | Signed by hand and sent by the owner | by hand | no fee | [page](https://www.irs.gov/filing/where-to-file-your-taxes-for-form-8832) (2026-10-24) |
+| Federal | Change of Address or Responsible Party — Business (`irs-8822b`) | mail: by the business's state: Kansas City, MO; Ogden, UT; abroad: Ogden, UT 84201-0023 | Signed by hand and sent by the owner | by hand | no fee | [page](https://www.irs.gov/pub/irs-pdf/f8822b.pdf) (2026-10-24) |
+| Federal | Election by a Small Business Corporation (S corporation) (`irs-2553`) | fax, mail: by the business's state: fax +18558877734 or Kansas City, MO; fax +18552147520 or Ogden, UT | Signed by hand, then Placetta faxes it | by hand | no fee | [page](https://www.irs.gov/filing/where-to-file-your-taxes-for-form-2553) (2026-10-24) |
 | Federal | Automatic extension of time to file business returns (`irs-7004`) | fax, mail: +18558877737, Internal Revenue Service, Ogden | Signed by hand, then Placetta faxes it | by hand | no fee | [page](https://www.irs.gov/instructions/i5472) (2026-10-18) |
 | Federal | Pro forma Form 1120 for a foreign-owned U.S. LLC (`irs-1120`) | fax, mail: +18558877737, Internal Revenue Service, Ogden | Signed by hand, then Placetta faxes it | by hand | no fee | [page](https://www.irs.gov/instructions/i5472) (2026-10-18) |
 | California | Statement of Information (California LLC) (`ca-llc-12`) | portal: bizfileonline.sos.ca.gov | On the agency's portal | typed | on the portal | [page](https://www.sos.ca.gov/business-programs/business-entities/faqs) (2026-10-18) |
@@ -214,6 +221,33 @@ With every channel switched on, a saved login for each portal and a connected ma
 | Cupertino | City of Cupertino business license (`cup-license`) | portal: cupertino.hdlgov.com | On the agency's portal | typed | on the portal | [page](https://cupertino.gov/i-want-to/apply-for/business-license-application) (2026-10-18) |
 | San Gabriel | City of San Gabriel business license (`sgb-license`) | email: Financeinfo@sgch.org | Signed by hand and sent by the owner | by hand | billed after | [page](https://sangabrielcity.com/DocumentCenter/View/19742/City-Business-License-Guidelines-and-Fees-2023) (2026-10-18) |
 | Unincorporated Los Angeles County | Los Angeles County business license (unincorporated areas) (`lac-business-license`) | portal: losangelescountyca-energovweb.tylerhost.net | On the agency's portal | typed | not stated | [page](https://ttc.lacounty.gov/business-license-requirements-2/) (2026-10-18) |
+| Georgia | Unemployment insurance tax account (DOL-1N) (`ga-dol`) | fax, mail: +14042323285, Georgia Department of Labor, Atlanta | Signed by hand, then Placetta faxes it | by hand | no fee | [page](https://dol.georgia.gov/faqs-employers/employers-faqs-unemployment-insurance) (2026-10-24) |
+| Georgia | Georgia state alcohol license, with the local license (`ga-alcohol`) | portal: gtc.dor.ga.gov | On the agency's portal | typed | not stated | [page](https://dor.georgia.gov/alcohol/apply-license-sell-alcohol) (2026-10-24) |
+| Duluth, GA | Business zoning and use certificate (`dul-zoning`) | portal: app.govwell.com | On the agency's portal | typed | not stated | [page](https://www.duluthga.net/services/city_clerk/new_business_applications/index.php) (2026-10-24) |
+| Duluth, GA | Duluth occupational tax certificate (business license) (`dul-otc`) | portal: duluthga.govbuilt.com | On the agency's portal | typed | not stated | [page](https://www.duluthga.net/services/city_clerk/new_business_applications/index.php) (2026-10-24) |
+| Texas | Texas alcohol permit (beer and wine: BG) (`tx-tabc`) | portal: tabcaims.elicense365.com | On the agency's portal | by hand | on the portal | [page](https://www.tabc.texas.gov/services/tabc-licenses-permits/new-tabc-licenses-permits/) (2026-10-24) |
+| Sugar Land | Food establishment plan review (`sl-plan-review`) | portal: energovweb.sugarlandtx.gov | On the agency's portal | typed | billed after | [page](https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements) (2026-10-24) |
+| Sugar Land | Food permit (`sl-food-permit`) | portal: energovweb.sugarlandtx.gov | On the agency's portal | typed | billed after | [page](https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements) (2026-10-24) |
+| Washington | Beer and/or wine restaurant license (`wa-lcb`) | portal: secure.dor.wa.gov | On the agency's portal | typed | on the portal | [page](https://lcb.wa.gov/licensing/apply-liquor-license) (2026-10-24) |
+| Milpitas | City of Milpitas business license (`mil-license`) | portal: milpitas.hdlgov.com | On the agency's portal | typed | billed after | [page](https://www.milpitas.gov/243/Apply) (2026-10-24) |
+| Daly City | Daly City business license tax certificate (`dly-license`) | portal: dalycity.hdlgov.com | On the agency's portal | typed | not stated | [page](https://dalycity.org/438/Business-License-Requirements-Applicatio) (2026-10-24) |
+| Arcadia | City of Arcadia business license (`arc-license`) | portal: arcadia.hdlgov.com | On the agency's portal | typed | not stated | [page](https://www.arcadiaca.gov/government/development_services/business_license/index.php) (2026-10-24) |
+| Alhambra | City of Alhambra business license (`alh-license`) | portal: secure.alhambraca.gov | On the agency's portal | typed | not stated | [page](https://secure.alhambraca.gov/BusinessLicenseApplication/) (2026-10-24) |
+| Torrance | City of Torrance business license (`tor-license`) | portal: aca-prod.accela.com | On the agency's portal | typed | not stated | [page](https://www.torranceca.gov/Business/Business-License) (2026-10-24) |
+| Bellevue | City of Bellevue business license (`bel-license`) | portal: www.filelocal-wa.gov | On the agency's portal | typed | on the portal | [page](https://bellevuewa.gov/city-government/departments/finance/business-taxes/business-licenses) (2026-10-24) |
+| Quincy | Quincy business license (`qcy-license`) | portal: quincyma.viewpointcloud.com | On the agency's portal | typed | not stated | [page](https://www.quincyma.gov/departments/city_clerk/index.php) (2026-10-24) |
+| Washington, DC | LLC formation (Articles of Organization) (`dc-formation`) | portal: corponline.dlcp.dc.gov | On the agency's portal | typed | on the portal | [page](https://dlcp.dc.gov/service/domestic-limited-liability-company) (2026-10-24) |
+| Federal | Federal basic importer's permit for wine, beer or spirits (`ttb-importer`) | portal: www.ttbonline.gov | On the agency's portal | typed | no fee | [page](https://www.ttb.gov/import-export/itd/importing-bottled-alcohol-beverages-into-the-united-states) (2026-10-24) |
+| Minnesota | Articles of Organization (Minnesota LLC) (`mn-sos-llc`) | portal: mblsportal.sos.state.mn.us | On the agency's portal | typed | on the portal | [page](https://www.sos.mn.gov/business-liens/start-a-business/) (2026-10-24) |
+| Washington | Registration of an out-of-state company (`wa-sos-foreign`) | portal: ccfs.sos.wa.gov | On the agency's portal | typed | on the portal | [page](https://www.sos.wa.gov/corporations-charities/business-entities/online-filing-instructions/register-foreign-non-wa-limited-liability-company-llc-online) (2026-10-24) |
+| Pennsylvania | Registration of an out-of-state company to do business in the state (`pa-foreign-registration`) | portal: file.dos.pa.gov | On the agency's portal | typed | on the portal | [page](https://www.pa.gov/services/dos/register-a-business) (2026-10-24) |
+| Virginia | Registration of an out-of-state company to do business in the state (`va-foreign-registration`) | portal: cis.scc.virginia.gov | On the agency's portal | typed | on the portal | [page](https://www.scc.virginia.gov/businesses/forms-and-fees/foreign-limited-liability-companies/) (2026-10-24) |
+| Colorado | Registration of an out-of-state company to do business in the state (`co-foreign-registration`) | portal: www.coloradosos.gov | On the agency's portal | typed | on the portal | [page](https://www.sos.state.co.us/pubs/business/fileAForm.html) (2026-10-24) |
+| Maryland | Registration of an out-of-state company to do business in the state (`md-foreign-registration`) | portal: egov.maryland.gov | On the agency's portal | typed | on the portal | [page](https://dat.maryland.gov/businesses/Pages/default.aspx) (2026-10-24) |
+| Washington, DC | Registration of an out-of-state company to do business in the state (`dc-foreign-registration`) | portal: corponline.dlcp.dc.gov | On the agency's portal | typed | on the portal | [page](https://dlcp.dc.gov/service/domestic-limited-liability-company) (2026-10-24) |
+| Chicago | Sidewalk cafe permit (`chi-sidewalk-cafe`) | portal: ipi.cityofchicago.org | On the agency's portal | typed | billed after | [page](https://www.chicago.gov/city/en/depts/bacp/supp_info/sidewalkcafe.html) (2026-10-24) |
+| Los Angeles | Alarm permit (`la-alarm-permit`) | portal: latax.lacity.org | On the agency's portal | typed | not stated | [page](https://finance.lacity.gov/alarm-permits-general-information) (2026-10-24) |
+| Federal | Medical device establishment registration (initial importer) (`fda-device-reg`) | portal: www.access.fda.gov | On the agency's portal | none | on the portal | [page](https://www.fda.gov/medical-devices/device-registration-and-listing/how-register-and-list) (2026-10-24) |
 
 ## Team only, and why
 
@@ -259,7 +293,6 @@ With every channel switched on, a saved login for each portal and a connected ma
 | San Diego | Certificate of Occupancy (`sdg-co`) | Not an application: issued after the final inspection of the building permit work. | [page](https://www.sandiego.gov/development-services/forms-publications/information-bulletin/585) (2026-10-12) |
 | San Diego County | Food facility plan check (`sdc-plan-check`) | Online through the county's Accela Citizen Access, reached through dehpay.com; the portal's own host isn't printed, so the worker can't be pointed at it. | [page](https://www.sandiegocounty.gov/content/dam/sdc/deh/fhd/food/pdf/onlinesubmission_pc.pdf) (2026-10-18) |
 | San Diego County | Public health permit (food facility) (`sdc-health-permit`) | The county issues it in person with the plan check; no remote route is published. | [page](https://www.sandiegocounty.gov/content/sdc/deh/fhd/food/food_faq.html) (2026-10-12) |
-| Irvine | City of Irvine business license (`irv-license`) | Irvine is moving business licensing to its new PRISM portal and hasn't published the portal's address yet ("check back closer to launch"). | [page](https://cityofirvine.gov/community-development/business-licensing) (2026-10-18) |
 | Orange County, CA | Food facility health permit (`oc-health-permit`) | The plan checker directs the owner or contractor to the application at the final inspection; no address or inbox is published for it. | [page](https://ochealthinfo.com/about-hca/public-health-services/environmental-health-division/food/food-facility-health-permit) (2026-10-18) |
 | Fort Worth | Food establishment plan review (`ftw-plan-review`) | Plans go to the Department of Development at 1000 Throckmorton; no email or online route is published. | [page](https://www.fortworthtexas.gov/departments/environmental-services/consumer-health/plan-review) (2026-10-18) |
 | Fort Worth | Food establishment permit (`ftw-food-permit`) | Consumer Health issues it after the Certificate of Occupancy and a permit inspection; there's no application route of its own. | [page](https://www.fortworthtexas.gov/departments/environmental-services/consumer-health/plan-review) (2026-10-18) |
@@ -275,7 +308,6 @@ With every channel switched on, a saved login for each portal and a connected ma
 | Sacramento County | Food facility plan review (`sacc-plan-review`) | A printed plan set goes to 11080 White Rock Rd; for electronic submittal the county sends instructions on request (EHPlanReview@SacCounty.gov), so there's no route Placetta can send the whole packet on. | [page](https://emd.saccounty.gov/content/dam/emd/docs/transition/Application%20for%20Food%20Facility%20Plan%20Review%202026-2027.pdf) (2026-10-18) |
 | Sacramento County | Health permit to operate a food facility (`sacc-health-permit`) | The application to operate goes in with the fees before opening; the county's guide names no inbox or online route. | [page](https://emd.saccounty.gov/EH/Documents/How%20to%20Obtain%20a%20Health%20Permit%2002-6-23.pdf) (2026-10-17) |
 | Nevada | Unemployment insurance employer account (`nv-esd`) | The registration page says DETR shares details with the Department of Taxation but doesn't name the employer portal's address. | [page](https://tax.nv.gov/faqs/register-a-business/) (2026-10-18) |
-| Clark County (unincorporated) | Clark County business license (`cc-business-license`) | The county's apply page loads its options in buttons the page text doesn't carry, so the online route wasn't confirmed. | [page](https://www.clarkcountynv.gov/business/doing_business_with_clark_county/apply-for-a-business-license) (2026-10-18) |
 | Chicago | Food establishment plan review (`chi-plan-review`) | Reviewed as part of the building permit by a city sanitarian; Public Health isn't on E-Plan. | [page](https://www.chicago.gov/content/dam/city/depts/cdph/FoodProtection/FP_Plan.Review.Requirements.2020_Feb2021.pdf) (2026-10-17) |
 | Philadelphia | Food business plan review (`phl-plan-review`) | Submitted by phone appointment or walk-in at 7801 Essington Ave. | [page](https://phila.gov/services/permits-violations-licenses/get-a-license/business-licenses/food-businesses/apply-for-a-plan-review-for-a-stationary-food-business/) (2026-10-17) |
 | Philadelphia | Building permit for the build-out (`phl-building`) | The city's page names no application route for the building permit: "Call 311 and ask to speak to an L&I Building Unit representative." | [page](https://business.phila.gov/?p=1402) (2026-10-18) |
@@ -295,9 +327,6 @@ With every channel switched on, a saved login for each portal and a connected ma
 | Plano | Certificate of Occupancy (`pla-co`) | The packet goes to Building Inspections with the fee; the guide names no email, mailing address or online route for it. | [page](https://content.civicplus.com/api/assets/tx-plano/d2490980-662a-4f38-8def-66070c8691e5) (2026-10-18) |
 | Plano | Food establishment plan review (`pla-plan-review`) | Submitted to Building Inspections with the Environmental Health review form and fee; no remote route is published. | [page](https://www.plano.gov/food-permits) (2026-10-18) |
 | Plano | Food establishment permit (`pla-food-permit`) | Issued by Environmental Health once the fee is paid, after the Certificate of Occupancy; there's no application route of its own. | [page](https://www.plano.gov/food-permits) (2026-10-18) |
-| Federal | Entity Classification Election (`irs-8832`) | Mailed to Kansas City or Ogden by the entity's state (Ogden for a foreign country); no fax or online route. | [page](https://www.irs.gov/filing/where-to-file-your-taxes-for-form-8832) (2026-10-18) |
-| Federal | Change of Address or Responsible Party — Business (`irs-8822b`) | Mailed to Kansas City or Ogden by the state of the old business address (Ogden for any place outside the US). | [page](https://www.irs.gov/pub/irs-pdf/f8822b.pdf) (2026-10-18) |
-| Federal | Election by a Small Business Corporation (S corporation) (`irs-2553`) | Faxed or mailed to Kansas City (855-887-7734) or Ogden (855-214-7520) by the corporation's state. | [page](https://www.irs.gov/filing/where-to-file-your-taxes-for-form-2553) (2026-10-18) |
 | Montgomery County, MD | Food service plan review (`moco-plan-review`) | Health and Human Services reviews the plans before any building permit issues; they go in with the building permit to the permitting office for the address (the county's Department of Permitting Services, or the City of Rockville's or Gaithersburg's), filed by the design professional. | [page](https://montgomerycountymd.gov/HHS/Resources/Files/L%26R/Guidance%20-%20DHHS%20Plan%20Review%20via%20DPS%2010_2024.pdf) (2026-10-18) |
 | San Mateo County | Food facility plan check (`smc-plan-check`) | San Mateo County's plan check page didn't load past its navigation for us, so the plan submission route (MyEHS or paper) wasn't confirmed. | [page](https://www.smchealth.org/food-facility-plan-check-process) (2026-10-18) |
 | Glendale | Glendale business registration certificate (`gln-brc`) | Applied for in the city's GlendalePermits portal, whose address the city's page doesn't print. | [page](https://www.glendaleca.gov/government/departments/community-development/licenses-permits-and-applications/license-and-permit-applications/business-registration-certificate) (2026-10-18) |
@@ -305,18 +334,10 @@ With every channel switched on, a saved login for each portal and a connected ma
 | Montgomery County, MD | Certified food service manager (`moco-cfsm`) | Not researched yet. |  |
 | Rockville | Building permit for the build-out (`rock-building`) | Not researched yet. |  |
 | Rockville | Commercial occupancy permit (`rock-occupancy`) | Not researched yet. |  |
-| Georgia | Unemployment insurance tax account (DOL-1A) (`ga-dol`) | Not researched yet. |  |
-| Georgia | Georgia state alcohol license, with the local license (`ga-alcohol`) | Not researched yet. |  |
 | Gwinnett County | Food service plan review (`gw-plan-review`) | Not researched yet. |  |
 | Gwinnett County | Food service permit (`gw-food-permit`) | Not researched yet. |  |
-| Duluth, GA | Business zoning and use certificate (`dul-zoning`) | Not researched yet. |  |
-| Duluth, GA | Duluth occupational tax certificate (business license) (`dul-otc`) | Not researched yet. |  |
-| Texas | Texas alcohol permit (beer and wine: BG) (`tx-tabc`) | Not researched yet. |  |
-| Sugar Land | Food establishment plan review (`sl-plan-review`) | Not researched yet. |  |
-| Sugar Land | Food permit (`sl-food-permit`) | Not researched yet. |  |
 | Sugar Land | Certificate of Occupancy (`sl-co`) | Not researched yet. |  |
 | Virginia | Virginia ABC retail license (on-premises wine and beer) (`va-abc`) | Not researched yet. |  |
-| Washington | Beer and/or wine restaurant license (`wa-lcb`) | Not researched yet. |  |
 | New Jersey | Retail alcohol license from the municipality (`nj-abc`) | Not researched yet. |  |
 | New Jersey | Food establishment plan review (`nj-plan-review`) | Not researched yet. |  |
 | Massachusetts | Alcohol license from the local licensing authority (section 12) (`ma-alcohol`) | Not researched yet. |  |
@@ -326,32 +347,24 @@ With every channel switched on, a saved login for each portal and a connected ma
 | Hawaii | Food establishment permit (`hi-food-permit`) | Not researched yet. |  |
 | Utah | Utah restaurant alcohol license (`ut-alcohol`) | Not researched yet. |  |
 | Salt Lake County | Food service permit (`slco-food-permit`) | Not researched yet. |  |
-| Fremont | City of Fremont business tax registration (`fre-business-tax`) | Not researched yet. |  |
+| Fremont | City of Fremont business tax registration (`fre-business-tax`) | Waiting for verification: fremont.gov refused an automated read (403), so the online application's address wasn't confirmed. | [page](https://fremont.gov/government/departments/finance/revenue/business-tax/apply-for-a-business-tax-account) |
 | Cupertino | Building permit for the tenant improvement (`cup-building`) | Not researched yet. |  |
-| Milpitas | City of Milpitas business license (`mil-license`) | Not researched yet. |  |
 | Milpitas | Building permit for the tenant improvement (`mil-building`) | Not researched yet. |  |
-| Daly City | Daly City business license tax certificate (`dly-license`) | Not researched yet. |  |
 | Daly City | Building permit for the tenant improvement (`dly-building`) | Not researched yet. |  |
-| Arcadia | City of Arcadia business license (`arc-license`) | Not researched yet. |  |
 | Arcadia | Building permit for the build-out (`arc-building`) | Not researched yet. |  |
-| Alhambra | City of Alhambra business license (`alh-license`) | Not researched yet. |  |
 | Alhambra | Certificate of Occupancy (occupancy permit) (`alh-co`) | Not researched yet. |  |
 | Alhambra | Building permit for the build-out (`alh-building`) | Not researched yet. |  |
-| Torrance | City of Torrance business license (`tor-license`) | Not researched yet. |  |
 | Unincorporated Los Angeles County | Building permit for the build-out (unincorporated Los Angeles County) (`lacpw-building`) | Not researched yet. |  |
 | Fort Lee | Fort Lee retail food establishment license (`ftl-food-license`) | Not researched yet. |  |
 | Fort Lee | Food establishment plan review (`ftl-plan-review`) | Not researched yet. |  |
 | Fort Lee | Construction permit for the build-out (`ftl-construction`) | Not researched yet. |  |
-| Henderson | City of Henderson business license (`hen-license`) | Not researched yet. |  |
-| Bellevue | City of Bellevue business license (`bel-license`) | Not researched yet. |  |
+| Henderson | City of Henderson business license (`hen-license`) | Waiting for verification: cityofhenderson.com refused an automated read (403), so the online application's address wasn't confirmed. | [page](https://www.cityofhenderson.com/government/departments/finance/business-licensing/apply-for-a-business-license) |
 | Bellevue | Building permit for the tenant improvement (`bel-building`) | Not researched yet. |  |
 | Quincy | Quincy food establishment permit (`qcy-food-permit`) | Not researched yet. |  |
-| Quincy | Quincy business license (`qcy-license`) | Not researched yet. |  |
-| Irvine | Building permit for the tenant improvement (`irv-building`) | Not researched yet. |  |
-| Chicago | Building permit for the interior alteration (`chi-building`) | Not researched yet. |  |
+| Irvine | Building permit for the tenant improvement (`irv-building`) | Plans go in through the IrvineReady! portal, whose address the city's page doesn't print, and are signed by the licensed architect, engineer, contractor or interior designer who prepared them. | [page](https://cityofirvine.gov/node/69516) (2026-10-24) |
+| Chicago | Building permit for the interior alteration (`chi-building`) | "Only an Illinois-licensed architect or engineer or City-licensed expediter can apply for a plan-based building permit"; the Express Permit Program is for nonstructural work up to 2,000 square feet (500 in an assembly space such as a restaurant dining room). | [page](https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/apply.html) (2026-10-24) |
 | Atlanta | Building permit for the build-out (`atl-building`) | Not researched yet. |  |
 | Washington, DC | Building permit (`dc-building`) | Not researched yet. |  |
-| Washington, DC | LLC formation (Articles of Organization) (`dc-formation`) | Not researched yet. |  |
 | Jersey City | Construction permit for the build-out (`jc-construction`) | Not researched yet. |  |
 | Arlington | Commercial building permit (`arl-building`) | Not researched yet. |  |
 | Miami | Certificate of Occupancy or Completion after the build-out (`mia-co`) | Not researched yet. |  |
@@ -367,7 +380,6 @@ With every channel switched on, a saved login for each portal and a connected ma
 | Colorado | Colorado packaging producer responsibility (EPR): join before selling, unless exempt (`co-epr`) | Not researched yet. |  |
 | California | California importer's license for upholstered furniture (`ca-bhgs-importer`) | Not researched yet. |  |
 | California | California retail furniture dealer's license (`ca-bhgs-retail`) | Not researched yet. |  |
-| Federal | Federal basic importer's permit for wine, beer or spirits (`ttb-importer`) | Not researched yet. |  |
 | Federal | Foreign supplier verification (FSVP) and the importer's DUNS number at entry (`fda-fsvp`) | Not researched yet. |  |
 | California | Workers' compensation insurance (`ca-workers-comp`) | Not researched yet. |  |
 | Texas | Workers' compensation, or the yearly non-subscriber notice (`tx-workers-comp`) | Not researched yet. |  |
@@ -385,36 +397,27 @@ With every channel switched on, a saved login for each portal and a connected ma
 | Nevada | Workers' compensation insurance (`nv-workers-comp`) | Not researched yet. |  |
 | Ohio | Workers' compensation insurance (`oh-workers-comp`) | Not researched yet. |  |
 | Washington, DC | Workers' compensation insurance (`dc-workers-comp`) | Not researched yet. |  |
-| Minnesota | Articles of Organization (Minnesota LLC) (`mn-sos-llc`) | Not researched yet. |  |
 | Oregon | Articles of Organization (Oregon LLC) (`or-sos-llc`) | Not researched yet. |  |
 | Ohio | Articles of Organization (Ohio LLC) (`oh-sos-llc`) | Not researched yet. |  |
-| New York State | Registration of an out-of-state LLC (Application for Authority) (`ny-dos-foreign-llc`) | Not researched yet. |  |
-| Washington | Registration of an out-of-state company (`wa-sos-foreign`) | Not researched yet. |  |
-| Massachusetts | Registration of an out-of-state LLC (`ma-sos-foreign-llc`) | Not researched yet. |  |
+| New York State | Registration of an out-of-state LLC (Application for Authority) (`ny-dos-foreign-llc`) | Waiting for verification: dos.ny.gov refused an automated read (403), so the Department of State's online filing route wasn't confirmed. | [page](https://dos.ny.gov/application-authority-foreign-limited-liability-companies) |
+| Massachusetts | Registration of an out-of-state LLC (`ma-sos-foreign-llc`) | Waiting for verification: sec.state.ma.us answers automated reads with a bot check, so the online route for the foreign LLC registration wasn't confirmed. | [page](https://www.sec.state.ma.us/divisions/corporations/download/c156cs48fllcregistration.pdf) |
 | Florida | Registration of an out-of-state LLC (`fl-sunbiz-foreign-llc`) | Not researched yet. |  |
-| Georgia | Registration of an out-of-state company (`ga-sos-foreign`) | Not researched yet. |  |
+| Georgia | Registration of an out-of-state company (`ga-sos-foreign`) | Waiting for verification: sos.ga.gov refused an automated read (403); eCorp (ecorp.sos.ga.gov) files Georgia's domestic LLCs, but the foreign registration guide wasn't read. | [page](https://sos.ga.gov/how-to-guide/how-to-guide-register-foreign-entity) |
 | Arizona | Registration of an out-of-state LLC (`az-acc-foreign`) | Not researched yet. |  |
 | Illinois | Registration of an out-of-state LLC (`il-sos-foreign-llc`) | Not researched yet. |  |
-| New York State | Assumed name (DBA) for a company trading under a brand name (`ny-assumed-name`) | Not researched yet. |  |
+| New York State | Assumed name (DBA) for a company trading under a brand name (`ny-assumed-name`) | Waiting for verification: dos.ny.gov refused an automated read (403), so the Department of State's online filing route wasn't confirmed. | [page](https://dos.ny.gov/certificate-assumed-name-domestic-and-foreign-business-corporations) |
 | DEKALB | Food service plan review (`dekalb-plan-review`) | Not researched yet. |  |
 | DEKALB | Food service permit (`dekalb-food-permit`) | Not researched yet. |  |
-| Los Angeles County | Fictitious business name (DBA) (`lac-fbn`) | Not researched yet. |  |
-| Santa Clara County | Fictitious business name (DBA) (`scc-fbn`) | Not researched yet. |  |
-| Pennsylvania | Registration of an out-of-state company to do business in the state (`pa-foreign-registration`) | Not researched yet. |  |
+| Los Angeles County | Fictitious business name (DBA) (`lac-fbn`) | Waiting for verification: lavote.gov refused an automated read (403), so the Registrar-Recorder's online filing route wasn't confirmed. | [page](https://lavote.gov/home/county-clerk/fictitious-business-names/frequently-asked-questions) |
+| Santa Clara County | Fictitious business name (DBA) (`scc-fbn`) | Waiting for verification: santaclaracounty.gov answers automated reads with a bot check, so the Clerk-Recorder's filing route wasn't confirmed. | [page](https://www.santaclaracounty.gov/node/286) |
 | Nevada | Registration of an out-of-state company to do business in the state (`nv-foreign-registration`) | Not researched yet. |  |
 | Oregon | Registration of an out-of-state company to do business in the state (`or-foreign-registration`) | Not researched yet. |  |
-| Virginia | Registration of an out-of-state company to do business in the state (`va-foreign-registration`) | Not researched yet. |  |
-| New Jersey | Registration of an out-of-state company to do business in the state (`nj-foreign-registration`) | Not researched yet. |  |
-| Colorado | Registration of an out-of-state company to do business in the state (`co-foreign-registration`) | Not researched yet. |  |
+| New Jersey | Registration of an out-of-state company to do business in the state (`nj-foreign-registration`) | Waiting for verification: Read 2026-10-24: "File your certificate online" (www.njportal.com/DOR/BusinessFormation) covers the "certificate of formation/authorization", $100. Not routed yet: a third form on njportal.com needs that portal's playbook first (worker/filer/src/playbooks.ts). | [page](https://www.nj.gov/treasury/revenue/gettingregistered.shtml) |
 | Minnesota | Registration of an out-of-state company to do business in the state (`mn-foreign-registration`) | Not researched yet. |  |
 | Ohio | Registration of an out-of-state company to do business in the state (`oh-foreign-registration`) | Not researched yet. |  |
-| Maryland | Registration of an out-of-state company to do business in the state (`md-foreign-registration`) | Not researched yet. |  |
-| Washington, DC | Registration of an out-of-state company to do business in the state (`dc-foreign-registration`) | Not researched yet. |  |
 | Arizona | Employer registration for withholding and unemployment insurance (JT-1) (`az-jt1`) | Not researched yet. |  |
 | New York City | Tobacco retail dealer license (`nyc-tobacco-dealer`) | Not researched yet. |  |
 | New York City | Outdoor dining permit (Dining Out NYC) (`nyc-outdoor-dining`) | Not researched yet. |  |
-| Chicago | Sidewalk cafe permit (`chi-sidewalk-cafe`) | Not researched yet. |  |
-| Los Angeles | Alarm permit (`la-alarm-permit`) | Not researched yet. |  |
 | California | Barbering and cosmetology establishment license (`ca-bbc-establishment`) | Not researched yet. |  |
 | New York State | Appearance enhancement business license (`ny-dos-aeb`) | Not researched yet. |  |
 | Texas | Cosmetology establishment license (`tx-tdlr-establishment`) | Not researched yet. |  |
@@ -427,11 +430,10 @@ With every channel switched on, a saved login for each portal and a connected ma
 | California | Automotive repair dealer registration (`ca-bar-ard`) | Not researched yet. |  |
 | New York State | Repair shop registration (`ny-dmv-repair`) | Not researched yet. |  |
 | Florida | Motor vehicle repair shop registration (`fl-fdacs-repair`) | Not researched yet. |  |
-| Federal | Medical device establishment registration (initial importer) (`fda-device-reg`) | Not researched yet. |  |
 | California | Industrial stormwater permit coverage (`ca-igp`) | Not researched yet. |  |
 | Texas | Industrial stormwater permit coverage (MSGP) (`tx-msgp`) | Not researched yet. |  |
 | Los Angeles County | Air quality permit for equipment (Permit to Construct) (`scaqmd-permit-lac`) | Not researched yet. |  |
 | Orange County, CA | Air quality permit for equipment (Permit to Construct) (`scaqmd-permit-orc`) | Not researched yet. |  |
 | California | Hazardous materials business plan (`ca-hmbp`) | Not researched yet. |  |
-| City of Las Vegas | Building permit for the build-out (`lv-building`) | Not researched yet. |  |
+| City of Las Vegas | Building permit for the build-out (`lv-building`) | "Only a Nevada licensed contractor may obtain a building permit for commercial construction." | [page](https://www.lasvegasnevada.gov/Business/Permits-Licenses/Building-Permits) (2026-10-24) |
 | Arizona | Workers' compensation insurance (`az-workers-comp`) | Not researched yet. |  |

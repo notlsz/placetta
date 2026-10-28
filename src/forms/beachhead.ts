@@ -53,10 +53,10 @@ export const BEACHHEAD: OfficialForm[] = [
     url: "https://www.rockvillemd.gov/mgoconnect", info: ROCK, fee: null, proof: P("Commercial Occupancy Permit Application", ROCK) }),
 
   /* ------------------------------------------------ Georgia ------------------------------------------------ */
-  f({ id: "ga-dol", form: "Application for GDOL Tax Account (DOL-1A)", title: B("Unemployment insurance tax account (DOL-1A)", "失业保险税账户（DOL-1A）"),
-    agency: B("Georgia Department of Labor", "佐治亚州劳工部"), level: "state", where: "GA", segments: ALL, needs: { employees: true }, method: "online", order: 60,
-    how: B("Employers with a quarterly payroll of $1,500, or a worker in 20 weeks of a year, file Form DOL-1A and then quarterly tax and wage reports.", "季度工资达 1,500 美元或一年内有 20 周雇有员工的雇主，须提交 DOL-1A 表，之后按季申报税款和工资。"),
-    url: "https://dol.georgia.gov/node/2291", info: "https://dol.georgia.gov/node/2291", fee: 0,
+  f({ id: "ga-dol", form: "Application for GDOL Tax Account or Status Change (DOL-1N, formerly DOL-1A)", title: B("Unemployment insurance tax account (DOL-1N)", "失业保险税账户（DOL-1N）"),
+    agency: B("Georgia Department of Labor", "佐治亚州劳工部"), level: "state", where: "GA", segments: ALL, needs: { employees: true }, method: "pdf_mail", order: 60,
+    how: B("Employers with a quarterly payroll of $1,500, or a worker in 20 weeks of a year, mail the signed Employer Status Report (DOL-1N, the form the FAQ calls DOL-1A) to the Department of Labor, then file quarterly tax and wage reports.", "季度工资达 1,500 美元或一年内有 20 周雇有员工的雇主，须将签字的雇主状况报告（DOL-1N，即常见问题中所称的 DOL-1A）寄给劳工部，之后按季申报税款和工资。"),
+    url: "https://dol.georgia.gov/node/2291", info: "https://dol.georgia.gov/node/2291", pdf: "https://dol.georgia.gov/document/unemployment-tax/application-gdol-tax-account-or-status-change-dol-1n/download", fee: 0,
     proof: P("You must complete an Application for GDOL Tax Account or Status Change (DOL-1A) form and return it to the Georgia Department of Labor", "https://dol.georgia.gov/node/2291") }),
   f({ id: "ga-alcohol", form: "Georgia retail alcohol license (Georgia Tax Center)", title: B("Georgia state alcohol license, with the local license", "佐治亚州酒类执照（及地方执照）"),
     agency: B("Georgia Department of Revenue, Alcohol and Tobacco Division", "佐治亚州税务局酒类与烟草处"), level: "state", where: "GA", segments: [R, T], needs: { alcohol: true }, method: "online", order: 71,
