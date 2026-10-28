@@ -63,6 +63,7 @@ import { secretValues, withoutEnv } from "../_shared/secrets.ts";
 // Agent memory (src/odeliaMemory/): read before a run, saved after it
 // @ts-types="./agent.d.ts"
 import { loadMemory, saveRun, type RunMemory } from "./agent.js";
+import { autofileAll, type AutofileIO } from "./agent.js";
 import { gradeRun, GRADER_SAMPLE_RATE, sampled } from "./agent.js";
 import { memoryDb, pastRuns } from "./memory.ts";
 
@@ -359,6 +360,34 @@ async function servicesFor(ws: string, run: Run, token: string | null): Promise<
       if (error) { if (error.code === "42P01" || error.code === "PGRST205") return []; throw new Error("Couldn't read the comments."); }
       return (data ?? []).map((c) => ({ id: String(c.id), item: { kind: c.item_kind as "app" | "doc" | "job", id: String(c.item_id) }, by: c.from_hq ? "Headquarters" : String(c.author_email || "A teammate"),
         hq: !!c.from_hq, text: String(c.body ?? ""), at: String(c.created_at), resolved: !!c.resolved_at }));
+    },
+  };
+}
+
+/** What Autopilot's filing needs from the server (src/autopilotFile.ts): the agencies' PDFs, the adopted signature from
+ *  the vault, Documents, the database's own check (autopilot_file), and the dispatcher started with the monitor key. */
+function autopilotIO(ws: string, svc: Services): AutofileIO {
+  return {
+    loadPdf: (file: string) => sitePdf(file),
+    async signature(grant: string) {
+      const { data } = await admin.rpc("autopilot_signature", { p_grant: grant });
+      return typeof data === "string" ? data : null;
+    },
+    async upload(appId: string, name: string, bytes: Uint8Array) {
+      return (await svc.saveFile(new File([bytes as BlobPart], name, { type: "application/pdf" }), appId)).path;
+    },
+    async file(r) {
+      const { data, error } = await admin.rpc("autopilot_file", { p_ws: ws, p_grant: r.grant, p_app_id: r.app_id, p_title: r.title, p_agency: r.agency, p_portal_url: r.portal_url,
+        p_fee: r.fee, p_payload: r.payload, p_store: r.store, p_form: r.form });
+      if (error || typeof data !== "string") throw new Error(error?.message ?? "autopilot_scope: refused");
+      return data;
+    },
+    async start(id: string) {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/file`, {
+        method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${env("SUPABASE_ANON_KEY")}`, apikey: env("SUPABASE_ANON_KEY"), "x-monitor-key": await monitorKey() },
+        body: JSON.stringify({ action: "autopilot_start", workspace_id: ws, filing_id: id }),
+      });
+      if (!res.ok) console.error("autopilot start", ws, res.status);
     },
   };
 }
@@ -829,6 +858,13 @@ export async function work(runId: string, token: string | null, ticket: string |
       }
     }
     await save();
+    // Autopilot (src/autopilotFile.ts): the filings this run marked go in now, under the owner's standing authorization;
+    // every check runs again first and the database checks the grant once more. One that can't go is put back on its
+    // card for the owner, with why.
+    if (((cur.approvals ?? []) as { autopilot?: { filing?: string } }[]).some((a) => a.autopilot && !a.autopilot.filing)) {
+      const done = await autofileAll(cur, autopilotIO(ws, await svcP), new Date().toISOString()).catch((e) => { console.error("autopilot", ws, String((e as Error)?.message ?? e).slice(0, 160)); return null; });
+      if (done?.patches.length) { for (const p of done.patches) { cur = p(cur); pending.push(p); } await save(); }
+    }
     if ("paused" in out) {
       const next = await lease.release({ state: { ...out.paused, spent: who.spent }, steps, draft, updated_at: new Date().toISOString() });
       if (next) await handOver(runId, token, next);

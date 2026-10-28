@@ -50,7 +50,8 @@ export async function initiative(ws: string, name: string, state: unknown, today
         continue;
       }
       if (!weekday(today)) continue;
-      const hands = mode === "auto" && !!io.mail && !!mv.to.email;
+      // Hands-off, and Autopilot (Hands-off plus filing under the owner's standing authorization)
+      const hands = (mode === "auto" || mode === "autopilot") && !!io.mail && !!mv.to.email;
       if (!hands && !o.canStart) continue;
       const token = hands ? newToken(() => crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32) : null;
       const row: ChaseRow = { workspace_id: ws, key: mv.key, app_id: mv.app, item_id: mv.item, holder: mv.holder, n: mv.ask, to_name: mv.to.name, to_email: mv.to.email ?? null, via: hands ? "odelia_email" : "draft", token, day: today };

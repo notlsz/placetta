@@ -60,6 +60,7 @@ import { Queue, QueueLocked } from "./cloud/Ops";
 import { PartnerPage, usePartnerMe } from "./Partner";
 /* Owner controls: Plan first, Ask me first, Always allow, business rules and Undo (src/autonomy.ts, src/rewind.ts) */
 import { approvePlan, autoOk, markSecond, secondStep, workPrompt } from "./autonomy";
+import { autopilotOn } from "./autopilot";
 import { addUndo, recorder, undoTitle } from "./rewind";
 import { withDemoPlan } from "./demoPlan";
 import { ownerApprove } from "./cloud/owners";
@@ -1134,6 +1135,20 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     setWs(audit("agent", B("Approved under your rule", "已按您的规则批准"), a.auto!.label, a.title));
     void approve(a.id);
   }, [view_, owner, busy, termsHold, approve]);
+  // Autopilot (src/autopilot.ts): a filing Odelia marked under the owner's standing authorization goes without a tap. In
+  // an account the server files it after the run (supabase/functions/agent-run, then the dispatcher's undo window);
+  // here, in the sample, it goes the same way a tap would, through the same checks and the same undo window, while the
+  // authorization is still live.
+  const autoFiled = useRef(new Set<string>());
+  useEffect(() => {
+    if (cloud || busy) return;
+    const a = view_.approvals.find(x => x.kind === "file" && x.autopilot && !x.autopilot.filing && !autoFiled.current.has(x.id));
+    if (!a) return;
+    autoFiled.current.add(a.id);
+    if (!autopilotOn(view_, nowIso())) { setWs(x => ({ ...x, approvals: x.approvals.map(y => (y.id === a.id ? { ...y, autopilot: undefined } : y)) })); return; }
+    void approve(a.id);
+    say(lang === "zh" ? `自动驾驶已为您提交：${a.title.zh}。${HOLD_MINUTES} 分钟内可以撤销。` : `Filed for you under Autopilot: ${a.title.en}. You can undo it for ${HOLD_MINUTES} minutes.`);
+  }, [view_, cloud, busy, approve, say, lang]);
 
   useEffect(() => {
     const id = pendingFiling.current;

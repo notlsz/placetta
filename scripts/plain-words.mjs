@@ -7,7 +7,7 @@
      src/*.tsx                  every string literal that reads as a sentence (has a space or Chinese characters),
                                 plus every B("…", "…") pair; identifiers in quotes ("handoff" as a state name) don't count
      src/jobs.ts, src/serverRun.ts, src/harness.ts, src/live.ts, src/replay.ts, src/finish.ts, src/today.ts, and the owner controls (src/autonomy.ts, rewind.ts,
-     businessRules.ts, commands.ts, held.ts, demoPlan.ts)
+     businessRules.ts, commands.ts, held.ts, demoPlan.ts, autopilot.ts, autopilotFile.ts, weekDone.ts, forms/esign.ts)
                                 B("…", "…") and L("…", "…") pairs and { en: "…", zh: "…" } labels only: the step
                                 labels and notes a person sees, not the instructions written for the model
    Allowed: code comments, import paths, class names, and the restaurant sense of "seats" in the forms library
@@ -50,7 +50,7 @@ const inPair = lead => /\b[BL]\(\s*$|\{\s*en:\s*$|,\s*$/.test(lead);
 const files = [];
 const srcDir = join(ROOT, "src");
 for (const f of readdirSync(srcDir)) if (f.endsWith(".tsx") || f === "i18n.ts") files.push({ path: join(srcDir, f), all: true });
-for (const f of ["jobs.ts", "serverRun.ts", "harness.ts", "live.ts", "replay.ts", "autonomy.ts", "rewind.ts", "businessRules.ts", "commands.ts", "held.ts", "demoPlan.ts", "finish.ts", "today.ts", "initiative.ts", "escalate.ts"]) files.push({ path: join(srcDir, f), all: false });
+for (const f of ["jobs.ts", "serverRun.ts", "harness.ts", "live.ts", "replay.ts", "autonomy.ts", "rewind.ts", "businessRules.ts", "commands.ts", "held.ts", "demoPlan.ts", "finish.ts", "today.ts", "initiative.ts", "escalate.ts", "autopilot.ts", "autopilotFile.ts", "weekDone.ts", "forms/esign.ts"]) files.push({ path: join(srcDir, f), all: false });
 
 const hits = [];
 for (const { path, all } of files) {

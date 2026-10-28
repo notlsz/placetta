@@ -1,8 +1,8 @@
 # Terms of Service
 
-Last updated: 2026-10-22
+Last updated: 2026-10-27
 
-Effective date: 2026-10-22. If you accepted an earlier version, this version applies to you from the day you accept it in the app, or from 30 days after we notify you of it by email or in the app if you keep using the service after then, whichever comes first. Until then, the previous version applies.
+Effective date: 2026-10-27. If you accepted an earlier version, this version applies to you from the day you accept it in the app, or from 30 days after we notify you of it by email or in the app if you keep using the service after then, whichever comes first. Until then, the previous version applies.
 
 These terms are an agreement between you and Placetta Inc. ("Placetta", "we", "us"). They cover your use of placetta.com, the Placetta app, and texts and calls with Odelia, Placetta's AI agent (together, the "service"). "You" means the business you represent and the people who use the service for it.
 
@@ -36,7 +36,7 @@ Odelia researches requirements on official government websites and cites the age
 
 ## Your approval comes first
 
-Odelia never files, pays or sends anything on her own. Every filing and every message needs your approval in the app.
+Odelia never pays or sends anything on her own, and never files anything without an owner's approval: the approval of that filing in the app, or, if an owner turns on Autopilot, the standing authorization they sign, within its limits (see the Filing Authorization). Every message needs your approval in the app.
 
 After you approve an application, Placetta's software checks it against the agency's current requirements and submits it on your behalf by email from your connected mailbox, by fax, by certified mail or on the agency's website, using the saved logins you choose to keep with us. When no automatic channel fits, our filing team submits it. Placetta stops and asks you whenever an agency requires a CAPTCHA, an identity check, a payment, a sworn statement or your handwritten signature, and some agencies require an in-person step. You complete those yourself. Placetta never types a card or bank number and never sends a Social Security, ITIN or passport number.
 
@@ -50,6 +50,7 @@ Odelia and Placetta's filing software and team act for your business only within
 
 - Without asking each time: read what you upload or connect, look up requirements and fees on official websites, check the status of your filings on agency websites and public records, track deadlines, and prepare drafts for you to review.
 - Only after an owner of your workspace approves that exact item in the app: submit a filing, send a message as your business, book an inspection at the time the owner picked, or change something in an app you connected. Each approval covers that one item.
+- Under Autopilot, only if an owner turns it on: submit the filings within the standing authorization that owner signed (its stores, agencies, filing types, fee caps and 12 months), each only after it passes every automated check, as the Filing Authorization explains. It can be revoked at any time, in one tap.
 - Saved agency logins are opened only to do something an owner approved, such as submitting a filing or booking an inspection, and each opening is recorded in your audit trail. Placetta's software types the login itself; the AI model never sees the password. Placetta never creates an agency account in your name.
 - Never: pay a government fee, type a card or bank number, sign your name, make a sworn statement for you, file an appeal, appear at a hearing or an inspection for you, or send a Social Security, ITIN or passport number.
 
@@ -276,7 +277,7 @@ Applications already submitted to an agency stay with that agency. Placetta cann
 
 **PLACETTA DOES NOT PROMISE THAT THE SERVICE WILL BE ACCURATE, COMPLETE, FREE OF ERRORS OR UNINTERRUPTED, THAT THE LICENSES WE MAP ARE COMPLETE, THAT EVERY DEADLINE WILL BE CAUGHT OR EVERY REMINDER WILL ARRIVE, OR THAT ANY AGENCY WILL APPROVE AN APPLICATION.**
 
-This section does not limit a commitment these terms make expressly, such as that Placetta never files, pays or sends anything without your approval.
+This section does not limit a commitment these terms make expressly, such as that Placetta never files, pays or sends anything without your approval (for a filing, your approval of it or an Autopilot authorization an owner signed).
 
 ## Limitation of liability
 
@@ -390,9 +391,9 @@ Website: placetta.com
 
 # 服务条款
 
-最后更新：2026-10-22
+最后更新：2026-10-27
 
-生效日期：2026-10-22。如您已接受过上一版本，本版本自您在应用中接受之日起对您适用；如您在我们通过邮件或应用内通知您满 30 天后继续使用本服务，则自该日起适用，以两者中较早者为准。在此之前，继续适用上一版本。
+生效日期：2026-10-27。如您已接受过上一版本，本版本自您在应用中接受之日起对您适用；如您在我们通过邮件或应用内通知您满 30 天后继续使用本服务，则自该日起适用，以两者中较早者为准。在此之前，继续适用上一版本。
 
 本条款是您与 Placetta Inc.（中文名称“快哉”，下称“快哉”或“我们”）之间的协议，适用于您对 placetta.com、快哉应用，以及与快哉 AI 智能体 Odelia 之间的短信和通话（合称“本服务”）的使用。“您”指您所代表的企业及代表该企业使用本服务的人员。
 
@@ -426,7 +427,7 @@ Odelia 在政府官方网站上查询相关要求，并注明所依据的机构�
 
 ## 一切以您的批准为前提
 
-Odelia 不会自行提交、付款或发送任何内容。每一份申请、每一条消息，都须经您在应用中批准。
+Odelia 不会自行付款或发送任何内容；未经所有者批准，也不会提交任何申报。所谓批准，是指在应用中对该项申报的批准，或所有者开启自动驾驶时签署的长期授权（以其范围为限，详见《申报授权书》）。每一条消息都须经您在应用中批准。
 
 您批准申请后，快哉的软件会对照该机构的最新要求进行核对，再代表您提交：通过您连接的邮箱发送邮件、发送传真、寄送挂号信，或在该机构网站上使用您选择保存在快哉的登录信息提交。没有合适的自动渠道时，由我们的申报团队提交。如机构要求验证码（CAPTCHA）、身份核验、付款、宣誓声明或您的亲笔签名，快哉会暂停并请您处理；部分机构还要求本人到场。这些步骤由您自行完成。快哉从不输入银行卡号或银行账号，也从不发送社会安全号码（SSN）、个人纳税识别号（ITIN）或护照号码。
 
@@ -440,6 +441,7 @@ Odelia 以及快哉的申报软件和团队，只在以下范围内代表您的�
 
 - 无需每次询问：阅读您上传或连接的内容，在官方网站上查询要求和费用，在机构网站和公开记录中查询您的申报进度，跟踪截止日期，以及准备草稿供您审核。
 - 须经您工作区的所有者在应用中批准该具体事项后才可进行：提交申报、以您企业的名义发送消息、在所有者选定的时间预约检查，或更改您所连接应用中的内容。每次批准只涵盖该一项事项。
+- 自动驾驶下，且仅在所有者开启时：在该所有者签署的长期授权范围内（其门店、机构、申报类型、费用上限和 12 个月有效期）提交申报，每项都须先通过全部自动核对，详见《申报授权书》。可随时一键撤销。
 - 已保存的机构登录信息，只在执行所有者已批准的事项（例如提交申报或预约检查）时才会打开，每次打开都会记入您的审计记录。登录信息由快哉的软件自行输入，AI 模型看不到密码。快哉绝不以您的名义开设机构账户。
 - 绝不：支付政府规费、输入银行卡号或银行账号、代您签名、代您作出宣誓声明、提起申诉、代您出席听证或检查，或发送社会安全号码（SSN）、个人纳税识别号（ITIN）或护照号码。
 
@@ -666,7 +668,7 @@ Odelia 是快哉的 AI 助理，专门为您的企业处理合规工作：执照
 
 **快哉不保证本服务准确、完整、不会出错或中断，不保证我们梳理的执照清单完整，不保证能发现每一个截止日期或每一条提醒都能送达，也不保证任何机构会批准申请。**
 
-本节不限制本条款明确作出的承诺，例如未经您批准，快哉绝不提交、付款或发送任何内容。
+本节不限制本条款明确作出的承诺，例如未经您批准（就申报而言，指您对该项申报的批准或所有者签署的自动驾驶授权），快哉绝不提交、付款或发送任何内容。
 
 ## 责任限制
 

@@ -1,8 +1,8 @@
 # How Placetta's AI works
 
-Last updated: 2026-10-22
+Last updated: 2026-10-27
 
-Effective date: 2026-10-22.
+Effective date: 2026-10-27.
 
 Placetta uses an AI agent, Odelia, to handle the paperwork of getting licenses, permits and registrations. This page explains what she does and where her limits are.
 
@@ -24,7 +24,7 @@ Odelia researches requirements on official government websites and cites the age
 
 ## What it never does on its own
 
-Odelia never files, pays or sends anything by herself. Every filing and every message needs your approval in the app.
+Odelia never pays or sends anything by herself, and never files anything without an owner's approval: the approval of that filing in the app, or, if an owner turns on Autopilot, the standing authorization they sign, within its limits (see the Filing Authorization). Every message needs your approval in the app.
 
 After you approve a filing, Placetta checks it against the agency's current requirements before submitting it. You always pay government fees yourself, directly to the agency.
 
@@ -63,9 +63,9 @@ Email: support@placetta.com
 
 # 快哉的 AI 如何工作
 
-最后更新：2026-10-22
+最后更新：2026-10-27
 
-生效日期：2026-10-22。
+生效日期：2026-10-27。
 
 快哉使用 AI 智能体 Odelia，处理办理执照、许可和登记过程中的文书工作。本页说明她能做什么，以及她的局限在哪里。
 
@@ -87,7 +87,7 @@ Odelia 在政府官方网站上查询相关要求，并注明机构来源，方�
 
 ## 未经批准，它不会做什么
 
-Odelia 不会自行提交、付款或发送任何内容。每一份申请、每一条消息，都须经您在应用中批准。
+Odelia 不会自行付款或发送任何内容；未经所有者批准，也不会提交任何申报。所谓批准，是指在应用中对该项申报的批准，或所有者开启自动驾驶时签署的长期授权（以其范围为限，详见《申报授权书》）。每一条消息都须经您在应用中批准。
 
 您批准申请后，快哉会先对照机构的最新要求进行核对，再行提交。政府规费始终由您本人直接支付给机构。
 

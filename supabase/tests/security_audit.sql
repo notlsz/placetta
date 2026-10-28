@@ -57,6 +57,8 @@ begin
     format('public.ai_margin(%L, current_date)', w),
     format('public.ai_status(%L)', w),
     format('public.ask_person(%L, %L, %L, %L)', w, 'help me', '{}', 'en'),
+    format('public.autopilot_grant(%L, %L, null, true, public.current_terms_version(), %L, 10, 10, %L, null)', w, 'Eve Evil', '{"stores":["s"],"agencies":["a"],"forms":["f"]}', 'typed'),
+    format('public.autopilot_revoke(%L)', w),
     format('public.assign_item(%L, %L, %L, %L)', w, 'app', 'bl', eve),
     format('(select count(*) from public.audit_export(%L, now() - interval ''1 day'', now() + interval ''1 day''))', w),
     format('public.audit_record_export(%L, %L)', w, 'documents'),
@@ -115,7 +117,7 @@ begin
   leaks := '{}';
   foreach x in array array['workspaces', 'workspace_members', 'workspace_invites', 'documents', 'filings', 'comments', 'agent_memories', 'agent_runs',
                            'purchases', 'updates', 'audit_log', 'mention_notices', 'odelia_messages', 'mail_threads', 'integrations', 'agency_logins', 'billing',
-                           'trust_links', 'trust_requests'] loop
+                           'trust_links', 'trust_requests', 'autopilot_grants'] loop
     begin
       execute format('select count(*) from public.%I where %s = %L', x, case when x = 'workspaces' then 'id' else 'workspace_id' end, w) into n;
       if n > 0 then leaks := leaks || x; end if;

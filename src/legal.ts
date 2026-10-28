@@ -10,7 +10,7 @@
 export type LegalDoc = { id: "terms" | "privacy" | "authorization" | "ai"; title: { en: string; zh: string }; updated: string; body: { en: string; zh: string } };
 
 /** The date of this version. Every document also says it takes effect on this date. */
-export const UPDATED = "2026-10-22";
+export const UPDATED = "2026-10-27";
 
 const TERMS_EN = `Effective date: ${UPDATED}. If you accepted an earlier version, this version applies to you from the day you accept it in the app, or from 30 days after we notify you of it by email or in the app if you keep using the service after then, whichever comes first. Until then, the previous version applies.
 
@@ -46,7 +46,7 @@ Odelia researches requirements on official government websites and cites the age
 
 ## Your approval comes first
 
-Odelia never files, pays or sends anything on her own. Every filing and every message needs your approval in the app.
+Odelia never pays or sends anything on her own, and never files anything without an owner's approval: the approval of that filing in the app, or, if an owner turns on Autopilot, the standing authorization they sign, within its limits (see the Filing Authorization). Every message needs your approval in the app.
 
 After you approve an application, Placetta's software checks it against the agency's current requirements and submits it on your behalf by email from your connected mailbox, by fax, by certified mail or on the agency's website, using the saved logins you choose to keep with us. When no automatic channel fits, our filing team submits it. Placetta stops and asks you whenever an agency requires a CAPTCHA, an identity check, a payment, a sworn statement or your handwritten signature, and some agencies require an in-person step. You complete those yourself. Placetta never types a card or bank number and never sends a Social Security, ITIN or passport number.
 
@@ -60,6 +60,7 @@ Odelia and Placetta's filing software and team act for your business only within
 
 - Without asking each time: read what you upload or connect, look up requirements and fees on official websites, check the status of your filings on agency websites and public records, track deadlines, and prepare drafts for you to review.
 - Only after an owner of your workspace approves that exact item in the app: submit a filing, send a message as your business, book an inspection at the time the owner picked, or change something in an app you connected. Each approval covers that one item.
+- Under Autopilot, only if an owner turns it on: submit the filings within the standing authorization that owner signed (its stores, agencies, filing types, fee caps and 12 months), each only after it passes every automated check, as the Filing Authorization explains. It can be revoked at any time, in one tap.
 - Saved agency logins are opened only to do something an owner approved, such as submitting a filing or booking an inspection, and each opening is recorded in your audit trail. Placetta's software types the login itself; the AI model never sees the password. Placetta never creates an agency account in your name.
 - Never: pay a government fee, type a card or bank number, sign your name, make a sworn statement for you, file an appeal, appear at a hearing or an inspection for you, or send a Social Security, ITIN or passport number.
 
@@ -286,7 +287,7 @@ Applications already submitted to an agency stay with that agency. Placetta cann
 
 **PLACETTA DOES NOT PROMISE THAT THE SERVICE WILL BE ACCURATE, COMPLETE, FREE OF ERRORS OR UNINTERRUPTED, THAT THE LICENSES WE MAP ARE COMPLETE, THAT EVERY DEADLINE WILL BE CAUGHT OR EVERY REMINDER WILL ARRIVE, OR THAT ANY AGENCY WILL APPROVE AN APPLICATION.**
 
-This section does not limit a commitment these terms make expressly, such as that Placetta never files, pays or sends anything without your approval.
+This section does not limit a commitment these terms make expressly, such as that Placetta never files, pays or sends anything without your approval (for a filing, your approval of it or an Autopilot authorization an owner signed).
 
 ## Limitation of liability
 
@@ -430,7 +431,7 @@ Odelia 在政府官方网站上查询相关要求，并注明所依据的机构�
 
 ## 一切以您的批准为前提
 
-Odelia 不会自行提交、付款或发送任何内容。每一份申请、每一条消息，都须经您在应用中批准。
+Odelia 不会自行付款或发送任何内容；未经所有者批准，也不会提交任何申报。所谓批准，是指在应用中对该项申报的批准，或所有者开启自动驾驶时签署的长期授权（以其范围为限，详见《申报授权书》）。每一条消息都须经您在应用中批准。
 
 您批准申请后，快哉的软件会对照该机构的最新要求进行核对，再代表您提交：通过您连接的邮箱发送邮件、发送传真、寄送挂号信，或在该机构网站上使用您选择保存在快哉的登录信息提交。没有合适的自动渠道时，由我们的申报团队提交。如机构要求验证码（CAPTCHA）、身份核验、付款、宣誓声明或您的亲笔签名，快哉会暂停并请您处理；部分机构还要求本人到场。这些步骤由您自行完成。快哉从不输入银行卡号或银行账号，也从不发送社会安全号码（SSN）、个人纳税识别号（ITIN）或护照号码。
 
@@ -444,6 +445,7 @@ Odelia 以及快哉的申报软件和团队，只在以下范围内代表您的�
 
 - 无需每次询问：阅读您上传或连接的内容，在官方网站上查询要求和费用，在机构网站和公开记录中查询您的申报进度，跟踪截止日期，以及准备草稿供您审核。
 - 须经您工作区的所有者在应用中批准该具体事项后才可进行：提交申报、以您企业的名义发送消息、在所有者选定的时间预约检查，或更改您所连接应用中的内容。每次批准只涵盖该一项事项。
+- 自动驾驶下，且仅在所有者开启时：在该所有者签署的长期授权范围内（其门店、机构、申报类型、费用上限和 12 个月有效期）提交申报，每项都须先通过全部自动核对，详见《申报授权书》。可随时一键撤销。
 - 已保存的机构登录信息，只在执行所有者已批准的事项（例如提交申报或预约检查）时才会打开，每次打开都会记入您的审计记录。登录信息由快哉的软件自行输入，AI 模型看不到密码。快哉绝不以您的名义开设机构账户。
 - 绝不：支付政府规费、输入银行卡号或银行账号、代您签名、代您作出宣誓声明、提起申诉、代您出席听证或检查，或发送社会安全号码（SSN）、个人纳税识别号（ITIN）或护照号码。
 
@@ -670,7 +672,7 @@ Odelia 是快哉的 AI 助理，专门为您的企业处理合规工作：执照
 
 **快哉不保证本服务准确、完整、不会出错或中断，不保证我们梳理的执照清单完整，不保证能发现每一个截止日期或每一条提醒都能送达，也不保证任何机构会批准申请。**
 
-本节不限制本条款明确作出的承诺，例如未经您批准，快哉绝不提交、付款或发送任何内容。
+本节不限制本条款明确作出的承诺，例如未经您批准（就申报而言，指您对该项申报的批准或所有者签署的自动驾驶授权），快哉绝不提交、付款或发送任何内容。
 
 ## 责任限制
 
@@ -985,7 +987,7 @@ Placetta doesn't hold SOC 2 or any other security certification today. What we d
 - You can turn on two-step sign-in, and a PIN for sensitive settings, in Settings. Placetta's team must use two-step sign-in to reach customer records and saved logins.
 - Card numbers are handled by Stripe. We never see full card numbers.
 - The audit trail records every action by Odelia, by you, by our team and by agencies.
-- Nothing is filed, paid or sent without your approval.
+- Nothing is filed, paid or sent without your approval. A filing within an Autopilot authorization an owner signed counts as approved.
 - If a security incident exposes your workspace's information, we tell the owners by email without undue delay, and within 72 hours of confirming that their information was involved, unless the law sets a shorter time.
 
 No system is perfectly secure. If you think someone else has accessed your workspace, email support@placetta.com. Our trust page says what is in place and what isn't finished yet: https://placetta.com/trust
@@ -1258,7 +1260,7 @@ const PRIVACY_ZH = `生效日期：${UPDATED}。
 - 您可以在“设置”中开启两步登录，以及用于敏感设置的 PIN。快哉团队成员必须开启两步登录，才能访问客户记录和已保存的登录信息。
 - 银行卡号由 Stripe 处理。我们看不到完整卡号。
 - 审计记录会记下 Odelia、您、我们的团队和各机构的每一项操作。
-- 未经您批准，不会提交、付款或发送任何内容。
+- 未经您批准，不会提交、付款或发送任何内容。所有者签署的自动驾驶授权范围内的申报视为已批准。
 - 如发生安全事件导致您工作区的信息泄露，我们会在确认相关信息受影响后，及时并在 72 小时内通过邮件告知所有者，法律规定更短期限的，从其规定。
 
 任何系统都无法做到绝对安全。如您认为他人可能进入了您的工作区，请发邮件至 support@placetta.com。我们的信任与安全页面列明了已落实和尚未完成的事项：https://placetta.com/trust
@@ -1338,8 +1340,9 @@ You appoint Placetta as your authorized agent for one limited purpose:
 - to submit the applications you approve, on your behalf, by email from your connected mailbox, by fax, by certified mail or on the agency's website
 - to follow up with the agency on those applications, such as checking their status
 - to book the inspections those permits need, at the time an owner approves, on the agency's website with your saved login or by the agency's phone or email
+- if an owner turns on Autopilot, to prepare and submit, without a separate approval of each, the filings within the standing authorization that owner signs, as "Autopilot" below explains
 
-This authority covers only the filings and inspection bookings an owner approves in the app, exactly as approved. Each approval covers that one filing or booking. It covers nothing else. It is not a general power of attorney.
+This authority covers only the filings and inspection bookings an owner approves in the app, exactly as approved, and the filings within an Autopilot authorization an owner has signed and not revoked. Each approval covers that one filing or booking. It covers nothing else. It is not a general power of attorney.
 
 ## How a filing happens
 
@@ -1352,13 +1355,30 @@ This authority covers only the filings and inspection bookings an owner approves
 
 ## Signatures
 
-- You sign every application yourself. Placetta places your signature only on the form you signed and approved.
-- Placetta never signs your name, and never signs or makes a statement, affidavit or certification for you, including any made under penalty of perjury.
+- You sign every application yourself. Placetta places your signature only on the form you signed and approved, or, under Autopilot, a signature an owner adopted on a form that section allows, as "Autopilot" below explains.
+- Apart from placing a signature an owner adopted that way, Placetta never signs your name, and never signs or makes a statement, affidavit or certification for you, including any made under penalty of perjury.
 - If an agency website asks for a certification or attestation in your name that you have not signed, Placetta stops and asks you to complete it.
+
+## Autopilot
+
+Autopilot is optional. It lets an owner give once, for a set of filings, the approval they would otherwise give for each one.
+
+- How an owner grants it: in the app, by typing their full name, choosing whether that typed name or a drawn signature is their signature, and ticking the box that says they agree to this section and have authority to sign for the business. We record who signed, when, from which IP address and browser, and which version of this authorization they were shown, and keep that record in your audit trail.
+- What it covers: only the stores, the agencies and the filing types the owner ticks, and only a filing whose agency fee is known and is within both the per-filing cap and the monthly cap the owner sets. It covers nothing else, and it never covers a payment.
+- How long it lasts: 12 months from signing, unless an owner revokes it sooner. When it ends, every filing waits for an owner's approval again.
+- Checks first: Placetta submits a filing under Autopilot only after it passes every automated check: every line filled and checked, no Social Security, ITIN or passport number, the agency that takes that form, a fee within both caps, a way of sending it that Placetta has verified, and, for the first filings of each form, a check by the Placetta team. A filing that fails any check waits for an owner, with the reason shown.
+- You are told about each one: every filing under Autopilot is recorded in your audit trail and sent to the owners as a "Filed for you" update. Until it leaves Placetta, you can undo it from the filing. Once it has reached the agency, Placetta cannot recall it; withdrawing it is up to the agency.
+- Signatures: the signature the owner adopts is kept encrypted. Placetta places it only on a form whose agency says on its own page that it accepts an electronic signature, and only where the signature does not declare, certify, affirm or swear to anything. **A statement made under penalty of perjury, and any other declaration, certification or attestation, is the signer's own act: Autopilot never makes it for you. You sign each such form yourself, and a form that needs a handwritten signature always comes to you as a packet to sign.**
+- Fees: you still pay every government fee yourself, directly to the agency. Autopilot does not let Placetta pay, enter a card or bank number, or agree to a charge for you. When an agency bills after it receives a filing, the bill comes to you.
+- Agency accounts and verification: Placetta never creates an account on an agency's website for you, with or without Autopilot. Where an agency's website needs your own login, you save it once. When a website asks for a CAPTCHA or an identity check, Placetta does not answer it; it stops, as it does for any filing.
+- Two owners: if your business rules require two owners to approve a filing, Autopilot does not replace either approval.
+- Revoking it: any owner can turn Autopilot off in Settings, in one tap, or by emailing support@placetta.com from the email address on their account. It ends when we receive it, and Placetta stops every filing under it that has not yet left Placetta.
+
+By signing Autopilot, the owner confirms, for each filing it covers, what "What you confirm" below says, to the extent the owner can confirm it in advance, and agrees to keep the business's information in the app true and up to date so the filings made from it stay accurate.
 
 ## What we never do
 
-- We never submit an application you have not approved in the app.
+- We never submit an application you have not approved in the app, except a filing within an Autopilot authorization an owner signed and has not revoked.
 - We never pay government fees. You pay each agency directly, using the payment link we send you.
 - We never appear in person for you where an agency requires you to. You do that yourself.
 - We never create an agency account in your name.
@@ -1378,7 +1398,7 @@ By granting this authorization, and each time you approve a filing, you confirm 
 
 ## Agency portal logins
 
-If you save logins for agency websites, they are encrypted in a vault. Placetta's filing software, and our filing team when it takes over, open them only to submit a filing or book an inspection an owner approved, and every opening is recorded in your audit trail. The software types the login itself; the AI model never sees the password. When an agency website asks for a CAPTCHA or an identity check, Placetta stops and asks you to complete it.
+If you save logins for agency websites, they are encrypted in a vault. Placetta's filing software, and our filing team when it takes over, open them only to submit a filing or book an inspection an owner approved, or a filing within an Autopilot authorization, and every opening is recorded in your audit trail. The software types the login itself; the AI model never sees the password. When an agency website asks for a CAPTCHA or an identity check, Placetta stops and asks you to complete it.
 
 ## Agencies decide
 
@@ -1406,8 +1426,9 @@ const AUTH_ZH = `生效日期：${UPDATED}。
 - 代表您提交经您批准的申请，方式包括通过您连接的邮箱发送邮件、发送传真、寄送挂号信，或在机构网站上提交
 - 就这些申请与机构跟进，例如查询办理状态
 - 在所有者批准的时间，为这些许可预约所需的检查，方式为使用您保存的登录信息在机构网站上预约，或通过机构的电话或邮件预约
+- 如所有者开启“自动驾驶”，在该所有者签署的长期授权范围内准备并提交申报，无需逐项另行批准，详见下文“自动驾驶”
 
-本授权仅涵盖所有者在应用中批准的申报和检查预约，且以批准的内容为准。每次批准只涵盖该项申报或预约。本授权不涵盖其他任何事项，也不是一般性的授权委托书。
+本授权仅涵盖所有者在应用中批准的申报和检查预约（以批准的内容为准），以及所有者已签署且未撤销的自动驾驶授权范围内的申报。每次批准只涵盖该项申报或预约。本授权不涵盖其他任何事项，也不是一般性的授权委托书。
 
 ## 申报流程
 
@@ -1420,13 +1441,30 @@ const AUTH_ZH = `生效日期：${UPDATED}。
 
 ## 签名
 
-- 每一份申请都由您本人签署。快哉只会将您的签名用于您签署并批准的那份表格。
-- 快哉绝不代您签名，也绝不代您签署或作出任何声明、宣誓书或证明，包括任何以伪证罪处罚为前提作出的声明。
+- 每一份申请都由您本人签署。快哉只会将您的签名用于您签署并批准的那份表格；在自动驾驶下，也会将所有者采用的签名用于该部分允许的表格，详见下文“自动驾驶”。
+- 除按上述方式使用所有者采用的签名外，快哉绝不代您签名，也绝不代您签署或作出任何声明、宣誓书或证明，包括任何以伪证罪处罚为前提作出的声明。
 - 如机构网站要求以您的名义作出您未签署的证明或声明，快哉会暂停并请您本人完成。
+
+## 自动驾驶
+
+自动驾驶为可选功能。它让所有者对一组申报一次性给出原本需要逐项给出的批准。
+
+- 所有者如何授予：在应用中输入本人全名，选择以打字姓名或手写签名作为签名，并勾选同意本节且有权代表企业签署的方框。我们会记录签署人、签署时间、所用的 IP 地址和浏览器，以及签署人所看到的本授权书版本，并将该记录保存在您的审计记录中。
+- 涵盖范围：仅限所有者勾选的门店、机构和申报类型，且仅限机构费用已确定、并同时不超过所有者设定的单项上限和每月上限的申报。不涵盖其他任何事项，也绝不涵盖付款。
+- 有效期：自签署起 12 个月，所有者提前撤销的除外。到期后，每项申报都重新等待所有者批准。
+- 先行核对：快哉只有在申报通过全部自动核对后，才会在自动驾驶下提交：每一栏都已填写并核对，不含社会安全号码、ITIN 或护照号码，提交给受理该表格的机构，费用在两项上限之内，采用快哉核实过的提交方式，并且每种表格的前几份申报经快哉团队核对。任何一项核对未通过的申报，都会等待所有者处理，并说明原因。
+- 每一项都会告知您：自动驾驶下的每项申报都会记入您的审计记录，并以“已为您提交”的通知发给所有者。在申报发出快哉之前，您可以在该申报中撤销。申报送达机构后，快哉无法撤回；能否撤回由机构决定。
+- 签名：所有者采用的签名会加密保存。快哉只会在机构官方页面表明接受电子签名、且签名不构成任何声明、证明、确认或宣誓的表格上使用它。**以伪证罪处罚为前提作出的陈述，以及任何其他声明、证明或确认，都是签署人本人的行为：自动驾驶绝不会代您作出。这类表格每一份都由您本人签署，需要手写签名的表格也一律以材料包形式交由您签署。**
+- 费用：所有政府规费仍由您本人直接支付给机构。自动驾驶不允许快哉付款、输入银行卡号或银行账号，或代您同意任何收费。机构在收到申报后才开账单的，账单由您支付。
+- 机构账户与核验：无论是否开启自动驾驶，快哉都绝不以您的名义在机构网站上开设账户。机构网站需要您本人登录的，由您保存一次登录信息。机构网站要求验证码（CAPTCHA）或身份核验时，快哉不会作答，而是像处理任何申报一样暂停。
+- 两位所有者：如您的业务规则要求两位所有者批准某项申报，自动驾驶不能替代其中任何一位的批准。
+- 撤销：任何一位所有者都可以在“设置”中一键关闭自动驾驶，或用其账户邮箱发邮件至 support@placetta.com。撤销自我们收到时生效，快哉会停止该授权下所有尚未发出快哉的申报。
+
+签署自动驾驶即表示，所有者在能够事先确认的范围内，就其涵盖的每项申报确认下文“您确认的事项”所述内容，并同意保持应用中企业信息真实、最新，以确保据此作出的申报准确。
 
 ## 我们绝不会做的事
 
-- 绝不提交未经您在应用中批准的申请。
+- 绝不提交未经您在应用中批准的申请，但所有者已签署且未撤销的自动驾驶授权范围内的申报除外。
 - 绝不代付政府规费。您通过我们发送的付款链接，直接向各机构付款。
 - 机构要求您本人到场时，绝不代您到场。这些步骤由您自行完成。
 - 绝不以您的名义开设机构账户。
@@ -1446,7 +1484,7 @@ const AUTH_ZH = `生效日期：${UPDATED}。
 
 ## 机构网站登录信息
 
-如您保存了机构网站的登录信息，这些信息会加密存放在保险库中。快哉的申报软件，以及接手处理时的申报团队，只会在提交所有者已批准的申报或预约所有者已批准的检查时打开这些信息，每次打开都会记入您的审计记录。登录信息由软件自行输入，AI 模型看不到密码。如机构网站要求验证码（CAPTCHA）或身份核验，快哉会暂停并请您本人完成。
+如您保存了机构网站的登录信息，这些信息会加密存放在保险库中。快哉的申报软件，以及接手处理时的申报团队，只会在提交所有者已批准的申报、自动驾驶授权范围内的申报，或预约所有者已批准的检查时打开这些信息，每次打开都会记入您的审计记录。登录信息由软件自行输入，AI 模型看不到密码。如机构网站要求验证码（CAPTCHA）或身份核验，快哉会暂停并请您本人完成。
 
 ## 审批由机构决定
 
@@ -1484,7 +1522,7 @@ Odelia researches requirements on official government websites and cites the age
 
 ## What it never does on its own
 
-Odelia never files, pays or sends anything by herself. Every filing and every message needs your approval in the app.
+Odelia never pays or sends anything by herself, and never files anything without an owner's approval: the approval of that filing in the app, or, if an owner turns on Autopilot, the standing authorization they sign, within its limits (see the Filing Authorization). Every message needs your approval in the app.
 
 After you approve a filing, Placetta checks it against the agency's current requirements before submitting it. You always pay government fees yourself, directly to the agency.
 
@@ -1541,7 +1579,7 @@ Odelia 在政府官方网站上查询相关要求，并注明机构来源，方�
 
 ## 未经批准，它不会做什么
 
-Odelia 不会自行提交、付款或发送任何内容。每一份申请、每一条消息，都须经您在应用中批准。
+Odelia 不会自行付款或发送任何内容；未经所有者批准，也不会提交任何申报。所谓批准，是指在应用中对该项申报的批准，或所有者开启自动驾驶时签署的长期授权（以其范围为限，详见《申报授权书》）。每一条消息都须经您在应用中批准。
 
 您批准申请后，快哉会先对照机构的最新要求进行核对，再行提交。政府规费始终由您本人直接支付给机构。
 

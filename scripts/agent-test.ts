@@ -28,6 +28,8 @@ import { APPEALS, appealFor as appealForRule, BUSINESS_LICENSE_ROUTES, counselPa
 import { appealLetter as caseLetter, checkAnswer, datesFor, hearingScript, mayFile, PARTNER, questionsFor, SAFETY_DAYS, type AppealCase } from "../src/appeals/flow";
 import { emailsIn } from "../src/guard";
 import { BUILTIN } from "../src/skills";
+import { autopilotTests, grant as autopilotGrant } from "./autopilot-test";
+import { putGrant } from "../src/autopilot";
 import { lessonKeys, lessonsBrief, parseDistill, rank, runEvidence, score, scrubLesson, worthLearning, type Lesson } from "../src/learning";
 import { inDays } from "../src/time";
 import { B, same } from "../src/bi";
@@ -3271,6 +3273,24 @@ citeTests(ok, eq);
 reviewFixTests(ok, eq);
 filingProgressTests(ok, eq);
 await initiativeTests(ok, eq);
+await autopilotTests(ok, eq);
+
+{
+  console.log("\n# Autopilot end to end: the server's loop files a complete seller's permit without a tap, and not a pricey one");
+  const off = formById("ca-cdtfa")!;
+  const sellerApp = (fee: number) => app("sp", "draft", { official: "ca-cdtfa", agency: off.agency, level: "state", fees: [{ label: same("Fee"), amount: fee }], source: { label: "cdtfa.ca.gov", url: off.info },
+    fields: [{ id: "n", label: same("Business name"), value: "Lucky Leaf Tea LLC" }, { id: "core-owner", label: same("Owner or responsible person"), value: "Mei Chen" }, { id: "core-address", label: same("Business location address"), value: "100 N First St, San Jose, CA 95113" }] });
+  const signed = (fee: number) => putGrant(autopilotGrant({ scope: { stores: ["business"], agencies: [off.agency.en], forms: ["ca-cdtfa"] } }))(workspace({ apps: [sellerApp(fee)] }));
+  const run = (fee: number) => agent({ ws: signed(fee), svc: account().svc, prompt: "File the seller's permit.", script: [() => ask(["request_filing_approval", { application_id: "sp" }]), () => say("Filed for you under Autopilot.")] });
+  const r = await run(0);
+  const o = callNamed(r, "request_filing_approval")[0];
+  ok(o?.parsed?.filed_under_autopilot === true && r.w.approvals.some(a => a.app === "sp" && a.autopilot?.grant === "g1"), "the card is marked to be filed under the grant, after the run (agent-run files it)", o?.out);
+  const r2 = await run(900);
+  const o2 = callNamed(r2, "request_filing_approval")[0];
+  ok(Array.isArray(o2?.parsed?.waits_for_owner) && r2.w.approvals.some(a => a.app === "sp" && !a.autopilot && /per-filing cap/.test(a.autopilotWhy?.[0]?.en ?? "")), "a $900 fee waits for the owner, with why", o2?.out);
+  const sms = await agent({ ws: signed(0), svc: account().svc, channel: "sms", sender: "+14085550100", prompt: "File the seller's permit.", script: [() => ask(["request_filing_approval", { application_id: "sp" }]), () => say("It's on a card.")] });
+  ok(!sms.w.approvals.some(a => a.autopilot), "asked by text: never filed on its own");
+}
 
 {
   console.log("\n# ask_specialist: Odelia asks a person instead of guessing, and the job waits on them");
