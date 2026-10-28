@@ -17,7 +17,8 @@ export type PageState = {
 export type Stop = { reason: "captcha" | "identity" | "payment" | "secret_number" | "code" | "account"; en: string; zh: string };
 
 /** A page that makes a new account on the agency's site: a password typed twice, or a registration heading with a
- *  password box. Placetta never creates an account for the owner; it uses only the login they saved. */
+ *  password box. Such a page goes to the owner, except while the worker makes the business's own account under its agent
+ *  authority (account.ts, run.ts makeAccount); Placetta never makes a person's own identity account (ID.me, Login.gov). */
 const REGISTER = /\b(create (an |your )?account|register (an |for an )?account|new (user|account) registration|sign ?up)\b/i;
 export function makesAccount(s: PageState): boolean {
   const pw = s.controls.filter((c) => c.type === "password").length;
@@ -53,7 +54,7 @@ export function mustStop(s: PageState): Stop | null {
     return { reason: "captcha", en: "The agency's site is asking for a CAPTCHA. Open the live view and complete it, then tap \"I've done it\".", zh: "机构网站要求完成验证码。请打开实时画面完成后点击“我已完成”。" };
   }
   if (makesAccount(s)) {
-    return { reason: "account", en: "The agency's site wants a new account made. Placetta never creates one for you. If you have an account, save its login in Settings; if not, open the live view and create it yourself, then tap \"I've done it\".", zh: "机构网站要求新建账户。快哉从不代您创建账户。如您已有账户，请在设置中保存登录信息；如没有，请打开实时画面自行创建后点击“我已完成”。" };
+    return { reason: "account", en: "The agency's site wants a new account made, and Odelia can't make this one for the business. If you have an account, save its login in Settings; if not, open the live view and create it yourself, then tap \"I've done it\".", zh: "机构网站要求新建账户，而 Odelia 无法为企业开设这个账户。如您已有账户，请在设置中保存登录信息；如没有，请打开实时画面自行创建后点击“我已完成”。" };
   }
   if (ID_HOST.test(host) || s.frames.some((f) => /id\.me|login\.gov/i.test(f))) {
     return { reason: "identity", en: "The agency needs you to verify your identity. Open the live view and sign in, then tap \"I've done it\".", zh: "机构需要您验证身份。请打开实时画面登录后点击“我已完成”。" };

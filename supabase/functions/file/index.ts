@@ -33,7 +33,7 @@ import { DEST, destFor, staleDestinations, TEAM_ONLY, type Dest } from "./destin
 import { sendEmail as sendSystemEmail, systemMailReady } from "../_shared/email.ts";
 import { suppressedIn } from "../_shared/suppression.ts";
 import { asAgent,
-  afterHold, askedToResubmit, type Bi, canFaxSignedFor, CHANNEL_SAID, check, DUPLICATE_REF, emailFor, envFrom, fallback, faxFailures, faxFile, faxTo, feeBlocks, type Filing,
+  afterHold, askedToResubmit, type Bi, canFaxSignedFor, canMakeAccount, CHANNEL_SAID, check, DUPLICATE_REF, emailFor, envFrom, fallback, faxFailures, faxFile, faxTo, feeBlocks, type Filing,
   handBackDue, handoffPacket, hasLoginFor, holds, isForeign, type LogEntry, mailOutcome, mailTo, OWNER_REF, pick, type Refusal, refusalOf, sentByYou, signedCopy,
   TEACH_REFUSED, teachRefusal, teamApproved, whyYours, YOURS_REF, selfFileScope, workerOn, workerState,
   type Beat, rerouteLead, wakeable, wakeConfig, wakeMs, wakePlan, waitsOnWorker, WORKER_ASLEEP,
@@ -204,11 +204,17 @@ async function facts(f: Filing, d: Dest | undefined) {
     admin.from("integrations").select("kind").eq("workspace_id", f.workspace_id).in("kind", ["gmail", "outlook_mail", "mailbox"]).eq("status", "connected"),
   ]);
   if (logins.error || mail.error) throw new Error("workspace lookup failed");
-  return {
-    // The same host, and on a host many agencies share (Accela, BTExpress), the same agency's path.
-    hasLogin: hasLoginFor((logins.data ?? []).map((r) => r.url as string), d),
-    mailConnected: (mail.data ?? []).length > 0,
-  };
+  // The same host, and on a host many agencies share (Accela, BTExpress), the same agency's path.
+  const hasLogin = hasLoginFor((logins.data ?? []).map((r) => r.url as string), d);
+  // No saved login: may Odelia make the business's own account first? (the live agent packet, with account making
+  // switched on: 20261105090000_agent_accounts.sql account_authority). A database without it yet says no.
+  let authority = false;
+  if (d?.portal && !hasLogin && !d.noLogin) {
+    const { data, error } = await admin.rpc("account_authority", { p_ws: f.workspace_id });
+    if (error && error.code !== "PGRST202") console.error("account authority:", error.code ?? "");
+    authority = !error && typeof data === "string" && data.length > 0;
+  }
+  return { hasLogin, mailConnected: (mail.data ?? []).length > 0, makesAccount: canMakeAccount(d, authority) };
 }
 
 /** Filings of this form Placetta already submitted itself: the two-key period covers the first FILER_TWO_KEY. */

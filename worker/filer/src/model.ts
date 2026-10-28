@@ -7,7 +7,9 @@ import type { LabelIn, LabelOut } from "./teach.ts";
 import type { Filing } from "./types.ts";
 
 export type ToolCall = { name: string; input: Record<string, unknown> };
-export type StepInput = { filing: Filing; agency: string; state: PageState; recent: string[]; note?: string; guide?: string[] };
+/** account: while the worker makes the business's account on the site (account.ts accountNote): what to do, with no
+ *  password and nothing from the inbox. */
+export type StepInput = { filing: Filing; agency: string; state: PageState; recent: string[]; note?: string; guide?: string[]; account?: string };
 export interface Model { calls: number; next(i: StepInput): Promise<ToolCall> }
 
 const str = { type: "string" } as const;
@@ -21,6 +23,7 @@ export const TOOLS = [
   { name: "wait", description: "Wait for the page (at most 10000 ms).", input_schema: { type: "object", properties: { ms: { type: "number" } }, required: ["ms"] } },
   { name: "need_person", description: "Stop and ask the customer: anything you can't do from the approved values, any question the form asks that the values don't answer.", input_schema: { type: "object", properties: { reason: str, message: str }, required: ["reason", "message"] } },
   { name: "done", description: "The agency confirmed the submission on this page.", input_schema: { type: "object", properties: { confirmation_number: str, summary: str }, required: ["confirmation_number", "summary"] } },
+  { name: "account", description: "Only while making the business's account on the site: verify when the site says it sent an email or a code; created when the account is made or you are signed in.", input_schema: { type: "object", properties: { status: { type: "string", enum: ["verify", "created"] } }, required: ["status"] } },
 ];
 
 export function prompt(i: StepInput): string {
@@ -42,6 +45,7 @@ export function prompt(i: StepInput): string {
     "", `Your last steps: ${i.recent.slice(-10).join("; ") || "none"}`,
     ...(i.note ? ["", `Note: ${i.note}`] : []),
     ...(i.guide?.length ? ["", ...i.guide] : []),
+    ...(i.account ? ["", i.account] : []),
     "", "Choose exactly one tool. Fill every field on the page before continuing. Call done only when the agency shows a confirmation.",
   ].join("\n");
 }

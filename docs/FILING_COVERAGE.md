@@ -35,6 +35,18 @@ With every channel switched on, a saved login for each portal and a connected ma
 
 Of the 336 forms with the team, 18 are insurance the owner buys from an insurer (workers' compensation), which the plan keeps as the owner's step: nothing is filed, so 318 are forms the team files.
 
+## Portal logins
+
+Of the 158 forms filed on an agency portal, who makes the account when the business has none saved (`supabase/functions/file/accounts.ts`). Odelia makes a business account under the business's agent authority, with its inbox at Placetta, and saves the login (`worker/filer/src/account.ts`).
+
+| Account | Forms |
+|---|---:|
+| None needed: the portal files without one | 12 |
+| Odelia makes it: the agency's page says you make your own | 21 |
+| Odelia makes it: the platform's public sign-up (the team confirms on the first run) | 23 |
+| The owner's own identity (ID.me, Login.gov): stays with the owner | 2 |
+| Not read yet: the Placetta team is asked | 100 |
+
 ## Forms Placetta can route
 
 | Place | Form | Channels | First try | Signature | Fee | Source (checked) |

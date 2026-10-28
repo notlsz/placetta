@@ -28,6 +28,8 @@ import { attachReply, type ChaseRow, fromAsked, refOf, replyPrompt } from "../_s
 import { scoreText } from "../_shared/injection.ts";
 import { wsTagOf } from "../_shared/carry.ts";
 import { agencyMail } from "./agency.ts";
+import { inboxTokenOf } from "../_shared/agent_inbox.ts";
+import { inboxRow } from "../_shared/agent_inbox_in.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
@@ -77,8 +79,26 @@ const agencyStart = async (ws: string, prompt: string, title: { en: string; zh: 
 const systemMail = (m: InMail) => /^(mailer-daemon|postmaster)@/.test(m.from) || odeliaAddresses(env).includes(m.from)
   || /auto-replied/.test((m.headers["auto-submitted"] ?? []).join(" ").toLowerCase()) || !!m.headers["x-autoreply"] || !!m.headers["x-autorespond"];
 
+/** Mail to a business's own inbox at Placetta (odelia+<token>@, the email on accounts Odelia makes on agency sites):
+ *  kept for the portal worker waiting on it (sender, subject, links, codes), and nothing else. Nobody gets mail back. */
+async function agentInbox(m: InMail, token: string) {
+  const verdict = await senderVerified(m).catch(() => ({ ok: false, why: "error" }));
+  const { data, error } = await admin.rpc("agent_inbox_receive", inboxRow(m, token, verdict.ok));
+  if (error) { console.error("agent inbox", error.code ?? ""); return { ok: false, skipped: "agent_inbox_failed" }; }
+  return data === true ? { ok: true, inbox: true } : { ok: true, skipped: "unknown_inbox" };
+}
+
 export async function received(m: InMail) {
   const mine = odeliaAddresses(env);
+  // The business's own inbox (odelia+<token>@, the email on agency accounts Odelia makes): kept for the portal worker
+  // waiting on a verification (agent_inbox.ts). An agency also writes there about a filing, so the same mail then goes
+  // through the agency reader (agency.ts). A workspace tag (odelia+w<12 hex>@, carry.ts) is never an inbox token.
+  const token = inboxTokenOf(m.to, mine);
+  if (token && !/^w[0-9a-f]{12}$/.test(token)) {
+    const kept = await agentInbox(m, token);
+    if (!systemMail(m)) await agencyMail(admin, m, { odelia: mine, start: agencyStart, env }).catch((e) => { console.error("agency mail", String(e).slice(0, 200)); return null; });
+    return kept;
+  }
   // Odelia's address, or a workspace's own (odelia+w<id>@..., for agencies)
   if (!(m.to.some((t) => mine.includes(t)) || wsTagOf(m.to, mine))) return { ok: true, skipped: "not_for_odelia" };
   if (automated(m)) {

@@ -147,7 +147,9 @@ test("the model reads the steps with the warning that they aren't verified yet",
 });
 
 test("the worker gets each destination's tenant path, other hosts and start page", () => {
-  assert.deepEqual(routeOf("dal-co"), { tenant: "/dallastx", alsoOn: undefined, start: "https://aca-prod.accela.com/dallastx" });
+  assert.deepEqual(routeOf("dal-co"), { tenant: "/dallastx", alsoOn: undefined, start: "https://aca-prod.accela.com/dallastx", noLogin: undefined, account: "business" });
+  assert.equal(routeOf("hc-business-tax")?.noLogin, true);
+  assert.equal(routeOf("irs-8821")?.account, "individual", "IRS e-Services is the owner's own ID.me sign-in");
   assert.deepEqual(routeOf("hc-business-tax")?.alsoOn, ["hillsborough.county-taxes.com"]);
   assert.equal(routeOf("irs-ss4"), null, "no portal, no route");
 });

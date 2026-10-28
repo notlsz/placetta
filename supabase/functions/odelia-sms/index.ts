@@ -34,6 +34,7 @@ import { parseWhatsApp, subscribeChallenge, verifyWhatsApp, waMedia, waMediaHost
 import { hashLine, linqLineHealth, linqLines, linqReady, linqTyping, parseLinq, verifyLinq, type LinqEvent } from "../_shared/linq.ts";
 import { sendStartReminders, startForStranger, textStartOn } from "../_shared/text_start_db.ts";
 import { publicStart } from "../_shared/text_start.ts";
+import { codeInText } from "../_shared/agent_inbox.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
@@ -169,6 +170,17 @@ async function inbound(p: Inbound, logId: number, via: Via = {}) {
   if (!ws) { await textUser(admin, env, { link, segments: [SAY.noWorkspace[lang]], kind: "system" }); return; }
   await admin.from("odelia_messages").update({ workspace_id: ws.id }).eq("id", logId);
 
+  // A code an agency texted the owner for an account Odelia is making for the business (the one tap: forward it here).
+  // Kept for the waiting run only when one of the workspace's accounts is waiting on a code; anything else goes on as usual.
+  const code = codeInText(text);
+  if (code) {
+    const { data: took } = await admin.rpc("agent_inbox_owner_code", { p_user: link.user_id, p_ws: ws.id, p_code: code, p_provider_id: `sms:${logId}` });
+    if (took === true) {
+      await admin.from("odelia_messages").update({ body: lang === "zh" ? "转发了机构的验证码" : "Forwarded the agency's code" }).eq("id", logId);
+      await textUser(admin, env, { link, workspace_id: ws.id, segments: [lang === "zh" ? "收到，Odelia 正在输入验证码。" : "Got it. Odelia is entering the code now."], kind: "system" });
+      return;
+    }
+  }
   const target = switchTarget(text);
   if (target && all.length) {
     const hit = pickWorkspace(all, target);

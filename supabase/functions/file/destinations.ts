@@ -30,6 +30,9 @@ export type Dest = {
   alsoOn?: string[];                                // other hosts the portal's own pages send the browser to (its sign-in
                                                     // service, or the same app under the county's name), as the agency or its guide links them
   noLogin?: boolean;                                // the portal files without an account (the worker opens it with no saved login)
+  account?: "business" | "individual" | "unknown";  // who may make its account, when it differs from its host's row in
+                                                    // accounts.ts PORTAL_ACCOUNTS (business: Odelia makes it under agent
+                                                    // authority; individual: a person's ID.me or Login.gov; unknown: ask the team)
   faxQuality?: "high" | "very_high";                // when the agency asks for a finer fax (the IRS asks for 300 DPI or more)
   owner?: OwnerRoute;                               // only the business can submit it: an owner packet, never a send
   notReady?: string;                                // why automatic filing must not be switched on yet (an unconfirmed
@@ -2091,6 +2094,7 @@ export function destinationProblems(dest: Record<string, Dest> = DEST): string[]
     for (const h of d.alsoOn ?? []) if (!isPublicHost(h)) out.push(`${id}: every other host the portal uses must be a public host name`);
     if (d.alsoOn?.length && !d.portal) out.push(`${id}: other portal hosts without a portal`);
     if (d.payment !== undefined && !PAYMENTS.has(d.payment)) out.push(`${id}: payment must be one of ${[...PAYMENTS].join(", ")}`);
+    if (d.account !== undefined && (!d.portal || d.noLogin || !["business", "individual", "unknown"].includes(d.account))) out.push(`${id}: account is for a portal that needs a sign-in (business, individual or unknown)`);
     if (d.onBehalf === "authorization" && !d.authorization?.trim()) out.push(`${id}: name the authorization the agency asks for`);
     if (d.notReady !== undefined && d.notReady.trim().length < 10) out.push(`${id}: say why it isn't ready for automatic filing`);
     if (d.attach && (!Array.isArray(d.attach) || d.attach.some((a) => !a.trim()))) out.push(`${id}: attachments must be named`);

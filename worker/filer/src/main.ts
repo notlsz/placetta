@@ -7,6 +7,7 @@
 // (wake.ts); it drains the queue and idles, and the plan puts it to sleep again after 15 minutes with no request. While
 // a run is open it asks for its own /healthz every few minutes, so the plan doesn't put it to sleep mid-filing.
 import { DEST } from "../../../supabase/functions/file/destinations.ts";
+import { accountOf } from "../../../supabase/functions/file/accounts.ts";
 import { defaultDeps, launcher, opener } from "./browsers.ts";
 import { checkEnv, missingLines } from "./env.ts";
 import { LiveViews } from "./live.ts";
@@ -24,7 +25,7 @@ import { AnthropicStatusModel, runStatusCheck, sessionPage, type StatusModel, ty
 /** The destination's tenant path, other hosts and start page, from destinations.ts like its host. */
 export const routeOf = (id: string): Route | null => {
   const d = DEST[id];
-  return d?.portal ? { tenant: d.tenant, alsoOn: d.alsoOn, start: d.portalUrl } : null;
+  return d?.portal ? { tenant: d.tenant, alsoOn: d.alsoOn, start: d.portalUrl, noLogin: d.noLogin, account: accountOf(d) } : null;
 };
 
 /** A new browser session for one run, never reused (browsers.ts): a new Steel or Browserbase session (no saved profile
@@ -59,6 +60,10 @@ export const settings = () => ({
   // unverified one stops at the agency's review page for the team's check, however many filings the agency has had
   // (run.ts beforeSubmit). FILER_ALLOW_UNVERIFIED=0 sends those filings to the team instead, as before.
   allowUnverified: process.env.FILER_ALLOW_UNVERIFIED !== "0",
+  // Making the business's account (account.ts): how long to wait for the agency's verification email, and Odelia's
+  // number the owner forwards a texted code to (the same ODELIA_NUMBER odelia-sms answers on), when there is one.
+  accountMailMs: Math.min(30, Math.max(1, Number(process.env.FILER_ACCOUNT_MAIL_MINUTES ?? "10") || 10)) * 60_000,
+  odeliaNumber: /^\+[1-9]\d{6,14}$/.test(process.env.ODELIA_NUMBER ?? "") ? process.env.ODELIA_NUMBER : undefined,
 });
 
 /** How many filings run side by side in this container (FILER_CONCURRENCY, 1 to 4, default 1). Each slot has its own
