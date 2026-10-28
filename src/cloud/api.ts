@@ -68,6 +68,9 @@ export type FilingPayload = {
   official?: string; pdf_path?: string;                          // the official form id and the filled (signed) PDF
   signature?: { name: string; title?: string; signed_at: string; kind: "typed" | "drawn" };
   version?: number; answers_hash?: string;                       // the filled form's version it files, and its answers' fingerprint
+  // the agency's expedite the owner chose on the card (src/expedite.ts): what the team asks for, its time, the agency's
+  // own fee (paid to the agency, never marked up; null when the agency sets it) and the page that says so
+  expedite?: { id: string; label: Bi; turnaround: Bi; fee_usd: number | null; how?: "form" | "team"; source: string };
 };
 export type QueueRow = Filing & { business: string; approver_email: string | null; assignee_email: string | null; assigned_to: string | null };
 export type Billing = {

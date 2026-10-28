@@ -6,7 +6,8 @@ import { B, type Cert, type Store, type Workspace } from "./model";
 import { countyOf, stateCode, cityName } from "./counties";
 import { FWW_SOURCE, FWW_THRESHOLD, GRADES_SOURCE, readiness, todayLogs, usLocations, valueOf, type Readiness } from "./stores";
 import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn, inDays } from "./time";
-import { basisLine, openingLine, openingPath, type Evidence } from "./smart";
+import { basisLine, estimateSay, openingLine, openingPath, type Evidence } from "./smart";
+import { EstimateDate, HingeLine } from "./OpeningEstimate";
 import { useEvidence } from "./evidence";
 import { I, Menu, Pill, StatusChip } from "./ui";
 import { saveFile } from "./files";
@@ -99,7 +100,7 @@ function StoreCard({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
         <Ring score={r.score} band={r.band} />
         <div className="store-name">
           <b>{b(s.name)}</b>
-          <span>{b(r.label)}{s.stage === "opening" && s.projectedOpen ? (lang === "zh" ? `，预计 ${fmtDay(s.projectedOpen, lang, true)} 开业` : `. Opening ${fmtDay(s.projectedOpen, lang, true)}`) : ""}</span>
+          <span>{b(r.label)}{s.stage === "opening" && s.projectedOpen ? (lang === "zh" ? `，预计 ${b(estimateSay(s.projectedOpen, p?.range))} 开业` : `. Opening ${b(estimateSay(s.projectedOpen, p?.range))}`) : ""}</span>
           {line && p && p.verdict !== "not_mapped" && <span className={"opening-line " + p.verdict}>{b(line)}</span>}
         </div>
         <Grade s={s} />
@@ -245,8 +246,10 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
       </header>
       {(() => { const { p, line } = withPath(s, ws, ev); const basis = p ? basisLine(p) : null; return line && p && p.verdict !== "not_mapped" ? (
         <p className={"opening-line " + p.verdict}>
+          {p.landing && <span className="opening-date"><span className="oe-k">{lang === "zh" ? "预计开业" : "Opening"}</span> <EstimateDate date={p.landing} range={p.range} lang={lang} /></span>}
           {b(line)}
           {p.blocker && (p.verdict === "late" || p.verdict === "tight") && <> <button type="button" className="pill quiet sm" disabled={busy} onClick={() => ask(lang === "zh" ? `${s.name.zh}进度落后，怎样追回？先处理${p.blocker!.name.zh}。` : `${s.name.en} is behind. How do we get it back on schedule? Start with the ${p.blocker!.name.en}.`)}>{lang === "zh" ? "让 Odelia 追回进度" : "Have Odelia catch it up"}</button></>}
+          <HingeLine hinge={p.hinge} lang={lang} onOpen={id => openApp(id, "progress")} className="opening-basis" />
           {basis && <small className="opening-basis">{b(basis)}</small>}
         </p>) : null; })()}
 

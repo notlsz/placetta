@@ -1,6 +1,7 @@
 import TIMES from "./times.json";
 import { B, type Bi } from "../bi";
 import type { Level } from "../model";
+import type { Expedite } from "./expedite";
 import { WORLD_FORMS, unaccent, worldPlaces } from "./world";
 import { LOCAL_US } from "./local-us";
 import { BEACHHEAD } from "./beachhead";
@@ -60,6 +61,9 @@ export type OfficialForm = {
   takes?: Bi;
   takesDays?: number | null;   // the days a file-by date counts back, when the time came from research (null: none)
   takesSource?: string;       // the agency page that states that time, and when we read it
+  /** Paid (or free) ways the agency offers to go faster, each with its fee, turnaround and official source
+      (src/forms/expedite.ts: the shared shape, and the table for forms without their own list). */
+  expedite?: Expedite[];
   renews?: Bi;
   fields: FormField[];        // as printed on the form or asked by the portal
   attach?: Bi[];

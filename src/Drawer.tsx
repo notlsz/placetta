@@ -27,6 +27,8 @@ import { Working } from "./Bot";
 import { AllowRule } from "./AllowRule";
 import { FilledStatus, OnlineAnswers } from "./FilledForm";
 import { fileable } from "./forms/versions";
+import { ExpeditePick, StepTime } from "./ExpeditePick";
+import { expediteStep } from "./expedite";
 import { Corrections } from "./PlanCorrections";
 /* Team review: the permit's comment thread and who it's assigned to (src/Comments.tsx) */
 import { AssignPicker, CommentThread, useItemThread, useTeam } from "./Comments";
@@ -209,6 +211,8 @@ function Progress({ a }: { a: Application }) {
           </li>
         ))}
       </ol>
+      <StepTime a={a} />
+      <ExpeditePick a={a} />
       {f && f.status !== "requested" && <StatusTimeline a={a} filing={f} />}
       {f?.agent_state === "needs_you" && <FinishStep f={f} />}
       {f && cloud?.owner && f.channel === "team" && f.status === "submitted" && !f.confirmation_number && <AddConfirmation f={f} />}
@@ -468,7 +472,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
         )}
         <section>
           <h3>{t("ap_does")}</h3>
-          <ol className="does">{a.does.map((d, i) => <li key={i}>{b(d)}</li>)}</ol>
+          <ol className="does">{a.does.map((d, i) => <li key={i}>{b(d)}</li>)}{app && a.kind === "file" && (() => { const x = expediteStep(app); return x ? <li data-expedite-step="">{b(x)}</li> : null; })()}</ol>
         </section>
         <section>
           <h3>{a.kind === "send" ? (zh ? "发送内容（可直接修改）" : "What will be sent (edit it here)") : t("ap_data")}</h3>
@@ -506,6 +510,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
             <SignaturePad onChange={setSig} />
           </section>
         )}
+        {app && a.kind === "file" && <ExpeditePick a={app} />}
         <AllowRule a={a} commit={allow} />
         {app && a.kind === "file" && <FilingChargeSection approvalId={a.id} app={app} />}
         {app && a.kind === "file" && (

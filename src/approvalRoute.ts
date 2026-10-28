@@ -1,6 +1,7 @@
 import { B, type Bi } from "./bi";
 import type { Application, Approval } from "./model";
 import { formById } from "./forms/registry";
+import { expediteOf } from "./forms/expedite";
 import ROUTES from "./forms/filingRoutes.json";
 import STEPS from "./forms/filingSteps.json";
 
@@ -87,7 +88,10 @@ const SAYS_NO_TIME = /^(to be confirmed|待确认)$|doesn'?t publish|未公布|n
 
 /** The agency's time for an application: the registry's published one, else its own estimate; undefined when neither
  *  states a time. */
-export function expectedTime(app?: Pick<Application, "official" | "est">): Bi | undefined {
+export function expectedTime(app?: Pick<Application, "official" | "est"> & { expedite?: string }): Bi | undefined {
+  // the expedite the owner chose, in the agency's words
+  const x = app?.expedite ? expediteOf(app.official).find(o => o.id === app.expedite) : undefined;
+  if (x) return B(`${x.label.en}: ${x.turnaround.en}`, `${x.label.zh}：${x.turnaround.zh}`);
   const f = app?.official ? formById(app.official) : undefined;
   if (f?.takes && !SAYS_NO_TIME.test(f.takes.en)) return f.takes;
   if (app?.est && app.est.en.trim() && !SAYS_NO_TIME.test(app.est.en)) return app.est;
@@ -96,7 +100,7 @@ export function expectedTime(app?: Pick<Application, "official" | "est">): Bi | 
 
 /** What an approval card says under its title about who acts and how long it takes. null: a card with no filing (an
  *  upload is the owner's own step). */
-export function approvalRoute(a: Pick<Approval, "kind">, app?: Pick<Application, "official" | "est">): { who: Bi; time?: Bi; steps?: Bi[] } | null {
+export function approvalRoute(a: Pick<Approval, "kind">, app?: Pick<Application, "official" | "est"> & { expedite?: string }): { who: Bi; time?: Bi; steps?: Bi[] } | null {
   if (a.kind === "file") {
     const steps = personSteps(app);
     return { who: WHO[routeOf(app)], time: expectedTime(app), ...(steps.length ? { steps } : {}) };

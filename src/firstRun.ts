@@ -17,7 +17,7 @@ import { B, type Bi } from "./bi";
 import type { Application, Approval, Workspace } from "./model";
 import { formById } from "./forms/registry";
 import { costToOpen } from "./cost";
-import { workspaceOpening, type Evidence } from "./smart";
+import { workspaceEstimate, type Evidence, type Hinge } from "./smart";
 import { readiness } from "./stores";
 import { checksFor, type Check } from "./controls";
 import { routeOf } from "./approvalRoute";
@@ -51,6 +51,8 @@ export type FirstRun = {
   published: number;         // applications with a published fee
   unpublished: number;       // fees the agency sets or the registry doesn't have: never counted
   opening: string | null;    // the opening date the permits put it at
+  range: { fast: string; slow: string } | null;   // the same chain at the steps' quickest and longest published times
+  hinge: Hinge[];            // the one or two steps the date hinges on, each with its time and source
   ready: { score: number; issued: number; total: number; failing: Check[] } | null;   // the store's "% ready to open"
   filled: number;            // form lines filled from the signup's answers
   first: { approval: Approval; app: Application } | null;   // the first filing, ready to approve
@@ -61,7 +63,7 @@ export type FirstRun = {
 export function firstRunFacts(ws: Workspace, today: string, ev: Evidence = {}): FirstRun {
   const who = ws.apps.map(whoFiles);
   const cost = costToOpen(ws, { today, ev });
-  const open = workspaceOpening(ws, today, ev);
+  const open = workspaceEstimate(ws, today, ev);
   const store = open?.store ?? (ws.stores ?? []).find(s => s.stage === "opening") ?? (ws.stores ?? [])[0];
   let ready: FirstRun["ready"] = null;
   if (store && store.stage === "opening" && (store.apps ?? []).length) {
@@ -75,7 +77,7 @@ export function firstRunFacts(ws: Workspace, today: string, ev: Evidence = {}): 
   const app = approval ? ws.apps.find(a => a.id === approval.app) : undefined;
   return {
     permits: ws.apps.length, odelia: who.filter(w => w === "odelia").length, online: who.filter(w => w === "online").length, prepares: who.filter(w => w === "prepares").length, you: who.filter(w => w === "you").length, confirm: who.filter(w => w === "confirm").length,
-    agencyUSD: cost.agencyUSD, published: cost.published, unpublished: cost.unpublished, opening: open?.date ?? null, ready,
+    agencyUSD: cost.agencyUSD, published: cost.published, unpublished: cost.unpublished, opening: open?.date ?? null, range: open?.path?.range ?? null, hinge: open?.path?.hinge ?? [], ready,
     filled: fp?.filled ?? 0, first: approval && app ? { approval, app } : null, ms: fp?.ms ?? null,
   };
 }

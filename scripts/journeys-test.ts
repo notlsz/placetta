@@ -162,7 +162,7 @@ export async function journeyTests(ok: Ok, eq: Eq) {
       ok(!off.length, `${place}: every source is a government site`, off.map(a => a.source?.url));
       ok(p.fees === 0 && p.apps.every(a => a.fees.every(f => f.tbd || f.amount === 0)), `${place}: no fee is invented where the registry has none`);
       const path = openingPath(store("x", place, { stage: "opening", plannedOpen: "2027-06-01", apps: p.apps.map(a => a.id) }), { apps: p.apps, approvals: [], stores: [], facts: [], deadlines: [] } as unknown as Workspace, TODAY);
-      ok(path.basis.guessed > 0 && /assumed 30 days/.test(basisLine(path)?.en ?? ""), `${place}: the opening estimate says which times are assumed`, basisLine(path)?.en);
+      ok(path.basis.guessed > 0 && /30-day default/.test(basisLine(path)?.en ?? ""), `${place}: the opening estimate says which times are assumed`, basisLine(path)?.en);
     }
     const r = await run({ ws: workspace(), prompt: "Add a store in Mexico City and one in Paris, and one in Atlantis.", script: [
       () => ask(["add_store", { name: "Moonleaf Roma Norte", city: "Mexico City", country: "Mexico" }], ["add_store", { name: "Moonleaf Marais", city: "Paris", country: "France" }], ["add_store", { name: "Moonleaf Atlantis", city: "Atlantis", country: "Atlantis" }]),

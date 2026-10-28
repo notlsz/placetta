@@ -4,7 +4,9 @@ import { useApp, type PermitsTab, type View } from "./ctx";
 import type { Approval, Application, Deadline, Fact, FactGroup, Level, LicenseHit, Status } from "./model";
 import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn, fmtMonth, fmtStamp, money } from "./time";
 import { FileCard, Footer, I, Modal, Pill, StatusChip, feeText, feeTotal } from "./ui";
-import { isOpeningMilestone, withOpenings, workspaceOpening, type Evidence } from "./smart";
+import { isOpeningMilestone, withOpenings, workspaceEstimate, type Evidence } from "./smart";
+import { EstimateDate, HingeLine } from "./OpeningEstimate";
+import { choices } from "./expedite";
 import { scheduleAppeals } from "./finish";
 import type { Workspace } from "./model";
 import { useEvidence } from "./evidence";
@@ -195,11 +197,11 @@ export function NeedRow({ a, compact }: { a: Approval; compact?: boolean }) {
 }
 
 function AppRow({ a }: { a: Application }) {
-  const { b, openApp } = useApp();
+  const { b, lang, openApp } = useApp();
   return (
     <Working on={a.status === "draft"} size="line">
       <button type="button" className={"row arow" + (a.critical ? " crit" : "")} onClick={() => openApp(a.id)}>
-        <span className="arow-n"><b>{b(a.name)}</b><small>{a.next ? b(a.next) : b(a.agency)}</small></span>
+        <span className="arow-n"><b>{b(a.name)}</b><small>{a.next ? b(a.next) : b(a.agency)}</small>{(() => { const c = choices(a); if (!c.length) return null; const on = c.find(x => x.id === (a.expedite ?? null)) ?? c[0]; const alt = c.find(x => x.id !== on.id)!; return <small className="arow-x" data-expedite={a.expedite ?? "standard"}>{lang === "zh" ? `${b(on.label)}：${b(on.time)}。可选 ${b(alt.label)}：${b(alt.time)}，${b(alt.fee)}` : `${b(on.label)}: ${b(on.time)}. ${a.expedite ? "Or" : "Or pay for"} ${b(alt.label)}: ${b(alt.time)}, ${b(alt.fee)}`}</small>; })()}</span>
         <StatusChip s={a.status} />
       </button>
     </Working>
@@ -442,7 +444,8 @@ export function Overview() {
   /* the opening date, only where the plan or a store's path gives one */
   const fp = ws.firstPlan;
   const previews = ws.apps.filter(isPreview).length;
-  const landing = workspaceOpening(ws, today, ev)?.date ?? null;
+  const est = workspaceEstimate(ws, today, ev);
+  const landing = est?.date ?? null;
   const renewal = nextRenewal(ws, today);
 
   /* behind the tabs: the plan, the dates, the updates, this month, the stores, and what else a business may need */
@@ -547,7 +550,7 @@ export function Overview() {
               <div className="plan-card">
                 {ctxLine && <p className="ctx">{ctxLine}</p>}
                 <p className="plan-sum">{t(n === 1 ? "hm_plan1" : "hm_planN", { n, a: approved, r: agency, t: n - approved - agency })}</p>
-                {landing && <p className="plan-open"><I.deadlines />{t("hm_open", { d: fmtDay(landing, lang, true) })}</p>}
+                {landing && <div className="plan-open oe"><I.deadlines /><span><span className="oe-k">{zh ? "预计开业" : "Opening"}</span> <EstimateDate date={landing} range={est?.path?.range} lang={lang} /><HingeLine hinge={est?.path?.hinge ?? []} lang={lang} onOpen={id => openApp(id, "progress")} /></span></div>}
                 <CostLine />
                 {nextUp.length > 0 && (
                   <>
@@ -608,7 +611,7 @@ export function Overview() {
       </section>
       )}
       <HomeNext next={nextAll.slice(0, 6)} />
-      <HomeSide soon={soon} landing={landing} n={n} approved={approved} agency={agency} />
+      <HomeSide soon={soon} landing={landing} est={est} n={n} approved={approved} agency={agency} />
       <Footer />
     </div>
   );
@@ -641,8 +644,8 @@ function HomeNext({ next }: { next: Application[] }) {
 /** Home's right column on a wide screen (1200px and up): the opening, the cost, the next permits and the next dates,
  *  all from the workspace, so a laptop's width carries the plan beside the one thing to do (Linear's and Stripe's
  *  dashboards). Narrower screens keep the single column; the same lists are under More. */
-function HomeSide({ soon, landing, n, approved, agency }: { soon: Deadline[]; landing: string | null; n: number; approved: number; agency: number }) {
-  const { b, lang, go, ws } = useApp();
+function HomeSide({ soon, landing, est, n, approved, agency }: { soon: Deadline[]; landing: string | null; est: ReturnType<typeof workspaceEstimate>; n: number; approved: number; agency: number }) {
+  const { b, lang, go, ws, openApp } = useApp();
   const zh = lang === "zh";
   const left = n - approved - agency;
   const recent = ws.audit.slice(0, 4);
@@ -653,7 +656,8 @@ function HomeSide({ soon, landing, n, approved, agency }: { soon: Deadline[]; la
     <aside className="hm-side" aria-label={zh ? "计划概览" : "Plan at a glance"}>
       {!first && <section className="hs-card hs-open">
         <p className="hs-k">{zh ? "预计开业" : "Projected opening"}</p>
-        <p className="hs-date">{landing ? fmtDay(landing, lang, true) : zh ? "待定" : "Not set yet"}</p>
+        <p className="hs-date">{landing ? <EstimateDate date={landing} range={est?.path?.range} lang={lang} /> : zh ? "待定" : "Not set yet"}</p>
+        {est?.path && <HingeLine hinge={est.path.hinge} lang={lang} onOpen={id => openApp(id, "progress")} className="hs-sub" />}
         <p className="hs-sub">{zh ? `${n} 项许可：已办好 ${approved}，机构审核中 ${agency}，待办 ${left}` : `${n} permits: ${approved} done, ${agency} with the agency, ${left} to do`}</p>
         <span className="hs-bar" aria-hidden="true"><i style={{ width: `${n ? (approved / n) * 100 : 0}%` }} /><i className="b2" style={{ width: `${n ? (agency / n) * 100 : 0}%` }} /></span>
         <CostLine />

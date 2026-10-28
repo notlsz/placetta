@@ -23,7 +23,7 @@ export type Status = "approved" | "review" | "filing" | "ready" | "needs" | "dra
 export type Actor = "agent" | "you" | "agency" | "team";
 
 export type Field = { id: string; label: Bi; value: string; from?: Bi; quote?: string };   // quote: the document's own words the value came from
-export type Fee = { label: Bi; amount: number; tbd?: boolean };   // tbd: the agency sets it (by size, risk or sales); amount is 0 or a floor
+export type Fee = { label: Bi; amount: number; tbd?: boolean; expedite?: boolean };   // tbd: the agency sets it (by size, risk or sales); amount is 0 or a floor. expedite: the agency's own fee for the expedite the owner chose (src/expedite.ts), passed through at cost
 /** ISO currency of an application's fees; USD when absent. */
 export type Currency = string;
 export type CheckItem = {
@@ -74,6 +74,7 @@ export type Application = {
   notes?: { id: string; title: Bi; text: Bi; source: { label: string; url: string; quote: string; checked: string } }[];
   versions?: FormVersion[];  // the agency's own form, filled, each time its answers changed (src/forms/versions.ts); newest last
   filed?: Filed;             // its latest filing as the filings table has it (src/finish.ts stampFilings): the proof a job waits on
+  expedite?: string;         // the agency's expedite option the owner chose (src/forms/expedite.ts expediteOf id); absent: standard
 };
 
 /** A line that changed between two filled copies of a form. */

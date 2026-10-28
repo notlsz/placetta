@@ -2551,3 +2551,35 @@ div.wl { cursor: default; }
 .appeal-act .lnk { display: inline-flex; align-items: center; gap: 2px; }
 .appeal-note { margin: 10px 0 0; font-size: 11.5px; line-height: 1.45; color: var(--ink3); }
 @media (max-width: 520px) { .appeal dl > div { grid-template-columns: 1fr; gap: 2px; } }
+
+/* The opening estimate (src/OpeningEstimate.tsx): the date, its range, the hinge with its sources */
+.oe-date { display: inline; }
+.oe-date b { font-weight: 600; color: var(--ink); }
+.oe-range { margin-left: 6px; color: var(--ink2); font-weight: 400; }
+.hs-date .oe-range { display: block; margin: 2px 0 0; font-family: inherit; font-size: 14px; line-height: 1.4; letter-spacing: 0; }
+.oe-k { color: var(--ink2); }
+.plan-open.oe { align-items: flex-start; }
+.plan-open.oe svg { margin-top: 2px; }
+.oe-hinge { margin: 4px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--ink2); }
+.oe-hinge .lnk { padding: 0; border: 0; background: none; font: inherit; font-weight: 600; color: var(--ink); cursor: pointer; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 2px; }
+.oe-hinge a { color: var(--blue-ink); }
+.fr-hinge { margin: 10px 2px 0; }
+.arow-x { display: block; margin-top: 2px; color: var(--ink3); font-size: 12px; }
+.pg-time { margin: 12px 0 0; font-size: 13px; line-height: 1.5; color: var(--ink2); }
+.pg-time b { color: var(--ink); font-weight: 600; }
+.pg-time a { color: var(--blue-ink); }
+
+/* Standard or expedited (src/ExpeditePick.tsx): two cards side by side, the chosen one outlined */
+.xp { margin-top: 14px; }
+.xp-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+.xp-opt { position: relative; display: block; padding: 10px 12px; border-radius: 12px; background: var(--card); box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
+.xp-opt.on { box-shadow: 0 0 0 2px var(--blue-ink); }
+.xp-opt input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.xp-opt:focus-within { outline: 2px solid var(--blue); outline-offset: 2px; }
+.xp-opt input:disabled + .xp-tx { opacity: .7; }
+.xp-tx { display: flex; flex-direction: column; gap: 2px; font-size: 13px; line-height: 1.45; color: var(--ink2); }
+.xp-tx b { color: var(--ink); font-size: 13.5px; }
+.xp-tx small { font-size: 12px; color: var(--ink3); }
+.xp-tx a { color: var(--blue-ink); }
+.xp-est { margin: 8px 0 0; font-size: 13px; color: var(--ink); }
+.opening-date { display: block; margin-bottom: 2px; font-size: 14px; color: var(--ink); }

@@ -36,7 +36,7 @@ import { cadence, ensureProof, MAIN_BOT, MAX_CHILDREN, MAX_RUN_CHILDREN, met, ne
 import { companyFacts, factLines, placeFacts, type PlaceRecord } from "./connectorFacts";
 import { replyMoment, scrubStep, traced } from "./replay";
 import { emailsIn, injected, SECRET_WHY, secretNumber } from "./guard";
-import { basisLine, openingLine, openingPath, preflight } from "./smart";
+import { basisLine, hingeSay, openingLine, openingPath, preflight } from "./smart";
 import { cityOf as recordsCity, cityRecords } from "./opendata";
 import { replyLanguage } from "./langs";
 import { agencyKey, lessonUsable, placeKey, type Lesson } from "./learning";
@@ -1459,7 +1459,9 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           for (const f of x.svc?.filings() ?? []) if (f.submitted_at && f.status !== "canceled" && !submitted[f.app_id]) submitted[f.app_id] = f.submitted_at;
           const p = openingPath(st, all, today, { submitted });
           return { verdict: p.verdict, permits_in_hand_by: p.landing ?? undefined, days_to_spare: p.slack ?? undefined, holding_it_up: p.blocker ? { application_id: p.blocker.app, name: p.blocker.name[lang], waiting_on: p.blocker.on, why: p.blocker.why[lang] } : undefined,
-            say: openingLine(p)?.[lang], how_estimated: basisLine(p)?.[lang], estimated_without_agency_time: p.guessed || undefined };
+            say: openingLine(p)?.[lang], how_estimated: basisLine(p)?.[lang], estimated_without_agency_time: p.guessed || undefined,
+            likely_between: p.range ? [p.range.fast, p.range.slow] : undefined, hinges_on: hingeSay(p)?.[lang],
+            hinge_sources: p.hinge.map(h => ({ application_id: h.app, time: h.timing.say[lang], source: h.timing.source ?? null, kind: h.timing.kind })) };
         };
         mark();
         return {

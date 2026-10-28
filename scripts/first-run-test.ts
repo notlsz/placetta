@@ -12,7 +12,7 @@ import { SAMPLE_WS } from "../src/sample";
 import { firstWorkspace } from "../src/plan/start";
 import { canFileLine, firstRunFacts, isFirstRun, needLine, nowLine, whoFiles, type FirstRun } from "../src/firstRun";
 import { costToOpen } from "../src/cost";
-import { workspaceOpening } from "../src/smart";
+import { estimateSay, hingeSay, workspaceEstimate, workspaceOpening } from "../src/smart";
 import { readiness } from "../src/stores";
 import { routeOf } from "../src/approvalRoute";
 import { daysFromNow, fmtDay, money } from "../src/time";
@@ -34,6 +34,8 @@ function render(ws: Workspace, lang: Lang, el: ReactElement = createElement(Over
 const PRIMARY = /class="pill ink dtn-go"/g;
 const count = (h: string, re: RegExp) => (h.match(re) ?? []).length;
 const words = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
+/** The text as read, tags removed without adding spaces (a link inside a sentence stays inside it). */
+const text = (h: string) => h.replace(/<[^>]+>/g, "").replace(/&#x27;/g, "'").replace(/&amp;/g, "&").replace(/&quot;/g, '"');
 
 export function firstRunTests(ok: Ok) {
   console.log("\n# First run: the outcome first, every number from the plan");
@@ -50,6 +52,8 @@ export function firstRunTests(ok: Ok) {
     ok(f.permits === ws.apps.length && f.odelia + f.online + f.prepares + f.you + f.confirm === f.permits, `${name}: every application counted once, by who files it`, f);
     ok(f.agencyUSD === cost.agencyUSD && f.unpublished === cost.unpublished, `${name}: agency fees are Cost to open's own total`, [f.agencyUSD, cost.agencyUSD]);
     ok(f.opening === (workspaceOpening(ws, today)?.date ?? null), `${name}: the opening is the date the store card and Deadlines show`, f.opening);
+    const est = workspaceEstimate(ws, today)!;
+    ok(JSON.stringify(f.range) === JSON.stringify(est.path?.range) && f.hinge.map(x => x.app).join() === est.path!.hinge.map(x => x.app).join() && f.hinge.length > 0, `${name}: the range and the hinge are the estimate's own`, [f.range, f.hinge.map(x => x.app)]);
     ok(f.ready?.score === readiness(store, ws).score && f.ready.total === store.apps!.length && f.ready.issued === 0, `${name}: % ready is the store's readiness, nothing issued yet`, f.ready);
     ok(f.ready!.score === Math.round((100 * f.ready!.issued) / f.ready!.total), `${name}: % ready is exactly the issued count beside it`, f.ready!.score);
     // who files: the approval card's own route; the portal isn't counted as hers today
@@ -67,6 +71,11 @@ export function firstRunTests(ok: Ok) {
       ok(h.includes("data-first-run") && w.includes(needLine(f)[lang]) && w.includes(canFileLine(f)![lang]), `${name} ${lang}: Home leads with the need and what Odelia files`);
       ok(w.includes(money(f.agencyUSD)) && (!f.opening || w.includes(fmtDay(f.opening, lang, true))) && w.includes(`${f.ready!.score}%`), `${name} ${lang}: the fees, the opening and % ready, as computed`);
       ok(count(h, PRIMARY) === 1, `${name} ${lang}: exactly one primary button`, count(h, PRIMARY));
+      {
+        const est = workspaceEstimate(ws, today)!, tx = text(h), range = estimateSay(est.date, est.path!.range)[lang].slice(estimateSay(est.date)[lang].length).replace(/^[,，]\s*/, "");
+        ok(!range || tx.includes(range), `${name} ${lang}: the opening's likely range is shown`, range);
+        ok(tx.includes(hingeSay(est.path!)![lang]) && h.includes("data-hinge"), `${name} ${lang}: the step the date hinges on, with its time and source`, hingeSay(est.path!)![lang]);
+      }
       ok(!h.includes("hm-calm"), `${name} ${lang}: never "You're all set" on a plan with nothing filed`);
       ok(w.includes(nowLine(ws, f)[lang]), `${name} ${lang}: what Odelia is doing right now`);
       ok(!/[·•]/.test(w) && !/(^|[^\d.,:$])0\d/.test(w), `${name} ${lang}: no dot separators, no leading zeros`);
@@ -96,6 +105,7 @@ export function firstRunTests(ok: Ok) {
     const f = firstRunFacts(skipped, today), w = words(h);
     ok(h.includes('data-plan-build="done"') && count(h, /<li>/g) === skipped.apps.length, `${lang}: the build lists every application in the plan`, count(h, /<li>/g));
     ok(w.includes(needLine(f)[lang]) && w.includes(money(f.agencyUSD)), `${lang}: the build ends with the same outcome Home shows`);
+    ok(!f.opening || (text(h).includes(fmtDay(f.opening, lang, true)) && text(h).includes(hingeSay({ hinge: f.hinge })![lang])), `${lang}: the build shows the same opening and hinge`, f.opening);
     ok(count(h, /class="sbtn ink big"/g) === 1 && h.includes("data-plan-skip"), `${lang}: one primary button, and a way straight to the plan`);
     ok(!/[·•]/.test(w) && !/(^|[^\d.,:$])0\d/.test(w), `${lang}: the build has no dot separators or leading zeros`);
   }

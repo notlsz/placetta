@@ -5,7 +5,7 @@ import { fmtDay, inDays, money, nowIso } from "./time";
 import { groundedAnswer } from "./answer";
 import { ownWords, readLine } from "./plan/line";
 import { appealFor, appealSay } from "./appeals";
-import { openingOf } from "./smart";
+import { hingeSay, openingOf, openingPath } from "./smart";
 import { headline, todos } from "./doNext";
 
 /* ------------------------------------------------------------------ *
@@ -422,7 +422,10 @@ function fromWorkspace(ctx: Context, text: string): Plan | null {
           : gap > 0 ? B(`, ${gap} day${gap === 1 ? "" : "s"} before your ${target.en} target.`, `，比您定的 ${target.zh} 早 ${gap} 天。`)
           : gap < 0 ? B(`, ${-gap} day${gap === -1 ? "" : "s"} after your ${target.en} target.`, `，比您定的 ${target.zh} 晚 ${-gap} 天。`)
           : B(`, right on your ${target.en} target.`, `，正好是您定的 ${target.zh}。`);
-        text_.push(B(opens.en + vs.en, opens.zh + vs.zh));
+        // the range and the step the date hinges on, with where its time comes from (the same estimate as Home and Stores)
+        const op = openingPath(s, w, today), r = op.range, h = hingeSay(op);
+        const likely = r && (r.fast !== d || r.slow !== d) ? B(` Likely ${fmtDay(r.fast, "en", r.fast.slice(0, 4) !== d.slice(0, 4))} to ${fmtDay(r.slow, "en", r.slow.slice(0, 4) !== d.slice(0, 4))}.`, `可能在 ${fmtDay(r.fast, "zh", r.fast.slice(0, 4) !== d.slice(0, 4))} 至 ${fmtDay(r.slow, "zh", r.slow.slice(0, 4) !== d.slice(0, 4))} 之间。`) : B("", "");
+        text_.push(B(opens.en + vs.en + likely.en + (h ? " " + h.en : ""), opens.zh + vs.zh + likely.zh + (h ? h.zh : "")));
       } else text_.push(B("Opening: no date yet. The permits aren't mapped for it.", "开业：尚无日期，还没有梳理它的许可。"));
     } else if (s && s.stage === "open" && open) text_.push(B(`${s.name.en} is already open${s.opened ? `, since ${fmtDay(s.opened, "en", true)}` : ""}.`, `${s.name.zh}已开业${s.opened ? `，自 ${fmtDay(s.opened, "zh", true)} 起` : ""}。`));
   };

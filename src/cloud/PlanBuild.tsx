@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AgentBot } from "../Bot";
 import type { Lang } from "../i18n";
 import type { Workspace } from "../model";
-import { money } from "../time";
+import { daysFromNow, money } from "../time";
 import { formById, formsEntity } from "../forms/registry";
 import { canFileLine, firstRunFacts, needLine, restLine, whoFiles, type Who } from "../firstRun";
 import { FirstStats } from "../FirstRun";
@@ -22,7 +22,8 @@ export function PlanBuild({ lang, ws, place, instant, busy, err, onBack, onNext,
 }) {
   const zh = lang === "zh";
   const b = (x: { en: string; zh: string }) => x[lang];
-  const today = new Date().toISOString().slice(0, 10);
+  // the local day, as Home counts it (a UTC day showed a different opening date than Home in the evening)
+  const today = daysFromNow(0);
   const f = useMemo(() => firstRunFacts(ws, today), [ws, today]);
   const apps = ws.apps;
   const reduce = typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;

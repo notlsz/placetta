@@ -10,7 +10,8 @@ import { fmtDay } from "./time";
 import { filingBlockers, isBlank } from "./core";
 import { formById, placesOf, segmentOf } from "./forms/registry";
 import type { Application, Approval, Deadline, Field, Status, Store, Workspace } from "./model";
-import { publishedDays, type FormStat } from "./plan";
+import type { FormStat } from "./plan";
+import { calendarDays, expediteOf, hostOf, timingOf, type Timing } from "./forms/expedite";
 import { BY_HAND, carriesIdentifier, emailsIn, governmentAddress, SECRET_NOTE, secretNumber } from "./guard";
 import { ein as einCheck, latin as latinCheck, premises as premisesCheck, PREMISES_LINE } from "./validate";
 
@@ -174,8 +175,9 @@ export function preflight(w: Workspace, a: Approval, today: string): Preflight {
     // the fee matches what the agency publishes
     const off = app.official ? formById(app.official) : undefined;
     checked++;
-    const fee = app.fees.reduce((s, x) => s + x.amount, 0);
-    if (off && off.fee != null && !app.fees.some(x => x.tbd) && Math.abs(fee - off.fee) > 0.5)
+    // (the agency's own expedite fee the owner chose is on top of its standard fee, so it isn't compared with it)
+    const fee = app.fees.filter(x => !x.expedite).reduce((s, x) => s + x.amount, 0);
+    if (off && off.fee != null && !app.fees.some(x => x.tbd && !x.expedite) && Math.abs(fee - off.fee) > 0.5)
       add(warn(B("Fee", "费用"), B(`$${fee} here; the agency publishes $${off.fee}. Check before paying.`, `此处为 $${fee}，机构公布为 $${off.fee}。付款前请核对。`)));
     const s = storeOfApp(w, app.id);
     if (off) {
@@ -228,12 +230,20 @@ export function preflight(w: Workspace, a: Approval, today: string): Preflight {
 
 export type OpeningPath = {
   verdict: "on_track" | "tight" | "late" | "no_date" | "not_mapped" | "open";
-  landing: string | null;        // the day the last permit should be in hand
+  landing: string | null;        // the day the last permit should be in hand: the opening date, at the steps' usual times
   slack: number | null;          // planned opening minus landing, in days (negative: late)
   blocker?: { app: string; name: Bi; status: Status; on: "you" | "odelia" | "team" | "agency" | "someone_else"; why: Bi };
-  guessed: number;               // permits with no published agency time, counted at 30 days
+  guessed: number;               // permits with no published agency time, counted at the 30-day default
   basis: { measured: number; published: number; guessed: number };   // where each permit's time came from
+  /** The same chain at every step's quickest and longest published time: "likely Dec 20 to Feb 3". */
+  range: { fast: string; slow: string } | null;
+  /** The one or two steps that decide the date: the longest on the critical chain, each with its time and source. */
+  hinge: Hinge[];
+  /** The critical chain, first step first: what has to finish before what. */
+  chain: string[];
 };
+/** One step the date hinges on: its time from today (calendar days, quickest, usual, longest) and where that time comes from. */
+export type Hinge = { app: string; name: Bi; agency: Bi; days: { fast: number; typical: number; slow: number }; timing: Timing; expedite?: { id: string; label: Bi } };
 /** What makes the estimate real: when each application went to the agency, and how long Placetta's own filings of
     each form took (filing_stats, only forms with 3 or more). */
 export type Evidence = { submitted?: Record<string, string>; stats?: FormStat[] };
@@ -242,19 +252,42 @@ const BUFFER = 7;
 const addDays = (iso: string, n: number) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const between = (a: string, b: string) => Math.round((Date.parse(b + "T12:00:00Z") - Date.parse(a + "T12:00:00Z")) / 864e5);
 
-/** Days still to go for one application from today, before counting what it waits on. The agency's time is, in
-    order: Placetta's own filings of that form (the slow end, p90), the agency's published time, else 30 days. An
-    application already with the agency counts from the day it was submitted. */
-function remaining(a: Application, ev: Evidence, today: string): { days: number; from: "measured" | "published" | "guessed" | "done" } {
-  if (a.status === "approved") return { days: 0, from: "done" };
-  const st = a.official ? ev.stats?.find(x => x.form === a.official && x.n >= 3) : undefined;
-  const pub = publishedDays(a.est);
-  const agency = st ? st.p90_days : pub ?? 30;
-  const from = st ? "measured" : pub != null ? "published" : "guessed";
+type Three = { fast: number; typical: number; slow: number };
+const each = (x: Three, f: (n: number) => number): Three => ({ fast: f(x.fast), typical: f(x.typical), slow: f(x.slow) });
+
+/** How long one step takes at the agency, in calendar days, and where that comes from. In order: the expedite the owner
+ *  chose (when the agency publishes its time), Placetta's own filings of the form (the median, the slow end at p90), the
+ *  agency's published time (src/forms/expedite.ts timingOf), else the 30-day default, said as a default. */
+export function stepTiming(a: Application, ev: Evidence = {}): { timing: Timing; days: Three; expedite?: { id: string; label: Bi } } {
+  const x = a.expedite ? expediteOf(a.official).find(o => o.id === a.expedite) : undefined;
+  const chosen = x ? { expedite: { id: x.id, label: x.label } } : {};
+  if (x?.span) {
+    const timing: Timing = { ...x.span, kind: "agency", say: x.turnaround, source: x.source, checked: x.checked };
+    return { timing, days: each(x.span, n => calendarDays(n, x.span!.unit)), ...chosen };
+  }
+  const st = a.official ? ev.stats?.find(s => s.form === a.official && s.n >= 3) : undefined;
+  if (st) {
+    const sp = { fast: st.median_days, typical: st.median_days, slow: Math.max(st.median_days, st.p90_days), unit: "calendar" as const };
+    return { timing: { ...sp, kind: "measured", say: B(`${st.median_days} days on Placetta's filings, ${st.p90_days} at the slow end`, `快哉实际办理 ${st.median_days} 天，慢的情况 ${st.p90_days} 天`) }, days: sp, ...chosen };
+  }
+  const timing = timingOf(a);
+  return { timing, days: each(timing, n => calendarDays(n, timing.unit)), ...chosen };
+}
+
+/** Days still to go for one application from today, before counting what it waits on: the agency's time, plus what's
+ *  left before it's filed (a week to gather documents and fix what bounces, for one not ready yet). An application
+ *  already with the agency counts from the day it was submitted. */
+function remaining(a: Application, ev: Evidence, today: string): { days: Three; from: "measured" | "published" | "guessed" | "done"; step: ReturnType<typeof stepTiming> } {
+  const step = stepTiming(a, ev);
+  if (a.status === "approved") return { days: { fast: 0, typical: 0, slow: 0 }, from: "done", step };
+  const from = step.timing.kind === "measured" ? "measured" : step.timing.kind === "default" ? "guessed" : "published";
   const sent = ev.submitted?.[a.id];
-  const inReview = sent ? Math.max(2, agency - Math.max(0, between(sent.slice(0, 10), today))) : Math.ceil(agency / 2);
-  const by: Record<Exclude<Status, "approved">, number> = { review: inReview, filing: agency + 2, ready: agency + 3, needs: agency + BUFFER, draft: agency + BUFFER, todo: agency + BUFFER, waiting: agency + BUFFER };
-  return { days: by[a.status as Exclude<Status, "approved">], from };
+  const agency = step.days;
+  const before: Record<string, number> = { filing: 2, ready: 3, needs: BUFFER, draft: BUFFER, todo: BUFFER, waiting: BUFFER };
+  const days = a.status === "review"
+    ? each(agency, n => (sent ? Math.max(2, n - Math.max(0, between(sent.slice(0, 10), today))) : Math.ceil(n / 2)))
+    : each(agency, n => n + (before[a.status] ?? BUFFER));
+  return { days, from, step };
 }
 
 const ON: Record<Status, NonNullable<OpeningPath["blocker"]>["on"]> = { approved: "agency", review: "agency", filing: "team", ready: "you", needs: "you", draft: "odelia", todo: "odelia", waiting: "someone_else" };
@@ -272,44 +305,64 @@ function why(a: Application, w: Workspace): Bi {
   return B("Odelia is preparing it", "Odelia 正在准备");
 }
 
-/** Where a store's permits put its opening, what's holding it up, and how much room is left. */
+/** Where a store's permits put its opening, what's holding it up, how much room is left, the range and the hinge. Each
+ *  step starts when the steps it waits on are done (the company before the EIN, the EIN before the registrations, the
+ *  plan check before the building permit and the health permit), so the date is the end of the longest chain. */
 export function openingPath(s: Store, w: Workspace, today: string, ev: Evidence = {}): OpeningPath {
   const none = { measured: 0, published: 0, guessed: 0 };
-  if (s.stage === "open") return { verdict: "open", landing: s.opened ?? null, slack: null, guessed: 0, basis: none };
+  const empty = { range: null, hinge: [], chain: [] };
+  if (s.stage === "open") return { verdict: "open", landing: s.opened ?? null, slack: null, guessed: 0, basis: none, ...empty };
   const apps = w.apps.filter(a => (s.apps ?? []).includes(a.id));
-  if (!apps.length) return { verdict: "not_mapped", landing: null, slack: null, guessed: 0, basis: none };
+  if (!apps.length) return { verdict: "not_mapped", landing: null, slack: null, guessed: 0, basis: none, ...empty };
   const basis = { ...none };
   const byId = new Map(w.apps.map(a => [a.id, a]));
-  const finish = new Map<string, number>(), via = new Map<string, string | undefined>();
+  const finish = new Map<string, Three>(), via = new Map<string, string | undefined>(), own = new Map<string, ReturnType<typeof remaining>>();
   let guessed = 0;
-  const visit = (a: Application, seen: Set<string>): number => {
+  const zero: Three = { fast: 0, typical: 0, slow: 0 };
+  const visit = (a: Application, seen: Set<string>): Three => {
     if (finish.has(a.id)) return finish.get(a.id)!;
-    if (seen.has(a.id)) return 0;   // a loop in the data: don't count it twice
+    if (seen.has(a.id)) return zero;   // a loop in the data: don't count it twice
     seen.add(a.id);
-    let start = 0, from: string | undefined;
+    // each of the three runs waits on its own slowest dependency; the critical chain is the usual run's
+    const start = { ...zero };
+    let from: string | undefined;
     for (const c of a.checklist) {
       const dep = c.dep ? byId.get(c.dep) : undefined;
       if (!dep || c.state === "done") continue;
       const f = visit(dep, seen);
-      if (f > start) { start = f; from = dep.id; }
+      if (f.typical > start.typical) { start.typical = f.typical; from = dep.id; }
+      start.fast = Math.max(start.fast, f.fast); start.slow = Math.max(start.slow, f.slow);
     }
     const r = remaining(a, ev, today);
+    own.set(a.id, r);
     if (r.from !== "done") basis[r.from]++;
     if (r.from === "guessed") guessed++;
-    const end = start + r.days;
+    const end = { fast: start.fast + r.days.fast, typical: start.typical + r.days.typical, slow: start.slow + r.days.slow };
     finish.set(a.id, end); via.set(a.id, from);
     return end;
   };
-  let last: Application | undefined, far = 0;
-  for (const a of apps) { const f = visit(a, new Set()); if (f > far || !last) { far = f; last = a; } }
+  let last: Application | undefined, far = 0, fast = 0, slow = 0;
+  for (const a of apps) {
+    const f = visit(a, new Set());
+    if (f.typical > far || !last) { far = f.typical; last = a; }
+    fast = Math.max(fast, f.fast); slow = Math.max(slow, f.slow);
+  }
   const landing = addDays(today, far);
-  // the blocker is where the longest chain starts: the first step that has to move
-  let b = last!;
-  for (let i = 0; i < 20 && via.get(b.id); i++) b = byId.get(via.get(b.id)!)!;
+  // the critical chain, from the last step back to the first one that has to move
+  const chain: string[] = [];
+  for (let id: string | undefined = last!.id, i = 0; id && i < 40 && !chain.includes(id); i++, id = via.get(id)) chain.unshift(id);
+  const b = byId.get(chain[0])!;
   const blocker = far > 0 ? { app: b.id, name: b.name, status: b.status, on: ON[b.status], why: why(b, w) } : undefined;
-  if (!s.plannedOpen) return { verdict: "no_date", landing, slack: null, blocker, guessed, basis };
+  // the hinge: the step on that chain that takes longest, and the next one too when it's at least half as long
+  const ranked = chain.map(id => ({ a: byId.get(id)!, r: own.get(id) })).filter((x): x is { a: Application; r: ReturnType<typeof remaining> } => !!x.r && x.r.days.typical > 0)
+    .sort((x, y) => y.r.days.typical - x.r.days.typical);
+  const hinge: Hinge[] = ranked.filter((x, i) => i === 0 || (i === 1 && x.r.days.typical * 2 >= ranked[0].r.days.typical))
+    .map(({ a, r }) => ({ app: a.id, name: a.name, agency: a.agency, days: r.days, timing: r.step.timing, ...(r.step.expedite ? { expedite: r.step.expedite } : {}) }));
+  const range = far > 0 ? { fast: addDays(today, Math.min(fast, far)), slow: addDays(today, Math.max(slow, far)) } : null;
+  const out = { landing, blocker, guessed, basis, range, hinge, chain };
+  if (!s.plannedOpen) return { verdict: "no_date", slack: null, ...out };
   const slack = between(landing, s.plannedOpen);
-  return { verdict: slack < 0 ? "late" : slack < 7 ? "tight" : "on_track", landing, slack, blocker, guessed, basis };
+  return { verdict: slack < 0 ? "late" : slack < 7 ? "tight" : "on_track", slack, ...out };
 }
 
 /* The opening date has one source: where a store's permits land today (openingPath). The store card, the cost line on
@@ -332,6 +385,45 @@ export function workspaceOpening(w: Workspace, today: string, ev: Evidence = {})
     if (d && (!best || d > best.date)) best = { date: d, store: s };
   }
   return best ?? (w.firstPlan?.projectedOpen ? { date: w.firstPlan.projectedOpen } : null);
+}
+
+/** The workspace's opening with everything said about it: the date, its range, the hinge, and the store it's for. The
+ *  one estimate Home, Stores, the plan and the first-run build all show. The date is always workspaceOpening's. */
+export function workspaceEstimate(w: Workspace, today: string, ev: Evidence = {}): { date: string; store?: Store; path?: OpeningPath } | null {
+  const o = workspaceOpening(w, today, ev);
+  if (!o) return null;
+  return o.store ? { ...o, path: openingPath(o.store, w, today, ev) } : o;
+}
+
+const yearOf = (iso: string) => iso.slice(0, 4);
+/** "Jan 7, 2027, likely Dec 20, 2026 to Feb 3" / "2027年1月7日，可能在 2026年12月20日 至 2月3日 之间": the date and its
+ *  range, the range's ends with a year only where it differs from the date's. Just the date when there's no range. */
+export function estimateSay(date: string, range?: { fast: string; slow: string } | null): Bi {
+  const d = B(fmtDay(date, "en", true), fmtDay(date, "zh", true));
+  if (!range || (range.fast === date && range.slow === date)) return d;
+  const end = (x: string, l: "en" | "zh") => fmtDay(x, l, yearOf(x) !== yearOf(date));
+  return B(`${d.en}, likely ${end(range.fast, "en")} to ${end(range.slow, "en")}`, `${d.zh}，可能在 ${end(range.fast, "zh")} 至 ${end(range.slow, "zh")} 之间`);
+}
+
+/** One step the date hinges on, said with its time and where the time comes from: "Food facility plan check, up to 20
+ *  business days after payment, per deh.santaclaracounty.gov". A default says it's a default; a report or a statistic
+ *  says what it is. */
+export function hingeStepSay(h: Hinge): Bi {
+  const t = h.timing, host = hostOf(t.source);
+  const per = t.kind === "default" ? B("", "")
+    : t.kind === "measured" ? B("", "")
+    : t.kind === "report" ? B(`, per ${host}'s own performance report`, `，依据 ${host} 公布的绩效报告`)
+    : t.kind === "statistic" ? B(`, per ${host} (a statistic, not the agency's)`, `，依据 ${host}（统计数据，非机构公布）`)
+    : host ? B(`, per ${host}`, `，依据 ${host}`) : B("", "");
+  const fast = h.expedite ? B(` with ${/^[A-Z][a-z]/.test(h.expedite.label.en) ? h.expedite.label.en.charAt(0).toLowerCase() + h.expedite.label.en.slice(1) : h.expedite.label.en}`, `（${h.expedite.label.zh}）`) : B("", "");
+  return B(`${h.name.en}${fast.en}, ${t.say.en}${per.en}`, `${h.name.zh}${fast.zh}，${t.say.zh}${per.zh}`);
+}
+
+/** "The date hinges on: …" with the one or two steps that decide it, or null when nothing is left to wait on. */
+export function hingeSay(p: Pick<OpeningPath, "hinge">): Bi | null {
+  if (!p.hinge.length) return null;
+  const parts = p.hinge.map(hingeStepSay);
+  return B(`The date hinges on ${parts.map(x => x.en).join("; and ")}.`, `开业日期取决于：${parts.map(x => x.zh).join("；以及")}。`);
 }
 
 /** Deadlines with each opening store's opening as its one milestone. A stored "Target opening" milestone (the sample's,
@@ -370,8 +462,8 @@ export function openingLine(p: OpeningPath): Bi | null {
 export function basisLine(p: OpeningPath): Bi | null {
   const { measured: m, published: pu, guessed: g } = p.basis;
   if (!m && !pu && !g) return null;
-  const en = [m && `Placetta's own filing times for ${m}`, pu && `the agency's published time for ${pu}`, g && `an assumed 30 days for ${g} with no published time`].filter(Boolean).join(", ");
-  const zh = [m && `${m} 项按快哉实际办理时间`, pu && `${pu} 项按机构公布时间`, g && `${g} 项无公布时间，按 30 天估算`].filter(Boolean).join("，");
+  const en = [m && `Placetta's own filing times for ${m}`, pu && `the agency's published time for ${pu}`, g && `a 30-day default for ${g} with no published time`].filter(Boolean).join(", ");
+  const zh = [m && `${m} 项按快哉实际办理时间`, pu && `${pu} 项按机构公布时间`, g && `${g} 项无公布时间，按默认 30 天估算`].filter(Boolean).join("，");
   return B(`Estimate from ${en}. Submitted applications count from the day they went in.`, `估算依据：${zh}。已提交的申请从提交当天起算。`);
 }
 

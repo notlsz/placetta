@@ -11,6 +11,8 @@ import { TrustShare } from "./TrustShare";
 import { openSettings } from "./Settings";
 import { useTeam } from "./Comments";
 import { CostSheet, useCost } from "./CostToOpen";
+import { estimateSay } from "./smart";
+import { HingeLine } from "./OpeningEstimate";
 import "./firstrun.css";
 
 /* Home in the first run (src/firstRun.ts): the outcome first, then the one thing to do, then what stands between the
@@ -32,10 +34,11 @@ export function untilSay(iso: string): Bi {
 
 /** The three numbers an owner asks first: what the agencies charge, when it opens, how ready it is. Each from the plan;
  *  a number that isn't known isn't shown. */
-export function FirstStats({ f, lang, total, onBreakdown }: { f: FirstRun; lang: "en" | "zh"; total?: number; onBreakdown?: () => void }) {
+export function FirstStats({ f, lang, total, onBreakdown, onOpen }: { f: FirstRun; lang: "en" | "zh"; total?: number; onBreakdown?: () => void; onOpen?: (app: string) => void }) {
   const zh = lang === "zh";
   const b = (x: Bi) => x[lang];
   return (
+    <>
     <dl className="fr-stats">
       {f.published > 0 && (
         <div className="fr-stat">
@@ -47,7 +50,7 @@ export function FirstStats({ f, lang, total, onBreakdown }: { f: FirstRun; lang:
       {f.opening && (
         <div className="fr-stat">
           <dt>{zh ? "预计开业" : "Expected opening"}</dt>
-          <dd><b>{fmtDay(f.opening, lang, true)}</b><small>{b(untilSay(f.opening))}</small></dd>
+          <dd><b>{fmtDay(f.opening, lang, true)}</b><small>{b(untilSay(f.opening))}</small>{f.range && (f.range.fast !== f.opening || f.range.slow !== f.opening) && <small className="oe-range" data-range="">{b(estimateSay(f.opening, f.range)).slice(fmtDay(f.opening, lang, true).length).replace(/^[,，]\s*/, "")}</small>}</dd>
         </div>
       )}
       {f.ready && (
@@ -57,13 +60,15 @@ export function FirstStats({ f, lang, total, onBreakdown }: { f: FirstRun; lang:
         </div>
       )}
     </dl>
+    {f.opening && <HingeLine hinge={f.hinge} lang={lang} onOpen={onOpen} className="fr-hinge" />}
+    </>
   );
 }
 
 /** The top of Home in the first run: the problem in one sentence, how much of it Odelia takes, the numbers, and what
  *  she is doing right now. */
 export function FirstRunHead() {
-  const { b, lang, busy, live, ws } = useApp();
+  const { b, lang, busy, live, ws, openApp } = useApp();
   const f = useFirstRun();
   const zh = lang === "zh";
   const open = (ws.stores ?? []).length > 0 && (ws.stores ?? []).every(s => s.stage === "open");
@@ -76,7 +81,7 @@ export function FirstRunHead() {
       <p className="fr-k">{zh ? "您的开业计划" : "Your opening plan"}{f.ms != null && <span>{zh ? `Odelia 用时 ${(Math.max(1, Math.round(f.ms / 100)) / 10).toString()} 秒梳理` : `Mapped by Odelia in ${(Math.max(1, Math.round(f.ms / 100)) / 10).toString()} seconds`}</span>}</p>
       <h2 id="fr-h">{b(needLine(f, open))}{can && <> <em>{b(can)}</em></>}</h2>
       {rest && <p className="fr-rest">{b(rest)}</p>}
-      <FirstStats f={f} lang={lang} total={cost.totalUSD} onBreakdown={() => setSheet(true)} />
+      <FirstStats f={f} lang={lang} total={cost.totalUSD} onBreakdown={() => setSheet(true)} onOpen={id => openApp(id, "progress")} />
       <p className="fr-now" aria-live="polite"><span className={"fr-pulse" + (running ? " on" : "")} aria-hidden="true" /><b>{zh ? "Odelia 现在" : "Odelia right now"}</b><span>{b(nowLine(ws, f, running))}</span></p>
       {sheet && <CostSheet c={cost} onClose={() => setSheet(false)} />}
       {f.filled > 0 && <p className="fr-done"><I.check />{zh ? `已根据您的注册信息填好 ${f.filled} 栏表格` : `${f.filled} form line${f.filled === 1 ? "" : "s"} already filled from your signup`}</p>}

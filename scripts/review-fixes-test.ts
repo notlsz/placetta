@@ -49,8 +49,11 @@ export function reviewFixTests(ok: Ok, eq: Eq) {
   {
     const r = reply(w, "What's left?"), gap = Math.round((Date.parse(sj.plannedOpen! + "T12:00:00Z") - Date.parse(open + "T12:00:00Z")) / 864e5);
     const fmt = (iso: string, y: boolean) => new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", ...(y ? { year: "numeric" } : {}) });
-    eq(r.p.reply.text[1].en, `Opens around ${fmt(open, true)}, ${gap} days before your ${fmt(sj.plannedOpen!, false)} target.`, "the opening says the date and how it sits against the target, plainly");
-    ok(/^约 .+ 开业，比您定的 .+ 早 \d+ 天。$/.test(r.p.reply.text[1].zh), "and in Chinese", r.p.reply.text[1].zh);
+    const said = r.p.reply.text[1].en, lead = `Opens around ${fmt(open, true)}, ${gap} days before your ${fmt(sj.plannedOpen!, false)} target.`;
+    eq(said.slice(0, lead.length), lead, "the opening says the date and how it sits against the target, plainly");
+    // then the range and the step the date hinges on, with where its time comes from (the same estimate as Home)
+    ok(/^ Likely [A-Z][a-z]{2} \d{1,2}(, \d{4})? to [A-Z][a-z]{2} \d{1,2}(, \d{4})?\. The date hinges on .+\.$/.test(said.slice(lead.length)), "then the likely range and the hinge", said);
+    ok(/^约 .+ 开业，比您定的 .+ 早 \d+ 天。可能在 .+ 至 .+ 之间。开业日期取决于：.+。$/.test(r.p.reply.text[1].zh), "and in Chinese", r.p.reply.text[1].zh);
     ok(!/where the permits put it|planned:/.test(r.en), "no 'where the permits put it today (planned: …)'");
   }
   for (const q of ["When do we open?", "When will we open?", "什么时候开业？", "What permits do I still need for San Jose and when will we open?"]) {
