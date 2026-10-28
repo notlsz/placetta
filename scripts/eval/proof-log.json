@@ -10961,5 +10961,213 @@
   "found": true,
   "sha256": "daa39a0f33d3a982",
   "context": " other filing............................................................$60.00 *annual report license tax is $60 or two-tenths of one mill on the dollar ($.0002) whichever is greater based on the company's assets located and employed in the state of wyoming. nonprofit"
+ },
+ {
+  "id": "or-oda-retail",
+  "read": "https://www.oregon.gov/oda/food-safety/fs-licensing/Pages/default.aspx",
+  "quote": "Retail : Stores with packaged foods or bulk foods.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "3c3c763ed35d7d0a",
+  "context": "t of agriculture offers licenses for the following types of food establishments retail: stores with packaged foods or bulk foods. bakery: bread, rolls, cakes, pies, doughnuts, cookies, biscuits, crackers, and "
+ },
+ {
+  "id": "or-oda-processing-warehouse",
+  "read": "https://www.oregon.gov/oda/food-safety/fs-licensing/Pages/default.aspx",
+  "quote": "Food processing and warehousing : Production or storage and distribution of food.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "3c3c763ed35d7d0a",
+  "context": "ls, cakes, pies, doughnuts, cookies, biscuits, crackers, and all similar goods. food processing and warehousing: production or storage and distribution of food. cannabis: businesses that process or bake cannabis containing foods or have a w"
+ },
+ {
+  "id": "wa-wsda-warehouse",
+  "read": "https://agr.wa.gov/Services/Licenses-Permits-and-Certificates/Summary-Descriptions/Food-Storage-Warehouse",
+  "quote": "Facilities where food is stored, kept, or held for distribution to wholesale facilities, retail outlets and restaurants",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "d31b2edcf7c12684",
+  "context": "uit or vegetables what activities require this license and who needs to get it? facilities where food is stored, kept, or held for distribution to wholesale facilities, retail outlets and restaurants how do i apply? you apply by completing an application form. how much will it c"
+ },
+ {
+  "id": "wa-wsda-processor",
+  "read": "https://agr.wa.gov/departments/food-safety/food-safety/food-processors",
+  "quote": "You need a Food Processor License if your process falls into the following categories",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "57299d66448bc845",
+  "context": "ther container. food processor application food processor application (spanish) you need a food processor license if your process falls into the following categories: you cook, bake, freeze, slice, dehydrate, smoke, roast coffee beans, bottle wa"
+ },
+ {
+  "id": "ut-udaf-retail-plan",
+  "read": "https://ag.utah.gov/regulatory-services/retail-food-regulatory-program/",
+  "quote": "All prospective, converted, or remodeled food establishments must complete and submit a plan review application at least thirty (30) calendar days prior to operating.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "486fcb80b745dd5d",
+  "context": " (801) 982-2200 [email protected] starting a retail food establishment business all prospective, converted, or remodeled food establishments must complete and submit a plan review application at least thirty (30) calendar days prior to operating. after the plans have been reviewed and approved, a pre-operational inspection i"
+ },
+ {
+  "id": "ut-udaf-retail",
+  "read": "https://ag.utah.gov/regulatory-services/retail-food-regulatory-program/",
+  "quote": "An application for food establishment registration will be completed during the pre-operational inspection.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "486fcb80b745dd5d",
+  "context": "shment has been built in accordance with the approved plans and specifications. an application for food establishment registration will be completed during the pre-operational inspection. note: all relevant plan review and registration fees must be paid before a food"
+ },
+ {
+  "id": "ut-udaf-manufactured-plan",
+  "read": "https://ag.utah.gov/regulatory-services/manufactured-food/",
+  "quote": "All prospective, converted, or remodeled food establishments must complete and submit a plan review application at least thirty (30) calendar days prior to operating.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "eb2a617de1886887",
+  "context": " 982-2200 [email protected] starting a manufactured food establishment business all prospective, converted, or remodeled food establishments must complete and submit a plan review application at least thirty (30) calendar days prior to operating. after the plans have been reviewed and approved, a pre-operational inspection i"
+ },
+ {
+  "id": "ut-udaf-manufactured",
+  "read": "https://ag.utah.gov/regulatory-services/manufactured-food/",
+  "quote": "An application for food establishment registration will be completed during the pre-operational inspection.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "eb2a617de1886887",
+  "context": "shment has been built in accordance with the approved plans and specifications. an application for food establishment registration will be completed during the pre-operational inspection. note: all relevant plan review and registration fees must be paid before a food"
+ },
+ {
+  "id": "id-ibr",
+  "read": "https://tax.idaho.gov/business-registration/",
+  "quote": "Idaho requires businesses to register for certain tax permits using the Idaho Business Registration (IBR) process.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "ef8214aea7c6fa9d",
+  "context": "getting tax permits on this page on this page related pages getting tax permits idaho requires businesses to register for certain tax permits using the idaho business registration (ibr) process. these permits include seller's permits for sales and use taxes, travel and conv"
+ },
+ {
+  "id": "id-ibr-employer",
+  "read": "https://tax.idaho.gov/business-registration/",
+  "quote": "If you have employees, you’ll also get a income tax withholding account and permits from the Idaho Department of Labor and the Industrial Commission.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "ef8214aea7c6fa9d",
+  "context": "use taxes, travel and convention permits, and some auditorium district permits. if you have employees, you'll also get a income tax withholding account and permits from the idaho department of labor and the industrial commission. read more about all the taxes we work with. tips use the business wizard on bus"
+ },
+ {
+  "id": "mt-withholding",
+  "read": "https://revenuefiles.mt.gov/taxes/withholding-tax/accounts",
+  "quote": "You must register for a Montana withholding tax account if you: Issue Montana wages",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "241e1dc284b2028e",
+  "context": "withholding account how to open or close a montana withholding account overview you must register for a montana withholding tax account if you: issue montana wages issue forms w-2 (with or without withholding) issue forms 1099 with withholding"
+ },
+ {
+  "id": "mt-ui",
+  "read": "https://uid.dli.mt.gov/employer-handbook.pdf",
+  "quote": "An employer who meets the above criteria is subject to Unemployment Insurance and must register.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "07e543d3eb99008c",
+  "context": "u must cover your employees for at least two calendar years. who must register? an employer who meets the above criteria is subject to unemployment insurance and must register. register online at uieservices.mt.gov. a new employer that acquires an existing"
+ },
+ {
+  "id": "mt-wholesale-food",
+  "read": "https://dphhs.mt.gov/assets/publichealth/FCS/Wholesale/LicenseGuide.pdf",
+  "quote": "If I sell or distribute food to grocery stores or other businesses, do I need a wholesale food license? A: Yes",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "e38b74a03597c28c",
+  "context": " a retail food license, which may be obtained through your local sanitarian. q: if i sell or distribute food to grocery stores or other businesses, do i need a wholesale food license? a: yes, but there are exceptions, as indicated in table 1. q: if i sell or distribute "
+ },
+ {
+  "id": "mt-retail-food",
+  "read": "https://dphhs.mt.gov/assets/publichealth/FCS/Wholesale/LicenseGuide.pdf",
+  "quote": "you will likely need a retail food license, which may be obtained through your local sanitarian.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "e38b74a03597c28c",
+  "context": "bute food directly to consumers, do i need a wholesale food license? a: no, but you will likely need a retail food license, which may be obtained through your local sanitarian. q: if i sell or distribute food to grocery stores or other businesses, do i nee"
+ },
+ {
+  "id": "wy-sales-tax",
+  "read": "https://excise-tax-div.wyo.gov/general-administrative/excise-tax-faqs",
+  "quote": "If you are selling tangible personal property, the answer is yes.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "d39e4dd9b070fa9e",
+  "context": " sales tax. it all depends on what you're selling and your business operations. if you are selling tangible personal property, the answer is yes. if you're providing any other sales or services, please reach out to our educat"
+ },
+ {
+  "id": "wy-dws",
+  "read": "https://dws.wyo.gov/dws-division/workers-compensation/new-employers/",
+  "quote": "Even if a business may be non-liable or optional under Wyoming’s Workers’ Compensation fund, registration is still required so DWS can make that determination.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "78c846228763c060",
+  "context": "age before starting work in the state ( wyo. stat. §§ 27-14-101 and 27-14-207). even if a business may be non-liable or optional under wyoming's workers' compensation fund, registration is still required so dws can make that determination. get started: register your business all employers—wyoming-based and out-of-stat"
+ },
+ {
+  "id": "wy-wda-food",
+  "read": "https://agriculture.wy.gov/chs-information",
+  "quote": "No establishment or processing plant shall serve, hold for sale or sell food to the public without a valid license.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "0fabc1cc82c367b4",
+  "context": "is and shall be prominently displayed in the establishment or processing plant. no establishment or processing plant shall serve, hold for sale or sell food to the public without a valid license. the license application is not available online and may be obtained from the lo"
+ },
+ {
+  "id": "ak-business-license",
+  "read": "https://www.commerce.alaska.gov/web/cbpl/BusinessLicensing/ObtainBusinessLicenseNumber.aspx",
+  "quote": "or another business activity must obtain an Alaska Business License.",
+  "checked": "2026-10-28",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-28"
+ },
+ {
+  "id": "ak-esd-ui",
+  "read": "https://www.labor.state.ak.us/estax/forms/AER.pdf",
+  "quote": "has employed one or more persons is required by law to register.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "6199430fc1bc388f",
+  "context": "son, firm, corporation, or other type of organization for some portion of a day has employed one or more persons is required by law to register. to register online: go to https://my.alaska.gov. create a myalaska account or l"
+ },
+ {
+  "id": "ak-dec-food",
+  "read": "https://dec.alaska.gov/eh/fss/food/opening/",
+  "quote": "No matter what you are planning on doing you will need to submit a Food Establishment Application.",
+  "checked": "2026-10-28",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-28"
+ },
+ {
+  "id": "hi-food-warehouse",
+  "read": "https://health.hawaii.gov/san/files/2025/09/HAR-11-50-2025-searchable.pdf",
+  "quote": "No person may operate a food establishment without a valid permit issued by the director",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "8f667f782ba90691",
+  "context": "ents, homemade food products and hand-pounded poi, and exemptions. (a) permits. no person may operate a food establishment without a valid permit issued by the director, which shall remain valid for one year from the date of issuance unless suspend"
  }
 ]
