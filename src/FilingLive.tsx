@@ -45,7 +45,7 @@ export function masked(label: string, value: string): string {
 const hostOf = (u?: string | null) => { try { return u ? new URL(/^https?:/i.test(u) ? u : `https://${u}`).hostname.replace(/^www\./, "") : ""; } catch { return ""; } };
 const isImg = (p?: string | null) => !!p && /\.(png|jpe?g|webp)$/i.test(p);
 const CHAN: Record<string, Bi> = {
-  portal: B("on the agency's site", "在机构网站上"), email: B("by email", "通过邮件"), fax: B("by fax", "通过传真"), mail: B("by certified mail", "通过挂号信"), team: B("with the Placetta team", "由快哉团队"),
+  portal: B("on the agency's site", "在机构网站上"), email: B("by email", "通过邮件"), fax: B("by fax", "通过传真"), mail: B("by certified mail", "通过挂号信"), team: B("sent by you", "由您提交"),
 };
 
 /** An account's filing, from the log the file function and the portal worker write as they go. */
@@ -212,7 +212,7 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
   const refused = run.events.filter(e => e.kind === "refused").length;
   const head: Record<State, Bi> = {
     queued: B("Starting", "即将开始"), running: B("Filing now", "正在提交"), needs_you: B("Needs you for one step", "需要您完成一步"),
-    done: B("Submitted", "已提交"), team: B("With the Placetta team", "由快哉团队处理"), stopped: B("Stopped before anything was sent", "已在发送前停止"), failed: B("Didn't go through", "未能完成"),
+    done: B("Submitted", "已提交"), team: B("With Placetta for a check", "快哉正在核对"), stopped: B("Stopped before anything was sent", "已在发送前停止"), failed: B("Didn't go through", "未能完成"),
     held: B("Approved, waiting before it's sent", "已批准，等待发送"),
   };
   const evIndex = (e: Ev) => run.events.indexOf(e);

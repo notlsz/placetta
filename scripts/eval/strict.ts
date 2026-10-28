@@ -23,7 +23,7 @@ export type Gold = {
   lifecycle?: { expect: { id: string; group: string; verified: boolean; source: string; quote?: string }[]; mustNot: { id: string; why: string }[] };
 };
 
-type Entry = { id: string; read: string; quote: string; checked: string; method: "curl" | "webfetch"; found: boolean };
+type Entry = { id: string; read: string; quote: string; checked: string; method: "curl" | "webfetch" | "browser"; found: boolean };
 const log = LOG as Entry[];
 const words = (s: string) => s.trim().split(/\s+/).length;
 

@@ -2311,26 +2311,6 @@
   "context": "full details, contact fulton county environmental health services. introduction all food service operations must receive a food service permit from environmental health services to operate in fulton county. obtaining a food service permit from fulton county board of health is the first"
  },
  {
-  "id": "ca-food-manager",
-  "read": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
-  "quote": "food facilities that prepare, handle, or serve non-prepackaged potentially hazardous food (PHF), except temporary food facilities, to have at least one owner or employee",
-  "checked": "2026-10-22",
-  "method": "curl",
-  "found": true,
-  "sha256": "b6b4d1ebb372e472",
-  "context": " certification the california health and safety code, section 113947.1 requires food facilities that prepare, handle, or serve non-prepackaged potentially hazardous food (phf), except temporary food facilities, to have at least one owner or employee who has successfully passed an examination from an accredited food protection m"
- },
- {
-  "id": "ca-food-handler",
-  "read": "https://rmadocs.venturacounty.gov/environmental-health/programs/consumer-food-protection/publications/environmental-health-californias-requirement-for-food-safety-certification.pdf",
-  "quote": "A food handler shall obtain a food hander card within 30 days after the date of hire.",
-  "checked": "2026-10-22",
-  "method": "curl",
-  "found": true,
-  "sha256": "b6b4d1ebb372e472",
-  "context": "m the date of the change to comply with the certified food manager requirement. a food handler shall obtain a food hander card within 30 days after the date of hire. while training is not required to take the examination, many people find that t"
- },
- {
   "id": "ca-cdph-pfr",
   "read": "https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/FDBPrograms/FoodSafetyProgram/ProcessedFoodRegistration.aspx",
   "quote": "PFR certificates are also required for general food warehouses.",
@@ -7325,5 +7305,50 @@
   "found": true,
   "sha256": "42bd92ea8e06f76c",
   "context": " of food safety and sanitation, as well as to protect the health of the public. we facilitate the process of issuing permits and granting health approvals required for operating food premises. this includes reviewing documentation, conducting assessments, and ensuring com"
+ },
+ {
+  "id": "lac-fbn",
+  "read": "https://www.lavote.gov/home/county-clerk/fictitious-business-names/general-info",
+  "quote": "Persons doing business for profit under a fictitious name (does not include surname in company name).",
+  "checked": "2026-10-24",
+  "method": "browser",
+  "found": true,
+  "note": "curl got HTTP 403; read in a browser on 2026-10-24"
+ },
+ {
+  "id": "scc-fbn",
+  "read": "https://clerkrecorder.santaclaracounty.gov/business-services/apply-renew-or-refile-fictitious-business-name-fbn-statement",
+  "quote": "Online services are now available through our Self-Service portal.",
+  "checked": "2026-10-24",
+  "method": "browser",
+  "found": true,
+  "note": "curl got HTTP 403; read in a browser on 2026-10-24"
+ },
+ {
+  "id": "il-sos-foreign-llc",
+  "read": "https://www.ilga.gov/Documents/legislation/ilcs/documents/080501800K45-5.htm",
+  "quote": "before transacting business in this State, a foreign limited liability company shall be admitted to do so by the Secretary of State.",
+  "checked": "2026-10-24",
+  "method": "browser",
+  "found": true,
+  "note": "curl got no connection; read in a browser on 2026-10-24"
+ },
+ {
+  "id": "ca-food-handler",
+  "read": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=113948",
+  "quote": "handler who is hired on or after June 1, 2011, shall obtain a food handler card within 30 days after the date of hire.",
+  "checked": "2026-10-24",
+  "method": "browser",
+  "found": true,
+  "note": "curl got HTTP 403; read in a browser on 2026-10-24"
+ },
+ {
+  "id": "ca-food-manager",
+  "read": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=113947.1",
+  "quote": "There shall be at least one food safety certified owner or employee at each food facility.",
+  "checked": "2026-10-24",
+  "method": "browser",
+  "found": true,
+  "note": "curl got HTTP 403; read in a browser on 2026-10-24"
  }
 ]

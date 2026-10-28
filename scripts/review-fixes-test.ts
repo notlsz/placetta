@@ -138,7 +138,7 @@ export function reviewFixTests(ok: Ok, eq: Eq) {
   eq(rs.who.en, "Odelia files online", "the sign permit goes on San José's portal (filing coverage: portal)");
   eq(rs.time?.en, "Average: 2 weeks.", "with the city's published time, from the registry");
   const team = approvalRoute({ kind: "file" }, { official: undefined, est: B("To be confirmed", "待确认") })!;
-  ok(team.who.en === "The Placetta team files it" && !team.time, "a form with no route goes to the team, and no time is invented", team);
+  ok(team.who.en === "Odelia prepares it and you send it" && !team.time, "a form with no route is prepared for the business to send, and no time is invented", team);
   ok(approvalRoute({ kind: "upload" }) === null, "an upload card is the owner's own step: no route line");
   for (const [form, kind] of Object.entries(ROUTES as Record<string, string>)) if (!["portal", "email", "fax", "mail", "owner", "faxSigned", "ownerSigns", "team"].includes(kind)) ok(false, `${form}: unknown route ${kind}`);
 

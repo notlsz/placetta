@@ -858,8 +858,10 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       const v = await api.fileNow(cloud.wsId, filing.id).catch(() => null);
       void refresh();
       const st = v?.filing.agent_state, last = v?.filing.agent_log?.at(-1);
-      return st === "handoff" || !v
-        ? B(`Sent to the Placetta team. They check the ${app.name.en.toLowerCase()} against the agency's current requirements and submit it. If the agency charges a fee, you'll get its payment link here.`, `已交给快哉团队。他们会对照机构现行要求核对${app.name.zh}后提交。如需缴纳机构费用，付款链接会发到这里。`)
+      return !v
+        ? B(`Approved. Odelia couldn't start sending the ${app.name.en.toLowerCase()} just now; ask her to try again in a minute.`, `已批准。Odelia 暂时无法开始提交${app.name.zh}，请稍后让她重试。`)
+        : st === "handoff"
+        ? B(`Approved. Placetta checks the first filings of each form before Odelia sends them on her own, and the ${app.name.en.toLowerCase()} is in that check. It goes once checked, usually within a business day.`, `已批准。Odelia 自动提交每种表格的前几份时，快哉会先核对，${app.name.zh}正在核对中，核对后即发送，通常在一个工作日内。`)
         : st === "needs_you" && last ? B(`One step needs you first: ${last.en}`, `需要您先完成一步：${last.zh}`)
         : B(`Filing it now: I checked the ${app.name.en.toLowerCase()} against the agency's requirements and I'm submitting it. Watch each step below.`, `正在提交：我已对照机构要求核对${app.name.zh}，正在提交。每一步都显示在下方。`);
     } catch (e) {
@@ -1215,7 +1217,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       removeLogin: async id => { if (!ownerOk()) return; try { await api.removeLogin(cloud.wsId, id); setLogins(await api.listLogins(cloud.wsId)); } catch (e) { fail(e); } },
       feedUrl: async rotate => (await api.integration<{ url: string }>(cloud.wsId, "feed_url", { rotate: !!rotate })).url,
       markPaid: async id => { if (!ownerOk()) return; try { await api.markPaid(id); await refresh(); say(lang === "zh" ? "已告知团队，他们会继续提交。" : "Thanks. The team will finish the submission."); } catch (e) { fail(e); } },
-      resumeFiling: async (id, resubmit) => { try { await api.resumeFiling(cloud.wsId, id, !!resubmit); await refresh(); say(lang === "zh" ? "好的，快哉继续办理。" : "Thanks. Placetta carries on."); } catch (e) { fail(e); } },
+      resumeFiling: async (id, resubmit, confirmation) => { try { await api.resumeFiling(cloud.wsId, id, !!resubmit, confirmation ?? ""); await refresh(); say(confirmation !== undefined ? (lang === "zh" ? "已记录为已提交，Odelia 会跟进进度。" : "Marked as sent. Odelia tracks it from here.") : lang === "zh" ? "好的，快哉继续办理。" : "Thanks. Placetta carries on."); } catch (e) { fail(e); } },
+      addConfirmation: async (id, confirmation) => { try { await api.addConfirmation(cloud.wsId, id, confirmation); await refresh(); say(lang === "zh" ? "确认号已保存。" : "Confirmation number saved."); } catch (e) { fail(e); } },
       teachFiling: async id => { if (!ownerOk()) return; try { await api.teachFiling(cloud.wsId, id); await refresh(); say(lang === "zh" ? "好的。实时浏览器打开后，请像平时一样提交，Odelia 会在旁记下步骤。" : "Got it. When the live browser opens, file it the way you always do. Odelia watches and writes down the steps."); } catch (e) { fail(e); } },
       uploadSigned: async (id, appId, file) => {
         try {

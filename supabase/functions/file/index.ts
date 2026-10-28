@@ -25,10 +25,11 @@ import {
   admin, aalOf, describe, HttpError, isStaff, ok, readBody, requireAccess, requireUser, serve, uuidParam,
   SUPABASE_URL, b64urlDecode, utf8,
 } from "./shared.ts";
-import { DEST, staleDestinations, type Dest } from "./destinations.ts";
+import { DEST, staleDestinations, TEAM_ONLY, type Dest } from "./destinations.ts";
 import {
-  afterHold, askedToResubmit, canFaxSignedFor, CHANNEL_SAID, check, DUPLICATE_REF, emailFor, envFrom, fallback, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holds,
-  isForeign, killSwitchOn, type LogEntry, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, type Refusal, refusalOf, rerouteDue, signedCopy, TEACH_REFUSED, teachRefusal, teamApproved,
+  afterHold, askedToResubmit, type Bi, canFaxSignedFor, CHANNEL_SAID, check, DUPLICATE_REF, emailFor, envFrom, fallback, faxFailures, faxFile, faxTo, feeBlocks, type Filing,
+  handBackDue, handoffPacket, hasLoginFor, holds, isForeign, killSwitchOn, type LogEntry, mailOutcome, mailTo, OWNER_REF, pick, type Refusal, refusalOf, sentByYou, signedCopy,
+  TEACH_REFUSED, teachRefusal, teamApproved, whyYours, YOURS_REF,
 } from "./logic.ts";
 
 const env = () => envFrom((k) => Deno.env.get(k));
@@ -117,12 +118,21 @@ async function teamTask(f: Filing, kind: string, title: string, detail?: unknown
   if (data?.length) await alertTeam(f, kind, title);   // only the first time, never for a repeat
 }
 
-async function toTeam(f: Filing, en: string, zh: string, kind = "handoff") {
-  // The status stays as it was: a request nobody has started can still be canceled.
-  const g = await step(f, log(en, zh, "handoff"), { channel: "team", agent_state: "handoff" });
-  await teamTask(g, kind, en);
-  return view(g);
+/** Odelia isn't sending this one: the business sends it itself. She puts the filled form and a packet in Documents (why,
+    where and how the agency takes it, the signature, the fee, what goes with it), the owners hear about it the way they
+    chose (the needs_you stage alert), and "I've sent it" marks it submitted so she tracks it like her own. check:
+    something may already have reached the agency, so the packet says to look first. The status stays as it was: a
+    request nobody has started can still be canceled. */
+async function toYou(f: Filing, why: Bi, opts: { check?: boolean; expect?: Record<string, unknown> } = {}) {
+  const d = DEST[f.payload.official ?? ""];
+  const t = TEAM_ONLY[f.payload.official ?? ""];
+  const packet = handoffPacket(f, d, why, { check: opts.check, agencyWhy: t?.why, agencySource: t?.source });
+  // Saved with the filing's documents (not as its receipt: nothing has reached the agency yet).
+  await saveReceipt(f, d?.owner ? "owner-packet.pdf" : "filing-packet.pdf", await receiptPdf(packet.lines), "application/pdf");
+  return view(await step(f, log(packet.en, packet.zh, "needs_you", d?.owner ? OWNER_REF : YOURS_REF),
+    { ...(opts.expect ?? {}), channel: "team", agent_state: "needs_you", handoff_url: packet.link }));
 }
+const bi = (en: string, zh: string): Bi => ({ en, zh });
 
 async function needsYou(f: Filing, en: string, zh: string, handoff_url: string | null = null, kind = "needs_you") {
   return view(await step(f, log(en, zh, kind), { agent_state: "needs_you", handoff_url }));
@@ -130,13 +140,9 @@ async function needsYou(f: Filing, en: string, zh: string, handoff_url: string |
 
 /** An agency that takes the form only from the business itself (the owner, or the person being certified): nothing is
     sent. Odelia puts a one-page packet in Documents (what to send, where, the fee and what goes with it) and the
-    owner taps "I've done it" once it's sent; the team then confirms it with the agency. */
+    owner taps "I've sent it" once it's sent; Odelia tracks it from there. */
 async function toOwner(f: Filing, d: Dest) {
-  const packet = ownerPacket(f, d);
-  // Saved with the filing's documents (not as its receipt: nothing has reached the agency yet).
-  await saveReceipt(f, "owner-packet.pdf", await receiptPdf(packet.lines), "application/pdf");
-  return view(await step(f, log(packet.en, packet.zh, "needs_you", OWNER_REF),
-    { channel: "team", requirements_checked: true, agent_state: "needs_you", handoff_url: packet.link }));
+  return await toYou(f, { en: d.owner!.why, zh: d.owner!.why });
 }
 
 // ------------------------------------------------------------------ facts about the workspace
@@ -215,28 +221,31 @@ async function markSubmit(f: Filing, en: string, zh: string): Promise<Filing> {
   return data as unknown as Filing;
 }
 
-/** markSubmit, except that a workspace at its daily cap hands the filing to the team instead of sending it. */
+/** markSubmit, except that a workspace at its daily cap hands the filing to the business instead of sending it. */
 async function claimOrTeam(f: Filing, en: string, zh: string): Promise<Filing | ReturnType<typeof view>> {
   try {
     return await markSubmit(f, en, zh);
   } catch (e) {
     if (!(e instanceof Refused) || e.why !== "cap") throw e;
     const n = env().dailyCap;
-    return await toTeam(f,
-      `Placetta has sent ${n} filings by fax or mail for this business in the last 24 hours, the most it sends on its own in a day. The Placetta team sends this one.`,
-      `过去 24 小时内，快哉已为该商家通过传真或邮寄自动提交了 ${n} 份申请，已达每日上限。这一份由快哉团队提交。`, "review");
+    return await toYou(f, bi(
+      `Placetta has sent ${n} filings by fax or mail for this business in the last 24 hours, the most it sends on its own in a day.`,
+      `过去 24 小时内，快哉已为该商家通过传真或邮寄自动提交了 ${n} 份申请，已达每日上限。`));
   }
 }
 const isView = (x: Filing | ReturnType<typeof view>): x is ReturnType<typeof view> => "filing" in x;
 
-/** The two-key period and dry runs: stop before sending, the team reviews. */
+/** Placetta's check of a form's first self-filings (the two-key period): stop before sending until Placetta approves.
+    The owner sees that it's in the check, and the sweep hands it to them with its packet if the check takes longer
+    than REVIEW_HOURS. A dry run sends nothing: the business gets the packet. */
 async function holdForTeam(f: Filing, d: Dest): Promise<ReturnType<typeof view> | null> {
   const e = env();
   if (e.dryRun) {
-    return await toTeam(f, "Dry run: everything is ready to send. The Placetta team reviews it; nothing was sent.", "演练：已准备好发送，由快哉团队审核，未实际发送。", "review");
+    return await toYou(f, bi("Placetta's sending is paused for testing, so nothing was sent.", "快哉的自动发送正处于测试暂停中，未实际发送。"));
   }
   if (!teamApproved(f) && (await selfFiledCount(f.payload.official!)) < e.twoKey) {
-    const g = await step(f, log("With the Placetta team for a final check before it's sent", "快哉团队正在发送前做最后核对", "review_wait"), { agent_state: "handoff" });
+    const g = await step(f, log("Placetta checks the first filings of each form before Odelia sends them on her own, and this one is in that check. Nothing for you to do: it goes once checked, usually within a business day. If it takes longer than a day, Odelia gives it to you to send.",
+      "Odelia 自动提交每种表格的前几份时，快哉会先核对，这一份正在核对中。您无需操作：核对后即发送，通常在一个工作日内。若超过一天，Odelia 会把材料交给您自行提交。", "review_wait"), { agent_state: "handoff" });
     await teamTask(g, "review", `Two-key review before Placetta sends ${f.payload.official} (${f.channel}). Approve or take it over.`, { source: d.source });
     return view(g);
   }
@@ -247,7 +256,7 @@ async function sendEmail(f: Filing, d: Dest) {
   const held = await holdForTeam(f, d);
   if (held) return held;
   const secret = Deno.env.get("FILER_SECRET") ?? "";
-  if (secret.length < 32) return await toTeam(f, "Email filing isn't set up yet (FILER_SECRET).", "邮件提交尚未配置。");
+  if (secret.length < 32) return await toYou(f, bi("Placetta's email sending isn't set up yet.", "快哉的邮件发送尚未配置。"));
   const { subject, body } = emailFor(f);
   const claimed = await claimOrTeam(f, `Emailing it to ${d.email}`, `正在发送邮件至 ${d.email}`);
   if (isView(claimed)) return claimed;
@@ -272,12 +281,13 @@ async function sendEmail(f: Filing, d: Dest) {
     // No answer, or the server failed partway: the email may have left. The team checks; nothing is sent again.
     console.error("filer mail_send unknown:", res?.status ?? "timeout");
     await teamTask(g, "check_agency", "The email send didn't confirm (timeout or server error). Check the customer's Sent folder before sending again.");
-    return await toTeam(g, "The email didn't confirm. The team is checking whether it went before anything is sent again.", "邮件未确认送出。团队会先核实是否已发出，再决定是否重发。", "check_agency");
+    await teamTask(g, "check_agency", "An email filing didn't confirm; the business was asked to check before sending again.");
+    return await toYou(g, bi("Odelia can't tell whether the email reached the agency.", "Odelia 无法确认邮件是否已送达机构。"), { check: true });
   }
   if (outcome === "refused") {
     const msg = String(out?.error?.message ?? `error ${res?.status}`).slice(0, 200);
     // A refusal before sending (bad input, not connected, too large) is safe to hand to the team as not sent.
-    return await toTeam(g, `The email wasn't sent: ${msg}`, `邮件未发送：${String(out?.error?.message_zh ?? msg).slice(0, 200)}`);
+    return await toYou(g, bi(`The email wasn't sent: ${msg}`, `邮件未发送：${String(out?.error?.message_zh ?? msg).slice(0, 200)}`));
   }
   const from = String(out.account ?? "");
   const h = await step(g, log(`Emailed the ${f.payload.form?.en ?? "form"} to ${d.email}${from ? ` from ${from}` : ""}`, `已从 ${from || "您的邮箱"} 将${f.payload.form?.zh ?? "表格"}发送至 ${d.email}`, "submitted", String(out.id ?? "")),
@@ -290,7 +300,7 @@ const TELNYX = "https://api.telnyx.com/v2";
 async function sendFax(f: Filing, d: Dest, retry = false) {
   if (!retry) { const held = await holdForTeam(f, d); if (held) return held; }
   const to = faxTo(d, f.payload);
-  if (!to) return await toTeam(f, "There's no fax number for this applicant.", "没有适用于该申请人的传真号码。");
+  if (!to) return await toYou(f, bi("The agency lists no fax number for this applicant.", "机构没有列出适用于该申请人的传真号码。"));
   let g = f;
   if (!retry) {
     const claimed = await claimOrTeam(f, `Faxing it to ${to}${isForeign(f.payload) ? " (international applicants)" : ""}`, `正在传真至 ${to}`);
@@ -308,7 +318,7 @@ async function sendFax(f: Filing, d: Dest, retry = false) {
   const id = body?.data?.id as string | undefined;
   if (!res || !res.ok || !id) {
     console.error("telnyx refused:", res?.status, JSON.stringify(body?.errors ?? "").slice(0, 200));
-    return await toTeam(g, "The fax service didn't take the fax. The team will send it.", "传真服务未接收，团队会处理。");
+    return await toYou(g, bi("The fax service didn't take the fax, so nothing was sent.", "传真服务未接收，未发出任何内容。"));
   }
   return view(await step(g, log("Fax queued with the fax service", "传真已进入发送队列", "fax_queued", id), { provider_ref: id, agent_state: "running", channel: "fax" }));
 }
@@ -336,7 +346,7 @@ async function applyFax(f: Filing, status: string, info: { pages?: number; reaso
       { ...same, provider_ref: null });
     // Counted from the row the database just returned, not from what this caller read earlier.
     if (faxFailures(g) < 3) return await sendFax(g, DEST[f.payload.official ?? ""]!, true);
-    return await toTeam(g, "The fax failed 3 times. The team will send it.", "传真 3 次未送达，团队会处理。");
+    return await toYou(g, bi("The fax didn't go through after 3 tries.", "传真尝试 3 次均未送达。"));
   }
   return view(f);
 }
@@ -362,8 +372,8 @@ async function sendMail(f: Filing, d: Dest) {
   if (held) return held;
   const to = mailTo(d, f.payload);
   let from: Record<string, string>;
-  try { from = JSON.parse(Deno.env.get("LOB_FROM") ?? ""); } catch { return await toTeam(f, "Certified mail isn't set up yet (return address).", "挂号信尚未配置寄件地址。"); }
-  if (!to) return await toTeam(f, "There's no mailing address for this form.", "该表格没有邮寄地址。");
+  try { from = JSON.parse(Deno.env.get("LOB_FROM") ?? ""); } catch { return await toYou(f, bi("Placetta's certified mail isn't set up yet.", "快哉的挂号信寄送尚未配置。")); }
+  if (!to) return await toYou(f, bi("The agency lists no mailing address for this form.", "机构没有列出这份表格的邮寄地址。"));
   const claimed = await claimOrTeam(f, `Mailing it by certified mail to ${to.name}, ${to.city}`, `正在以挂号信寄往 ${to.name}，${to.city}`);
   if (isView(claimed)) return claimed;
   const g = claimed;
@@ -380,7 +390,8 @@ async function sendMail(f: Filing, d: Dest) {
   const body = res ? await res.json().catch(() => ({})) : {};
   if (!res || !res.ok || !body?.id) {
     console.error("lob refused:", res?.status, JSON.stringify(body?.error ?? "").slice(0, 200));
-    return await toTeam(g, "The mail service didn't take the letter. The team will mail it.", "邮寄服务未接收信件，团队会处理。", "check_agency");
+    await teamTask(g, "check_agency", "The mail service didn't confirm a certified letter; the business was asked to check before mailing again.");
+    return await toYou(g, bi("The mail service didn't confirm the letter.", "邮寄服务未确认收到信件。"), { check: true });
   }
   const tracking = String(body.tracking_number ?? "");
   const h = await step(g, log(`Sent by certified mail to ${to.name}${tracking ? `. Tracking ${tracking}` : ""}${body.expected_delivery_date ? `, expected ${body.expected_delivery_date}` : ""}`,
@@ -456,41 +467,37 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
 
   // A probe workspace goes through every check as if self-filing were on for every channel, then stops: nothing leaves.
   const synth = await isSynthetic(f.workspace_id);
-  if (!synth && !killSwitchOn(f, e)) return await toTeam(f, "Self-filing isn't on for this agency yet. The Placetta team submits it.", "该机构尚未开通自动提交，由快哉团队提交。");
+  if (!synth && !killSwitchOn(f, e)) return await toYou(f, bi("Placetta doesn't send this form to the agency by itself yet.", "快哉暂时不会自动向机构提交这份表格。"));
   const d = DEST[f.payload.official ?? ""];
   const ePick = synth ? { ...e, channels: ["email", "fax", "mail", "portal"] as typeof e.channels, portalWorker: true, fax: true, mail: true } : e;
   // Where it would go decides what is checked: the filled form and its signature only travel by email, fax and mail.
-  const channel = pick(f, d, ePick, await facts(f, d));
+  const fx = await facts(f, d);
+  const channel = pick(f, d, ePick, fx);
   const problems = check(f, d, { docPaths: await docPaths(f) }, channel);
   if (problems.length) {
     return await needsYou(f, problems.map((p) => p.en).join(". ").slice(0, 900), problems.map((p) => p.zh).join("；").slice(0, 900), null, "needs_you");
   }
   if (synth) {
-    const to = !d ? "the Placetta team (no destination on file)" : channel === "fax" ? `fax ${faxTo(d, f.payload) ?? "?"}` : channel === "mail" ? `mail to ${mailTo(d, f.payload)?.name ?? "?"}`
-      : channel === "email" ? `email ${d.email}` : channel === "portal" ? `the agency's site ${d.portal ?? ""}`.trim() : channel === "owner" ? "the owner's packet" : "the Placetta team";
+    const to = !d ? "you, with a packet (no destination on file)" : channel === "fax" ? `fax ${faxTo(d, f.payload) ?? "?"}` : channel === "mail" ? `mail to ${mailTo(d, f.payload)?.name ?? "?"}`
+      : channel === "email" ? `email ${d.email}` : channel === "portal" ? `the agency's site ${d.portal ?? ""}`.trim() : channel === "owner" ? "the owner's packet" : "you, with a packet";
     return view(await step(f, log(`Test run: checked and ready to go by ${to}. Nothing was sent.`, `测试运行：已核对，可通过${to}提交。未实际发送。`, "dry_run", channel),
       { channel: channel === "owner" ? "team" : channel, requirements_checked: true, agent_state: "done" }));
   }
   if (channel === "owner") return await toOwner(f, d!);
-  if (channel === "team" && d?.signature === "wet" && !d.portal) {
-    const where = d.fax ? `fax it to ${faxTo(d, f.payload)}` : d.mail ? `mail it to ${mailTo(d, f.payload)?.name}, ${mailTo(d, f.payload)?.city}` : d.email ? `email it to ${d.email}` : "send it to the agency";
-    const whereZh = d.fax ? `传真至 ${faxTo(d, f.payload)}` : d.mail ? `寄往 ${mailTo(d, f.payload)?.name}` : d.email ? `发送邮件至 ${d.email}` : "交给机构";
-    // The agency's fee goes with it, so the person sends it with the payment rather than Placetta faxing it.
-    const withFee = feeBlocks(f, d) ? " with the agency's fee" : "";
-    const withFeeZh = feeBlocks(f, d) ? "并附上机构费用" : "";
-    if (canFaxSignedFor(f, d, e)) {
-      // ref "upload": the app shows an upload button for the signed copy.
-      return view(await step(f, log(
-        "This agency needs a handwritten signature. Download the filled form from Documents, sign it by hand, then upload a scan or a clear photo of the signed page here. Placetta faxes it to the agency and saves the confirmation.",
-        "该机构要求手写签名。请从“文件”下载已填写的表格，手写签名后，在此上传签名页的扫描件或清晰照片。快哉会将其传真给机构并保存送达确认。",
-        "wet_signature", "upload"), { channel: "team", requirements_checked: true, agent_state: "needs_you", handoff_url: null }));
-    }
-    return await needsYou(await step(f, null, { channel: "team", requirements_checked: true }),
-      `This agency needs a handwritten signature. Download the filled form from Documents, sign it by hand, then ${where}${withFee}. Tap "I've done it" when it's sent.`,
-      `该机构要求手写签名。请从“文件”下载已填写的表格，手写签名后${withFeeZh}${whereZh}。发出后点击“我已完成”。`, null, "wet_signature");
+  // Self-filing is on for this form, but no channel Placetta sends on fits this filing: the business sends it. A wet
+  // signature on a form Placetta can fax asks for the signed copy instead.
+  if (channel === "team" && !(d?.signature === "wet" && !d.portal && canFaxSignedFor(f, d, e))) {
+    return await toYou(await step(f, null, { requirements_checked: true }, false), whyYours(f, d, e, fx));
+  }
+  if (channel === "team") {
+    // ref "upload": the app shows an upload button for the signed copy, and "I've sent it" if they send it themselves.
+    return view(await step(f, log(
+      "This agency needs a handwritten signature. Download the filled form from Documents, sign it by hand, then upload a scan or a clear photo of the signed page here. Placetta faxes it to the agency and saves the confirmation. Or send it yourself and tap \"I've sent it\".",
+      "该机构要求手写签名。请从“文件”下载已填写的表格，手写签名后，在此上传签名页的扫描件或清晰照片。快哉会将其传真给机构并保存送达确认。也可自行发送后点击“我已发出”。",
+      "wet_signature", "upload"), { channel: "team", requirements_checked: true, agent_state: "needs_you", handoff_url: null }));
   }
   f = await step(f, log("Checked against the agency's requirements", "已按机构要求核对", "check"),
-    { channel, agent_state: channel === "team" ? "handoff" : "running", requirements_checked: true, status: "in_progress" });
+    { channel, agent_state: "running", requirements_checked: true, status: "in_progress" });
   // The undo window: nothing leaves for SEND_HOLD_MINUTES, so the person can take it back. The sweep sends it after.
   if (holds(channel, e)) return view(await holdSend(f, e.holdMinutes));
   switch (channel) {
@@ -499,12 +506,11 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
     case "mail": return await sendMail(f, d!);
     case "portal": return view(await step(f, log("Opening the agency's site", "打开机构网站", "queued"), { agent_state: "queued" }));
     default:
-      await teamTask(f, "handoff", "No automatic channel for this form yet.");
-      return view(await step(f, log("No automatic channel for this form yet. The Placetta team submits it.", "该表格暂无自动提交方式，由快哉团队提交。", "handoff")));
+      return await toYou(f, bi("Placetta doesn't send this form by itself yet.", "快哉暂时无法自动提交这份表格。"));
   }
 }
 
-async function resume(f: Filing, by: string, resubmit = false) {
+async function resume(f: Filing, by: string, resubmit = false, confirmation = "") {
   if (f.agent_state !== "needs_you") return view(f);
   // Every change below compares-and-sets on needs_you, so two taps on "carry on" act once.
   const was = { expect_agent_state: "needs_you" };
@@ -517,15 +523,15 @@ async function resume(f: Filing, by: string, resubmit = false) {
     const g = await step(f, log("You asked Placetta to send it again", "您要求快哉再次提交", "resubmit", by), { ...was, agent_state: null, handoff_url: null });
     return await startAgain(g);
   }
-  if (last?.kind === "needs_you" && last.ref === OWNER_REF) {
-    const g = await step(f, log("You sent it to the agency yourself. The Placetta team confirms it arrived.", "您已亲自提交给机构，快哉团队会确认机构已收到。", "you_sent"), { ...was, agent_state: "handoff", channel: "team" });
-    await teamTask(g, "review", "The owner says they sent an owner-only form themselves (owner packet). Confirm with the agency and record the submission.");
-    return view(g);
-  }
-  if (last?.kind === "wet_signature") {
-    const g = await step(f, log("You signed and sent it yourself. The Placetta team confirms it reached the agency.", "您已亲自签署并发出，快哉团队会确认机构已收到。", "you_sent"), { ...was, agent_state: "handoff", channel: "team" });
-    await teamTask(g, "review", "Customer says they signed and sent the form themselves. Confirm with the agency and record the submission.");
-    return view(g);
+  // "I've sent it": the business sent it with the packet (or signed by hand and sent it). It's submitted, with the
+  // agency's confirmation number when they have one, and Odelia tracks it from here like her own filings.
+  if (sentByYou(last)) {
+    const conf = confirmationOf(confirmation);
+    return view(await step(f, log(
+      conf ? `You sent it to the agency, confirmation ${conf}. Odelia checks its status from here and tells you when it moves.`
+        : "You sent it to the agency. Odelia checks its status from here and tells you when it moves. Add the agency's confirmation number when you have it.",
+      conf ? `您已提交给机构，确认号 ${conf}。之后由 Odelia 跟进进度，有变化会通知您。` : "您已提交给机构。之后由 Odelia 跟进进度，有变化会通知您。收到机构的确认号后请补充填写。",
+      "you_sent", conf ?? undefined), { ...was, status: "submitted", agent_state: "done", requirements_checked: true, handoff_url: null, ...(conf ? { confirmation_number: conf } : {}) }));
   }
   if (f.channel === "portal") {
     return view(await step(f, log("You finished your step. Placetta carries on.", "您已完成这一步，快哉继续办理。", "resume", by), { ...was, agent_state: "queued", handoff_url: null }));
@@ -535,6 +541,22 @@ async function resume(f: Filing, by: string, resubmit = false) {
   return await startAgain(g);
 }
 const startAgain = (f: Filing) => start(f, new Request("https://local"), "resume");
+
+/** A confirmation number the business typed: letters, digits and - / . # only, at most 60 characters; null if none. */
+function confirmationOf(raw: unknown): string | null {
+  const v = String(raw ?? "").trim().slice(0, 60);
+  if (!v) return null;
+  if (!/^[A-Za-z0-9][A-Za-z0-9 ./#-]*$/.test(v)) throw new HttpError("bad_request", "A confirmation number has only letters, numbers and - / . #", "确认号只能包含字母、数字和 - / . #");
+  return v;
+}
+
+/** The agency's confirmation number for a filing the business sent itself, added after "I've sent it". */
+async function addConfirmation(f: Filing, raw: unknown, by: string) {
+  const conf = confirmationOf(raw);
+  if (!conf) throw new HttpError("bad_request", "Type the agency's confirmation number.", "请输入机构的确认号。");
+  if (f.channel !== "team" || f.status !== "submitted" || f.confirmation_number) throw new HttpError("bad_request", "This filing already has its confirmation, or Placetta sent it.", "这份申请已有确认号，或由快哉提交。");
+  return view(await step(f, log(`Confirmation ${conf} added`, `已添加确认号 ${conf}`, "confirmation", by), { confirmation_number: conf }));
+}
 
 /** The person signed a wet-signature form by hand and uploaded it: check the file, turn a photo into a PDF the fax
     service takes, record it, and run the filing again so it goes by fax. */
@@ -598,7 +620,7 @@ async function sendHeld(f: Filing) {
     case "fax": return await sendFax(f, d!);
     case "mail": return await sendMail(f, d!);
     case "queued": return view(f);   // the portal worker takes it from the queue
-    default: return await toTeam(f, "The agency's address changed while it waited. The Placetta team sends it.", "等待期间机构地址有变，由快哉团队提交。");
+    default: return await toYou(f, bi("The agency's address changed while it waited, so Placetta didn't send it.", "等待期间机构地址有变，快哉未发送。"));
   }
 }
 
@@ -707,7 +729,7 @@ async function telnyxWebhook(req: Request) {
 
 /** Runs that stopped partway (the function was killed between steps): a start that never picked a channel, a fax
     whose failure was recorded but not resent, an email or letter that never confirmed. Nothing is sent again; the team
-    checks with the agency when anything may have left. */
+    the business gets the packet, told to check with the agency first when anything may have left. */
 async function lostRuns(): Promise<number> {
   const before = new Date(Date.now() - 15 * 60 * 1000).toISOString();
   const { data, error } = await admin.from("filings").select(COLS).eq("agent_state", "running").lt("updated_at", before)
@@ -717,11 +739,13 @@ async function lostRuns(): Promise<number> {
   for (const r of (data ?? []) as unknown as Filing[]) {
     const sent = !!r.submit_clicked_at;
     try {
-      const g = await step(r, sent
-        ? log("Placetta lost track of this filing after it may have been sent. The team is checking with the agency before anything is sent again.", "快哉在可能已发出后中断，团队会先向机构核实，再决定是否重发。", "handoff")
-        : log("Placetta stopped before sending this filing. The Placetta team takes it from here.", "快哉在发送前中断，由快哉团队接手。", "handoff"),
-        { expect_agent_state: "running", expect_provider_ref: r.provider_ref, agent_state: "handoff", channel: "team" });
-      await teamTask(g, sent ? "check_agency" : "handoff", sent ? "A run stopped after the send was recorded. Check the agency (and the Sent folder) before sending again." : "A run stopped before sending. Send it or start it again.");
+      const expect = { expect_agent_state: "running", expect_provider_ref: r.provider_ref };
+      if (sent) {
+        await teamTask(r, "check_agency", "A run stopped after the send was recorded; the business was asked to check before sending again.");
+        await toYou(r, bi("Placetta stopped partway after it may have sent this.", "快哉在可能已发出后中断。"), { check: true, expect });
+      } else {
+        await toYou(r, bi("Placetta stopped before sending this, so nothing was sent.", "快哉在发送前中断，未发出任何内容。"), { expect });
+      }
       n++;
     } catch (e) {
       if (!(e instanceof Refused)) console.error("lost run:", describe(e));
@@ -733,7 +757,7 @@ async function lostRuns(): Promise<number> {
 /** The agency's site failed before anything was submitted: Placetta sends it another way the agency takes (email, fax or
     certified mail, after the same undo window and the same checks), or prepares the owner's packet when only the
     business may send it. Nothing is ever sent twice: only a filing with no submit on record, by a compare-and-set on
-    its hand-back. When there's no other way, the team files it, as before, and the log says why. */
+    its hand-back. When there's no other way, the business gets the packet, and it says why. */
 async function reroute(f: Filing) {
   const e = env();
   const d = DEST[f.payload.official ?? ""];
@@ -741,12 +765,12 @@ async function reroute(f: Filing) {
   const route = fallback(f, d, e, await facts(f, d));
   const problems = route === "team" ? [] : check(f, d, { docPaths: await docPaths(f) }, route);
   if (route === "team" || problems.length) {
-    const why = route === "team" ? "There's no other way the agency takes it that Placetta can send by itself" : `It can't go another way yet: ${problems.map((p) => p.en).join(". ")}`;
-    const whyZh = route === "team" ? "机构没有其他快哉可以自动提交的方式" : `暂时无法改用其他方式：${problems.map((p) => p.zh).join("；")}`;
-    return view(await step(f, log(`The agency's site didn't work. ${why}, so the Placetta team files it.`.slice(0, 900), `机构网站无法完成。${whyZh}，由快哉团队提交。`.slice(0, 900), "reroute", "team"), was, false));
+    const why = route === "team" ? whyYours(f, d ? { ...d, portal: undefined } : d, e, await facts(f, d)) : { en: `It can't go another way yet: ${problems.map((p) => p.en).join(". ")}.`, zh: `暂时无法改用其他方式：${problems.map((p) => p.zh).join("；")}。` };
+    await closeHandoffTasks(f);
+    return await toYou(f, bi(`The agency's site didn't work. ${why.en}`.slice(0, 900), `机构网站无法完成。${why.zh}`.slice(0, 900)), { expect: was });
   }
-  // Placetta sends it itself now: the team's hand-back task for it is closed
-  await admin.from("team_tasks").update({ done_at: new Date().toISOString() }).eq("filing_id", f.id).eq("kind", "handoff").is("done_at", null);
+  // Placetta sends it itself now: the hand-back task for it is closed
+  await closeHandoffTasks(f);
   if (route === "owner") {
     const g = await step(f, log("The agency's site didn't work. This form is one the business sends itself, so Odelia prepared the packet.", "机构网站无法完成。这份表格需由企业本人提交，Odelia 已准备好材料包。", "reroute", "owner"), was);
     return await toOwner(g, d!);
@@ -763,22 +787,46 @@ async function reroute(f: Filing) {
   }
 }
 
-/** Every filing whose portal run failed and that hasn't been looked at since: each tried another way, once. */
-async function rerouteFailed(): Promise<number> {
-  const { data, error } = await admin.from("filings").select(COLS).eq("channel", "team").eq("agent_state", "handoff").is("submit_clicked_at", null)
-    .not("status", "in", "(canceled,submitted,accepted,rejected)").limit(50);
-  if (error) { console.error("reroute:", error.code ?? ""); return 0; }
+/** Hand-back tasks for this filing (the worker's, the database's) are closed once Odelia has decided what happens. */
+async function closeHandoffTasks(f: Filing) {
+  await admin.from("team_tasks").update({ done_at: new Date().toISOString() }).eq("filing_id", f.id).eq("kind", "handoff").is("done_at", null);
+}
+
+/** Every filing left with Placetta (a portal run's hand-back, a check that ran long, anything else): the agency's site
+    failed, so it's tried another way once; something may have reached the agency, so the business checks first; or
+    the business sends it with the packet. Placetta's check of a form's first filings is left alone for REVIEW_HOURS,
+    and a filing the Placetta team took over by hand stays theirs. */
+async function handBacks(): Promise<number> {
+  const { data, error } = await admin.from("filings").select(COLS).eq("agent_state", "handoff")
+    .not("status", "in", "(canceled,submitted,accepted,rejected)").order("updated_at").limit(100);
+  if (error) { console.error("hand-backs:", error.code ?? ""); return 0; }
   let n = 0;
+  const now = Date.now();
   for (const r of (data ?? []) as unknown as Filing[]) {
-    if (!rerouteDue(r)) continue;
-    try { await reroute(r); n++; } catch (e) { if (!(e instanceof Refused)) console.error("reroute:", describe(e)); }
+    const due = handBackDue(r, now);
+    if (!due) continue;
+    const was = { expect: { expect_agent_state: "handoff" } };
+    try {
+      if (due === "reroute") await reroute(r);
+      else {
+        await closeHandoffTasks(r);
+        if (due === "review_late") {
+          await admin.from("team_tasks").update({ done_at: new Date().toISOString() }).eq("filing_id", r.id).eq("kind", "review").is("done_at", null);
+          await toYou(r, bi("Placetta's check of this form's first filings took longer than a day, so it's yours to send.", "快哉对这种表格首批申请的核对超过一天，请您自行提交。"), was);
+        } else if (due === "check") await toYou(r, bi("Something may already have reached the agency.", "可能已有内容送达机构。"), { ...was, check: true });
+        else {
+          await toYou(r, bi("Odelia couldn't finish sending this one herself.", "Odelia 未能自行完成提交。"), was);
+        }
+      }
+      n++;
+    } catch (e) { if (!(e instanceof Refused)) console.error("hand-back:", describe(e)); }
   }
   return n;
 }
 
 async function sweep() {
   const released = await releaseDue();
-  const rerouted = await rerouteFailed();
+  const rerouted = await handBacks();
   const { data: n } = await admin.rpc("requeue_stuck_filings");
   const lost = await lostRuns();
   const { data: rows } = await admin.from("filings").select(COLS).in("channel", ["fax", "mail"])
@@ -831,8 +879,8 @@ serve(async (req) => {
     const f = await loadFiling(ws, filingId);
     return await settled(() => teach(f, by));
   }
-  if (!["start", "resume", "signed", "stop", "status", "undo", "send_now"].includes(action)) {
-    throw new HttpError("bad_request", "action must be start, resume, signed, stop, undo, send_now, teach or status.");
+  if (!["start", "resume", "signed", "stop", "status", "undo", "send_now", "confirmation"].includes(action)) {
+    throw new HttpError("bad_request", "action must be start, resume, signed, stop, undo, send_now, confirmation, teach or status.");
   }
   // Sending, carrying on, and stopping are an owner's, as in the database (only owners approve or cancel filings);
   // any member can check on one.
@@ -841,7 +889,8 @@ serve(async (req) => {
   const resubmit = body.resubmit === true;
   return await settled(() => {
     if (action === "status") return refreshStatus(f);
-    if (action === "resume") return resume(f, by, resubmit);
+    if (action === "resume") return resume(f, by, resubmit, String(body.confirmation ?? ""));
+    if (action === "confirmation") return addConfirmation(f, body.confirmation, by);
     if (action === "start") return start(f, req, by, resubmit);
     if (action === "signed") return signed(f, String(body.path ?? "").slice(0, 500), by);
     if (action === "undo") return undo(f, by);

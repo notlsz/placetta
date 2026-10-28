@@ -867,6 +867,28 @@ async function finishing() {
   eq([renewalCycle("Every year."), renewalCycle("Renew every year."), renewalCycle("Every 2 years."), renewalCycle("Every two years."), renewalCycle("每年"), renewalCycle("Every year by May 15.")],
     [{ months: 12 }, { months: 12 }, { months: 24 }, { months: 24 }, { months: 12 }, { month: 5, day: 15 }], "the agency's cycles read as months, or a day each year");
   eq([renewalCycle("Does not expire."), renewalCycle("Every year, by the tax return due date."), renewalCycle("Valid up to 10 years."), renewalCycle(undefined)], [null, null, null, null], "anything else gives no date: none is made up");
+  // the registry's own wordings (2026-10-24: 90 of the 118 stated cycles read, up from 53)
+  eq(["Every 12 months.", "Every year from the issue date.", "Every year, one year from the issue date. The renewal notice comes 45 days before.", "Valid for 5 years.", "Valid for two years.",
+    "Valid 3 years from the exam date.", "Every 3 years, with 4 hours of approved continuing education.", "Every 4 years from the first registration; the clerk mails a renewal letter.",
+    "Biennial statement every two years ($9).", "Every year ($200).", "The first card is valid 2 years; renewals 3 years, or 5 with extra food safety training."].map(renewalCycle),
+    [{ months: 12 }, { months: 12 }, { months: 12 }, { months: 60 }, { months: 24 }, { months: 36 }, { months: 36 }, { months: 48 }, { months: 24 }, { months: 12 }, { months: 24 }],
+    "a term counted from the approval, however the agency words it");
+  eq(["Every year, due December 31.", "Every year; all certificates expire December 31.", "Every year; receipts run October 1 to September 30.", "Every year, by the last day of February.",
+    "Every year; renewals are due by March 1.", "Every year: the certificate expires December 31; renew on ATLBiz from January 1 to February 15 ($500 late filing fee) and pay by April 1.",
+    "Every year: the license runs for the calendar year, renewed by paying by January 1.", "Every year; the license year starts October 1.", "Every year; payments after January 31 carry a penalty."].map(renewalCycle),
+    [{ month: 12, day: 31 }, { month: 12, day: 31 }, { month: 9, day: 30 }, { month: 2, day: 29 }, { month: 3, day: 1 }, { month: 12, day: 31 }, { month: 1, day: 1 }, { month: 10, day: 1 }, { month: 1, day: 31 }],
+    "a date the agency fixes for everyone: the expiry when it names one, else the due date");
+  eq([renewalCycle("Renew between October 1 and December 31 of every even-numbered year."), renewalCycle("Every five years; registrations expire December 31 of the fifth year."), renewalCycle("Every year, between October 1 and December 31.")],
+    [{ month: 12, day: 31, parity: "even", opens: { month: 10, day: 1 } }, { month: 12, day: 31, years: 5 }, { month: 12, day: 31, opens: { month: 10, day: 1 } }], "even years, every few years, and a renewal window");
+  eq(["Every year: restaurant licenses expire December 31, others June 30.", "Every year online, on the district's date: October 1 in Miami, February 1 in Tampa, April 1 in Orlando.", "Every 2 or 4 years, as chosen.",
+    "Every year, by the 15th day of the 4th month of the tax year.", "Every year, due on the 15th of the month your business started in San José; a 25% penalty is added the day after it's due, and another 25% a month later.",
+    "Every year, before the date printed on the license, when it carries endorsements.", "Every two years, on December 31", "Doesn't need to be renewed.", "Renewal fee $40."].map(renewalCycle),
+    [null, null, null, null, null, null, null, null, null], "a date that depends on the kind of license, a district, the tax year, a choice or the owner's start month: no date");
+  eq([nextRenewal("2026-11-15", { month: 12, day: 31, parity: "even", opens: { month: 10, day: 1 } }), nextRenewal("2026-03-02", { month: 12, day: 31, parity: "even", opens: { month: 10, day: 1 } }),
+    nextRenewal("2027-05-01", { month: 12, day: 31, parity: "even", opens: { month: 10, day: 1 } }), nextRenewal("2026-03-02", { month: 12, day: 31, years: 5 }),
+    nextRenewal("2026-11-15", { month: 12, day: 31, opens: { month: 10, day: 1 } }), nextRenewal("2026-06-01", { month: 12, day: 31, opens: { month: 10, day: 1 } }), nextRenewal("2027-03-10", { month: 2, day: 29 })],
+    ["2028-12-31", "2026-12-31", "2028-12-31", "2030-12-31", "2027-12-31", "2026-12-31", "2028-02-29"],
+    "the next date: an approval inside the window is this round's; the fifth year counts the first; February's last day in a leap year");
   eq([nextRenewal("2026-10-20", { months: 12 }), nextRenewal("2024-02-29", { months: 12 }), nextRenewal("2026-06-01", { month: 5, day: 15 }), nextRenewal("2026-03-01", { month: 5, day: 15 })],
     ["2027-10-20", "2025-02-28", "2027-05-15", "2026-05-15"], "the next renewal: a year on (the last day of a shorter month), or the next named day");
   const r1 = scheduleRenewals(s1, T);
@@ -1643,7 +1665,7 @@ async function spending() {
 function appealRules() {
   console.log("\n# Appeal playbooks: official sources, deadline math, cited drafts, counsel handoff");
   // official hosts only: the statute, the regulation, the city code's publisher or the agency's own pages
-  const OFFICIAL = /^https:\/\/(abcab\.ca\.gov|www\.abc\.ca\.gov|www\.tabc\.texas\.gov|statutes\.capitol\.texas\.gov|www\.nysenate\.gov|(www\.)?sf\.gov|planning\.lacity\.gov|finance\.lacity\.gov|dbs\.lacity\.gov|leginfo\.legislature\.ca\.gov|ochealthinfo\.com|dallascityhall\.com|nyc-business\.nyc\.gov|www\.nyc\.gov|www\.sanjoseca\.gov|www\.houstontx\.gov|gov\.texas\.gov)\//;
+  const OFFICIAL = /^https:\/\/(abcab\.ca\.gov|www\.abc\.ca\.gov|www\.tabc\.texas\.gov|statutes\.capitol\.texas\.gov|www\.nysenate\.gov|(www\.)?sf\.gov|planning\.lacity\.gov|finance\.lacity\.gov|dbs\.lacity\.gov|leginfo\.legislature\.ca\.gov|ochealthinfo\.com|dallascityhall\.com|nyc-business\.nyc\.gov|www\.nyc\.gov|www\.sanjoseca\.gov|www\.houstontx\.gov|gov\.texas\.gov|www\.mass\.gov|malegislature\.gov|www\.nj\.gov)\//;
   const HAN = (s: string) => /[一-鿿]/.test(s);
   const by0 = (id: string) => APPEALS.find(a => a.id === id)!;
   for (const a of APPEALS) {
@@ -1656,6 +1678,19 @@ function appealRules() {
     if (a.fee.usd != null) ok(a.fee.verified, `${a.id}: a dollar fee only when confirmed`);
   }
   eq(APPEALS.filter(a => !a.deadline.verified).map(a => a.id), [], "every playbook's rule is confirmed on an official page (San José and Houston closed as not applicable)");
+  // Massachusetts and New Jersey liquor (read 2026-10-24)
+  { const ma = by0("ma_abcc_appeal"), nj = by0("nj_abc_municipal_appeal");
+    eq([appealForRule({ name: B("Common victualler all-alcohol license", "") }, "1 Beach St, Boston, MA 02111")?.id, appealForRule({ name: B("Plenary retail consumption license", "") }, "1 Main St, Fort Lee, NJ 07024")?.id],
+      ["ma_abcc_appeal", "nj_abc_municipal_appeal"], "a local liquor decision in Massachusetts or New Jersey goes to its state's appeal");
+    // received Thursday 2026-10-22: Fri 23, Mon 26, Tue 27, Wed 28, Thu 29
+    const d1 = appealDeadline(ma.deadline, "2026-10-22", ma.tz)!;
+    ok(d1.date === "2026-10-29" && d1.unit === "business" && d1.verified && /5 business days of receipt/.test(d1.rule) && /c\.138 §67/.test(d1.section), "Massachusetts: 5 business days from receipt, weekends skipped (ABCC; c.138 §67)", d1);
+    // received Wednesday 2026-11-25: Thanksgiving (26th) and the weekend skipped: Fri 27, Mon 30, Tue Dec 1, Wed 2, Thu 3
+    eq(appealDeadline(ma.deadline, "2026-11-25", ma.tz)!.date, "2026-12-03", "Massachusetts: Thanksgiving isn't a business day");
+    const d2 = appealDeadline(nj.deadline, "2026-10-20", nj.tz)!;
+    ok(d2.date === "2026-11-19" && d2.legal === "2026-11-19" && /registered mail/.test(d2.rule), "New Jersey: 30 days from service or registered mailing (Division of ABC)", d2);
+    ok(nj.fee.usd === 100 && nj.fee.verified && /Division of ABC/.test(nj.fee.says.en) && /Trenton, NJ 08625-0087/.test(nj.file.en), "New Jersey: the $100 fee and where it goes, from the Division's own procedure");
+    ok(/Chelsea, MA 02150/.test(ma.file.en) && /Not by both mail and fax/.test(ma.file.en) && ma.fee.usd === null, "Massachusetts: where it goes, and no fee invented"); }
   eq(BUSINESS_LICENSE_ROUTES.map(r => r.city), ["San Francisco", "Los Angeles", "New York City", "Dallas", "San José", "Houston"], "business license denial is defined city by city");
   const sj = BUSINESS_LICENSE_ROUTES.find(r => r.city === "San José")!, hou = BUSINESS_LICENSE_ROUTES.find(r => r.city === "Houston")!;
   ok(sj.route === null && /^Not applicable/.test(sj.what) && sj.source === "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration" && /official receipt for payment of the tax/.test(sj.what) && /municode/.test(sj.check ?? ""),
@@ -1746,7 +1781,7 @@ async function appeals() {
 
 function appealTiers() {
   console.log("\n# Appeal routes: every playbook tiered, each from the agency's own words or the rule");
-  const OFFICIAL = /^https:\/\/(abcab\.ca\.gov|www\.abc\.ca\.gov|www\.tabc\.texas\.gov|statutes\.capitol\.texas\.gov|www\.nysenate\.gov|(www\.)?sf\.gov|www\.sf\.gov|planning\.lacity\.gov|finance\.lacity\.gov|dbs\.lacity\.gov|ochealthinfo\.com|dallascityhall\.com|nyc-business\.nyc\.gov|www\.nyc\.gov|www\.sanjoseca\.gov)\//;
+  const OFFICIAL = /^https:\/\/(abcab\.ca\.gov|www\.abc\.ca\.gov|www\.tabc\.texas\.gov|statutes\.capitol\.texas\.gov|www\.nysenate\.gov|(www\.)?sf\.gov|www\.sf\.gov|planning\.lacity\.gov|finance\.lacity\.gov|dbs\.lacity\.gov|ochealthinfo\.com|dallascityhall\.com|nyc-business\.nyc\.gov|www\.nyc\.gov|www\.sanjoseca\.gov|www\.mass\.gov|www\.nj\.gov)\//;
   for (const a of APPEALS) {
     const t = TIERS[a.id];
     ok(!!t && OFFICIAL.test(t.source) && sourcesOf(a).some(s => s.url === t.source) && t.says.length > 10 && /[一-鿿]/.test(t.why.zh),

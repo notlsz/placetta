@@ -211,7 +211,8 @@ function Progress({ a }: { a: Application }) {
       </ol>
       {f && f.status !== "requested" && <StatusTimeline a={a} filing={f} />}
       {f?.agent_state === "needs_you" && <FinishStep f={f} />}
-      {f && cloud?.owner && f.channel === "team" && f.agent_state === "handoff" && !!f.portal_url && !f.submit_clicked_at && ["requested", "in_progress"].includes(f.status) && <TeachStep f={f} />}
+      {f && cloud?.owner && f.channel === "team" && f.status === "submitted" && !f.confirmation_number && <AddConfirmation f={f} />}
+      {f && cloud?.owner && f.channel === "team" && (f.agent_state === "handoff" || f.agent_state === "needs_you") && !!f.portal_url && !f.submit_clicked_at && ["requested", "in_progress"].includes(f.status) && <TeachStep f={f} />}
       <FilingLive app={a.id} embedded />
       <AskSpecialist app={a} />
       {f?.note && f.status !== "needs_info" && <p className="note">{zh ? "团队备注：" : "From the team: "}{f.note}</p>}
@@ -554,32 +555,62 @@ const CHANNEL: Record<string, { en: string; zh: string }> = {
   email: { en: "by email", zh: "通过邮件" }, fax: { en: "by fax", zh: "通过传真" }, mail: { en: "by certified mail", zh: "通过挂号信" }, portal: { en: "on the agency's site", zh: "在机构网站上" },
 };
 
-/** A hand-back: what Placetta needs, the live view to do it in, and "I've done it, carry on". */
+/** A hand-back: what Placetta needs, the live view to do it in, and "I've done it, carry on". A filing the business
+ *  sends itself (its packet, an owner-only form, a hand-signed form) ends with "I've sent it" and the agency's
+ *  confirmation number; Odelia tracks it from there. */
 function FinishStep({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>["filings"][number] }) {
   const { lang, cloud, busy } = useApp();
   const zh = lang === "zh";
+  const [conf, setConf] = useState("");
   const ask = [...(f.agent_log ?? [])].reverse().find(e => ["need_person", "needs_you", "wet_signature"].includes(e.kind));
   const upload = ask?.kind === "wet_signature" && ask.ref === "upload";
   // The same form with the same answers as one already sent: going on means sending it again, so the button says so.
   const duplicate = ask?.kind === "needs_you" && ask.ref === "duplicate";
+  // the business sends it itself (file function: sentByYou)
+  const yours = ask?.kind === "wet_signature" || (ask?.kind === "needs_you" && (ask.ref === "yours" || ask.ref === "owner_packet"));
+  const sent = <div className="sent-it">
+    <input type="text" className="inp sm" maxLength={60} value={conf} onChange={e => setConf(e.target.value)} disabled={busy}
+      placeholder={zh ? "机构确认号（如有）" : "Agency confirmation number (if any)"} aria-label={zh ? "机构确认号" : "Agency confirmation number"} />
+    <button type="button" className={upload ? "pill quiet sm" : "pill ink sm"} disabled={busy} onClick={() => void cloud?.resumeFiling(f.id, false, conf)}>{zh ? "我已发出" : "I've sent it"}</button>
+  </div>;
   return (
     <div className="finish-step" role="status">
-      <b>{zh ? "完成这一步" : "Finish this step"}</b>
+      <b>{yours ? (zh ? "请您提交这一份" : "This one is yours to send") : zh ? "完成这一步" : "Finish this step"}</b>
       <p>{ask ? (zh ? ask.zh : ask.en) : zh ? "快哉需要您完成一步。" : "Placetta needs you for one step."}</p>
       <div className="m-btns">
-        {f.handoff_url && <a className="pill quiet sm" href={f.handoff_url} target="_blank" rel="noopener noreferrer">{zh ? "打开" : "Open"}<I.ext /></a>}
+        {f.handoff_url && <a className="pill quiet sm" href={f.handoff_url} target="_blank" rel="noopener noreferrer">{yours ? (zh ? "打开机构网站" : "Open the agency's site") : zh ? "打开" : "Open"}<I.ext /></a>}
         {!cloud?.owner
           // Carrying on, uploading the signed copy and sending again are an owner's; the file function refuses members.
           ? <span className="note">{zh ? "需要工作区所有者完成这一步。" : "An owner of this workspace finishes this step."}</span>
           : upload
-          ? <label className={`pill ink sm${busy ? " off" : ""}`}>
+          ? <><label className={`pill ink sm${busy ? " off" : ""}`}>
               {zh ? "上传签名件" : "Upload the signed copy"}
               <input type="file" accept="application/pdf,image/jpeg,image/png" hidden disabled={busy}
                 onChange={e => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void cloud?.uploadSigned(f.id, f.app_id, file); }} />
-            </label>
+            </label>{sent}</>
           : duplicate
           ? <button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.resumeFiling(f.id, true)}>{zh ? "再次提交" : "Send it again"}</button>
+          : yours
+          ? sent
           : <button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.resumeFiling(f.id)}>{zh ? "我已完成，继续" : "I've done it, carry on"}</button>}
+      </div>
+    </div>
+  );
+}
+
+/** A filing the business sent itself, without the agency's confirmation number yet: add it when it comes. */
+function AddConfirmation({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>["filings"][number] }) {
+  const { lang, cloud, busy } = useApp();
+  const zh = lang === "zh";
+  const [conf, setConf] = useState("");
+  return (
+    <div className="finish-step" role="note">
+      <b>{zh ? "补充确认号" : "Add the confirmation number"}</b>
+      <p>{zh ? "收到机构的确认号后填在这里，Odelia 会用它查询进度。" : "When the agency sends its confirmation number, add it here. Odelia uses it to check the status."}</p>
+      <div className="m-btns sent-it">
+        <input type="text" className="inp sm" maxLength={60} value={conf} onChange={e => setConf(e.target.value)} disabled={busy}
+          placeholder={zh ? "机构确认号" : "Agency confirmation number"} aria-label={zh ? "机构确认号" : "Agency confirmation number"} />
+        <button type="button" className="pill ink sm" disabled={busy || !conf.trim()} onClick={() => void cloud?.addConfirmation(f.id, conf)}>{zh ? "保存" : "Save"}</button>
       </div>
     </div>
   );
@@ -595,8 +626,8 @@ function TeachStep({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>["
     <div className="finish-step teach-step" role="note">
       <b>{zh ? "教 Odelia 一次" : "Show Odelia how"}</b>
       <p>{zh
-        ? "Odelia 还没学过这个机构网站，所以由团队提交。您也可以在实时浏览器中亲自提交一次，Odelia 会在旁记下步骤，从不记录密码或保密号码。团队核对后，她会为每家在该网站办理的企业提交这份表格，每次提交仍需批准。"
-        : "Odelia hasn't learned this agency's site yet, so the team files it. Or file it once yourself in the live browser while she watches. She writes down the steps, never your password or any secret number. Once the team checks them, she files this form there for every business, and each filing still needs its approval."}</p>
+        ? "Odelia 还没学过这个机构网站。您可以在实时浏览器中亲自提交一次，Odelia 会在旁记下步骤，从不记录密码或保密号码。快哉核对后，她会为每家在该网站办理的企业提交这份表格，每次提交仍需批准。"
+        : "Odelia hasn't learned this agency's site yet. File it once yourself in the live browser while she watches. She writes down the steps, never your password or any secret number. Once Placetta checks them, she files this form there for every business, and each filing still needs its approval."}</p>
       <div className="m-btns"><button type="button" className="pill ink sm" disabled={busy} onClick={() => void cloud?.teachFiling(f.id)}>{zh ? "教 Odelia 一次" : "Show Odelia how"}</button></div>
     </div>
   );

@@ -6,7 +6,7 @@ import ROUTES from "./forms/filingRoutes.json";
 /* Who files it and how long the agency takes, on every approval card: from data Placetta already keeps, never a guess.
    Who: the form's first-try route (src/forms/filingRoutes.json, written with docs/FILING_COVERAGE.md by
    scripts/filing-coverage.mjs from supabase/functions/file/destinations.ts). A form with no route of its own, or one the
-   registry doesn't have, goes to the Placetta team, and the card says so.
+   registry doesn't have, Odelia prepares with a packet and the business sends, and the card says so.
    How long: the agency's own published processing time from the registry (src/forms), else the application's estimate
    when it states one. With neither, the card says nothing about time. Pure: NeedRow and the approval sheet render it,
    scripts/review-fixes-test.ts tests it. */
@@ -22,7 +22,7 @@ const WHO: Record<RouteKind, Bi> = {
   faxSigned: B("You sign it, then Odelia faxes it", "您签字后，Odelia 传真提交"),
   owner: B("Odelia prepares it and you send it", "Odelia 准备好，由您寄出"),
   ownerSigns: B("Odelia prepares it, you sign and send it", "Odelia 准备好，由您签字寄出"),
-  team: B("The Placetta team files it", "快哉团队代为提交"),
+  team: B("Odelia prepares it and you send it", "Odelia 准备好，由您提交"),
 };
 
 /** The route kind for an application's form. */
