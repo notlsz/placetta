@@ -15,11 +15,11 @@ const sf: WsState = { apps: [{ id: "bp", name: { en: "Building permit", zh: "建
 const filing = (id: string, app: string, status: string, extra: Partial<StatusFiling> = {}): StatusFiling =>
   ({ id, workspace_id: "w1", app_id: app, title: { en: app, zh: app }, status, updated_at: "2026-10-01T00:00:00Z", submitted_at: "2026-10-01T00:00:00Z", ...extra });
 
-function io(o: { tracking?: Record<string, Tracking & { lookup_url?: string }>; json?: unknown; page?: string; failFetch?: boolean } = {}) {
+function io(o: { tracking?: Record<string, Tracking & { lookup_url?: string }>; json?: unknown; jsonBy?: (url: string) => unknown; page?: string; failFetch?: boolean } = {}) {
   const log = { checks: [] as Check[], events: [] as Event[], updates: [] as Update[], tasks: [] as string[], runs: [] as string[], saved: new Map<string, Tracking>(), fetched: [] as string[] };
   const x: StatusIO = {
     tracking: async () => new Map(Object.entries(o.tracking ?? {})),
-    fetchJson: async (u) => { log.fetched.push(u); if (o.failFetch) throw new Error("503"); return o.json ?? []; },
+    fetchJson: async (u) => { log.fetched.push(u); if (o.failFetch) throw new Error("503"); return o.jsonBy ? o.jsonBy(u) : o.json ?? []; },
     fetchText: async (u) => { log.fetched.push(u); if (o.failFetch) throw new Error("503"); return o.page ?? ""; },
     saveTracking: async (id, _ws, t) => { log.saved.set(id, t); },
     check: async (c) => { log.checks.push(c); },
@@ -203,4 +203,123 @@ Deno.test("good standing: an approved license read weekly from open data; news o
   ok(c.log.updates.length === 1 && /active again/.test(c.log.updates[0].title.en), "back in good standing says so once");
   const d = io({ json: issued, tracking: { f1: { ...t, next_check_at: "2026-10-30T00:00:00Z" } } });
   eq((await go(d.x, [filing("f1", "bl", "accepted", { confirmation_number: "2757733" })])).checked, 0, "not due before the week is out");
+});
+
+/* ------------------------------ state liquor licenses, read in code (2026-10-24) ------------------------------ */
+
+// Rows in the shape data.ny.gov and data.texas.gov returned when queried live on 2026-10-24 (trimmed to the fields read).
+const NY_PENDING_ROW = { application_id: "NA-0071-26-227961", description: "Grocery Store", received_date: "2026-09-18T16:10:00.000", status: "IntakeComplete" };
+const NY_ACTIVE_ROW = { licensepermitid: "0032-23-139868", description: "Farm winery", lastissuedate: "2026-01-27T00:00:00.000", effectivedate: "2026-03-01T00:00:00.000", expirationdate: "2029-02-28T00:00:00.000" };
+const NY_INACTIVE_ROW = { license_permit_id: "0340-19-111757", description: "Restaurant", expiration_date: "2021-04-30T00:00:00.000" };
+const TX_LICENSE_ROW = { license_id: "200212337", license_type: "NT", license_status: "Active", status_change_date: "2026-10-22T00:00:00.000", current_issued_date: "2026-10-22T00:00:00.000", expiration_date: "2026-11-08T00:00:00.000", owner: "Undermain Theatre" };
+const TX_PENDING_ROW = { application_id: "668589", license_type: "NT", applicationstatus: "Pending – In Review", primary_license_id: "200212372", submission_date: "2026-10-22T00:00:00.000" };
+
+Deno.test("New York SLA: pending, active and inactive datasets, by the record's own number", () => {
+  const l = LOOKUPS.find((y) => y.id === "ny_sla_license")!;
+  ok(l.kind === "open_data" && l.verified?.on === "2026-10-24" && l.urls, "read in code now, not a page for the model");
+  const u = l.urls!("NA-0071-26-227961").map(decodeURIComponent);
+  ok(u.length === 3 && u[0].includes("f8i8-k2gm") && u[0].includes("application_id='NA-0071-26-227961'") && u[1].includes("9s3h-dpkz") && u[2].includes("6dg3-2z7i"), u.join("\n"));
+  ok(!l.urls!("1' OR '1'='1").some((x) => decodeURIComponent(x).includes("'1'='1")), "the key can't change the query");
+  const p1 = l.parse!([[NY_PENDING_ROW], [], []])!;
+  eq([p1.status, p1.norm, p1.date], ["IntakeComplete", "received", "2026-09-18"], "intake complete is received");
+  eq(l.parse!([[{ ...NY_PENDING_ROW, status: "Conditionally Approved" }], [], []])!.norm, "approved");
+  eq(l.parse!([[{ ...NY_PENDING_ROW, status: "Under Review" }], [], []])!.norm, "in_review");
+  const p2 = l.parse!([[], [NY_ACTIVE_ROW], []])!;
+  eq([p2.status, p2.norm, p2.date, p2.expires], ["Active", "issued", "2026-01-27", "2029-02-28"], "an active license carries the SLA's own expiration date");
+  eq(l.parse!([[NY_PENDING_ROW], [NY_ACTIVE_ROW], []])!.norm, "issued", "active wins over a stale pending row");
+  const p3 = l.parse!([[], [], [NY_INACTIVE_ROW]])!;
+  eq([p3.status, p3.norm, p3.expires], ["Inactive", "expired", "2021-04-30"]);
+  eq(l.parse!([[], [], []]), null, "on none of the lists: no status");
+  eq(l.parse!("garbage"), null, "a feed answering in the wrong shape is no status, never a throw");
+});
+
+Deno.test("Texas TABC: one license id finds the application while pending and the license once issued", () => {
+  const l = LOOKUPS.find((y) => y.id === "tx_tabc_license")!;
+  ok(l.kind === "open_data" && l.verified?.on === "2026-10-24" && l.urls);
+  const u = l.urls!("200212372").map(decodeURIComponent);
+  ok(u[0].includes("7hf9-qc9f") && u[0].includes("license_id='200212372'") && u[1].includes("mxm5-tdpj") && u[1].includes("primary_license_id='200212372'"), u.join("\n"));
+  const p1 = l.parse!([[], [TX_PENDING_ROW]])!;
+  eq([p1.norm, p1.date], ["in_review", "2026-10-22"], "pending, in review");
+  eq(l.parse!([[], [{ ...TX_PENDING_ROW, applicationstatus: "Received" }]])!.norm, "received");
+  const p2 = l.parse!([[TX_LICENSE_ROW], [TX_PENDING_ROW]])!;
+  eq([p2.status, p2.norm, p2.date, p2.expires], ["Active", "issued", "2026-10-22", "2026-11-08"], "issued, with TABC's own expiration date");
+  eq(["Active - Renewal Pending", "Suspended", "Suspended - Renewal Pending", "Expired - Original Required", "Surrendered", "Temporarily Surrendered", "Cancelled"]
+    .map((s) => l.parse!([[{ ...TX_LICENSE_ROW, license_status: s }], []])!.norm),
+    ["issued", "suspended", "suspended", "expired", "withdrawn", "withdrawn", "withdrawn"], "every status the feed uses means what it says");
+  eq(l.parse!([[], []]), null);
+});
+
+Deno.test("liquor licenses route to the state's feed; California's stays Odelia's page", () => {
+  const b = (en: string) => ({ en, zh: en });
+  eq([lookupFor({ name: b("On-premises liquor license"), agency: b("NYS SLA") }, "136-20 Roosevelt Ave, Flushing, NY 11354")?.id,
+    lookupFor({ name: b("Mixed beverage permit"), agency: b("TABC") }, "9889 Bellaire Blvd, Houston, TX 77036")?.id,
+    lookupFor({ name: b("On-sale beer and wine license") }, "1 Main St, San Jose, CA 95113")?.kind],
+    ["ny_sla_license", "tx_tabc_license", "page"]);
+});
+
+const hou: WsState = { apps: [{ id: "mb", name: { en: "Mixed beverage permit", zh: "混合饮料许可" }, agency: { en: "TABC", zh: "德州酒类委员会" }, est: { en: "45 to 60 days", zh: "45 至 60 天" } }],
+  stores: [{ address: "9889 Bellaire Blvd, Houston, TX 77036", apps: ["mb"] }] };
+const tx = (x: StatusIO, f: StatusFiling[], st: WsState = hou) => runStatusChecks({ filings: f, states: new Map([["w1", st]]), today, now, io: x });
+const byUrl = (license: unknown[], pending: unknown[]) => (u: string) => u.includes("7hf9-qc9f") ? license : u.includes("mxm5-tdpj") ? pending : [];
+
+Deno.test("several datasets: every one is asked, in code, and the license's issue reaches the owner", async () => {
+  const a = io({ jsonBy: byUrl([], [TX_PENDING_ROW]) });
+  const r = await tx(a.x, [filing("f1", "mb", "submitted", { confirmation_number: "200212372" })]);
+  eq([r.code, r.model, a.log.fetched.length], [1, 0, 2], "both TABC datasets, no model");
+  eq(a.log.updates.length, 0, "in review on first sight is the baseline, not news");
+  const t = a.log.saved.get("f1")!;
+  eq(t.agency_norm, "in_review");
+  const b = io({ jsonBy: byUrl([{ ...TX_LICENSE_ROW, license_id: "200212372" }], []), tracking: { f1: { ...t, next_check_at: "2026-10-22T00:00:00Z" } } });
+  await tx(b.x, [filing("f1", "mb", "submitted", { confirmation_number: "200212372" })]);
+  ok(b.log.updates.some((u) => /Issued on the agency's record/.test(u.title.en)), "issued is news");
+  ok(b.log.updates.some((u) => /expires 2026-11-08 on the agency's record/.test(u.title.en) && /no renewal on your Deadlines/.test(u.body!.en) && /2026-11-08/.test(u.body!.zh)),
+    "and TABC's expiration date is offered for the calendar, in both languages");
+  const c = io({ failFetch: true });
+  const rc = await tx(c.x, [filing("f1", "mb", "submitted", { confirmation_number: "200212372" })]);
+  eq(rc.errors, 1, "one dataset failing is an error for the check, retried with back-off");
+});
+
+Deno.test("expiration: the agency's date governs the calendar's; said once per date, quiet when they agree", async () => {
+  const withRenewal = (date: string): WsState => ({ ...hou, deadlines: [{ id: "rn", app: "mb", kind: "renewal", date, title: { en: "Renew", zh: "续办" } }] });
+  const lic = [{ ...TX_LICENSE_ROW, license_id: "200212372", expiration_date: "2027-10-22T00:00:00.000" }];
+  const a = io({ jsonBy: byUrl(lic, []) });
+  await tx(a.x, [filing("f1", "mb", "accepted", { confirmation_number: "200212372" })], withRenewal("2027-11-30"));
+  const u = a.log.updates.find((x) => x.dedupe.startsWith("agency-expires:"));
+  ok(u && /2027-10-22/.test(u.title.en) && /Deadlines have the renewal on 2027-11-30/.test(u.body!.en) && /governs/.test(u.body!.en), JSON.stringify(u));
+  ok(a.log.events.some((e) => /expires 2027-10-22/.test(e.title.en)), "on the filing's timeline too");
+  const b = io({ jsonBy: byUrl(lic, []) });
+  await tx(b.x, [filing("f1", "mb", "accepted", { confirmation_number: "200212372" })], withRenewal("2027-10-22"));
+  ok(!b.log.updates.some((x) => x.dedupe.startsWith("agency-expires:")), "the calendar already has the agency's date: nothing to say");
+  const old = [{ ...lic[0], license_status: "Expired", expiration_date: "2025-01-01T00:00:00.000" }];
+  const c = io({ jsonBy: byUrl(old, []) });
+  await tx(c.x, [filing("f1", "mb", "accepted", { confirmation_number: "200212372" })], withRenewal("2027-10-22"));
+  ok(!c.log.updates.some((x) => x.dedupe.startsWith("agency-expires:")), "an expired license isn't offered as a renewal date");
+  ok(c.log.updates.some((x) => /no longer active/.test(x.title.en)), "it's out of good standing instead");
+});
+
+Deno.test("suspension: out of good standing, said in both languages", async () => {
+  const t0 = { agency_status: "Active", agency_norm: "issued", last_hash: "x", next_check_at: "2026-10-22T00:00:00Z" };
+  const a = io({ jsonBy: byUrl([{ ...TX_LICENSE_ROW, license_id: "200212372", license_status: "Suspended" }], []), tracking: { f1: t0 } });
+  await tx(a.x, [filing("f1", "mb", "accepted", { confirmation_number: "200212372" })]);
+  const u = a.log.updates.find((x) => /no longer active/.test(x.title.en));
+  ok(u && /Suspended/.test(u.body!.en) && /不再有效/.test(u.title.zh), JSON.stringify(a.log.updates));
+  eq(a.log.saved.get("f1")!.agency_norm, "suspended");
+});
+
+Deno.test("a record that leaves the feed is said once, with what to do next", async () => {
+  const nyc: WsState = { apps: [{ id: "ol", name: { en: "On-premises liquor license", zh: "店内酒牌" }, agency: { en: "NYS SLA", zh: "纽约州酒类管理局" } }],
+    stores: [{ address: "136-20 Roosevelt Ave, Flushing, NY 11354", apps: ["ol"] }] };
+  const go = (x: StatusIO) => runStatusChecks({ filings: [filing("f1", "ol", "submitted", { confirmation_number: "NA-0071-26-227961" })], states: new Map([["w1", nyc]]), today, now, io: x });
+  const a = io({ jsonBy: (u) => u.includes("f8i8-k2gm") ? [{ ...NY_PENDING_ROW, status: "Under Review" }] : [] });
+  await go(a.x);
+  eq(a.log.fetched.length, 3, "the three SLA datasets");
+  const t = a.log.saved.get("f1")!;
+  const b = io({ jsonBy: () => [], tracking: { f1: { ...t, next_check_at: "2026-10-22T00:00:00Z" } } });
+  const r = await go(b.x);
+  eq(r.changed, 1);
+  const u = b.log.updates[0];
+  ok(u && /no longer on New York State Liquor Authority's list/.test(u.title.en) && /Under Review/.test(u.body!.en) && /license number/.test(u.body!.en) && /执照编号/.test(u.body!.zh), JSON.stringify(u));
+  const c = io({ jsonBy: () => [], tracking: { f1: { ...b.log.saved.get("f1")!, next_check_at: "2026-10-22T00:00:00Z" } } });
+  await go(c.x);
+  eq(c.log.updates.length, 0, "said once: still gone is no news");
 });
