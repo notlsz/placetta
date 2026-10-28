@@ -19,7 +19,7 @@ import { actionKey, answerTier, guardRefused, pageTier, summarize, tierOf, type 
 import type { CallCost } from "./llm.ts";
 import { assertOnly, capture, expiresAt, restore, SIGN_IN_FAILED } from "./session.ts";
 import { CAPTCHA_ASK_REF, CAPTCHA_PARKED_MSG, CAPTCHA_ROUTE_MSG, captchaQuestion, CHANNEL_DAYS, isChoice, midRunAction } from "../../../supabase/functions/file/captcha.ts";
-import { captchaAnswered, headingOf, locate, pageState, staffGuard } from "./page.ts";
+import { captchaAnswered, headingOf, locate, pageState, staffGuard, tick } from "./page.ts";
 import { finalOn, type FormSteps, guideLines, navOn, pageOutline, payOn, type Playbook } from "./playbooks.ts";
 import { backoffMinutes, heal, type KeyLock, portalDown, receiptCheck, receiptLine } from "./heal.ts";
 import type { HumanCheck, Store, Taught } from "./store.ts";
@@ -727,13 +727,13 @@ export class Worker {
           ctx.f = await this.c.store.step(ctx.f, log("Didn't accept the site's terms: the business's agent authority doesn't cover it", "未接受网站条款：企业的代理授权不包括这一项", "refused"));
           return { end: await this.handBack(ctx, "terms", ACCOUNT_MSG.terms) };
         }
-        await loc.setChecked(true);
+        await tick(loc, true);
         rec(a);
         ctx.f = await this.c.store.step(ctx.f, log(`Accepted the site's terms for the business, as its agent (recorded with the page and the time)`, "已作为企业的代理人接受网站条款（已记录页面和时间）", "terms", headingOf(st).slice(0, 120)));
         return { ok: true };
       }
       if (control && typeof control.checked === "boolean" && control.checked === a.on) return { ok: true, same: control.label || control.name || a.selector };
-      await loc.setChecked(a.on);
+      await tick(loc, a.on);
       rec(a);
       return { ok: true };
     }

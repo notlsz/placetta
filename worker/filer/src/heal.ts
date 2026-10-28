@@ -60,7 +60,9 @@ export const receiptLine = (c: ReceiptCheck) => {
 
 /** Errors that mean the agency's site is down or slow rather than that something about this filing is wrong. */
 const DOWN = /net::ERR_|ECONNRESET|ECONNREFUSED|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|socket hang up|Timeout \d+ms exceeded|navigation timeout|\b50[234]\b|service unavailable|bad gateway|gateway time-?out|temporarily unavailable|maintenance/i;
-export const portalDown = (msg: string) => DOWN.test(msg);
+/** A Playwright locator that timed out ("locator.setChecked: Timeout 30000ms exceeded") is a control Odelia couldn't
+ *  work, on a site that answered: not the site being down. */
+export const portalDown = (msg: string) => !/^\s*locator\.\w+:/.test(msg) && DOWN.test(msg);
 /** How long to wait before the next try when the portal is down, by the try that just failed: 2, 10, then 30 minutes. */
 export const backoffMinutes = (attempts: number) => [2, 10, 30][Math.min(Math.max(attempts, 1), 3) - 1];
 

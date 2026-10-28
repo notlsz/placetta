@@ -138,6 +138,25 @@ export function staffGuard(page: Page) {
 }
 
 /** The selector as a Playwright locator. */
+/** Tick or untick a checkbox or radio. Many government sites (USWDS, FinCEN's BOI e-filing) hide the real input and draw
+ *  their own box on its label, so Playwright's setChecked waits on an input nobody can see. Try it briefly, then click
+ *  the input's label, then set it directly; each counts only when the input really ends up in that state. */
+export async function tick(loc: Locator, on: boolean): Promise<void> {
+  const ok = async () => (await loc.isChecked({ timeout: 2000 }).catch(() => !on)) === on;
+  try { await loc.setChecked(on, { timeout: 5000 }); if (await ok()) return; } catch { /* hidden input: try its label */ }
+  const id = await loc.getAttribute("id", { timeout: 2000 }).catch(() => null);
+  if (id) {
+    const label = loc.page().locator(`label[for="${id.replace(/["\\]/g, "\\$&")}"]`).first();
+    if (await label.count().catch(() => 0)) {
+      if (on || (await loc.getAttribute("type").catch(() => "")) !== "radio") await label.click({ timeout: 5000 }).catch(() => {});
+      if (await ok()) return;
+    }
+  }
+  await loc.setChecked(on, { force: true, timeout: 5000 }).catch(() => {});
+  if (await ok()) return;
+  throw new Error(`Couldn't ${on ? "tick" : "untick"} that box on the page.`);
+}
+
 export function locate(page: Page, selector: string): Locator {
   if (selector.startsWith("label:")) return page.getByLabel(selector.slice(6), { exact: true });
   if (selector.startsWith("button:")) return page.getByRole("button", { name: selector.slice(7), exact: true });
