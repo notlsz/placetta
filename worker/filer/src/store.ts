@@ -43,7 +43,14 @@ export interface Store {
   heartbeat?(info: Record<string, unknown>): Promise<void>;
   /** The nightly re-check's drift, for the Quality tab (qa_report through filer_probe_report). */
   probeReport?(findings: unknown[]): Promise<number>;
+  /** A visible CAPTCHA goes to the Placetta team first (20261102090200_human_checks.sql): a check with its team task and
+   *  the time it goes to the owner if nobody opens it (now, outside the team's hours); where it stands; and its end
+   *  (solved writes "Solved a human check for you" in the owner's audit trail when someone on the team opened it). */
+  humanCheckOpen?(f: Filing, liveUrl: string, holdUntil: string): Promise<HumanCheck | null>;
+  humanCheck?(id: string): Promise<{ state: string; opened_at: string | null } | null>;
+  humanCheckClose?(id: string, state: "solved" | "to_owner" | "ended"): Promise<boolean>;
 }
+export type HumanCheck = { id: string; escalate_at: string };
 
 /** The worker's database access, through the functions in 20261022120000_filer_least_privilege.sql only: no table is
  *  read or written directly, so the same code runs on the filer's own role key (FILER_DB_KEY, which has no table grants
@@ -61,7 +68,8 @@ export class SupabaseStore implements Store {
   private get db(): SupabaseClient { return this.runDb ?? this.base; }
   async begin(f: Filing) {
     this.runDb = null;
-    const { data, error } = await this.base.rpc("filer_begin_run", { p_filing: f.id, p_minutes: 45 });
+    // an hour, the most the database gives: a run may wait on the team for a human check, then on the owner
+    const { data, error } = await this.base.rpc("filer_begin_run", { p_filing: f.id, p_minutes: 60 });
     if (error) {
       // a database without the run tokens yet keeps working on the filer's role alone, and says so
       if (error.code === "PGRST202") { console.warn("filer_begin_run is missing: apply 20261022190000_agent_security.sql so each run gets its own token"); return; }
@@ -138,6 +146,19 @@ export class SupabaseStore implements Store {
   }
   async probeReport(findings: unknown[]) {
     return (await this.call<number | null>("filer_probe_report", { p_findings: findings }, "probe report")) ?? 0;
+  }
+  async humanCheckOpen(f: Filing, liveUrl: string, holdUntil: string) {
+    const rows = await this.call<{ check_id: string; escalates_at: string }[] | null>("filer_human_check_open", { p_filing: f.id, p_live_url: liveUrl, p_hold_until: holdUntil }, "human check");
+    const r = (rows ?? [])[0];
+    return r ? { id: r.check_id, escalate_at: r.escalates_at } : null;
+  }
+  async humanCheck(id: string) {
+    const rows = await this.call<{ check_state: string; opened: string | null }[] | null>("filer_human_check", { p_check: id }, "human check lookup");
+    const r = (rows ?? [])[0];
+    return r ? { state: r.check_state, opened_at: r.opened } : null;
+  }
+  async humanCheckClose(id: string, state: "solved" | "to_owner" | "ended") {
+    return (await this.call<boolean>("filer_human_check_close", { p_check: id, p_state: state }, "human check close")) === true;
   }
   async selfFiled(official: string) {
     return (await this.call<number | null>("filer_self_filed", { p_official: official }, "count")) ?? 0;

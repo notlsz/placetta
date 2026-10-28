@@ -7,6 +7,7 @@ import * as api from "./api";
 import { openSettings } from "../Settings";
 import { CompanyMetrics } from "../Metrics";
 import { AskReply } from "./AskReply";
+import { HumanCheckActions } from "./HumanCheck";
 import { OpsMore, OpsTabs, useOpsTab } from "./OpsMore";
 
 /* The Placetta team's filing queue. Each request is exactly what the customer approved: the form, the fields,
@@ -35,6 +36,7 @@ const KIND: Record<string, Bi> = {
   team_time: B("This filing took longer than its budget", "此项申报用时超出预算"),
   playbook_review: B("Check the steps Odelia learned on a new agency site (Quality tab)", "核对 Odelia 在新机构网站上学会的步骤（质量页）"),
   billing: B("Billing needs a look", "账单需要处理"),
+  human_check: B("Solve a human check (a CAPTCHA) in the live browser", "在实时浏览器中完成真人验证（验证码）"),
 };
 
 /** What Odelia's models cost this month against what the plans pay, with the ten workspaces that cost the most. */
@@ -272,6 +274,7 @@ export function Queue() {
                   <small className="ago">{fmtAgo(t.created_at, lang)}</small>
                   <Pill sm kind="quiet" onClick={() => void finish(t.id)}>{lang === "zh" ? "完成" : "Done"}</Pill>
                   {t.kind === "ask_person" && <AskReply t={t} onDone={id => setTasks(x => x.filter(y => y.id !== id))} />}
+                  {t.kind === "human_check" && <HumanCheckActions t={t} onDone={id => setTasks(x => x.filter(y => y.id !== id))} />}
                 </div>
               ))}</div>
             </section>
