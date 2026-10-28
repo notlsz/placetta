@@ -94,7 +94,7 @@ const SAYS_NO_TIME = /^(to be confirmed|待确认)$|doesn'?t publish|未公布|n
 
 /** The agency's time for an application: the registry's published one, else its own estimate; undefined when neither
  *  states a time. */
-export function expectedTime(app?: Pick<Application, "official" | "est"> & { expedite?: string }): Bi | undefined {
+export function expectedTime(app?: RouteApp): Bi | undefined {
   // the expedite the owner chose, in the agency's words
   const x = app?.expedite ? expediteOptions(app.official).find(o => o.id === app.expedite) : undefined;
   if (x) return B(`${x.label.en}: ${x.turnaround.en}`, `${x.label.zh}：${x.turnaround.zh}`);
@@ -106,7 +106,10 @@ export function expectedTime(app?: Pick<Application, "official" | "est"> & { exp
 
 /** What an approval card says under its title about who acts and how long it takes. null: a card with no filing (an
  *  upload is the owner's own step). */
-export function approvalRoute(a: Pick<Approval, "kind">, app?: Pick<Application, "official" | "est"> & { expedite?: string }, today = new Date().toISOString().slice(0, 10)): { who: Bi; time?: Bi; steps?: Bi[]; faster?: Bi } | null {
+/** What the route line reads from a step: its form, the agency's time and the owner's expedite. A step saved before the
+ *  time was recorded (or a test's bare form id) has no est, and gets no time line rather than an invented one. */
+export type RouteApp = Pick<Application, "official"> & { est?: Application["est"]; expedite?: string };
+export function approvalRoute(a: Pick<Approval, "kind">, app?: RouteApp, today = new Date().toISOString().slice(0, 10)): { who: Bi; time?: Bi; steps?: Bi[]; faster?: Bi } | null {
   if (a.kind === "file") {
     const steps = personSteps(app);
     // the agency's paid expedite tiers, when its own page states them and the quote is current (src/forms/speed.ts)

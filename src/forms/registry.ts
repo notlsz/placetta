@@ -82,7 +82,7 @@ export type OfficialForm = {
   except?: Where[];
   /** The proof behind the source link: a sentence (under 25 words) from the official page that states the requirement,
       the day it was read, and the URL that was fetched to read it (src/forms/proof.ts, scripts/eval/proof.ts). */
-  proof?: { quote: string; checked: string; read: string; en?: string };   // en: the quote in English, when the page isn't
+  proof?: { quote: string; checked: string; read: string; en?: string; link?: string };   // link: the page the quote is on, when not the form's own (proof.ts)   // en: the quote in English, when the page isn't
   /** A filing only a local professional may make (a notary, a lawyer, a gestor): Placetta prepares it and hands it to one. */
   specialist?: Bi;
   /** Internal only, never shown or cited: a secondary source (a law firm, a blog, an aggregator) that named this filing
