@@ -163,7 +163,8 @@ const countryName = (code: string): Bi => { const c = COUNTRIES.find(x => x.code
 const priv = readFileSync("site/privacy.html", "utf8");
 const BRAND = (priv.match(/<span class="wm">[\s\S]*?<\/svg><\/span>/) ?? [""])[0];
 const FAVICON = (priv.match(/<link rel="(?:icon|apple-touch-icon|manifest)"[^>]*>/g) ?? []).join("\n");
-const FONTS = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+SC:wght@400;500&display=swap";
+// self-hosted (npm run fonts): no request to Google Fonts, so no third party sees each visit
+const FONTS = "/fonts/fonts.css";
 const UI = {
   home: B("Home", "首页"), guides: B("Guides", "指南"), cities: B("Cities", "城市"), answers: B("Answers", "问答"), forms: B("Official forms", "官方表格"),
   plan: B("Get my plan", "获取我的方案"), privacy: B("Privacy Policy", "隐私政策"), terms: B("Terms and Conditions", "服务条款"),
@@ -234,8 +235,6 @@ ${l === "zh" ? BAIDU_META + "\n" : ""}<link rel="canonical" href="${url}">
 <meta name="twitter:description" content="${esc(o.desc)}">
 <meta name="twitter:image" content="${ORIGIN}/guides/og.png">
 ${FAVICON}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS}">
 <link rel="stylesheet" href="/guides/guides.css">
 ${[crumbs, ...o.ld].map(ldTag).join("\n")}

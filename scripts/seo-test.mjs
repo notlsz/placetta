@@ -241,6 +241,28 @@ group("the lead sheet takes ordinary email addresses", () => {
   }
 });
 
+// Fonts from Google (fonts.googleapis.com, fonts.gstatic.com) hand every visitor's address to Google: the fonts are the
+// site's own (site/fonts, npm run fonts), and nothing the site or the app ships may point at those hosts again.
+group("fonts are self-hosted: no Google Fonts host in site/, index.html or src/", () => {
+  const GOOGLE = /fonts\.(googleapis|gstatic)\.com/;
+  const walk = d => readdirSync(d).flatMap(f => { const p = `${d}/${f}`; return statSync(p).isDirectory() ? walk(p) : /\.(woff2|png|jpe?g|gif|webp|ico|pdf|mp4|webm|zip)$/i.test(p) ? [] : [p]; });
+  const files = [...walk("site"), "index.html", ...walk("src")];
+  const bad = files.filter(f => GOOGLE.test(read(f)));
+  check(`${files.length} files, none references a Google Fonts host`, files.length > 1000 && !bad.length, bad.slice(0, 10).join(", "));
+  const csp = [...read("vercel.json").matchAll(/"Content-Security-Policy",\s*"value":\s*"([^"]*)"/g)].map(m => m[1]);
+  check("vercel.json CSP: font-src and style-src allow no Google host", csp.length >= 2 && csp.every(v => !GOOGLE.test(v) && /font-src 'self'/.test(v)), csp.join(" | "));
+  try { execFileSync("node", ["scripts/fonts.mjs", "--check"], { stdio: "pipe" }); check("site/fonts is what npm run fonts writes", true); }
+  catch (e) { check("site/fonts is what npm run fonts writes", false, String(e.stderr || e.message)); }
+  const css = read("site/fonts/fonts.css");
+  const urls = [...css.matchAll(/url\(([^)]+)\)/g)].map(m => m[1]);
+  check("every font in fonts.css exists", urls.length > 0 && urls.every(u => existsSync(`site/fonts/${u}`)), urls.filter(u => !existsSync(`site/fonts/${u}`)).slice(0, 5));
+  check("every face swaps and has a unicode-range", (css.match(/@font-face/g) ?? []).length === (css.match(/font-display: swap/g) ?? []).length && (css.match(/@font-face/g) ?? []).length === (css.match(/unicode-range:/g) ?? []).length);
+  for (const fam of ["Inter", "Noto Sans SC", "Newsreader", "Noto Serif SC", "IBM Plex Mono"]) check(`fonts.css has ${fam}, and its license is in /fonts/LICENSES/`, css.includes(`font-family: '${fam}'`) && existsSync(`site/fonts/LICENSES/${fam.toLowerCase().replace(/ /g, "-")}.txt`));
+  const html = files.filter(f => f.endsWith(".html") && /font-family:[^;"]*(Inter|Noto|Newsreader|Plex)/.test(read(f)));
+  const unlinked = [...html, "index.html"].filter(f => !read(f).includes('href="/fonts/fonts.css"'));
+  check(`${html.length} pages that use the fonts link /fonts/fonts.css`, !unlinked.length, unlinked.slice(0, 10).join(", "));
+});
+
 for (const r of results) console.log("  " + r);
 console.log(`\ntest:seo: ${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

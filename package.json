@@ -16,6 +16,7 @@
     "seo": "node scripts/seo/build.mjs",
     "seo:all": "npm run guides && node scripts/seo/build.mjs",
     "seo:og": "node scripts/seo/og.mjs",
+    "fonts": "node scripts/fonts.mjs",
     "test:seo": "node scripts/seo-test.mjs",
     "legal": "node scripts/build-legal.mts",
     "beam": "esbuild src/site/beam.tsx --bundle --minify --format=iife --jsx=automatic --target=es2020 --define:process.env.NODE_ENV=\\\"production\\\" --outfile=site/beam.js --log-level=warning",

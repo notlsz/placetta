@@ -9,7 +9,7 @@ import { viteSingleFile } from "vite-plugin-singlefile";
 const website = (): Plugin => ({
   name: "placetta-website",
   apply: "build",
-  closeBundle() { if (existsSync("site")) { cpSync("site", "dist", { recursive: true }); externalizeScripts("dist"); } selfHostFonts("dist"); },
+  closeBundle() { if (existsSync("site")) { cpSync("site", "dist", { recursive: true }); externalizeScripts("dist"); noGoogleFonts("dist"); } },
 });
 
 /** The website's CSP allows scripts from the site itself only (no 'unsafe-inline', vercel.json), so every inline
@@ -33,48 +33,29 @@ export function externalizeScripts(root: string) {
   return made.size;
 }
 
-/** The fonts are served from the site itself (/fonts/), not Google Fonts: no third party sees each visit, and the CSP
- *  allows fonts and styles from the site only. Every page's Google Fonts link becomes a link to each family's own
- *  stylesheet, written from the @fontsource packages with the family names the pages already use; only the woff2
- *  files are copied, and a browser downloads just the character ranges a page uses. */
-const FONT_FAMILIES: Record<string, { slug: string; css: string[]; as?: string }> = {
-  "Inter": { slug: "inter", css: ["@fontsource-variable/inter/index.css"], as: "Inter Variable" },
-  "Noto Sans SC": { slug: "noto-sans-sc", css: ["@fontsource/noto-sans-sc/400.css", "@fontsource/noto-sans-sc/500.css", "@fontsource/noto-sans-sc/600.css"] },
-  "Noto Serif SC": { slug: "noto-serif-sc", css: ["@fontsource/noto-serif-sc/400.css", "@fontsource/noto-serif-sc/500.css"] },
-  "Newsreader": { slug: "newsreader", css: ["@fontsource-variable/newsreader/opsz.css", "@fontsource-variable/newsreader/opsz-italic.css"], as: "Newsreader Variable" },
-  "IBM Plex Mono": { slug: "ibm-plex-mono", css: ["@fontsource/ibm-plex-mono/400.css", "@fontsource/ibm-plex-mono/500.css"] },
-};
-export function selfHostFonts(root: string) {
-  const out = join(root, "fonts"), files = join(out, "files"), written = new Set<string>();
-  const family = (name: string) => {
-    const f = FONT_FAMILIES[name];
-    if (!f) throw new Error(`The page asks Google Fonts for "${name}", which isn't self-hosted yet: add it to FONT_FAMILIES in vite.config.ts`);
-    if (!written.has(f.slug)) {
-      mkdirSync(files, { recursive: true });
-      const css = f.css.map(p => {
-        const dir = join("node_modules", p, "..");
-        return readFileSync(join("node_modules", p), "utf8")
-          .replace(/,\s*url\(\.\/files\/[^)]+\.woff\) format\('woff'\)/g, "")
-          .replace(/url\(\.\/files\/([^)]+\.woff2)\)/g, (_m, file: string) => { writeFileSync(join(files, file), readFileSync(join(dir, "files", file))); return `url(/fonts/files/${file})`; })
-          .replace(f.as ? new RegExp(`font-family: '${f.as}'`, "g") : /^$/, `font-family: '${name}'`);
-      }).join("\n");
-      writeFileSync(join(out, `${f.slug}.css`), css);
-      written.add(f.slug);
-    }
-    return `/fonts/${f.slug}.css`;
-  };
-  const walk = (dir: string): string[] => readdirSync(dir).flatMap(f => { const p = join(dir, f); return statSync(p).isDirectory() ? (p === out ? [] : walk(p)) : p.endsWith(".html") ? [p] : []; });
-  for (const file of walk(root)) {
-    const html = readFileSync(file, "utf8");
-    if (!html.includes("fonts.g")) continue;
-    const next = html
-      .replace(/<link\b[^>]*\bhref="https:\/\/fonts\.(googleapis|gstatic)\.com\/?"[^>]*>\s*/g, "")
-      .replace(/<link\b[^>]*\bhref="https:\/\/fonts\.googleapis\.com\/css2\?([^"]+)"[^>]*>/g, (_m, q: string) =>
-        [...new URLSearchParams(q.replace(/&amp;/g, "&")).getAll("family")].map(v => `<link rel="stylesheet" href="${family(v.split(":")[0])}">`).join(""));
-    if (next !== html) writeFileSync(file, next);
-  }
-  return written.size;
+/** The fonts are served from the site itself (site/fonts, written by npm run fonts from the @fontsource packages), not
+ *  Google Fonts: no third party sees each visit, and the CSP allows fonts and styles from the site only. Every page
+ *  links /fonts/fonts.css; the build fails if a page, stylesheet or script in dist/ still points at a Google Fonts host. */
+export function noGoogleFonts(root: string) {
+  const walk = (dir: string): string[] => readdirSync(dir).flatMap(f => { const p = join(dir, f); return statSync(p).isDirectory() ? walk(p) : /\.(html|css|js)$/.test(p) ? [p] : []; });
+  const bad = walk(root).filter(f => /fonts\.(googleapis|gstatic)\.com/.test(readFileSync(f, "utf8")));
+  if (bad.length) throw new Error(`These files load fonts from Google, which sees every visitor's address; link /fonts/fonts.css instead (npm run fonts):\n  ${bad.slice(0, 10).join("\n  ")}`);
+  if (!existsSync(join(root, "fonts", "fonts.css"))) throw new Error(`${root}/fonts/fonts.css is missing: run npm run fonts`);
 }
+/** In dev (npm run dev, the app at /app/), /fonts/ is served from site/fonts, as the site serves it in production. */
+const devFonts = (): Plugin => ({
+  name: "placetta-dev-fonts",
+  apply: "serve",
+  configureServer(server) {
+    server.middlewares.use("/fonts", (req, res, next) => {
+      const path = decodeURIComponent((req.url ?? "/").split("?")[0]);
+      const file = join("site", "fonts", path);
+      if (path.includes("..") || !existsSync(file) || !statSync(file).isFile()) return next();
+      res.setHeader("Content-Type", file.endsWith(".css") ? "text/css" : file.endsWith(".woff2") ? "font/woff2" : "text/plain; charset=utf-8");
+      res.end(readFileSync(file));
+    });
+  },
+});
 
 /** pdf.js's image decoders and standard fonts, next to the app (pdfjs/), for drawing the filled forms' pages
  *  (src/forms/render.ts). Without them a form still draws, minus the odd scanned image. Not in the one-file build. */
@@ -132,5 +113,5 @@ export default defineConfig(({ mode, command }) => {
   const guard = serverOnly(define.__LOCAL_AGENT__ === "true");
   return mode === "single"
     ? { define, plugins: [react(), viteSingleFile(), guard], build: { outDir: "dist-single" } }
-    : { define, base: "/app/", plugins: [react(), website(), pdfjsAssets(), guard], build: { outDir: "dist/app", emptyOutDir: true, sourcemap: false } };
+    : { define, base: "/app/", plugins: [react(), website(), pdfjsAssets(), devFonts(), guard], build: { outDir: "dist/app", emptyOutDir: true, sourcemap: false } };
 });
