@@ -71,3 +71,6 @@ services:
       # FILER_PROBE=1                      the nightly re-check with a remote browser too (spends the provider's minutes)
       # FILER_KEEP_AWAKE=0                 don't ask for its own /healthz while a filing runs (only for a plan that never sleeps)
       # FILER_DRY_RUN=1                    every filing stops at the agency's review page; nothing is sent
+      # ODELIA_NUMBER                      Odelia's Telnyx number (the same as odelia-sms's): when an agency texts the owner a
+      #                                    code for an account Odelia is making, the owner forwards it there in one tap
+      # FILER_ACCOUNT_MAIL_MINUTES         how long to wait for an agency's verification email (default 10, at most 30)

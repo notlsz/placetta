@@ -26,6 +26,8 @@ import { routeSns } from "../_shared/ses_inbound.ts";
 import { suppress, suppressedIn } from "../_shared/suppression.ts";
 import { attachReply, type ChaseRow, fromAsked, refOf, replyPrompt } from "../_shared/chase.ts";
 import { scoreText } from "../_shared/injection.ts";
+import { inboxTokenOf } from "../_shared/agent_inbox.ts";
+import { inboxRow } from "../_shared/agent_inbox_in.ts";
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
@@ -66,8 +68,20 @@ async function reply(to: string, lang: Lang, m: InMail, text: string, o: { uid: 
   return r.ok;
 }
 
+/** Mail to a business's own inbox at Placetta (odelia+<token>@, the email on accounts Odelia makes on agency sites):
+ *  kept for the portal worker waiting on it (sender, subject, links, codes), and nothing else. Nobody gets mail back. */
+async function agentInbox(m: InMail, token: string) {
+  const verdict = await senderVerified(m).catch(() => ({ ok: false, why: "error" }));
+  const { data, error } = await admin.rpc("agent_inbox_receive", inboxRow(m, token, verdict.ok));
+  if (error) { console.error("agent inbox", error.code ?? ""); return { ok: false, skipped: "agent_inbox_failed" }; }
+  return data === true ? { ok: true, inbox: true } : { ok: true, skipped: "unknown_inbox" };
+}
+
 export async function received(m: InMail) {
   const mine = odeliaAddresses(env);
+  // the business's inbox, before anything else: an agency's verification mail comes from a no-reply address
+  const token = inboxTokenOf(m.to, mine);
+  if (token) return await agentInbox(m, token);
   if (!m.to.some((t) => mine.includes(t)) || automated(m)) return { ok: true, skipped: "not_for_odelia" };
   const { data: uid } = await admin.rpc("user_by_email", { p_email: m.from });
   const user = typeof uid === "string" ? uid : null;

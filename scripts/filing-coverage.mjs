@@ -40,14 +40,15 @@ try {
         `export { FORMS, selfStep } from ${JSON.stringify(join(root, "src/forms/registry.ts"))};`,
         `export * as D from ${JSON.stringify(join(destDir, "destinations.ts"))};`,
         `export * as L from ${JSON.stringify(join(destDir, "logic.ts"))};`,
+        ...(existsSync(join(destDir, "accounts.ts")) ? [`export * as A from ${JSON.stringify(join(destDir, "accounts.ts"))};`] : []),
       ].join("\n"),
       resolveDir: root, loader: "ts",
     },
     bundle: true, platform: "node", format: "esm", outfile: join(tmp, "coverage.mjs"), logLevel: "error",
     external: ["*.pdf?inline"],
   });
-  const { FORMS, selfStep, D, L } = await import(join(tmp, "coverage.mjs"));
-  const result = report(FORMS, D, L, selfStep);
+  const { FORMS, selfStep, D, L, A } = await import(join(tmp, "coverage.mjs"));
+  const result = report(FORMS, D, L, selfStep, A);
   if (at >= 0) { console.log(JSON.stringify(result.counts)); process.exit(0); }
   if (check) {
     const problems = [...result.problems];
@@ -70,7 +71,7 @@ try {
   rmSync(tmp, { recursive: true, force: true });
 }
 
-function report(FORMS, D, L, selfStep = () => undefined) {
+function report(FORMS, D, L, selfStep = () => undefined, A = null) {
   const DEST = D.DEST, TEAM_ONLY = D.TEAM_ONLY ?? {}, TO_VERIFY = D.TO_VERIFY ?? {};
   const us = FORMS.filter((f) => !f.currency || f.currency === "USD");
   const ids = new Set(FORMS.map((f) => f.id));
@@ -142,6 +143,21 @@ function report(FORMS, D, L, selfStep = () => undefined) {
   // owner's step and never puts it up for filing, so the team row above counts it but no one files it.
   const insurance = rows.filter((r) => r.route === "team" && selfStep(r.f) === "insurance").length;
   md.push(`Of the ${routes.team} forms with the team, ${insurance} are insurance the owner buys from an insurer (workers' compensation), which the plan keeps as the owner's step: nothing is filed, so ${routes.team - insurance} are forms the team files.`, "");
+
+  // Who makes each portal's account when the business has no saved login (supabase/functions/file/accounts.ts)
+  if (A?.accountOf) {
+    const portalRows = rows.filter((r) => r.d?.portal);
+    const kindOf = (r) => { const k = A.accountOf(r.d); return k === "business" ? `business:${A.PORTAL_ACCOUNTS[r.d.portal.toLowerCase()]?.basis ?? "entry"}` : k; };
+    const n = (k) => portalRows.filter((r) => kindOf(r) === k).length;
+    md.push("## Portal logins", "");
+    md.push(`Of the ${portalRows.length} forms filed on an agency portal, who makes the account when the business has none saved (\`supabase/functions/file/accounts.ts\`). Odelia makes a business account under the business's agent authority, with its inbox at Placetta, and saves the login (\`worker/filer/src/account.ts\`).`, "");
+    md.push("| Account | Forms |", "|---|---:|");
+    md.push(`| None needed: the portal files without one | ${n("none")} |`);
+    md.push(`| Odelia makes it: the agency's page says you make your own | ${n("business:page")} |`);
+    md.push(`| Odelia makes it: the platform's public sign-up (the team confirms on the first run) | ${n("business:platform") + n("business:entry")} |`);
+    md.push(`| The owner's own identity (ID.me, Login.gov): stays with the owner | ${n("individual")} |`);
+    md.push(`| Not read yet: the Placetta team is asked | ${n("unknown")} |`, "");
+  }
 
   const PLACE = {
     US: "Federal", NY: "New York State", NYC: "New York City", CA: "California", LA: "Los Angeles", LAC: "Los Angeles County", TX: "Texas", HOU: "Houston",

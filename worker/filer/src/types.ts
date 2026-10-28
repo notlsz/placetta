@@ -44,4 +44,6 @@ export type Result =
   | { kind: "needs_you"; reason: string; message: Bi; trace: TraceStep[] }
   | { kind: "handoff"; reason: string; message: Bi; trace: TraceStep[]; task?: "handoff" | "review" | "check_agency" | "first_run" }
   | { kind: "review"; message: Bi; trace: TraceStep[] }
-  | { kind: "stopped"; trace: TraceStep[] };
+  | { kind: "stopped"; trace: TraceStep[] }
+  /** Inside a run only (run.ts makeAccount): the business's account is made; the filing carries on signed in. */
+  | { kind: "account_made"; trace: TraceStep[] };

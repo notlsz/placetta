@@ -25,11 +25,17 @@ import { startRecorder } from "./recorder.ts";
 import { blockedPage } from "./env.ts";
 import type { LivePage, LiveViews } from "./live.ts";
 import type { Act, Bi, Filing, Login, Result, Skill, TraceStep } from "./types.ts";
+import { ACCOUNT_MSG, accountNote, accountPage, codeControl, codeToPhone, emailControl, newPassword, phoneCodeMsg, profileValue, termsControl } from "./account.ts";
+import { makesAccount, type Stop } from "./guards.ts";
+import type { AccountSetup } from "./store.ts";
+import type { AccountKind } from "../../../supabase/functions/file/accounts.ts";
+import { IDENTITY_HOSTS } from "../../../supabase/functions/file/accounts.ts";
 
 export type Session = { browser: Browser; page: Page; liveUrl: string | null; close(): Promise<void> };
 /** The destination's details the worker needs beyond its host: the agency's path on a host many agencies share (so
-    its own saved login is used), the other hosts the portal sends the browser to, and the page to start from. */
-export type Route = { tenant?: string; alsoOn?: string[]; start?: string };
+    its own saved login is used), the other hosts the portal sends the browser to, the page to start from, whether it
+    files with no account, and who may make its account when there's no saved login (accounts.ts). */
+export type Route = { tenant?: string; alsoOn?: string[]; start?: string; noLogin?: boolean; account?: AccountKind };
 export type Config = {
   store: Store; model: Model;
   /** A new, empty browser session for a run on this host (main.ts: local Chromium, or Browserbase for the hosts that
@@ -55,6 +61,10 @@ export type Config = {
   teachMs?: number;                                    // how long a person has to file while Odelia watches (default holdMs)
   teachSettleMs?: number;                              // after the confirmation shows, how long before the recording ends
   teachWithoutLive?: boolean;                          // tests: the person's browser is the test itself, not a live view
+  /** Making the business's account: how long to wait for the agency's email (default 10 minutes), and Odelia's number
+   *  the owner forwards a texted code to (ODELIA_NUMBER), when Placetta has one. */
+  accountMailMs?: number;
+  odeliaNumber?: string;
 };
 
 const TEACH = {
@@ -130,6 +140,8 @@ export function pageInjection(st: PageState): string | null {
   return h && h.score > 0 ? `hidden text: ${h.hits[0]}` : null;
 }
 const urlKey = (u: string) => { try { const x = new URL(u); return x.origin + x.pathname; } catch { return u; } };
+/** An address on a person's identity service (ID.me, Login.gov, IRS Secure Access). */
+const identityUrl = (u: string) => { try { return IDENTITY_HOSTS.test(new URL(u).hostname); } catch { return false; } };
 
 /** Teach mode: read the page a page event came from, as soon as it arrives. The page read must still be that page (the
  *  same address, and the heading the event named among the page's headings); otherwise it's marked as not read, which
@@ -154,6 +166,10 @@ type Ctx = {
   /** The hand-back the person just finished, and the page it was on (handBack, waived). */
   waive?: { reason: string; at: string };
   staffChecks?: number;                                // visible CAPTCHAs given to the team this run
+  /** While the worker makes the business's account (makeAccount): its row, email, when it started, whether the
+   *  registration was sent and the account verified, and whether it's made. */
+  account?: { setup: string; email: string; since: string; registered: boolean; verified: boolean; done: boolean };
+  blocked?: Blocked[];                                 // what the sandbox refused this run (an ID.me jump among them)
 };
 /** The URL is on the portal or one of the other hosts its destination names. */
 const onAny = (url: string, hosts: string[]) => hosts.some((h) => onPortal(url, h));
@@ -177,7 +193,8 @@ export class Worker {
   async run(f0: Filing): Promise<Result | null> {
     const track: { session?: Session; dir?: string } = {};
     const alive = { on: true };
-    const limit = this.c.runMs ?? this.c.maxMs + this.c.holdMs + (this.c.live?.on ? this.c.staffHoldMs ?? STAFF_MS : 0) + 5 * 60_000;
+    const limit = this.c.runMs ?? this.c.maxMs + this.c.holdMs + (this.c.live?.on ? this.c.staffHoldMs ?? STAFF_MS : 0) + 5 * 60_000
+      + (this.c.accountMailMs ?? 10 * 60_000);   // making an account may wait on the agency's email once
     try {
       // past the limit: storage wiped, browser closed, the run's folder gone and its token ended now, not when the
       // model or the page finally answers
@@ -241,6 +258,14 @@ export class Worker {
       const blocked: Blocked[] = [];
       await harden(page, hosts, (b) => { blocked.push(b); });
       const login = await store.login(f, host, route?.tenant);
+      // No saved login on a site that needs one: Odelia makes the business's own account first, when she may
+      // (makeAccount); a person's own identity, or a site nobody has checked, never gets one.
+      let setup: AccountSetup | null = null;
+      if (!login && route && !route.noLogin && !teaching && store.accountBegin) {
+        const gate = await this.accountGate(f, host, route);
+        if ("end" in gate) { await this.finish(f, gate.end); return gate.end; }
+        setup = gate.setup;
+      }
       f = await store.step(f, log(`Opening ${host}`, `打开 ${host}`, "visit"), { provider_ref: null });
       if (pb && !teaching) f = await store.step(f, taught
         ? log(`Following the steps taught on ${host}${taught.status === "approved" ? ", reviewed by the Placetta team" : " (not yet reviewed: you press submit)"}`, `按在 ${host} 上学到的步骤操作${taught.status === "approved" ? "（已经快哉团队核对）" : "（尚未核对：由您点击提交）"}`, "playbook", JSON.stringify(pageOutline(pb.form)).slice(0, 800))
@@ -255,7 +280,8 @@ export class Worker {
       (events as RawEvent[] & { scans?: Promise<void>[] }).scans = scans;
       // The agency's own start page when the destination names one (on a host many agencies share, it's the agency's path).
       const start = pb?.form.start ?? route?.start;
-      await page.goto(this.c.startUrl ? this.c.startUrl(host) : start && onAny(start, hosts) ? start : `https://${host}/`);
+      const entry = this.c.startUrl ? this.c.startUrl(host) : start && onAny(start, hosts) ? start : `https://${host}/`;
+      await page.goto(entry);
       // the agency's bot protection refused this server's address: nothing was typed; another route, or Browserbase
       const first = await pageState(page).catch(() => null);
       if (first && blockedPage(first)) {
@@ -263,7 +289,11 @@ export class Worker {
         await this.finish(f, res);
         return res;
       }
-      const ctx: Ctx = { f, host, hosts, login, page, session, trace: [], t0: Date.now(), files: new Map(), pb, dir, taught, assist: !!taught && taught.status !== "approved" };
+      const ctx: Ctx = { f, host, hosts, login, page, session, trace: [], t0: Date.now(), files: new Map(), pb, dir, taught, assist: !!taught && taught.status !== "approved", blocked };
+      if (setup) {
+        const end = await this.makeAccount(ctx, setup, route?.tenant, entry);
+        if (end) { await this.finish(ctx.f, end, ctx); return end; }
+      }
       const key = portalKey(host, f.payload.official!);
       if (teaching) {
         const res = await this.teach(ctx, events, page.url());
@@ -319,22 +349,30 @@ export class Worker {
     if (ctx.f.status === "canceled") return { end: { ...STOPPED, trace: ctx.trace } };
     const st = await pageState(page);
     await this.proof(ctx, st);
-    const stop = mustStop(st);
+    const stop = this.stopOf(ctx, st);
     if (stop && !(await this.waived(ctx, stop, st))) return { end: await this.handBack(ctx, stop.reason, { en: stop.en, zh: stop.zh }) };
     const loc = locate(page, a.selector).first();
     if (!(await loc.count())) return { ok: false, error: `No element for ${a.selector}` };
     const p = ctx.f.payload;
     const rec = (x: Act) => ctx.trace.push({ ...x, url: urlKey(st.url), heading: headingOf(st), at: Date.now() });
+    const control = st.controls.find((c) => c.selector === a.selector);
     if (a.action === "fill") {
       if (a.login) {
         if (!ctx.login || !onAny(st.url, ctx.hosts)) return { ok: false, error: "No saved login for this site." };
         await loc.fill(a.login === "username" ? ctx.login.username : ctx.login.password);
         rec({ action: "fill", selector: a.selector, login: a.login });
-        ctx.f = await this.c.store.step(ctx.f, log(`Entered the saved ${a.login}`, `已填写保存的${a.login === "username" ? "用户名" : "密码"}`, "quiet"));
+        ctx.f = await this.c.store.step(ctx.f, log(ctx.account ? `Entered the new account's ${a.login === "username" ? "email" : "password"}` : `Entered the saved ${a.login}`,
+          ctx.account ? `已填写新账户的${a.login === "username" ? "邮箱" : "密码"}` : `已填写保存的${a.login === "username" ? "用户名" : "密码"}`, "quiet"));
         return { ok: true };
       }
       const value = valueOverride ?? "";
-      const from = fieldFor(value, p);
+      // Making the business's account: its email is only ever the business's inbox (fill_login), and every other value
+      // comes from the business's profile among the approved values.
+      if (ctx.account && control && emailControl(control)) {
+        ctx.f = await this.c.store.step(ctx.f, log("Refused to type an email other than the business's inbox into the new account", "拒绝在新账户中填写企业收件箱以外的邮箱", "refused"));
+        return { ok: false, error: "Refused: the account's email and user name are typed with fill_login username." };
+      }
+      const from = ctx.account ? profileValue(value, p) : fieldFor(value, p);
       if (!from) {
         ctx.f = await this.c.store.step(ctx.f, log("Refused a value the customer didn't approve", "拒绝填写未经批准的内容", "refused"));
         return { ok: false, error: "Refused: that value isn't one of the approved values." };
@@ -359,6 +397,21 @@ export class Worker {
       return { ok: true };
     }
     if (a.action === "check") {
+      // A site's terms, accepted for the business while Odelia makes its account: only when its agent authority covers
+      // it, recorded (the page, its heading, when) before the box is ticked; otherwise the box is the owner's.
+      if (ctx.account && a.on && control && termsControl(control) && !control.checked) {
+        try {
+          await this.c.store.acceptTerms!(ctx.f, ctx.account.setup, st.url, headingOf(st), control.label || control.name);
+        } catch (e) {
+          if (!/terms_not_covered/.test(e instanceof Error ? e.message : String(e))) throw e;
+          ctx.f = await this.c.store.step(ctx.f, log("Didn't accept the site's terms: the business's agent authority doesn't cover it", "未接受网站条款：企业的代理授权不包括这一项", "refused"));
+          return { end: await this.handBack(ctx, "terms", ACCOUNT_MSG.terms) };
+        }
+        await loc.setChecked(true);
+        rec(a);
+        ctx.f = await this.c.store.step(ctx.f, log(`Accepted the site's terms for the business, as its agent (recorded with the page and the time)`, "已作为企业的代理人接受网站条款（已记录页面和时间）", "terms", headingOf(st).slice(0, 120)));
+        return { ok: true };
+      }
       await loc.setChecked(a.on);
       rec(a);
       return { ok: true };
@@ -392,6 +445,21 @@ export class Worker {
       nav = !!again && urlKey(again.url) === urlKey(st.url) && navOn(ctx.pb?.playbook, again, text);
     }
     const final = !!text && !nav && (isFinal(text) || finalOn(ctx.pb?.playbook, st, text));
+    // Making the business's account: the only thing sent is the account itself, from the account's own pages. Its
+    // send isn't the filing's: no review page, no two-key, and submit_clicked_at stays the filing's.
+    if (ctx.account) {
+      if (final && !accountPage(st)) {
+        ctx.f = await this.c.store.step(ctx.f, log("Refused to send anything but the new account while making it", "开设账户期间，拒绝发送账户以外的任何内容", "refused"));
+        return { ok: false, error: "Refused: while making the account, nothing but the account is sent. Call account with status created once it's made." };
+      }
+      if (makesAccount(st) || (final && accountPage(st))) ctx.account.registered = true;
+      await Promise.all([page.waitForLoadState("domcontentloaded").catch(() => undefined), loc.click()]);
+      await page.waitForLoadState("domcontentloaded").catch(() => undefined);
+      rec({ action: "click", selector: a.selector });
+      if (!onAny(page.url(), ctx.hosts)) return { end: { kind: "handoff", reason: "left_portal", trace: ctx.trace, message: { en: "The run left the agency's site.", zh: "运行离开了机构网站。" } } };
+      ctx.f = await this.c.store.step(ctx.f, log(`Pressed ${text || a.selector.replace(/^\w+:/, "")}`, `点击 ${text || a.selector.replace(/^\w+:/, "")}`, "click"));
+      return { ok: true };
+    }
     if (final && ctx.f.submit_clicked_at) {
       // Already submitted in this run: a second "send" is the agency's fee or a confirmation of it, which is the person's.
       return { end: await this.handBack(ctx, "payment", PAY) };
@@ -474,6 +542,11 @@ export class Worker {
   private async handBack(ctx: Ctx, reason: string, message: Bi): Promise<Result> {
     const h0 = Date.now();
     try {
+      // Making the business's account: an ID.me or Login.gov page means the site wants a person's own identity, which
+      // stays the owner's (and the registry is wrong about the site); a code is looked for in the business's inbox
+      // first, and one sent to a phone is the owner's one tap.
+      if (ctx.account && reason === "identity") return await this.identityBack(ctx);
+      if (ctx.account && reason === "code") return await this.accountCode(ctx);
       if (reason === "captcha") {
         const r = await this.staffFirst(ctx, message);
         if (r) return r;
@@ -538,8 +611,9 @@ export class Worker {
     }
   }
 
-  /** The page as the owner is handed it, and how to tell they're finished with it. */
-  private async ownerBack(ctx: Ctx, reason: string, message: Bi): Promise<Result> {
+  /** The page as the owner is handed it, and how to tell they're finished with it. poll: something else that finishes
+   *  the step (a code the owner texted Odelia, entered by the worker). */
+  private async ownerBack(ctx: Ctx, reason: string, message: Bi, poll?: () => Promise<boolean>): Promise<Result> {
     const until = new Date(Date.now() + this.c.holdMs).toISOString();
     // A session with no hosted view (local Chromium) gets the worker's own live browser for this hand-back (live.ts).
     const own = !ctx.session.liveUrl ? this.c.live?.open(ctx.page as unknown as Parameters<LiveViews["open"]>[0], this.c.holdMs) ?? null : null;
@@ -563,6 +637,12 @@ export class Worker {
         // One tap: Done in the live browser, or the page simply no longer needing the person (the CAPTCHA solved, the
         // code typed, the fee paid and the agency's next page showing), and Odelia carries on by herself. Never while
         // the person's hands are on the page: two quiet polls in a row, nothing clicked or typed for 3 seconds.
+        if (poll && await poll().catch(() => false)) {
+          ctx.f = await this.c.store.step(ctx.f, log("Odelia entered the code you sent and carries on.", "Odelia 已输入您发来的验证码，继续办理。", "resume"),
+            { agent_state: "running", provider_ref: null, handoff_url: null });
+          ctx.waive = { reason, at };
+          return { kind: "needs_you", reason: "resumed", message, trace: ctx.trace };
+        }
         const idle = !own || Date.now() - (this.c.live?.touched(own.token) ?? 0) > 3000;
         const tapped = !!own && !!this.c.live?.done(own.token);
         const cleared = SELF_CLEARING.has(reason) && await this.cleared(ctx, reason, at);
@@ -604,6 +684,143 @@ export class Worker {
   private async takeBack(id: string): Promise<boolean> {
     const s = this.c.store as Store & { takeHeld?(id: string): Promise<boolean> };
     return s.takeHeld ? await s.takeHeld(id) : false;
+  }
+
+  // ---------------------------------------------------------------- making the business's account (account.ts)
+
+  /** Why this page needs a person, while making the account too: the account page itself is the work, not a stop. */
+  private stopOf(ctx: Ctx, st: PageState): Stop | null {
+    const s = mustStop(st);
+    return s && ctx.account && s.reason === "account" ? null : s;
+  }
+
+  /** Before anything opens: whose account the site's is. A person's own identity is handed back with the reason; a site
+   *  nobody has checked goes to the team; a business account starts, when the business's agent authority covers it. */
+  private async accountGate(f: Filing, host: string, route: Route): Promise<{ end: Result } | { setup: AccountSetup }> {
+    const { store } = this.c;
+    const kind = route.account ?? "unknown";
+    if (kind === "individual") return { end: { kind: "handoff", reason: "account_identity", trace: [], message: ACCOUNT_MSG.identity } };
+    if (kind === "unknown" || kind === "none") {
+      await store.teamTask(f, "account", `${host} needs an account for ${f.payload.official} and the business has none saved. May an agent or the business make its own account there (no ID.me or Login.gov)? Set its row in supabase/functions/file/accounts.ts PORTAL_ACCOUNTS.`, { host, official: f.payload.official });
+      return { end: { kind: "handoff", reason: "account_unknown", trace: [], message: ACCOUNT_MSG.unknown } };
+    }
+    try {
+      return { setup: await store.accountBegin!(f, host, route.tenant, host) };
+    } catch (e) {
+      if (/account_authority/.test(e instanceof Error ? e.message : String(e))) return { end: { kind: "handoff", reason: "account_authority", trace: [], message: ACCOUNT_MSG.authority } };
+      throw e;
+    }
+  }
+
+  /** Makes the business's account: a new strong password, saved in the vault before the agency's form is sent, the
+   *  business's inbox as its email, the model filling the site's pages under the account guards, the verification read
+   *  from the inbox. Null once the account is made and its login saved (the run then files, signed in); otherwise how the
+   *  run ends. */
+  private async makeAccount(ctx: Ctx, setup: AccountSetup, tenant: string | undefined, entry: string): Promise<Result | null> {
+    const { store } = this.c;
+    const password = newPassword();
+    // https://<host><tenant>: the login matches this destination, and on a shared host only this agency (loginMatches)
+    await store.saveLogin!(ctx.f, setup.id, `https://${ctx.host}${tenant ?? "/"}`, setup.email, password);
+    ctx.login = { username: setup.email, password, host: ctx.host };
+    ctx.account = { setup: setup.id, email: setup.email, since: new Date(Date.now() - 60_000).toISOString(), registered: false, verified: false, done: false };
+    ctx.f = await store.step(ctx.f, log(`Making the business's own account on ${ctx.host}, with its inbox at Placetta (${setup.email}). The password is new, kept in the vault, and never shown to anyone.`,
+      `正在用企业在快哉的收件箱（${setup.email}）为企业在 ${ctx.host} 开设账户。密码为新生成，保存在保险库中，不会向任何人显示。`, "account"));
+    let res: Result;
+    try {
+      res = await this.drive(ctx, "No login is saved for this site: make the business's account first.");
+    } catch (e) {
+      await store.accountState?.(ctx.f, setup.id, ctx.account.registered ? "awaiting_email" : "failed", "the run stopped").catch(() => undefined);
+      throw e;
+    }
+    const made = ctx.account.done;
+    const registered = ctx.account.registered;
+    ctx.account = undefined;
+    if (made) {
+      await store.accountSaved!(ctx.f, setup.id);
+      ctx.f = await store.step(ctx.f, log(`Made the business's account on ${ctx.host} and saved its login. This filing and every later one sign in with it.`,
+        `已为企业在 ${ctx.host} 开设账户并保存登录信息。本次及以后的申报都用它登录。`, "account_saved"));
+      await ctx.page.goto(entry);
+      return null;
+    }
+    // Not made: a registration the agency has keeps its login (it may yet verify); one never sent is dropped.
+    await store.accountState?.(ctx.f, setup.id, registered ? "awaiting_email" : res.kind === "needs_you" ? "failed" : "handed_back", res.kind).catch(() => undefined);
+    return res;
+  }
+
+  /** The site said it sent an email or a code: read it from the business's inbox (only a link on the portal's own hosts,
+   *  or a code), and open or enter it. */
+  private async verifyAccount(ctx: Ctx, st: PageState): Promise<Exec> {
+    const { store } = this.c;
+    if (!ctx.account || !store.waitForMail) return { ok: false, error: "The business's inbox isn't reachable from this run." };
+    const box = st.controls.find((c) => codeControl(c) && !c.value);
+    await store.accountState?.(ctx.f, ctx.account.setup, "awaiting_email").catch(() => undefined);
+    ctx.f = await store.step(ctx.f, log("Waiting for the agency's email at the business's inbox", "正在等待机构发到企业收件箱的邮件", "account"));
+    const w0 = Date.now();   // time spent waiting on the agency's email isn't the run's own
+    const hit = await store.waitForMail(ctx.f, { hosts: ctx.hosts, since: ctx.account.since, want: box ? "any" : "link" }, { timeoutMs: this.c.accountMailMs ?? 10 * 60_000, pollMs: this.c.pollMs, stop: () => ctx.f.status === "canceled" });
+    ctx.t0 += Date.now() - w0;
+    if (!hit) {
+      if (box && codeToPhone(st)) return { end: await this.phoneCode(ctx) };
+      await store.teamTask(ctx.f, "account", `Odelia made the business's account on ${ctx.host} (${ctx.account.email}), but the agency's verification email didn't come within ${Math.round((this.c.accountMailMs ?? 600_000) / 60_000)} minutes. Check the inbox and the site.`, { host: ctx.host, email: ctx.account.email });
+      return { end: { kind: "handoff", reason: "account_no_mail", trace: ctx.trace, message: ACCOUNT_MSG.noMail } };
+    }
+    if (hit.link) {
+      // pickVerification keeps only links on the portal's own hosts; the sandbox checks again
+      if (!linkAllowed(hit.link, ctx.hosts) || !onAny(hit.link, ctx.hosts)) return { ok: false, error: "The agency's email linked somewhere off its site." };
+      await ctx.page.goto(hit.link);
+      ctx.account.verified = true;
+      ctx.f = await store.step(ctx.f, log("Opened the agency's verification link from the business's inbox", "已打开企业收件箱中机构发来的验证链接", "account", new URL(hit.link).hostname));
+      return { ok: true };
+    }
+    return await this.enterCode(ctx, hit.code!, "email");
+  }
+
+  /** A code into the page's code box, typed by the worker (the model never handles it). */
+  private async enterCode(ctx: Ctx, code: string, from: "email" | "text"): Promise<Exec> {
+    const st = await pageState(ctx.page);
+    const box = st.controls.find((c) => codeControl(c) && !c.value) ?? st.controls.find((c) => codeControl(c));
+    if (!box) return { ok: false, error: "The agency sent a code, but this page has no box for it." };
+    await locate(ctx.page, box.selector).first().fill(code);
+    ctx.account && (ctx.account.verified = true);
+    ctx.waive = { reason: "code", at: `${urlKey(st.url)}|${headingOf(st)}` };
+    ctx.f = await this.c.store.step(ctx.f, log(from === "email" ? "Entered the code the agency emailed to the business's inbox" : "Entered the code you texted Odelia", from === "email" ? "已输入机构发到企业收件箱的验证码" : "已输入您发给 Odelia 的验证码", "account"));
+    return { ok: true };
+  }
+
+  /** A code box while making the account: the agency's email first; a code sent to a phone is the owner's one tap. */
+  private async accountCode(ctx: Ctx): Promise<Result> {
+    const { store } = this.c;
+    const st = await pageState(ctx.page);
+    const phone = codeToPhone(st);
+    const hit = store.waitForMail && ctx.account
+      ? await store.waitForMail(ctx.f, { hosts: ctx.hosts, since: ctx.account.since, want: "code" }, { timeoutMs: phone ? 0 : this.c.accountMailMs ?? 10 * 60_000, pollMs: this.c.pollMs, stop: () => ctx.f.status === "canceled" })
+      : null;
+    if (hit?.code) {
+      const r = await this.enterCode(ctx, hit.code, hit.mail.source === "owner_sms" ? "text" : "email");
+      if ("ok" in r && r.ok) return { kind: "needs_you", reason: "resumed", message: { en: "", zh: "" }, trace: ctx.trace };
+    }
+    return await this.phoneCode(ctx);
+  }
+
+  /** The agency sent the code to the owner's phone: they forward the text to Odelia (odelia-sms keeps it for this run)
+   *  or type it in the live view. */
+  private async phoneCode(ctx: Ctx): Promise<Result> {
+    const { store } = this.c;
+    if (ctx.account) await store.accountState?.(ctx.f, ctx.account.setup, "awaiting_code").catch(() => undefined);
+    const since = new Date().toISOString();
+    const poll = store.waitForMail && ctx.account ? async () => {
+      const hit = await store.waitForMail!(ctx.f, { hosts: ctx.hosts, since, want: "code" }, { timeoutMs: 0, pollMs: 0 });
+      if (!hit?.code) return false;
+      const r = await this.enterCode(ctx, hit.code, hit.mail.source === "owner_sms" ? "text" : "email");
+      return "ok" in r && r.ok;
+    } : undefined;
+    return await this.ownerBack(ctx, "code", phoneCodeMsg(this.c.odeliaNumber), poll);
+  }
+
+  /** The site wants a person's own identity (ID.me, Login.gov): nothing more is typed, the owner is told why, and the
+   *  team corrects the site's row. */
+  private async identityBack(ctx: Ctx): Promise<Result> {
+    await this.c.store.teamTask(ctx.f, "account", `Making the business's account on ${ctx.host} reached an ID.me or Login.gov sign-in. Set ${ctx.host} to "individual" in supabase/functions/file/accounts.ts.`, { host: ctx.host });
+    return { kind: "handoff", reason: "account_identity", trace: ctx.trace, message: ACCOUNT_MSG.identity };
   }
 
   // ---------------------------------------------------------------- replay and drive
@@ -667,7 +884,9 @@ export class Worker {
       if (ctx.f.status === "canceled") return { ...STOPPED, trace: ctx.trace };
       const st = await pageState(ctx.page);
       // The guide's fee page goes to the person even before any card field shows.
-      const own = mustStop(st);
+      // making the account, a jump the sandbox refused to an ID.me or Login.gov sign-in is the site asking for a person
+      if (ctx.account && ctx.blocked?.some((b) => b.kind === "navigation" && identityUrl(b.detail))) return await this.identityBack(ctx);
+      const own = this.stopOf(ctx, st);
       const stop = (own && !(await this.waived(ctx, own, st)) ? own : null) ?? (payOn(ctx.pb?.playbook, st) ? { reason: "payment" as const, ...PAY } : null);
       if (stop) {
         const r = await this.handBack(ctx, stop.reason, { en: stop.en, zh: stop.zh });
@@ -683,7 +902,8 @@ export class Worker {
       // After the submit, the guide's confirmation pattern finds the agency's number without asking the model.
       const pattern = ctx.f.submit_clicked_at && ctx.pb?.playbook.confirm ? new RegExp(ctx.pb.playbook.confirm, "i").exec(st.text) : null;
       if (pattern?.[1]) return await this.done(ctx, pattern[1], `Submitted following the published guide for ${ctx.pb!.playbook.name}`, false);
-      const call = await this.c.model.next({ filing: ctx.f, agency: ctx.host, state: st, recent, note, guide: ctx.pb ? guideLines(ctx.pb) : undefined });
+      const call = await this.c.model.next({ filing: ctx.f, agency: ctx.host, state: st, recent, note, guide: ctx.pb && !ctx.account ? guideLines(ctx.pb) : undefined,
+        ...(ctx.account ? { account: accountNote(ctx.account.email, ctx.host) } : {}) });
       note = undefined;
       const x = call.input as Record<string, string & boolean & number>;
       let r: Exec;
@@ -705,6 +925,20 @@ export class Worker {
           const conf = String(x.confirmation_number ?? "").trim();
           if (!conf || !st.text.includes(conf) || !ctx.f.submit_clicked_at) { r = { ok: false, error: "done needs the confirmation number shown on this page, after the submit." }; break; }
           return await this.done(ctx, conf, String(x.summary ?? ""), false);
+        }
+        case "account": {
+          if (!ctx.account) { r = { ok: false, error: "There's no account being made on this run." }; break; }
+          if (x.status === "created") {
+            // the model's word alone never saves a login: the account form was sent this run, and this page isn't it
+            if (!ctx.account.registered) { r = { ok: false, error: "The account form hasn't been sent yet." }; break; }
+            if (makesAccount(st)) { r = { ok: false, error: "This page is still the account form." }; break; }
+            ctx.account.done = true;
+            return { kind: "account_made", trace: ctx.trace };
+          }
+          const v = await this.verifyAccount(ctx, st);
+          if ("end" in v) { if (v.end.kind === "needs_you" && v.end.reason === "resumed") { r = { ok: true }; break; } return v.end; }
+          r = v;
+          break;
         }
         default: r = { ok: false, error: "Unknown tool." };
       }
@@ -833,8 +1067,8 @@ export class Worker {
       await store.notify(g, { en: `Submitted: ${f.title.en}`, zh: `已提交：${f.title.zh}` }, { en: `Confirmation ${res.confirmation}.`, zh: `确认号 ${res.confirmation}。` });
     } else if (res.kind === "stopped") {
       // the customer stopped it; the database already says so, and nothing was submitted
-    } else if (res.kind === "needs_you") {
-      // already recorded by handBack
+    } else if (res.kind === "needs_you" || res.kind === "account_made") {
+      // already recorded by handBack (account_made never ends a run: makeAccount carries on to the filing)
     } else if (res.kind === "review") {
       const g = await store.step(f, null, { agent_state: "handoff" });
       await store.teamTask(g, "review", `Review the agency's review page for ${f.payload.official} before Placetta submits (Documents, review-page.png).`);

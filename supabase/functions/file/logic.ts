@@ -1,6 +1,7 @@
 // The dispatcher's decisions, kept free of I/O so they can be tested: is this agency switched on, is the filing
 // complete, which channel sends it, and is the owner foreign. index.ts does the sending.
 import { type Dest, loginMatches, TEAM_ONLY } from "./destinations.ts";
+import { ACCOUNT_SAY, accountOf } from "./accounts.ts";
 
 export type Bi = { en: string; zh: string };
 /** "team" is the database's name for "not sent by Placetta": the business sends it with the packet Odelia prepares
@@ -239,7 +240,19 @@ export function check(f: Filing, d: Dest | undefined, ctx: { docPaths: Set<strin
   return out;
 }
 
-export type Facts = { hasLogin: boolean; mailConnected: boolean };
+/** makesAccount: no saved login, but Odelia may make the business's own account on the portal first (accounts.ts
+    "business", and the business signed Placetta as its agent with account making switched on: account_authority in
+    20261105090000_agent_accounts.sql). */
+export type Facts = { hasLogin: boolean; mailConnected: boolean; makesAccount?: boolean };
+
+/** The worker goes to make this portal's account for the business: the business's agent authority covers making
+    accounts, and the site takes a business's own account ("business"), or nobody has said yet ("unknown": the worker
+    asks the team before it opens anything, and the filing goes another way the agency takes meanwhile). Never for a
+    person's own identity ("individual"). */
+export const canMakeAccount = (d: Dest | undefined, authority: boolean): boolean => {
+  const k = accountOf(d);
+  return !!d?.portal && authority && (k === "business" || k === "unknown");
+};
 
 /** The filing carries an agency fee. */
 export const feeDue = (f: Filing): boolean => Number(f.fee_estimate ?? 0) > 0;
@@ -279,7 +292,8 @@ export function pick(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Ro
   if (!d) return "team";
   if (d.owner) return "owner";
   const on = (c: Channel) => env.channels.includes(c);
-  if (d.portal && (facts.hasLogin || d.noLogin) && env.portalWorker && on("portal")) return "portal";
+  // no saved login: the account is made first, by the worker, when Odelia may make it (worker/filer/src/account.ts)
+  if (d.portal && (facts.hasLogin || d.noLogin || facts.makesAccount) && env.portalWorker && on("portal")) return "portal";
   if (feeBlocks(f, d)) return "team";
   if (d.signature === "wet") return signedCopy(f) && canFaxSignedFor(f, d, env) ? "fax" : "team";
   if (d.email && facts.mailConnected && on("email") && extraFiles(f) <= EMAIL_ATTACHMENTS) return "email";
@@ -296,6 +310,12 @@ export function whyYours(f: Filing, d: Dest | undefined, env: Env, facts: Facts)
     const t = TEAM_ONLY[f.payload.official ?? ""];
     return t ? { en: `Odelia can't send this one for you: ${t.why}`, zh: `Odelia 无法代您提交这一份：${t.why}` }
       : { en: "Placetta doesn't have a checked way to send this form to the agency yet.", zh: "快哉尚未核实这份表格的提交方式。" };
+  }
+  // the agency's site would have taken it, but it needs an account nobody has saved: say whose account it is
+  if (d.portal && !facts.hasLogin && !d.noLogin && env.portalWorker && env.channels.includes("portal")) {
+    const kind = accountOf(d);
+    if (kind === "individual") return ACCOUNT_SAY.individual;
+    if (kind !== "none") return facts.makesAccount && kind === "unknown" ? ACCOUNT_SAY.unknown : ACCOUNT_SAY.authority;
   }
   if (feeBlocks(f, d)) return { en: "The agency's fee goes with this filing, and Placetta never sends money.", zh: "这份申请需随附机构费用，快哉从不代付款项。" };
   if (d.signature === "wet") return { en: "The agency needs a handwritten signature on this form.", zh: "该机构要求在表格上手写签名。" };
@@ -314,12 +334,21 @@ export function whyYours(f: Filing, d: Dest | undefined, env: Env, facts: Facts)
     (unverified_playbook), or a "Show Odelia how" run ended without a filing (no_live_view, teach_incomplete). The
     worker writes these as the hand-back's ref (worker/filer/src/run.ts). Each is tried another way the agency takes,
     else handed to the business with its packet. */
-export const PORTAL_FAILED = new Set(["limit", "left_portal", "no_portal", "portal_failed", "review_differs", "page_injection", "unverified_playbook", "no_live_view", "teach_incomplete", "portal_blocked", WORKER_ASLEEP]);
+export const PORTAL_FAILED = new Set(["limit", "left_portal", "no_portal", "portal_failed", "review_differs", "page_injection", "unverified_playbook", "no_live_view", "teach_incomplete", "portal_blocked", WORKER_ASLEEP,
+  // Odelia couldn't make the business's account (worker/filer/src/account.ts): the site wants a person's own identity,
+  // nobody has said yet whether an agent may make it, the agent authority doesn't cover it, or the agency's email never came
+  "account_identity", "account_unknown", "account_authority", "account_no_mail"]);
 
 /** A reroute's sentences, from why the agency's site wasn't used: it failed, or the worker didn't wake in time.
     lead is a whole sentence; sends(said) says the other way it goes. */
 export function rerouteLead(f: Pick<Filing, "agent_log">): { lead: Bi; sends(said: Bi): Bi } {
   const last = [...f.agent_log].reverse().find((e) => e.kind === "handoff");
+  // Odelia couldn't make the business's account: the worker's own sentence says why, and what the owner can do
+  if (last?.ref?.startsWith("account_")) {
+    const c = last.ref === "account_identity" ? { en: "This agency's site signs in with a person's own identity (ID.me or Login.gov)", zh: "该机构网站要用个人身份（ID.me 或 Login.gov）登录" }
+      : { en: "This agency's site needs an account Odelia couldn't make for the business yet", zh: "该机构网站需要账户，Odelia 暂时无法为企业开设" };
+    return { lead: { en: last.en, zh: last.zh }, sends: (said) => ({ en: `${c.en}, so Placetta sends it ${said.en} instead.`, zh: `${c.zh}，快哉改为${said.zh}提交。` }) };
+  }
   const c = last?.ref === WORKER_ASLEEP
     ? { en: "Odelia's filing browser didn't start in time", zh: "Odelia 的提交浏览器未能及时启动" }
     : { en: "The agency's site didn't work", zh: "机构网站无法完成" };

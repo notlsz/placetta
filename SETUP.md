@@ -141,6 +141,28 @@ and works the team queue's "Send as the business's agent" tasks (the dispatcher 
 SJPermits.org's simple permits (the sign permit among them) take only a licensed contractor or the property owner as
 applicant, so the business's sign contractor applies there; Odelia sends them the packet.
 
+### The business's own accounts (Odelia gets the login)
+
+The table above is Placetta's own accounts. A business's own account on an agency site, where the business has no
+saved login, Odelia makes for it (`worker/filer/src/account.ts`): its email is the business's inbox at Placetta
+(`odelia+<token>@in.placetta.com`), the password is new and goes straight into the vault, the agency's verification
+email is read from that inbox, and the login is saved for every later filing and status check. Which sites allow it is
+`supabase/functions/file/accounts.ts` (business, an owner's own ID.me or Login.gov identity, or not read yet: the team
+gets a task). `docs/FILING_COVERAGE.md`, Portal logins, has the counts. To switch it on:
+
+1. Run `20261105090000_agent_accounts.sql`, and deploy `file`, `odelia-mail`, `odelia-sms` and the worker.
+2. SES inbound (Email with Amazon SES, step 5): make the rule's recipient condition the domain `in.placetta.com`, not
+   only `odelia@in.placetta.com`, so the plus addresses reach `odelia-mail`.
+3. COUNSEL REVIEW REQUIRED: the agent section of the Filing Authorization must say Placetta may make and hold the
+   business's accounts on agency sites and accept their terms of use for it. Then, in Supabase SQL:
+   `update public.app_settings set agent_accounts_on = true;` Until then nothing changes: the owner is asked as before.
+4. Optional, in Render (placetta-filer): `ODELIA_NUMBER` (the owner forwards a texted code there in one tap) and
+   `FILER_ACCOUNT_MAIL_MINUTES` (default 10).
+
+A terms box is ticked only while the agent packet is live and account making is on; each acceptance (the page, its
+heading, the time) is in `portal_accounts.terms`, `agent_acts` and the audit trail. A CAPTCHA on a sign-up goes to the
+team as always. A code sent to the owner's phone is their one tap.
+
 ### Questions for the agencies (each yes removes a touch)
 
 - Santa Clara County DEH (dehplancheck@deh.sccgov.org): may an authorized agent sign the plan check application's
@@ -472,7 +494,7 @@ Approval usually takes a day.
 If you name a configuration set in `AWS_SES_CONFIGURATION_SET`, add `"arn:aws:ses:us-east-1:ACCOUNT_ID:configuration-set/NAME"` to `Resource` (make it a list). If you take the S3 option in step 5, add a second statement: `{"Effect": "Allow", "Action": "s3:GetObject", "Resource": "arn:aws:s3:::BUCKET/*"}`. Then Security credentials, **Create access key**, "Application running outside AWS", and copy the key ID and secret.
 
 **5. Odelia's inbox on in.placetta.com.** At IONOS add an MX record: host name `in`, points to `inbound-smtp.us-east-1.amazonaws.com`, priority 10. (Verifying `placetta.com` covers its subdomains; if the rule below says `in.placetta.com` isn't verified, create a domain identity for it too.) Then SES, **Email receiving**, **Create rule set** `placetta`, and **Set as active**. In it, **Create rule** `odelia`:
-- Recipient condition: `odelia@in.placetta.com`. Leave spam and virus scanning on.
+- Recipient condition: `odelia@in.placetta.com`, and the domain `in.placetta.com` so each business's own inbox (`odelia+<token>@in.placetta.com`, the email on accounts Odelia makes for it) arrives too. Leave spam and virus scanning on.
 - Action: **Publish to Amazon SNS topic**, **Create SNS topic** named `placetta-mail` (creating it here gives SES permission to publish), **Encoding: Base64**.
 
 That carries each message whole up to 150 KB; SES bounces larger mail back to the sender. If owners will email large scans, use instead the action **Deliver to S3 bucket** (Create S3 bucket, for example `placetta-inbound-ACCOUNT_ID`, object key prefix `inbound/`, SNS topic `placetta-mail`) and set `AWS_SES_S3_BUCKET` to the bucket's name; `odelia-mail` then reads each message from that bucket and from no other.
