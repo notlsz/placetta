@@ -10961,5 +10961,303 @@
   "found": true,
   "sha256": "daa39a0f33d3a982",
   "context": " other filing............................................................$60.00 *annual report license tax is $60 or two-tenths of one mill on the dollar ($.0002) whichever is greater based on the company's assets located and employed in the state of wyoming. nonprofit"
+ },
+ {
+  "id": "tx-dshs-food-mfr",
+  "read": "https://www.dshs.texas.gov/food-manufacturers-wholesalers-warehouses/food-manufacturers-general-information",
+  "quote": "Firms that manufacture food for sale to the public in the following manner are required to have a Food Manufacturer license with DSHS.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "a07c92a006446300",
+  "context": "food manufacturers general information who must license as a food manufacturer? firms that manufacture food for sale to the public in the following manner are required to have a food manufacturer license with dshs. this includes any firm that engages in the following activities: processing and"
+ },
+ {
+  "id": "tx-dshs-food-wholesale",
+  "read": "https://www.dshs.texas.gov/food-manufacturers-wholesalers-warehouses/food-wholesalers-warehouses-general-information",
+  "quote": "Firms that engage in any of the following activities are required to obtain a food wholesaler license",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "25be5c6a5680d024",
+  "context": " cooperative agreement labeling food wholesalers/warehouses general information firms that engage in any of the following activities are required to obtain a food wholesaler license, a warehouse operator license, or a food wholesaler registration: sell any type"
+ },
+ {
+  "id": "nm-trd-registration",
+  "read": "https://www.tax.newmexico.gov/businesses/who-must-register-a-business/",
+  "quote": "Anyone who engages in business in New Mexico must register with the Taxation and Revenue Department.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "e4ed0ca8e2d2a95d",
+  "context": "tax districts county officials oil & gas outreach who must register a business? anyone who engages in business in new mexico must register with the taxation and revenue department. \"engaging in business\" means carrying on or causing to be carried on any activi"
+ },
+ {
+  "id": "nm-dws-ui",
+  "read": "https://www.dws.nm.gov/UI-Tax-Information",
+  "quote": "New employers subject to Unemployment Insurance taxes must register with NMDWS on to the Unemployment Insurance Tax Self-Service System.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "36d438333c10ee8a",
+  "context": "employers log in to the unemployment insurance tax & claims system register now new employers subject to unemployment insurance taxes must register with nmdws on to the unemployment insurance tax self-service system. after registering with nmdws, you will receive an employer account number (ean)"
+ },
+ {
+  "id": "nm-nmed-retail-food",
+  "read": "https://www.env.nm.gov/foodprogram/retail-food-application/",
+  "quote": "The retail food permit application required to serve food directly to customers is available here.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "732301a2f97f31f1",
+  "context": "assist you throughout the permitting process. please contact us for assistance. the retail food permit application required to serve food directly to customers is available here. the temporary food event permit application is available here. if your restaura"
+ },
+ {
+  "id": "nm-nmed-manufactured-food",
+  "read": "https://www.env.nm.gov/foodprogram/retail-food-application/",
+  "quote": "If your restaurant is permitted but you would like to begin selling products to other businesses, you must also obtain a food manufacturing permit.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "732301a2f97f31f1",
+  "context": " available here. the temporary food event permit application is available here. if your restaurant is permitted but you would like to begin selling products to other businesses, you must also obtain a food manufacturing permit. the manufactured food permit application is available here. variance applicatio"
+ },
+ {
+  "id": "co-cdphe-manufactured-food",
+  "read": "https://cdphe.colorado.gov/dehs/mf",
+  "quote": "Manufacturers, warehouses, re-packers, shellfish dealers, salvage operations, and grain storage facilities must be registered.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "f8d9c6fce5fb0cc1",
+  "context": "uently asked questions expand all when to submit a new application registration manufacturers, warehouses, re-packers, shellfish dealers, salvage operations, and grain storage facilities must be registered. food manufacturing and storage includes: selling your food to retailers. re-pac"
+ },
+ {
+  "id": "ok-otc-sales",
+  "read": "https://oklahoma.gov/business/operate/business-taxes.html",
+  "quote": "Wholesale and retail businesses that sell such items to customers in the state are required to obtain one or more applicable sales tax permits",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "cef4cbe33828e309",
+  "context": "material items to customers in oklahoma involves the collection of sales taxes. wholesale and retail businesses that sell such items to customers in the state are required to obtain one or more applicable sales tax permits (stps) from the <b><i>oklahoma tax commission</i></b> <i><b>(otc)</b></i>. stps"
+ },
+ {
+  "id": "ok-otc-withholding",
+  "read": "https://oklahoma.gov/business/operate/business-taxes.html",
+  "quote": "Businesses with employees must set up an account with the Oklahoma Tax Commission (OTC) for withholding and remitting state income taxes",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "cef4cbe33828e309",
+  "context": "ries paid to employees.</span></p>\\n\"}}\" id=\"text-d4c5929f89\" class=\"cmp-text\"> businesses with employees must set up an account with the oklahoma tax commission (otc) for withholding and remitting state income taxes from the wages and salaries paid to employees. oklahoma tax commission unemploy"
+ },
+ {
+  "id": "ok-oesc-ui",
+  "read": "https://oklahoma.gov/business/operate/business-taxes.html",
+  "quote": "Employers must also set up an account and withhold and remit state unemployment taxes to the Oklahoma Employment Security Commission (OESC)",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "cef4cbe33828e309",
+  "context": "mission (oesc)</i></b>.</span></p>\\n\"}}\" id=\"text-beac4bd140\" class=\"cmp-text\"> employers must also set up an account and withhold and remit state unemployment taxes to the oklahoma employment security commission (oesc). oesc home page contribution rates ez tax express federal taxes <span class=\\\"b"
+ },
+ {
+  "id": "ok-osdh-food-establishment",
+  "read": "https://oklahoma.gov/health/services/licensing-inspections/consumer-health-service/licensure/food.html",
+  "quote": "A license application is submitted to the Oklahoma State Department of Health, along with the required application fee.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "3653afcc47721465",
+  "context": "been met</li>\\n</ul>\\n</li>\\n</ul>\\n\"}}\" id=\"text-f983c08d40\" class=\"cmp-text\"> a license application is submitted to the oklahoma state department of health, along with the required application fee. a pre-licensure inspection may be completed when the following have occurred: p"
+ },
+ {
+  "id": "ok-osdh-food-manufacturing",
+  "read": "https://oklahoma.gov/health/services/licensing-inspections/consumer-health-service/licensure/food.html",
+  "quote": "A license application is submitted to the Oklahoma State Department of Health, along with the required application fee.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "3653afcc47721465",
+  "context": "been met</li>\\n</ul>\\n</li>\\n</ul>\\n\"}}\" id=\"text-f983c08d40\" class=\"cmp-text\"> a license application is submitted to the oklahoma state department of health, along with the required application fee. a pre-licensure inspection may be completed when the following have occurred: p"
+ },
+ {
+  "id": "ks-kdor-sales",
+  "read": "https://www.ksrevenue.gov/pdf/pub1510.pdf",
+  "quote": "If you are making retail sales or providing taxable services in Kansas, you must register and collect the tax.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "9f3238b9ee4542e1",
+  "context": "ional type, including nonprofit, religious, governmental or educational groups. if you are making retail sales or providing taxable services in kansas, you must register and collect the tax. out-ofstate retailers that have either physical or economic nexus in kansas mus"
+ },
+ {
+  "id": "ks-kdor-withholding",
+  "read": "https://www.ksrevenue.gov/bustaxtypeswh.html",
+  "quote": "An employer must withhold Kansas tax if the employee is a resident of Kansas, performing services inside or outside of Kansas",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "7d9c7aac7b979eaf",
+  "context": "rom each employee's wages to help pre-pay the state income tax of the employee. an employer must withhold kansas tax if the employee is a resident of kansas, performing services inside or outside of kansas, or a nonresident of kansas, performing services in kansas. the employer remits"
+ },
+ {
+  "id": "ks-kdol-ui",
+  "read": "https://www.dol.ks.gov/home/showpublisheddocument/68/639015674355270000",
+  "quote": "is required to file form K-CNS 010, Status Report, within 15 days of paying its first employee.",
+  "checked": "2026-10-28",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-28"
+ },
+ {
+  "id": "ks-kda-food-establishment",
+  "read": "https://www.agriculture.ks.gov/licenses/food-and-lodging-applications-and-licenses/license-information-food-safety",
+  "quote": "A business that prepares or offers food for immediate consumption is required to have a Food Establishment License.",
+  "checked": "2026-10-28",
+  "method": "webfetch",
+  "found": true,
+  "note": "curl got 403; read with WebFetch on 2026-10-28"
+ },
+ {
+  "id": "ks-kda-food-processing",
+  "read": "https://www.ksrevisor.gov/statutes/chapters/ch65/065_006_0089.html",
+  "quote": "It shall be unlawful for any person to engage in the business of conducting a food establishment or food processing plant",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "0eb550069f688fe4",
+  "context": "ense requirements, fees, inspections, denial, hearing, display; exceptions. (a) it shall be unlawful for any person to engage in the business of conducting a food establishment or food processing plant unless such person shall have in effect a valid license therefor issued by the "
+ },
+ {
+  "id": "ne-dor-sales",
+  "read": "https://revenue.nebraska.gov/sites/default/files/doc/business/f_20.pdf",
+  "quote": "Every person engaged in business as a retailer making retail sales of taxable property or services in Nebraska must obtain a sales tax permit",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "e922436f6136b60d",
+  "context": "aska licensing or registration requirements sales and use tax sales tax permit. every person engaged in business as a retailer making retail sales of taxable property or services in nebraska must obtain a sales tax permit for each location in nebraska (see reg-1-004, permits). a separate permit is re"
+ },
+ {
+  "id": "ne-dor-withholding",
+  "read": "https://revenue.nebraska.gov/sites/default/files/doc/business/f_20.pdf",
+  "quote": "you must apply for an income tax withholding certificate prior to withholding income taxes for Nebraska.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "e922436f6136b60d",
+  "context": "nduct business in nebraska, or are considered an employer for federal purposes, you must apply for an income tax withholding certificate prior to withholding income taxes for nebraska. see the withholding regulations for additional information. the income tax with"
+ },
+ {
+  "id": "ne-ndol-ui",
+  "read": "https://dol.nebraska.gov/webdocs/Resources/Items/1_UI%20Tax%20Account%20Instruction%20guide.pdf",
+  "quote": "Employers must complete a new employer registration to create an on‐line account and gain access to tax functionality.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "3cfba9c3b4ea504b",
+  "context": "limit the functions available to the agent. completing an employer registration employers must complete a new employer registration to create an on‐line account and gain access to tax functionality. employer responses to registration questions allow the agency to establish tax "
+ },
+ {
+  "id": "ne-nda-food-establishment",
+  "read": "https://nda.nebraska.gov/fscp/foods/inspection_areas",
+  "quote": "Application for a permit shall be made prior to the operation of a food establishment, food processing plant, or salvage operation.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "328262e29f690c80",
+  "context": "king, or holding human food found in 21 c.f.r. part 117.4 and 117.0 to 117.110. application for a permit shall be made prior to the operation of a food establishment, food processing plant, or salvage operation. inspections must take place prior to a food establishment operating. if the foo"
+ },
+ {
+  "id": "ne-nda-food-processing",
+  "read": "https://nda.nebraska.gov/fscp/foods/inspection_areas",
+  "quote": "Application for a permit shall be made prior to the operation of a food establishment, food processing plant, or salvage operation.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "328262e29f690c80",
+  "context": "king, or holding human food found in 21 c.f.r. part 117.4 and 117.0 to 117.110. application for a permit shall be made prior to the operation of a food establishment, food processing plant, or salvage operation. inspections must take place prior to a food establishment operating. if the foo"
+ },
+ {
+  "id": "sd-dor-sales",
+  "read": "https://dor.sd.gov/media/qn3a1y31/license-requirements-for-sales-use-contractors-excise-tax.pdf",
+  "quote": "Businesses are required to have a South Dakota sales tax license and must collect and remit sales tax on taxable transactions if:",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "90f59e62d2f03ded",
+  "context": "a municipality that imposes a sales tax or use tax. sales and use tax licensing businesses are required to have a south dakota sales tax license and must collect and remit sales tax on taxable transactions if: • the business has a physical presence in south dakota. contractor's excise tax"
+ },
+ {
+  "id": "sd-dlr-ui",
+  "read": "https://dlr.sd.gov/ra/businesses/registration.aspx",
+  "quote": "All newly established businesses are required to register with the Reemployment Assistance Tax Unit.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "082fd6df8b3dd696",
+  "context": "ces south dakota laws & rules reemployment assistance tax employer registration all newly established businesses are required to register with the reemployment assistance tax unit. successors to a business already subject to the reemployment assistance laws mu"
+ },
+ {
+  "id": "sd-doh-food-service",
+  "read": "https://doh.sd.gov/topics/food-lodging-safety/licensure-codes/food-service/",
+  "quote": "Steps 1-3 must be completed before issuance of a food service license.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "bcb9350ac856c662",
+  "context": "ontact a health protection advisor in your region step 4 approval for licensing steps 1-3 must be completed before issuance of a food service license. additional information links if you need a food service license for a temporary"
+ },
+ {
+  "id": "nd-tax-sales",
+  "read": "https://www.tax.nd.gov/starting-new-business",
+  "quote": "If they are, you need to apply for a North Dakota Sales Tax Permit.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "4b949c26f0cc19d9",
+  "context": " products or services you will be selling and if they are subject to sales tax. if they are, you need to apply for a north dakota sales tax permit. additional guidance and information can be found within the sales tax guideline"
+ },
+ {
+  "id": "nd-tax-withholding",
+  "read": "https://www.tax.nd.gov/income-tax-withholding",
+  "quote": "Employers must register for an Income Tax Withholding account with the Office of State Tax Commissioner online",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "12c611bc52c67d11",
+  "context": "rom federal income tax withholding. register for income tax withholding account employers must register for an income tax withholding account with the office of state tax commissioner online through the north dakota taxpayer access point (nd tap). register here: north d"
+ },
+ {
+  "id": "nd-jsnd-ui",
+  "read": "https://www.jobsnd.com/unemployment-business-tax/file-reports",
+  "quote": "An employer must  Register for Unemployment Insurance Tax within 20 days after first employing workers.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "bbf0d030d9c9d430",
+  "context": "ployment business tax file reports file reports employer reporting requirements an employer must register for unemployment insurance tax within 20 days after first employing workers. note: upon clicking the hyperlink, you will be directed to the state of north d"
+ },
+ {
+  "id": "nd-wsi",
+  "read": "https://www.nd.gov/faq/workforce-safety-and-insurance-faq",
+  "quote": "As an employer or prospective employer in North Dakota, you must provide workers' compensation insurance coverage for your employees.",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "9a67dbaa2786e455",
+  "context": "-5033 with questions. copy link do i need wsi coverage? do i need wsi coverage? as an employer or prospective employer in north dakota, you must provide workers' compensation insurance coverage for your employees. refer to insurance coverage information to find out if you need to apply for wo"
+ },
+ {
+  "id": "nd-hhs-food-processing",
+  "read": "https://www.hhs.nd.gov/health/food-and-lodging/food-and-beverage-establishments/manufactured-and-processed-food",
+  "quote": "In North Dakota, a food processing license is required to process, manufacture, package, label, or store food and drink products intended for human consumption",
+  "checked": "2026-10-28",
+  "method": "curl",
+  "found": true,
+  "sha256": "fbf0b8440e765c39",
+  "context": " establishments manufactured and processed food manufactured and processed food in north dakota, a food processing license is required to process, manufacture, package, label, or store food and drink products intended for human consumption and to sell these products to other businesses (wholesale) which then sell the "
  }
 ]

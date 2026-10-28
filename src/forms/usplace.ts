@@ -46,6 +46,12 @@ export const COUNTIES: Record<string, County> = {
   RIVERSIDE: { code: "RIVERSIDE", en: "Riverside County", zh: "河滨县", state: "CA", health: { en: "Riverside County Department of Environmental Health", zh: "河滨县环境卫生局" } },
   SBDC: { code: "SBDC", en: "San Bernardino County", zh: "圣贝纳迪诺县", state: "CA", health: { en: "San Bernardino County Environmental Health Services", zh: "圣贝纳迪诺县环境卫生服务处" } },
   CONTRACOSTA: { code: "CONTRACOSTA", en: "Contra Costa County", zh: "康特拉科斯塔县", state: "CA", health: { en: "Contra Costa Environmental Health", zh: "康特拉科斯塔县环境卫生处" } },
+  // where the state's food permit doesn't apply (src/forms/states/plains.json, except): New Mexico's Environment
+  // Department has no jurisdiction in Bernalillo County; Nebraska forwards a retail food permit in these three counties
+  BERNALILLO: { code: "BERNALILLO", en: "Bernalillo County", zh: "伯纳利欧县", state: "NM" },
+  DOUGLASNE: { code: "DOUGLASNE", en: "Douglas County", zh: "道格拉斯县", state: "NE" },
+  LANCASTERNE: { code: "LANCASTERNE", en: "Lancaster County", zh: "兰开斯特县", state: "NE" },
+  HALLNE: { code: "HALLNE", en: "Hall County", zh: "霍尔县", state: "NE" },
 };
 
 type CityRow = { county: string; zh?: string; uninc?: boolean; ownHealth?: { en: string; zh: string } };
@@ -104,7 +110,12 @@ add("MA", "SUFFOLK", "boston,chelsea,revere,winthrop");
 add("IL", "COOK", "chicago,evanston,skokie,oak park,schaumburg,naperville");
 add("PA", "PHILA", "philadelphia");
 add("CO", "DENVERC", "denver");
-add("UT", "SLCO", "salt lake city,west valley city,sandy,west jordan,south jordan,murray,midvale,draper,taylorsville,millcreek,holladay,cottonwood heights,riverton,herriman");
+add("NM", "BERNALILLO", "albuquerque,los ranchos de albuquerque,tijeras");
+add("NM", "BERNALILLO", "south valley,north valley", { uninc: true });
+add("NE", "DOUGLASNE", "omaha,ralston,bennington,valley,waterloo,elkhorn");
+add("NE", "LANCASTERNE", "lincoln,hickman,waverly");
+add("NE", "HALLNE", "grand island,wood river,cairo,doniphan,alda");
+add("UT", "SLCO","salt lake city,west valley city,sandy,west jordan,south jordan,murray,midvale,draper,taylorsville,millcreek,holladay,cottonwood heights,riverton,herriman");
 
 /* ZIP codes whose mailing name is a big city the place isn't in. USPS names a ZIP after its post office, not the city
    or county that licenses the address: "5145 Buford Hwy NE, Atlanta, GA 30341" is in Chamblee, DeKalb County, so the
