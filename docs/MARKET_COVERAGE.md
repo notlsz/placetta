@@ -33,7 +33,7 @@ Each market is read at a sample storefront address for a new milk tea shop with 
 | Tampa | 10 | 9 | 4 | 8 | 1 |
 | Phoenix | 9 | 9 | 3 | 5 | 0 |
 | Sacramento | 12 | 11 | 5 | 8 | 1 |
-| Columbus | 9 | 8 | 1 | 5 | 1 |
+| Columbus | 10 | 9 | 1 | 6 | 1 |
 | California | 8 | 8 | 3 | 7 | 0 |
 | New York | 6 | 6 | 2 | 5 | 0 |
 | Massachusetts | 7 | 7 | 1 | 6 | 0 |
@@ -533,6 +533,7 @@ Read at 3420 E Main St, Columbus, OH 43213. Jurisdictions: US, OH, CMH. Franklin
 | Unemployment insurance employer account | `oh-ui` Employer registration (Ohio Unemployment SOURCE) · portal thesource.jfs.ohio.gov | no | portal (thesource.jfs.ohio.gov) | Online only (thesource.jfs.ohio.gov): Placetta prepares the answers summary for the agency's site. |
 | Food service plan review | `cmh-plan-review` Plan Review Application (food service operation) · [PDF](https://www.columbus.gov/files/sharedassets/city/v/10/public-health/planreview-application.pdf) | yes | email |  |
 | Workers' compensation insurance | `oh-workers-comp` BWC Form U-3 (Application for coverage), with the state fund | no | Placetta team: not researched | Nothing to fill: Ohio employers buy coverage from the state's own fund, the Bureau of Workers' Compensation, not from a private insurer (unless self-insured). |
+| Ohio employer withholding registration | `oh-withholding` Employer withholding account (OH\|TAX eServices) · portal myportal.tax.ohio.gov | no | portal (myportal.tax.ohio.gov) | Online only (myportal.tax.ohio.gov): Placetta prepares the answers summary for the agency's site. |
 | Building permit for the build-out: We'll confirm with the City of Columbus building department | none | no | Placetta team: no official form to route yet | The planner lists "Building permit for the build-out: We'll confirm with the City of Columbus building department" with no official form in the registry for this place yet. |
 | Columbus food service license | `cmh-food-license` Food service operation license | no | Placetta team: Completed at the final inspection, where the fee is collected. | Filed in person; Completed at the final inspection, where the fee is collected. |
 
