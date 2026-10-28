@@ -364,6 +364,43 @@ Left for you after that: turn on the Stripe customer portal, and have each teamm
 - **Sessions**: sign out here or everywhere (Settings, Security).
 - **Hosting headers** (`vercel.json`): a strict Content Security Policy for the app (scripts only from the app, data only to Supabase), a separate one for the website, no framing, HSTS, and long caching for hashed assets.
 
+## Human check on sign-in (Cloudflare Turnstile, free)
+
+Every way into Odelia's model credits, emails and text messages starts at Supabase Auth: a code by email or text, a
+password sign-in, a new account, a reset link. Everything after that needs a signed-in person (and, with payments on,
+a plan). So the check sits there: the app gets a Turnstile token (`src/cloud/human.ts`) and Supabase verifies it on
+those calls. It's invisible for almost everyone; a small box appears at the bottom only when Cloudflare wants a click.
+Text codes cost money per message, so this mostly stops scripts from running up the SMS bill.
+
+It's off until both halves are set, and turning on only the app half changes nothing (the token is sent and ignored).
+Do them in this order:
+
+1. **Cloudflare** (free, no card): dash.cloudflare.com, **Turnstile**, **Add widget**. Name it Placetta, add the
+   hostnames `placetta.com` and `www.placetta.com` (add `localhost` only on a separate test widget), widget mode
+   **Managed**. Copy the **Site key** and the **Secret key**.
+2. **Vercel**: Project placetta, Settings, Environment Variables, add `VITE_TURNSTILE_SITE_KEY` = the site key
+   (Production), then redeploy. The site key is public by design; the app's security policy already allows
+   `challenges.cloudflare.com` on `/app/`.
+3. **Supabase**: Authentication, **Attack Protection** (shown as Bot and Abuse Protection on some dashboards), turn on
+   **Enable CAPTCHA protection**, provider **Turnstile by Cloudflare**, paste the **secret key**, Save. From this moment
+   Supabase refuses a sign-in, sign-up, code or reset without a valid token, so do it only after step 2 is live.
+
+To undo, turn the Supabase toggle off; the app keeps working with or without the Vercel variable.
+
+**Mainland China.** Turnstile isn't blocked there, but Cloudflare's script loads slowly and fails more often. The app
+starts the check as soon as the sign-in screen opens (so it runs while the person types), waits up to 20 seconds, and
+then sends the call anyway; if Supabase refuses it, the screen says in English and Chinese that the check didn't pass
+and to try again or email support@placetta.com. Watch for that after turning it on. If people in China report it, turn
+the Supabase toggle off: Supabase's own limits below still cap what a script can send.
+
+**Supabase's own limits** (Authentication, Rate Limits), worth tightening whether or not the check is on: SMS sent per
+hour, emails sent per hour, and sign-in and verification requests per IP. Low numbers are fine for real customers.
+
+The landing page's plan-request form, text-to-start and the partners' embedded plan box don't use the check: none of
+them spends model credits from a stranger, and each already has per-IP limits in the database
+(`plan_requests_limit`, `text_start` limits, partner-api's limiter). Odelia's own endpoints all need a signed-in person.
+`npm run test:human` checks the token on every auth call, a fresh one each time, none while it's off, and the refusal.
+
 ## Sign in with Google or Microsoft
 
 Both use one redirect address: `https://esquxzcfsylffuijvzec.supabase.co/auth/v1/callback`
