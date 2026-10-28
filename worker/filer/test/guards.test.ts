@@ -123,3 +123,23 @@ test("the model's check: the strong tier must say true; a false, an error or ano
   const sys = stepSystem({ filing: { payload: { official: "sf-nbr", fields: [] } } as never, agency: "SF" });
   assert.ok(sys.includes(OPT_OUT_RULE));
 });
+
+test("a split address takes the parts of the approved line, exactly, and nothing else", async () => {
+  const { addressParts, fieldFor, optionFor } = await import("../src/guards.ts");
+  const p = { fields: [{ id: "mailing_address", label: { en: "Business Mailing Address, City, State, Zip", zh: "" }, value: "123 Test St, San Francisco, CA 94103" }] } as never;
+  assert.deepEqual(addressParts("123 Test St, San Francisco, CA 94103"), { street: "123 Test St", city: "San Francisco", state: "CA", zip: "94103" });
+  for (const v of ["123 Test St", "San Francisco", "CA", "94103"]) assert.ok(fieldFor(v, p), v);
+  assert.ok(optionFor("California", p), "a state dropdown of names");
+  assert.ok(optionFor("ca", p), "a state dropdown of codes");
+  for (const v of ["124 Test St", "Oakland", "NY", "94104", "Test St"]) assert.equal(fieldFor(v, p), null, v);
+  assert.equal(addressParts("somewhere in SF"), null);
+});
+
+test("the step prompt says what day it is, in the page part (the cached part stays put)", async () => {
+  const { todayLine, stepPage, stepSystem: sys } = await import("../src/model.ts");
+  assert.match(todayLine(new Date("2026-10-28T22:00:00Z")), /10\/28\/2026/);
+  assert.match(todayLine(new Date("2026-10-29T05:30:00Z")), /10\/29\/2026 US Eastern, .*10\/28\/2026 US Pacific/);
+  const f = { payload: { official: "x", fields: [] } } as never;
+  assert.doesNotMatch(sys({ filing: f, agency: "SF" }), /Today's date/);
+  assert.match(stepPage({ filing: f, agency: "SF", state: page({}), recent: [] }), /Today's date/);
+});

@@ -163,13 +163,40 @@ export function fieldFor(value: string, p: Payload): { label: string } | null {
   const v = value.trim();
   if (!v) return null;
   const f = (p.fields ?? []).find((x) => x.value.trim() === v);
-  return f ? { label: f.label.en } : null;
+  return f ? { label: f.label.en } : addressPartFor(v, p);
 }
 
 /** A select option is allowed when it equals an approved value (ignoring case and spaces). */
 export function optionFor(option: string, p: Payload): { label: string } | null {
   const f = (p.fields ?? []).find((x) => x.value.trim() && norm(x.value) === norm(option));
-  return f ? { label: f.label.en } : null;
+  return f ? { label: f.label.en } : addressPartFor(option.trim(), p, true);
+}
+
+// ---------------------------------------------------------------- split addresses
+// Many agency forms split an address into street, city, state and ZIP, while the customer approved it as one line
+// ("123 Test St, San Francisco, CA 94103"). Each part, exactly as it stands in the approved line, is approved too; the
+// state also as its full name, for a dropdown. Nothing is reworded: a part the line doesn't hold is refused.
+const STATES: Record<string, string> = { AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California", CO: "Colorado", CT: "Connecticut", DE: "Delaware", DC: "District of Columbia", FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa", KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland", MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi", MO: "Missouri", MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey", NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota", OH: "Ohio", OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont", VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming", PR: "Puerto Rico" };
+
+/** "street, city, ST 12345" → its parts; null for anything else. */
+export function addressParts(line: string): { street: string; city: string; state: string; zip: string } | null {
+  const m = line.trim().match(/^(.+?),\s*([^,]+?),\s*([A-Za-z]{2})\.?\s+(\d{5}(?:-\d{4})?)$/);
+  if (!m || !STATES[m[3].toUpperCase()]) return null;
+  return { street: m[1].trim(), city: m[2].trim(), state: m[3].toUpperCase(), zip: m[4] };
+}
+
+function addressPartFor(v: string, p: Payload, loose = false): { label: string } | null {
+  if (!v) return null;
+  const same = (a: string) => (loose ? norm(a) === norm(v) : a === v);
+  for (const f of p.fields ?? []) {
+    if (!/address/i.test(f.label.en)) continue;
+    const a = addressParts(f.value);
+    if (!a) continue;
+    const zip5 = a.zip.slice(0, 5);
+    const parts = [a.street, a.city, a.state, STATES[a.state], a.zip, zip5, `${a.state} ${a.zip}`, `${a.city}, ${a.state} ${a.zip}`];
+    if (parts.some(same)) return { label: `${f.label.en} (part)` };
+  }
+  return null;
 }
 
 /** A script link that runs nothing itself: "javascript:;", "javascript:void(0)", "javascript:". Agency sites built on
