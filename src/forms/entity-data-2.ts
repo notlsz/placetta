@@ -3,6 +3,7 @@
 // there by scripts/eval/proof-read.py's matcher; a page that refused automated reads leaves its row UNVERIFIED with the
 // reason, stating nothing.
 import type { CustomTier, Report, StateData, Tier } from "./entities";
+import { LATER_STATES } from "./entity-data-3";
 
 /* ------------------------------------------------------------------ Alabama */
 const AL_LLC = "https://www.sos.alabama.gov/business-entities/llcs";
@@ -37,6 +38,32 @@ const CT_FEES = "https://portal.ct.gov/-/media/sots/business-services/bsd-forms/
 const CT_LLC = "https://business.ct.gov/knowledge-base/articles/domestic-limited-liability-companies-forms-and-fees";
 const CT_LLC_REPORT: Report = { name: ["Annual Report", "年度报告"], fee: 80, due: ["Online between January 1 and March 31 each year", "每年 1 月 1 日至 3 月 31 日在线提交"],
   q: [CT_LLC, "Annual Report - filed online annually from January 1 to March 31. (file online) > $80"] };
+
+/* ------------------------------------------------------------------ District of Columbia */
+const DC_FEES = "https://dlcp.dc.gov/node/1621901";
+const DC_LLC_FEES = "https://dlcp.dc.gov/node/1621921";
+const DC_CORP_FEES = "https://dlcp.dc.gov/node/1621906";
+
+/* ------------------------------------------------------------------ Hawaii */
+const HI_FEES = "https://cca.hawaii.gov/wp-content/uploads/2025/12/Form-Fee-Schedule-12-2022.pdf";
+const HI_LLC = "https://cca.hawaii.gov/breg/registration/dllc/fees/";
+const HI_CORP = "https://cca.hawaii.gov/breg/registration/dpc/fees/";
+const HI_X: Omit<CustomTier, "q"> = { label: ["Expedited review", "加急审查"], turn: ["faster review; no time is stated on the fee page", "加快审查；收费页面未注明时限"], hours: null, fee: 25 };
+
+/* ------------------------------------------------------------------ Idaho */
+const ID_FORMS = "https://sos.idaho.gov/business-forms/";
+const ID_CORP_PDF = "https://sos.idaho.gov/CORP/forms/CORP/Art%20of%20Incorp%20General.pdf";
+const ID_PAPER: readonly [string, string] = ["$100 online; $20 more for a paper filing.", "在线 100 美元；纸质提交另加 20 美元。"];
+
+/* ------------------------------------------------------------------ Indiana: the fees are Indiana Code 23-0.5-9 (iga.in.gov) */
+const IN_FEES = "https://iga.in.gov/ic/2026/Title_23/Article_0.5/Chapter_9.pdf";
+const IN_FOREIGN_NOTE: readonly [string, string] = ["$75 filed online; $125 on paper (Indiana Code 23-0.5-9-26).", "在线 75 美元；纸质 125 美元（印第安纳州法典 23-0.5-9-26）。"];
+
+/* ------------------------------------------------------------------ Iowa: sos.iowa.gov answers curl with 403; read with WebFetch */
+const IA_FEES = "https://sos.iowa.gov/businesses/business-entity-forms-and-fees";
+
+/* ------------------------------------------------------------------ Kansas */
+const KS_FA = "https://sos.ks.gov/forms/business_services/FA.pdf";
 
 export const MORE_STATES: StateData[] = [
   {
@@ -131,4 +158,105 @@ export const MORE_STATES: StateData[] = [
         proof: [CT_FEES, "F. Application for Certificate of Authority (Includes $285 License Fee) 385"] },
     },
   },
+  {
+    st: "DC", name: ["the District of Columbia", "华盛顿特区"], agency: ["DC Department of Licensing and Consumer Protection, Corporations Division", "华盛顿特区许可与消费者保护局公司处"],
+    site: DC_FEES, portal: "https://corponline.dlcp.dc.gov/",
+    x: [["same", 100, [DC_FEES, "Expedited same-day service: $100, in addition to all other fees required by statute or regulation;"], ["Charged to every walk-in customer at the Business License Center", "在营业执照中心现场办理的客户一律收取"]],
+      { label: ["3-day", "3 天加急"], turn: ["within 3 days", "3 天内办结"], hours: 72, fee: 50, q: [DC_FEES, "Expedited 3-day service: $50, in addition to all other fees required by statute or regulation."] }],
+    report: {
+      llc: { name: ["Biennial report", "双年报"], fee: 300, due: ["Every two years", "每两年一次"], q: [DC_LLC_FEES, "Domestic & Foreign Limited Liability Company Biennial report $300.00"] },
+      corp: { name: ["Biennial report", "双年报"], fee: 300, due: ["Every two years", "每两年一次"], q: [DC_CORP_FEES, "Domestic & Foreign Business Corporation Biennial report $300.00"] },
+    },
+    rows: {
+      "llc-form": { id: "dc-formation", fee: 99, proof: [DC_LLC_FEES, "Domestic Limited Liability Company Certificate of organization $99.00"] },
+      "corp-form": { form: "Articles of Incorporation (Form DCA-1)", fee: 99, feeNote: ["For authorized capital up to $100,000; the fee rises with the capital.", "授权资本不超过 100,000 美元时的费用；资本越高费用越高。"],
+        proof: [DC_CORP_FEES, "Filing articles of incorporation for a corporation with authorized capital up to one hundred thousand dollars ($100,000) $99.00"] },
+      "llc-qualify": { doc: ["Foreign Registration Statement", "外州注册声明"], form: "Foreign Registration Statement (limited liability company)", fee: 220,
+        proof: [DC_LLC_FEES, "Foreign Limited Liability Company Foreign registration statement $220.00"] },
+      "corp-qualify": { doc: ["Foreign Registration Statement", "外州注册声明"], form: "Foreign Registration Statement (business corporation)", fee: 220,
+        proof: [DC_CORP_FEES, "Foreign Business Corporation Foreign registration statement $220.00"] },
+    },
+  },
+  {
+    st: "HI", name: ["Hawaii", "夏威夷州"], agency: ["Hawaii Department of Commerce and Consumer Affairs, Business Registration Division", "夏威夷州商业与消费者事务部企业登记处"],
+    site: HI_FEES,
+    report: {
+      llc: { name: ["Annual Report", "年度报告"], fee: 15, due: ["Every year", "每年"], q: [HI_FEES, "Annual Report (Domestic/Foreign) $15.00** $25.00"] },
+      corp: { name: ["Annual Report", "年度报告"], fee: 15, due: ["Every year", "每年"], q: [HI_FEES, "Annual Report of Domestic and Foreign Corporations Organized for $15.00** $25.00"] },
+    },
+    rows: {
+      "llc-form": { id: "hi-llc", fee: 50, proof: [HI_LLC, "DOMESTIC LIMITED LIABILITY COMPANY FILING FEE EXPEDITED REVIEW Articles of Organization $50.00 $25.00"],
+        x: [{ ...HI_X, q: [HI_LLC, "DOMESTIC LIMITED LIABILITY COMPANY FILING FEE EXPEDITED REVIEW Articles of Organization $50.00 $25.00"] }] },
+      "corp-form": { form: "Form DP-1, Articles of Incorporation", fee: 50, proof: [HI_CORP, "DOMESTIC PROFIT CORPORATION FILING FEE EXPEDITED REVIEW Articles of Incorporation $50.00 $25.00"],
+        x: [{ ...HI_X, q: [HI_CORP, "DOMESTIC PROFIT CORPORATION FILING FEE EXPEDITED REVIEW Articles of Incorporation $50.00 $25.00"] }] },
+      "llc-qualify": { doc: ["Application for Certificate of Authority", "营业授权证书申请"], form: "Application for Certificate of Authority (foreign limited liability company)", fee: 50,
+        proof: [HI_FEES, "Liability Company Application for Certificate of Authority $50.00* $25.00"], x: [{ ...HI_X, q: [HI_FEES, "Liability Company Application for Certificate of Authority $50.00* $25.00"] }] },
+      "corp-qualify": { doc: ["Application for Certificate of Authority", "营业授权证书申请"], form: "Application for a Certificate of Authority (foreign profit corporation)", fee: 50,
+        proof: [HI_FEES, "Application for a Certificate of Authority $50.00* $25.00"], x: [{ ...HI_X, q: [HI_FEES, "Application for a Certificate of Authority $50.00* $25.00"] }] },
+    },
+  },
+  {
+    st: "ID", name: ["Idaho", "爱达荷州"], agency: ["Idaho Secretary of State, Business and Commercial Services", "爱达荷州州务卿商业服务处"],
+    site: ID_FORMS, portal: "https://sosbiz.idaho.gov/",
+    p: [5, "About 3 to 5 days from the date of filing", "提交后约 3 至 5 天", [ID_FORMS, "Business Filings are currently being processed approximately 3-5 days from the date of filing."]],
+    x: [{ label: ["Expedited", "加急"], turn: ["faster handling; no time is stated", "加快处理；未注明时限"], hours: null, fee: 40, q: [ID_CORP_PDF, "If expedited service is requested, add an additional $40.00 to the filing fee."], note: ["Paper forms (page 2)", "纸质表格（第 2 页）"] },
+      ["same", 100, [ID_CORP_PDF, "If 'same day' service is requested, add $100.00 to the filing fee."], ["Paper forms (page 2)", "纸质表格（第 2 页）"]]],
+    rows: {
+      "llc-form": { doc: ["Certificate of Organization", "组织证书"], form: "Certificate of Organization, Limited Liability Company", fee: 100, feeNote: ID_PAPER,
+        proof: [ID_FORMS, "Start an LLC Certificate of Organization – Limited Liability Company $100 (base filing fee)"] },
+      "corp-form": { form: "Articles of Incorporation, General Business", fee: 100, feeNote: ID_PAPER, url: ID_CORP_PDF,
+        proof: [ID_FORMS, "Start a corporation Articles of Incorporation – General Business $100 (base filing fee)"] },
+      "llc-qualify": { doc: ["Foreign Registration Statement", "外州注册声明"], form: "Foreign Registration Statement (limited liability company)", fee: 100, feeNote: ID_PAPER,
+        proof: [ID_FORMS, "Register an out-of-state business in Idaho Foreign Registration Statement $100 (base filing fee)"] },
+      "corp-qualify": { doc: ["Foreign Registration Statement", "外州注册声明"], form: "Foreign Registration Statement (corporation)", fee: 100, feeNote: ID_PAPER,
+        proof: [ID_FORMS, "Register an out-of-state business in Idaho Foreign Registration Statement $100 (base filing fee)"] },
+    },
+  },
+  {
+    st: "IN", name: ["Indiana", "印第安纳州"], agency: ["Indiana Secretary of State, Business Services Division", "印第安纳州州务卿商业服务处"],
+    site: IN_FEES, portal: "https://inbiz.in.gov/",
+    rows: {
+      "llc-form": { form: "Articles of Organization (domestic limited liability company)", fee: 75, feeNote: ["$75 filed online; $100 on paper (Indiana Code 23-0.5-9-19).", "在线 75 美元；纸质 100 美元（印第安纳州法典 23-0.5-9-19）。"],
+        proof: [IN_FEES, "organization of a domestic limited liability company: (1) Seventy-five dollars ($75) for an electronic filing."] },
+      "corp-form": { form: "Articles of Incorporation (domestic business corporation)", fee: 75, feeNote: ["$75 filed online; $100 on paper (Indiana Code 23-0.5-9-1).", "在线 75 美元；纸质 100 美元（印第安纳州法典 23-0.5-9-1）。"],
+        proof: [IN_FEES, "incorporation of a domestic business corporation: (1) Seventy-five dollars ($75) for an electronic filing."] },
+      "llc-qualify": { doc: ["Foreign Registration Statement", "外州注册声明"], form: "Foreign Registration Statement (limited liability company)", fee: 75, feeNote: IN_FOREIGN_NOTE,
+        proof: [IN_FEES, "registration statement electronically: (1) Seventy-five dollars ($75) for a for-profit entity."] },
+      "corp-qualify": { doc: ["Foreign Registration Statement", "外州注册声明"], form: "Foreign Registration Statement (corporation)", fee: 75, feeNote: IN_FOREIGN_NOTE,
+        proof: [IN_FEES, "registration statement electronically: (1) Seventy-five dollars ($75) for a for-profit entity."] },
+    },
+  },
+  {
+    st: "IA", name: ["Iowa", "爱荷华州"], agency: ["Iowa Secretary of State, Business Services", "爱荷华州州务卿商业服务处"],
+    site: IA_FEES,
+    report: {
+      llc: { name: ["Biennial report", "双年报"], fee: 30, due: ["Odd-numbered years, January 1 to April 1", "单数年份 1 月 1 日至 4 月 1 日"],
+        q: [IA_FEES, "Every Odd numbered year beginning January 1st and due by April 1st."], feeQ: [IA_FEES, "$30* by online filing or $45* by paper."] },
+      corp: { name: ["Biennial report", "双年报"], fee: 60, due: ["Even-numbered years, January 1 to April 1", "双数年份 1 月 1 日至 4 月 1 日"],
+        q: [IA_FEES, "Every Even numbered year beginning January 1st and due by April 1st. The filing fee is $60."] },
+    },
+    rows: {
+      "llc-form": { doc: ["Certificate of Organization", "组织证书"], form: "Certificate of Organization (limited liability company)", fee: 50, proof: [IA_FEES, "Certificate of Organization - $50"] },
+      "corp-form": { form: "Articles of Incorporation (profit corporation)", fee: 50, proof: [IA_FEES, "Articles of Incorporation - $50"] },
+      "llc-qualify": { doc: ["Foreign Registration Statement", "外州注册声明"], form: "Foreign Registration Statement (limited liability company)", fee: 100, proof: [IA_FEES, "Foreign Registration Statement- $100"] },
+      "corp-qualify": { doc: ["Foreign Registration Statement", "外州注册声明"], form: "Foreign Registration Statement (profit corporation)", fee: 100, proof: [IA_FEES, "Foreign Registration Statement - $100"] },
+    },
+  },
+  {
+    st: "KS", name: ["Kansas", "堪萨斯州"], agency: ["Kansas Secretary of State, Business Services", "堪萨斯州州务卿商业服务处"],
+    site: "https://www.sos.ks.gov/forms/business_services/dl.pdf",
+    rows: {
+      "llc-form": { form: "Articles of Organization (Form DL)", fee: 85, feeNote: ["$85 online; $90 on paper.", "在线 85 美元；纸质 90 美元。"], url: "https://www.sos.ks.gov/forms/business_services/dl.pdf",
+        proof: ["https://www.sos.ks.gov/forms/business_services/dl.pdf", "Online Articles of Organization:...................... $85"] },
+      "corp-form": { form: "Articles of Incorporation (Form 51-01, for-profit corporation)", fee: 85, feeNote: ["$85 online; $90 on paper.", "在线 85 美元；纸质 90 美元。"], url: "https://sos.ks.gov/forms/business_services/AI.pdf",
+        proof: ["https://sos.ks.gov/forms/business_services/AI.pdf", "For-profit Corporation online filing:................. $85"] },
+      "llc-qualify": { doc: ["Application for Authority", "营业授权申请"], form: "Foreign Business Application for Authority (Form FA), limited liability company", fee: 115, url: KS_FA,
+        proof: [KS_FA, "o Limited liability company o Series limited liability company (fee $115) (fee $115)"] },
+      "corp-qualify": { doc: ["Application for Authority", "营业授权申请"], form: "Foreign Business Application for Authority (Form FA), corporation for profit", fee: 115, url: KS_FA,
+        proof: [KS_FA, "o Corporation for profit o Limited partnership (fee $115) (fee $115)"] },
+    },
+  },
 ];
+
+// Kentucky onward (src/forms/entity-data-3.ts)
+MORE_STATES.push(...LATER_STATES);
