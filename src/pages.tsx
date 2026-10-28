@@ -24,6 +24,8 @@ import { hrefOf, plainClick } from "./route";
 import { HomeMetrics } from "./Metrics";
 import { HeldSends, LocalHold, useApprovalHold } from "./SendHold";
 import { CostLine } from "./CostToOpen";
+import { FirstAction, FirstRunHead, FirstRunMore } from "./FirstRun";
+import { isFirstRun } from "./firstRun";
 import { firstSentence } from "./phrase";
 /* Team review: the review table, comments on documents, and the Mine filter (src/ReviewTable.tsx, src/Comments.tsx) */
 import { hasReview, PermitsReview } from "./ReviewTable";
@@ -403,6 +405,8 @@ export function Overview() {
   const ev = useEvidence();
   if (!n) return <Welcome />;
   const zh = lang === "zh";
+  /* the first run (src/firstRun.ts): a plan written at sign-up with nothing filed yet leads with the outcome */
+  const firstRun = isFirstRun(ws);
   const today = daysFromNow(0);
   const c = (s: Status[]) => ws.apps.filter(a => s.includes(a.status)).length;
   /* Team review: Mine keeps what's assigned to this person (and the jobs about it) in each section below */
@@ -478,7 +482,8 @@ export function Overview() {
 
   return (
     <div className="page home">
-      {top ? <DoNextCard x={top} n={ordered.length} docs={docAt} title={biz} onLater={() => setLater(l => [...l.filter(k => k !== top.key), top.key])} /> : (
+      {firstRun && <FirstRunHead />}
+      {top ? <DoNextCard x={top} n={ordered.length} docs={docAt} title={biz} onLater={() => setLater(l => [...l.filter(k => k !== top.key), top.key])} /> : firstRun && !mine ? <FirstAction title={biz} /> : (
         <section className="hm-calm" aria-live="polite">
           <h1 className="vh">{biz}</h1>
           <span className="hm-calm-i" aria-hidden="true"><I.check /></span>
@@ -501,6 +506,8 @@ export function Overview() {
           {rest.length > 3 && <button type="button" className="lnk more" onClick={() => setAll(!all)}>{all ? (zh ? "收起" : "Show fewer") : (zh ? `全部 ${ordered.length} 项` : `All ${ordered.length}`)}</button>}
         </section>
       )}
+
+      {firstRun && <FirstRunMore />}
 
       <div className={"hm-status" + (more ? " open" : "")}>
         <button type="button" className="hm-status-b" onClick={() => openMore(working ? "work" : "plan")} aria-controls="hm-more">

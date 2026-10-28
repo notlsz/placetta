@@ -1,0 +1,88 @@
+/* The first run (src/FirstRun.tsx, src/cloud/PlanBuild.tsx): the outcome first, quiet everywhere else. One accent stays
+   on the single primary button; numbers carry the weight. No dot separators, no circles behind icons. */
+
+/* Home: the outcome */
+.fr-head { margin: 0 0 22px; }
+.fr-k { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0; font-size: 13px; font-weight: 600; color: var(--blue-ink); }
+.fr-k span { font-weight: 500; color: var(--ink3); }
+.fr-head h2 { margin: 8px 0 0; font-family: var(--display); font-size: 30px; font-weight: 600; line-height: 1.18; letter-spacing: -.025em; color: var(--ink); }
+.fr-head h2 em { font-style: normal; color: var(--ink2); font-weight: 500; }
+.fr-rest { margin: 8px 0 0; font-size: 14px; line-height: 1.5; color: var(--ink3); }
+.fr-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 18px 0 0; padding: 0; }
+.fr-stat { margin: 0; padding: 14px 16px; border-radius: 16px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+.fr-stat dt { font-size: 12.5px; color: var(--ink3); }
+.fr-stat dd { margin: 4px 0 0; display: flex; flex-direction: column; gap: 2px; }
+.fr-stat dd b { font-family: var(--display); font-size: 24px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.fr-stat dd small { font-size: 12.5px; color: var(--ink2); }
+.fr-now { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 14px 0 0; font-size: 14px; line-height: 1.5; color: var(--ink2); }
+.fr-now b { font-weight: 600; color: var(--ink); }
+.fr-pulse { flex: none; align-self: center; width: 8px; height: 8px; border-radius: 2px; background: var(--ink3); }
+.fr-pulse.on { background: var(--blue-ink); animation: fr-pulse 1.2s ease-in-out infinite; }
+@keyframes fr-pulse { 50% { opacity: .35; } }
+.fr-done { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; font-size: 13.5px; color: var(--ink2); }
+.fr-done svg { width: 15px; height: 15px; color: var(--blue-ink); }
+
+/* Home: ready to open, and the optional setup */
+.page.home .sec.fr-ready, .page.home .sec.fr-setup { margin-top: 32px; }
+.fr-ready .sec-h, .fr-setup .sec-h { align-items: center; }
+.fr-ready .sec-h .lnk, .fr-setup .sec-h .lnk { display: inline-flex; align-items: center; gap: 4px; min-height: 40px; padding: 0; border: 0; background: none; font: inherit; font-size: 13.5px; color: var(--blue-ink); cursor: pointer; }
+.fr-setup .sec-h .lnk.quiet { color: var(--ink3); }
+.fr-bar { height: 6px; margin: 4px 0 0; border-radius: 99px; background: var(--sky); overflow: hidden; }
+.fr-bar i { display: block; height: 100%; background: var(--blue-ink); transition: width .8s ease; }
+.fr-sub { margin: 8px 0 10px; font-size: 13.5px; color: var(--ink3); }
+.fr-steps { list-style: none; margin: 0; padding: 0; border-radius: 18px; background: var(--card); box-shadow: 0 0 0 1px var(--line); overflow: hidden; }
+.fr-steps li { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 12px 10px 16px; }
+.fr-steps li + li { border-top: 1px solid var(--line); }
+.fr-steps li.done { color: var(--ink3); }
+.fr-n { flex: none; width: 20px; font-size: 14px; font-weight: 600; color: var(--ink3); font-variant-numeric: tabular-nums; }
+.fr-n svg { width: 16px; height: 16px; color: var(--blue-ink); }
+.fr-tx { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.fr-tx b { font-size: 14.5px; font-weight: 500; }
+.fr-tx small { font-size: 13px; color: var(--ink3); }
+.fr-steps .pill.quiet { flex: none; background: none; color: var(--blue-ink); box-shadow: none; }
+
+@media (max-width: 859px) {
+  .fr-head { margin-bottom: 16px; }
+  .fr-head h2 { font-size: 23px; }
+  .fr-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+  .fr-stat { padding: 10px 10px; border-radius: 14px; }
+  .fr-stat dd b { font-size: 17px; }
+  .fr-stat dt, .fr-stat dd small { font-size: 11.5px; }
+  .fr-now { font-size: 13.5px; }
+  .fr-head .fr-rest, .fr-head .fr-done { display: none; }
+  /* the head already carries the plan: the card under it drops its bot and keeps its button near the first screen */
+  .fr-head ~ .dtn .dtn-bot { display: none; }
+  .fr-head ~ .dtn h2 { margin-top: 8px; font-size: 23px; }
+  .fr-head ~ .dtn .dtn-why { font-size: 14.5px; }
+  .fr-head ~ .dtn .dtn-act { margin-top: 16px; }
+}
+
+/* Onboarding: Odelia builds the plan in front of you */
+.pb { gap: 0; }
+.pb-top { display: flex; align-items: center; gap: 12px; }
+.pb-bot { flex: none; display: grid; place-items: center; width: 56px; height: 56px; overflow: hidden; }
+.pb-top p { margin: 0; font-size: 14px; color: var(--ink2); }
+.pb-top p b { display: block; font-size: 15px; font-weight: 600; color: var(--ink); }
+.pb-list { list-style: none; margin: 16px 0 0; padding: 0; border-radius: 18px; background: var(--card); box-shadow: 0 0 0 1px var(--line); overflow: hidden; max-height: 360px; overflow-y: auto; }
+.pb-list li { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: baseline; gap: 2px 10px; padding: 10px 14px; animation: pb-in .28s ease both; }
+.pb-list li + li { border-top: 1px solid var(--line); }
+.pb-list .pb-n { font-size: 13px; color: var(--ink3); font-variant-numeric: tabular-nums; }
+.pb-list .pb-name { min-width: 0; font-size: 14px; font-weight: 500; color: var(--ink); }
+.pb-list .pb-name small { display: block; font-size: 12.5px; font-weight: 400; color: var(--ink3); }
+.pb-list .pb-fee { text-align: right; font-size: 13.5px; font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
+.pb-list .pb-who { display: block; font-size: 12px; color: var(--ink3); }
+.pb-list .pb-who.pb-odelia { color: var(--blue-ink); }
+@keyframes pb-in { from { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .pb-list li { animation: none; } .fr-pulse.on { animation: none; } }
+.pb-sum { margin: 18px 0 0; }
+.pb-sum h1 { margin: 0; font: 600 26px/1.2 var(--display); letter-spacing: -.025em; }
+.pb-sum h1 em { font-style: normal; font-weight: 500; color: var(--ink2); }
+.pb-sum .fr-rest { margin-top: 6px; }
+.pb .onb-act { margin-top: 18px; flex-wrap: wrap; }
+.pb-hint { margin: 8px 0 0; font-size: 13px; color: var(--ink3); text-align: right; }
+@media (max-width: 600px) {
+  .pb-list { max-height: 300px; }
+  .pb-sum h1 { font-size: 22px; }
+  .pb .onb-act .sbtn.big { flex: 1 0 100%; }
+  .pb-hint { text-align: left; }
+}
