@@ -1908,7 +1908,6 @@ export const TO_VERIFY: Record<string, { source: string; note: string; partial?:
   "lac-fbn": { source: "https://lavote.gov/home/county-clerk/fictitious-business-names/frequently-asked-questions", note: "lavote.gov refused an automated read (403), so the Registrar-Recorder's online filing route wasn't confirmed." },
   "scc-fbn": { source: "https://www.santaclaracounty.gov/node/286", note: "santaclaracounty.gov answers automated reads with a bot check, so the Clerk-Recorder's filing route wasn't confirmed." },
   "hen-license": { source: "https://www.cityofhenderson.com/government/departments/finance/business-licensing/apply-for-a-business-license", note: "cityofhenderson.com refused an automated read (403), so the online application's address wasn't confirmed." },
-  "nj-foreign-registration": { source: "https://www.nj.gov/treasury/revenue/gettingregistered.shtml", note: "Read 2026-10-24: \"File your certificate online\" (www.njportal.com/DOR/BusinessFormation) covers the \"certificate of formation/authorization\", $100. Not routed yet: a third form on njportal.com needs that portal's playbook first (worker/filer/src/playbooks.ts)." },
   "fre-business-tax": { source: "https://fremont.gov/government/departments/finance/revenue/business-tax/apply-for-a-business-tax-account", note: "fremont.gov refused an automated read (403), so the online application's address wasn't confirmed." },
 };
 
