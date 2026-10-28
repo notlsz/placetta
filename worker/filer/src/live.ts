@@ -11,7 +11,11 @@
 //   no Placetta code    the view is a picture of the page and the person's clicks; the agency's page never runs in
 //                       Placetta's origin, and the view sends no cookies (the address is the only key)
 //
-// Tests: worker/filer/test/live.test.ts.
+//   the team's view     a visible CAPTCHA goes to the Placetta team first (run.ts staffFirst): their view of the same
+//                       page covers every SSN, card, account and saved-login line and won't let them type in one
+//                       (StaffGuard, page.ts staffGuard); if the page can't be covered, they get no picture at all
+//
+// Tests: worker/filer/test/live.test.ts, worker/filer/test/staff.test.ts.
 import { randomBytes } from "node:crypto";
 
 /** What the view needs from the run's page (Playwright's Page has all of it). */
@@ -23,10 +27,15 @@ export type LivePage = {
   url(): string;
 };
 
-type View = { page: LivePage; until: number; touched: number; done: boolean; host: string };
+/** The team's view: a picture with the owner's lines covered, and whether the line in focus is one of them. */
+export type StaffGuard = { shot(): Promise<Uint8Array>; typingBlocked(): Promise<boolean> };
+
+type View = { page: LivePage; until: number; touched: number; done: boolean; host: string; staff?: StaffGuard };
 export type Reply = { status: number; type: string; body: string | Uint8Array; headers?: Record<string, string> };
 
 /** Keys a person may press in the view: editing and moving between fields, nothing that opens the browser's own tools. */
+/** Keys that only move between lines: staff may press these while a covered line has focus, to move off it. */
+const MOVE = new Set(["Tab", "Escape", "ArrowUp", "ArrowDown", "PageUp", "PageDown"]);
 const KEYS = new Set(["Enter", "Tab", "Backspace", "Delete", "Escape", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown", "Space"]);
 
 export class LiveViews {
@@ -38,12 +47,12 @@ export class LiveViews {
   /** Can this worker serve a view? Only with a public https address (Render gives one: RENDER_EXTERNAL_URL). */
   get on(): boolean { return !!this.base && /^https:\/\//.test(this.base); }
 
-  /** A view of this page until ttlMs from now. Null when the worker has no public address. */
-  open(page: LivePage, ttlMs: number): { token: string; url: string } | null {
+  /** A view of this page until ttlMs from now. Null when the worker has no public address. With staff, the team's view. */
+  open(page: LivePage, ttlMs: number, staff?: StaffGuard): { token: string; url: string } | null {
     if (!this.on) return null;
     const token = randomBytes(24).toString("base64url");
     let host = ""; try { host = new URL(page.url()).hostname; } catch { /* about:blank */ }
-    this.views.set(token, { page, until: this.now() + ttlMs, touched: 0, done: false, host });
+    this.views.set(token, { page, until: this.now() + ttlMs, touched: 0, done: false, host, ...(staff ? { staff } : {}) });
     return { token, url: `${this.base!.replace(/\/+$/, "")}/live/${token}` };
   }
   close(token: string | null | undefined) { if (token) this.views.delete(token); }
@@ -67,9 +76,12 @@ export class LiveViews {
     const v = m ? this.view(m[1]) : null;
     if (!m || !v) return text(404, "This live view has ended. Go back to Placetta.");
     const part = m[2] ?? "";
-    if (method === "GET" && part === "") return { status: 200, type: "text/html; charset=utf-8", body: page(v.host), headers: SECURE };
+    if (method === "GET" && part === "") return { status: 200, type: "text/html; charset=utf-8", body: page(v.host, !!v.staff), headers: SECURE };
     if (method === "GET" && part === "/frame.jpg") {
-      const img = await v.page.screenshot({ type: "jpeg", quality: 70 });
+      // the team's picture or none: never the page uncovered
+      let img: Uint8Array;
+      try { img = v.staff ? await v.staff.shot() : await v.page.screenshot({ type: "jpeg", quality: 70 }); }
+      catch { return text(503, "The page can't be shown right now."); }
       return { status: 200, type: "image/jpeg", body: img, headers: { ...SECURE, "Cache-Control": "no-store" } };
     }
     if (method !== "POST") return text(405, "Not allowed.");
@@ -77,6 +89,10 @@ export class LiveViews {
     let a: { kind?: string; x?: number; y?: number; w?: number; h?: number; text?: string; key?: string; dy?: number };
     try { a = JSON.parse(body || "{}"); } catch { return text(400, "Bad request."); }
     v.touched = this.now();
+    // staff never type into, or edit, a line that is the owner's
+    if (v.staff && (a.kind === "type" || (a.kind === "key" && !MOVE.has(String(a.key)))) && await v.staff.typingBlocked()) {
+      return text(403, "That line is the owner's. Only the human check is yours.");
+    }
     const vp = v.page.viewportSize() ?? { width: 1280, height: 720 };
     if (a.kind === "click") {
       // the click lands where it was on the picture, scaled to the page's own size
@@ -105,7 +121,7 @@ const json = (o: unknown): Reply => ({ status: 200, type: "application/json", bo
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 
 /** The view: the page as a picture that refreshes, a box to type into, and Done. */
-function page(host: string): string {
+function page(host: string, staff = false): string {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Placetta live browser</title>
 <style>
@@ -121,14 +137,14 @@ main{padding:12px 16px;max-width:1320px;margin:0 auto}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.row input{flex:1;min-width:180px;font:inherit;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg)}
 p{color:var(--mut);margin:6px 0}
 </style></head><body>
-<header><span><b>Live browser on ${esc(host || "the agency's site")}</b><small>Click on the page to use it. What you type goes only to the agency's page.</small></span>
+<header><span><b>${staff ? "Placetta team view" : "Live browser"} on ${esc(host || "the agency's site")}</b><small>${staff ? "Solve the human check only. The owner's numbers and saved login are covered, and you can't type in those lines." : "Click on the page to use it. What you type goes only to the agency's page."}</small></span>
 <button class="ink" id="done" type="button">Done, Odelia carries on</button></header>
 <main>
 <div class="row"><input id="txt" autocomplete="off" placeholder="Type here, then press Send (for a code or a number)"><button id="send" type="button">Send</button>
 <button data-key="Tab" type="button">Tab</button><button data-key="Enter" type="button">Enter</button><button data-key="Backspace" type="button">Delete</button>
 <button data-scroll="-600" type="button">Scroll up</button><button data-scroll="600" type="button">Scroll down</button></div>
 <img id="shot" alt="The agency's page, as it is now">
-<p id="msg">Solve the CAPTCHA, enter the code, or pay the fee on the page. When you're done, Odelia carries on by herself.</p>
+<p id="msg">${staff ? "Solve the CAPTCHA on the page. Once it's done, Odelia carries on by herself. Opening this view is in the owner's audit trail." : "Solve the CAPTCHA, enter the code, or pay the fee on the page. When you're done, Odelia carries on by herself."}</p>
 </main><script src="/live.js"></script></body></html>`;
 }
 

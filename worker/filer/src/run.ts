@@ -1,5 +1,6 @@
 // The portal worker: claims a queued portal filing, replays the portal's skill or lets Claude drive, enforces the
-// guards, hands back to the person for CAPTCHAs, ID checks, payments and SSNs, and never submits twice.
+// guards, hands back to the person for CAPTCHAs, ID checks, payments and SSNs, and never submits twice. A visible
+// CAPTCHA goes to the Placetta team first (staffFirst); Placetta never solves or bypasses one by itself.
 //
 // Isolation between runs (and so between customers): every run opens its own browser session (open(): a new Chromium
 // process with a new, empty browser context, or a new Browserbase session) and gets its own temporary folder for the
@@ -11,19 +12,19 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Browser, Page } from "playwright-core";
-import { confirmPattern, fieldFor, isFinal, mustStop, onPortal, optionFor, reviewMismatch, stopLinesFilled, type PageState } from "./guards.ts";
+import { confirmPattern, fieldFor, isFinal, mustStop, onPortal, optionFor, reviewMismatch, staffMay, stopLinesFilled, type PageState } from "./guards.ts";
 import type { Model } from "./model.ts";
-import { captchaAnswered, headingOf, locate, pageState } from "./page.ts";
+import { captchaAnswered, headingOf, locate, pageState, staffGuard } from "./page.ts";
 import { finalOn, type FormSteps, guideLines, navOn, pageOutline, payOn, type Playbook } from "./playbooks.ts";
 import { backoffMinutes, heal, type KeyLock, portalDown, receiptCheck, receiptLine } from "./heal.ts";
-import type { Store, Taught } from "./store.ts";
+import type { HumanCheck, Store, Taught } from "./store.ts";
 import { harden, linkAllowed, safeConfirm, wipe, withTimeout, type Blocked } from "./sandbox.ts";
 import { scoreText } from "../../../supabase/functions/_shared/injection.ts";
 import { checkValue, confirmationIn, customerData, draftProblems, factKey, factsOf, fileFor, fillFacts, generalize, type Labeler, type RawEvent, record } from "./teach.ts";
 import { startRecorder } from "./recorder.ts";
 import { blockedPage } from "./env.ts";
-import type { LiveViews } from "./live.ts";
-import type { Act, Filing, Login, Result, Skill, TraceStep } from "./types.ts";
+import type { LivePage, LiveViews } from "./live.ts";
+import type { Act, Bi, Filing, Login, Result, Skill, TraceStep } from "./types.ts";
 
 export type Session = { browser: Browser; page: Page; liveUrl: string | null; close(): Promise<void> };
 /** The destination's details the worker needs beyond its host: the agency's path on a host many agencies share (so
@@ -44,7 +45,10 @@ export type Config = {
   dryRun: boolean; twoKey: number; maxSteps: number; maxMs: number; holdMs: number; pollMs: number;
   beforeSubmitClick?(f: Filing): Promise<void>;        // tests: kill the run right after submit_clicked_at
   tmpRoot?: string;                                    // where each run's own folder is made (the system's temp folder)
-  runMs?: number;                                      // the whole run's hard limit (default maxMs + holdMs + 5 minutes)
+  runMs?: number;                                      // the whole run's hard limit (default maxMs + holdMs + staffHoldMs + 5 minutes)
+  /** How long a visible CAPTCHA waits with the Placetta team at most before it goes to the owner (default 20 minutes;
+   *  the database sends an unopened one to the owner after 15 minutes in the team's hours, at once outside them). */
+  staffHoldMs?: number;
   lock?: KeyLock;                                      // shared by the worker's slots: one run per workspace and portal at a time
   /** Teach mode: names the recorded pages and maps unmapped fields (teach.ts Labeler); without it, labels are plain. */
   labeler?: Labeler;
@@ -77,6 +81,20 @@ const BLOCKED_MSG = {
   en: "The agency's site refused Placetta's server before anything was entered. Odelia tries another way the agency takes, or gives it to you to send.",
   zh: "机构网站在填写任何内容前拒绝了快哉的服务器。Odelia 会改用机构接受的其他方式，否则交由您自行提交。",
 };
+/** What the owner reads while a visible CAPTCHA is with the Placetta team (staffFirst). */
+const TEAM = {
+  waiting: { en: "A human check (a CAPTCHA) came up on the agency's site. The Placetta team is solving it for you, so there's nothing for you to do.", zh: "机构网站出现了真人验证（验证码）。快哉团队正在为您完成，您无需操作。" },
+  opened: { en: "Someone on the Placetta team opened the page to solve the human check.", zh: "快哉团队成员已打开页面，正在完成真人验证。" },
+  solved: { en: "The Placetta team solved a human check for you. Odelia carries on.", zh: "快哉团队为您完成了一次真人验证，Odelia 继续办理。" },
+  offHours: { en: "A human check came up outside the Placetta team's hours, so it's yours this time: one tap opens it.", zh: "真人验证出现在快哉团队的工作时间以外，这次需要您完成：点一下即可打开。" },
+  notTaken: { en: "The Placetta team couldn't get to the human check within 15 minutes, so it's yours: one tap opens it.", zh: "快哉团队未能在 15 分钟内处理这次真人验证，需要您完成：点一下即可打开。" },
+  passed: { en: "The Placetta team passed the human check to you: one tap opens it.", zh: "快哉团队将这次真人验证交给您：点一下即可打开。" },
+  tooLong: { en: "The human check is taking the Placetta team too long, so it's yours: one tap opens it.", zh: "快哉团队处理这次真人验证用时过长，需要您完成：点一下即可打开。" },
+};
+const STAFF_MS = 20 * 60_000;
+/** Visible CAPTCHAs one run gives the team before the next one goes to the owner. */
+const STAFF_TRIES = 3;
+
 /** Hand-backs a person finishes on the page itself: once the page no longer needs them, Odelia carries on by herself. */
 const SELF_CLEARING = new Set(["captcha", "code", "identity", "account", "secret_number", "payment"]);
 
@@ -135,6 +153,7 @@ type Ctx = {
   replayFailed?: boolean;
   /** The hand-back the person just finished, and the page it was on (handBack, waived). */
   waive?: { reason: string; at: string };
+  staffChecks?: number;                                // visible CAPTCHAs given to the team this run
 };
 /** The URL is on the portal or one of the other hosts its destination names. */
 const onAny = (url: string, hosts: string[]) => hosts.some((h) => onPortal(url, h));
@@ -158,7 +177,7 @@ export class Worker {
   async run(f0: Filing): Promise<Result | null> {
     const track: { session?: Session; dir?: string } = {};
     const alive = { on: true };
-    const limit = this.c.runMs ?? this.c.maxMs + this.c.holdMs + 5 * 60_000;
+    const limit = this.c.runMs ?? this.c.maxMs + this.c.holdMs + (this.c.live?.on ? this.c.staffHoldMs ?? STAFF_MS : 0) + 5 * 60_000;
     try {
       // past the limit: storage wiped, browser closed, the run's folder gone and its token ended now, not when the
       // model or the page finally answers
@@ -450,8 +469,77 @@ export class Worker {
 
   // ---------------------------------------------------------------- hand-back
 
-  /** The page as the person is handed it, and how to tell they're finished with it. */
-  private async handBack(ctx: Ctx, reason: string, message: { en: string; zh: string }): Promise<Result> {
+  /** A step for a person: a visible CAPTCHA to the Placetta team first, anything else (or a CAPTCHA the team can't take)
+   *  to the owner. Time spent waiting on a person isn't counted against the run's own time. */
+  private async handBack(ctx: Ctx, reason: string, message: Bi): Promise<Result> {
+    const h0 = Date.now();
+    try {
+      if (reason === "captcha") {
+        const r = await this.staffFirst(ctx, message);
+        if (r) return r;
+      }
+      return await this.ownerBack(ctx, reason, message);
+    } finally {
+      ctx.t0 += Date.now() - h0;
+    }
+  }
+
+  /** A visible CAPTCHA, to the Placetta team's queue (20261102090200_human_checks.sql): staff open the worker's own live
+   *  view of this one page (the owner's lines covered, page.ts staffGuard), solve it, and Odelia carries on by herself.
+   *  Placetta never solves or gets around one itself. Null hands it to the owner: no public live view, a page that also
+   *  needs the owner, outside the team's hours, nobody opening it in time, staff passing it on, or too many this run. */
+  private async staffFirst(ctx: Ctx, message: Bi): Promise<Result | null> {
+    const { store, live } = this.c;
+    if (!live?.on || !store.humanCheckOpen || !store.humanCheck || !store.humanCheckClose) return null;
+    if ((ctx.staffChecks ?? 0) >= STAFF_TRIES) return null;
+    const st = await pageState(ctx.page).catch(() => null);
+    if (!st || !staffMay(st) || payOn(ctx.pb?.playbook, st)) return null;
+    ctx.staffChecks = (ctx.staffChecks ?? 0) + 1;
+    const span = this.c.staffHoldMs ?? STAFF_MS;
+    const t0 = Date.now(), until = new Date(t0 + span).toISOString();
+    const view = live.open(ctx.page as unknown as LivePage, span, staffGuard(ctx.page));
+    if (!view) return null;
+    const at = await this.pageKey(ctx);
+    let check: HumanCheck | null = null;
+    const close = async (state: "solved" | "to_owner" | "ended") => {
+      if (check) await store.humanCheckClose!(check.id, state).catch((e) => { console.error("filer: human check close", e instanceof Error ? e.message : e); return false; });
+    };
+    const toOwner = async (why: Bi) => { await close("to_owner"); ctx.f = await store.step(ctx.f, log(why.en, why.zh, "team_check", "to_owner"), { provider_ref: null }); return null; };
+    try {
+      check = await store.humanCheckOpen(ctx.f, view.url, until).catch((e) => { console.error("filer: human check", e instanceof Error ? e.message : e); return null; });
+      if (!check) return null;
+      const escalate = new Date(check.escalate_at).getTime();
+      if (!(escalate > Date.now())) return await toOwner(TEAM.offHours);
+      ctx.f = await store.step(ctx.f, log(TEAM.waiting.en, TEAM.waiting.zh, "team_check", "waiting"), { provider_ref: `held-until:${until}` });
+      let opened = false, clearFor = 0;
+      while (Date.now() < t0 + span) {
+        await sleep(this.c.pollMs);
+        const now = await store.reload(ctx.f.id).catch(() => ctx.f);
+        if (now.status === "canceled") { ctx.f = now; await close("ended"); return { ...STOPPED, trace: ctx.trace }; }
+        const c = await store.humanCheck(check.id).catch(() => null);
+        if (c?.opened_at && !opened) { opened = true; ctx.f = await store.step(ctx.f, log(TEAM.opened.en, TEAM.opened.zh, "team_check", "opened")); }
+        // as with the owner: Done in the view, or the page no longer asking (two quiet polls, hands off for 3 seconds)
+        const idle = Date.now() - live.touched(view.token) > 3000;
+        const tapped = live.done(view.token);
+        const cleared = await this.cleared(ctx, "captcha", at);
+        clearFor = cleared && idle ? clearFor + 1 : 0;
+        if (tapped || clearFor >= 2) {
+          await close(cleared ? "solved" : "ended");
+          ctx.f = await store.step(ctx.f, cleared ? log(TEAM.solved.en, TEAM.solved.zh, "team_check", "solved") : log("The Placetta team tapped Done. Odelia looks at the page again.", "快哉团队已点击完成，Odelia 重新查看页面。", "quiet"), { provider_ref: null });
+          ctx.waive = { reason: "captcha", at };
+          return { kind: "needs_you", reason: "resumed", message, trace: ctx.trace };
+        }
+        if (c && c.state !== "waiting") return await toOwner(TEAM.passed);
+        if (!c?.opened_at && Date.now() >= escalate) return await toOwner(TEAM.notTaken);
+      }
+      return await toOwner(TEAM.tooLong);
+    } finally {
+      live.close(view.token);
+    }
+  }
+
+  /** The page as the owner is handed it, and how to tell they're finished with it. */
+  private async ownerBack(ctx: Ctx, reason: string, message: Bi): Promise<Result> {
     const until = new Date(Date.now() + this.c.holdMs).toISOString();
     // A session with no hosted view (local Chromium) gets the worker's own live browser for this hand-back (live.ts).
     const own = !ctx.session.liveUrl ? this.c.live?.open(ctx.page as unknown as Parameters<LiveViews["open"]>[0], this.c.holdMs) ?? null : null;

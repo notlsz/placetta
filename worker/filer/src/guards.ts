@@ -83,6 +83,34 @@ export function stopLinesFilled(reason: Stop["reason"], s: PageState): boolean {
   return lines.length > 0 && lines.every((c) => !!c.value);
 }
 
+/** A signature line or an e-sign step: always the owner's. */
+const SIGN = /\b(signature|e-?sign(ature)?|sign here|signed by|electronically sign)\b/i;
+
+/** May the Placetta team clear this page? Only when a visible CAPTCHA is all it needs a person for. Anything else on it
+ *  that is the owner's (an SSN or card line, a code sent to them, an ID check, an account to make, a signature) keeps
+ *  the whole page with the owner, so staff never get a page that holds the owner's numbers to fill. (run.ts staffFirst;
+ *  the guide's fee page is checked there too.) */
+export function staffMay(s: PageState): boolean {
+  if (mustStop(s)?.reason !== "captcha") return false;
+  const rest: PageState = { ...s, frames: s.frames.filter((f) => !CAPTCHA_FRAME.test(f)), markers: s.markers.filter((m) => !CAPTCHA_MARK.test(m)), text: s.text.replace(/i'?m not a robot/gi, "") };
+  if (mustStop(rest)) return false;
+  return !s.controls.some((c) => SIGN.test(describeControl(c))) && !s.headings.some((h) => SIGN.test(h));
+}
+
+/** The lines the team's live view covers and won't let staff type into: SSNs and other ID numbers, cards and bank
+ *  accounts, codes, and the saved login (user name, email and password). The source is shared with the page itself
+ *  (page.ts tagHidden runs it there), so what is tested here is exactly what is covered. */
+export const STAFF_HIDDEN_SOURCE = String.raw`\b(ssn|social security|itin|taxpayer|tax ?id|tin|ein|fein|passport|driver'?s? licen[cs]e|date of birth|dob|birth ?date|card|cvv|cvc|csc|expir\w*|routing|account|acct|iban|bank|password|passcode|pin|user ?(name|id)|login|log ?in|sign ?in|e[- ]?mail|one-time|verification code)\b|^cc-`;
+const STAFF_HIDDEN = new RegExp(STAFF_HIDDEN_SOURCE, "i");
+export const STAFF_HIDDEN_AUTOCOMPLETE = ["username", "email", "current-password", "new-password", "one-time-code", "bday"];
+export type FieldFacts = { type: string; label: string; name: string; id: string; autocomplete: string; placeholder?: string };
+export function staffHides(c: FieldFacts): boolean {
+  if (c.type === "password") return true;
+  const ac = c.autocomplete.toLowerCase();
+  if (/^cc-/.test(ac) || STAFF_HIDDEN_AUTOCOMPLETE.includes(ac)) return true;
+  return STAFF_HIDDEN.test(`${c.label} ${c.name} ${c.id} ${c.placeholder ?? ""}`.replace(/[_-]+/g, " "));
+}
+
 /** A control whose value the model must never see (page.ts masks it to "(filled)"). */
 export const secretControl = (c: Pick<Control, "label" | "name" | "id" | "autocomplete">) =>
   SECRET.test(`${c.label} ${c.name} ${c.id}`) || CARD.test(`${c.label} ${c.name} ${c.id}`) || /^cc-/i.test(c.autocomplete) || c.autocomplete === "one-time-code";
