@@ -24,3 +24,19 @@ test("the base image is pinned to the exact Playwright version the worker's lock
   const lock = JSON.parse(readFileSync(new URL("../package-lock.json", import.meta.url), "utf8"));
   assert.strictEqual(tag, lock.packages["node_modules/playwright-core"].version);
 });
+
+test("render.yaml: a web service with the health check, enough memory for Chromium, and every key the worker needs", async () => {
+  const { checkEnv } = await import("../src/env.ts");
+  const y = readFileSync(new URL("../../../render.yaml", import.meta.url), "utf8");
+  assert.match(y, /type: web\b/);
+  assert.match(y, /healthCheckPath: \/healthz/);
+  const plan = /plan: (\w+)/.exec(y)?.[1] ?? "";
+  assert.ok(["standard", "pro", "pro_plus", "pro_max", "pro_ultra"].includes(plan), `plan ${plan} is too small for Chromium`);
+  const keys = [...y.matchAll(/- key: (\w+)/g)].map((m) => m[1]);
+  const set = Object.fromEntries(keys.map((k) => [k, k === "ANTHROPIC_API_KEY" ? "sk-ant-x" : k === "SUPABASE_URL" ? "https://esquxzcfsylffuijvzec.supabase.co" : "x"]));
+  assert.deepEqual(checkEnv(set).missing, [], "the blueprint asks for every required value");
+  const asked = [...y.matchAll(/- key: (\w+)\n\s+sync: false/g)].map((m) => m[1]);
+  assert.deepEqual(asked, ["SUPABASE_SERVICE_ROLE_KEY", "ANTHROPIC_API_KEY"], "the founder pastes two values");
+  const docker = readFileSync(new URL("../Dockerfile", import.meta.url), "utf8");
+  for (const p of [...y.matchAll(/^\s+- (supabase\/\S+)/gm)].map((m) => m[1])) assert.ok(docker.includes(p), `the image copies ${p}`);
+});

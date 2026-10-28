@@ -7,7 +7,9 @@
   },
   "scripts": {
     "start": "node --experimental-strip-types src/main.ts",
-    "test": "node --experimental-strip-types --test test/heal.test.ts test/guards.test.ts test/playbooks.test.ts test/replay.test.ts test/reroute.test.ts test/store.test.ts test/docker.test.ts test/filer.test.ts test/sandbox.test.ts test/teach.test.ts test/gbfood.test.ts test/cafllc.test.ts",
+    "check": "node --experimental-strip-types src/selfcheck.ts",
+    "probe": "node --experimental-strip-types src/probe.ts --all",
+    "test": "node --experimental-strip-types --test test/cafllc.test.ts test/docker.test.ts test/filer.test.ts test/gbfood.test.ts test/guards.test.ts test/heal.test.ts test/live.test.ts test/playbooks.test.ts test/replay.test.ts test/reroute.test.ts test/sandbox.test.ts test/store.test.ts test/teach.test.ts",
     "typecheck": "node ../../node_modules/typescript/bin/tsc -p tsconfig.json"
   },
   "dependencies": {

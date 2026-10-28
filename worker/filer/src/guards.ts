@@ -36,11 +36,20 @@ const CODE = /one-time|verification code|security code sent|sms code|text messag
 
 const describeControl = (c: Control) => `${c.label} ${c.name} ${c.id}`.trim();
 
+/** An invisible reCAPTCHA (the Texas Comptroller's sign-in carries one) asks nothing of anyone: it's a score the page
+ *  checks in the background, with no box to tick and no picture to pick. Its anchor frame says size=invisible and its
+ *  marks are the badge and the hidden response field. Nothing is solved or touched either way; if the page then shows a
+ *  real challenge (a visible anchor, a challenge frame, a widget), that is a CAPTCHA and goes to the person. */
+const INVISIBLE_ANCHOR = /recaptcha\/(enterprise|api2)\/anchor\?[^#]*\bsize=invisible\b/i;
+const INVISIBLE_MARK = /^(grecaptcha-badge|grecaptcha-logo|grecaptcha-error|g-recaptcha-response(-\d+)?|recaptcha-enterprise-script)$/i;
+export const challengeFrame = (f: string) => CAPTCHA_FRAME.test(f) && !INVISIBLE_ANCHOR.test(f);
+export const challengeMark = (m: string) => m.split(/\s+/).some((t) => t && CAPTCHA_MARK.test(t) && !INVISIBLE_MARK.test(t));
+
 /** Why this page must go to the person, or null. Checked before the model sees the page. */
 export function mustStop(s: PageState): Stop | null {
   let host = "";
   try { host = new URL(s.url).hostname; } catch { /* about:blank */ }
-  if (s.frames.some((f) => CAPTCHA_FRAME.test(f)) || s.markers.some((m) => CAPTCHA_MARK.test(m)) || /i'?m not a robot/i.test(s.text)) {
+  if (s.frames.some(challengeFrame) || s.markers.some(challengeMark) || /i'?m not a robot/i.test(s.text)) {
     return { reason: "captcha", en: "The agency's site is asking for a CAPTCHA. Open the live view and complete it, then tap \"I've done it\".", zh: "机构网站要求完成验证码。请打开实时画面完成后点击“我已完成”。" };
   }
   if (makesAccount(s)) {
@@ -64,6 +73,19 @@ export function mustStop(s: PageState): Stop | null {
   }
   return null;
 }
+
+/** After the person filled the lines a stop was for (an SSN, a code), every such line on the page has something in it,
+ *  so the same page doesn't send them back again. Only for those two: a CAPTCHA is checked in the page (run.ts), and a
+ *  fee, an ID check or an account page is never waved through by what's in a box. */
+export function stopLinesFilled(reason: Stop["reason"], s: PageState): boolean {
+  if (reason !== "secret_number" && reason !== "code") return false;
+  const lines = s.controls.filter((c) => reason === "secret_number" ? SECRET.test(describeControl(c)) : c.autocomplete === "one-time-code" || CODE.test(describeControl(c)));
+  return lines.length > 0 && lines.every((c) => !!c.value);
+}
+
+/** A control whose value the model must never see (page.ts masks it to "(filled)"). */
+export const secretControl = (c: Pick<Control, "label" | "name" | "id" | "autocomplete">) =>
+  SECRET.test(`${c.label} ${c.name} ${c.id}`) || CARD.test(`${c.label} ${c.name} ${c.id}`) || /^cc-/i.test(c.autocomplete) || c.autocomplete === "one-time-code";
 
 const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
 

@@ -3,7 +3,7 @@ import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
 import { DEST, destinationProblems, staleDestinations, TO_VERIFY, type Dest } from "./destinations.ts";
 import {
   afterHold, askedToResubmit, canFaxSigned, canFaxSignedFor, check, emailFor, envFrom, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holdMinutes,
-  fallback, handBackDue, handoffPacket, holds, isForeign, killSwitchOn, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, PORTAL_FAILED, refusalOf, REVIEW_HOURS, rerouteDue,
+  fallback, handBackDue, handoffPacket, holds, isForeign, killSwitchOn, selfFileScope, workerOn, workerState, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, PORTAL_FAILED, refusalOf, REVIEW_HOURS, rerouteDue,
   sentByYou, signedCopy, teachRefusal, teamApproved, waysToSend, whyYours, YOURS_REF,
 } from "./logic.ts";
 
@@ -361,7 +361,7 @@ Deno.test("the other way follows the same rules as the first, without the site",
   assertEquals(fallback(signed, undefined, ENV, facts), "team");
   // what goes by paper gets the paper checks: the filled form must be in Documents
   assert(check(filing({ pdf_path: undefined }), dest({ portal: "x.gov" }), { docPaths: docs }, "mail").some((p) => p.kind === "file"));
-  assertEquals([...PORTAL_FAILED].sort(), ["left_portal", "limit", "no_live_view", "no_portal", "page_injection", "portal_failed", "review_differs", "teach_incomplete", "unverified_playbook"]);
+  assertEquals([...PORTAL_FAILED].sort(), ["left_portal", "limit", "no_live_view", "no_portal", "page_injection", "portal_blocked", "portal_failed", "review_differs", "teach_incomplete", "unverified_playbook"]);
 });
 
 Deno.test("a filing Odelia can't send goes to the business with a packet: why, where, signature, fee, and I've sent it", () => {
@@ -474,4 +474,20 @@ Deno.test("every shipped destination: with all four channels on, Placetta sends 
   // certified mail carries Placetta's own copy, so it never takes a wet-signature form (a printed scan isn't the
   // original signature); the shipped mail-only agencies all want a wet signature or a fee, so they're the business's
   for (const c of ["email", "fax", "portal", "owner"]) assert(seen[c] > 0, `${c} is used by some destination`);
+});
+
+Deno.test("FILER_AGENCIES=portal switches on every agency website and nothing else; the worker is on while it beats", () => {
+  const env = (agencies: string) => envFrom((k) => ({ FILER_AGENCIES: agencies, FILER_CHANNELS: "email,fax,mail,portal" } as Record<string, string>)[k]);
+  const f = filing();
+  assertEquals(selfFileScope(f, env("portal"), dest({ portal: "x.gov" })), "portal");
+  assertEquals(selfFileScope(f, env("portal"), dest({ portal: undefined })), null, "no website: not switched on by the word");
+  assertEquals(selfFileScope(f, env(""), dest({ portal: "x.gov" })), null);
+  assertEquals(selfFileScope(f, env(f.payload.official ?? ""), dest({ portal: undefined })), "all");
+  assert(workerOn("1", null) && !workerOn("0", { live: true }) && workerOn(undefined, { live: true }) && !workerOn(undefined, { live: false }) && !workerOn("", null));
+  const on = env("portal"), off = envFrom(() => undefined);
+  assertEquals(workerState(undefined, on, { live: true, seen_at: "t" }), "live");
+  assertEquals(workerState(undefined, on, { live: false, seen_at: "t" }), "down");
+  assertEquals(workerState(undefined, on, { live: false, seen_at: null }), "not_set_up");
+  assertEquals(workerState("0", on, { live: true, seen_at: "t" }), "off");
+  assertEquals(workerState(undefined, off, { live: true, seen_at: "t" }), "off", "the portal channel isn't on");
 });

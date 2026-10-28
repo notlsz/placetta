@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { ONLINE_FILING, useOnlineFiling } from "./onlineFiling";
 import { hrefOf, plainClick, readRoute, setRoute } from "./route";
 import { useApp } from "./ctx";
 import { B, type Bi } from "./model";
@@ -531,6 +532,15 @@ function Integrations() {
   );
 }
 
+/** Whether Odelia submits on agency websites herself right now (src/onlineFiling.ts): live, or who files them instead. */
+function OnlineFilingLine() {
+  const { b } = useApp();
+  const st = useOnlineFiling();
+  if (!st) return null;
+  const say = ONLINE_FILING[st.state];
+  return <p className={"sg-note of-line" + (say.live ? " ok" : "")} aria-live="polite"><b>{b(say.short)}.</b> {b(say.long)}</p>;
+}
+
 function Logins() {
   const { b, lang, cloud, ws } = useApp();
   const [adding, setAdding] = useState(false);
@@ -546,6 +556,7 @@ function Logins() {
       rows={cloud.logins.map(l => ({ label: { en: l.agency, zh: l.agency },
         sub: <>{l.username}{l.last_opened_at ? (lang === "zh" ? `，团队上次打开 ${fmtAgo(l.last_opened_at, lang)}` : `. Team last opened it ${fmtAgo(l.last_opened_at, lang)}`) : ""}</>,
         right: cloud.owner ? <Btn kind="warm" guard onClick={() => void cloud.removeLogin(l.id)}>{lang === "zh" ? "删除" : "Remove"}</Btn> : undefined }))}>
+      <OnlineFilingLine />
       {!cloud.owner ? <p className="sg-note">{lang === "zh" ? "只有所有者可以添加或删除登录信息。" : "Only owners can add or remove saved logins."}</p>
         : <div className="sg-act"><Btn guard kind="line" onClick={() => setAdding(true)}><I.plus />{lang === "zh" ? "添加登录" : "Add a login"}</Btn></div>}
       {cloud.owner && adding && (
