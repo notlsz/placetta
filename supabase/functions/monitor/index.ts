@@ -1101,7 +1101,8 @@ Deno.serve(async (req) => {
     } catch (e) { console.error("status checks", String(e).slice(0, 160)); }
   }
 
-  // Self-filing: requeue stuck runs, refresh faxes and letters on their way, flag destinations older than 90 days.
+  // Self-filing: requeue stuck runs, wake a sleeping portal worker for queued filings (or send them another way when it
+  // doesn't wake), refresh faxes and letters on their way, flag destinations older than 90 days.
   const sweep = await fetch(`${SUPABASE_URL}/functions/v1/file`, {
     method: "POST", headers: { "Content-Type": "application/json", "x-monitor-key": req.headers.get("x-monitor-key") ?? "" }, body: "{}",
   }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
@@ -1113,5 +1114,5 @@ Deno.serve(async (req) => {
     { app: APP, today, limit: 500 }).catch((e) => { console.error("mention notices", String(e).slice(0, 160)); return null; });
 
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
-  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, chases_sent: initiativeSent, agency_asks: answered, status_checks: status, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled, billing_ok: billingOk });
+  return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed, worker_wake: sweep.wake ?? null, fell_back: sweep.fell_back ?? 0 } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(RESEND && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, chases_sent: initiativeSent, agency_asks: answered, status_checks: status, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled, billing_ok: billingOk });
 });

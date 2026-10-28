@@ -30,21 +30,38 @@ import {
   afterHold, askedToResubmit, type Bi, canFaxSignedFor, CHANNEL_SAID, check, DUPLICATE_REF, emailFor, envFrom, fallback, faxFailures, faxFile, faxTo, feeBlocks, type Filing,
   handBackDue, handoffPacket, hasLoginFor, holds, isForeign, type LogEntry, mailOutcome, mailTo, OWNER_REF, pick, type Refusal, refusalOf, sentByYou, signedCopy,
   TEACH_REFUSED, teachRefusal, teamApproved, whyYours, YOURS_REF, selfFileScope, workerOn, workerState,
+  type Beat, rerouteLead, wakeable, wakeConfig, wakeMs, wakePlan, waitsOnWorker, WORKER_ASLEEP,
 } from "./logic.ts";
+import { pingWorker } from "./wake.ts";
 
 const env = () => envFrom((k) => Deno.env.get(k));
 /** The portal worker's heartbeat (20261102090000_filer_heartbeat.sql), read at most every 30 seconds. Null when the
  *  database doesn't have it yet. */
-let beatCache: { at: number; beat: { live: boolean; seen_at: string | null } | null } | null = null;
-async function workerBeat() {
-  if (beatCache && Date.now() - beatCache.at < 30_000) return beatCache.beat;
+let beatCache: { at: number; beat: Beat | null } | null = null;
+async function workerBeat(fresh = false) {
+  if (!fresh && beatCache && Date.now() - beatCache.at < 30_000) return beatCache.beat;
   const { data, error } = await admin.rpc("filer_live", {});
-  const r = (data as { live: boolean; seen_at: string | null }[] | null)?.[0];
-  beatCache = { at: Date.now(), beat: error || !r ? null : { live: r.live === true, seen_at: r.seen_at ?? null } };
+  const r = (data as { live: boolean; seen_at: string | null; wake_since?: string | null }[] | null)?.[0];
+  beatCache = { at: Date.now(), beat: error || !r ? null : { live: r.live === true, seen_at: r.seen_at ?? null, wake_since: r.wake_since ?? null } };
   return beatCache.beat;
 }
-/** The env, with the portal worker on only while it's on (FILER_ENABLED, or unset: its heartbeat). */
-const liveEnv = async () => ({ ...env(), portalWorker: workerOn(Deno.env.get("FILER_ENABLED"), await workerBeat()) });
+/** Wake on demand (logic.ts "sleep and wake"): FILER_URL and FILER_SECRET, and how long a wake may take. */
+const wakeCfg = () => wakeConfig(Deno.env.get("FILER_URL"), Deno.env.get("FILER_SECRET"));
+const wakeWindow = () => wakeMs(Deno.env.get("FILER_WAKE_SECONDS"));
+/** Asleep but wakeable: filings still queue for the worker, and the queue wakes it. */
+const asleep = (beat: Beat | null) => wakeable(!!wakeCfg(), beat, Date.now(), wakeWindow());
+/** The env, with the portal worker on only while it's on (FILER_ENABLED, or unset: its heartbeat, or asleep and wakeable). */
+const liveEnv = async () => { const beat = await workerBeat(); return { ...env(), portalWorker: workerOn(Deno.env.get("FILER_ENABLED"), beat, asleep(beat)) }; };
+/** A filing was just queued (or held) for the agency's website: wake the worker if it sleeps. Never throws, never waits
+ *  more than a few seconds; the database lets one ping through every 30 seconds and none while the worker beats. */
+async function wakeWorker(): Promise<void> {
+  const out = await pingWorker(wakeCfg(), { claim: async () => {
+    const { data, error } = await admin.rpc("filer_wake_claim", {});
+    if (error) { if (error.code !== "PGRST202") console.error("filer wake claim:", error.code ?? ""); return false; }
+    return data === true;
+  }, fetch }).catch(() => "not_needed" as const);
+  if (out === "sent" || out === "woke") { beatCache = null; console.log("filer wake:", out); }
+}
 const COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, provider_ref, submit_clicked_at, attempts, requirements_checked, confirmation_number, portal_url, receipt_path, fee_estimate, send_after";
 const log = (en: string, zh: string, kind = "info", ref?: string): LogEntry => ({ en, zh, kind, ...(ref ? { ref } : {}) });
 
@@ -514,12 +531,21 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
   f = await step(f, log("Checked against the agency's requirements", "已按机构要求核对", "check"),
     { channel, agent_state: "running", requirements_checked: true, status: "in_progress" });
   // The undo window: nothing leaves for SEND_HOLD_MINUTES, so the person can take it back. The sweep sends it after.
-  if (holds(channel, e)) return view(await holdSend(f, e.holdMinutes));
+  if (holds(channel, e)) {
+    const held = await holdSend(f, e.holdMinutes);
+    // a sleeping worker starts waking during the undo window, so it's up when the filing is released
+    if (channel === "portal") await wakeWorker();
+    return view(held);
+  }
   switch (channel) {
     case "email": return await sendEmail(f, d!);
     case "fax": return await sendFax(f, d!);
     case "mail": return await sendMail(f, d!);
-    case "portal": return view(await step(f, log("Opening the agency's site", "打开机构网站", "queued"), { agent_state: "queued" }));
+    case "portal": {
+      const g = await step(f, log("Opening the agency's site", "打开机构网站", "queued"), { agent_state: "queued" });
+      await wakeWorker();
+      return view(g);
+    }
     default:
       return await toYou(f, bi("Placetta doesn't send this form by itself yet.", "快哉暂时无法自动提交这份表格。"));
   }
@@ -549,7 +575,9 @@ async function resume(f: Filing, by: string, resubmit = false, confirmation = ""
       "you_sent", conf ?? undefined), { ...was, status: "submitted", agent_state: "done", requirements_checked: true, handoff_url: null, ...(conf ? { confirmation_number: conf } : {}) }));
   }
   if (f.channel === "portal") {
-    return view(await step(f, log("You finished your step. Placetta carries on.", "您已完成这一步，快哉继续办理。", "resume", by), { ...was, agent_state: "queued", handoff_url: null }));
+    const g = await step(f, log("You finished your step. Placetta carries on.", "您已完成这一步，快哉继续办理。", "resume", by), { ...was, agent_state: "queued", handoff_url: null });
+    await wakeWorker();
+    return view(g);
   }
   // A check that failed earlier: run the checks again from the start.
   const g = await step(f, log("Checking it again", "重新核对", "resume", by), { ...was, agent_state: null, handoff_url: null }, false);
@@ -634,7 +662,7 @@ async function sendHeld(f: Filing) {
     case "email": return await sendEmail(f, d!);
     case "fax": return await sendFax(f, d!);
     case "mail": return await sendMail(f, d!);
-    case "queued": return view(f);   // the portal worker takes it from the queue
+    case "queued": await wakeWorker(); return view(f);   // the portal worker takes it from the queue
     default: return await toYou(f, bi("The agency's address changed while it waited, so Placetta didn't send it.", "等待期间机构地址有变，快哉未发送。"));
   }
 }
@@ -677,7 +705,7 @@ async function teamApprove(f: Filing, by: string) {
     case "email": return await sendEmail(g, d!);
     case "fax": return await sendFax(g, d!);
     case "mail": return await sendMail(g, d!);
-    case "portal": return view(await step(g, null, { agent_state: "queued" }, false));
+    case "portal": { const q = await step(g, null, { agent_state: "queued" }, false); await wakeWorker(); return view(q); }
     default: throw new HttpError("bad_request", "No channel to send it on.");
   }
 }
@@ -689,8 +717,10 @@ async function teamApprove(f: Filing, by: string) {
 async function teach(f: Filing, by: string) {
   const why = teachRefusal(f, destFor(f.payload.official, f.payload), await liveEnv());
   if (why) throw new HttpError("bad_request", TEACH_REFUSED[why].en, TEACH_REFUSED[why].zh);
-  return view(await step(f, log("You're showing Odelia how to file this on the agency's site. The live browser opens in a moment.", "您正在教 Odelia 如何在机构网站上提交。实时浏览器即将打开。", "teach", by),
-    { expect_agent_state: f.agent_state, channel: "portal", agent_state: "queued", handoff_url: null, provider_ref: null }));
+  const g = await step(f, log("You're showing Odelia how to file this on the agency's site. The live browser opens in a moment.", "您正在教 Odelia 如何在机构网站上提交。实时浏览器即将打开。", "teach", by),
+    { expect_agent_state: f.agent_state, channel: "portal", agent_state: "queued", handoff_url: null, provider_ref: null });
+  await wakeWorker();
+  return view(g);
 }
 
 async function takeOver(f: Filing, by: string) {
@@ -779,19 +809,21 @@ async function reroute(f: Filing) {
   const was = { expect_agent_state: "handoff" };
   const route = fallback(f, d, e, await facts(f, d));
   const problems = route === "team" ? [] : check(f, d, { docPaths: await docPaths(f) }, route);
+  // why the agency's site isn't used: it failed, or the worker didn't wake in time (logic.ts rerouteLead)
+  const { lead, sends } = rerouteLead(f);
   if (route === "team" || problems.length) {
     const why = route === "team" ? whyYours(f, d ? { ...d, portal: undefined } : d, e, await facts(f, d)) : { en: `It can't go another way yet: ${problems.map((p) => p.en).join(". ")}.`, zh: `暂时无法改用其他方式：${problems.map((p) => p.zh).join("；")}。` };
     await closeHandoffTasks(f);
-    return await toYou(f, bi(`The agency's site didn't work. ${why.en}`.slice(0, 900), `机构网站无法完成。${why.zh}`.slice(0, 900)), { expect: was });
+    return await toYou(f, bi(`${lead.en} ${why.en}`.slice(0, 900), `${lead.zh}${why.zh}`.slice(0, 900)), { expect: was });
   }
   // Placetta sends it itself now: the hand-back task for it is closed
   await closeHandoffTasks(f);
   if (route === "owner") {
-    const g = await step(f, log("The agency's site didn't work. This form is one the business sends itself, so Odelia prepared the packet.", "机构网站无法完成。这份表格需由企业本人提交，Odelia 已准备好材料包。", "reroute", "owner"), was);
+    const g = await step(f, log(`${lead.en} This form is one the business sends itself, so Odelia prepared the packet.`, `${lead.zh}这份表格需由企业本人提交，Odelia 已准备好材料包。`, "reroute", "owner"), was);
     return await toOwner(g, d!);
   }
-  const said = CHANNEL_SAID[route];
-  const g = await step(f, log(`The agency's site didn't work, so Placetta sends it ${said.en} instead.`, `机构网站无法完成，快哉改为${said.zh}提交。`, "reroute", route),
+  const said = sends(CHANNEL_SAID[route]);
+  const g = await step(f, log(said.en, said.zh, "reroute", route),
     { ...was, channel: route, agent_state: "running", requirements_checked: true, handoff_url: null });
   if (holds(route, e)) return view(await holdSend(g, e.holdMinutes));
   switch (route) {
@@ -839,8 +871,36 @@ async function handBacks(): Promise<number> {
   return n;
 }
 
+/** Filings queued for the agency's website while the worker isn't beating: ping it awake (asleep, wakeable), or, once a
+    wake has gone unanswered for the wake window, hand them back with ref worker_asleep so handBacks sends them the way
+    they'd go without the worker. Nothing at all without wake on demand set up (FILER_URL, FILER_SECRET): as before. */
+async function wakeSweep(): Promise<{ wake: string; fell_back: number }> {
+  const { data, error } = await admin.from("filings").select(COLS).eq("channel", "portal").eq("agent_state", "queued")
+    .not("status", "in", "(canceled,submitted,accepted,rejected)").order("updated_at").limit(100);
+  if (error) { console.error("wake sweep:", error.code ?? ""); return { wake: "none", fell_back: 0 }; }
+  const now = Date.now();
+  const waiting = ((data ?? []) as unknown as Filing[]).filter((f) => waitsOnWorker(f, now));
+  if (!waiting.length) return { wake: "none", fell_back: 0 };
+  const plan = wakePlan({ configured: !!wakeCfg(), beat: await workerBeat(true), waiting: waiting.length, nowMs: now, windowMs: wakeWindow() });
+  if (plan === "wake") { await wakeWorker(); return { wake: "pinged", fell_back: 0 }; }
+  if (plan !== "fall_back") return { wake: plan, fell_back: 0 };
+  let n = 0;
+  for (const f of waiting) {
+    try {
+      // compare-and-set on queued: a worker that wakes and claims it first keeps it
+      await step(f, log("Odelia's filing browser didn't start in time. Placetta sends it another way the agency takes, or gives it to you to send.",
+        "Odelia 的提交浏览器未能及时启动。快哉会改用机构接受的其他方式，否则交由您自行提交。", "handoff", WORKER_ASLEEP),
+        { expect_agent_state: "queued", agent_state: "handoff", channel: "team", handoff_url: null });
+      n++;
+    } catch (e) { if (!(e instanceof Refused)) console.error("wake fall back:", describe(e)); }
+  }
+  return { wake: "failed", fell_back: n };
+}
+
 async function sweep() {
   const released = await releaseDue();
+  // before the hand-backs, so a filing the worker didn't wake for goes another way in this same sweep
+  const woken = await wakeSweep();
   const rerouted = await handBacks();
   const { data: n } = await admin.rpc("requeue_stuck_filings");
   const lost = await lostRuns();
@@ -853,7 +913,7 @@ async function sweep() {
     await admin.from("team_tasks").upsert({ kind: "destination_stale", title: `Re-check ${s.id} destinations (last checked ${s.checked}) on ${s.source}`, dedupe: `stale:${s.id}:${s.checked}` },
       { onConflict: "dedupe", ignoreDuplicates: true });
   }
-  return { released, rerouted, requeued: n ?? 0, lost, refreshed: rows?.length ?? 0 };
+  return { released, rerouted, requeued: n ?? 0, lost, refreshed: rows?.length ?? 0, wake: woken.wake, fell_back: woken.fell_back };
 }
 
 // ------------------------------------------------------------------ router
@@ -876,7 +936,7 @@ serve(async (req) => {
   if (action === "worker") {
     await requireAccess(ws, user, jwt, "member");
     const beat = await workerBeat();
-    return ok({ worker: { state: workerState(Deno.env.get("FILER_ENABLED"), env(), beat), seen_at: beat?.seen_at ?? null } });
+    return ok({ worker: { state: workerState(Deno.env.get("FILER_ENABLED"), env(), beat, asleep(beat)), seen_at: beat?.seen_at ?? null } });
   }
   const filingId = uuidParam(body.filing_id, "filing_id");
   const by = user.email ?? user.id;

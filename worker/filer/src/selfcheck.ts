@@ -1,8 +1,9 @@
 // The founder's check, in one command: cd worker/filer && npm run check (on Render: the service's Shell tab, same
 // command). Each line says yes or what to fix. It reads, it never files: the keys are there and work, the database has
 // the worker's functions, Chromium starts, and a public agency page opens. Exit code 0 when everything passes.
+import { defaultDeps, launcher } from "./browsers.ts";
 import { checkEnv, missingLines } from "./env.ts";
-import { launchLocal, readPublic } from "./probe.ts";
+import { readPublic } from "./probe.ts";
 import { PLAYBOOKS } from "./playbooks.ts";
 import { dbKey, SupabaseStore } from "./store.ts";
 import { VERSION } from "./main.ts";
@@ -13,8 +14,10 @@ const say = (ok: boolean, line: string) => { lines.push([ok, line]); console.log
 const env = checkEnv(process.env);
 say(env.ok, env.ok ? "keys: SUPABASE_URL, the database key and ANTHROPIC_API_KEY are set" : `keys: ${missingLines(env).join("; ")}`);
 for (const w of env.warnings) console.log(`note ${w}`);
-say(true, `browser: ${env.browser === "local" ? "local Chromium in the container (Browserbase not needed)" : "Browserbase for the hosts that refuse a cloud server, local Chromium for the rest"}`);
-say(!!env.publicUrl || env.browser === "browserbase", env.publicUrl ? `live browser for hand-backs at ${env.publicUrl}/live/...` : "live browser: no public address; on Render, RENDER_EXTERNAL_URL is set for a web service");
+say(true, `browser: ${env.provider === "steel" ? "Steel for every run (no Chromium in this container)" : env.provider === "browserbase" ? "Browserbase for every run (no Chromium in this container)"
+  : env.browser === "local" ? "local Chromium in the container (Browserbase not needed)" : "Browserbase for the hosts that refuse a cloud server, local Chromium for the rest"}`);
+say(!!env.publicUrl || env.browser !== "local", env.publicUrl ? `live browser for hand-backs at ${env.publicUrl}/live/...` : "live browser: no public address; on Render, RENDER_EXTERNAL_URL is set for a web service");
+say(env.wake, env.wake ? "wake on demand: FILER_SECRET is set (use the same value in the Supabase secrets, with FILER_URL)" : "wake on demand: set FILER_SECRET (32+ characters, the same as the Supabase secret) so the app can wake a sleeping worker");
 
 if (process.env.ANTHROPIC_API_KEY) {
   const r = await fetch("https://api.anthropic.com/v1/models", { headers: { "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" } }).catch(() => null);
@@ -29,13 +32,13 @@ if (env.ok) {
   }
 }
 try {
-  const b = await launchLocal();
+  const b = await launcher(defaultDeps(process.env))();
   try {
     const st = await readPublic(b, "https://boiefiling.fincen.gov/fileboir", ["boiefiling.fincen.gov"], 500);
-    say(/Beneficial Ownership/i.test(st.text), "Chromium starts and opens a public agency page (FinCEN's BOI E-Filing)");
+    say(/Beneficial Ownership/i.test(st.text), `the browser (${env.provider}) starts and opens a public agency page (FinCEN's BOI E-Filing)`);
   } finally { await b.close(); }
 } catch (e) {
-  say(false, `Chromium: ${e instanceof Error ? e.message.slice(0, 160) : e}`);
+  say(false, `browser (${env.provider}): ${e instanceof Error ? e.message.slice(0, 160) : e}`);
 }
 say(true, `${PLAYBOOKS.length} playbooks, ${PLAYBOOKS.filter((p) => p.verified).length} verified on a watched first run`);
 const bad = lines.filter(([ok]) => !ok).length;

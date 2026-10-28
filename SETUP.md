@@ -2,33 +2,62 @@
 
 ## Turn on online filing (Odelia submits on agency websites)
 
-About ten minutes. Afterwards Odelia files on agency websites herself; the owner only approves, signs, pays an agency
-fee, or solves a CAPTCHA in the live browser she opens for them.
+About fifteen minutes, and $0 a month to start: Render's free plan runs the worker, Steel's free plan runs its browser.
+Afterwards Odelia files on agency websites herself; the owner only approves, signs, pays an agency fee, or solves a
+CAPTCHA in the live browser she opens for them.
 
-1. **Render**: dashboard.render.com, **New**, **Blueprint**, pick this repository. Render reads `render.yaml` and asks
-   for two values:
+The free plan sleeps after 15 minutes with nothing to do. When a filing is queued for an agency's website, Supabase pings
+the worker (`FILER_URL`, with `FILER_SECRET`), it wakes in about a minute, files, and sleeps again. If it doesn't wake
+within 3 minutes (`FILER_WAKE_SECONDS`), the filing goes another way the agency takes, or to the owner with the packet.
+
+0. **A shared secret.** Make one long random value, for example `openssl rand -hex 32`. If Supabase already has a
+   `FILER_SECRET` (Placetta's email sending uses it), use that one instead. It goes in both Render and Supabase.
+1. **Steel**: app.steel.dev, sign up (the free plan, no card), **API Keys**, copy the key. CAPTCHA solving stays off:
+   Placetta never asks Steel to solve one.
+2. **Render**: dashboard.render.com, **New**, **Blueprint**, pick this repository. Render reads `render.yaml` (plan
+   `free`, `BROWSER_PROVIDER=steel`) and asks for four values:
    - `SUPABASE_SERVICE_ROLE_KEY`: Supabase, Project Settings, API keys, the `service_role` secret key.
    - `ANTHROPIC_API_KEY`: console.anthropic.com, Settings, API keys, Create key (starts `sk-ant-`).
+   - `STEEL_API_KEY`: the key from step 1.
+   - `FILER_SECRET`: the value from step 0.
 
-   Press **Apply**. It builds the worker (Chromium included, no Browserbase account needed) on the Standard plan
-   ($25 a month, 2 GB, which Chromium needs).
-2. **Supabase**: Edge Functions, Secrets (https://supabase.com/dashboard/project/esquxzcfsylffuijvzec/functions/secrets).
-   Add two secrets:
+   Press **Apply**. When it's live, copy the service's address from the top of placetta-filer
+   (`https://placetta-filer-….onrender.com`).
+3. **Supabase**: Edge Functions, Secrets (https://supabase.com/dashboard/project/esquxzcfsylffuijvzec/functions/secrets).
+   Add:
+   - `FILER_URL` = the Render address from step 2
+   - `FILER_SECRET` = the value from step 0 (skip if it was already there)
    - `FILER_CHANNELS` = `email,fax,mail,portal`
    - `FILER_AGENCIES` = `portal` (if it already lists form ids, add `,portal` to the end): every agency website on,
      including ones added later; email, fax and mail stay per form.
 
-The database part is one migration, `supabase/migrations/20261102090000_filer_heartbeat.sql`, run like the others
-(Database, below). To check: open the service's address (top of placetta-filer in Render) with `/healthz` on the end
-(`"ok": true`, a recent `"heartbeat"`), or in Render, placetta-filer, Shell, run `npm run check`. In the app, Settings, Agency logins says
-**Online filing is live**. If a key is missing, the deploy shows as failed and `/healthz` names the key and where to
-get it; the worker takes no filing until it's set. `FILER_ENABLED` is no longer needed in Supabase: filings queue for
-the worker only while it's running (set it to `0` to switch websites off).
+The database part is two migrations, `supabase/migrations/20261102090000_filer_heartbeat.sql` and
+`20261102090300_filer_wake.sql`, run like the others (Database, below). To check: open the Render address with
+`/healthz` on the end (`"ok": true`, `"browser": "steel"`, `"wake_on_demand": true`, a recent `"heartbeat"`), or in
+Render, placetta-filer, Shell, run `npm run check`. In the app, Settings, Agency logins says **Online filing is live**
+while it's awake and **Online filing is asleep and wakes on demand** while it sleeps. If a key is missing, the deploy
+shows as failed and `/healthz` names the key and where to get it; the worker takes no filing until it's set.
+`FILER_ENABLED` is no longer needed in Supabase: filings queue for the worker only while it's running or asleep and
+wakeable (set it to `0` to switch websites off).
+
+**Switching later is one setting each.** The worker is a plain Docker container (`worker/filer/Dockerfile`), the same
+everywhere.
+
+| To | Change |
+| --- | --- |
+| Browserbase instead of Steel | Render, Environment: `BROWSER_PROVIDER=browserbase`, add `BROWSERBASE_API_KEY` and `BROWSERBASE_PROJECT_ID` |
+| Always on, more memory | `render.yaml`: `plan: standard` (2 GB, about $25 a month). `FILER_URL` can stay; it isn't needed |
+| Chromium inside the container | `BROWSER_PROVIDER=local` (needs `plan: standard`; 512 MB is too small for Chromium) |
+| Cloud Run (or Fly, or any host) | Build `worker/filer/Dockerfile` from the repo root, set the same variables plus `FILER_PUBLIC_URL` (its https address), and point the Supabase secret `FILER_URL` at it. On Cloud Run, deploy with `--no-cpu-throttling` (the worker files between requests) and one max instance; with zero min instances it wakes on the ping like Render free |
 
 Still guarded: the owner approves every filing; each form's first 10 stop at the agency's review page for the team;
-CAPTCHAs, codes, SSNs and fees go to the person; no account is ever created; only the destination's own hosts are
-opened; page text is data. Optional: `BROWSERBASE_API_KEY` and `BROWSERBASE_PROJECT_ID` in Render, only for the few
-agency sites that refuse a cloud server (EDD, bizfile Online, MassTaxConnect, sanjoseca.gov); `FILER_DB_KEY` per
+CAPTCHAs, codes, SSNs and fees go to a person, never to a solver (Steel's and Browserbase's CAPTCHA solving are switched
+off when each session is made); every run gets a new, empty remote browser that is released when it ends; no account is
+ever created; only the destination's own hosts are opened; page text is data. On a hand-back the owner gets the browser
+provider's live view; a CAPTCHA for the Placetta team always opens the worker's own view, with the owner's lines covered
+(no picture at all if it can't be covered). `/wake` takes only `FILER_SECRET` and at most 12 wakes a minute. Optional:
+with `BROWSER_PROVIDER=local`, `BROWSERBASE_API_KEY` and `BROWSERBASE_PROJECT_ID` send only the few agency sites that
+refuse a cloud server (EDD, bizfile Online, MassTaxConnect, sanjoseca.gov) to Browserbase; `FILER_DB_KEY` per
 `docs/soc2/runbooks/filer-least-privilege.md`.
 
 Placetta runs on the Supabase project **Placetta** (`esquxzcfsylffuijvzec`). The database, security rules and server functions are built and tested; going live means bringing the project up to date, adding your keys, configuring sign-in and hosting the app. One command does nearly all of it.
@@ -46,8 +75,9 @@ Everything else is built and deployed. These need your accounts, so no one else 
    under Billing health in the queue; its signing secret goes to `stripe_config`. Check that Billing health says OK
    before switching payments on: `update public.app_settings set payments_on = true;` (until then everyone has early
    access, free).
-3. **The portal worker.** See "Turn on online filing" at the top: a Render Blueprint with two pasted values, then
-   `FILER_CHANNELS` and `FILER_AGENCIES` in the Supabase secrets.
+3. **The portal worker.** See "Turn on online filing" at the top: a free Steel key, a Render Blueprint (free plan)
+   with four pasted values, then `FILER_URL`, `FILER_SECRET`, `FILER_CHANNELS` and `FILER_AGENCIES` in the Supabase
+   secrets.
 4. **Texts and calls.** iMessage first: start Linq's trial (linqapp.com) and run `npm run launch`; texts work the
    same day, no carrier registration. Telnyx for calls and as the SMS fallback: buy a number and register the 10DLC
    brand and campaign (it needs your EIN and takes a few days). See "Odelia on iMessage (Linq)" and "Text and call

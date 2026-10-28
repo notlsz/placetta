@@ -25,18 +25,32 @@ test("the base image is pinned to the exact Playwright version the worker's lock
   assert.strictEqual(tag, lock.packages["node_modules/playwright-core"].version);
 });
 
-test("render.yaml: a web service with the health check, enough memory for Chromium, and every key the worker needs", async () => {
+test("render.yaml: a web service with the health check, memory for its browser, and every key the worker needs", async () => {
   const { checkEnv } = await import("../src/env.ts");
   const y = readFileSync(new URL("../../../render.yaml", import.meta.url), "utf8");
   assert.match(y, /type: web\b/);
   assert.match(y, /healthCheckPath: \/healthz/);
-  const plan = /plan: (\w+)/.exec(y)?.[1] ?? "";
-  assert.ok(["standard", "pro", "pro_plus", "pro_max", "pro_ultra"].includes(plan), `plan ${plan} is too small for Chromium`);
-  const keys = [...y.matchAll(/- key: (\w+)/g)].map((m) => m[1]);
-  const set = Object.fromEntries(keys.map((k) => [k, k === "ANTHROPIC_API_KEY" ? "sk-ant-x" : k === "SUPABASE_URL" ? "https://esquxzcfsylffuijvzec.supabase.co" : "x"]));
-  assert.deepEqual(checkEnv(set).missing, [], "the blueprint asks for every required value");
+  const plan = /^\s+plan: (\w+)/m.exec(y)?.[1] ?? "";
+  // the values the blueprint sets, and a stand-in for each one the founder pastes
+  const set: Record<string, string> = {};
+  for (const m of y.matchAll(/- key: (\w+)\n\s+(?:value: "?([^"\n#]*?)"?\s*(?:#.*)?$|sync: false)/gm)) set[m[1]] = m[2] ?? (m[1] === "ANTHROPIC_API_KEY" ? "sk-ant-x" : m[1] === "FILER_SECRET" ? "s".repeat(32) : "x");
+  const env = checkEnv(set);
+  assert.deepEqual(env.missing, [], "the blueprint asks for every required value");
+  // Chromium in the container needs 2 GB; the free plan (512 MB) only with a remote browser, which starts no Chromium here
+  if (!["standard", "pro", "pro_plus", "pro_max", "pro_ultra"].includes(plan)) {
+    assert.ok(["free", "starter"].includes(plan), `unknown plan ${plan}`);
+    assert.equal(env.remote, true, `plan ${plan} is too small for Chromium: BROWSER_PROVIDER must be steel or browserbase`);
+    assert.match(set.NODE_OPTIONS ?? "", /--max-old-space-size=(\d{3})\b/);
+    assert.ok(Number(/--max-old-space-size=(\d+)/.exec(set.NODE_OPTIONS)![1]) <= 384, "the heap fits in 512 MB");
+  }
+  assert.equal(plan, "free", "the $0 start: Render free with Steel");
+  assert.equal(env.provider, "steel");
+  assert.equal(env.wake, true, "FILER_SECRET is asked for, so the app can wake it");
+  assert.match(y, /plan: standard/, "the comments show the one-line switch to standard");
+  assert.match(y, /BROWSER_PROVIDER value: local/);
+  assert.match(y, /BROWSER_PROVIDER value: browserbase/);
   const asked = [...y.matchAll(/- key: (\w+)\n\s+sync: false/g)].map((m) => m[1]);
-  assert.deepEqual(asked, ["SUPABASE_SERVICE_ROLE_KEY", "ANTHROPIC_API_KEY"], "the founder pastes two values");
+  assert.deepEqual(asked, ["SUPABASE_SERVICE_ROLE_KEY", "ANTHROPIC_API_KEY", "STEEL_API_KEY", "FILER_SECRET"], "the founder pastes four values");
   const docker = readFileSync(new URL("../Dockerfile", import.meta.url), "utf8");
   for (const p of [...y.matchAll(/^\s+- (supabase\/\S+)/gm)].map((m) => m[1])) assert.ok(docker.includes(p), `the image copies ${p}`);
 });
