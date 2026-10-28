@@ -253,3 +253,40 @@ Deno.test("a refunded pack takes its credit back, once, never below zero", async
   await post(d, event("charge.refunded", ch));
   assertEquals(db.billing.get(WS)!.ai_credit_usd, 0);
 });
+
+Deno.test("single-use cards: off by default, then only the card made for an Autopilot fee, within it, while the grant is live", async () => {
+  const db = fakeDb();
+  const p = { id: "p-1", workspace_id: WS, status: "approved", method: "card", card_id: "ic_1Fee", amount_cents: 44500, grant_live: true };
+  const paid: string[] = [];
+  const RT = "whsec_rt_" + "b".repeat(32);
+  const cardsOn = (o: Partial<typeof p> = {}): Deps => ({ ...deps(db), env: env({ STRIPE_ISSUING: "on", STRIPE_ISSUING_AUTH_SECRET: RT }),
+    issuing: { purchaseForCard: async (id) => (id === p.card_id ? { ...p, ...o } : null), paid: async (id) => { paid.push(id); } } });
+  const auth = (amount: number, card = "ic_1Fee", expires = new Date(NOW + 864e5).toISOString()) => event("issuing_authorization.request",
+    { id: "iauth_1", object: "issuing.authorization", amount: 0, approved: false, pending_request: { amount, currency: "usd" }, merchant_data: { category: "government_services", name: "CITY OF SAN JOSE" },
+      card: { id: card, object: "issuing.card", metadata: { purchase_id: "p-1", workspace_id: WS, expires } } });
+  const answer = async (d: Deps, ev: unknown, secret?: string) => {
+    const r = await post(d, ev, { secret });
+    assertEquals(r.status, 200);
+    assertEquals(r.headers.get("Stripe-Version"), "2025-03-31.basil");
+    return (await r.json()).approved as boolean;
+  };
+  // cards off (the default): declined, whatever the card
+  assertEquals(await answer({ ...deps(db), issuing: cardsOn().issuing }, auth(44500)), false);
+  // on: the right card, within its amount, signed with the real-time endpoint's own secret
+  assertEquals(await answer(cardsOn(), auth(44500), RT), true);
+  assertEquals(await answer(cardsOn(), auth(44501)), false, "a cent over the fee");
+  assertEquals(await answer(cardsOn(), auth(100, "ic_other")), false, "another card");
+  assertEquals(await answer(cardsOn(), auth(100, "ic_1Fee", new Date(NOW - 1000).toISOString())), false, "after it lapsed");
+  assertEquals(await answer(cardsOn({ grant_live: false }), auth(100)), false, "Autopilot turned off since");
+  assertEquals(await answer(cardsOn({ status: "paid" }), auth(100)), false, "already paid: one payment per card");
+  assertEquals(db.events.size, 0, "authorization requests are answered, never claimed");
+  // the real-time secret is accepted only with cards on
+  assertEquals((await post(deps(db), auth(100), { secret: RT })).status, 400);
+  // settled: marked paid, once; with cards off it's ignored
+  const tx = event("issuing_transaction.created", { id: "ipi_1", object: "issuing.transaction", amount: -44500, card: "ic_1Fee" });
+  assertEquals((await post(deps(db), tx)).status, 200);
+  assertEquals(paid, []);
+  assertEquals((await post(cardsOn(), tx)).status, 200);
+  assertEquals((await post(cardsOn(), tx)).status, 200);
+  assertEquals(paid, ["ic_1Fee"]);
+});

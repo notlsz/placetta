@@ -1158,3 +1158,31 @@ export async function networkView(ws: string, keys: string[]): Promise<import(".
   const d = (data ?? {}) as Partial<import("../learning").NetworkView>;
   return { lessons: d.lessons ?? [], curve: d.curve ?? [], businesses: d.businesses ?? 0, live: d.live ?? 0, forms: d.forms ?? [] };
 }
+
+/* Placetta as your agent (20261103090100_agent_authority.sql, src/agentPacket.ts): an owner signs the packet once, in one
+   session; the database records it with the time, IP and browser and returns the workspace's copy. Revoking is one
+   call, and turning Autopilot off revokes it too. */
+type AgentRow = { id: string; by: string; at: string; expires: string; version: string; agencies: string[]; forms: string[]; items: { id: string; form?: string; agency?: string; sig: "esign" | "hand"; at: string; expires?: string; doc?: string }[]; agent: string; apEmail?: string; revokedAt?: string };
+export async function agentAuthorize(ws: string, o: { name: string; title?: string; agree: boolean; version: string; agencies: string[]; forms: string[];
+  items: { id: string; form?: string; agency?: string; sig: "esign" | "hand"; months?: number | null; names_agent: boolean; doc?: string }[]; apEmail?: string }): Promise<AgentRow> {
+  const { data, error } = await supabase().rpc("agent_authorize", { p_ws: ws, p_name: o.name, p_title: o.title ?? null, p_agree: o.agree, p_version: o.version,
+    p_agencies: o.agencies, p_forms: o.forms, p_items: o.items, p_ap_email: o.apEmail ?? null });
+  if (error) {
+    if (/terms_version/.test(error.message ?? "")) throw err("terms_version", "The Filing Authorization was just updated. Reload to read the current version.");
+    const m = /agent_\w+:\s*(.+)$/.exec(error.message ?? "");
+    if (m) throw err("agent", m[1].charAt(0).toUpperCase() + m[1].slice(1));
+    throw fromPg(error);
+  }
+  return data as AgentRow;
+}
+export async function agentRevoke(ws: string): Promise<{ revoked: boolean; stopped: number }> {
+  const { data, error } = await supabase().rpc("agent_revoke", { p_ws: ws, p_why: "revoked in Settings" });
+  if (error) throw fromPg(error);
+  return data as { revoked: boolean; stopped: number };
+}
+/** Placetta's agent of record, as the founder set it (app_settings): the name the forms carry. null until it's set. */
+export async function agentOfRecord(): Promise<{ name: string; title: string; phone: string; fax?: string; email: string } | null> {
+  const { data, error } = await supabase().from("app_settings").select("agent_of_record").maybeSingle();
+  if (error) return null;
+  return (data?.agent_of_record as { name: string; title: string; phone: string; fax?: string; email: string } | null) ?? null;
+}

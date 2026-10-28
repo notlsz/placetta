@@ -1,6 +1,7 @@
 import { B, type Bi } from "./bi";
 import { audit, setApp } from "./core";
 import { autopilotCheck, grantOf, storeOf, type AutopilotCheck } from "./autopilot";
+import { agentOf } from "./agentPacket";
 import { formById } from "./forms/registry";
 import { canFill } from "./forms/canFill";
 import { fillForm, stampSignature, type LoadPdf } from "./forms/fill";
@@ -92,6 +93,9 @@ export async function autofile(w: Workspace, apId: string, io: AutofileIO, now: 
       checklist: app.checklist.map((c, i) => ({ label: c.label, state: c.state, doc: docs[i]?.path })),
       attachments: docs.filter((d): d is NonNullable<typeof d> => !!d?.path).map(d => ({ name: d.name, path: d.path! })),
       autopilot: { grant: g.id, sign: chk.sign, passed: chk.passed },
+      // sent by Placetta as the business's agent: the signed packet, its agent of record, and the owner's pages for this form
+      ...(chk.passed.includes("agent authority") && agentOf(w) ? { agent: { auth: agentOf(w)!.id, by: agentOf(w)!.agent,
+        signed: agentOf(w)!.items.filter(i => i.form === app.official && i.doc).map(i => i.doc!) } } : {}),
     };
     const id = await io.file({ grant: g.id, app_id: app.id, title: ap.title, agency: app.agency, portal_url: app.source.url || null, fee: chk.fee ?? 0, payload, store: storeOf(w, app.id), form: app.official! });
     await io.start(id).catch(() => undefined);   // the dispatcher's sweep starts it if this call didn't

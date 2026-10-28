@@ -4,6 +4,7 @@ import { useApp } from "./ctx";
 import { ACTIONS, AUTONOMY, DIAL, HOUSE_MAX, HOUSE_TEMPLATE, addRule, dropBusinessRule, dropRule, houseCheck, putBusinessRule, setAutonomy, setHouse, toggleBusinessRule, type ActionKind, type Autonomy } from "./autonomy";
 import { grantState } from "./autopilot";
 import { AutopilotSign, AutopilotStatus } from "./AutopilotSettings";
+import { AgentStatus } from "./SignOnce";
 import { nowIso } from "./time";
 import { BR_ACTIONS, BR_EVENTS, BR_VIAS, actionsFor, ruleLabel, validRule, type BrAction, type BrEventKind, type BrVia } from "./businessRules";
 import { fmtAgo } from "./time";
@@ -55,6 +56,7 @@ export function AutonomyGroup() {
       <p className="ap-dial-sub">{b(cur.sub)}</p>
       {(mode === "autopilot" || ws.controls?.autopilot) && <AutopilotStatus owner={owner} onSign={() => setSigning(true)} />}
       {signing && owner && <AutopilotSign onClose={() => setSigning(false)} />}
+      {(mode === "autopilot" || ws.controls?.autopilot || ws.controls?.agent) && <AgentStatus owner={owner} />}
       <h3 className="ap-more">{zh ? "更谨慎的方式" : "More careful"}</h3>
       <ul className="sg-list" role="radiogroup" aria-label={zh ? "更谨慎的方式" : "More careful"}>
         {AUTONOMY.filter(m => !DIAL.includes(m.id)).map(m => (

@@ -30,6 +30,10 @@ export const WEBHOOK_EVENTS = [
   "invoice.paid", "invoice.payment_failed", "charge.refunded",
 ];
 export const VERSION = "2025-03-31.basil";
+/** Single-use cards (_shared/issuing.ts) are on only with STRIPE_ISSUING=on; then the webhook also needs these (the
+ *  authorization request goes to the real-time endpoint set in Stripe's Issuing settings, this same function). */
+export const ISSUING_EVENTS = ["issuing_transaction.created"];
+export const issuingOn = (env: (k: string) => string | undefined) => env("STRIPE_ISSUING") === "on";
 
 type Env = (k: string) => string | undefined;
 type Fetch = typeof fetch;
@@ -110,8 +114,10 @@ export async function webhookSecret(env: Env, store: Store): Promise<string | un
 }
 
 type Endpoint = { id: string; url?: string; status?: string; enabled_events?: string[]; metadata?: Record<string, string> };
-const missingEvents = (e: Endpoint) => (e.enabled_events ?? []).includes("*") ? [] : WEBHOOK_EVENTS.filter((ev) => !(e.enabled_events ?? []).includes(ev));
-const eventParams = () => Object.fromEntries(WEBHOOK_EVENTS.map((ev, i) => [`enabled_events[${i}]`, ev]));
+/** The events the endpoint needs: WEBHOOK_EVENTS, and the single-use cards' once they're on (_shared/issuing.ts). */
+export const webhookEvents = (env: Env) => [...WEBHOOK_EVENTS, ...(issuingOn(env) ? ISSUING_EVENTS : [])];
+const missingEvents = (e: Endpoint, env: Env) => (e.enabled_events ?? []).includes("*") ? [] : webhookEvents(env).filter((ev) => !(e.enabled_events ?? []).includes(ev));
+const eventParams = (env: Env) => Object.fromEntries(webhookEvents(env).map((ev, i) => [`enabled_events[${i}]`, ev]));
 
 /**
  * Make sure Stripe sends every event the app relies on to our webhook. No signing secret yet: make the endpoint and keep
@@ -130,8 +136,8 @@ export async function ensureWebhook(env: Env, store: Store, url: string, f: Fetc
     let e: Endpoint | null = null;
     try { e = await s.get(`webhook_endpoints/${encodeURIComponent(id)}`); } catch (x) { if ((x as { status?: number }).status !== 404) throw x; }
     if (e && e.url === url) {
-      if (!missingEvents(e).length && e.status !== "disabled") return "stored";
-      await s.post(`webhook_endpoints/${encodeURIComponent(id)}`, { ...eventParams(), disabled: "false" });
+      if (!missingEvents(e, env).length && e.status !== "disabled") return "stored";
+      await s.post(`webhook_endpoints/${encodeURIComponent(id)}`, { ...eventParams(env), disabled: "false" });
       return "updated";
     }
     // gone (or moved) in Stripe: the stored secret is useless now, so make it again below
@@ -140,10 +146,10 @@ export async function ensureWebhook(env: Env, store: Store, url: string, f: Fetc
   const ours = (list?.data ?? []).filter((e: Endpoint) => e.url === url) as Endpoint[];
   if (ours.some((e) => e.metadata?.placetta !== "1")) return "manual";
   for (const e of ours) await s.del(`webhook_endpoints/${e.id}`);
-  const p: Record<string, string> = { url, "metadata[placetta]": "1", api_version: VERSION, description: "Placetta billing", ...eventParams() };
+  const p: Record<string, string> = { url, "metadata[placetta]": "1", api_version: VERSION, description: "Placetta billing", ...eventParams(env) };
   // the key names what it replaces, so making it again after a deletion isn't answered with the deleted one (Stripe
   // replays an idempotency key's first answer for 24 hours)
-  const made = await s.post("webhook_endpoints", p, `placetta-webhook-${url}-${[gone, ...ours.map((e) => e.id)].filter(Boolean).join(",")}-${WEBHOOK_EVENTS.length}`);
+  const made = await s.post("webhook_endpoints", p, `placetta-webhook-${url}-${[gone, ...ours.map((e) => e.id)].filter(Boolean).join(",")}-${webhookEvents(env).length}`);
   if (!made?.secret) throw new Error("Stripe made the webhook without a signing secret.");
   await store.set("webhook_secret", made.secret);
   await store.set("webhook_endpoint", made.id);
@@ -171,7 +177,7 @@ export async function billingHealth(env: Env, store: Store, url: string, o: { f?
   const h: Health = {
     ok: false, checked_at: (o.now ?? new Date()).toISOString(),
     key: { set: !!key, mode: key.startsWith("sk_live_") || key.startsWith("rk_live_") ? "live" : key ? "test" : null },
-    webhook: { exists: false, id: null, status: null, missing_events: [...WEBHOOK_EVENTS], how: null },
+    webhook: { exists: false, id: null, status: null, missing_events: webhookEvents(env), how: null },
     secret: { stored: false, env: !!env("STRIPE_WEBHOOK_SECRET") }, prices: [], legacy_active: [],
     tax: "Not configured in code: Checkout sessions don't set automatic_tax, so Stripe Tax isn't applied.", problems: [],
   };
@@ -184,7 +190,7 @@ export async function billingHealth(env: Env, store: Store, url: string, o: { f?
   try {
     const list = await s.get("webhook_endpoints?limit=100");
     const e = ((list?.data ?? []) as Endpoint[]).find((x) => x.url === url);
-    if (e) h.webhook = { ...h.webhook, exists: true, id: e.id, status: e.status ?? null, missing_events: missingEvents(e) };
+    if (e) h.webhook = { ...h.webhook, exists: true, id: e.id, status: e.status ?? null, missing_events: missingEvents(e, env) };
   } catch (e) { h.problems.push("Couldn't list webhooks: " + (e as Error).message.slice(0, 120)); }
   if (!h.webhook.exists) h.problems.push("No Stripe webhook points at " + url + ".");
   else {

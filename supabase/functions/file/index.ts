@@ -30,9 +30,9 @@ import {
   SUPABASE_URL, b64urlDecode, utf8,
 } from "./shared.ts";
 import { DEST, destFor, staleDestinations, TEAM_ONLY, type Dest } from "./destinations.ts";
-import { sendEmail, systemMailReady } from "../_shared/email.ts";
+import { sendEmail as sendSystemEmail, systemMailReady } from "../_shared/email.ts";
 import { suppressedIn } from "../_shared/suppression.ts";
-import {
+import { asAgent,
   afterHold, askedToResubmit, type Bi, canFaxSignedFor, CHANNEL_SAID, check, DUPLICATE_REF, emailFor, envFrom, fallback, faxFailures, faxFile, faxTo, feeBlocks, type Filing,
   handBackDue, handoffPacket, hasLoginFor, holds, isForeign, type LogEntry, mailOutcome, mailTo, OWNER_REF, pick, type Refusal, refusalOf, sentByYou, signedCopy,
   TEACH_REFUSED, teachRefusal, teamApproved, whyYours, YOURS_REF, selfFileScope, workerOn, workerState,
@@ -68,7 +68,7 @@ async function wakeWorker(): Promise<void> {
   }, fetch }).catch(() => "not_needed" as const);
   if (out === "sent" || out === "woke") { beatCache = null; console.log("filer wake:", out); }
 }
-const COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, provider_ref, submit_clicked_at, attempts, requirements_checked, confirmation_number, portal_url, receipt_path, fee_estimate, send_after";
+const COLS = "id, workspace_id, app_id, title, status, payload, channel, agent_state, agent_log, handoff_url, provider_ref, submit_clicked_at, attempts, requirements_checked, confirmation_number, portal_url, receipt_path, fee_estimate, send_after, agent_auth";
 const log = (en: string, zh: string, kind = "info", ref?: string): LogEntry => ({ en, zh, kind, ...(ref ? { ref } : {}) });
 
 // ------------------------------------------------------------------ the filing row
@@ -124,7 +124,7 @@ async function alertTeam(f: Filing, kind: string, title: string) {
   const subject = kind === "destination_stale" ? `Team task: ${title}` : `New for the team: ${what} (${who})`;
   const text = `${what} for ${who}\n\n${title}\n\n${app ? `Filing queue: ${app}/app/` : ""}`;
   const html = `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif"><p><b>${esc(what)}</b> for ${esc(who)}</p><p>${esc(title)}</p>${app ? `<p><a href="${esc(app)}/app/">Open the filing queue</a></p>` : ""}</div>`;
-  const r = await sendEmail(menv, { from, to, subject, text, html }, { suppressed: suppressedIn(admin) });
+  const r = await sendSystemEmail(menv, { from, to, subject, text, html }, { suppressed: suppressedIn(admin) });
   if (!r.ok) console.error("team alert failed:", r.status, r.detail ?? "");
 }
 
@@ -163,6 +163,18 @@ async function toYou(f: Filing, why: Bi, opts: { check?: boolean; expect?: Recor
     { ...(opts.expect ?? {}), channel: "team", agent_state: "needs_you", handoff_url: packet.link }));
 }
 const bi = (en: string, zh: string): Bi => ({ en, zh });
+
+/** Placetta sends it as the business's agent: the owner signed what's theirs in the one signup session (the pages are
+    in payload.agent.signed), so nothing comes back to them. It goes to the team's queue: a named Placetta person sends
+    it the way the agency takes it, as the business's agent, and records it (agent_acts logs the submission). */
+async function toTeamAsAgent(f: Filing) {
+  const ag = (f.payload as { agent?: { by?: string; signed?: string[] } }).agent ?? {};
+  await teamTask(f, "send_as_agent", `Send as the business's agent: ${f.title.en}`.slice(0, 200), { by: ag.by ?? null, signed: ag.signed ?? [], official: f.payload.official ?? null });
+  return view(await step(f, log(
+    `Placetta's filing team sends this as your agent${ag.by ? ` (${ag.by})` : ""}, with the pages you signed when you signed up. Nothing for you to do.`,
+    `快哉申报团队将以您代理人的身份${ag.by ? `（${ag.by}）` : ""}，连同您注册时签好的页面一并提交。您无需操作。`, "as_agent"),
+    { channel: "team", requirements_checked: true, agent_state: "handoff", handoff_url: null }));
+}
 
 async function needsYou(f: Filing, en: string, zh: string, handoff_url: string | null = null, kind = "needs_you") {
   return view(await step(f, log(en, zh, kind), { agent_state: "needs_you", handoff_url }));
@@ -503,6 +515,7 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
   const synth = await isSynthetic(f.workspace_id);
   const d = destFor(f.payload.official, f.payload);
   const scope = selfFileScope(f, e, d);
+  if (!synth && asAgent(f) && (!scope || !d || d.owner || d.signature === "wet")) return await toTeamAsAgent(f);
   if (!synth && !scope) return await toYou(f, bi("Placetta doesn't send this form to the agency by itself yet.", "快哉暂时不会自动向机构提交这份表格。"));
   const ePick = synth ? { ...e, channels: ["email", "fax", "mail", "portal"] as typeof e.channels, portalWorker: true, fax: true, mail: true } : e;
   // Where it would go decides what is checked: the filled form and its signature only travel by email, fax and mail.

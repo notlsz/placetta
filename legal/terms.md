@@ -1,8 +1,8 @@
 # Terms of Service
 
-Last updated: 2026-10-27
+Last updated: 2026-10-28
 
-Effective date: 2026-10-27. If you accepted an earlier version, this version applies to you from the day you accept it in the app, or from 30 days after we notify you of it by email or in the app if you keep using the service after then, whichever comes first. Until then, the previous version applies.
+Effective date: 2026-10-28. If you accepted an earlier version, this version applies to you from the day you accept it in the app, or from 30 days after we notify you of it by email or in the app if you keep using the service after then, whichever comes first. Until then, the previous version applies.
 
 These terms are an agreement between you and Placetta Inc. ("Placetta", "we", "us"). They cover your use of placetta.com, the Placetta app, and texts and calls with Odelia, Placetta's AI agent (together, the "service"). "You" means the business you represent and the people who use the service for it.
 
@@ -391,9 +391,9 @@ Website: placetta.com
 
 # 服务条款
 
-最后更新：2026-10-27
+最后更新：2026-10-28
 
-生效日期：2026-10-27。如您已接受过上一版本，本版本自您在应用中接受之日起对您适用；如您在我们通过邮件或应用内通知您满 30 天后继续使用本服务，则自该日起适用，以两者中较早者为准。在此之前，继续适用上一版本。
+生效日期：2026-10-28。如您已接受过上一版本，本版本自您在应用中接受之日起对您适用；如您在我们通过邮件或应用内通知您满 30 天后继续使用本服务，则自该日起适用，以两者中较早者为准。在此之前，继续适用上一版本。
 
 本条款是您与 Placetta Inc.（中文名称“快哉”，下称“快哉”或“我们”）之间的协议，适用于您对 placetta.com、快哉应用，以及与快哉 AI 智能体 Odelia 之间的短信和通话（合称“本服务”）的使用。“您”指您所代表的企业及代表该企业使用本服务的人员。
 

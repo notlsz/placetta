@@ -2,7 +2,7 @@
 import { deepStrictEqual as assertEquals, ok as assert } from "node:assert";
 import { DEST, destinationProblems, staleDestinations, TO_VERIFY, type Dest } from "./destinations.ts";
 import {
-  afterHold, askedToResubmit, canFaxSigned, canFaxSignedFor, check, emailFor, envFrom, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holdMinutes,
+  afterHold, asAgent, askedToResubmit, canFaxSigned, canFaxSignedFor, check, emailFor, envFrom, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holdMinutes,
   fallback, handBackDue, handoffPacket, holds, isForeign, killSwitchOn, selfFileScope, workerOn, workerState, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, PORTAL_FAILED, refusalOf, REVIEW_HOURS, rerouteDue,
   sentByYou, signedCopy, teachRefusal, teamApproved, waysToSend, whyYours, YOURS_REF,
 } from "./logic.ts";
@@ -491,4 +491,12 @@ Deno.test("FILER_AGENCIES=portal switches on every agency website and nothing el
   assertEquals(workerState(undefined, on, { live: false, seen_at: null }), "not_set_up");
   assertEquals(workerState("0", on, { live: true, seen_at: "t" }), "off");
   assertEquals(workerState(undefined, off, { live: true, seen_at: "t" }), "off", "the portal channel isn't on");
+});
+
+Deno.test("sent as agent only when the database marked it and the payload names the same packet", () => {
+  const A = "22222222-2222-4222-8222-222222222222";
+  assert(asAgent(filing({ agent: { auth: A } } as Partial<Filing["payload"]>, { agent_auth: A })));
+  assert(!asAgent(filing({ agent: { auth: A } } as Partial<Filing["payload"]>)), "a payload alone (a customer's own insert loses the mark) is not enough");
+  assert(!asAgent(filing({}, { agent_auth: A })), "nor the mark with no packet in the payload");
+  assert(!asAgent(filing({ agent: { auth: "33333333-3333-4333-8333-333333333333" } } as Partial<Filing["payload"]>, { agent_auth: A })), "nor another packet");
 });

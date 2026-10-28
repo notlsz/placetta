@@ -29,7 +29,12 @@ export type Filing = {
   confirmation_number: string | null; portal_url: string | null;
   fee_estimate?: number | string | null;            // the agency fee; paid by the person, so never sent by email, fax or mail
   send_after?: string | null;                       // while agent_state is "held": when it goes, unless the person undoes it
+  agent_auth?: string | null;                       // sent by Placetta as the business's agent, under this signed packet
 };
+
+/** Placetta sends this one as the business's named agent (the owner's signed packet, checked by the database's
+ *  agent_act_ok when it went in and again when it's submitted): the team sends it, never the owner. */
+export const asAgent = (f: Filing): boolean => !!f.agent_auth && !!(f.payload as { agent?: { auth?: string } }).agent?.auth && (f.payload as { agent: { auth: string } }).agent.auth === f.agent_auth;
 
 export type Env = {
   agencies: string[];        // FILER_AGENCIES: form ids allowed to self-file

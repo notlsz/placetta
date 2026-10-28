@@ -1,8 +1,8 @@
 # Privacy Policy
 
-Last updated: 2026-10-27
+Last updated: 2026-10-28
 
-Effective date: 2026-10-27.
+Effective date: 2026-10-28.
 
 This policy explains how Placetta Inc. ("Placetta", "we") handles information when people visit placetta.com, and when businesses use the Placetta app and text or call Odelia, Placetta's AI agent. Placetta is a service for businesses. Most of the information we handle comes from businesses and the people who act for them.
 
@@ -279,9 +279,9 @@ Email: support@placetta.com
 
 # 隐私政策
 
-最后更新：2026-10-27
+最后更新：2026-10-28
 
-生效日期：2026-10-27。
+生效日期：2026-10-28。
 
 本政策说明访客浏览 placetta.com，以及企业使用快哉应用、给快哉的 AI 智能体 Odelia 发短信或打电话时，Placetta Inc.（下称“快哉”或“我们”）如何处理相关信息。快哉是面向企业的服务，我们处理的信息大多来自企业及代表企业行事的人员。
 
