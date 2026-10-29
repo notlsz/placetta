@@ -27,8 +27,8 @@ import { preflight } from "./smart";
 import { riskBlocks, riskFlags } from "./risk";
 import { RiskCard, useRisk } from "./RiskCard";
 import { ProofPanel } from "./Proof";
-import { FileCard, I, LevelTag, Modal, Pill, Sheet, StatusChip, feeText, feeTotal } from "./ui";
-import { INK, RouteLine } from "./pages";
+import { FileCard, I, LevelTag, Modal, Pill, Sheet, feeText, feeTotal } from "./ui";
+import { INK, LicenseAction, licenseView, RouteLine } from "./pages";
 import { filingBlockers } from "./core";
 import { findItAsk } from "./StillNeeded";
 import { B } from "./bi";
@@ -64,6 +64,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
   const appr = ws.approvals.find(x => x.app === id && x.kind !== "upload");
   const done = a.checklist.filter(c => c.state !== "missing").length;
   const zh = lang === "zh";
+  const view = licenseView(ws, a, lang);
   // A row from the instant plan (src/plan/preview.ts): readable in full; the paid moment is asking Odelia to fill and file it.
   const fillAndFile = () => {
     if (cloud && cloud.plan === "none") { cloud.openPlans("start"); return; }
@@ -82,10 +83,20 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
     <Sheet label={b(a.name)} onClose={onClose}>
       <header className="sh-h">
         <div className="sh-top">
-          <LevelTag l={a.level} /><StatusChip s={a.status} />
+          <LevelTag l={a.level} />
           <button type="button" className="icbtn close" onClick={onClose} aria-label={t("close")}><I.x /></button>
         </div>
         <h2>{b(a.name)}</h2>
+        {/* Stripe's payment page: the state in plain words, its date and the one thing to do, then what happens next;
+            the agency, its codes and its sources stay below as secondary text */}
+        <div className="sh-state">
+          <div className="sh-state-tx">
+            <p className={"sh-say g-" + view.g}>{b(view.say)}</p>
+            {(view.when || view.miss) && <p className={"sh-due" + (view.when?.hot && view.g !== "done" ? " hot" : "")}>{[view.when?.text, view.miss && b(view.miss)].filter(Boolean).join(zh ? "。" : ". ")}</p>}
+          </div>
+          {view.todo && <div className="sh-state-act"><LicenseAction x={view.todo} /></div>}
+        </div>
+        <p className="sh-whatnext"><b>{zh ? "接下来：" : "What happens next: "}</b>{b(view.next)}</p>
         {a.when && <p className="sh-when">{b(a.when)}</p>}
         {a.plain && <p className="sh-plain">{b(a.plain)}</p>}
         <p className="sh-ag">
@@ -100,7 +111,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
             <a href={n.source.url} target="_blank" rel="noopener noreferrer" title={t("source")}>{n.source.label}<I.ext /></a>
           </div>
         ))}
-        {a.next &&<p className="sh-next">{a.critical && <em>{t("critical")}</em>}{b(a.next)}</p>}
+        {a.next && b(a.next) !== b(view.say) && <p className="sh-next sh-sec">{b(a.next)}</p>}
         <AppealPanel a={a} onClose={onClose} />
         <div className="sh-asg"><AssignPicker item={{ kind: "app", id: a.id }} title={a.name} /></div>
         {a.preview && <p className="sh-pv"><I.spark />{a.status === "ready"
@@ -119,7 +130,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
         {tab === "receipt" && <ProofPanel a={a} fallback={<Receipt a={a} />} />}
         {tab === "comments" && <AppComments a={a} />}
       </div>
-      {appr ? (
+      {appr && !view.todo ? (
         <footer className="sh-f">
           <span><I.pause />{t("waitingYou")}</span>
           <Pill kind="ink" disabled={busy} onClick={() => openApproval(appr.id)}>{t("review")}</Pill>

@@ -35,6 +35,7 @@ import { existingWorkspace, StoresCheck } from "../StoresCheck";
 import { KINDS as STORE_KINDS, toPlan, type StoreResult } from "../plan/existing";
 import { partnerMe } from "./partnersApi";
 import { captureMcpAuth, McpConsent, pendingMcpAuth } from "./McpConsent";
+import { AppSkeleton } from "../Skeleton";
 
 /* Signed-in Placetta: sign in with Google, Microsoft or an email code, then two-step sign-in if it's on.
    Invites to a teammate's workspace are accepted on sign-in. New businesses start with onboarding (and the filing
@@ -914,6 +915,8 @@ export function CloudRoot() {
     if (gate) document.documentElement.dataset.theme = "light"; else applyTheme(readTheme());
   }, [gate]);
 
+  // a returning person sees the app's own frame while the workspace opens (src/Skeleton.tsx), so nothing jumps
+  if (phase.k === "loading" && lastWs.get()) return <AppSkeleton lang={lang} />;
   if (phase.k === "app") return <App key={phase.s.wsId} cloud={phase.s} />;
   if (phase.k === "hq") return <HqHome lang={lang} setLang={setLang} email={phase.email} rows={phase.rows}
     onNew={() => setPhase({ k: "onboard", email: phase.email, back: "" })} onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />;
@@ -943,7 +946,7 @@ export function CloudRoot() {
       {phase.k === "twostep" && <TwoStepCode lang={lang} factorId={phase.factorId} onDone={() => void open(lastWs.get())} onSignOut={() => { void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
       {phase.k === "mcp" && <McpConsent lang={lang} email={phase.email} req={phase.req} rows={phase.rows} start={phase.start} onDone={() => void open(phase.start)} />}
       {phase.k === "onboard" && <Onboard lang={lang} email={phase.email} agreedAtSignup={!!phase.agreed} onCreated={id => void open(id)} onCancel={phase.back !== undefined ? () => void open(phase.back!) : undefined} />}
-      {phase.k === "error" && <div className="gate-card"><h1>{L(B("Something went wrong.", "出了点问题。"))}</h1><p className="gate-sub">{phase.msg}</p><button type="button" className="sbtn ink" onClick={() => void open(lastWs.get())}>{L(B("Try again", "重试"))}</button></div>}
+      {phase.k === "error" && <div className="gate-card"><h1>{L(B("Something went wrong.", "出了点问题。"))}</h1><p className="gate-sub">{phase.msg}</p><div className="pe-act"><button type="button" className="sbtn ink" onClick={() => void open(lastWs.get())}>{L(B("Retry", "重试"))}</button><a className="lnk pe-tell" href={"mailto:support@placetta.com?subject=" + encodeURIComponent(L(B("The app didn't open", "应用无法打开"))) + "&body=" + encodeURIComponent(phase.msg)}>{L(B("Tell Placetta", "告诉快哉"))}</a></div></div>}
     </Frame>
   );
 }

@@ -1617,6 +1617,22 @@ const SETTINGS_CATS: { id: string; label: Bi; items: string[] }[] = [
   { id: "advanced", label: B("Advanced", "高级"), items: ["entities", "agentmemory", "skills", "assistants", "contract", "modules", "sso", "scim"] },
   { id: "help", label: B("Help and legal", "帮助与法律"), items: ["help", "legal"] },
 ];
+/** The words each section answers to in Settings' search, in English and Chinese. */
+const SETTING_WORDS: Record<string, string> = {
+  account: "account email sign out business workspace 账户 邮箱 退出 企业 工作区", appearance: "appearance theme dark light accent color 外观 主题 深色 浅色 颜色",
+  language: "language english chinese 语言 英文 中文", facts: "business facts name address owner ein details 企业资料 名称 地址 负责人",
+  house: "house rules always never preferences 规则 偏好", entities: "entities legal entity annual report registered agent state 实体 法人 年报",
+  team: "team members invite roles people 团队 成员 邀请 角色", hq: "headquarters share franchise brand 总部 共享 加盟", partner: "partner sharing accountant lawyer 合作伙伴 共享",
+  agent: "odelia agent assistant model voice 助手 模型 语音", autonomy: "autonomy autopilot ask before acting approval 自主 自动 批准",
+  brules: "business rules two owners approve limits 业务规则 双人批准", phone: "phone calls texts number 电话 短信 号码", approvals: "approvals allow never ask me 批准 允许",
+  memory: "memory remembered forget 记忆 记住 忘记", agentmemory: "agent memory learned notes 助手记忆", skills: "skills playbooks forms learned 技能 手册 表格",
+  integrations: "connections integrations email calendar drive lark slack 连接 集成 邮箱 日历", assistants: "ai assistants chatgpt claude mcp 助手 连接器",
+  logins: "logins portal passwords saved accounts 登录 门户 密码", billing: "billing plan payment invoice card stripe allowance 账单 方案 付款 发票 额度",
+  contract: "contract yearly agreement 合同 年度", modules: "modules add-ons sales tax alcohol entity compliance 模块 附加", filingcap: "filing cap limit spend 申报上限",
+  spending: "spending budgets purchases 支出 预算 购买", security: "security password sessions two-step 安全 密码 两步验证", sso: "single sign-on sso saml okta 单点登录",
+  scim: "provisioning scim directory 用户同步", pin: "pin lock settings code 锁定", recording: "recording calls screen 录音 录屏", data: "privacy data export delete account 隐私 数据 导出 删除",
+  activity: "activity audit history log export csv 活动记录 审计 历史", help: "help support contact 帮助 支持 联系", legal: "legal terms privacy policy 法律 条款 隐私政策",
+};
 const CLOUD_ONLY = new Set(["recording", "team", "hq", "partner", "security", "sso", "scim", "pin", "phone", "contract", "filingcap", "assistants"]);
 const catOf = (k: string) => SETTINGS_CATS.find(c => c.id === k || c.items.includes(k))?.id;
 const readCat = () => { try { return catOf(localStorage.getItem("placetta-settings-cat") ?? ""); } catch { return undefined; } };
@@ -1687,12 +1703,23 @@ export function Settings() {
     return () => window.removeEventListener("placetta:settings", on);
   }, []);
   const active = CATS.find(c => c.id === cat) ?? CATS[0];
-  const show = (k: string) => active.items.includes(k);
+  /* Search over every section (the gap Linear's and Vercel's settings leave): typing shows the sections whose name or
+     words match, from every category at once; clearing it goes back to the category */
+  const [q, setQ] = useState("");
+  const query = q.trim().toLowerCase();
+  const all = CATS.flatMap(c => c.items);
+  const found = query ? all.filter(k => (SETTING_WORDS[k] ?? k).toLowerCase().includes(query) || b(CATS.find(c => c.items.includes(k))!.label).toLowerCase().includes(query)) : [];
+  const show = (k: string) => (query ? found.includes(k) : active.items.includes(k));
 
   return (
     <PinLock.Provider value={pinCtx}>
-    <div className={"page settings" + (inCat ? " at-cat" : "")}>
+    <div className={"page settings" + (inCat || query ? " at-cat" : "") + (query ? " searching" : "")}>
       <header className="ph"><div className="ph-tx"><h1>{t("nav_settings")}</h1></div></header>
+      <div className="set-search">
+        <I.find />
+        <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder={lang === "zh" ? "搜索设置，例如账单、团队、PIN" : "Search settings, like billing, team or PIN"} aria-label={lang === "zh" ? "搜索设置" : "Search settings"} />
+      </div>
+      {query && !found.length && <p className="quiet set-none">{lang === "zh" ? "没有匹配的设置。换个词试试，或问 Odelia。" : "No setting matches. Try another word, or ask Odelia."}</p>}
       <div className="set-grid">
         <nav className="set-nav" aria-label={t("nav_settings")}>
           {CATS.map(c => <a key={c.id} className="set-tab" href={hrefOf("settings", c.id)} aria-current={c.id === active.id ? "page" : undefined} onClick={e => { if (!plainClick(e)) return; e.preventDefault(); setCat(c.id, true); toTop(); }}><span>{b(c.label)}</span><I.chevR /></a>)}

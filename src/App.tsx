@@ -12,10 +12,10 @@ import { emptyBook } from "./memory";
 import { chipsOf, keepRecall, recallFrom, SAMPLE_ME } from "./recall";
 import { AgentPanel } from "./AgentPanel";
 import { Composer } from "./Composer";
-import { AgentBot } from "./Bot";
 import { HOLD_MINUTES, startHold } from "./hold";
 import { finishWork, stampFilings } from "./finish";
 import { TABS, hrefOf, plainClick, readRoute, setRoute } from "./route";
+import { Guard } from "./SafeBoundary";
 import { AppCtx, type CloudCtx, type Ctx, type OdeliaTab, type PermitsTab, type Signed, type Tab, type View } from "./ctx";
 import { formById } from "./forms/registry";
 import { canFill } from "./forms/canFill";
@@ -140,10 +140,6 @@ const askFor = (u: { kind: UpdateItem["kind"]; title: Bi }): Bi => ({
   mention: B(`What does this comment need from me: ${u.title.en}`, `这条评论需要我做什么：${u.title.zh}`),
 })[u.kind];
 
-const PLAN_LABEL: Record<string, Bi> = {
-  starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版"), locations: B("Essentials, per location", "基础版（按门店）"), pro: B("Pro, per location", "专业版（按门店）"),
-  store: B("Store plan, billed yearly", "门店方案（按年计费）"), store_monthly: B("Store plan, monthly", "门店方案（按月）"),
-};
 
 export default function App({ cloud }: { cloud?: CloudSession }) {
   /* language */
@@ -167,6 +163,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   // the side menu folds down to icons on wider screens; remembered per browser
   const [slimPref, setSlimPref] = useState(() => readFlag("placetta-side-slim"));
   useEffect(() => writeFlag("placetta-side-slim", slimPref), [slimPref]);
+  // the sidebar folds to icons with ⌘\ or Ctrl \ (Claude.ai's), and from the account menu
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => { if (e.key === "\\" && (e.metaKey || e.ctrlKey) && !e.altKey) { e.preventDefault(); setSlimPref(v => !v); } };
+    addEventListener("keydown", on);
+    return () => removeEventListener("keydown", on);
+  }, []);
   const [view, setView] = useState<View>(() => readRoute().view);
   // the tab open on Permits or Odelia (and the category asked of Settings), from the address
   const [sub, setSub] = useState<string | undefined>(() => readRoute().sub);
@@ -1440,70 +1442,60 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   // Home's count is everything waiting on the owner: the same list as Home's "Do this next" and "Waiting on you" and the
   // chat's greeting (src/doNext.ts todos), never the approvals alone
   const badge: Partial<Record<View, number>> = { overview: todos(view_, daysFromNow(0)).length, odelia: waitingJobs };
-  const wsSub = cloud ? (billing?.free && !billing.subscription_status ? b(B("Early access", "抢先体验")) : plan === "monthly" ? b(PLAN_LABEL[billing?.subscription_plan ?? ""] ?? B("Monthly plan", "月度方案")) : plan === "entry" ? b(B("Entry plan", "开店计划")) : b(B("No plan yet", "尚未开通"))) : t("sampleWs");
   const current = (v: View) => view === v || (v === "permits" && view === "find");
-  /* The bell: unread updates, always in reach (the sidebar's top on a desktop, the top bar on a phone). */
-  const bell = (
-    <a {...navLink("odelia", "updates")} className="bellb" aria-label={unread ? (lang === "zh" ? `${unread} 条新动态` : `${unread} new update${unread === 1 ? "" : "s"}`) : t("nav_updates")} title={t("nav_updates")}>
-      {/* a mark, not a number: the one count of what needs you is Home's (src/doNext.ts todos); a second number beside
-          it, counting updates, read as a disagreement */}
-      <I.bell />{unread > 0 && <em className="mark" aria-hidden="true" />}
-    </a>
-  );
-
+  const mac = /Mac|iPhone|iPad/.test(navigator.platform);
   const slim = slimPref && !phone;
   // Stores is a place of its own once there are two or more; one store is Home's to show (its /stores address still opens)
-  const nav = NAV.filter(n => n.v !== "stores" || (view_.stores ?? []).length >= 2);
-  /* Search: the magnifier beside the business's name (and in the phone's top bar), and Ctrl K or ⌘K anywhere */
+  const many = (view_.stores ?? []).length >= 2;
+  const nav = NAV.filter(n => n.v !== "stores" || many);
+  /* Search: the magnifier on the top row (and in the phone's top bar), and Ctrl K or ⌘K anywhere */
   const searchb = (
     <button type="button" className="icbtn srchb cmdk-open" onClick={() => setCmdk(true)} aria-label={t("nav_search")}
-      title={(lang === "zh" ? "搜索，或直接交给 Odelia" : "Search, or hand Odelia a job") + (/Mac|iPhone|iPad/.test(navigator.platform) ? " (⌘K)" : " (Ctrl K)")}><I.find /></button>
+      title={(lang === "zh" ? "搜索，或直接交给 Odelia" : "Search, or hand Odelia a job") + (mac ? " (⌘K)" : " (Ctrl K)")}><I.find /></button>
+  );
+  /* The top row, as Linear's and Claude.ai's: the mark and the business's name together, opening the switcher, which
+     also holds Headquarters, the partner page and the filing queue for the people who have them */
+  const switcher = [
+    ...(cloud ? cloud.workspaces.map(x => ({ key: x.id, label: x.name, picked: x.id === cloud.wsId, onPick: () => { if (x.id !== cloud.wsId) cloud.switchTo(x.id); } })) : [{ key: "sample", label: b(view_.business), picked: true, onPick: () => go("overview") }]),
+    ...(canHq ? [{ key: "hq", label: t("nav_hq"), icon: <I.hq />, onPick: () => go("hq") }] : []),
+    ...(partnerMe ? [{ key: "partner", label: b(B("Partner", "合作伙伴")), icon: <I.user />, onPick: () => go("partner") }] : []),
+    ...(cloud?.me.staff || cloud?.me.staff_email ? [{ key: "queue", label: t("nav_queue"), icon: <I.queue />, onPick: () => go("queue") }] : []),
+    ...(cloud ? [{ key: "new", label: b(B("New business", "新建企业")), icon: <I.plus />, onPick: () => cloud.newWorkspace() }] : []),
+    { key: "site", label: b(B("Placetta website", "快哉官网")), icon: <I.globe />, href: "/" },
+  ];
+  // a sample says so once, at the bottom, where the account would be
+  const who = cloudCtx ? (cloudCtx.email.split("@")[0] || cloudCtx.email) : b(B("Sample account", "示例账户"));
+  /* The bottom: the person, opening language, help, collapse and sign out (Claude.ai's account menu) */
+  const account = [
+    { key: "en", label: "English", picked: lang === "en", onPick: () => setLang("en") },
+    { key: "zh", label: "中文", picked: lang === "zh", onPick: () => setLang("zh") },
+    { key: "help", label: b(B("Help", "帮助")), icon: <I.message />, onPick: () => go("settings", "help") },
+    ...(!phone ? [{ key: "slim", label: b(slim ? B("Expand the sidebar", "展开侧栏") : B("Collapse the sidebar", "收起侧栏")) + (mac ? " (⌘\\)" : " (Ctrl \\)"), icon: <I.panel />, onPick: () => setSlimPref(v => !v) }] : []),
+    ...(cloud ? [{ key: "out", label: b(B("Sign out", "退出登录")), icon: <I.logout />, onPick: () => cloud.signOut() }] : []),
+  ];
+  const navRow = (n: (typeof NAV)[number]) => (
+    <li key={n.v}><a {...navLink(n.v)} aria-current={current(n.v) ? "page" : undefined} title={slim ? t(n.k) : undefined}>
+      <n.Icon /><span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}
+    </a></li>
   );
   const side = (
-    <nav className={"side" + (navOpen ? " open" : "")} aria-label="Workspace">
-      <div className="side-top">
-        <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}>{slim ? <Mark size={22} /> : <Logo lang={lang} height={17} />}</button>
-        {phone
-          ? <button type="button" className="icbtn" onClick={() => setNavOpen(false)} aria-label={t("close")}><I.x /></button>
-          : <span className="side-tools">{bell}<button type="button" className="slimb" onClick={() => setSlimPref(v => !v)} aria-label={t(slim ? "expandMenu" : "collapseMenu")} title={t(slim ? "expandMenu" : "collapseMenu")} aria-expanded={!slim}><I.panel /></button></span>}
+    <nav className={"side side2" + (navOpen ? " open" : "")} aria-label="Workspace">
+      <div className="side-top sw-row">
+        <Menu className="sw-wrap" buttonClass="wsname sw-btn" label={b(B("Workspaces", "工作区"))}
+          button={<><span className="sw-mark" aria-hidden="true"><Mark size={20} /></span><b title={b(view_.business)}>{b(view_.business)}</b></>}
+          items={switcher} />
+        {phone ? <button type="button" className="icbtn" onClick={() => setNavOpen(false)} aria-label={t("close")}><I.x /></button> : searchb}
       </div>
-      <div className="ws-row">
-      {cloud ? (
-        <Menu className="wsname-wrap" buttonClass="wsname" label={b(B("Workspaces", "工作区"))} button={<><b>{b(view_.business)}</b><span>{wsSub}</span><I.chev /></>}
-          items={[
-            ...cloud.workspaces.map(x => ({ key: x.id, label: x.name, picked: x.id === cloud.wsId, onPick: () => { if (x.id !== cloud.wsId) cloud.switchTo(x.id); } })),
-            { key: "new", label: b(B("New business", "新建企业")), icon: <I.plus />, onPick: () => cloud.newWorkspace() },
-            { key: "site", label: b(B("Placetta website", "快哉官网")), icon: <I.globe />, href: "/" },
-            { key: "out", label: b(B("Sign out", "退出登录")), icon: <I.logout />, onPick: () => cloud.signOut() },
-          ]} />
-      ) : (
-        <div className="wsname-wrap">
-          <button type="button" className="wsname" disabled><b>{b(view_.business)}</b><span>{wsSub}</span></button>
-        </div>
-      )}
-      {!phone && searchb}
-      </div>
-      {!phone && (
+      {!phone ? (
         <ul className="nav">
-          {nav.map(n => (
-            <li key={n.v}><a {...navLink(n.v)} aria-current={current(n.v) ? "page" : undefined} title={slim ? t(n.k) : undefined}>
-              {n.v === "odelia" ? <span className="nav-bot" aria-hidden="true"><AgentBot size={22} busy={busy} task={busy ? step?.state : undefined} interactive={false} /></span> : <n.Icon />}
-              <span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}
-            </a></li>
-          ))}
+          {nav.map(navRow)}
+          {navRow({ v: "settings", k: "nav_settings", Icon: I.settings })}
         </ul>
-      )}
-      <ul className="nav">
-        {canHq && <li><a {...navLink("hq")} aria-current={view === "hq" ? "page" : undefined} title={slim ? t("nav_hq") : undefined}><I.hq /><span>{t("nav_hq")}</span></a></li>}
-        {!!partnerMe && <li><a {...navLink("partner")} aria-current={view === "partner" ? "page" : undefined} title={slim ? b(B("Partner", "合作伙伴")) : undefined}><I.user /><span>{b(B("Partner", "合作伙伴"))}</span></a></li>}
-        {(cloud?.me.staff || cloud?.me.staff_email) && <li><a {...navLink("queue")} aria-current={view === "queue" ? "page" : undefined} title={slim ? t("nav_queue") : undefined}><I.queue /><span>{t("nav_queue")}</span></a></li>}
-      </ul>
-      <div className="side-bot">
-        <a {...navLink("settings")} className={"setb" + (view === "settings" ? " on" : "")} aria-current={view === "settings" ? "page" : undefined} title={slim ? t("nav_settings") : undefined}><I.settings /><span>{t("nav_settings")}</span></a>
-        <div className="lang" role="group" aria-label={t("langSwitch")}>
-          <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")}>EN</button>
-          <button type="button" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>中文</button>
-        </div>
+      ) : many ? <ul className="nav">{navRow(NAV.find(n => n.v === "stores")!)}</ul> : null}
+      <div className="side-bot side-acct">
+        <Menu className="acct-wrap" buttonClass="acct-btn" label={b(B("Account", "账户"))}
+          button={<><span className="acct-av" aria-hidden="true">{who.slice(0, 1).toUpperCase()}</span><span className="acct-name">{who}</span></>}
+          items={account} />
       </div>
     </nav>
   );
@@ -1519,11 +1511,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
             <header className="mbar">
               <button type="button" className="icbtn" onClick={() => setNavOpen(true)} aria-label="Menu" title={t("nav_more")}><I.menu /></button>
               <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}><Logo lang={lang} height={16} /></button>
-              <span className="mbar-r">
-                {searchb}
-                {bell}
-                <a {...navLink("settings")} className="icbtn" aria-label={t("nav_settings")} aria-current={view === "settings" ? "page" : undefined}><I.settings /></a>
-              </span>
+              <span className="mbar-r">{searchb}</span>
             </header>
           )}
           {termsHold && (
@@ -1537,15 +1525,15 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
               <div className="tb-act"><button type="button" className="sbtn ink" onClick={() => void acceptTerms()}>{b(B("Accept", "接受"))}</button></div>
             </section>
           )}
-          <main className={"content" + (view === "overview" ? " wash" : "") + (chatPage ? " chatpage" : "")} ref={main}>{page}</main>
+          <main className={"content" + (view === "overview" ? " wash" : "") + (chatPage ? " chatpage" : "")} ref={main}>{/* one screen that fails shows its own error with Retry; the sidebar, the chat and the rest carry on */}<Guard key={view}>{page}</Guard></main>
           {!panelOpen && !chatPage && <div className="dockbar"><Composer variant="dock" tts={tts} asked={asked} showLive={view !== "overview" && view !== "find"} starters={view === "overview"} /></div>}
           {toast && <div className="toast" role="status">{toast}</div>}
           {phone && (
+            /* four places, as Airbnb's and Instagram's bars: Stores (two or more) is in the menu */
             <nav className="tabbar" aria-label={t("nav_more")}>
-              {nav.map(n => (
+              {[...NAV.filter(n => n.v !== "stores"), { v: "settings" as View, k: "nav_settings" as Key, Icon: I.settings }].map(n => (
                 <a key={n.v} {...navLink(n.v)} aria-current={current(n.v) ? "page" : undefined}>
-                  {n.v === "odelia" ? <span className="nav-bot" aria-hidden="true"><AgentBot size={24} busy={busy} task={busy ? step?.state : undefined} interactive={false} /></span> : <n.Icon />}
-                  <span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}
+                  <n.Icon /><span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}
                 </a>
               ))}
             </nav>

@@ -647,7 +647,8 @@ const STATES = [
   // the card's Ask me, Always allow or Never per kind of action (src/AllowRule.tsx), then with Never picked
   { name: "approval-choices", go: p => permCard(p, false) },
   { name: "approval-choices-never", go: p => permCard(p, true) },
-  { name: "tabbar-odelia", go: async p => { await open(p, ""); return click(p, ".tabbar a:last-child"); } },
+  { name: "tabbar-odelia", go: async p => { await open(p, ""); return click(p, ".tabbar a[href$=\"/odelia\"]"); } },
+  { name: "account-menu", go: async p => { await open(p, ""); return viaMenu(p, "button.acct-btn"); } },
   { name: "plans", go: async p => {
     await open(p, "");
     for (const t of [/^Get your entry plan/, /^See plans/, /^Change plan/, /^Compare plans/]) if (await clickText(p, t)) return true;

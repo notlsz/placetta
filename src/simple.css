@@ -69,3 +69,111 @@
 @keyframes appr-flash { 0% { box-shadow: 0 0 0 3px rgba(168, 111, 20, .35); } 100% { box-shadow: 0 0 0 3px rgba(168, 111, 20, 0); } }
 .appr-why { display: block; margin-top: 2px; font-size: 12.5px; color: var(--ink2); }
 .appr-why a { color: var(--blue-ink); text-decoration: none; margin-left: 6px; white-space: nowrap; }
+
+/* Licenses: what acts on many at once, under Needs you */
+.lic-bulk { display: flex; align-items: center; }
+.lic-bulk .lic-more { gap: 6px; margin: 0 0 4px 8px; color: var(--blue-ink); }
+.lic-bulk .lic-more svg { width: 14px; height: 14px; }
+.lic-g .batch-row { margin: 4px 0 8px; }
+
+/* Home: Recent and Coming up rows are the link itself */
+.hs-list .hs-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 40px; padding: 7px 0; border: 0; background: none; font: inherit; font-size: inherit; color: inherit; text-align: left; cursor: pointer; }
+.hs-list .hs-row:hover .hs-t, .hs-list .hs-row:hover .hs-t b { color: var(--blue-ink); }
+.hs-recent li, .page.home .hs-recent li, .page.home .hs-dates li, .hs-dates li { padding: 0; }
+.hs-dates .hs-row { justify-content: flex-start; gap: 14px; }
+.hs-row small { flex: none; color: var(--ink3); font-size: 12px; }
+
+/* License detail: Stripe's head, the state in plain words with its date and one action */
+.sh-state { display: flex; align-items: center; gap: 16px; margin: 6px 0 4px; }
+.sh-state-tx { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.sh-say { margin: 0; font-size: 16px; font-weight: 600; color: var(--ink); }
+.sh-say.g-you { color: var(--warm); }
+.sh-due { margin: 0; font-size: 13.5px; color: var(--ink2); }
+.sh-due.hot { color: var(--warm); }
+.sh-state-act { flex: none; display: flex; align-items: center; }
+.sh-whatnext { margin: 4px 0 12px; font-size: 14px; line-height: 1.5; color: var(--ink2); }
+.sh-whatnext b { font-weight: 600; color: var(--ink); }
+.sh-h .sh-sec, .sh-h .sh-next.sh-sec { display: block; margin: 6px 0 0; font-size: 13px; color: var(--ink3); }
+.sh-h .sh-ag, .sh-h .sh-plain, .sh-h .sh-when { font-size: 13px; color: var(--ink3); }
+.sh-h .sh-plain { margin: 0 0 6px; line-height: 1.45; }
+@media (max-width: 560px) { .sh-state { flex-wrap: wrap; } .sh-state-act { flex-basis: 100%; } }
+
+/* Settings: search over every section */
+.settings .set-search { display: flex; align-items: center; gap: 10px; max-width: 560px; height: 44px; margin: 0 0 28px; padding: 0 14px; border-radius: 12px; background: var(--mist); color: var(--ink3); }
+.settings .set-search svg { width: 16px; height: 16px; flex: none; }
+.settings .set-search input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; font: inherit; font-size: 15px; color: var(--ink); outline: none; }
+.settings .set-search:focus-within { box-shadow: 0 0 0 2px var(--blue-ink); }
+.settings.searching .set-head { display: none; }
+.settings .set-none { margin: 0 0 24px; }
+@media (max-width: 760px) { .settings.at-cat > .set-search { display: flex; } }
+
+/* Loading: the page's own shape. Error: one sentence, Retry, Tell Placetta */
+.skel { display: block; border-radius: 8px; background: linear-gradient(90deg, var(--mist) 0%, var(--mist2) 50%, var(--mist) 100%); background-size: 200% 100%; animation: skel 1.4s ease-in-out infinite; }
+@keyframes skel { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+.skel-page .skel-h1 { width: 220px; height: 40px; margin-bottom: 16px; }
+.skel-page .skel-sub { width: min(480px, 80%); height: 16px; margin-bottom: 28px; }
+.skel-page .skel-tabs { width: min(320px, 70%); height: 20px; margin-bottom: 28px; }
+.skel-row { display: flex; align-items: center; gap: 16px; min-height: 60px; padding: 10px 8px; }
+.skel-tx { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.skel-b { height: 15px; }
+.skel-s { height: 12px; }
+.skel-act { width: 72px; height: 30px; border-radius: 99px; }
+.skel-shell { display: flex; min-height: 100vh; background: var(--bg); }
+.skel-side { display: flex; flex-direction: column; gap: 14px; flex: none; width: 232px; padding: 24px 24px; background: var(--side, var(--mist)); }
+.skel-side .skel-logo { width: 104px; height: 20px; margin-bottom: 18px; }
+.skel-side .skel-ws { width: 120px; height: 30px; margin-bottom: 10px; }
+.skel-side .skel-nav { width: 150px; height: 18px; }
+.skel-main { flex: 1; min-width: 0; }
+.skel-mbar { display: none; align-items: center; justify-content: center; height: 52px; }
+.skel-mbar .skel-logo { width: 104px; height: 18px; }
+@media (max-width: 859px) { .skel-side { display: none; } .skel-mbar { display: flex; } .skel-page { padding: 20px 18px 120px; } }
+.page-err { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; padding-top: 96px; }
+.pe-say { margin: 0; font-size: 18px; line-height: 1.45; color: var(--ink); }
+.pe-act { display: flex; align-items: center; gap: 20px; }
+.pe-tell { display: inline-flex; align-items: center; min-height: 40px; font-size: 14.5px; font-weight: 500; color: var(--blue-ink); text-decoration: none; }
+.gate-card .pe-act { justify-content: center; margin-top: 8px; }
+
+/* Home: the opening card holds the date at the top and the progress and cost together at the bottom */
+.hs-open > .hs-prog { margin-top: auto; }
+.hs-open > .hs-prog + .cost-line, .hs-open > .hs-prog + * { margin-top: 0; }
+
+/* The sidebar, as Linear's, Notion's and Claude.ai's: one top row (the mark and the business, opening the switcher, and
+   search), four places and Settings, the person at the bottom. One icon style, counts as plain numbers, the place
+   you're on a soft background only. */
+.side2 { padding: 14px 10px 12px; }
+.side2 .side-top.sw-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; height: 44px; margin: 0 0 14px; padding: 0; }
+.side2 .sw-wrap { flex: 1; min-width: 0; }
+.side2 button.wsname.sw-btn { display: flex; flex-direction: row; align-items: center; gap: 8px; width: 100%; height: 40px; margin: 0; padding: 0 8px; border: 0; border-radius: 10px; background: none; font: inherit; color: var(--ink); text-align: left; cursor: pointer; }
+.side2 button.wsname.sw-btn:hover { background: rgba(var(--e), .045); }
+.side2 .sw-mark { flex: none; display: grid; place-items: center; width: 22px; height: 22px; }
+.side2 .sw-btn b { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 600; line-height: 1.2; }
+.side2 .sw-btn .sw-tag { flex: none; margin-left: auto; padding: 0 5px; border-radius: 5px; background: rgba(var(--e), .06); font: 500 10.5px/16px var(--sans); font-style: normal; color: var(--ink3); }
+.side2 .sw-btn > svg { flex: none; width: 14px; height: 14px; margin-left: auto; color: var(--ink3); }
+.side2 .side-top .srchb, .side2 .side-top .icbtn { flex: none; display: grid; place-items: center; width: 40px; height: 40px; margin: 0; padding: 0; border: 0; border-radius: 10px; background: none; color: var(--ink2); cursor: pointer; }
+.side2 .side-top .srchb:hover { background: rgba(var(--e), .045); color: var(--ink); }
+.side2 .side-top .srchb svg { width: 18px; height: 18px; }
+.side2 .nav { gap: 1px; }
+.side2 .nav :is(button, a) { height: 36px; padding: 0 10px; gap: 10px; border-radius: 8px; font-size: 14px; color: var(--ink2); }
+.side2 .nav :is(button, a) svg { width: 18px; height: 18px; color: var(--ink3); }
+.side2 .nav :is(button, a) > span { justify-content: center; }
+.side2 .nav :is(button, a)[aria-current="page"] { background: rgba(var(--e), .06); box-shadow: none; color: var(--ink); font-weight: 500; }
+.side2 .nav :is(button, a)[aria-current="page"] svg { color: var(--ink); }
+.side2 .nav :is(button, a) em { flex: none; padding: 0; background: none; font: 500 12.5px/1 var(--sans); font-style: normal; color: var(--ink3); }
+.side2 .side-acct { position: static; margin: auto 0 0; padding: 10px 0 0; background: none; }
+.side2 .acct-wrap { width: 100%; }
+.side2 .acct-btn { display: flex; align-items: center; gap: 10px; width: 100%; height: 40px; padding: 0 8px; border: 0; border-radius: 10px; background: none; font: inherit; color: var(--ink2); text-align: left; cursor: pointer; }
+.side2 .acct-btn:hover { background: rgba(var(--e), .045); color: var(--ink); }
+.side2 .acct-av { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; background: var(--blue-ink); font: 600 11.5px/1 var(--sans); color: #fff; }
+.side2 .acct-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; line-height: 1.2; }
+/* folded to icons */
+.slim .side2 { padding: 14px 8px 12px; }
+.slim .side2 .side-top.sw-row { flex-direction: column; height: auto; gap: 6px; }
+.slim .side2 .sw-btn { justify-content: center; width: 40px; padding: 0; }
+.slim .side2 .sw-btn :is(b, .sw-tag, svg:not(.sw-mark svg)) { display: none; }
+.slim .side2 .nav :is(button, a) { width: 40px; height: 36px; padding: 0; justify-content: center; }
+.slim .side2 .acct-btn { justify-content: center; width: 40px; padding: 0; }
+.slim .side2 .acct-name { display: none; }
+/* phone: the bar's four places, counts as plain numbers */
+.tabbar a em { min-width: 0; height: auto; padding: 0; border-radius: 0; background: none; box-shadow: none; color: var(--warm); font: 600 11px/1 var(--sans); top: 6px; left: calc(50% + 13px); }
+.slim .side2 button.wsname.sw-btn { display: flex; }
