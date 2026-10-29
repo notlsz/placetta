@@ -3910,6 +3910,59 @@ body #faq .faqcta{background:#fff;box-shadow:var(--sh-1);border-radius:var(--r-m
 #how .fui{border-radius:var(--r-sm);box-shadow:0 0 0 1px var(--bd),0 18px 40px -16px rgba(15,27,51,.22)}
 #how .seg95{background:#fff;box-shadow:var(--sh-1)}
 @media (max-width:767px){#how .seg95{box-shadow:none}}
+
+/* land99 (Oct 29): less is more. No decorative rules, no bento boxes; whitespace and type do the separating.
+   Every row lines up: numbers on one baseline, icons centred on their line, logos in one 32px slot. */
+/* proof stats: four numbers on one line, no rules between them */
+body #case .pfrow{gap:28px 32px!important;border:0!important;margin-bottom:72px!important;align-items:start}
+body #case .pfrow>div{padding:0!important;border:0!important}
+body #case .pfrow b{line-height:1!important;height:1em}
+/* testimonials: four quotes, no card, no lines inside */
+body .tq97g{gap:40px!important}
+body .tq97{padding:0!important;background:none!important;box-shadow:none!important;border-radius:0!important;transform:none!important}
+@media (hover:hover){body .tq97:hover{box-shadow:none!important;transform:none!important}}
+body .tq97r{padding-bottom:0!important;margin-bottom:18px!important;border:0!important}
+body .tq97 figcaption{padding-top:0!important;border:0!important}
+@media (max-width:639px){body .tq97g{gap:28px!important;margin-inline:0!important;padding-inline:0!important}body .tq97{flex:0 0 80%!important}}
+/* folds: a plain disclosure row, no box */
+body .prmore,body .prmore.ag96,body #pricing .prmore,body .more97 details.prmore.ag96{background:none!important;box-shadow:none!important;border:0!important;border-radius:0!important;padding-inline:0!important}
+body .prmore:hover,body .prmore.ag96:hover,body #pricing .prmore:hover{box-shadow:none!important}
+body .prmore summary{justify-content:space-between!important;gap:24px!important;max-width:760px;padding-inline:0!important}
+body .prmore summary>span{flex:1 1 auto}
+body .prmore summary svg{align-self:center}
+/* the six "more" folds: one quiet column */
+@media (min-width:1024px){body .more97{display:flex!important;flex-direction:column!important;gap:8px!important}}
+@media (max-width:1023px){body .more97{background:none!important;box-shadow:none!important;border-radius:0!important;overflow:visible!important}body .more97>section+section{border:0!important}}
+/* how it works: scenes on their own paper, no card around them */
+body #how .seg95{background:none!important;box-shadow:none!important;padding-inline:0}
+@media (min-width:768px){body #how .seg95 button[aria-selected="true"]{background:var(--card)!important;box-shadow:none!important}}
+body #how .fcard{background:none!important;box-shadow:none!important;border-radius:0!important}
+@media (hover:hover){body #how .fcard:hover{box-shadow:none!important}}
+body #how .fct{padding:0!important}
+body #how .feat{gap:40px!important}
+body #how .fcv{margin:20px 0 0!important;background:linear-gradient(180deg,#F1F4F8,#E7ECF2)!important}
+/* pricing: the table without its panel, row lines kept and faint */
+@media (min-width:768px){body .c98w::before{display:none}body .c98 tbody th,body .c98 tbody td{border-top-color:rgba(15,27,51,.06)!important}body .c98 tbody td.us{border-top-color:transparent!important}}
+/* what you pay, never without you: two columns of text */
+body .pb98{gap:24px 56px!important;margin:56px 0 32px!important}
+body .pb98c{padding:0!important;background:none!important;box-shadow:none!important;border-radius:0!important}
+body .pb98h{margin-bottom:14px!important}
+body .pb98 ul{display:flex;flex-direction:column;gap:18px}
+body .pb98 li{padding:0!important;border:0!important}
+/* trust: two columns of text, each icon centred on its title line */
+@media (min-width:1024px){body .tr97g{grid-template-columns:1fr 1fr!important;gap:32px 56px!important}}
+body .tr97g li{align-items:flex-start}
+body .tr97g svg{margin-top:0!important;width:22px;height:22px}
+body .tr97g b{line-height:22px!important}
+/* backers: names and marks on whitespace, no ruled rows */
+body #backers #bkG.bkg{border:0!important;row-gap:4px!important}
+body #backers #bkG.bkg li,body #backers #bkG.bkrow li{border:0!important;min-height:56px}
+body #invR .ivt{border:0!important}
+/* FAQ: questions on the page, not in cards */
+body #faq .fq,body #faq .fq.on{background:none!important;box-shadow:none!important;border-radius:0!important;padding-inline:0!important}
+body #faq .faq{gap:0!important}
+body #faq .fq button{padding:18px 0!important}
+body #faq .faqcta{background:none!important;box-shadow:none!important;border-radius:0!important;padding:0!important}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -4452,7 +4505,6 @@ body #faq .faqcta{background:#fff;box-shadow:var(--sh-1);border-radius:var(--r-m
       <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h7"/><path d="M17 15v4M15 17h4"/></svg><p><b data-i18n="tr97.acc">两步验证登录与审计日志</b><span data-i18n="tr97.accs">适用于整个团队，每个操作都有记录，可导出为 CSV。</span></p></li>
       <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 14l2 2 4-4"/></svg><p><b data-i18n="tr97.soc">您的数据，您的权利</b><span data-i18n="tr97.socs">我们保存什么、由谁处理、如何导出或删除，都写在信任中心。</span></p></li>
     </ul>
-    <p class="tr97l" data-i18n="tr97.legal">快哉不是律师事务所，也不隶属于任何政府机构。<a href="/trust">信任中心</a>、<a href="privacy.html" data-legal="privacy.html">隐私政策</a>、<a href="terms.html" data-legal="terms.html">服务条款</a>。</p>
   </div>
 </section>
 
