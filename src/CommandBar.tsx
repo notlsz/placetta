@@ -3,6 +3,8 @@ import { useApp, type View } from "./ctx";
 import { allSkills } from "./skills";
 import { hasReplay } from "./replay";
 import { I } from "./ui";
+import { Marked } from "./Suggest";
+import { recents, remember } from "./suggestions";
 
 /* ⌘K (Ctrl+K): jump to anything in the workspace, or hand Odelia a job, from anywhere, without the mouse. Type to
    filter stores, applications, deadlines, documents, jobs, playbooks and pages; Enter on anything else asks Odelia. */
@@ -38,6 +40,8 @@ export function CommandBar({ open, setOpen }: { open: boolean; setOpen: (v: bool
     const close = (f: () => void) => () => { setOpen(false); f(); };
     const g = (en: string, zhs: string) => (zh ? zhs : en);
     const out: Hit[] = [];
+    // an empty box offers what this viewer searched before; picking one puts it back in the box, nothing runs
+    if (!s) for (const r of recents("cmdk")) out.push({ id: "r-" + r, group: g("Recent", "最近搜索"), label: r, run: () => { setQ(r); setAt(0); input.current?.focus(); } });
     const askHit: Hit | null = s ? { id: "ask", group: g("Ask Odelia", "问 Odelia"), label: q.trim(), sub: g("Hand her this as a job", "交给她去做"), run: close(() => ask(q.trim())) } : null;
     // A sentence is a job for Odelia; a word or two is more likely a search, so the matches come first.
     const sentence = q.trim().split(/\s+/).length >= 3 || /[\u3400-\u9fff]{4,}/.test(q);
@@ -84,7 +88,7 @@ export function CommandBar({ open, setOpen }: { open: boolean; setOpen: (v: bool
   }, [q, ws, zh, b, ask, go, openApp, openReplay, setOpen]);
 
   if (!open) return null;
-  const pick = (i: number) => hits[i]?.run();
+  const pick = (i: number) => { const h = hits[i]; if (!h) return; if (q.trim() && !h.id.startsWith("r-")) remember("cmdk", q); h.run(); };
   let last = "";
   return (
     <div className="cmdk-back" onMouseDown={e => { if (e.target === e.currentTarget) setOpen(false); }}>
@@ -108,7 +112,7 @@ export function CommandBar({ open, setOpen }: { open: boolean; setOpen: (v: bool
               <li key={h.id} role="presentation">
                 {head && <span className="cmdk-g">{head}</span>}
                 <button type="button" id={"cmdk-" + h.id} role="option" aria-selected={i === at} className={i === at ? "on" : ""} onMouseEnter={() => setAt(i)} onClick={() => pick(i)}>
-                  {h.id === "ask" ? <I.spark /> : null}<b>{h.label}</b>{h.sub ? <small>{h.sub}</small> : null}{i === at ? <I.arrow /> : null}
+                  {h.id === "ask" ? <I.spark /> : h.id.startsWith("r-") ? <I.clock /> : null}<b>{h.id === "ask" ? h.label : <Marked label={h.label} q={q} />}</b>{h.sub ? <small>{h.sub}</small> : null}{i === at ? <I.arrow /> : null}
                 </button>
               </li>
             );

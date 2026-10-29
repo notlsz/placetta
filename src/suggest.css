@@ -1,0 +1,10 @@
+/* Suggestions under a text field (src/Suggest.tsx): the shared menu surface (.menu), floating over the page. One row
+   per suggestion, its icon, label and second line on one line. */
+.menu.sug { position: fixed; z-index: 1000; min-width: 0; max-width: none; max-height: min(320px, 50vh); }
+.sug-o { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border-radius: 10px; font-size: 14px; line-height: 1.3; color: var(--ink); white-space: nowrap; cursor: pointer; flex: none; }
+.sug-o.on { background: var(--mist); }
+.sug-o > svg { flex: none; width: 16px; height: 16px; color: var(--ink3); }
+.sug-o > svg.menu-check { width: 14px; height: 14px; margin-left: auto; color: var(--blue-ink); }
+.sug-l { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.sug-m { font-weight: 600; }
+.sug-s { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; text-align: right; font-size: 12.5px; color: var(--ink3); }

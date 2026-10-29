@@ -10,6 +10,8 @@ import { DrawPad } from "./AutopilotSettings";
 import { Guard } from "./SafeBoundary";
 import { CONSENTS, DISCLOSURE, DISCLOSURE_VERSION, type AdoptedSignature } from "./esignDisclosure";
 import "./controls.css";
+import { SuggestInput } from "./Suggest";
+import { factSource, titleSource } from "./suggestions";
 
 /* "Sign once, 2 minutes" (src/agentPacket.ts): everything Placetta needs the owner's own hand for, in one sitting, so
    that afterwards Placetta acts as the business's agent where each agency allows it and nothing comes back to sign.
@@ -21,6 +23,9 @@ const EMAIL = /^[^\s@<>()",;:]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,}$/;
 
 export function SignOnce({ onClose }: { onClose: () => void }) {
   const { b, lang, ws, editWs, say, cloud } = useApp();
+  // the signer's name as the workspace has it (never a guess), and the titles people sign filings with
+  const nameSrc = useMemo(() => factSource(ws, "Owner", lang, { kind: "person" }), [ws, lang]);
+  const titleSrc = useMemo(() => titleSource(lang), [lang]);
   const zh = lang === "zh";
   const [agent, setAgent] = useState<AgentOfRecord | null>(null);
   useEffect(() => { if (cloud) void api.agentOfRecord().then(setAgent).catch(() => setAgent(null)); }, [cloud]);
@@ -110,8 +115,8 @@ export function SignOnce({ onClose }: { onClose: () => void }) {
         <label className="sst-field"><span>{zh ? "机构账单发送至（应付账款邮箱，可选）" : "Send agency bills to (your accounts-payable email, optional)"}</span>
           <input type="email" value={ap} onChange={e => setAp(e.target.value.slice(0, 200))} placeholder="ap@yourbusiness.com" /></label>
         {!apOk && <p className="rf-note">{zh ? "请检查邮箱地址。" : "Check the email address."}</p>}
-        <label className="sst-field"><span>{zh ? "您的全名（作为签名）" : "Your full name (your signature)"}</span><input value={name} onChange={e => setName(e.target.value.slice(0, 120))} autoComplete="name" /></label>
-        <label className="sst-field"><span>{zh ? "职务（可选）" : "Title (optional)"}</span><input value={title} onChange={e => setTitle(e.target.value.slice(0, 120))} /></label>
+        <label className="sst-field"><span>{zh ? "您的全名（作为签名）" : "Your full name (your signature)"}</span><SuggestInput lang={lang} value={name} onValue={v => setName(v.slice(0, 120))} source={nameSrc} /></label>
+        <label className="sst-field"><span>{zh ? "职务（可选）" : "Title (optional)"}</span><SuggestInput lang={lang} value={title} onValue={v => setTitle(v.slice(0, 120))} source={titleSrc} /></label>
         <h3>{zh ? "您的签名，只需一次" : "Your signature, once"}</h3>
         <p className="sg-note">{zh ? "快哉只在您批准申报（或自动驾驶授权涵盖）、且机构接受电子签名的表格上使用它。机构要求亲笔签名的，快哉会把表格寄给您。" : "Placetta places it only on forms you approve (or your Autopilot covers) whose agency takes an electronic signature. Where the agency wants ink, Placetta mails you the page."}</p>
         <label className="check"><input type="radio" name="so-sig" checked={kind === "drawn"} onChange={() => setKind("drawn")} /><span>{zh ? "手写签名" : "Draw my signature"}</span></label>

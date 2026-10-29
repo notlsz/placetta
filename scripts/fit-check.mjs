@@ -606,6 +606,9 @@ const STATES = [
     await p.locator(".spend-b").first().scrollIntoViewIfNeeded().catch(() => {});
     return true;
   } },
+  /* suggestions under a text field, mid-typing (src/Suggest.tsx): a place, a kind of business, a state picker */
+  { name: "suggest-where", go: async p => { await open(p, "permits/find"); const i = p.locator(".matcher input").nth(1); await i.click(); await i.pressSequentially("san j", { delay: 30 }); await settle(p); return (await p.locator(".sug [role=option]").count()) > 0; } },
+  { name: "suggest-what", go: async p => { await open(p, "permits/find"); const i = p.locator(".matcher input").first(); await i.click(); await i.pressSequentially("milk t", { delay: 30 }); await p.keyboard.press("ArrowDown"); await settle(p); return (await p.locator(".sug [role=option]").count()) > 0; } },
   { name: "find-results", go: async p => { await open(p, "permits/find"); if (!(await clickText(p, "Milk tea shop, San Jose, CA"))) return false; await p.locator(".hit").first().waitFor({ timeout: 20000 }).catch(() => {}); await p.waitForTimeout(800); return true; } },
   { name: "nav-menu", go: async p => { await open(p, ""); return click(p, ".mbar button[aria-label=Menu]"); } },
   // the sidebar's More group opened by hand on Home (it opens by itself on the pages it lists); the phone menu lists them outright

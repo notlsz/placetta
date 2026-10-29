@@ -7,6 +7,8 @@ import { formKeys, valueInputOf } from "./valueInput";
 import { daysFromNow } from "./time";
 import { weekDone, weekLines } from "./weekDone";
 import { I, Modal, Pill, Select } from "./ui";
+import { SuggestInput } from "./Suggest";
+import { agencySource } from "./suggestions";
 
 /* The value report in the app (src/value.ts): what Placetta delivered for each store and the whole brand, from records
    only. Shown on Stores, in each store, and at renewal time in Plans and Settings; exported as one page the owner can
@@ -126,6 +128,7 @@ export function NoticeEditor({ storeId }: { storeId: string }) {
   const store = (ws.stores ?? []).find(s => s.id === storeId);
   const [open, setOpen] = useState(false);
   const [n, setN] = useState<{ doc: string; agency: string; what: string; date: string; fine: string; cureBy: string }>({ doc: "", agency: "", what: "", date: daysFromNow(0), fine: "", cureBy: "" });
+  const agencySrc = useMemo(() => agencySource(lang, ws), [lang, ws]);
   if (!store) return null;
   const list = store.notices ?? [];
   const zh = lang === "zh";
@@ -152,7 +155,7 @@ export function NoticeEditor({ storeId }: { storeId: string }) {
               <option value="">{b(B("Choose its document", "选择对应文件"))}</option>
               {ws.docs.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
             </Select></label>
-          <label><span>{b(B("Agency", "机构"))}</span><input value={n.agency} onChange={e => setN({ ...n, agency: e.target.value })} /></label>
+          <label><span>{b(B("Agency", "机构"))}</span><SuggestInput lang={lang} value={n.agency} onValue={v => setN({ ...n, agency: v })} source={agencySrc} /></label>
           <label><span>{b(B("What it says", "通知内容"))}</span><input value={n.what} onChange={e => setN({ ...n, what: e.target.value })} /></label>
           <label><span>{b(B("Dated", "日期"))}</span><input type="date" value={n.date} onChange={e => setN({ ...n, date: e.target.value })} /></label>
           <label><span>{b(B("Fine it names, in dollars", "通知所列罚款（美元）"))}</span><input inputMode="numeric" value={n.fine} onChange={e => setN({ ...n, fine: e.target.value.replace(/[^\d]/g, "") })} /></label>

@@ -66,6 +66,8 @@ const KINDS: [RegExp, Kind][] = [
   [/warehouse|3pl|fulfil|仓库|物流/i, { key: "warehouse", activity: "Warehouse", sells: "Warehousing and storage", naics: ["493110", "General Warehousing and Storage"], irs: "Transportation & warehousing", food: false, prepares: false }],
   [/import|e-?commerce|online|amazon|进口|电商|跨境/i, { key: "seller", activity: "Online seller", sells: "Consumer goods", irs: "Retail", food: false, prepares: false }],
 ];
+/** The same table, for the fields that suggest a kind of business and its NAICS code as it's typed (src/suggestions.ts). */
+export const BUSINESS_KINDS: readonly (readonly [RegExp, Kind])[] = KINDS;
 const RETAIL: Kind = { key: "retail", activity: "Retail store", sells: "Retail goods", irs: "Retail", food: false, prepares: false };
 export function kindOf(what: string): Kind {
   const k = KINDS.find(([re]) => re.test(what))?.[1] ?? RETAIL;
