@@ -32,6 +32,8 @@
                area, like the chatbar it sits above.
      center    a child of a centering box (flex column with align-items center, grid with justify-items center, flex
                row with justify-content center) or a line of text-align:center text, off its box's center by >2px
+     row       one-line items side by side (buttons, links, text, numbers, badges) whose centers differ by more than
+               2px on the line they share (a wrapped row is split into its lines; baseline-aligned rows are skipped)
      icon      an icon (an svg up to 28px, or the small box holding only it) in a row whose single line of text it
                sits beside, off that line's center by more than 1.5px (to the first line when the row aligns to
                the top)
@@ -380,6 +382,43 @@ function align(INDENT_OK) {
     }
     const off = icy - lc;
     if (Math.abs(off) > 1.5) mark(ic, "icon", `${f1(off)}px ${off > 0 ? "below" : "above"} the center of "${(near.node.textContent || "").trim().slice(0, 30)}"`);
+  }
+
+  /* ---------------- row: things side by side on one line share one center ----------------
+     The founder's rule (Oct 29 2026): buttons, links, text, numbers and badges that sit next to each other on one line
+     are on the same y axis. In every flex row (and every block that lays out inline buttons), the one-line items that
+     overlap vertically, i.e. share a visual line, must have centers within 2px of each other. A wrapped row is split
+     into its lines first; tall items (cards, multi-line text, images over 48px) are left out. */
+  const oneLine = el => {
+    const r = R(el); if (r.height > 48) return false;
+    const lh = px(css(el).lineHeight) || px(css(el).fontSize) * 1.3;
+    return el.matches("button, a, input, select, .pill, .sbtn, .lnk, [role=button], [role=tab]") || r.height <= lh * 1.6 + 2;
+  };
+  const rowsSeen = new Set();
+  for (const box of document.body.querySelectorAll("*")) {
+    if (!shown(box)) continue;
+    const bs = css(box);
+    const flexRow = /flex/.test(bs.display) && !bs.flexDirection.startsWith("column");
+    const inlineKids = !flexRow && /block/.test(bs.display) && [...box.children].filter(k => /inline/.test(css(k).display) && k.matches("button, a, .pill, .sbtn, .lnk")).length > 1;
+    if (!flexRow && !inlineKids) continue;
+    if (bs.alignItems === "baseline" || bs.alignItems === "last baseline") continue;   // text baselines on purpose
+    const items = [...box.children].filter(k => shown(k) && inFlow(k) && oneLine(k) && (k.textContent || "").trim());
+    if (items.length < 2) continue;
+    // split a wrapped row into its visual lines
+    const linesOf = [];
+    for (const k of items.sort((a, b) => R(a).top - R(b).top)) {
+      const kr = R(k), ln = linesOf.find(l => Math.min(l.bottom, kr.bottom) - Math.max(l.top, kr.top) > Math.min(l.h, kr.height) * .4);
+      if (ln) { ln.items.push(k); ln.top = Math.min(ln.top, kr.top); ln.bottom = Math.max(ln.bottom, kr.bottom); } else linesOf.push({ top: kr.top, bottom: kr.bottom, h: kr.height, items: [k] });
+    }
+    for (const ln of linesOf) {
+      if (ln.items.length < 2) continue;
+      const cy = ln.items.map(k => { const r = R(k); return (r.top + r.bottom) / 2; });
+      const sorted = [...cy].sort((a, b) => a - b), med = sorted[Math.floor(sorted.length / 2)];
+      ln.items.forEach((k, j) => {
+        const off = cy[j] - med;
+        if (Math.abs(off) > 2 && !rowsSeen.has(k)) { rowsSeen.add(k); mark(k, "row", `${f1(off)}px ${off > 0 ? "below" : "above"} the line it shares with "${label(ln.items[(j + 1) % ln.items.length])}"`); }
+      });
+    }
   }
 
   /* ---------------- the main column's left edge ---------------- */

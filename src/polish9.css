@@ -196,3 +196,13 @@
 .ptabs a[aria-selected="true"], .hm-tabs button[aria-selected="true"] { color: var(--ink); }
 .ptabs a[aria-selected="true"]::after, .hm-tabs button[aria-selected="true"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px; background: var(--ink); }
 @media (max-width: 859px) { .ptabs, .ptabs.hm-tabs { gap: 18px; } .ptabs a, .hm-tabs button { padding: 9px 0 10px; } }
+
+/* the tour's Back and Next: one line, one center (Back is shorter than Next) */
+.tour-act { align-items: center; }
+/* Odelia's Playbooks tab: room below the last playbook so the chat bar never covers it */
+.page.odelia .playbooks.tabbed { padding-bottom: 120px; }
+
+/* the chat bar: bot, words, mic and send on one center. Its items sit on the bottom (so it can grow with a longer
+   message); every one is 44px tall, so a one-line message's text line is centered on the icons at every width. */
+.composer textarea { min-height: 44px; padding-top: 10.4px; padding-bottom: 10.4px; line-height: 23.2px; }
+@media (max-width: 559px) { .c-dock .composer .ic.mic { width: 44px; height: 44px; } }
