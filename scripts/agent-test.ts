@@ -34,6 +34,7 @@ import { BUILTIN } from "../src/skills";
 import { autopilotTests, grant as autopilotGrant } from "./autopilot-test";
 import { textApproveTests } from "./text-approve-test";
 import { agentAuthorityTests } from "./agent-authority-test";
+import { vellumTests } from "./vellum-test";
 import { bakery as replicaBakery, replicateTests } from "./replicate-test";
 import { putGrant } from "../src/autopilot";
 import { lessonKeys, lessonsBrief, parseDistill, rank, runEvidence, score, scrubLesson, worthLearning, type Lesson } from "../src/learning";
@@ -3325,6 +3326,7 @@ privacyTests(ok, eq);
 lawWatchTests(ok, eq);
 await autopilotTests(ok, eq);
 await agentAuthorityTests(ok, eq);
+vellumTests(ok, eq);
 await textApproveTests(ok, eq);
 replicateTests(ok, eq);
 

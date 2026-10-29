@@ -64,6 +64,7 @@ import { cloverPlaces, gbpPlaces, type Place, shopifyPlaces, squarePlaces, xeroP
 import { checkSend, dsAccount, dsSend, dsStatus, SignError } from "./esign.ts";
 import { MCP_ACTIONS, mcpFinish, mcpRemote } from "./mcp.ts";
 import { MCP_OWNER_ACTIONS } from "./mcp_rules.ts";
+import { purgeSynced } from "./purge.ts";
 import {
   answers, type Attachment, base64Lines, buildMessage, type Dial, decodeWords, encodeHeader, hintOf, Imap, imapVerify, isMailboxProvider, MailboxError,
   type MailboxProvider, newMessageId, parseMessage, providerFor, providerName, serversFor, smtpSend, smtpVerify, tlsDial, type Host,
@@ -1563,6 +1564,8 @@ const disconnect: Action = async (c) => {
   const { error } = await admin.from("integrations").delete().eq("id", row.id);
   if (error) throw new Error(`integration delete failed: ${error.code ?? ""}`);
   await dropSecret(row.secret_id);
+  // what Placetta copied from the account goes with it (purge.ts): a mailbox's watched threads and the replies' first lines
+  const purged = await purgeSynced(admin as never, c.ws, kind);
   // the teammates' WeChat links go with the account (a new account means new OpenIDs anyway)
   if ((kind as string) === "wechat_bot") await admin.from("wechat_links").delete().eq("workspace_id", c.ws);
   if ((kind as string) === "telegram_bot") await admin.from("telegram_links").delete().eq("workspace_id", c.ws);
@@ -1572,7 +1575,7 @@ const disconnect: Action = async (c) => {
     object: name,
     detail: row.account ? same(row.account) : null,
   });
-  return ok();
+  return ok({ deleted: purged });
 };
 
 const feedUrl: Action = async (c) => {

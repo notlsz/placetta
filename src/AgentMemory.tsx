@@ -9,6 +9,7 @@ import { emptyAgentMemory, isLive, scopeKey, TOPIC_INFO, TOPICS, type AgentMemor
 import { onTempChat, setTempChat, tempChat } from "./odeliaMemory/tempChat";
 import { whyKept } from "./odeliaMemory/retrieve";
 import { importMemories } from "./odeliaMemory/import";
+import { memoryExport, memoryFileName } from "./odeliaMemory/export";
 
 /* Settings, Agent memory: what Odelia keeps about the business between conversations, and every control over it.
      the switch            off by default (opt-in, as the privacy policy discloses); owners and admins turn it on
@@ -189,6 +190,13 @@ export function AgentMemoryGroup({ db, preload }: { db: () => Promise<MemoryApi>
         {st.enabled && <li className="sg-row"><span className="sg-tx"><b>{zh ? "参考聊天记录" : "Reference chat history"}</b>
           <small>{zh ? "只搜索您自己以往的对话，从不搜索同事的对话，也从不在群聊或频道中引用。" : "Searches only your own earlier chats, never a teammate's, and never quotes them into a group chat or channel."}</small></span>
           <span className="sg-r">{toggle(st.referenceChats !== false && st.referenceMemories !== false, v => void setPerson("referenceChats")(v), zh ? "参考聊天记录" : "Reference chat history", st.referenceMemories === false)}</span></li>}
+        <li className="sg-row"><span className="sg-tx"><b>{zh ? "下载记忆" : "Download your memories"}</b>
+          <small>{zh ? "每条记忆、建议和旧版本，连同来源和日期（JSON）。" : "Every memory, suggestion and past version, with its source and date, as JSON."}</small></span>
+          <span className="sg-r">{btn(zh ? "下载" : "Download", () => {
+            const at = now(), file = new Blob([JSON.stringify(memoryExport(mem, b(ws.business), at), null, 2)], { type: "application/json" });
+            const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = memoryFileName(at); a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+          }, "quiet", zh ? "下载记忆" : "Download your memories")}</span></li>
         <li className="sg-row"><span className="sg-tx"><b>{zh ? "已用空间" : "Space used"}</b>
           <small className={`am-cap${cap.warn ? " warn" : ""}`}>{zh ? `已保存 ${cap.used} 条，上限 ${cap.cap} 条` : `${cap.used} of ${cap.cap} memories saved`}</small></span>
           <span className="sg-r">{canAdmin && (mem.items.length > 0 || mem.briefs.some(x => x.proposals.length)) ? btn(zh ? "全部忘记" : "Forget all", () => {

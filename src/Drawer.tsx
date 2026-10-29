@@ -560,7 +560,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
           </section>
         )}
         {app && a.kind === "file" && <ExpeditePick a={app} />}
-        <AllowRule a={a} commit={allow} />
+        <AllowRule a={a} commit={allow} onClose={onClose} />
         {app && a.kind === "file" && <FilingChargeSection approvalId={a.id} app={app} />}
         {app && a.kind === "file" && (
           <section>

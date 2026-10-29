@@ -439,6 +439,10 @@ export type ControlCtx = {
   mode: RunMode;
   /** The request came from outside the app (a text, call, email or chat). */
   remote: boolean;
+  /** What this run has read from outside (the run's Shield, src/security/secure.ts). Once it read content with
+   *  instructions aimed at an AI, nothing it makes leaves on its own: no Always allow rule, no Hands-off send and no
+   *  Autopilot filing; each waits on its card for an owner (Meta Muse's tainted-data gate). */
+  taint?: () => "none" | "flagged" | "quarantined";
   /** This run, so its held changes share one card. */
   run: string;
   made: { approvals: string[] };
@@ -455,6 +459,8 @@ export type ControlCtx = {
   logins?: string[];
 };
 
+/** Why a card the run would have sent or filed on its own waits instead: the run read planted instructions. */
+export const TAINT_WHY = "this run read content with instructions aimed at an AI, so nothing it makes goes out on its own";
 const HOLD_NOTE = "This workspace is set to Ask me first, so this change is on an approval card for an owner and nothing changed yet. Don't call it again and don't build on it: anything it would create doesn't exist yet. Carry on with reading and drafting; at the end say in one sentence what's waiting for approval.";
 const PLAN_REFUSE = "Plan first is on for this request: don't change anything yet. Read and research what the plan needs, then write the whole plan with set_plan (every step and the done list). Once it's saved, stop and say it's waiting for an owner's approval.";
 const PLAN_NOTE = "The plan is saved and waiting for an owner's approval. Stop now and do none of its steps. In one or two sentences, say what the plan will do and that it starts once an owner approves it.";
@@ -494,6 +500,7 @@ export function withControls(tools: Tool[], c: ControlCtx): Tool[] {
     c.mark?.();
     return { waiting_for_owner_approval: true, approval_id: id, changed_now: false, note: HOLD_NOTE };
   };
+  const tainted = () => (c.taint?.() ?? "none") !== "none";
   return tools.map(t => ({
     ...t,
     async execute(input: Record<string, unknown>) {
@@ -533,6 +540,11 @@ export function withControls(tools: Tool[], c: ControlCtx): Tool[] {
       if ((name === "draft_message" || name === "send_email") && str(o.approval_id) && !c.remote) {
         const yes = allowRule(c.get(), name, input, { remote: c.remote });
         const ap = c.get().approvals.find(a => a.id === str(o.approval_id));
+        // the tainted-data gate: after planted instructions, a send waits for an owner whatever rule or mode would let it go
+        if (tainted() && ap && ap.kind === "send" && (yes || handsOff(c.mode.mode))) {
+          c.apply(w2 => audit("agent", B("Kept a message for your approval", "将消息留待您批准"), ap.title, B("This request read content with instructions aimed at an AI, so nothing it drafted goes out on its own.", "本次请求读到了针对 AI 的指令，因此它起草的内容不会自动发出。"))(w2));
+          return { ...o, waits_for_owner: TAINT_WHY, note: `This message waits for an owner's approval: ${TAINT_WHY}. Say so in one short sentence.` };
+        }
         if (yes && ap && ap.kind === "send" && !ap.fee) {
           c.apply(w2 => audit("agent", B("Used your rule", "使用了您的规则"), yes.label, ap.title)(usedRule(yes.id, now())({ ...w2, approvals: w2.approvals.map(a => (a.id === ap.id ? { ...a, auto: { rule: yes.id, label: yes.label } } : a)) })));
           return { ...o, goes_out_under_owner_rule: yes.label.en, note: `Under the owner's rule "${yes.label.en}" this message is approved without another tap as soon as an owner has Placetta open, then waits out the usual undo window before it's sent. Say so in one short sentence.` };
@@ -560,13 +572,13 @@ export function withControls(tools: Tool[], c: ControlCtx): Tool[] {
         // from a request that came from outside the app; one that doesn't stays for the owner, with why
         if (c.mode.mode === "autopilot" && ap && ap.kind === "file" && !ap.autopilot) {
           const at = now(), chk = autopilotCheck(c.get(), ap, { now: at, ...(c.logins ? { logins: c.logins } : {}) });
-          if (chk.ok && !c.remote) {
+          if (chk.ok && !c.remote && !tainted()) {
             c.apply(markAutopilot(ap.id, chk, at));
             c.autofile?.(ap.id);
             return { ...o, filed_under_autopilot: true, note: `Autopilot is on and this filing passed every check (${chk.passed.join(", ")}), so Placetta files it for the owner now without a tap; they get a "Filed for you" update and can undo it while it's held.${chk.team.length ? " The Placetta team checks the first filings of each form before they go." : ""}${chk.needs.length ? ` Afterwards: ${chk.needs.map(n => n.why.en).join(" ")}` : ""} Say so in one short sentence.` };
           }
-          c.apply(whyNotAutopilot(ap.id, chk));
-          const why = c.remote ? ["a request from outside the app never files on its own"] : chk.needs.filter(n => !n.after).map(n => n.why.en);
+          c.apply(whyNotAutopilot(ap.id, chk.ok && tainted() ? { ...chk, needs: [{ kind: "check", why: B("This request read content with instructions aimed at an AI, so a person approves this filing.", "本次请求读到了针对 AI 的指令，因此这项申报由人批准。") }] } : chk));
+          const why = c.remote ? ["a request from outside the app never files on its own"] : chk.ok && tainted() ? [TAINT_WHY] : chk.needs.filter(n => !n.after).map(n => n.why.en);
           return { ...o, waits_for_owner: why, note: `Autopilot didn't file this one on its own, so it waits on its card for an owner: ${why.join(" ")} Say so in one short sentence.` };
         }
       }
@@ -603,6 +615,31 @@ export function allowOptions(a: Approval, w: Workspace): { action: ActionKind; t
     const target = action === "applications" ? str(call.input.application_id) || undefined : undefined;
     if (out.some(x => x.action === action && x.target === target)) continue;
     out.push({ action, ...(target ? { target } : {}), label: ruleWords("allow", action, target, w) });
+  }
+  return out;
+}
+
+/** The three answers an approval card gives for each kind of action on it, the way Grok asks: this time only (approving
+ *  the card), always (an Always allow rule, only where allowOptions offers one: never for filing, paying or anything with
+ *  a fee) or never (a Never rule, and the card is set aside). Filing with an agency can be stopped from the card; letting
+ *  it go on its own is Autopilot's signed authorization, never a tick here. */
+export type PermOption = { action: ActionKind; what: Bi; allow?: { target?: string; label: Bi }; deny: { target?: string; label: Bi } };
+export function permissionOptions(a: Approval, w: Workspace): PermOption[] {
+  const strip = (x: Bi): Bi => { const en = x.en.replace(/^(Always allow|Never): /, ""); return B(en.charAt(0).toUpperCase() + en.slice(1), x.zh.replace(/^(始终允许|绝不)：/, "")); };
+  const out: PermOption[] = [];
+  const denyFor = (action: ActionKind, target?: string) => ({ ...(target ? { target } : {}), label: ruleWords("deny", action, target, w) });
+  for (const o of allowOptions(a, w)) {
+    // a Never rule matches by words, so it names the one address rather than the whole "To" line
+    const one = o.action === "contact" ? recipients(o.target ?? "") : [];
+    out.push({ action: o.action, what: strip(o.label), allow: { ...(o.target ? { target: o.target } : {}), label: o.label }, deny: denyFor(o.action, one.length === 1 ? one[0] : o.target) });
+  }
+  if (out.length) return out;
+  const app = a.app ? w.apps.find(x => x.id === a.app) : undefined;
+  const agency = (a.agency ?? app?.agency)?.en?.trim();
+  if (a.kind === "file" && agency) { const d = denyFor("filing", agency); out.push({ action: "filing", what: strip(d.label), deny: d }); }
+  if (a.kind === "send") {
+    const to = recipients((a.data ?? []).find(f => f.id === "to")?.value ?? "");
+    if (to.length === 1) { const d = denyFor("contact", to[0]); out.push({ action: "contact", what: strip(d.label), deny: d }); }
   }
   return out;
 }

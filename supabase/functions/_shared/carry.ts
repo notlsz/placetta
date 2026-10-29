@@ -257,10 +257,13 @@ export type AnswerRoute =
   | { route: "ask_owner"; question: Bi };
 /** How an agency's question is answered. Only the owner can give what's missing, so they get one plain question;
  *  otherwise it goes back the way it came, as their agent when the packet covers it. */
-export function answerRoute(o: { missing: string[]; asks: number; authority: boolean; channel: "email" | "portal" | "other"; replyTo: string | null; agency: Bi }): AnswerRoute {
+/** agencyAddress: the address to answer is the agency's own (its domain, or a government sender). A mail tied to a filing
+ *  only by its thread or a printed number, from anywhere else, never gets the workspace's answers on its own: the owner
+ *  sees the draft and taps (the address came from outside, so it can't be trusted with the business's facts). */
+export function answerRoute(o: { missing: string[]; asks: number; authority: boolean; channel: "email" | "portal" | "other"; replyTo: string | null; agency: Bi; agencyAddress?: boolean }): AnswerRoute {
   if (o.missing.length || !o.asks) return { route: "ask_owner", question: oneQuestion(o.missing.length ? o.missing : ["what the agency's letter asks for"], o.agency) };
   if (o.channel === "portal") return { route: "resubmit" };
-  if (o.channel === "email" && o.replyTo && o.authority) return { route: "send_as_agent" };
+  if (o.channel === "email" && o.replyTo && o.authority && o.agencyAddress === true) return { route: "send_as_agent" };
   return { route: "draft_for_owner" };
 }
 /** One plain question for the owner about what only they can give: what the agency asks for, in its words, and how to

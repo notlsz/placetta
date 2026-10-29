@@ -45,6 +45,9 @@ export type NewsIn = {
   subject?: string; asks?: string[]; date?: string | null; window?: string | null; fee?: number | null; inspectionConfirmation?: string | null;
   /** Where to answer: the agency's address (a mail) and the message to thread under. */
   replyTo?: string | null; messageId?: string | null; source: "agency_page" | "odelia"; url?: string | null;
+  /** replyTo is the agency's own address (its domain or a government sender), checked by the caller. Only then does an
+   *  answer go as the business's agent without the owner's tap. */
+  replyToAgency?: boolean;
   /** The license itself, when it came with the news (a PDF attached or downloaded from the portal), and what it says. */
   license?: { path: string | null; number?: string | null; expires?: string | null };
   /** The words, fenced, for a run that reads what code couldn't. */
@@ -108,7 +111,7 @@ export async function actOnNews(n: NewsIn, io: CarryIO): Promise<NewsOut> {
     const prof = profileOf(n.state, f);
     const { answers, missing } = answerAsks(asks, prof, f.app_id);
     const agent = f.agent_auth ? await io.agent(f.workspace_id) : null;
-    const route = answerRoute({ missing, asks: asks.length, authority: !!agent, channel: n.replyTo ? "email" : f.channel === "portal" ? "portal" : "other", replyTo: n.replyTo ?? null, agency });
+    const route = answerRoute({ missing, asks: asks.length, authority: !!agent, channel: n.replyTo ? "email" : f.channel === "portal" ? "portal" : "other", replyTo: n.replyTo ?? null, agency, agencyAddress: n.replyToAgency === true });
     out.route = route.route;
     if (route.route === "send_as_agent") {
       const mail = answerMail({ business: prof.business || "the business", agentName: agent!.name, appName: lower(name.en), confirmation: f.confirmation_number, subject: n.subject ?? name.en, answers });
@@ -218,7 +221,7 @@ export async function runChases(filings: CarryFiling[], o: { states: Map<string,
     const app = ((st?.apps ?? []) as AppLite[]).find((a) => a?.id === f.app_id);
     const agent = f.agent_auth ? await o.io.agent(f.workspace_id) : null;
     const to = o.chase.agencyEmail(f);
-    const step = chaseStep({ status: f.status, submitted_at: f.submitted_at, usualDays: o.usual(f, app), lastMovement: o.lastMovement(f), today: o.today, log: o.chase.log(f.id), canEmail: !!agent && !!to, canCall: o.chase.canCall(f) });
+    const step = chaseStep({ status: f.status, submitted_at: f.submitted_at, usualDays: o.usual(f, app), lastMovement: o.lastMovement(f), today: o.today, log: o.chase.log(f.id), canEmail: !!agent && !!to, canCall: !!agent && o.chase.canCall(f) });
     if (step.act === "none") continue;
     if (!(await o.chase.claim(f.workspace_id, f.id, step.act, o.today))) continue;
     const name = app?.name ?? f.title, agency = app?.agency ?? B("the agency", "机构");
