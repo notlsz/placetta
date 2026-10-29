@@ -27,6 +27,9 @@ export interface Store {
   login(f: Filing, host: string, tenant?: string): Promise<Login | null>;
   skill(key: string): Promise<Skill | null>;
   saveSkill(s: Skill): Promise<void>;
+  /** A recording that adds a host, a payment step or a recipient line (skillcheck.ts): saved switched off with why, for
+   *  the team's review; a later run can't switch it back on. */
+  holdSkill?(s: Skill, why: string[]): Promise<void>;
   skillFailed(key: string): Promise<{ disabled: boolean }>;
   selfFiled(official: string): Promise<number>;
   download(path: string): Promise<Uint8Array>;
@@ -244,6 +247,10 @@ export class SupabaseStore implements Store, StatusStore {
   async saveSkill(s: Skill) {
     await this.call("filer_save_skill", { p_key: s.key, p_name: s.name, p_body: s.body, p_uses: s.uses,
       p_last_seconds: s.last_seconds, p_best_seconds: s.best_seconds }, "skill save");
+  }
+  async holdSkill(s: Skill, why: string[]) {
+    await this.call("filer_hold_skill", { p_key: s.key, p_name: s.name, p_body: s.body, p_uses: s.uses,
+      p_last_seconds: s.last_seconds, p_best_seconds: s.best_seconds, p_why: why }, "skill hold");
   }
   async skillFailed(key: string) {
     return { disabled: (await this.call<boolean>("filer_skill_failed", { p_key: key }, "skill update")) === true };

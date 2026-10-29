@@ -49,7 +49,7 @@ Deno.test("approved by the agency: the filing moves, the license is stored, the 
 
 Deno.test("a request the workspace answers goes back to the agency as the business's agent, after the undo window", async () => {
   const t = fake();
-  const r = await actOnNews(news({ kind: "rfi", asks: ["A copy of the lease", "Square footage"], replyTo: "clerk@sccgov.org", subject: "Request for information" }), t.io);
+  const r = await actOnNews(news({ kind: "rfi", asks: ["A copy of the lease", "Square footage"], replyTo: "clerk@sccgov.org", replyToAgency: true, subject: "Request for information" }), t.io);
   assertEquals([r.status, r.route, r.outbox], ["needs_info", "send_as_agent", "ob-1"]);
   assertEquals(t.out[0].kind, "rfi_answer");
   assertEquals(t.out[0].to, "clerk@sccgov.org");
@@ -61,7 +61,7 @@ Deno.test("a request the workspace answers goes back to the agency as the busine
 Deno.test("no live packet, or the database refuses it: a draft for the owner's one tap instead", async () => {
   for (const o of [{ agent: false }, { refuse: true }]) {
     const t = fake(o);
-    const r = await actOnNews(news({ kind: "rfi", asks: ["A copy of the lease"], replyTo: "clerk@sccgov.org" }), t.io);
+    const r = await actOnNews(news({ kind: "rfi", asks: ["A copy of the lease"], replyTo: "clerk@sccgov.org", replyToAgency: true }), t.io);
     assertEquals(r.route, "draft_for_owner");
     assertEquals(t.out.length, 0);
     assert(t.log.some((l) => l.startsWith("run Answering County health") && /draft_message/.test(l) || /Draft the reply/.test(l)));
@@ -70,7 +70,7 @@ Deno.test("no live packet, or the database refuses it: a draft for the owner's o
 
 Deno.test("what only the owner can give: one plain question, nothing sent", async () => {
   const t = fake();
-  const r = await actOnNews(news({ kind: "deficiency", asks: ["A copy of the lease", "Signed affidavit of ownership"], replyTo: "clerk@sccgov.org" }), t.io);
+  const r = await actOnNews(news({ kind: "deficiency", asks: ["A copy of the lease", "Signed affidavit of ownership"], replyTo: "clerk@sccgov.org", replyToAgency: true }), t.io);
   assertEquals(r.route, "ask_owner");
   assertEquals(t.out.length, 0);
   const q = t.log.find((l) => l.startsWith("update One question"))!;

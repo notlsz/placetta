@@ -152,3 +152,24 @@ test("the agency logged it out: the run signs in as before and replaces it; it e
   assert.ok(!vault.rows.has("w1|127.0.0.1"), "dropped");
   assert.ok(vault.drops.includes("sign_in_failed"), "a refused sign-in is a security event");
 });
+
+// Grok Bot shared one computer between users. Here each filing run gets its own fresh browser, opens only its own
+// workspace's login for that portal, and a run for one workspace leaves nothing a run for another can use.
+test("one worker, two workspaces on the same portal: a fresh browser each, each with its own login, nothing carried across", async () => {
+  const p = await startPortal({ cookieAuth: true }); portals.push(p);
+  const vault = new Vault();
+  const opened: unknown[] = [], asked: string[] = [];
+  const open = async (...a: Parameters<typeof openBrowser>) => { const s = await openBrowser(...a); opened.push(s); return s; };
+  const go = async (store: Mem) => new Worker({ store, model: new Scripted(), open, portalOf: () => "127.0.0.1", startUrl: () => p.url + "/",
+    dryRun: false, twoKey: 10, maxSteps: 80, maxMs: 120000, holdMs: 300, pollMs: 100 }).run(store.f);
+  class Own extends Mem { override async login(f: Filing) { asked.push(f.workspace_id); return { username: "demo", password: this.password, host: "127.0.0.1" }; } }
+  const a = new Own(vault, "wa"), bb = new Own(vault, "wb");
+  assert.equal((await go(a))?.kind, "submitted");
+  assert.equal((await go(bb))?.kind, "submitted");
+  assert.equal(opened.length, 2, "a new browser for each run");
+  assert.notStrictEqual(opened[0], opened[1]);
+  assert.deepEqual(asked, ["wa", "wb"], "each run asked for its own workspace's login only");
+  assert.equal(p.signIns, 2, "workspace wb signed in itself; wa's session wasn't used");
+  assert.ok(vault.rows.has("wa|127.0.0.1") && vault.rows.has("wb|127.0.0.1"));
+  assert.notEqual(vault.rows.get("wa|127.0.0.1")!.state, vault.rows.get("wb|127.0.0.1")!.state, "two separate signed-in sessions");
+});

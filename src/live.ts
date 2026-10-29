@@ -2639,7 +2639,7 @@ export function liveAgent(model: Model, history: Turn[], files: Map<string, File
         const noted = model.tools ? makeTools(() => ws, apply, moment, made, lang, () => streamed.length, !!o.account, { model, files, svc: o.services, signal, me, mcp, request: req.text, comments: o.comments, shield }).map(t => ({ ...t,
           execute: (i: Record<string, unknown>) => { const out = t.execute(i); const note = (v: unknown) => { addUsed(used, usedBy(t.name, i, v, ws)); return v; }; return out instanceof Promise ? out.then(note) : note(out); } })) : undefined;
         // and each call records its moment for the replay (traced), with what the owner's controls made of it
-        const tools = noted ? traced(secureTools(withControls(noted, { get: () => ws, apply, mode, remote: false, run: "b" + Date.parse(runStart).toString(36), made, mark: () => { made.lastToolAt = streamed.length; } }), shield, { get: () => ws, apply, appReadOnly: mcpReads }), () => ws, moment) : undefined;
+        const tools = noted ? traced(secureTools(withControls(noted, { get: () => ws, apply, mode, remote: false, taint: () => shield.policy.taint, run: "b" + Date.parse(runStart).toString(36), made, mark: () => { made.lastToolAt = streamed.length; } }), shield, { get: () => ws, apply, appReadOnly: mcpReads }), () => ws, moment) : undefined;
         const research = model.kind === "server";
         const brief = rules(ws, lang, !!o.account, research, o.services?.connected() ?? [], !!tools, { me, names: tools?.map(t => t.name) }) + controlsBrief(ws, mode);
         const turns: Turn[] = [...(model.system ? [] : [{ role: "user" as const, content: brief }]), ...history.slice(-12), { role: "user", content: req.text }];

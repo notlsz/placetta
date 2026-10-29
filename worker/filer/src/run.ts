@@ -31,6 +31,7 @@ import { blockedPage } from "./env.ts";
 import type { LivePage, LiveViews } from "./live.ts";
 import { screenOk, SCREEN_CONSENT_MSG, STRICT, TEACH_CONSENT_MSG, teachOk, withNotice, type RecordingPolicy } from "./privacy.ts";
 import type { Act, Bi, Filing, Login, Result, Skill, TraceStep } from "./types.ts";
+import { reviewSkill } from "./skillcheck.ts";
 import { cardLineOk, type CardDetails, type CardOutcome, type CardPart, CARD_PARTS, guardStore, optionCandidates, pageAmount, partValue, redactDeep, redactText, scrubPage, secretsOf } from "./card.ts";
 import { ACCOUNT_MSG, accountNote, accountPage, codeControl, codeToPhone, emailControl, newPassword, phoneCodeMsg, profileValue, termsControl } from "./account.ts";
 import { makesAccount, type Stop } from "./guards.ts";
@@ -500,7 +501,7 @@ export class Worker {
           const now = await store.taughtResult?.(taught.id, ctx.f, res.kind === "submitted", ctx.drift).catch(() => null);
           if (now === "draft" && taught.status === "approved") ctx.f = await store.step(ctx.f, log(`The taught steps for ${host} failed again and went back to the Placetta team for review`, `${host} 的已学步骤再次失败，已退回快哉团队核对`, "quiet"));
         }
-      } else if (res.kind === "submitted") await this.learn(key, ctx.f, res, skill);
+      } else if (res.kind === "submitted") await this.learn(key, ctx.f, res, skill, ctx.hosts);
       return res;
     } catch (e) {
       if (alive.on) await this.fail(f, e);   // a run past its limit was already failed by run()
@@ -1622,14 +1623,23 @@ export class Worker {
     }
   }
 
-  private async learn(key: string, f: Filing, res: Extract<Result, { kind: "submitted" }>, old: Skill | null) {
+  private async learn(key: string, f: Filing, res: Extract<Result, { kind: "submitted" }>, old: Skill | null, hosts: string[] = []) {
     const pattern = (res as unknown as { pattern?: string }).pattern;
     const steps = res.trace.filter((s) => !s.handback);
-    await this.c.store.saveSkill({
+    const skill: Skill = {
       key, name: `${f.payload.form?.en ?? f.payload.official} on ${key.split(":")[1]}`, enabled: true, uses: (old?.uses ?? 0) + 1, fails_in_a_row: 0,
       last_seconds: res.seconds, best_seconds: Math.min(res.seconds, old?.best_seconds ?? Infinity),
       body: { version: (old?.body.version ?? 0) + (res.replayed ? 0 : 1), steps, confirm: pattern ? { pattern } : old?.body.confirm },
-    });
+    };
+    // a replay of the same steps teaches nothing new; a new recording that adds a host, a payment step or a recipient line
+    // waits, switched off, for the team's review (skillcheck.ts)
+    const review = res.replayed ? { hold: false, why: [] as string[] } : reviewSkill(old?.body.steps, steps, hosts.length ? hosts : [key.split(":")[1] ?? ""]);
+    if (review.hold && this.c.store.holdSkill) {
+      await this.c.store.holdSkill({ ...skill, enabled: false }, review.why);
+      await this.c.store.teamTask(f, "playbook_review", `Review the steps Odelia recorded for ${key} before they run on their own: ${review.why.join("; ")}`.slice(0, 300), { key, why: review.why });
+      return;
+    }
+    await this.c.store.saveSkill(skill);
   }
 
   private async fail(f: Filing, e: unknown) {

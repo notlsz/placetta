@@ -409,7 +409,7 @@ export async function runRounds(o: {
   const mcp = from.plainSms ? [] : ((await o.svc?.mcpTools?.().catch(() => [])) ?? []).filter(t => !isRemote(o.channel) || t.read_only);
   // a store's bot has its own key (several start in the same moment), so its held changes and its undo are its own
   const runKey = "r" + Date.parse(st.started).toString(36) + (o.child ? "-" + o.child.job : "");
-  const ctl: ControlCtx = { get: o.ws, apply, mode: childMode(runMode(o.ws(), st.request ?? ""), o.child), remote: isRemote(o.channel), run: runKey, made, mark: () => { made.lastToolAt = st.text.length; }, notify: o.notify, outside: x => outside.push(x) };
+  const ctl: ControlCtx = { get: o.ws, apply, mode: childMode(runMode(o.ws(), st.request ?? ""), o.child), remote: isRemote(o.channel), taint: () => shield.policy.taint, run: runKey, made, mark: () => { made.lastToolAt = st.text.length; }, notify: o.notify, outside: x => outside.push(x) };
   // The agencies' own forms (src/forms/versions.ts): the PDFs come through the server's own way (the site's /app/forms/)
   // and the copies filled to check a form before approval are kept, so the run doesn't fill the same answers twice.
   const forms = { load: loaderWith(o.svc?.formPdf), cache: new Map<string, FilledCopy>() };

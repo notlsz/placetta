@@ -7,7 +7,7 @@
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
 import { type InMail, senderVerified } from "../_shared/mail.ts";
 import { scoreText } from "../_shared/injection.ts";
-import { agencyDomains, asksIn, classifyAgencyMail, dateIn, feeIn, matchFiling, type Candidate, windowIn, wsTagOf } from "../_shared/carry.ts";
+import { agencyDomains, asksIn, classifyAgencyMail, dateIn, feeIn, fromDomain, govSender, matchFiling, type Candidate, windowIn, wsTagOf } from "../_shared/carry.ts";
 import { actOnNews, type AppLite, type WsState } from "../_shared/carry_run.ts";
 import { appealInfo, carryIO, type Start } from "../monitor/carry.ts";
 import { DEST } from "../file/destinations.ts";
@@ -77,7 +77,7 @@ export async function agencyMail(admin: SupabaseClient, m: InMail, o: { odelia: 
   const r = await actOnNews({
     f, state: st, kind: c.kind, confidence: c.confidence, by: hit.by, today, now: new Date().toISOString(), holdMinutes: Math.max(1, holdMinutes(o.env("SEND_HOLD_MINUTES"))),
     subject: m.subject, asks: held ? [] : asksIn(m.text), date: dateIn(m.text, today), window: windowIn(m.text), fee: feeIn(m.text),
-    replyTo: m.from, messageId: header(m, "message-id") || m.id.replace(/^mail:/, ""), source: "odelia", words, held,
+    replyTo: m.from, replyToAgency: fromDomain(m.from, hit.filing.domains) || govSender(m.from), messageId: header(m, "message-id") || m.id.replace(/^mail:/, ""), source: "odelia", words, held,
     license: c.kind === "approved" ? { path: saved[0] ?? null } : undefined,
     appeal: c.kind === "denied" ? appealInfo(app, address, held ? "" : m.text.slice(0, 2000), today) : undefined,
   }, carryIO(admin, o.start));

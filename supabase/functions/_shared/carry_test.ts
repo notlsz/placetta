@@ -84,7 +84,10 @@ Deno.test("a request is answered from the workspace where it holds the answer, a
 
 Deno.test("the answer goes back the way it came: as agent by email, a draft without a packet, a resubmission on a portal, else one question", () => {
   const ag = b("County health", "县卫生局");
-  assertEquals(answerRoute({ missing: [], asks: 2, authority: true, channel: "email", replyTo: "clerk@x.gov", agency: ag }).route, "send_as_agent");
+  assertEquals(answerRoute({ missing: [], asks: 2, authority: true, channel: "email", replyTo: "clerk@x.gov", agency: ag, agencyAddress: true }).route, "send_as_agent");
+  // an address that isn't the agency's own (a thread or a printed number tied it): the owner taps
+  assertEquals(answerRoute({ missing: [], asks: 2, authority: true, channel: "email", replyTo: "records@evil.example", agency: ag }).route, "draft_for_owner");
+  assertEquals(answerRoute({ missing: [], asks: 2, authority: true, channel: "email", replyTo: "records@evil.example", agency: ag, agencyAddress: false }).route, "draft_for_owner");
   assertEquals(answerRoute({ missing: [], asks: 2, authority: false, channel: "email", replyTo: "clerk@x.gov", agency: ag }).route, "draft_for_owner");
   assertEquals(answerRoute({ missing: [], asks: 2, authority: true, channel: "portal", replyTo: null, agency: ag }).route, "resubmit");
   const q = answerRoute({ missing: ["Floor plan", "Signed affidavit"], asks: 3, authority: true, channel: "email", replyTo: "c@x.gov", agency: ag });

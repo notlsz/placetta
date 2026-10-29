@@ -71,6 +71,12 @@
 .allow-rule input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--blue-ink); }
 .allow-rule label b { display: block; font-weight: 500; font-size: 14px; }
 .allow-rule label small { display: block; font-size: 12.5px; color: var(--ink3); line-height: 1.45; }
+/* Ask me, Always allow or Never, per kind of action on the card: the words and the choice share one center */
+.perm-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px; padding: 8px 0; }
+.perm-what { flex: 1 1 220px; min-width: 0; }
+.perm-what b { display: block; font-weight: 500; font-size: 14px; }
+.perm-what small { display: block; font-size: 12.5px; color: var(--ink3); line-height: 1.45; }
+.perm-act { display: flex; align-items: center; justify-content: flex-end; padding-top: 4px; }
 .auto-note { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--sky-wash); font-size: 13.5px; color: var(--blue-deep); }
 .second-note { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--warm-soft); font-size: 13.5px; color: var(--warm); }
 
