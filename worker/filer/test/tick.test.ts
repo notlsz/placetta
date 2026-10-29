@@ -70,3 +70,13 @@ test("a button under a floating bar is still pressed", { timeout: 60000 }, async
   assert.equal(await page.locator("#n").getAttribute("data-hit"), "1");
   await page.close();
 });
+
+test("a button hidden from the accessibility tree is still found by its own text (Georgia)", { timeout: 60000 }, async () => {
+  const { locate } = await import("../src/page.ts");
+  const { press } = await import("../src/run.ts");
+  const page = await (await open()).newPage();
+  await page.setContent(`<div aria-hidden="true"><button id="action_3" title="" onclick="this.dataset.hit='1'"><span><span>Next</span></span></button></div><button>Next step</button>`);
+  await press(locate(page, "button:Next").first());
+  assert.equal(await page.locator("#action_3").getAttribute("data-hit"), "1");
+  await page.close();
+});

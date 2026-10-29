@@ -165,7 +165,11 @@ export async function tick(loc: Locator, on: boolean): Promise<void> {
 
 export function locate(page: Page, selector: string): Locator {
   if (selector.startsWith("label:")) return page.getByLabel(selector.slice(6), { exact: true });
-  if (selector.startsWith("button:")) return page.getByRole("button", { name: selector.slice(7), exact: true });
+  // by its accessible name, or (Georgia's GenTax hides its step buttons from the accessibility tree) by its own text
+  if (selector.startsWith("button:")) {
+    const name = selector.slice(7), exact = new RegExp(`^\\s*${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`);
+    return page.getByRole("button", { name, exact: true }).or(page.locator("button, input[type=submit], input[type=button]").filter({ hasText: exact, visible: true }));
+  }
   if (selector.startsWith("link:")) return page.getByRole("link", { name: selector.slice(5), exact: true });
   return page.locator(selector);
 }
