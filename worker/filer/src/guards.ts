@@ -167,8 +167,22 @@ export function fieldFor(value: string, p: Payload): { label: string } | null {
 }
 
 /** A select option is allowed when it equals an approved value (ignoring case and spaces). */
+// The same business type, as agencies' lists spell it. Only whole names that mean exactly the same thing: an approved
+// "Limited Liability Company" may be chosen as "LLC", never as "LLC taxed as a partnership" (that's the owner's call).
+const ENTITY_SAME: string[][] = [
+  ["limited liability company", "llc", "l.l.c.", "limited liability company (llc)", "llc (limited liability company)"],
+  ["corporation", "corp", "corp.", "c corporation", "c corp", "c-corporation"],
+  ["s corporation", "s corp", "s-corporation", "s-corp"],
+  ["sole proprietorship", "sole proprietor", "individual/sole proprietor", "proprietorship"],
+  ["limited partnership", "lp", "l.p."],
+  ["limited liability partnership", "llp", "l.l.p."],
+  ["general partnership", "partnership", "gp"],
+  ["nonprofit corporation", "non-profit corporation", "not-for-profit corporation", "nonprofit"],
+];
+const sameEntity = (a: string, b: string) => { const x = norm(a), y = norm(b); return ENTITY_SAME.some((g) => g.includes(x) && g.includes(y)); };
+
 export function optionFor(option: string, p: Payload): { label: string } | null {
-  const f = (p.fields ?? []).find((x) => x.value.trim() && norm(x.value) === norm(option));
+  const f = (p.fields ?? []).find((x) => x.value.trim() && (norm(x.value) === norm(option) || sameEntity(x.value, option)));
   return f ? { label: f.label.en } : addressPartFor(option.trim(), p, true);
 }
 

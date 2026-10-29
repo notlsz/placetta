@@ -24,7 +24,7 @@ export interface Model { calls: number; next(i: StepInput): Promise<ToolCall>; r
 /** The rule the step prompt carries for required questions about receiving information (guards.ts optOutQuestion). */
 export const OPT_OUT_RULE = "One exception to need_person: a required question that only asks whether the business wants to RECEIVE marketing, newsletters, program information, surveys or promotional contact, with a No option, may be answered No with answer_no. Never use it for consent to terms, certifications, eligibility, tax or zoning questions, whether the business sells or does something, data sharing the law requires, or anything where No would change what is filed. If unsure, call need_person.";
 /** guards.ts addressPartFor: the parts of an approved one-line address are approved values too. */
-export const ADDRESS_RULE = "When the page splits an approved address into separate street, city, state and ZIP fields, fill each field with its part of that approved address, copied exactly (the state as its two-letter code, or its full name when a dropdown only lists names).";
+export const ADDRESS_RULE = "A business type may be chosen as the list's exact abbreviation of the same type (Limited Liability Company as LLC, Corporation as Corp), never as a narrower or different type. When the page splits an approved address into separate street, city, state and ZIP fields, fill each field with its part of that approved address, copied exactly (the state as its two-letter code, or its full name when a dropdown only lists names).";
 
 /** Today's date where US agencies are (Eastern and Pacific), for fields such as \"no future dates\". In the page part, so
  *  the cached system part stays the same all day long. */

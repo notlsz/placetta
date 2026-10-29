@@ -149,3 +149,11 @@ test("SF's No radio: the question and the answer in one label", () => {
   assert.equal(noChoice(control({ type: "radio", label: "Would you like to receive information about City-offered additional opportunities and programs? Yes", value: "on" })), null);
   assert.equal(noChoice(control({ type: "radio", label: "Know your rights", value: "on" })), null);
 });
+
+test("a business type may be chosen as the list's abbreviation of the same type, never a different one", async () => {
+  const { optionFor } = await import("../src/guards.ts");
+  const p = { fields: [{ id: "t", label: { en: "Business type", zh: "" }, value: "Limited Liability Company" }] } as never;
+  assert.ok(optionFor("LLC", p));
+  assert.equal(optionFor("LLC taxed as a partnership", p), null);
+  assert.equal(optionFor("Corporation", p), null);
+});
