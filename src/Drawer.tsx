@@ -24,6 +24,9 @@ import { daysFromNow, fmtStamp } from "./time";
 import { denialAppeal } from "./finish";
 import { NOT_A_LAW_FIRM, ROUTE_NAME } from "./appeals";
 import { preflight } from "./smart";
+import { riskBlocks, riskFlags } from "./risk";
+import { RiskCard, useRisk } from "./RiskCard";
+import { ProofPanel } from "./Proof";
 import { FileCard, I, LevelTag, Modal, Pill, Sheet, StatusChip, feeText, feeTotal } from "./ui";
 import { INK, RouteLine } from "./pages";
 import { filingBlockers } from "./core";
@@ -72,7 +75,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
     { k: "check", l: t("tab_check"), n: `${done}/${a.checklist.length}` },
     { k: "form", l: t("tab_form") },
     { k: "fees", l: t("tab_fees") },
-    { k: "receipt", l: t("tab_receipt") },
+    { k: "receipt", l: cloud?.filings.some(x => x.app_id === a.id && x.status !== "canceled") ? (zh ? "证明" : "Proof") : t("tab_receipt") },
     { k: "comments", l: zh ? "评论" : "Comments", n: talk ? String(talk) : undefined },
   ];
   return (
@@ -113,7 +116,7 @@ export function AppDrawer({ id, tab, edit, version, onTab, onClose }: { id: stri
         {tab === "check" && <Checklist a={a} />}
         {tab === "form" && <FormPreview key={a.id + String(edit)} a={a} startEdit={edit} version={version} />}
         {tab === "fees" && <Fees a={a} />}
-        {tab === "receipt" && <Receipt a={a} />}
+        {tab === "receipt" && <ProofPanel a={a} fallback={<Receipt a={a} />} />}
         {tab === "comments" && <AppComments a={a} />}
       </div>
       {appr ? (
@@ -438,7 +441,10 @@ function Receipt({ a }: { a: Application }) {
 
 export function ApproveModal({ id, onClose }: { id: string; onClose: () => void }) {
   const { b, t, lang, ws, approve, openApp, busy, cloud, go, ask } = useApp();
-  const a = ws.approvals.find(x => x.id === id);
+  // a one-tap fix changes the answers, so the card is put up again for them: follow it to its replacement
+  const a = ws.approvals.find(x => x.id === id) ?? (() => { const next = ws.closed.find(x => x.id === id)?.withdrawn?.next; return next ? ws.approvals.find(x => x.id === next) : undefined; })();
+  const risk = useRisk(a);
+  const [override, setOverride] = useState(false);
   const [sig, setSig] = useState<Signed | null>(null);
   // Sign once: the signature this owner adopted, placed with this one tap where the agency takes an electronic signature
   const [saved, setSaved] = useState<{ by: string } | null>(null);
@@ -470,7 +476,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
   const pf = preflight(ws, a, daysFromNow(0));
   // a card for answers that changed since it was put up, or a filled form that doesn't match them, can't be approved
   const gate = fileable(ws, a);
-  const blocked = left.empty.length + left.missing.length + pf.errors.length > 0 || !gate.ok;
+  const blocked = left.empty.length + left.missing.length + pf.errors.length > 0 || !gate.ok || (!!risk && riskBlocks(risk, override));
   const zh = lang === "zh";
   return (
     <Modal label={b(a.title)} onClose={onClose} wide>
@@ -482,7 +488,8 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
         <button type="button" className="icbtn close" onClick={onClose} aria-label={t("close")}><I.x /></button>
       </header>
       <div className="m-body">
-        {(a.kind === "file" || a.kind === "send" || a.kind === "change") && pf.checked > 0 && (
+        {risk && <RiskCard a={a} risk={risk} override={override} setOverride={setOverride} />}
+        {(a.kind === "send" || a.kind === "change") && pf.checked > 0 && (
           <section className={"ap-check" + (pf.errors.length ? " bad" : pf.warnings.length ? " warn" : " ok")} aria-live="polite">
             <h3><I.check />{pf.errors.length || pf.warnings.length
               ? (zh ? `已核对 ${pf.checked} 项：${pf.errors.length ? `${pf.errors.length} 项需要更正` : ""}${pf.errors.length && pf.warnings.length ? "，" : ""}${pf.warnings.length ? `${pf.warnings.length} 项请留意` : ""}` : `Checked ${pf.checked} lines: ${[pf.errors.length && `${pf.errors.length} to fix`, pf.warnings.length && `${pf.warnings.length} to look at`].filter(Boolean).join(", ")}`)
@@ -570,7 +577,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
         <p>{cloud?.termsHold && <span className="ap-hold" role="note">{lang === "zh" ? "请先在页面顶部接受更新后的条款，然后再批准。" : "Accept the updated Terms at the top of the page to approve this."} </span>}{t("ap_note")} {cloud ? (a.kind === "file" ? t("ap_team") : "") : t("ap_sim")}</p>
         <div className="m-btns">
           {app && <button type="button" className="pill quiet" onClick={() => { onClose(); openApp(app.id, "form", true); }}><I.pencil />{t("ap_edit")}</button>}
-          <Pill kind="ink" disabled={busy || blocked || (needSig && !sig) || !!cloud?.termsHold} onClick={() => { allow.current?.(); approve(a.id, sig ?? undefined); onClose(); }}>{b(a.action)}</Pill>
+          <Pill kind="ink" disabled={busy || blocked || (needSig && !sig) || !!cloud?.termsHold} onClick={() => { allow.current?.(); approve(a.id, sig ?? undefined, risk && a.kind === "file" ? riskFlags(risk, override && risk.level === "high" ? { at: new Date().toISOString() } : undefined) : undefined); onClose(); }}>{b(a.action)}</Pill>
         </div>
       </footer>
     </Modal>

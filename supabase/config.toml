@@ -12,6 +12,10 @@ verify_jwt = false
 [functions.calendar-feed]
 verify_jwt = false
 
+# A shared proof link's documents: the token is the credential (supabase/functions/proof).
+[functions.proof]
+verify_jwt = false
+
 [functions.monitor]
 verify_jwt = false
 

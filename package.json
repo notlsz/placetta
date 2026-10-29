@@ -35,6 +35,7 @@
     "test:words": "node scripts/plain-words.mjs",
     "test:home": "vite build --ssr scripts/home-next-test.ts --outDir .home-test --emptyOutDir --logLevel error && node .home-test/home-next-test.js; s=$?; rm -rf .home-test; exit $s",
     "test:human": "VITE_SUPABASE_URL=https://test.supabase.co VITE_SUPABASE_KEY=sb_publishable_test VITE_TURNSTILE_SITE_KEY= vite build --ssr scripts/human-check-test.ts --outDir .human-test --emptyOutDir --logLevel error && node .human-test/human-check-test.js; s=$?; rm -rf .human-test; exit $s",
+    "test:risk": "esbuild scripts/risk-proof-test.ts --bundle --platform=node --format=esm --outfile=.risk-test.mjs '--external:*.pdf?inline' --log-level=error && node .risk-test.mjs; s=$?; rm -f .risk-test.mjs; exit $s",
     "test:bot": "esbuild scripts/bot-crash-test.ts --bundle --platform=node --format=esm --outfile=.bot-crash-test.mjs --external:bot-avatars --log-level=error && node .bot-crash-test.mjs; s=$?; rm -f .bot-crash-test.mjs; exit $s",
     "test:crash": "node scripts/crash-smoke.mjs",
     "test:next-path": "esbuild scripts/next-path-test.ts --bundle --platform=node --format=esm --outfile=.next-path-test.mjs --log-level=error && node .next-path-test.mjs; s=$?; rm -f .next-path-test.mjs; exit $s",

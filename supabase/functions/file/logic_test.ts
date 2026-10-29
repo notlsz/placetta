@@ -4,7 +4,7 @@ import { DEST, destinationProblems, staleDestinations, TO_VERIFY, type Dest } fr
 import {
   afterHold, asAgent, askedToResubmit, canFaxSigned, canFaxSignedFor, check, emailFor, envFrom, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holdMinutes,
   fallback, handBackDue, handoffPacket, holds, isForeign, killSwitchOn, selfFileScope, workerOn, workerState, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, PORTAL_FAILED, refusalOf, REVIEW_HOURS, rerouteDue,
-  sentByYou, signedCopy, teachRefusal, teamApproved, waysToSend, whyYours, YOURS_REF, checkCents, lobCheckBody, captchaPlan, pastRejectionProblems,
+  sentByYou, signedCopy, teachRefusal, teamApproved, waysToSend, whyYours, YOURS_REF, checkCents, lobCheckBody, captchaPlan, pastRejectionProblems, riskRows,
 } from "./logic.ts";
 
 const WS = "11111111-1111-1111-1111-111111111111";
@@ -612,4 +612,16 @@ Deno.test("CDTFA needs an account: no longer opened as a no-login site", () => {
   const d = DEST_W["ca-cdtfa"];
   assertEquals(!!d.noLogin, false);
   assertEquals(d.account, "unknown");
+});
+
+Deno.test("risk flags: only known kinds and severities are kept, each once; a High the owner sent anyway is marked", () => {
+  const f = filing({ official: "irs-ss4", risk: { level: "high", flags: [
+    { issue: "name", severity: "high" }, { issue: "name", severity: "medium" }, { issue: "zip", severity: "medium" },
+    { issue: "Robert'); drop table", severity: "high" }, { issue: "ein", severity: "critical" },
+  ], override: { at: "2026-10-29T12:00:00Z" } } });
+  const rows = riskRows(f);
+  assertEquals(rows.map((r) => [r.issue, r.severity, r.overridden]), [["name", "high", true], ["zip", "medium", false]]);
+  assert(rows.every((r) => r.form === "irs-ss4" && r.workspace_id === f.workspace_id && r.filing_id === f.id));
+  assertEquals(riskRows(filing({})), []);
+  assertEquals(riskRows(filing({ risk: { flags: "nope" as unknown as [] } })), []);
 });

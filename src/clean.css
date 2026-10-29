@@ -134,3 +134,86 @@
 /* the table's corner: "Store" and its box sit on the same line as each column's name and box, not lower */
 .rv-t thead th.rv-corner { vertical-align: top; padding-top: calc(34px + 8px); }
 .rv-pickall { align-items: flex-start; line-height: 1.3; }
+
+/* rejection risk on an approval card (src/RiskCard.tsx): one level, each issue with where it came from and a one-tap fix.
+   Every row shares one center (docs/LESSONS.md, Oct 29 2026); no dots or bullets, the level is said in words. */
+.ap-risk { border-radius: 12px; padding: 12px 14px; border: 1px solid color-mix(in oklab, #15803d 25%, transparent); background: color-mix(in oklab, #15803d 5%, var(--bg, #fff)); }
+.ap-risk.medium { border-color: color-mix(in oklab, #b45309 30%, transparent); background: color-mix(in oklab, #b45309 6%, var(--bg, #fff)); }
+.ap-risk.high { border-color: color-mix(in oklab, #b91c1c 30%, transparent); background: color-mix(in oklab, #b91c1c 6%, var(--bg, #fff)); }
+.ap-risk .rk-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 28px; }
+.ap-risk .rk-head h3 { margin: 0; font-size: 14px; line-height: 20px; }
+.ap-risk .rk-chip, .ap-risk .rk-sev { display: inline-flex; align-items: center; justify-content: center; height: 24px; padding: 0 10px; border-radius: 6px; font-size: 12.5px; font-weight: 600; line-height: 1; white-space: nowrap; }
+.ap-risk .rk-chip.low, .ap-risk .rk-sev.low { color: #166534; background: color-mix(in oklab, #15803d 12%, transparent); }
+.ap-risk .rk-chip.medium, .ap-risk .rk-sev.medium { color: #92400e; background: color-mix(in oklab, #b45309 14%, transparent); }
+.ap-risk .rk-chip.high, .ap-risk .rk-sev.high { color: #991b1b; background: color-mix(in oklab, #b91c1c 13%, transparent); }
+.ap-risk .rk-sum { margin: 6px 0 0; font-size: 14px; line-height: 20px; color: var(--ink2, #475569); }
+.ap-risk .rk-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.ap-risk .rk-row { display: grid; grid-template-columns: 72px 1fr auto; align-items: center; gap: 12px; }
+.ap-risk .rk-sev { width: 72px; padding: 0; }
+.ap-risk .rk-text p { margin: 0; font-size: 14px; line-height: 20px; }
+.ap-risk .rk-text small { display: block; margin-top: 2px; font-size: 12px; line-height: 16px; color: var(--ink3, #64748b); }
+.ap-risk .rk-fix { display: inline-flex; align-items: center; gap: 6px; height: 32px; white-space: nowrap; }
+.ap-risk .rk-fix svg { width: 14px; height: 14px; flex-shrink: 0; }
+.ap-risk .rk-foot { margin: 10px 0 0; font-size: 13.5px; line-height: 20px; color: #991b1b; }
+.ap-risk .rk-over { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 14px; line-height: 20px; cursor: pointer; }
+.ap-risk .rk-over input { width: 18px; height: 18px; margin: 0; flex-shrink: 0; }
+@media (max-width: 560px) {
+  .ap-risk .rk-row { grid-template-columns: 64px 1fr; row-gap: 6px; }
+  .ap-risk .rk-sev { width: 64px; }
+  .ap-risk .rk-fix { grid-column: 2; justify-self: start; }
+}
+
+/* proof of a filing (src/Proof.tsx): in the sheet, shared, and printed. One column, facts as label and value on one
+   center line, no boxes inside boxes, no dots. */
+.proof { display: flex; flex-direction: column; gap: 18px; }
+.proof .pf-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.proof .pf-title h3 { margin: 0; font-size: 15px; line-height: 22px; }
+.pf-strength { margin: 2px 0 0; font-size: 14px; line-height: 20px; color: var(--ink2, #475569); }
+.pf-strength.agency { color: #166534; }
+.proof .pf-print { display: inline-flex; align-items: center; gap: 6px; height: 32px; }
+.proof .pf-print svg { width: 15px; height: 15px; flex-shrink: 0; }
+.pf-print-only { display: none; }
+.pf-facts { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.pf-facts > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 24px; }
+.pf-facts dt { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink2, #475569); }
+.pf-facts dd { margin: 0; font-size: 14px; line-height: 20px; text-align: right; font-weight: 500; }
+.pf-facts dd.mono { font-family: var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace); letter-spacing: .02em; }
+.pf-sec h4, .pf-sec h2 { margin: 0 0 10px; font-size: 14px; line-height: 20px; font-weight: 600; }
+.pf-docs, .pf-events, .pf-links { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.pf-docs li { display: grid; grid-template-columns: 120px 1fr auto; align-items: center; gap: 12px; min-height: 32px; }
+.pf-kind { display: inline-flex; align-items: center; height: 24px; font-size: 12.5px; line-height: 1; color: var(--ink2, #475569); }
+.pf-name { font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+.pf-docs .pill, .pf-docs .pf-open { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 14px; white-space: nowrap; text-decoration: none; }
+.pf-events li { display: grid; grid-template-columns: 112px 1fr auto; align-items: center; gap: 12px; min-height: 24px; font-size: 14px; line-height: 20px; }
+.pf-when { color: var(--ink3, #64748b); font-variant-numeric: tabular-nums; }
+.pf-src { font-size: 12.5px; color: var(--ink2, #475569); white-space: nowrap; }
+.pf-quiet { margin: 0; font-size: 13px; line-height: 18px; color: var(--ink3, #64748b); }
+.pf-share .pf-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 10px; }
+.pf-share .seg { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border-radius: 999px; background: var(--mist, #f1f5f9); }
+.pf-share .seg button { height: 28px; padding: 0 12px; border-radius: 999px; font-size: 13px; line-height: 1; color: var(--ink2, #475569); }
+.pf-share .seg button[aria-pressed="true"] { background: var(--card, #fff); color: var(--ink, #0f172a); box-shadow: 0 1px 2px rgba(15, 23, 42, .08); }
+.pf-share .pill { height: 32px; display: inline-flex; align-items: center; }
+.pf-check { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; line-height: 20px; }
+.pf-check input { width: 16px; height: 16px; margin: 0; flex-shrink: 0; }
+.pf-made { margin: 10px 0 0; }
+.pf-made input { width: 100%; height: 36px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--line, #e2e8f0); font-size: 13px; background: var(--card, #fff); }
+.pf-links { margin-top: 12px; }
+.pf-links li { display: flex; align-items: center; gap: 12px; min-height: 28px; font-size: 13.5px; line-height: 20px; }
+.pf-links li > span:nth-child(2) { flex: 1; color: var(--ink2, #475569); }
+.proof-page .pf-facts { margin-top: 24px; }
+.proof-page .pf-sec { margin-top: 28px; }
+@media (max-width: 560px) {
+  .pf-docs li { grid-template-columns: 1fr auto; row-gap: 2px; }
+  .pf-docs { gap: 14px; }
+  .pf-docs .pf-kind { grid-column: 1 / -1; height: auto; }
+  .pf-events li { grid-template-columns: 1fr auto; }
+  .pf-events .pf-when { grid-column: 1 / -1; }
+}
+@media print {
+  body.printing-proof * { visibility: hidden !important; }
+  body.printing-proof .proof, body.printing-proof .proof * { visibility: visible !important; }
+  body.printing-proof .proof { position: absolute; inset: 0 auto auto 0; width: 100%; padding: 24px; background: #fff; color: #000; }
+  body.printing-proof .proof .pf-print, body.printing-proof .proof .pf-share, body.printing-proof .proof .pf-docs .pill { display: none !important; }
+  body.printing-proof .pf-print-only { display: block; margin: 0; font-weight: 600; }
+  .proof-page .tp-lang, .proof-page .pf-open { display: none !important; }
+}

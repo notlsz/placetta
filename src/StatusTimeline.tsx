@@ -76,7 +76,7 @@ function Sends({ list, zh, acts, now, onUndo }: { list: api.OutboxSend[]; zh: bo
  * A phone call with the agency is an event too, with its recording, transcript and summary one tap away (Calls).
  */
 
-const SOURCE: Record<string, { en: string; zh: string }> = {
+export const SOURCE: Record<string, { en: string; zh: string }> = {
   team: { en: "Placetta team", zh: "快哉团队" }, owner: { en: "You", zh: "您" }, placetta: { en: "Placetta", zh: "快哉" },
   open_data: { en: "City's open data", zh: "城市公开数据" }, agency_page: { en: "Agency's status page", zh: "机构状态页面" }, odelia: { en: "Odelia", zh: "Odelia" },
   phone_call: { en: "Odelia's call to the agency", zh: "Odelia 致电机构" },

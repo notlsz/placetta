@@ -132,6 +132,8 @@ export type Approval = {
   hash?: string;
   version?: number;
   withdrawn?: { at: string; why: Bi; next?: string };
+  /** the rejection risk the owner saw when they approved it, and their "send it anyway" on a High (src/risk.ts) */
+  risk?: import("./risk").RiskFlags;
 };
 /** A change to something that already exists, which the agent only makes after you confirm it. */
 export type Change =

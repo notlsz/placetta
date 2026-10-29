@@ -44,7 +44,7 @@ import { asAgent,
   handBackDue, handoffPacket, waitForStart, hasLoginFor, holds, isForeign, type LogEntry, mailOutcome, mailTo, OWNER_REF, pick, type Refusal, refusalOf, sentByYou, signedCopy,
   TEACH_REFUSED, teachRefusal, teamApproved, whyYours, YOURS_REF, selfFileScope, workerOn, workerState,
   type Beat, rerouteLead, wakeable, wakeConfig, wakeMs, wakePlan, waitsOnWorker, WORKER_ASLEEP, checkCents, lobCheckBody,
-  canEmailSignedFor, kitAddress, paperFile, signKit, wetAsk, wetPath, type WetPath, captchaPlan, pastRejectionProblems, type PastRejection,
+  canEmailSignedFor, kitAddress, paperFile, signKit, wetAsk, wetPath, type WetPath, captchaPlan, pastRejectionProblems, type PastRejection, riskRows,
 } from "./logic.ts";
 import { CAPTCHA_ASK_REF, isChoice, type CaptchaChoice } from "./captcha.ts";
 import { agencyLetter, faxEvent, kitLetter, kitSendAt, lobAddress, lobEvent, lobSigned, type MailEvent } from "./paper.ts";
@@ -626,6 +626,22 @@ async function pastRejections(official: string | undefined): Promise<PastRejecti
   return (data as PastRejection[]).filter((r) => typeof r?.reason === "string");
 }
 
+/** What the check before approval found, kept against this filing so the agency's decision teaches the next card
+ *  (filing_risk_flags, risk_issue_stats). The owner's "send it anyway" on a High risk goes in its log. Never blocks. */
+async function keepRisk(f: Filing, by: string): Promise<Filing> {
+  const rows = riskRows(f);
+  if (rows.length) {
+    const { error } = await admin.from("filing_risk_flags").upsert(rows, { onConflict: "filing_id,issue", ignoreDuplicates: true });
+    if (error) console.error("risk flags:", error.code ?? "");
+  }
+  const over = f.payload.risk?.override?.at;
+  if (over && f.payload.risk?.level === "high" && !f.agent_log.some((e) => e.kind === "risk_override")) {
+    const what = rows.filter((r) => r.severity === "high").map((r) => r.issue.replace(/_/g, " ")).join(", ");
+    f = await step(f, log(`You chose to send it despite a high risk of it being sent back${what ? ` (${what})` : ""}`, `尽管被退回的风险高${what ? `（${what}）` : ""}，您仍选择提交`, "risk_override", by), {}, false);
+  }
+  return f;
+}
+
 /** An earlier filing of the same form with the same answers in the last 30 days, if any. */
 async function duplicateOf(f: Filing): Promise<{ id: string; approved_at: string } | null> {
   const { data, error } = await admin.rpc("filing_duplicate_of", { p_id: f.id, p_days: 30 });
@@ -715,6 +731,7 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
   }
   f = await step(f, log("Checked against the agency's requirements", "已按机构要求核对", "check"),
     { channel, agent_state: "running", requirements_checked: true, status: "in_progress" });
+  f = await keepRisk(f, by);
   // The agency refuses a future start date and the approved one is ahead: wait, and file it that morning (agency time is
   // US, so 15:00 UTC is morning on both coasts). The sweep releases it like any hold; the owner is told, not asked.
   const startDay = waitForStart(f, d, new Date().toISOString().slice(0, 10));
