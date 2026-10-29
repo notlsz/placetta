@@ -43,11 +43,11 @@ Of the 255 forms filed on an agency portal, who makes the account when the busin
 
 | Account | Forms |
 |---|---:|
-| None needed: the portal files without one | 14 |
+| None needed: the portal files without one | 13 |
 | Odelia makes it: the agency's page says you make your own | 21 |
 | Odelia makes it: the platform's public sign-up (the team confirms on the first run) | 27 |
 | The owner's own identity (ID.me, Login.gov): stays with the owner | 2 |
-| Not read yet: the Placetta team is asked | 191 |
+| Not read yet: the Placetta team is asked | 192 |
 
 ## Forms Placetta can route
 
@@ -74,7 +74,7 @@ Of the 255 forms filed on an agency portal, who makes the account when the busin
 | California | Articles of Organization (California LLC) (`ca-llc-1`) | portal: bizfileonline.sos.ca.gov | On the agency's portal | typed | on the portal | [page](https://www.sos.ca.gov/business-programs/business-entities/faqs) (2026-10-18) |
 | California | Application to Register a Foreign LLC (`ca-llc-5`) | portal: bizfileonline.sos.ca.gov | On the agency's portal | typed | on the portal | [page](https://www.sos.ca.gov/business-programs/business-entities/faqs) (2026-10-18) |
 | California | LLC annual tax ($800) (`ca-ftb-3522`) | owner packet | Owner packet: the owner sends it | none | sent with it | [page](https://www.ftb.ca.gov/forms/2026/2026-3522.pdf) (2026-10-13) |
-| California | Seller's permit (`ca-cdtfa`) | portal: onlineservices.cdtfa.ca.gov | On the agency's portal | none | no fee | [page](https://cdtfa.ca.gov/formspubs/pub107/applying-for-a-sellers-permit.htm) (2026-10-13) |
+| California | Seller's permit (`ca-cdtfa`) | portal: onlineservices.cdtfa.ca.gov | On the agency's portal | none | no fee | [page](https://cdtfa.ca.gov/formspubs/pub107/applying-for-a-sellers-permit.htm) (2026-10-28) |
 | California | Registration Form for Commercial Employers (`ca-edd-de1`) | fax, mail, portal: eddservices.edd.ca.gov, +19166549211, Employment Development Department, Sacramento | On the agency's portal | by hand | no fee | [page](https://edd.ca.gov/en/payroll_taxes/step-3-register-for-a-payroll-tax-account/) (2026-10-18) |
 | California | Alcoholic beverage license (`ca-abc`) | portal: services.abc.ca.gov | On the agency's portal | by hand | on the portal | [page](https://www.abc.ca.gov/wp-content/uploads/2026/08/online_application_instructions.pdf) (2026-10-28) |
 | Los Angeles | City of Los Angeles business tax registration (`la-btrc`) | email, portal: Finance.CustomerService@lacity.org, latax.lacity.org | On the agency's portal | drawn | no fee | [page](https://finance.lacity.gov/tax-education/new-business-registration/how-register-btrc) (2026-10-18) |

@@ -64,6 +64,9 @@ export type Dest = {
   alsoOn?: string[];                                // other hosts the portal's own pages send the browser to (its sign-in
                                                     // service, or the same app under the county's name), as the agency or its guide links them
   noLogin?: boolean;                                // the portal files without an account (the worker opens it with no saved login)
+  startNotFuture?: boolean;                         // the agency's form refuses a business start date later than today: a
+                                                    // filing approved with a future start date waits and files itself
+                                                    // on that day (logic.ts waitForStart), so nobody is asked
   captcha?: boolean;                                // the agency's own guide shows a CAPTCHA on the way to submitting: when it
                                                     // also takes the form by email, fax or mail, Placetta sends it that way
                                                     // (logic.ts pick), so nobody has to solve one
@@ -259,7 +262,7 @@ export const DEST: Record<string, Dest> = {
   "dal-building": { portal: "aca-prod.accela.com", portalUrl: "https://aca-prod.accela.com/dallastx", tenant: "/dallastx", signature: "typed", payment: "portal", checked: "2026-10-13", source: "https://dallascityhall.com/departments/sustainabledevelopment/DCH%20documents/3.%20Applying%20for%20a%20Commercial%20Alteration%20and%20Addition%20Application.pdf", also: ["https://dallascityhall.com/departments/sustainabledevelopment/Pages/DallasNow.aspx"] },
   // The application opens with no account (seen 2026-10-24: "New Business Registration Form", Organization Type first);
   // it ends with "Submit for Electronic Signature" and a DocuSign email the owner signs.
-  "sf-business-registration": { portal: "etaxstatement.sfgov.org", portalUrl: "https://etaxstatement.sfgov.org/NewBusinessRegistration/application", noLogin: true, signature: "typed", payment: "portal", checked: "2026-10-13", source: "https://sftreasurer.org/business/register-business" },
+  "sf-business-registration": { portal: "etaxstatement.sfgov.org", portalUrl: "https://etaxstatement.sfgov.org/NewBusinessRegistration/application", noLogin: true, startNotFuture: true /* the live form (2026-10-28) says of the start date "future dates not accepted" */, signature: "typed", payment: "portal", checked: "2026-10-13", source: "https://sftreasurer.org/business/register-business" },
   "sj-building-ti": { portal: "sjpermits.org", portalUrl: "https://www.sjpermits.org/", signature: "drawn", payment: "portal", checked: "2026-10-13", source: "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement" },
   "sj-sign": { portal: "sjpermits.org", portalUrl: "https://www.sjpermits.org/", signature: "drawn", payment: "invoice", checked: "2026-10-13", source: "https://www.sanjoseca.gov/business/development-services-permit-center/online-permits-at-sjpermits-org/planning-online-permits" },
   // Inspection bookings (src/inspections/booking.ts): the agency's own scheduling page, from the inspection guides
@@ -336,11 +339,15 @@ export const DEST: Record<string, Dest> = {
     // "Register Online" links to onlineservices.cdtfa.ca.gov; "There is no charge for a seller's permit."
     portal: "onlineservices.cdtfa.ca.gov",
     portalUrl: "https://onlineservices.cdtfa.ca.gov/",
-    noLogin: true,                                    // "Register for a Permit, License, or Account" is on the public page, outside Login (seen 2026-10-24)
+    // Registration needs a CDTFA username: pub 439 says "select Register, then select Sign Up Now", and on the live run
+    // (2026-10-28) "Register a New Business Activity" opened Sign Up Now, with CDTFA saying a registration is submitted
+    // from a logged-in account. Until the team confirms who may make it, the owner saves the login once (Settings).
+    account: "unknown",
     signature: "none",
     payment: "none",
-    checked: "2026-10-13",
+    checked: "2026-10-28",
     source: "https://cdtfa.ca.gov/formspubs/pub107/applying-for-a-sellers-permit.htm",
+    also: ["https://cdtfa.ca.gov/formspubs/pub439.pdf"],
   },
   "ny-dtf-17": {
     // "register with the Tax Department through New York Business Express"; needs a NY.gov Business account

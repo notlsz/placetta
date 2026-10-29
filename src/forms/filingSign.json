@@ -38,7 +38,7 @@
 "ca-abc-257": {"s":"wet","f":"wet","p":"portal","site":"services.abc.ca.gov","src":"https://www.abc.ca.gov/wp-content/uploads/2026/08/online_application_instructions.pdf","chk":"2026-10-28"},
 "ca-abc-258": {"s":"wet","f":"wet","p":"in_person","owner":true,"src":"https://www.abc.ca.gov/licensing/license-forms/new-license-application/","chk":"2026-10-28"},
 "ca-cdph-pfr": {"s":"wet","f":"wet","p":"with_filing","src":"https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/FDBPrograms/FoodSafetyProgram/ProcessedFoodRegistration.aspx","chk":"2026-10-18"},
-"ca-cdtfa": {"s":"none","f":"none","p":"none","site":"onlineservices.cdtfa.ca.gov","open":true,"src":"https://cdtfa.ca.gov/formspubs/pub107/applying-for-a-sellers-permit.htm","chk":"2026-10-13"},
+"ca-cdtfa": {"s":"none","f":"none","p":"none","site":"onlineservices.cdtfa.ca.gov","src":"https://cdtfa.ca.gov/formspubs/pub107/applying-for-a-sellers-permit.htm","chk":"2026-10-28"},
 "ca-corp-form": {"s":"typed","f":"esign","p":"portal","site":"bizfileonline.sos.ca.gov","src":"https://www.sos.ca.gov/business-programs/business-entities/faqs","chk":"2026-10-27"},
 "ca-corp-qualify": {"s":"typed","f":"esign","p":"portal","site":"bizfileonline.sos.ca.gov","src":"https://www.sos.ca.gov/business-programs/business-entities/faqs","chk":"2026-10-27"},
 "ca-edd-de1": {"s":"wet","f":"wet","p":"none","site":"eddservices.edd.ca.gov","src":"https://edd.ca.gov/en/payroll_taxes/step-3-register-for-a-payroll-tax-account/","chk":"2026-10-18"},

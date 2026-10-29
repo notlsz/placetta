@@ -591,3 +591,25 @@ Deno.test("past rejections: the next filing of a form is checked against why the
   assertEquals(pastRejectionProblems(filing({ fields: [{ id: "l1", label: b("Legal name"), value: "" }], signature: { name: "M", signed_at: "x", kind: "typed" } }), reasons), []);
   assertEquals(pastRejectionProblems(good, [{ reason: "Fee was short", seen: 1 }]), []);
 });
+
+// ---- waiting for the start date (live run 2026-10-28: SF refused a future start date and Odelia had to ask)
+import { isoDay, waitForStart } from "./logic.ts";
+import { DEST as DEST_W } from "./destinations.ts";
+Deno.test("a future start date on a form that refuses one: Odelia waits for that day instead of asking", () => {
+  const f = (v: string, label = "Business start date") => ({ payload: { fields: [{ label: { en: label, zh: "" }, value: v }] } });
+  const sf = DEST_W["sf-business-registration"];
+  assertEquals(waitForStart(f("2026-11-15"), sf, "2026-10-29"), "2026-11-15");
+  assertEquals(waitForStart(f("11/15/2026"), sf, "2026-10-29"), "2026-11-15");
+  assertEquals(waitForStart(f("2026-10-29"), sf, "2026-10-29"), null, "today is accepted: file now");
+  assertEquals(waitForStart(f("2026-10-01"), sf, "2026-10-29"), null, "past is accepted: file now");
+  assertEquals(waitForStart(f("soon"), sf, "2026-10-29"), null, "not a date: never guess");
+  assertEquals(waitForStart(f("2026-11-15", "Date business started"), sf, "2026-10-29"), "2026-11-15");
+  assertEquals(waitForStart(f("2026-11-15", "Expiration date"), sf, "2026-10-29"), null, "only the start date");
+  assertEquals(waitForStart(f("2026-11-15"), DEST_W["ca-cdtfa"], "2026-10-29"), null, "agencies without the rule file now");
+  assertEquals(isoDay("2026-02-30"), null);
+});
+Deno.test("CDTFA needs an account: no longer opened as a no-login site", () => {
+  const d = DEST_W["ca-cdtfa"];
+  assertEquals(!!d.noLogin, false);
+  assertEquals(d.account, "unknown");
+});

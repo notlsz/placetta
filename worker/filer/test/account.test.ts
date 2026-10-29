@@ -323,7 +323,7 @@ test("the registry's account rows: every one checked, ID.me's stays with the own
   assert.deepEqual(accountProblems(PORTAL_ACCOUNTS, portals), []);
   assert.equal(accountOf(DEST["irs-8821"]), "individual");
   assert.equal(accountOf(DEST["irs-2848"]), "individual");
-  assert.equal(accountOf(DEST["ca-cdtfa"]), "none");
+  assert.equal(accountOf(DEST["ca-cdtfa"]), "unknown", "CDTFA registers from a signed-in account (pub 439; live run 2026-10-28)");
   assert.equal(accountOf(DEST["ga-sos"]), "business");
   assert.equal(accountOf(DEST["ca-llc-1"]), "unknown", "not read yet: the team is asked");
 });

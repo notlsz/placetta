@@ -813,3 +813,52 @@ queue; none of it has run with a real owner yet.
 
 Tests: `scripts/initiative-test.ts` (in `npm run test:agent`), `supabase/functions/monitor/initiative_test.ts`,
 `supabase/functions/_shared/chase_test.ts`, `supabase/tests/odelia_initiative.sql` (17 checks), red team H1 to H12.
+
+## Agents scorecard (2026-10-29)
+
+Twenty-two agents scored for Odelia's job (getting a business's federal, state and city licenses filed and approved
+on its own) and for general agent quality, out of 10. Placetta's judgment from the cited pages; funding figures are as
+reported, several by a single outlet, and marked so. Odelia's side comes from this repository and production: no real
+agency filing has completed yet (the live runs on 2026-10-28 reached SF's start-date page and CDTFA's sign-up wall),
+and the 15-license dry run (`worker/filer/test/dryrun.test.ts`) passed with a scripted model.
+
+| Agent | What it is | Strength to copy | Investor hook, and Placetta's version | Biggest gap | Job / agent | Source |
+|---|---|---|---|---|---|---|
+| Claude Duet (Anthropic) | Proactive personal agent in its own cloud; email, calendar, payments | Messages you first; asks before payments, signing, deletions; passwords hidden from the agent | Always-on work that starts itself. Ours: Odelia starts each renewal and agency follow-up herself | Research preview, US waitlist; can't call, text, or be watched or taken over | 3 / 8 | [VKTR](https://www.vktr.com/ai-platforms/claude-duet-anthropic-previews-an-ai-agent-that-messages-you-first/) |
+| Meta Muse | Personal agent: books, fills forms, buys; app and WhatsApp | Lives in WhatsApp, where people already are | Billions of users one tap away. Ours: Odelia in WeChat and WhatsApp for Chinese founders | Reliability unreported; US only | 3 / 7 | [PBS](https://www.pbs.org/newshour/nation/meta-launches-personal-ai-agent-muse-to-help-with-everyday-tasks) |
+| OpenAI Dots | Always-on agents in ChatGPT, own cloud computers, 4,000+ apps | Specialist agents with their own identity, credentials and tools | Agents as coworkers inside Slack and Teams. Ours: one Odelia per store, with that store's logins | Mostly bundles Codex abilities; texting "coming soon" | 3 / 8 | [TechCrunch](https://techcrunch.com/2026/09/29/openai-launches-dots-its-bubbly-agentic-avatar/) |
+| Instinct | Text-based personal agent with its own phone number and computer; calls for you | Works over SMS and places phone calls (concierge) | $1B Series C at $10B, a month after $2.5B. Ours: Odelia calls the agency counter when a site stalls | Invite-only since August 2026; no usage numbers | 4 / 8 | [TechCrunch](https://techcrunch.com/2026/09/28/viral-ai-agent-instinct-raises-1b-series-c-at-a-10b-valuation) |
+| Gemini Spark (Google) | 24/7 agent in Gmail and Docs | Recurring checks that catch what you'd miss | Distribution in Workspace. Ours: the daily check of every open filing | Texts, email sending and browser control "later" | 3 / 7 | [Engadget](https://engadget.com/2176556/googles-gemini-spark-is-an-agentic-ai-assistant) |
+| Grok Bot (xAI) | Persistent cloud computer with a browser; scheduled routines; MCP | Works sites with no API, keeps going with the laptop closed | Bundled with Cursor and SuperGrok. Ours: the agency-website worker | xAI-only models, memory can't be inspected; early beta, $200 a month | 4 / 7 | [Vellum (a competitor)](https://www.vellum.ai/blog/official-grok-bot-breakdown) |
+| Sierra | Enterprise customer-service agents | Charges per outcome, not per seat | Above $15.8B, paid when work is done. Ours: the $299 license is already per filing; a version that charges only on approval is a pricing decision for the founder | Six-figure contracts; closed platform | 2 / 9 | [ai2.work](https://ai2.work/blog/sierra-hits-15b-valuation-as-ai-agents-reach-production) |
+| Decagon | Customer-support agents | Fast enterprise deployment | $250M at $4.5B. Ours: tests every agency site before a real filing | Support only | 2 / 8 | [Built In](https://builtin.com/articles/decagon-raises-250m-series-d-4b-valuation-20260130) |
+| Harvey | Legal AI for law firms | Cited drafts lawyers trust | Reported $11B to $15.5B. Ours: every value cites the words it came from | Drafts for lawyers; doesn't file with agencies | 3 / 8 | [Sacra](https://sacra.com/c/harvey/) |
+| Legora | Collaborative legal AI | Firm-wide workflows | $550M Series D. Ours: one plan the brand, the store and the landlord share | Same as Harvey: no filing | 3 / 8 | [Legora](https://legora.com/newsroom/legora-raises-550-million-series-d-to-fuel-us-growth) |
+| Devin (Cognition) | Autonomous software engineer | Finishes whole tasks; you watch and take over | Reported $26B, ARR about $492M (later reports higher). Ours: the live view and takeover on agency sites | Coding only | 2 / 9 | [DEV](https://dev.to/rishi_kora/cognition-raises-1b-at-26b-devin-hits-492m-arr-37o4) |
+| EliseAI | Leasing and healthcare agents | One vertical owned end to end | $350M at $4B. Ours: one vertical (store openings) owned end to end | Housing and health only | 2 / 8 | [Digital Health News](https://www.digitalhealthnews.com/eliseai-raises-350m-at-4b-valuation-to-accelerate-ai-product-development-) |
+| Genspark | All-in-one "super agent", 150+ tools | Speed to revenue | Reported past $100M ARR. Ours: a free plan in minutes that converts | Generalist, shallow on regulated filing | 3 / 7 | [Business Wire](https://stocks.observer-reporter.com/observerreporter/article/bizwire-2026-1-28-genspark-launches-ai-workspace-20-as-it-crosses-100m-arr-and-tops-off-300m-series-b) |
+| Decagon-style rivals: Wonderful | Enterprise agents, local teams in 30+ countries | Embedded local deployment | About $2B. Ours: Chinese HQ, US permits, in both languages | Services-heavy | 2 / 7 | [Globes](https://en.globes.co.il/en/article-1001537395) |
+| Parloa | Enterprise voice agents | Voice at scale | $350M at $3B. Ours: Odelia on the phone with agencies | Contact center only | 2 / 8 | [Tech.eu](https://tech.eu/2026/01/15/parloa-raises-350m-tripling-valuation-to-3bn/) |
+| Armadin | Autonomous offensive-security agent swarm | Proves every finding by running it | $255.5M at $2.5B+. Ours: proof per filing (receipt, confirmation number) | Security only | 1 / 8 | [Unite.AI](https://unite.ai/armadin-raises-255-5m-series-b-at-over-2-5b-valuation-to-scale-its-agentic-security-platform) |
+| Factory | Coding "droids" for enterprises | Agents across the whole lifecycle | Valuations reported from $1.5B to $5B; not settled | Coding only | 1 / 8 | [doolpa](https://doolpa.com/news/factory-ai-150m-series-c-droids-enterprise-coding-april-2026) |
+| Poke | Agent over iMessage and SMS | No app to install | Reported $300M (single outlet). Ours: text to start, no app | Consumer; shallow tools | 3 / 7 | [ecosistemastartup](https://ecosistemastartup.com/?p=85860) |
+| Lindy | No-code agent builder | Templates anyone sets up | Not verified this session | Credit pricing; generic | 2 / 6 | not verified |
+| Hermes Agent (Nous) | Open-source self-improving agent | Writes skills from experience and improves them | Open source and model-agnostic. Ours: a site filed once becomes stored steps, replayed with no model | DIY hosting | 2 / 7 | [Hermes docs](https://hermes-agent.nousresearch.com/docs) |
+| Chai Discovery | AI antibody design | Zero-shot results on hard targets | $130M, about $1.3B. Not an agent for our job | Different field | 0 / n.a. | [eWEEK](https://www.eweek.com/news/chai-discovery-ai-funding/) |
+| Hark | Personal AI interface and hardware (Brett Adcock) | Proactive app before hardware | $700M Series A at $6B. Not comparable yet | Product largely unreleased | 1 / n.a. | [TechCrunch](https://techcrunch.com/2026/05/21/hark-raises-700m-series-a-for-its-secretive-universal-ai-interface/) |
+| **Placetta (Odelia)** | License, permit and registration agent | Plans, fills, files on sites, email and fax, tracks | | No completed real filing yet | **6.5 live, 8.5 built / 7.5** | this repo |
+
+None of the 22 files licenses with agencies; the personal agents (Duet, Muse, Dots, Instinct, Spark, Grok Bot) could
+attempt a form but carry no registry, no per-agency steps and no tracking until approval.
+
+### Gaps filled in this pass
+
+- **Wait instead of asking (Duet, Poke).** The live SF run stopped to ask the owner about a future start date the city
+  refuses. A destination can now say `startNotFuture`; an approved filing with a later start date is held and files
+  itself that morning, and the owner is told, not asked (`logic.ts waitForStart`, migration
+  `20261105091600_filing_wait_until.sql`, tests in `file/logic_test.ts`).
+- **The account wall found before the run, not during it.** CDTFA registers only from a signed-in account (pub 439,
+  and the live run). Its destination no longer opens as a no-login site, so the owner hears once, at approval, that a
+  saved login is needed, instead of the run stalling on Sign Up Now.
+
+Still the biggest gap: one real filing completed and confirmed by an agency.

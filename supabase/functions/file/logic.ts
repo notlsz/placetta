@@ -385,6 +385,32 @@ const extraFiles = (f: Filing) => (f.payload.attachments ?? []).length;
     copy of an ink signature); certified mail never carries it, since a mailed form must be the original. A fee rules
     out email, fax and mail. A fax or a letter carries only the form, so a filing with attachments never goes by fax or
     mail, and an email with more than four goes to the team. */
+/** The business start date on the approved form, when the agency refuses a future one (Dest.startNotFuture) and the
+    approved date is still ahead: the day Odelia files it herself, as YYYY-MM-DD. Otherwise null. Copies what personal
+    agents do when they can (Claude Duet, Poke): wait and act, instead of asking. Only an unambiguous date counts. */
+const START_LABEL = /\b(start(ing|ed)?|began|begin|commence(d|ment)?|opening)\b.*\bdate\b|\bdate\b.*\b(start(ed)?|began|commenced|business began)\b/i;
+export function waitForStart(f: Pick<Filing, "payload">, d: Pick<Dest, "startNotFuture"> | undefined, today: string): string | null {
+  if (!d?.startNotFuture) return null;
+  for (const x of f.payload.fields ?? []) {
+    if (!START_LABEL.test(x.label?.en ?? "")) continue;
+    const day = isoDay(x.value);
+    if (day && day > today) return day;
+  }
+  return null;
+}
+/** YYYY-MM-DD from "2026-11-15" or "11/15/2026"; anything else is not a date we act on. */
+export function isoDay(v: string): string | null {
+  const t = (v ?? "").trim();
+  let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
+  let y: number, mo: number, da: number;
+  if (m) { y = +m[1]; mo = +m[2]; da = +m[3]; }
+  else if ((m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(t))) { y = +m[3]; mo = +m[1]; da = +m[2]; }
+  else return null;
+  const dt = new Date(Date.UTC(y, mo - 1, da));
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== da) return null;
+  return dt.toISOString().slice(0, 10);
+}
+
 export function pick(f: Filing, d: Dest | undefined, env: Env, facts: Facts): Route {
   if (!d) return "team";
   if (d.owner) return "owner";

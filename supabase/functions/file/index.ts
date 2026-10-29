@@ -41,7 +41,7 @@ import { sendEmail as sendSystemEmail, systemMailReady } from "../_shared/email.
 import { suppressedIn } from "../_shared/suppression.ts";
 import { asAgent,
   afterHold, askedToResubmit, type Bi, canFaxSignedFor, canMakeAccount, CHANNEL_SAID, check, DUPLICATE_REF, emailFor, envFrom, fallback, faxFailures, faxFile, faxTo, feeBlocks, type Filing,
-  handBackDue, handoffPacket, hasLoginFor, holds, isForeign, type LogEntry, mailOutcome, mailTo, OWNER_REF, pick, type Refusal, refusalOf, sentByYou, signedCopy,
+  handBackDue, handoffPacket, waitForStart, hasLoginFor, holds, isForeign, type LogEntry, mailOutcome, mailTo, OWNER_REF, pick, type Refusal, refusalOf, sentByYou, signedCopy,
   TEACH_REFUSED, teachRefusal, teamApproved, whyYours, YOURS_REF, selfFileScope, workerOn, workerState,
   type Beat, rerouteLead, wakeable, wakeConfig, wakeMs, wakePlan, waitsOnWorker, WORKER_ASLEEP, checkCents, lobCheckBody,
   canEmailSignedFor, kitAddress, paperFile, signKit, wetAsk, wetPath, type WetPath, captchaPlan, pastRejectionProblems, type PastRejection,
@@ -715,6 +715,15 @@ async function start(f: Filing, req: Request, by: string, resubmit = false) {
   }
   f = await step(f, log("Checked against the agency's requirements", "已按机构要求核对", "check"),
     { channel, agent_state: "running", requirements_checked: true, status: "in_progress" });
+  // The agency refuses a future start date and the approved one is ahead: wait, and file it that morning (agency time is
+  // US, so 15:00 UTC is morning on both coasts). The sweep releases it like any hold; the owner is told, not asked.
+  const startDay = waitForStart(f, d, new Date().toISOString().slice(0, 10));
+  if (startDay) {
+    const when = new Date(`${startDay}T15:00:00Z`).toISOString();
+    return view(await rpcFiling("filing_wait_until", { p_id: f.id, p_at: when,
+      p_en: `The agency only takes a start date of today or earlier, so Odelia files this on ${startDay}, the day the business starts. Nothing for you to do.`,
+      p_zh: `该机构只接受今天或更早的开业日期，因此 Odelia 将在 ${startDay}（企业开业当天）提交。您无需操作。` }));
+  }
   // The undo window: nothing leaves for SEND_HOLD_MINUTES, so the person can take it back. The sweep sends it after.
   if (holds(channel, e)) {
     const held = await holdSend(f, e.holdMinutes);
