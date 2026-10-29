@@ -443,6 +443,8 @@ export const PLAYBOOKS: Playbook[] = [
     verified: null,
     // "Check the box to the left of the inspection you wish to schedule, select a date ... click Request Inspection."
     final: [{ page: "Schedule Inspection", button: "Request Inspection" }],
+    // the date and comments are typed on the page that sends them: there is no separate review page
+    review: "entered",
     // "Click Schedule Inspection" only opens the request form on My Inspections
     nav: [{ page: "My Inspections", button: "Schedule Inspection" }],
     pay: ["Pay Fees", "Payment"],
