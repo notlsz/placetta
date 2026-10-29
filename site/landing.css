@@ -3981,3 +3981,15 @@ body main .faqcta .btn,body main .ctab .btn,body main .prbtn,body .hdr .btn{min-
 @media (max-width:639px){.trl{gap:12px 20px}}
 @media (min-width:1024px){.trl{flex-wrap:nowrap;gap:22px;justify-content:space-between}.trl li{font-size:var(--fs-c);white-space:nowrap}}
 .trl{margin-bottom:24px}
+/* land99: city suggestions under the "Where are you opening?" boxes, one row per city, icon centered with its two lines */
+.cpkw{position:relative}
+.cpk{position:fixed;z-index:60;box-sizing:border-box;max-height:420px;overflow-y:auto;padding:8px;border-radius:16px;background:#fff;color:var(--ink);box-shadow:0 12px 40px rgba(15,27,51,.16),0 2px 6px rgba(15,27,51,.06);text-align:left}
+.cpkh{margin:0;padding:8px 12px 6px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.cpko{display:flex;align-items:center;gap:14px;min-height:60px;padding:6px 12px;border-radius:12px;cursor:pointer}
+.cpko.on,.cpko:hover{background:var(--bg)}
+.cpki{flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;overflow:hidden}
+.cpki svg{display:block}
+.cpkt{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0}
+.cpkn{font-size:15px;line-height:20px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cpkn b{font-weight:600}
+.cpks{font-size:13px;line-height:18px;color:var(--muted)}

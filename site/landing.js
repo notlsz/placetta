@@ -2598,3 +2598,147 @@ addEventListener("popstate", () => { const sec = PATH_SEC[location.pathname.repl
   label();
   document.querySelectorAll("[data-lang]").forEach(x => x.addEventListener("click", () => setTimeout(label, 0)));
 })();
+/* land99:js (Oct 29): the "Where are you opening?" boxes suggest places the way Airbnb's search does. Focus shows the
+   most asked-for US cities, typing narrows them (English or Chinese, a neighborhood, a state). Each city has its own
+   line icon, drawn here: a landmark or thing the place is known for. Picking one fills the box; nothing is sent. */
+(function cityPick(){
+  const P = (d, x) => '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + d + '"/>' + (x || "") + '</svg>';
+  const C = (cx, cy, r) => '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '"/>';
+  // [name, Chinese, state, state in Chinese, icon, other names people type]
+  // Airbnb-style suggestion art: a small flat, colored illustration of each city on a soft tile of its own color.
+  // [tile color, shapes in a 32 box]
+  const ART = {
+    "New York City": ["#E6EEF9", '<rect x="15.3" y="2.5" width="1.4" height="5" rx=".7" fill="#7D8AA0"/><rect x="13.5" y="7" width="5" height="4.5" rx=".6" fill="#D6C29A"/><rect x="11.5" y="11" width="9" height="5" rx=".6" fill="#E2D2AE"/><rect x="9" y="15.5" width="14" height="14" rx=".8" fill="#EADDBE"/><rect x="16" y="11" width="4.5" height="5" fill="#CDB68A"/><rect x="16" y="15.5" width="7" height="14" fill="#D6C29A"/><path d="M11 18.5h2v2h-2zM11 22.5h2v2h-2zM11 26.5h2v2h-2zM14 18.5h1.5v2H14zM14 22.5h1.5v2H14zM18 18.5h2v2h-2zM18 22.5h2v2h-2zM18 26.5h2v2h-2zM14.5 12.5h1.5v2h-1.5z" fill="#FFE59A"/>'],
+    "Los Angeles": ["#FFE9DA", '<circle cx="21" cy="12" r="7" fill="#FFB37A"/><path d="M2 26c6-3 22-3 28 0v4H2z" fill="#F2C48B"/><path d="M15 29c.4-5 .9-10 .3-15" stroke="#A8693A" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M15.5 13c-3-3.5-7.5-3.8-10.5-1.5 3.5-.4 6.5.3 10.5 1.5zM15.5 13c2.5-4 7-5 10.5-3-3.5 0-7 1-10.5 3zM15.5 13c-1-4-4-6.5-7.5-6.5 3 1.3 5.3 3.5 7.5 6.5zM15.5 13c1.5-3.5 4.5-5.5 7.5-5.5-2.7 1.3-5.2 3.2-7.5 5.5zM15.5 13c-3.3.2-6 2.3-7 5 2.2-2 4.6-3.6 7-5zM15.5 13c3 .8 5.3 3.2 5.8 6-1.8-2.4-3.8-4.4-5.8-6z" fill="#38A169"/>'],
+    "San Francisco": ["#E3EFFA", '<path d="M0 22h32v10H0z" fill="#7DB4E0"/><path d="M0 24.5c3 0 3-1 6-1s3 1 6 1 3-1 6-1 3 1 6 1 3-1 6-1 3 1 4 1" stroke="#A9CFEE" stroke-width="1.2" fill="none"/><path d="M2 20h28v2.2H2z" fill="#D9472B"/><path d="M8 5h2.6v22H8zM21.4 5H24v22h-2.6z" fill="#E8552F"/><path d="M8 9h2.6M21.4 9H24M8 14h2.6M21.4 14H24" stroke="#B8381F" stroke-width="1"/><path d="M9.3 6c3 9 10.4 9 13.4 0M1 13c4 2 6.5 4.5 8.3 7M22.7 20c1.8-2.5 4.3-5 8.3-7" stroke="#E8552F" stroke-width="1.2" fill="none"/><path d="M12 12.5V20M14.5 14V20M17.5 14V20M20 12.5V20M4 15v5M6.5 17v3M25.5 17v3M28 15v5" stroke="#E8552F" stroke-width=".7"/>'],
+    "San Jose": ["#E5F5EC", '<path d="M9 5v3M13 5v3M17 5v3M21 5v3M9 24v3M13 24v3M17 24v3M21 24v3M5 10h3M5 14h3M5 18h3M5 22h3M24 10h3M24 14h3M24 18h3M24 22h3" stroke="#9AA7B7" stroke-width="1.6" stroke-linecap="round"/><rect x="7" y="7" width="18" height="18" rx="3" fill="#2E3A4D"/><rect x="11" y="11" width="10" height="10" rx="1.6" fill="#3DCB8B"/><path d="M13 14h6M13 16.5h4M13 19h5" stroke="#1F8F5C" stroke-width="1.2" stroke-linecap="round"/><circle cx="9.5" cy="9.5" r=".9" fill="#5C6B80"/>'],
+    "Houston": ["#ECE9FC", '<path d="M13 23.5c0 3 1.5 5.5 3 7 1.5-1.5 3-4 3-7z" fill="#FF9F1C"/><path d="M14.5 23.5c0 2 .7 3.6 1.5 4.6.8-1 1.5-2.6 1.5-4.6z" fill="#FFD43B"/><path d="M11.5 17l-4 4v4l4-2.5zM20.5 17l4 4v4l-4-2.5z" fill="#E5484D"/><path d="M16 2c4 3 5.5 8 5.5 14 0 3-.5 6-1 8h-9c-.5-2-1-5-1-8C10.5 10 12 5 16 2z" fill="#F4F6FB"/><path d="M16 2c4 3 5.5 8 5.5 14 0 3-.5 6-1 8H16z" fill="#DDE2EE"/><path d="M16 2c1.9 1.4 3.2 3.2 4.1 5.5h-8.2C12.8 5.2 14.1 3.4 16 2z" fill="#E5484D"/><circle cx="16" cy="13" r="2.6" fill="#5B8DEF" stroke="#C3CCDF" stroke-width="1"/><path d="M15 17v7h2v-7z" fill="#C5CCDB"/>'],
+    "Seattle": ["#E2F1F6", '<path d="M0 26l9-11 6 6 5-5 12 10v6H0z" fill="#C9E0EA"/><path d="M9 15l-2.5 3 2.5-.6 2.4 1z" fill="#fff"/><path d="M16 2v5" stroke="#8C97A8" stroke-width="1.4" stroke-linecap="round"/><path d="M9 9.5h14l-2.5 3h-9z" fill="#F2A541"/><path d="M10.5 8h11l1.5 1.5H9z" fill="#E08F2A"/><path d="M14.6 12.5L12 30M17.4 12.5L20 30" stroke="#7D899B" stroke-width="1.6" stroke-linecap="round"/><path d="M13 19h6M12.5 23h7" stroke="#7D899B" stroke-width="1"/><path d="M8 30h16" stroke="#6E7A8C" stroke-width="1.6" stroke-linecap="round"/>'],
+    "Chicago": ["#EEF1F6", '<path d="M3 20V9h3v-3h3v14zM10 20V4h4v16zM15 20V8h3v12zM19 20v-9h4v9zM24 20V6h3v3h2v11z" fill="#C3CCDA"/><path d="M4 23c0-5 5-8 12-8s12 3 12 8c0 2.6-2.4 4-5 4-1.5 0-3-1.2-7-1.2S10.5 27 9 27c-2.6 0-5-1.4-5-4z" fill="#A9B5C6"/><path d="M4 23c0-5 5-8 12-8s12 3 12 8c-5-3-19-3-24 0z" fill="#D7DEE8"/><path d="M9 18.5c3-1.4 10-1.4 14 .3" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M2 29h28" stroke="#9AA6B8" stroke-width="1.4" stroke-linecap="round"/>'],
+    "Boston": ["#E3EEF9", '<path d="M0 26c4-1.5 8-1.5 12 0s8 1.5 12 0 6-1 8-.5V32H0z" fill="#5E9ED6"/><path d="M5 7l4 1.5M27 7l-4 1.5" stroke="#FFD34D" stroke-width="1.6" stroke-linecap="round"/><path d="M13 9h6l1.8 18h-9.6z" fill="#F6F7FA"/><path d="M12.6 13h6.8l.4 4h-7.6zM11.9 21h8.2l.4 4h-9z" fill="#E5484D"/><rect x="13.5" y="5" width="5" height="4" rx="1" fill="#FFD34D"/><path d="M12.5 5l3.5-3 3.5 3z" fill="#E5484D"/><path d="M12 9h8" stroke="#2E3A4D" stroke-width="1.2" stroke-linecap="round"/>'],
+    "Miami": ["#FFE7EE", '<path d="M0 26c4-1.5 8-1.5 12 0s8 1.5 12 0 6-1 8-.5V32H0z" fill="#8FD6E8"/><path d="M15 20v8M15 23.5l-3 2.5" stroke="#F06A8D" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M11 17c3-4.5 12-5 16-.5-1.5 4.5-7.5 6.5-13 5-2.6-.7-3.8-2.5-3-4.5z" fill="#FF8FAE"/><path d="M17 15c3.5-1 7.5-.3 10 1.5-2.5 1-6 1.2-10-1.5z" fill="#FF6F96"/><path d="M12.5 7.5c-3 2.5-1.5 5 0 7.5s1.2 4-.8 5" stroke="#FF8FAE" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="12" cy="6" r="2.4" fill="#FF8FAE"/><path d="M13.8 5.5l3.5 1.5-2.2 1.6z" fill="#2E3A4D"/><circle cx="11.6" cy="5.6" r=".6" fill="#2E3A4D"/>'],
+    "Dallas": ["#FFF2D6", '<path d="M16 3.5l3.7 7.8 8.5.9-6.4 5.8 1.8 8.4L16 22.1l-7.6 4.3 1.8-8.4-6.4-5.8 8.5-.9z" fill="#F5B82E"/><path d="M16 3.5l3.7 7.8 8.5.9-6.4 5.8 1.8 8.4L16 22.1z" fill="#E39E12"/><path d="M16 9.5l1.8 3.8 4.1.4-3.1 2.8.9 4.1-3.7-2.1z" fill="#F7C95A" opacity=".7"/>'],
+    "Austin": ["#ECE6F8", '<circle cx="22" cy="10" r="6" fill="#FFE08A"/><circle cx="24" cy="8.5" r="1.2" fill="#F5CC5C"/><path d="M0 27l5-3 4 2 5-4 5 3 5-2 8 3v6H0z" fill="#B7A6DB"/><path d="M16 13l-1.3-2v3.3c-1.4 0-2 1-2 2.6-2-2-5.4-2.4-10-1.3 2.7 1.3 4 3.3 4 6 1.3-1.3 3.4-1.3 4.7 0 .7-1.3 2-2 3.3-1.3.4 2 .9 3.3 1.3 4 .4-.7.9-2 1.3-4 1.3-.7 2.6 0 3.3 1.3 1.3-1.3 3.4-1.3 4.7 0 0-2.7 1.3-4.7 4-6-4.6-1.1-8-.7-10 1.3 0-1.6-.6-2.6-2-2.6V11z" fill="#3B3152"/>'],
+    "Washington, DC": ["#E7EDF8", '<path d="M16 2v3" stroke="#8792A6" stroke-width="1.2"/><path d="M12.5 5.5h7l-1 2h-5z" fill="#E3E8F0"/><path d="M10 12a6 6 0 0 1 12 0z" fill="#F8F9FC"/><path d="M16 6a6 6 0 0 1 6 6h-6z" fill="#DCE3EE"/><rect x="9" y="12" width="14" height="3" fill="#E6EBF3"/><path d="M3 17h26l-2-2H5z" fill="#F1F4F9"/><rect x="3" y="17" width="26" height="10" fill="#F8F9FC"/><path d="M5.5 18.5v7M9 18.5v7M12.5 18.5v7M16 18.5v7M19.5 18.5v7M23 18.5v7M26.5 18.5v7" stroke="#C5CEDD" stroke-width="1.4"/><path d="M1 29h30" stroke="#9AA6B8" stroke-width="1.6" stroke-linecap="round"/><path d="M11 12.5v2.5M14 12.5v2.5M18 12.5v2.5M21 12.5v2.5" stroke="#C5CEDD" stroke-width=".9"/>'],
+    "Atlanta": ["#FFEAE0", '<path d="M16 10c-6.5 0-10.5 4.5-10.5 10S10 30 16 30s10.5-4.5 10.5-10S22.5 10 16 10z" fill="#FFA06E"/><path d="M16 10c6.5 0 10.5 4.5 10.5 10S22 30 16 30c2.5-3 3-12.5 0-20z" fill="#FF7F5C"/><ellipse cx="11.5" cy="16" rx="2.2" ry="3" fill="#FFC3A0" opacity=".8"/><path d="M16 10c0-2.5.8-4 2-5.5" stroke="#8A5A33" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M17.5 7.5c2.5-3.5 6.5-4 9-2.5-1.5 3-5.5 4.5-9 2.5z" fill="#46B06A"/>'],
+    "Philadelphia": ["#F6EEDF", '<rect x="5" y="4" width="22" height="3" rx="1.2" fill="#7A5230"/><path d="M16 7v3" stroke="#6B4729" stroke-width="2"/><path d="M9 25c1.5-2.5 1.5-6 1.5-10a5.5 5.5 0 0 1 11 0c0 4 0 7.5 1.5 10z" fill="#C08A52"/><path d="M16 9.5a5.5 5.5 0 0 1 5.5 5.5c0 4 0 7.5 1.5 10h-7z" fill="#A06C38"/><rect x="7" y="24.5" width="18" height="2.6" rx="1.3" fill="#8C5C2F"/><path d="M15.2 13.5l1.4 2.5-1.6 2.5 1.4 2.6" stroke="#4A3220" stroke-width="1.1" fill="none" stroke-linecap="round"/><circle cx="16" cy="29" r="1.6" fill="#7A5230"/>'],
+    "Las Vegas": ["#FBE5F1", '<path d="M16 5l10 4.5-10 4.5-10-4.5z" fill="#F36B70"/><path d="M6 9.5l10 4.5v13l-10-4.5z" fill="#E5484D"/><path d="M26 9.5l-10 4.5v13l10-4.5z" fill="#C7353A"/><ellipse cx="16" cy="9.5" rx="1.5" ry=".8" fill="#fff"/><circle cx="9" cy="14.5" r="1.1" fill="#fff"/><circle cx="13" cy="20.5" r="1.1" fill="#fff"/><circle cx="19.5" cy="16" r="1.1" fill="#fff"/><circle cx="22.5" cy="14.5" r="1.1" fill="#fff"/><circle cx="19.5" cy="22" r="1.1" fill="#fff"/><circle cx="22.5" cy="20.5" r="1.1" fill="#fff"/>'],
+    "Irvine": ["#FFF0D9", '<circle cx="16" cy="18" r="10" fill="#FF9F1C"/><path d="M16 8a10 10 0 0 1 0 20c4-3 4.5-17 0-20z" fill="#F28C0F"/><ellipse cx="12" cy="14" rx="2.4" ry="1.6" fill="#FFC56B" transform="rotate(-30 12 14)"/><path d="M16 8.5c0-2 .5-3.2 1.5-4.5" stroke="#7A5230" stroke-width="1.4" stroke-linecap="round"/><path d="M17 6c2-3 6-3.5 8.5-2-1.5 3-5.5 4-8.5 2z" fill="#46B06A"/>'],
+    "Phoenix": ["#FFEBDB", '<circle cx="23" cy="9" r="5" fill="#FFC15E"/><path d="M0 27c6-2 26-2 32 0v5H0z" fill="#EFBF7A"/><path d="M13 28V8a3 3 0 0 1 6 0v20z" fill="#3FA66B"/><path d="M16 5a3 3 0 0 1 3 3v20h-3z" fill="#2E8C55"/><path d="M13 18H9.5A2.5 2.5 0 0 1 7 15.5V12a1.5 1.5 0 0 1 3 0v3h3zM19 15h3v-3.5a1.5 1.5 0 0 1 3 0V14a3.5 3.5 0 0 1-3.5 3.5H19z" fill="#3FA66B"/><path d="M14.5 9v17M17.5 9v17" stroke="#2A7D4B" stroke-width=".6"/><circle cx="16" cy="4.8" r="1.2" fill="#FF6F96"/>'],
+    "Jersey City": ["#E3EFFA", '<path d="M4 18v-6h3v6zM8 18V8h3v10zM12 18v-8h2.5v8zM20 18V9h3v9zM24 18v-5h3v5z" fill="#BFCBDB"/><path d="M15 18V5h4v13z" fill="#A9B7CB"/><path d="M0 24h32v8H0z" fill="#7DB4E0"/><path d="M5 20.5l2.5 5h17l2.5-5z" fill="#F5F7FB"/><path d="M5 20.5h22l-.8 1.6H5.8z" fill="#2F6FB8"/><rect x="10" y="16.5" width="12" height="4" rx="1" fill="#FFFFFF"/><path d="M11.5 18h2M15 18h2M18.5 18h2" stroke="#5B8DEF" stroke-width="1.3" stroke-linecap="round"/><rect x="14" y="13.5" width="4" height="3" fill="#E5484D"/><path d="M0 27c3 0 3-1 6-1s3 1 6 1 3-1 6-1 3 1 6 1 3-1 6-1" stroke="#A9CFEE" stroke-width="1.2" fill="none"/>'],
+    "Cupertino": ["#E9F6E5", '<path d="M3 28c6-2 20-2 26 0v4H3z" fill="#A8D88F"/><path d="M15 28v-9" stroke="#8A5A33" stroke-width="2.4" stroke-linecap="round"/><path d="M15 22l-3-2.5M15 21l3-2.5" stroke="#8A5A33" stroke-width="1.4" stroke-linecap="round"/><circle cx="15" cy="12" r="9" fill="#5DBB63"/><circle cx="18" cy="10" r="5.5" fill="#6FCB72"/><circle cx="11" cy="10" r="1.6" fill="#FF8A3D"/><circle cx="18" cy="15" r="1.6" fill="#FF8A3D"/><circle cx="14.5" cy="16" r="1.4" fill="#FF8A3D"/><circle cx="19" cy="8" r="1.4" fill="#FF8A3D"/>'],
+    "Milpitas": ["#FFF5D4", '<path d="M16 3c-3 0-4.5 4.5-4.5 11.5S13 26 16 26s4.5-4.5 4.5-11.5S19 3 16 3z" fill="#F7C948"/><path d="M16 3c3 0 4.5 4.5 4.5 11.5S19 26 16 26z" fill="#ECB52A"/><path d="M12.2 8h7.6M11.6 12h8.8M11.6 16h8.8M12 20h8M14 4.5v20M18 4.5v20" stroke="#D99E1E" stroke-width=".7" opacity=".8"/><path d="M11.5 15c-3.5 0-5.5 3.5-6.5 11 4.5 0 8-1.8 10.5-5.5zM20.5 15c3.5 0 5.5 3.5 6.5 11-4.5 0-8-1.8-10.5-5.5z" fill="#5FB84E"/><path d="M16 26v3" stroke="#4E9A40" stroke-width="2" stroke-linecap="round"/>'],
+    "Daly City": ["#EDF1F6", '<path d="M0 22c6-6 14-7 20-4s9 2 12 0v14H0z" fill="#9ACB8B"/><path d="M4 22h4.5v4H4zM9.5 21h4.5v5H9.5zM15 22h4.5v4H15zM20.5 21H25v5h-4.5zM26 22h4v4h-4z" fill="#FFB3C1"/><path d="M9.5 21h4.5v5H9.5zM20.5 21H25v5h-4.5z" fill="#A6D3F2"/><path d="M15 22h4.5v4H15z" fill="#FFE08A"/><path d="M3.5 22l2.75-2 2.75 2zM9 21l2.75-2 2.75 2zM14.5 22l2.75-2 2.75 2zM20 21l2.75-2 2.75 2zM25.5 22l2.25-2 2.25 2z" fill="#E07A8B"/><path d="M7 14a4 4 0 0 1 .8-7.9 5.5 5.5 0 0 1 10.6 1.4A3.4 3.4 0 0 1 18.5 14z" fill="#fff"/><path d="M17 16a3 3 0 0 1 .6-5.9 4 4 0 0 1 7.8 1A2.5 2.5 0 0 1 25.5 16z" fill="#fff" opacity=".85"/>'],
+    "San Diego": ["#E2F3FB", '<circle cx="24" cy="8" r="4" fill="#FFC15E"/><path d="M0 25h32v7H0z" fill="#5DB3E4"/><path d="M15 4v18" stroke="#7A5230" stroke-width="1.2"/><path d="M16 5l9 15h-9z" fill="#FFFFFF"/><path d="M14 8l-7 12h7z" fill="#FF8A65"/><path d="M5 22h22l-3 4.5H8z" fill="#2F6FB8"/><path d="M0 28c3 0 3-1 6-1s3 1 6 1 3-1 6-1 3 1 6 1 3-1 6-1" stroke="#9AD3F0" stroke-width="1.2" fill="none"/>'],
+    "Denver": ["#E5EFFA", '<circle cx="25" cy="7" r="3.5" fill="#FFD166"/><path d="M1 28l9-16 5 7 4-6 12 15z" fill="#7E9CCB"/><path d="M10 12l-3.2 5.7 2-1 1.7 1.3 1.6-1.6 1.6.9zM19 13l-2.4 3.6 1.6-.4 1 1 1.3-1 1 .4z" fill="#FFFFFF"/><path d="M1 28l6-7 5 4 6-5 6 4 7-2v6H1z" fill="#4F6E9E"/><path d="M1 30h30" stroke="#3D5A86" stroke-width="2" stroke-linecap="round"/>'],
+    "Nashville": ["#FCEBDC", '<path d="M18.5 13.5L26 6" stroke="#6B4A2B" stroke-width="2.6" stroke-linecap="round"/><path d="M24.5 3.5l4 4-2.5 1.5-3-3z" fill="#4A3320"/><path d="M18.5 13.5c-2-2-5.3-1.6-6.6.6-.8 1.3-.3 2.4-1.6 3.2-1.6.9-3.7.5-4.8 2.4-1.3 2.4 0 5.3 2.1 6.6s5 1.1 6.4-1c1-1.7.6-3.4 1.6-4.8.8-1 2.1-.8 3.2-1.8 1.8-1.6 1.7-3.8-.3-5.2z" fill="#E0913F"/><path d="M18.8 13.7c2 1.4 2.1 3.6.3 5.2-1.1 1-2.4.8-3.2 1.8-1 1.4-.6 3.1-1.6 4.8-1.4 2.1-4.3 2.3-6.4 1z" fill="#C2722A"/><circle cx="12.6" cy="19.4" r="1.8" fill="#4A3320"/><path d="M8.5 23.5l1.8 1.8" stroke="#4A3320" stroke-width="1.6" stroke-linecap="round"/><path d="M10 22l14-14" stroke="#F6E1C3" stroke-width=".5"/>'],
+    "Portland": ["#FDE7EC", '<path d="M16 17v13" stroke="#3E9A5C" stroke-width="1.8" stroke-linecap="round"/><path d="M16 24c-3.5 0-6-1.5-7-4.5 3.5 0 5.7 1.5 7 4.5zM16 26c3 0 5.5-1.3 6.5-4-3.2 0-5.3 1.3-6.5 4z" fill="#46B06A"/><path d="M16 3.5c-4.5 0-7.5 3.2-7.5 7.2S11.5 18 16 18s7.5-3.3 7.5-7.3-3-7.2-7.5-7.2z" fill="#F0506A"/><path d="M16 3.5c4.5 0 7.5 3.2 7.5 7.2S20.5 18 16 18c2.5-2.5 3.5-11.5 0-14.5z" fill="#D63A55"/><path d="M16 7.5c-2 0-3.3 1.4-3.3 3s1.3 3 3.3 3 3-1.3 3-3M12 5.5c1.8 1 3 3 3 5.5M20.5 6.5c-1 .8-1.5 2-1.6 3.4" stroke="#A8253D" stroke-width="1" fill="none" stroke-linecap="round"/>'],
+    "Honolulu": ["#DFF5F7", '<circle cx="24" cy="8" r="4.5" fill="#FFC15E"/><path d="M2 22c3.5 0 5-11 12-11 4.5 0 6 3 6 6-3-1.5-6 0-6 3 0 4 6 5 10 2.5 1.5 3 5 3.5 6 3.5v6H2z" fill="#2BA4C8"/><path d="M14 11c4.5 0 6 3 6 6-3-1.5-6 0-6 3-1.5-3-1.5-6.5 0-9z" fill="#E8F8FB"/><path d="M2 28c3 0 3-1 6-1s3 1 6 1 3-1 6-1 3 1 6 1 3-1 6-1" stroke="#9BDDEB" stroke-width="1.3" fill="none"/>'],
+  };
+  const A = n => '<svg viewBox="0 0 32 32" width="44" height="44" fill="none" aria-hidden="true"><rect width="32" height="32" fill="' + ART[n][0] + '"/>' + ART[n][1] + '</svg>';
+  const CITIES = [
+    ["New York City", "纽约", "New York", "纽约州", A("New York City"), ["nyc", "new york", "manhattan", "brooklyn", "queens", "flushing", "法拉盛", "纽约市"]],
+    ["Los Angeles", "洛杉矶", "California", "加利福尼亚州", A("Los Angeles"), ["la", "l a", "hollywood", "alhambra", "arcadia", "洛杉矶县"]],
+    ["San Francisco", "旧金山", "California", "加利福尼亚州", A("San Francisco"), ["sf", "s f", "san fran", "三藩市"]],
+    ["San Jose", "圣何塞", "California", "加利福尼亚州", A("San Jose"), ["silicon valley", "硅谷", "圣荷西"]],
+    ["Houston", "休斯顿", "Texas", "得克萨斯州", A("Houston"), ["休士顿"]],
+    ["Seattle", "西雅图", "Washington", "华盛顿州", A("Seattle"), ["bellevue", "贝尔维尤"]],
+    ["Chicago", "芝加哥", "Illinois", "伊利诺伊州", A("Chicago"), ["chi", "芝城"]],
+    ["Boston", "波士顿", "Massachusetts", "马萨诸塞州", A("Boston"), ["cambridge", "剑桥"]],
+    ["Miami", "迈阿密", "Florida", "佛罗里达州", A("Miami"), ["miami beach", "迈阿密海滩"]],
+    ["Dallas", "达拉斯", "Texas", "得克萨斯州", A("Dallas"), ["plano", "fort worth", "普莱诺"]],
+    ["Austin", "奥斯汀", "Texas", "得克萨斯州", A("Austin"), []],
+    ["Washington, DC", "华盛顿特区", "District of Columbia", "哥伦比亚特区", A("Washington, DC"), ["dc", "d c", "washington dc", "华府"]],
+    ["Atlanta", "亚特兰大", "Georgia", "佐治亚州", A("Atlanta"), []],
+    ["Philadelphia", "费城", "Pennsylvania", "宾夕法尼亚州", A("Philadelphia"), ["philly"]],
+    ["Las Vegas", "拉斯维加斯", "Nevada", "内华达州", A("Las Vegas"), ["vegas", "赌城"]],
+    ["Irvine", "尔湾", "California", "加利福尼亚州", A("Irvine"), ["orange county", "oc", "橙县", "costa mesa"]],
+    ["Phoenix", "凤凰城", "Arizona", "亚利桑那州", A("Phoenix"), ["scottsdale", "tempe"]],
+    ["Jersey City", "泽西市", "New Jersey", "新泽西州", A("Jersey City"), ["edison", "爱迪生"]],
+    ["Cupertino", "库比蒂诺", "California", "加利福尼亚州", A("Cupertino"), []],
+    ["Milpitas", "米尔皮塔斯", "California", "加利福尼亚州", A("Milpitas"), []],
+    ["Daly City", "戴利城", "California", "加利福尼亚州", A("Daly City"), []],
+    ["San Diego", "圣地亚哥", "California", "加利福尼亚州", A("San Diego"), ["圣迭戈"]],
+    ["Denver", "丹佛", "Colorado", "科罗拉多州", A("Denver"), ["boulder"]],
+    ["Nashville", "纳什维尔", "Tennessee", "田纳西州", A("Nashville"), []],
+    ["Portland", "波特兰", "Oregon", "俄勒冈州", A("Portland"), []],
+    ["Honolulu", "檀香山", "Hawaii", "夏威夷州", A("Honolulu"), ["hawaii", "夏威夷", "火奴鲁鲁"]],
+  ];
+  const ABBR = {"New York":"ny","California":"ca","Texas":"tx","Washington":"wa","Illinois":"il","Massachusetts":"ma","Florida":"fl","District of Columbia":"dc","Georgia":"ga","Pennsylvania":"pa","Nevada":"nv","Arizona":"az","New Jersey":"nj","Colorado":"co","Tennessee":"tn","Oregon":"or","Hawaii":"hi"};
+  const POPULAR = 8;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const fold = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[.,，]/g, " ").replace(/\s+/g, " ").trim();
+  const keysOf = c => [c[0], c[1], ...c[5]].map(fold);
+  function score(q, c){
+    const f = fold(q); if (!f) return 1;
+    const ks = keysOf(c), st = [fold(c[2]), c[3], ABBR[c[2]] || ""];
+    if (fold(c[0]).startsWith(f) || c[1].startsWith(f)) return 5;
+    if (ks.some(k => k.startsWith(f))) return 4;
+    if (ks.some(k => k.includes(" " + f) || (/[㐀-鿿]/.test(f) && k.includes(f)))) return 3;
+    // "san jose ca", "austin, texas": the city, then its state
+    const ws = f.split(" ");
+    for (let i = ws.length - 1; i > 0; i--){ const a = ws.slice(0, i).join(" "), b = ws.slice(i).join(" ");
+      if (ks.some(k => k.startsWith(a)) && st.some(s => s && s.startsWith(b))) return 3; }
+    if (f.length >= 2 && st.some(s => s && s.startsWith(f))) return 2;
+    return 0;
+  }
+  const zh = () => (document.documentElement.lang || "").startsWith("zh");
+  const nameOf = c => zh() ? c[1] : c[0];
+  const subOf = c => zh() ? c[3] : c[2];
+  const bold = (label, q) => { const f = q.trim(); if (!f) return esc(label); const i = label.toLowerCase().indexOf(f.toLowerCase());
+    return i < 0 ? esc(label) : esc(label.slice(0, i)) + "<b>" + esc(label.slice(i, i + f.length)) + "</b>" + esc(label.slice(i + f.length)); };
+
+  ["st-hero", "st-final"].forEach(id => {
+    const inp = document.getElementById(id); if (!inp) return;
+    const wrap = inp.closest(".stwrap"), form = inp.closest("form");
+    const box = document.createElement("div"); box.className = "cpk"; box.hidden = true; box.id = id + "-list"; box.setAttribute("role", "listbox");
+    document.body.appendChild(box);
+    inp.setAttribute("role", "combobox"); inp.setAttribute("aria-autocomplete", "list"); inp.setAttribute("aria-expanded", "false"); inp.setAttribute("aria-controls", box.id);
+    let rows = [], act = -1, picked = false;
+    function render(){
+      const q = inp.value;
+      rows = q.trim() ? CITIES.map((c, i) => ({c, n: score(q, c), i})).filter(x => x.n > 0).sort((a, b) => b.n - a.n || a.i - b.i).slice(0, 6).map(x => x.c) : CITIES.slice(0, POPULAR);
+      if (!rows.length || (rows.length === 1 && fold(nameOf(rows[0])) === fold(q))) { close(); return; }
+      act = q.trim() ? 0 : -1;
+      box.innerHTML = (q.trim() ? "" : '<p class="cpkh">' + (zh() ? "热门开店城市" : "Popular places to open") + "</p>") +
+        rows.map((c, i) => '<div class="cpko' + (i === act ? " on" : "") + '" role="option" id="' + id + "-o" + i + '" aria-selected="' + (i === act) + '" data-i="' + i + '"><span class="cpki">' + c[4] + '</span><span class="cpkt"><span class="cpkn">' + bold(nameOf(c), q) + '</span><span class="cpks">' + esc(subOf(c)) + "</span></span></div>").join("");
+      box.hidden = false; inp.setAttribute("aria-expanded", "true"); paintAct();
+      place();
+    }
+    // the list floats over the page (the hero clips anything inside it), under the box, or above it when there's no room
+    function place(){
+      if (box.hidden) return;
+      const r = form.getBoundingClientRect(), need = Math.min(box.scrollHeight, 420) + 12;
+      // room below the box, and above it under the fixed site header
+      const below = innerHeight - r.bottom - 16, above = r.top - 96;
+      const up = below < Math.min(need, 240) && above > below;
+      box.style.maxHeight = Math.max(160, Math.min(420, up ? above : below)) + "px";
+      box.style.left = r.left + "px"; box.style.width = r.width + "px";
+      box.style.top = up ? "auto" : (r.bottom + 8) + "px";
+      box.style.bottom = up ? (innerHeight - r.top + 8) + "px" : "auto";
+    }
+    addEventListener("scroll", place, {passive: true}); addEventListener("resize", place);
+    function paintAct(){ [...box.querySelectorAll(".cpko")].forEach((o, i) => { o.classList.toggle("on", i === act); o.setAttribute("aria-selected", String(i === act)); });
+      if (act >= 0) inp.setAttribute("aria-activedescendant", id + "-o" + act); else inp.removeAttribute("aria-activedescendant"); }
+    function close(){ box.hidden = true; inp.setAttribute("aria-expanded", "false"); inp.removeAttribute("aria-activedescendant"); act = -1; }
+    function pick(i){ const c = rows[i]; if (!c) return; inp.value = nameOf(c); picked = true; close();
+      inp.dispatchEvent(new Event("input", {bubbles: true}));
+      if (typeof track === "function") track("city_suggestion_pick", {source: form.dataset.src, city: c[0], typed: !!inp.value}); inp.focus(); }
+    inp.addEventListener("focus", () => { if (!picked) render(); });
+    inp.addEventListener("click", () => { if (box.hidden) render(); });
+    inp.addEventListener("input", e => { if (e.isTrusted) { picked = false; render(); } });
+    inp.addEventListener("keydown", e => {
+      if (box.hidden) { if (e.key === "ArrowDown") { render(); e.preventDefault(); } return; }
+      if (e.key === "ArrowDown") { act = Math.min(rows.length - 1, act + 1); paintAct(); e.preventDefault(); }
+      else if (e.key === "ArrowUp") { act = Math.max(-1, act - 1); paintAct(); e.preventDefault(); }
+      else if (e.key === "Enter" && act >= 0) { e.preventDefault(); pick(act); }
+      else if (e.key === "Escape") { close(); e.stopPropagation(); }
+      else if (e.key === "Tab") close();
+    });
+    // pointerdown, not click, so the pick lands before the input's blur closes the list
+    box.addEventListener("pointerdown", e => { const o = e.target.closest(".cpko"); if (o) { e.preventDefault(); pick(+o.dataset.i); } });
+    inp.addEventListener("blur", () => setTimeout(close, 120));
+    form.addEventListener("submit", () => close());
+    if (wrap) wrap.classList.add("cpkw");
+  });
+})();
