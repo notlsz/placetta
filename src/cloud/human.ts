@@ -33,9 +33,15 @@ let widget: { id: string; t: Widget } | null = null;
 let ready: { token: string; at: number } | null = null;
 let waiting: ((t: string | null) => void)[] = [];
 let failures = 0;
+/** Cloudflare is showing its box and waiting for a click: no deadline runs out and nothing resets it meanwhile. */
+let interactive = false;
+/** A check is under way (executed, no answer yet): a second request joins it instead of resetting it. */
+let pending = false;
 
 /** For tests: swap the key, the document and the clock, and forget everything loaded. */
-export function configureHuman(e: Env) { env = e; loading = null; widget = null; ready = null; waiting = []; failures = 0; }
+export function configureHuman(e: Env) { env = e; loading = null; widget = null; ready = null; waiting = []; failures = 0; interactive = false; pending = false; }
+/** True while Cloudflare's box is on screen waiting for the person (the sign-in screen says "tick the box below"). */
+export const humanWaiting = () => interactive;
 /** True when a site key is set, so tokens are asked for. */
 export const humanCheckOn = () => !!env.siteKey;
 /** How many times a token couldn't be had (script blocked, Cloudflare unreachable, an error): for the sign-in screen. */
@@ -79,10 +85,12 @@ async function mount(): Promise<{ id: string; t: Widget } | null> {
     const id = t.render(box, {
       sitekey: env.siteKey, action: "auth", appearance: "interaction-only", execution: "execute", size: "flexible",
       language: lang(), "refresh-expired": "manual", retry: "auto",
-      callback: (token: string) => { ready = { token, at: now() }; settle(token); },
-      "error-callback": () => { failures++; settle(null); return true; },
+      callback: (token: string) => { pending = false; interactive = false; ready = { token, at: now() }; settle(token); },
+      "error-callback": () => { pending = false; interactive = false; failures++; settle(null); return true; },
       "expired-callback": () => { ready = null; },
-      "timeout-callback": () => { failures++; settle(null); },
+      "timeout-callback": () => { pending = false; interactive = false; failures++; settle(null); },
+      "before-interactive-callback": () => { interactive = true; },
+      "after-interactive-callback": () => { interactive = false; },
     });
     widget = { id, t };
     return widget;
@@ -105,9 +113,17 @@ async function token(take: boolean): Promise<string | undefined> {
     let done = false;
     const once = (t: string | null) => { if (!done) { done = true; resolve(t); } };
     waiting.push(once);
-    setTimeout(() => { if (!done) { failures++; waiting = waiting.filter(f => f !== once); once(null); } }, env.wait ?? WAIT_MS);
+    // the deadline doesn't run out while Cloudflare's box waits for the person (up to the token's own life)
+    const started = now();
+    const tick = () => {
+      if (done) return;
+      if (interactive && now() - started < FRESH_MS) { setTimeout(tick, 1000); return; }
+      failures++; waiting = waiting.filter(f => f !== once); once(null);
+    };
+    setTimeout(tick, env.wait ?? WAIT_MS);
   });
-  if (waiting.length === 1) { try { w.t.reset(w.id); w.t.execute(w.id); } catch { failures++; settle(null); } }
+  // start a check only when none is under way: resetting one would wipe the box the person is about to tick
+  if (!pending) { try { pending = true; w.t.reset(w.id); w.t.execute(w.id); } catch { pending = false; failures++; settle(null); } }
   const t = await got;
   if (!t) return undefined;
   if (take) { ready = null; try { w.t.reset(w.id); } catch { /* gone */ } }

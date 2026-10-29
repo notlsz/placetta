@@ -52,6 +52,17 @@
   ],
   "redirects": [
     {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "placetta.vercel.app"
+        }
+      ],
+      "destination": "https://www.placetta.com/:path*",
+      "permanent": true
+    },
+    {
       "source": "/zh/",
       "destination": "/zh",
       "permanent": true
