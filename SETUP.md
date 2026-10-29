@@ -88,6 +88,11 @@ the worker's guards (approved values only, the review-page check, the final subm
 | `GEMINI_FREE_SYNTHETIC=1` (optional) | Lets a free-tier `GEMINI_API_KEY` (no `GEMINI_PAID`) run rehearsals: filings on a synthetic workspace (`workspaces.synthetic`, the production probe or a test, set by the service role only). Never a real customer's filing. With only a free key, the worker starts and every customer filing waits for the team | Rehearsals only |
 | `OPENROUTER_API_KEY` | openrouter.ai, Keys (starts `sk-or-`). Add credit | Claude Sonnet 5.5 through hosts other than our Anthropic account, or any model you name; always with `data_collection: deny` |
 | `MUSE_API_KEY` | dev.meta.ai, API keys (US only, public preview; Meta's docs call it `MODEL_API_KEY`) | Meta's Muse Spark 1.3, never a `-contributor` model (Meta trains on those), never files |
+| `GROQ_API_KEY` | console.groq.com, API Keys (starts `gsk_`). Free tier | `openai/gpt-oss-120b` (`GROQ_MODEL` to change). Rehearsals only until `GROQ_PAID=1` |
+| `MISTRAL_API_KEY` | console.mistral.ai, API Keys. Free Experiment tier | `mistral-large-latest` (`MISTRAL_MODEL`). Rehearsals only until `MISTRAL_PAID=1` |
+| `NVIDIA_API_KEY` with `NVIDIA_MODEL` | build.nvidia.com, a model's page, Get API Key (starts `nvapi-`); `NVIDIA_MODEL` = that model's id, which must take tools | Rehearsals only until `NVIDIA_PAID=1` |
+| An OpenRouter model ending in `:free` | Named in `FILER_MODELS`, for example `openrouter:meta-llama/llama-3.3-70b-instruct:free` | Always rehearsals only: the free hosts keep prompts |
+| `FREE_MODELS_SYNTHETIC=1` | Lets every free tier above (and Gemini's) run rehearsals on synthetic workspaces. Never a real customer's filing | Rehearsals only |
 
 Set each in **both** places that use models: Supabase, Edge Functions, Secrets (the server) and Render, placetta-filer,
 Environment (the worker). Any one key runs the worker; with only one, `/healthz` and `npm run check` warn that there's

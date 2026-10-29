@@ -112,7 +112,7 @@ test("Muse: Meta Model API chat completions at api.meta.ai/v1 with tools; a cont
 
 test("the order: FILER_MODELS, else ODELIA_MODELS, else the default; bare names take the vendor's default model; FILER_MODEL still names Claude", () => {
   const ids = (e: Record<string, string>) => seatsOf(envOf(e)).map((s) => `${s.vendor}:${s.model}`);
-  assert.deepEqual(ids({}), ["anthropic:claude-sonnet-5-5", "gemini:gemini-3.8-flash", "openrouter:anthropic/claude-sonnet-5.5", "muse:muse-spark-1.3"]);
+  assert.deepEqual(ids({}), ["anthropic:claude-sonnet-5-5", "gemini:gemini-3.8-flash", "openrouter:anthropic/claude-sonnet-5.5", "muse:muse-spark-1.3", "groq:openai/gpt-oss-120b", "mistral:mistral-large-latest"]);
   assert.deepEqual(ids({ FILER_MODEL: "claude-opus-5-5" })[0], "anthropic:claude-opus-5-5");
   assert.deepEqual(ids({ ODELIA_MODELS: "gemini:gemini-3.6-flash, openrouter:meta/muse-spark-1.3,anthropic" }), ["gemini:gemini-3.6-flash", "openrouter:meta/muse-spark-1.3", "anthropic:claude-sonnet-5-5"]);
   assert.deepEqual(ids({ ODELIA_MODELS: "gemini", FILER_MODELS: "muse,nonsense:x,anthropic:claude-sonnet-5-5,anthropic:claude-sonnet-5-5" }), ["muse:muse-spark-1.3", "anthropic:claude-sonnet-5-5"]);
@@ -245,4 +245,34 @@ test("env: a free Gemini key with GEMINI_FREE_SYNTHETIC=1 starts the worker for 
   assert.deepEqual(e.missing, []);
   assert.ok(e.warnings.some((w) => /rehearsals on synthetic workspaces only/.test(w)));
   assert.deepEqual(checkEnv({ ...base, GEMINI_API_KEY: "g" }).missing.map((m) => m.key), ["ANTHROPIC_API_KEY"], "without the switch, as before");
+});
+
+test("free model APIs (Groq, Mistral, NVIDIA, OpenRouter :free) take rehearsals only, until marked paid", async () => {
+  const { refusal, freeTier, seatsOf, answerOf } = await import("../src/llm.ts");
+  const keys: Record<string, string> = { GROQ_API_KEY: "gsk_x", MISTRAL_API_KEY: "m", NVIDIA_API_KEY: "nvapi-x", OPENROUTER_API_KEY: "sk-or-x" };
+  const env = (extra: Record<string, string> = {}) => (k: string) => ({ ...keys, ...extra })[k];
+  const groq = { vendor: "groq" as const, model: "openai/gpt-oss-120b" };
+  const free = { vendor: "openrouter" as const, model: "meta-llama/llama-3.3-70b-instruct:free" };
+  assert.equal(refusal(env(), groq), "free_tier", "a customer's run never reaches a free tier");
+  assert.equal(refusal(env(), groq, { synthetic: true }), "free_tier", "not even a rehearsal without the flag");
+  assert.equal(refusal(env({ FREE_MODELS_SYNTHETIC: "1" }), groq, { synthetic: true }), null);
+  assert.equal(refusal(env({ FREE_MODELS_SYNTHETIC: "1" }), groq), "free_tier");
+  assert.equal(refusal(env({ GROQ_PAID: "1" }), groq), null, "marked paid: customers too");
+  assert.ok(freeTier(env({ OPENROUTER_PAID: "1" }), free), ":free is always a free tier");
+  assert.ok(!freeTier(env(), { vendor: "openrouter", model: "anthropic/claude-haiku-5.5" }));
+  assert.equal(refusal(env({ GEMINI_API_KEY: "g", FREE_MODELS_SYNTHETIC: "1" }), { vendor: "gemini", model: "gemini-3.8-flash" }, { synthetic: true }), null);
+  // NVIDIA has no default model: it joins only when NVIDIA_MODEL names one
+  assert.ok(!seatsOf(env()).some((s) => s.vendor === "nvidia"));
+  assert.ok(seatsOf(env({ NVIDIA_MODEL: "nvidia/some-model" })).some((s) => s.vendor === "nvidia" && s.model === "nvidia/some-model"));
+  // each goes to its own OpenAI-style host with the tools
+  const sent: { url: string; body: Record<string, unknown> }[] = [];
+  const f = (async (url: string, init: RequestInit) => {
+    sent.push({ url, body: JSON.parse(String(init.body)) });
+    return new Response(JSON.stringify({ choices: [{ message: { tool_calls: [{ function: { name: "done", arguments: "{}" } }] } }], usage: { prompt_tokens: 10, completion_tokens: 2 } }), { status: 200 });
+  }) as unknown as typeof fetch;
+  const ask = { prompt: "p", tools: [{ name: "done", description: "d", input_schema: { type: "object" } }], only: "done", maxTokens: 100 };
+  for (const s of [groq, { vendor: "mistral" as const, model: "mistral-large-latest" }, { vendor: "nvidia" as const, model: "nvidia/some-model" }, free]) await answerOf(s, ask, env(), f);
+  assert.deepEqual(sent.map((x) => new URL(x.url).host), ["api.groq.com", "api.mistral.ai", "integrate.api.nvidia.com", "openrouter.ai"]);
+  assert.ok(sent.every((x) => Array.isArray(x.body.tools)));
+  assert.equal((sent[3].body.provider as { data_collection: string }).data_collection, "allow", "a :free model's hosts keep prompts; only rehearsals reach it");
 });

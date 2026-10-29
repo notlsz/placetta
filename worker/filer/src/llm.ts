@@ -54,19 +54,35 @@ export type AskIn = Omit<Ask, "prompt" | "system" | "advisor"> & { prompt: strin
 export type CallCost = { tier: ModelTier | "any"; model: string; input: number; output: number; cache_read: number; cache_write: number; usd: number;
   /** The advisor calls in it and their share of usd (billed at the advisor's rates). */
   advisor_calls?: number; advisor_usd?: number };
-export type Vendor = "anthropic" | "gemini" | "openrouter" | "muse";
+export type Vendor = "anthropic" | "gemini" | "openrouter" | "muse" | "groq" | "mistral" | "nvidia";
 export type Seat = { vendor: Vendor; model: string };
 type Env = (k: string) => string | undefined;
 type Fetch = typeof fetch;
 
-export const VENDORS: Vendor[] = ["anthropic", "gemini", "openrouter", "muse"];
-export const KEY_OF: Record<Vendor, string> = { anthropic: "ANTHROPIC_API_KEY", gemini: "GEMINI_API_KEY", openrouter: "OPENROUTER_API_KEY", muse: "MUSE_API_KEY" };
+export const VENDORS: Vendor[] = ["anthropic", "gemini", "openrouter", "muse", "groq", "mistral", "nvidia"];
+export const KEY_OF: Record<Vendor, string> = { anthropic: "ANTHROPIC_API_KEY", gemini: "GEMINI_API_KEY", openrouter: "OPENROUTER_API_KEY", muse: "MUSE_API_KEY",
+  groq: "GROQ_API_KEY", mistral: "MISTRAL_API_KEY", nvidia: "NVIDIA_API_KEY" };
+/** The OpenAI-style hosts (chat completions with tools). Groq: console.groq.com docs, OpenAI compatibility; Mistral:
+ *  docs.mistral.ai, chat completions; NVIDIA: build.nvidia.com, integrate.api.nvidia.com. */
+const CHAT_BASE: Partial<Record<Vendor, string>> = { groq: "https://api.groq.com/openai/v1", mistral: "https://api.mistral.ai/v1", nvidia: "https://integrate.api.nvidia.com/v1" };
+/** Free tiers: their providers may keep or train on prompts, so they take only rehearsals (a synthetic workspace, with
+ *  FREE_MODELS_SYNTHETIC=1, or GEMINI_FREE_SYNTHETIC=1 for Gemini) until the founder sets that vendor's _PAID=1. An
+ *  OpenRouter model whose id ends in ":free" is always a free tier. Never a real customer's data on a free tier. */
+export function freeTier(env: Env, s: Seat): boolean {
+  if (s.vendor === "openrouter") return /:free$/i.test(s.model);
+  if (s.vendor === "gemini" || s.vendor === "groq" || s.vendor === "mistral" || s.vendor === "nvidia") return env(`${s.vendor.toUpperCase()}_PAID`) !== "1";
+  return false;
+}
+const freeRehearsals = (env: Env, s: Seat) => env("FREE_MODELS_SYNTHETIC") === "1" || (s.vendor === "gemini" && env("GEMINI_FREE_SYNTHETIC") === "1");
+/** A model the env names (NVIDIA's catalog changes often, so it has no default: NVIDIA_MODEL picks one). */
+const envModel = (env: Env, v: Vendor) => (env(`${v.toUpperCase()}_MODEL`) ?? "").trim();
 /** Each vendor's default model, checked on the vendor's own docs on 2026-10-28:
  *  claude-sonnet-5-5 (platform.claude.com, models, Sonnet 5.5), gemini-3.8-flash (ai.google.dev models: stable),
  *  anthropic/claude-sonnet-5.5 (openrouter.ai: served by hosts other than our own Anthropic account, so our spend cap
  *  doesn't reach it), muse-spark-1.3 (dev.meta.ai docs, models: "Recommended for new work"). */
-export const DEFAULT_MODEL: Record<Vendor, string> = { anthropic: "claude-sonnet-5-5", gemini: "gemini-3.8-flash", openrouter: "anthropic/claude-sonnet-5.5", muse: "muse-spark-1.3" };
-export const DEFAULT_ORDER: Vendor[] = ["anthropic", "gemini", "openrouter", "muse"];
+export const DEFAULT_MODEL: Record<Vendor, string> = { anthropic: "claude-sonnet-5-5", gemini: "gemini-3.8-flash", openrouter: "anthropic/claude-sonnet-5.5", muse: "muse-spark-1.3",
+  groq: "openai/gpt-oss-120b", mistral: "mistral-large-latest", nvidia: "" };
+export const DEFAULT_ORDER: Vendor[] = ["anthropic", "gemini", "openrouter", "muse", "groq", "mistral", "nvidia"];
 
 /** The ordered seats from FILER_MODELS, else ODELIA_MODELS, else the default order (FILER_MODEL still names the Anthropic
  *  model). Unknown vendors and duplicates are dropped. */
@@ -78,18 +94,18 @@ export function seatsOf(env: Env): Seat[] {
       const i = s.indexOf(":");
       const v = (i < 0 ? s : s.slice(0, i)).trim().toLowerCase() as Vendor;
       const m = i < 0 ? "" : s.slice(i + 1).trim();
-      return { vendor: v, model: m || (v === "anthropic" ? anth : DEFAULT_MODEL[v]) };
+      return { vendor: v, model: m || (v === "anthropic" ? anth : envModel(env, v) || DEFAULT_MODEL[v]) };
     }).filter((x) => VENDORS.includes(x.vendor) && !!x.model)
-    : DEFAULT_ORDER.map((v) => ({ vendor: v, model: v === "anthropic" ? anth : DEFAULT_MODEL[v] }));
+    : DEFAULT_ORDER.map((v) => ({ vendor: v, model: v === "anthropic" ? anth : envModel(env, v) || DEFAULT_MODEL[v] })).filter((x) => !!x.model);
   const seen = new Set<string>();
   return list.filter((s) => { const k = `${s.vendor}:${s.model}`; if (seen.has(k)) return false; seen.add(k); return true; });
 }
 
 /** Why a seat may not take customer data, or null when it may. Checked before anything is sent. */
-export function refusal(env: Env, s: Seat, o: { synthetic?: boolean } = {}): "no_key" | "zdr" | "gemini_unpaid" | "contributor" | null {
+export function refusal(env: Env, s: Seat, o: { synthetic?: boolean } = {}): "no_key" | "zdr" | "gemini_unpaid" | "free_tier" | "contributor" | null {
   if (!env(KEY_OF[s.vendor])?.trim()) return "no_key";
   if (!zdrAllows(env, s.vendor, s.model)) return "zdr";
-  if (s.vendor === "gemini" && env("GEMINI_PAID") !== "1" && !(env("GEMINI_FREE_SYNTHETIC") === "1" && o.synthetic === true)) return "gemini_unpaid";
+  if (freeTier(env, s) && !(freeRehearsals(env, s) && o.synthetic === true)) return s.vendor === "gemini" ? "gemini_unpaid" : "free_tier";
   if (s.vendor === "muse" && /contributor/i.test(s.model)) return "contributor";
   if (s.vendor === "openrouter" && /^meta\/.*contributor/i.test(s.model)) return "contributor";
   return null;
@@ -99,8 +115,8 @@ export function refusal(env: Env, s: Seat, o: { synthetic?: boolean } = {}): "no
  *  claude-haiku-5-5 and claude-opus-5-5 (platform.claude.com, models overview: the Claude API IDs), anthropic/claude-haiku-5.5
  *  and anthropic/claude-opus-5.5 (openrouter.ai model pages). Gemini and Muse keep their one default for both tiers. */
 export const TIER_MODEL: Record<ModelTier, Record<Vendor, string>> = {
-  fast: { anthropic: "claude-haiku-5-5", gemini: "gemini-3.8-flash", openrouter: "anthropic/claude-haiku-5.5", muse: "muse-spark-1.3" },
-  strong: { anthropic: "claude-opus-5-5", gemini: "gemini-3.8-flash", openrouter: "anthropic/claude-opus-5.5", muse: "muse-spark-1.3" },
+  fast: { anthropic: "claude-haiku-5-5", gemini: "gemini-3.8-flash", openrouter: "anthropic/claude-haiku-5.5", muse: "muse-spark-1.3", groq: "openai/gpt-oss-120b", mistral: "mistral-large-latest", nvidia: "" },
+  strong: { anthropic: "claude-opus-5-5", gemini: "gemini-3.8-flash", openrouter: "anthropic/claude-opus-5.5", muse: "muse-spark-1.3", groq: "openai/gpt-oss-120b", mistral: "mistral-large-latest", nvidia: "" },
 };
 const TIER_ENV: Record<ModelTier, string> = { fast: "FILER_MODEL_FAST", strong: "FILER_MODEL_STRONG" };
 
@@ -111,11 +127,11 @@ export function tierSeats(env: Env, tier: ModelTier): Seat[] {
   const parse = (raw: string) => raw.split(",").map((s) => s.trim()).filter(Boolean).map((s) => {
     const i = s.indexOf(":");
     const v = (i < 0 ? s : s.slice(0, i)).trim().toLowerCase() as Vendor;
-    return { vendor: v, model: (i < 0 ? "" : s.slice(i + 1).trim()) || TIER_MODEL[tier][v] };
+    return { vendor: v, model: (i < 0 ? "" : s.slice(i + 1).trim()) || envModel(env, v) || TIER_MODEL[tier][v] };
   }).filter((x) => VENDORS.includes(x.vendor) && !!x.model);
   const head = parse((env(TIER_ENV[tier]) ?? "").trim() || `anthropic:${TIER_MODEL[tier].anthropic}`);
   const named = (env("FILER_MODELS") ?? "").trim() || (env("ODELIA_MODELS") ?? "").trim();
-  const chain = named ? seatsOf(env) : DEFAULT_ORDER.filter((v) => v !== "anthropic").map((v) => ({ vendor: v, model: TIER_MODEL[tier][v] }));
+  const chain = named ? seatsOf(env) : DEFAULT_ORDER.filter((v) => v !== "anthropic").map((v) => ({ vendor: v, model: envModel(env, v) || TIER_MODEL[tier][v] })).filter((x) => !!x.model);
   const seen = new Set<string>();
   return [...head, ...chain].filter((s) => { const k = `${s.vendor}:${s.model}`; if (seen.has(k)) return false; seen.add(k); return true; });
 }
@@ -153,7 +169,7 @@ export const usableSeats = (env: Env, o: { synthetic?: boolean } = {}) => seatsO
 export function redact(text: string, env: Env): string {
   let t = text;
   for (const v of VENDORS) { const k = env(KEY_OF[v])?.trim(); if (k && k.length >= 6) t = t.split(k).join("•••"); }
-  return t.replace(/sk-ant-[\w-]+/g, "•••").replace(/sk-or-[\w-]+/g, "•••").replace(/AIza[\w-]{20,}/g, "•••").replace(/\bBearer\s+\S+/gi, "Bearer •••");
+  return t.replace(/sk-ant-[\w-]+/g, "•••").replace(/\bgsk_[\w-]+/g, "•••").replace(/\bnvapi-[\w-]+/g, "•••").replace(/sk-or-[\w-]+/g, "•••").replace(/AIza[\w-]{20,}/g, "•••").replace(/\bBearer\s+\S+/gi, "Bearer •••");
 }
 
 /** A vendor's refusal, as text a log can carry: the status and the API's own reason, trimmed and scrubbed. */
@@ -340,9 +356,12 @@ export async function answerOf(s: Seat, a: Ask, env: Env, f: Fetch = fetch): Pro
     case "openrouter":
       // only hosts that don't keep or train on prompts; with zero retention required, only zero-retention hosts; and
       // only hosts that take the tools and tool_choice as sent
+      // a ":free" model is only ever a rehearsal (refusal: free_tier), and its hosts keep prompts, so it can't ask for deny
       return chat(f, "https://openrouter.ai/api/v1/chat/completions", key, s.model, a, env,
-        { provider: { data_collection: "deny", require_parameters: true, ...(zdrRequired(env) ? { zdr: true } : {}) } });
+        { provider: { data_collection: /:free$/i.test(s.model) ? "allow" : "deny", require_parameters: true, ...(zdrRequired(env) ? { zdr: true } : {}) } });
     case "muse": return chat(f, (env("MUSE_BASE_URL")?.trim().replace(/\/+$/, "") || "https://api.meta.ai/v1") + "/chat/completions", key, s.model, a, env, {});
+    case "groq": case "mistral": case "nvidia":
+      return chat(f, CHAT_BASE[s.vendor] + "/chat/completions", key, s.model, a, env, {});
   }
 }
 

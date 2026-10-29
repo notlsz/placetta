@@ -55,8 +55,8 @@ test("answers: need_person, an invalid call and a repeat go up; a wait doesn't c
 
 test("tiers: Haiku 5.5 fast, Opus 5.5 strong, each failing over through Gemini and OpenRouter at the tier's model; env overrides", () => {
   const ids = (e: Record<string, string>, t: "fast" | "strong") => tierSeats(envOf(e), t).map((s) => `${s.vendor}:${s.model}`);
-  assert.deepEqual(ids({}, "fast"), ["anthropic:claude-haiku-5-5", "gemini:gemini-3.8-flash", "openrouter:anthropic/claude-haiku-5.5", "muse:muse-spark-1.3"]);
-  assert.deepEqual(ids({}, "strong"), ["anthropic:claude-opus-5-5", "gemini:gemini-3.8-flash", "openrouter:anthropic/claude-opus-5.5", "muse:muse-spark-1.3"]);
+  assert.deepEqual(ids({}, "fast"), ["anthropic:claude-haiku-5-5", "gemini:gemini-3.8-flash", "openrouter:anthropic/claude-haiku-5.5", "muse:muse-spark-1.3", "groq:openai/gpt-oss-120b", "mistral:mistral-large-latest"]);
+  assert.deepEqual(ids({}, "strong"), ["anthropic:claude-opus-5-5", "gemini:gemini-3.8-flash", "openrouter:anthropic/claude-opus-5.5", "muse:muse-spark-1.3", "groq:openai/gpt-oss-120b", "mistral:mistral-large-latest"]);
   assert.deepEqual(ids({ FILER_MODEL_FAST: "anthropic:claude-sonnet-5-5" }, "fast")[0], "anthropic:claude-sonnet-5-5");
   // FILER_MODELS names the failover chain behind the tier's own model
   assert.deepEqual(ids({ FILER_MODELS: "gemini:gemini-3.8-flash,openrouter" }, "strong"), ["anthropic:claude-opus-5-5", "gemini:gemini-3.8-flash", "openrouter:anthropic/claude-sonnet-5.5"]);
