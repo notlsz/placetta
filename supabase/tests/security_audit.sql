@@ -205,7 +205,7 @@ begin
   -- document request, both by a token only the owner was shown: supabase/tests/trust_pages.sql)
   select string_agg(p.proname, ', ') into e from pg_proc p join pg_namespace s on s.oid = p.pronamespace
    where s.nspname = 'public' and p.prosecdef and has_function_privilege('anon', p.oid, 'execute')
-     and p.proname not in ('incident_log_public', 'page_hit', 'partner_lookup', 'sso_for_email', 'text_start_peek', 'trust_page', 'trust_request', 'public_outcomes');
+     and p.proname not in ('incident_log_public', 'page_hit', 'partner_lookup', 'sso_for_email', 'text_start_peek', 'trust_page', 'trust_request', 'public_outcomes', 'proof_page');
   res := res || jsonb_build_object('anon runs only the website''s functions', e is null);
   if e is not null then raise notice 'anon can run: %', e; end if;
 
