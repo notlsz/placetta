@@ -11,7 +11,7 @@ import { HqRollout } from "./HqRollout";
 /* Team review (src/review.ts, src/ReviewTable.tsx, src/Comments.tsx): the review table across franchisees, and the
    permit threads each franchisee shares with headquarters */
 import { buildGrid, statusSay, storesOfHq, storesOfWorkspace, type HqReviewRow, type ReviewCell, type ReviewRow, type ReviewStore } from "./review";
-import { ReviewTable, STATUS_ICON, type Picked } from "./ReviewTable";
+import { ReviewSkeleton, ReviewTable, STATUS_ICON, type Picked } from "./ReviewTable";
 import { CommentThread, type Collab, type ThreadSource } from "./Comments";
 import { SAMPLE_HQ_ID, SAMPLE_PEOPLE, sampleHqNotices, sampleHqReview, type Comment, type ItemRef, type Notice } from "./collab";
 import type { Workspace } from "./model";
@@ -63,6 +63,8 @@ export function Headquarters({ lang, initial, sample }: { lang: Lang; initial: H
   const today = daysFromNow(0);
   const [rows, setRows] = useState<HqRow[]>(initial);
   const [review, setReview] = useState<HqReviewRow[]>([]);
+  // until the first load answers, the review table shows its shape, not "no franchisee has shared"
+  const [loaded, setLoaded] = useState(!!sample);
   const [notices, setNotices] = useState<Notice[]>(() => (sample ? sampleHqNotices() : []));
   const [filter, setFilter] = useState<Filter>("all");
   const [view, setView] = useState<View>("review");
@@ -77,6 +79,7 @@ export function Headquarters({ lang, initial, sample }: { lang: Lang; initial: H
       const [r, rv, ns] = await Promise.all([api.hqStores(), capi.hqReview(), capi.listNotices().catch(() => [] as Notice[])]);
       setRows(r); setReview(rv); setNotices(ns); setErr("");
     } catch (e) { setErr((e as api.ApiError).message ?? String(e)); }
+    finally { setLoaded(true); }
   }, [sample]);
   useEffect(() => {
     void load();
@@ -197,7 +200,7 @@ export function Headquarters({ lang, initial, sample }: { lang: Lang; initial: H
       {!sample && <HqMetrics lang={lang} />}
       {!sample && <HqRollout lang={lang} say={say} />}
 
-      {lines.length === 0 && stores.length === 0 ? (
+      {!loaded ? <ReviewSkeleton lang={lang} /> : lines.length === 0 && stores.length === 0 ? (
         <div className="empty">
           <p>{b(B("No franchisee has shared stores with you yet. Ask each franchisee's owner to open Settings, Headquarters, in Placetta and add your email.",
             "还没有加盟商与您共享门店。请各加盟商的所有者在快哉的“设置 > 总部”中添加您的邮箱。"))}</p>
@@ -262,7 +265,7 @@ function HqReview({ lang, stores, onOpen, ask, remind }: { lang: Lang; stores: R
       bulk={(picked, _grid, clear) => {
         const ok = hasApp(picked);
         return asking !== null ? (
-          <span className="rv-ask">
+          <span className="rv-msg">
             <textarea rows={2} value={asking} maxLength={2000} onChange={e => setAsking(e.target.value)} aria-label={zh ? "给加盟商的话" : "Message to the franchisee"} />
             <button type="button" className="sbtn ink" disabled={!asking.trim()} onClick={async () => { if (await ask(picked, asking)) { setAsking(null); clear(); } }}>{zh ? "发送" : "Send"}</button>
             <button type="button" className="lnk quiet" onClick={() => setAsking(null)}>{zh ? "取消" : "Cancel"}</button>
