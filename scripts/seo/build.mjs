@@ -85,9 +85,33 @@ const webPageLd = ({ path, title, desc, type = "WebPage", d, extra = {} }) => ({
   inLanguage: "en", isPartOf: { "@id": SITE_ID }, publisher: PUB, about: { "@id": ORG_ID }, ...(d ? { datePublished: d.p, dateModified: d.d } : {}), ...extra });
 
 /* ------------------------------------------------------------ the landing page */
-const LANDING = "site/index.html";
+const LANDING = "site/index.html", LANDING_JS = "site/landing.js", LANDING_CSS = "site/landing.css";
 let landing = read(LANDING);
-const { T, FAQ, TIERS } = landingData(landing);
+// the page's script and stylesheet are files of their own (land9, Oct 29), shared by /, /zh and /more.html
+const landingJs = read(LANDING_JS);
+const { T, FAQ, TIERS } = landingData(landingJs);
+/** The page's own script and stylesheet, each linked with a version from its content, so a deploy never pairs a page with
+ *  an old copy of either. */
+const assetV = f => createHash("sha256").update(read(f)).digest("hex").slice(0, 10);
+const versioned = h => h.replace(/href="\/landing\.css(\?v=[0-9a-f]+)?"/, `href="/landing.css?v=${assetV(LANDING_CSS)}"`).replace(/src="\/landing\.js(\?v=[0-9a-f]+)?"/, `src="/landing.js?v=${assetV(LANDING_JS)}"`);
+/** The copy the script sets (data-i18n, aria labels, placeholders), written into html[lo, hi) in one language. */
+function fillCopy(html, lo, hi, get) {
+  const ok = k => typeof get(k) === "string";
+  const before = html.length;
+  html = fillInner(html, lo, hi, 'data-i18n="([^"]+)"', k => (ok(k) && !/\{[a-z]+\}/.test(get(k)) ? get(k) : null));
+  hi += html.length - before;
+  return html.slice(0, lo) + html.slice(lo, hi)
+    .replace(/<[a-zA-Z][^>]*\sdata-i18n-aria="([^"]+)"[^>]*>/g, (tag, k) => (ok(k) ? setAttr(tag, "aria-label", strip(get(k))) : tag))
+    .replace(/<input\b[^>]*\sdata-i18n-ph="([^"]+)"[^>]*>/g, (tag, k) => (ok(k) ? setAttr(tag, "placeholder", get(k)) : tag)) + html.slice(hi);
+}
+const CHECKSVG = cutDecl(landingJs, "CHECK").code.slice(1, -1);
+/** The price cards, as renderPrice() draws them, in one language (0 English, 1 Chinese). */
+const tiersHtml = (i, risk) => TIERS.map(p => `<div class="plan${p.hl ? " pfeat" : ""}"><p class="pl"><span>${p.l[i]}</span>${p.tag ? `<span class="ptag">${p.tag[i]}</span>` : ""}</p><p class="pv">${p.v[i]}<small>${p.u[i]}</small></p><p class="pps">${p.ps[i]}</p><p class="pn">${p.n[i]}</p><ul class="plist">${p.f.map(f => `<li>${CHECKSVG}<p>${f[i]}</p></li>`).join("")}</ul><div class="pcta">${p.mail ? `<a class="btn b-out" href="mailto:support@placetta.com?subject=Odelia%20for%20franchisors" data-track="price_scale">${p.cta[i]}</a>` : `<button type="button" class="btn ${p.hl ? "b-ink" : "b-out"}" data-open="pricing">${p.cta[i]}</button>`}${p.hl ? `<small>${risk}</small>` : ""}</div></div>`).join("");
+/** Put `inner` inside the first element opened by `open`, when the page has one. */
+function fillDiv(html, open, inner) {
+  const at = html.indexOf(open); if (at < 0) return html;
+  const s0 = at + open.length; return html.slice(0, s0) + inner + html.slice(closeOf(html, "div", s0));
+}
 { // the proof band reads its form count and latest read day from the proof log, so the number on the page is the number on file
   const log = JSON.parse(readFileSync("scripts/eval/proof-log.json", "utf8"));
   const forms = new Set(log.filter(r => r.found !== false && r.checked).map(r => r.id)).size, day = log.map(r => r.checked || "").sort().pop() || "";
@@ -95,22 +119,13 @@ const { T, FAQ, TIERS } = landingData(landing);
 }
 const en = k => T.en[k];
 {
-  const bodyAt = landing.indexOf('<div class="hwrap">') >= 0 ? landing.indexOf("</style>") : 0;
-  const scriptAt = landing.indexOf("<script", bodyAt);
+  const bodyAt = landing.indexOf("<main>");
   // the English copy the script sets, in the markup
-  landing = fillInner(landing, bodyAt, scriptAt, 'data-i18n="([^"]+)"', k => (typeof en(k) === "string" && !/\{[a-z]+\}/.test(en(k)) ? en(k) : null));
-  const scriptAt2 = landing.indexOf("<script", bodyAt);
-  landing = landing.slice(0, bodyAt) + landing.slice(bodyAt, scriptAt2)
-    .replace(/<[a-zA-Z][^>]*\sdata-i18n-aria="([^"]+)"[^>]*>/g, (tag, k) => (typeof en(k) === "string" ? setAttr(tag, "aria-label", strip(en(k))) : tag))
-    .replace(/<input\b[^>]*\sdata-i18n-ph="([^"]+)"[^>]*>/g, (tag, k) => (typeof en(k) === "string" ? setAttr(tag, "placeholder", en(k)) : tag)) + landing.slice(scriptAt2);
+  landing = fillCopy(landing, bodyAt, landing.indexOf("<script", bodyAt), en);
   // the FAQ, as renderFaq() draws it with the first question open
   const faqHtml = FAQ.map((f, k) => `<div class="fq ${k === 0 ? "on" : ""}"><button type="button" data-f="${k}" aria-expanded="${k === 0}"><span class="fqt">${f[0][0]}</span><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></button><div class="tg"><div><p>${f[1][0]}</p></div></div></div>`).join("");
-  // the price cards, as renderPrice() draws them
-  const CHECKSVG = cutDecl(landing, "CHECK").code.slice(1, -1);
-  const tiersHtml = TIERS.map(p => `<div class="plan${p.hl ? " pfeat" : ""}"><p class="pl"><span>${p.l[0]}</span>${p.tag ? `<span class="ptag">${p.tag[0]}</span>` : ""}</p><p class="pv">${p.v[0]}<small>${p.u[0]}</small></p><p class="pps">${p.ps[0]}</p><p class="pn">${p.n[0]}</p><ul class="plist">${p.f.map(f => `<li>${CHECKSVG}<p>${f[0]}</p></li>`).join("")}</ul><div class="pcta">${p.mail ? `<a class="btn b-out" href="mailto:support@placetta.com?subject=Odelia%20for%20franchisors" data-track="price_scale">${p.cta[0]}</a>` : `<button type="button" class="btn ${p.hl ? "b-ink" : "b-out"}" data-open="pricing">${p.cta[0]}</button>`}${p.hl ? `<small>${en("price.risk")}</small>` : ""}</div></div>`).join("");
-  const ti = landing.indexOf('<div class="plans" id="tiers">'); if (ti < 0) throw new Error("no #tiers");
-  const ts = ti + '<div class="plans" id="tiers">'.length;
-  landing = landing.slice(0, ts) + tiersHtml + landing.slice(closeOf(landing, "div", ts));
+  // the price cards (on /more.html since land9; here only if the page has them again)
+  landing = fillDiv(landing, '<div class="plans" id="tiers">', tiersHtml(0, en("price.risk")));
   const fa = landing.indexOf('<div class="faq" id="faqList">'); if (fa < 0) throw new Error("no #faqList");
   const fs = fa + '<div class="faq" id="faqList">'.length;
   landing = landing.slice(0, fs) + faqHtml + landing.slice(closeOf(landing, "div", fs));
@@ -140,7 +155,7 @@ const LANDING_TITLE = { en: "Placetta: licenses, permits and registrations to op
   const page = webPageLd({ path: "/", title: LANDING_TITLE.en, desc: DESCRIPTION, d, extra: { mainEntity: { "@id": ORIGIN + "/#service" }, primaryImageOfPage: OG_IMAGE } });
   landing = block(landing, "head", head({ path: "/", title: LANDING_TITLE.en, desc: DESCRIPTION, ld: [orgLd(), websiteLd(SEARCH_PATH), page, service, faqLd],
     extra: `<link rel="preload" as="image" href="/media/hero-poster.jpg" fetchpriority="high">\n${HREFLANG}\n<link rel="alternate" type="text/plain" title="llms.txt" href="${ORIGIN}/llms.txt">` }), "</title>");
-  landing = landing.replace(/<title>[^<]*<\/title>/, `<title>${esc(LANDING_TITLE.en)}</title>`);
+  landing = versioned(landing.replace(/<title>[^<]*<\/title>/, `<title>${esc(LANDING_TITLE.en)}</title>`));
   // crawlable links to the content for anything that doesn't run the page's script (people with it see the page as before)
   const data = JSON.parse(readFileSync("site/guides/data.json", "utf8"));
   const links = [["/guides/", "License guides, city by city"], ...data.hubs.business.slice(0, 7).map(x => [x.url.replace(ORIGIN, ""), x.name]), ...data.hubs.permits.map(x => [x.url.replace(ORIGIN, ""), x.name]),
@@ -156,16 +171,9 @@ const LANDING_TITLE = { en: "Placetta: licenses, permits and registrations to op
   const ZH = "site/zh.html";
   const zh = k => T.zh[k] ?? T.en[k];
   let page = landing.replace(/<html lang="[^"]*"/, '<html lang="zh-CN"');
-  const bodyAt = page.indexOf("</style>"), scriptAt = page.indexOf("<script", bodyAt);
-  page = fillInner(page, bodyAt, scriptAt, 'data-i18n="([^"]+)"', k => (typeof zh(k) === "string" && !/\{[a-z]+\}/.test(zh(k)) ? zh(k) : null));
-  const s2 = page.indexOf("<script", bodyAt);
-  page = page.slice(0, bodyAt) + page.slice(bodyAt, s2)
-    .replace(/<[a-zA-Z][^>]*\sdata-i18n-aria="([^"]+)"[^>]*>/g, (tag, k) => (typeof zh(k) === "string" ? setAttr(tag, "aria-label", strip(zh(k))) : tag))
-    .replace(/<input\b[^>]*\sdata-i18n-ph="([^"]+)"[^>]*>/g, (tag, k) => (typeof zh(k) === "string" ? setAttr(tag, "placeholder", zh(k)) : tag)) + page.slice(s2);
-  const CHECKSVG = cutDecl(page, "CHECK").code.slice(1, -1);
-  const tiersHtml = TIERS.map(p => `<div class="plan${p.hl ? " pfeat" : ""}"><p class="pl"><span>${p.l[1]}</span>${p.tag ? `<span class="ptag">${p.tag[1]}</span>` : ""}</p><p class="pv">${p.v[1]}<small>${p.u[1]}</small></p><p class="pps">${p.ps[1]}</p><p class="pn">${p.n[1]}</p><ul class="plist">${p.f.map(f => `<li>${CHECKSVG}<p>${f[1]}</p></li>`).join("")}</ul><div class="pcta">${p.mail ? `<a class="btn b-out" href="mailto:support@placetta.com?subject=Odelia%20for%20franchisors" data-track="price_scale">${p.cta[1]}</a>` : `<button type="button" class="btn ${p.hl ? "b-ink" : "b-out"}" data-open="pricing">${p.cta[1]}</button>`}${p.hl ? `<small>${zh("price.risk")}</small>` : ""}</div></div>`).join("");
-  const ts = page.indexOf('<div class="plans" id="tiers">') + '<div class="plans" id="tiers">'.length;
-  page = page.slice(0, ts) + tiersHtml + page.slice(closeOf(page, "div", ts));
+  const bodyAt = page.indexOf("<main>");
+  page = fillCopy(page, bodyAt, page.indexOf("<script", bodyAt), zh);
+  page = fillDiv(page, '<div class="plans" id="tiers">', tiersHtml(1, zh("price.risk")));
   const faqHtml = FAQ.map((f, k) => `<div class="fq ${k === 0 ? "on" : ""}"><button type="button" data-f="${k}" aria-expanded="${k === 0}"><span class="fqt">${f[0][1]}</span><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></button><div class="tg"><div><p>${f[1][1]}</p></div></div></div>`).join("");
   const fs = page.indexOf('<div class="faq" id="faqList">') + '<div class="faq" id="faqList">'.length;
   page = page.slice(0, fs) + faqHtml + page.slice(closeOf(page, "div", fs));
@@ -174,11 +182,33 @@ const LANDING_TITLE = { en: "Placetta: licenses, permits and registrations to op
   const wp = { ...webPageLd({ path: "/zh", title: LANDING_TITLE.zh, desc: DESCRIPTION_ZH, d, extra: { mainEntity: { "@id": ORIGIN + "/#service" }, primaryImageOfPage: OG_IMAGE } }), inLanguage: "zh-CN" };
   page = block(page, "head", head({ path: "/zh", title: LANDING_TITLE.zh, desc: DESCRIPTION_ZH, zh: true, locale: "zh_CN", ld: [orgLd(), websiteLd(SEARCH_PATH), wp, faqLd],
     extra: `<link rel="preload" as="image" href="/media/hero-poster.jpg" fetchpriority="high">\n${HREFLANG}` }), "</title>");
-  page = page.replace(/<title>[^<]*<\/title>/, `<title>${esc(LANDING_TITLE.zh)}</title>`);
+  page = versioned(page.replace(/<title>[^<]*<\/title>/, `<title>${esc(LANDING_TITLE.zh)}</title>`));
   const data = JSON.parse(readFileSync("site/guides/data.json", "utf8"));
   const zlinks = [["/guides/zh/", "开店许可指南"], ...data.cities.slice(0, 12).map(c => [c.url.replace(ORIGIN, "").replace("/guides/", "/guides/zh/"), `${c.city} 开店许可指南`]), ["/help/", "帮助中心"], ["/trust", "信任中心"], ["/about.html", "关于快哉"], ["/stats.html", "实测结果"]];
   page = block(page, "links", `<noscript><nav class="ctr" aria-label="网站" style="display:flex;flex-wrap:wrap;gap:8px 20px;padding:24px 0;font-size:14px">${zlinks.map(([h, n]) => `<a href="${h}">${esc(n)}</a>`).join("")}</nav></noscript>`, "<footer>");
   put(ZH, page);
+}
+
+/* ------------------------------------------------------------ /more.html (land9, Oct 29)
+   Everything that used to sit folded on the home page: case studies and example plans, the numbers, more plans, trust,
+   permits and dates, sectors, apps, where we work, China and the US, the experts. Its own sections are the block between
+   the more:main markers in site/more.html; everything around them (head, header, footer, the lead sheet, the script)
+   is the landing page's, so the two never drift. */
+{
+  const MORE = "site/more.html", src = read(MORE), a = "<!-- more:main -->", b = "<!-- /more:main -->", i = src.indexOf(a), j = src.indexOf(b);
+  if (i < 0 || j < i) throw new Error("site/more.html: the more:main block is missing");
+  let main = src.slice(i, j + b.length);
+  main = fillCopy(main, 0, main.length, en);
+  main = fillDiv(main, '<div class="plans" id="tiers">', tiersHtml(0, en("price.risk")));
+  let page = landing;
+  const ms = page.indexOf("<main>") + "<main>".length, me = page.indexOf("</main>"), hw = page.indexOf('<div class="hwrap">');
+  const hwrap = page.slice(hw, closeOf(page, "div", page.indexOf(">", hw) + 1) + "</div>".length);
+  page = page.slice(0, ms) + "\n" + hwrap + "\n" + main + "\n" + page.slice(me);
+  const title = "More about Placetta: case studies, coverage and plans", desc = "Placetta's case studies and example plans, a typical opening priced line by line, plans for chains, trust and security, where we work and every agency we handle.";
+  const d = dated("/more.html", page);
+  page = block(page, "head", head({ path: "/more.html", title, desc, ld: [orgLd(), webPageLd({ path: "/more.html", title, desc, d }), crumbsLd([["Placetta", "/"], ["More about Placetta", "/more.html"]])] }), "</title>");
+  page = versioned(page.replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`));
+  put(MORE, page);
 }
 
 /* ------------------------------------------------------------ the Help Center */
@@ -404,7 +434,7 @@ infoPage({
 });
 
 /* ------------------------------------------------------------ sitemaps, robots, llms.txt */
-const PAGES = ["/", "/zh", "/about.html", "/editorial.html", "/stats.html", "/partners.html", "/help/", ...[...out.keys()].filter(f => /^site\/help\/.+\/index\.html$/.test(f)).map(f => f.slice(4).replace(/index\.html$/, "")), "/trust", "/ai.html", "/privacy.html", "/terms.html", "/authorization.html"];
+const PAGES = ["/", "/zh", "/more.html", "/about.html", "/editorial.html", "/stats.html", "/partners.html", "/help/", ...[...out.keys()].filter(f => /^site\/help\/.+\/index\.html$/.test(f)).map(f => f.slice(4).replace(/index\.html$/, "")), "/trust", "/ai.html", "/privacy.html", "/terms.html", "/authorization.html"];
 const pagesXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${PAGES.map(p => `<url><loc>${ORIGIN}${p}</loc><lastmod>${NEXT[p]?.d ?? TODAY}</lastmod></url>`).join("\n")}\n</urlset>\n`;
 put("site/sitemaps/pages.xml", pagesXml);
 const maps = [...new Set(["pages.xml", ...readdirSync("site/sitemaps").filter(f => f.endsWith(".xml"))])].sort();

@@ -3,7 +3,7 @@
    (src/plan/preview.ts, the same plan the app starts with), priced by src/pricing.ts the way the billing function
    prices it: licenses at $149, complex ones at $999 (outcome pricing, 2026-10-28), the free ones (inspections, staff certificates) not counted.
    Only US cities whose city or county steps are in the registry are written, so the number is never a generic guess.
-   Writes CITY_PRICES into site/index.html (between its city-prices markers). Run it after the forms registry changes;
+   Writes CITY_PRICES into site/landing.js, the landing page's script (between its city-prices markers). Run it after the forms registry changes;
    --check exits 1 when the page is out of date, --print shows the counts and --list every filing. */
 import { readFileSync, writeFileSync } from "node:fs";
 import { previewPlan } from "../src/plan/preview";
@@ -29,11 +29,11 @@ for (const city of cities) {
 if (process.argv.includes("--print")) console.log(JSON.stringify(out, null, 1));
 else {
   // written into the landing page between its markers, so the table needs no request and no other file
-  const P = "site/index.html", html = readFileSync(P, "utf8");
+  const P = "site/landing.js", html = readFileSync(P, "utf8");
   const a = "/* city-prices */\n", b = "\n/* /city-prices */", i = html.indexOf(a), j = html.indexOf(b);
-  if (i < 0 || j < i) throw new Error("city-prices markers not found in site/index.html");
+  if (i < 0 || j < i) throw new Error("city-prices markers not found in site/landing.js");
   const next = html.slice(0, i + a.length) + `const CITY_PRICES = ${JSON.stringify(out)};` + html.slice(j);
-  if (process.argv.includes("--check")) { if (next !== html) { console.error("site/index.html: CITY_PRICES is out of date, run npm run landing:cities"); process.exit(1); } }
+  if (process.argv.includes("--check")) { if (next !== html) { console.error("site/landing.js: CITY_PRICES is out of date, run npm run landing:cities"); process.exit(1); } }
   else writeFileSync(P, next);
   console.log(`CITY_PRICES: ${Object.keys(out).length} cities`);
 }

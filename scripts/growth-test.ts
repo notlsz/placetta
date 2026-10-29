@@ -175,7 +175,7 @@ export function growthTests(ok: Ok, eq: Eq) {
     eq([cleanCode("https://placetta.com/app/settings/team?hq=" + "a".repeat(64)), cleanCode("short"), cleanCode(" ab-cd ".repeat(4) + "x".repeat(10))], ["a".repeat(64), null, "abcd".repeat(4) + "x".repeat(10)], "an invite code from a link or pasted");
     eq(inviteLink("https://placetta.com/", "abc"), "https://placetta.com/app/settings/team?hq=abc", "the invite link opens where an owner joins");
     // no public price changed: the landing page still says what it said
-    const site = readFileSync("site/index.html", "utf8");
+    const site = readFileSync("site/index.html", "utf8") + readFileSync("site/more.html", "utf8") + readFileSync("site/landing.js", "utf8");   // the page, its other half and its script (land9)
     ok(["$149", "$999", "$99"].every(x => site.includes(x)) && !/\$3,500|\$6,500|\$49 pack|Headquarters plans start/.test(site), "the landing page shows the simple model's prices, and none of the old plans");
     // outcome pricing (2026-10-28): $149 a license when it's approved, nothing if it's turned down because of our mistake
     ok(!site.includes("$299") && site.includes("If it's turned down because of a mistake on our side, you pay nothing") && site.includes("如因我们的失误被退回，您无需付费")

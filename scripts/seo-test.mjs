@@ -182,7 +182,13 @@ group("landing page readable without JavaScript", () => {
   check("crawlable links to the content", ["/guides/", "/about.html", "/help/"].every(p => b.includes(`href="${p}"`)) && (b.match(/href="\/guides\/[^"]+"/g) ?? []).length >= 10);
   check("hero poster preloaded", h.includes('rel="preload" as="image" href="/media/hero-poster.jpg"'));
   check("social card image exists", existsSync("site/media/og-home.png") && existsSync("site/guides/og.png"));
-  check("document.title in the script matches the <title>", h.includes(`: "${(h.match(/<title>([^<]*)</) ?? [])[1]}";`));
+  // the page's script is its own file since land9 (site/landing.js), shared by /, /zh and /more.html
+  check("the page links its script and stylesheet with a version", /src="\/landing\.js\?v=[0-9a-f]{10}"/.test(h) && /href="\/landing\.css\?v=[0-9a-f]{10}"/.test(h));
+  check("document.title in the script matches the <title>", read("site/landing.js").includes(`: "${(h.match(/<title>([^<]*)</) ?? [])[1]}";`));
+  check("the home page stays light (under 400 KB)", h.length < 400_000, h.length);
+  const more = pages.get("site/more.html") ?? read("site/more.html");
+  check("/more.html carries the sections that left the home page, readable without JavaScript", ["studies", "numbers", "plans", "trust", "cost", "industries", "together", "agencies", "cn", "experts"].every(id => more.includes(`id="${id}"`)) && /<div class="plans" id="tiers"><div class="plan/.test(more));
+  check("the home page links to each of them", ["studies", "numbers", "plans", "trust", "cost", "industries", "together", "agencies", "cn", "experts"].every(id => b.includes(`href="/more.html#${id}"`)));
 });
 
 group("help and trust pages readable without JavaScript", () => {
@@ -231,7 +237,7 @@ group("guides: answer first, quotable, tables, FAQ, hreflang, no thin duplicates
 // The lead sheet's email check (found by the Playwright walk: since 2026-10-21 it read "\.[^\s@]{2}$" and refused every
 // .com address, so no plan request went out): the landing pages' own rule, run on real addresses
 group("the lead sheet takes ordinary email addresses", () => {
-  for (const f of ["site/index.html", "site/zh.html"]) {
+  for (const f of ["site/landing.js"]) {
     const m = /function contactOk\(\)\{[\s\S]*?return (\/\^[^\n]*?\$\/)\.test\(Q\.email\.trim\(\)\);/.exec(read(f));
     check(`${f}: the lead sheet's email rule is found`, !!m);
     if (!m) continue;
