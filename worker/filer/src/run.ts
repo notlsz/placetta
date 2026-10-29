@@ -1600,7 +1600,7 @@ export class Worker {
       const g = await this.c.store.step(cur, log("The run stopped after pressing submit, so nothing more is sent until it's checked with the agency.", "运行在点击提交后中断，在向机构确认之前不会再提交。", "handoff", "maybe_submitted"), { agent_state: "handoff", channel: "team" });
       console.error("filer: stopped after submit:", msg);
       await this.c.store.teamTask(g, "check_agency", "Run stopped after submit was pressed. Check the agency first.");
-    } else if (/^(steel|browserbase|browsers|local:|model error|model chose no tool)/.test(msg)) {
+    } else if (/^(steel|browserbase|kernel|browsers|local:|browser session isn't fresh|model error|model chose no tool)/.test(msg)) {
       // Placetta's own browser didn't start (the provider refused the session): the agency was never reached, so this is
       // ours to fix. Wait (2, 10, 30 minutes); after 3 tries the filing is held for the team, never handed to the owner.
       if (cur.attempts >= 3) {

@@ -197,6 +197,9 @@ export async function openKernel(d: Deps): Promise<Session> {
   catch { await release(); throw new Error("kernel: couldn't connect to the session"); }
   try {
     const page = await firstPage(browser);
+    // A new Kernel browser opens on its own start page, not a blank one. Leave it for about:blank so the run starts
+    // where every other provider's does; run.ts assertFresh still checks the session has no cookies and no other pages.
+    if (/^https?:/i.test(page.url())) await page.goto("about:blank", { timeout: 15_000 });
     return { browser, page, liveUrl: null, recorded: false, provider: "kernel", close: async () => { await browser.close().catch(() => undefined); await release(); } };
   } catch (e) {
     await browser.close().catch(() => undefined); await release();
