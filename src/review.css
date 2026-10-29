@@ -195,7 +195,7 @@ button.rv-need.big:focus-visible { outline: 2px solid var(--blue-ink); outline-o
 @media (max-width: 640px) {
   .rv-sum { padding: 14px; }
   .rv-sum-p .rv-prog { width: 80px; }
-  .rv-chips { flex-wrap: nowrap; overflow-x: auto; margin: 0 -14px; padding: 2px 14px; scrollbar-width: none; }
+  .rv-chip { height: 30px; padding: 0 10px; font-size: 12.5px; }
   .rv-bar { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; }
   .rv-tools { flex-wrap: nowrap; justify-content: flex-end; }
   .rv-tools .sel { flex: 1 1 auto; min-width: 0; max-width: none; }
