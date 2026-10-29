@@ -134,9 +134,6 @@
 .pe-tell { display: inline-flex; align-items: center; min-height: 40px; font-size: 14.5px; font-weight: 500; color: var(--blue-ink); text-decoration: none; }
 .gate-card .pe-act { justify-content: center; margin-top: 8px; }
 
-/* Home: the opening card holds the date at the top and the progress and cost together at the bottom */
-.hs-open > .hs-prog { margin-top: auto; }
-.hs-open > .hs-prog + .cost-line, .hs-open > .hs-prog + * { margin-top: 0; }
 
 /* The sidebar, as Linear's, Notion's and Claude.ai's: one top row (the mark and the business, opening the switcher, and
    search), four places and Settings, the person at the bottom. One icon style, counts as plain numbers, the place
@@ -177,3 +174,20 @@
 /* phone: the bar's four places, counts as plain numbers */
 .tabbar a em { min-width: 0; height: auto; padding: 0; border-radius: 0; background: none; box-shadow: none; color: var(--warm); font: 600 11px/1 var(--sans); top: 6px; left: calc(50% + 13px); }
 .slim .side2 button.wsname.sw-btn { display: flex; }
+
+/* Odelia's page is the conversation (Claude.ai, ChatGPT): one quiet line of what she's on, the thread, the composer
+   with its promise underneath */
+.now-line { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 36px; margin: 4px 0 6px; padding: 0 4px; border: 0; background: none; font: inherit; font-size: 13.5px; color: var(--ink2); text-align: left; cursor: pointer; }
+.now-line:hover .nl-t { color: var(--ink); }
+.now-line .nl-dot { flex: none; width: 6px; height: 6px; border-radius: 3px; background: var(--blue-ink); }
+.now-line.on .nl-dot { animation: nl-pulse 1.4s ease-in-out infinite; }
+@keyframes nl-pulse { 50% { opacity: .35; } }
+.now-line .nl-k { flex: none; color: var(--ink3); }
+.now-line .nl-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.now-line > svg { flex: none; width: 14px; height: 14px; color: var(--ink3); }
+.pn-hint { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 6px 0 0; font-size: 12px; color: var(--ink3); }
+.pn-hint svg { width: 12px; height: 12px; flex: none; }
+/* the task and its approval, one message card */
+.msg-card { margin: 10px 0 4px; border-radius: 16px; background: var(--mist); overflow: hidden; }
+.panel.full .turn .msg-card > .job.compact, .msg-card > .job.compact, .answer .msg-card > .job.compact, .panel .msg-card > .job { margin: 0; background: none; box-shadow: none; border-radius: 0; }
+.panel.full .turn .msg-card > .appr.compact, .msg-card > .appr.compact, .answer .msg-card > .appr.compact, .panel .msg-card > .appr { margin: 0; padding: 4px 14px 14px 14px; border-radius: 0; background: none; box-shadow: none; }

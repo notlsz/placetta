@@ -1,3 +1,4 @@
+import { SkeletonRows } from "./Skeleton";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ONLINE_FILING, useOnlineFiling } from "./onlineFiling";
 import { hrefOf, plainClick, readRoute, setRoute } from "./route";
@@ -1633,6 +1634,7 @@ const SETTING_WORDS: Record<string, string> = {
   scim: "provisioning scim directory 用户同步", pin: "pin lock settings code 锁定", recording: "recording calls screen 录音 录屏", data: "privacy data export delete account 隐私 数据 导出 删除",
   activity: "activity audit history log export csv 活动记录 审计 历史", help: "help support contact 帮助 支持 联系", legal: "legal terms privacy policy 法律 条款 隐私政策",
 };
+const PRIMARY = ["general", "facts", "team", "odelia", "billing"];
 const CLOUD_ONLY = new Set(["recording", "team", "hq", "partner", "security", "sso", "scim", "pin", "phone", "contract", "filingcap", "assistants"]);
 const catOf = (k: string) => SETTINGS_CATS.find(c => c.id === k || c.items.includes(k))?.id;
 const readCat = () => { try { return catOf(localStorage.getItem("placetta-settings-cat") ?? ""); } catch { return undefined; } };
@@ -1654,6 +1656,7 @@ export function Settings() {
   const [theme, setTheme] = useTheme();
   const [accent, setAccent] = useState(readAccent);
   const [hex, setHex] = useState(readAccent);
+  const [accentOpen, setAccentOpen] = useState(false);
   useEffect(() => { if (accent) applyAccent(accent); }, [theme, accent]);
   const [pinSt, setPinSt] = useState<api.PinStatus | null>(null);
   const [del, setDel] = useState(false);
@@ -1707,6 +1710,8 @@ export function Settings() {
      words match, from every category at once; clearing it goes back to the category */
   const [q, setQ] = useState("");
   const query = q.trim().toLowerCase();
+  // the five places owners change (Linear's short list); the rest are one tap away under More settings
+  const [moreOpen, setMoreOpen] = useState(false);
   const all = CATS.flatMap(c => c.items);
   const found = query ? all.filter(k => (SETTING_WORDS[k] ?? k).toLowerCase().includes(query) || b(CATS.find(c => c.items.includes(k))!.label).toLowerCase().includes(query)) : [];
   const show = (k: string) => (query ? found.includes(k) : active.items.includes(k));
@@ -1722,7 +1727,10 @@ export function Settings() {
       {query && !found.length && <p className="quiet set-none">{lang === "zh" ? "没有匹配的设置。换个词试试，或问 Odelia。" : "No setting matches. Try another word, or ask Odelia."}</p>}
       <div className="set-grid">
         <nav className="set-nav" aria-label={t("nav_settings")}>
-          {CATS.map(c => <a key={c.id} className="set-tab" href={hrefOf("settings", c.id)} aria-current={c.id === active.id ? "page" : undefined} onClick={e => { if (!plainClick(e)) return; e.preventDefault(); setCat(c.id, true); toTop(); }}><span>{b(c.label)}</span><I.chevR /></a>)}
+          {CATS.filter(c => PRIMARY.includes(c.id) || moreOpen || c.id === active.id).map(c => <a key={c.id} className="set-tab" href={hrefOf("settings", c.id)} aria-current={c.id === active.id ? "page" : undefined} onClick={e => { if (!plainClick(e)) return; e.preventDefault(); setCat(c.id, true); toTop(); }}><span>{b(c.label)}</span><I.chevR /></a>)}
+          {CATS.some(c => !PRIMARY.includes(c.id) && c.id !== active.id) && (
+            <button type="button" className="set-more" aria-expanded={moreOpen} onClick={() => setMoreOpen(v => !v)}><I.chevR /><span>{moreOpen ? (lang === "zh" ? "收起" : "Fewer") : (lang === "zh" ? "更多设置" : "More settings")}</span></button>
+          )}
         </nav>
         <div className="set-col">
           {/* on a phone: the row back to the list, and the category's name */}
@@ -1804,7 +1812,8 @@ export function Settings() {
           <Group id="appearance" hidden={!show("appearance")} title={B("Appearance", "外观")} note={B("Dark mode for the agent and your workspace. Saved in this browser.", "为助理和工作区开启深色模式，保存在此浏览器中。")} rows={([
             ["light", B("Light", "浅色")], ["dark", B("Dark", "深色")], ["system", B("Match this device", "跟随设备")],
           ] as [Theme, Bi][]).map(([k, l]) => ({ label: l, pick: () => setTheme(k), right: <label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="theme" checked={theme === k} onChange={() => setTheme(k)} aria-label={b(l)} /><i /></label> }))}>
-            <div className="sg-sub accent">
+            {/* the accent colours are a choice few make: folded under Show all (Linear's Appearance keeps it to the theme) */}
+            {!accentOpen && !accent ? <button type="button" className="sg-showall" onClick={() => setAccentOpen(true)}>{lang === "zh" ? "主题色：显示全部" : "Accent color: show all"}</button> : <div className="sg-sub accent">
               <h3>{lang === "zh" ? "主题色" : "Accent color"}</h3>
               <p className="sg-note">{lang === "zh" ? "按钮、链接、高亮和助理光效的颜色。选一个，或输入您自己的颜色。" : "The color of buttons, links, highlights and the agent's glow. Pick one or enter your own."}</p>
               <div className="swatches" role="radiogroup" aria-label={lang === "zh" ? "主题色" : "Accent color"}>
@@ -1813,7 +1822,7 @@ export function Settings() {
                 <input className="sw-hex" value={hex} onChange={e => { const v = e.target.value.trim(); setHex(v); if (/^#?[0-9a-f]{6}$/i.test(v)) setAccent(applyAccent(v.startsWith("#") ? v : "#" + v)); }} placeholder="#4D73A3" aria-label="Hex" maxLength={7} spellCheck={false} />
                 {accent && <Btn onClick={() => { setAccent(applyAccent("")); setHex(""); }}>{lang === "zh" ? "恢复默认" : "Reset"}</Btn>}
               </div>
-            </div>
+            </div>}
           </Group>
 
           {show("language") && <LanguageGroup />}
@@ -1900,7 +1909,7 @@ function SpendingGroup() {
   };
   const spent = (b: Budget) => spentIn(b, purchases);
   const num = (v: string) => Math.max(0, Math.round(Number(v.replace(/[^\d.]/g, "")) || 0));
-  if (!loaded) return <Group id="spending" title={B("Spending", "支出")} note={B("Loading…", "加载中…")} />;
+  if (!loaded) return <Group id="spending" title={B("Spending", "支出")}><SkeletonRows rows={3} label={lang === "zh" ? "正在载入支出" : "Loading spending"} /></Group>;
   return (
     <Group id="spending" title={B("Spending", "支出")} note={B("What Odelia may ask to buy for the business, from whom, how much, and from which budget. Every purchase waits for an owner's approval (two owners above the two-person amount); you then pay it on the payee's own page and Odelia records it with its receipt. Placetta never holds or moves your money.", "Odelia 可为企业申请购买什么、向谁购买、金额上限以及使用哪项预算。每笔购买都需所有者批准（超过双人审批金额需两位所有者）；批准后您在对方页面付款，Odelia 记录付款及收据。快哉从不持有或转移您的资金。")}>
       <ul className="sg-list">

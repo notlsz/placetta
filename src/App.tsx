@@ -16,6 +16,7 @@ import { HOLD_MINUTES, startHold } from "./hold";
 import { finishWork, stampFilings } from "./finish";
 import { TABS, hrefOf, plainClick, readRoute, setRoute } from "./route";
 import { Guard } from "./SafeBoundary";
+import { PageSkeleton } from "./Skeleton";
 import { AppCtx, type CloudCtx, type Ctx, type OdeliaTab, type PermitsTab, type Signed, type Tab, type View } from "./ctx";
 import { formById } from "./forms/registry";
 import { canFill } from "./forms/canFill";
@@ -140,6 +141,10 @@ const askFor = (u: { kind: UpdateItem["kind"]; title: Bi }): Bi => ({
   mention: B(`What does this comment need from me: ${u.title.en}`, `这条评论需要我做什么：${u.title.zh}`),
 })[u.kind];
 
+
+/** ?sim=error in the sample: a screen that throws while drawing, to see and check the error state. */
+const SIM = typeof location !== "undefined" ? new URLSearchParams(location.search).get("sim") : null;   // read once: the address loses its query when a page sets its route
+function SimFail(): React.ReactElement { throw new Error("sim=error: a screen failing on purpose"); }
 
 export default function App({ cloud }: { cloud?: CloudSession }) {
   /* language */
@@ -1439,6 +1444,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     hq: cloud?.hq.length ? <Headquarters lang={lang} initial={cloud.hq} /> : !cloud ? <Headquarters lang={lang} initial={[]} sample={{ ws: view_, team: collab }} /> : <Overview />,
     partner: <PartnerPage lang={lang} sample={!cloud} />,
   }[view];
+  // the sample can show a screen loading (?sim=loading) or failing (?sim=error), so both states can be seen and checked
+  const sim = !cloud ? SIM : null;
+  const shown = sim === "error" ? <SimFail /> : sim === "loading" ? <PageSkeleton label={lang === "zh" ? "正在载入" : "Loading"} /> : page;
   // Home's count is everything waiting on the owner: the same list as Home's "Do this next" and "Waiting on you" and the
   // chat's greeting (src/doNext.ts todos), never the approvals alone
   const badge: Partial<Record<View, number>> = { overview: todos(view_, daysFromNow(0)).length, odelia: waitingJobs };
@@ -1525,7 +1533,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
               <div className="tb-act"><button type="button" className="sbtn ink" onClick={() => void acceptTerms()}>{b(B("Accept", "接受"))}</button></div>
             </section>
           )}
-          <main className={"content" + (view === "overview" ? " wash" : "") + (chatPage ? " chatpage" : "")} ref={main}>{/* one screen that fails shows its own error with Retry; the sidebar, the chat and the rest carry on */}<Guard key={view}>{page}</Guard></main>
+          <main className={"content" + (view === "overview" ? " wash" : "") + (chatPage ? " chatpage" : "")} ref={main}>{/* one screen that fails shows its own error with Retry; the sidebar, the chat and the rest carry on */}<Guard key={view}>{shown}</Guard></main>
           {!panelOpen && !chatPage && <div className="dockbar"><Composer variant="dock" tts={tts} asked={asked} showLive={view !== "overview" && view !== "find"} starters={view === "overview"} /></div>}
           {toast && <div className="toast" role="status">{toast}</div>}
           {phone && (

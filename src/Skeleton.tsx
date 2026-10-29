@@ -4,7 +4,22 @@ import "./simple.css";
    one action when it can't). The skeleton has the app's real frame (the sidebar on a desktop, the top bar and tab bar
    on a phone, a page head and rows), so nothing jumps when the workspace arrives. */
 
-const zhOf = (lang?: "en" | "zh") => lang ? lang === "zh" : typeof navigator !== "undefined" && /^zh/i.test(navigator.language);
+const zhOf = (lang?: "en" | "zh") => {
+  if (lang) return lang === "zh";
+  try { const v = localStorage.getItem("placetta-lang"); if (v === "en" || v === "zh") return v === "zh"; } catch { /* storage blocked */ }
+  return typeof navigator !== "undefined" && /^zh/i.test(navigator.language);
+};
+
+/** Rows while a list loads from the server: the shape of the rows it will show. */
+export function SkeletonRows({ rows = 3, label }: { rows?: number; label?: string }) {
+  return (
+    <div className="skel-rows" role="status" aria-busy="true" aria-label={label}>
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="skel-row"><span className="skel-tx"><span className="skel skel-b" style={{ width: `${50 + ((i * 17) % 30)}%` }} /><span className="skel skel-s" style={{ width: `${30 + ((i * 11) % 24)}%` }} /></span></div>
+      ))}
+    </div>
+  );
+}
 
 /** A page's shape while it loads: a title, a line under it, and rows. */
 export function PageSkeleton({ rows = 5, label }: { rows?: number; label?: string }) {
@@ -44,7 +59,9 @@ export function PageError({ onRetry, lang, what }: { onRetry: () => void; lang?:
   const mail = `mailto:support@placetta.com?subject=${encodeURIComponent(zh ? "页面无法打开" : "A page didn't open")}&body=${encodeURIComponent((zh ? "打开的页面：" : "Page: ") + (typeof location !== "undefined" ? location.pathname : "") + (what ? "\n" + what : ""))}`;
   return (
     <div className="page page-err" role="alert">
-      <p className="pe-say">{zh ? "这个页面没能打开。您的工作都已保存。" : "This page didn't open. Your work is saved."}</p>
+      <span className="pe-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z" /><path d="M12 8v5" /><path d="M12 16.5v.01" /></svg></span>
+      <p className="pe-say">{zh ? "这个页面没能打开。" : "This page didn't open."}</p>
+      <p className="pe-sub">{zh ? "您的工作都已保存，Odelia 也照常在办。再试一次通常就好。" : "Your work is saved and Odelia carries on. Trying again usually fixes it."}</p>
       <div className="pe-act">
         <button type="button" className="pill ink" onClick={onRetry}>{zh ? "重试" : "Retry"}</button>
         <a className="lnk pe-tell" href={mail}>{zh ? "告诉快哉" : "Tell Placetta"}</a>

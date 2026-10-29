@@ -102,20 +102,47 @@ export function storeSay(s: Store, ws: Workspace, ev: Evidence = {}): { main: Bi
   return { main, needs: p ? needs : null, warn: warn || (!p && !!needs) };
 }
 
+/** A store's next date, the one its row shows: a certificate or permit coming due, its next license date, or its
+ *  opening. */
+function storeNext(s: Store, ws: Workspace, ev: Evidence): { when: string; what: Bi; hot: boolean } | null {
+  const today = daysFromNow(0);
+  const c: { date: string; what: Bi }[] = [
+    ...s.certs.filter(x => x.expires >= today).map(x => ({ date: x.expires, what: B(`${x.person}'s ${x.kind.en.toLowerCase()} renews`, `${x.person}的${x.kind.zh}续期`) })),
+    ...(s.permits ?? []).filter(x => x.expires >= today).map(x => ({ date: x.expires, what: B(`${x.name.en} renews`, `${x.name.zh}续期`) })),
+    ...ws.deadlines.filter(d => d.app && s.apps?.includes(d.app) && d.date >= today && (d.kind === "due" || d.kind === "renewal")).map(d => ({ date: d.date, what: d.title })),
+  ];
+  const p = s.stage === "opening" ? openingPath(s, ws, today, ev) : null;
+  if (p?.landing && p.verdict !== "not_mapped") c.push({ date: p.landing, what: B("Opens", "开业") });
+  const n = c.sort((x, y) => x.date.localeCompare(y.date))[0];
+  return n ? { when: n.date, what: n.what, hot: daysUntil(n.date) <= 30 } : null;
+}
+
 function StoreCard({ s, onOpen }: { s: Store; onOpen: () => void }) {
-  const { b, ws } = useApp();
-  const say = storeSay(s, ws, useEvidence());
+  const { b, ws, lang, busy, ask } = useApp();
+  const ev = useEvidence();
+  const say = storeSay(s, ws, ev);
   const bot = jobsAt(ws, s);
+  const next = storeNext(s, ws, ev);
+  const zh = lang === "zh";
+  // one action, where the store has one: renew what's expiring, or see what's waiting
+  const expiring = s.certs.find(c => { const d = daysUntil(c.expires); return d >= 0 && d <= 30; });
+  const waiting = bot.open.some(j => j.status === "waiting");
   return (
-    <li><button type="button" className="st-row" onClick={onOpen}>
-      <span className="sb-bot" aria-hidden="true"><StoreBot id={s.id} size={26} label={b(s.name)} busy={bot.open.some(j => j.status === "running")} /></span>
-      <span className="st-tx">
-        <b>{b(s.name)}</b>
-        <small className={say.warn ? "needs" : undefined}>{b(say.main)}</small>
-        {say.needs && <small className="needs">{b(say.needs)}</small>}
+    <li>
+      <button type="button" className="st-row" onClick={onOpen}>
+        <span className="sb-bot" aria-hidden="true"><StoreBot id={s.id} size={26} label={b(s.name)} busy={bot.open.some(j => j.status === "running")} /></span>
+        <span className="st-tx">
+          <b>{b(s.name)}</b>
+          <small className={say.warn ? "needs" : undefined}>{b(say.main)}</small>
+          {say.needs && <small className="needs">{b(say.needs)}</small>}
+        </span>
+      </button>
+      {next && <span className={"st-when" + (next.hot ? " hot" : "")}><b>{fmtDay(next.when, lang, daysUntil(next.when) > 300)}</b><small>{b(next.what)}</small></span>}
+      <span className="st-act">
+        {expiring ? <button type="button" className="todo-lnk" disabled={busy} onClick={() => ask(zh ? `为${b(s.name)}续期${expiring.person}的${expiring.kind.zh}，${expiring.expires} 到期。` : `Renew ${expiring.person}'s ${expiring.kind.en} at ${s.name.en}, expiring ${expiring.expires}.`)}>{zh ? "续期" : "Renew"}</button>
+          : waiting ? <button type="button" className="todo-lnk" onClick={onOpen}>{zh ? "查看" : "Review"}</button> : null}
       </span>
-      <I.chevR />
-    </button></li>
+    </li>
   );
 }
 

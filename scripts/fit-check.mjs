@@ -606,6 +606,8 @@ const SETTINGS = ["general", "facts", "team", "odelia", "connections", "billing"
 const PAGES = [["home", ""], ["licenses", "licenses"], ["licenses-review", "licenses/review"], ["licenses-documents", "licenses/documents"], ["licenses-deadlines", "licenses/deadlines"],
   ["find", "licenses/find"], ["stores", "stores"], ["odelia-chat", "odelia"], ["odelia-work", "odelia/work"], ["odelia-playbooks", "odelia/playbooks"], ["odelia-updates", "odelia/updates"],
   ["headquarters", "headquarters"], ["partner", "partner"],
+  // the sample's loading and error states (src/App.tsx SIM)
+  ["sim-loading", "licenses?sim=loading"], ["sim-error", "licenses?sim=error"],
   ["old-permits", "permits"], ["old-permits-filed", "permits/filed"], ["old-permits-deadlines", "permits/deadlines"], ["old-permits-find", "permits/find"],
   ["old-work", "work"], ["old-applications", "applications"], ["old-documents", "documents"], ["old-deadlines", "deadlines"], ["old-activity", "activity"], ["old-context", "context"], ["old-find", "find"]];
 
