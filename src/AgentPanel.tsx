@@ -28,6 +28,7 @@ import { planApprovalId } from "./autonomy";
 import { shownPrompt } from "./internalPrompt";
 import { hasReplay } from "./replay";
 import { elapsed, reveal, stepTimes } from "./cloud/runFeed";
+import { headline, todos } from "./doNext";
 import "./panel-clean.css";
 
 /* Less is more (the founder, on this screen): the owner says what they need, Odelia does the permit work, they approve.
@@ -85,12 +86,15 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
         <span className="pn-t">
           <b>{t("agentName")}</b>
           {/* the live step shows once, in full, in the thread below; the header only says she's on it */}
-          <small>{busy ? <em className="pn-verb">{t("working")}</em> : agencies ? t("idle", { n: agencies }) : t("idleNew")}</small>
+          {/* on her page the strip below says it, with more; the header keeps only that she's on it */}
+          {(mode !== "page" || busy) && <small>{busy ? <em className="pn-verb">{t("working")}</em> : agencies ? t("idle", { n: agencies }) : t("idleNew")}</small>}
         </span>
         {mode !== "page" && <button type="button" className="pn-work" onClick={() => { go("odelia", "work"); if (mode === "sheet") onHide?.(); }}>{t("nav_work")}</button>}
         {onHide && <button type="button" className="icbtn" onClick={onHide} aria-label={t("close")} title={t("close")}><I.x /></button>}
       </header>
 
+      {/* above the thread, so it stays in view however far the conversation scrolls */}
+      {mode === "page" && <NowStrip agencies={agencies} />}
       <div className="feed" ref={scroller}>
         {mode === "page" && !feed.length && (
           <div className="feed-empty">
@@ -107,6 +111,48 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
 
       <div className="pn-dock"><Composer variant="panel" tts={tts} asked={asked} /></div>
     </aside>
+  );
+}
+
+/** Odelia's page opens on where her work stands, in three plain lines before the thread: what she is doing now, the
+ *  last thing she did, and what needs the owner (the same todos() count as Home's badge and "Waiting on you"). Each
+ *  opens where it's kept: Work, Activity, the first thing waiting. Facts from the workspace only. */
+function NowStrip({ agencies }: { agencies: number }) {
+  const { b, lang, ws, busy, live, go, openApproval, openApp } = useApp();
+  const zh = lang === "zh";
+  const today = daysFromNow(0);
+  const need = todos(ws, today);
+  const first = need[0];
+  const jobs = (ws.jobs ?? []).filter(j => j.status === "running" && !j.children?.length);
+  const withAgency = ws.apps.filter(a => a.status === "review" || a.status === "filing").length;
+  const did = ws.audit.find(e => e.actor === "agent");
+  const now: { t: string; s: string } = busy && live ? { t: `${b(taskVerb(live.state))}…`, s: b(live.label) }
+    : jobs.length ? { t: b(jobs[0].title), s: zh ? (jobs.length > 1 ? `进行中，另有 ${jobs.length - 1} 项` : "进行中") : jobs.length > 1 ? `In progress, and ${jobs.length - 1} more` : (zh ? "进行中" : "In progress") }
+    : agencies ? { t: zh ? `跟进 ${agencies} 个机构` : `Watching ${agencies} agencies`, s: withAgency ? (zh ? `${withAgency} 项申请在机构审核中` : `${withAgency} filing${withAgency === 1 ? "" : "s"} with an agency`) : (zh ? "有变化会告诉您" : "She tells you when anything changes") }
+    : { t: zh ? "随时为您效劳" : "Ready when you are", s: zh ? "交给她一项任务" : "Give her a task below" };
+  const openFirst = () => {
+    if (!first) return;
+    if (first.kind === "approval") openApproval(first.a.id);
+    else if (first.kind === "doc") openApp(first.app.id, "check");
+    else go("odelia", "work");
+  };
+  return (
+    <section className="now-strip" aria-label={zh ? "Odelia 的工作" : "Odelia's work"}>
+      <button type="button" className={"ns-cell ns-now" + (busy ? " on" : "")} onClick={() => go("odelia", "work")}>
+        <span className="ns-k"><span className="ns-live" aria-hidden="true" />{zh ? "正在做" : "Now"}</span>
+        <b aria-live="polite">{now.t}</b><small>{now.s}</small>
+      </button>
+      <button type="button" className="ns-cell" onClick={() => go("settings", "activity")} disabled={!did}>
+        <span className="ns-k">{zh ? "刚做完" : "Last done"}{did && <time dateTime={did.at}>{fmtAgo(did.at, lang)}</time>}</span>
+        <b>{did ? b(did.action) : zh ? "还没有记录" : "Nothing yet"}</b>{did && <small>{b(did.object)}</small>}
+      </button>
+      <button type="button" className={"ns-cell" + (first ? " ns-need" : "")} onClick={openFirst} disabled={!first}>
+        <span className="ns-k">{zh ? "需要您" : "Needs you"}{need.length > 0 && <em>{need.length}</em>}</span>
+        <b>{first ? b(headline(first)) : zh ? "没有需要您处理的" : "Nothing needs you"}</b>
+        {first && <small>{need.length > 1 ? (zh ? `先做这一项，共 ${need.length} 项` : `First of ${need.length}`) : (zh ? "只有这一项" : "Just this one")}</small>}
+      </button>
+      <p className="ns-never"><I.lock />{zh ? "未经您同意，绝不签名、声明、付款或提交。" : "Never without you: signing, attesting, paying, submitting."}</p>
+    </section>
   );
 }
 
@@ -288,13 +334,17 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
         </Working>
       )}
       {live && last && <AllowanceNote asked={asked} />}
-      {plan && <PlanCard job={plan} compact />}
-      {plan && <PlanGate job={plan} />}
+      {/* while she works, the plan leads; once she has answered, her words come first, then the task, then what she
+          needs from you (message, task, action) */}
+      {live && plan && <PlanCard job={plan} compact />}
+      {live && plan && <PlanGate job={plan} />}
       {live && draft && <p className="drafting" aria-live="polite">{draft}</p>}
       {r && (
         <div className="answer">
           {r.text.map((p, i) => { const body = splitSources(b(p))[0]; return body ? <Prose key={i} text={body} cites={i === r.text.length - 1 ? r.sources : undefined} /> : null; })}
           {r.chain && <ol className="chain">{r.chain.map((c, i) => <li key={i}>{b(c)}</li>)}</ol>}
+          {plan && <PlanCard job={plan} compact />}
+          {plan && <PlanGate job={plan} />}
           {filed.map(id => <FilingLive key={id} app={id} />)}
           {(r.apps?.some(id => !covered.has(id) && !filed.includes(id)) || (r.files?.length && !filed.length)) ? (
             <div className="made">

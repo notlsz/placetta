@@ -121,3 +121,17 @@ the live labels and a GenTax-style link (`test/guards.test.ts`, `test/sandbox.te
 
 **Rule.** A guard's test uses the exact words of the live page and of the approved field, read with the probe, never a
 paraphrase.
+
+## 2026-10: the first-run tour came back after Skip
+
+**What happened.** A reviewer pressed Skip on the tour ("Tell Odelia what you need", 1 of 3) and it showed again on the
+next page. Skip was also a 28 by 20 pixel word in the corner.
+
+**The cause.** Skip wrote its "seen" mark to localStorage only, inside a try that swallowed the failure. A browser that
+reads storage but refuses writes (a full quota, some private modes) kept no mark, so every page load opened the tour.
+
+**The guard.** `src/Walkthrough.tsx` keeps the mark in the tab's memory first, then in localStorage, sessionStorage or
+a cookie, whichever takes it, and reads all four. Escape skips too. Skip is a labelled 44px button with a close mark.
+
+**Rule.** A dismissal a person makes must stick even when storage refuses the write: keep it in memory for the visit
+and fall back through the other per-viewer stores. Test it with `Storage.prototype.setItem` throwing.

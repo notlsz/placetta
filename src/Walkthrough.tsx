@@ -10,8 +10,34 @@ import { isFirstRun } from "./firstRun";
    again. Ends by handing them the one thing to do next. */
 
 const KEY = "placetta-tour-1";
-export const tourSeen = () => { try { return localStorage.getItem(KEY) === "1"; } catch { return true; } };
-export const replayTour = () => { try { localStorage.removeItem(KEY); } catch { /* storage blocked */ } window.dispatchEvent(new Event("placetta-tour")); };
+/* Skip or finish sticks. The tour once came back after Skip: in a browser that reads storage but refuses writes (a full
+   quota, some private modes) the "seen" mark was never kept, so the next page load showed it again. Now the mark is kept
+   in this tab's memory first (it holds across every page of the visit), then in localStorage, sessionStorage or a
+   cookie, whichever takes it; any one of them counts as seen. With nowhere to read from at all, it counts as seen. */
+let seenThisVisit = false;
+const COOKIE = KEY + "=1";
+export function tourSeen(): boolean {
+  if (seenThisVisit) return true;
+  let readable = false;
+  try { if (localStorage.getItem(KEY) === "1") return true; readable = true; } catch { /* storage blocked */ }
+  try { if (sessionStorage.getItem(KEY) === "1") return true; readable = true; } catch { /* storage blocked */ }
+  try { if (document.cookie.split("; ").includes(COOKIE)) return true; readable = true; } catch { /* cookies blocked */ }
+  return !readable;
+}
+function keepSeen() {
+  seenThisVisit = true;
+  try { localStorage.removeItem(KEY + "-at"); } catch { /* storage blocked */ }
+  try { localStorage.setItem(KEY, "1"); if (localStorage.getItem(KEY) === "1") return; } catch { /* storage full or blocked */ }
+  try { sessionStorage.setItem(KEY, "1"); if (sessionStorage.getItem(KEY) === "1") return; } catch { /* storage full or blocked */ }
+  try { document.cookie = `${COOKIE}; max-age=31536000; path=/; samesite=lax`; } catch { /* cookies blocked */ }
+}
+export const replayTour = () => {
+  seenThisVisit = false;
+  try { localStorage.removeItem(KEY); } catch { /* storage blocked */ }
+  try { sessionStorage.removeItem(KEY); } catch { /* storage blocked */ }
+  try { document.cookie = `${KEY}=; max-age=0; path=/`; } catch { /* cookies blocked */ }
+  window.dispatchEvent(new Event("placetta-tour"));
+};
 
 const CARDS: { title: Bi; text: Bi }[] = [
   { title: B("Tell Odelia what you need", "告诉 Odelia 您要做什么"), text: B("Type or talk, in English or 中文. Plain words are fine.", "打字或说话，中文或英文都行，用大白话就可以。") },
@@ -61,13 +87,20 @@ export function Walkthrough() {
   const setI = (n: number) => { setIRaw(n); try { localStorage.setItem(KEY + "-at", String(n)); } catch { /* storage blocked */ } };
   const zh = lang === "zh";
   useEffect(() => { const on = () => { setI(0); setFloating(false); setOpen(true); }; window.addEventListener("placetta-tour", on); return () => window.removeEventListener("placetta-tour", on); }, []);
+  // Escape skips it too, and it sticks the same way
+  useEffect(() => {
+    if (!open) return;
+    const on = (e: KeyboardEvent) => { if (e.key === "Escape") { keepSeen(); setOpen(false); } };
+    window.addEventListener("keydown", on);
+    return () => window.removeEventListener("keydown", on);
+  }, [open]);
   if (!open) return null;
-  const done = () => { try { localStorage.setItem(KEY, "1"); localStorage.removeItem(KEY + "-at"); } catch { /* storage blocked */ } setOpen(false); };
+  const done = () => { keepSeen(); setOpen(false); };
   const c = CARDS[i], last = i === CARDS.length - 1;
   return (
     <div className={floating ? "tour-float" : "scrim tour-scrim"} role="dialog" aria-modal={floating ? "false" : "true"} aria-label={zh ? "使用导览" : "Quick tour"}>
       <div className="tour">
-        <button type="button" className="tour-skip" onClick={done}>{zh ? "跳过" : "Skip"}</button>
+        <button type="button" className="tour-skip" onClick={done} aria-label={zh ? "跳过导览" : "Skip the tour"}><span>{zh ? "跳过" : "Skip"}</span><I.x /></button>
         <Picture i={i} zh={zh} />
         <p className="tour-n">{zh ? `第 ${i + 1} 步，共 ${CARDS.length} 步` : `${i + 1} of ${CARDS.length}`}</p>
         <h2>{zh ? c.title.zh : c.title.en}</h2>
