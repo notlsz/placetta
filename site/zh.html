@@ -3613,6 +3613,8 @@ body #case .tsh3{margin-bottom:20px}
 .tq97g{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:0!important}
 .tq97{display:flex;flex-direction:column;gap:14px;margin:0;padding:22px 22px 20px;border-radius:16px;background:#fff;box-shadow:0 1px 2px rgba(15,27,51,.06),0 0 0 1px rgba(15,27,51,.05)}
 .tq97l{height:var(--lh);width:auto;max-width:120px;align-self:flex-start;object-fit:contain}
+/* every card's logo in one 32px slot, centred in it: the marks, the numbers under them and every row below line up across the cards */
+.tq97lb{display:flex;align-items:center;height:32px;flex:none}.tq97lb .tq97l{align-self:center}
 .tq97r{margin:0;display:flex;flex-direction:column;gap:2px}
 .tq97r strong{font-family:var(--serif);font-weight:300;font-size:34px;line-height:1.05;letter-spacing:-.02em;color:var(--ink)}
 html[lang="zh-CN"] .tq97r strong{font-family:var(--zhserif);font-weight:500;font-size:28px}
@@ -6325,7 +6327,7 @@ function renderTs(swap){
   const i = L(), g = document.getElementById("tsGrid");
   renderTsTabs(); g.classList.add("tq97g"); g.removeAttribute("role"); g.removeAttribute("aria-labelledby"); g.removeAttribute("tabindex");
   g.innerHTML = TS.map(x => `<figure class="tq97">
-    <img class="tq97l" src="${x.logo}" alt="${esc(x.alt[i])}" style="--lh:${Math.round(x.lh * .72)}px" loading="lazy" decoding="async" draggable="false">
+    <span class="tq97lb"><img class="tq97l" src="${x.logo}" alt="${esc(x.alt[i])}" style="--lh:${Math.round(x.lh * .72)}px" loading="lazy" decoding="async" draggable="false"></span>
     <p class="tq97r"><strong>${x.st[i]}</strong><small>${x.sl[i]}</small></p>
     <blockquote>\u201c${x.q[i]}\u201d</blockquote>
     <figcaption><span class="tsav" aria-hidden="true" style="background-image:url('${x.ph}')"></span><span><b>${x.n}</b><small>${x.rl[i]}</small>${x.mc ? `<small class="tsmc">${x.mc[i]}</small>` : ""}</span></figcaption>
