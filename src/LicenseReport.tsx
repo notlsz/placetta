@@ -37,7 +37,7 @@ export function ReportButton() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" className="pill quiet" onClick={() => setOpen(true)}><I.form />{lang === "zh" ? "许可报告" : "License report"}</button>
+      <button type="button" className="lnk ph-lnk" onClick={() => setOpen(true)}><I.form /><span>{lang === "zh" ? "执照报告" : "License report"}</span></button>
       {open && <LicenseReport onClose={() => setOpen(false)} />}
     </>
   );

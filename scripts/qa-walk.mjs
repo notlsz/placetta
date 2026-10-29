@@ -726,9 +726,9 @@ flow("permits", ["sample", "preview"], async w => {
     }
   }
   // Deadlines: each action
-  await w.go("permits/deadlines");
+  await w.go("licenses/deadlines");
   for (const name of [w.L("Remind them", "提醒"), w.L("Prepare it", "准备"), w.L("File what's ready", "提交")]) {
-    if (await w.tap(new RegExp("^" + name), { optional: true, wait: 500 })) { await w.look(name); await w.idle(); await w.close(); await w.go("permits/deadlines"); }
+    if (await w.tap(new RegExp("^" + name), { optional: true, wait: 500 })) { await w.look(name); await w.idle(); await w.close(); await w.go("licenses/deadlines"); }
   }
   // Find licenses
   await w.go("permits");
@@ -1246,7 +1246,7 @@ flow("staff-ops", ["preview"], async w => {
 });
 
 /* ---------- the click-everything pass ---------- */
-const CRAWL_PAGES = ["", "permits", "permits/filed", "permits/documents", "permits/deadlines", "permits/find", "stores", "odelia", "odelia/work", "odelia/playbooks", "odelia/updates", ...SETTINGS.map(s => "settings/" + s), "partner"];
+const CRAWL_PAGES = ["", "licenses", "licenses/documents", "licenses/deadlines", "licenses/find", "stores", "odelia", "odelia/work", "odelia/playbooks", "odelia/updates", ...SETTINGS.map(s => "settings/" + s), "partner"];
 if (CRAWL) for (const path of CRAWL_PAGES) flow("crawl " + (path || "home"), path === "partner" ? ["sample"] : ["sample", "preview"], async w => {
   if (w.phone) return;   // the pass runs at desktop width; the phone gets the flows above
   await w.look("page");

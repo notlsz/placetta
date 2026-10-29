@@ -1,0 +1,71 @@
+/* Simple: the four-place sidebar, Licenses as a to-do list, Stores in sentences (Apple Reminders, Linear, Gusto). Few
+   lines, no boxes per row, every row's items on one vertical center. */
+
+/* the business's name with the search magnifier beside it */
+.ws-row { display: flex; align-items: center; min-width: 0; }
+.ws-row > .wsname-wrap { flex: 1; min-width: 0; }
+.ws-row > .srchb { flex: none; display: grid; place-items: center; width: 40px; height: 40px; margin: 6px 4px 0 0; padding: 0; border: 0; border-radius: 12px; background: none; color: var(--ink2); cursor: pointer; }
+.ws-row > .srchb:hover { background: rgba(var(--e), .05); color: var(--ink); }
+.ws-row > .srchb svg { width: 18px; height: 18px; }
+.slim .ws-row { justify-content: center; }
+.slim .ws-row > .wsname-wrap { display: none; }
+.slim .ws-row > .srchb { margin: 12px 0 8px; }
+.mbar .srchb { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 12px; background: none; color: var(--ink2); }
+.mbar .srchb svg { width: 20px; height: 20px; }
+
+/* quiet links in a page's head: Find licenses, the license report */
+.ph-act .ph-lnk { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 4px; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 500; color: var(--blue-ink); cursor: pointer; white-space: nowrap; }
+.ph-act .ph-lnk:hover { color: var(--blue-deep); }
+.ph-act .ph-lnk svg { width: 15px; height: 15px; flex: none; }
+.permits .ph-act { align-items: center; gap: 16px; }
+
+/* Licenses: three groups, rows without boxes */
+.lic-g { margin-top: 28px; }
+.lic-g:first-of-type { margin-top: 20px; }
+.lic-h { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font-size: 13px; font-weight: 600; color: var(--ink2); letter-spacing: 0; }
+.lic-h span { font-weight: 500; color: var(--ink3); font-variant-numeric: tabular-nums; }
+.lic-you .lic-h { color: var(--warm); }
+.lic-list { list-style: none; margin: 0; padding: 0; }
+.lic { display: flex; align-items: center; gap: 12px; min-height: 60px; }
+.lic > :first-child { flex: 1; min-width: 0; }
+.lic-main { display: flex; align-items: center; gap: 16px; width: 100%; min-height: 60px; margin: 0; padding: 10px 8px; border: 0; border-radius: 12px; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.lic-main:hover { background: rgba(var(--e), .035); }
+.lic-tx { display: flex; flex-direction: column; flex: 1; min-width: 0; gap: 2px; }
+.lic-tx b { font-weight: 600; font-size: 15px; line-height: 1.35; }
+.lic-tx small { font-size: 13.5px; color: var(--ink2); line-height: 1.4; }
+.lic-tx .c-team { display: flex; align-items: center; gap: 10px; color: var(--ink3); font-size: 12.5px; }
+.lic-tx .c-team span { display: inline-flex; align-items: center; gap: 4px; }
+.lic-tx .c-team svg { width: 12px; height: 12px; }
+.lic-when { display: flex; flex-direction: column; align-items: flex-end; flex: none; max-width: 40%; gap: 2px; text-align: right; }
+.lic-when b { font-size: 13.5px; font-weight: 500; color: var(--ink2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.lic-when small { font-size: 12.5px; color: var(--ink3); line-height: 1.35; }
+.lic-when.hot b { color: var(--warm); }
+.lic-act { flex: none; display: flex; align-items: center; }
+.lic-act .todo-lnk { display: inline-flex; align-items: center; min-height: 40px; padding: 0 4px; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 550; color: var(--blue-ink); cursor: pointer; white-space: nowrap; }
+.lic-act .todo-lnk:disabled { opacity: .5; cursor: default; }
+.lic-more { display: inline-flex; align-items: center; min-height: 40px; margin: 4px 0 0 8px; padding: 0; border: 0; background: none; font: inherit; font-size: 13.5px; color: var(--ink2); cursor: pointer; }
+@media (max-width: 640px) {
+  .lic { align-items: center; gap: 8px; }
+  .lic-main { flex-wrap: wrap; gap: 4px 12px; padding: 10px 4px; }
+  .lic-when { flex-basis: 100%; max-width: none; flex-direction: row; align-items: center; gap: 8px; text-align: left; }
+}
+
+/* Stores: one row a store, its state in a sentence */
+.st-list { list-style: none; margin: 20px 0 0; padding: 0; }
+.st-row { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 64px; padding: 10px 8px; border: 0; border-radius: 12px; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.st-row:hover { background: rgba(var(--e), .035); }
+.st-row .sb-bot { flex: none; display: grid; place-items: center; width: 30px; height: 30px; }
+.st-tx { display: flex; flex-direction: column; flex: 1; min-width: 0; gap: 2px; }
+.st-tx b { font-weight: 600; font-size: 15px; }
+.st-tx small { font-size: 13.5px; color: var(--ink2); }
+.st-tx small.needs { color: var(--warm); }
+.st-row > svg { flex: none; width: 16px; height: 16px; color: var(--ink3); }
+.sd-say { margin: 6px 0 0; font-size: 15px; color: var(--ink2); }
+.sd-say.needs { color: var(--warm); }
+.stores-strip .ss-say { font-size: 13px; color: var(--ink2); }
+
+/* Odelia: the strip's Needs you points at the card below; the card flashes once when it's reached */
+.appr.flash { animation: appr-flash 1.4s ease-out; }
+@keyframes appr-flash { 0% { box-shadow: 0 0 0 3px rgba(168, 111, 20, .35); } 100% { box-shadow: 0 0 0 3px rgba(168, 111, 20, 0); } }
+.appr-why { display: block; margin-top: 2px; font-size: 12.5px; color: var(--ink2); }
+.appr-why a { color: var(--blue-ink); text-decoration: none; margin-left: 6px; white-space: nowrap; }

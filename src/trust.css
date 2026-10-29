@@ -88,13 +88,13 @@
 .ck-filter button { padding: 6px 12px; border-radius: 999px; background: var(--mist); font-size: 13px; color: var(--ink2); }
 .ck-filter button[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
 .ck-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.ck { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 11px 14px; border-radius: 14px; background: var(--card2); box-shadow: inset 3px 0 0 var(--blue); }
-.ck.warn { box-shadow: inset 3px 0 0 var(--warm-dot); }
-.ck.fail { box-shadow: inset 3px 0 0 var(--warm); background: var(--warm-soft); }
+.ck-list > .ck { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 11px 14px; border-radius: 14px; background: var(--card2); box-shadow: inset 3px 0 0 var(--blue); }
+.ck-list > .ck.warn { box-shadow: inset 3px 0 0 var(--warm-dot); }
+.ck-list > .ck.fail { box-shadow: inset 3px 0 0 var(--warm); background: var(--warm-soft); }
 .ck-tx { display: grid; gap: 2px; min-width: 0; }
 .ck-tx small { color: var(--ink2); }
 .ck-tag { font-size: 12px; color: var(--ink3); }
-.ck .pill { flex: none; }
+.ck-list > .ck .pill { flex: none; }
 
 .q-in { display: grid; gap: 10px; }
 .q-in textarea { min-height: 150px; font: 14px/1.5 var(--sans); }

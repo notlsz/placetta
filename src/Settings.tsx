@@ -1601,17 +1601,20 @@ function AssistantAccess() {
   );
 }
 
-/* Settings categories, Anthropic style: a few clear groups in the sidebar, one shown at a time. */
+/* Settings categories, as Vercel's and Linear's: a short list on the left, one shown at a time. What an owner actually
+   changes stays in its category; the rest (single sign-on, provisioning, AI assistants, Odelia's learned skills and
+   memory, the contract, add-ons, related entities) is under Advanced, one tap away and nothing removed. */
 const SETTINGS_CATS: { id: string; label: Bi; items: string[] }[] = [
   { id: "general", label: B("General", "通用"), items: ["account", "appearance", "language"] },
-  { id: "facts", label: B("Business facts", "企业资料"), items: ["facts", "house", "entities"] },
+  { id: "facts", label: B("Business facts", "企业资料"), items: ["facts", "house"] },
   { id: "team", label: B("Team", "团队"), items: ["team", "hq", "partner"] },
-  { id: "odelia", label: B("Odelia", "Odelia"), items: ["agent", "autonomy", "brules", "phone", "approvals", "memory", "agentmemory", "skills"] },
-  { id: "connections", label: B("Connections", "连接"), items: ["integrations", "assistants", "logins"] },
-  { id: "billing", label: B("Billing", "账单"), items: ["billing", "contract", "modules", "filingcap", "spending"] },
-  { id: "security", label: B("Security", "安全"), items: ["security", "sso", "scim", "pin"] },
+  { id: "odelia", label: B("Odelia", "Odelia"), items: ["agent", "autonomy", "brules", "phone", "approvals", "memory"] },
+  { id: "connections", label: B("Connections", "连接"), items: ["integrations", "logins"] },
+  { id: "billing", label: B("Billing", "账单"), items: ["billing", "filingcap", "spending"] },
+  { id: "security", label: B("Security", "安全"), items: ["security", "pin"] },
   { id: "privacy", label: B("Privacy and data", "隐私与数据"), items: ["recording", "data"] },
   { id: "activity", label: B("Activity", "活动记录"), items: ["activity"] },
+  { id: "advanced", label: B("Advanced", "高级"), items: ["entities", "agentmemory", "skills", "assistants", "contract", "modules", "sso", "scim"] },
   { id: "help", label: B("Help and legal", "帮助与法律"), items: ["help", "legal"] },
 ];
 const CLOUD_ONLY = new Set(["recording", "team", "hq", "partner", "security", "sso", "scim", "pin", "phone", "contract", "filingcap", "assistants"]);
