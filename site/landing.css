@@ -3972,3 +3972,12 @@ body main .faqcta .btn,body main .ctab .btn,body main .prbtn,body .hdr .btn{min-
 .xpl.xfav{vertical-align:middle!important;position:relative;top:-.04em}
 .cshd{align-items:center!important}
 .pgm>section:first-child{margin-top:var(--sec-in)!important}
+/* land9: the trust points under the price band, one quiet line, plain icons on their words */
+.trl{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin:var(--sec-in) 0 0;padding:0;list-style:none}
+.trl li{display:flex;align-items:center;gap:8px;font-size:var(--fs-s);line-height:20px;color:var(--ink2)}
+.trl svg{flex:none;display:block;color:var(--gs-ink)}
+.trl a{display:inline-flex;align-items:center;gap:6px;color:var(--gs-ink);text-decoration:none}
+.trl a:hover{color:var(--ink)}
+@media (max-width:639px){.trl{gap:12px 20px}}
+@media (min-width:1024px){.trl{flex-wrap:nowrap;gap:22px;justify-content:space-between}.trl li{font-size:var(--fs-c);white-space:nowrap}}
+.trl{margin-bottom:24px}
