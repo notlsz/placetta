@@ -16,12 +16,10 @@
 .page.home .hs-recent li, .page.home .hs-dates li { padding: 7px 0; }
 .page.home .hs-list button { padding: 9px 0; }
 
-/* the cost line closes the opening card on space, not a rule; its icon sits on the first line of the words */
+/* the cost line closes the opening card on space, not a rule; its icon, words and Breakdown share one center */
 .hs-open .cost-line { box-shadow: none; padding-top: var(--s2, 8px); }
-.cost-line { align-items: flex-start; }
-.cost-line > svg { margin-top: calc((1.5em - 16px) / 2); }
+.cost-line { align-items: center; }
 .cost-line > span { line-height: 1.5; }
-.cost-line .lnk { align-self: center; }
 
 /* Waiting on you (wide screens): a plain list on the page, no frame and no rule between rows */
 @media (min-width: 860px) {

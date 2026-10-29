@@ -709,11 +709,26 @@ export async function loadWorkspace(ws: string): Promise<{ name: string; state: 
 
 /* ------------------------------ updates ------------------------------ */
 
-export type UpdateRow = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team" | "mail"; title: Bi; body: Bi | null; app_id: string | null; created_at: string; read_at: string | null };
+export type UpdateRow = { id: string; kind: "deadline" | "renewal" | "filing" | "payment" | "team" | "mail"; title: Bi; body: Bi | null; app_id: string | null; created_at: string; read_at: string | null;
+  /** A Hands-off ask still in its undo window (migration 20261105100100_chase_hold): the ask's id, for Undo. */
+  undo?: string };
 export async function listUpdates(ws: string): Promise<UpdateRow[]> {
-  const { data, error } = await supabase().from("updates").select("id, kind, title, body, app_id, created_at, read_at").eq("workspace_id", ws).order("created_at", { ascending: false }).limit(60);
+  const { data, error } = await supabase().from("updates").select("id, kind, title, body, app_id, created_at, read_at, dedupe").eq("workspace_id", ws).order("created_at", { ascending: false }).limit(60);
   if (error) throw fromPg(error);
-  return (data ?? []) as UpdateRow[];
+  const rows = (data ?? []) as (UpdateRow & { dedupe?: string | null })[];
+  // an Update about a held ask offers Undo while the ask is still held
+  const held = new Map<string, string>();
+  if (rows.some(r => r.dedupe?.startsWith("chase-hold:"))) {
+    const { data: asks } = await supabase().from("odelia_chases").select("id, key, n").eq("workspace_id", ws).eq("hold_state", "held");
+    for (const a of (asks ?? []) as { id: string; key: string; n: number }[]) held.set(`chase-hold:${a.key}:${a.n}`, a.id);
+  }
+  return rows.map(({ dedupe, ...r }) => (dedupe && held.has(dedupe) ? { ...r, undo: held.get(dedupe)! } : r));
+}
+/** Undo a Hands-off ask while it's held: true when it was stopped, false when it already went. */
+export async function chaseUndo(id: string): Promise<boolean> {
+  const { data, error } = await supabase().rpc("chase_undo", { p_id: id });
+  if (error) throw fromPg(error);
+  return data === true;
 }
 /** Live: calls back when the workspace gets a new Update or one of its filings changes stage (migration
  *  20261024120000_stage_alerts adds both tables to Realtime; row level security decides who hears what). The caller

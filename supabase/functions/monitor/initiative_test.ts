@@ -1,6 +1,6 @@
 // deno test monitor/initiative_test.ts: the morning's moves with a stand-in database and mailbox.
 import { deepStrictEqual as assertEquals, match as assertMatch, ok as assert } from "node:assert";
-import { initiative, movePrompt, specialistWake, type ChaseRow, type InitIO } from "./initiative.ts";
+import { holdKey, initiative, movePrompt, sendHeldAsks, specialistWake, type ChaseRow, type HeldAsk, type InitIO } from "./initiative.ts";
 
 const lease = { id: "lease", label: { en: "Signed lease", zh: "租约" }, state: "missing" };
 const plans = { id: "plans", label: { en: "Scaled floor plan", zh: "平面图" }, state: "missing" };
@@ -24,26 +24,42 @@ function io(o: { mail?: boolean; failMail?: boolean; taken?: string[] } = {}) {
   return { x, rows, released, mails, preps };
 }
 
-Deno.test("Hands-off: the asks go from Odelia's own address now, each claimed with its reference", async () => {
+Deno.test("Hands-off: the asks from Odelia's own address are held for the undo window, each claimed with its reference and an Update to undo it", async () => {
   const t = io();
-  const r = await initiative("ws1", "Acme Noodles", state("auto"), "2026-11-02", t.x, { canStart: true });
-  assertEquals(t.mails.map((m) => m.to), ["lena@westfieldprops.com", "kevin@wubuild.com"]);
-  assert(t.rows.every((x) => x.via === "odelia_email" && /^[A-HJ-NP-Z2-9]{8}$/.test(x.token ?? "")));
-  assert(t.mails.every((m, i) => m.subject.endsWith(`[P-${t.rows[i].token}]`) && /AI assistant/.test(m.text)));
+  const r = await initiative("ws1", "Acme Noodles", state("auto"), "2026-11-02", t.x, { canStart: true, holdMinutes: 10, now: "2026-11-02T15:00:00.000Z" });
+  assertEquals(t.mails.length, 0, "nothing leaves in the morning run itself");
+  assertEquals(t.rows.map((x) => x.to_email), ["lena@westfieldprops.com", "kevin@wubuild.com"]);
+  assert(t.rows.every((x) => x.via === "odelia_email" && /^[A-HJ-NP-Z2-9]{8}$/.test(x.token ?? "") && x.hold_state === "held" && x.send_after === "2026-11-02T15:10:00.000Z"));
+  assert(t.rows.every((x) => x.mail_subject!.endsWith(`[P-${x.token}]`) && /AI assistant/.test(x.mail_body!)));
+  assertEquals(r.holds.map((u) => u.dedupe), [holdKey("hp:lease", 1), holdKey("hp:plans", 1)]);
+  assert(r.holds.every((u) => /in 10 minutes/.test(u.title.en) && /undo/.test(u.body!.en) && /撤销/.test(u.body!.zh)));
   assertEquals(r.sent, 2);
   assertEquals(r.later.map((m) => m.kind), ["renewal"]);   // only the renewal needs a run
   assertMatch(r.update!.title.en, /Odelia started 3 things on her own/);
   assertEquals(r.update!.dedupe, "morning:2026-11-02");
 });
 
-Deno.test("a mail that doesn't go gives its claim back; one already claimed isn't sent twice", async () => {
-  const t = io({ failMail: true });
-  const r = await initiative("ws1", "Acme", state("auto"), "2026-11-02", t.x, { canStart: false });
-  assertEquals(t.released, ["hp:lease", "hp:plans"]);
-  assertEquals(r.sent, 0);
+Deno.test("one already claimed isn't held twice; with no mail set up nothing is held", async () => {
   const u = io({ taken: ["hp:lease"] });
-  await initiative("ws1", "Acme", state("auto"), "2026-11-02", u.x, { canStart: false });
-  assertEquals(u.mails.map((m) => m.to), ["kevin@wubuild.com"]);
+  const r = await initiative("ws1", "Acme", state("auto"), "2026-11-02", u.x, { canStart: false });
+  assertEquals([u.rows.map((x) => x.to_email), r.holds.length], [["kevin@wubuild.com"], 1]);
+  const n = io({ mail: false });
+  const r2 = await initiative("ws1", "Acme", state("auto"), "2026-11-02", n.x, { canStart: false });
+  assertEquals([n.rows.length, r2.holds.length], [0, 0]);
+});
+
+Deno.test("the sweep sends only what it claimed (past the window, not undone); a send that fails gives the ask back", async () => {
+  const sent: string[] = [], done: [string, boolean, string | null][] = [];
+  const due: HeldAsk[] = [{ id: "c1", workspace_id: "ws1", to_email: "lena@westfieldprops.com", mail_subject: "Signed lease [P-ABCDEFGH]", mail_body: "Hello, this is Odelia, an AI assistant." },
+    { id: "c2", workspace_id: "ws1", to_email: "kevin@wubuild.com", mail_subject: "Plans [P-HJKLMNPQ]", mail_body: "Hello" }];
+  const r = await sendHeldAsks({ claim: async () => due, mail: async (to) => { if (to.startsWith("kevin")) return { ok: false }; sent.push(to); return { ok: true, id: "pm-9" }; },
+    done: async (id, ok, p) => { done.push([id, ok, p]); } });
+  assertEquals(r, { sent: 1, failed: 1 });
+  assertEquals(sent, ["lena@westfieldprops.com"]);
+  assertEquals(done, [["c1", true, "pm-9"], ["c2", false, null]]);
+  // an undone ask is never claimed (chase_claim_due takes only held rows), so nothing is sent
+  const none = await sendHeldAsks({ claim: async () => [], mail: async () => { throw new Error("must not send"); }, done: async () => {} });
+  assertEquals(none, { sent: 0, failed: 0 });
 });
 
 Deno.test("Usual: a run drafts each ask for approval, and the Update says drafting, not sent", async () => {

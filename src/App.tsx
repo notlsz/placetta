@@ -370,7 +370,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   /* the Updates inbox: the monitor's updates in an account (worked out locally until its first run), the sample's otherwise */
   const updatesBase = useMemo<UpdateItem[]>(() => {
     const base = cloud && serverUpdates.length
-      ? serverUpdates.map(u => ({ id: u.id, kind: u.kind, title: u.title, body: u.body ?? undefined, app: u.app_id ?? undefined, at: u.created_at, read: !!u.read_at, prompt: askFor(u) }))
+      ? serverUpdates.map(u => ({ id: u.id, kind: u.kind, title: u.title, body: u.body ?? undefined, app: u.app_id ?? undefined, at: u.created_at, read: !!u.read_at, prompt: askFor(u), ...(u.undo ? { undo: u.undo } : {}) }))
       : localUpdates(view_).map(u => ({ ...u, read: readLocal.has(u.id) }));
     if (!cloud) return base;
     const seen = new Set(base.map(u => u.title.en));
@@ -1321,6 +1321,11 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         try { await api.recordExport(cloud.wsId, "workspace_data"); } catch (e) { if ((e as api.ApiError).code !== "PGRST202") { fail(e); return; } }
         const data = { exported: nowIso(), workspace: api.strip(wsRef.current), audit: wsRef.current.audit, filings, documents: docs.map(d => ({ name: d.name, size: d.size, created_at: d.created_at, source: d.source })) };
         void save(`placetta-data-${inDays(0)}.json`, new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+      },
+      undoAsk: async id => {
+        try { const stopped = await api.chaseUndo(id); say(stopped ? (lang === "zh" ? "已撤销，这封邮件不会发出。" : "Undone. That email won't go.") : (lang === "zh" ? "这封邮件已经发出。" : "That email already went.")); }
+        catch (e) { fail(e); }
+        void api.listUpdates(cloud.wsId).then(setServerUpdates, () => undefined);
       },
       switchTo: cloud.switchTo, newWorkspace: cloud.newWorkspace, signOut: cloud.signOut, reopen: cloud.reopen,
     };

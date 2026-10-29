@@ -93,6 +93,8 @@ export type CloudCtx = {
   /** A stored file (a screenshot of an agency page, the form as sent) as a URL this page can show. */
   fileUrl(path: string): Promise<string | null>;
   exportData(): void;
+  /** Stop a Hands-off ask Odelia is holding for its undo window (owners and admins). */
+  undoAsk(id: string): Promise<void>;
   switchTo(id: string): void;
   newWorkspace(): void;
   signOut(everywhere?: boolean): void;
