@@ -22,6 +22,9 @@ export type Payload = {
   pdf_path?: string;                                // the filled official PDF, signed when the agency takes a signature
   signature?: { name: string; title?: string; signed_at: string; kind: "typed" | "drawn" };
   us_address?: boolean;                             // false when the business has no US address
+  // what the check before approval found (src/risk.ts riskFlags): each issue's kind and severity, never a value, and the
+  // owner's "send it anyway" when the risk was High. Kept for learning (filing_risk_flags).
+  risk?: { level?: string; flags?: { issue?: string; severity?: string }[]; override?: { at?: string } };
 };
 
 export type Filing = {
@@ -237,6 +240,20 @@ export function pastRejectionProblems(f: Filing, reasons: PastRejection[]): Prob
       seen.add("c:" + label);
       out.push({ kind: "file", en: `${said(reason)} ${c.label.en} isn't with it yet.`, zh: `${saidZh(reason)}${c.label.zh}尚未附上。` });
     }
+  }
+  return out;
+}
+
+/** The risk flags a filing carries, cleaned for filing_risk_flags: known shapes only, at most 30, each kind once. */
+export function riskRows(f: Pick<Filing, "id" | "workspace_id" | "payload">): { filing_id: string; workspace_id: string; form: string | null; issue: string; severity: "low" | "medium" | "high"; overridden: boolean }[] {
+  const r = f.payload.risk;
+  if (!r || !Array.isArray(r.flags)) return [];
+  const over = !!r.override?.at, seen = new Set<string>(), out: ReturnType<typeof riskRows> = [];
+  for (const x of r.flags.slice(0, 30)) {
+    const issue = String(x?.issue ?? ""), sev = String(x?.severity ?? "");
+    if (!/^[a-z_]{1,40}$/.test(issue) || !["low", "medium", "high"].includes(sev) || seen.has(issue)) continue;
+    seen.add(issue);
+    out.push({ filing_id: f.id, workspace_id: f.workspace_id, form: f.payload.official?.slice(0, 120) ?? null, issue, severity: sev as "low" | "medium" | "high", overridden: over && sev === "high" });
   }
   return out;
 }

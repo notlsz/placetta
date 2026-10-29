@@ -138,7 +138,8 @@ export type Ctx = {
   openReplay(jobId: string): void;
   /** Stop a job, and every store's part of it when it's split across stores (their runs on the server too). */
   stopJob(jobId: string): void;
-  approve(id: string, sig?: Signed): void | Promise<void>;
+  /** risk: the rejection risk the owner saw on the card, and their "send it anyway" on a High (src/risk.ts), kept with the filing */
+  approve(id: string, sig?: Signed, risk?: import("./risk").RiskFlags): void | Promise<void>;
   /** Several filings that passed every check, approved together from one tap. */
   approveAll(ids: string[]): void;
   upload(app: string, item: string, files?: File[]): void;

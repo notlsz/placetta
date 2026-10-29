@@ -11,6 +11,8 @@ import { CloudRoot } from "./cloud/Root";
 import { applyTheme, readTheme } from "./hooks";
 import { TrustPage } from "./TrustPage";
 import { tokenFromPath } from "./trust";
+import { ProofPage } from "./Proof";
+import { proofTokenFromPath } from "./proofFacts";
 
 // Signed in or not is decided by CloudRoot, which keeps the sign-in screens light; start light there so they never flash dark.
 if (cloudConfigured) document.documentElement.dataset.theme = "light"; else applyTheme(readTheme());
@@ -20,6 +22,8 @@ if (cloudConfigured) document.documentElement.dataset.theme = "light"; else appl
 // The artifact preview (VITE_PREVIEW) runs the signed-in app against a stand-in backend in the browser.
 // A shared status page (/app/trust/<token>) is public: no sign-in, no workspace, only the page (src/TrustPage.tsx).
 const trustToken = tokenFromPath(location.pathname);
+// A shared proof of one filing (/app/proof/<token>) is public the same way (src/Proof.tsx).
+const proofToken = proofTokenFromPath(location.pathname);
 // /app/sample: the sample workspace (the one the shareable preview runs), open to anyone with no sign-in, so the website's
 // "See it working" is one click from the hero (Vanta's interactive demo, Stripe's test mode). It stays the sample for the
 // rest of the tab's session, so moving between its pages and reloading keep it; a new tab opens the signed-in app.
@@ -31,6 +35,6 @@ try {
 } catch { sample = /^\/app\/sample\/?$/.test(location.pathname); if (sample) history.replaceState(null, "", "/app/" + location.search); }
 void preparePreview().then(() => createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <Guard>{trustToken ? <TrustPage token={trustToken} /> : cloudConfigured && !sample ? <CloudRoot /> : <App />}</Guard>
+    <Guard>{trustToken ? <TrustPage token={trustToken} /> : proofToken ? <ProofPage token={proofToken} /> : cloudConfigured && !sample ? <CloudRoot /> : <App />}</Guard>
   </StrictMode>,
 ));

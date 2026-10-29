@@ -17,7 +17,7 @@ import { ein as einCheck, latin as latinCheck, premises as premisesCheck, PREMIS
 
 /* ------------------------------------------------------------------ preflight */
 
-export type Check = { level: "error" | "warn"; field?: string; label: Bi; note: Bi };
+export type Check = { level: "error" | "warn"; field?: string; label: Bi; note: Bi; /** a stable name for what was found (src/risk.ts learns per kind) */ kind?: string };
 export type Preflight = { checked: number; errors: Check[]; warnings: Check[] };
 
 const US_STATES = "AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY PR GU VI AS MP".split(" ");
@@ -46,48 +46,48 @@ export function parseDate(v: string): string | null {
 
 const digits = (v: string) => v.replace(/\D/g, "");
 /** "Golden Ox Noodle, LLC" and "golden ox noodle llc" are the same name. */
-const nameKey = (v: string) => v.toLowerCase().replace(/\./g, "").replace(/[,'’"()&]/g, " ").replace(/\b(l\.?l\.?c|inc|incorporated|corp|corporation|co|company|ltd|limited|pllc|lp|llp)\b/g, " ").replace(/\s+/g, " ").trim();
+export const nameKey = (v: string) => v.toLowerCase().replace(/\./g, "").replace(/[,'’"()&]/g, " ").replace(/\b(l\.?l\.?c|inc|incorporated|corp|corporation|co|company|ltd|limited|pllc|lp|llp)\b/g, " ").replace(/\s+/g, " ").trim();
 /** The city part of "39-01 Bell Blvd, Bayside, NY 11361". */
 export const cityOf = (address: string) => { const p = address.split(",").map(s => s.trim()).filter(Boolean); return p.length >= 3 ? p[p.length - 2] : p.length === 2 ? p[1].replace(/\b[A-Z]{2}\b.*$/, "").trim() || null : null; };
 const streetNo = (address: string) => /^\s*([\d-]+[A-Za-z]?)\s/.exec(address)?.[1] ?? null;
 
-function storeOfApp(w: Workspace, appId: string): Store | undefined { return (w.stores ?? []).find(s => (s.apps ?? []).includes(appId)); }
-function legalName(w: Workspace): string | undefined {
+export function storeOfApp(w: Workspace, appId: string): Store | undefined { return (w.stores ?? []).find(s => (s.apps ?? []).includes(appId)); }
+export function legalName(w: Workspace): string | undefined {
   const f = w.facts.find(x => /legal (business |entity )?name|registered name/i.test(x.label.en));
   return f?.value.en || w.meta?.entity || undefined;
 }
 
-type Rule = { test: RegExp; skip?: RegExp; check: (v: string, ctx: { w: Workspace; app?: Application; today: string; label: string }) => Check | null | undefined };
+type Rule = { kind: string; test: RegExp; skip?: RegExp; check: (v: string, ctx: { w: Workspace; app?: Application; today: string; label: string }) => Check | null | undefined };
 const err = (label: Bi, note: Bi): Check => ({ level: "error", label, note });
 const warn = (label: Bi, note: Bi): Check => ({ level: "warn", label, note });
 
 const RULES: Rule[] = [
   // "SSN, ITIN, or EIN of responsible party" takes either kind of number
   // a number shown masked ("••-•••4471") is on file and kept out of view; it was checked when it was saved
-  { test: /\b(ssn|social security|itin)\b/i, check: (v, c) =>
+  { kind: "ssn", test: /\b(ssn|social security|itin)\b/i, check: (v, c) =>
       v.includes("•") ? null : /^(\d{3}|\*{3}|x{3})-?(\d{2}|\*{2}|x{2})-?\d{4}$/i.test(v.trim()) || (/\b(f?ein|tin|tax id)\b/i.test(c.label) && /^\d{2}-?\d{7}$/.test(v.trim())) ? null
       : err(B(c.label, c.label), B("A Social Security number or ITIN is 9 digits.", "社会安全号或 ITIN 为 9 位数字。")) },
-  { test: /\b(ein|fein)\b|employer identification|federal (tax|employer) id/i, check: (v, c) => {
+  { kind: "ein", test: /\b(ein|fein)\b|employer identification|federal (tax|employer) id/i, check: (v, c) => {
       if (v.includes("•")) return null;
       if (/applied|pending|apply/i.test(v) && !/\d{2}-?\d{7}/.test(v)) return warn(B(c.label, c.label), B("No EIN yet. Most agencies won't take the filing until it's issued.", "尚未取得 EIN。多数机构要等 EIN 下发后才受理。"));
       // the format, a prefix the IRS assigns, and an ITIN written where the EIN goes (src/validate.ts)
       const p = einCheck(v);
       return p ? { level: p.level, label: B(c.label, c.label), note: p.note } : null;
     } },
-  { test: /e-?mail/i, check: (v, c) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.trim()) ? null : err(B(c.label, c.label), B("That isn't an email address.", "这不是有效的电子邮箱地址。")) },
-  { test: /phone|telephone|mobile|\bcell\b|\bfax\b/i, check: (v, c) => {
+  { kind: "email", test: /e-?mail/i, check: (v, c) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.trim()) ? null : err(B(c.label, c.label), B("That isn't an email address.", "这不是有效的电子邮箱地址。")) },
+  { kind: "phone", test: /phone|telephone|mobile|\bcell\b|\bfax\b/i, check: (v, c) => {
       const d = digits(v);
       if (d.length === 10 || (d.length === 11 && d.startsWith("1"))) return null;
       if (v.trim().startsWith("+") && d.length >= 8 && d.length <= 15) return warn(B(c.label, c.label), B("An international number. Some US agency forms only take a US number.", "这是国际号码。部分美国机构表格只接受美国号码。"));
       return err(B(c.label, c.label), B("A US phone number has 10 digits.", "美国电话号码为 10 位数字。"));
     } },
-  { test: /\bzip\b|postal code/i, check: (v, c) =>
+  { kind: "zip", test: /\bzip\b|postal code/i, check: (v, c) =>
       // "City, state, and ZIP code" holds all three: the ZIP has to be in there somewhere (a foreign address may have none)
       /city|state/i.test(c.label) ? (/\b\d{5}(-\d{4})?\b/.test(v) || /foreign/i.test(c.label) && !/\b[A-Z]{2}\b/.test(v) ? null : warn(B(c.label, c.label), B("No ZIP code in it.", "其中没有邮编。")))
       : /^\d{5}(-\d{4})?$/.test(v.trim()) ? null : err(B(c.label, c.label), B("A ZIP code is 5 digits (or ZIP+4).", "邮编为 5 位数字（或 ZIP+4）。")) },
-  { test: /^state$|^state of (formation|incorporation|organization)$/i, check: (v, c) =>
+  { kind: "state", test: /^state$|^state of (formation|incorporation|organization)$/i, check: (v, c) =>
       US_STATES.includes(v.trim().toUpperCase()) || STATE_NAMES.test(v.trim()) ? null : warn(B(c.label, c.label), B("Not a US state as written. Check the spelling or use the two-letter code.", "不是规范的美国州名。请检查拼写或使用两字母代码。")) },
-  { test: /date|expir|opening|start|effective|\bdob\b|birth/i, skip: /update|candidate|mandate/i, check: (v, c) => {
+  { kind: "date", test: /date|expir|opening|start|effective|\bdob\b|birth/i, skip: /update|candidate|mandate/i, check: (v, c) => {
       const d = parseDate(v);
       if (!d) return /^\d|[A-Za-z]{3,}\s+\d|\d{4}年/.test(v.trim()) ? warn(B(c.label, c.label), B("Couldn't read this as a date. Write it as 2026-11-02.", "无法识别为日期。请写成 2026-11-02 这样的格式。")) : null;
       if (/expir/i.test(c.label) && d < c.today) return err(B(c.label, c.label), B(`Expired on ${d}. The agency will reject an expired document.`, `已于 ${d} 过期。机构会拒收过期文件。`));
@@ -95,7 +95,7 @@ const RULES: Rule[] = [
       if (/birth|\bdob\b/i.test(c.label) && d > c.today) return err(B(c.label, c.label), B("A birth date can't be in the future.", "出生日期不能晚于今天。"));
       return null;
     } },
-  { test: /address|premises|business location|location of (the )?business/i, skip: /mail|e-?mail|home|residen|owner|officer|member|agent|landlord|billing|previous|web/i, check: (v, c) => {
+  { kind: "address", test: /address|premises|business location|location of (the )?business/i, skip: /mail|e-?mail|home|residen|owner|officer|member|agent|landlord|billing|previous|web/i, check: (v, c) => {
       // where the business is can't be a P.O. box (src/validate.ts premises)
       if (PREMISES_LINE.test(c.label) || /^(business |store |site )?address$/i.test(c.label.trim())) { const p = premisesCheck(v); if (p) return { level: p.level, label: B(c.label, c.label), note: p.note }; }
       const s = c.app && storeOfApp(c.w, c.app.id);
@@ -105,7 +105,7 @@ const RULES: Rule[] = [
       const noOk = !no || new RegExp(`(^|\\D)${no.replace(/[-]/g, "\\-")}(\\D|$)`).test(v);
       return cityOk && noOk ? null : warn(B(c.label, c.label), B(`Doesn't match ${s.name.en}'s address on file: ${s.address}.`, `与${s.name.zh}登记的地址不一致：${s.address}。`));
     } },
-  { test: /legal (business |entity )?name|business name|entity name|name of (the )?(business|entity|company|applicant)/i, skip: /dba|trade|doing business|fictitious|assumed/i, check: (v, c) => {
+  { kind: "name", test: /legal (business |entity )?name|business name|entity name|name of (the )?(business|entity|company|applicant)/i, skip: /dba|trade|doing business|fictitious|assumed/i, check: (v, c) => {
       const known = legalName(c.w);
       if (!known || nameKey(known) === nameKey(v)) return null;
       return warn(B(c.label, c.label), B(`Differs from the legal name on file, "${known}". Agencies match it to the state registration letter for letter.`, `与登记的法定名称“${known}”不一致。机构会逐字核对州注册记录。`));
@@ -142,7 +142,7 @@ export function preflight(w: Workspace, a: Approval, today: string): Preflight {
   const fields: Field[] = a.kind === "send" || a.kind === "change" ? a.data ?? [] : app?.fields ?? [];
   const errors: Check[] = [], warnings: Check[] = [];
   let checked = 0;
-  const add = (c: Check | null | undefined, field?: string) => { if (c) (c.level === "error" ? errors : warnings).push({ ...c, field }); };
+  const add = (c: Check | null | undefined, field?: string, kind?: string) => { if (c) (c.level === "error" ? errors : warnings).push({ ...c, field, ...(kind ?? c.kind ? { kind: kind ?? c.kind } : {}) }); };
 
   for (const f of fields) {
     // "Line 7a: Name of responsible party" is matched on what the line asks, not its number
@@ -151,7 +151,7 @@ export function preflight(w: Workspace, a: Approval, today: string): Preflight {
     if (isBlank(v)) continue;   // empty lines are filingBlockers' job, shown above the checks
     if (/^(n\/?a|none|not applicable|无|不适用)$/i.test(v.trim())) continue;   // a real answer: there isn't one
     // a Social Security number or ITIN, on any line or in a message: Placetta never keeps or sends one (src/guard.ts)
-    if (secretNumber(f.label.en, v)) { add(err(f.label, SECRET_NOTE), f.id); continue; }
+    if (secretNumber(f.label.en, v)) { add(err(f.label, SECRET_NOTE), f.id, "secret"); continue; }
     // "By hand" answers a line the signer writes on the signed copy (SS-4 line 7b, as Odelia is told to fill it). The
     // format check used to read it as a malformed SSN and refuse every such filing.
     if (BY_HAND.test(v.trim())) continue;
@@ -159,14 +159,14 @@ export function preflight(w: Workspace, a: Approval, today: string): Preflight {
     // received an EIN?") answered "No" used to be read as a malformed EIN
     const choices = offForm?.fields.find(x => x.id === f.id)?.options;
     if (choices?.some(c => c.toLowerCase() === v.trim().toLowerCase()) || (/\?\s*$/.test(label) && /^(yes|no|y|n|是|否)$/i.test(v.trim()))) continue;
-    if (PLACEHOLDER.test(v)) { add(err(f.label, B("Still has a placeholder in it.", "仍包含占位文字。")), f.id); continue; }
+    if (PLACEHOLDER.test(v)) { add(err(f.label, B("Still has a placeholder in it.", "仍包含占位文字。")), f.id, "placeholder"); continue; }
     // the line against its source: a value read from a document must say what the document's own words say
-    if (f.quote) { const s = sourceCheck(f, v); if (s) { add(s, f.id); continue; } }
+    if (f.quote) { const s = sourceCheck(f, v); if (s) { add(s, f.id, "source"); continue; } }
     // a US agency's own form takes English letters (src/validate.ts latin); abroad, the agency's own script is fine
-    if (offForm && (offForm.currency ?? "USD") === "USD" && a.kind === "file") { const p = latinCheck(v); if (p) { add({ level: p.level, label: f.label, note: p.note }, f.id); continue; } }
+    if (offForm && (offForm.currency ?? "USD") === "USD" && a.kind === "file") { const p = latinCheck(v); if (p) { add({ level: p.level, label: f.label, note: p.note }, f.id, "latin"); continue; } }
     for (const r of RULES) {
       if (!r.test.test(label) || r.skip?.test(label)) continue;
-      add(r.check(v, { w, app, today, label }), f.id);
+      add(r.check(v, { w, app, today, label }), f.id, r.kind);
       break;
     }
   }
@@ -178,36 +178,36 @@ export function preflight(w: Workspace, a: Approval, today: string): Preflight {
     // (the agency's own expedite fee the owner chose is on top of its standard fee, so it isn't compared with it)
     const fee = app.fees.filter(x => !x.expedite).reduce((s, x) => s + x.amount, 0);
     if (off && off.fee != null && !app.fees.some(x => x.tbd && !x.expedite) && Math.abs(fee - off.fee) > 0.5)
-      add(warn(B("Fee", "费用"), B(`$${fee} here; the agency publishes $${off.fee}. Check before paying.`, `此处为 $${fee}，机构公布为 $${off.fee}。付款前请核对。`)));
+      add(warn(B("Fee", "费用"), B(`$${fee} here; the agency publishes $${off.fee}. Check before paying.`, `此处为 $${fee}，机构公布为 $${off.fee}。付款前请核对。`)), undefined, "fee");
     const s = storeOfApp(w, app.id);
     if (off) {
       // the right agency for where the store is: an NYC form for an Austin store is the costliest mistake there is
       checked++;
       const places = s?.address ? placesOf(s.address) : [];
       if (places.length > 1 && !places.includes(off.where))
-        add(err(B("Agency", "机构"), B(`This is ${off.agency.en}'s form (${off.where}); ${s!.name.en} is at ${s!.address}. It goes to the wrong agency.`, `这是${off.agency.zh}的表格（${off.where}）；${s!.name.zh}位于 ${s!.address}。会提交到错误的机构。`)));
+        add(err(B("Agency", "机构"), B(`This is ${off.agency.en}'s form (${off.where}); ${s!.name.en} is at ${s!.address}. It goes to the wrong agency.`, `这是${off.agency.zh}的表格（${off.where}）；${s!.name.zh}位于 ${s!.address}。会提交到错误的机构。`)), undefined, "agency");
       // the right kind of business
       checked++;
       const seg = segmentOf([w.business.en, ...w.facts.filter(x => /what you sell|business type|cuisine/i.test(x.label.en)).map(x => x.value.en)].join(" "));
       if (w.business.en && !off.segments.includes(seg))
-        add(warn(B("Business type", "业务类型"), B(`${off.form} is for ${off.segments.join(" or ")} businesses; this one reads as ${seg}. Make sure it applies.`, `${off.form} 适用于${off.segments.join("或")}类业务；本企业看起来属于 ${seg}。请确认适用。`)));
+        add(warn(B("Business type", "业务类型"), B(`${off.form} is for ${off.segments.join(" or ")} businesses; this one reads as ${seg}. Make sure it applies.`, `${off.form} 适用于${off.segments.join("或")}类业务；本企业看起来属于 ${seg}。请确认适用。`)), undefined, "segment");
       // every line the agency's own form asks, and every attachment it lists
       checked++;
       const have = new Set(app.fields.map(x => x.id));
       const gone = off.fields.filter(x => !have.has(x.id));
       if (off.fields.length && gone.length)
-        add(warn(B("Form lines", "表格栏目"), B(`The agency's form also asks for ${gone.slice(0, 3).map(x => x.label.en).join("; ")}${gone.length > 3 ? ` and ${gone.length - 3} more` : ""}, which aren't on this application.`, `机构表格还要求填写：${gone.slice(0, 3).map(x => x.label.zh).join("；")}${gone.length > 3 ? ` 等 ${gone.length} 项` : ""}，本申请中没有。`)));
+        add(warn(B("Form lines", "表格栏目"), B(`The agency's form also asks for ${gone.slice(0, 3).map(x => x.label.en).join("; ")}${gone.length > 3 ? ` and ${gone.length - 3} more` : ""}, which aren't on this application.`, `机构表格还要求填写：${gone.slice(0, 3).map(x => x.label.zh).join("；")}${gone.length > 3 ? ` 等 ${gone.length} 项` : ""}，本申请中没有。`)), undefined, "form_lines");
       checked++;
       const words = (t: string) => t.toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(x => x.length > 3);
       const listed = app.checklist.map(c => new Set(words(c.label.en)));
       const unlisted = (off.attach ?? []).filter(at => { const k = words(at.en); return k.length && !listed.some(l => k.filter(x => l.has(x)).length / k.length >= 0.5); });
       if (unlisted.length)
-        add(warn(B("Attachments", "附件"), B(`The agency also lists ${unlisted.slice(0, 2).map(x => x.en).join("; ")}${unlisted.length > 2 ? " and more" : ""} as attachments.`, `机构还要求附上：${unlisted.slice(0, 2).map(x => x.zh).join("；")}${unlisted.length > 2 ? " 等" : ""}。`)));
+        add(warn(B("Attachments", "附件"), B(`The agency also lists ${unlisted.slice(0, 2).map(x => x.en).join("; ")}${unlisted.length > 2 ? " and more" : ""} as attachments.`, `机构还要求附上：${unlisted.slice(0, 2).map(x => x.zh).join("；")}${unlisted.length > 2 ? " 等" : ""}。`)), undefined, "attachments");
     }
     // the same form isn't already filed for the same store
     checked++;
     const twin = app.official ? w.apps.find(x => x.id !== app.id && x.official === app.official && storeOfApp(w, x.id)?.id === s?.id && ["filing", "review", "approved"].includes(x.status)) : undefined;
-    if (twin) add(warn(B("Already filed", "已提交过"), B(`${twin.name.en} for this ${s ? "store" : "business"} is already ${twin.status === "approved" ? "approved" : "filed"}. Filing again may pay the fee twice.`, `该${s ? "门店" : "企业"}的${twin.name.zh}已${twin.status === "approved" ? "获批" : "提交"}。再次提交可能重复缴费。`)));
+    if (twin) add(warn(B("Already filed", "已提交过"), B(`${twin.name.en} for this ${s ? "store" : "business"} is already ${twin.status === "approved" ? "approved" : "filed"}. Filing again may pay the fee twice.`, `该${s ? "门店" : "企业"}的${twin.name.zh}已${twin.status === "approved" ? "获批" : "提交"}。再次提交可能重复缴费。`)), undefined, "already_filed");
   }
   if (a.kind === "send") {
     checked++;

@@ -37,6 +37,7 @@ import { companyFacts, factLines, placeFacts, type PlaceRecord } from "./connect
 import { replyMoment, scrubStep, traced } from "./replay";
 import { emailsIn, injected, SECRET_WHY, secretNumber } from "./guard";
 import { basisLine, hingeSay, openingLine, openingPath, preflight } from "./smart";
+import { autoFixes, withFixes } from "./risk";
 import { cityOf as recordsCity, cityRecords } from "./opendata";
 import { replyLanguage } from "./langs";
 import { agencyKey, lessonUsable, placeKey, type Lesson } from "./learning";
@@ -875,6 +876,13 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           return { approval_requested: false, why: "Not ready: nothing is filed with an empty field or a missing document.", empty_fields: bl.empty.map(x => x.en), missing_documents: bl.missing.map(x => x.en),
             do_next: "Fill what you can with fill_fields. Ask the person for the rest in one short list. Write letters with draft_document; ask them to upload the other documents. Then call this again." };
         }
+        // what needs no one's judgement is fixed before anyone sees it (src/risk.ts autoFixes): an EIN without its dash, a
+        // state spelled out, stray spaces, the legal name in its registered spelling. Each fixed line says so.
+        const fixes = autoFixes(get(), a);
+        if (fixes.length) {
+          apply(w => audit("agent", L("Fixed lines before asking for approval", "提交批准前修正了栏目"), a.name, same(fixes.map(x => x.why.en).join("; ")))(setApp(a.id, { fields: withFixes(w.apps.find(x => x.id === a.id) ?? a, fixes).fields })(w)));
+          a = get().apps.find(x => x.id === a.id) ?? a;
+        }
         const badAddr = a.official ? addressProblems(a.official, Object.fromEntries(a.fields.map(f => [f.id, f.value]))) : [];
         if (badAddr.length) { mark(); return { approval_requested: false, why: "An address on this form isn't one the agency accepts on that line.", address_problems: badAddr.map(p => addrOut(a.official!, p.field, p.value, p.check)), do_next: ADDR_NEXT }; }
         // The agency's own form, filled with these answers and read back: a line that didn't come out right on it (a
@@ -949,7 +957,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         // learn it: the next filing of this form fills itself
         const off = a.official ? formById(a.official) : undefined;
         if (off) { const before = get().skills?.length ?? 0; apply(w => learnForm(w, get().apps.find(x => x.id === a.id) ?? a, off.form, off.agency, touches.get(a.id) ?? 1)); if ((get().skills?.length ?? 0) > before) made.skills.push(B(`File ${off.form}`, `申报${off.form}`)); }
-        return { approval_id: ap.id, checked_lines: pf.checked, ...(pf.warnings.length ? { worth_mentioning: pf.warnings.map(e => `${e.label.en}: ${e.note.en}`) } : {}),
+        return { approval_id: ap.id, checked_lines: pf.checked, ...(fixes.length ? { fixed_lines: fixes.map(x => `${x.from} → ${x.to} (${x.why.en})`) } : {}), ...(pf.warnings.length ? { worth_mentioning: pf.warnings.map(e => `${e.label.en}: ${e.note.en}`) } : {}),
           ...(fm ? { official_form: `${formName(a)} filled with these answers and read back: all ${fm.read.checked} lines match. The filled form goes back to the person with your reply.` } : {}) };
       },
     },

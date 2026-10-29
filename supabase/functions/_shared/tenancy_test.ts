@@ -28,6 +28,8 @@ const PROOF: Record<string, RegExp[]> = {
   "forms": [/requireUser\(req\)/, /monitor_key_ok/],
   // their own credential: a hashed token, a signed webhook, a signed state, the monitor key
   "calendar-feed": [/calendar_feeds"\)\.select\("workspace_id"\)\.eq\("token", token\)/],
+  // a shared proof link's token, checked by the database (proof_doc: live, shares documents, this filing's own)
+  "proof": [/tokenOk\(t\)/, /admin\.rpc\("proof_doc", \{ p_token: t, p_doc: d \}\)/],
   "chat-events": [/slackSigned\(/, /larkOpen\(/, /monitor_key_ok/],
   "mcp": [/mcp_token_auth/],
   "monitor": [/monitor_key_ok|monitorKeyOk|x-monitor-key/],

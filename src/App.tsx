@@ -54,6 +54,7 @@ import { UPDATED } from "./legal";
 import { daysFromNow, daysUntil, inDays, nowIso } from "./time";
 import { todos } from "./doNext";
 import { preflight } from "./smart";
+import type { RiskFlags } from "./risk";
 import { I, Menu, Modal } from "./ui";
 import * as api from "./cloud/api";
 import { fromRow, merge, napper, pollDelay, startFeed, type Pushed } from "./cloud/runFeed";
@@ -886,6 +887,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         app_id: app.id, title: a.title, agency: app.agency, portal_url: app.source.url || undefined, fee_estimate: app.fees.reduce((s, f) => s + f.amount, 0),
         payload: {
           form: app.form, source: app.source, does: [...a.does, ...(expediteStep(app) ? [expediteStep(app)!] : [])], official: app.official, pdf_path, signature, answers_hash: answersHash(app), ...(g.version ? { version: g.version.n } : {}),
+          ...(a.risk ? { risk: a.risk } : {}),
           ...(() => { const x = app.expedite ? expediteOptions(app.official).find(o => o.id === app.expedite) : undefined; return x ? { expedite: { id: x.id, label: x.label, turnaround: x.turnaround, fee_usd: extraFee(x, app.fields), how: x.how, source: x.source.url } } : {}; })(),
           fields: app.fields.map(f => ({ id: f.id, label: f.label, value: f.value, from: f.from })),
           checklist: app.checklist.map((c, i) => ({ label: c.label, state: c.state, doc: appDocs[i]?.path })),
@@ -962,10 +964,13 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     if (started) say(lang === "zh" ? `${HOLD_MINUTES} 分钟后发送，在此之前可以撤销。` : `Sending in ${HOLD_MINUTES} minutes. You can undo it until then.`);
     return started;
   };
-  const approve = useCallback(async (id: string, sig?: Signed) => {
+  const approve = useCallback(async (id: string, sig?: Signed, risk?: RiskFlags) => {
     if (held()) return;
     if (cloud && termsRef.current) { say(lang === "zh" ? "请先在页面顶部接受更新后的条款，然后再批准。" : "Accept the updated Terms at the top of the page first, then approve."); return; }
-    const w = wsRef.current, a = w.approvals.find(x => x.id === id); if (!a) return;
+    const w = wsRef.current, a0 = w.approvals.find(x => x.id === id); if (!a0) return;
+    // the rejection risk the card showed, kept on the card (an undo window approves it again later) and with the filing
+    const a = risk ? { ...a0, risk } : a0;
+    if (risk) setWs(x => ({ ...x, approvals: x.approvals.map(y => (y.id === id ? { ...y, risk } : y)) }));
     const shown = `${S.approvedIt[lang]}: ${a.title[lang]}`;
     /* Always allow: a message approved under an owner's rule goes, when its undo window ends, only while the rule still
        covers it and no Never rule stops it. Otherwise it waits for a person's own approval. */
@@ -1363,7 +1368,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       const now = nowIso();
       setWs(w => ({ ...w, jobs: (w.jobs ?? []).map(x => (ids.has(x.id) && x.status !== "done" && x.status !== "stopped" ? { ...x, status: "stopped" as const, waiting: undefined, updated: now } : x)) }));
     },
-    approve: (id, sig) => void approve(id, sig),
+    approve: (id, sig, risk) => void approve(id, sig, risk),
     approveAll: ids => void approveAll(ids),
     upload: (app, item, files) => void upload(app, item, files),
     download: async id => {

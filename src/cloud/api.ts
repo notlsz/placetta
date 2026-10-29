@@ -72,6 +72,9 @@ export type FilingPayload = {
   // the agency's expedite the owner chose on the card (src/expedite.ts): what the team asks for, its time, the agency's
   // own fee (paid to the agency, never marked up; null when the agency sets it) and the page that says so
   expedite?: { id: string; label: Bi; turnaround: Bi; fee_usd: number | null; how?: "form" | "team"; source: string };
+  // what the check before approval found (src/risk.ts riskFlags): kinds and severities only, and the owner's "send it
+  // anyway" on a High risk. The file function keeps them so the agency's decision teaches the next card.
+  risk?: import("../risk").RiskFlags;
 };
 export type QueueRow = Filing & { business: string; approver_email: string | null; assignee_email: string | null; assigned_to: string | null };
 export type Billing = {
@@ -855,6 +858,8 @@ export const mcpTokenList = (ws: string) => rpcData<McpToken[]>("mcp_token_list"
 export const mcpTokenRevoke = (id: string) => rpcVoid("mcp_token_revoke", { p_id: id });
 /** The MCP server's address. */
 export const mcpUrl = () => `${URL_.replace(/\/+$/, "")}/functions/v1/mcp`;
+/** A shared proof link's document, through the proof function (supabase/functions/proof): a 5-minute signed address. */
+export const proofDocUrl = (token: string, doc: string) => `${URL_.replace(/\/+$/, "")}/functions/v1/proof?t=${encodeURIComponent(token)}&d=${encodeURIComponent(doc)}`;
 /** SCIM's base URL for the identity provider. */
 export const scimUrl = () => `${URL_.replace(/\/+$/, "")}/functions/v1/scim/v2`;
 
