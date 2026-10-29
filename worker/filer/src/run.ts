@@ -702,7 +702,14 @@ export class Worker {
         ctx.f = await this.c.store.step(ctx.f, log("Refused to type into a line for a person's ID number", "拒绝在个人证件号码栏中填写", "refused"));
         return { ok: false, error: "Refused: this line is for a person's ID number." };
       }
-      await loc.fill(value);
+      // A line that won't take typing (disabled or hidden until another answer is chosen, as FinCEN's TIN is until its
+      // type and country are) goes back to the model as this step's error, not as the site failing (30 s, then a retry).
+      try { await loc.fill(value, { timeout: 10_000 }); }
+      catch (e) {
+        const why = await loc.isEditable({ timeout: 2000 }).then((ed) => (ed ? "it didn't respond" : "it's disabled or read-only right now"), () => "it isn't visible right now");
+        if (!/Timeout \d+ms exceeded/.test(e instanceof Error ? e.message : String(e))) throw e;
+        return { ok: false, error: `That field didn't take typing: ${why}. Choose the other answers on this page first (a type or country can unlock it), then fill it again; if it stays locked, call need_person.` };
+      }
       rec({ action: "fill", selector: a.selector, field: from.label });
       ctx.f = await this.c.store.step(ctx.f, { ...log(`Filled ${from.label}`, `已填写 ${from.label}`, "fill"), value: shown(from.label, value) });
       return { ok: true };
