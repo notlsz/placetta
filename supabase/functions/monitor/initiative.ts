@@ -2,7 +2,10 @@
 // (src/initiative.ts): ask the right person for a missing document and follow up every three business days, get ahead of
 // a renewal 61 to 90 days out, and one Update with only what needs a person.
 //   Hands-off (the owner's setting): the ask goes from Odelia's own address (ODELIA_EMAIL), says she's an AI assistant,
-//   carries a reference that ties the reply back (odelia-mail), and nothing else: no link, no fee, no signature.
+//   carries a reference that ties the reply back (odelia-mail), and nothing else: no link, no fee, no signature. Like
+//   every outbound send it keeps the undo window: the ask is written into its odelia_chases row, held SEND_HOLD_MINUTES
+//   (send_after), the owner gets an Update with Undo, and the per-minute outbox sweep sends it once the window is over
+//   (sendHeldAsks below; migration 20261105100100_chase_hold).
 //   Otherwise: a run drafts the ask for an owner's one-tap approval, the way every message goes.
 //   Plan first: nothing is started; the owner only hears what needs them.
 // Every ask is a row in odelia_chases, claimed before it goes, so two runs of the monitor never ask twice. Asks go out on
@@ -12,7 +15,9 @@ import { chaseMail, contactsOf, MAX_ASKS, morning, morningUpdate, newToken, norm
 
 type Bi = { en: string; zh: string };
 export type Update = { workspace_id: string; kind: "agent"; title: Bi; body?: Bi; app_id?: string | null; dedupe: string };
-export type ChaseRow = { workspace_id: string; key: string; app_id: string; item_id: string; holder: string; n: number; to_name: string | null; to_email: string | null; via: "odelia_email" | "draft"; token: string | null; day: string };
+export type ChaseRow = { workspace_id: string; key: string; app_id: string; item_id: string; holder: string; n: number; to_name: string | null; to_email: string | null; via: "odelia_email" | "draft"; token: string | null; day: string;
+  /** A Hands-off ask waiting out its undo window: when it goes, and the email itself. */
+  send_after?: string; hold_state?: "held"; mail_subject?: string; mail_body?: string };
 export type InitIO = {
   /** The owners' memory books are in the workspace state under their user ids. */
   owners(ws: string): string[];
@@ -27,16 +32,19 @@ export type InitIO = {
   /** A renewal prepared once per deadline and date. */
   claimPrep(ws: string, key: string, date: string): Promise<boolean>;
 };
-export type InitResult = { update: Update | null; sent: number; later: Move[] };
+export type InitResult = { update: Update | null; sent: number; later: Move[]; holds: Update[] };
 
 const isHan = (s: string) => /[㐀-鿿]/.test(s);
 const lowerFirst = (s: string) => (/^[A-Z][a-z]/.test(s) && !/^[A-Z][a-z]+ [A-Z]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
 
 /** One workspace's morning: the asks Hands-off sends now, the moves a run has to start (later), and the Update. */
-export async function initiative(ws: string, name: string, state: unknown, today: string, io: InitIO, o: { canStart: boolean; filings?: { app_id: string; status: string; agent_state?: string | null }[] }): Promise<InitResult> {
-  if (!state || typeof state !== "object") return { update: null, sent: 0, later: [] };
+export async function initiative(ws: string, name: string, state: unknown, today: string, io: InitIO, o: { canStart: boolean; filings?: { app_id: string; status: string; agent_state?: string | null }[]; holdMinutes?: number; now?: string }): Promise<InitResult> {
+  if (!state || typeof state !== "object") return { update: null, sent: 0, later: [], holds: [] };
   let w: ReturnType<typeof normalizeState>;
-  try { w = normalizeState(name, state as Record<string, unknown>); } catch { return { update: null, sent: 0, later: [] }; }
+  try { w = normalizeState(name, state as Record<string, unknown>); } catch { return { update: null, sent: 0, later: [], holds: [] }; }
+  const hold = Math.min(1440, Math.max(1, Math.round(o.holdMinutes ?? 10)));
+  const sendAt = new Date(Date.parse(o.now ?? new Date().toISOString()) + hold * 60_000).toISOString();
+  const holds: Update[] = [];
   const mode = String(((w as { controls?: { autonomy?: string } }).controls ?? {}).autonomy ?? "usual");
   const books = io.owners(ws).map((id) => ((w as { memories?: Record<string, unknown> }).memories ?? {})[id]).filter(Boolean);
   const m = morning(w, today, { contacts: contactsOf(books), chased: io.chased(ws), filings: o.filings });
@@ -54,13 +62,15 @@ export async function initiative(ws: string, name: string, state: unknown, today
       const hands = (mode === "auto" || mode === "autopilot") && !!io.mail && !!mv.to.email;
       if (!hands && !o.canStart) continue;
       const token = hands ? newToken(() => crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32) : null;
-      const row: ChaseRow = { workspace_id: ws, key: mv.key, app_id: mv.app, item_id: mv.item, holder: mv.holder, n: mv.ask, to_name: mv.to.name, to_email: mv.to.email ?? null, via: hands ? "odelia_email" : "draft", token, day: today };
+      const mail = hands ? chaseMail(mv, name, token!, isHan(mv.to.name) ? "zh" : "en") : null;
+      const row: ChaseRow = { workspace_id: ws, key: mv.key, app_id: mv.app, item_id: mv.item, holder: mv.holder, n: mv.ask, to_name: mv.to.name, to_email: mv.to.email ?? null, via: hands ? "odelia_email" : "draft", token, day: today,
+        ...(mail ? { send_after: sendAt, hold_state: "held" as const, mail_subject: mail.subject.slice(0, 300), mail_body: mail.text.slice(0, 4000) } : {}) };
       if (!(await io.claim(row))) continue;
-      if (hands) {
-        const mail = chaseMail(mv, name, token!, isHan(mv.to.name) ? "zh" : "en");
-        const r = await io.mail!(mv.to.email!, mail.subject, mail.text).catch(() => ({ ok: false }));
-        if (!r.ok) { await io.release(ws, mv.key, mv.ask); continue; }
-        if ((r as { id?: string }).id) await io.sent(ws, mv.key, mv.ask, (r as { id: string }).id);
+      if (mail) {
+        // held, not sent: the sweep sends it once the undo window is over, unless the owner undoes it from this Update
+        holds.push({ workspace_id: ws, kind: "agent", app_id: mv.app, dedupe: holdKey(mv.key, mv.ask),
+          title: { en: `Emailing ${plainName(mv.to.name)} in ${hold} minutes: ${lowerFirst(mv.label.en)}`, zh: `${hold} 分钟后发邮件给 ${plainName(mv.to.name)}：${mv.label.zh}` },
+          body: { en: `Odelia wrote to ${plainName(mv.to.name)} from her own address for the ${lowerFirst(mv.label.en)}. You can undo it until it goes.`, zh: `Odelia 已用她自己的邮箱给 ${plainName(mv.to.name)} 写信索取${mv.label.zh}。发出之前可以撤销。` } });
         sent++; started.push(mv);
       } else {
         // a run drafts it for an owner's approval: the morning says so, not that it went
@@ -71,7 +81,32 @@ export async function initiative(ws: string, name: string, state: unknown, today
     }
   }
   const u = morningUpdate(m, started);
-  return { update: u ? { workspace_id: ws, kind: "agent", dedupe: `morning:${today}`, title: u.title, body: u.body } : null, sent, later };
+  return { update: u ? { workspace_id: ws, kind: "agent", dedupe: `morning:${today}`, title: u.title, body: u.body } : null, sent, later, holds };
+}
+
+/** The Update a held ask carries, so the app can offer Undo on it while the ask is still held (src/App.tsx). */
+export const holdKey = (key: string, n: number) => `chase-hold:${key}:${n}`.slice(0, 300);
+const plainName = (s: string) => String(s ?? "").replace(/[\u0000-\u001f<>]/g, "").slice(0, 80);
+
+/* ------------------------------ the held asks, once their undo window is over ------------------------------ */
+
+export type HeldAsk = { id: string; workspace_id: string; to_email: string | null; mail_subject: string | null; mail_body: string | null };
+export type SendIO = {
+  /** chase_claim_due: held asks past their window, taken under the row lock (an Undo after this is too late). */
+  claim(limit: number): Promise<HeldAsk[]>;
+  mail: (to: string, subject: string, text: string) => Promise<{ ok: boolean; id?: string }>;
+  /** chase_send_done: sent with the provider's id, or given back (deleted) so the next morning can ask again. */
+  done(id: string, ok: boolean, providerId: string | null): Promise<void>;
+};
+export async function sendHeldAsks(io: SendIO, limit = 20): Promise<{ sent: number; failed: number }> {
+  const r = { sent: 0, failed: 0 };
+  for (const a of await io.claim(limit)) {
+    if (!a.to_email || !a.mail_subject || !a.mail_body) { await io.done(a.id, false, null); r.failed++; continue; }
+    const res = await io.mail(a.to_email, a.mail_subject, a.mail_body).catch(() => ({ ok: false } as { ok: boolean; id?: string }));
+    await io.done(a.id, res.ok, res.ok ? (res.id ?? null) : null);
+    if (res.ok) r.sent++; else r.failed++;
+  }
+  return r;
 }
 
 /* ------------------------------ what a run is asked to do ------------------------------ */

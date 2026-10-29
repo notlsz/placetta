@@ -49,7 +49,8 @@ import { stageAlert, stageUpdates, type StageFiling, type StageUpdate } from "./
 import { goodNews, ownerWorthy } from "./quiet.ts";
 import { inspectionWork, PREP } from "./inspections.ts";
 import { runStatusChecks, type StatusFiling, type StatusIO, type StatusRun, type WsState } from "./status_checks.ts";
-import { initiative, movePrompt, specialistWake, type ChaseRow, type InitIO } from "./initiative.ts";
+import { initiative, movePrompt, sendHeldAsks, specialistWake, type ChaseRow, type HeldAsk, type InitIO } from "./initiative.ts";
+import { holdMinutes } from "../file/logic.ts";
 import { carryDaily, carryOutbox, type Start } from "./carry.ts";
 import { feedsFor, lawWatch } from "./law_watch.ts";
 import type { Alert, WsLite } from "../../../src/lawWatch.ts";
@@ -641,8 +642,10 @@ Deno.serve(async (req) => {
   // What Odelia wrote an agency as the business's agent, once its undo window is over (pg_cron, every minute while one
   // is due; migration 20261105090300_carry_to_approval).
   if (asked.action === "outbox") {
-    if (Deno.env.get("CARRY") === "off") return json(200, { ok: true, off: true });
-    try { return json(200, await carryOutbox(admin, (k) => Deno.env.get(k))); }
+    // Hands-off asks held for their undo window go in the same sweep (initiative.ts sendHeldAsks)
+    const asks = await heldAsks().catch((e) => { console.error("held asks", String(e).slice(0, 160)); return { sent: 0, failed: 0 }; });
+    if (Deno.env.get("CARRY") === "off") return json(200, { ok: true, off: true, asks });
+    try { return json(200, { ...(await carryOutbox(admin, (k) => Deno.env.get(k))), asks }); }
     catch (e) { console.error("agency outbox", String(e).slice(0, 160)); return json(500, { error: "outbox failed" }); }
   }
 
@@ -760,8 +763,10 @@ Deno.serve(async (req) => {
         const { data: plan } = await admin.rpc("plan_of", { ws });
         if (plan === "none") continue;
         try {
-          const r = await initiative(ws, names.get(ws) ?? "", states.get(ws), workspaceToday((states.get(ws) as { stores?: unknown } | null)?.stores, started), io, { canStart, filings: filingsOf.get(ws) ?? [] });
+          const r = await initiative(ws, names.get(ws) ?? "", states.get(ws), workspaceToday((states.get(ws) as { stores?: unknown } | null)?.stores, started), io,
+            { canStart, filings: filingsOf.get(ws) ?? [], holdMinutes: Math.max(1, holdMinutes(Deno.env.get("SEND_HOLD_MINUTES"))), now: started.toISOString() });
           if (r.update) list.push(r.update);
+          list.push(...r.holds);
           if (r.later.length) laterMoves.set(ws, r.later);
           initiativeSent += r.sent;
         } catch (e) { console.error("initiative", ws, String(e).slice(0, 160)); }
@@ -1219,3 +1224,14 @@ Deno.serve(async (req) => {
   await admin.from("app_settings").update({ monitor_last_run: started.toISOString() }).eq("id", true);
   return json(200, { ok: true, mention_notices: mentions, self_filing: sweep ? { requeued: sweep.requeued, refreshed: sweep.refreshed, worker_wake: sweep.wake ?? null, fell_back: sweep.fell_back ?? 0 } : null, workspaces: byWs.size, created: created.length, emailed, team_alerts: team, hq_reports: hqSent, renewal_notices: renewalNotices, email: !!(MAIL_ON && FROM), weekly_checks: watches, phone_notices: phoned, team_chats: chats, odelia_jobs: jobs, settled, resumed, chases_sent: initiativeSent, agency_asks: answered, status_checks: status, carry: carried, ai_alerts: aiAlerts, ai_throttled: throttled, business_rules: ruled, billing_ok: billingOk, law_watch: law });
 });
+
+
+/** Hands-off asks whose undo window is over, from Odelia's own address (initiative.ts; migration 20261105100100_chase_hold). */
+async function heldAsks() {
+  if (!mailOutReady((k) => Deno.env.get(k))) return { sent: 0, failed: 0 };
+  return await sendHeldAsks({
+    claim: async (limit) => { const { data, error } = await admin.rpc("chase_claim_due", { p_limit: limit }); if (error) { console.error("chase claim due", error.code); return []; } return (data ?? []) as HeldAsk[]; },
+    mail: async (to, subject, text) => { const b = mailBody(text); const r = await sendOdeliaMail((k) => Deno.env.get(k), { to, subject, text: b.text, html: b.html }, fetch, suppressedIn(admin)); return { ok: r.ok, id: r.id }; },
+    done: async (id, ok, provider) => { await admin.rpc("chase_send_done", { p_id: id, p_ok: ok, p_provider: provider }); },
+  });
+}

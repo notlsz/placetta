@@ -918,7 +918,8 @@ const UPDATE_KIND: Record<string, { label: { en: string; zh: string }; Icon: () 
 
 /** Updates as rows: each one opens the permit or hands it to Odelia. Home shows the latest few; the Updates tab, all. */
 function UpdateList({ items }: { items: import("./model").UpdateItem[] }) {
-  const { b, lang, openApp, ask, ws } = useApp();
+  const { b, lang, openApp, ask, ws, cloud } = useApp();
+  const canUndo = !!cloud && (cloud.owner || cloud.admin);
   return (
     <ul className="updates">
       {items.map(u => {
@@ -934,6 +935,7 @@ function UpdateList({ items }: { items: import("./model").UpdateItem[] }) {
             <div className="upd-act">
               {app && <button type="button" className="sbtn quiet" onClick={() => openApp(app.id, u.kind === "mention" ? "comments" : undefined)}>{b(B("Open", "打开"))}</button>}
               {u.prompt && <button type="button" className="sbtn ink" onClick={() => ask(b(u.prompt!))}>{b(B("Handle it", "去处理"))}</button>}
+              {u.undo && canUndo && <button type="button" className="sbtn warm" onClick={() => void cloud!.undoAsk(u.undo!)}>{b(B("Undo", "撤销"))}</button>}
             </div>
           </li>
         );

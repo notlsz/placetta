@@ -557,6 +557,26 @@ const click = async (p, loc) => {
 };
 const clickText = async (p, text) => { const l = p.getByRole("button", { name: text }).filter({ visible: true }).first(); if (!(await l.count())) return false; await l.click(); await settle(p); return true; };
 
+/** Opens approval cards until one shows the Ask me / Always allow / Never choices; never: pick Never too. */
+async function permCard(p, never) {
+  for (const path of ["", "approvals"]) {
+    await open(p, path);
+    const opens = p.locator("main button, main a").filter({ visible: true });
+    const n = Math.min(await opens.count(), 40);
+    for (let i = 0; i < n; i++) {
+      const b = opens.nth(i);
+      if (!/approve|批准/i.test((await b.textContent().catch(() => "")) ?? "")) continue;
+      await b.click().catch(() => {}); await settle(p);
+      if (await p.locator(".perm-row").filter({ visible: true }).count()) {
+        if (never) { await p.locator(".perm-row [role=radio]").filter({ hasText: /^(Never|绝不)$/ }).first().click(); await settle(p); }
+        return true;
+      }
+      await p.keyboard.press("Escape"); await settle(p);
+    }
+  }
+  return false;
+}
+
 /** Clicks a sidebar control, opening the phone menu first when the sidebar is tucked away. */
 const viaMenu = async (p, loc) => (await click(p, loc)) || ((await click(p, ".mbar button[aria-label=Menu]")) && click(p, loc));
 
@@ -627,6 +647,9 @@ const STATES = [
   { name: "cmdk", go: async p => { await open(p, ""); if (await viaMenu(p, ".cmdk-open")) return true; await p.keyboard.press("Control+k"); await settle(p); return true; } },
   { name: "cmdk-typed", go: async p => { await open(p, ""); if (!(await viaMenu(p, ".cmdk-open"))) { await p.keyboard.press("Control+k"); await settle(p); } await p.keyboard.type("food facility plan check permit"); await settle(p); return true; } },
   { name: "approval-drawer", go: async p => { await open(p, ""); return clickText(p, "Approve"); } },
+  // the card's Ask me, Always allow or Never per kind of action (src/AllowRule.tsx), then with Never picked
+  { name: "approval-choices", go: p => permCard(p, false) },
+  { name: "approval-choices-never", go: p => permCard(p, true) },
   { name: "tabbar-odelia", go: async p => { await open(p, ""); return click(p, ".tabbar a:last-child"); } },
   { name: "plans", go: async p => {
     await open(p, "");
