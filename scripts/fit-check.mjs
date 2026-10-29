@@ -604,7 +604,7 @@ const STATES = [
   { name: "review-remind", go: async p => { await open(p, "permits/review"); const l = p.locator(".rv-pick").filter({ visible: true }); if (!(await l.count())) return false; await l.first().check(); await settle(p); return clickText(p, "Set a reminder"); } },
   { name: "review-filters", go: async p => { await open(p, "permits/review"); if (await click(p, ".rv-ftog")) return true; return (await p.locator(".rv-filters").count()) > 0; } },
   { name: "hq-picked-ask", go: async p => { await open(p, "headquarters"); const l = p.locator(".rv-pick").filter({ visible: true }); if (!(await l.count())) return false; await l.first().check(); await settle(p); return clickText(p, "Ask the franchisee"); } },
-  { name: "hq-item", go: async p => { await open(p, "headquarters"); return click(p, ".rv-c.s-missing .rv-open, .rv-open"); } },
+  { name: "hq-item", go: async p => { await open(p, "headquarters"); return click(p, ".rv-c.s-missing .rv-cell, .rv-cell"); } },
   { name: "doc-comments", go: async p => { await open(p, "permits/documents"); return click(p, ".cmt-btn.has, .cmt-btn"); } },
   { name: "stores-check", go: async p => { await open(p, "stores"); await p.locator(".st-more .pill").first().click().catch(() => {}); return clickText(p, "Check stores already open"); } },
   { name: "stores-check-list", go: async p => { await open(p, "stores"); await p.locator(".st-more .pill").first().click().catch(() => {}); if (!(await clickText(p, "Check stores already open"))) return false; await p.locator(".sc-f input").first().fill("Flushing, NY"); return clickText(p, "Check my stores"); } },

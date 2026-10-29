@@ -28,7 +28,7 @@ import { forgetRecall, keepRecall, recallFrom } from "../src/recall";
 import { addRule, allowOptions, autoOk, planApprovalId, putBusinessRule, setAutonomy } from "../src/autonomy";
 import { undoRun } from "../src/rewind";
 import { fire, type Notice } from "../src/businessRules";
-import { buildGrid, cellOf, columnOf, filterGrid, gridCsv, itemStatus, preparePrompt, regionOf, sortRows, storesOfHq, storesOfWorkspace, toPrepare, type HqReviewRow, type ReviewItem } from "../src/review";
+import { buildGrid, cellOf, colTally, columnOf, doneSay, filterGrid, gridCsv, gridTally, itemCounts, itemStatus, rowTally, preparePrompt, regionOf, sortRows, storesOfHq, storesOfWorkspace, toPrepare, type HqReviewRow, type ReviewItem } from "../src/review";
 import { initials, mentionsIn, odeliaAsk, segments, typing, SAMPLE_PEOPLE } from "../src/collab";
 let xeroReads: number | undefined;
 
@@ -967,10 +967,22 @@ async function teamReviewAttacked() {
   const lapsedOnly = filterGrid(g, { status: "lapsed" });
   eq([lapsedOnly.rows.map(r => r.store.key), lapsedOnly.columns.map(c => c.key)], [["b"], ["manager", "renewals"]], "a status filter keeps the rows and columns that have it");
   eq(filterGrid(g, { mine: "me" }).rows.map(r => r.store.key), ["a"], "Mine keeps the cells assigned to you");
+  const attn = filterGrid(g, { status: "attention" });
+  eq([attn.rows.map(r => r.store.key), attn.columns.map(c => c.key)], [["a", "b"], ["health", "sign", "manager", "renewals"]], "Needs attention keeps what's lapsed, missing a document or expiring, and nothing else");
   eq([filterGrid(g, { region: "NY" }).rows.map(r => r.store.key), filterGrid(g, { stage: "opening" }).rows.map(r => r.store.key), filterGrid(g, { store: "b", status: "missing" }).rows.length], [["b"], ["a"], 0], "region, stage, and filters that leave nothing");
   const picked = toPrepare(g, [{ row: "a", col: "health" }, { row: "a", col: "sign" }, { row: "b", col: "health" }, { row: "b", col: "manager" }, { row: "zz", col: "health" }, { row: "a", col: "nope" }]);
   eq(picked.map(x => [x.store.key, x.apps.map(a => a.id)]), [["a", ["a-health", "a-sign"]]], "Ask Odelia to prepare takes only what still needs preparing: not an approved permit, a certificate, a made-up row or column");
   ok(!/split_job/.test(preparePrompt(picked, "en")) && /Prepare these applications for Alpha \(store a\)/.test(preparePrompt(picked, "en")), "one store: no split");
+  // the summaries: per store, per column, the whole grid, with the renewals column left out of what it would count twice
+  const bravo = g.rows.find(r => r.store.key === "b")!;
+  eq([rowTally(bravo, g.columns), colTally(g.rows, "health")], [{ total: 3, done: 1, attention: 2, moving: 0, todo: 0 }, { total: 2, done: 1, attention: 1, moving: 0, todo: 0 }], "a store's tally (renewals not counted twice) and a column's");
+  const tot = gridTally(g), ic = itemCounts(g);
+  eq([tot.total, tot.done + tot.attention + tot.moving + tot.todo, ic.lapsed], [tot.total, tot.total, 1], "the grid's tally adds up, and the lapsed certificate counts once, not again under renewals");
+  eq([doneSay(tot, "en"), doneSay({ total: 9, done: 4, attention: 0, moving: 0, todo: 5 }, "zh")], [`${tot.done} of ${tot.total} done`, "9 项中 4 项已完成"], "the tally in words");
+  const sw = storesOfWorkspace({ ...w, apps: w.apps.map(a => a.id === "b-health" ? { ...a, agency: same("NYC Health"), next: same("Renew in May"), source: { label: "", url: "https://www.nyc.gov/health" }, receipt: "doc-1" } : a.id === "ein" ? { ...a, source: { label: "x", url: "javascript:alert(1)" } } : a) });
+  const bh = sw.flatMap(st => st.items).find(i => i.id === "b-health")!, ein = sw.flatMap(st => st.items).find(i => i.id === "ein")!;
+  eq([bh.agency?.en, bh.step?.en, bh.source, bh.confirmed, ein.source, ein.confirmed], ["NYC Health", "Renew in May", { label: "nyc.gov", url: "https://www.nyc.gov/health" }, true, undefined, false],
+    "the detail card's facts: the agency, the next step, the agency's own page (never a script address), and confirmed only where the agency's decision is on file");
 
   // mentions written to fool the parser, and comments that plant instructions
   const others = SAMPLE_PEOPLE.filter(p => !p.you);

@@ -58,6 +58,16 @@ export type ReviewItem = {
   /** open comments (in Headquarters: open comments shared with it) */
   comments?: number;
   assignee?: string | null;
+  /** the agency that issues it (a workspace's own applications; headquarters doesn't get it) */
+  agency?: Bi;
+  /** what happens next, as the application says it */
+  step?: Bi;
+  /** why it applies: the issuing agency's own page the requirement rests on */
+  source?: { label: string; url: string };
+  /** the agency decided it: approved, with its decision date or the receipt it sent on file (never inferred from a status alone) */
+  confirmed?: boolean;
+  /** the receipt or confirmation number the agency gave, when there is one */
+  receipt?: boolean;
 };
 export type ReviewStore = {
   /** unique across franchisees: "<workspace>:<store>" in Headquarters, the store id in a workspace */
@@ -161,6 +171,8 @@ export function regionOf(address: string): string {
   return parts.length > 1 ? parts[parts.length - 1] : "";
 }
 
+const hostOf = (url: string) => { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return url; } };
+
 /** The stores of one workspace with every requirement on their lists. An application belongs to the store that lists
  *  it, or to the only store; with two or more stores, what no store lists is the whole business's own row. */
 export function storesOfWorkspace(w: Workspace, o: { comments?: (appId: string) => number; assignee?: (appId: string) => string | null | undefined } = {}): ReviewStore[] {
@@ -171,7 +183,11 @@ export function storesOfWorkspace(w: Workspace, o: { comments?: (appId: string) 
     const a = w.apps.find(x => x.id === id);
     if (!a) return null;
     return { kind: "app", id: a.id, name: a.name, official: a.official, level: a.level, status: a.status, missing: a.checklist.some(c => c.state === "missing" && !c.dep),
-      due: nextDue(a.id, a.status === "approved"), expires: renews(a.id), comments: o.comments?.(a.id) ?? 0, assignee: o.assignee?.(a.id) ?? null };
+      due: nextDue(a.id, a.status === "approved"), expires: renews(a.id), comments: o.comments?.(a.id) ?? 0, assignee: o.assignee?.(a.id) ?? null,
+      agency: a.agency?.en ? a.agency : undefined, step: a.next?.en ? a.next : undefined,
+      source: a.source?.url && /^https:\/\//.test(a.source.url) ? { label: a.source.label || hostOf(a.source.url), url: a.source.url } : undefined,
+      confirmed: a.status === "approved" && (!!a.filed?.decided || a.filed?.status === "issued" || !!a.receipt),
+      receipt: !!(a.receipt || a.filed?.receipt || a.filed?.confirmation) };
   };
   const listed = new Set(stores.flatMap(s => s.apps ?? []));
   const out: ReviewStore[] = stores.map(s => {
@@ -244,7 +260,7 @@ export function buildGrid(stores: ReviewStore[], today: string): ReviewGrid {
   return { columns, rows };
 }
 
-export type ReviewFilter = { store?: string; status?: CellStatus | "all"; region?: string; stage?: "all" | "open" | "opening"; mine?: string | null };
+export type ReviewFilter = { store?: string; status?: CellStatus | "all" | "attention"; region?: string; stage?: "all" | "open" | "opening"; mine?: string | null };
 export type ReviewSort = "risk" | "next" | "name" | "opening";
 
 /** The grid as filtered: rows with at least one matching cell, columns with at least one, and which cells match. */
@@ -253,7 +269,7 @@ export function filterGrid(g: ReviewGrid, f: ReviewFilter): ReviewGrid & { match
   const match = (row: ReviewRow, col: string) => {
     const c = row.cells[col];
     if (!c || c.status === "none") return false;
-    if (status && c.status !== status) return false;
+    if (status === "attention" ? !(c.status === "lapsed" || c.status === "missing" || c.status === "expiring") : status && c.status !== status) return false;
     if (f.mine && !c.assignees.includes(f.mine)) return false;
     return true;
   };
@@ -277,6 +293,36 @@ export function sortRows(rows: ReviewRow[], by: ReviewSort, lang: "en" | "zh" = 
     opening: (a: ReviewRow, b: ReviewRow) => (a.store.opens ?? "9999").localeCompare(b.store.opens ?? "9999"),
   }[by];
   return [...rows].sort((a, b) => biz(a) - biz(b) || cmp(a, b) || name(a).localeCompare(name(b)));
+}
+
+/** How far along a set of cells is: how many are approved and current, how many need someone (lapsed, a missing
+ *  document, expiring), and how many are with the team or the agency. */
+export type Tally = { total: number; done: number; attention: number; moving: number; todo: number };
+export function tallyOf(cells: ReviewCell[]): Tally {
+  const t: Tally = { total: 0, done: 0, attention: 0, moving: 0, todo: 0 };
+  for (const c of cells) {
+    if (c.status === "none") continue;
+    t.total++;
+    if (c.status === "approved") t.done++;
+    else if (c.status === "lapsed" || c.status === "missing" || c.status === "expiring") t.attention++;
+    else if (c.status === "filed" || c.status === "review") t.moving++;
+    else t.todo++;
+  }
+  return t;
+}
+/** A store's tally across the columns shown. The renewals column repeats what the other columns already count, so it's left out. */
+export const rowTally = (row: ReviewRow, columns: ReviewColumn[]) => tallyOf(columns.filter(c => c.key !== RENEWALS.key).map(c => row.cells[c.key]).filter(Boolean));
+/** A column's tally across the stores shown. */
+export const colTally = (rows: ReviewRow[], col: string) => tallyOf(rows.map(r => r.cells[col]).filter(Boolean));
+/** The whole grid's tally, renewals left out. */
+export const gridTally = (g: ReviewGrid) => tallyOf(g.rows.flatMap(r => g.columns.filter(c => c.key !== RENEWALS.key).map(c => r.cells[c.key])));
+/** "4 of 9 done" */
+export const doneSay = (t: Tally, lang: "en" | "zh") => (lang === "zh" ? `${t.total} 项中 ${t.done} 项已完成` : `${t.done} of ${t.total} done`);
+/** Counts per status across the grid's cells, renewals left out (they repeat the other columns): the status chips. */
+export function itemCounts(g: ReviewGrid): Record<CellStatus, number> {
+  const out = { lapsed: 0, missing: 0, expiring: 0, todo: 0, filed: 0, review: 0, approved: 0, none: 0 } as Record<CellStatus, number>;
+  for (const r of g.rows) for (const c of g.columns) if (c.key !== RENEWALS.key) out[r.cells[c.key].status]++;
+  return out;
 }
 
 /** Counts per status across the grid's cells, for the filter. */
