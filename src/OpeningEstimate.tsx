@@ -17,12 +17,12 @@ export function EstimateDate({ date, range, lang }: { date: string; range?: { fa
 
 /** "The date hinges on Food facility plan check, up to 20 business days after payment, per deh.santaclaracounty.gov."
  *  The step's name opens it (when onOpen is given) and the host links to the agency's own page. */
-export function HingeLine({ hinge, lang, onOpen, className }: { hinge: Hinge[]; lang: Lang; onOpen?: (app: string) => void; className?: string }) {
+export function HingeLine({ hinge, lang, onOpen, className, lead }: { hinge: Hinge[]; lang: Lang; onOpen?: (app: string) => void; className?: string; lead?: string }) {
   if (!hinge.length) return null;
   const zh = lang === "zh";
   return (
     <p className={"oe-hinge" + (className ? " " + className : "")} data-hinge="">
-      {zh ? "开业日期取决于：" : "The date hinges on "}
+      {lead}{zh ? "开业日期取决于：" : "The date hinges on "}
       {hinge.map((h, i) => {
         const said = hingeStepSay(h)[lang], name = h.name[lang];
         const host = hostOf(h.timing.source);

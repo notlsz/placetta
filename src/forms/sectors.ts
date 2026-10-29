@@ -181,7 +181,7 @@ const SALON = /\bnail (salon|spa|bar|studio)s?\b|\bhair ?(salon|studio)s?\b|\bbe
 const AUTO = /\bauto(motive)? (repair|service|body)\b|\bcar repair\b|\bbody shop\b|\bmechanic\b|\bcollision\b|汽修|修车|汽车维修/i;
 const DEVICES = /\bmedical (device|equipment|supplies)\b|\bdevices? (importer|distributor)\b|医疗器械|医疗设备/i;
 const MANUFACTURES = /\bmanufactur(er|ers|ing)\b|\bfactory\b|\bproduction facility\b|工厂|制造|生产基地/i;
-const OFFICE = /\b(office|startup|software|saas|tech(nology)? (company|office|startup)|game studio|gaming studio|video games?|r ?& ?d center)\b|科技公司|软件|游戏工作室|办公室|研发中心/i;
+const OFFICE = /\b(office|startup|software|saas|tech(nology)? (company|office|startup)|game studio|gaming studio|video games?|r ?& ?d center|ai (company|lab))\b|科技公司|初创公司|初创企业|人工智能|软件|游戏工作室|办公室|研发中心/i;
 
 /** The sector needs the words of a business name: a nail salon is `salon`, an auto body shop `autoRepair`, a medical
     device importer `devices`, a factory `manufactures`, a tech office or game studio `office`. */

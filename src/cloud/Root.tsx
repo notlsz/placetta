@@ -450,6 +450,19 @@ function OnbProgress({ lang, step }: { lang: Lang; step: 1 | 2 }) {
   );
 }
 
+/* The first screen's examples: one of each kind of business Placetta maps, not only food. Each reads in the line
+   parser (src/plan/line.ts) and builds its own plan from the registry: a factory gets the stormwater and air permits,
+   a C-corp the Articles of Incorporation. */
+const EXAMPLES: Bi[] = [
+  B("Milk tea shop in Flushing, NY", "奶茶店，纽约法拉盛"),
+  B("Packaging factory in Los Angeles, CA", "包装工厂，洛杉矶"),
+  B("AI startup (C-corp) in San Francisco, CA", "AI 初创公司（C 型公司），加州旧金山"),
+  B("Investment company in New York, NY", "投资公司，纽约"),
+  B("Biotech lab in San Diego, CA", "生物科技实验室，圣地亚哥"),
+  B("Solar installer in Austin, TX", "太阳能安装公司，德州奥斯汀"),
+  B("Laundry detergent brand in Houston, TX", "洗衣液品牌，德州休斯顿"),
+];
+
 /* One line instead of a form: "Milk tea shop at 150 N First St, San Jose, CA" or "奶茶店，法拉盛". What it sells, the city
    and the street are read from the words (src/plan/line.ts, the same reading a first text to Odelia gets); anything
    missing is asked right there, one field at a time. Someone who ticked the Terms when they created their account isn't
@@ -500,7 +513,7 @@ function Onboard({ lang, email, agreedAtSignup = false, onCreated, onCancel }: {
   const settle = () => {
     const city = parsed?.city ?? placeNow.replace(/,.*$/, "").trim();
     const state = parsed?.state ?? f.state;
-    if (!what) { setErr(L(B("Say what you're opening, like \"milk tea shop\".", "请说明开什么店，例如“奶茶店”。"))); return null; }
+    if (!what) { setErr(L(B("Say what you're opening, like \"milk tea shop\" or \"packaging factory\".", "请说明您要开办什么业务，例如“奶茶店”或“包装工厂”。"))); return null; }
     if (!city || !state) { setErr(L(B("Add the city and state, like Flushing, NY.", "请填写城市和州，例如 Flushing, NY。"))); return null; }
     if (!agree) { setErr(L(B("Check the box to agree to the Terms of Service and Privacy Policy.", "请勾选同意《服务条款》和隐私政策。"))); return null; }
     return { city, state };
@@ -646,23 +659,23 @@ function Onboard({ lang, email, agreedAtSignup = false, onCreated, onCancel }: {
   return (
     <div className="gate-card wide">
       <OnbProgress lang={lang} step={1} />
-      <h1>{L(B("What are you opening, and where?", "您要开什么店？开在哪里？"))}</h1>
+      <h1>{L(B("What are you opening, and where?", "您要开办什么业务？开在哪里？"))}</h1>
       <p className="gate-sub">{L(B("One line, with the street if you have it. Your plan for that address appears right away: every license, in order, with fees and timelines.", "一句话就够，有街道地址更好。该地址的计划立刻出现：全部执照按顺序列出，附费用和时间。"))}</p>
       <form className="onb" onSubmit={e => { e.preventDefault(); toMore(); }}>
         <label className="q">
-          <span className="sr">{L(B("What and where", "开什么店、在哪里"))}</span>
+          <span className="sr">{L(B("What and where", "开办什么业务、在哪里"))}</span>
           <input id="onb-line" className="onb-line" value={line} onChange={e => { setLine(e.target.value); setErr(""); }} placeholder={L(B("Milk tea shop at 38 Main St, Flushing, NY", "奶茶店，纽约法拉盛 38 Main St"))} autoFocus autoComplete="off" />
         </label>
         {!line && (
           <div className="chips ex">
-            {[B("Milk tea shop in Flushing, NY", "奶茶店，纽约法拉盛"), B("Hot pot restaurant in Irvine, CA", "火锅店，加州尔湾"), B("Bakery in Houston, TX", "烘焙店，德州休斯顿"), B("Furniture importer in Los Angeles, CA", "家具进口商，洛杉矶"), B("Laundry detergent brand in Houston, TX", "洗衣液品牌，德州休斯顿")].map(x => (
+            {EXAMPLES.map(x => (
               <button key={x.en} type="button" className="chip" onClick={() => setLine(L(x))}>{L(x)}</button>
             ))}
           </div>
         )}
         {line.trim() && (
           <p className="onb-read" aria-live="polite">
-            {what ? <span><I.check />{what}</span> : <span className="miss">{L(B("What kind of business?", "什么类型的店？"))}</span>}
+            {what ? <span><I.check />{what}</span> : <span className="miss">{L(B("What kind of business?", "什么类型的业务？"))}</span>}
             {parsed || (placeNow && f.state) ? <span><I.check />{placeNow}{!parsed && f.state ? `, ${f.state}` : ""}</span> : <span className="miss">{L(B("Which city and state?", "哪个城市和州？"))}</span>}
             {streetNow && <span><I.check />{streetNow}</span>}
             {whenNow === 3 && <span><I.check />{L(B("Already open", "已开业"))}</span>}

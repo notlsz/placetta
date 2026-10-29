@@ -726,6 +726,33 @@ async function record(p, W, name) {
   }
 }
 
+/** Onboarding back to its first screen (the line and its example chips), from the questions or the plan preview. */
+async function toLine(p) {
+  for (let i = 0; i < 14 && !(await p.locator("#onb-line").count()); i++) {
+    const back = p.locator(".pv-act .pv-link, .onb-act3 .sbtn.quiet").filter({ hasText: /^(Back|返回)$/ });
+    if (!(await back.count())) return false;
+    await back.first().click(); await p.waitForTimeout(250);
+  }
+  return (await p.locator("#onb-line").count()) > 0;
+}
+/** One example chip, through the yes-or-no questions ("Not sure" to each), to the finished plan preview. */
+async function toPlan(p, re) {
+  if (!(await toLine(p))) return false;
+  await p.fill("#onb-line", ""); await p.waitForTimeout(150);
+  const chip = p.locator(".chips.ex .chip").filter({ hasText: re });
+  if (!(await chip.count())) return false;
+  await chip.first().click();
+  const agree = p.locator("#onb-agree"); if (await agree.count()) await agree.check();
+  await p.click("form.onb button[type=submit]"); await p.waitForTimeout(400);
+  for (let i = 0; i < 12 && !(await p.locator("[data-plan-build]").count()); i++) {
+    const ns = p.locator(".onb-act3 .sbtn.line"); if (!(await ns.count())) break;
+    await ns.click(); await p.waitForTimeout(200);
+  }
+  await p.locator('[data-plan-build="done"]').waitFor();
+  await settle(p);
+  return true;
+}
+
 /** Signed out (with --signin): the sign-in screens and onboarding, step by step, in a fresh browser. */
 async function gate(W) {
   const ctx = await browser.newContext({ viewport: { width: W, height: HEIGHT }, reducedMotion: "reduce" });
@@ -741,7 +768,9 @@ async function gate(W) {
     ["gate-password", async () => { await p.fill("#gate-email", `fit-${W}@example.com`); await p.click("button[type=submit]"); await p.waitForTimeout(700); return (await p.locator("#gate-pw").count()) > 0; }],
     ["gate-code", async () => { await p.getByText("Email me a code instead").click(); await p.waitForTimeout(700); return (await p.locator("#gate-code").count()) > 0; }],
     ["onboarding", async () => { await p.fill("#gate-code", "123456"); await p.click("button[type=submit]"); await p.waitForTimeout(2500); return (await p.locator("#onb-line").count()) > 0; }],
-    ["onboarding-filled", async () => { await p.fill("#onb-line", "Bubble tea and hot pot restaurant with a retail counter in Rowland Heights, Los Angeles County, CA"); await p.waitForTimeout(600); const more = p.getByRole("button", { name: /Add a name/ }); if (await more.count()) { await more.first().click(); await settle(p); } return true; }],
+    // the plan preview (src/cloud/PlanBuild.tsx) for three of the first screen's examples: food, an AI C-corp, a factory
+    ...[["food", /Milk tea/], ["ai", /AI startup/], ["factory", /factory/i]].map(([k, re]) => [`onboarding-plan-${k}`, () => toPlan(p, re)]),
+    ["onboarding-filled", async () => { await toLine(p); await p.fill("#onb-line", "Bubble tea and hot pot restaurant with a retail counter in Rowland Heights, Los Angeles County, CA"); await p.waitForTimeout(600); const more = p.getByRole("button", { name: /Add a name/ }); if (await more.count()) { await more.first().click(); await settle(p); } return true; }],
     ["onboarding-answers", async () => { if (await p.locator("#onb-place").count()) await p.fill("#onb-place", "Rowland Heights, CA"); await p.locator("#onb-agree").check(); await p.click("form.onb button[type=submit]"); await p.waitForTimeout(600); if (!(await p.locator("#onb-legal").count())) return false; await p.fill("#onb-legal", "Lucky Leaf Tea LLC"); await p.fill("#onb-owner", "Mei Chen"); await p.fill("#onb-address", "18800 Colima Rd, Rowland Heights, CA 91748"); await settle(p); return true; }],
   ];
   for (const [name, go] of steps) {

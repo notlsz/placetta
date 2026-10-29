@@ -340,6 +340,9 @@ export function ownedAbroadFact(facts: { label: { en: string }; value: { en: str
   return f ? /^yes\b/i.test(f.value.en.trim()) : undefined;
 }
 
+/** Words that say the business is (or will be) a corporation, not an LLC. */
+const CORP_WORDS = /\b(c|s)[- ]?corp(oration)?\b|\bcorporation\b|\bincorporated\b|[CS] ?型公司|股份有限公司/i;
+
 export function previewPlan(what: string, where: string, opening?: string, o: PreviewOptions = {}): PreviewPlan {
   const today = o.today ?? daysFromNow(0);
   const segment = segmentOf(what);
@@ -351,7 +354,8 @@ export function previewPlan(what: string, where: string, opening?: string, o: Pr
   // a furniture brand: wood goods, upholstered furniture and clothing storage units, read from what it is (src/forms/furniture.ts)
   // the company: none yet, it's formed here; one formed in another state or abroad registers here instead
   const legal = (o.entity ?? "").trim(), home = companyHome(o.formedIn, where);
-  const corp = o.corp ?? /\b(inc|incorporated|corp|corporation)\.?\s*$/i.test(legal);
+  // a corporation by its legal name ("Acme Inc."), or by the words before one is formed ("AI startup (C-corp)", "C 型公司")
+  const corp = o.corp ?? (/\b(inc|incorporated|corp|corporation)\.?\s*$/i.test(legal) || CORP_WORDS.test(what));
   const needs = { food, employees, signage: o.signage ?? !mobile, buildout, newEntity: !legal, imports: o.imports ?? imports(what), alcohol, terrace: o.terrace ?? terrace(what), ...furnitureNeeds(what), ...sectorNeeds(what), ...productNeeds(what),
     ...(legal && home === "abroad" ? { foreignEntity: true } : legal && home === "other" ? { outOfState: true } : {}), ...(corp ? { corp: true } : {}),
     // a US company (new, or formed in a state) with an owner outside the US: Form 5472 each year. A company formed abroad

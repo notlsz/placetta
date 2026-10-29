@@ -856,6 +856,9 @@ export function segmentOf(text: string): Segment {
   if (FURNITURE.test(t)) return /showroom|store|retail|gallery|shop|门店|展厅/.test(t) || !/import|e-?commerce|online|amazon|seller|wholesal|跨境|电商|进口|批发/.test(t) ? "retail" : "seller";
   if (/import|e-?commerce|amazon|seller|shein|temu|tiktok shop|跨境|电商|卖家|进口/.test(t)) return "seller";
   if (/tea|coffee|restaurant|food|kitchen|bakery|hot ?pot|malatang|noodle|dessert|ice cream|bubble|cafe|\bbar\b|\bpub\b|tavern|brewery|奶茶|茶|咖啡|餐|火锅|麻辣烫|面|甜品|烘焙|食|酒吧/.test(t)) return "restaurant";
+  // a factory is an industrial site, not a store: the stormwater, air and hazardous materials filings sit on that path
+  // (src/forms/sectors.ts). A food maker took the restaurant path above, a furniture maker the furniture one
+  if (/\bfactory\b|\bmanufactur(er|ers|ing)\b|\bproduction facility\b|工厂|制造|生产基地/.test(t)) return "warehouse";
   return "retail";
 }
 

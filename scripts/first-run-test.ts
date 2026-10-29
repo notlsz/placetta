@@ -104,7 +104,10 @@ export function firstRunTests(ok: Ok) {
     const h = render(skipped, lang, createElement(PlanBuild, { lang, ws: skipped, place: "100 N First St, San Jose", instant: true, busy: false, err: "", onBack: noop, onNext: noop, onSkip: noop }));
     const f = firstRunFacts(skipped, today), w = words(h);
     ok(h.includes('data-plan-build="done"') && count(h, /<li>/g) === skipped.apps.length, `${lang}: the build lists every application in the plan`, count(h, /<li>/g));
-    ok(w.includes(needLine(f)[lang]) && w.includes(money(f.agencyUSD)), `${lang}: the build ends with the same outcome Home shows`);
+    const head = lang === "zh" ? `在 100 N First St, San Jose 开业需要 ${f.permits} 项执照和许可` : `${f.permits} licenses to open in 100 N First St, San Jose`;
+    ok(w.includes(head) && w.includes(money(f.agencyUSD)) && (!canFileLine(f) || w.includes(canFileLine(f)![lang])), `${lang}: the build leads with the answer, the fees and what Odelia files, as Home does`, head);
+    // one number per row: the list's own marker is off (a <ul>), so "1. 1Articles" can't print
+    ok(!h.includes("<ol") && count(h, /class="pv-n"/g) === skipped.apps.length, `${lang}: each row shows its number once`);
     ok(!f.opening || (text(h).includes(fmtDay(f.opening, lang, true)) && text(h).includes(hingeSay({ hinge: f.hinge })![lang])), `${lang}: the build shows the same opening and hinge`, f.opening);
     ok(count(h, /class="sbtn ink big"/g) === 1 && h.includes("data-plan-skip"), `${lang}: one primary button, and a way straight to the plan`);
     ok(!/[·•]/.test(w) && !/(^|[^\d.,:$])0\d/.test(w), `${lang}: the build has no dot separators or leading zeros`);
