@@ -149,7 +149,9 @@ export async function autopilotTests(ok: Ok, eq: Eq) {
   ok(approvals(t.before) === 8 && approvals(t.after) === 0, "eight approval taps before, none after");
   // 23 and 16 until 2026-10-28, when the county's plan check and health permit (signed in ink) began going by email
   // from Placetta once the owner uploads the signed page: one "send it yourself" fewer each
-  eq([t.before.length, t.after.length], [21, 14], "21 touches before, 14 after (counted, not estimated)");
+  // 22 and 15 from 2026-10-29: CDTFA's portal needs the business's own account (filingSign ca-cdtfa no longer "open"),
+  // one more step for the owner until Odelia makes agency accounts herself (agent_accounts_on)
+  eq([t.before.length, t.after.length], [22, 15], "22 touches before, 15 after (counted, not estimated)");
   ok(t.after.filter(x => /pay the agency/.test(x.what.en)).length === t.before.filter(x => /pay the agency/.test(x.what.en)).length, "payments stay the owner's, as many as before");
 
   console.log("\n# What Odelia did for you this week");
