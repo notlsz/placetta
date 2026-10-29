@@ -639,9 +639,11 @@ export class Worker {
     const c = st.controls.find((k) => k.selector === selector);
     const no = c ? noChoice(c) : null;
     const refused: Exec = { ok: false, error: "Refused: Odelia may answer No by herself only to a question about receiving optional information. Call need_person." };
-    if (!no || !optOutQuestion(question) || !onPage(question, st)) return refused;
-    if (!this.c.model.optOut || !(await this.c.model.optOut(question))) return refused;
-    if (no.kind === "select") return await this.exec(ctx, { action: "select", selector, option: no.option, optOut: true });
+    // which check said no goes in the log (kind refused), so a refusal can be told apart from a model that disagreed
+    const why = !c ? "the control isn't on this page" : !no ? "the control isn't a No choice" : !optOutQuestion(question) ? "the wording isn't only about receiving information" : !onPage(question, st) ? "the question isn't on this page as quoted" : "";
+    if (why) { ctx.f = await this.c.store.step(ctx.f, log(`Didn't answer No by herself: ${why}`, "未自行回答“否”", "refused")); return refused; }
+    if (!this.c.model.optOut || !(await this.c.model.optOut(question))) { ctx.f = await this.c.store.step(ctx.f, log("Didn't answer No by herself: the second model read didn't agree", "未自行回答“否”：第二次模型判断不同意", "refused")); return refused; }
+    if (no?.kind === "select") return await this.exec(ctx, { action: "select", selector, option: no.option, optOut: true });
     if (c?.checked) return { ok: true, same: question.slice(0, 80) };
     const r = await this.exec(ctx, { action: "check", selector, on: true });
     if ("ok" in r && r.ok) ctx.f = await this.c.store.step(ctx.f, log(OPT_OUT_LOG.en, OPT_OUT_LOG.zh, "fill", "opt_out"));

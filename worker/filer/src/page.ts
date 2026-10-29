@@ -39,7 +39,13 @@ async function readState(page: Page): Promise<PageState> {
     for (const el of Array.from(document.querySelectorAll("input, select, textarea")) as HTMLInputElement[]) {
       const type = (el.getAttribute("type") ?? (el.tagName === "SELECT" ? "select" : el.tagName === "TEXTAREA" ? "textarea" : "text")).toLowerCase();
       if (["hidden", "submit", "button", "image", "reset"].includes(type)) continue;
-      if (!visible(el) && type !== "file") continue;
+      // a checkbox or radio a site hides and draws on its label (USWDS, FinCEN, SF, Georgia's GenTax) counts when its label shows
+      const drawnOnLabel = (type === "checkbox" || type === "radio") && (() => {
+        const id = el.getAttribute("id");
+        const l = (id ? document.querySelector(`label[for="${CSS.escape(id)}"]`) : null) ?? el.closest("label");
+        return !!l && visible(l);
+      })();
+      if (!visible(el) && type !== "file" && !drawnOnLabel) continue;
       const label = labelOf(el);
       labels.set(label, (labels.get(label) ?? 0) + 1);
       controls.push({

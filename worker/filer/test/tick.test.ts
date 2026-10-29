@@ -40,3 +40,14 @@ test("a box that never ticks is an error about the box, not the site being down"
   assert.equal(portalDown("net::ERR_CONNECTION_RESET"), true);
   await page.close();
 });
+
+test("the page reader lists a radio or checkbox drawn on its label, so Odelia can see and answer it", { timeout: 60000 }, async () => {
+  const { pageState } = await import("../src/page.ts");
+  const page = await (await open()).newPage();
+  await page.setContent(`<p>Would you like to receive information about City-offered additional opportunities and programs?</p>${USWDS}<input type="radio" id="gone" style="display:none"><label for="gone" style="display:none">Hidden both</label>`);
+  const st = await pageState(page);
+  const labels = st.controls.map((c) => c.label);
+  assert.ok(labels.includes("Initial report") && labels.includes("I agree"), labels.join(", "));
+  assert.ok(!labels.includes("Hidden both"), "a control hidden with its label stays out");
+  await page.close();
+});
