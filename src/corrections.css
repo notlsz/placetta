@@ -51,12 +51,16 @@
 .rw-lanes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 14px; }
 .rw-lane h3 { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink3); display: flex; gap: 6px; }
 .rw-lane.ln-lapsed h3, .rw-lane.ln-30 h3 { color: var(--warm); }
-.rw-lane ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.rw-lane li { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+/* every card the same size: lanes stretch to the row, cards fill their lane, the date row has a fixed height with or without a button */
+.rw-lanes { align-items: stretch; }
+.rw-lane { display: flex; flex-direction: column; }
+.rw-lane ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.rw-lane li { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: var(--card); box-shadow: 0 0 0 1px var(--line); flex: 1; }
+.rw-tx { flex: 1; }
 .rw-tx b { font-size: 14px; display: block; }
 .rw-tx small { display: block; font-size: 12.5px; color: var(--ink3); }
 .rw-tx p { margin: 6px 0 0; font-size: 12.5px; color: var(--ink2); line-height: 1.45; }
-.rw-act { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rw-act { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-height: 32px; }
 .rw-act em { font-style: normal; font-weight: 600; font-size: 13px; font-variant-numeric: tabular-nums; }
 .rw-act small { font-size: 12.5px; color: var(--ink3); }
 .rw-act .pill { margin-left: auto; }
