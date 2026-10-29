@@ -38,6 +38,8 @@ import { AlsoNeed } from "./AlsoNeed";
 import { findItAsk } from "./StillNeeded";
 import { headline, nextRenewal, todos, type Todo } from "./doNext";
 import { readPasted, type Read } from "./intakeParse";
+import { SuggestInput } from "./Suggest";
+import { factSource, kindSource, placeSource, remember } from "./suggestions";
 /* The incumbents' deliverables, filled (docs/COMPETITIVE.md, "The incumbents"): the license report and the renewal runway */
 import { ReportButton } from "./LicenseReport";
 import { RenewalRunway } from "./RenewalRunway";
@@ -996,9 +998,11 @@ export function AuditTrail() {
 /* --------------------------------- context --------------------------------- */
 
 function FactRow({ f }: { f: Fact }) {
-  const { b, t, editFact } = useApp();
+  const { b, t, editFact, ws, lang } = useApp();
   const [edit, setEdit] = useState(false);
   const [v, setV] = useState("");
+  // one-tap fills from the stores' addresses and the same line on the workspace's applications
+  const fills = useMemo(() => factSource(ws, f.label.en, lang), [ws, f.label.en, lang]);
   const save = () => { const x = v.trim(); if (x && x !== b(f.value)) editFact(f.id, x); setEdit(false); };
   return (
     <div className="row fact">
@@ -1006,7 +1010,7 @@ function FactRow({ f }: { f: Fact }) {
       <dd>
         {edit ? (
           <form className="fact-edit" onSubmit={e => { e.preventDefault(); save(); }}>
-            <input autoFocus value={v} onChange={e => setV(e.target.value)} aria-label={b(f.label)} onKeyDown={e => { if (e.key === "Escape") setEdit(false); }} />
+            <SuggestInput lang={lang} autoFocus value={v} onValue={setV} source={fills} aria-label={b(f.label)} onKeyDown={e => { if (e.key === "Escape") setEdit(false); }} />
             <button type="submit" className="pill ink sm">{t("save")}</button>
             <button type="button" className="pill quiet sm" onClick={() => setEdit(false)}>{t("cancel")}</button>
           </form>
@@ -1065,7 +1069,10 @@ export function FindLicenses({ result, live }: { result: { what: string; where: 
   const { t, b, lang, run, busy, openApp, ask, mode, go: nav } = useApp();
   const [what, setWhat] = useState(result?.what ?? "");
   const [where, setWhere] = useState(result?.where ?? "");
-  const go = (w = what, p = where) => { const W = w.trim() || b({ en: "Milk tea shop", zh: "奶茶店" }), P = p.trim() || b({ en: "San Jose, CA", zh: "加州圣何塞" }); setWhat(W); setWhere(P); run({ match: { what: W, where: P } }, lang === "zh" ? `查找许可：${W}，${P}` : `Find licenses: ${W} in ${P}`); };
+  // what kind of business, by its words and NAICS code; where, from the places the registry maps
+  const whatSrc = useMemo(() => kindSource(lang), [lang]);
+  const whereSrc = useMemo(() => placeSource(lang), [lang]);
+  const go = (w = what, p = where) => { const W = w.trim() || b({ en: "Milk tea shop", zh: "奶茶店" }), P = p.trim() || b({ en: "San Jose, CA", zh: "加州圣何塞" }); setWhat(W); setWhere(P); remember("find-what", W); remember("find-where", P); run({ match: { what: W, where: P } }, lang === "zh" ? `查找许可：${W}，${P}` : `Find licenses: ${W} in ${P}`); };
   const examples: [string, string][] = lang === "zh" ? [["奶茶店", "加州圣何塞"], ["奶茶店", "加州弗里蒙特"], ["美发店", "加州奥克兰"]] : [["Milk tea shop", "San Jose, CA"], ["Milk tea shop", "Fremont, CA"], ["Hair salon", "Oakland, CA"]];
   const isFremont = !!result && /fremont|弗里蒙特/i.test(result.where);
   return (
@@ -1073,9 +1080,9 @@ export function FindLicenses({ result, live }: { result: { what: string; where: 
       <a className="back" href={hrefOf("permits")} onClick={e => { if (!plainClick(e)) return; e.preventDefault(); nav("permits"); }}><I.chevR />{t("nav_apps")}</a>
       <PageHead title={t("nav_find")} sub={t("fd_sub")} />
       <form className="matcher" onSubmit={e => { e.preventDefault(); go(); }}>
-        <label><span>{t("fd_what")}</span><input value={what} onChange={e => setWhat(e.target.value)} placeholder={t("fd_whatPh")} /></label>
+        <label><span>{t("fd_what")}</span><SuggestInput lang={lang} value={what} onValue={setWhat} source={whatSrc} recent="find-what" placeholder={t("fd_whatPh")} /></label>
         <i aria-hidden="true" />
-        <label><span>{t("fd_where")}</span><input value={where} onChange={e => setWhere(e.target.value)} placeholder={t("fd_wherePh")} /></label>
+        <label><span>{t("fd_where")}</span><SuggestInput lang={lang} value={where} onValue={setWhere} source={whereSrc} recent="find-where" placeholder={t("fd_wherePh")} /></label>
         <button type="submit" className="m-go" disabled={busy} aria-label={t("fd_go")}><I.find /></button>
       </form>
       <div className="examples">{examples.map(([w, p]) => <button key={w + p} type="button" disabled={busy} onClick={() => go(w, p)}>{w}, {p}</button>)}</div>

@@ -9,6 +9,8 @@ import { nowIso } from "./time";
 import { Guard } from "./SafeBoundary";
 import { SetSheet } from "./SetUI";
 import "./controls.css";
+import { SuggestInput } from "./Suggest";
+import { factSource, titleSource } from "./suggestions";
 
 /* Autopilot in Settings (src/autopilot.ts): the screen that says exactly what Odelia will do alone and what still needs
    a person, and why; the sheet where an owner signs the standing authorization once (scope, caps, a typed or drawn
@@ -70,6 +72,9 @@ export function DrawPad({ onChange }: { onChange: (png: string | null) => void }
 /** The sheet where an owner signs Autopilot once. */
 export function AutopilotSign({ onClose }: { onClose: () => void }) {
   const { b, lang, ws, editWs, say, cloud } = useApp();
+  // the signer's name as the workspace has it (never a guess), and the titles people sign filings with
+  const nameSrc = useMemo(() => factSource(ws, "Owner", lang, { kind: "person" }), [ws, lang]);
+  const titleSrc = useMemo(() => titleSource(lang), [lang]);
   const zh = lang === "zh";
   const all = useMemo(() => defaultScope(ws), [ws]);
   const [scope, setScope] = useState<AutopilotScope>(all);
@@ -131,8 +136,8 @@ export function AutopilotSign({ onClose }: { onClose: () => void }) {
 
         <AutopilotPlanList rows={rows} />
 
-        <label className="sst-field"><span>{zh ? "您的全名（作为签名）" : "Your full name (your signature)"}</span><input value={name} onChange={e => setName(e.target.value.slice(0, 120))} autoComplete="name" /></label>
-        <label className="sst-field"><span>{zh ? "职务（可选）" : "Title (optional)"}</span><input value={title} onChange={e => setTitle(e.target.value.slice(0, 120))} placeholder={zh ? "例如：管理成员" : "e.g. Managing Member"} /></label>
+        <label className="sst-field"><span>{zh ? "您的全名（作为签名）" : "Your full name (your signature)"}</span><SuggestInput lang={lang} value={name} onValue={v => setName(v.slice(0, 120))} source={nameSrc} /></label>
+        <label className="sst-field"><span>{zh ? "职务（可选）" : "Title (optional)"}</span><SuggestInput lang={lang} value={title} onValue={v => setTitle(v.slice(0, 120))} source={titleSrc} placeholder={zh ? "例如：管理成员" : "e.g. Managing Member"} /></label>
         <div className="ap-sig" role="radiogroup" aria-label={zh ? "签名方式" : "Signature"}>
           <label className="check"><input type="radio" name="ap-sig" checked={sig === "typed"} onChange={() => setSig("typed")} /><span>{zh ? "以打字姓名作为签名" : "Use my typed name as my signature"}</span></label>
           <label className="check"><input type="radio" name="ap-sig" checked={sig === "drawn"} onChange={() => setSig("drawn")} /><span>{zh ? "手写签名" : "Draw my signature"}</span></label>

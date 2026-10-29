@@ -6,6 +6,8 @@ import { I, Pill } from "./ui";
 import { inDays } from "./time";
 import { EstimateDate, HingeLine } from "./OpeningEstimate";
 import { COVERAGE_SAY, compareTable, missingFacts, openDoes, parseTargets, priceSay, replicate, setLocationFacts, type LocationFacts, type ReplicaKind, type TargetPlan } from "./replicate";
+import { SuggestInput } from "./Suggest";
+import { placeSource } from "./suggestions";
 import "./replicate.css";
 
 /* Replicate this store: pick a store that works, name the new places, see each one's plan side by side, give each
@@ -64,6 +66,8 @@ export function ReplicateSheet({ onClose, source: first }: { onClose: () => void
   const stores = ws.stores ?? [];
   const [source, setSource] = useState(first ?? stores.find(s => s.stage === "open")?.id ?? stores[0]?.id ?? "");
   const [text, setText] = useState("");
+  // each new place is suggested as it's typed, from the places the registry maps
+  const placeSrc = useMemo(() => placeSource(lang), [lang]);
   const [facts, setFacts] = useState<Record<string, LocationFacts>>({});
   const [pending, setPending] = useState<string | null>(null);
   const today = inDays(0);
@@ -105,7 +109,7 @@ export function ReplicateSheet({ onClose, source: first }: { onClose: () => void
         </label>
         <label>
           <span>{zh ? "新地点" : "New places"}</span>
-          <input value={text} onChange={e => setText(e.target.value)} placeholder={zh ? "达拉斯、休斯顿、奥斯汀和多伦多" : "Dallas, Houston, Austin, and Toronto"} />
+          <SuggestInput lang={lang} many value={text} onValue={setText} source={placeSrc} placeholder={zh ? "达拉斯、休斯顿、奥斯汀和多伦多" : "Dallas, Houston, Austin, and Toronto"} />
         </label>
       </div>
       {parsed.unknown.length > 0 && <p className="rep-warn">{zh ? `无法确定这些地点在哪里，请加上州或国家：${parsed.unknown.join("、")}` : `Couldn't tell where ${parsed.unknown.join(", ")} ${parsed.unknown.length === 1 ? "is" : "are"}: add the state or country.`}</p>}

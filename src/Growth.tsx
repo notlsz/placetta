@@ -12,6 +12,8 @@ import { stateCode } from "./counties";
 import { daysFromNow, daysUntil, fmtDay } from "./time";
 import { RenewalValue, ValueReportSheet } from "./ValueReport";
 import { I, Select } from "./ui";
+import { SuggestInput } from "./Suggest";
+import { factSource, merge, rank, stateSource, type Sug } from "./suggestions";
 
 /* Settings for the growth mechanics: the contract (term, auto-renew, the one-click online cancel, the renewal notice,
    what the year delivered), the modules on the plan, the hard monthly cap on filings past the allowance, and the
@@ -207,6 +209,12 @@ export function EntitiesGroup() {
   const list = obligations(entities, today);
   const [draft, setDraft] = useState<{ name: string; kind: EntityKind; state: string; date: string } | null>(null);
   const canEdit = !cloud || !cloud.viewer;
+  // the legal name: the entities already here (registering one in another state) and the workspace's own record of it
+  const nameSrc = useMemo(() => {
+    const known: Sug[] = [...new Set(entities.map(e => e.name))].map(n => ({ id: "ent:" + n, label: n, value: n, icon: "entity", sub: zh ? "已添加的实体" : "Already here" }));
+    return merge(q => (q.trim() ? rank(q, known) : known), factSource(ws, "Legal name", lang, { kind: "legal" }));
+  }, [entities, ws, lang, zh]);
+  const stateSrc = useMemo(() => stateSource(lang, { code: true }), [lang]);
   const save = () => {
     if (!draft) return;
     const st = stateCode(draft.state);
@@ -238,9 +246,9 @@ export function EntitiesGroup() {
       {entities.length > 0 && canEdit && <ul className="sg-list">{entities.map(e => <li key={e.id} className="sg-row"><span className="sg-tx"><b>{e.name}</b><small>{b(KINDS.find(k => k.id === e.kind)!.label)}{zh ? "，登记于 " : ", registered in "}{e.registrations.map(r => `${r.state} ${r.date}`).join(zh ? "、" : ", ")}</small></span><span className="sg-r"><Btn kind="warm" onClick={() => remove(e.id)}>{zh ? "移除" : "Remove"}</Btn></span></li>)}</ul>}
       {canEdit && (draft ? (
         <form className="sg-form" onSubmit={e => { e.preventDefault(); save(); }}>
-          <input value={draft.name} onChange={e => setDraft({ ...draft, name: e.target.value })} placeholder={zh ? "法定名称" : "Legal name"} aria-label={zh ? "法定名称" : "Legal name"} />
+          <SuggestInput lang={lang} value={draft.name} onValue={v => setDraft({ ...draft, name: v })} source={nameSrc} placeholder={zh ? "法定名称" : "Legal name"} aria-label={zh ? "法定名称" : "Legal name"} />
           <Select value={draft.kind} onChange={e => setDraft({ ...draft, kind: e.target.value as EntityKind })} aria-label={zh ? "类型" : "Kind"}>{KINDS.map(k => <option key={k.id} value={k.id}>{b(k.label)}</option>)}</Select>
-          <input value={draft.state} onChange={e => setDraft({ ...draft, state: e.target.value })} placeholder={zh ? "州（如 CA）" : "State (CA, New York)"} aria-label={zh ? "州" : "State"} />
+          <SuggestInput lang={lang} fixed value={draft.state} onValue={v => setDraft({ ...draft, state: v })} source={stateSrc} placeholder={zh ? "州（如 CA）" : "State (CA, New York)"} aria-label={zh ? "州" : "State"} />
           <input type="date" value={draft.date} onChange={e => setDraft({ ...draft, date: e.target.value })} aria-label={zh ? "在该州登记的日期" : "Date it registered in that state"} />
           <p className="sg-note">{b(B("Add the same name again for each other state it's registered in.", "如在其他州也有登记，请用同一名称再添加一次。"))}</p>
           <div className="sg-form-act"><button type="button" className="sbtn" onClick={() => setDraft(null)}>{zh ? "取消" : "Cancel"}</button><button type="submit" className="sbtn ink">{zh ? "保存" : "Save"}</button></div>

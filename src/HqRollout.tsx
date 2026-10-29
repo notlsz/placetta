@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { B, type Bi } from "./bi";
 import type { Lang } from "./i18n";
 import * as api from "./cloud/api";
@@ -6,6 +6,8 @@ import { hqQuote, inviteLink, type BillTo } from "./hqPlan.ts";
 import { consentLine, disclosure } from "./contract.ts";
 import { fmtDay } from "./time";
 import { I } from "./ui";
+import { SuggestInput } from "./Suggest";
+import { placeSource } from "./suggestions";
 
 /* The brand plan on Headquarters (src/hqPlan.ts): who pays, the price from locations and people, one invite per new
    location, and, when headquarters pays, its checkout. Works for a headquarters account with no workspace, so it reads
@@ -17,6 +19,7 @@ export function HqRollout({ lang, say }: { lang: Lang; say: (s: string) => void 
   const [v, setV] = useState<api.HqPlanView | null | undefined>(undefined);
   const [f, setF] = useState<{ brand: string; billTo: BillTo; tier: "essentials" | "pro" }>({ brand: "", billTo: "franchisee", tier: "essentials" });
   const [label, setLabel] = useState("");
+  const placeSrc = useMemo(() => placeSource(lang, { only: ["city", "world"] }), [lang]);
   const [made, setMade] = useState<{ label: string; link: string } | null>(null);
   const [agreed, setAgreed] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -63,7 +66,7 @@ export function HqRollout({ lang, say }: { lang: Lang; say: (s: string) => void 
           )}
           {plan.bill_to === "hq" && paying && <div className="sg-act"><button type="button" className="sbtn quiet" disabled={busy} onClick={() => void run(async () => { await api.hqSync(); await load(); say(zh ? "门店数量已更新。" : "Location count updated."); })}>{zh ? "更新门店数量" : "Update the location count"}</button></div>}
           <form className="sg-form invite" onSubmit={e => { e.preventDefault(); void run(async () => { const code = await api.hqInviteCreate(label); setMade({ label, link: inviteLink(location.origin, code) }); setLabel(""); await load(); }); }}>
-            <input value={label} maxLength={120} onChange={e => setLabel(e.target.value)} placeholder={zh ? "新门店（如：奥斯汀 2 号店）" : "New location (Austin store 2)"} aria-label={zh ? "新门店名称" : "New location"} />
+            <SuggestInput lang={lang} value={label} maxLength={120} onValue={setLabel} source={placeSrc} placeholder={zh ? "新门店（如：奥斯汀 2 号店）" : "New location (Austin store 2)"} aria-label={zh ? "新门店名称" : "New location"} />
             <button type="submit" className="sbtn ink" disabled={busy}>{zh ? "生成邀请" : "Create an invite"}</button>
           </form>
           {made && (
