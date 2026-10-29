@@ -3801,12 +3801,16 @@ html[lang="zh-CN"] #backers #bkG.bkg li span{font-family:var(--zh)!important}
 #backers .bkinv{grid-column:1/-1;margin-top:56px!important;padding-top:0!important;border:0!important;display:grid;gap:16px}
 @media (min-width:1024px){#backers .bkinv{grid-template-columns:300px 1fr;column-gap:72px;align-items:start}}
 #backers .invl{margin:0;text-align:left;text-transform:none;letter-spacing:-.1px;font-size:15px;font-weight:500;color:var(--ink);padding-top:20px}
-#invR.invr{-webkit-mask-image:none!important;mask-image:none!important;overflow:visible;max-width:none;margin:0}
-#invR .ivt{animation:none!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));width:auto!important;gap:0!important;padding:0!important;border-top:1px solid var(--bd2)}
-#invR .ivt img{justify-self:center;align-self:center;height:calc(var(--h) * .82);max-width:78%;width:auto;margin:22px 0;filter:grayscale(1) contrast(.9);opacity:.62;transition:opacity .25s var(--ease)}
+/* the investors behind the brands we serve: one line that drifts (founder, Oct 29), every mark in one grey, each centered
+   in a slot of one height so the line reads level; it pauses on hover, and stands still in one scrollable row with motion off */
+#invR.invr{display:block;overflow:hidden;max-width:none;margin:0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+#invR .ivt{display:flex!important;flex-wrap:nowrap!important;align-items:center;gap:56px!important;width:max-content!important;padding:8px 56px 8px 0!important;border:0!important;animation:ivmq 48s linear infinite!important}
+#invR:hover .ivt{animation-play-state:paused!important}
+#invR .ivt img{flex:none;display:block;align-self:center;height:calc(var(--h) * .82);max-width:none;width:auto;margin:0;filter:grayscale(1) contrast(.9);opacity:.62;transition:opacity .25s var(--ease)}
 #invR .ivt img:hover{opacity:1}
-#invR .ivt img[aria-hidden]{display:none!important}
-@media (max-width:767px){#invR .ivt{grid-template-columns:repeat(3,minmax(0,1fr))}#invR .ivt img{height:calc(var(--h) * .66);margin:16px 0}}
+#invR .ivt img[aria-hidden]{display:block!important}
+@media (max-width:767px){#invR .ivt{gap:36px!important;padding-right:36px!important;animation-duration:36s!important}#invR .ivt img{height:calc(var(--h) * .66)}}
+@media (prefers-reduced-motion:reduce){#invR.invr{overflow-x:auto;-webkit-mask-image:none;mask-image:none}#invR .ivt{animation:none!important}#invR .ivt img[aria-hidden]{display:none!important}}
 
 /* ---------- faq and close ---------- */
 .fq{border-radius:var(--r-md)}
