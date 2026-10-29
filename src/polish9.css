@@ -182,3 +182,17 @@
 :root[data-theme="dark"] .ns-cell { background: var(--mist); }
 :root[data-theme="dark"] .ns-k em { background: var(--card); }
 :root[data-theme="dark"] .ns-need .ns-k em { background: rgba(0, 0, 0, .25); }
+
+/* the links under Waiting on you: one row, one baseline, room between them, the icon centred on its words */
+.hm-needs .hm-needs-more { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 24px; margin-top: 8px; }
+.hm-needs .hm-needs-more:empty { display: none; }
+.hm-needs .hm-needs-more .lnk.more { display: inline-flex; align-items: center; gap: 6px; margin: 0; min-height: 32px; line-height: 1; }
+.hm-needs .hm-needs-more .lnk.more svg { flex: none; }
+
+/* tabs: one style everywhere (page tabs and Home's own): plain words, a short bar under the one you're on, no rule across the row */
+.ptabs, .ptabs.hm-tabs { gap: 24px; padding: 0; border-radius: 0; background: none; box-shadow: none; }
+.ptabs a, .hm-tabs button { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 0; padding: 10px 0 11px; border-radius: 0; background: none !important; box-shadow: none !important; font-size: 14px; font-weight: 500; line-height: 1.2; color: var(--ink3); }
+.ptabs a:hover, .hm-tabs button:hover { color: var(--ink); }
+.ptabs a[aria-selected="true"], .hm-tabs button[aria-selected="true"] { color: var(--ink); }
+.ptabs a[aria-selected="true"]::after, .hm-tabs button[aria-selected="true"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px; background: var(--ink); }
+@media (max-width: 859px) { .ptabs, .ptabs.hm-tabs { gap: 18px; } .ptabs a, .hm-tabs button { padding: 9px 0 10px; } }
