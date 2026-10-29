@@ -30,7 +30,8 @@ function until(iso: string): Bi {
 }
 
 /** One line: what's known, what isn't, and how long. */
-export function CostLine({ page }: { page?: boolean }) {
+/** noDate: the opening date is already stated just above (Home's opening card), so the line ends at the money. */
+export function CostLine({ page, noDate }: { page?: boolean; noDate?: boolean }) {
   const { b, ws } = useApp();
   const c = useCost();
   const [open, setOpen] = useState(false);
@@ -40,7 +41,7 @@ export function CostLine({ page }: { page?: boolean }) {
   if (c.unpublished) parts.push(B(`${c.unpublished} agency fee${c.unpublished === 1 ? "" : "s"} not published`, `${c.unpublished} 项机构费用未公布`));
   if (c.quoted) parts.push(B("plus a quote from the team", "另需团队报价"));
   // the date itself, the same one the store card and Deadlines show (src/smart.ts workspaceOpening), then how far off
-  if (c.landing) parts.push(B(`opens around ${fmtDay(c.landing, "en", true)} (${until(c.landing).en})`, `预计 ${fmtDay(c.landing, "zh", true)} 前后开业（${until(c.landing).zh}后）`));
+  if (c.landing && !noDate) parts.push(B(`opens around ${fmtDay(c.landing, "en", true)} (${until(c.landing).en})`, `预计 ${fmtDay(c.landing, "zh", true)} 前后开业（${until(c.landing).zh}后）`));
   return (
     <>
       <p className={"cost-line" + (page ? " on-page" : "")}>

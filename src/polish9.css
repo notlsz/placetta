@@ -1,0 +1,184 @@
+/* The 9 pass on Home and Odelia's page, loaded after every other stylesheet (src/main.tsx).
+
+   Home makes two things dominant, the one thing to do and the opening date, and quiets the rest. Odelia's page opens on
+   where her work stands (now, last done, needs you) and reads message, then task, then action.
+   One type scale, one spacing rhythm, one set of card tokens for both screens:
+     type     12.5 meta, 13.5 secondary, 15 body, 17 section, 30 headline, 38 the date
+     space    4, 8, 12, 16, 24, 32
+     cards    rest (a hairline), raise (a hairline and a soft lift): only the two anchors on Home are raised
+   Cards side by side are the same height, with their action row pinned to the bottom. */
+
+:root {
+  --t-meta: 12.5px; --t-sec: 13.5px; --t-body: 15px; --t-section: 17px; --t-head: 30px; --t-date: 38px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
+  --r-card: 18px; --r-anchor: 24px;
+  --card-rest: 0 0 0 1px var(--line);
+  --card-raise: 0 0 0 1px var(--line), 0 1px 2px rgba(var(--e), .04), 0 22px 44px -30px rgba(45, 75, 120, .4);
+  --ease-out: cubic-bezier(.2, .7, .2, 1);
+}
+
+/* ------------------------------------------------------------------ Home */
+
+/* the two anchors: the next action and the opening date, same treatment, same height side by side */
+.page.home > .dtn { display: flex; flex-direction: column; padding: var(--s6) var(--s6) 28px; border-radius: var(--r-anchor); background: linear-gradient(180deg, var(--card) 0%, var(--card2) 100%); box-shadow: var(--card-raise); }
+.page.home > .dtn h2 { font-size: var(--t-head); line-height: 1.15; letter-spacing: -.022em; text-wrap: balance; }
+.page.home > .dtn .dtn-why { margin-top: var(--s3); font-size: var(--t-body); color: var(--ink2); }
+.page.home > .dtn .dtn-act { margin-top: auto; padding-top: 28px; }
+.page.home .dtn-k { font-size: var(--t-sec); }
+
+.hs-open { display: flex; flex-direction: column; gap: var(--s3); padding: var(--s5) var(--s5) var(--s4); border-radius: var(--r-anchor); background: linear-gradient(180deg, var(--card) 0%, var(--card2) 100%); box-shadow: var(--card-raise); }
+.hs-open > * { margin: 0; }
+.hs-open .hs-k { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); font-size: var(--t-sec); font-weight: 600; color: var(--blue-ink); }
+.hs-when { font-weight: 500; color: var(--ink3); white-space: nowrap; }
+.hs-open .hs-date { margin: -2px 0 0; font: 600 var(--t-date)/1.08 var(--display); letter-spacing: -.03em; color: var(--ink); }
+.hs-open .hs-date .oe-range { display: block; margin: 6px 0 0; font: 400 var(--t-sec)/1.4 var(--sans); letter-spacing: 0; color: var(--ink2); }
+.hs-open .oe-hinge { font-size: var(--t-meta); line-height: 1.55; color: var(--ink3); }
+.hs-open .oe-hinge .lnk { font-weight: 500; color: var(--ink2); text-decoration-color: var(--line); }
+.hs-open .oe-hinge a { color: var(--ink2); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 2px; }
+.hs-prog { display: flex; flex-direction: column; gap: 6px; }
+.hs-prog .hs-bar { height: 4px; margin: 0; }
+.hs-prog .hs-sub { margin: 0; font-size: var(--t-meta); color: var(--ink3); }
+/* the cost to open closes the card, pinned to its foot */
+.hs-open .cost-line { margin: auto 0 0; padding: var(--s3) 0 0; border-radius: 0; background: none; box-shadow: inset 0 1px 0 var(--line); font-size: var(--t-meta); line-height: 1.5; color: var(--ink3); }
+.hs-open .cost-line > svg { color: var(--ink3); }
+.hs-open .cost-line b { color: var(--ink2); }
+.hs-open .cost-line .lnk { min-height: 32px; font-size: var(--t-meta); }
+
+/* narrower than the two-column layout: the date sits right under the next action */
+.page.home > .hm-open-inline { margin-top: var(--s4); }
+
+/* the morning brief: one calm line */
+.hm-brief { display: flex; flex-wrap: wrap; gap: 0 var(--s5); margin-top: var(--s4); }
+.hm-brief button { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0; border: 0; background: none; font: inherit; font-size: var(--t-sec); color: var(--ink3); cursor: pointer; transition: color .15s; }
+.hm-brief button.on { color: var(--ink2); }
+.hm-brief button:hover { color: var(--ink); }
+.hm-brief button:hover span { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
+.hm-brief svg { flex: none; width: 15px; height: 15px; }
+
+/* Waiting on you: secondary, one hairline card, rows at one height */
+.page.home .sec.hm-needs { margin-top: var(--s6); }
+.hm-needs .sec-h h2 { font-size: var(--t-section); white-space: nowrap; }
+@media (max-width: 859px) { .hm-needs .sec-h h2 { font-size: 16px; } }
+
+/* Odelia on the card: on a phone (styles.css) and beside the opening card on a wide screen */
+@media (min-width: 1200px) {
+  .page.home > .dtn .dtn-bot { display: grid; place-items: center; width: 64px; height: 64px; margin: -6px 0 var(--s3) -8px; }
+  .page.home > .dtn h2 { font-size: 34px; }
+}
+.hm-needs .stack { box-shadow: var(--card-rest); border-radius: var(--r-card); }
+.hm-needs .stack .appr-tx b { font-size: 14.5px; }
+
+/* the status line and the tertiary lists: quiet type, no boxes */
+.page.home .hm-status { margin-top: var(--s5); }
+.hm-status-tx { font-size: var(--t-sec); color: var(--ink2); }
+.page.home > .hm-nextwide { padding: var(--s4) var(--s5) var(--s2); border-radius: var(--r-card); box-shadow: var(--card-rest); background: var(--card); }
+.hs-h h2 { font-size: var(--t-sec); font-weight: 600; color: var(--ink2); }
+.hs-h .lnk { font-size: var(--t-meta); color: var(--ink3); }
+.hs-h .lnk:hover { color: var(--ink); }
+.hn-list .hs-n b { font-size: var(--t-sec); }
+.hn-list .hs-n small, .hn-next, .hn-fee { font-size: var(--t-meta); }
+.hm-side .hs-card:not(.hs-open) { padding: 0; border-radius: 0; background: none; box-shadow: none; }
+.hs-recent li, .hs-dates li { padding: var(--s2) 0; font-size: var(--t-sec); }
+.hs-recent .hs-t { color: var(--ink3); }
+.hs-recent .hs-t b { color: var(--ink2); }
+.hs-dates .hs-d b { color: var(--ink2); }
+.hs-dates .hs-t { color: var(--ink2); }
+
+@media (min-width: 1200px) {
+  .page.home { column-gap: var(--s5); }
+  /* row one: the next action and the opening, side by side at one height */
+  .page.home > .dtn, .page.home > .hm-calm { grid-row: 1; align-self: stretch; margin-top: 0; }
+  .page.home > .hm-open-inline { grid-column: 2; grid-row: 1; align-self: stretch; margin-top: 0; }
+  .page.home:has(> .hm-open-inline) > .hm-side { grid-row: 2 / span 30; gap: var(--s6); margin-top: var(--s6); top: var(--s5); }
+  .page.home > .hm-brief { margin-top: var(--s4); }
+}
+
+@media (max-width: 859px) {
+  .page.home > .dtn { padding: var(--s5) 22px 20px; border-radius: var(--r-anchor); }
+  .page.home > .dtn h2 { font-size: 28px; }
+  .page.home > .dtn .dtn-act { padding-top: 22px; }
+  .hs-open { padding: 20px 20px var(--s3); }
+  .hs-open .hs-date { font-size: 32px; }
+  .hm-brief { flex-direction: column; margin-top: var(--s3); }
+  .hm-brief button { min-height: 40px; }
+  .page.home .sec.hm-needs { margin-top: 28px; }
+  /* Waiting on you swipes sideways: every card the same height, its button pinned to the foot */
+  .hm-needs .stack { align-items: stretch; box-shadow: none; }
+  .hm-needs .stack .appr { grid-template-rows: minmax(0, 1fr) 44px; align-items: start; }
+  .hm-needs .stack .appr > .pill, .hm-needs .stack .appr > .appr-btns, .hm-needs .stack .appr > .hold { grid-row: 2; align-self: end; }
+  .hm-needs .stack .job.compact { display: flex; flex-direction: column; }
+  .hm-needs .stack .job.compact .job-act { margin-top: auto; min-height: 44px; }
+}
+
+/* one entrance, on Home's two anchors only */
+@media (prefers-reduced-motion: no-preference) {
+  .page.home > .dtn, .page.home > .hm-open-inline { animation: p9-rise .42s var(--ease-out) both; }
+  .page.home > .hm-open-inline { animation-delay: .06s; }
+}
+@keyframes p9-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ------------------------------------------------------------------ Odelia's page */
+
+/* where her work stands: three cells at one height */
+.now-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
+.ns-cell { display: flex; flex-direction: column; gap: 3px; min-width: 0; min-height: 96px; padding: var(--s3) 14px; border: 0; border-radius: 14px; background: var(--mist); font: inherit; text-align: left; color: var(--ink); cursor: pointer; transition: background .15s; }
+.ns-cell:hover:not(:disabled) { background: var(--mist2); }
+.ns-cell:disabled { cursor: default; opacity: 1; }
+.ns-cell:focus-visible { outline: 2px solid var(--blue-ink); outline-offset: 2px; }
+.ns-k { display: flex; align-items: center; gap: 6px; font-size: var(--t-meta); font-weight: 500; color: var(--ink3); }
+.ns-k time { margin-left: auto; font-weight: 400; white-space: nowrap; }
+.ns-k em { margin-left: auto; min-width: 22px; padding: 1px 7px; border-radius: 99px; background: var(--card); font-style: normal; font-weight: 600; text-align: center; color: var(--warm); }
+.ns-cell b { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 14px; font-weight: 500; line-height: 1.35; }
+.ns-cell small { margin-top: auto; overflow: hidden; font-size: var(--t-meta); line-height: 1.4; color: var(--ink3); white-space: nowrap; text-overflow: ellipsis; }
+.ns-need { background: var(--warm-soft); }
+.ns-need:hover:not(:disabled) { background: var(--warm-soft); box-shadow: inset 0 0 0 1px rgba(168, 111, 20, .25); }
+.ns-need .ns-k { color: var(--warm); }
+/* the live mark: still while she waits, breathing while she works */
+.ns-live { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--blue-ink); }
+.ns-now.on .ns-live { background: #3F9A62; }
+@media (prefers-reduced-motion: no-preference) {
+  .ns-now.on .ns-live { animation: p9-breathe 1.6s ease-in-out infinite; }
+}
+@keyframes p9-breathe { 50% { opacity: .35; } }
+.ns-never { grid-column: 1 / -1; display: flex; align-items: center; gap: 7px; margin: 2px 0 0; font-size: var(--t-meta); color: var(--ink3); }
+.ns-never svg { flex: none; width: 13px; height: 13px; }
+
+/* a turn: message, then the task, then the action */
+.wico { width: auto; height: auto; border-radius: 0; background: none; }
+.panel.full .answer { gap: var(--s3); }
+.panel.full .turn .job.compact { margin: var(--s1) 0 0; padding: 14px var(--s4) var(--s3); border-radius: 16px; background: var(--card); box-shadow: var(--card-rest); }
+.panel.full .turn .job.compact .job-t b { font-size: 14.5px; font-weight: 600; }
+.panel.full .turn .job.compact .job-t small { font-size: var(--t-meta); color: var(--ink3); }
+.panel.full .turn .job-bar { margin: 10px 0 6px; height: 3px; }
+.panel.full .turn .job-need { margin-top: var(--s2); padding: var(--s2) var(--s3); border-radius: 10px; font-size: var(--t-sec); }
+.hz-proof.pending { color: var(--ink3); }
+.hz-proof.pending svg { color: var(--ink3); }
+.panel.full .turn .hz-proof { margin: 10px 0 0; font-size: var(--t-meta); }
+/* the one thing she needs from you is the strongest button on the page */
+.panel.full .turn .appr { box-shadow: var(--card-rest); border: 0; background: var(--card); }
+.panel.full .turn .appr .pill.primary { background: var(--ink); color: var(--on-ink); }
+.panel.full .turn .appr .pill.primary:hover:not(:disabled) { background: var(--ink-hover); }
+
+.panel.full > .now-strip { flex: none; margin: 4px 0 var(--s2); }
+
+@media (max-width: 640px) {
+  /* on a phone the three cells swipe sideways in one short row, every cell the same size */
+  .panel.full > .now-strip { display: flex; gap: var(--s2); margin: 0 0 var(--s1); padding: 2px 0 4px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .now-strip::-webkit-scrollbar { display: none; }
+  .ns-cell { flex: 0 0 74%; min-height: 76px; padding: 10px var(--s3); border-radius: 12px; scroll-snap-align: start; }
+  .ns-cell b { -webkit-line-clamp: 1; line-clamp: 1; }
+  .ns-never { flex: 0 0 auto; align-self: center; max-width: 60%; padding-right: 18px; }
+}
+
+/* ------------------------------------------------------------------ the first-run tour */
+
+/* Skip is a full-size target: 44px tall, labelled, with the close mark people look for */
+.tour { padding-top: 56px; }
+.tour-skip { display: inline-flex; align-items: center; gap: 6px; top: 8px; right: 8px; min-width: 44px; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 14px; font-weight: 500; color: var(--ink2); transition: background .15s, color .15s; }
+.tour-skip:hover, .tour-skip:focus-visible { background: var(--mist); color: var(--ink); }
+.tour-skip svg { width: 16px; height: 16px; }
+@media (max-width: 860px) { .tour-float .tour { padding-top: 52px; } }
+
+:root[data-theme="dark"] .ns-cell { background: var(--mist); }
+:root[data-theme="dark"] .ns-k em { background: var(--card); }
+:root[data-theme="dark"] .ns-need .ns-k em { background: rgba(0, 0, 0, .25); }

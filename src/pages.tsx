@@ -26,7 +26,7 @@ import { hrefOf, plainClick } from "./route";
 import { HomeMetrics } from "./Metrics";
 import { HeldSends, LocalHold, useApprovalHold } from "./SendHold";
 import { CostLine } from "./CostToOpen";
-import { FirstAction, FirstRunHead, FirstRunMore } from "./FirstRun";
+import { FirstAction, FirstRunHead, FirstRunMore, untilSay } from "./FirstRun";
 import { isFirstRun } from "./firstRun";
 import { firstSentence } from "./phrase";
 /* Team review: the review table, comments on documents, and the Mine filter (src/ReviewTable.tsx, src/Comments.tsx) */
@@ -325,8 +325,7 @@ function whyLine(x: Todo, lang: "en" | "zh", t: (k: Key) => string): string {
 }
 
 /** A phone (the bottom tab bar's width): the "Do this next" card fills the first screen there. Safe without a window. */
-function usePhone() {
-  const q = "(max-width: 859px)";
+function usePhone(q = "(max-width: 859px)") {
   const has = () => typeof window !== "undefined" && typeof window.matchMedia === "function";
   const [n, setN] = useState(() => has() && window.matchMedia(q).matches);
   useEffect(() => { if (!has()) return; const mq = window.matchMedia(q); const on = () => setN(mq.matches); mq.addEventListener("change", on); return () => mq.removeEventListener("change", on); }, []);
@@ -338,10 +337,12 @@ function DoNextCard({ x, n, onLater, docs, title }: { x: Todo; n: number; onLate
   const { b, t, lang, busy, live, ask } = useApp();
   const zh = lang === "zh";
   const phone = usePhone();
+  // two columns (1200 and up): the card stands beside the opening card at its height, and Odelia fills the top of it
+  const wide = usePhone("(min-width: 1200px)");
   return (
     <section className="dtn" data-do-next={x.key} aria-labelledby="dtn-h">
       <h1 className="vh">{title}</h1>
-      {phone && <div className="dtn-bot" aria-hidden="true"><AgentBot size={64} busy={busy} task={busy ? live?.state : undefined} gaze={[0, 2.4]} interactive={false} /></div>}
+      {(phone || wide) && <div className="dtn-bot" aria-hidden="true"><AgentBot size={64} busy={busy} task={busy ? live?.state : undefined} gaze={[0, 2.4]} interactive={false} /></div>}
       <p className="dtn-k">{zh ? "下一步" : "Do this next"}{docs && docs.of > 1 ? <span>{zh ? `文件 ${docs.i}/${docs.of}` : `${docs.i} of ${docs.of}`}</span> : n > 1 ? <span>{zh ? `第 1 项，共 ${n} 项` : `1 of ${n}`}</span> : null}</p>
       <h2 id="dtn-h">{b(headline(x))}</h2>
       <p className="dtn-why">{whyLine(x, lang, t)}</p>
@@ -437,7 +438,10 @@ export function Overview() {
   const withAgency = ws.apps.filter(a => FILED.includes(a.status) && a.status !== "approved" && (!mine || mineApp(team, a.id)));
   const decision = (id: string) => ws.deadlines.filter(d => d.app === id && d.kind === "estimate" && d.date >= today).sort((x, y) => x.date.localeCompare(y.date))[0];
   const unread = updates.filter(u => !u.read).length;
-  const working = chiefs.length + running.length + ws.running.length + withAgency.length > 0 || queued.length > 0 || routines.length > 0 || (busy && !!live);
+  /* the morning brief: renewals coming due, what agencies sent back, what's with them now */
+  const renewalsSoon = ws.deadlines.filter(d => d.kind === "renewal" && daysUntil(d.date) >= 0 && daysUntil(d.date) <= 30).length;
+  const replies = updates.filter(u => !u.read && (u.kind === "filing" || u.kind === "mail")).length;
+  const working =chiefs.length + running.length + ws.running.length + withAgency.length > 0 || queued.length > 0 || routines.length > 0 || (busy && !!live);
   const steps = (j: { steps: { done: boolean }[] }) => zh ? `${j.steps.filter(s => s.done).length}/${j.steps.length} 步` : `${j.steps.filter(s => s.done).length} of ${j.steps.length} steps`;
 
   /* 3. All set: what's issued */
@@ -501,6 +505,10 @@ export function Overview() {
           {mineCtl && !rest.length && <div className="hm-calm-mine">{mineCtl}</div>}
         </section>
       )}
+
+      {/* the opening date, second only to the one thing to do; the wide screen's right column carries it instead */}
+      {!firstRun && (landing || n > 0) && <OpeningCard inline landing={landing} est={est} n={n} approved={approved} agency={agency} />}
+      {!firstRun && <Brief renewals={renewalsSoon} replies={replies} withAgency={withAgency.length} />}
 
       {rest.length > 0 && (
         <section className="sec hm-needs">
@@ -614,7 +622,7 @@ export function Overview() {
       </section>
       )}
       <HomeNext next={nextAll.slice(0, 6)} />
-      <HomeSide soon={soon} landing={landing} est={est} n={n} approved={approved} agency={agency} />
+      <HomeSide soon={soon} />
       <Footer />
     </div>
   );
@@ -644,27 +652,61 @@ function HomeNext({ next }: { next: Application[] }) {
   );
 }
 
-/** Home's right column on a wide screen (1200px and up): the opening, the cost, the next permits and the next dates,
- *  all from the workspace, so a laptop's width carries the plan beside the one thing to do (Linear's and Stripe's
- *  dashboards). Narrower screens keep the single column; the same lists are under More. */
-function HomeSide({ soon, landing, est, n, approved, agency }: { soon: Deadline[]; landing: string | null; est: ReturnType<typeof workspaceEstimate>; n: number; approved: number; agency: number }) {
-  const { b, lang, go, ws, openApp } = useApp();
+/** The morning brief, one calm line: renewals due within 30 days, unread replies from agencies, filings with agencies
+ *  now. Each part opens where it's kept. Counted from the workspace; a zero is said plainly, never hidden. */
+function Brief({ renewals, replies, withAgency }: { renewals: number; replies: number; withAgency: number }) {
+  const { lang, go } = useApp();
+  const zh = lang === "zh";
+  const s = (n: number, one: string, many: string) => (n === 1 ? one : many).replace("{n}", String(n));
+  return (
+    <nav className="hm-brief" aria-label={zh ? "今日简报" : "Today's brief"}>
+      <button type="button" className={renewals ? "on" : ""} title={zh ? "30 天内到期的续期" : "Renewals due within 30 days"} onClick={() => go("permits", "deadlines")}>
+        <I.deadlines /><span>{zh ? (renewals ? `30 天内 ${renewals} 项续期` : "30 天内无续期") : renewals ? s(renewals, "1 renewal due soon", "{n} renewals due soon") : "No renewals due soon"}</span>
+      </button>
+      <button type="button" className={replies ? "on" : ""} onClick={() => go("odelia", "updates")}>
+        <I.message /><span>{zh ? (replies ? `${replies} 条机构回复未读` : "没有未读的机构回复") : replies ? s(replies, "1 new agency reply", "{n} new agency replies") : "No new agency replies"}</span>
+      </button>
+      <button type="button" onClick={() => go("permits", "filed")}>
+        <I.clock /><span>{zh ? (withAgency ? `${withAgency} 项在机构审核中` : "目前没有在机构审核的申请") : withAgency ? s(withAgency, "1 with an agency", "{n} with agencies") : "Nothing with an agency"}</span>
+      </button>
+    </nav>
+  );
+}
+
+/** The projected opening, Home's second anchor after the one thing to do: the date large, how far off it is, the range,
+ *  what it hinges on, the permits behind it and the cost to open. One card, two places: the right column on a wide
+ *  screen, under "Do this next" on anything narrower (the column isn't shown there). All from workspaceEstimate. */
+function OpeningCard({ landing, est, n, approved, agency, inline }: { landing: string | null; est: ReturnType<typeof workspaceEstimate>; n: number; approved: number; agency: number; inline?: boolean }) {
+  const { b, lang, openApp } = useApp();
   const zh = lang === "zh";
   const left = n - approved - agency;
+  return (
+    <section className={"hs-card hs-open" + (inline ? " hm-open-inline" : "")} aria-labelledby={inline ? "hs-open-h2" : "hs-open-h"}>
+      <p className="hs-k"><span id={inline ? "hs-open-h2" : "hs-open-h"}>{zh ? "预计开业" : "Projected opening"}</span>{landing && daysUntil(landing) >= 0 && <span className="hs-when">{b(untilSay(landing))}</span>}</p>
+      <p className="hs-date">{landing ? <EstimateDate date={landing} range={est?.path?.range} lang={lang} /> : zh ? "待定" : "Not set yet"}</p>
+      {est?.path && <HingeLine hinge={est.path.hinge} lang={lang} onOpen={id => openApp(id, "progress")} className="hs-sub" />}
+      <div className="hs-prog">
+        <span className="hs-bar" aria-hidden="true"><i style={{ width: `${n ? (approved / n) * 100 : 0}%` }} /><i className="b2" style={{ width: `${n ? (agency / n) * 100 : 0}%` }} /></span>
+        <p className="hs-sub">{zh ? `${n} 项许可：已办好 ${approved}，机构审核中 ${agency}，待办 ${left}` : `${n} permits: ${approved} done, ${agency} with the agency, ${left} to do`}</p>
+      </div>
+      <CostLine noDate />
+    </section>
+  );
+}
+
+/** Home's right column on a wide screen (1200px and up), under the opening card (OpeningCard sits beside "Do this
+ *  next" at its height): what Odelia did lately and the next dates,
+ *  all from the workspace, so a laptop's width carries the plan beside the one thing to do (Linear's and Stripe's
+ *  dashboards). Narrower screens keep the single column; the same lists are under More. */
+function HomeSide({ soon }: { soon: Deadline[] }) {
+  const { b, lang, go, ws } = useApp();
+  const zh = lang === "zh";
   const recent = ws.audit.slice(0, 4);
   // in the first run the head of Home already carries the opening and the money (src/FirstRun.tsx): one of each, not two
   const first = isFirstRun(ws);
   if (first) soon = soon.filter(d => !isOpeningMilestone(d) && !d.id.startsWith("open-"));
   return (
     <aside className="hm-side" aria-label={zh ? "计划概览" : "Plan at a glance"}>
-      {!first && <section className="hs-card hs-open">
-        <p className="hs-k">{zh ? "预计开业" : "Projected opening"}</p>
-        <p className="hs-date">{landing ? <EstimateDate date={landing} range={est?.path?.range} lang={lang} /> : zh ? "待定" : "Not set yet"}</p>
-        {est?.path && <HingeLine hinge={est.path.hinge} lang={lang} onOpen={id => openApp(id, "progress")} className="hs-sub" />}
-        <p className="hs-sub">{zh ? `${n} 项许可：已办好 ${approved}，机构审核中 ${agency}，待办 ${left}` : `${n} permits: ${approved} done, ${agency} with the agency, ${left} to do`}</p>
-        <span className="hs-bar" aria-hidden="true"><i style={{ width: `${n ? (approved / n) * 100 : 0}%` }} /><i className="b2" style={{ width: `${n ? (agency / n) * 100 : 0}%` }} /></span>
-        <CostLine />
-      </section>}
       {recent.length > 0 && (
         <section className="hs-card">
           <div className="hs-h"><h2>{zh ? "最近" : "Recent"}</h2><button type="button" className="lnk" onClick={() => go("settings", "activity")}>{zh ? "全部记录" : "Activity"}<I.chevR /></button></div>

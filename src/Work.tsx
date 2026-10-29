@@ -232,10 +232,12 @@ function Harness({ job, compact }: { job: Job; compact?: boolean }) {
   const c = job.checked;
   const proof = c ? (c.passed === c.of ? (zh ? `独立检查：${c.of} 项全部完成` : `Checked by a separate reviewer: all ${c.of} done`) : (zh ? `独立检查：${c.of} 项中完成 ${c.passed} 项` : `Checked by a separate reviewer: ${c.passed} of ${c.of} done`))
     : job.done?.length ? (zh ? `完成标准 ${job.done.length} 项，完成后由独立检查核对` : `${job.done.length} things define done; a separate reviewer checks them at the end`) : "";
-  if (compact) return c ? <div className="hz"><p className={"hz-proof" + (c.passed === c.of ? " ok" : " short")}>{c.passed === c.of ? <I.check /> : null}<span>{proof}</span></p></div> : null;
+  // a check still short on a job that's under way is pending, not a warning; short on a finished job is the warning
+  const short = job.status === "done" || job.status === "stopped" ? " short" : " pending";
+  if (compact) return c ? <div className="hz"><p className={"hz-proof" + (c.passed === c.of ? " ok" : short)}>{c.passed === c.of ? <I.check /> : <I.shield />}<span>{proof}</span></p></div> : null;
   return (
     <div className="hz">
-      {proof && <p className={"hz-proof" + (c ? (c.passed === c.of ? " ok" : " short") : "")}>{!c || c.passed === c.of ? <I.check /> : null}<span>{proof}{c ? <small>{zh ? `，${fmtAgo(c.at, lang)}` : `, ${fmtAgo(c.at, lang)}`}</small> : null}</span></p>}
+      {proof && <p className={"hz-proof" + (c ? (c.passed === c.of ? " ok" : short) : "")}>{!c || c.passed === c.of ? <I.check /> : null}<span>{proof}{c ? <small>{zh ? `，${fmtAgo(c.at, lang)}` : `, ${fmtAgo(c.at, lang)}`}</small> : null}</span></p>}
       <button type="button" className="lnk hz-tog" onClick={() => setOpen(v => !v)} aria-expanded={open}>{open ? (zh ? "收起" : "Hide") : (zh ? "她如何检查自己的工作" : "How she checks her work")}</button>
       {open && (
         <div className="hz-body">
