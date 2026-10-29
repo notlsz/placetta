@@ -135,3 +135,19 @@ a cookie, whichever takes it, and reads all four. Escape skips too. Skip is a la
 
 **Rule.** A dismissal a person makes must stick even when storage refuses the write: keep it in memory for the visit
 and fall back through the other per-viewer stores. Test it with `Storage.prototype.setItem` throwing.
+
+## Everything on a line shares one center (Oct 29 2026)
+
+What broke: the founder found, one screenshot at a time, things sitting at different heights on the same line: "Have
+Odelia find all 2" against "Show fewer"; the tour's Back 7px above Next; the chat bar's text 2.6px under its mic on
+phones; testimonial logos at four heights; Home's tabs in an old pill style beside underlined ones; download icons
+pressed against their words. Each was a row whose items had different heights with nothing centering them
+(flex-start or flex-end alignment, one item 4px taller), or two styles for the same control.
+
+Rules:
+- In a row, buttons, links, text, numbers, badges and logos share one vertical center. Icons are centered on their
+  text's line. Use align-items: center, or give every item the same height when a row must align to its bottom.
+- Logos in a set go in equal-height slots, centered.
+- One style per control (tabs, pills, small buttons): never two.
+- Less is more: whitespace over divider lines; few boxes, no bento grids. Side-by-side cards are the same height.
+- Check before showing UI: node scripts/fit-check.mjs --align (its "row" and "icon" checks must report 0).
