@@ -1,0 +1,136 @@
+/* The reduction pass, loaded last (src/main.tsx). The founder's direction: fewer horizontal lines and bento grids, less
+   is more, and every number and icon on the same line as its words.
+
+   Rules this file follows:
+     lines    a line stays only where it carries meaning (a table's group heading, a frozen column's edge); rows in a list
+              are told apart by spacing and type, never by a rule between them
+     boxes    one raised card per screen at most (Home's next action and the opening date beside it); everything else is
+              plain text groups on the page, with whitespace between
+     align    an icon is centred on the first line of its words; a count sits on its label's line, centred on it; dates,
+              times and right-hand meta share one column */
+
+/* ------------------------------------------------------------------ Home */
+
+/* lists on Home (Recent, Coming up, Next up): no rule between rows, a little more air instead */
+.page.home .hs-list li + li { box-shadow: none; }
+.page.home .hs-recent li, .page.home .hs-dates li { padding: 7px 0; }
+.page.home .hs-list button { padding: 9px 0; }
+
+/* the cost line closes the opening card on space, not a rule; its icon sits on the first line of the words */
+.hs-open .cost-line { box-shadow: none; padding-top: var(--s2, 8px); }
+.cost-line { align-items: flex-start; }
+.cost-line > svg { margin-top: calc((1.5em - 16px) / 2); }
+.cost-line > span { line-height: 1.5; }
+.cost-line .lnk { align-self: center; }
+
+/* Waiting on you (wide screens): a plain list on the page, no frame and no rule between rows */
+@media (min-width: 860px) {
+  .hm-needs .stack, .hm-needs .stack.stack { background: none; box-shadow: none; border-radius: 0; overflow: visible; }
+  .hm-needs .stack > * + * { border-top: 0; }
+  .hm-needs .stack .appr { padding: 10px 0 10px 2px; }
+  .hm-needs .stack .appr.compact { min-height: 52px; }
+}
+:root[data-theme="dark"] .hm-needs .stack { background: none; box-shadow: none; }
+@media (max-width: 859px) {
+  /* the phone keeps its swipe cards (a carousel needs an edge); the card above them goes */
+  :root[data-theme="dark"] .hm-needs .stack .appr, :root[data-theme="dark"] .hm-needs .stack .job.compact { background: var(--card); }
+}
+
+/* Next up: the same quiet list as Recent and Coming up, not a framed card */
+.page.home > .hm-nextwide { padding: 0; border-radius: 0; background: none; box-shadow: none; }
+
+/* status chips: a soft fill, not an outline */
+.st:not(.st-approved):not(.st-ready):not(.st-needs):not(.st-filing) { box-shadow: none; background: var(--mist); }
+
+/* ------------------------------------------------------------------ Odelia's page */
+
+/* where her work stands: three plain text groups on one line, no tiles */
+.now-strip { gap: var(--s2, 8px) var(--s5, 24px); }
+.ns-cell, :root[data-theme="dark"] .ns-cell { min-height: 0; padding: 4px 0; border-radius: 8px; background: none; }
+.ns-cell:hover:not(:disabled) { background: none; }
+.ns-cell:hover:not(:disabled) b { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
+.ns-need, .ns-need:hover:not(:disabled) { background: none; box-shadow: none; }
+.ns-cell small { margin-top: 0; }
+/* the count is a plain number on its label's line, centred on it; it stays in the label's column, no pill */
+.ns-k { line-height: 1.4; }
+.ns-k em, :root[data-theme="dark"] .ns-k em, :root[data-theme="dark"] .ns-need .ns-k em { min-width: 0; margin-left: 2px; padding: 0; border-radius: 0; background: none; line-height: inherit; }
+.ns-k time { margin-left: auto; }
+@media (max-width: 640px) {
+  .ns-cell { flex: 0 0 72%; min-height: 0; padding: 2px 0; border-radius: 0; }
+}
+
+/* her task cards in the thread: one quiet fill, no outline */
+.panel.full .turn .appr { box-shadow: none; background: var(--mist); }
+.panel.full .turn .job.compact { box-shadow: none; background: var(--mist); }
+
+/* ------------------------------------------------------------------ Permits */
+
+/* the cost to open on the To do tab: one line of type, no box */
+.cost-line.on-page { padding: 0; border-radius: 0; background: none; }
+
+/* the permits list on a laptop: rows on the page, told apart by space; hover shows the row */
+@media (min-width: 860px) {
+  .apps-t .tray { background: none; box-shadow: none; border-radius: 0; overflow: visible; }
+  .apps-t .tray > * + * .tr.row, .apps-t .tray > .tr.row + .tr.row { box-shadow: none; }
+  .apps-t .tr.row { padding-block: 16px; border-radius: 12px; }
+}
+
+/* the review table: the cells are already their own tiles, so the rule under every row and every column head goes.
+   What stays: the short rule under each group's name (it shows which columns the group spans) and the frozen store
+   column's edge (it shows what scrolls under it) */
+.rv-cols th { box-shadow: none; }
+.rv-c { box-shadow: none; }
+.rv-t thead th.rv-corner { box-shadow: inset -1px 0 0 rgba(var(--e), .06); }
+.rv-t th.rv-s { box-shadow: inset -1px 0 0 rgba(var(--e), .06); }
+.rv-r.w-lapsed th.rv-s { box-shadow: inset 3px 0 0 var(--rv-red), inset -1px 0 0 rgba(var(--e), .06); }
+.rv-r.w-missing th.rv-s, .rv-r.w-expiring th.rv-s { box-shadow: inset 3px 0 0 var(--warm), inset -1px 0 0 rgba(var(--e), .06); }
+.rv-groups th.rv-g > span { box-shadow: inset 0 -1px 0 rgba(var(--e), .08); }
+/* a status that wraps keeps its icon on the first line of its words */
+.rv .rv-st { align-items: flex-start; }
+.rv-st svg { margin-top: calc((1.25 * 13px - 14px) / 2); width: 14px; height: 14px; }
+.rv-st b { line-height: 1.25; }
+/* the summary's filter chips: a fill tells them apart, not an outline */
+.rv-chip { box-shadow: none; }
+.rv-chip:hover { box-shadow: none; background: var(--mist2); }
+/* each store's footer on a phone sits on space, not a rule */
+.rv-card-f { box-shadow: none; }
+
+/* ------------------------------------------------------------------ Deadlines and the renewal runway */
+
+/* the runway: a plain section with its lanes as text groups, no frame and no card per renewal */
+.rw { padding: 0; border-radius: 0; background: none; box-shadow: none; }
+.rw-h h2 { align-items: center; }
+.rw-h h2 span { line-height: 1; }
+.rw-lanes { gap: var(--s5, 24px); }
+.rw-lane h3 { align-items: center; }
+.rw-lane ul { gap: var(--s4, 16px); }
+.rw-lane li { padding: 0; border-radius: 0; background: none; box-shadow: none; }
+.rw-act { min-height: 32px; }
+
+/* the timeline: rows on the page, a date in the left column without a tile, the opening date in blue */
+.tray:has(> .row.tl) { padding: 0; gap: 2px; border-radius: 0; background: none; }
+.tray > .row.tl { margin: 0; padding: 10px 0; border-radius: 12px; background: none; box-shadow: none; }
+.tray > .row.tl:hover { background: none; }
+.tl-date, .k-milestone .tl-date { height: auto; border-radius: 0; background: none; box-shadow: none; }
+.k-milestone .tl-date b, .k-milestone .tl-date small { color: var(--blue-ink); }
+
+/* ------------------------------------------------------------------ Stores */
+
+/* Today's checks close each store card on space, not a rule; each check is a word with its mark, not a pill */
+.store-today { border-top: 0; padding-top: 4px; gap: 6px 14px; }
+.logdot { padding: 0; border-radius: 0; background: none; box-shadow: none; }
+
+/* a permit's name on a phone card: the comment count and the initials sit on the name's first line, centred on it */
+.rv-item-t { align-items: flex-start; }
+.rv-item-t > :not(b) { display: inline-flex; align-items: center; height: calc(14px * 1.3); line-height: 1; }
+
+/* on a wide screen every row's "In 5 days" sits in one column and its button in the next, whatever the button says */
+@media (min-width: 860px) {
+  .tray > .row.tl .tl-act { display: grid; grid-template-columns: 6.5rem 10rem; align-items: center; gap: 12px; }
+  .tray > .row.tl .tl-act > em { grid-column: 1; justify-self: end; white-space: nowrap; }
+  .tray > .row.tl .tl-act > .pill { grid-column: 2; justify-self: start; }
+}
+
+/* the table's corner: "Store" and its box sit on the same line as each column's name and box, not lower */
+.rv-t thead th.rv-corner { vertical-align: top; padding-top: calc(34px + 8px); }
+.rv-pickall { align-items: flex-start; line-height: 1.3; }
