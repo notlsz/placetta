@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import App from "../App";
 import { GateBot } from "../Bot";
 import { LegalBody } from "../Legal";
 import { LEGAL, UPDATED } from "../legal";
 import { Logo } from "../Logo";
 import { I, Menu, Select } from "../ui";
+import { SuggestInput } from "../Suggest";
+import { placeSource } from "../suggestions";
 import { B, type Bi } from "../model";
 import type { Lang } from "../i18n";
 import * as api from "./api";
@@ -17,7 +19,7 @@ import { HqHome } from "../Headquarters";
 import { applyTheme, readTheme } from "../hooks";
 import type { HqRow } from "../hq";
 import { firstPlanClock } from "../plan/prefill";
-import { CITIES, ownWords, parsePlace, readLine, SELLS, STATES, streetIn, zipIn } from "../plan/line";
+import { ownWords, parsePlace, readLine, SELLS, STATES, streetIn, zipIn } from "../plan/line";
 import { firstWorkspace } from "../plan/start";
 import { MoreStep } from "./MoreStep";
 import { PlanBuild } from "./PlanBuild";
@@ -460,6 +462,8 @@ function Onboard({ lang, email, agreedAtSignup = false, onCreated, onCancel }: {
   const [line, setLine] = useState(() => (hand ? "" : saved.line ?? embedLine()));
   // a business that came through a partner answers once whether the partner sees its progress (off unless ticked)
   const [share, setShare] = useState(false);
+  // the city box suggests the places the registry maps, each with how many licenses it holds there
+  const placeSrc = useMemo(() => placeSource(lang), [lang]);
   // "I already have stores": the free check instead of the one line (src/StoresCheck.tsx)
   const [mode, setMode] = useState<"plan" | "existing">("plan");
   const read = readLine(line);
@@ -665,8 +669,7 @@ function Onboard({ lang, email, agreedAtSignup = false, onCreated, onCancel }: {
         {line.trim() && !read.place && !f.place && (
           <label className="q">
             <span>{L(B("City and state", "城市和州"))}</span>
-            <input id="onb-place" list="onb-cities" value={f.place} onChange={e => setF({ ...f, place: e.target.value })} placeholder="Flushing, NY" autoComplete="address-level2" />
-            <datalist id="onb-cities">{CITIES.map(c => <option key={c} value={c} />)}</datalist>
+            <SuggestInput id="onb-place" lang={lang} value={f.place} onValue={v => setF({ ...f, place: v })} source={placeSrc} placeholder="Flushing, NY" />
           </label>
         )}
         {needState && (

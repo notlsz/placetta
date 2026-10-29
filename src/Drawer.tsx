@@ -1,7 +1,7 @@
 import { checkAddress, RULE_LABEL } from "./forms/addressCheck";
 import { FilingChargeSection } from "./FilingCharge";
 import { canFill, onlineOnly, ONLINE_ONLY } from "./forms/canFill";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { signSpotOf } from "./forms/fill";
 import { signRule } from "./forms/esign";
 import { adoptedPng } from "./adoptedSignature";
@@ -14,7 +14,7 @@ import { FilingLive } from "./FilingLive";
 import { AskSpecialist } from "./Specialist";
 import { StatusTimeline } from "./StatusTimeline";
 import { useApp, type Signed, type Tab } from "./ctx";
-import type { Application, Approval, CheckItem, Doc } from "./model";
+import type { Application, Approval, CheckItem, Doc, Field } from "./model";
 import { openSettings } from "./Settings";
 import { formById, METHOD } from "./forms/registry";
 import { saveFile } from "./files";
@@ -31,6 +31,16 @@ import { findItAsk } from "./StillNeeded";
 import { B } from "./bi";
 import { BY_HAND } from "./guard";
 import { Working } from "./Bot";
+import { SuggestInput } from "./Suggest";
+import { fieldSource, stateSource } from "./suggestions";
+
+/** A line of the form, edited: what the workspace already knows for it, one tap away (src/suggestions.ts). */
+function FieldEdit({ f, value, onValue, onEnter, label, options }: { f: Field; value: string; onValue: (v: string) => void; onEnter: () => void; label: string; options?: string[] }) {
+  const { ws, lang, t } = useApp();
+  const { source, fixed } = useMemo(() => fieldSource(ws, f.label.en, lang, options), [ws, f.label.en, lang, options]);
+  return <SuggestInput lang={lang} value={value} onValue={onValue} source={source} fixed={fixed} placeholder={t("empty")} aria-label={label}
+    onKeyDown={e => { if (e.key === "Enter") onEnter(); }} />;
+}
 import { AllowRule } from "./AllowRule";
 import { FilledStatus, OnlineAnswers } from "./FilledForm";
 import { fileable } from "./forms/versions";
@@ -347,7 +357,7 @@ function FormPreview({ a, startEdit, version }: { a: Application; startEdit: boo
             <div key={f.id} className={f.value ? "" : "empty"}>
               <dt>{b(f.label)}</dt>
               <dd>
-                {edit ? <input value={vals[f.id] ?? ""} placeholder={t("empty")} onChange={e => setVals(v => ({ ...v, [f.id]: e.target.value }))} onKeyDown={e => { if (e.key === "Enter") save(); }} aria-label={b(f.label)} />
+                {edit ? <FieldEdit f={f} value={vals[f.id] ?? ""} onValue={x => setVals(v => ({ ...v, [f.id]: x }))} onEnter={save} label={b(f.label)} options={off?.fields.find(x => x.id === f.id)?.options} />
                   : <span>{f.value || t("empty")}</span>}
                 {f.from && !edit && <small>{b(f.from)}</small>}
                 {f.quote && !edit && <q className="cite">{f.quote}</q>}
@@ -659,6 +669,7 @@ function KitButton({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>["
   const zh = lang === "zh";
   const [open, setOpen] = useState(false);
   const [a, setA] = useState({ name: "", line1: "", line2: "", city: "", state: "", zip: "" });
+  const stateSrc = useMemo(() => stateSource(lang, { code: true }), [lang]);
   // the kit on its way: the last sign_kit since the card asked for ink, unless it was canceled
   const log = f.agent_log ?? [];
   let onWay = false;
@@ -675,7 +686,7 @@ function KitButton({ f }: { f: NonNullable<ReturnType<typeof useApp>["cloud"]>["
       {field("line1", "Street address", "街道地址", 64, { autoComplete: "address-line1" })}
       {field("line2", "Suite (optional)", "单元（可选）", 64, { autoComplete: "address-line2" })}
       {field("city", "City", "城市", 40, { autoComplete: "address-level2" })}
-      {field("state", "State", "州", 2, { autoComplete: "address-level1" })}
+      <SuggestInput className="inp sm" lang={lang} fixed value={a.state} onValue={v => setA(x => ({ ...x, state: v }))} source={stateSrc} placeholder={zh ? "州" : "State"} aria-label={zh ? "州" : "State"} />
       {field("zip", "ZIP code", "邮编", 10, { autoComplete: "postal-code", inputMode: "numeric" })}
       <button type="submit" className="pill ink sm" disabled={busy || !ok}>{zh ? "寄给我" : "Mail it to me"}</button>
     </form>

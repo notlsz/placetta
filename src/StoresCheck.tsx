@@ -8,6 +8,8 @@ import { daysFromNow, fmtDay } from "./time";
 import { normalizeState } from "./core";
 import { stateOf } from "./plan/preview";
 import { checkStores, findingLine, KINDS, RANK, readPlace, requiredFor, toPlan, totals, type Answer, type Answers, type Have, type StoreInput, type StoreResult } from "./plan/existing";
+import { SuggestInput } from "./Suggest";
+import { placeSource } from "./suggestions";
 import "./ode.css";
 
 /* The free compliance check for stores a business already runs: city and kind per store, then a checklist from
@@ -15,9 +17,6 @@ import "./ode.css";
    risks per store, turned into the plan. No model is called. Used in onboarding ("I already have stores") and on the
    Stores page. The website has the same check, signed out (src/site/stores-check.ts). */
 
-const CITIES = ["Flushing, NY", "Brooklyn, NY", "Manhattan, NY", "Jersey City, NJ", "Edison, NJ", "Boston, MA", "Philadelphia, PA", "Washington, DC", "Chicago, IL",
-  "Houston, TX", "Dallas, TX", "Austin, TX", "Atlanta, GA", "Miami, FL", "Seattle, WA", "Bellevue, WA", "Portland, OR", "San Francisco, CA", "San Jose, CA", "Oakland, CA",
-  "Fremont, CA", "Los Angeles, CA", "Arcadia, CA", "Irvine, CA", "San Gabriel, CA", "San Diego, CA", "Las Vegas, NV", "Phoenix, AZ", "Denver, CO"];
 const HAVE: [Have, Bi][] = [["have", B("Have it", "已有")], ["unsure", B("Not sure", "不确定")], ["missing", B("Don't have", "没有")]];
 const KIND_TAG: Record<string, Bi> = {
   lapsed: B("Expired", "已过期"), gap: B("Missing", "缺少"), due_soon: B("Renew soon", "即将续期"), unsure: B("Not sure", "不确定"), no_date: B("No renewal date", "无续期日期"), ok: B("In order", "已具备"),
@@ -36,6 +35,8 @@ export function StoresCheck({ lang, onApply, applyLabel, busy, footer, err, intr
   const [answers, setAnswers] = useState<Answers>({});
   const [step, setStep] = useState<"stores" | "check" | "results">("stores");
   const [warn, setWarn] = useState("");
+  // the city box suggests the US cities the registry maps, each with how many licenses it holds there
+  const citySrc = useMemo(() => placeSource(lang, { only: ["city"] }), [lang]);
   const ready = stores.filter(s => readPlace(s.city));
   // whole-business permits (the EIN) are asked once, under "biz", and count for every store
   const merged = useMemo<Answers>(() => Object.fromEntries(ready.map(s => [s.id, { ...(answers[s.id] ?? {}), ...(answers.biz ?? {}) }])), [ready, answers]);
@@ -73,12 +74,11 @@ export function StoresCheck({ lang, onApply, applyLabel, busy, footer, err, intr
         <p className="sc-sub">{L(B("Add each store's city and what it sells. Placetta lists what each one has to hold, from its registry of official forms, and shows any gaps. Free, and no AI involved.",
           "填写每家门店的城市和业态。快哉会根据官方表格登记库列出每家店必须持有的许可，并找出缺口。免费，不使用 AI。"))}</p>
       </>}
-      <datalist id="sc-cities">{CITIES.map(c => <option key={c} value={c} />)}</datalist>
       <ol className="sc-stores">
         {stores.map((s, i) => (
           <li key={s.id}>
             <span className="sc-num">{i + 1}</span>
-            <label className="sc-f"><span>{L(B("City and state", "城市和州"))}</span><input list="sc-cities" value={s.city} onChange={e => edit(s.id, { city: e.target.value })} placeholder="Flushing, NY" autoComplete="off" aria-invalid={!!s.city && !readPlace(s.city)} /></label>
+            <label className="sc-f"><span>{L(B("City and state", "城市和州"))}</span><SuggestInput lang={lang} value={s.city} onValue={v => edit(s.id, { city: v })} source={citySrc} placeholder="Flushing, NY" aria-invalid={!!s.city && !readPlace(s.city)} /></label>
             <label className="sc-f"><span>{L(B("What it sells", "业态"))}</span>
               <Select sz="lg" value={s.what} onChange={e => edit(s.id, { what: e.target.value })}>{KINDS.map(k => <option key={k.en} value={k.en}>{L(k)}</option>)}</Select></label>
             <label className="sc-f"><span>{L(B("Name (optional)", "店名（选填）"))}</span><input value={s.name ?? ""} onChange={e => edit(s.id, { name: e.target.value })} placeholder={L(B("Main St", "主街店"))} maxLength={60} /></label>

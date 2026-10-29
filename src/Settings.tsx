@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ONLINE_FILING, useOnlineFiling } from "./onlineFiling";
 import { hrefOf, plainClick, readRoute, setRoute } from "./route";
 import { useApp } from "./ctx";
@@ -47,6 +47,8 @@ const memoryDb = () => import("./cloud/memoryApi");
 import { SetSheet } from "./SetUI";
 import { ContractGroup, EntitiesGroup, FilingCapGroup, ModulesGroup } from "./Growth";
 import { cleanCode } from "./hqPlan.ts";
+import { SuggestInput } from "./Suggest";
+import { agencySource } from "./suggestions";
 
 
 /* Settings, the way Muse and Alven do it: a calm column of groups, one row per thing, the control on the right,
@@ -546,6 +548,8 @@ function Logins() {
   const { b, lang, cloud, ws } = useApp();
   const [adding, setAdding] = useState(false);
   const [f, setF] = useState({ agency: "", url: "", username: "", password: "", note: "" });
+  // the agencies this workspace files with first, then every agency the registry maps (by name or initials)
+  const agencySrc = useMemo(() => agencySource(lang, ws), [lang, ws]);
   if (!cloud) {
     return (
       <Group id="logins" title={B("Agency logins", "机构登录")} note={B("Saved logins for agency portals, encrypted in a vault. Placetta opens one only to file for you, and each opening shows in your audit trail.", "加密保存在保险库中的机构门户登录信息。快哉只在为您提交时打开，每次打开都会记入审计记录。")}
@@ -563,7 +567,7 @@ function Logins() {
       {cloud.owner && adding && (
         <SetSheet title={lang === "zh" ? "添加机构登录" : "Add an agency login"} sub={lang === "zh" ? "加密保存在保险库中。快哉只在为您提交时打开。" : "Kept encrypted in a vault. Placetta opens it only to file for you."} onClose={() => setAdding(false)}>
           <form className="sst-form" onSubmit={e => { e.preventDefault(); if (!f.agency.trim() || !f.username.trim() || !f.password) return; void cloud.saveLogin({ agency: f.agency.trim(), url: f.url.trim() || undefined, username: f.username.trim(), password: f.password, note: f.note.trim() || undefined }).then(() => { setAdding(false); setF({ agency: "", url: "", username: "", password: "", note: "" }); }); }}>
-            <input placeholder={lang === "zh" ? "机构，例如 CDTFA" : "Agency, e.g. CDTFA"} value={f.agency} onChange={e => setF({ ...f, agency: e.target.value })} aria-label="Agency" autoFocus />
+            <SuggestInput lang={lang} placeholder={lang === "zh" ? "机构，例如 CDTFA" : "Agency, e.g. CDTFA"} value={f.agency} onValue={v => setF({ ...f, agency: v })} source={agencySrc} aria-label="Agency" autoFocus />
             <input placeholder="https://…" value={f.url} onChange={e => setF({ ...f, url: e.target.value })} aria-label="Website" />
             <input placeholder={lang === "zh" ? "用户名" : "Username"} autoComplete="off" value={f.username} onChange={e => setF({ ...f, username: e.target.value })} aria-label="Username" />
             <input type="password" placeholder={lang === "zh" ? "密码" : "Password"} autoComplete="new-password" value={f.password} onChange={e => setF({ ...f, password: e.target.value })} aria-label="Password" />
