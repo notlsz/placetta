@@ -25,7 +25,8 @@
 //
 // An unrecorded browser (open's second argument): a run where a person may be handed a page they haven't agreed to
 // have recorded (privacy.ts: California, or nowhere known, without their opt-in). On Steel the run opens on Browserbase
-// with recording off when its two keys are set, else on local Chromium when this container has it, else on Steel all
+// with recording off when its two keys are set, else on Kernel (KERNEL_API_KEY; it records nothing unless asked, and
+// its stealth mode, which turns on a CAPTCHA solver, stays off), else on local Chromium when this container has it, else on Steel all
 // the same, still marked recorded, so run.ts never hands that page to the person.
 //
 // The API key never leaves this module in an error: a refusal says "steel 401", not the address it went to.
@@ -57,6 +58,7 @@ export const defaultDeps = (env: Record<string, string | undefined> = process.en
 const STEEL_API = "https://api.steel.dev";
 const STEEL_CONNECT = "wss://connect.steel.dev";
 const BB_API = "https://api.browserbase.com";
+const KERNEL_API = "https://api.onkernel.com";
 
 /** The body Steel's sessions API gets: nothing saved, nothing solved. Exported for the tests. */
 export function steelBody(ms: number) {
@@ -168,6 +170,40 @@ export async function openBrowserbase(d: Deps, o: { record?: boolean } = {}): Pr
   }
 }
 
+/** The body Kernel's browsers API gets (kernel.sh docs, Create a browser session, read 2026-10-28). stealth stays false:
+ *  Kernel's stealth "enables the CAPTCHA solver", and a CAPTCHA goes to a person. Headless (the cheaper image, about
+ *  $0.06 an hour); the person's hand-back uses the worker's own live view. No profile, no proxy: a new, empty browser.
+ *  Kernel keeps no replay unless one is started, so a Kernel session counts as unrecorded. */
+export const kernelBody = (idleSeconds = 300) => ({ headless: true, stealth: false, timeout_seconds: Math.max(60, Math.min(Math.floor(idleSeconds), 3600)) });
+
+/** A new Kernel browser for one run (kernel.sh). For runs that may not be recorded when Browserbase isn't set up. */
+export async function openKernel(d: Deps): Promise<Session> {
+  const key = (d.env.KERNEL_API_KEY ?? "").trim();
+  if (!key) throw new Error("kernel: KERNEL_API_KEY is not set");
+  const api = (d.env.KERNEL_API_URL || KERNEL_API).replace(/\/+$/, "");
+  const auth = { Authorization: `Bearer ${key}`, "Content-Type": "application/json" };
+  const res = await d.fetch(`${api}/browsers`, { method: "POST", headers: auth, body: JSON.stringify(kernelBody()), signal: AbortSignal.timeout(30_000) }).catch(() => null);
+  if (!res?.ok) {
+    const why = res ? (await res.text().catch(() => "")).replaceAll(key, "•••").replace(/\s+/g, " ").slice(0, 160) : "";
+    throw new Error(`kernel ${res?.status ?? "unreachable"}${why ? `: ${why}` : ""}`);
+  }
+  const s = await res.json().catch(() => ({})) as { session_id?: string; cdp_ws_url?: string };
+  if (!s.session_id || !/^[\w-]{6,80}$/.test(s.session_id) || typeof s.cdp_ws_url !== "string" || !/^wss?:\/\//.test(s.cdp_ws_url)) throw new Error("kernel: no session");
+  const id = s.session_id;
+  const release = () => d.fetch(`${api}/browsers/${encodeURIComponent(id)}`, { method: "DELETE", headers: auth, signal: AbortSignal.timeout(15_000) })
+    .then(() => undefined, () => undefined);
+  let browser: Browser;
+  try { browser = await d.connect(s.cdp_ws_url); }
+  catch { await release(); throw new Error("kernel: couldn't connect to the session"); }
+  try {
+    const page = await firstPage(browser);
+    return { browser, page, liveUrl: null, recorded: false, provider: "kernel", close: async () => { await browser.close().catch(() => undefined); await release(); } };
+  } catch (e) {
+    await browser.close().catch(() => undefined); await release();
+    throw new Error(`kernel: ${e instanceof Error ? e.message.replaceAll(key, "•••").slice(0, 120) : "error"}`);
+  }
+}
+
 /** Local Chromium: a new process with a new, empty context (Playwright's throwaway profile, deleted on close). */
 export async function openLocal(d: Deps): Promise<Session> {
   const browser = await d.launch();
@@ -192,14 +228,17 @@ export function orderFor(env: Record<string, string | undefined>, host: string, 
   const list = usableProviders(env);
   if (list === "invalid") return [];
   const bb = !!env.BROWSERBASE_API_KEY?.trim() && !!env.BROWSERBASE_PROJECT_ID?.trim();
+  const kernel = !!env.KERNEL_API_KEY?.trim();
   let order: Provider[] = list.length === 1 && list[0] === "local" && wantsHostedBrowser(host, env) ? ["browserbase"] : [...list];
   if (o.unrecorded) {
     order = order.filter((p) => p !== "steel");
     if (bb && !order.includes("browserbase")) order.unshift("browserbase");
+    // Kernel (no recording unless asked) right after Browserbase: the free stand-in until Browserbase's keys are set
+    if (kernel && !order.includes("kernel")) order.splice(order.includes("browserbase") ? order.indexOf("browserbase") + 1 : 0, 0, "kernel");
     if (!order.includes("local")) order.push("local");
   }
   if (o.only) {
-    const keyed = o.only === "local" || (o.only === "steel" ? !!env.STEEL_API_KEY?.trim() : bb);
+    const keyed = o.only === "local" || (o.only === "steel" ? !!env.STEEL_API_KEY?.trim() : o.only === "kernel" ? kernel : bb);
     order = keyed && !(o.unrecorded && o.only === "steel") ? [o.only] : [];
   }
   return order;
@@ -216,7 +255,7 @@ export function opener(d: Deps): (host?: string, o?: OpenOpts) => Promise<Sessio
     const failed: string[] = [];
     for (const p of order) {
       try {
-        const s = p === "steel" ? await openSteel(d) : p === "browserbase" ? await openBrowserbase(d, o.unrecorded ? { record: false } : {}) : await openLocal(d);
+        const s = p === "steel" ? await openSteel(d) : p === "kernel" ? await openKernel(d) : p === "browserbase" ? await openBrowserbase(d, o.unrecorded ? { record: false } : {}) : await openLocal(d);
         // the California rule, checked on what was opened, not only on what was asked for
         if (o.unrecorded && s.recorded) { await s.close().catch(() => undefined); failed.push(`${p}: recorded`); continue; }
         if (failed.length || order.length > 1) console.log(`filer: browser ${p}${failed.length ? ` after ${failed.join("; ")}` : ""}`);

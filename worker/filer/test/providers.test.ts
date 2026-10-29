@@ -406,5 +406,18 @@ test("a browser comparison run opens on the one provider it names, never on Stee
   const f = (b: unknown) => ({ payload: { bench_browser: b } }) as never;
   assert.deepEqual(benchBrowser(f("steel"), true), { only: "steel" });
   assert.deepEqual(benchBrowser(f("steel"), false), {}, "a real filing ignores it");
-  assert.deepEqual(benchBrowser(f("kernel"), true), {});
+  assert.deepEqual(benchBrowser(f("kernel"), true), { only: "kernel" });
+  assert.deepEqual(benchBrowser(f("chrome"), true), {});
+});
+
+test("Kernel: a California run opens on it when Browserbase isn't set up, never with its CAPTCHA solver; Steel stays for the rest", async () => {
+  const { orderFor, kernelBody } = await import("../src/browsers.ts");
+  const env = { BROWSER_PROVIDER: "browserbase,steel", STEEL_API_KEY: "s", KERNEL_API_KEY: "k" };
+  assert.deepEqual(orderFor(env, ""), ["steel"], "a run that may be recorded stays on Steel");
+  assert.deepEqual(orderFor(env, "", { unrecorded: true }), ["kernel", "local"]);
+  const withBb = { ...env, BROWSERBASE_API_KEY: "b", BROWSERBASE_PROJECT_ID: "p" };
+  assert.deepEqual(orderFor(withBb, "", { unrecorded: true }), ["browserbase", "kernel", "local"], "Browserbase first once its keys are in");
+  assert.deepEqual(orderFor({ ...env, KERNEL_API_KEY: "" }, "", { unrecorded: true }), ["local"]);
+  assert.equal(kernelBody().stealth, false, "stealth turns on Kernel's CAPTCHA solver");
+  assert.equal(kernelBody().headless, true);
 });

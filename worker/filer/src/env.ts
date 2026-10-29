@@ -34,11 +34,12 @@ export const WHERE = {
   STEEL_API_KEY: "app.steel.dev, sign up (the free plan is enough), API Keys, copy the key",
   BROWSERBASE_API_KEY: "browserbase.com, Settings, API Key",
   BROWSERBASE_PROJECT_ID: "browserbase.com, Settings, Project ID",
-  BROWSER_PROVIDER: "local, steel or browserbase, or an order of them such as browserbase,steel,local (unset: browserbase,steel,local when Browserbase's keys are set, else local Chromium)",
+  KERNEL_API_KEY: "dashboard.onkernel.com, API Keys (free plan: $5 of browser time a month)",
+  BROWSER_PROVIDER: "local, steel, browserbase or kernel, or an order of them such as browserbase,steel,local (unset: browserbase,steel,local when Browserbase's keys are set, else local Chromium)",
 };
 
-export type Provider = "local" | "steel" | "browserbase";
-const PROVIDERS: Provider[] = ["local", "steel", "browserbase"];
+export type Provider = "local" | "steel" | "browserbase" | "kernel";
+const PROVIDERS: Provider[] = ["local", "steel", "browserbase", "kernel"];
 /** BROWSER_PROVIDER, an ordered list ("browserbase,steel,local"): a run opens on the first that gives it a session, and
  *  the next is tried when one refuses (a quota, a 4xx or 5xx, a failed connection; browsers.ts opener). Unset: with
  *  Browserbase's two keys, browserbase, then steel when STEEL_API_KEY is set, then local Chromium (Browserbase Developer
@@ -61,7 +62,7 @@ export function usableProviders(env: Record<string, string | undefined>): Provid
   const l = providersOf(env);
   if (l === "invalid" || l.length < 2) return l;
   const bb = !!env.BROWSERBASE_API_KEY?.trim() && !!env.BROWSERBASE_PROJECT_ID?.trim();
-  const keyed = (x: Provider) => x === "local" || (x === "steel" ? !!env.STEEL_API_KEY?.trim() : bb);
+  const keyed = (x: Provider) => x === "local" || (x === "steel" ? !!env.STEEL_API_KEY?.trim() : x === "kernel" ? !!env.KERNEL_API_KEY?.trim() : bb);
   return l.some(keyed) ? l.filter(keyed) : l;
 }
 /** The first choice (what the worker reports as its browser). */

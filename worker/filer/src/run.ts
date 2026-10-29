@@ -40,7 +40,7 @@ import { IDENTITY_HOSTS } from "../../../supabase/functions/file/accounts.ts";
 
 /** recorded: the provider keeps a replay of the session (Steel always does): such a session never gets a card (card.ts).
  *  provider: which browser served the run (browsers.ts), for the log and filer_runs. */
-export type Session = { browser: Browser; page: Page; liveUrl: string | null; recorded?: boolean; provider?: "local" | "steel" | "browserbase";
+export type Session = { browser: Browser; page: Page; liveUrl: string | null; recorded?: boolean; provider?: "local" | "steel" | "browserbase" | "kernel";
   /** The provider keeps this session alive cheaply while nobody drives it (Browserbase keepAlive): a run waiting on a
    *  person may park it (ParkLot). A local Chromium is the worker's own and is kept too; a hosted one without it isn't. */
   keepAlive?: boolean; close(): Promise<void> };
@@ -205,9 +205,9 @@ const STOPPED: Result = { kind: "stopped", trace: [] };
 /** A session another run (or anything else) has used is refused: a new run starts with no cookies and one blank page. */
 /** A browser comparison run (docs/browser-bench.md): a rehearsal filing in a synthetic workspace may name the one provider
  *  it runs on (payload.bench_browser), so the same filings can be timed on each. Ignored for every real filing. */
-export function benchBrowser(f: Filing, synthetic: boolean): { only?: "local" | "steel" | "browserbase" } {
+export function benchBrowser(f: Filing, synthetic: boolean): { only?: "local" | "steel" | "browserbase" | "kernel" } {
   const b = (f.payload as { bench_browser?: unknown }).bench_browser;
-  return synthetic && (b === "steel" || b === "browserbase" || b === "local") ? { only: b } : {};
+  return synthetic && (b === "steel" || b === "browserbase" || b === "local" || b === "kernel") ? { only: b } : {};
 }
 
 export async function assertFresh(session: Session): Promise<void> {

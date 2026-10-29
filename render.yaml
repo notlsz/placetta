@@ -60,6 +60,8 @@ services:
         sync: false                      # browserbase.com, Developer plan ($20 a month), Settings, API Key. Left empty: runs use Steel
       - key: BROWSERBASE_PROJECT_ID
         sync: false                      # browserbase.com, Settings, Project ID
+      - key: KERNEL_API_KEY
+        sync: false                      # dashboard.onkernel.com, API Keys (free: $5 of browser time a month). For California runs until Browserbase's keys are set; may stay empty
       - key: FILER_SECRET
         generateValue: true              # Render makes a random 256-bit value; copy it from the service's Environment tab to the Supabase secret FILER_SECRET
       # ---- set for you ----

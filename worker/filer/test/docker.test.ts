@@ -53,7 +53,7 @@ test("render.yaml: a web service with the health check, memory for its browser, 
   assert.match(y, /BROWSER_PROVIDER value: browserbase/);
   const asked = [...y.matchAll(/- key: (\w+)\n\s+sync: false/g)].map((m) => m[1]);
   // Browserbase's two keys may stay empty: the worker skips Browserbase and runs on Steel until they're set
-  assert.deepEqual(asked, ["SUPABASE_SERVICE_ROLE_KEY", "ANTHROPIC_API_KEY", "STEEL_API_KEY", "BROWSERBASE_API_KEY", "BROWSERBASE_PROJECT_ID"], "the founder pastes three values, and Browserbase's two when the plan is bought");
+  assert.deepEqual(asked, ["SUPABASE_SERVICE_ROLE_KEY", "ANTHROPIC_API_KEY", "STEEL_API_KEY", "BROWSERBASE_API_KEY", "BROWSERBASE_PROJECT_ID", "KERNEL_API_KEY"], "the founder pastes three values, Browserbase's two when the plan is bought, and Kernel's free key for California runs until then");
   const steelOnly = checkEnv({ ...set, BROWSERBASE_API_KEY: "", BROWSERBASE_PROJECT_ID: "" });
   assert.deepEqual(steelOnly.missing, []);
   assert.equal(steelOnly.provider, "steel");
