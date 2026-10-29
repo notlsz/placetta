@@ -3839,7 +3839,8 @@ html[lang="zh-CN"] .prmore summary h2,html[lang="zh-CN"] .prmore summary h3,html
   #trust #security{margin-top:0!important}
 }
 @media (max-width:767px){
-  .seg95{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;width:auto!important;margin-inline:-24px!important;padding:4px 24px!important;background:none!important;gap:6px!important;scrollbar-width:none}
+  #how #h95.seg95{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;width:auto!important;max-width:none!important;margin:0 -24px 24px!important;padding:2px 24px!important;background:none!important;gap:6px!important;scrollbar-width:none}
+  #how #h95 button{min-height:40px}
   .seg95::-webkit-scrollbar{display:none}
   .seg95 button{flex:none!important}
 }
@@ -3896,6 +3897,17 @@ html[lang="zh-CN"] .prmore summary h2,html[lang="zh-CN"] .prmore summary h3,html
 }
 @media (min-width:1024px) and (max-height:880px){.hero .hl{gap:16px!important}.hero .hstack{gap:18px!important}}
 body #faq .faqcta{background:#fff;box-shadow:var(--sh-1);border-radius:var(--r-md)}
+
+/* land98: how it works on the same card as the rest of the page, its product scenes on the hero's plan paper */
+#how .fcard{background:#fff!important;border-radius:var(--r-md)!important;box-shadow:var(--sh-1);transition:box-shadow .3s var(--ease)}
+@media (hover:hover){#how .fcard:hover{box-shadow:var(--sh-2)}}
+#how .fcv{margin:20px 12px 12px;border-radius:var(--r-sm);background:
+  linear-gradient(rgba(19,42,85,.05) 1px,transparent 1px) 0 0/28px 28px,
+  linear-gradient(90deg,rgba(19,42,85,.05) 1px,transparent 1px) 0 0/28px 28px,
+  linear-gradient(180deg,#F1F4F8,#E5EBF2)!important}
+#how .fui{border-radius:var(--r-sm);box-shadow:0 0 0 1px var(--bd),0 18px 40px -16px rgba(15,27,51,.22)}
+#how .seg95{background:#fff;box-shadow:var(--sh-1)}
+@media (max-width:767px){#how .seg95{box-shadow:none}}
 </style>
 
 <!-- shared drawings: hero gradients, brand seal, example tea-house marks -->
@@ -4339,7 +4351,7 @@ body #faq .faqcta{background:#fff;box-shadow:var(--sh-1);border-radius:var(--r-m
           <h3 class="pb98h" data-i18n="pb.sh">每一步都经过您</h3>
           <ul>
             <li><b data-i18n="pb.s1">未经您批准，Odelia 绝不签署、声明、付款或提交</b><span data-i18n="pb.s1s">每份申请先给您过目，您确认后才提交。</span></li>
-            <li><b data-i18n="pb.s2">Odelia 始终表明自己是 AI 助手</b><span data-i18n="pb.s2s">她打出的每一通电话、发出的每一封邮件和传真都会说明。</span></li>
+            <li><b data-i18n="pb.s2">Odelia 始终表明自己是 AI 助手</b><span data-i18n="pb.s2s">她每次替您致电机构时都会说明。</span></li>
             <li><b data-i18n="pb.s3">每个操作都有记录</b><span data-i18n="pb.s3s">只增不改的审计记录，可导出为 CSV。</span></li>
           </ul>
         </div>
@@ -4987,11 +4999,11 @@ Object.assign(T.zh, {"vs.1": "梳理出 8 项执照和许可", "vs.2": "备好�
 /* land98: the hero's live count and the pay-and-safety band under the price table */
 Object.assign(T.en, {"hc.empty": "You know about a few of your licenses. Type your city to see the full count.", "hc.hit": "A restaurant in {city} needs <b>{n} licenses and permits</b>. Your free plan lists every one, with agencies, fees and timelines.",
   "pb.h": "What you pay", "pb.p1": "$149 a store a month", "pb.p1s": "Billed yearly, or $179 month to month, cancel anytime.", "pb.p2": "$149 a license, charged when it's approved", "pb.p2s": "$999 for a liquor license, building plan review or an import permit. Turned down because of a mistake on our side, you pay nothing.", "pb.p3": "No credits, no usage meter", "pb.p3s": "Agency fees are paid at cost, by you, directly to each agency.",
-  "pb.sh": "Never without you", "pb.s1": "Odelia never signs, attests, pays or submits without your approval", "pb.s1s": "You see each application first. Nothing is filed until you say so.", "pb.s2": "Odelia always says she's an AI agent", "pb.s2s": "On every call, email and fax she sends.", "pb.s3": "Every action on the record", "pb.s3s": "An append-only audit trail you can export as CSV.",
+  "pb.sh": "Never without you", "pb.s1": "Odelia never signs, attests, pays or submits without your approval", "pb.s1s": "You see each application first. Nothing is filed until you say so.", "pb.s2": "Odelia always says she's an AI agent", "pb.s2s": "Every time she calls an agency for you.", "pb.s3": "Every action on the record", "pb.s3s": "An append-only audit trail you can export as CSV.",
   "tr97.accs": "For your whole team, with every action on the record, exportable as CSV."});
 Object.assign(T.zh, {"hc.empty": "您知道的执照只是其中几项。输入城市，看看一共要办多少。", "hc.hit": "在 {city} 开一家餐厅，需要办理 <b>{n} 项执照和许可</b>。免费计划逐项列出，附办理机构、规费和时间。",
   "pb.h": "您要付的费用", "pb.p1": "每家门店每月 149 美元", "pb.p1s": "按年计费，或按月 179 美元，可随时取消。", "pb.p2": "每项执照 149 美元，获批时才收取", "pb.p2s": "酒类执照、建筑图纸审查或进口许可每项 999 美元。如因我们的失误被退回，您无需付费。", "pb.p3": "没有点数，不按用量计费", "pb.p3s": "政府规费按实际金额，由您直接支付给各机构。",
-  "pb.sh": "每一步都经过您", "pb.s1": "未经您批准，Odelia 绝不签署、声明、付款或提交", "pb.s1s": "每份申请先给您过目，您确认后才提交。", "pb.s2": "Odelia 始终表明自己是 AI 助手", "pb.s2s": "她打出的每一通电话、发出的每一封邮件和传真都会说明。", "pb.s3": "每个操作都有记录", "pb.s3s": "只增不改的审计记录，可导出为 CSV。",
+  "pb.sh": "每一步都经过您", "pb.s1": "未经您批准，Odelia 绝不签署、声明、付款或提交", "pb.s1s": "每份申请先给您过目，您确认后才提交。", "pb.s2": "Odelia 始终表明自己是 AI 助手", "pb.s2s": "她每次替您致电机构时都会说明。", "pb.s3": "每个操作都有记录", "pb.s3s": "只增不改的审计记录，可导出为 CSV。",
   "tr97.accs": "适用于整个团队，每个操作都有记录，可导出为 CSV。"});
 /* copy each PROOF flag unlocks; while a flag is false, T above holds the safe wording */
 
@@ -5435,11 +5447,15 @@ function onScroll(){
 addEventListener("scroll", onScroll, {passive:true});
 
 /* ============ reveal + in-view behaviour ============ */
-const io = new IntersectionObserver(es => es.forEach(e => {
-  if (!e.isIntersecting) return;
-  e.target.classList.remove("pre"); io.unobserve(e.target);
-}), {threshold:0, rootMargin:"0px 0px -4% 0px"});
-document.querySelectorAll(".rv").forEach(el => { if (!RM && el.getBoundingClientRect().top > innerHeight) { el.classList.add("pre"); io.observe(el); } });
+/* land98: nothing is hidden on load. A section is only faded in at the moment it comes within a fifth of a screen of
+   the viewport's bottom edge: it gets .pre for two frames, then eases in. Without JavaScript or IntersectionObserver,
+   with reduced motion, for crawlers and full-page captures, every section simply shows. */
+const io = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return; const el = e.target; io.unobserve(el);
+  if (el.getBoundingClientRect().top < innerHeight * .8) return;
+  el.classList.add("pre"); requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove("pre")));
+}), {threshold:0, rootMargin:"0px 0px 20% 0px"}) : null;
+if (io && !RM) document.querySelectorAll(".rv").forEach(el => { if (el.getBoundingClientRect().top > innerHeight) io.observe(el); });
 // the finished plan is the still frame; the first time it scrolls into view (motion allowed) it plays from the typed line
 new IntersectionObserver(es => es.forEach(e => { vVisible = e.isIntersecting; if (vVisible && !vSeen.v && e.intersectionRatio >= .3){ vSeen.v = true; if (vMode === "wait"){ vt = -INTRO; vMode = "intro"; paintApp(); } } if (vVisible && vMode === "scroll") vScrollTarget(); }), {threshold: [0, .3]}).observe(document.getElementById("vcard"));
 
