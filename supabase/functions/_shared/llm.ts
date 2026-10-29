@@ -92,6 +92,9 @@ const OPENAI_STYLE: Record<string, { url: string; key: string }> = {
   cerebras: { url: "https://api.cerebras.ai/v1/chat/completions", key: "CEREBRAS_API_KEY" },
   // Meta's Muse Spark on Meta Model API, OpenAI SDK compatible (dev.meta.ai docs: base https://api.meta.ai/v1, Bearer key)
   muse: { url: "https://api.meta.ai/v1/chat/completions", key: "MUSE_API_KEY" },
+  // free tiers (docs.mistral.ai; build.nvidia.com): rehearsals only until MISTRAL_PAID=1 or NVIDIA_PAID=1 (vendorOk)
+  mistral: { url: "https://api.mistral.ai/v1/chat/completions", key: "MISTRAL_API_KEY" },
+  nvidia: { url: "https://integrate.api.nvidia.com/v1/chat/completions", key: "NVIDIA_API_KEY" },
 };
 export const PROVIDERS = ["anthropic", ...Object.keys(OPENAI_STYLE)];
 /** Each vendor's key, by provider. */
@@ -200,6 +203,8 @@ export function vendorOk(env: Env, provider: string, o: { hasFiles: boolean; rol
     case "deepseek": return env("ALLOW_DEEPSEEK") === "1" && !o.hasFiles;
     // the open-model backups: on when their key is set (paid API tiers don't train on traffic), never with files
     case "openrouter": case "groq": case "cerebras": case "muse": return !o.hasFiles;
+    // free tiers that may keep or train on prompts: a rehearsal only, unless the founder marks the key paid
+    case "mistral": case "nvidia": return !o.hasFiles && (env(`${provider.toUpperCase()}_PAID`) === "1" || (env("FREE_MODELS_SYNTHETIC") === "1" && o.synthetic === true));
     default: return false;
   }
 }
@@ -207,7 +212,7 @@ export function vendorOk(env: Env, provider: string, o: { hasFiles: boolean; rol
 /** A free-tier Gemini key for rehearsals: only with GEMINI_FREE_SYNTHETIC=1 and only for a call on a synthetic
  *  workspace. Google may use free-tier prompts to improve its products, so a real customer's call never goes there. */
 export function geminiFreeRehearsal(env: Env, synthetic: boolean | undefined): boolean {
-  return env("GEMINI_FREE_SYNTHETIC") === "1" && synthetic === true;
+  return (env("GEMINI_FREE_SYNTHETIC") === "1" || env("FREE_MODELS_SYNTHETIC") === "1") && synthetic === true;
 }
 
 /* ---------- Anthropic Messages -> OpenAI chat ---------- */

@@ -168,3 +168,12 @@ if (bad) throw new Error(`${bad} failed`);
   }
   if (bad) throw new Error(`${bad} failed`);
 }
+
+// free tiers: Mistral and NVIDIA take a rehearsal only, until marked paid; Gemini's free key with the shared flag too
+check("mistral: no customer call on a free key", !vendorOk(only({}), "mistral", { hasFiles: false, role: "plan" }));
+check("mistral: a rehearsal with FREE_MODELS_SYNTHETIC=1", vendorOk(only({ FREE_MODELS_SYNTHETIC: "1" }), "mistral", { hasFiles: false, role: "plan", synthetic: true }));
+check("mistral: a customer with MISTRAL_PAID=1", vendorOk(only({ MISTRAL_PAID: "1" }), "mistral", { hasFiles: false, role: "plan" }));
+check("nvidia: never a customer's files", !vendorOk(only({ NVIDIA_PAID: "1" }), "nvidia", { hasFiles: true, role: "plan" }));
+check("gemini: FREE_MODELS_SYNTHETIC opens rehearsals too", vendorOk(only({ FREE_MODELS_SYNTHETIC: "1" }), "gemini", { hasFiles: false, role: "plan", synthetic: true }));
+check("mistral named in ODELIA_MODELS joins the route", names(routeFor(only({ ODELIA_MODELS: "mistral:mistral-large-latest" }), "plan", "claude-sonnet-5-5"))[0] === "mistral:mistral-large-latest");
+if (bad) throw new Error(`${bad} failed`);
