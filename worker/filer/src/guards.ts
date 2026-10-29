@@ -277,11 +277,13 @@ export const onPage = (question: string, s: PageState) => {
 /** The control's No: a radio labelled just "No", or a select with an option "No". Null when there's none. */
 export function noChoice(c: Control): { kind: "radio" } | { kind: "select"; option: string } | null {
   const isNo = (t: string) => /^no\.?$/i.test(t.trim());
+  // SF's radios carry the question and the answer in one aria-label: "Would you like ... programs? No"
+  const endsNo = (t: string) => /\?\s*no\.?$/i.test(t.trim());
   if (c.tag === "select") {
     const o = (c.options ?? []).find(isNo);
     return o ? { kind: "select", option: o } : null;
   }
-  if (c.type === "radio" && (isNo(c.label) || isNo(c.value))) return { kind: "radio" };
+  if (c.type === "radio" && (isNo(c.label) || isNo(c.value) || endsNo(c.label))) return { kind: "radio" };
   return null;
 }
 

@@ -210,6 +210,31 @@ export function benchBrowser(f: Filing, synthetic: boolean): { only?: "local" | 
   return synthetic && (b === "steel" || b === "browserbase" || b === "local" || b === "kernel") ? { only: b } : {};
 }
 
+/** The open list's option whose text is exactly the value (ignoring case and spaces), clicked. False when none is. */
+/** Click, and when something lies over the button (Georgia's floating "Scroll for More" bar) or it never settles,
+ *  send the click to the button itself. Every guard on what the press does has already run. */
+export async function press(loc: import("playwright-core").Locator): Promise<void> {
+  try { await loc.click({ timeout: 10_000 }); }
+  catch (e) {
+    if (!/intercepts pointer events|Timeout \d+ms exceeded|not stable|outside of the viewport/.test(e instanceof Error ? e.message : String(e))) throw e;
+    await loc.scrollIntoViewIfNeeded({ timeout: 3000 }).catch(() => undefined);
+    await loc.dispatchEvent("click", undefined, { timeout: 5000 });
+  }
+}
+
+export async function pickOption(page: Page, value: string): Promise<boolean> {
+  const want = value.trim().toLowerCase().replace(/\s+/g, " ");
+  const opts = page.locator('[role="option"], .usa-combo-box__list-option');
+  await opts.first().waitFor({ state: "visible", timeout: 4000 }).catch(() => undefined);
+  const n = Math.min(await opts.count().catch(() => 0), 300);
+  for (let i = 0; i < n; i++) {
+    const o = opts.nth(i);
+    const t = ((await o.textContent().catch(() => "")) ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+    if (t === want && await o.isVisible().catch(() => false)) { await o.click({ timeout: 5000 }); return true; }
+  }
+  return false;
+}
+
 export async function assertFresh(session: Session): Promise<void> {
   const ctx = session.page.context();
   const cookies = await ctx.cookies();
@@ -712,6 +737,12 @@ export class Worker {
         if (!/Timeout \d+ms exceeded/.test(e instanceof Error ? e.message : String(e))) throw e;
         return { ok: false, error: `That field didn't take typing: ${why}. Choose the other answers on this page first (a type or country can unlock it), then fill it again; if it stays locked, call need_person.` };
       }
+      // A type-ahead box (USWDS combo box, FinCEN's tax ID type and country): typing alone chooses nothing, so pick the
+      // list's option whose text is exactly the approved value; none exact goes back to the model as this step's error.
+      if (await loc.evaluate((el) => el.getAttribute("role") === "combobox" || ["list", "both"].includes(el.getAttribute("aria-autocomplete") ?? "")).catch(() => false)) {
+        const picked = await pickOption(ctx.page, value);
+        if (!picked) return { ok: false, error: `That box suggests choices, and none of them is exactly "${value}". Call need_person with the choices it shows.` };
+      }
       rec({ action: "fill", selector: a.selector, field: from.label });
       ctx.f = await this.c.store.step(ctx.f, { ...log(`Filled ${from.label}`, `已填写 ${from.label}`, "fill"), value: shown(from.label, value) });
       return { ok: true };
@@ -792,7 +823,7 @@ export class Worker {
         return { ok: false, error: "Refused: while making the account, nothing but the account is sent. Call account with status created once it's made." };
       }
       if (makesAccount(st) || (final && accountPage(st))) ctx.account.registered = true;
-      await Promise.all([page.waitForLoadState("domcontentloaded").catch(() => undefined), loc.click()]);
+      await Promise.all([page.waitForLoadState("domcontentloaded").catch(() => undefined), press(loc)]);
       await page.waitForLoadState("domcontentloaded").catch(() => undefined);
       rec({ action: "click", selector: a.selector });
       if (!onAny(page.url(), ctx.hosts)) return { end: { kind: "handoff", reason: "left_portal", trace: ctx.trace, message: { en: "The run left the agency's site.", zh: "运行离开了机构网站。" } } };
@@ -819,7 +850,7 @@ export class Worker {
       ctx.cardClicked = true;
       if (final) { ctx.paid = true; ctx.f = await this.c.store.step(ctx.f, log(`Paying the agency's fee: pressed ${text}`, `正在支付机构费用：点击 ${text}`, "fee", "pay")); }
     }
-    await Promise.all([page.waitForLoadState("domcontentloaded").catch(() => undefined), loc.click()]);
+    await Promise.all([page.waitForLoadState("domcontentloaded").catch(() => undefined), press(loc)]);
     await page.waitForLoadState("domcontentloaded").catch(() => undefined);
     rec({ action: "click", selector: a.selector, ...(final ? { submit: true } : {}) });
     // after the saved password went in: past the sign-in page (signed in), or still on it with words of a refusal (a

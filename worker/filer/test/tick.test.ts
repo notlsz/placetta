@@ -51,3 +51,22 @@ test("the page reader lists a radio or checkbox drawn on its label, so Odelia ca
   assert.ok(!labels.includes("Hidden both"), "a control hidden with its label stays out");
   await page.close();
 });
+
+test("a type-ahead box: the option whose text is exactly the value is picked, nothing else", { timeout: 60000 }, async () => {
+  const { pickOption } = await import("../src/run.ts");
+  const page = await (await open()).newPage();
+  await page.setContent(`<input role="combobox" id="t" aria-autocomplete="list"><ul role="listbox"><li role="option" onclick="document.getElementById('t').dataset.v='Foreign TIN'">Foreign TIN</li><li role="option" onclick="document.getElementById('t').dataset.v='Foreign'">Foreign</li></ul>`);
+  assert.equal(await pickOption(page, "foreign"), true);
+  assert.equal(await page.locator("#t").getAttribute("data-v"), "Foreign");
+  assert.equal(await pickOption(page, "Fore"), false, "a partial match is never picked");
+  await page.close();
+});
+
+test("a button under a floating bar is still pressed", { timeout: 60000 }, async () => {
+  const { press } = await import("../src/run.ts");
+  const page = await (await open()).newPage();
+  await page.setContent(`<button id="n" onclick="this.dataset.hit='1'">Next</button><div style="position:fixed;inset:0;background:transparent">Scroll for More</div>`);
+  await press(page.getByRole("button", { name: "Next", exact: true }));
+  assert.equal(await page.locator("#n").getAttribute("data-hit"), "1");
+  await page.close();
+});

@@ -143,3 +143,9 @@ test("the step prompt says what day it is, in the page part (the cached part sta
   assert.doesNotMatch(sys({ filing: f, agency: "SF" }), /Today's date/);
   assert.match(stepPage({ filing: f, agency: "SF", state: page({}), recent: [] }), /Today's date/);
 });
+
+test("SF's No radio: the question and the answer in one label", () => {
+  assert.deepEqual(noChoice(control({ type: "radio", label: "Would you like to receive information about City-offered additional opportunities and programs? No", value: "on" })), { kind: "radio" });
+  assert.equal(noChoice(control({ type: "radio", label: "Would you like to receive information about City-offered additional opportunities and programs? Yes", value: "on" })), null);
+  assert.equal(noChoice(control({ type: "radio", label: "Know your rights", value: "on" })), null);
+});
