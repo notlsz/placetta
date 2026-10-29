@@ -37,9 +37,21 @@ let failures = 0;
 let interactive = false;
 /** A check is under way (executed, no answer yet): a second request joins it instead of resetting it. */
 let pending = false;
+/** Cloudflare's own error code from the last failed check (e.g. 600010), shown on the sign-in screen so a failure
+ *  says which kind it is: the browser judged suspicious, the page blocked, or the site not set up. */
+let lastCode = "";
+export const humanErrorCode = () => lastCode;
+/** What a Cloudflare error code means for the person, in plain words (Turnstile docs, Error codes). */
+export function humanErrorHint(code: string, zh: boolean): string {
+  if (!code) return "";
+  if (/^600/.test(code) || /^300/.test(code)) return zh ? "Cloudflare 认为此浏览器可疑。请关闭 VPN 或广告拦截/隐私插件，或换用 Chrome、Safari 再试。" : "Cloudflare flagged this browser. Turn off a VPN or ad and privacy blockers, or try Chrome or Safari.";
+  if (/^110/.test(code)) return zh ? "此网址的人机验证设置有误，我们正在修复。" : "The check isn't set up for this address. We're fixing it.";
+  if (/^200/.test(code) || /^400/.test(code) || /^1060/.test(code)) return zh ? "验证没有加载完成。请刷新页面再试。" : "The check didn't finish loading. Refresh the page and try again.";
+  return "";
+}
 
 /** For tests: swap the key, the document and the clock, and forget everything loaded. */
-export function configureHuman(e: Env) { env = e; loading = null; widget = null; ready = null; waiting = []; failures = 0; interactive = false; pending = false; }
+export function configureHuman(e: Env) { env = e; loading = null; widget = null; ready = null; waiting = []; failures = 0; interactive = false; pending = false; lastCode = ""; }
 /** True while Cloudflare's box is on screen waiting for the person (the sign-in screen says "tick the box below"). */
 export const humanWaiting = () => interactive;
 /** True when a site key is set, so tokens are asked for. */
@@ -85,8 +97,8 @@ async function mount(): Promise<{ id: string; t: Widget } | null> {
     const id = t.render(box, {
       sitekey: env.siteKey, action: "auth", appearance: "interaction-only", execution: "execute", size: "flexible",
       language: lang(), "refresh-expired": "manual", retry: "auto",
-      callback: (token: string) => { pending = false; interactive = false; ready = { token, at: now() }; settle(token); },
-      "error-callback": () => { pending = false; interactive = false; failures++; settle(null); return true; },
+      callback: (token: string) => { lastCode = ""; pending = false; interactive = false; ready = { token, at: now() }; settle(token); },
+      "error-callback": (code?: string | number) => { lastCode = code === undefined ? "" : String(code); pending = false; interactive = false; failures++; settle(null); return true; },
       "expired-callback": () => { ready = null; },
       "timeout-callback": () => { pending = false; interactive = false; failures++; settle(null); },
       "before-interactive-callback": () => { interactive = true; },

@@ -10,7 +10,7 @@ import { placeSource } from "../suggestions";
 import { B, type Bi } from "../model";
 import type { Lang } from "../i18n";
 import * as api from "./api";
-import { prepareHuman } from "./human";
+import { humanErrorCode, humanErrorHint, prepareHuman } from "./human";
 import { normalize, type CloudSession } from "./session";
 import { consumeHandoff, readHandoff } from "./handoff";
 import { TwoStepCode } from "./TwoStep";
@@ -144,8 +144,10 @@ function SignIn({ lang, start }: { lang: Lang; start?: StartPeek | null }) {
     prepareHuman();
   }, []);
   // Supabase refused the call because the human check didn't pass (blocked, slow, or a used token)
-  const captchaMsg = L(B("We couldn't confirm you're a person. Wait a moment and try again. If it keeps failing, email support@placetta.com.",
-    "暂时无法确认您是真人操作。请稍候再试。如多次失败，请发邮件至 support@placetta.com。"));
+  // Cloudflare's own error code, when it gave one, says which kind of failure this is and what to try
+  const cfCode = humanErrorCode(), hint = humanErrorHint(cfCode, lang === "zh");
+  const captchaMsg = L(B(`We couldn't confirm you're a person.${hint ? ` ${humanErrorHint(cfCode, false)}` : " Wait a moment and try again."}${cfCode ? ` (Cloudflare code ${cfCode})` : ""} If it keeps failing, email support@placetta.com.`,
+    `暂时无法确认您是真人操作。${hint ? humanErrorHint(cfCode, true) : "请稍候再试。"}${cfCode ? `（Cloudflare 代码 ${cfCode}）` : ""}如多次失败，请发邮件至 support@placetta.com。`));
   const withProvider = async (p: api.Provider) => {
     setBusy(true); setErr("");
     try { await api.signInWith(p); } catch (e) { setErr((e as api.ApiError).message); setBusy(false); }
