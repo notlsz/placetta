@@ -28,7 +28,7 @@ import { planApprovalId } from "./autonomy";
 import { shownPrompt } from "./internalPrompt";
 import { hasReplay } from "./replay";
 import { elapsed, reveal, stepTimes } from "./cloud/runFeed";
-import { headline, todos } from "./doNext";
+import { todos } from "./doNext";
 import "./panel-clean.css";
 
 /* Less is more (the founder, on this screen): the owner says what they need, Odelia does the permit work, they approve.
@@ -89,7 +89,7 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
           {/* on her page the strip below says it, with more; the header keeps only that she's on it */}
           {(mode !== "page" || busy) && <small>{busy ? <em className="pn-verb">{t("working")}</em> : agencies ? t("idle", { n: agencies }) : t("idleNew")}</small>}
         </span>
-        {mode !== "page" && <button type="button" className="pn-work" onClick={() => { go("odelia", "work"); if (mode === "sheet") onHide?.(); }}>{t("nav_work")}</button>}
+        {mode !== "page" && <button type="button" className="pn-work" onClick={() => { go("odelia", "work"); if (mode === "sheet") onHide?.(); }}>{t("nav_doing")}</button>}
         {onHide && <button type="button" className="icbtn" onClick={onHide} aria-label={t("close")} title={t("close")}><I.x /></button>}
       </header>
 
@@ -130,12 +130,33 @@ function NowStrip({ agencies }: { agencies: number }) {
     : jobs.length ? { t: b(jobs[0].title), s: zh ? (jobs.length > 1 ? `进行中，另有 ${jobs.length - 1} 项` : "进行中") : jobs.length > 1 ? `In progress, and ${jobs.length - 1} more` : (zh ? "进行中" : "In progress") }
     : agencies ? { t: zh ? `跟进 ${agencies} 个机构` : `Watching ${agencies} agencies`, s: withAgency ? (zh ? `${withAgency} 项申请在机构审核中` : `${withAgency} filing${withAgency === 1 ? "" : "s"} with an agency`) : (zh ? "有变化会告诉您" : "She tells you when anything changes") }
     : { t: zh ? "随时为您效劳" : "Ready when you are", s: zh ? "交给她一项任务" : "Give her a task below" };
+  /* the approval itself is shown once, as its card in the thread below (Ramp's one card a request): the strip points
+     there instead of naming it again. With no card in the thread it opens the approval, the document or the work. */
   const openFirst = () => {
     if (!first) return;
+    const card = first.kind === "approval" ? document.querySelector<HTMLElement>(`.feed [data-appr="${CSS.escape(first.a.id)}"]`) : null;
+    if (card) {
+      card.scrollIntoView({ block: "center", behavior: "smooth" });
+      card.classList.remove("flash"); void card.offsetWidth; card.classList.add("flash");
+      card.querySelector<HTMLElement>("button")?.focus({ preventScroll: true });
+      return;
+    }
     if (first.kind === "approval") openApproval(first.a.id);
     else if (first.kind === "doc") openApp(first.app.id, "check");
     else go("odelia", "work");
   };
+  // Superhuman's one key: A opens the first approval to review (it's confirmed there, never approved by the key alone)
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      if (e.key !== "a" || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+      const el = document.activeElement as HTMLElement | null;
+      if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return;
+      if (document.querySelector("[role=dialog], .modal")) return;
+      if (first?.kind === "approval") { e.preventDefault(); openApproval(first.a.id); }
+    };
+    addEventListener("keydown", on);
+    return () => removeEventListener("keydown", on);
+  }, [first, openApproval]);
   return (
     <section className="now-strip" aria-label={zh ? "Odelia 的工作" : "Odelia's work"}>
       <button type="button" className={"ns-cell ns-now" + (busy ? " on" : "")} onClick={() => go("odelia", "work")}>
@@ -148,8 +169,8 @@ function NowStrip({ agencies }: { agencies: number }) {
       </button>
       <button type="button" className={"ns-cell" + (first ? " ns-need" : "")} onClick={openFirst} disabled={!first}>
         <span className="ns-k">{zh ? "需要您" : "Needs you"}{need.length > 0 && <em>{need.length}</em>}</span>
-        <b>{first ? b(headline(first)) : zh ? "没有需要您处理的" : "Nothing needs you"}</b>
-        {first && <small>{need.length > 1 ? (zh ? `先做这一项，共 ${need.length} 项` : `First of ${need.length}`) : (zh ? "只有这一项" : "Just this one")}</small>}
+        <b>{first ? (zh ? `${need.length} 项等您` : `${need.length} thing${need.length === 1 ? "" : "s"} waiting`) : zh ? "没有需要您处理的" : "Nothing needs you"}</b>
+        {first && <small>{first.kind === "approval" ? (zh ? "跳到第一项，或按 A 查看" : "Jump to the first, or press A") : (zh ? "打开第一项" : "Open the first")}</small>}
       </button>
       <p className="ns-never"><I.lock />{zh ? "未经您同意，绝不签名、声明、付款或提交。" : "Never without you: signing, attesting, paying, submitting."}</p>
     </section>
@@ -343,7 +364,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
         <div className="answer">
           {r.text.map((p, i) => { const body = splitSources(b(p))[0]; return body ? <Prose key={i} text={body} cites={i === r.text.length - 1 ? r.sources : undefined} /> : null; })}
           {r.chain && <ol className="chain">{r.chain.map((c, i) => <li key={i}>{b(c)}</li>)}</ol>}
-          {plan && <PlanCard job={plan} compact />}
+          {plan && <PlanCard job={plan} compact noNeed={rows.length > 0 || group.length > 1} />}
           {plan && <PlanGate job={plan} />}
           {filed.map(id => <FilingLive key={id} app={id} />)}
           {(r.apps?.some(id => !covered.has(id) && !filed.includes(id)) || (r.files?.length && !filed.length)) ? (
@@ -362,7 +383,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
             </figure>
           )}
           {group.length > 1 && <ApproveGroup ids={group} />}
-          {rows.filter(id => !(plan && id === planApprovalId(plan.id))).map(id => { const a = ws.approvals.find(x => x.id === id)!; return <NeedRow key={id} a={a} compact />; })}
+          {rows.filter(id => !(plan && id === planApprovalId(plan.id))).map(id => { const a = ws.approvals.find(x => x.id === id)!; return <NeedRow key={id} a={a} compact about={plan?.apps?.length ? ws.apps.find(x => x.id === plan.apps![0]) : undefined} />; })}
           {/* the agency's forms this run filled again: each opens the filled form on its application */}
           {r.forms?.map(n => <FilledCard key={n.app + n.version} n={n} />)}
           {done.map(id => { const a = ws.closed.find(x => x.id === id)!; return a.withdrawn ? <WithdrawnRow key={id} a={a} /> : <p key={id} className="resolved"><span className="ok-dot"><I.check /></span><span>{b(a.title)}</span><em>{t("approvedIt")}</em></p>; })}

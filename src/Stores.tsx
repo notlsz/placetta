@@ -2,11 +2,11 @@ import { inspectionsFor } from "./inspections/forStore";
 import { useEffect, useMemo, useState } from "react";
 import { openSettings } from "./Settings";
 import { useApp } from "./ctx";
-import { B, type Cert, type Store, type Workspace } from "./model";
+import { B, type Bi, type Cert, type Store, type Workspace } from "./model";
 import { countyOf, stateCode, cityName } from "./counties";
-import { FWW_SOURCE, FWW_THRESHOLD, GRADES_SOURCE, readiness, todayLogs, usLocations, valueOf, type Readiness } from "./stores";
+import { FWW_SOURCE, FWW_THRESHOLD, GRADES_SOURCE, readiness, todayLogs, usLocations, valueOf } from "./stores";
 import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn, inDays } from "./time";
-import { basisLine, estimateSay, openingLine, openingPath, type Evidence } from "./smart";
+import { basisLine, openingLine, openingPath, type Evidence } from "./smart";
 import { EstimateDate, HingeLine } from "./OpeningEstimate";
 import { useEvidence } from "./evidence";
 import { I, Menu, Pill, StatusChip } from "./ui";
@@ -46,16 +46,6 @@ function botLine(jobs: Job[], zh: boolean, finished = 0, bare = false) {
   return bare ? (zh ? `正在处理 ${n} 项工作` : `On ${n} job${s(n)}`) : zh ? `Odelia 正在处理这家店的 ${n} 项工作` : `Odelia is on ${n} job${s(n)} here`;
 }
 
-function Ring({ score, band, size = 64 }: { score: number; band: Readiness["band"]; size?: number }) {
-  const r = (size - 8) / 2, c = 2 * Math.PI * r;
-  return (
-    <svg className={"ring b-" + band} width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
-      <circle cx={size / 2} cy={size / 2} r={r} className="ring-bg" />
-      <circle cx={size / 2} cy={size / 2} r={r} className="ring-fg" strokeDasharray={`${(c * score) / 100} ${c}`} transform={`rotate(-90 ${size / 2} ${size / 2})`} />
-      <text x="50%" y="50%" dominantBaseline="central" textAnchor="middle">{score}</text>
-    </svg>
-  );
-}
 
 function Grade({ s }: { s: Store }) {
   const { b, lang } = useApp();
@@ -88,37 +78,44 @@ function withPath(s: Store, ws: Parameters<typeof openingPath>[1], ev: Evidence 
   return { p, line: p ? openingLine(p) : null, s: p?.landing && p.verdict !== "not_mapped" ? { ...s, projectedOpen: p.landing } : s };
 }
 
-function StoreCard({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
-  const { b, t, ws, lang } = useApp();
-  const { p, line, s } = withPath(raw, ws, useEvidence());
-  const r = readiness(s, ws);
-  const logs = todayLogs(s);
-  const expiring = s.certs.filter(c => { const d = daysUntil(c.expires); return d >= 0 && d <= 30; });
-  const bot = jobsAt(ws, raw);
+/** A store's state in plain sentences, in place of a score and a grade (Apple's Health summaries: "All good"). The first
+ *  says where it stands: on track to open on a date, behind, or all good once open. The second, when there is one, says
+ *  what needs the owner: a certificate or permit expiring, a job waiting. Each part is counted from the workspace. */
+export function storeSay(s: Store, ws: Workspace, ev: Evidence = {}): { main: Bi; needs: Bi | null; warn: boolean } {
+  const p = s.stage === "opening" ? openingPath(s, ws, daysFromNow(0), ev) : null;
+  const soon = (d: string) => { const n = daysUntil(d); return n >= 0 && n <= 30; };
+  const certs = s.certs.filter(c => soon(c.expires)).length, permits = (s.permits ?? []).filter(x => soon(x.expires)).length;
+  const jobs = jobsAt(ws, s).open.filter(j => j.status === "waiting").length;
+  const pl = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+  const en = [certs && pl(certs, "certificate expiring", "certificates expiring"), permits && pl(permits, "permit expiring", "permits expiring"), jobs && pl(jobs, "job waiting", "jobs waiting")].filter(Boolean) as string[];
+  const zh = [certs && `${certs} 张证书即将到期`, permits && `${permits} 项许可即将到期`, jobs && `${jobs} 项工作等您`].filter(Boolean) as string[];
+  const needs = en.length ? B(`Needs you: ${en.length > 1 ? en.slice(0, -1).join(", ") + " and " + en.at(-1) : en[0]}`, `需要您：${zh.join("，")}`) : null;
+  const day = (d: string, l: "en" | "zh") => fmtDay(d, l, daysUntil(d) > 300);
+  let main: Bi, warn = false;
+  if (!p) main = needs ?? B("All good", "一切正常");
+  else if (p.verdict === "not_mapped") main = B("Licenses not mapped yet", "尚未梳理执照");
+  else if (!p.landing) main = B("Opening date not set yet", "开业日期尚未确定");
+  else if (p.verdict === "on_track") main = B(`On track to open ${day(p.landing, "en")}`, `按计划 ${day(p.landing, "zh")} 开业`);
+  else if (p.verdict === "tight") { warn = true; main = B(`Opening ${day(p.landing, "en")}, with little time to spare`, `预计 ${day(p.landing, "zh")} 开业，时间很紧`); }
+  else if (p.verdict === "late") { warn = true; main = B(`Behind plan: opening around ${day(p.landing, "en")}`, `落后于计划：预计 ${day(p.landing, "zh")} 前后开业`); }
+  else main = B(`Licenses in hand around ${day(p.landing, "en")}`, `预计 ${day(p.landing, "zh")} 前后取得全部执照`);
+  return { main, needs: p ? needs : null, warn: warn || (!p && !!needs) };
+}
+
+function StoreCard({ s, onOpen }: { s: Store; onOpen: () => void }) {
+  const { b, ws } = useApp();
+  const say = storeSay(s, ws, useEvidence());
+  const bot = jobsAt(ws, s);
   return (
-    <button type="button" className="store" onClick={onOpen}>
-      <div className="store-top">
-        <Ring score={r.score} band={r.band} />
-        <div className="store-name">
-          <b>{b(s.name)}</b>
-          <span>{b(r.label)}{s.stage === "opening" && s.projectedOpen ? (lang === "zh" ? `，预计 ${b(estimateSay(s.projectedOpen, p?.range))} 开业` : `. Opening ${b(estimateSay(s.projectedOpen, p?.range))}`) : ""}</span>
-          {line && p && p.verdict !== "not_mapped" && <span className={"opening-line " + p.verdict}>{b(line)}</span>}
-        </div>
-        <Grade s={s} />
-      </div>
-      <Value s={s} />
-      {s.stage === "open" && (
-        <div className="store-today">
-          <span className="st-lbl">{t("today")}</span>
-          {logs.map(l => <span key={l.kind} className={"logdot" + (l.log?.done ? " on" : "")} title={b(l.label)}>{l.log?.done ? <I.check /> : null}{b(B(l.kind === "temps" ? "Temps" : l.kind === "cleaning" ? "Cleaning" : "Pests", l.kind === "temps" ? "温度" : l.kind === "cleaning" ? "清洁" : "虫害"))}</span>)}
-          {expiring.length > 0 && <em className="warnline">{b(B(`${expiring.length} certificate expiring`, `${expiring.length} 张证书即将到期`))}</em>}
-        </div>
-      )}
-      <span className={"store-bot" + (bot.open.some(j => j.status === "waiting") ? " needs" : "")}>
-        <span className="sb-bot" aria-hidden="true"><StoreBot id={raw.id} size={22} label={b(s.name)} busy={bot.open.some(j => j.status === "running")} /></span>
-        <span>{botLine(bot.open, lang === "zh", bot.done.filter(j => j.status === "done").length)}</span>
+    <li><button type="button" className="st-row" onClick={onOpen}>
+      <span className="sb-bot" aria-hidden="true"><StoreBot id={s.id} size={26} label={b(s.name)} busy={bot.open.some(j => j.status === "running")} /></span>
+      <span className="st-tx">
+        <b>{b(s.name)}</b>
+        <small className={say.warn ? "needs" : undefined}>{b(say.main)}</small>
+        {say.needs && <small className="needs">{b(say.needs)}</small>}
       </span>
-    </button>
+      <I.chevR />
+    </button></li>
   );
 }
 
@@ -218,6 +215,7 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
   const { b, t, lang, ws, ask, busy, updateStore, openApp } = useApp();
   const r = readiness(s, ws);
   const ev = useEvidence();
+  const say = storeSay(s, ws, ev);
   const [reading, setReading] = useState("");
   const [askTemp, setAskTemp] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -233,10 +231,10 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
     <div className="page narrow store-detail">
       <button type="button" className="back" onClick={onBack}><I.chevR />{t("nav_stores")}</button>
       <header className="sd-head">
-        <Ring score={r.score} band={r.band} size={92} />
         <div>
           <h1>{b(s.name)}</h1>
           <p>{s.address}</p>
+          <p className={"sd-say" + (say.warn ? " needs" : "")}>{b(say.main)}{say.needs ? (lang === "zh" ? "。" : ". ") + b(say.needs) : ""}</p>
         </div>
         <Grade s={s} />
         {s.stage === "opening" && <Pill disabled={busy} onClick={() => {
@@ -519,10 +517,10 @@ export function Stores() {
   if (s) return <StoreDetail s={s} onBack={() => setOpen(null)} />;
   return (
     <div className="page">
-      <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p className="ph-long">{b(B("Every store inspection-ready every day, measured on what matters: opening on time, staying open, no fines.", "每家门店每天都做好迎检准备，用三件事衡量：按期开业、持续营业、零罚款。"))}</p><p className="ph-short">{b(B("Every store ready for inspection, every day.", "每家门店，每天都做好迎检准备。"))}</p></div>
+      <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p className="ph-long">{b(B("Where each store stands, in a sentence. Tap one for its logs, certificates, inspections and licenses.", "每家门店的进展，一句话说清。点开查看记录、证书、检查和执照。"))}</p><p className="ph-short">{b(B("Each store, in a sentence.", "每家门店，一句话说清。"))}</p></div>
         {/* one action in view, the rest behind More: four pills in a row read as clutter, and stack four deep on a phone */}
-        <div className="ph-acts st-acts">
-          {stores.length > 0 && <Pill onClick={() => setReport(true)}>{lang === "zh" ? "价值报告" : "Value report"}</Pill>}
+        <div className="ph-acts ph-act st-acts">
+          {stores.length > 0 && <button type="button" className="lnk ph-lnk" onClick={() => setReport(true)}>{lang === "zh" ? "价值报告" : "Value report"}</button>}
           <Menu className="st-more" buttonClass="pill" label={lang === "zh" ? "更多" : "More"} button={<>{lang === "zh" ? "更多" : "More"}<I.chev /></>} items={[
             ...(!bulk ? [{ key: "bulk", label: lang === "zh" ? "规划多家门店" : "Plan many stores", onPick: () => setBulk(true) }] : []),
             ...(!check ? [{ key: "check", label: lang === "zh" ? "检查已开业门店" : "Check stores already open", onPick: () => setCheck(true) }] : []),
@@ -542,13 +540,13 @@ export function Stores() {
       {sheet === "replicate" && <ReplicateSheet onClose={() => setSheet(null)} />}
       <ReplicaFacts />
       {stores.length === 1 ? (
-        // one store: its card beside its permits, so the page is the store's own dashboard, not a card in an empty page
-        <div className="stores one">
-          <StoreCard s={stores[0]} onOpen={() => setOpen(stores[0].id)} />
+        // one store: its line, then its licenses, so the page is the store's own summary, not a card in an empty page
+        <>
+          <ul className="st-list"><StoreCard s={stores[0]} onOpen={() => setOpen(stores[0].id)} /></ul>
           <StoreNext s={stores[0]} onOpen={() => setOpen(stores[0].id)} />
-        </div>
+        </>
       ) : stores.length ? (
-        <div className="stores">{stores.map(x => <StoreCard key={x.id} s={x} onOpen={() => setOpen(x.id)} />)}</div>
+        <ul className="st-list">{stores.map(x => <StoreCard key={x.id} s={x} onOpen={() => setOpen(x.id)} />)}</ul>
       ) : (
         <div className="empty">
           <p>{b(B("Add your first store and Placetta starts tracking its readiness every day.", "添加第一家门店，快哉每天跟踪它的迎检就绪度。"))}</p>
@@ -562,15 +560,14 @@ export function Stores() {
 /** A compact line per store for the overview. */
 export function StoresStrip({ onOpen }: { onOpen: () => void }) {
   const { b, ws } = useApp();
+  const ev = useEvidence();
   const stores = ws.stores ?? [];
   if (!stores.length) return null;
   return (
     <div className="stores-strip">
-      {stores.map(s => { const r = readiness(s, ws); return (
+      {stores.map(s => { const say = storeSay(s, ws, ev); return (
         <button key={s.id} type="button" className="ss" onClick={onOpen}>
-          <Ring score={r.score} band={r.band} size={44} />
-          <span><b>{b(s.name)}</b><small>{b(r.label)}</small></span>
-          <Grade s={s} />
+          <span><b>{b(s.name)}</b><small className="ss-say">{b(say.needs ?? say.main)}</small></span>
         </button>
       ); })}
     </div>

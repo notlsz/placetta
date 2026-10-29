@@ -48,7 +48,8 @@ export function WatchLink({ job }: { job: Job }) {
 
 /** One job's plan: the steps in order, the next one marked, done ones ticked. */
 /** actions: show the one button that moves the job now even on a compact card (Home, Needs you). */
-export function PlanCard({ job, compact, actions }: { job: Job; compact?: boolean; actions?: boolean }) {
+/** noNeed: the approval it waits on is its own card right below (Odelia's thread), so its "Needs" line would say it twice. */
+export function PlanCard({ job, compact, actions, noNeed }: { job: Job; compact?: boolean; actions?: boolean; noNeed?: boolean }) {
   const { b, lang, ws, openApp } = useApp();
   const p = progress(job), next = job.steps.findIndex(s => !s.done);
   const zh = lang === "zh";
@@ -70,7 +71,7 @@ export function PlanCard({ job, compact, actions }: { job: Job; compact?: boolea
           </li>
         ))}
       </ol>
-      {job.status === "waiting" && job.waiting && <p className={"job-need" + (awayWait(job) ? " away" : "")}><b>{awayWait(job) ? (zh ? "进度：" : "Where it is: ") : zh ? "需要：" : "Needs: "}</b>{b(job.waiting)}</p>}
+      {job.status === "waiting" && job.waiting && !(noNeed && !awayWait(job)) && <p className={"job-need" + (awayWait(job) ? " away" : "")}><b>{awayWait(job) ? (zh ? "进度：" : "Where it is: ") : zh ? "需要：" : "Needs: "}</b>{b(job.waiting)}</p>}
       {job.status === "done" && <DoneReport job={job} compact={compact} />}
       {(!compact || actions) && <JobActions job={job} />}
       {(needsYou(job) || (job.checked && job.checked.passed < job.checked.of && !awayWait(job))) && <AskPerson context={() => jobContext(job)} />}

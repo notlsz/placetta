@@ -80,16 +80,16 @@ function tilesOf(m: MonthMetrics, lang: Lang, go?: (v: "permits" | "odelia", sub
   const oldest = m.waiting.map(x => x.at).filter((x): x is string => !!x).sort()[0];
   if (m.waiting.length) out.push({ id: "waiting", value: n(m.waiting.length), label: B("Approvals waiting for you", "等您批准"), sub: oldest ? (zh ? `最早的 ${waitedFor(oldest, lang)}提出` : `oldest asked ${waitedFor(oldest, lang).toLowerCase()}`) : undefined,
     list: items(m.waiting, x => (x.at ? (zh ? `${waitedFor(x.at, lang)}提出` : `asked ${waitedFor(x.at, lang).toLowerCase()}`) : undefined)) });
-  if (m.submitted.length) out.push({ id: "submitted", value: n(m.submitted.length), label: B("Filings submitted this month", "本月已提交"), list: items(m.submitted, x => (x.at ? fmtDay(x.at.slice(0, 10), lang) : undefined)), open: go && { label: B("Open filed", "打开已提交"), go: () => go("permits", "filed") } });
+  if (m.submitted.length) out.push({ id: "submitted", value: n(m.submitted.length), label: B("Filings submitted this month", "本月已提交"), list: items(m.submitted, x => (x.at ? fmtDay(x.at.slice(0, 10), lang) : undefined)), open: go && { label: B("Open licenses", "打开执照"), go: () => go("permits") } });
   // speed to filing, measured: approval to the agency having it, each filing with who sent it and its time from the plan
   if (m.filed?.length && m.median_filed_ms != null) {
     const who = (by: "odelia" | "team") => (by === "odelia" ? "Odelia" : zh ? "快哉团队" : "the Placetta team");
     const split = [m.median_odelia_ms != null ? (zh ? `Odelia ${dur(m.median_odelia_ms, lang)}` : `Odelia ${dur(m.median_odelia_ms, lang)}`) : "", m.median_team_ms != null ? (zh ? `团队 ${dur(m.median_team_ms, lang)}` : `team ${dur(m.median_team_ms, lang)}`) : ""].filter(Boolean).join(zh ? "，" : ", ");
     out.push({ id: "filed", value: dur(m.median_filed_ms, lang), label: B("Median time from your approval to filed", "从您批准到提交的中位用时"), sub: split || undefined,
       list: <Rows rows={m.filed.map(x => ({ key: x.id, main: b(x.title), side: [zh ? `${who(x.by)}用时 ${dur(x.ms, lang)}` : `${dur(x.ms, lang)} by ${who(x.by)}`, x.plan_ms != null ? (zh ? `距计划 ${dur(x.plan_ms, lang)}` : `${dur(x.plan_ms, lang)} from the plan`) : ""].filter(Boolean).join(zh ? "，" : ", ") }))} />,
-      open: go && { label: B("Open filed", "打开已提交"), go: () => go("permits", "filed") } });
+      open: go && { label: B("Open licenses", "打开执照"), go: () => go("permits") } });
   }
-  if (m.approved.length) out.push({ id: "approved", value: n(m.approved.length), label: B("Approved by agencies this month", "本月获机构批准"), list: items(m.approved, x => (x.at ? fmtDay(x.at.slice(0, 10), lang) : undefined)), open: go && { label: B("Open filed", "打开已提交"), go: () => go("permits", "filed") } });
+  if (m.approved.length) out.push({ id: "approved", value: n(m.approved.length), label: B("Approved by agencies this month", "本月获机构批准"), list: items(m.approved, x => (x.at ? fmtDay(x.at.slice(0, 10), lang) : undefined)), open: go && { label: B("Open licenses", "打开执照"), go: () => go("permits") } });
   if (m.renewals.length) out.push({ id: "renewals", value: n(m.renewals.length), label: B("Renewals caught before they lapse", "提前盯住的续期"), list: items(m.renewals, x => (x.date ? fmtDay(x.date, lang, true) : undefined)), open: go && { label: B("Open Deadlines", "打开截止日期"), go: () => go("permits", "deadlines") } });
   return out;
 }
