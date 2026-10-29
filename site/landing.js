@@ -2555,49 +2555,6 @@ function moreData(){
 }
 if (PG_MORE) moreData();
 track("page_view", {});
-})();
-
-/* ============ section links: real paths (/pricing, /faq ...), never a # in the address bar or in a shared link ============ */
-const SEC_PATH = {top: "/", how: "/how-it-works", case: "/customers", pricing: "/pricing", faq: "/faq", backers: "/backers", sample: "/sample-plan"};
-const PATH_SEC = Object.fromEntries(Object.entries(SEC_PATH).map(([k, v]) => [v, k]));
-const secRM = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-function goSec(sec, smooth){ const el = document.getElementById(sec); if (!el) return false;
-  // a section folded away (land97) opens before the page scrolls to it
-  for (let d = el.closest("details"); d; d = d.parentElement && d.parentElement.closest("details")) d.open = true;
-  const hd = document.getElementById(el.getAttribute("aria-labelledby") || ""), own = hd && hd.closest("details.fold97"); if (own) own.open = true;
-  if (sec === "top") scrollTo({top: 0, behavior: smooth && !secRM() ? "smooth" : "auto"}); else el.scrollIntoView({behavior: smooth && !secRM() ? "smooth" : "auto", block: "start"}); return true; }
-document.addEventListener("click", e => { const a = e.target.closest("a[data-sec]"); if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
-  if (!goSec(a.dataset.sec, true)) return; e.preventDefault(); const path = SEC_PATH[a.dataset.sec]; if (location.pathname !== path) history.pushState({sec: a.dataset.sec}, "", path + location.search); });
-addEventListener("popstate", () => { const sec = PATH_SEC[location.pathname.replace(/\/+$/, "") || "/"]; if (sec) goSec(sec, true); });
-// an old link with a # still lands in the right place, and the # is dropped from the address bar
-(function(){ const h = location.hash.slice(1), sec = SEC_PATH[h] ? h : PATH_SEC[location.pathname.replace(/\/+$/, "") || "/"] || null;
-  if (location.hash) history.replaceState(null, "", (sec ? SEC_PATH[sec] : location.pathname) + location.search);
-  if (sec && sec !== "top") addEventListener("load", () => setTimeout(() => goSec(sec, false), 60), {once: true}); })();
-
-/* experts: one line per category, "Show all" opens them; phones: each case study's plan folds behind "See the plan" */
-(function(){
-  const art = document.getElementById("xpArt"), more = document.getElementById("xpMore");
-  const S = {en: {"xp.all": "Show all", "xp.less": "Show fewer", "cs.plan": "See the plan", "cs.planx": "Hide the plan"}, zh: {"xp.all": "显示全部", "xp.less": "收起", "cs.plan": "查看计划", "cs.planx": "收起计划"}};
-  const t = k => S[document.documentElement.lang === "zh-CN" ? "zh" : "en"][k];
-  const label = () => {
-    if (more) more.textContent = t(art.classList.contains("open") ? "xp.less" : "xp.all");
-    document.querySelectorAll(".csplan").forEach(b => { b.textContent = t(b.parentElement.classList.contains("planopen") ? "cs.planx" : "cs.plan"); });
-  };
-  if (art && more) {
-    const fit = () => { const over = art.children.length > 3 || [...art.querySelectorAll(".xpflow")].some(f => f.scrollHeight > f.clientHeight + 2); more.hidden = !art.classList.contains("open") && !over; };
-    more.addEventListener("click", () => { const on = art.classList.toggle("open"); more.setAttribute("aria-expanded", on); label(); fit(); });
-    new MutationObserver(fit).observe(art, {childList: true}); addEventListener("resize", fit); setTimeout(fit, 400);
-  }
-  document.querySelectorAll(".csr").forEach(r => {
-    if (!r.querySelector(".belstage")) return;
-    const card = r.parentElement, b = document.createElement("button");
-    b.type = "button"; b.className = "csplan"; b.setAttribute("aria-expanded", "false");
-    b.addEventListener("click", () => { const on = card.classList.toggle("planopen"); b.setAttribute("aria-expanded", on); label(); });
-    card.insertBefore(b, r);
-  });
-  label();
-  document.querySelectorAll("[data-lang]").forEach(x => x.addEventListener("click", () => setTimeout(label, 0)));
-})();
 /* land99:js (Oct 29): the "Where are you opening?" boxes suggest places the way Airbnb's search does. Focus shows the
    most asked-for US cities, typing narrows them (English or Chinese, a neighborhood, a state). Each city has its own
    line icon, drawn here: a landmark or thing the place is known for. Picking one fills the box; nothing is sent. */
@@ -2688,6 +2645,18 @@ addEventListener("popstate", () => { const sec = PATH_SEC[location.pathname.repl
   const bold = (label, q) => { const f = q.trim(); if (!f) return esc(label); const i = label.toLowerCase().indexOf(f.toLowerCase());
     return i < 0 ? esc(label) : esc(label.slice(0, i)) + "<b>" + esc(label.slice(i, i + f.length)) + "</b>" + esc(label.slice(i + f.length)); };
 
+  // The hero line under the box ("A restaurant in San Jose needs 11 licenses") lived with the price comparison, which
+  // moved to /more, so on the home page it never answered. It answers here when that comparison isn't on the page.
+  const hc = document.getElementById("hCity"), counts = typeof CITY_PRICES === "object" ? CITY_PRICES : {};
+  function paintHero(v){
+    if (!hc || document.getElementById("c96You")) return;
+    const f = fold(v), c = f && CITIES.find(x => keysOf(x).includes(f) || fold(x[0] + " " + (ABBR[x[2]] || "")) === f || fold(x[0] + " " + x[2]) === f);
+    const q = c && counts[c[0]];
+    if (q) { hc.innerHTML = (zh() ? "在 {city} 开一家餐厅，需要办理 <b>{n} 项执照和许可</b>。免费计划逐项列出，附办理机构、规费和时间。" : "A restaurant in {city} needs <b>{n} licenses and permits</b>. Your free plan lists every one, with agencies, fees and timelines.").replace("{city}", esc(v.trim().slice(0, 40))).replace("{n}", q.n + q.c); hc.classList.add("on"); }
+    else { hc.textContent = zh() ? "您知道的执照只是其中几项。输入城市，看看一共要办多少。" : "You know about a few of your licenses. Type your city to see the full count."; hc.classList.remove("on"); }
+  }
+  const heroIn = document.getElementById("st-hero"); let ht = 0;
+  if (heroIn) heroIn.addEventListener("input", () => { clearTimeout(ht); ht = setTimeout(() => paintHero(heroIn.value), 200); });
   ["st-hero", "st-final"].forEach(id => {
     const inp = document.getElementById(id); if (!inp) return;
     const wrap = inp.closest(".stwrap"), form = inp.closest("form");
@@ -2741,4 +2710,47 @@ addEventListener("popstate", () => { const sec = PATH_SEC[location.pathname.repl
     form.addEventListener("submit", () => close());
     if (wrap) wrap.classList.add("cpkw");
   });
+})();
+})();
+
+/* ============ section links: real paths (/pricing, /faq ...), never a # in the address bar or in a shared link ============ */
+const SEC_PATH = {top: "/", how: "/how-it-works", case: "/customers", pricing: "/pricing", faq: "/faq", backers: "/backers", sample: "/sample-plan"};
+const PATH_SEC = Object.fromEntries(Object.entries(SEC_PATH).map(([k, v]) => [v, k]));
+const secRM = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+function goSec(sec, smooth){ const el = document.getElementById(sec); if (!el) return false;
+  // a section folded away (land97) opens before the page scrolls to it
+  for (let d = el.closest("details"); d; d = d.parentElement && d.parentElement.closest("details")) d.open = true;
+  const hd = document.getElementById(el.getAttribute("aria-labelledby") || ""), own = hd && hd.closest("details.fold97"); if (own) own.open = true;
+  if (sec === "top") scrollTo({top: 0, behavior: smooth && !secRM() ? "smooth" : "auto"}); else el.scrollIntoView({behavior: smooth && !secRM() ? "smooth" : "auto", block: "start"}); return true; }
+document.addEventListener("click", e => { const a = e.target.closest("a[data-sec]"); if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+  if (!goSec(a.dataset.sec, true)) return; e.preventDefault(); const path = SEC_PATH[a.dataset.sec]; if (location.pathname !== path) history.pushState({sec: a.dataset.sec}, "", path + location.search); });
+addEventListener("popstate", () => { const sec = PATH_SEC[location.pathname.replace(/\/+$/, "") || "/"]; if (sec) goSec(sec, true); });
+// an old link with a # still lands in the right place, and the # is dropped from the address bar
+(function(){ const h = location.hash.slice(1), sec = SEC_PATH[h] ? h : PATH_SEC[location.pathname.replace(/\/+$/, "") || "/"] || null;
+  if (location.hash) history.replaceState(null, "", (sec ? SEC_PATH[sec] : location.pathname) + location.search);
+  if (sec && sec !== "top") addEventListener("load", () => setTimeout(() => goSec(sec, false), 60), {once: true}); })();
+
+/* experts: one line per category, "Show all" opens them; phones: each case study's plan folds behind "See the plan" */
+(function(){
+  const art = document.getElementById("xpArt"), more = document.getElementById("xpMore");
+  const S = {en: {"xp.all": "Show all", "xp.less": "Show fewer", "cs.plan": "See the plan", "cs.planx": "Hide the plan"}, zh: {"xp.all": "显示全部", "xp.less": "收起", "cs.plan": "查看计划", "cs.planx": "收起计划"}};
+  const t = k => S[document.documentElement.lang === "zh-CN" ? "zh" : "en"][k];
+  const label = () => {
+    if (more) more.textContent = t(art.classList.contains("open") ? "xp.less" : "xp.all");
+    document.querySelectorAll(".csplan").forEach(b => { b.textContent = t(b.parentElement.classList.contains("planopen") ? "cs.planx" : "cs.plan"); });
+  };
+  if (art && more) {
+    const fit = () => { const over = art.children.length > 3 || [...art.querySelectorAll(".xpflow")].some(f => f.scrollHeight > f.clientHeight + 2); more.hidden = !art.classList.contains("open") && !over; };
+    more.addEventListener("click", () => { const on = art.classList.toggle("open"); more.setAttribute("aria-expanded", on); label(); fit(); });
+    new MutationObserver(fit).observe(art, {childList: true}); addEventListener("resize", fit); setTimeout(fit, 400);
+  }
+  document.querySelectorAll(".csr").forEach(r => {
+    if (!r.querySelector(".belstage")) return;
+    const card = r.parentElement, b = document.createElement("button");
+    b.type = "button"; b.className = "csplan"; b.setAttribute("aria-expanded", "false");
+    b.addEventListener("click", () => { const on = card.classList.toggle("planopen"); b.setAttribute("aria-expanded", on); label(); });
+    card.insertBefore(b, r);
+  });
+  label();
+  document.querySelectorAll("[data-lang]").forEach(x => x.addEventListener("click", () => setTimeout(label, 0)));
 })();
