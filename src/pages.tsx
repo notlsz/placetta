@@ -528,7 +528,7 @@ export function Overview() {
           <div className="stack" data-indent>{shown.map(x => <TodoRow key={x.key} x={x} />)}</div>
           <div className="hm-needs-more">
           {all && docsAll.length > 1 && <button type="button" className="lnk more" disabled={busy} onClick={() => ask(b(findItAsk(B(docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.en} (${x.app.name.en})` : "").join("; "), docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.zh}（${x.app.name.zh}）` : "").join("；")), B("open applications", "进行中的申请"), true)))}><I.spark />{zh ? `让 Odelia 找齐 ${docsAll.length} 份文件` : `Have Odelia find all ${docsAll.length}`}</button>}
-          {rest.length > 3 && <button type="button" className="lnk more" onClick={() => setAll(!all)}>{all ? (zh ? "收起" : "Show fewer") : (zh ? `查看全部 ${ordered.length} 项` : `See all ${ordered.length}`)}</button>}
+          {rest.length > 3 && <button type="button" className="lnk more" onClick={() => setAll(!all)}>{all ? (zh ? "收起" : "Show fewer") : (zh ? `查看全部 ${rest.length} 项` : `See all ${rest.length}`)}</button>}
           </div>
         </section>
       )}
