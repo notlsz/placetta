@@ -340,3 +340,23 @@
   .page.stores-page > .ph { flex-direction: row; align-items: flex-start; }
   .page.stores-page > .ph .ph-tx p { display: none; }
 }
+
+/* round 11 */
+.pm-tabrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.pm-tabrow > :first-child { min-width: 0; flex: 1 1 auto; }
+.pm-tabrow .mine-row { flex: none; margin: 0; }
+@media (max-width: 640px) { .pm-tabrow { flex-wrap: wrap; } .pm-tabrow .mine-row { order: 2; } }
+/* the cost line: Breakdown follows the amount, not across the page */
+.page.permits .cost-line.on-page { justify-content: flex-start; }
+.page.permits .cost-line.on-page .lnk { margin-left: 4px; }
+/* the License column gets the room Status didn't use, so an agency's name fits on one line more often */
+@media (min-width: 860px) { .page.permits .apps-t .tr { grid-template-columns: minmax(0, 2.7fr) 112px 128px minmax(0, 1.4fr); } }
+/* one title weight on every page (Ive) */
+.ph h1 { font-weight: 600; letter-spacing: -.03em; }
+/* the Ask bar spans the same column as the page on a wide screen */
+@media (min-width: 860px) { .dockbar .composer-wrap { width: min(820px, calc(100% - 80px)); } }
+.page.permits .cost-line.on-page { flex-wrap: nowrap; }
+.page.permits .cost-line.on-page > span { flex: 0 1 auto; }
+.page.permits .cost-line.on-page .lnk { flex: none; white-space: nowrap; }
+.pm-tabrow { margin-bottom: 22px; }
+.pm-tabrow > .ptabs { margin-bottom: 0; }

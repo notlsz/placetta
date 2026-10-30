@@ -818,15 +818,18 @@ export function Permits({ tab: asked }: { tab: PermitsTab }) {
         {ws.apps.length > 0 && <ReportButton />}
         <button type="button" className="pill quiet" onClick={() => go("find")}><I.find />{t("nav_find")}</button>
       </PageHead>
-      <Tabs view="permits" tabs={tabs} current={tab} />
+      {/* the tabs and the Everything/Mine filter on one row (Jobs): one fewer row of controls before the first license */}
+      <div className="pm-tabrow">
+        <Tabs view="permits" tabs={tabs} current={tab} />
+        {(tab === "todo" || tab === "filed") && teamOf(team) && (
+          <div className="mine-row">
+            <MineToggle count={ws.apps.filter(a => mineApp(team, a.id) && (tab === "todo" ? !FILED.includes(a.status) : FILED.includes(a.status))).length} />
+          </div>
+        )}
+      </div>
       {(tab === "todo" || tab === "filed") && (
         <div className="pm-bar">
           <CostLine page />
-          {teamOf(team) && (
-            <div className="mine-row">
-              <MineToggle count={ws.apps.filter(a => mineApp(team, a.id) && (tab === "todo" ? !FILED.includes(a.status) : FILED.includes(a.status))).length} />
-            </div>
-          )}
         </div>
       )}
       {tab === "todo" && <PermitTable rows={todo} empty={mine ? (lang === "zh" ? "没有分配给您的待办许可。" : "Nothing to do is assigned to you.") : t("allClear")} />}
