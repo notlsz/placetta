@@ -839,7 +839,7 @@ export function Permits({ tab: asked }: { tab: PermitsTab }) {
 }
 
 function PermitTable({ rows: list, empty }: { rows: Application[]; empty: string }) {
-  const { t, b, openApp } = useApp();
+  const { t, b, lang, openApp } = useApp();
   if (!list.length) return <p className="quiet tab-empty">{empty}</p>;
   return (
     <>
@@ -869,6 +869,8 @@ function PermitTable({ rows: list, empty }: { rows: Application[]; empty: string
                       {/* one line a cell: the first sentence, a whole phrase ("Fax: about 4 business days"); all of it on hover and in the sheet */}
                       <span className="c-est" title={b(a.est)}>{firstSentence(b(a.est))}</span>
                       <span className="c-next" title={a.next ? b(a.next) : undefined}>{a.next ? firstSentence(b(a.next)) : ""}</span>
+                      {/* a phone reads the fee and the next step as one sentence */}
+                      <span className="c-mob">{[feeText(a, t), a.next ? firstSentence(b(a.next)) : ""].filter(Boolean).map(x => x.replace(/[.。]\s*$/, "")).join(lang === "zh" ? "。" : ". ") + (lang === "zh" ? "。" : ".")}</span>
                     </div>
                     </Working>
                   );

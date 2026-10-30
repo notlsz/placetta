@@ -13,7 +13,7 @@ import { formById } from "./forms/registry";
 import { money, daysFromNow, fmtAgo } from "./time";
 import type { Approval, Workspace } from "./model";
 import { FilingLive } from "./FilingLive";
-import { LiveBot, Working } from "./Bot";
+import { AgentBot, LiveBot, Working } from "./Bot";
 import { taskVerb } from "./tasks";
 import { PlanCard } from "./Work";
 import { RememberedChips } from "./Remembered";
@@ -349,7 +349,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
       {live && plan && <PlanGate job={plan} />}
       {live && draft && <p className="drafting" aria-live="polite">{draft}</p>}
       {r && (
-        <div className="answer">
+        <div className="answer"><span className="ans-bot" aria-hidden="true"><AgentBot size={24} interactive={false} /></span>
           {r.text.map((p, i) => { const body = splitSources(b(p))[0]; return body ? <Prose key={i} text={body} cites={i === r.text.length - 1 ? r.sources : undefined} /> : null; })}
           {r.chain && <ol className="chain">{r.chain.map((c, i) => <li key={i}>{b(c)}</li>)}</ol>}
           {plan && <PlanCard job={plan} compact />}

@@ -114,7 +114,7 @@
 @media (min-width: 860px) {
   .page.permits .apps-t .c-name { display: grid; grid-template-columns: minmax(0, max-content) auto; column-gap: 14px; justify-content: start; align-items: center; }
   .page.permits .apps-t .c-name > b { grid-column: 1 / -1; }
-  .page.permits .apps-t .c-name > small:not(.c-team) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .page.permits .apps-t .c-name > small:not(.c-team) { min-width: 0; overflow-wrap: anywhere; white-space: normal; }
   .page.permits .apps-t .c-name > .c-team { margin: 0; }
 }
 
@@ -183,7 +183,6 @@
 .c-crit { display: inline-grid; place-items: center; width: 18px; height: 18px; margin-left: 6px; vertical-align: -3px; color: var(--blue-ink); }
 .c-crit svg { width: 14px; height: 14px; }
 .page.permits .c-fee.tbd { color: var(--ink3); font-size: 13px; }
-.page.permits .c-name small { white-space: normal; overflow: visible; text-overflow: clip; }
 
 /* Stores (Paul Smith, Chesky): one plain storefront for every store, so Odelia's cloud stays hers; the next step is
    said under the store, where the eye already is */
@@ -209,3 +208,39 @@
 
 /* the suggestion chips scroll sideways on a phone: the row fades at its edge instead of cutting a word in half */
 @media (max-width: 640px) { .sugg { -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); } }
+
+/* "After that" on a phone: the same list as the desktop, not a sideways carousel half under the Ask bar (Ive, Jobs) */
+@media (max-width: 640px) {
+  .page.home.simple-home .hm-needs .stack { flex-direction: column; gap: 0; margin: 0; padding: 0; overflow: visible; scroll-snap-type: none; }
+  .page.home.simple-home .hm-needs .stack > * { flex: none; }
+  .page.home.simple-home .hm-needs .stack .appr, .page.home.simple-home .hm-needs .stack .job.compact { height: auto; padding: 12px 4px; border-radius: 0; background: none; box-shadow: none; }
+  .page.home.simple-home .hm-needs .stack .appr { grid-template-columns: 32px minmax(0, 1fr) auto; }
+  .page.home.simple-home .hm-needs .stack .appr .appr-btns, .page.home.simple-home .hm-needs .stack .appr > .pill { grid-column: auto; justify-self: end; margin-left: 0; }
+}
+
+/* A page's actions sit on its title's line, centered on it (Ive), not between the title and the sentence under it */
+@media (min-width: 641px) {
+  .page.permits > .ph, .page.stores > .ph { align-items: flex-start; }
+  .page.permits > .ph .ph-act, .page.stores > .ph .ph-act { margin-top: 2px; }
+}
+/* Licenses on a phone: the two actions are quiet links, so the tabs and the list start higher */
+@media (max-width: 640px) {
+  .page.permits > .ph .ph-act { gap: 4px 16px; }
+  .page.permits > .ph .ph-act .pill { height: 32px; padding: 0; background: none; box-shadow: none; color: var(--blue-ink); font-weight: 500; font-size: 14.5px; }
+  .page.permits > .ph .ph-act .pill svg { width: 15px; height: 15px; }
+}
+
+/* Odelia's face by her words (Paul Smith): just above each answer */
+.answer { position: relative; }
+.answer > .ans-bot { display: none; }
+.page.odelia .answer > .ans-bot { display: grid; place-items: center; width: 28px; height: 28px; margin: 0 0 -6px -2px; }
+
+/* Licenses rows on a phone: the status sits level with the name, always as a pill; the fee and the next step are one
+   sentence instead of two loose lines */
+.apps-t .c-mob { display: none; }
+@media (max-width: 640px) {
+  .page.permits .apps-t .tr.row .c-fee, .page.permits .apps-t .tr.row .c-next { display: none; }
+  .page.permits .apps-t .tr.row .c-mob { display: block; grid-column: 1 / -1; font-size: 13.5px; line-height: 19px; color: var(--ink2); }
+  .page.permits .apps-t .tr.row .c-st { align-self: start; margin-top: -1px; }
+  .page.permits .apps-t .st-draft { padding: 2px 10px; border-radius: 99px; background: var(--sky-wash); color: var(--blue-ink); }
+}

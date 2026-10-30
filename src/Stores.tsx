@@ -552,7 +552,7 @@ export function Stores() {
   const s = stores.find(x => x.id === open);
   if (s) return <StoreDetail s={s} onBack={() => setOpen(null)} />;
   return (
-    <div className="page">
+    <div className="page stores">
       <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p className="ph-long">{b(B("Every store ready for inspection, every day.", "每家门店，每天都做好迎检准备。"))}</p><p className="ph-short">{b(B("Every store ready for inspection, every day.", "每家门店，每天都做好迎检准备。"))}</p></div>
         {/* one action in view, the rest behind More: four pills in a row read as clutter, and stack four deep on a phone */}
         <div className="ph-acts st-acts">

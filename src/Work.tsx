@@ -57,7 +57,7 @@ export function PlanCard({ job, compact, actions }: { job: Job; compact?: boolea
   return (
     <section className={"job " + job.status + (compact ? " compact" : "")} aria-label={b(job.title)}>
       <header>
-        <span className="job-t"><b>{b(job.title)}</b><small>{zh ? `${p.done}/${p.all} 步，${fmtAgo(job.updated, lang)}更新` : `${p.done} of ${p.all} steps, updated ${fmtAgo(job.updated, lang)}`}</small></span>
+        <span className="job-t"><b>{b(job.title)}</b><small>{zh ? `${p.done}/${p.all} 步，${fmtAgo(job.updated, lang)}更新` : `${p.done} of ${p.all} steps, updated ${fmtAgo(job.updated, lang).replace(/^Just/, "just")}`}</small></span>
         <em className={"job-s " + (awayWait(job) ? "away" : job.status)}>{b(state)}</em>
       </header>
       {parent && !compact && <p className="job-from">{zh ? `属于“${parent.title.zh || parent.title.en}”，由 Odelia 统筹` : `Part of “${parent.title.en}”, which Odelia coordinates`}</p>}
