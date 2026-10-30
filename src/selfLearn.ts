@@ -62,7 +62,10 @@ export function noteCall(s: SelfState, call: { name: string; input: Record<strin
 
   if (error) {
     // the error's own words with anything quoted taken out: a quoted id or value can carry a business's name
-    slip({ tool: name, app: appId || undefined, form, reason: firstSentence(String(content)).replace(/"[^"]*"|“[^”]*”|'[^']*'/g, "…"), keys: Object.keys(input).sort() });
+    // ...and the same error said once: "fields[0].value is required; fields[3].value is required" is one lesson, so a
+    // repeat confirms it instead of starting a near-copy (production, 2026-10-30)
+    const reason = [...new Set(firstSentence(String(content)).replace(/"[^"]*"|“[^”]*”|'[^']*'/g, "…").replace(/^Error:\s*/, "").replace(/\[\d+\]/g, "[n]").replace(/\b\d+\b/g, "N").replace(/\.\s*$/, "").split(/;\s*/))].join("; ");
+    slip({ tool: name, app: appId || undefined, form, reason, keys: Object.keys(input).sort() });
     return;
   }
   // per line: a value that isn't one of the line's choices, an address the agency doesn't take, an SSN kept off

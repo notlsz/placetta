@@ -70,4 +70,10 @@ const elsewhere: SelfState = { slips: [], fixes: [], seen: [], forms: ["ny-dtf-1
 const v3 = lessonVerdicts(elsewhere, inPlay);
 ok(!v3.wins.length && !v3.losses.length, "a run that never touched the form or tool leaves its lessons alone", v3);
 
+// 7. the same error said once, so repeats confirm one lesson instead of making near-copies
+const e1: SelfState = { slips: [], fixes: [] }, e2: SelfState = { slips: [], fixes: [] };
+noteCall(e1, { name: "fill_fields", input: { application_id: id, fields: [] }, content: "Error: Invalid arguments for fill_fields: fields[0].value is required; fields[1].value is required.", error: true }, w);
+noteCall(e2, { name: "fill_fields", input: { application_id: id, fields: [] }, content: "Error: Invalid arguments for fill_fields: fields[0].value is required; fields[1].value is required; fields[2].value is required.", error: true }, w);
+ok(e1.slips[0].reason === e2.slips[0].reason && /fields\[n\]\.value is required/.test(e1.slips[0].reason), "the same error in different counts is one lesson", [e1.slips[0].reason, e2.slips[0].reason]);
+
 if (fails) { console.error(`\n${fails} failed`); process.exit(1); } else console.log("\nall passed");
