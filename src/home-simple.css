@@ -285,3 +285,11 @@
 @media (max-width: 640px) {
   .settings .sg-row + .sg-row, .settings .sg-list > li + .sg-row, .settings .sg-row + li, .settings .set-tab + .set-tab { border-top: 0; }
 }
+
+/* round 6: the store row ends on its next date; "Later" is readable; the approval seal shows its tick at once (the
+   draw was still running when the page was first seen, so it read as an empty ring) */
+.store-row.plain .sr-when { flex: none; align-self: center; font-size: 14px; font-variant-numeric: tabular-nums; color: var(--ink2); }
+.dtn-act .lnk.quiet { color: var(--ink2); }
+.win-ring { animation-delay: 0s; animation-duration: .45s; }
+.win-tick { animation-delay: .3s; animation-duration: .3s; }
+.st .st-seal { width: 13px; height: 13px; margin-left: -3px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }

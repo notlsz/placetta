@@ -67,7 +67,8 @@ export const I = {
 };
 
 export const LevelTag = ({ l }: { l: Level | "vault" }) => { const { t } = useApp(); return <span className={"lvl lvl-" + l}>{t(("lv_" + l) as Key)}</span>; };
-export const StatusChip = ({ s }: { s: Status }) => { const { t } = useApp(); return <span className={"st st-" + s}>{t(("s_" + s) as Key)}</span>; };
+/** An approved license carries the agency's seal, the same mark as Home's approval moment: Placetta's one signature. */
+export const StatusChip = ({ s }: { s: Status }) => { const { t } = useApp(); return <span className={"st st-" + s}>{s === "approved" && <svg className="st-seal" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" /><path d="M5.2 8.2l1.9 1.9 3.8-4" /></svg>}{t(("s_" + s) as Key)}</span>; };
 export const Sample = () => { const { t } = useApp(); return <span className="sample">{t("sampleTag")}</span>; };
 
 export const feeTotal = (a: Application) => a.fees.reduce((s, f) => s + f.amount, 0);

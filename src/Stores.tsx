@@ -142,7 +142,9 @@ function StoreRow({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
   // the one next step, in words: what the first job waiting on the owner needs, else the certificate that expires first
   const ask = bot.open.find(j => j.status === "waiting" && j.waiting)?.waiting;
   const cert = [...s.certs].filter(c => { const d = daysUntil(c.expires); return d >= 0 && d <= 30; }).sort((x, y) => x.expires.localeCompare(y.expires))[0];
-  const step = ask ? b(ask) : cert ? (zh ? `${fmtDay(cert.expires, lang)}（${daysUntil(cert.expires)} 天后）前续期${cert.person}的${b(cert.kind)}` : `Renew ${cert.person}'s ${b(cert.kind)} by ${fmtDay(cert.expires, lang)} (${daysUntil(cert.expires)} days)`) : "";
+  const step = ask ? b(ask) : cert ? (zh ? `${fmtDay(cert.expires, lang)} 前续期${cert.person}的${b(cert.kind)}` : `Renew ${cert.person}'s ${b(cert.kind)} by ${fmtDay(cert.expires, lang)}`) : "";
+  // the answer at the row's end (Chesky): the next date that matters, a renewal's days left or the opening day
+  const when = cert ? (zh ? `${daysUntil(cert.expires)} 天` : `${daysUntil(cert.expires)} days`) : s.stage === "opening" && s.projectedOpen ? fmtDay(s.projectedOpen, lang) : "";
   return (
     <button type="button" className={"store-row" + (CLASSIC_STORES ? "" : " plain")} onClick={onOpen}>
       {CLASSIC_STORES
@@ -150,7 +152,7 @@ function StoreRow({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
         : <span className={"sr-ico" + (bot.open.some(j => j.status === "running") ? " on" : "")} aria-hidden="true"><I.store /></span>}
       <span className="sr-tx"><b>{b(s.name)}</b><small>{where.replace(/\.\s*$/, "")}{zh ? "。" : "."}</small>
         {!CLASSIC_STORES && needs && <em className="sr-step">{step ? `${step.replace(/^(your approval|您的批准)[:：]\s*/i, zh ? "批准：" : "Approve: ").replace(/[.。]\s*$/, "")}${waiting + expiring > 1 ? (zh ? `，另有 ${waiting + expiring - 1} 项` : `, and ${waiting + expiring - 1} more`) : ""}` : needs}</em>}</span>
-      {CLASSIC_STORES ? (needs ? <em className="sr-need">{needs}</em> : <span className="sr-ok">{zh ? "没有需要您的" : "Nothing needs you"}</span>) : null}
+      {CLASSIC_STORES ? (needs ? <em className="sr-need">{needs}</em> : <span className="sr-ok">{zh ? "没有需要您的" : "Nothing needs you"}</span>) : when ? <span className="sr-when">{when}</span> : null}
       <I.chevR />
     </button>
   );
@@ -557,7 +559,7 @@ export function Stores() {
         {/* one action in view, the rest behind More: four pills in a row read as clutter, and stack four deep on a phone */}
         <div className="ph-acts st-acts">
           {stores.length > 0 && <button type="button" className="pill quiet" onClick={() => setReport(true)}>{lang === "zh" ? "价值报告" : "Value report"}</button>}
-          <Menu className="st-more" buttonClass="pill" label={lang === "zh" ? "更多" : "More"} button={<>{lang === "zh" ? "更多" : "More"}<I.chev /></>} items={[
+          <Menu className="st-more" buttonClass="pill quiet" label={lang === "zh" ? "更多" : "More"} button={<>{lang === "zh" ? "更多" : "More"}<I.chev /></>} items={[
             ...(!bulk ? [{ key: "bulk", label: lang === "zh" ? "规划多家门店" : "Plan many stores", onPick: () => setBulk(true) }] : []),
             ...(!check ? [{ key: "check", label: lang === "zh" ? "检查已开业门店" : "Check stores already open", onPick: () => setCheck(true) }] : []),
             ...(stores.length > 0 ? [{ key: "replicate", label: lang === "zh" ? "复制这家门店" : "Replicate this store", onPick: () => setSheet("replicate") },
