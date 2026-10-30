@@ -166,7 +166,7 @@ jobs:
         run: node scripts/check-dependabot.mjs
       - name: Evidence collector, log export, access review and key minting tests
         run: node --test scripts/soc2-evidence.test.mjs scripts/log-export.test.mjs scripts/access-review.test.mjs scripts/mint-role-key.test.mjs
-      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with: { go-version: stable, cache: false }
       # Built from the Go module proxy at an exact version, so the download is checked against sum.golang.org.
       # (gitleaks v8.30.1 needs Go 1.24.11 or newer; the latest stable Go always is.)
