@@ -612,5 +612,3 @@
 @media (max-width: 640px) { .page.odelia .c-panel > .sugg { display: none; } }
 /* Panel 9 round 2: "Do this next" in the business's own accent (its tea), not the warning amber; amber stays for what's late */
 .dtn-k { color: var(--blue-ink); }
-/* the agency's stamp lands a little crooked, like a real rubber stamp (Paul Smith: the classic with a twist) */
-.win-stamp { transform: rotate(-4deg); transform-origin: 50% 40%; }

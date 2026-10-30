@@ -348,3 +348,10 @@ lesson (seeded, or learned on its own) so the agent itself knows the pattern.
   still waits for approval.
 - A total repeated right above the buttons duplicated the fee section's own Total; the fee section already ends at the
   decision, so only "Not now" was added. Check a borrowed pattern against what the screen already says before adding it.
+
+## 2026-10-30: a tilted stamp broke the one-axis rule
+
+- A reviewer's "tilt the stamp like a real rubber stamp" went in and fit-check failed at every width: rotated text sits
+  off its column's center and overlaps the check. The founder's rule (everything in a row on one y axis, icons centered
+  with their text) outranks a reviewer's wit. Rule: run fit-check before every push, and never take a suggestion that
+  rotates or offsets content; find the personality in words and color instead.
