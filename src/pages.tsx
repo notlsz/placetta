@@ -361,10 +361,12 @@ function DoNextCard({ x, n, onLater, docs, title }: { x: Todo; n: number; onLate
 /** One row of "Waiting on you": what it is, and its one quiet button. A missing document is named by itself (the
  *  button already says Upload); Find it for me waits on the "Do this next" card. */
 function TodoRow({ x }: { x: Todo }) {
-  const { b } = useApp();
+  const { b, lang } = useApp();
   if (x.kind === "approval") return <NeedRow a={x.a} compact />;
   if (x.kind === "job") return <PlanCard job={x.job} compact actions />;
-  const label = b(x.label);
+  // every row starts with what to do (Ive): "Add construction drawings", like the approval rows beside it
+  const raw = b(x.label), verb = /^(add|upload|send|sign|get|approve|file|renew|confirm|上传|添加|提交|签)/i.test(raw);
+  const label = verb ? raw : lang === "zh" ? `上传${raw}` : `Add ${/^[A-Z]{2,}/.test(raw) ? raw : raw.charAt(0).toLowerCase() + raw.slice(1)}`;
   return (
     <div className="appr compact k-doc">
       <span className="appr-ico k-upload"><I.clip /></span>

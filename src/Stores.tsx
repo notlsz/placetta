@@ -144,6 +144,8 @@ function StoreRow({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
   const ask = bot.open.find(j => j.status === "waiting" && j.waiting)?.waiting;
   const cert = [...s.certs].filter(c => { const d = daysUntil(c.expires); return d >= 0 && d <= 30; }).sort((x, y) => x.expires.localeCompare(y.expires))[0];
   const step = ask ? b(ask) : cert ? (zh ? `续期：${cert.person}的${b(cert.kind)}` : `Renew: ${cert.person}'s ${b(cert.kind)}`) : "";
+  const mine = ws.apps.filter(a => (raw.apps ?? []).includes(a.id));
+  const marks = [...mine.filter(a => a.status === "approved").map(() => "done"), ...mine.filter(a => a.status === "review" || a.status === "filing").map(() => "agency"), ...mine.filter(a => !["approved", "review", "filing"].includes(a.status)).map(() => "")];
   // the answer at the row's end (Chesky): the next date that matters, a renewal's days left or the opening day
   const when = cert ? (zh ? `${daysUntil(cert.expires)} 天后续期` : `Renews in ${daysUntil(cert.expires)} days`) : s.stage === "opening" && s.projectedOpen ? (zh ? `${fmtDay(s.projectedOpen, lang)} 开业` : `Opens ${fmtDay(s.projectedOpen, lang)}`) : "";
   return (
@@ -152,6 +154,8 @@ function StoreRow({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
         ? <span className="sr-bot" aria-hidden="true"><StoreBot id={raw.id} size={28} label={b(s.name)} busy={bot.open.some(j => j.status === "running")} /></span>
         : <span className={"sr-ico" + (bot.open.some(j => j.status === "running") ? " on" : "")} aria-hidden="true"><I.store /></span>}
       <span className="sr-tx"><b>{b(s.name)}</b><small>{where.replace(/\.\s*$/, "")}{zh ? "。" : "."}</small>
+        {/* the store's licenses, one mark each, the same signature as Home (Paul Smith): done, with the agency, to do */}
+        {!CLASSIC_STORES && s.stage !== "open" && marks.length > 1 && marks.length <= 24 && <span className="hm-segs sr-segs" role="img" aria-label={zh ? `${marks.filter(m => m === "done").length}/${marks.length} 项执照已办好` : `${marks.filter(m => m === "done").length} of ${marks.length} licenses done`}>{marks.map((m, i) => <i key={i} className={m} />)}</span>}
         {!CLASSIC_STORES && needs && <em className="sr-step">{step ? `${step.replace(/^(your approval|您的批准)[:：]\s*/i, zh ? "批准：" : "Approve: ").replace(/[.。]\s*$/, "")}${waiting + expiring > 1 ? (zh ? `，另有 ${waiting + expiring - 1} 项` : `, and ${waiting + expiring - 1} more`) : ""}` : needs}</em>}</span>
       {CLASSIC_STORES ? (needs ? <em className="sr-need">{needs}</em> : <span className="sr-ok">{zh ? "没有需要您的" : "Nothing needs you"}</span>) : when ? <span className="sr-when">{when}</span> : null}
       <I.chevR />

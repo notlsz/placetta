@@ -196,7 +196,7 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
       )}
       {slash.menu}
       <VoiceBeam className="beam" level={level} processing={busy} theme="light" colors={BEAM} bandColors={BAND} idle={0} scale={dock ? 1.1 : 0.9} borderRadius={RADIUS[variant]}>
-        <BorderBeam className="c-edge" size="md" theme="light" colorVariant="ice" borderRadius={RADIUS[variant]} staticColors brightness={1} saturation={1} strength={0.85} css={EDGE_CSS}>
+        <BorderBeam className="c-edge" active={busy} size="md" theme="light" colorVariant="ice" borderRadius={RADIUS[variant]} staticColors brightness={1} saturation={1} strength={0.85} css={EDGE_CSS}>
         <form className={"composer" + (over ? " drop" : "")} onSubmit={e => { e.preventDefault(); send(); }}
           onDragOver={e => { if (e.dataTransfer.types.includes("Files")) { e.preventDefault(); setOver(true); } }} onDragLeave={() => setOver(false)}
           onDrop={e => { const f = Array.from(e.dataTransfer.files ?? []); setOver(false); if (f.length) { e.preventDefault(); upload("", "", f); } }}>

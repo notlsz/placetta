@@ -418,3 +418,20 @@
 .page.permits .cost-line.on-page .cl-date { display: none; }
 .page.permits > .ph .ph-act .pill { height: 32px; padding: 0; background: none; box-shadow: none; color: var(--blue-ink); font-weight: 500; font-size: 14.5px; }
 .page.permits > .ph .ph-act { gap: 4px 20px; }
+
+/* panel round: plain numerals, no filled circles, on the phone's tab bar (Ive, house rule); the bell's dot goes on a
+   phone, where the tab counts already say what needs you (Jobs) */
+.tabbar a em { background: none; color: var(--warm); min-width: 0; padding: 0; font-weight: 600; font-size: 11px; }
+@media (max-width: 859px) { .mbar .bellb em.mark { display: none; } }
+/* the cost on a phone says what the agencies set too (Rams: never a cleaner number than the truth) */
+@media (max-width: 640px) {
+  .page.permits .cost-line.on-page .cl-plus { display: inline; }
+  .page.permits .cost-line.on-page { flex-wrap: wrap; }
+}
+/* a short conversation starts at the top, under "Working on" (Chesky; most of the panel agreed) */
+.page.odelia.chat .feed > :first-child { margin-top: 0; }
+/* the actions menu lines up with the card's edge (Ive) */
+.page.odelia .answer .t-foot { margin-left: 0; padding-left: 0; }
+.page.odelia .answer .t-foot .t-more { margin-left: -7px; }
+.hm-segs.sr-segs { max-width: 220px; margin-top: 6px; gap: 3px; }
+.hm-segs.sr-segs i { height: 4px; }
