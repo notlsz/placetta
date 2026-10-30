@@ -844,6 +844,7 @@ function PermitTable({ rows: list, empty }: { rows: Application[]; empty: string
   return (
     <>
       {list.some(isPreview) && <p className="prev-note"><I.spark />{t("hm_preview")}</p>}
+      {list.some(a => a.critical) && <p className="crit-key"><span className="c-crit" aria-hidden="true"><I.flag /></span>{t("critical")}</p>}
       <div className="table apps-t" role="table">
         <div className="tr th" role="row"><span>{t("th_app")}</span><span>{t("th_status")}</span><span>{t("th_fee")}</span><span>{t("th_takes")}</span><span>{t("th_next")}</span></div>
         {LEVELS.map(l => {

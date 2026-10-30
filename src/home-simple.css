@@ -174,7 +174,7 @@
 
 /* A plan and the approval that moves it read as one card (Jobs: say it once): the approval sits in the plan's footer */
 .answer .job.compact:has(+ .appr) { border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0; padding-bottom: 4px; }
-.answer .job.compact + .appr { margin-top: -12px; border-top-left-radius: 0; border-top-right-radius: 0; background: var(--card2); box-shadow: 0 0 0 1px var(--line); clip-path: inset(0 -2px -2px -2px); }
+.answer .job.compact + .appr { margin-top: -12px; border-top-left-radius: 0; border-top-right-radius: 0; background: var(--mist); box-shadow: none; }
 .answer .job.compact + .appr .appr-ico { display: none; }
 .answer .job.compact + .appr { grid-template-columns: minmax(0, 1fr) auto; }
 
@@ -293,3 +293,16 @@
 .win-ring { animation-delay: 0s; animation-duration: .45s; }
 .win-tick { animation-delay: .3s; animation-duration: .3s; }
 .st .st-seal { width: 13px; height: 13px; margin-left: -3px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* the plan and its Approve are one grey card: the same ground, no band between them */
+
+/* "Preparing" is the same blue pill at every width (Ive) */
+.apps-t .st.st-draft { background: var(--sky-wash); color: var(--blue-ink); }
+
+/* Licenses (Rams): the flag says what it means once, above the table; the assignee sits on its own line under the agency, at one x on every row */
+.crit-key { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; font-size: 13px; line-height: 18px; color: var(--ink2); }
+.crit-key .c-crit { margin-left: 0; vertical-align: 0; }
+@media (min-width: 860px) {
+  .page.permits .apps-t .c-name { grid-template-columns: minmax(0, 1fr); }
+  .page.permits .apps-t .c-name > .c-team { justify-self: start; margin-top: 2px; }
+}

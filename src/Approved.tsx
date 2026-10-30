@@ -35,6 +35,8 @@ export function ApprovedMoment() {
   if (!win || gone || seen(win.app.id)) return null;
   const close = () => { keep(win.app.id); setGone(true); };
   const name = b(win.app.name);
+  // the warm line (Paul Smith): how many are left, from the plan
+  const left = ws.apps.filter(a => a.status !== "approved").length;
   const days = Math.max(0, Math.round((Date.now() - new Date(win.at).getTime()) / 864e5));
   const when = zh ? (days === 0 ? "今天" : days === 1 ? "昨天" : `${days} 天前`) : days === 0 ? "today" : days === 1 ? "yesterday" : `${days} days ago`;
   return (
@@ -45,7 +47,7 @@ export function ApprovedMoment() {
       <div className="win-tx">
         <h2 id="win-h">{zh ? `您的${name}已办好。` : `Your ${name.charAt(0).toLowerCase() + name.slice(1)} is in.`}</h2>
         <p className="win-sub">
-          {zh ? `${when}获批。` : `Approved ${when}. `}
+          {zh ? `${when}获批。` : `Approved ${when}. `}{left > 0 ? (zh ? `还剩 ${left} 项。` : `${left === 1 ? "One" : left}\u00a0to go. `) : (zh ? "全部办好了。" : "That's all of them. ")}
           {win.number ? (zh ? `编号 ${win.number}。` : `Number ${win.number}. `) : ""}
           {win.renews ? (zh ? `续期已记在 ${fmtDay(win.renews, lang, true)}。` : `Renewal on the calendar for ${fmtDay(win.renews, lang, true)}.`) : ""}
         </p>
