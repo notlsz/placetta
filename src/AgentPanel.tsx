@@ -52,7 +52,13 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
   const scroller = useRef<HTMLDivElement>(null);
   const last = feed[feed.length - 1];
   const sig = feed.length + ":" + (last && last.kind === "turn" ? last.steps.length + (last.reply ? "r" : "") : "");
-  useEffect(() => { const el = scroller.current; if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" }); }, [sig]);
+  // to the newest message; one taller than the view opens at its first line, not mid-sentence (panel 9)
+  useEffect(() => {
+    const el = scroller.current; if (!el) return;
+    const lastEl = el.lastElementChild as HTMLElement | null;
+    const top = lastEl && lastEl.offsetHeight > el.clientHeight ? lastEl.offsetTop - el.offsetTop - 8 : el.scrollHeight;
+    el.scrollTo({ top, behavior: "smooth" });
+  }, [sig]);
 
   const agencies = ws.connections.filter(c => c.state === "connected" && c.level !== "vault").length;
   const say = useCallback((text: string) => { unlockAudio(); if (tts.speaking === text) tts.stop(); else tts.speak(text, speakTag(lang)); }, [tts, lang]);

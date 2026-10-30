@@ -31,16 +31,16 @@ export function ideas(w: Workspace, today: string, o: { unpublished?: number } =
       out.push({
         id: "renew:" + r.id, icon: "renew", rank: r.days,
         title: B(`I can renew the ${lower(r.name.en)}${at.en}`, `我可以续期${at.zh}${r.name.zh}`),
-        why: B(`It expires on ${day(r.date)}, ${r.days} days from now. I'll prepare it and you approve it.`,
-          `${day(r.date, true)}到期，还有 ${r.days} 天。我来准备，您批准即可。`),
+        why: B(`Its renewal is due on ${day(r.date)}, ${r.days} days from now. I'll prepare it and you approve it.`,
+          `${day(r.date, true)}前要续期，还有 ${r.days} 天。我来准备，您批准即可。`),
         ask: B(`Start the renewal of the ${r.name.en}${at.en}, which expires on ${r.date}.`, `开始续期${at.zh}${r.name.zh}，${r.date} 到期。`),
       });
     } else if (r.holder) {
       out.push({
         id: "cert:" + r.id, icon: "person", rank: r.days + 5,
         title: B(`I can remind ${r.holder.en} to renew the ${lower(r.name.en.replace(/^\S+'s\s+/, ""))}`, `我可以提醒${r.holder.zh}续期${r.name.zh}`),
-        why: B(`It expires on ${day(r.date)}. I'll text them in their own language and keep the new card on file.`,
-          `${day(r.date, true)}到期。我会用对方的语言发短信，并把新证存档。`),
+        why: B(`Its renewal is due on ${day(r.date)}. I'll text the reminder in ${r.holder.en}'s own language and keep the new card on file.`,
+          `${day(r.date, true)}前要续期。我会用${r.holder.zh}的母语发提醒，并把新证存档。`),
         ask: B(`Remind ${r.holder.en} to renew their ${r.name.en} before ${r.date}, and keep the new card on file.`, `提醒${r.holder.zh}在 ${r.date} 前续期${r.name.zh}，并把新证存档。`),
       });
     }

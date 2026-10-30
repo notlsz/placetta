@@ -600,3 +600,13 @@
 .wk-trust { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 4px 0 8px; }
 .wk-trust .lnk { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; }
 .wk-trust .lnk svg { width: 14px; height: 14px; }
+/* Panel 9: Ideas runs to the page's right edge like every other list, its reasons in the same grey as other second lines */
+.ideas-page { max-width: none; }
+.ideas .idea-tx small { color: var(--ink2); }
+/* every Odelia tab: the same space under the title, so the tab row never moves between Chat, Work, Ideas and Updates */
+@media (min-width: 641px) { .page.odelia > .ph { padding-bottom: 18px; } }
+@media (max-width: 640px) { .page.odelia .pn-dock { padding-left: 0; padding-right: 0; } }
+/* phone: every message box on the content's left edge, the same as Odelia's own page */
+@media (max-width: 640px) { .dockbar .composer-wrap { width: calc(100% - 52px); } }
+/* phone chat: no suggestion chips over her answer; her card already has the next step, and Ideas has the rest */
+@media (max-width: 640px) { .page.odelia .c-panel > .sugg { display: none; } }

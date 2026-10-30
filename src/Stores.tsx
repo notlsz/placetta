@@ -147,7 +147,7 @@ function StoreRow({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
   const mine = ws.apps.filter(a => (raw.apps ?? []).includes(a.id));
   const marks = [...mine.filter(a => a.status === "approved").map(() => "done"), ...mine.filter(a => a.status === "review" || a.status === "filing").map(() => "agency"), ...mine.filter(a => !["approved", "review", "filing"].includes(a.status)).map(() => "")];
   // the answer at the row's end (Chesky): the next date that matters, a renewal's days left or the opening day
-  const when = cert ? (zh ? `${daysUntil(cert.expires)} 天后续期` : `Renews in ${daysUntil(cert.expires)} days`) : s.stage === "opening" && s.projectedOpen ? (zh ? `${fmtDay(s.projectedOpen, lang)} 开业` : `Opens ${fmtDay(s.projectedOpen, lang)}`) : "";
+  const when = cert ? (zh ? `${daysUntil(cert.expires)} 天后到期` : `Expires in ${daysUntil(cert.expires)} days`) : s.stage === "opening" && s.projectedOpen ? (zh ? `${fmtDay(s.projectedOpen, lang)} 开业` : `Opens ${fmtDay(s.projectedOpen, lang)}`) : "";
   return (
     <button type="button" className={"store-row" + (CLASSIC_STORES ? "" : " plain")} onClick={onOpen}>
       {CLASSIC_STORES
