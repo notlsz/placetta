@@ -12,7 +12,7 @@
 
 /* the "…" under her latest finished answer */
 .t-foot { display: flex; align-items: center; margin: -4px 0 0 -6px; }
-.t-more { display: inline-grid; place-items: center; width: 32px; height: 28px; border-radius: 8px; color: var(--ink3); transition: color .15s; }
+.t-more { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0; border-radius: 8px; color: var(--ink3); font-size: 13px; transition: color .15s; }
 .t-more:hover, .t-more:focus-visible, .t-more[aria-expanded="true"] { color: var(--ink); }
 .t-more-wrap .menu { min-width: 200px; }
 

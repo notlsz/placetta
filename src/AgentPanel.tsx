@@ -386,7 +386,8 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
           {more.length > 0 && (
             <div className="t-foot" ref={foot}>
               <Menu className="t-more-wrap" buttonClass="t-more" label={zh ? "更多" : "More"} buttonLabel={zh ? "更多操作" : "More for this answer"}
-                button={<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5.5" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="18.5" cy="12" r="1.6" /></svg>} items={more} />
+                // a word, not three dots: the dots under a finished answer read as her still typing (panel 3, all three reviewers)
+                button={<><span>{zh ? "更多" : "More"}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg></>} items={more} />
             </div>
           )}
         </div>

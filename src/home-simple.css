@@ -432,7 +432,7 @@
 .page.odelia.chat .feed > :first-child { margin-top: 0; }
 /* the actions menu lines up with the card's edge (Ive) */
 .page.odelia .answer .t-foot { margin-left: 0; padding-left: 0; }
-.page.odelia .answer .t-foot .t-more { margin-left: -7px; }
+.page.odelia .answer .t-foot .t-more { margin-left: 0; }
 .hm-segs.sr-segs { max-width: 220px; margin-top: 6px; gap: 3px; }
 .hm-segs.sr-segs i { height: 4px; }
 
@@ -454,3 +454,34 @@
 .c-crit-t { margin-left: 8px; font-size: 12px; font-weight: 500; color: var(--blue-ink); white-space: nowrap; vertical-align: 1px; }
 /* the phone's Licenses: the first thing under the tabs is the money, then licenses (Jobs); Everything/Mine stays on wider screens */
 @media (max-width: 640px) { .pm-tabrow .mine-row { display: none; } }
+
+/* Panel 3 (2026-10-30, three reviewers): the consensus fixes.
+   1. Content never shows through the message box: the fade under it turns solid before the box begins. */
+.dockbar::before { background: linear-gradient(rgba(var(--w), 0), var(--card) 46%); }
+.content.wash ~ .dockbar::before { background: linear-gradient(rgba(var(--w), 0), var(--bg) 46%); }
+/* 2. Row icons sit on the page's one left edge, like the headings above them. */
+.page.home.simple-home .hm-needs .stack .appr { padding-left: 0; padding-right: 0; grid-template-columns: 30px minmax(0, 1fr) auto; }
+.page.home.simple-home .hm-needs .stack .appr .appr-ico { justify-self: start; width: 20px; place-items: center start; }
+.store-row.plain { padding-left: 0; padding-right: 0; }
+.store-row.plain:hover { background: none; }
+.store-row.plain:hover .sr-tx b { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
+.store-row.plain .sr-ico { width: 20px; place-items: center start; }
+.st-next { padding-left: 0; padding-right: 0; }
+.st-next:hover:not(:disabled) { background: none; }
+.st-next-bot { width: 20px; place-items: center start; }
+/* 3. Store tools is a text link, like License report and Find licenses. */
+.st-tools { display: inline-flex; align-items: center; gap: 4px; font-size: 15px; font-weight: 500; color: var(--blue-ink); background: none; border: 0; padding: 6px 0; cursor: pointer; }
+.st-tools svg { width: 14px; height: 14px; }
+/* 4. Licenses: the license column wide enough that an agency's name stays on one line. */
+@media (min-width: 860px) { .page.permits .apps-t .tr { grid-template-columns: minmax(0, 3.1fr) 112px 120px minmax(0, 1.3fr); } }
+/* 5. Phone: the opening-date words take their own line under the title, never leaving a lone word beside them; the
+   tabs fade early enough to read as a row that scrolls. */
+@media (max-width: 640px) {
+  .page.permits .c-crit-t { display: block; margin: 2px 0 0; }
+  .page .ptabs { -webkit-mask-image: linear-gradient(90deg, #000 74%, transparent); mask-image: linear-gradient(90deg, #000 74%, transparent); }
+}
+/* 6. Phone tabs: the count sits level after the label in its grey; Odelia's cloud is grey too until her tab is open. */
+.tabbar a em { position: static; display: inline; min-width: 0; height: auto; margin-left: 4px; padding: 0; border-radius: 0; background: none; color: var(--ink3); font: 500 11px/1.1 var(--sans); }
+.tabbar a:not([aria-current="page"]) .nav-bot { filter: grayscale(1) opacity(.65); }
+/* 7. Phone: Odelia's suggestion chips scroll sideways, so the row fades at the edge instead of cutting a chip off. */
+@media (max-width: 640px) { .c-panel > .sugg { -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent); mask-image: linear-gradient(90deg, #000 80%, transparent); padding-right: 32px; } }

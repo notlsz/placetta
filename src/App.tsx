@@ -1581,7 +1581,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
               {NAV.map(n => (
                 <a key={n.v} {...navLink(n.v)} aria-current={current(n.v) ? "page" : undefined}>
                   {n.v === "odelia" ? <span className="nav-bot" aria-hidden="true"><AgentBot size={24} busy={busy} task={busy ? step?.state : undefined} interactive={false} /></span> : <n.Icon />}
-                  <span>{t(n.k)}</span>{badge[n.v] && !current(n.v) ? <em>{badge[n.v]}</em> : null}
+                  {/* the count sits level with the label, in the label's grey, as on the desktop list (panel 3) */}
+                  <span>{t(n.k)}{badge[n.v] && !current(n.v) ? <em>{badge[n.v]}</em> : null}</span>
                 </a>
               ))}
             </nav>

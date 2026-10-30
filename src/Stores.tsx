@@ -569,7 +569,7 @@ export function Stores() {
       <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p className="ph-long">{b(storesSay)}</p><p className="ph-short">{b(storesSay)}</p></div>
         {/* one action in view, the rest behind More: four pills in a row read as clutter, and stack four deep on a phone */}
         <div className="ph-acts st-acts">
-          <Menu className="st-more" buttonClass="pill quiet" label={lang === "zh" ? "门店工具" : "Store tools"} button={<>{lang === "zh" ? "门店工具" : "Store tools"}<I.chev /></>} items={[
+          <Menu className="st-more" buttonClass="lnk st-tools" label={lang === "zh" ? "门店工具" : "Store tools"} button={<>{lang === "zh" ? "门店工具" : "Store tools"}<I.chev /></>} items={[
             ...(stores.length > 0 ? [{ key: "report", label: lang === "zh" ? "价值报告" : "Value report", onPick: () => setReport(true) }] : []),
             ...(!bulk ? [{ key: "bulk", label: lang === "zh" ? "规划多家门店" : "Plan many stores", onPick: () => setBulk(true) }] : []),
             ...(!check ? [{ key: "check", label: lang === "zh" ? "检查已开业门店" : "Check stores already open", onPick: () => setCheck(true) }] : []),

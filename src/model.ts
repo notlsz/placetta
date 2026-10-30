@@ -767,7 +767,7 @@ export const SAMPLE: Workspace = {
 
 export const SUGGESTIONS: Bi[] = [
   B("File everything that's ready", "把能提交的都提交"),
-  B("What's blocking our opening date?", "什么在拖慢我们的开业日期？"),
+  B("What's blocking opening?", "什么在拖慢开业？"),
   B("Add a second shop in Fremont", "在弗里蒙特开第二家店"),
 ];
 /** With a live agent: tasks it does end to end. */

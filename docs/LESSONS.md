@@ -307,3 +307,14 @@ lesson (seeded, or learned on its own) so the agent itself knows the pattern.
   didn't recur: a win; it did: a loss), so the ones that work rank first and the ones that don't retire. And every
   form's fix is also kept as a pattern for any form ("a line refused as X was accepted as Y"), so a slip on a new form
   that works like an old one is caught the first time.
+
+## 2026-10-30: a pattern lesson split into one copy per answer; three dots read as "still typing"
+
+- What broke: production wrote four copies of the same "Any form" pattern, because the lesson's text carried the shape
+  of the answer that worked ("Xxx", "Xx xxxxxxx"). A pattern that is meant to collect confirmations across forms can't
+  contain anything that varies per form. Rule: a pattern lesson's text is built only from the reason and the kind of
+  fix; test that two different answers produce the identical text (scripts/self-learn-test.ts).
+- UI, panel 3: all three reviewers read the "…" menu under Odelia's finished answer as a typing indicator, and saw page
+  rows through the floating message box. Rules: a control under a finished message says what it is in a word ("More"),
+  never an ellipsis; the fade under the message box turns solid before the box begins; list icons sit on the page's
+  one left edge, not inset by row padding.
