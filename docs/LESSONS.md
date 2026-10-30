@@ -327,3 +327,9 @@ lesson (seeded, or learned on its own) so the agent itself knows the pattern.
   it recover. Rules: the probe runs three cases at a time by default and waits whenever a trivial query takes over 3
   seconds (scripts/probe/run.ts, breathe()); a probe that fails on timeouts is a capacity finding, not a product one,
   so read the database's logs before changing the product.
+- Why the database had no headroom (found after): pg_cron opens a new connection for every job it starts, and four
+  jobs ran every minute, each leaving a row in cron.job_run_details that nothing deleted. On a small instance the
+  connection setup alone is real load, and once the probe drained the disk budget, every new connection timed out
+  ("job startup timeout"). Rules: one per-minute job that calls each sweep only while it has something due
+  (public.minute_sweep, migration 20261108090000); cron history kept 3 days; a new every-minute job is added to
+  minute_sweep, never scheduled on its own.
