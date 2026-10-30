@@ -338,3 +338,13 @@ lesson (seeded, or learned on its own) so the agent itself knows the pattern.
   it is spent even an idle database crawls (a checkpoint of 26 buffers took 29 seconds; PostgREST couldn't load its
   schema cache) until the budget refills. Rule: verify a fix with `--slice` or `--only` on the cases it touches; a full
   probe runs only on its own Sunday schedule.
+
+## 2026-10-30: copying Muse, and what not to copy
+
+- Muse's Ideas work because every offer carries the fact behind it ("I found an email from the airline confirming your
+  canceled flight on October 14"). Odelia's Ideas (src/ideas.ts) follow that rule strictly: every number is one the
+  records hold, the fee count is the same one the cost line shows, and a business with no records gets no offers rather
+  than invented ones (scripts/ideas-test.ts). An idea never acts: tapping it asks her, and anything filed, sent or paid
+  still waits for approval.
+- A total repeated right above the buttons duplicated the fee section's own Total; the fee section already ends at the
+  decision, so only "Not now" was added. Check a borrowed pattern against what the screen already says before adding it.
