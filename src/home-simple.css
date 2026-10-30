@@ -693,3 +693,4 @@
 }
 /* phone Stores keeps its one-line summary, like the desktop */
 @media (max-width: 640px) { .page.stores-page > .ph .ph-tx p { display: block; } .store-row.plain .sr-she { align-items: flex-start; } .store-row.plain .sr-she-bot { margin-top: 1px; } }
+@media (max-width: 640px) { .page.stores-page > .ph .ph-tx p.ph-long { display: none; } }
