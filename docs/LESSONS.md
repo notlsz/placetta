@@ -301,3 +301,5 @@ Fixes retire when businesses contradict them or they keep losing. The twelve fix
 
 **The rule.** When a probe or a customer run shows a slip, the fix goes in twice: in code when it's a bug, and as a
 lesson (seeded, or learned on its own) so the agent itself knows the pattern.
+- A migration that redefines a function starts from the newest definition of it (grep every migration), never from the
+  first: the fix-lessons migration briefly undid the security rule that one business can't make a lesson live.
