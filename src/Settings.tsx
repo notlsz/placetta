@@ -1771,11 +1771,16 @@ export function Settings() {
           {show("agentmemory") && <AgentMemoryGroup db={memoryDb} />}
           {show("skills") && <SkillsGroup />}
 
-          <Group id="appearance" hidden={!show("appearance")} title={B("Appearance", "外观")} note={B("Dark mode for the agent and your workspace. Saved in this browser.", "为助理和工作区开启深色模式，保存在此浏览器中。")} rows={([
-            ["light", B("Light", "浅色")], ["dark", B("Dark", "深色")], ["system", B("Match this device", "跟随设备")],
-          ] as [Theme, Bi][]).map(([k, l]) => ({ label: l, pick: () => setTheme(k), right: <label className="radio" onClick={e => e.stopPropagation()}><input type="radio" name="theme" checked={theme === k} onChange={() => setTheme(k)} aria-label={b(l)} /><i /></label> }))}>
-            <div className="sg-sub accent">
-              <h3>{lang === "zh" ? "主题色" : "Accent color"}</h3>
+          {show("language") && <LanguageGroup />}
+
+          <Group id="appearance" hidden={!show("appearance")} title={B("Appearance", "外观")} note={B("Dark mode for the agent and your workspace. Saved in this browser.", "为助理和工作区开启深色模式，保存在此浏览器中。")} rows={[{ label: B("Theme", "主题"), right: (
+            <div className="seg sg-theme" role="radiogroup" aria-label={lang === "zh" ? "主题" : "Theme"}>
+              {([["light", B("Light", "浅色")], ["dark", B("Dark", "深色")], ["system", B("Auto", "跟随设备")]] as [Theme, Bi][]).map(([k, l]) => (
+                <button key={k} type="button" role="radio" aria-checked={theme === k} aria-pressed={theme === k} onClick={() => setTheme(k)}>{b(l)}</button>
+              ))}
+            </div>) }]}>
+            <details className="sg-sub accent sg-fold">
+              <summary><h3>{lang === "zh" ? "主题色" : "Accent color"}</h3><I.chev /></summary>
               <p className="sg-note">{lang === "zh" ? "按钮、链接、高亮和助理光效的颜色。选一个，或输入您自己的颜色。" : "The color of buttons, links, highlights and the agent's glow. Pick one or enter your own."}</p>
               <div className="swatches" role="radiogroup" aria-label={lang === "zh" ? "主题色" : "Accent color"}>
                 {ACCENTS.map((c, i) => <button key={c} type="button" role="radio" aria-checked={(accent || ACCENTS[0]).toLowerCase() === c.toLowerCase()} className="sw" style={{ background: c }} aria-label={i === 0 ? (lang === "zh" ? "快哉蓝（默认）" : "Placetta blue (default)") : c} onClick={() => setAccent(applyAccent(i === 0 ? "" : c))} />)}
@@ -1783,10 +1788,9 @@ export function Settings() {
                 <input className="sw-hex" value={hex} onChange={e => { const v = e.target.value.trim(); setHex(v); if (/^#?[0-9a-f]{6}$/i.test(v)) setAccent(applyAccent(v.startsWith("#") ? v : "#" + v)); }} placeholder="#4D73A3" aria-label="Hex" maxLength={7} spellCheck={false} />
                 {accent && <Btn onClick={() => { setAccent(applyAccent("")); setHex(""); }}>{lang === "zh" ? "恢复默认" : "Reset"}</Btn>}
               </div>
-            </div>
+            </details>
           </Group>
 
-          {show("language") && <LanguageGroup />}
 
           {show("recording") && <RecordingGroup />}
 

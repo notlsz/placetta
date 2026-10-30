@@ -519,11 +519,11 @@ export function Overview() {
       {rest.length > 0 && (
         <section className="sec hm-needs">
           <div className="sec-h">
-            <h2>{zh ? "等您处理" : "Waiting on you"}<em>{ordered.length}</em></h2>
+            <h2>{CLASSIC_HOME ? <>{zh ? "等您处理" : "Waiting on you"}<em>{ordered.length}</em></> : zh ? "接下来" : "After that"}</h2>
             {mineCtl}
           </div>
           {all && !mine && <BatchApprove />}
-          <div className="stack">{shown.map(x => <TodoRow key={x.key} x={x} />)}</div>
+          <div className="stack" data-indent>{shown.map(x => <TodoRow key={x.key} x={x} />)}</div>
           <div className="hm-needs-more">
           {all && docsAll.length > 1 && <button type="button" className="lnk more" disabled={busy} onClick={() => ask(b(findItAsk(B(docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.en} (${x.app.name.en})` : "").join("; "), docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.zh}（${x.app.name.zh}）` : "").join("；")), B("open applications", "进行中的申请"), true)))}><I.spark />{zh ? `让 Odelia 找齐 ${docsAll.length} 份文件` : `Have Odelia find all ${docsAll.length}`}</button>}
           {rest.length > 3 && <button type="button" className="lnk more" onClick={() => setAll(!all)}>{all ? (zh ? "收起" : "Show fewer") : (zh ? `全部 ${ordered.length} 项` : `All ${ordered.length}`)}</button>}
@@ -805,9 +805,6 @@ export function Permits({ tab: asked }: { tab: PermitsTab }) {
     ...(review ? [{ id: "review", label: lang === "zh" ? "按门店" : "By store" }] : []),
     { id: "documents", label: t("nav_docs"), count: ws.docs.length }, { id: "deadlines", label: t("nav_deadlines"), count: soon },
   ];
-  const sub = tab === "documents" ? t("docs_sub") : tab === "deadlines" ? t("dl_sub") : tab === "review"
-    ? (lang === "zh" ? "每家门店的每项许可一目了然：状态、下一个日期，点开即可处理。可以多选后一起交给 Odelia、分配或设置提醒。" : "Every permit at every store in one table: its state and next date, one click from the application. Pick several to hand to Odelia, assign or remind.")
-    : t("apps_sub");
   const zh = lang === "zh";
   const short = tab === "documents" ? (zh ? "您上传的、快哉准备的、机构发回的文件。" : "What you uploaded, what Placetta prepared, what agencies sent.")
     : tab === "deadlines" ? (zh ? "每个重要日期，按先后排列。" : "Every date that matters, in order.")
@@ -815,7 +812,7 @@ export function Permits({ tab: asked }: { tab: PermitsTab }) {
     : t("apps_sub_s");
   return (
     <div className="page permits">
-      <PageHead title={t("nav_apps")} sub={sub} short={short}>
+      <PageHead title={t("nav_apps")} sub={short} short={short}>
         {ws.apps.length > 0 && <ReportButton />}
         <button type="button" className="pill quiet" onClick={() => go("find")}><I.find />{t("nav_find")}</button>
       </PageHead>

@@ -109,7 +109,7 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
       </div>
       {asking && <AskSheet context={panelContext(feed)} onClose={() => setAsking(false)} />}
 
-      <div className="pn-dock"><Composer variant="panel" tts={tts} asked={asked} /></div>
+      <div className="pn-dock"><Composer variant="panel" tts={tts} asked={asked} />{mode === "page" && !CLASSIC_STRIP && <p className="pn-never"><I.lock />{lang === "zh" ? "未经您同意，绝不签名、付款或提交。" : "Nothing is signed, paid or submitted without you."}</p>}</div>
     </aside>
   );
 }
@@ -117,6 +117,9 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
 /** Odelia's page opens on where her work stands, in three plain lines before the thread: what she is doing now, the
  *  last thing she did, and what needs the owner (the same todos() count as Home's badge and "Waiting on you"). Each
  *  opens where it's kept: Work, Activity, the first thing waiting. Facts from the workspace only. */
+/** The old three-cell strip (Now, Last done, Needs you) above the thread; off for the one-line version. */
+const CLASSIC_STRIP = false as boolean;
+
 function NowStrip({ agencies }: { agencies: number }) {
   const { b, lang, ws, busy, live, go, openApproval, openApp } = useApp();
   const zh = lang === "zh";
@@ -136,6 +139,12 @@ function NowStrip({ agencies }: { agencies: number }) {
     else if (first.kind === "doc") openApp(first.app.id, "check");
     else go("odelia", "work");
   };
+  // the simple page (Muse's "Muse is working", Grok Bot's chat first): one quiet line, the whole line opens her Work
+  if (!CLASSIC_STRIP) return (
+    <button type="button" className={"now-line" + (busy ? " on" : "")} onClick={() => go("odelia", "work")}>
+      <span className="ns-live" aria-hidden="true" /><span className="nl-k">{zh ? "正在做：" : "Working on:"}</span><span className="nl-t" aria-live="polite">{now.t}</span><I.chevR />
+    </button>
+  );
   return (
     <section className="now-strip" aria-label={zh ? "Odelia 的工作" : "Odelia's work"}>
       <button type="button" className={"ns-cell ns-now" + (busy ? " on" : "")} onClick={() => go("odelia", "work")}>

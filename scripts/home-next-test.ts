@@ -44,7 +44,7 @@ function homeNextTests(ok: Ok) {
     const h = render(SAMPLE_WS, lang);
     ok(count(h, PRIMARY) === 1, `${lang}: the sample shows exactly one primary "Do this next" button`, count(h, PRIMARY));
     ok(count(h, /data-do-next=/g) === 1 && !h.includes("hm-calm"), `${lang}: one "Do this next" card, no calm state`);
-    ok(h.includes(lang === "en" ? "Do this next" : "下一步") && h.includes(lang === "en" ? "Waiting on you" : "等您处理"), `${lang}: the card and Waiting on you are labeled`);
+    ok(h.includes(lang === "en" ? "Do this next" : "下一步") && h.includes(lang === "en" ? "After that" : "接下来"), `${lang}: the card and Waiting on you are labeled`);
     ok(!/[·•]/.test(words(h)), `${lang}: no bullet or dot separators`);
     ok(!/(^|[^\d.,:$])0\d/.test(words(h)), `${lang}: no leading zeros`);
   }
@@ -56,7 +56,7 @@ function homeNextTests(ok: Ok) {
   ok(list.at(-1)?.key === "a:a-sign", "then what only waits on the owner (the sign permit)", list.map(x => x.key));
   // one count everywhere (the 2026-10-23 review): Waiting on you counts everything waiting, the card above included, the
   // same number as the Home badge and the greeting
-  ok(render(SAMPLE_WS, "en").match(/Waiting on you.*?<em>(\d+)<\/em>/)?.[1] === String(list.length), "Waiting on you counts everything waiting on the owner, like the badge");
+  ok(render(SAMPLE_WS, "en").includes(`${list.length} things need you.`), "the greeting counts everything waiting on the owner, like the badge");
 
   // only a missing document: still exactly one primary button, the upload
   const docOnly: Workspace = { ...SAMPLE_WS, approvals: [], jobs: [], deadlines: [] };

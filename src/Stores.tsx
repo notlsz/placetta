@@ -122,6 +122,33 @@ function StoreCard({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
   );
 }
 
+/** The simple Stores list (CLASSIC_STORES off), the way Grok Bot lists its bots and Airbnb a host's listings: one row a
+ *  store, its name, where it stands in one plain sentence, and what needs you there. The score, grade and checks live
+ *  in the store itself. */
+const CLASSIC_STORES = false as boolean;
+
+function StoreRow({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
+  const { b, ws, lang } = useApp();
+  const zh = lang === "zh";
+  const { p, s } = withPath(raw, ws, useEvidence());
+  const r = readiness(s, ws);
+  const bot = jobsAt(ws, raw);
+  const waiting = bot.open.filter(j => j.status === "waiting").length;
+  const expiring = s.certs.filter(c => { const d = daysUntil(c.expires); return d >= 0 && d <= 30; }).length;
+  const where = s.stage === "opening"
+    ? (s.projectedOpen ? (zh ? `筹备中，预计 ${b(estimateSay(s.projectedOpen, p?.range))} 开业` : `Opening ${b(estimateSay(s.projectedOpen, p?.range))}`) + (p && p.verdict === "on_track" ? (zh ? "，进度正常" : ", on track") : "") : (zh ? "筹备中" : "Getting ready to open"))
+    : (zh ? `已开业，${b(r.label)}` : `Open. ${b(r.label)}`);
+  const needs = [waiting ? (zh ? `${waiting} 件事需要您` : `${waiting} thing${waiting === 1 ? " needs" : "s need"} you`) : "", expiring ? (zh ? `${expiring} 张证书即将到期` : `${expiring} certificate${expiring === 1 ? "" : "s"} expiring`) : ""].filter(Boolean).join(zh ? "，" : ", ");
+  return (
+    <button type="button" className="store-row" onClick={onOpen}>
+      <span className="sr-bot" aria-hidden="true"><StoreBot id={raw.id} size={28} label={b(s.name)} busy={bot.open.some(j => j.status === "running")} /></span>
+      <span className="sr-tx"><b>{b(s.name)}</b><small>{where.replace(/\.\s*$/, "")}{zh ? "。" : "."}</small></span>
+      {needs ? <em className="sr-need">{needs}</em> : <span className="sr-ok">{zh ? "没有需要您的" : "Nothing needs you"}</span>}
+      <I.chevR />
+    </button>
+  );
+}
+
 /** A store's permits beside its card: how many are done, and the next ones with their status and next step. */
 function StoreNext({ s, onOpen }: { s: Store; onOpen: () => void }) {
   const { b, ws, lang, openApp } = useApp();
@@ -519,7 +546,7 @@ export function Stores() {
   if (s) return <StoreDetail s={s} onBack={() => setOpen(null)} />;
   return (
     <div className="page">
-      <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p className="ph-long">{b(B("Every store inspection-ready every day, measured on what matters: opening on time, staying open, no fines.", "每家门店每天都做好迎检准备，用三件事衡量：按期开业、持续营业、零罚款。"))}</p><p className="ph-short">{b(B("Every store ready for inspection, every day.", "每家门店，每天都做好迎检准备。"))}</p></div>
+      <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p className="ph-long">{b(B("Every store ready for inspection, every day.", "每家门店，每天都做好迎检准备。"))}</p><p className="ph-short">{b(B("Every store ready for inspection, every day.", "每家门店，每天都做好迎检准备。"))}</p></div>
         {/* one action in view, the rest behind More: four pills in a row read as clutter, and stack four deep on a phone */}
         <div className="ph-acts st-acts">
           {stores.length > 0 && <Pill onClick={() => setReport(true)}>{lang === "zh" ? "价值报告" : "Value report"}</Pill>}
@@ -541,7 +568,9 @@ export function Stores() {
       {sheet === "q" && <QuestionnaireSheet onClose={() => setSheet(null)} />}
       {sheet === "replicate" && <ReplicateSheet onClose={() => setSheet(null)} />}
       <ReplicaFacts />
-      {stores.length === 1 ? (
+      {!CLASSIC_STORES && stores.length > 0 ? (
+        <div className="store-rows">{stores.map(x => <StoreRow key={x.id} s={x} onOpen={() => setOpen(x.id)} />)}</div>
+      ) : stores.length === 1 ? (
         // one store: its card beside its permits, so the page is the store's own dashboard, not a card in an empty page
         <div className="stores one">
           <StoreCard s={stores[0]} onOpen={() => setOpen(stores[0].id)} />

@@ -38,3 +38,55 @@
   .hm-odelia { margin-top: 24px; }
 }
 .page.home.simple-home > .dtn .dtn-bot { display: none; }
+
+/* Odelia's page (src/AgentPanel.tsx NowStrip, CLASSIC_STRIP off): what she's on in one quiet line, then the
+   conversation; the promise sits under the box you type in, the way Grok Bot and Muse keep the chat first */
+.panel.full > .now-line { flex: none; display: flex; align-items: center; gap: 8px; width: 100%; min-height: 36px; margin: 2px 0 8px; padding: 0; border: 0; background: none; font: inherit; font-size: 14px; text-align: left; color: var(--ink2); cursor: pointer; }
+.now-line .ns-live { flex: none; width: 7px; height: 7px; border-radius: 99px; background: var(--ink3); }
+.now-line.on .ns-live { background: var(--blue-ink); animation: fr-pulse 1.2s ease-in-out infinite; }
+.now-line .nl-k { flex: none; color: var(--ink3); }
+.now-line .nl-t { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
+.now-line > svg { flex: none; width: 14px; height: 14px; color: var(--ink3); }
+.now-line:hover .nl-t { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
+.pn-never { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 8px 0 0; font-size: 12px; color: var(--ink3); }
+.pn-never svg { width: 12px; height: 12px; }
+@keyframes fr-pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .now-line.on .ns-live { animation: none; } }
+
+/* Permits: the list reads like a to-do list (name and agency, status, fee, what's next); how long it takes and the
+   agency's page live in the permit itself. One line under the title, not three. */
+@media (min-width: 860px) {
+  .page.permits .apps-t .tr { grid-template-columns: minmax(0, 2.2fr) 136px 96px minmax(0, 1.6fr); }
+  .page.permits .apps-t .c-est, .page.permits .apps-t .tr.th span:nth-child(4) { display: none; }
+}
+.page.permits .apps-t .c-src, .page.permits .apps-t .c-est2 { display: none; }
+
+/* Stores (src/Stores.tsx StoreRow, CLASSIC_STORES off): one row a store, Grok Bot's bot list and Airbnb's listings */
+.store-rows { display: flex; flex-direction: column; margin-top: 8px; }
+.store-row { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 68px; padding: 10px 12px; border: 0; border-radius: 14px; background: none; font: inherit; text-align: left; color: var(--ink); cursor: pointer; }
+.store-row + .store-row { margin-top: 2px; }
+.store-row:hover { background: rgba(var(--e), .035); }
+.sr-bot { flex: none; display: grid; place-items: center; width: 32px; height: 32px; }
+.sr-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sr-tx b { font-size: 15.5px; font-weight: 600; }
+.sr-tx small { font-size: 13.5px; color: var(--ink2); }
+.sr-need { flex: none; font-style: normal; font-size: 13.5px; font-weight: 500; color: var(--warm); }
+.sr-ok { flex: none; font-size: 13.5px; color: var(--ink3); }
+.store-row > svg { flex: none; width: 16px; height: 16px; color: var(--ink3); }
+@media (max-width: 600px) {
+  .store-row { flex-wrap: wrap; row-gap: 4px; }
+  .sr-need, .sr-ok { order: 3; flex-basis: 100%; padding-left: 46px; }
+  .store-row > svg { order: 2; }
+}
+
+/* Settings: the theme is one row with three choices; the accent color folds away (few owners change it) */
+.sg-theme { margin: 0; padding: 3px; }
+.sg-theme button { padding: 5px 12px; font-size: 13px; }
+.sg-fold > summary { display: flex; align-items: center; gap: 8px; list-style: none; cursor: pointer; }
+.sg-fold > summary::-webkit-details-marker { display: none; }
+.sg .sg-sub.sg-fold > summary h3 { margin: 0; line-height: 20px; }
+.sg-fold > summary { min-height: 20px; }
+.sg-fold > summary svg { display: block; }
+.sg-fold > summary svg { width: 14px; height: 14px; color: var(--ink3); transition: transform .2s; }
+.sg-fold[open] > summary svg { transform: rotate(180deg); }
+.sg-fold:not([open]) { padding-bottom: 0; }

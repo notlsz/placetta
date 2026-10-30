@@ -1510,7 +1510,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       )}
       <ul className="nav">
         <li><button type="button" className="cmdk-open" onClick={() => setCmdk(true)} title={lang === "zh" ? "搜索，或直接交给 Odelia" : "Search, or hand Odelia a job"}><I.find /><span>{lang === "zh" ? "搜索" : "Search"}</span><kbd>{/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</kbd></button></li>
-        {canHq && <li><a {...navLink("hq")} aria-current={view === "hq" ? "page" : undefined} title={slim ? t("nav_hq") : undefined}><I.hq /><span>{t("nav_hq")}</span></a></li>}
+        {canHq && (moreOpen || phone) && <li><a {...navLink("hq")} aria-current={view === "hq" ? "page" : undefined} title={slim ? t("nav_hq") : undefined}><I.hq /><span>{t("nav_hq")}</span></a></li>}
         {!!partnerMe && <li><a {...navLink("partner")} aria-current={view === "partner" ? "page" : undefined} title={slim ? b(B("Partner", "合作伙伴")) : undefined}><I.user /><span>{b(B("Partner", "合作伙伴"))}</span></a></li>}
         {(cloud?.me.staff || cloud?.me.staff_email) && <li><a {...navLink("queue")} aria-current={view === "queue" ? "page" : undefined} title={slim ? t("nav_queue") : undefined}><I.queue /><span>{t("nav_queue")}</span></a></li>}
       </ul>
@@ -1518,15 +1518,16 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         <p className="nav-h">{t("nav_more")}</p>
         <ul className="nav">{moreRows}</ul>
       </>}
-      {view_.locations.length > 0 && <p className="nav-h">{t("locations")}</p>}
-      <ul className="nav locs">
+      {/* the stores are one click away on Stores; the sidebar keeps only the places you go (Muse's five, Grok Bot's list) */}
+      {phone && view_.locations.length > 0 && <p className="nav-h">{t("locations")}</p>}
+      {phone && <ul className="nav locs">
         {view_.locations.map(l => (
           <li key={l.id}><button type="button" title={slim ? b(l.name) : undefined} onClick={() => {
             if (!cloud && l.id === "fremont") { setMatch(m => m && /fremont|弗里蒙特/i.test(m.where) ? m : null); go("find"); if (!match || !/fremont|弗里蒙特/i.test(match.where)) void run({ match: { what: lang === "zh" ? "奶茶店" : "Milk tea shop", where: lang === "zh" ? "加州弗里蒙特" : "Fremont, CA" } }, null); }
             else go("overview");
           }}><I.pin /><span>{b(l.name)}<small>{b(l.county)}</small></span>{l.state === "mapping" && <em className="map">{t("mapping")}</em>}</button></li>
         ))}
-      </ul>
+      </ul>}
       <div className="side-bot">
         <a {...navLink("settings")} className={"setb" + (view === "settings" ? " on" : "")} aria-current={view === "settings" ? "page" : undefined} title={slim ? t("nav_settings") : undefined}><I.settings /><span>{t("nav_settings")}</span></a>
         <div className="lang" role="group" aria-label={t("langSwitch")}>
