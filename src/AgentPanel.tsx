@@ -56,7 +56,7 @@ export function AgentPanel({ feed, tts, mode, onHide, asked }: {
   useEffect(() => {
     const el = scroller.current; if (!el) return;
     const lastEl = el.lastElementChild as HTMLElement | null;
-    const top = lastEl && lastEl.offsetHeight > el.clientHeight ? lastEl.offsetTop - el.offsetTop - 8 : el.scrollHeight;
+    const top = lastEl && lastEl.offsetHeight > el.clientHeight - 40 ? Math.max(0, el.scrollTop + lastEl.getBoundingClientRect().top - el.getBoundingClientRect().top - 24) : el.scrollHeight;
     el.scrollTo({ top, behavior: "smooth" });
   }, [sig]);
 

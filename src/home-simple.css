@@ -618,7 +618,7 @@
 .st-next .st-next-tx { color: var(--blue-ink); }
 /* Panel 10 */
 /* Licenses: fixed side columns, so the headers and the rows under them share every x (the shared fr split drifted 5px) */
-@media (min-width: 860px) { .page.permits .apps-t .tr { grid-template-columns: minmax(0, 1fr) 112px 120px 156px; } }
+@media (min-width: 860px) { .page.permits .apps-t .tr.th, .page.permits .apps-t .tr.row, .page.permits .apps-t .tray .tr { grid-template-columns: minmax(0, 1fr) 112px 120px 156px; } }
 /* Odelia's own message box: the same height, buttons and place as on every other page */
 .page.odelia .composer .ic, .page.odelia .composer .sendb, .panel .composer .ic, .panel .composer .sendb { width: 44px; height: 44px; }
 @media (min-width: 641px) { .page.odelia .pn-dock { padding-bottom: 2px; } }
@@ -630,3 +630,26 @@
 .settings .swatches .sw-item small { font-size: 12px; line-height: 16px; color: var(--ink2); white-space: nowrap; }
 .settings .swatches { align-items: flex-start; gap: 12px 8px; }
 .settings .swatches .sw-own, .settings .swatches .sw-hex { align-self: flex-start; }
+@media (min-width: 860px) { .page.permits .apps-t .tr.th, .page.permits .apps-t .tr.row { padding-right: 0; } }
+/* Panel 11 */
+/* phone: "Working on" on its own line, the task under it on the same left edge, the chevron on the first line */
+@media (max-width: 640px) {
+  .panel.full > .now-line { display: grid; grid-template-columns: minmax(0, 1fr) 16px; column-gap: 8px; row-gap: 2px; align-items: center; }
+  .panel.full > .now-line .ns-live { display: none; }
+  .panel.full > .now-line .nl-k { grid-row: 1; grid-column: 1; }
+  .panel.full > .now-line .nl-t { grid-row: 2; grid-column: 1 / 3; }
+  .panel.full > .now-line > svg { grid-row: 1; grid-column: 2; }
+}
+/* the accent preview the same round shape as its swatches */
+.settings .sg-fold > summary .sw-now { border-radius: 50%; }
+/* Settings sections: the open one gets the same pale pill as the main sidebar, text still on the edge */
+@media (min-width: 761px) {
+  .settings .set-tab { position: relative; z-index: 0; }
+  .settings .set-tab[aria-current="page"]::after { content: ""; position: absolute; z-index: -1; left: -10px; right: 0; top: 2px; bottom: 2px; border-radius: 10px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+}
+/* Stores on a phone: chevrons sit on their title line */
+@media (max-width: 640px) { .st-next { align-items: flex-start; } .st-next > svg:last-child { margin-top: 3px; } .store-row.plain > svg:last-child { align-self: flex-start; } }
+/* phone Home: a tighter Do this next card, so one row of After that shows above the message box */
+@media (max-width: 640px) { .page.home .dtn { padding: 20px 22px 18px; } .page.home .dtn .dtn-act .pill.dtn-go { height: 50px; } }
+/* her first line starts below the feed's top fade, never under it */
+.page.odelia.chat .feed { padding-top: 18px; }
