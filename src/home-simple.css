@@ -108,7 +108,7 @@
   .side:hover .slimb, .side .slimb:focus-visible { opacity: 1; }
 }
 .page.permits .pm-bar { margin-bottom: 18px; }
-.page.home.simple-home .hm-needs-more .lnk.more { color: var(--blue-ink); font-weight: 500; }
+.page.home.simple-home .hm-needs .hm-needs-more .lnk.more { color: var(--blue-ink) !important; font-weight: 500; }
 
 /* Permits rows in two lines: the name, then the agency with who has it beside it */
 @media (min-width: 860px) {
