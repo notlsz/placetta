@@ -39,7 +39,8 @@ export function CostLine({ page, noDate }: { page?: boolean; noDate?: boolean })
   const known = money(c.totalUSD);
   // on Permits, one short line (the breakdown says which fees aren't published yet): "$6,764 so far, opens Feb 7, 2027"
   if (page) {
-    const short: Bi[] = [B(`${known}${c.unpublished || c.quoted ? " so far" : ""}`, `${c.unpublished || c.quoted ? "目前 " : ""}${known}`)];
+    // "known", never "so far": the amount isn't money spent, it's every fee an agency has published (Jobs, Rams)
+    const short: Bi[] = [B(`${known}${c.unpublished ? ` plus ${c.unpublished} fee${c.unpublished === 1 ? "" : "s"} set by the agenc${c.unpublished === 1 ? "y" : "ies"}` : c.quoted ? " known" : ""}`, `已知 ${known}${c.unpublished ? `，另有 ${c.unpublished} 项由机构核定` : ""}`)];
     if (c.landing && !noDate) short.push(B(`opens ${fmtDay(c.landing, "en", true)}`, `预计 ${fmtDay(c.landing, "zh", true)} 开业`));
     return (
       <>

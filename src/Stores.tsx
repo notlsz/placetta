@@ -552,10 +552,16 @@ export function Stores() {
   const [sheet, setSheet] = useState<"checks" | "trust" | "q" | "replicate" | null>(null);
   const stores = ws.stores ?? [];
   const s = stores.find(x => x.id === open);
+  const ev = useEvidence();
   if (s) return <StoreDetail s={s} onBack={() => setOpen(null)} />;
+  // the page's sentence is where the stores stand, not a slogan (Chesky): "1 open, 1 opening Feb 7"
+  const openN = stores.filter(x => x.stage === "open").length, next = stores.filter(x => x.stage !== "open").map(x => ({ x, d: withPath(x, ws, ev).s.projectedOpen ?? x.plannedOpen ?? "" })).sort((p, q) => p.d.localeCompare(q.d));
+  const storesSay = !stores.length ? B("Every store ready for inspection, every day.", "每家门店，每天都做好迎检准备。")
+    : B([openN ? `${openN} open` : "", next.length ? `${next.length} opening${next.length === 1 && next[0].d ? ` ${fmtDay(next[0].d, "en")}` : ""}` : ""].filter(Boolean).join(", ") + ".",
+      [openN ? `${openN} 家已开业` : "", next.length ? `${next.length} 家筹备中${next.length === 1 && next[0].d ? `，${fmtDay(next[0].d, "zh")} 开业` : ""}` : ""].filter(Boolean).join("，") + "。");
   return (
     <div className="page stores-page">
-      <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p className="ph-long">{b(B("Every store ready for inspection, every day.", "每家门店，每天都做好迎检准备。"))}</p><p className="ph-short">{b(B("Every store ready for inspection, every day.", "每家门店，每天都做好迎检准备。"))}</p></div>
+      <header className="ph"><div className="ph-tx"><h1>{t("nav_stores")}</h1><p className="ph-long">{b(storesSay)}</p><p className="ph-short">{b(storesSay)}</p></div>
         {/* one action in view, the rest behind More: four pills in a row read as clutter, and stack four deep on a phone */}
         <div className="ph-acts st-acts">
           <Menu className="st-more" buttonClass="pill quiet" label={lang === "zh" ? "更多" : "More"} button={<>{lang === "zh" ? "更多" : "More"}<I.chev /></>} items={[

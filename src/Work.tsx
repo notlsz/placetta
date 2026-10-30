@@ -353,7 +353,7 @@ export function WorkPage() {
 /** The approval a plan waits on, inside the plan's own card (Jobs, Ive: one card, the task said once): just the button,
  *  or the undo window once approved. */
 function PlanApprove({ a }: { a: Approval }) {
-  const { t, busy, openApproval } = useApp();
+  const { lang, busy, openApproval } = useApp();
   const hold = useApprovalHold(a.id);
-  return <div className="job-approve">{hold ? <LocalHold hold={hold} compact /> : <button type="button" className="pill ink sm" onClick={() => openApproval(a.id)} disabled={busy}><span>{t("approve")}</span><i aria-hidden="true"><I.arrow /></i></button>}</div>;
+  return <div className="job-approve">{hold ? <LocalHold hold={hold} compact /> : <button type="button" className="pill ink sm" onClick={() => openApproval(a.id)} disabled={busy}><span>{lang === "zh" ? "查看并批准" : "Review and approve"}</span><i aria-hidden="true"><I.arrow /></i></button>}</div>;
 }

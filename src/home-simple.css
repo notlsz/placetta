@@ -360,3 +360,9 @@
 .page.permits .cost-line.on-page .lnk { flex: none; white-space: nowrap; }
 .pm-tabrow { margin-bottom: 22px; }
 .pm-tabrow > .ptabs { margin-bottom: 0; }
+/* round 12 */
+.page.permits .apps-t .c-name > small:not(.c-team) { text-wrap: pretty; }
+/* Odelia's cloud on her first line, not a line of its own: the first line of her answer starts after it */
+.page.odelia .answer > .ans-bot { position: absolute; left: -2px; top: -2px; margin: 0; }
+.page.odelia .answer > .ans-bot + p, .page.odelia .answer > .ans-bot + * > :first-child { text-indent: 34px; }
+.settings .set-col > .sg:first-child + .sg { margin-top: 48px; }

@@ -22,8 +22,8 @@ export function standing(w: Workspace, today: string): { text: Bi; approvals: st
   const withAgency = w.apps.filter(a => a.status === "review" || a.status === "filing").length;
   const list = todos(w, today), first = list[0];
   const need = list.length;
-  const lead = B(`Here's where things stand: ${n(done, "application is", "applications are")} approved, ${withAgency} ${withAgency === 1 ? "is" : "are"} with the agency, and ${n(need, "thing needs", "things need")} you.`,
-    `目前进展：${done} 项申请已获批准，${withAgency} 项在机构审核中，${need} 项需要您处理。`);
+  const lead = B(`Here's where things stand: ${n(done, "license is", "licenses are")} approved, ${withAgency} ${withAgency === 1 ? "is" : "are"} with the agency, and ${n(need, "thing needs", "things need")} you.`,
+    `目前进展：${done} 项执照已获批准，${withAgency} 项在机构审核中，${need} 项需要您处理。`);
   const next = first ? B(` First: ${lowerFirst(headline(first).en)}.`, `先做这一项：${headline(first).zh}。`) : B(" Nothing needs you right now.", "目前没有需要您处理的事项。");
   return { text: B(lead.en + next.en, lead.zh + next.zh), approvals: first?.kind === "approval" ? [first.a.id] : [] };
 }
