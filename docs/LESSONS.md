@@ -273,3 +273,15 @@ answer, even "None", and refused "No" on a box that only ticks for yes.
 - A form Odelia names by its title in a city the library covers is the library's form, when one form there shares
   clearly more of its words than any other (Boston's food permit went in as a bare row, probe run 11).
 - A line named with its section in front ("Section II cooking equipment counts") still finds its line.
+
+## 2026-10: every silent run had spent its turn thinking
+
+**What happened.** The new log line ("run ended without words") showed the send-back never fired: each silent run had
+ended on max_tokens with no text, and the send-back skipped max_tokens on purpose. A workspace read also timed out
+(57014) under load and failed a run, and the probe's own sign-in hit a gateway timeout.
+
+**The rules.**
+
+- Log the case you're guarding before you trust the guard: the first look at real data showed the guard was dead code.
+- A turn with no words gets a second chance whatever its stop reason.
+- Reads retry on a timeout the same way saves do; the probe retries its sign-in.

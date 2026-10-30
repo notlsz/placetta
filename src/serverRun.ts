@@ -541,7 +541,9 @@ export async function runRounds(o: {
         // ... and a run with no words at all (no job either) is sent back the same way: "Done." over nothing was the
         // whole answer three times running on the Texas sales tax probe
         const silent = !text.trim() && !st.text.slice(made.lastToolAt).trim() && (st.quiet ?? 0) < 1;
-        if ((openJob || silent) && data.stop_reason !== "max_tokens") {
+        // (a turn that spent its whole budget thinking ends on max_tokens with no words: it gets the same second chance;
+        // the logs showed every silent run ended this way, 2026-10-30)
+        if (openJob || silent) {
           st.quiet = (st.quiet ?? 0) + 1;
           st.messages.push({ role: "assistant", content: data.content.length ? data.content : [{ type: "text", text: "(no reply)" }] });
           st.messages.push({ role: "user", content: openJob

@@ -751,7 +751,12 @@ export async function work(runId: string, token: string | null, ticket: string |
     const w = await saveOnto<Workspace>({
       tries: SAVE_TRIES,
       async read() {
-        const { data: fresh, error } = await admin.from("workspaces").select("name, state, updated_at").eq("id", ws).maybeSingle();
+        let { data: fresh, error } = await admin.from("workspaces").select("name, state, updated_at").eq("id", ws).maybeSingle();
+        // the same under load: a read that times out is read again, up to three times
+        for (let k = 0; error && TRANSIENT_PG.test(String(error.code ?? "")) && k < 3; k++) {
+          await new Promise((r) => setTimeout(r, 500 + Math.random() * 1000));
+          ({ data: fresh, error } = await admin.from("workspaces").select("name, state, updated_at").eq("id", ws).maybeSingle());
+        }
         if (error) throw err("save_failed", "Couldn't read the workspace: " + error.code);
         return fresh?.updated_at ? { w: normalizeState(fresh.name ?? row.name, fresh.state ?? {}), version: String(fresh.updated_at) } : null;
       },

@@ -93,7 +93,9 @@ async function person(tag: string): Promise<Person> {
     insert into public.age_confirmations (user_id, method) values (${lit(id)}, 'attest') on conflict (user_id) do nothing;`);
   made.users.add(id);
   const db = createClient(URL_, ANON, { auth: { persistSession: false, autoRefreshToken: false } });
-  const { data: s, error: se } = await db.auth.signInWithPassword({ email, password });
+  // a sign-in that times out under the probe's load (504) is tried again: it's the gateway, not the account
+  let { data: s, error: se } = await db.auth.signInWithPassword({ email, password });
+  for (let k = 0; (se || !s.session) && k < 3; k++) { await sleep(2000 * (k + 1)); ({ data: s, error: se } = await db.auth.signInWithPassword({ email, password })); }
   if (se || !s.session) throw new Error(`sign in: ${se?.message}`);
   const p = { id, email, jwt: s.session.access_token, db };
   people.push(p);
