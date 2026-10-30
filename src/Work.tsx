@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useApp } from "./ctx";
 import { B, type Bi } from "./bi";
 import { fmtAgo, fmtDay } from "./time";
-import { I, Pill } from "./ui";
+import { I } from "./ui";
 import { LocalHold, useApprovalHold } from "./SendHold";
 import { awayWait, cadence, continuePrompt, family, nextAction, nextRun, progress, proven, storeOf, type Job, type Routine } from "./jobs";
 import { reportLines } from "./finish";
@@ -66,7 +66,7 @@ export function PlanCard({ job, compact, actions, approve }: { job: Job; compact
       <ol className="job-steps">
         {job.steps.map((s, i) => (
           <li key={i} className={s.done ? "done" : i === next && job.status !== "stopped" ? "now" : ""}>
-            <span className="tick" aria-hidden="true">{s.done ? <I.check /> : null}</span>
+            <span className="tick" aria-hidden="true">{s.done ? <I.check /> : <em>{i + 1}</em>}</span>
             <span>{b(s.title)}</span>
           </li>
         ))}
@@ -355,5 +355,5 @@ export function WorkPage() {
 function PlanApprove({ a }: { a: Approval }) {
   const { t, busy, openApproval } = useApp();
   const hold = useApprovalHold(a.id);
-  return <div className="job-approve">{hold ? <LocalHold hold={hold} compact /> : <Pill onClick={() => openApproval(a.id)} disabled={busy} sm>{t("approve")}</Pill>}</div>;
+  return <div className="job-approve">{hold ? <LocalHold hold={hold} compact /> : <button type="button" className="pill ink sm" onClick={() => openApproval(a.id)} disabled={busy}><span>{t("approve")}</span><i aria-hidden="true"><I.arrow /></i></button>}</div>;
 }

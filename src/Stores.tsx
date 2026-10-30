@@ -13,7 +13,7 @@ import { I, Menu, Pill, StatusChip } from "./ui";
 import { saveFile } from "./files";
 import { parseStoreList, permitsOnOpening, planCsv, planStores, toWorkspace, type FormStat } from "./plan";
 import * as api from "./cloud/api";
-import { StoreBot } from "./Bot";
+import { AgentBot, StoreBot } from "./Bot";
 import { storeOf, type Job } from "./jobs";
 import { PlanCard, WatchLink } from "./Work";
 import { firstSentence } from "./phrase";
@@ -577,9 +577,11 @@ export function Stores() {
       {sheet === "q" && <QuestionnaireSheet onClose={() => setSheet(null)} />}
       {sheet === "replicate" && <ReplicateSheet onClose={() => setSheet(null)} />}
       <ReplicaFacts />
-      {!CLASSIC_STORES && stores.length > 0 ? (
+      {!CLASSIC_STORES && stores.length > 0 ? (<>
         <div className="store-rows">{stores.map(x => <StoreRow key={x.id} s={x} onOpen={() => setOpen(x.id)} />)}</div>
-      ) : stores.length === 1 ? (
+        {/* Odelia's one line under the stores (Paul Smith): the next thing a growing owner does, one tap to start it */}
+        {!CLASSIC_STORES && <button type="button" className="st-next" disabled={busy} onClick={() => ask(lang === "zh" ? "我要再开一家店。" : "I'm opening another store.")}><span className="st-next-bot" aria-hidden="true"><AgentBot size={22} interactive={false} /></span>{lang === "zh" ? "要再开一家店？告诉我地址。" : "Opening another store? Tell me the address."}</button>}
+      </>) : stores.length === 1 ? (
         // one store: its card beside its permits, so the page is the store's own dashboard, not a card in an empty page
         <div className="stores one">
           <StoreCard s={stores[0]} onOpen={() => setOpen(stores[0].id)} />

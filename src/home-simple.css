@@ -313,3 +313,17 @@
   /* Licenses on a phone: the opening date is Home's; the cost line keeps the amount and Breakdown on one line */
   .page.permits .cost-line.on-page .cl-date { display: none; }
 }
+
+/* round 9 */
+/* Odelia's line under the stores */
+.st-next { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; margin-top: 12px; padding: 8px 12px; border: 0; border-radius: 12px; background: none; font: inherit; font-size: 14.5px; color: var(--ink2); text-align: left; cursor: pointer; }
+.st-next:hover:not(:disabled) { color: var(--ink); background: rgba(var(--e), .035); }
+.st-next-bot { flex: none; display: grid; place-items: center; width: 28px; height: 22px; }
+/* steps not done yet read as numbers, not boxes that look tappable */
+.job-steps .tick em { font-style: normal; font-size: 11.5px; font-weight: 600; color: var(--ink3); }
+.job-steps li:not(.done) .tick { border: 0; box-shadow: none; background: none; }
+/* Licenses: group labels, column headers and license names on one left edge */
+@media (min-width: 860px) {
+  .page.permits .apps-t .tg-h { padding-left: 14px; }
+  .page.permits .apps-t .tr.th { padding-left: 14px; }
+}
