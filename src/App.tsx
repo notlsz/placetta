@@ -1436,7 +1436,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       {odeliaTab !== "chat" && <PageHead title={t("nav_odelia")} />}
       <Tabs view="odelia" current={odeliaTab} tabs={[
         { id: "chat", label: t("nav_chat") }, { id: "work", label: t("nav_work"), count: waitingJobs },
-        { id: "playbooks", label: t("nav_playbooks") }, { id: "updates", label: t("nav_updates"), count: unread },
+        // Playbooks stays one click away under More; the tab shows only while you're on it
+        ...(odeliaTab === "playbooks" ? [{ id: "playbooks", label: t("nav_playbooks") }] : []), { id: "updates", label: t("nav_updates"), count: unread },
       ]} />
       {odeliaTab === "chat" && <AgentPanel feed={feed} tts={tts} mode="page" asked={asked} />}
       {odeliaTab === "work" && <WorkPage />}
@@ -1479,7 +1480,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}>{slim ? <Mark size={22} /> : <Logo lang={lang} height={17} />}</button>
         {phone
           ? <button type="button" className="icbtn" onClick={() => setNavOpen(false)} aria-label={t("close")}><I.x /></button>
-          : <span className="side-tools">{bell}<button type="button" className="slimb" onClick={() => setSlimPref(v => !v)} aria-label={t(slim ? "expandMenu" : "collapseMenu")} title={t(slim ? "expandMenu" : "collapseMenu")} aria-expanded={!slim}><I.panel /></button></span>}
+          : <span className="side-tools">{/* the bell's updates are Odelia's Updates tab, with its count */}<button type="button" className="slimb" onClick={() => setSlimPref(v => !v)} aria-label={t(slim ? "expandMenu" : "collapseMenu")} title={t(slim ? "expandMenu" : "collapseMenu")} aria-expanded={!slim}><I.panel /></button></span>}
       </div>
       {cloud ? (
         <Menu className="wsname-wrap" buttonClass="wsname" label={b(B("Workspaces", "工作区"))} button={<><b>{b(view_.business)}</b><span>{wsSub}</span><I.chev /></>}

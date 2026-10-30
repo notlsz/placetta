@@ -1277,7 +1277,7 @@ function LanguageGroup() {
   const list = LANGUAGES.filter(l => !q.trim() || `${l.native} ${l.en} ${l.code}`.toLowerCase().includes(q.trim().toLowerCase()));
   const pick = (code: string) => { saveSpeak(code); setPicked(speakOf(code) ?? null); setLang(uiLangOf(code)); setOpen(false); setQ(""); };
   return (
-    <Group id="language" title={B("Language", "语言")} note={B("Placetta writes and speaks to you in this language, and drafts agency letters in the agency's own language. Menus and pages show in English, or Chinese for the Chinese options.", "快哉用这里选择的语言与您交流，并用机构所在地的语言起草致机构的信函。菜单和页面显示英文，选择中文时显示中文。")}
+    <Group id="language" title={B("Language", "语言")} note={B("Odelia writes to you in this language, and to agencies in theirs.", "Odelia 用这种语言与您交流，用机构的语言与机构沟通。")}
       rows={[{ label: B("Language", "语言"), sub: <>{cur.native}{cur.native !== cur.en ? <span className="quiet">, {cur.en}</span> : null}</>, right: <Btn onClick={() => setOpen(true)}>{zh ? "更改" : "Change"}</Btn> }]}>
       {open && (
         <Modal label={zh ? "语言" : "Language"} onClose={() => { setOpen(false); setQ(""); }}>
@@ -1773,7 +1773,7 @@ export function Settings() {
 
           {show("language") && <LanguageGroup />}
 
-          <Group id="appearance" hidden={!show("appearance")} title={B("Appearance", "外观")} note={B("Dark mode for the agent and your workspace. Saved in this browser.", "为助理和工作区开启深色模式，保存在此浏览器中。")} rows={[{ label: B("Theme", "主题"), right: (
+          <Group id="appearance" hidden={!show("appearance")} title={B("Appearance", "外观")} note={B("Saved in this browser.", "保存在此浏览器中。")} rows={[{ label: B("Theme", "主题"), right: (
             <div className="seg sg-theme" role="radiogroup" aria-label={lang === "zh" ? "主题" : "Theme"}>
               {([["light", B("Light", "浅色")], ["dark", B("Dark", "深色")], ["system", B("Auto", "跟随设备")]] as [Theme, Bi][]).map(([k, l]) => (
                 <button key={k} type="button" role="radio" aria-checked={theme === k} aria-pressed={theme === k} onClick={() => setTheme(k)}>{b(l)}</button>

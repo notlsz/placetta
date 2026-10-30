@@ -56,7 +56,7 @@
 /* Permits: the list reads like a to-do list (name and agency, status, fee, what's next); how long it takes and the
    agency's page live in the permit itself. One line under the title, not three. */
 @media (min-width: 860px) {
-  .page.permits .apps-t .tr { grid-template-columns: minmax(0, 2.2fr) 136px 96px minmax(0, 1.6fr); }
+  .page.permits .apps-t .tr { grid-template-columns: minmax(0, 2.2fr) 124px 136px minmax(0, 1.6fr); }
   .page.permits .apps-t .c-est, .page.permits .apps-t .tr.th span:nth-child(4) { display: none; }
 }
 .page.permits .apps-t .c-src, .page.permits .apps-t .c-est2 { display: none; }
@@ -109,3 +109,32 @@
 }
 .page.permits .pm-bar { margin-bottom: 18px; }
 .page.home.simple-home .hm-needs-more .lnk.more { color: var(--blue-ink); font-weight: 500; }
+
+/* Permits rows in two lines: the name, then the agency with who has it beside it */
+@media (min-width: 860px) {
+  .page.permits .apps-t .c-name { display: grid; grid-template-columns: minmax(0, max-content) auto; column-gap: 14px; justify-content: start; align-items: center; }
+  .page.permits .apps-t .c-name > b { grid-column: 1 / -1; }
+  .page.permits .apps-t .c-name > small:not(.c-team) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .page.permits .apps-t .c-name > .c-team { margin: 0; }
+}
+
+/* Odelia's page opens on the conversation: the tabs above it name the page, so no second header with her name */
+.page.odelia.chat .panel.full > .pn-h { display: none; }
+
+/* A store (src/Stores.tsx StoreDetail): the name and where it stands lead; no score ring, no fine print on how the
+   date was worked out (the Breakdown and each permit keep it); checks read as a quiet list, the way Grok Bot lists
+   what a bot still has to do, not a stack of tinted boxes */
+.store-detail .sd-head .ring { display: none; }
+.store-detail .opening-line .opening-basis { display: none; }
+.store-detail .ck-list { gap: 0; }
+.store-detail .ck-list .ck { background: none; border: 0; box-shadow: none; border-radius: 12px; padding: 12px 8px; }
+.store-detail .ck-list .ck + .ck { border-top: 1px solid var(--line); border-radius: 0; }
+.store-detail .ck-list .ck::before { display: none; }
+.store-detail .ck-list .ck-tag { display: none; }
+.store-detail .ck-list .ck.fail small { color: var(--warm); }
+.store-detail .sd-head { grid-template-columns: minmax(0, 1fr) auto auto; }
+@media (max-width: 600px) {
+  .store-detail .sd-head { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .store-detail .sd-head h1 { font-size: 28px; }
+  .store-detail .sd-head > .pill { justify-self: start; }
+}

@@ -37,6 +37,21 @@ export function CostLine({ page, noDate }: { page?: boolean; noDate?: boolean })
   const [open, setOpen] = useState(false);
   if (!ws.apps.length) return null;
   const known = money(c.totalUSD);
+  // on Permits, one short line (the breakdown says which fees aren't published yet): "$6,764 so far, opens Feb 7, 2027"
+  if (page) {
+    const short: Bi[] = [B(`${known}${c.unpublished || c.quoted ? " so far" : ""}`, `${c.unpublished || c.quoted ? "目前 " : ""}${known}`)];
+    if (c.landing && !noDate) short.push(B(`opens ${fmtDay(c.landing, "en", true)}`, `预计 ${fmtDay(c.landing, "zh", true)} 开业`));
+    return (
+      <>
+        <p className="cost-line on-page">
+          <I.card />
+          <span><b>{b(B("Cost to open", "开业成本"))}</b> {short.map(b).join(b(B(", ", "，")))}</span>
+          <button type="button" className="lnk" onClick={() => setOpen(true)}>{b(B("Breakdown", "明细"))}<I.chevR /></button>
+        </p>
+        {open && <CostSheet c={c} onClose={() => setOpen(false)} />}
+      </>
+    );
+  }
   const parts: Bi[] = [B(`${known}${c.unpublished || c.quoted ? " known" : ""}`, `${c.unpublished || c.quoted ? "已知 " : ""}${known}`)];
   if (c.unpublished) parts.push(B(`${c.unpublished} agency fee${c.unpublished === 1 ? "" : "s"} not published`, `${c.unpublished} 项机构费用未公布`));
   if (c.quoted) parts.push(B("plus a quote from the team", "另需团队报价"));
