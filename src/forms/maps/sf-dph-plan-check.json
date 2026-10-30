@@ -123,7 +123,8 @@
    },
    {
     "radio": "Food Facility Type",
-    "value": "Other"
+    "value": "Other",
+    "if": "^(?!(none|n/?a|not applicable|no)\\.?$).+"
    }
   ],
   "food_prep_facility": [

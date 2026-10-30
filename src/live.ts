@@ -18,6 +18,15 @@ import { answersHash, fillAndRead, formName, formOf, latestVersion, problemsOf, 
 
 /* An address the agency doesn't accept on a line, as a tool tells the model: what's wrong, what the agency accepts,
    what to do without one, and the three sources that say so. */
+/** A form line named by the start of its long label ("Cooking equipment counts" for "Cooking equipment counts, one per
+ *  line in the printed order: ..."): the one line whose label starts that way. Odelia shortened Denver's labels and
+ *  every fill went to a new, unprinted field (production probe, 2026-10-30). */
+const labelStart = (off: { fields: { id: string; label: { en: string } }[] } | undefined, key: string) => {
+  const k = key.replace(/[.:]\s*$/, "").trim();
+  if (!off || k.length < 12) return undefined;
+  const hits = off.fields.filter(o => o.label.en.toLowerCase().startsWith(k));
+  return hits.length === 1 ? hits[0] : undefined;
+};
 const addrOut = (form: string, field: string, value: string, c: AddressCheck) => ({ field, value, problem: c.problem?.en, rule: RULE_LABEL[c.rule.rule].en, agency_accepts: c.rule.what.en,
   if_the_business_has_none: c.rule.ifNone.en, sources: c.rule.confirmations.map(x => x.url), form });
 const ADDR_NEXT = "Leave that line empty. Tell the person in plain words what the agency accepts there and what to do if the business has none (if_the_business_has_none), citing the sources, then fill the address they give.";
@@ -788,7 +797,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const off = a.official ? formById(a.official) : undefined;
         // an address the agency doesn't accept on that line (an address abroad where it needs a Texas street address, a
         // P.O. box where it needs the premises) stays off the form: Placetta says what the agency accepts instead
-        const lineOf = (f: Field) => { const raw = f.label.en.trim(), key = raw.toLowerCase().replace(/^line\s+/, ""); return off?.fields.find(o => o.id === key || o.label.en.toLowerCase() === key || o.label.zh === raw || o.line.toLowerCase() === key || `${o.line}: ${o.label.en}`.toLowerCase() === key)?.id ?? a.fields.find(y => y.label.en.toLowerCase() === raw.toLowerCase() || y.id === raw)?.id; };
+        const lineOf = (f: Field) => { const raw = f.label.en.trim(), key = raw.toLowerCase().replace(/^line\s+/, ""); return (off?.fields.find(o => o.id === key || o.label.en.toLowerCase() === key || o.label.zh === raw || o.line.toLowerCase() === key || `${o.line}: ${o.label.en}`.toLowerCase() === key) ?? labelStart(off, key))?.id ?? a.fields.find(y => y.label.en.toLowerCase() === raw.toLowerCase() || y.id === raw)?.id; };
         const refused = off ? given.map(f => ({ f, id: lineOf(f) })).map(x => ({ ...x, c: x.id ? checkAddress(off.id, x.id, x.f.value) : null })).filter(x => x.c && !x.c.ok) : [];
         // a Social Security number or ITIN is never kept, on its own line ("7b") or any other (src/guard.ts)
         const lineLabel = (f: Field) => { const id = lineOf(f); return a.fields.find(y => y.id === id)?.label.en ?? off?.fields.find(o => o.id === id)?.label.en ?? ""; };
@@ -820,7 +829,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           for (const f of incoming) {
             const raw = f.label.en.trim(), low = raw.toLowerCase(), key = low.replace(/^line\s+/, "");
             // an official form's line, named by its own label, its line number or "Line N: label"
-            const o = off?.fields.find(o => o.id === key || o.label.en.toLowerCase() === key || o.label.zh === raw || o.line.toLowerCase() === key || `${o.line}: ${o.label.en}`.toLowerCase() === key || `${o.line}：${o.label.zh}` === raw);
+            const o = off?.fields.find(o => o.id === key || o.label.en.toLowerCase() === key || o.label.zh === raw || o.line.toLowerCase() === key || `${o.line}: ${o.label.en}`.toLowerCase() === key || `${o.line}：${o.label.zh}` === raw) ?? labelStart(off, key);
             const hits = fields.map((y, j) => ((!!o && y.id === o.id) || y.label.en.toLowerCase() === low || y.label.zh === raw || y.id === raw) ? j : -1).filter(j => j >= 0);
             const k = hits.length > 1 ? (hits.find(j => !took.has(j) && isBlank(fields[j].value)) ?? hits.find(j => !took.has(j)) ?? hits[0]) : hits[0] ?? -1;
             if (k >= 0) took.add(k);

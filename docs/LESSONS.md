@@ -255,3 +255,17 @@ line with no "no patio" box) and the form refused anything but its choices.
 - Hide a bank's account and routing numbers and real card numbers (Luhn), never an agency's account or certificate
   number: the owner gives those so they go on forms.
 - A pick-one line where no choice fits takes its own negative choice, or "Not applicable", which ticks nothing.
+
+## 2026-10: probe runs 8 and 9: forms that wouldn't take a right answer
+
+**What happened.** 41 of 45 passed. Denver's equipment counts never reached the form: Odelia named the line by the
+start of its long label, which matched nothing, so each fill became a new unprinted field; and counts written "2, 0, 1"
+filled only the first box. San Francisco's plan check ticked "Other" over "Restaurant" whenever its "Other" line had any
+answer, even "None", and refused "No" on a box that only ticks for yes.
+
+**The rules.**
+
+- A line named by the start of its own label is that line, when exactly one label starts that way.
+- Boxes that take one number per line read a comma list as lines.
+- A box ticked by a companion line ("Other: ____") ticks only when that line has a real answer.
+- "No" on a yes-only box is an answer: it ticks nothing.

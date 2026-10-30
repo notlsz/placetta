@@ -148,6 +148,10 @@ function date(v: string): { mm: string; dd: string; yyyy: string } | null {
 
 export function pick(v: string, chain?: string): string {
   if (!chain) return v;
+  // a list of counts written on one line ("2, 0, 1" or "Stove 2, Range 0") for boxes that take one number per line:
+  // the commas are the lines (Denver's plan review, production probe 2026-10-30). Only for numbers: a list of people
+  // keeps "name, title" on one line.
+  if (/^line\d\|digits$/.test(chain.trim()) && !/[\n;]/.test(v) && v.includes(",")) v = v.split(",").map(x => x.trim()).join("\n");
   return chain.split("|").reduce((s, p) => (s ? pick1(s, p.trim() as Pick) : ""), v);
 }
 
