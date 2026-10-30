@@ -22,9 +22,12 @@ import { answersHash, fillAndRead, formName, formOf, latestVersion, problemsOf, 
  *  line in the printed order: ..."): the one line whose label starts that way. Odelia shortened Denver's labels and
  *  every fill went to a new, unprinted field (production probe, 2026-10-30). */
 const labelStart = (off: { fields: { id: string; label: { en: string } }[] } | undefined, key: string) => {
-  const k = key.replace(/[.:]\s*$/, "").trim();
-  if (!off || k.length < 12) return undefined;
-  const hits = off.fields.filter(o => o.label.en.toLowerCase().startsWith(k));
+  // "Section II: Cooking equipment counts", "Section II cooking equipment (counts)": the section's name and the
+  // punctuation aside, the line whose label begins with the same words
+  const words = (t: string) => t.toLowerCase().replace(/^(section|line|page|part)\s+[\w.-]+\s*[:.\-]?\s*/, "").replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter(Boolean);
+  const k = words(key);
+  if (!off || k.join(" ").length < 12) return undefined;
+  const hits = off.fields.filter(o => { const l = words(o.label.en); return k.length <= l.length ? k.every((x, i) => l[i] === x) : l.length >= 3 && l.every((x, i) => k[i] === x); });
   return hits.length === 1 ? hits[0] : undefined;
 };
 const addrOut = (form: string, field: string, value: string, c: AddressCheck) => ({ field, value, problem: c.problem?.en, rule: RULE_LABEL[c.rule.rule].en, agency_accepts: c.rule.what.en,
@@ -691,7 +694,17 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         // in as a bare row with no lines, so the probe's plan never had the official form (2026-10-30)
         const formNo = !str(i.official_form_id) ? (str(i.form) + " " + str(i.name)).toUpperCase().match(/\b[A-Z]{1,6}(?:-[A-Z0-9]{1,6}){1,3}\b/g)?.filter(x => /\d/.test(x)) : undefined;
         const byNo = formNo?.length ? FORMS.filter(f => formNo.some(n => f.form.toUpperCase().includes(n))) : [];
-        const off = str(i.official_form_id) ? formById(str(i.official_form_id)) : byNo.length === 1 ? byNo[0] : undefined;
+        // ...and one named by its title for a store whose city the library covers ("Food Establishment Permit Application"
+        // in Boston is bos-food-permit): the one library form there whose words it shares (probe, 2026-10-30)
+        const st0 = str(i.store_id) ? (get().stores ?? []).find(x => x.id === str(i.store_id)) : (get().stores ?? []).length === 1 ? get().stores![0] : undefined;
+        const sig = (t: string) => new Set(t.toLowerCase().replace(/\([^)]*\)/g, " ").replace(/[^a-z ]+/g, " ").split(/\s+/).filter(x => x.length > 3 && !/^(application|permit|license|licence|form|city|county|state|business)$/.test(x)));
+        const byName = !str(i.official_form_id) && !byNo.length && st0?.address && (str(i.name) || str(i.form)) ? (() => {
+          const places = placesOf(st0.address!).filter(c => c !== "US" && !/^[A-Z]{2}$/.test(c));
+          const want = sig(`${str(i.name)} ${str(i.form)}`);
+          const scored = FORMS.filter(f => places.includes(f.where)).map(f => ({ f, n: [...sig(`${f.title.en} ${f.form}`)].filter(x => want.has(x)).length })).filter(x => want.size >= 2 && x.n >= 2).sort((a, b) => b.n - a.n);
+          return scored.length && (scored.length === 1 || scored[0].n > scored[1].n) ? scored[0].f : undefined;
+        })() : undefined;
+        const off = str(i.official_form_id) ? formById(str(i.official_form_id)) : byNo.length === 1 ? byNo[0] : byName;
         if (str(i.official_form_id) && !off) throw new Error(`No official form "${str(i.official_form_id)}". Use an id from find_official_forms, or leave it out.`);
         const name = off ? off.title[lang] : str(i.name, 120), agency = off ? off.agency[lang] : str(i.agency, 160);
         if (!name || !agency) throw new Error("name and agency are required (or an official_form_id)");

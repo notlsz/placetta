@@ -270,3 +270,6 @@ answer, even "None", and refused "No" on a box that only ticks for yes.
 - A box ticked by a companion line ("Other: ____") ticks only when that line has a real answer.
 - "No" on a yes-only box is an answer: it ticks nothing.
 - "No" on a yes-only box must pass the read-back too, not just the fill: change both sides of a check together.
+- A form Odelia names by its title in a city the library covers is the library's form, when one form there shares
+  clearly more of its words than any other (Boston's food permit went in as a bare row, probe run 11).
+- A line named with its section in front ("Section II cooking equipment counts") still finds its line.
