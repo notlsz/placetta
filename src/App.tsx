@@ -1437,7 +1437,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const odeliaTab: OdeliaTab = ODELIA_TABS.includes(sub as OdeliaTab) ? (sub as OdeliaTab) : "chat";
   const odelia = (
     <div className={"page odelia" + (odeliaTab === "chat" ? " chat" : "")}>
-      {odeliaTab !== "chat" && <PageHead title={t("nav_odelia")} />}
+      {/* the title on every tab, chat too, so the page's top edge doesn't jump between pages (panels 4 to 6); a phone hides it on chat */}
+      <PageHead title={t("nav_odelia")} />
       <Tabs view="odelia" current={odeliaTab} tabs={[
         { id: "chat", label: t("nav_chat") }, { id: "work", label: t("nav_work"), count: waitingJobs },
         // Playbooks stays one click away under More; the tab shows only while you're on it

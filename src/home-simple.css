@@ -521,3 +521,19 @@
 .tabbar a em { position: absolute; top: 2px; left: calc(50% + 8px); margin: 0; }
 /* Panel 6: on a phone, the promise under Odelia's box keeps clear of the tab bar */
 @media (max-width: 640px) { .pn-never { margin: 10px 0 12px; } }
+/* Panel 6 round 2 (2026-10-30). */
+/* Odelia: on a phone, her words hang beside her cloud like on a desktop (not wrapping under it); her card keeps the full width */
+@media (max-width: 640px) {
+  .page.odelia .answer > .ans-bot + p, .page.odelia .answer > .ans-bot + * > :first-child { text-indent: 0; padding-left: 34px; }
+  .page.odelia.chat > .ph { display: none; }
+}
+/* the chat page under its title: no second band of space above the tabs */
+@media (min-width: 641px) { .page.odelia.chat > .ph { padding-bottom: 18px; } }
+/* Home on a phone: the button takes its own width and Later sits beside it, as on a desktop */
+@media (max-width: 640px) {
+  .dtn-act { justify-content: flex-start; flex-wrap: nowrap; gap: 16px; }
+  .dtn-act .pill.dtn-go { flex: 0 1 auto; width: auto; }
+}
+/* Stores: the next-store line one step under the list, not a gap away */
+.st-next { margin-top: 4px; }
+@media (min-width: 860px) { .page.odelia.chat { padding-top: 56px; } }
