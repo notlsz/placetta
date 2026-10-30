@@ -485,3 +485,16 @@
 .tabbar a:not([aria-current="page"]) .nav-bot { filter: grayscale(1) opacity(.65); }
 /* 7. Phone: Odelia's suggestion chips scroll sideways, so the row fades at the edge instead of cutting a chip off. */
 @media (max-width: 640px) { .c-panel > .sugg { -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent); mask-image: linear-gradient(90deg, #000 80%, transparent); padding-right: 32px; } }
+/* Panel 4 (2026-10-30). */
+/* the Settings pill on the nav items' column (it sat 4px right of them) */
+.setb { margin-left: -4px; }
+/* accent's name beside its swatch */
+.settings .sg-fold > summary .sw-name { margin-left: auto; font-size: 14px; color: var(--ink2); }
+.settings .sg-fold > summary .sw-name + .sw-now { margin-left: 8px; }
+/* phone stores: the date line on the text column (the icon is 20px and the gap 14px now) */
+@media (max-width: 640px) { .store-row.plain .sr-when { padding-left: 34px; } }
+/* "Opening another store?" reads as the row it is: a chevron at its end, like the stores above it */
+.st-next .st-next-tx { flex: 1; min-width: 0; }
+.st-next > svg:last-child { flex: none; width: 16px; height: 16px; color: var(--ink3); }
+/* phone tabs: the count as the same small count the Licenses tabs use */
+.tabbar a em { display: inline-block; min-width: 16px; height: 16px; margin-left: 4px; padding: 0 4px; border-radius: 99px; background: var(--mist2); color: var(--ink2); font: 500 10.5px/16px var(--sans); text-align: center; vertical-align: 1px; }

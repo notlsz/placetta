@@ -1780,10 +1780,10 @@ export function Settings() {
               ))}
             </div>) }]}>
             <details className="sg-sub accent sg-fold">
-              <summary><h3>{lang === "zh" ? "主题色" : "Accent color"}</h3><span className="sw-now" style={{ background: accent || ACCENTS[0] }} aria-hidden="true" /><I.chev /></summary>
+              <summary><h3>{lang === "zh" ? "主题色" : "Accent color"}</h3><span className="sw-name">{accentName(accent, lang)}</span><span className="sw-now" style={{ background: accent || ACCENTS[0] }} aria-hidden="true" /><I.chev /></summary>
               <p className="sg-note">{lang === "zh" ? "按钮、链接、高亮和助理光效的颜色。选一个，或输入您自己的颜色。" : "The color of buttons, links, highlights and the agent's glow. Pick one or enter your own."}</p>
               <div className="swatches" role="radiogroup" aria-label={lang === "zh" ? "主题色" : "Accent color"}>
-                {ACCENTS.map((c, i) => <button key={c} type="button" role="radio" aria-checked={(accent || ACCENTS[0]).toLowerCase() === c.toLowerCase()} className="sw" style={{ background: c }} aria-label={i === 0 ? (lang === "zh" ? "快哉蓝（默认）" : "Placetta blue (default)") : c} onClick={() => setAccent(applyAccent(i === 0 ? "" : c))} />)}
+                {ACCENTS.map((c, i) => <button key={c} type="button" role="radio" aria-checked={(accent || ACCENTS[0]).toLowerCase() === c.toLowerCase()} className="sw" style={{ background: c }} aria-label={accentName(i === 0 ? "" : c, lang) + (i === 0 ? (lang === "zh" ? "（默认）" : " (default)") : "")} title={accentName(i === 0 ? "" : c, lang)} onClick={() => setAccent(applyAccent(i === 0 ? "" : c))} />)}
                 <label className="sw-own"><input type="color" value={accent || ACCENTS[0]} onChange={e => setAccent(applyAccent(e.target.value))} aria-label={lang === "zh" ? "自选颜色" : "Choose a color"} /></label>
                 <input className="sw-hex" value={hex} onChange={e => { const v = e.target.value.trim(); setHex(v); if (/^#?[0-9a-f]{6}$/i.test(v)) setAccent(applyAccent(v.startsWith("#") ? v : "#" + v)); }} placeholder="#4D73A3" aria-label="Hex" maxLength={7} spellCheck={false} />
                 {accent && <Btn onClick={() => { setAccent(applyAccent("")); setHex(""); }}>{lang === "zh" ? "恢复默认" : "Reset"}</Btn>}
@@ -1970,4 +1970,14 @@ function SpendingGroup() {
       </div>
     </Group>
   );
+}
+
+/* The accents by name, after teas (Paul Smith, panel 4: a classic picker with a twist): a color you can say. */
+const TEA: Record<string, [string, string]> = {
+  "#4d73a3": ["Placetta blue", "快哉蓝"], "#2f7d6d": ["Matcha", "抹茶"], "#7a5ab8": ["Butterfly pea", "蝶豆花"],
+  "#c25b7a": ["Hibiscus", "洛神花"], "#c7772b": ["Oolong", "乌龙"], "#3a3f47": ["Earl Grey", "伯爵"],
+};
+function accentName(c: string, lang: string) {
+  const t = TEA[(c || "#4D73A3").toLowerCase()];
+  return t ? t[lang === "zh" ? 1 : 0] : (lang === "zh" ? "自选" : "Your own");
 }

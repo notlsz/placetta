@@ -866,7 +866,7 @@ function PermitTable({ rows: list, empty }: { rows: Application[]; empty: string
               <div className="tray">
                 {rows.map(a => {
                   return (
-                    <Working key={a.id} on={a.status === "draft"} size="line">
+                    <Working key={a.id} on={false} size="line">{/* the "Preparing" chip already says she is on it; a beam on a borderless row read as a stray line (panels 3, 4) */}
                     {/* a row, not a button, so the agency's own page can be a link inside it (Harvey and Legora link every
                         cited row to its source): the row opens the application, the link opens the page it rests on */}
                     <div className={"tr row" + (a.critical ? " crit" : "")} role="row" tabIndex={0} aria-label={b(a.name)} onClick={() => openApp(a.id)}

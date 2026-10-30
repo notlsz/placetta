@@ -35,10 +35,9 @@ const EDGE_CSS = `
   filter: hue-rotate(20deg) saturate(.55);
   box-shadow: inset 0 0 6px 1px rgba(115, 153, 198, .22);
 }
-[data-beam="{id}"] [data-beam-bloom] {
-  background: conic-gradient(from var(--beam-angle-{id}), transparent 0%, transparent 58%, rgba(143, 174, 211, .25) 64%, rgba(115, 153, 198, .9) 69.5%,
-    rgba(143, 174, 211, .25) 75%, transparent 82%);
-}`;
+[data-beam="{id}"] [data-beam-bloom] { display: none; }`;
+/* no bloom: the soft glow it spread below the box read as a smudge in every review (panels 3 and 4); the stroke alone
+   says she is working */
 
 /** Close enough to count as the same question: most of the suggestion's words are already in something asked. */
 const STOP = new Set(["the", "a", "an", "our", "my", "we", "is", "are", "to", "of", "for", "from", "what", "whats", "what's", "do", "does", "can", "you", "me", "and", "in", "on"]);

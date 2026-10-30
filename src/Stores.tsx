@@ -591,7 +591,7 @@ export function Stores() {
       {!CLASSIC_STORES && stores.length > 0 ? (<>
         <div className="store-rows">{stores.map(x => <StoreRow key={x.id} s={x} onOpen={() => setOpen(x.id)} />)}</div>
         {/* Odelia's one line under the stores (Paul Smith): the next thing a growing owner does, one tap to start it */}
-        {!CLASSIC_STORES && <button type="button" className="st-next" disabled={busy} onClick={() => ask(lang === "zh" ? "我要再开一家店。" : "I'm opening another store.")}><span className="st-next-bot" aria-hidden="true"><AgentBot size={22} interactive={false} /></span>{lang === "zh" ? "要再开一家店？告诉我地址。" : "Opening another store? Tell me the address."}</button>}
+        {!CLASSIC_STORES && <button type="button" className="st-next" disabled={busy} onClick={() => ask(lang === "zh" ? "我要再开一家店。" : "I'm opening another store.")}><span className="st-next-bot" aria-hidden="true"><AgentBot size={22} interactive={false} /></span><span className="st-next-tx">{lang === "zh" ? "要再开一家店？告诉我地址。" : "Opening another store? Tell me the address."}</span><I.chevR /></button>}
       </>) : stores.length === 1 ? (
         // one store: its card beside its permits, so the page is the store's own dashboard, not a card in an empty page
         <div className="stores one">

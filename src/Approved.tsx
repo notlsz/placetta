@@ -40,6 +40,9 @@ export function ApprovedMoment() {
   const name = b(win.app.name);
   // the warm line (Paul Smith): how many are left, from the plan
   const left = ws.apps.filter(a => a.status !== "approved").length;
+  // the next one by name, so the win ends on a promise and not a count (Chesky, panel 4): the one she is preparing
+  const next = ws.apps.find(a => a.status === "draft");
+  const nextName = next ? b(next.name) : "";
   const day = fmtDay(win.at.slice(0, 10), lang);
   // a milestone the owner keeps, not a notice to clear (Paul Smith, the panel): the agency's stamp with its date, and
   // Odelia saying it. It leaves on its own after a week, or once they open the license.
@@ -53,7 +56,9 @@ export function ApprovedMoment() {
       <div className="win-tx">
         <h2 id="win-h">{zh ? `您的${name}已办好。` : `Your ${name.charAt(0).toLowerCase() + name.slice(1)} is in.`}</h2>
         <p className="win-sub">
-          {left > 0 ? (zh ? `还剩 ${left} 项，我在办下一项。` : `${left === 1 ? "One" : left}\u00a0to go, and I'm on the next one.`) : (zh ? "全部办好了。" : "That's every one of them.")}
+          {left > 0 ? (nextName
+            ? (zh ? `还剩 ${left} 项。我正在办${nextName}。` : `${left === 1 ? "One" : left}\u00a0to go. I'm on your ${nextName.charAt(0).toLowerCase() + nextName.slice(1)} now.`)
+            : (zh ? `还剩 ${left} 项，我在办下一项。` : `${left === 1 ? "One" : left}\u00a0to go, and I'm on the next one.`)) : (zh ? "全部办好了。" : "That's every one of them.")}
           {win.number ? (zh ? ` 编号 ${win.number}。` : ` Number ${win.number}.`) : ""}
           {win.renews ? (zh ? ` 续期已记在 ${fmtDay(win.renews, lang, true)}。` : ` Renewal on the calendar for ${fmtDay(win.renews, lang, true)}.`) : ""}
         </p>
