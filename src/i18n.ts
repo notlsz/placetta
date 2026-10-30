@@ -21,7 +21,7 @@ export const S = {
   nav_hq: B("Headquarters", "总部"),
   today: B("Today", "今天"),
   nav_apps: B("Licenses", "执照"),
-  nav_todo: B("In progress", "办理中"),
+  nav_todo: B("Open", "办理中"),
   nav_filed: B("Filed", "已提交"),
   nav_docs: B("Documents", "文件"),
   nav_deadlines: B("Deadlines", "截止日期"),

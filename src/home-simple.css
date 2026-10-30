@@ -653,3 +653,27 @@
 @media (max-width: 640px) { .page.home .dtn { padding: 20px 22px 18px; } .page.home .dtn .dtn-act .pill.dtn-go { height: 50px; } }
 /* her first line starts below the feed's top fade, never under it */
 .page.odelia.chat .feed { padding-top: 18px; }
+/* Panel 12 */
+/* the tea swatches on an even grid, whatever their names' lengths */
+.settings .swatches .sw-item { width: 72px; min-width: 72px; }
+/* phone "Working on": the chevron sits with the task it opens, the label just above it */
+@media (max-width: 640px) {
+  .panel.full > .now-line { row-gap: 2px; }
+  .panel.full > .now-line > svg { grid-row: 2; align-self: start; margin-top: 3px; }
+  .panel.full > .now-line .nl-t { grid-column: 1; }
+}
+/* the license-in card carries a breath of the accent: a celebration, not one more card (Paul Smith, panel 12) */
+.win { background: color-mix(in srgb, var(--blue-ink) 5%, var(--card)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--blue-ink) 18%, var(--line)); }
+/* phone: Later on the button's center line */
+@media (max-width: 640px) { .dtn-act { align-items: center; } .dtn-act .lnk { line-height: 20px; } }
+/* phone Home: a tighter Do this next card, so the first After that row shows above the message box */
+@media (max-width: 640px) {
+  .page.home .dtn { padding: 16px 20px 14px; }
+  .page.home .dtn h2, .page.home .dtn .dtn-t { font-size: 24px; line-height: 30px; }
+  .page.home .dtn .dtn-act .pill.dtn-go { height: 48px; }
+  .page.home .win { padding: 14px 16px; }
+}
+/* desktop: "Working on" opens like every other row, its chevron on the right edge */
+@media (min-width: 641px) { .panel.full > .now-line > svg { margin-left: auto; } }
+/* phone tab bar: Odelia's tab in the same grey as the others until it's open */
+.tabbar a:not([aria-current="page"]) .nav-bot { filter: grayscale(1); opacity: .6; }
