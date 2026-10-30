@@ -83,6 +83,8 @@ type Run = { id: string; workspace_id: string; created_by: string | null; kind: 
   /** "Don't remember this chat": no memory read beyond the records and briefs, none saved. */
   no_memory?: boolean };
 /** The channels a chat bot answers in: Slack, Lark, WeChat, Teams and Telegram. */
+/** Postgres errors worth trying again: a statement timeout, a serialization failure, a deadlock, a dropped connection. */
+const TRANSIENT_PG = /^(57014|40001|40P01|08\w{3}|53300)$/;
 const CHATS = new Set(Object.keys(CHAT_KINDS));
 
 const SUPABASE_URL = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "");
@@ -755,6 +757,9 @@ export async function work(runId: string, token: string | null, ticket: string |
       },
       async write(w, version) {
         const { data: saved, error } = await admin.from("workspaces").update({ state: stripState(w), updated_at: new Date().toISOString() }).eq("id", ws).eq("updated_at", version).select("id");
+        // a statement timeout or a deadlock under load (the probe's 45 runs at once, 57014) is tried again on the newest
+        // state, like a save someone else beat; only a real error fails the run
+        if (error && TRANSIENT_PG.test(String(error.code ?? ""))) { await new Promise((r) => setTimeout(r, 400 + Math.random() * 800)); return false; }
         if (error) throw err("save_failed", "save failed: " + error.code);
         return !!saved?.length;
       },

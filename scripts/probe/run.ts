@@ -477,7 +477,9 @@ async function edges(): Promise<Result[]> {
     ok("the run finishes", x.run?.status === "done", x.error ?? x.run?.error);
     const w = await load(w0);
     ok("Arizona foreign LLC registration is in the plan", w.apps.some((a2) => a2.official === "az-acc-foreign"), w.apps.map((a2) => a2.official ?? a2.name.en).join(", "));
-    ok("and not a new Arizona LLC", !w.apps.some((a2) => a2.official === "az-llc"));
+    // removing a filing waits on the owner's confirmation (remove_application puts a card up): a pending removal is right
+    const llc = w.apps.find((a2) => a2.official === "az-llc");
+    ok("and not a new Arizona LLC", !llc || w.approvals.some((x) => x.kind === "change" && (x.app === llc.id || JSON.stringify(x.change ?? {}).includes(llc.id))), llc ? "asked to remove it" : undefined);
   });
   await edge("the county comes from the address, not the city's name", async (ok, r) => {
     const c = await person("edge-county"), w0 = await workspace(c, "Edge Chamblee");

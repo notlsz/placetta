@@ -218,3 +218,18 @@ state before load (`page.addInitScript(() => localStorage.setItem("placetta-tour
 - The application itself is never a document to wait for.
 - "Done." is never said over open work: a run without words on an open job is sent back once, and its reply says what's open.
 - A test plays the customer fully (uploads, numbers they'd have) before it calls a stop a failure.
+
+## 2026-10: probe run 6: honest stops, a silent reply, and a timeout that failed a run
+
+**What happened.** 33 of 45 cases passed (from 27). Most of the rest were Odelia correctly refusing to make up a
+number only an agency issues; the probe's owner had never given it. Three were real: the Texas sales tax run replied
+"Done." three times with nothing behind it (no job, no words); a Boston run failed on a save that hit a statement
+timeout (57014) while 45 runs wrote at once; Dallas's food permit went in by its form number without the library's
+id, so it had no lines.
+
+**The rules.**
+
+- A run never ends on no words: it's sent back once, and if it's still silent it says so plainly, never "Done.".
+- A save that times out or deadlocks is tried again on the newest state; only a real error fails a run.
+- A form named by its number is the library's form when exactly one form carries that number.
+- A refusal to invent an identity number is correct. When a test stops there, the test's owner is missing a fact.

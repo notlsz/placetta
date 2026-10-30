@@ -1278,7 +1278,7 @@ function LanguageGroup() {
   const pick = (code: string) => { saveSpeak(code); setPicked(speakOf(code) ?? null); setLang(uiLangOf(code)); setOpen(false); setQ(""); };
   return (
     <Group id="language" title={B("Language", "语言")} note={B("Odelia writes to you in this language, and to agencies in theirs.", "Odelia 用这种语言与您交流，用机构的语言与机构沟通。")}
-      rows={[{ label: B(cur.native, cur.native), sub: cur.native !== cur.en ? cur.en : undefined, right: <Btn onClick={() => setOpen(true)}>{zh ? "更改" : "Change"}</Btn> }]}>
+      rows={[{ label: B(cur.native, cur.native), sub: cur.native !== cur.en ? cur.en : undefined, right: <button type="button" className="lnk sg-link" onClick={() => setOpen(true)}>{zh ? "更改" : "Change"}</button> }]}>
       {open && (
         <Modal label={zh ? "语言" : "Language"} onClose={() => { setOpen(false); setQ(""); }}>
           <header className="m-h"><span className="m-eyebrow"><I.globe />{zh ? "语言" : "Language"}</span><h2>{zh ? "选择语言" : "Choose a language"}</h2></header>

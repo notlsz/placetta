@@ -263,8 +263,25 @@
 @media (min-width: 860px) { .page.stores-page { max-width: 760px; } }
 
 /* a plan's approval says only what's new: the plan's title already names the task */
-.answer .job.compact + .appr .appr-tx > b { display: none; }
-.answer .job.compact + .appr .appr-tx > span:first-of-type { margin-top: 0; font-size: 14px; color: var(--ink2); }
+.answer .job.compact + .appr { display: flex; justify-content: flex-end; padding-block: 10px 12px; }
+.answer .job.compact + .appr .appr-tx { display: none; }
 
 /* the assignee lines up with the agency line, not between the two lines of the row */
 @media (min-width: 860px) { .page.permits .apps-t .c-name > .c-team { align-self: start; line-height: 18px; } }
+
+/* One column for every page on a wide screen (Ive): the same width, the same left edge, the same title height, so
+   moving between Home, Licenses, Stores, Odelia and Settings never shifts the page under the eye */
+@media (min-width: 860px) {
+  .page.home.simple-home, .page.permits, .page.stores-page, .page.settings, .page.odelia.chat {
+    max-width: 900px; margin-left: auto; margin-right: auto; padding-left: 40px; padding-right: 40px;
+  }
+  .page.home.simple-home, .page.permits, .page.stores-page, .page.settings { padding-top: 56px; }
+}
+
+/* One language for actions (Rams): page actions are grey pills, inline actions are the blue link; a store's icon is
+   grey like every other row icon; "No fee" is as quiet as a fee the agency sets */
+.settings .sg-link { color: var(--blue-ink); font-weight: 500; font-size: 14.5px; padding: 8px 0; }
+.store-row.plain .sr-ico.on { color: var(--ink3); }
+@media (max-width: 640px) {
+  .settings .sg-row + .sg-row, .settings .sg-list > li + .sg-row, .settings .sg-row + li, .settings .set-tab + .set-tab { border-top: 0; }
+}

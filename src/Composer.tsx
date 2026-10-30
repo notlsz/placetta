@@ -200,7 +200,7 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
         <form className={"composer" + (over ? " drop" : "")} onSubmit={e => { e.preventDefault(); send(); }}
           onDragOver={e => { if (e.dataTransfer.types.includes("Files")) { e.preventDefault(); setOver(true); } }} onDragLeave={() => setOver(false)}
           onDrop={e => { const f = Array.from(e.dataTransfer.files ?? []); setOver(false); if (f.length) { e.preventDefault(); upload("", "", f); } }}>
-          {dock && <span className="c-bot" aria-hidden="true"><LiveBot size={34} busy={busy} task={busy && live ? live.state : undefined} gaze={[2.8, 0]} /></span>}
+          <span className="c-bot" aria-hidden="true"><LiveBot size={dock ? 34 : 30} busy={busy} task={busy && live ? live.state : undefined} gaze={[2.8, 0]} /></span>
           <input ref={attach} type="file" multiple hidden onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) upload("", "", f); }} />
           <label htmlFor={"ask-" + variant} className="sr">{t("askPh")}</label>
           <textarea id={"ask-" + variant} ref={ta} rows={1} value={draft} placeholder={slash.plan ? (lang === "zh" ? "要做什么？她先写计划" : "What's the job? She plans it first") : narrow ? t("askPhShort") : t("askPh")} onChange={e => setDraft(e.target.value)}

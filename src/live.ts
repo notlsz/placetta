@@ -678,7 +678,11 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         owner_changed_mind: { type: "boolean", description: "The owner now says a license they said didn't apply does" },
       }, required: [] },
       execute(i) {
-        const off = str(i.official_form_id) ? formById(str(i.official_form_id)) : undefined;
+        // a form named by its number without its id ("CCS-FRM-424") is the library's form: Dallas's food permit used to go
+        // in as a bare row with no lines, so the probe's plan never had the official form (2026-10-30)
+        const formNo = !str(i.official_form_id) ? (str(i.form) + " " + str(i.name)).toUpperCase().match(/\b[A-Z]{1,6}(?:-[A-Z0-9]{1,6}){1,3}\b/g)?.filter(x => /\d/.test(x)) : undefined;
+        const byNo = formNo?.length ? FORMS.filter(f => formNo.some(n => f.form.toUpperCase().includes(n))) : [];
+        const off = str(i.official_form_id) ? formById(str(i.official_form_id)) : byNo.length === 1 ? byNo[0] : undefined;
         if (str(i.official_form_id) && !off) throw new Error(`No official form "${str(i.official_form_id)}". Use an id from find_official_forms, or leave it out.`);
         const name = off ? off.title[lang] : str(i.name, 120), agency = off ? off.agency[lang] : str(i.agency, 160);
         if (!name || !agency) throw new Error("name and agency are required (or an official_form_id)");

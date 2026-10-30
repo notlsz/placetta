@@ -230,7 +230,7 @@ function Harness({ job, compact }: { job: Job; compact?: boolean }) {
   const files = toolbox(ws, job), hand = job.handoffs ?? [];
   if (!job.done?.length && !pb && !files.length && !hand.length) return null;
   const c = job.checked;
-  const proof = c ? (c.passed === c.of ? (zh ? `独立检查：${c.of} 项全部完成` : `Checked by a separate reviewer: all ${c.of} done`) : (zh ? `独立检查：${c.of} 项中完成 ${c.passed} 项` : `Checked by a separate reviewer: ${c.passed} of ${c.of} done`))
+  const proof = c ? (c.passed === c.of ? (zh ? `独立检查：${c.of} 项全部完成` : `Checked by a separate reviewer: all ${c.of} done`) : c.passed === 0 && job.status !== "done" && job.status !== "stopped" ? (zh ? "完成前会再由独立检查核对一遍" : "A second check runs before it counts as done") : (zh ? `独立检查：${c.of} 项中完成 ${c.passed} 项` : `Checked by a separate reviewer: ${c.passed} of ${c.of} done`))
     : job.done?.length ? (zh ? `完成标准 ${job.done.length} 项，完成后由独立检查核对` : `${job.done.length} things define done; a separate reviewer checks them at the end`) : "";
   // a check still short on a job that's under way is pending, not a warning; short on a finished job is the warning
   const short = job.status === "done" || job.status === "stopped" ? " short" : " pending";

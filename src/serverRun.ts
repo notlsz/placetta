@@ -538,10 +538,15 @@ export async function runRounds(o: {
         // Ended without a word while its own job still has open steps: that read as "Done." on unfinished work (the
         // production probe, Seattle and Las Vegas, 2026-10-30). Once, it's sent back to do the steps or say what blocks them.
         const openJob = !text.trim() && (st.quiet ?? 0) < 1 ? (o.ws().jobs ?? []).find(j => own(j) && j.updated >= st.started! && j.status !== "done" && j.status !== "stopped" && j.steps.some(x => !x.done)) : undefined;
-        if (openJob && data.stop_reason !== "max_tokens") {
+        // ... and a run with no words at all (no job either) is sent back the same way: "Done." over nothing was the
+        // whole answer three times running on the Texas sales tax probe
+        const silent = !text.trim() && !st.text.slice(made.lastToolAt).trim() && (st.quiet ?? 0) < 1;
+        if ((openJob || silent) && data.stop_reason !== "max_tokens") {
           st.quiet = (st.quiet ?? 0) + 1;
           st.messages.push({ role: "assistant", content: data.content.length ? data.content : [{ type: "text", text: "(no reply)" }] });
-          st.messages.push({ role: "user", content: `You stopped without a reply, and job ${openJob.id} (${openJob.title.en}) still has open steps: ${openJob.steps.filter(x => !x.done).map(x => x.title.en).join("; ")}. Do them now with your tools (fill what the person's answers give, estimate what you may, put the card up), then write the reply: what's done and, plainly, what still needs the person.` });
+          st.messages.push({ role: "user", content: openJob
+            ? `You stopped without a reply, and job ${openJob.id} (${openJob.title.en}) still has open steps: ${openJob.steps.filter(x => !x.done).map(x => x.title.en).join("; ")}. Do them now with your tools (fill what the person's answers give, estimate what you may, put the card up), then write the reply: what's done and, plainly, what still needs the person.`
+            : "You stopped without a reply. Finish what the person asked with your tools (fill what you can, estimate what you may, put the card up), then write the reply: what you did and, plainly, what still needs the person." });
           continue;
         }
         finished = true; break;
@@ -711,7 +716,7 @@ export async function runRounds(o: {
   const reported = (o.ws().jobs ?? []).filter(j => own(j) && j.status === "done" && !!j.report && j.report.at >= st.started!)
     .flatMap(j => reportLines(o.ws(), j, o.lang, new Date().toISOString().slice(0, 10))).slice(0, 4).join(" ");
   // no words and a job still open: the open line says it, never "Done." on top of it
-  const final = [honest(said, o.lang) || (open.length ? "" : o.lang === "zh" ? "完成了。" : "Done."), waits, formLine, proof, reported].filter(Boolean).join("\n\n");
+  const final = [honest(said, o.lang) || (open.length ? "" : o.lang === "zh" ? "我没写完回复就停下了。请再问我一次，或在“工作”里看我做了什么。" : "I stopped before writing a reply. Ask me again, or open Work to see what I did."), waits, formLine, proof, reported].filter(Boolean).join("\n\n");
   const cited = [...st.sources.filter(x => official(x.url)), ...st.sources.filter(x => !official(x.url))].slice(0, 4);
 
   /* ---- Sources: from what this run's tools read, never from the model's words (src/sources.ts) ---- */
