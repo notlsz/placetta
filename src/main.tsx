@@ -5,6 +5,7 @@ import App from "./App";
 import "./polish95.css";   // the 9.5 pass, after every component's own styles
 import "./polish9.css";    // Home and Odelia's page: one scale, the two anchors, the live strip (after polish95)
 import "./clean.css";      // the reduction pass: fewer rules and boxes, everything on one line (last)
+import "./home-simple.css";  // the simple Home: one column, a greeting that answers (after clean)
 import { Guard } from "./SafeBoundary";
 import { cloudConfigured, preparePreview } from "./cloud/api";
 import { CloudRoot } from "./cloud/Root";

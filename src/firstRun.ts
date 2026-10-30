@@ -112,6 +112,21 @@ export function restLine(f: FirstRun): Bi | null {
   return en.length ? B(en.join(" "), zh.join("")) : null;
 }
 
+/** Home's headline in the first run, the count and nothing else: "12 licenses and permits to open." */
+export function headLine(f: FirstRun, open = false): Bi {
+  return B(`${s(f.permits, "license or permit", "licenses and permits")} to ${open ? "operate" : "open"}.`, `${open ? "经营" : "开业"}需要办 ${f.permits} 项执照和许可。`);
+}
+
+/** Who does what, in one breath: "Odelia does the paperwork on 9. 3 are yours." Her share is what she files today,
+ *  files once online filing is on, or prepares for you to send; never what she only confirms. null when she has none. */
+export function splitLine(f: FirstRun): Bi | null {
+  const hers = f.odelia + f.online + f.prepares, yours = f.you;
+  if (!hers) return null;
+  if (!yours && hers === f.permits) return B(`Odelia does the paperwork on all ${f.permits}.`, `全部 ${f.permits} 项的文书都由 Odelia 办理。`);
+  return B(`Odelia does the paperwork on ${hers}.${yours ? ` ${yours} ${yours === 1 ? "is" : "are"} yours.` : ""}`,
+    `其中 ${hers} 项的文书由 Odelia 办理${yours ? `，${yours} 项需要您本人办理` : ""}。`);
+}
+
 /** What Odelia is doing right now, said from the workspace: a running task, the filing she waits on, or what's next. */
 export function nowLine(ws: Workspace, f: FirstRun, running?: Bi | null): Bi {
   if (running) return running;

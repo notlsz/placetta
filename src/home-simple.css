@@ -1,0 +1,40 @@
+/* The simple Home (src/pages.tsx Overview, CLASSIC_HOME off): one centered column at every width, the way Muse,
+   Instinct and Grok Bot open on a single conversation, not a dashboard. A greeting that answers, the one next step,
+   the short list, what Odelia is doing, and ideas to ask. Loaded last. */
+.page.home.simple-home { display: block; max-width: 680px; margin-left: auto; margin-right: auto; padding-top: 64px; }
+@media (min-width: 1200px) { .page.home.simple-home { display: block; max-width: 680px; } .page.home.simple-home > * { grid-column: auto; } }
+
+.hm-hello { margin: 0 0 28px; }
+.hm-hi { margin: 0; font-size: 15px; color: var(--ink3); }
+.hm-hello h1 { margin: 4px 0 0; font-family: var(--display, inherit); font-size: 34px; font-weight: 600; line-height: 1.18; letter-spacing: -.025em; color: var(--ink); text-wrap: balance; }
+.hm-hello h1 em { display: block; margin-top: 4px; font-style: normal; font-weight: 500; font-size: .62em; letter-spacing: -.01em; color: var(--ink2); }
+.hm-goal { margin: 12px 0 0; font-size: 14.5px; color: var(--ink2); }
+.hm-goal-bar { display: flex; gap: 0; height: 4px; margin-top: 10px; border-radius: 99px; background: var(--mist2); overflow: hidden; max-width: 320px; }
+.hm-goal-bar i { display: block; height: 100%; background: #3F9A62; transition: width .8s ease; }
+.hm-goal-bar i.b2 { background: var(--blue-ink); }
+
+/* the one next step keeps its card; nothing sits beside it */
+.page.home.simple-home > .dtn, .page.home.simple-home > .hm-calm { margin-top: 0; }
+.page.home.simple-home .sec.hm-needs { margin-top: 40px; }
+
+/* what Odelia is doing: one line, the whole line opens her page (Muse's "Muse is working") */
+.hm-odelia { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 52px; margin-top: 32px; padding: 6px 4px; border: 0; border-radius: 14px; background: none; font: inherit; text-align: left; color: var(--ink2); cursor: pointer; }
+.hm-odelia:hover { color: var(--ink); background: rgba(var(--e), .035); }
+.hm-odelia-bot { flex: none; display: grid; place-items: center; width: 32px; height: 32px; }
+.hm-odelia-tx { flex: 1; min-width: 0; font-size: 14.5px; line-height: 1.4; }
+.hm-odelia > svg { flex: none; width: 16px; height: 16px; color: var(--ink3); }
+
+/* ideas to ask (Muse's Ideas, Instinct's example tasks): quiet chips, one tap asks */
+.hm-ideas { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.hm-ideas button { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border: 1px solid var(--line); border-radius: 99px; background: var(--card); font: inherit; font-size: 13.5px; color: var(--ink2); cursor: pointer; }
+.hm-ideas button:hover:not(:disabled) { color: var(--ink); border-color: rgba(var(--e), .2); }
+.hm-ideas button:disabled { opacity: .5; cursor: default; }
+
+@media (max-width: 859px) {
+  .page.home.simple-home { padding-top: 16px; }
+  .hm-hello { margin-bottom: 20px; }
+  .hm-hello h1 { font-size: 27px; }
+  .page.home.simple-home .sec.hm-needs { margin-top: 28px; }
+  .hm-odelia { margin-top: 24px; }
+}
+.page.home.simple-home > .dtn .dtn-bot { display: none; }

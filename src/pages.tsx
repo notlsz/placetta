@@ -26,8 +26,8 @@ import { hrefOf, plainClick } from "./route";
 import { HomeMetrics } from "./Metrics";
 import { HeldSends, LocalHold, useApprovalHold } from "./SendHold";
 import { CostLine } from "./CostToOpen";
-import { FirstAction, FirstRunHead, FirstRunMore, untilSay } from "./FirstRun";
-import { isFirstRun } from "./firstRun";
+import { FirstAction, FirstRunHead, FirstRunMore, untilSay, useFirstRun } from "./FirstRun";
+import { headLine, isFirstRun, splitLine } from "./firstRun";
 import { firstSentence } from "./phrase";
 /* Team review: the review table, comments on documents, and the Mine filter (src/ReviewTable.tsx, src/Comments.tsx) */
 import { hasReview, PermitsReview } from "./ReviewTable";
@@ -381,6 +381,10 @@ function WorkLine({ title, status, children, onOpen }: { title: string; status: 
   return <li><details className="wl-d"><summary className="wl">{line}<I.chevR /></summary><div className="wl-body">{children}</div></details></li>;
 }
 
+/** Home's two looks: the simple one (a greeting that says what needs you, the one next step, the short list, what
+ *  Odelia is doing, ideas to ask) and the classic one (the opening card, the brief, More, the wide columns). */
+const CLASSIC_HOME = false as boolean;
+
 export function Overview() {
   const { t, b, ws, lang, go, ask, busy, live, updates, queued, editWs, openApp } = useApp();
   const n = ws.apps.length;
@@ -494,8 +498,8 @@ export function Overview() {
   const mineCtl = teamOf(team) ? <MineToggle count={mineN} /> : null;
 
   return (
-    <div className="page home">
-      {firstRun && <FirstRunHead />}
+    <div className={"page home" + (CLASSIC_HOME ? "" : " simple-home")}>
+      {CLASSIC_HOME ? firstRun && <FirstRunHead /> : <HomeHello need={ordered.length} firstRun={firstRun} landing={landing} n={n} approved={approved} agency={agency} />}
       <DoneScreen />
       {top ? <DoNextCard x={top} n={ordered.length} docs={docAt} title={biz} onLater={() => setLater(l => [...l.filter(k => k !== top.key), top.key])} /> : firstRun && !mine ? <FirstAction title={biz} /> : (
         <section className="hm-calm" aria-live="polite">
@@ -509,8 +513,8 @@ export function Overview() {
       )}
 
       {/* the opening date, second only to the one thing to do; the wide screen's right column carries it instead */}
-      {!firstRun && (landing || n > 0) && <OpeningCard inline landing={landing} est={est} n={n} approved={approved} agency={agency} />}
-      {!firstRun && <Brief renewals={renewalsSoon} replies={replies} withAgency={withAgency.length} />}
+      {CLASSIC_HOME && !firstRun && (landing || n > 0) && <OpeningCard inline landing={landing} est={est} n={n} approved={approved} agency={agency} />}
+      {CLASSIC_HOME && !firstRun && <Brief renewals={renewalsSoon} replies={replies} withAgency={withAgency.length} />}
 
       {rest.length > 0 && (
         <section className="sec hm-needs">
@@ -527,8 +531,19 @@ export function Overview() {
         </section>
       )}
 
-      {firstRun && <FirstRunMore />}
+      {CLASSIC_HOME && firstRun && <FirstRunMore />}
 
+      {!CLASSIC_HOME && (
+        <>
+          <button type="button" className="hm-odelia" onClick={() => go("odelia", working ? "work" : undefined)}>
+            <span className="hm-odelia-bot" aria-hidden="true"><AgentBot size={32} busy={busy} task={busy ? live?.state : undefined} gaze={[0, 2.4]} interactive={false} /></span>
+            <span className="hm-odelia-tx">{workN > 0 ? (zh ? `Odelia 正在处理 ${workN} 件事` : `Odelia is working on ${workN} thing${workN === 1 ? "" : "s"}`) : busy && live ? `${b(taskVerb(live.state))}…` : zh ? "Odelia 随时待命" : "Odelia is ready when you are"}</span>
+            <I.chevR />
+          </button>
+          <HomeIdeas />
+        </>
+      )}
+      {CLASSIC_HOME && <>
       <div className={"hm-status" + (more ? " open" : "")}>
         <button type="button" className="hm-status-b" onClick={() => openMore(working ? "work" : "plan")} aria-controls="hm-more">
           <span className="hm-status-bot" aria-hidden="true"><AgentBot size={40} busy={busy} task={busy ? live?.state : undefined} gaze={[0, 2.4]} interactive={false} /></span>
@@ -627,8 +642,46 @@ export function Overview() {
       )}
       <HomeNext next={nextAll.slice(0, 6)} />
       <HomeSide soon={soon} />
+      </>}
       <Footer />
     </div>
+  );
+}
+
+/** The top of the simple Home, said the way Muse and Instinct talk: a greeting, how many things need you (or, in the
+ *  first run, how many licenses there are and who does them), and the goal with its progress in one quiet line. */
+function HomeHello({ need, firstRun, landing, n, approved, agency }: { need: number; firstRun: boolean; landing: string | null; n: number; approved: number; agency: number }) {
+  const { b, lang } = useApp();
+  const f = useFirstRun();
+  const zh = lang === "zh";
+  const hr = new Date().getHours();
+  const hi = zh ? (hr < 12 ? "早上好。" : hr < 18 ? "下午好。" : "晚上好。") : hr < 12 ? "Good morning." : hr < 18 ? "Good afternoon." : "Good evening.";
+  const head = firstRun ? b(headLine(f)) : need ? (zh ? `有 ${need} 件事需要您。` : `${need} thing${need === 1 ? " needs" : "s need"} you.`) : zh ? "今天没有需要您处理的事。" : "Nothing needs you today.";
+  const split = firstRun ? splitLine(f) : null;
+  const sub = [landing ? (zh ? `预计 ${fmtDay(landing, lang, true)} 前后开业` : `Opening around ${fmtDay(landing, lang, true)}`) : "",
+    zh ? `${n} 项许可已办好 ${approved} 项` : `${approved} of ${n} permit${n === 1 ? "" : "s"} done`].filter(Boolean).join(zh ? "，" : ". ") + (zh ? "。" : ".");
+  return (
+    <header className="hm-hello">
+      <p className="hm-hi">{hi}</p>
+      <h1>{head}{split && <em>{b(split)}</em>}</h1>
+      <p className="hm-goal">{sub}</p>
+      <span className="hm-goal-bar" aria-hidden="true"><i style={{ width: `${n ? (approved / n) * 100 : 0}%` }} /><i className="b2" style={{ width: `${n ? (agency / n) * 100 : 0}%` }} /></span>
+    </header>
+  );
+}
+
+/** Ideas to ask Odelia, the way Muse's Ideas and Instinct's example tasks show what an agent can do: one tap asks. */
+function HomeIdeas() {
+  const { b, lang, ask, busy } = useApp();
+  const ideas = [
+    B("What's blocking my opening?", "什么在拖慢我的开业？"),
+    B("File everything that's ready", "把准备好的都提交"),
+    B("What renews next?", "下一个要续期的是什么？"),
+  ];
+  return (
+    <nav className="hm-ideas" aria-label={lang === "zh" ? "问 Odelia" : "Ask Odelia"}>
+      {ideas.map(x => <button key={x.en} type="button" disabled={busy} onClick={() => ask(b(x))}>{b(x)}</button>)}
+    </nav>
   );
 }
 

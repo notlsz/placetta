@@ -10,7 +10,7 @@ import { PlanBuild } from "../src/cloud/PlanBuild";
 import { S, fmt, type Lang } from "../src/i18n";
 import { SAMPLE_WS } from "../src/sample";
 import { firstWorkspace } from "../src/plan/start";
-import { canFileLine, firstRunFacts, isFirstRun, needLine, nowLine, whoFiles, type FirstRun } from "../src/firstRun";
+import { canFileLine, firstRunFacts, headLine, isFirstRun, needLine, nowLine, splitLine, whoFiles, type FirstRun } from "../src/firstRun";
 import { costToOpen } from "../src/cost";
 import { estimateSay, hingeSay, workspaceEstimate, workspaceOpening } from "../src/smart";
 import { readiness } from "../src/stores";
@@ -68,20 +68,16 @@ export function firstRunTests(ok: Ok) {
     ok(f.unpublished >= tbd, `${name}: fees the agency sets stay out of the total`, [f.unpublished, tbd]);
     for (const lang of ["en", "zh"] as Lang[]) {
       const h = render(ws, lang), w = words(h);
-      ok(h.includes("data-first-run") && w.includes(needLine(f)[lang]) && w.includes(canFileLine(f)![lang]), `${name} ${lang}: Home leads with the need and what Odelia files`);
-      ok(w.includes(money(f.agencyUSD)) && (!f.opening || w.includes(fmtDay(f.opening, lang, true))) && w.includes(`${f.ready!.score}%`), `${name} ${lang}: the fees, the opening and % ready, as computed`);
+      // the simple Home (2026-10-30): the count, who does the paperwork, the opening once, one button; the fees, the
+      // hinge and % ready live on Permits and the cost breakdown, not here
+      ok(w.includes(headLine(f)[lang]) && (!splitLine(f) || w.includes(splitLine(f)![lang])), `${name} ${lang}: Home leads with the count and who does the paperwork`);
+      ok(!f.opening || count(text(h), new RegExp(fmtDay(f.opening, lang, true).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) === 1, `${name} ${lang}: the opening date, once`);
       ok(count(h, PRIMARY) === 1, `${name} ${lang}: exactly one primary button`, count(h, PRIMARY));
-      {
-        const est = workspaceEstimate(ws, today)!, tx = text(h), range = estimateSay(est.date, est.path!.range)[lang].slice(estimateSay(est.date)[lang].length).replace(/^[,，]\s*/, "");
-        ok(!range || tx.includes(range), `${name} ${lang}: the opening's likely range is shown`, range);
-        ok(tx.includes(hingeSay(est.path!)![lang]) && h.includes("data-hinge"), `${name} ${lang}: the step the date hinges on, with its time and source`, hingeSay(est.path!)![lang]);
-      }
+      ok(h.includes("hm-odelia"), `${name} ${lang}: what Odelia is doing, one line`);
       ok(!h.includes("hm-calm"), `${name} ${lang}: never "You're all set" on a plan with nothing filed`);
-      ok(w.includes(nowLine(ws, f)[lang]), `${name} ${lang}: what Odelia is doing right now`);
       ok(!/[·•]/.test(w) && !/(^|[^\d.,:$])0\d/.test(w), `${name} ${lang}: no dot separators, no leading zeros`);
       ok(!/saved|节省/i.test(w), `${name} ${lang}: no savings claimed`);
-      ok(!h.includes("hs-open") && !/Opening around|前后开业|Opening, where the permits put it|开业日（按许可进度）/.test(w), `${name} ${lang}: one opening date on the first screen, not three`);
-      ok(w.includes(lang === "en" ? `Total with Placetta ${money(costToOpen(ws, { today }).totalUSD)}` : `合计 ${money(costToOpen(ws, { today }).totalUSD)}`), `${name} ${lang}: the two money figures are labeled apart`);
+      ok(!h.includes("hs-open"), `${name} ${lang}: no opening card beside the greeting`);
     }
   }
   ok(render(skipped, "en").includes('data-do-next="first"'), "skipped the answers: the first action is to fill the first application");
