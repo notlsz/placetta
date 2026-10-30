@@ -389,3 +389,26 @@
   .page.permits .apps-t .tr.row { align-items: start; }
   .page.permits .apps-t .tr.row > .c-st, .page.permits .apps-t .tr.row > .c-fee, .page.permits .apps-t .tr.row > .c-next { margin-top: 0; line-height: 20px; }
 }
+
+/* round 15 */
+.hm-segs { display: flex; gap: 4px; max-width: 320px; margin-top: 12px; }
+.hm-segs i { flex: 1; height: 6px; border-radius: 3px; background: var(--mist2); }
+.hm-segs i.done { background: var(--blue-ink); }
+.hm-segs i.agency { background: var(--blue); animation: seg-breathe 2.4s ease-in-out infinite; }
+@keyframes seg-breathe { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .hm-segs i.agency { animation: none; } }
+/* the chat fades out at its top edge, the way it fades under the Ask bar, instead of cutting a line in half */
+.page.odelia.chat .feed { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 20px); mask-image: linear-gradient(180deg, transparent 0, #000 20px); }
+/* Licenses: the cost line says what the page is for, so the sentence under the title goes (Jobs) */
+.page.permits:has(.pm-bar) > .ph .ph-tx p { display: none; }
+/* Licenses on a phone: rows on white, without a grey box around each group (Rams) */
+@media (max-width: 640px) { .page.permits .apps-t .tray { background: none; box-shadow: none; padding-inline: 0; } }
+@media (max-width: 640px) {
+  .page.permits .apps-t .tr.row { padding-inline: 0; }
+  .page.permits .cost-line.on-page .cl-plus { display: none; }
+}
+/* a phone keeps the full width for Odelia's card: her cloud sits at the start of her first line instead of a margin */
+@media (max-width: 640px) {
+  .page.odelia .answer { padding-left: 0; }
+  .page.odelia .answer > .ans-bot + p, .page.odelia .answer > .ans-bot + * > :first-child { text-indent: 34px; }
+}

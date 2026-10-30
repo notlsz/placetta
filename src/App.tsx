@@ -1504,7 +1504,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
           {NAV.map(n => (
             <li key={n.v}><a {...navLink(n.v)} aria-current={current(n.v) ? "page" : undefined} title={slim ? t(n.k) : undefined}>
               {n.v === "odelia" ? <span className="nav-bot" aria-hidden="true"><AgentBot size={22} busy={busy} task={busy ? step?.state : undefined} interactive={false} /></span> : <n.Icon />}
-              <span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}
+              <span>{t(n.k)}</span>{badge[n.v] && !current(n.v) ? <em>{badge[n.v]}</em> : null}
             </a></li>
           ))}
           <li><button type="button" className="moreb" onClick={() => setMoreOpen(v => !v)} aria-expanded={moreOpen} title={slim ? t("nav_more") : undefined}>

@@ -40,13 +40,14 @@ export function CostLine({ page, noDate }: { page?: boolean; noDate?: boolean })
   // on Permits, one short line (the breakdown says which fees aren't published yet): "$6,764 so far, opens Feb 7, 2027"
   if (page) {
     // "known", never "so far": the amount isn't money spent, it's every fee an agency has published (Jobs, Rams)
-    const short: Bi[] = [B(`${known}${c.unpublished ? ` plus ${c.unpublished} fee${c.unpublished === 1 ? "" : "s"} set by the agenc${c.unpublished === 1 ? "y" : "ies"}` : c.quoted ? " known" : ""}`, `已知 ${known}${c.unpublished ? `，另有 ${c.unpublished} 项由机构核定` : ""}`)];
+    const short: Bi[] = [B(`${known}${c.quoted && !c.unpublished ? " known" : ""}`, `已知 ${known}`)];
+    const plus = c.unpublished ? B(` plus ${c.unpublished} fee${c.unpublished === 1 ? "" : "s"} set by the agenc${c.unpublished === 1 ? "y" : "ies"}`, `，另有 ${c.unpublished} 项由机构核定`) : null;
     if (c.landing && !noDate) short.push(B(`opens ${fmtDay(c.landing, "en", true)}`, `预计 ${fmtDay(c.landing, "zh", true)} 开业`));
     return (
       <>
         <p className="cost-line on-page">
           <I.card />
-          <span><b>{b(B("Cost to open", "开业成本"))}</b> {b(short[0])}{short[1] && <span className="cl-date">{b(B(", ", "，"))}{b(short[1])}</span>}</span>
+          <span><b>{b(B("Cost to open", "开业成本"))}</b> {b(short[0])}{plus && <span className="cl-plus">{b(plus)}</span>}{short[1] && <span className="cl-date">{b(B(", ", "，"))}{b(short[1])}</span>}</span>
           <button type="button" className="lnk" onClick={() => setOpen(true)}>{b(B("Breakdown", "明细"))}<I.chevR /></button>
         </p>
         {open && <CostSheet c={c} onClose={() => setOpen(false)} />}

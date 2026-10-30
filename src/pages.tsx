@@ -669,7 +669,11 @@ function HomeHello({ need, firstRun, landing, n, approved, agency }: { need: num
       <p className="hm-hi"><span className="hm-hi-bot" aria-hidden="true"><AgentBot size={28} gaze={[0, 2.4]} interactive={false} /></span>{hi}</p>
       <h1>{head}{split && <em>{b(split)}</em>}</h1>
       <p className="hm-goal">{sub}</p>
-      <span className="hm-goal-bar" aria-hidden="true"><i style={{ width: `${n ? (approved / n) * 100 : 0}%` }} /><i className="b2" style={{ width: `${n ? (agency / n) * 100 : 0}%` }} /></span>
+      {/* one mark per license (Paul Smith): approved ones in seal blue, the ones with the agency breathing, the rest
+          waiting; "2 of 11" becomes something you can see. Many licenses fall back to the single bar */}
+      {n > 0 && n <= 24 ? (
+        <span className="hm-segs" aria-hidden="true">{Array.from({ length: n }, (_, i) => <i key={i} className={i < approved ? "done" : i < approved + agency ? "agency" : ""} />)}</span>
+      ) : <span className="hm-goal-bar" aria-hidden="true"><i style={{ width: `${n ? (approved / n) * 100 : 0}%` }} /><i className="b2" style={{ width: `${n ? (agency / n) * 100 : 0}%` }} /></span>}
     </header>
   );
 }
