@@ -52,7 +52,7 @@ export function PlanCard({ job, compact, actions }: { job: Job; compact?: boolea
   const { b, lang, ws, openApp } = useApp();
   const p = progress(job), next = job.steps.findIndex(s => !s.done);
   const zh = lang === "zh";
-  const state = awayWait(job) ? awayLabel(job) : job.status === "waiting" ? B("Waiting", "等待中") : job.status === "done" ? B("Done", "已完成") : job.status === "stopped" ? B("Stopped", "已停止") : job.status === "queued" ? B("Waiting its turn", "排队中") : B("In progress", "进行中");
+  const state = awayWait(job) ? awayLabel(job) : job.status === "waiting" ? B("Needs you", "需要您") : job.status === "done" ? B("Done", "已完成") : job.status === "stopped" ? B("Stopped", "已停止") : job.status === "queued" ? B("Waiting its turn", "排队中") : B("In progress", "进行中");
   const parent = job.parent ? (ws.jobs ?? []).find(j => j.id === job.parent) : undefined;
   return (
     <section className={"job " + job.status + (compact ? " compact" : "")} aria-label={b(job.title)}>

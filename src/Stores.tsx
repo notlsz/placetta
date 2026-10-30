@@ -139,11 +139,18 @@ function StoreRow({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
     ? (s.projectedOpen ? (zh ? `筹备中，预计 ${b(estimateSay(s.projectedOpen, p?.range))} 开业` : `Opening ${b(estimateSay(s.projectedOpen, p?.range))}`) + (p && p.verdict === "on_track" ? (zh ? "，进度正常" : ", on track") : "") : (zh ? "筹备中" : "Getting ready to open"))
     : (zh ? `已开业，${b(r.label)}` : `Open. ${b(r.label)}`);
   const needs = [waiting ? (zh ? `${waiting} 件事需要您` : `${waiting} thing${waiting === 1 ? " needs" : "s need"} you`) : "", expiring ? (zh ? `${expiring} 张证书即将到期` : `${expiring} certificate${expiring === 1 ? "" : "s"} expiring`) : ""].filter(Boolean).join(zh ? "，" : ", ");
+  // the one next step, in words: what the first job waiting on the owner needs, else the certificate that expires first
+  const ask = bot.open.find(j => j.status === "waiting" && j.waiting)?.waiting;
+  const cert = [...s.certs].filter(c => { const d = daysUntil(c.expires); return d >= 0 && d <= 30; }).sort((x, y) => x.expires.localeCompare(y.expires))[0];
+  const step = ask ? b(ask) : cert ? (zh ? `${fmtDay(cert.expires, lang, true)} 前续期${cert.person}的${b(cert.kind)}` : `Renew ${cert.person}'s ${b(cert.kind)} by ${fmtDay(cert.expires, lang, true)}`) : "";
   return (
-    <button type="button" className="store-row" onClick={onOpen}>
-      <span className="sr-bot" aria-hidden="true"><StoreBot id={raw.id} size={28} label={b(s.name)} busy={bot.open.some(j => j.status === "running")} /></span>
-      <span className="sr-tx"><b>{b(s.name)}</b><small>{where.replace(/\.\s*$/, "")}{zh ? "。" : "."}</small></span>
-      {needs ? <em className="sr-need">{needs}</em> : <span className="sr-ok">{zh ? "没有需要您的" : "Nothing needs you"}</span>}
+    <button type="button" className={"store-row" + (CLASSIC_STORES ? "" : " plain")} onClick={onOpen}>
+      {CLASSIC_STORES
+        ? <span className="sr-bot" aria-hidden="true"><StoreBot id={raw.id} size={28} label={b(s.name)} busy={bot.open.some(j => j.status === "running")} /></span>
+        : <span className={"sr-ico" + (bot.open.some(j => j.status === "running") ? " on" : "")} aria-hidden="true"><I.store /></span>}
+      <span className="sr-tx"><b>{b(s.name)}</b><small>{where.replace(/\.\s*$/, "")}{zh ? "。" : "."}</small>
+        {!CLASSIC_STORES && needs && <em className="sr-step">{step ? `${step.replace(/^(your approval|您的批准)[:：]\s*/i, zh ? "批准：" : "Approve: ").replace(/[.。]\s*$/, "")}${waiting + expiring > 1 ? (zh ? `，另有 ${waiting + expiring - 1} 项` : `, and ${waiting + expiring - 1} more`) : ""}` : needs}</em>}</span>
+      {CLASSIC_STORES ? (needs ? <em className="sr-need">{needs}</em> : <span className="sr-ok">{zh ? "没有需要您的" : "Nothing needs you"}</span>) : null}
       <I.chevR />
     </button>
   );

@@ -1278,7 +1278,7 @@ function LanguageGroup() {
   const pick = (code: string) => { saveSpeak(code); setPicked(speakOf(code) ?? null); setLang(uiLangOf(code)); setOpen(false); setQ(""); };
   return (
     <Group id="language" title={B("Language", "语言")} note={B("Odelia writes to you in this language, and to agencies in theirs.", "Odelia 用这种语言与您交流，用机构的语言与机构沟通。")}
-      rows={[{ label: B("Language", "语言"), sub: <>{cur.native}{cur.native !== cur.en ? <span className="quiet">, {cur.en}</span> : null}</>, right: <Btn onClick={() => setOpen(true)}>{zh ? "更改" : "Change"}</Btn> }]}>
+      rows={[{ label: B(cur.native, cur.native), sub: cur.native !== cur.en ? cur.en : undefined, right: <Btn onClick={() => setOpen(true)}>{zh ? "更改" : "Change"}</Btn> }]}>
       {open && (
         <Modal label={zh ? "语言" : "Language"} onClose={() => { setOpen(false); setQ(""); }}>
           <header className="m-h"><span className="m-eyebrow"><I.globe />{zh ? "语言" : "Language"}</span><h2>{zh ? "选择语言" : "Choose a language"}</h2></header>
@@ -1780,7 +1780,7 @@ export function Settings() {
               ))}
             </div>) }]}>
             <details className="sg-sub accent sg-fold">
-              <summary><h3>{lang === "zh" ? "主题色" : "Accent color"}</h3><I.chev /></summary>
+              <summary><h3>{lang === "zh" ? "主题色" : "Accent color"}</h3><span className="sw-now" style={{ background: accent || ACCENTS[0] }} aria-hidden="true" /><I.chev /></summary>
               <p className="sg-note">{lang === "zh" ? "按钮、链接、高亮和助理光效的颜色。选一个，或输入您自己的颜色。" : "The color of buttons, links, highlights and the agent's glow. Pick one or enter your own."}</p>
               <div className="swatches" role="radiogroup" aria-label={lang === "zh" ? "主题色" : "Accent color"}>
                 {ACCENTS.map((c, i) => <button key={c} type="button" role="radio" aria-checked={(accent || ACCENTS[0]).toLowerCase() === c.toLowerCase()} className="sw" style={{ background: c }} aria-label={i === 0 ? (lang === "zh" ? "快哉蓝（默认）" : "Placetta blue (default)") : c} onClick={() => setAccent(applyAccent(i === 0 ? "" : c))} />)}

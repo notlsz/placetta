@@ -1572,7 +1572,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
             </section>
           )}
           <main className={"content" + (view === "overview" ? " wash" : "") + (chatPage ? " chatpage" : "")} ref={main}>{page}</main>
-          {!panelOpen && !chatPage && <div className="dockbar"><Composer variant="dock" tts={tts} asked={asked} showLive={view !== "overview" && view !== "find"} starters={view === "overview"} /></div>}
+          {!panelOpen && !chatPage && view !== "settings" && <div className="dockbar"><Composer variant="dock" tts={tts} asked={asked} showLive={view !== "overview" && view !== "find"} starters={view === "overview"} /></div>}
           {toast && <div className="toast" role="status">{toast}</div>}
           {phone && (
             <nav className="tabbar" aria-label={t("nav_more")}>

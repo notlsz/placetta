@@ -195,7 +195,7 @@ export function Composer({ variant, tts, asked, showLive = true, starters = fals
         <div className="sugg dock-chips">{chips.map(s => <button key={s.en} type="button" onClick={() => (isUploadChip(s) ? attach.current?.click() : ask(b(s)))}>{isUploadChip(s) ? <I.upload /> : null}{b(s)}</button>)}</div>
       )}
       {slash.menu}
-      <VoiceBeam className="beam" level={level} processing={busy} theme="light" colors={BEAM} bandColors={BAND} idle={dock ? 0.16 : 0.1} scale={dock ? 1.1 : 0.9} borderRadius={RADIUS[variant]}>
+      <VoiceBeam className="beam" level={level} processing={busy} theme="light" colors={BEAM} bandColors={BAND} idle={0} scale={dock ? 1.1 : 0.9} borderRadius={RADIUS[variant]}>
         <BorderBeam className="c-edge" size="md" theme="light" colorVariant="ice" borderRadius={RADIUS[variant]} staticColors brightness={1} saturation={1} strength={0.85} css={EDGE_CSS}>
         <form className={"composer" + (over ? " drop" : "")} onSubmit={e => { e.preventDefault(); send(); }}
           onDragOver={e => { if (e.dataTransfer.types.includes("Files")) { e.preventDefault(); setOver(true); } }} onDragLeave={() => setOver(false)}

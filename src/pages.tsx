@@ -860,15 +860,15 @@ function PermitTable({ rows: list, empty }: { rows: Application[]; empty: string
                         cited row to its source): the row opens the application, the link opens the page it rests on */}
                     <div className={"tr row" + (a.critical ? " crit" : "")} role="row" tabIndex={0} aria-label={b(a.name)} onClick={() => openApp(a.id)}
                       onKeyDown={e => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openApp(a.id); } }}>
-                      <span className="c-name"><b>{b(a.name)}</b><small>{b(a.agency)}</small><small className="c-est2">{b(a.est)}</small>{isPreview(a) && <small className="c-prev">{t("prevTag")}</small>}
+                      <span className="c-name"><b>{b(a.name)}{a.critical && <span className="c-crit" title={t("critical")} aria-label={t("critical")}><I.flag /></span>}</b><small>{b(a.agency)}</small><small className="c-est2">{b(a.est)}</small>{isPreview(a) && <small className="c-prev">{t("prevTag")}</small>}
                         {a.source.url && <a className="c-src" href={a.source.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
                           title={a.source.quote ? `“${a.source.quote}”${a.source.checked ? ` (${t("src_checked")} ${a.source.checked})` : ""}` : t("source")}>{a.source.label}<I.ext /></a>}
                         <TeamLine id={a.id} /></span>
                       <span className="c-st"><StatusChip s={a.status} /></span>
-                      <span className="c-fee">{feeText(a, t)}</span>
+                      <span className={"c-fee" + (!feeTotal(a) && a.fees.some(x => x.tbd) ? " tbd" : "")}>{feeText(a, t)}</span>
                       {/* one line a cell: the first sentence, a whole phrase ("Fax: about 4 business days"); all of it on hover and in the sheet */}
                       <span className="c-est" title={b(a.est)}>{firstSentence(b(a.est))}</span>
-                      <span className="c-next" title={a.next ? b(a.next) : undefined}>{a.critical && <em>{t("critical")}</em>}{a.next ? firstSentence(b(a.next)) : ""}</span>
+                      <span className="c-next" title={a.next ? b(a.next) : undefined}>{a.next ? firstSentence(b(a.next)) : ""}</span>
                     </div>
                     </Working>
                   );

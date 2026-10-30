@@ -62,6 +62,7 @@ export const I = {
   book: () => <svg {...sv}><path d="M5 4.5h9.5a2 2 0 0 1 2 2V20H7a2 2 0 0 1-2-2z" /><path d="M5 18a2 2 0 0 1 2-2h9.5" /><path d="M9 8.5h4.5" /></svg>,
   queue: () => <svg {...sv}><rect x="4" y="4" width="16" height="5" rx="1.5" /><rect x="4" y="11" width="16" height="4" rx="1.5" /><path d="M4 19h10" /></svg>,
   copy: () => <svg {...sv} width={14} height={14}><rect x="8" y="8" width="11" height="11" rx="2" /><path d="M5 15.5V6a1 1 0 0 1 1-1h9.5" /></svg>,
+  flag: () => <svg {...sv}><path d="M6 20V4.5M6 5h10.5l-2 3.5 2 3.5H6" /></svg>,
   clip: () => <svg {...sv}><path d="M20.5 11.5l-8.3 8.3a5 5 0 0 1-7-7l8.6-8.6a3.4 3.4 0 0 1 4.8 4.8l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9" /></svg>,
 };
 
