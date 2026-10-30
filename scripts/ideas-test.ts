@@ -29,6 +29,12 @@ for (const x of renews) {
 ok(ideas(SAMPLE, today, { unpublished: 7 }).some(x => x.icon === "fee" && /7 agency fees/.test(x.title.en)), "the fee offer counts what the cost line counts");
 ok(!ideas(SAMPLE, today, { unpublished: 0 }).some(x => x.icon === "fee"), "no fee offer when every fee is known");
 
+// margin ideas only from what a store's records show: none in the sample, one each when a store owes premiums or paid fines
+ok(!list.some(x => x.icon === "margin"), "no margin offer without a cost on file");
+const costly: Workspace = { ...SAMPLE, stores: SAMPLE.stores.map((st, i) => i ? st : { ...st, schedule: { postedThrough: today, changes: 3, premiumOwed: 240, source: st.schedule?.source ?? { en: "", zh: "" } }, value: { ...st.value, fines: 500 } }) };
+const m = ideas(costly, today).filter(x => x.icon === "margin");
+ok(m.length === 2 && m.some(x => /\$240/.test(x.why.en) && /3 late schedule changes/.test(x.why.en)) && m.some(x => /\$500/.test(x.why.en)), "a store's premiums and fines become offers, with its own numbers", m.map(x => x.why.en));
+
 // a business with no records gets no offers, not made-up ones
 const empty: Workspace = { ...SAMPLE, apps: [], deadlines: [], stores: [] };
 ok(ideas(empty, today, { unpublished: 0 }).length === 0, "nothing in the records, nothing offered");

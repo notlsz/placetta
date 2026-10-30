@@ -14,7 +14,7 @@ import { fmtDay } from "./time.ts";
    Ranked by what it protects: a license that lapses, then the opening date, then money, then growth. Pure, so the app,
    Home and the tests all show the same list. */
 
-export type IdeaIcon = "renew" | "person" | "fast" | "fee" | "store";
+export type IdeaIcon = "renew" | "person" | "fast" | "fee" | "store" | "margin";
 export type Idea = { id: string; icon: IdeaIcon; title: Bi; why: Bi; ask: Bi; rank: number };
 
 const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
@@ -75,7 +75,27 @@ export function ideas(w: Workspace, today: string, o: { unpublished?: number } =
     });
   }
 
-  // 4. growth: the next store starts from a store that already has its licenses
+  // 4. margin: money a store's own records say it is losing to rules it can keep (the operator's lens: cut the cost
+  //    that buys nothing). Only from what is on file: premium pay owed for late schedule changes, fines paid.
+  for (const st of w.stores ?? []) {
+    const owed = st.schedule?.premiumOwed ?? 0;
+    if (owed > 0 && st.schedule) out.push({
+      id: "premium:" + st.id, icon: "margin", rank: 60,
+      title: B(`I can stop the schedule-change premiums at ${st.name.en}`, `我可以帮${st.name.zh}避免排班变更补偿`),
+      why: B(`${st.schedule.changes} late schedule ${st.schedule.changes === 1 ? "change" : "changes"} left $${owed.toLocaleString("en-US")} in premium pay owed. I'll post the next schedule early and flag changes before they cost you.`,
+        `${st.schedule.changes} 次晚改排班，产生应付补偿 $${owed.toLocaleString("en-US")}。我会提前发布下期排班，并在变更产生费用前提醒您。`),
+      ask: B(`Help ${st.name.en} stop owing schedule-change premiums: post the next schedule on time and warn me before a change costs premium pay.`, `帮${st.name.zh}避免排班变更补偿：按时发布下期排班，并在变更产生补偿前提醒我。`),
+    });
+    if (st.value.fines > 0) out.push({
+      id: "fines:" + st.id, icon: "margin", rank: 55,
+      title: B(`I can keep ${st.name.en}'s fines from coming back`, `我可以防止${st.name.zh}再被罚款`),
+      why: B(`${st.name.en} has paid $${st.value.fines.toLocaleString("en-US")} in fines. I'll run a mock inspection against what was cited and fix it before the next visit.`,
+        `${st.name.zh}已缴罚款 $${st.value.fines.toLocaleString("en-US")}。我会按被罚的项目做一次模拟检查，在下次检查前整改。`),
+      ask: B(`Run a mock inspection at ${st.name.en} against what it was fined for, and list what to fix before the next visit.`, `按${st.name.zh}被罚的项目做一次模拟检查，列出下次检查前要整改的地方。`),
+    });
+  }
+
+  // 5. growth: the next store starts from a store that already has its licenses
   const open = (w.stores ?? []).find(s => s.stage === "open" && (s.apps?.length || s.permits?.length));
   if (open) {
     const n = (open.permits?.length ?? 0) || (open.apps?.length ?? 0);

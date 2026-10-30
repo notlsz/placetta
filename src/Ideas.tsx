@@ -9,7 +9,7 @@ import { useCost } from "./CostToOpen";
    A row is the offer in her words and the fact behind it; tapping it hands the work to her in the chat, where anything
    that gets filed, sent or paid still waits for the owner's approval. */
 
-const ICON: Record<IdeaIcon, () => ReactNode> = { renew: I.renew, person: I.user, fast: I.fast, fee: I.card, store: I.store };
+const ICON: Record<IdeaIcon, () => ReactNode> = { renew: I.renew, person: I.user, fast: I.fast, fee: I.card, store: I.store, margin: I.margin };
 
 export function IdeasList({ max, compact }: { max?: number; compact?: boolean }) {
   const { b, lang, ws, ask, go, busy } = useApp();
