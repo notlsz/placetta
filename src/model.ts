@@ -22,7 +22,10 @@ export type Level = "federal" | "state" | "county" | "city";
 export type Status = "approved" | "review" | "filing" | "ready" | "needs" | "draft" | "waiting" | "todo";
 export type Actor = "agent" | "you" | "agency" | "team";
 
-export type Field = { id: string; label: Bi; value: string; from?: Bi; quote?: string };   // quote: the document's own words the value came from
+export type Field = { id: string; label: Bi; value: string; from?: Bi; quote?: string;   // quote: the document's own words the value came from
+  /** Odelia's best estimate for a line nobody gave her (square footage, hours, customers a day): the card goes up with
+   *  it marked, and it can't be approved until the person confirms or changes it (Harvey's and Legora's drafts) */
+  confirm?: boolean };
 export type Fee = { label: Bi; amount: number; tbd?: boolean; expedite?: boolean };   // tbd: the agency sets it (by size, risk or sales); amount is 0 or a floor. expedite: the agency's own fee for the expedite the owner chose (src/expedite.ts), passed through at cost
 /** ISO currency of an application's fees; USD when absent. */
 export type Currency = string;
@@ -552,7 +555,7 @@ export const SAMPLE: Workspace = {
         F("app", "Applicant", "申请人", NAME, fromCtx), F("addr", "Site address", "场地地址", ADDR, fromLease),
         F("type", "Sign type", "招牌类型", "Wall sign, internally lit", fromPhotos), F("size", "Size", "尺寸", "8 ft × 2 ft (16 sq ft)", fromPhotos),
         F("text", "Sign text", "招牌文字", "MOONLEAF TEA", fromPhotos), F("light", "Lighting", "照明", "LED, internal", fromPhotos),
-        F("owner", "Property owner consent", "业主同意书", "Attached", B("From the landlord's letter", "来自房东同意函")), F("value", "Sign value", "招牌价值", "$3,200", fromYou),
+        F("owner", "Property owner consent", "业主同意书", "Attached", B("From the landlord's letter", "来自房东同意函")), { ...F("value", "Sign value", "招牌价值", "$3,200", B("Odelia's estimate: what a lit 16 sq ft wall sign costs in San Jose", "Odelia 估填：圣何塞 16 平方英尺灯箱招牌的一般造价")), confirm: true },
       ],
       checklist: [
         { id: "photos", label: B("Storefront photos", "门店照片"), state: "done", doc: "d-photo" },

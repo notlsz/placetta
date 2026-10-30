@@ -1618,6 +1618,13 @@ async function filledFormAttacks() {
   ok(!fileable(stale, stale.approvals[0]).ok, "a card for other answers can't be filed");
   const fresh = addApproval({ id: "ap-new", kind: "file", app: "ein", title: same("File it"), does: [], action: same("Approve"), hash: answersHash(ein()) })(workspace({ apps: [ein()] }));
   ok(fileable(fresh, fresh.approvals[0]).ok && !fileable(setField("ein", "l1", "Lucky Leaf Tea Co")(fresh), fresh.approvals[0]).ok, "a card for these answers can, until a line changes");
+  // Odelia's estimate waits for the person: the card is up, but it can't be filed until the line is confirmed
+  {
+    const guess = { ...fresh, apps: fresh.apps.map(a => ({ ...a, fields: a.fields.map((f, k) => (k === 0 ? { ...f, confirm: true } : f)) })) };
+    const g = fileable(guess, guess.approvals[0]);
+    const done = { ...guess, apps: guess.apps.map(a => ({ ...a, fields: a.fields.map(f => ({ ...f, confirm: false })) })) };
+    ok(!g.ok && "estimates" in g && g.estimates === 1 && fileable(done, done.approvals[0]).ok, "an unconfirmed estimate holds the card; confirmed, it files", g);
+  }
 
   // From a text (iMessage or WhatsApp, not plain SMS): the form is filled and kept, for the reply's link
   const sms = await agent({ ws: workspace({ apps: [ein({ l13: "" })] }), svc: acct.svc, channel: "sms", sender: "+17185550100", prompt: "6 employees, update the EIN form",

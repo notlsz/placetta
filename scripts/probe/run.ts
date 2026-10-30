@@ -191,6 +191,12 @@ type FilingRow = { id: string; status: string; channel: string | null; agent_sta
 async function approve(p: Person, ws: string, w: Workspace, ap: Approval, ok: ReturnType<typeof recorder>): Promise<FilingRow | null> {
   const app = w.apps.find((x) => x.id === ap.app);
   if (!ok("the card names its application", app)) return null;
+  // Odelia's estimates (Field.confirm): the owner confirms each on the card, as a person taps Confirm all
+  const est = app!.fields.filter((f) => f.confirm);
+  if (est.length) {
+    ok("estimates are marked for the owner to confirm", true, est.map((f) => `${f.label.en}: ${f.value}`).join("; ").slice(0, 300));
+    app!.fields = app!.fields.map((f) => (f.confirm ? { ...f, confirm: false } : f));
+  }
   const g = fileable(w, ap);
   if (!ok("the card can be filed (answers unchanged, form reads back)", g.ok, g.ok ? undefined : g.why.en)) return null;
   const off = app!.official ? formById(app!.official) : undefined;

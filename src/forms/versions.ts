@@ -214,13 +214,16 @@ export async function refreshForms(c: FormsCtx): Promise<FormsOut> {
 
 /** Can this card be filed now? Not when it was taken back, not when the answers changed since it was put up, and not
  *  when the filled form doesn't match its answers. When it can: the version it files. */
-export function fileable(w: Workspace, ap: Approval): { ok: true; version?: FormVersion } | { ok: false; why: Bi } {
+export function fileable(w: Workspace, ap: Approval): { ok: true; version?: FormVersion } | { ok: false; why: Bi; estimates?: number } {
   if (ap.kind !== "file" || !ap.app) return { ok: true };
   if (ap.withdrawn) return { ok: false, why: CHANGED_SINCE };
   const a = w.apps.find(x => x.id === ap.app);
   if (!a) return { ok: true };
   const h = answersHash(a);
   if (ap.hash && ap.hash !== h) return { ok: false, why: CHANGED_SINCE };
+  // Odelia's estimates wait for the person: confirmed or changed on the card, never filed as a guess
+  const est = a.fields.filter(f => f.confirm).length;
+  if (est) return { ok: false, estimates: est, why: B(est === 1 ? "Confirm or change Odelia's estimate first." : `Confirm or change Odelia's ${est} estimates first.`, `请先确认或修改 Odelia 估填的 ${est} 项。`) };
   const v = latestVersion(a);
   if (v && v.hash === h && !v.read.ok) { const p = problemLine(v.read.problems[0]); return { ok: false, why: B(`Not ready. ${p.en}`, `尚未就绪。${p.zh}`) }; }
   return { ok: true, ...(v && v.hash === h ? { version: v } : {}) };

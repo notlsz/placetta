@@ -186,3 +186,12 @@ held cards for optional lines (a DBA, a fax, an inspection language) instead of 
 - Read the production probe every day (`gh run list --workflow probe.yml --limit 1`); a red probe is the first task.
 - A check that refuses a value must look at what the line asks, not a word in its section's heading.
 - Optional lines never hold an approval: "None" is an answer.
+
+## 2026-10: a screenshot script "broke" the app by deleting a node React owned
+
+**What happened.** Checking the approval card, every permit drawer showed "Something on this page broke". The app was
+fine: the screenshot script had removed the tour's popup with `element.remove()`, and React then failed to insert next
+to a node it no longer had (`insertBefore ... not a child of this node`).
+
+**The rule.** A test or screenshot never edits the DOM React renders. Dismiss things the way a person does, or set the
+state before load (`page.addInitScript(() => localStorage.setItem("placetta-tour-1", "1"))` skips the tour).

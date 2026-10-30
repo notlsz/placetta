@@ -29,7 +29,7 @@ import { RiskCard, useRisk } from "./RiskCard";
 import { ProofPanel } from "./Proof";
 import { FileCard, I, LevelTag, Modal, Pill, Sheet, StatusChip, feeText, feeTotal } from "./ui";
 import { INK, RouteLine } from "./pages";
-import { filingBlockers } from "./core";
+import { audit, filingBlockers } from "./core";
 import { findItAsk } from "./StillNeeded";
 import { B } from "./bi";
 import { BY_HAND } from "./guard";
@@ -501,7 +501,8 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
             )}
           </section>
         )}
-        {!gate.ok && <section className="ap-left" role="alert"><h3>{b(gate.why)}</h3></section>}
+        {app && a.kind === "file" && <Estimates app={app} />}
+        {!gate.ok && !("estimates" in gate && gate.estimates) && <section className="ap-left" role="alert"><h3>{b(gate.why)}</h3></section>}
         {left.empty.length + left.missing.length > 0 && (
           <section className="ap-left" role="alert">
             <h3>{lang === "zh" ? "提交前还需要" : "Needed before it can be filed"}</h3>
@@ -520,7 +521,7 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
           <h3>{a.kind === "send" ? (zh ? "发送内容（可直接修改）" : "What will be sent (edit it here)") : t("ap_data")}</h3>
           {a.kind === "send"
             ? <SendFields a={a} />
-            : <dl className="kv data">{data.filter(f => !(a.kind === "file" && BY_HAND.test(f.value.trim()))).map(f => <div key={f.id}><dt>{b(f.label)}</dt><dd>{f.value || t("empty")}</dd></div>)}</dl>}
+            : <dl className="kv data">{data.filter(f => !(a.kind === "file" && BY_HAND.test(f.value.trim()))).map(f => <div key={f.id} className={f.confirm ? "est" : undefined}><dt>{b(f.label)}</dt><dd>{f.value || t("empty")}{f.confirm && <em className="est-tag">{zh ? "待确认" : "Estimate"}</em>}</dd></div>)}</dl>}
           {/* the lines the signer writes on the signed copy (an SSN, and on a form filled at sign-up whatever only the
               owner knows): listed together, so what Placetta sends and what you write are plain to see */}
           {a.kind === "file" && (() => {
@@ -585,6 +586,36 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
 }
 
 /** An email or text waiting for approval: every line editable in place, the checks above re-run as you type. */
+/** Odelia's estimates on a filing card (Field.confirm): each line with her best guess, editable, and one tap to confirm
+ *  it. The card can't be approved until every one is confirmed or changed (src/forms/versions.ts fileable). Changing a
+ *  value puts the card up again with the new answers, as any edit does. */
+function Estimates({ app }: { app: Application }) {
+  const { b, lang, editWs, busy } = useApp();
+  const est = app.fields.filter(f => f.confirm);
+  const [vals, setVals] = useState<Record<string, string>>({});
+  if (!est.length) return null;
+  const zh = lang === "zh";
+  const confirm = (ids: string[]) => editWs(w => audit("you", B(ids.length === 1 ? "Confirmed an estimate" : `Confirmed ${ids.length} estimates`, `确认了 ${ids.length} 项估填`), app.name,
+    B(est.filter(f => ids.includes(f.id)).map(f => `${f.label.en}: ${(vals[f.id] ?? f.value).trim()}`).join("; "), est.filter(f => ids.includes(f.id)).map(f => `${f.label.zh}：${(vals[f.id] ?? f.value).trim()}`).join("；")))({
+    ...w, apps: w.apps.map(x => (x.id !== app.id ? x : { ...x, fields: x.fields.map(f => (ids.includes(f.id) ? { ...f, value: (vals[f.id] ?? f.value).trim() || f.value, confirm: false, from: B("You confirmed", "您已确认") } : f)) })),
+  }));
+  return (
+    <section className="ap-est" aria-live="polite">
+      <h3>{zh ? `Odelia 估填了 ${est.length} 项，请确认或修改` : est.length === 1 ? "Odelia estimated 1 line. Confirm or change it" : `Odelia estimated ${est.length} lines. Confirm or change them`}</h3>
+      <ul>
+        {est.map(f => (
+          <li key={f.id}>
+            <label htmlFor={"est-" + f.id}>{b(f.label)}{f.from && <small>{b(f.from)}</small>}</label>
+            <input id={"est-" + f.id} className="inp" value={vals[f.id] ?? f.value} onChange={e => setVals(v => ({ ...v, [f.id]: e.target.value }))} />
+            <button type="button" className="pill quiet sm" disabled={busy || !(vals[f.id] ?? f.value).trim()} onClick={() => confirm([f.id])}>{zh ? "确认" : "Confirm"}</button>
+          </li>
+        ))}
+      </ul>
+      {est.length > 1 && <button type="button" className="lnk" disabled={busy} onClick={() => confirm(est.map(f => f.id))}>{zh ? `全部确认（${est.length} 项）` : `Confirm all ${est.length}`}</button>}
+    </section>
+  );
+}
+
 function SendFields({ a }: { a: Approval }) {
   const { b, lang, editWs } = useApp();
   const set = (id: string, value: string) => editWs(w => ({ ...w, approvals: w.approvals.map(x => (x.id === a.id ? { ...x, data: (x.data ?? []).map(f => (f.id === id ? { ...f, value } : f)) } : x)) }));
