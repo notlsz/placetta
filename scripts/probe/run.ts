@@ -187,6 +187,29 @@ const load_ = loaderWith(sitePdf);
 
 type FilingRow = { id: string; status: string; channel: string | null; agent_state: string | null; agent_log: { en: string; kind: string; ref?: string }[]; confirmation_number: string | null };
 
+/** The owner's uploads, the way the app keeps them: a file in Documents, a Doc on the workspace, the checklist item done. */
+async function uploadStandIns(p: Person, ws: string, appId: string): Promise<number> {
+  const row = await one<{ state: Record<string, unknown> }>(`select state from public.workspaces where id = ${lit(ws)}`);
+  const st = (row?.state ?? {}) as { apps?: { id: string; checklist?: { id: string; label: { en: string }; state: string; doc?: string }[] }[]; docs?: unknown[] };
+  const app = st.apps?.find((x) => x.id === appId);
+  const miss = (app?.checklist ?? []).filter((x) => x.state === "missing");
+  const docs = [...(st.docs ?? [])];
+  for (const it of miss) {
+    const name = `${it.label.en.replace(/[^\w ]+/g, "").trim().slice(0, 40).replace(/\s+/g, "-").toLowerCase() || "document"}.pdf`;
+    const path = `${ws}/${crypto.randomUUID()}/${name}`;
+    const body = new TextEncoder().encode(`%PDF-1.4\n% Production probe stand-in for: ${it.label.en}\n%%EOF\n`);
+    const up = await p.db.storage.from("documents").upload(path, new Blob([body], { type: "application/pdf" }), { contentType: "application/pdf" });
+    if (up.error) continue;
+    await p.db.from("documents").insert({ workspace_id: ws, app_id: appId, name, path, size: body.length, mime: "application/pdf", source: "customer" });
+    const id = `d-probe-${it.id}-${Date.now()}`;
+    docs.push({ id, name, kind: "pdf", size: body.length, by: "you", at: new Date().toISOString(), app: appId, tag: it.label, path });
+    it.state = "done"; it.doc = id;
+  }
+  const n = miss.filter((x) => x.state === "done").length;
+  if (n) await sql(`update public.workspaces set state = ${lit(JSON.stringify({ ...st, docs }))}::jsonb where id = ${lit(ws)}`);
+  return n;
+}
+
 /** Approves a card the way the app does (src/App.tsx fileOne) and starts the filing. */
 async function approve(p: Person, ws: string, w: Workspace, ap: Approval, ok: ReturnType<typeof recorder>): Promise<FilingRow | null> {
   const app = w.apps.find((x) => x.id === ap.app);
@@ -273,6 +296,23 @@ async function license(c: Case): Promise<Result> {
       if (!ok("the follow-up run finishes", b.run?.status === "done", b.error ?? b.run?.error ?? b.run?.status)) return r;
       w = await load(ws); app = w.apps.find((x) => x.id === app!.id) ?? app;
       ap = w.approvals.find((x) => x.kind === "file" && x.app === app!.id);
+    }
+    if (!ap) {
+      // documents only the owner has (plans, a lease, a certificate): the owner uploads them in the app, as a customer
+      // would, and tells Odelia. Stand-in PDFs, attached to the items they answer.
+      const n = app!.checklist.some((x) => x.state === "missing") ? await uploadStandIns(p, ws, app!.id) : 0;
+      if (n) ok("the owner uploads the documents Odelia asked for", true, `${n} uploaded`);
+      const said = r.reply!.split("\n--- after the answers ---\n").pop() ?? "";
+      const cc = await ask(p, ws, `${n ? `I uploaded the ${n === 1 ? "document" : `${n} documents`} you asked for in Documents. ` : ""}For anything else you still need, use your best estimate and I'll confirm it on the card. Put it up for my approval.`, c.lang ?? "en", 9,
+        [{ role: "user", content: first }, { role: "assistant", content: replyText(a.run) }, { role: "user", content: answersOf(c) }, { role: "assistant", content: said }]);
+      r.reply += `\n--- after the uploads ---\n${replyText(cc.run).slice(0, 800)}`; r.cost = (r.cost ?? 0) + (Number(cc.run?.cost_usd ?? 0) || 0);
+      w = await load(ws); app = w.apps.find((x) => x.id === app!.id) ?? app;
+      ap = w.approvals.find((x) => x.kind === "file" && x.app === app!.id);
+    }
+    if (!ap) {
+      // the card may be on a second copy of the same form (a clean copy Odelia made): it's still the card for it
+      const other = w.approvals.find((x) => x.kind === "file" && w.apps.some((y) => y.id === x.app && y.official && want.includes(y.official)));
+      if (other) { ap = other; app = w.apps.find((y) => y.id === other.app)!; }
     }
     if (!ok("an approval card is up for it", ap, `cards: ${w.approvals.map((x) => `${x.kind}:${x.app ?? ""}`).join(", ") || "none"}; status ${app!.status}`)) return r;
     const empty = app!.fields.filter((x) => !x.value.trim()).map((x) => x.label.en);

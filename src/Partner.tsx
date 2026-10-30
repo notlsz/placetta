@@ -226,7 +226,7 @@ function Dashboard({ lang, me, sample }: { lang: Lang; me: pa.PartnerMe; sample:
         <div className="empty"><p>{(dash?.referred ?? 0) > 0 ? L(B("The businesses you referred haven't shared their progress.", "您推荐的商家尚未共享进展。")) : L(B("No businesses yet. Share your link, or put the plan box on your site.", "还没有商家。分享您的链接，或在网站上放置计划框。"))}</p></div>
       ) : (
         <div className="table pt-t" role="table">
-          <div className="tr th" role="row"><span>{L(B("Business", "商家"))}</span><span>{L(B("Stage", "阶段"))}</span><span>{L(B("Permits approved", "已批准许可"))}</span><span>{L(B("Opening", "开业"))}</span></div>
+          <div className="tr th" role="row"><span>{L(B("Business", "商家"))}</span><span>{L(B("Stage", "阶段"))}</span><span>{L(B("Licenses approved", "已批准执照"))}</span><span>{L(B("Opening", "开业"))}</span></div>
           <div className="tray">{(refs ?? []).map(r => {
             const done = r.permits_done ?? 0, total = r.permits_total ?? 0;
             return (

@@ -430,7 +430,7 @@ function StoreDetail({ s, onBack }: { s: Store; onBack: () => void }) {
       )}
 
       {s.permits && s.permits.length > 0 && (
-        <Section title={b(B("Permits on file", "现有许可"))}>
+        <Section title={b(B("Licenses on file", "现有执照"))}>
           {s.permits.some(p => /\(estimated\)/.test(p.name.en)) && <p className="note">{b(B("Dates marked estimated follow each agency's renewal cycle from the opening day. Upload the certificates and Placetta sets the exact dates.", "标注“估算”的日期按各机构的续期周期从开业日推算。上传证书后，快哉会设置准确日期。"))}</p>}
           <ul className="tray">
             {s.permits.map((p, i) => { const d = daysUntil(p.expires); return (

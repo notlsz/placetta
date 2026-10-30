@@ -60,6 +60,19 @@ const f = (label: string, value: string) => ({ id: label, label: same(label), va
   const p10 = preflight(ws({ apps: [app("a10", { fields: [f("Email Communication: That person's email address", "Mei Chen")] })] }), fileAp("a10"), TODAY);
   ok(p10.errors.length === 1, "a name on the email line itself is still an error", p10.errors.length);
 
+  // production probe, 2026-10-30: lines that ask for several things. DTF-17 line K ("name, title, SSN or ITIN,
+  // address") with the SSN "by hand", and Hawaii BB-1 owner and contact lines where an address or email adds digits
+  const multi = app("a11", { fields: [
+    f("Line K: Responsible persons (name, title, SSN or ITIN, address)", "Mei Chen, managing member, SSN by hand, 2150 Lemoine Ave, Fort Lee, NJ 07024"),
+    f("Line 20: Owner name, title, phone and residential address", "Mei Chen, owner, (917) 555-0142, 2150 Lemoine Ave, Apt 4B, Fort Lee, NJ 07024"),
+    f("Business phone and email", "(917) 555-0142, owner2@probe-test.example"),
+    f("SSN, ITIN, or EIN of responsible party", "88-1234567"),
+  ] });
+  const p11 = preflight(ws({ apps: [multi] }), fileAp("a11"), TODAY);
+  ok(p11.errors.length === 0, "an SSN by hand inside a longer line, and a phone among an address or an email, pass", p11.errors.map(e => `${e.label.en}: ${e.note.en}`));
+  const p12 = preflight(ws({ apps: [app("a12", { fields: [f("Line K: Responsible persons (name, title, SSN or ITIN, address)", "Mei Chen, managing member, 2150 Lemoine Ave"), f("Business phone and email", "owner@probe-test.example")] })] }), fileAp("a12"), TODAY);
+  ok(p12.errors.length === 2, "a longer line with no SSN by hand, and a phone line with no phone, are still errors", p12.errors.map(e => e.note.en));
+
   // New York's DTF-17-ATT is for more than one store: a one-store business isn't asked for it
   {
     const att = [B("Schedule of locations (DTF-17-ATT) for more than one store", "多家门店需附门店清单（DTF-17-ATT）"), B("Copy of the lease", "租约副本")];

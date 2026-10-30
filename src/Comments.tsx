@@ -353,7 +353,7 @@ export function CommentsButton({ item, title, label }: { item: ItemRef; title: B
 export function CommentsModal({ item, title, onClose }: { item: ItemRef; title: Bi; onClose: () => void }) {
   const { b, lang, t } = useApp();
   const source = useItemThread(item, title);
-  const what = item.kind === "doc" ? B("Document", "文件") : item.kind === "job" ? B("Job", "工作") : B("Permit", "许可");
+  const what = item.kind === "doc" ? B("Document", "文件") : item.kind === "job" ? B("Job", "工作") : B("License", "执照");
   return (
     <Modal label={(lang === "zh" ? "评论：" : "Comments: ") + b(title)} onClose={onClose}>
       <header className="m-h">

@@ -19,7 +19,8 @@ export function secretNumber(label: string, value: string): boolean {
   if (!v.trim() || v.includes("•")) return false;
   if (SSN_SHAPE.test(v)) return true;
   // a line that takes an SSN, ITIN or EIN: an EIN written 12-3456789 is fine; any other 9 digits may be an SSN
-  return SSN_LINE.test(label) && !EIN_SHAPE.test(v) && /^\D*(\d\D*){9}$/.test(v);
+  // (nine digits in one run: a street number and a ZIP on a "name, SSN, address" line add up to nine too)
+  return SSN_LINE.test(label) && !EIN_SHAPE.test(v) && /^\D*(\d\D*){9}$/.test(v) && /(^|\D)\d{3}[\s.-]?\d{2}[\s.-]?\d{4}(\D|$)|(^|\D)\d{9}(\D|$)/.test(v);
 }
 /* What a replay of Odelia's work may show (src/replay.ts): never a Social Security number or ITIN, a card or bank
    account number, a password or an access key. Everything a replay writes goes through these two. */

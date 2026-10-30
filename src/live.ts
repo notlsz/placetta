@@ -23,7 +23,7 @@ const addrOut = (form: string, field: string, value: string, c: AddressCheck) =>
 const ADDR_NEXT = "Leave that line empty. Tell the person in plain words what the agency accepts there and what to do if the business has none (if_the_business_has_none), citing the sources, then fill the address they give.";
 import type { OrbState } from "thinking-orbs";
 import {
-  addApp, addApproval, addDeadline, addDoc, audit, feedFact, feeds, filingBlockers, isBlank, setApp, setCheck, setFact,
+  addApp, addApproval, addDeadline, addDoc, audit, feedFact, feeds, filingBlockers, isBlank, SELF_ITEM, setApp, setCheck, setFact,
   type AgentBackend, type AgentEvent, type Reply, type Request, type Step,
   resolveDeps, uid, viaWords, YOURS,
 } from "./core";
@@ -728,7 +728,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const fields = (listed ? officialFields(off!, given, get().facts, abroad) : withCore(coreFields(get(), target, abroad), given)).map(f => (isBlank(f.value) && known.has(f.id) ? { ...f, value: known.get(f.id)!.value, from: known.get(f.id)!.from } : f));
         const blocked = off ? addressProblems(off.id, Object.fromEntries(fields.filter(f => !isBlank(f.value)).map(f => [f.id, f.value]))) : [];
         for (const p of blocked) { const k = fields.findIndex(f => f.id === p.field); if (k >= 0) fields[k] = { ...fields[k], value: "", from: undefined, quote: undefined }; }
-        let checklist: CheckItem[] = [...attachFor(off?.attach, get()).map(l => ({ item: l[lang], have: false })), ...arr(i.checklist)].map((c, k) => { const o = c as Record<string, unknown>; return { id: "c" + k, label: same(str(o.item, 120)), state: (o.have ? "done" : "missing") as "done" | "missing" }; }).filter((c, k, all) => c.label.en && all.findIndex(x => x.label.en.toLowerCase() === c.label.en.toLowerCase()) === k);
+        let checklist: CheckItem[] = [...attachFor(off?.attach, get()).map(l => ({ item: l[lang], have: false })), ...arr(i.checklist)].map((c, k) => { const o = c as Record<string, unknown>; return { id: "c" + k, label: same(str(o.item, 120)), state: (o.have ? "done" : "missing") as "done" | "missing" }; }).filter((c, k, all) => c.label.en && !SELF_ITEM.test(c.label.en) && all.findIndex(x => x.label.en.toLowerCase() === c.label.en.toLowerCase()) === k);
         if (twin) {
           // the instant plan's row, refined in place: what it waits on and what's already in stay; answers typed into it stay
           const keep = twin.checklist.filter(c => c.dep || c.state === "done");
@@ -773,7 +773,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     },
     {
       name: "fill_fields",
-      description: "Fill or correct fields on an application. To clear a line filled by mistake, give it an empty value (\"\"). Match a field by its label as find_official_forms or prepare_application gave it (with or without the 'Line N:' prefix), its line number, or its id; a label that matches nothing is added as a new field, and the result names it so you can check. Values come from the person, the workspace facts, memory or their documents, never a guess. Not for applications already filed. Returns the fields still empty.",
+      description: "Fill or correct fields on an application. To clear a line filled by mistake, give it an empty value (\"\"); a line that isn't on the agency's form is removed that way. Match a field by its label as find_official_forms or prepare_application gave it (with or without the 'Line N:' prefix), its line number, or its id; a label that matches nothing is added as a new field, and the result names it so you can check. Two lines with the same label take the fills in order, the empty one first. Values come from the person, the workspace facts, memory or their documents, never a guess. Not for applications already filed. Returns the fields still empty.",
       inputSchema: { type: "object", properties: { application_id: { type: "string" }, fields: { type: "array", items: { type: "object", properties: { label: { type: "string" }, value: { type: "string" }, source: { type: "string", description: "Where the value came from, e.g. 'You told me' or 'From lease.pdf'" }, estimate: { type: "boolean", description: "true when this is your best estimate for a line nobody gave you (square footage, hours, customers a day, a food process): it shows on the card for the person to confirm or change, and nothing files until they do. Say in source what it rests on." } }, required: ["label", "value"] } } }, required: ["application_id", "fields"] },
       execute(i) {
         const a = findApp(i.application_id); notFiled(a);
@@ -810,14 +810,23 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         apply(w => ({ ...w, apps: w.apps.map(x => {
           if (x.id !== a.id) return x;
           const fields = [...x.fields];
+          // two lines with the same label (Houston's two "Contact Phone / Contact email" lines, for the business and the
+          // responsible party): each fill takes the next one, the empty one first. Production probe, 2026-10-30.
+          const took = new Set<number>();
           for (const f of incoming) {
             const raw = f.label.en.trim(), low = raw.toLowerCase(), key = low.replace(/^line\s+/, "");
             // an official form's line, named by its own label, its line number or "Line N: label"
             const o = off?.fields.find(o => o.id === key || o.label.en.toLowerCase() === key || o.label.zh === raw || o.line.toLowerCase() === key || `${o.line}: ${o.label.en}`.toLowerCase() === key || `${o.line}：${o.label.zh}` === raw);
-            const k = fields.findIndex(y => (!!o && y.id === o.id) || y.label.en.toLowerCase() === low || y.label.zh === raw || y.id === raw);
+            const hits = fields.map((y, j) => ((!!o && y.id === o.id) || y.label.en.toLowerCase() === low || y.label.zh === raw || y.id === raw) ? j : -1).filter(j => j >= 0);
+            const k = hits.length > 1 ? (hits.find(j => !took.has(j) && isBlank(fields[j].value)) ?? hits.find(j => !took.has(j)) ?? hits[0]) : hits[0] ?? -1;
+            if (k >= 0) took.add(k);
+            // a line that isn't on the agency's form, added by mistake, goes when it's cleared (it used to stay as an
+            // empty line no one could fill, holding the card back: Arizona TPT, production probe 2026-10-30)
+            if (k >= 0 && off && !f.value.trim() && !off.fields.some(y => y.id === fields[k].id)) { fields[k] = { ...fields[k], id: "\u0000gone" }; continue; }
             if (k >= 0) fields[k] = { ...fields[k], value: f.value, from: f.from, quote: fields[k].value === f.value ? fields[k].quote : undefined, confirm: f.confirm || undefined };
             else { fields.push(f); added.push(raw); }
           }
+          for (let j = fields.length - 1; j >= 0; j--) if (fields[j].id === "\u0000gone") fields.splice(j, 1);
           // a preview row from the instant plan becomes Odelia's own once she fills it (todo: not started, to draft: being prepared)
           const status: Status = x.preview && x.status === "todo" ? "draft" : x.status;
           return { ...x, fields, preview: false, status: status === "draft" && fields.every(f => !isBlank(f.value)) && !x.checklist.some(c => c.state === "missing") ? "ready" : status };

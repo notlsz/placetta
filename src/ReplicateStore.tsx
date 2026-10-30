@@ -33,7 +33,7 @@ function TargetDetail({ t }: { t: TargetPlan }) {
       </summary>
       {t.opening && (
         <div className="rep-open">
-          <span>{zh ? "预计取得全部许可：" : "Permits in hand around "}</span><EstimateDate date={t.opening.date} range={t.opening.range} lang={lang} />
+          <span>{zh ? "预计取得全部许可：" : "Licenses in hand around "}</span><EstimateDate date={t.opening.date} range={t.opening.range} lang={lang} />
           <HingeLine hinge={t.opening.hinge} lang={lang} />
         </div>
       )}

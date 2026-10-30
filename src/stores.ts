@@ -40,7 +40,7 @@ export function readiness(s: Store, w: Workspace): Readiness {
   const permits = s.permits ?? [];
   const pOk = permits.length ? permits.reduce((t, p) => t + certScore(p.expires), 0) / permits.length : 1;
   const soon = permits.filter(p => { const d = daysUntil(p.expires); return d >= 0 && d <= 45; }).length;
-  parts.push({ key: "permits", label: B("Permits", "许可证"), got: 35 * pOk, max: 35, note: soon ? B(`${soon} renewing soon`, `${soon} 项即将续期`) : B("All current", "全部有效") });
+  parts.push({ key: "permits", label: B("Licenses", "执照"), got: 35 * pOk, max: 35, note: soon ? B(`${soon} renewing soon`, `${soon} 项即将续期`) : B("All current", "全部有效") });
 
   const week = Array.from({ length: 7 }, (_, i) => daysFromNow(-7 + i));
   const expected = week.length * 3;

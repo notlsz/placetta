@@ -98,7 +98,7 @@ const NAV: { v: View; k: Key; Icon: () => React.ReactElement }[] = [
    the phone menu. Each links to the page's new address and lights up there. Updates isn't listed: the bell by the logo
    (and in the phone's top bar) opens it with its unread count, and so do Odelia's Updates tab and Home's "Odelia is
    working on". */
-const MORE: { id: string; v: View; sub?: string; k: Key; Icon: () => React.ReactElement }[] = [
+const MORE_ALL: { id: string; v: View; sub?: string; k: Key; Icon: () => React.ReactElement }[] = [
   { id: "work", v: "odelia", sub: "work", k: "nav_work", Icon: I.queue },
   { id: "playbooks", v: "odelia", sub: "playbooks", k: "nav_playbooks", Icon: I.book },
   { id: "documents", v: "permits", sub: "documents", k: "nav_docs", Icon: I.docs },
@@ -107,6 +107,10 @@ const MORE: { id: string; v: View; sub?: string; k: Key; Icon: () => React.React
   { id: "activity", v: "settings", sub: "activity", k: "nav_audit", Icon: I.audit },
   { id: "facts", v: "settings", sub: "facts", k: "nav_context", Icon: I.context },
 ];
+/* Less is more (Rams): the sidebar's More keeps the three an owner reaches for, Documents, Deadlines and Business
+   facts. Work, Playbooks, Find and Activity are a tab or a button away where they live, and ⌘K finds every one. */
+const CLASSIC_MORE = false as boolean;
+const MORE = CLASSIC_MORE ? MORE_ALL : MORE_ALL.filter(m => ["documents", "deadlines", "facts"].includes(m.id));
 const atMore = (m: (typeof MORE)[number], view: View, sub?: string) => view === m.v && (!m.sub || sub === m.sub);
 const PERMITS_TABS = TABS.permits as readonly PermitsTab[], ODELIA_TABS = TABS.odelia as readonly OdeliaTab[];
 

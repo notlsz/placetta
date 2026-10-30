@@ -1,0 +1,17 @@
+/* The approval moment (src/Approved.tsx): the agency's seal drawn once, in Placetta blue, then still. One quiet row
+   under the greeting, so the one thing to do stays the biggest thing on Home. */
+.win { display: flex; gap: 14px; align-items: center; padding: 14px 16px; margin: 0 0 16px; border-radius: 24px; background: var(--sky-wash); }
+.win-seal { flex: none; width: 36px; height: 36px; color: var(--blue-ink); }
+.win-seal svg { display: block; width: 36px; height: 36px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+.win-ring { stroke-width: 2.4; stroke-dasharray: 132; stroke-dashoffset: 132; animation: win-draw .7s cubic-bezier(.4, 0, .2, 1) .15s forwards; }
+.win-tick { stroke-width: 3.4; stroke-dasharray: 30; stroke-dashoffset: 30; animation: win-draw .35s cubic-bezier(.4, 0, .2, 1) .8s forwards; }
+@keyframes win-draw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .win-ring, .win-tick { animation: none; stroke-dashoffset: 0; } }
+.win-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.win h2 { margin: 0; font: 600 15px/20px var(--sans); color: var(--ink); }
+.win-sub { margin: 0; font-size: 13px; line-height: 18px; color: var(--ink2); }
+.win-act { flex: none; display: flex; align-items: center; gap: 4px; }
+.win-act .lnk { font-size: 14px; line-height: 20px; color: var(--blue-ink); padding: 8px; }
+.win-x { width: 32px; height: 32px; display: grid; place-items: center; border: 0; padding: 0; background: none; color: var(--ink3); border-radius: 8px; cursor: pointer; }
+.win-x:hover { color: var(--ink); background: var(--hover-mist); }
+.win-x svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }

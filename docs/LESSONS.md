@@ -195,3 +195,26 @@ to a node it no longer had (`insertBefore ... not a child of this node`).
 
 **The rule.** A test or screenshot never edits the DOM React renders. Dismiss things the way a person does, or set the
 state before load (`page.addInitScript(() => localStorage.setItem("placetta-tour-1", "1"))` skips the tour).
+
+## 2026-10: the probe's last 18 stops: lines that ask for several things, twin labels, and a silent "Done."
+
+**What happened.** 18 of 45 probe cases ended with no approval card. The causes, each found in the replies:
+
+- A line that asks for several things was checked as if it asked for one. DTF-17 line K ("name, title, SSN or ITIN,
+  address") with "SSN by hand" read as a malformed SSN, and the street number and ZIP added up to nine digits, which
+  read as a bare SSN. Hawaii BB-1's owner line with a phone and a home address counted the address digits as the phone.
+- Houston's form has two lines with the same label; every fill landed on the first, so the second stayed empty.
+- Los Angeles lists "the completed application" as an attachment; it was a missing document on the checklist.
+- A line Odelia added by mistake couldn't be removed, so a clean copy of the application was made and the card went up
+  on the copy.
+- A run that ended with no words while its job was open replied "Done.".
+- The probe stopped where a real owner wouldn't: documents only the owner has were never uploaded, and its answers
+  said "no account number yet" to forms that need one.
+
+**The rules.**
+
+- A check reads the whole line's question: on a line that asks for several things, find the part it checks inside it.
+- Two lines with the same label are two lines: fills take them in order, the empty one first.
+- The application itself is never a document to wait for.
+- "Done." is never said over open work: a run without words on an open job is sent back once, and its reply says what's open.
+- A test plays the customer fully (uploads, numbers they'd have) before it calls a stop a failure.

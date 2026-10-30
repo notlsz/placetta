@@ -1,3 +1,4 @@
+import { ApprovedMoment } from "./Approved";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { useApp, type PermitsTab, type View } from "./ctx";
@@ -491,8 +492,8 @@ export function Overview() {
   const say: string[] = [];
   if (workN > 0) say.push(zh ? `Odelia 正在处理 ${workN} 件事` : `Odelia is working on ${workN} thing${workN === 1 ? "" : "s"}`);
   else if (busy && live) say.push(`${b(taskVerb(live.state))}…`);
-  if (filed > 0) say.push(zh ? `已办好 ${approved}/${n} 项许可` : `${approved} of ${n} permits done`);
-  if (!say.length) say.push(zh ? `计划中有 ${n} 项许可` : `${n} permit${n === 1 ? "" : "s"} in your plan`);
+  if (filed > 0) say.push(zh ? `已办好 ${approved}/${n} 项执照` : `${approved} of ${n} licenses done`);
+  if (!say.length) say.push(zh ? `计划中有 ${n} 项执照` : `${n} license${n === 1 ? "" : "s"} in your plan`);
   if (landing && !filed && !firstRun) say.push(zh ? `预计 ${fmtDay(landing, lang, true)} 前后开业` : `Opening around ${fmtDay(landing, lang, true)}`);
   const status = say.join(zh ? "，" : ". ");
   const mineCtl = teamOf(team) && CLASSIC_HOME ? <MineToggle count={mineN} /> : null;
@@ -501,6 +502,7 @@ export function Overview() {
     <div className={"page home" + (CLASSIC_HOME ? "" : " simple-home")}>
       {CLASSIC_HOME ? firstRun && <FirstRunHead /> : <HomeHello need={ordered.length} firstRun={firstRun} landing={landing} n={n} approved={approved} agency={agency} />}
       <DoneScreen />
+      {!CLASSIC_HOME && <ApprovedMoment />}
       {top ? <DoNextCard x={top} n={ordered.length} docs={docAt} title={biz} onLater={() => setLater(l => [...l.filter(k => k !== top.key), top.key])} /> : firstRun && !mine ? <FirstAction title={biz} /> : (
         <section className="hm-calm" aria-live="polite">
           <h1 className="vh">{biz}</h1>
@@ -593,7 +595,7 @@ export function Overview() {
                 {split && <p className="plan-note" data-plan-split><I.check />{b(split)}</p>}
                 {previews > 0 && <p className="plan-note"><I.spark />{t("hm_preview")}</p>}
                 <div className="plan-act">
-                  <button type="button" className="pill quiet sm" onClick={() => go("permits")}>{zh ? "全部许可" : "All permits"}<I.chevR /></button>
+                  <button type="button" className="pill quiet sm" onClick={() => go("permits")}>{zh ? "全部执照" : "All licenses"}<I.chevR /></button>
                   <button type="button" className="pill quiet sm" onClick={() => go("find")}><I.find />{t("nav_find")}</button>
                 </div>
               </div>
@@ -659,7 +661,7 @@ function HomeHello({ need, firstRun, landing, n, approved, agency }: { need: num
   const head = firstRun ? b(headLine(f)) : need ? (zh ? `有 ${need} 件事需要您。` : `${need} thing${need === 1 ? " needs" : "s need"} you.`) : zh ? "今天没有需要您处理的事。" : "Nothing needs you today.";
   const split = firstRun ? splitLine(f) : null;
   const sub = [landing ? (zh ? `预计 ${fmtDay(landing, lang, true)} 前后开业` : `Opening around ${fmtDay(landing, lang, true)}`) : "",
-    zh ? `${n} 项许可已办好 ${approved} 项` : `${approved} of ${n} permit${n === 1 ? "" : "s"} done`].filter(Boolean).join(zh ? "，" : ". ") + (zh ? "。" : ".");
+    zh ? `${n} 项执照已办好 ${approved} 项` : `${approved} of ${n} license${n === 1 ? "" : "s"} done`].filter(Boolean).join(zh ? "，" : ". ") + (zh ? "。" : ".");
   return (
     <header className="hm-hello">
       <p className="hm-hi">{hi}</p>
@@ -692,7 +694,7 @@ function HomeNext({ next }: { next: Application[] }) {
   if (!next.length) return null;
   return (
     <section className="hm-nextwide hs-card" aria-label={zh ? "接下来" : "Next up"}>
-      <div className="hs-h"><h2>{zh ? "接下来" : "Next up"}</h2><button type="button" className="lnk" onClick={() => go("permits")}>{zh ? "全部许可" : "All permits"}<I.chevR /></button></div>
+      <div className="hs-h"><h2>{zh ? "接下来" : "Next up"}</h2><button type="button" className="lnk" onClick={() => go("permits")}>{zh ? "全部执照" : "All licenses"}<I.chevR /></button></div>
       <ul className="hs-list hn-list">
         {next.map(a => (
           <li key={a.id}>

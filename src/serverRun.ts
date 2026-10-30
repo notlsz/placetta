@@ -72,7 +72,7 @@ export type RunState = {
   moments?: number;
   /** The harness (src/harness.ts): what was asked, rounds in this seat, whether this seat is handing off, and how many
    *  times the checker has sent the work back. */
-  request?: string; seatRounds?: number; handing?: boolean; checks?: number;
+  request?: string; seatRounds?: number; handing?: boolean; checks?: number; quiet?: number;
   /** The network (src/learning.ts): the lessons this run started from (fixed for the whole run, so a resumed chunk
    *  reads the same), and each job's first independent check, which is the number the network moves. */
   lessons?: string[]; network?: string; firstChecks?: { job: string; passed: number; of: number }[];
@@ -534,7 +534,18 @@ export async function runRounds(o: {
       if (text) { st.text += (st.text ? "\n\n" : "") + text; o.draft?.(safeOut(clean(st.text.slice(made.lastToolAt)))); }
       if (data.stop_reason === "pause_turn") { st.messages.push({ role: "assistant", content: data.content }); continue; }
       const uses = data.content.filter(c => c.type === "tool_use");
-      if (!uses.length || data.stop_reason !== "tool_use") { finished = true; break; }
+      if (!uses.length || data.stop_reason !== "tool_use") {
+        // Ended without a word while its own job still has open steps: that read as "Done." on unfinished work (the
+        // production probe, Seattle and Las Vegas, 2026-10-30). Once, it's sent back to do the steps or say what blocks them.
+        const openJob = !text.trim() && (st.quiet ?? 0) < 1 ? (o.ws().jobs ?? []).find(j => own(j) && j.updated >= st.started! && j.status !== "done" && j.status !== "stopped" && j.steps.some(x => !x.done)) : undefined;
+        if (openJob && data.stop_reason !== "max_tokens") {
+          st.quiet = (st.quiet ?? 0) + 1;
+          st.messages.push({ role: "assistant", content: data.content.length ? data.content : [{ type: "text", text: "(no reply)" }] });
+          st.messages.push({ role: "user", content: `You stopped without a reply, and job ${openJob.id} (${openJob.title.en}) still has open steps: ${openJob.steps.filter(x => !x.done).map(x => x.title.en).join("; ")}. Do them now with your tools (fill what the person's answers give, estimate what you may, put the card up), then write the reply: what's done and, plainly, what still needs the person.` });
+          continue;
+        }
+        finished = true; break;
+      }
       st.messages.push({ role: "assistant", content: data.content });
       // in the order the model asked; several lookups in a row run side by side (READ_ONLY in src/live.ts)
       const results: Record<string, unknown>[] = await runAll(uses, async u => {
@@ -699,7 +710,8 @@ export async function runRounds(o: {
   // a job that finished in this run says what was filed, the proof and the next renewal, from the record (src/finish.ts)
   const reported = (o.ws().jobs ?? []).filter(j => own(j) && j.status === "done" && !!j.report && j.report.at >= st.started!)
     .flatMap(j => reportLines(o.ws(), j, o.lang, new Date().toISOString().slice(0, 10))).slice(0, 4).join(" ");
-  const final = [honest(said, o.lang) || (o.lang === "zh" ? "完成了。" : "Done."), waits, formLine, proof, reported].filter(Boolean).join("\n\n");
+  // no words and a job still open: the open line says it, never "Done." on top of it
+  const final = [honest(said, o.lang) || (open.length ? "" : o.lang === "zh" ? "完成了。" : "Done."), waits, formLine, proof, reported].filter(Boolean).join("\n\n");
   const cited = [...st.sources.filter(x => official(x.url)), ...st.sources.filter(x => !official(x.url))].slice(0, 4);
 
   /* ---- Sources: from what this run's tools read, never from the model's words (src/sources.ts) ---- */

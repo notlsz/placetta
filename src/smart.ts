@@ -65,6 +65,9 @@ export function attachFor(attach: Bi[] | undefined, w: Pick<Workspace, "stores" 
   return (attach ?? []).filter(a => many || !MULTI_STORE_ONLY.test(a.en));
 }
 
+/** A label that asks for more than one thing: "Business phone and email", "name, title, SSN or ITIN, address". */
+export const COMPOUND = /,|\band\b|\//i;
+const PHONE_IN = /(^|\D)(\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}(\D|$)/;
 type Rule = { kind: string; test: RegExp; skip?: RegExp; check: (v: string, ctx: { w: Workspace; app?: Application; today: string; label: string }) => Check | null | undefined };
 const err = (label: Bi, note: Bi): Check => ({ level: "error", label, note });
 const warn = (label: Bi, note: Bi): Check => ({ level: "warn", label, note });
@@ -73,7 +76,11 @@ const RULES: Rule[] = [
   // "SSN, ITIN, or EIN of responsible party" takes either kind of number
   // a number shown masked ("••-•••4471") is on file and kept out of view; it was checked when it was saved
   { kind: "ssn", test: /\b(ssn|social security|itin)\b/i, check: (v, c) =>
-      v.includes("•") ? null : /^(\d{3}|\*{3}|x{3})-?(\d{2}|\*{2}|x{2})-?\d{4}$/i.test(v.trim()) || (/\b(f?ein|tin|tax id)\b/i.test(c.label) && /^\d{2}-?\d{7}$/.test(v.trim())) ? null
+      v.includes("•") ? null :
+      // a line that asks for several things ("name, title, SSN or ITIN, address", DTF-17 line K): the SSN part is
+      // answered "by hand" inside it, (Placetta never keeps the number). Production probe, 2026-10-30.
+      /\b(name|title|address)\b/i.test(c.label) ? (/\bby hand\b|手写/i.test(v) ? null : err(B(c.label, c.label), B("Write \"SSN by hand\" in this line: the signer writes the number on the signed copy.", "请在这一行写“SSN 手写”：由签署人在签字件上写上号码。")))
+      : /^(\d{3}|\*{3}|x{3})-?(\d{2}|\*{2}|x{2})-?\d{4}$/i.test(v.trim()) || (/\b(f?ein|tin|tax id)\b/i.test(c.label) && /^\d{2}-?\d{7}$/.test(v.trim())) ? null
       : err(B(c.label, c.label), B("A Social Security number or ITIN is 9 digits.", "社会安全号或 ITIN 为 9 位数字。")) },
   { kind: "ein", test: /\b(ein|fein)\b|employer identification|federal (tax|employer) id/i, check: (v, c) => {
       if (v.includes("•")) return null;
@@ -89,6 +96,9 @@ const RULES: Rule[] = [
   { kind: "phone", test: /phone|telephone|mobile|\bcell\b|\bfax\b/i, check: (v, c) => {
       const d = digits(v);
       if (d.length === 10 || (d.length === 11 && d.startsWith("1"))) return null;
+      // "Business phone and email", or an owner line with a phone and a home address: the street number and ZIP add
+      // digits, so look for a phone number inside it. Production probe (Hawaii BB-1), 2026-10-30.
+      if (COMPOUND.test(c.label) && PHONE_IN.test(v)) return null;
       if (v.trim().startsWith("+") && d.length >= 8 && d.length <= 15) return warn(B(c.label, c.label), B("An international number. Some US agency forms only take a US number.", "这是国际号码。部分美国机构表格只接受美国号码。"));
       return err(B(c.label, c.label), B("A US phone number has 10 digits.", "美国电话号码为 10 位数字。"));
     } },

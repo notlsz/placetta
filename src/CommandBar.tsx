@@ -14,7 +14,7 @@ type Hit = { id: string; group: string; label: string; sub?: string; run: () => 
 /* Every place in the app, old names included so "applications" or "audit" still finds the page. */
 const PAGES: { v: View; sub?: string; en: string; zh: string; also?: string }[] = [
   { v: "overview", en: "Home", zh: "首页", also: "overview 概览" },
-  { v: "permits", en: "Permits", zh: "许可", also: "applications 申请 to do" }, { v: "permits", sub: "filed", en: "Permits: Filed", zh: "许可：已提交" },
+  { v: "permits", en: "Licenses", zh: "执照", also: "permits 许可 applications 申请 to do" }, { v: "permits", sub: "filed", en: "Licenses: Filed", zh: "执照：已提交" },
   { v: "permits", sub: "documents", en: "Documents", zh: "文件" }, { v: "permits", sub: "deadlines", en: "Deadlines", zh: "截止日期" },
   { v: "find", en: "Find licenses", zh: "查找许可" }, { v: "stores", en: "Stores", zh: "门店" },
   { v: "odelia", en: "Odelia: Chat", zh: "Odelia：对话", also: "ask chat" }, { v: "odelia", sub: "work", en: "Work", zh: "工作" },
@@ -47,7 +47,7 @@ export function CommandBar({ open, setOpen }: { open: boolean; setOpen: (v: bool
     const sentence = q.trim().split(/\s+/).length >= 3 || /[\u3400-\u9fff]{4,}/.test(q);
     if (askHit && sentence) out.push(askHit);
     const take = <T,>(list: T[], n: number, f: (x: T) => Hit | null) => { let k = 0; for (const x of list) { if (k >= n) break; const h = f(x); if (h) { out.push(h); k++; } } };
-    take(ws.apps, 6, a => has(a.name.en, a.name.zh, a.agency.en, a.agency.zh) ? { id: "a-" + a.id, group: g("Permits", "许可"), label: b(a.name), sub: b(a.agency), run: close(() => openApp(a.id)) } : null);
+    take(ws.apps, 6, a => has(a.name.en, a.name.zh, a.agency.en, a.agency.zh) ? { id: "a-" + a.id, group: g("Licenses", "执照"), label: b(a.name), sub: b(a.agency), run: close(() => openApp(a.id)) } : null);
     take(ws.stores ?? [], 4, st => has(st.name.en, st.name.zh, st.address) ? { id: "s-" + st.id, group: g("Stores", "门店"), label: b(st.name), sub: st.address, run: close(() => go("stores")) } : null);
     take(ws.jobs ?? [], 4, j => has(j.title.en, j.title.zh) ? { id: "j-" + j.id, group: g("Work", "工作"), label: b(j.title), sub: j.status === "waiting" ? g("Needs you", "需要您") : j.status === "done" ? g("Done", "已完成") : j.status === "queued" ? g("Waiting its turn", "排队中") : g("In progress", "进行中"), run: close(() => go("odelia", "work")) } : null);
     take(allSkills(ws).filter(x => x.on && x.kind !== "form"), 4, p => has(p.name.en, p.name.zh, p.description.en) ? { id: "p-" + p.id, group: g("Playbooks", "手册"), label: b(p.name), sub: g("Run it", "运行"), run: close(() => ask(zh ? `按手册“${p.name.zh}”（${p.id}）来做。` : `Run the playbook "${p.name.en}" (${p.id}).`)) } : null);
