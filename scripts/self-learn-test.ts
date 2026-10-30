@@ -57,6 +57,15 @@ ok(!lessonUsable({ ...asLesson[0], contradicts: 2 }), "a fix businesses contradi
 // 5. the same fix as a pattern for every form: a tool-level lesson without the form's name
 ok(ls.some(l => l.key === "tool:fill_fields" && /^Any form: a line refused as "not one of the line's printed choices"/.test(l.text.en) && !/Victualler|Patio/i.test(l.text.en)), "a form's fix also becomes a pattern for every form", ls.map(l => l.text.en));
 
+{ // two forms, two different answers to a choice line: one pattern, not one per answer
+  const pf = self.fixes.find(f => f.form && /choice/.test(f.reason));
+  if (pf) {
+    const a = fixLessons([{ ...pf, good: "Xyz other" }]).find(l => /^Any form/.test(l.text.en));
+    const b = fixLessons([{ ...pf, good: "Abc" }]).find(l => /^Any form/.test(l.text.en));
+    ok(!!a && a.text.en === b?.text.en && !/shape/.test(a.text.en), "the pattern reads the same whatever the answer was", [a?.text.en, b?.text.en]);
+  } else ok(false, "a choice fix to test the pattern with");
+}
+
 // 6. reinforcement: the next run starts from these lessons; a run that doesn't repeat the slip wins them, one that does loses them
 const inPlay = ls.map((l, k) => ({ id: "L" + k, key: l.key, text: l.text.en }));
 const clean: SelfState = { slips: [], fixes: [], seen: [], forms: ["bos-cv"], tools: ["fill_fields"] };

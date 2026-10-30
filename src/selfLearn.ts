@@ -137,7 +137,9 @@ export function fixLessons(fixes: Fix[]): NewLesson[] {
     // the same fix as a pattern for every form (the "different scenarios"): the reason and what kind of answer it took,
     // without the form; the same pattern seen on more forms adds confirmations to one lesson instead of new ones
     if (f.label && off && f.reason) {
-      const choice = !!off.fields.find(x => x.id === f.line)?.options?.includes(f.good ?? "");
+      // a refusal about printed choices is always the choice wording: the value it took differs per form and would split
+      // one pattern into a lesson per answer (production, 2026-10-30: four copies of the same pattern)
+      const choice = /choice|option/i.test(f.reason) || !!off.fields.find(x => x.id === f.line)?.options?.includes(f.good ?? "");
       push("tool:fill_fields", B(`Any form: a line refused as "${f.reason.replace(/\.$/, "")}" was accepted ${choice ? "as one of its own printed choices, word for word (Not applicable when none fits)" : f.good ? `in the shape "${f.good}"` : "once corrected the same turn"}.`,
         `任何表格：因“${f.reason.replace(/\.$/, "")}”被拒的栏目，${choice ? "改为该栏印刷选项之一（逐字；都不适用则填 Not applicable）" : f.good ? `改为“${f.good}”的格式` : "在同一轮更正"}后被接受。`));
     }
