@@ -333,3 +333,8 @@ lesson (seeded, or learned on its own) so the agent itself knows the pattern.
   ("job startup timeout"). Rules: one per-minute job that calls each sweep only while it has something due
   (public.minute_sweep, migration 20261108090000); cron history kept 3 days; a new every-minute job is added to
   minute_sweep, never scheduled on its own.
+- The bigger cause was me: four full probes (all 45 cases) ran against production in one afternoon to verify fixes,
+  each making accounts, uploading files and filing. On a small instance that spends the disk's burst budget, and once
+  it is spent even an idle database crawls (a checkpoint of 26 buffers took 29 seconds; PostgREST couldn't load its
+  schema cache) until the budget refills. Rule: verify a fix with `--slice` or `--only` on the cases it touches; a full
+  probe runs only on its own Sunday schedule.
