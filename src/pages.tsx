@@ -3,7 +3,9 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { useApp, type PermitsTab, type View } from "./ctx";
 import type { Approval, Application, Deadline, Fact, FactGroup, Level, LicenseHit, Status } from "./model";
-import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn, fmtMonth, fmtStamp, money } from "./time";
+import { daysFromNow, daysUntil, fmtAgo, fmtDay, fmtIn, fmtMonth, fmtStamp, money, nowIso } from "./time";
+import { ideas as ideasOf } from "./ideas";
+import { IdeasList } from "./Ideas";
 import { FileCard, Footer, I, Modal, Pill, StatusChip, feeText, feeTotal } from "./ui";
 import { isOpeningMilestone, withOpenings, workspaceEstimate, type Evidence } from "./smart";
 import { EstimateDate, HingeLine } from "./OpeningEstimate";
@@ -682,7 +684,15 @@ function HomeHello({ need, firstRun, landing, n, approved, agency }: { need: num
 
 /** Ideas to ask Odelia, the way Muse's Ideas and Instinct's example tasks show what an agent can do: one tap asks. */
 function HomeIdeas() {
-  const { b, lang, ask, busy } = useApp();
+  const { b, lang, ask, busy, ws } = useApp();
+  // what she can take on, from the records (src/ideas.ts); the plain questions only when there's nothing to offer
+  const offers = useMemo(() => ideasOf(ws, nowIso().slice(0, 10)), [ws]);
+  if (offers.length) return (
+    <section className="sec hm-offers" aria-label={lang === "zh" ? "Odelia 可以接手" : "Odelia can take on"}>
+      <div className="sec-h"><h2>{lang === "zh" ? "Odelia 还可以接手" : "Odelia can also take on"}</h2></div>
+      <IdeasList max={3} />
+    </section>
+  );
   const ideas = [
     B("What's blocking my opening?", "什么在拖慢我的开业？"),
     B("File everything that's ready", "把准备好的都提交"),

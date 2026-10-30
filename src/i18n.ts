@@ -27,6 +27,7 @@ export const S = {
   nav_deadlines: B("Deadlines", "截止日期"),
   nav_audit: B("Activity", "活动记录"),
   nav_updates: B("Updates", "动态"),
+  nav_ideas: B("Ideas", "建议"),
   nav_context: B("Business facts", "企业资料"),
   nav_find: B("Find licenses", "查找许可"),
   nav_settings: B("Settings", "设置"),

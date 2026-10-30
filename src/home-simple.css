@@ -568,3 +568,31 @@
 .c-edge > .composer, .dockbar .c-edge > .composer, .panel.full .c-edge > .composer, .panel.full .composer { border-radius: 24px; background: var(--card); box-shadow: none; }
 /* Settings: "Sample workspace" a step under its section's heading */
 .settings .sg-row b, .settings .sg-row strong { font-weight: 500; }
+/* Odelia's Ideas (src/Ideas.tsx): offers from the records, Muse's "Ideas" list. Plain icon on the left edge, the offer,
+   the fact behind it in grey, a chevron; space between rows, no rules. */
+.ideas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.ideas .idea { display: grid; grid-template-columns: 20px minmax(0, 1fr) 16px; column-gap: 14px; align-items: start; width: 100%; padding: 14px 0; border: 0; background: none; font: inherit; text-align: left; color: var(--ink); cursor: pointer; }
+.ideas .idea:disabled { cursor: default; opacity: .6; }
+.ideas .idea-ico { display: grid; place-items: center start; height: 22px; color: var(--ink2); }
+.ideas .idea-ico svg { width: 19px; height: 19px; }
+.ideas .idea-tx { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ideas .idea-tx b { font-size: 15px; font-weight: 500; line-height: 22px; }
+.ideas .idea-tx small { font-size: 13.5px; line-height: 20px; color: var(--ink3); }
+.ideas .idea > svg:last-child { width: 16px; height: 22px; color: var(--ink3); }
+.ideas .idea:hover:not(:disabled) .idea-tx b { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
+.ideas.compact .idea { padding: 10px 0; align-items: center; }
+.ideas.compact .idea-ico, .ideas.compact .idea > svg:last-child { height: 20px; }
+.ideas-page { max-width: 680px; }
+.ideas-sub { margin: 4px 0 12px; font-size: 14px; line-height: 21px; color: var(--ink2); }
+.ideas-none { font-size: 14px; color: var(--ink3); }
+.hm-offers { margin-top: 28px; }
+/* every Odelia tab on the same column and top edge as the other pages (Ideas sat 64px left of them) */
+@media (min-width: 860px) { .page.odelia { max-width: 900px; margin-left: auto; margin-right: auto; padding-left: 40px; padding-right: 40px; padding-top: 56px; } }
+.m-btns .ap-deny { margin-right: auto; }
+/* phone: the decision stacks, Approve full width on top, Not now and Edit first under it, nothing off screen */
+@media (max-width: 640px) {
+  .m-btns { flex-wrap: wrap; }
+  .m-btns > .pill.ink, .m-btns > button:last-child { order: -1; flex: 1 0 100%; justify-content: center; }
+  .m-btns > .pill.quiet { flex: 1 1 0; justify-content: center; }
+  .m-btns .ap-deny { margin-right: 0; }
+}

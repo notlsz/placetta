@@ -22,6 +22,7 @@
     "beam": "esbuild src/site/beam.tsx --bundle --minify --format=iife --jsx=automatic --target=es2020 --define:process.env.NODE_ENV=\\\"production\\\" --outfile=site/beam.js --log-level=warning",
     "test:plan": "esbuild scripts/plan-test.ts --bundle --platform=node --format=esm --outfile=.plan-test.mjs '--external:*.pdf?inline' --log-level=error && node .plan-test.mjs; s=$?; rm -f .plan-test.mjs; exit $s",
     "test:forms": "node scripts/forms-roundtrip.mjs",
+    "test:ideas": "esbuild scripts/ideas-test.ts --bundle --platform=node --format=esm --outfile=.ideas-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .ideas-test.mjs; s=$?; rm -f .ideas-test.mjs; exit $s",
     "test:learn": "esbuild scripts/self-learn-test.ts --bundle --platform=node --format=esm --outfile=.learn-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .learn-test.mjs; s=$?; rm -f .learn-test.mjs; exit $s",
     "test:agent": "esbuild scripts/agent-test.ts --bundle --platform=node --format=esm --outfile=.agent-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .agent-test.mjs; s=$?; rm -f .agent-test.mjs; exit $s",
     "test:redteam": "esbuild scripts/redteam-test.ts --bundle --platform=node --format=esm --outfile=.redteam-test.mjs '--external:*.pdf?inline' --external:playwright-core --external:thinking-orbs --log-level=error && node .redteam-test.mjs; s=$?; rm -f .redteam-test.mjs; exit $s",

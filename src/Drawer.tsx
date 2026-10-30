@@ -577,6 +577,8 @@ export function ApproveModal({ id, onClose }: { id: string; onClose: () => void 
       <footer className="m-f">
         <p>{cloud?.termsHold && <span className="ap-hold" role="note">{lang === "zh" ? "请先在页面顶部接受更新后的条款，然后再批准。" : "Accept the updated Terms at the top of the page to approve this."} </span>}{t("ap_note")} {cloud ? (a.kind === "file" ? t("ap_team") : "") : t("ap_sim")}</p>
         <div className="m-btns">
+          {/* not now: nothing is sent, and the card waits where it was */}
+          <button type="button" className="pill quiet ap-deny" onClick={onClose}>{zh ? "暂不" : "Not now"}</button>
           {app && <button type="button" className="pill quiet" onClick={() => { onClose(); openApp(app.id, "form", true); }}><I.pencil />{t("ap_edit")}</button>}
           <Pill kind="ink" disabled={busy || blocked || (needSig && !sig) || !!cloud?.termsHold} onClick={() => { allow.current?.(); approve(a.id, sig ?? undefined, risk && a.kind === "file" ? riskFlags(risk, override && risk.level === "high" ? { at: new Date().toISOString() } : undefined) : undefined); onClose(); }}>{b(a.action)}</Pill>
         </div>

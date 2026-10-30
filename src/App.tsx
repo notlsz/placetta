@@ -56,6 +56,7 @@ import { todos } from "./doNext";
 import { preflight } from "./smart";
 import type { RiskFlags } from "./risk";
 import { I, Menu, Modal } from "./ui";
+import { IdeasPage } from "./Ideas";
 import * as api from "./cloud/api";
 import { fromRow, merge, napper, pollDelay, startFeed, type Pushed } from "./cloud/runFeed";
 import { DEFAULT_POLICY, decide, type Purchase } from "./spend.ts";
@@ -1440,7 +1441,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       {/* the title on every tab, chat too, so the page's top edge doesn't jump between pages (panels 4 to 6); a phone hides it on chat */}
       <PageHead title={t("nav_odelia")} />
       <Tabs view="odelia" current={odeliaTab} tabs={[
-        { id: "chat", label: t("nav_chat") }, { id: "work", label: t("nav_work"), count: waitingJobs },
+        { id: "chat", label: t("nav_chat") }, { id: "work", label: t("nav_work"), count: waitingJobs }, { id: "ideas", label: t("nav_ideas") },
         // Playbooks stays one click away under More; the tab shows only while you're on it
         ...(odeliaTab === "playbooks" ? [{ id: "playbooks", label: t("nav_playbooks") }] : []), { id: "updates", label: t("nav_updates"), count: unread },
       ]} />
@@ -1448,6 +1449,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       {odeliaTab === "work" && <WorkPage />}
       {odeliaTab === "playbooks" && <PlaybooksPage />}
       {odeliaTab === "updates" && <UpdatesPage />}
+      {odeliaTab === "ideas" && <IdeasPage />}
     </div>
   );
   const page = {
