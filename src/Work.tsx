@@ -3,6 +3,7 @@ import { useApp } from "./ctx";
 import { B, type Bi } from "./bi";
 import { fmtAgo, fmtDay } from "./time";
 import { I } from "./ui";
+import { openSettings } from "./Settings";
 import { LocalHold, useApprovalHold } from "./SendHold";
 import { awayWait, cadence, continuePrompt, family, nextAction, nextRun, progress, proven, storeOf, type Job, type Routine } from "./jobs";
 import { reportLines } from "./finish";
@@ -289,7 +290,7 @@ const STARTERS = [
 
 /** The Work tab of Odelia's page (App renders the page shell and the tab strip). */
 export function WorkPage() {
-  const { b, lang, ws, busy, live, ask, queued, unqueue } = useApp();
+  const { b, lang, ws, busy, live, ask, queued, unqueue, go } = useApp();
   const [showDone, setShowDone] = useState(false);
   const zh = lang === "zh";
   const jobs = ws.jobs ?? [], routines = ws.routines ?? [];
@@ -301,6 +302,11 @@ export function WorkPage() {
   return (
     <div className="work tabbed">
       <p className="tab-lede">{zh ? "Odelia 手上的每项工作，按门店分组：每家门店有自己的助手做本店的部分，跨门店的工作由 Odelia 统筹。她最多同时处理三项，其余排队接着做。每项工作都可以回看她是怎么做的。" : "Every job Odelia is on, grouped by store: each store has its own bot doing that store's part, and Odelia coordinates the work that spans stores. She works up to three at once; more wait their turn. You can watch back how she did any job."}</p>
+      {/* Muse's avatar opens its activity log and the permissions you've approved: the same two, one tap from her work */}
+      <nav className="wk-trust" aria-label={zh ? "她做过什么，她可以做什么" : "What she did, what she may do"}>
+        <button type="button" className="lnk" onClick={() => openSettings(go, "activity")}>{zh ? "她做过的每件事" : "Everything she's done"}<I.chevR /></button>
+        <button type="button" className="lnk" onClick={() => openSettings(go, "approvals")}>{zh ? "她不用问就能做的事" : "What she may do without asking"}<I.chevR /></button>
+      </nav>
 
       {busy && live && <p className="work-now"><I.spark /><span>{zh ? "正在做：" : "Working now: "}{b(live.label)}…</span></p>}
 

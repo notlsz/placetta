@@ -2,6 +2,7 @@
 import { ideas } from "../src/ideas.ts";
 import { SAMPLE } from "../src/model.ts";
 import { runway } from "../src/runway.ts";
+import { connectAsk } from "../src/connectAsk.ts";
 import type { Workspace } from "../src/model.ts";
 
 let bad = 0;
@@ -31,6 +32,10 @@ ok(!ideas(SAMPLE, today, { unpublished: 0 }).some(x => x.icon === "fee"), "no fe
 // a business with no records gets no offers, not made-up ones
 const empty: Workspace = { ...SAMPLE, apps: [], deadlines: [], stores: [] };
 ok(ideas(empty, today, { unpublished: 0 }).length === 0, "nothing in the records, nothing offered");
+
+// "Connect my Gmail" opens the connection page; work that only sounds like it ("set up the food handler cards") goes to her
+ok(connectAsk("Connect my Gmail") === "Gmail" && connectAsk("Please connect our QuickBooks account") === "QuickBooks" && connectAsk("连接我的微信") === "微信", "asking to connect an app finds it", [connectAsk("Connect my Gmail"), connectAsk("连接我的微信")]);
+ok([ "set up the food handler cards", "Connect the sign permit to the store", "Connect my Gmail and file the permit"].every(t => connectAsk(t) === null), "work that isn't a connection still goes to Odelia");
 
 console.log(bad ? `\n${bad} failed` : "\nall passed");
 process.exit(bad ? 1 : 0);

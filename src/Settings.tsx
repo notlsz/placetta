@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { ONLINE_FILING, useOnlineFiling } from "./onlineFiling";
 import { hrefOf, plainClick, readRoute, setRoute } from "./route";
 import { useApp } from "./ctx";
+export { connectAsk } from "./connectAsk";
 import { B, type Bi } from "./model";
 import { fmtAgo, fmtDay } from "./time";
 import { Footer, I, Modal, Select } from "./ui";
@@ -265,7 +266,7 @@ function Integrations() {
   const { b, lang, cloud, say } = useApp();
   const pin = usePin();
   const [feed, setFeed] = useState("");
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(() => { const a = pendingApp; pendingApp = ""; return a; });
   const [only, setOnly] = useState(false);
   const [avail, setAvail] = useState<api.Availability | null>(null);
   const [form, setForm] = useState<{ kind: HookKind; url: string; secret: string; busy?: boolean } | null>(null);
@@ -1621,6 +1622,13 @@ let settingsTarget: string | null = null;
 let settingsOpenedAt = false;
 const takeSettingsTarget = () => { const t = settingsTarget; settingsTarget = null; if (t) settingsOpenedAt = true; return t; };
 /** Opens Settings at one section (e.g. "hq", "security"), switching to its category. */
+/** "Connect my Gmail": the connection page with that app already searched (Muse connects an app when you ask it to). */
+let pendingApp = "";
+export function openIntegrations(go: (v: "settings") => void, app: string) {
+  pendingApp = app;
+  openSettings(go, "integrations");
+}
+
 export function openSettings(go: (v: "settings") => void, section: string) {
   settingsTarget = section;
   go("settings");

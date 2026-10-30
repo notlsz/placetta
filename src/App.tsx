@@ -40,7 +40,7 @@ import { Logo, Mark } from "./Logo";
 import { SAMPLE_WS } from "./sample";
 import { B, same, type Application, type Approval, type Bi, type Doc, type LicenseHit, type UpdateItem, type Workspace } from "./model";
 import { FindLicenses, Overview, PageHead, Permits, Tabs, UpdatesPage } from "./pages";
-import { Settings } from "./Settings";
+import { connectAsk, openIntegrations, Settings } from "./Settings";
 import { Stores } from "./Stores";
 import { WorkPage } from "./Work";
 import { ReplayDrawer } from "./Watch";
@@ -737,6 +737,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [queued, setQueued] = useState<{ id: string; text: string }[]>([]);
   const ask = useCallback((text: string, voice = false) => {
     const q = text.trim(); if (!q) return;
+    // "Connect my Gmail": the connection page with that app found, where connecting is a deliberate tap, not a model's call
+    const app = connectAsk(q);
+    if (app) { openIntegrations(go, app); say(lang === "zh" ? `已为您找到 ${app}。点“连接”即可。` : `Here's ${app}. Tap Connect.`); return; }
     if (cloud && plan === "none") { setPlans("start"); return; }
     setPanelOpen(true);
     if (busyRef.current) {

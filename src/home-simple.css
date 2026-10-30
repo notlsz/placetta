@@ -596,3 +596,7 @@
   .m-btns > .pill.quiet { flex: 1 1 0; justify-content: center; }
   .m-btns .ap-deny { margin-right: 0; }
 }
+/* Work: what she did and what she may do, one tap away (Muse: the avatar opens the activity log and the permissions) */
+.wk-trust { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 4px 0 8px; }
+.wk-trust .lnk { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; }
+.wk-trust .lnk svg { width: 14px; height: 14px; }
