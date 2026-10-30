@@ -52,7 +52,10 @@ export function answersOf(c: Case): string {
     "Owner's home address: 2150 Lemoine Ave, Apt 4B, Fort Lee, NJ 07024. Owner's date of birth: 1988-04-12. Title: managing member, 100% owner.",
     "Business email: owner@probe-test.example. Business phone: (917) 555-0142.",
     "Bank: JPMorgan Chase, business checking. Card processor: Square.",
-    "About 1,500 sq ft, 30 seats, open 10am to 10pm every day. Expected sales about $35,000 a month. 4 employees from 2026-12-01, first payroll 2026-12-15.",
+    // what a real owner answers next: no new seat count or size (each case's own facts carry those; a second number
+    // only made Odelia ask which was right), and the dates and coverage most forms ask for
+    "Seats, size and hours are as I said before. We open on 2026-12-15. Expected sales about $35,000 a month. 4 employees from 2026-12-01, first payroll 2026-12-15, about $28,000 in wages in the first quarter.",
+    "Workers' comp: Travelers, policy WC-PROBE-0001, 2026-12-01 to 2027-12-01. Public water and public sewer. A certified food protection manager: Mei Chen. File returns monthly. Taxed as a single-member LLC, disregarded. Yes to email from the agency.",
     "Fiscal year ends December 31, cash basis. No alcohol, tobacco, vapor products, motor fuel or amusement machines. Not run from a home. No other locations in this state. No previous permits, no merger, not buying an existing business. No representatives or agents.",
     "For any other yes/no line that doesn't apply to us, the answer is No. Fill it all in and put it up for my approval.",
   ].join("\n");
