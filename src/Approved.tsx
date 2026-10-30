@@ -62,7 +62,7 @@ export function ApprovedMoment() {
           {win.number ? (zh ? ` 编号 ${win.number}。` : ` Number ${win.number}.`) : ""}
           {win.renews ? (zh ? ` 续期已记在 ${fmtDay(win.renews, lang, true)}。` : ` Renewal on the calendar for ${fmtDay(win.renews, lang, true)}.`) : ""}
         </p>
-        <button type="button" className="lnk win-see" onClick={() => { keep(win.app.id); openApp(win.app.id); }}>{zh ? "查看执照" : "See the license"}</button>
+        <button type="button" className="lnk win-see" onClick={() => { keep(win.app.id); openApp(win.app.id); }}>{zh ? `查看${name}` : `See your ${name.charAt(0).toLowerCase() + name.slice(1)}`}</button>
       </div>
     </section>
   );

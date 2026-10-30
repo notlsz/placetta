@@ -694,3 +694,13 @@
 /* phone Stores keeps its one-line summary, like the desktop */
 @media (max-width: 640px) { .page.stores-page > .ph .ph-tx p { display: block; } .store-row.plain .sr-she { align-items: flex-start; } .store-row.plain .sr-she-bot { margin-top: 1px; } }
 @media (max-width: 640px) { .page.stores-page > .ph .ph-tx p.ph-long { display: none; } }
+/* Panel 13 */
+/* phone After that: the icon the height of its text line, so it centers on the line, not 7px under it */
+@media (max-width: 640px) { .page.home.simple-home .hm-needs .stack .appr .appr-ico { height: 20px; align-self: start; } }
+/* page actions on the title's center line (Licenses and Stores sat 4 and 6px high) */
+@media (min-width: 641px) { .page.permits > .ph, .page.stores-page > .ph { align-items: center; } .page.permits > .ph .ph-act, .page.stores-page > .ph .ph-act { margin-top: 0; align-self: flex-start; height: 48px; display: flex; align-items: center; } }
+/* the chosen tea ringed in its own accent, not black */
+.settings .sw[aria-checked="true"] { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--blue-ink); }
+/* Settings: one gap between sections, and the accent's note the full width of its row */
+.settings .sg-sub.accent .sg-note { max-width: none; }
+@media (min-width: 641px) { .page.stores-page > .ph { align-items: flex-start; } .page.stores-page > .ph .ph-acts { align-self: flex-start; height: 48px; margin-top: 0; display: flex; align-items: center; } }

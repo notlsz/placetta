@@ -496,7 +496,7 @@ export function Overview() {
   const say: string[] = [];
   if (workN > 0) say.push(zh ? `Odelia 正在处理 ${workN} 件事` : `Odelia is working on ${workN} thing${workN === 1 ? "" : "s"}`);
   else if (busy && live) say.push(`${b(taskVerb(live.state))}…`);
-  if (filed > 0) say.push(zh ? `已办好 ${approved}/${n} 项执照` : `${approved} of ${n} licenses done`);
+  if (filed > 0) say.push(zh ? `已办好 ${approved}/${n} 项执照` : `${approved} of ${n} licenses approved`);
   if (!say.length) say.push(zh ? `计划中有 ${n} 项执照` : `${n} license${n === 1 ? "" : "s"} in your plan`);
   if (landing && !filed && !firstRun) say.push(zh ? `预计 ${fmtDay(landing, lang, true)} 前后开业` : `Opening around ${fmtDay(landing, lang, true)}`);
   const status = say.join(zh ? "，" : ". ");
@@ -669,7 +669,7 @@ function HomeHello({ need, firstRun, landing, n, approved, agency }: { need: num
   const head = firstRun ? b(headLine(f)) : need ? (zh ? `有 ${need} 件事需要您。` : `${need} thing${need === 1 ? " needs" : "s need"} you.`) : zh ? "今天没有需要您处理的事。" : "Nothing needs you today.";
   const split = firstRun ? splitLine(f) : null;
   const sub = [landing ? (zh ? `预计 ${fmtDay(landing, lang, true)} 前后开业` : `Opening around ${fmtDay(landing, lang, true)}`) : "",
-    (zh ? `${n} 项执照已办好 ${approved} 项` : `${approved} of ${n} license${n === 1 ? "" : "s"} done`) + (agency ? (zh ? `，${agency} 项在机构审批中` : `, ${agency} with the agency`) : "")].filter(Boolean).join(zh ? "，" : ". ") + (zh ? "。" : ".");
+    (zh ? `${n} 项执照已办好 ${approved} 项` : `${approved} of ${n} license${n === 1 ? "" : "s"} approved`) + (agency ? (zh ? `，${agency} 项在机构审批中` : `, ${agency} with the agency`) : "")].filter(Boolean).join(zh ? "，" : ". ") + (zh ? "。" : ".");
   return (
     <header className="hm-hello">
       <p className="hm-hi"><span className="hm-hi-bot" aria-hidden="true"><AgentBot size={28} gaze={[0, 2.4]} interactive={false} /></span>{hi}</p>
