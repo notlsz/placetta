@@ -36,7 +36,7 @@ class Mem implements Store {
     for (const [k, v] of Object.entries(patch)) (this.f as unknown as Record<string, unknown>)[k] = v;
     return { ...this.f };
   }
-  async login() { return { username: "demo", password: this.password, host: "127.0.0.1" }; }
+  async login(_f?: Filing) { return { username: "demo", password: this.password, host: "127.0.0.1" }; }
   async skill() { return null; }
   async saveSkill(_s: Skill) {}
   async skillFailed() { return { disabled: false }; }

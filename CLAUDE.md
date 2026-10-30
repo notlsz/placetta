@@ -19,6 +19,8 @@ When something breaks in production, add an entry there.
 
 For every task the founder assigns, run this loop, and keep running it until the work scores 9.5 or better:
 
+0. Write the done list first: the steps or parts that must all be true for the task to count as done. Check them
+   off at the end, and say which aren't.
 1. Compare. Look at how the companies he named do it (Muse, Instinct, Grok Bot, Claude Duet, OpenAI Dots, Gemini
    Spark, Sierra, Legora, Harvey, Devin, EliseAI, Genspark, Decagon, Armadin, Factory, Poke, Lindy, Hermes Agent,
    Parloa, Chai Discovery, Hark, wonderful.ai; docs/COMPARE-ALL.md) and copy what already works. Invent only when
@@ -28,6 +30,8 @@ For every task the founder assigns, run this loop, and keep running it until the
 4. Score it out of 10 against them, honestly.
 5. Confirm it works as intended, end to end.
 6. Adjust what falls short, then repeat from 1.
+7. Learn from every mistake: when something was wrong (yours, a test's, production's), find why, write the rule in
+   docs/LESSONS.md, and check for it from then on. Never make the same mistake twice.
 
 The founder only assigns tasks. Work you know a task needs, do without asking. Odelia follows the same loop on
 clients' filings (src/live.ts, "Every job runs one loop"); filing, paying and sending still wait for approval.

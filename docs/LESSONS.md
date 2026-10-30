@@ -151,3 +151,21 @@ Rules:
 - One style per control (tabs, pills, small buttons): never two.
 - Less is more: whitespace over divider lines; few boxes, no bento grids. Side-by-side cards are the same height.
 - Check before showing UI: node scripts/fit-check.mjs --align (its "row" and "icon" checks must report 0).
+
+## 2026-10: twelve pushes went out on a red CI, so the server never got them
+
+**What happened.** From the onboarding commit (Oct 29) to the third UI loop (Oct 30) every CI run on main failed,
+and "Deploy server functions" only runs after a green CI, so it skipped every time. The app (Vercel) shipped; the
+Supabase functions, including Odelia's new instructions, stayed at the Oct 29 morning build.
+
+**The cause.** Two checks failed that the local runs before each push didn't cover: the filer worker's typecheck
+(`worker/filer` `tsc`, a test's `Mem.login()` no longer matched `Store.login(f)` after another change) and
+`npm run seo` (a landing change left `site/index.html`, `site/sitemap.xml` and `site/sitemaps/pages.xml` stale).
+Nobody looked at CI after pushing.
+
+**The rules.**
+
+- After every push to main, check the CI run (`gh run list --workflow CI --limit 1`) and fix a red one before anything
+  else. A push isn't done until CI is green and "Deploy server functions" ran.
+- Before pushing a change to `site/`, run `npm run seo`. Before pushing a change near the worker, run
+  `(cd worker/filer && npx tsc -p tsconfig.json)`.
