@@ -48,6 +48,18 @@ const f = (label: string, value: string) => ({ id: label, label: same(label), va
   const errs = p2.errors.map(e => e.label.en);
   ok(["EIN", "Contact email", "Phone", "ZIP", "Food protection certificate expiration date", "Owner name"].every(l => errs.includes(l)), "wrong EIN, email, phone, ZIP, an expired date and a placeholder are all errors", errs);
 
+  // production probe, 2026-10-30: Florida DR-1's "Email Communication" section over a name and a phone line, and SS-4
+  // line 18 answered "No", were refused as a bad email and a bad EIN, so the card never went up
+  const dr1 = app("a9", { fields: [
+    f("Email Communication: Person who can answer questions about this application", "Mei Chen"), f("Email Communication: That person's telephone", "(917) 555-0142"),
+    f("Email Communication: That person's email address", "owner@example.com"),
+    f("Line 18: Has the applicant entity shown on line 1 ever applied for and received an EIN", "No"),
+  ] });
+  const p9 = preflight(ws({ apps: [dr1] }), fileAp("a9"), TODAY);
+  ok(p9.errors.length === 0, "a name or a phone under an Email section, and No to 'ever received an EIN', pass", p9.errors.map(e => `${e.label.en}: ${e.note.en}`));
+  const p10 = preflight(ws({ apps: [app("a10", { fields: [f("Email Communication: That person's email address", "Mei Chen")] })] }), fileAp("a10"), TODAY);
+  ok(p10.errors.length === 1, "a name on the email line itself is still an error", p10.errors.length);
+
   const soft = app("a3", { fields: [
     f("EIN", "Applied for"), f("Legal business name", "Golden Ox Restaurant Inc"), f("Premises address", "12 Other Ave, Queens, NY 11101"), f("Start date", plus(-10)), f("State", "Nwe York"),
   ] });

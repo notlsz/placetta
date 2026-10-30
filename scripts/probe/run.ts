@@ -275,7 +275,9 @@ async function license(c: Case): Promise<Result> {
     if (!f) return r;
     const last = f.agent_log.at(-1);
     ok("test run: checked and stopped, nothing sent", last?.kind === "dry_run" || f.agent_state === "needs_you", last ? `${last.kind}: ${last.en}` : f.agent_state);
-    ok("its route is decided (channel)", !!f.channel, f.channel);
+    // a form the signer signs in the card (formation, foreign registration) stops for the signature before a route is
+    // picked: that's the right stop, not a missing route
+    ok("its route is decided (channel)", !!f.channel || /signature/i.test(last?.en ?? ""), f.channel);
     const tasks = await sql(`select id from public.team_tasks where filing_id = ${lit(f.id)}`);
     ok("no task lands on the Placetta team", !tasks?.length, `${tasks?.length} tasks`);
 
@@ -346,11 +348,15 @@ async function edges(): Promise<Result[]> {
     ok("one submitted alert, not two", n === 1, `${n}`);
   });
   await edge("a duplicate approval isn't sent twice", async (ok) => {
-    const f1 = await mk(a, wa, "dup"), f2 = await mk(a, wa, "dup");
+    const f1 = await mk(a, wa, "dup");
     const r1 = await call("file", { workspace_id: wa, filing_id: f1.id, action: "start" }, { jwt: a.jwt });
-    const r2 = await call("file", { workspace_id: wa, filing_id: f2.id, action: "start" }, { jwt: a.jwt });
     ok("the first goes through its checks", r1.status === 200, r1.json);
-    const data = await one<{ agent_state: string | null; agent_log: unknown }>(`select agent_state, agent_log from public.filings where id = ${lit(f2.id)}`);
+    // a second open filing for the same application: the database refuses it outright (filings_one_open_per_app,
+    // added after this probe was written); if it ever gets in, the file function must hold it as a duplicate
+    const second = await mk(a, wa, "dup").then((f) => f, (e: Error) => e);
+    if (second instanceof Error) { ok("the second can't even be created while the first is open", /one_open_per_app/.test(second.message), second.message); return; }
+    const r2 = await call("file", { workspace_id: wa, filing_id: second.id, action: "start" }, { jwt: a.jwt });
+    const data = await one<{ agent_state: string | null; agent_log: unknown }>(`select agent_state, agent_log from public.filings where id = ${lit(second.id)}`);
     const last = (data?.agent_log as { ref?: string; en: string }[] | null)?.at(-1);
     ok("the second is held as a duplicate and asks the person", r2.status === 200 && data?.agent_state === "needs_you" && /already approved/i.test(last?.en ?? ""), last?.en ?? r2.json);
   });

@@ -169,3 +169,20 @@ Nobody looked at CI after pushing.
   else. A push isn't done until CI is green and "Deploy server functions" ran.
 - Before pushing a change to `site/`, run `npm run seo`. Before pushing a change near the worker, run
   `(cd worker/filer && npx tsc -p tsconfig.json)`.
+
+## 2026-10: the daily production probe failed for a week and nobody read it
+
+**What happened.** The probe that files 30 real licenses end to end against production failed every day from Oct 23.
+First the age gate refused its accounts (so nothing past sign-in was tested at all); once that was fixed, 27 of 29
+licenses stopped short of an approval card.
+
+**The causes.** The probe's accounts never confirmed their age. Two pre-approval checks refused right answers: a name
+and a phone under Florida DR-1's "Email Communication" section read as bad emails, and "No" to SS-4 line 18 ("ever
+received an EIN") read as a bad EIN; the card can't go up past an error, so Odelia waited on a specialist. And Odelia
+held cards for optional lines (a DBA, a fax, an inspection language) instead of writing "None" and putting the card up.
+
+**The rules.**
+
+- Read the production probe every day (`gh run list --workflow probe.yml --limit 1`); a red probe is the first task.
+- A check that refuses a value must look at what the line asks, not a word in its section's heading.
+- Optional lines never hold an approval: "None" is an answer.

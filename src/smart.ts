@@ -69,12 +69,15 @@ const RULES: Rule[] = [
       : err(B(c.label, c.label), B("A Social Security number or ITIN is 9 digits.", "社会安全号或 ITIN 为 9 位数字。")) },
   { kind: "ein", test: /\b(ein|fein)\b|employer identification|federal (tax|employer) id/i, check: (v, c) => {
       if (v.includes("•")) return null;
+      // a yes/no question about an EIN (SS-4 line 18, "ever applied for and received an EIN?") answered No is right
+      if (/^(no|none|n\/?a|not applicable)\b/i.test(v.trim()) && /\b(ever|previous|prior|before|other|another)\b|\?/i.test(c.label)) return null;
       if (/applied|pending|apply/i.test(v) && !/\d{2}-?\d{7}/.test(v)) return warn(B(c.label, c.label), B("No EIN yet. Most agencies won't take the filing until it's issued.", "尚未取得 EIN。多数机构要等 EIN 下发后才受理。"));
       // the format, a prefix the IRS assigns, and an ITIN written where the EIN goes (src/validate.ts)
       const p = einCheck(v);
       return p ? { level: p.level, label: B(c.label, c.label), note: p.note } : null;
     } },
-  { kind: "email", test: /e-?mail/i, check: (v, c) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.trim()) ? null : err(B(c.label, c.label), B("That isn't an email address.", "这不是有效的电子邮箱地址。")) },
+  // a section named "Email Communication" over a name or a phone line isn't an email line (Florida's DR-1)
+  { kind: "email", test: /e-?mail/i, skip: /person who|telephone|\bphone\b|\bname\b/i, check: (v, c) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.trim()) ? null : err(B(c.label, c.label), B("That isn't an email address.", "这不是有效的电子邮箱地址。")) },
   { kind: "phone", test: /phone|telephone|mobile|\bcell\b|\bfax\b/i, check: (v, c) => {
       const d = digits(v);
       if (d.length === 10 || (d.length === 11 && d.startsWith("1"))) return null;
