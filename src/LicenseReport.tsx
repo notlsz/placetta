@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useApp } from "./ctx";
 import { B, type Bi } from "./bi";
@@ -15,6 +15,12 @@ import "./report.css";
 
 const LANGS: { k: ReportLang; l: string }[] = [{ k: "en", l: "English" }, { k: "zh", l: "中文" }, { k: "both", l: "EN + 中文" }];
 const LEVELS = ["federal", "state", "county", "city"] as const;
+/** The status in two or three words, so it fits its column on one line. */
+const SHORT: Record<string, Bi> = {
+  approved: B("Approved", "已批准"), held: B("On file", "已持有"), review: B("With the agency", "机构审核中"), filing: B("Being filed", "正在提交"),
+  ready: B("Ready to approve", "待您批准"), needs: B("Needs you", "需要您"), draft: B("In progress", "准备中"), waiting: B("Waiting", "等待中"), todo: B("Not started", "未开始"),
+};
+const lower = (b: Bi): Bi => B(b.en.charAt(0).toLowerCase() + b.en.slice(1), b.zh);
 
 function day(iso: string | undefined, lang: ReportLang): string {
   if (!iso) return "";
@@ -94,36 +100,32 @@ export function LicenseReport({ onClose, store: first }: { onClose: () => void; 
       </div>
       <article className={"lr-paper" + (lang === "both" ? " lr-both" : "")} lang={lang === "zh" ? "zh-CN" : "en"}>
         <header className="lr-head">
-          <p className="lr-kick"><W lang={lang} x={B("License and permit report", "执照与许可报告")} /></p>
           <h1><W lang={lang} x={r.business} /></h1>
-          <p className="lr-scope"><W lang={lang} x={r.scope} />{r.address && <span className="lr-addr">{r.address}</span>}</p>
-          <p className="lr-meta"><span><W lang={lang} x={B("As of", "截至")} /> {day(r.asOf, lang)}</span><span><W lang={lang} x={B("Prepared by Odelia at Placetta", "由快哉的 Odelia 编制")} /></span></p>
+          <p className="lr-meta"><W lang={lang} x={B("License and permit report", "执照与许可报告")} /><span><W lang={lang} x={r.scope} /></span>{r.address && <span>{r.address}</span>}<span><W lang={lang} x={B("As of", "截至")} /> {day(r.asOf, lang)}</span></p>
         </header>
 
         <section className="lr-sum" aria-label={zh ? "概要" : "Summary"}>
-          <Tile n={r.counts.total} l={B("Licenses and permits", "执照与许可")} lang={lang} />
-          <Tile n={r.counts.approved} l={B("Approved or on file", "已批准或已持有")} lang={lang} />
-          <Tile n={r.counts.moving} l={B("Filed or ready to file", "已提交或待提交")} lang={lang} />
-          <Tile n={r.counts.toDo} l={B("Still to do", "待办")} lang={lang} />
+          <p className="lr-big">
+            <W lang={lang} x={B(`${r.counts.total} licenses and permits.`, `共 ${r.counts.total} 项执照与许可。`)} />{" "}
+            <span className="lr-k ok"><W lang={lang} x={B(`${r.counts.approved} approved`, `已批准 ${r.counts.approved} 项`)} /></span>
+            <span className="lr-k mv"><W lang={lang} x={B(`${r.counts.moving} filed`, `已提交 ${r.counts.moving} 项`)} /></span>
+            <span className="lr-k td"><W lang={lang} x={B(`${r.counts.toDo} to do`, `待办 ${r.counts.toDo} 项`)} /></span>
+          </p>
+          <div className="lr-prog" aria-hidden="true">
+            {r.counts.approved > 0 && <i className="ok" style={{ flexGrow: r.counts.approved }} />}{r.counts.moving > 0 && <i className="mv" style={{ flexGrow: r.counts.moving }} />}{r.counts.toDo > 0 && <i className="td" style={{ flexGrow: r.counts.toDo }} />}
+          </div>
+          <p className="lr-lede">
+            <W lang={lang} x={r.fees.known || r.fees.open
+              ? B(`${fee(r.fees.known)} in agency fees still to pay${r.fees.open ? `, plus ${r.fees.open} the agency sets` : ""}.`, `尚需缴纳机构费用 ${fee(r.fees.known)}${r.fees.open ? `，另有 ${r.fees.open} 项由机构核定` : ""}。`)
+              : B("No agency fees left to pay.", "没有待缴的机构费用。")} />{" "}
+            <W lang={lang} x={r.renewals.length ? B(`${r.renewals.length} renew${r.renewals.length === 1 ? "s" : ""} in the next 90 days.`, `未来 90 天有 ${r.renewals.length} 项续期。`) : B("Nothing renews in the next 90 days.", "未来 90 天没有续期。")} />
+          </p>
         </section>
-        <p className="lr-lede">
-          <W lang={lang} x={r.fees.known || r.fees.open
-            ? B(`Agency fees still to pay: ${fee(r.fees.known)}${r.fees.open ? `, plus ${r.fees.open} fee${r.fees.open === 1 ? "" : "s"} the agency sets` : ""}${r.fees.mixed ? " (in more than one currency; see each row)" : ""}. You pay each agency directly.`,
-              `尚需缴纳的机构费用：${fee(r.fees.known)}${r.fees.open ? `，另有 ${r.fees.open} 项由机构核定` : ""}${r.fees.mixed ? "（涉及多种货币，见各行）" : ""}。费用由您直接支付给各机构。`)
-            : B("No agency fees left to pay.", "没有待缴的机构费用。")} />
-          {" "}
-          <W lang={lang} x={r.renewals.length ? B(`Renewing or lapsed in the next 90 days: ${r.renewals.length}.`, `未来 90 天内续期或已过期：${r.renewals.length} 项。`) : B("Nothing renews in the next 90 days.", "未来 90 天没有需要续期的项目。")} />
-        </p>
-        <p className="lr-how"><W lang={lang} x={B(
-          "Each row names the agency, the form, the fee, how it's filed and how often it renews, with the official page it rests on: the agency's own words and the day Placetta read them. A row Placetta couldn't confirm on an official page says so and names who to ask.",
-          "每一行列出机构、表格、费用、办理方式和续期周期，以及依据的官方页面：机构原文和快哉核对的日期。未能在官方页面核实的行会注明，并写明该问哪个机构。")} />
-          {r.unconfirmed > 0 && <> <W lang={lang} x={B(`${r.unconfirmed} not confirmed yet.`, `${r.unconfirmed} 项尚未核实。`)} /></>}
-        </p>
 
         {byLevel.map(g => (
           <section key={g.l} className="lr-lv">
             <h2><W lang={lang} x={LEVEL_WORDS[g.l]} /><span>{g.rows.length}</span></h2>
-            {g.rows.map(x => <Row key={x.id} x={x} lang={lang} />)}
+            <div className="lr-list">{g.rows.map(x => <Row key={x.id} x={x} lang={lang} />)}</div>
           </section>
         ))}
 
@@ -166,6 +168,7 @@ export function LicenseReport({ onClose, store: first }: { onClose: () => void; 
         </section>
 
         <footer className="lr-foot">
+          <p><W lang={lang} x={B("Each row links the agency's own page; a quoted line shows the day Placetta read it. The spreadsheet has every field.", "每一行都附机构官方页面链接；引用原文的行注明快哉核对的日期。表格版包含全部字段。")} />{r.unconfirmed > 0 && <> <W lang={lang} x={B(`${r.unconfirmed} not confirmed on an official page yet.`, `${r.unconfirmed} 项尚未在官方页面核实。`)} /></>}</p>
           <p><W lang={lang} x={B(
             "Placetta isn't a law firm and this isn't legal advice: requirements come from each agency's published rules, as read on the dates shown. Agency fees are the amounts the agency publishes and are paid to the agency. Nothing is filed, paid or sent without your approval.",
             "快哉不是律师事务所，本报告不构成法律意见：各项要求来自机构公开发布的规定，以所示日期核对为准。机构费用以机构公布的金额为准，由您直接支付给机构。未经您批准，不会提交、付款或发送任何内容。")} /></p>
@@ -177,66 +180,28 @@ export function LicenseReport({ onClose, store: first }: { onClose: () => void; 
   );
 }
 
-function Tile({ n, l, lang }: { n: number; l: Bi; lang: ReportLang }) {
-  return <div className="lr-tile"><b>{n}</b><span><W lang={lang} x={l} /></span></div>;
-}
-
-function Field({ k, lang, children }: { k: Bi; lang: ReportLang; children: ReactNode }) {
-  return <div className="lr-f"><dt><W lang={lang} x={k} /></dt><dd>{children}</dd></div>;
-}
-
 function Row({ x, lang }: { x: ReportRow; lang: ReportLang }) {
   const host = (u: string) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return u; } };
+  const src = x.source?.url;
   return (
     <article className={"lr-row lrs-" + x.status}>
-      <div className="lr-rh">
-        <div>
-          <h3><W lang={lang} x={x.name} /></h3>
-          {x.plain && <p className="lr-plain"><W lang={lang} x={x.plain} /></p>}
-          {(x.critical || x.shared) && <p className="lr-tags">
-            {x.critical && <em><W lang={lang} x={B("Sets the opening date", "决定开业日期")} /></em>}
-            {x.shared && <em><W lang={lang} x={B("Company-wide", "全公司共用")} /></em>}
-          </p>}
-        </div>
-        <span className="lr-st"><W lang={lang} x={STATE_WORDS[x.status]} /></span>
+      <div className="lr-main">
+        <h3><W lang={lang} x={x.name} />{x.critical && <em className="lr-tag"><W lang={lang} x={B("Sets the opening date", "决定开业日期")} /></em>}</h3>
+        <p className="lr-sub">
+          <span><W lang={lang} x={x.agency} />{x.form && <>, <W lang={lang} x={x.form} /></>}</span>
+          {x.nextRenewal ? <span><W lang={lang} x={B("Renews", "续期")} /> {day(x.nextRenewal, lang)}</span> : x.renews && <span><W lang={lang} x={B("Renewal:", "续期：")} /> <W lang={lang} x={lower(x.renews)} /></span>}
+          {x.approved?.confirmation && <span><W lang={lang} x={B("Confirmation", "确认号")} /> {x.approved.confirmation}</span>}
+        </p>
+        {x.missing.length > 0 && <p className="lr-need"><W lang={lang} x={B(`${x.missing.length} answer${x.missing.length === 1 ? "" : "s"} still needed from you`, `还需要您提供 ${x.missing.length} 项信息`)} /></p>}
+        {x.proof === "quoted" && x.source?.quote && <q className="lr-q">{x.source.quote}</q>}
+        <p className="lr-srcl">
+          {src ? <a className="lr-a" href={src} target="_blank" rel="noopener noreferrer">{x.source?.label || host(src)}</a> : null}
+          {x.proof === "quoted" && x.source?.checked && <span><W lang={lang} x={B("read", "核对于")} /> {day(x.source.checked, lang)}</span>}
+          {x.proof === "open" && <span className="lr-open"><W lang={lang} x={B(`Not confirmed on an official page yet. Ask ${x.agency.en}.`, `尚未在官方页面核实，请向${x.agency.zh}确认。`)} /></span>}
+        </p>
       </div>
-      <dl className="lr-dl">
-        <Field k={B("Agency", "机构")} lang={lang}><W lang={lang} x={x.agency} /></Field>
-        {x.form && <Field k={B("Form", "表格")} lang={lang}><W lang={lang} x={x.form} /></Field>}
-        <Field k={B("Agency fee", "机构费用")} lang={lang}><W lang={lang} x={x.fee} /></Field>
-        {x.takes && <Field k={B("Usually takes", "通常需要")} lang={lang}><W lang={lang} x={x.takes} /></Field>}
-        {x.how && <Field k={B("How it's filed", "办理方式")} lang={lang}><W lang={lang} x={x.how} />{x.fileAt && <a className="lr-a" href={x.fileAt} target="_blank" rel="noopener noreferrer">{host(x.fileAt)}</a>}</Field>}
-        <Field k={B("Who files it", "由谁办理")} lang={lang}><W lang={lang} x={x.who} /></Field>
-        <Field k={B("Renews", "续期")} lang={lang}>{x.renews ? <W lang={lang} x={x.renews} /> : <W lang={lang} x={B("Not stated by the agency", "机构未说明")} />}{x.nextRenewal && <span className="lr-next"><W lang={lang} x={B("Next", "下次")} /> {day(x.nextRenewal, lang)}</span>}</Field>
-        {x.approved && (x.approved.on || x.approved.confirmation || x.approved.doc) && (
-          <Field k={B("Proof on file", "存档凭证")} lang={lang}>
-            {x.approved.on && <span><W lang={lang} x={B("Approved", "批准于")} /> {day(x.approved.on, lang)}</span>}
-            {x.approved.confirmation && <span><W lang={lang} x={B("Confirmation", "确认号")} /> {x.approved.confirmation}</span>}
-            {x.approved.doc && <span className="lr-doc">{x.approved.doc}</span>}
-          </Field>
-        )}
-        {x.missing.length > 0 && <Field k={B("Still needed", "仍需提供")} lang={lang}>{x.missing.map((m, i) => <span key={i} className="lr-miss"><W lang={lang} x={m} /></span>)}</Field>}
-        {x.foreign && <Field k={B("Owner in China", "业主在中国")} lang={lang}><W lang={lang} x={x.foreign} /></Field>}
-      </dl>
-      <div className={"lr-src" + (x.proof === "open" ? " open" : "")}>
-        {x.proof === "quoted" && x.source ? (
-          <>
-            <a className="lr-a" href={x.source.url} target="_blank" rel="noopener noreferrer">{x.source.label || host(x.source.url)}</a>
-            <q>{x.source.quote}</q>
-            <small><W lang={lang} x={B("Read on", "核对于")} /> {day(x.source.checked, lang)}</small>
-          </>
-        ) : x.proof === "linked" && x.source ? (
-          <>
-            <a className="lr-a" href={x.source.url} target="_blank" rel="noopener noreferrer">{x.source.label || host(x.source.url)}</a>
-            <small><W lang={lang} x={B("The agency's page. Placetta checks its current requirements before filing.", "机构页面。快哉在提交前会核对机构现行要求。")} /></small>
-          </>
-        ) : (
-          <>
-            <span><W lang={lang} x={B(`Not confirmed on an official page yet. Ask ${x.agency.en}.`, `尚未在官方页面核实，请向${x.agency.zh}确认。`)} /></span>
-            {x.source?.url && <a className="lr-a" href={x.source.url} target="_blank" rel="noopener noreferrer">{x.source.label || host(x.source.url)}</a>}
-          </>
-        )}
-      </div>
+      <span className="lr-fee"><W lang={lang} x={x.fee} /></span>
+      <span className="lr-st" title={STATE_WORDS[x.status].en}><W lang={lang} x={SHORT[x.status] ?? STATE_WORDS[x.status]} /></span>
     </article>
   );
 }
