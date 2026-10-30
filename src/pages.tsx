@@ -348,7 +348,7 @@ function DoNextCard({ x, n, onLater, docs, title }: { x: Todo; n: number; onLate
     <section className="dtn" data-do-next={x.key} aria-labelledby="dtn-h">
       <h1 className="vh">{title}</h1>
       {(phone || wide) && <div className="dtn-bot" aria-hidden="true"><AgentBot size={64} busy={busy} task={busy ? live?.state : undefined} gaze={[0, 2.4]} interactive={false} /></div>}
-      <p className="dtn-k">{zh ? "下一步" : "Do this next"}{docs && docs.of > 1 ? <span>{zh ? `文件 ${docs.i}/${docs.of}` : `${docs.i} of ${docs.of}`}</span> : n > 1 ? <span>{zh ? `第 1 项，共 ${n} 项` : `1 of ${n}`}</span> : null}</p>
+      <p className="dtn-k">{zh ? "下一步" : "Do this next"}{docs && docs.of > 1 ? <span>{zh ? `文件 ${docs.i}/${docs.of}` : `${docs.i} of ${docs.of}`}</span> : null}</p>
       <h2 id="dtn-h">{b(headline(x))}</h2>
       <p className="dtn-why">{whyLine(x, lang, t)}</p>
       <div className="dtn-act">
