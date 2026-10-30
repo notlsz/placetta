@@ -1787,11 +1787,11 @@ export function Settings() {
                 <button key={k} type="button" role="radio" aria-checked={theme === k} aria-pressed={theme === k} onClick={() => setTheme(k)}>{b(l)}</button>
               ))}
             </div>) }]}>
-            <details className="sg-sub accent sg-fold">
+            <details className="sg-sub accent sg-fold" open>
               <summary><h3>{lang === "zh" ? "主题色" : "Accent color"}</h3><span className="sw-name">{accentName(accent, lang)}</span><span className="sw-now" style={{ background: accent || ACCENTS[0] }} aria-hidden="true" /><I.chev /></summary>
               <p className="sg-note">{lang === "zh" ? "按钮、链接、高亮和助理光效的颜色。选一个，或输入您自己的颜色。" : "The color of buttons, links, highlights and the agent's glow. Pick one or enter your own."}</p>
               <div className="swatches" role="radiogroup" aria-label={lang === "zh" ? "主题色" : "Accent color"}>
-                {ACCENTS.map((c, i) => <button key={c} type="button" role="radio" aria-checked={(accent || ACCENTS[0]).toLowerCase() === c.toLowerCase()} className="sw" style={{ background: c }} aria-label={accentName(i === 0 ? "" : c, lang) + (i === 0 ? (lang === "zh" ? "（默认）" : " (default)") : "")} title={accentName(i === 0 ? "" : c, lang)} onClick={() => setAccent(applyAccent(i === 0 ? "" : c))} />)}
+                {ACCENTS.map((c, i) => <button key={c} type="button" role="radio" aria-checked={(accent || ACCENTS[0]).toLowerCase() === c.toLowerCase()} className="sw" style={{ background: c }} aria-label={accentName(i === 0 ? "" : c, lang) + (i === 0 ? (lang === "zh" ? "（默认）" : " (default)") : "")} title={accentName(i === 0 ? "" : c, lang)} onClick={() => setAccent(applyAccent(i === 0 ? "" : c))} />).map((btn, i) => <span key={ACCENTS[i]} className="sw-item">{btn}<small>{accentName(i === 0 ? "" : ACCENTS[i], lang)}</small></span>)}
                 <label className="sw-own"><input type="color" value={accent || ACCENTS[0]} onChange={e => setAccent(applyAccent(e.target.value))} aria-label={lang === "zh" ? "自选颜色" : "Choose a color"} /></label>
                 <input className="sw-hex" value={hex} onChange={e => { const v = e.target.value.trim(); setHex(v); if (/^#?[0-9a-f]{6}$/i.test(v)) setAccent(applyAccent(v.startsWith("#") ? v : "#" + v)); }} placeholder="#4D73A3" aria-label="Hex" maxLength={7} spellCheck={false} />
                 {accent && <Btn onClick={() => { setAccent(applyAccent("")); setHex(""); }}>{lang === "zh" ? "恢复默认" : "Reset"}</Btn>}

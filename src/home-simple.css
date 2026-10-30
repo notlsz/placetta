@@ -612,3 +612,21 @@
 @media (max-width: 640px) { .page.odelia .c-panel > .sugg { display: none; } }
 /* Panel 9 round 2: "Do this next" in the business's own accent (its tea), not the warning amber; amber stays for what's late */
 .dtn-k { color: var(--blue-ink); }
+/* Panel 10: on a phone the task Odelia is on wraps to a second line instead of losing its point */
+@media (max-width: 640px) { .now-line { align-items: flex-start; } .now-line .nl-t { white-space: normal; overflow: visible; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; } }
+/* the next store reads as an invitation, in the accent */
+.st-next .st-next-tx { color: var(--blue-ink); }
+/* Panel 10 */
+/* Licenses: fixed side columns, so the headers and the rows under them share every x (the shared fr split drifted 5px) */
+@media (min-width: 860px) { .page.permits .apps-t .tr { grid-template-columns: minmax(0, 1fr) 112px 120px 156px; } }
+/* Odelia's own message box: the same height, buttons and place as on every other page */
+.page.odelia .composer .ic, .page.odelia .composer .sendb, .panel .composer .ic, .panel .composer .sendb { width: 44px; height: 44px; }
+@media (min-width: 641px) { .page.odelia .pn-dock { padding-bottom: 2px; } }
+@media (max-width: 640px) { .pn-never { margin: 10px 0 4px; } }
+/* the stamp's date written like every other date (Oct 29), only the agency in capitals */
+.win-stamp small + small { text-transform: none; letter-spacing: 0; }
+/* the accents shown with their tea names under them (Paul Smith: let the twist be seen) */
+.settings .swatches .sw-item { display: inline-flex; flex-direction: column; align-items: center; gap: 6px; min-width: 64px; }
+.settings .swatches .sw-item small { font-size: 12px; line-height: 16px; color: var(--ink2); white-space: nowrap; }
+.settings .swatches { align-items: flex-start; gap: 12px 8px; }
+.settings .swatches .sw-own, .settings .swatches .sw-hex { align-self: flex-start; }
