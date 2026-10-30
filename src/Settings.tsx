@@ -1974,7 +1974,7 @@ function SpendingGroup() {
 
 /* The accents by name, after teas (Paul Smith, panel 4: a classic picker with a twist): a color you can say. */
 const TEA: Record<string, [string, string]> = {
-  "#4d73a3": ["Placetta blue", "快哉蓝"], "#2f7d6d": ["Matcha", "抹茶"], "#7a5ab8": ["Butterfly pea", "蝶豆花"],
+  "#4d73a3": ["Butterfly pea", "蝶豆花"], "#2f7d6d": ["Matcha", "抹茶"], "#7a5ab8": ["Lavender", "薰衣草"],
   "#c25b7a": ["Hibiscus", "洛神花"], "#c7772b": ["Oolong", "乌龙"], "#3a3f47": ["Earl Grey", "伯爵"],
 };
 function accentName(c: string, lang: string) {

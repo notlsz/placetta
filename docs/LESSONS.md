@@ -318,3 +318,12 @@ lesson (seeded, or learned on its own) so the agent itself knows the pattern.
   rows through the floating message box. Rules: a control under a finished message says what it is in a word ("More"),
   never an ellipsis; the fade under the message box turns solid before the box begins; list icons sit on the page's
   one left edge, not inset by row padding.
+
+## 2026-10-30: the probe starved production
+
+- What broke: during the 18:40 probe, owners' own writes to filings hit statement timeouts, the minute-by-minute cron
+  jobs could not start, and even a count of cron history timed out. Connections were few; the database was simply out of
+  headroom while five probe cases each made an account, uploaded documents and filed at once. Cancelling the probe let
+  it recover. Rules: the probe runs three cases at a time by default and waits whenever a trivial query takes over 3
+  seconds (scripts/probe/run.ts, breathe()); a probe that fails on timeouts is a capacity finding, not a product one,
+  so read the database's logs before changing the product.

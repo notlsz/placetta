@@ -43,6 +43,19 @@ const flag = (k: string) => argv.includes(k);
 const opt = (k: string) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : undefined; };
 const RUN = `probe-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "")}-${Math.random().toString(36).slice(2, 6)}`;
 
+/** The probe runs against production, so it backs off when the database is slow (2026-10-30: five cases at once, each
+ *  making an account and filing, starved the database until owners' own writes timed out). A case starts only once a
+ *  trivial query answers within 3 seconds, waiting up to 5 minutes. */
+async function breathe() {
+  for (let k = 0; k < 10; k++) {
+    const t = Date.now();
+    try { await sql("select 1"); } catch { /* slow or refused: wait below */ }
+    if (Date.now() - t < 3000) return;
+    console.log(`  database slow (${Date.now() - t} ms), waiting before the next case`);
+    await sleep(30_000);
+  }
+}
+
 /** The probe's own reads and writes, as the project's owner, through the management API's SQL endpoint. */
 async function sql<T = Record<string, unknown>>(query: string): Promise<T[]> {
   for (let attempt = 0; ; attempt++) {
@@ -521,7 +534,7 @@ async function main() {
   if (flag("--no-licenses")) cases = [];
   console.log(`${RUN}: ${cases.length} licenses${flag("--no-edges") ? "" : " and the edge cases"} against ${URL_}`);
   try {
-    await pool(cases, Number(opt("--parallel") ?? 5), async (c) => { const r = await license(c); results.push(r); console.log(line(r)); return r; });
+    await pool(cases, Number(opt("--parallel") ?? 3), async (c) => { await breathe(); const r = await license(c); results.push(r); console.log(line(r)); return r; });
     if (!flag("--no-edges")) results.push(...(await edges()));
   } finally {
     if (!flag("--keep")) { const c = await cleanup(); console.log(`cleaned up ${c.workspaces} workspaces and ${c.users} accounts`); }

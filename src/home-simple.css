@@ -478,13 +478,17 @@
    tabs fade early enough to read as a row that scrolls. */
 @media (max-width: 640px) {
   .page.permits .c-crit-t { display: block; margin: 2px 0 0; }
-  .page .ptabs { -webkit-mask-image: linear-gradient(90deg, #000 74%, transparent); mask-image: linear-gradient(90deg, #000 74%, transparent); }
+  /* four tabs that fit the phone, so none is cut (panels 3 to 5 all saw "Documents 15" clipped under the fade) */
+  .page.permits .ptabs { gap: 14px; -webkit-mask-image: none; mask-image: none; }
+  .page.permits .ptabs a { font-size: 13.5px; }
+  /* Deadlines lives under More on a phone; four tabs fit the width */
+  .page.permits .ptabs a[href$="deadlines"] { display: none; }
 }
 /* 6. Phone tabs: the count sits level after the label in its grey; Odelia's cloud is grey too until her tab is open. */
 .tabbar a em { position: static; display: inline; min-width: 0; height: auto; margin-left: 4px; padding: 0; border-radius: 0; background: none; color: var(--ink3); font: 500 11px/1.1 var(--sans); }
 .tabbar a:not([aria-current="page"]) .nav-bot { filter: grayscale(1) opacity(.65); }
 /* 7. Phone: Odelia's suggestion chips scroll sideways, so the row fades at the edge instead of cutting a chip off. */
-@media (max-width: 640px) { .c-panel > .sugg { -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent); mask-image: linear-gradient(90deg, #000 80%, transparent); padding-right: 32px; } }
+@media (max-width: 640px) { .panel .c-panel > .sugg, .c-panel > .sugg { flex-wrap: wrap; overflow: visible; margin-inline: 0; padding-inline: 0; -webkit-mask-image: none; mask-image: none; } }
 /* Panel 4 (2026-10-30). */
 /* the Settings pill on the nav items' column (it sat 4px right of them) */
 .setb { margin-left: -4px; }
@@ -498,3 +502,20 @@
 .st-next > svg:last-child { flex: none; width: 16px; height: 16px; color: var(--ink3); }
 /* phone tabs: the count as the same small count the Licenses tabs use */
 .tabbar a em { display: inline-block; min-width: 16px; height: 16px; margin-left: 4px; padding: 0 4px; border-radius: 99px; background: var(--mist2); color: var(--ink2); font: 500 10.5px/16px var(--sans); text-align: center; vertical-align: 1px; }
+/* Panel 5 (2026-10-30). */
+/* Settings sections on the page's left edge, the active mark in the gutter beside them (desktop) */
+@media (min-width: 761px) {
+  .settings .set-tab { padding-left: 0; }
+  .settings .set-tab[aria-current="page"]::before { left: -14px; }
+}
+/* the opening-date words in the quiet grey: blue read as a link */
+.c-crit-t { color: var(--ink3); }
+/* phone: the arrow stays beside its words on the full-width button */
+@media (max-width: 640px) { .dtn-go { justify-content: center; gap: 10px; } }
+/* "Opening another store?" on the same text column as the stores above it */
+.st-next { gap: 14px; }
+/* send with nothing to send: a plain arrow, no grey disc behind it (the house rule) */
+.sendb:disabled { background: none; }
+/* phone tabs: the count on the icon's corner, so every label stays centred under its icon */
+.tabbar a { position: relative; }
+.tabbar a em { position: absolute; top: 2px; left: calc(50% + 8px); margin: 0; }
