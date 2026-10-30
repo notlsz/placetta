@@ -277,7 +277,9 @@ async function license(c: Case): Promise<Result> {
     ok("test run: checked and stopped, nothing sent", last?.kind === "dry_run" || f.agent_state === "needs_you", last ? `${last.kind}: ${last.en}` : f.agent_state);
     // a form the signer signs in the card (formation, foreign registration) stops for the signature before a route is
     // picked: that's the right stop, not a missing route
-    ok("its route is decided (channel)", !!f.channel || /signature/i.test(last?.en ?? ""), f.channel);
+    // a stop that waits on the owner (their signature, a power of attorney the agency requires, a line filled on the
+    // agency's site) comes before a route is picked: right, not a missing route
+    ok("its route is decided (channel)", !!f.channel || f.agent_state === "needs_you", f.channel);
     const tasks = await sql(`select id from public.team_tasks where filing_id = ${lit(f.id)}`);
     ok("no task lands on the Placetta team", !tasks?.length, `${tasks?.length} tasks`);
 

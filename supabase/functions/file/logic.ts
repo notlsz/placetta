@@ -194,6 +194,14 @@ export function workerState(enabled: string | undefined, env: Pick<Env, "channel
 
 /** SSN or ITIN shapes. Placetta never stores or sends one. */
 export const SECRET_NUMBER = /\b\d{3}-?\d{2}-?\d{4}\b|\b9\d{2}-?[78]\d-?\d{4}\b/;
+/** An SSN or ITIN on a line: written as one (123-45-6789, 123 45 6789) anywhere, or a bare 9-digit number only on a
+ *  line that asks for an SSN or ITIN. A bare 9-digit state file number or Washington UBI (604123456) on its own line
+ *  isn't one (production probe, 2026-10-30: Texas line 7c and Seattle's UBI line were refused as SSNs). Same rule as
+ *  the app's src/guard.ts secretNumber. */
+export function secretOn(label: string, v: string): boolean {
+  if (/\b\d{3}-\d{2}-\d{4}\b|\b\d{3} \d{2} \d{4}\b/.test(v)) return true;
+  return SECRET_LABEL.test(label) && SECRET_NUMBER.test(v);
+}
 const SECRET_LABEL = /\b(ssn|itin|social security|passport)\b|社会安全号|护照号/i;
 
 /** The owner applies from outside the US: SS-4 line 7b says "Foreign", or the business has no US address. */
@@ -265,7 +273,7 @@ export function check(f: Filing, d: Dest | undefined, ctx: { docPaths: Set<strin
   const p = f.payload;
   for (const x of p.fields ?? []) {
     const v = (x.value ?? "").trim();
-    if (SECRET_NUMBER.test(v)) {
+    if (secretOn(x.label.en, v)) {
       out.push({ kind: "secret", en: `${x.label.en} has an SSN or ITIN. Placetta never sends one; that line is filled on the agency's own site or by hand.`, zh: `${x.label.zh}含有 SSN 或 ITIN。快哉从不发送这类号码，请在机构网站上或手写填写。` });
     } else if (!v && !SECRET_LABEL.test(x.label.en)) {
       out.push({ kind: "missing", en: `${x.label.en} is empty`, zh: `${x.label.zh}未填写` });

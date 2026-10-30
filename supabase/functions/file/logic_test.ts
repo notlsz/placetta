@@ -4,7 +4,7 @@ import { DEST, destinationProblems, staleDestinations, TO_VERIFY, type Dest } fr
 import {
   afterHold, asAgent, askedToResubmit, canFaxSigned, canFaxSignedFor, check, emailFor, envFrom, faxFailures, faxFile, faxTo, feeBlocks, type Filing, hasLoginFor, holdMinutes,
   fallback, handBackDue, handoffPacket, holds, isForeign, killSwitchOn, selfFileScope, workerOn, workerState, mailOutcome, mailTo, OWNER_REF, ownerPacket, pick, PORTAL_FAILED, refusalOf, REVIEW_HOURS, rerouteDue,
-  sentByYou, signedCopy, teachRefusal, teamApproved, waysToSend, whyYours, YOURS_REF, checkCents, lobCheckBody, captchaPlan, pastRejectionProblems, riskRows,
+  sentByYou, signedCopy, teachRefusal, teamApproved, waysToSend, whyYours, YOURS_REF, checkCents, lobCheckBody, captchaPlan, pastRejectionProblems, riskRows, secretOn,
 } from "./logic.ts";
 
 const WS = "11111111-1111-1111-1111-111111111111";
@@ -624,4 +624,11 @@ Deno.test("risk flags: only known kinds and severities are kept, each once; a Hi
   assert(rows.every((r) => r.form === "irs-ss4" && r.workspace_id === f.workspace_id && r.filing_id === f.id));
   assertEquals(riskRows(filing({})), []);
   assertEquals(riskRows(filing({ risk: { flags: "nope" as unknown as [] } })), []);
+});
+
+Deno.test("an SSN is an SSN wherever it's written as one; a bare 9-digit file number or UBI isn't (probe, 2026-10-30)", () => {
+  assert(secretOn("Owner", "Mei Chen, 123-45-6789"));
+  assert(secretOn("Owner's SSN", "123456789"));
+  assert(!secretOn("Line 7c: Home state registration or file number", "802123456"));
+  assert(!secretOn("Cover: UBI number, if you already have one", "604123456"));
 });

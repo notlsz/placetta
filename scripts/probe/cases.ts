@@ -54,7 +54,7 @@ export function answersOf(c: Case): string {
     "Bank: JPMorgan Chase, business checking. Card processor: Square.",
     // what a real owner answers next: no new seat count or size (each case's own facts carry those; a second number
     // only made Odelia ask which was right), and the dates and coverage most forms ask for
-    "Seats, size and hours are as I said before. We open on 2026-12-15. Expected sales about $35,000 a month. 4 employees from 2026-12-01, first payroll 2026-12-15, about $28,000 in wages in the first quarter.",
+    "Seats and size are as I said before; open 10am to 10pm every day, about 150 customers a day. No city business account number or state sales tax number yet: we're applying. We open on 2026-12-15. Expected sales about $35,000 a month. 4 employees from 2026-12-01, first payroll 2026-12-15, about $28,000 in wages in the first quarter.",
     "Workers' comp: Travelers, policy WC-PROBE-0001, 2026-12-01 to 2027-12-01. Public water and public sewer. A certified food protection manager: Mei Chen. File returns monthly. Taxed as a single-member LLC, disregarded. Yes to email from the agency.",
     "Fiscal year ends December 31, cash basis. No alcohol, tobacco, vapor products, motor fuel or amusement machines. Not run from a home. No other locations in this state. No previous permits, no merger, not buying an existing business. No representatives or agents.",
     "For any other yes/no line that doesn't apply to us, the answer is No. Fill it all in and put it up for my approval.",

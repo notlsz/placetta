@@ -131,10 +131,13 @@ export const YOURS: Record<"certificate" | "insurance", Bi> = {
   certificate: B("Your staff earn this themselves with an approved course or exam; Placetta doesn't file it. Keep the certificates on site for the inspector.", "由员工自行通过认可的课程或考试取得，快哉不代为申请。请把证书留在店内备查。"),
   insurance: B("Bought from an insurer before your first employee starts; Placetta doesn't file it. Upload the policy and Odelia keeps it on record.", "在首位员工入职前向保险公司购买，快哉不代为申请。上传保单后 Odelia 会存档。"),
 };
+export const SELF_ITEM = /^(the |a |one )?(completed|filled[- ]in|filled[- ]out|signed and completed|completed and signed) (application|application form|form)\b(?!\s+(for|from) )/i;
 export function filingBlockers(a: Pick<Application, "fields" | "checklist"> & { yours?: Application["yours"] }): { empty: Bi[]; missing: Bi[] } {
   // a certificate staff earn or insurance from an insurer never goes up for filing approval
   if (a.yours) return { empty: [], missing: [YOURS[a.yours]] };
-  return { empty: a.fields.filter(f => isBlank(f.value)).map(f => f.label), missing: a.checklist.filter(c => c.state === "missing").map(c => c.label) };
+  // "the completed application" is the form Placetta fills: it's never a document the owner still owes (production
+  // probe, 2026-10-30: LA County's health permit waited on itself)
+  return { empty: a.fields.filter(f => isBlank(f.value)).map(f => f.label), missing: a.checklist.filter(c => c.state === "missing" && !SELF_ITEM.test(c.label.en)).map(c => c.label) };
 }
 export const readyToFile = (a: Pick<Application, "fields" | "checklist"> & { yours?: Application["yours"] }) => { const b = filingBlockers(a); return !b.empty.length && !b.missing.length; };
 /** One sentence naming what's left, for the person. */

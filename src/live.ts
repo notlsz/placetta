@@ -772,7 +772,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
     },
     {
       name: "fill_fields",
-      description: "Fill or correct fields on an application. Match a field by its label as find_official_forms or prepare_application gave it (with or without the 'Line N:' prefix), its line number, or its id; a label that matches nothing is added as a new field, and the result names it so you can check. Values come from the person, the workspace facts, memory or their documents, never a guess. Not for applications already filed. Returns the fields still empty.",
+      description: "Fill or correct fields on an application. To clear a line filled by mistake, give it an empty value (\"\"). Match a field by its label as find_official_forms or prepare_application gave it (with or without the 'Line N:' prefix), its line number, or its id; a label that matches nothing is added as a new field, and the result names it so you can check. Values come from the person, the workspace facts, memory or their documents, never a guess. Not for applications already filed. Returns the fields still empty.",
       inputSchema: { type: "object", properties: { application_id: { type: "string" }, fields: { type: "array", items: { type: "object", properties: { label: { type: "string" }, value: { type: "string" }, source: { type: "string", description: "Where the value came from, e.g. 'You told me' or 'From lease.pdf'" } }, required: ["label", "value"] } } }, required: ["application_id", "fields"] },
       execute(i) {
         const a = findApp(i.application_id); notFiled(a);
