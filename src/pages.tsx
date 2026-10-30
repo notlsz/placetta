@@ -1,5 +1,5 @@
 import { ApprovedMoment } from "./Approved";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { useApp, type PermitsTab, type View } from "./ctx";
 import type { Approval, Application, Deadline, Fact, FactGroup, Level, LicenseHit, Status } from "./model";
@@ -34,7 +34,7 @@ import { headLine, isFirstRun, splitLine } from "./firstRun";
 import { firstSentence } from "./phrase";
 /* Team review: the review table, comments on documents, and the Mine filter (src/ReviewTable.tsx, src/Comments.tsx) */
 import { hasReview, PermitsReview } from "./ReviewTable";
-import { CommentsButton, MineToggle, useTeam, type Collab } from "./Comments";
+import { CollabCtx, CommentsButton, MineToggle, useTeam, type Collab } from "./Comments";
 import { SignButton } from "./SignDoc";
 import { shortName } from "./collab";
 import { AlsoNeed } from "./AlsoNeed";
@@ -661,8 +661,10 @@ function HomeHello({ need, firstRun, landing, n, approved, agency }: { need: num
   const f = useFirstRun();
   const zh = lang === "zh";
   const hr = new Date().getHours();
-  // the greeting names the business (Chesky): "Good morning, Moonleaf Tea."
-  const biz = b(ws.business);
+  // the greeting names the person (Chesky, panel 11: greet a person, not a company), the business when no name is known
+  const me = useContext(CollabCtx)?.me;
+  const first = (me?.name ?? "").trim().split(/\s+/)[0];
+  const biz = first || b(ws.business);
   const hi = zh ? `${hr < 12 ? "早上好" : hr < 18 ? "下午好" : "晚上好"}${biz ? `，${biz}` : ""}。` : `${hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening"}${biz ? `, ${biz}` : ""}.`;
   const head = firstRun ? b(headLine(f)) : need ? (zh ? `有 ${need} 件事需要您。` : `${need} thing${need === 1 ? " needs" : "s need"} you.`) : zh ? "今天没有需要您处理的事。" : "Nothing needs you today.";
   const split = firstRun ? splitLine(f) : null;
