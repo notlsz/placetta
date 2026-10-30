@@ -44,8 +44,6 @@ import { factSource, kindSource, placeSource, remember } from "./suggestions";
 import { ReportButton } from "./LicenseReport";
 import { RenewalRunway } from "./RenewalRunway";
 import { DoneScreen } from "./DoneScreen";
-import "./simple.css";
-import "./simple3.css";
 
 /** What the Mine filter keeps: an application or job assigned to this person, or a job about one that is. */
 const mineApp = (team: Collab, id?: string) => !!id && team.isMine({ kind: "app", id });
@@ -134,7 +132,7 @@ function BatchApprove() {
     <>
       <div className="batch-row">
         <span>{zh ? `${what(false)}已通过全部核对，没有需要留意的地方。` : `${what(true).replace(/^./, c => c.toUpperCase())} passed every check with nothing flagged.`}</span>
-        <Pill kind="quiet" disabled={busy} sm onClick={() => setOpen(true)}>{zh ? `一起批准 ${clean.length} 项` : `Approve ${clean.length} together`}</Pill>
+        <Pill disabled={busy} sm onClick={() => setOpen(true)}>{zh ? `一起批准 ${clean.length} 项` : `Approve ${clean.length} together`}</Pill>
       </div>
       {open && (
         <Modal label={zh ? "一起批准" : "Approve together"} onClose={() => setOpen(false)}>
@@ -166,22 +164,9 @@ export function RouteLine({ a, app, noFaster }: { a: Approval; app?: Application
   return <span className="appr-route"><em>{b(r.who)}</em>{r.steps?.map((s, i) => <span key={i} className="appr-time">{b(s)}</span>)}{r.time && <span className="appr-time"><I.clock />{b(r.time)}</span>}{r.faster && !noFaster && <span className="appr-time">{b(r.faster)}</span>}</span>;
 }
 
-/** Why an approval is asked, in one line, with the agency's own page that says so (Ramp shows the request; this adds
- *  the reason). From the license's plain line and its source; nothing when the workspace has neither. */
-function ApprWhy({ app }: { app?: Application }) {
-  const { b, lang } = useApp();
-  if (!app || (!app.plain && !app.source.url)) return null;
-  return (
-    <small className="appr-why">
-      {app.plain ? b(app.plain) : null}
-      {app.source.url && <a href={app.source.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} title={app.source.quote ? `“${app.source.quote}”` : undefined}>{lang === "zh" ? "来源" : "Source"}</a>}
-    </small>
-  );
-}
-
 /** One thing only you can do, with its one tap: Approve opens the approval (you confirm there), Upload opens the file
  *  picker on the first missing document, Pay opens the agency's page. */
-export function NeedRow({ a, compact, about }: { a: Approval; compact?: boolean; about?: Application }) {
+export function NeedRow({ a, compact }: { a: Approval; compact?: boolean }) {
   const { b, t, lang, ws, busy, openApproval, openApp, approve, upload, cloud } = useApp();
   const pick = useRef<HTMLInputElement>(null);
   const hold = useApprovalHold(a.id);   // the undo window (src/SendHold.tsx): approved, not sent yet
@@ -192,9 +177,9 @@ export function NeedRow({ a, compact, about }: { a: Approval; compact?: boolean;
   // the document this upload is for: the first one still missing on the permit (the checklist in the drawer otherwise)
   const missing = app?.checklist.find(c => c.state === "missing" && !c.dep);
   if (a.kind === "pay") return (
-    <div className={"appr k-pay" + (compact ? " compact" : "")} data-appr={a.id}>
+    <div className={"appr k-pay" + (compact ? " compact" : "")}>
       <span className={"appr-ico k-" + a.kind}><Icon /></span>
-      <span className="appr-tx"><b>{b(a.title)}</b>{sub && <span>{sub}</span>}<RouteLine a={a} app={app} /><ApprWhy app={app ?? about} /></span>
+      <span className="appr-tx"><b>{b(a.title)}</b>{sub && <span>{sub}</span>}<RouteLine a={a} app={app} /></span>
       <span className="appr-btns">
         <button type="button" className="pill quiet sm" disabled={busy} onClick={() => a.filing && void cloud?.markPaid(a.filing)}>{b(B("I've paid", "我已付款"))}</button>
         <Pill onClick={() => approve(a.id)} sm={compact}>{b(B("Pay the agency", "去付款"))}</Pill>
@@ -202,9 +187,9 @@ export function NeedRow({ a, compact, about }: { a: Approval; compact?: boolean;
     </div>
   );
   return (
-    <div className={"appr" + (compact ? " compact" : "")} data-appr={a.id}>
+    <div className={"appr" + (compact ? " compact" : "")}>
       <span className={"appr-ico k-" + a.kind}><Icon /></span>
-      <span className="appr-tx"><b>{b(a.title)}</b>{sub && <span>{sub}</span>}<RouteLine a={a} app={app} /><ApprWhy app={app ?? about} /></span>
+      <span className="appr-tx"><b>{b(a.title)}</b>{sub && <span>{sub}</span>}<RouteLine a={a} app={app} /></span>
       {a.kind === "upload" ? (
         <>
           <input ref={pick} type="file" hidden multiple onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (app && missing && f.length) upload(app.id, missing.id, f); }} />
@@ -294,15 +279,12 @@ const readMore = (): boolean => { try { return localStorage.getItem(HOME_MORE) =
 
 /** The one primary button a to-do needs: Approve opens the approval (you confirm there), Upload opens the file picker on
  *  the document it's for, Pay opens the agency's page. big: the "Do this next" card's. */
-function TodoButton({ x, big, quiet }: { x: Todo; big?: boolean; quiet?: boolean }) {
+function TodoButton({ x, big }: { x: Todo; big?: boolean }) {
   const { b, t, busy, openApproval, openApp, approve, upload, go } = useApp();
   const pick = useRef<HTMLInputElement>(null);
   const hold = useApprovalHold(x.kind === "approval" ? x.a.id : "");
-  // quiet: a link, for a list where only the first row's action is the page's one primary button (Licenses)
-  const cls = quiet ? "lnk todo-lnk" : "pill " + (big ? "ink dtn-go" : "primary sm");
-  const btn = (label: string, on: () => void) => quiet
-    ? <button type="button" className={cls} disabled={busy} onClick={on}>{label}</button>
-    : <button type="button" className={cls} disabled={busy} onClick={on}><span>{label}</span><i aria-hidden="true"><I.arrow /></i></button>;
+  const cls = "pill " + (big ? "ink dtn-go" : "primary sm");
+  const btn = (label: string, on: () => void) => <button type="button" className={cls} disabled={busy} onClick={on}><span>{label}</span><i aria-hidden="true"><I.arrow /></i></button>;
   const picker = (app: string, item: string) => <input ref={pick} type="file" hidden multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx" onChange={e => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) upload(app, item, f); }} />;
   if (x.kind === "doc") return <>{btn(big ? b(B("Photo or file", "拍照或上传")) : t("upload"), () => pick.current?.click())}{picker(x.app.id, x.item)}</>;
   if (x.kind === "job") {
@@ -344,13 +326,25 @@ function whyLine(x: Todo, lang: "en" | "zh", t: (k: Key) => string): string {
   return parts.join(zh ? "" : " ");
 }
 
+/** A phone (the bottom tab bar's width): the "Do this next" card fills the first screen there. Safe without a window. */
+function usePhone(q = "(max-width: 859px)") {
+  const has = () => typeof window !== "undefined" && typeof window.matchMedia === "function";
+  const [n, setN] = useState(() => has() && window.matchMedia(q).matches);
+  useEffect(() => { if (!has()) return; const mq = window.matchMedia(q); const on = () => setN(mq.matches); mq.addEventListener("change", on); return () => mq.removeEventListener("change", on); }, []);
+  return n;
+}
+
 /** The single most important thing, with one big button and a why line. Not now moves it to the end for this visit. */
 function DoNextCard({ x, n, onLater, docs, title }: { x: Todo; n: number; onLater?: () => void; docs?: { i: number; of: number }; title: string }) {
-  const { b, t, lang, busy, ask } = useApp();
+  const { b, t, lang, busy, live, ask } = useApp();
   const zh = lang === "zh";
+  const phone = usePhone();
+  // two columns (1200 and up): the card stands beside the opening card at its height, and Odelia fills the top of it
+  const wide = usePhone("(min-width: 1200px)");
   return (
     <section className="dtn" data-do-next={x.key} aria-labelledby="dtn-h">
       <h1 className="vh">{title}</h1>
+      {(phone || wide) && <div className="dtn-bot" aria-hidden="true"><AgentBot size={64} busy={busy} task={busy ? live?.state : undefined} gaze={[0, 2.4]} interactive={false} /></div>}
       <p className="dtn-k">{zh ? "下一步" : "Do this next"}{docs && docs.of > 1 ? <span>{zh ? `文件 ${docs.i}/${docs.of}` : `${docs.i} of ${docs.of}`}</span> : n > 1 ? <span>{zh ? `第 1 项，共 ${n} 项` : `1 of ${n}`}</span> : null}</p>
       <h2 id="dtn-h">{b(headline(x))}</h2>
       <p className="dtn-why">{whyLine(x, lang, t)}</p>
@@ -410,6 +404,7 @@ export function Overview() {
   }, []);   // once, when Home first shows the plan // eslint-disable-line react-hooks/exhaustive-deps
   const team = useTeam();
   const [later, setLater] = useState<string[]>([]);
+  const [all, setAll] = useState(false);
   const [tab, setTabState] = useState<HomeTab>(readTab);
   const setTab = (v: HomeTab) => { setTabState(v); try { localStorage.setItem(HOME_TAB, v); } catch { /* storage blocked */ } };
   const [more, setMoreState] = useState(readMore);
@@ -432,7 +427,7 @@ export function Overview() {
   const top = ordered[0], rest = ordered.slice(1);
   const docsAll = ordered.filter(x => x.kind === "doc");
   const docAt = top?.kind === "doc" ? { i: list.filter(x => x.kind === "doc").findIndex(x => x.key === top.key) + 1, of: docsAll.length } : undefined;
-  const shown = rest.slice(0, 3);
+  const shown = all ? rest : rest.slice(0, 3);
 
   /* 2. Odelia is working on */
   const jobs = ws.jobs ?? [];
@@ -445,6 +440,9 @@ export function Overview() {
   const withAgency = ws.apps.filter(a => FILED.includes(a.status) && a.status !== "approved" && (!mine || mineApp(team, a.id)));
   const decision = (id: string) => ws.deadlines.filter(d => d.app === id && d.kind === "estimate" && d.date >= today).sort((x, y) => x.date.localeCompare(y.date))[0];
   const unread = updates.filter(u => !u.read).length;
+  /* the morning brief: renewals coming due, what agencies sent back, what's with them now */
+  const renewalsSoon = ws.deadlines.filter(d => d.kind === "renewal" && daysUntil(d.date) >= 0 && daysUntil(d.date) <= 30).length;
+  const replies = updates.filter(u => !u.read && (u.kind === "filing" || u.kind === "mail")).length;
   const working =chiefs.length + running.length + ws.running.length + withAgency.length > 0 || queued.length > 0 || routines.length > 0 || (busy && !!live);
   const steps = (j: { steps: { done: boolean }[] }) => zh ? `${j.steps.filter(s => s.done).length}/${j.steps.length} 步` : `${j.steps.filter(s => s.done).length} of ${j.steps.length} steps`;
 
@@ -512,6 +510,7 @@ export function Overview() {
 
       {/* the opening date, second only to the one thing to do; the wide screen's right column carries it instead */}
       {!firstRun && (landing || n > 0) && <OpeningCard inline landing={landing} est={est} n={n} approved={approved} agency={agency} />}
+      {!firstRun && <Brief renewals={renewalsSoon} replies={replies} withAgency={withAgency.length} />}
 
       {rest.length > 0 && (
         <section className="sec hm-needs">
@@ -519,9 +518,12 @@ export function Overview() {
             <h2>{zh ? "等您处理" : "Waiting on you"}<em>{ordered.length}</em></h2>
             {mineCtl}
           </div>
-          <div className="stack" data-indent>{shown.map(x => <TodoRow key={x.key} x={x} />)}</div>
-          {/* the whole list lives on Licenses (with Approve together and Have Odelia find them all): one list, not two */}
-          {rest.length > 3 && <div className="hm-needs-more"><button type="button" className="lnk more" onClick={() => go("permits")}>{zh ? `查看全部 ${ordered.length} 项` : `See all ${ordered.length}`}<I.chevR /></button></div>}
+          {all && !mine && <BatchApprove />}
+          <div className="stack">{shown.map(x => <TodoRow key={x.key} x={x} />)}</div>
+          <div className="hm-needs-more">
+          {all && docsAll.length > 1 && <button type="button" className="lnk more" disabled={busy} onClick={() => ask(b(findItAsk(B(docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.en} (${x.app.name.en})` : "").join("; "), docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.zh}（${x.app.name.zh}）` : "").join("；")), B("open applications", "进行中的申请"), true)))}><I.spark />{zh ? `让 Odelia 找齐 ${docsAll.length} 份文件` : `Have Odelia find all ${docsAll.length}`}</button>}
+          {rest.length > 3 && <button type="button" className="lnk more" onClick={() => setAll(!all)}>{all ? (zh ? "收起" : "Show fewer") : (zh ? `全部 ${ordered.length} 项` : `All ${ordered.length}`)}</button>}
+          </div>
         </section>
       )}
 
@@ -654,22 +656,42 @@ function HomeNext({ next }: { next: Application[] }) {
   );
 }
 
+/** The morning brief, one calm line: renewals due within 30 days, unread replies from agencies, filings with agencies
+ *  now. Each part opens where it's kept. Counted from the workspace; a zero is said plainly, never hidden. */
+function Brief({ renewals, replies, withAgency }: { renewals: number; replies: number; withAgency: number }) {
+  const { lang, go } = useApp();
+  const zh = lang === "zh";
+  const s = (n: number, one: string, many: string) => (n === 1 ? one : many).replace("{n}", String(n));
+  return (
+    <nav className="hm-brief" aria-label={zh ? "今日简报" : "Today's brief"}>
+      <button type="button" className={renewals ? "on" : ""} title={zh ? "30 天内到期的续期" : "Renewals due within 30 days"} onClick={() => go("permits", "deadlines")}>
+        <I.deadlines /><span>{zh ? (renewals ? `30 天内 ${renewals} 项续期` : "30 天内无续期") : renewals ? s(renewals, "1 renewal due soon", "{n} renewals due soon") : "No renewals due soon"}</span>
+      </button>
+      <button type="button" className={replies ? "on" : ""} onClick={() => go("odelia", "updates")}>
+        <I.message /><span>{zh ? (replies ? `${replies} 条机构回复未读` : "没有未读的机构回复") : replies ? s(replies, "1 new agency reply", "{n} new agency replies") : "No new agency replies"}</span>
+      </button>
+      <button type="button" onClick={() => go("permits", "filed")}>
+        <I.clock /><span>{zh ? (withAgency ? `${withAgency} 项在机构审核中` : "目前没有在机构审核的申请") : withAgency ? s(withAgency, "1 with an agency", "{n} with agencies") : "Nothing with an agency"}</span>
+      </button>
+    </nav>
+  );
+}
 
 /** The projected opening, Home's second anchor after the one thing to do: the date large, how far off it is, the range,
- *  the licenses behind it and the cost to open. What the date hinges on is one tap away, behind Breakdown and on each
- *  license's timeline, not a paragraph here. One card, two places: the right column on a wide
+ *  what it hinges on, the permits behind it and the cost to open. One card, two places: the right column on a wide
  *  screen, under "Do this next" on anything narrower (the column isn't shown there). All from workspaceEstimate. */
 function OpeningCard({ landing, est, n, approved, agency, inline }: { landing: string | null; est: ReturnType<typeof workspaceEstimate>; n: number; approved: number; agency: number; inline?: boolean }) {
-  const { b, lang } = useApp();
+  const { b, lang, openApp } = useApp();
   const zh = lang === "zh";
   const left = n - approved - agency;
   return (
     <section className={"hs-card hs-open" + (inline ? " hm-open-inline" : "")} aria-labelledby={inline ? "hs-open-h2" : "hs-open-h"}>
       <p className="hs-k"><span id={inline ? "hs-open-h2" : "hs-open-h"}>{zh ? "预计开业" : "Projected opening"}</span>{landing && daysUntil(landing) >= 0 && <span className="hs-when">{b(untilSay(landing))}</span>}</p>
       <p className="hs-date">{landing ? <EstimateDate date={landing} range={est?.path?.range} lang={lang} /> : zh ? "待定" : "Not set yet"}</p>
+      {est?.path && <HingeLine hinge={est.path.hinge} lang={lang} onOpen={id => openApp(id, "progress")} className="hs-sub" />}
       <div className="hs-prog">
         <span className="hs-bar" aria-hidden="true"><i style={{ width: `${n ? (approved / n) * 100 : 0}%` }} /><i className="b2" style={{ width: `${n ? (agency / n) * 100 : 0}%` }} /></span>
-        <p className="hs-sub">{zh ? `${n} 项执照：已办好 ${approved}，机构审核中 ${agency}，待办 ${left}` : `${n} licenses: ${approved} done, ${agency} with the agency, ${left} to do`}</p>
+        <p className="hs-sub">{zh ? `${n} 项许可：已办好 ${approved}，机构审核中 ${agency}，待办 ${left}` : `${n} permits: ${approved} done, ${agency} with the agency, ${left} to do`}</p>
       </div>
       <CostLine noDate />
     </section>
@@ -681,13 +703,9 @@ function OpeningCard({ landing, est, n, approved, agency, inline }: { landing: s
  *  all from the workspace, so a laptop's width carries the plan beside the one thing to do (Linear's and Stripe's
  *  dashboards). Narrower screens keep the single column; the same lists are under More. */
 function HomeSide({ soon }: { soon: Deadline[] }) {
-  const { b, lang, go, ws, openApp, ask, busy } = useApp();
+  const { b, lang, go, ws } = useApp();
   const zh = lang === "zh";
   const recent = ws.audit.slice(0, 4);
-  // each row opens what it's about: the license it names, else the full record; a date opens its license or its ask
-  const appNamed = (o: Bi) => ws.apps.find(a => a.name.en === o.en || a.name.zh === o.zh);
-  const openAudit = (o: Bi) => { const a = appNamed(o); if (a) openApp(a.id, "progress"); else go("settings", "activity"); };
-  const openDate = (d: Deadline) => { if (d.app) openApp(d.app, "progress"); else if (d.prompt && d.ask) ask(b(d.prompt)); else go("permits", "deadlines"); };
   // in the first run the head of Home already carries the opening and the money (src/FirstRun.tsx): one of each, not two
   const first = isFirstRun(ws);
   if (first) soon = soon.filter(d => !isOpeningMilestone(d) && !d.id.startsWith("open-"));
@@ -697,7 +715,7 @@ function HomeSide({ soon }: { soon: Deadline[] }) {
         <section className="hs-card">
           <div className="hs-h"><h2>{zh ? "最近" : "Recent"}</h2><button type="button" className="lnk" onClick={() => go("settings", "activity")}>{zh ? "全部记录" : "Activity"}<I.chevR /></button></div>
           <ul className="hs-list hs-recent">
-            {recent.map(e => <li key={e.id}><button type="button" className="hs-row" onClick={() => openAudit(e.object)}><span className="hs-t"><b>{b(e.action)}</b>{" "}{b(e.object)}</span><small>{fmtAgo(e.at, lang)}</small></button></li>)}
+            {recent.map(e => <li key={e.id}><span className="hs-t"><b>{b(e.action)}</b>{" "}{b(e.object)}</span><small>{fmtAgo(e.at, lang)}</small></li>)}
           </ul>
         </section>
       )}
@@ -706,7 +724,7 @@ function HomeSide({ soon }: { soon: Deadline[] }) {
           <div className="hs-h"><h2>{zh ? "近期日期" : "Coming up"}</h2><button type="button" className="lnk" onClick={() => go("permits", "deadlines")}>{zh ? "全部日期" : "All dates"}<I.chevR /></button></div>
           <ul className="hs-list hs-dates">
             {soon.map(d => { const k = daysUntil(d.date); return (
-              <li key={d.id}><button type="button" className="hs-row" disabled={busy && !d.app} onClick={() => openDate(d)}><span className="hs-d"><b>{fmtDay(d.date, lang)}</b><small>{fmtIn(k, lang)}</small></span><span className="hs-t">{b(d.title)}</span></button></li>
+              <li key={d.id}><span className="hs-d"><b>{fmtDay(d.date, lang)}</b><small>{fmtIn(k, lang)}</small></span><span className="hs-t">{b(d.title)}</span></li>
             ); })}
           </ul>
         </section>
@@ -715,47 +733,48 @@ function HomeSide({ soon }: { soon: Deadline[] }) {
   );
 }
 
-/* --------------------------------- licenses --------------------------------- */
+/* --------------------------------- permits --------------------------------- */
 
-/** Licenses: one page for everything you file, as Apple Reminders lists a day: what needs you, what Odelia is on, what's
- *  done. Each row is the license's name, one plain phrase, its date and the one thing to do, and opens the drawer with
- *  the rest (fee, agency, timeline, documents). By store (two or more stores), Documents and Deadlines are views of the
- *  same page; Find licenses and the license report are quiet links in its head. */
+/** Permits: one page for everything you file. To do (yours and Odelia's to finish), Filed (with an agency, the team or
+ *  issued), the documents behind them and the dates they set. Find licenses is a button here, not a place of its own. */
 export function Permits({ tab: asked }: { tab: PermitsTab }) {
   const { t, ws, go, lang } = useApp();
   const team = useTeam();
-  /* Team review: a workspace with two or more stores gets the review table, stores against licenses */
+  /* Team review: a workspace with two or more stores gets the review table, stores against permits */
   const review = hasReview(ws.stores);
   const tab: PermitsTab = asked === "review" && !review ? "todo" : asked;
   const mine = team.mine && teamOf(team);
   const keep = (a: Application) => !mine || mineApp(team, a.id);
-  const zh = lang === "zh";
+  const todo = ws.apps.filter(a => !FILED.includes(a.status) && keep(a)), filed = ws.apps.filter(a => FILED.includes(a.status) && keep(a));
+  const soon = ws.deadlines.filter(d => { const k = daysUntil(d.date); return k >= 0 && k <= 30; }).length;
   const tabs = [
-    { id: "todo", label: t("nav_list") },
-    ...(review ? [{ id: "review", label: zh ? "按门店" : "By store" }] : []),
-    { id: "documents", label: t("nav_docs") }, { id: "deadlines", label: t("nav_deadlines") },
+    { id: "todo", label: t("nav_todo"), count: todo.length }, { id: "filed", label: t("nav_filed"), count: filed.length },
+    ...(review ? [{ id: "review", label: lang === "zh" ? "按门店" : "By store" }] : []),
+    { id: "documents", label: t("nav_docs"), count: ws.docs.length }, { id: "deadlines", label: t("nav_deadlines"), count: soon },
   ];
   const sub = tab === "documents" ? t("docs_sub") : tab === "deadlines" ? t("dl_sub") : tab === "review"
-    ? (zh ? "每家门店的每项执照一目了然：状态、下一个日期，点开即可处理。可以多选后一起交给 Odelia、分配或设置提醒。" : "Every license at every store in one table: its state and next date, one click from the application. Pick several to hand to Odelia, assign or remind.")
-    : (zh ? "需要您的、Odelia 在办的、已经办好的。点开任意一项查看全部细节。" : "What needs you, what Odelia is on, and what's done. Tap one for every detail.");
+    ? (lang === "zh" ? "每家门店的每项许可一目了然：状态、下一个日期，点开即可处理。可以多选后一起交给 Odelia、分配或设置提醒。" : "Every permit at every store in one table: its state and next date, one click from the application. Pick several to hand to Odelia, assign or remind.")
+    : t("apps_sub");
+  const zh = lang === "zh";
   const short = tab === "documents" ? (zh ? "您上传的、快哉准备的、机构发回的文件。" : "What you uploaded, what Placetta prepared, what agencies sent.")
     : tab === "deadlines" ? (zh ? "每个重要日期，按先后排列。" : "Every date that matters, in order.")
-    : tab === "review" ? (zh ? "每家门店的每项执照。" : "Every license at every store.")
-    : (zh ? "需要您的、在办的、办好的。" : "What needs you, what's moving, what's done.");
+    : tab === "review" ? (zh ? "每家门店的每项许可。" : "Every permit at every store.")
+    : t("apps_sub_s");
   return (
     <div className="page permits">
       <PageHead title={t("nav_apps")} sub={sub} short={short}>
-        <button type="button" className="lnk ph-lnk" onClick={() => go("find")}><I.find /><span>{t("nav_find")}</span></button>
         {ws.apps.length > 0 && <ReportButton />}
+        <button type="button" className="pill quiet" onClick={() => go("find")}><I.find />{t("nav_find")}</button>
       </PageHead>
       <Tabs view="permits" tabs={tabs} current={tab} />
-      {tab === "todo" && <CostLine page />}
-      {tab === "todo" && teamOf(team) && (
+      {(tab === "todo" || tab === "filed") && <CostLine page />}
+      {(tab === "todo" || tab === "filed") && teamOf(team) && (
         <div className="mine-row">
-          <MineToggle count={ws.apps.filter(a => mineApp(team, a.id)).length} />
+          <MineToggle count={ws.apps.filter(a => mineApp(team, a.id) && (tab === "todo" ? !FILED.includes(a.status) : FILED.includes(a.status))).length} />
         </div>
       )}
-      {tab === "todo" && <LicenseList apps={ws.apps.filter(keep)} empty={mine ? (zh ? "没有分配给您的执照。" : "Nothing is assigned to you.") : t("lic_empty")} />}
+      {tab === "todo" && <PermitTable rows={todo} empty={mine ? (lang === "zh" ? "没有分配给您的待办许可。" : "Nothing to do is assigned to you.") : t("allClear")} />}
+      {tab === "filed" && <PermitTable rows={filed} empty={t("empty")} />}
       {tab === "review" && <PermitsReview />}
       {tab === "documents" && <Documents />}
       {tab === "deadlines" && <Deadlines />}
@@ -763,157 +782,46 @@ export function Permits({ tab: asked }: { tab: PermitsTab }) {
   );
 }
 
-type LicGroup = "you" | "on" | "done";
-
-/** A license's one plain phrase: what it's waiting on, said the way a person would. */
-function licenseSay(a: Application, x: Todo | undefined, g: LicGroup): Bi {
-  if (g === "done") return a.status === "approved" ? B("Approved", "已批准") : B("Done", "已办好");
-  if (x?.kind === "approval") return ({
-    file: B("Filled in, ready for your approval", "已填好，等您批准"), send: B("A message is ready for your approval", "有一条消息等您批准"),
-    upload: B("Needs a document from you", "需要您提供一份文件"), pay: B("The agency fee is ready to pay", "机构费用等您支付"),
-    change: B("A change waits for your OK", "有一项更改等您确认"),
-  } as Record<string, Bi>)[x.a.kind] ?? B("Needs you", "需要您");
-  if (x?.kind === "doc") return B(`Needs ${x.label.en.charAt(0).toLowerCase() + x.label.en.slice(1)}`, `需要${x.label.zh}`);
-  if (x?.kind === "job") return x.job.waiting ? B(firstSentence(x.job.waiting.en), firstSentence(x.job.waiting.zh)) : B("Waiting on your answer", "等您回复");
-  if (g === "you") return a.next ? B(firstSentence(a.next.en), firstSentence(a.next.zh)) : B("Needs you", "需要您");
-  return ({
-    draft: B("Odelia is preparing it", "Odelia 正在准备"), ready: B("Ready to file", "可以提交"), review: B("With the agency", "机构审核中"),
-    filing: B("With the Placetta team", "快哉团队办理中"), waiting: B("Starts after an earlier step", "等前一步完成后开始"), todo: B("Not started yet", "尚未开始"),
-  } as Record<string, Bi>)[a.status] ?? B("In progress", "进行中");
-}
-
-/** The date a license's row shows: its next due date or renewal, or when it came through. */
-function licenseDate(ws: Workspace, a: Application, lang: "en" | "zh"): { text: string; hot: boolean } | null {
-  const today = daysFromNow(0);
-  const ds = ws.deadlines.filter(d => d.app === a.id && (d.kind === "due" || d.kind === "renewal")).sort((x, y) => x.date.localeCompare(y.date));
-  const d = ds.find(x => x.date >= today) ?? ds.filter(x => x.kind === "due" && a.status !== "approved").at(-1);
-  if (!d) return null;
-  const n = daysUntil(d.date), zh = lang === "zh", day = fmtDay(d.date, lang, Math.abs(n) > 300);
-  if (d.kind === "renewal") return { text: zh ? `${day}续期` : `Renews ${day}`, hot: n >= 0 && n <= 30 };
-  if (n < 0) return { text: zh ? `${day}已到期` : `Was due ${day}`, hot: true };
-  return { text: zh ? `${day}截止` : `Due ${day}`, hot: n <= 7 };
-}
-
-/** What happens if the date is missed, in plain words, only where the workspace says so: the opening waits on it, or
- *  the license lapses unrenewed. Nothing invented: no fine is named that the agency didn't state. */
-function licenseMiss(ws: Workspace, a: Application, g: LicGroup): Bi | null {
-  if (g === "done") {
-    const today = daysFromNow(0);
-    const r = ws.deadlines.find(d => d.app === a.id && d.kind === "renewal" && d.date >= today && daysUntil(d.date) <= 60);
-    return r ? B("Lapses if it isn't renewed by then", "到期前未续期即失效") : null;
-  }
-  if (a.critical) return B("If it slips, your opening slips", "它延误，开业就延误");
-  return null;
-}
-
-/** What happens next, in one sentence a person would say (Stripe's payment page says what the bank does next). */
-function licenseNext(a: Application, x: Todo | undefined, g: LicGroup, ws: Workspace, lang: "en" | "zh"): Bi {
-  const ag = a.agency;
-  if (g === "done") {
-    const r = ws.deadlines.filter(d => d.app === a.id && d.kind === "renewal" && d.date >= daysFromNow(0)).sort((p, q) => p.date.localeCompare(q.date))[0];
-    return r ? B(`Nothing to do until it renews on ${fmtDay(r.date, "en", true)}. Odelia starts the renewal ahead of time.`, `${fmtDay(r.date, "zh", true)}续期前无需处理，Odelia 会提前开始续期。`)
-      : B("Nothing more to do. Odelia keeps the proof on file.", "无需再处理，Odelia 会保存好证明。");
-  }
-  if (x?.kind === "doc") return B(`Once you add ${x.label.en.charAt(0).toLowerCase() + x.label.en.slice(1)}, Odelia finishes the application and asks you to approve it.`, `您补上${x.label.zh}后，Odelia 会完成申请并请您批准。`);
-  if (x?.kind === "approval" && x.a.kind === "upload") return B("Once you add the document, Odelia finishes the application and asks you to approve it.", "您补上文件后，Odelia 会完成申请并请您批准。");
-  if (x?.kind === "approval") return x.a.kind === "pay"
-    ? B(`Once the fee is paid, ${ag.en.replace(/^The /, "the ")} picks it up.`, `付款后，${ag.zh}会继续办理。`)
-    : x.a.kind === "send" ? B("Once you approve, the message goes out after the undo window.", "您批准后，消息会在撤销时限过后发出。")
-    : B(`Once you approve, Placetta files it with ${ag.en.replace(/^The /, "the ")} and tells you when it answers.`, `您批准后，快哉会向${ag.zh}提交，并在机构回复时告诉您。`);
-  if (x?.kind === "job") return B("Odelia carries on as soon as you answer her.", "您回复后，Odelia 会马上继续。");
-  void lang;
-  return ({
-    draft: B("Odelia finishes the form, then asks you to approve it.", "Odelia 填好表格后会请您批准。"),
-    ready: B("It's ready to file once you approve it.", "您批准后即可提交。"),
-    needs: B("The agency asked for something; Odelia shows you what.", "机构要求补充材料，Odelia 会告诉您需要什么。"),
-    review: B(`${ag.en} is reviewing it. Odelia tells you the moment it answers.`, `${ag.zh}正在审核，一有回复 Odelia 就会告诉您。`),
-    filing: B("The Placetta team submits it and sends you the proof.", "快哉团队会提交，并把证明发给您。"),
-    waiting: B("It starts once the step before it is done.", "前一步完成后就会开始。"),
-    todo: B("Odelia starts it in order, and asks you for anything she needs.", "Odelia 会按顺序开始，需要什么会问您。"),
-  } as Record<string, Bi>)[a.status] ?? B("Odelia tells you when anything changes.", "有任何变化，Odelia 都会告诉您。");
-}
-
-/** One license as its list row and its detail page say it: its group, its plain phrase, its date, what happens if it
- *  slips, what happens next, and the one thing waiting on the owner (from todos(), the one count). */
-export function licenseView(ws: Workspace, a: Application, lang: "en" | "zh") {
-  const x = todos(ws, daysFromNow(0)).find(z => z.app?.id === a.id);
-  const g: LicGroup = a.status === "approved" ? "done" : x || a.status === "needs" ? "you" : "on";
-  return { g, todo: g === "you" ? x : undefined, say: licenseSay(a, g === "you" ? x : undefined, g), when: licenseDate(ws, a, lang), miss: licenseMiss(ws, a, g), next: licenseNext(a, g === "you" ? x : undefined, g, ws, lang) };
-}
-
-/** The one thing to do on a license, as a button: the detail page's single primary action. */
-export function LicenseAction({ x }: { x: Todo }) { return <TodoButton x={x} />; }
-
-/** "Have Odelia find all 3": every missing document in one ask, from the same todos() list. */
-function FindAllDocs() {
-  const { b, ws, lang, busy, ask } = useApp();
-  const docs = todos(ws, daysFromNow(0)).filter((x): x is Extract<Todo, { kind: "doc" }> => x.kind === "doc");
-  if (docs.length < 2) return null;
-  const zh = lang === "zh", some = docs.slice(0, 8);
-  return (
-    <div className="lic-bulk"><button type="button" className="lnk lic-more" disabled={busy} onClick={() => ask(b(findItAsk(B(some.map(x => `${x.label.en} (${x.app.name.en})`).join("; "), some.map(x => `${x.label.zh}（${x.app.name.zh}）`).join("；")), B("open applications", "进行中的申请"), true)))}>
-      <I.spark />{zh ? `让 Odelia 找齐 ${docs.length} 份文件` : `Have Odelia find all ${docs.length} documents`}</button></div>
-  );
-}
-
-function LicenseList({ apps, empty }: { apps: Application[]; empty: string }) {
-  const { t, b, ws, lang, openApp, go } = useApp();
-  const [showDone, setShowDone] = useState(false);
-  const today = daysFromNow(0);
-  // one count of what needs the owner, the same list as Home's (src/doNext.ts todos): a license is "Needs you" when
-  // something there is for it, or the agency is asking for something
-  const list = todos(ws, today);
-  const todoOf = (a: Application) => list.find(x => x.app?.id === a.id);
-  const groupOf = (a: Application): LicGroup => a.status === "approved" ? "done" : todoOf(a) || a.status === "needs" ? "you" : "on";
-  const order = (x: Application, y: Application) => {
-    const ix = list.findIndex(z => z.app?.id === x.id), iy = list.findIndex(z => z.app?.id === y.id);
-    return (ix < 0 ? 999 : ix) - (iy < 0 ? 999 : iy) || byPriority(x, y);
-  };
-  const groups: { g: LicGroup; k: Key; rows: Application[] }[] = [
-    { g: "you", k: "lic_needs", rows: apps.filter(a => groupOf(a) === "you").sort(order) },
-    { g: "on", k: "lic_on", rows: apps.filter(a => groupOf(a) === "on").sort(byPriority) },
-    { g: "done", k: "lic_done", rows: apps.filter(a => groupOf(a) === "done") },
-  ];
-  // empty, Airbnb style: one plain sentence and the one thing to do
-  if (!apps.length) return <div className="empty lic-empty"><p>{empty}</p><button type="button" className="pill ink" onClick={() => go("find")}><I.find />{t("nav_find")}</button></div>;
-  const DONE_SHOWN = 3;
+function PermitTable({ rows: list, empty }: { rows: Application[]; empty: string }) {
+  const { t, b, openApp } = useApp();
+  if (!list.length) return <p className="quiet tab-empty">{empty}</p>;
   return (
     <>
-      {apps.some(isPreview) && <p className="prev-note"><I.spark />{t("hm_preview")}</p>}
-      {groups.map(({ g, k, rows }) => {
-        if (!rows.length) return null;
-        const shown = g === "done" && !showDone ? rows.slice(0, DONE_SHOWN) : rows;
-        return (
-          <section key={g} className={"lic-g lic-" + g} aria-label={t(k)}>
-            <h2 className="lic-h">{t(k)}<span>{rows.length}</span></h2>
-            {/* Home shows the top three; the whole list, with what acts on many at once, is here */}
-            {g === "you" && <><BatchApprove /><FindAllDocs /></>}
-            <ul className="lic-list">
-              {shown.map((a, i) => {
-                const x = g === "you" ? todoOf(a) : undefined, when = licenseDate(ws, a, lang), miss = licenseMiss(ws, a, g);
-                return (
-                  <li key={a.id} className="lic">
-                    <Working on={a.status === "draft"} size="line">
-                      <button type="button" className={"row arow lic-main" + (a.critical ? " crit" : "")} onClick={() => openApp(a.id, "progress")}>
-                        <span className="lic-tx"><b>{b(a.name)}</b><small>{b(licenseSay(a, x, g))}{miss && !when ? (lang === "zh" ? "。" : ". ") + b(miss) : ""}</small><TeamLine id={a.id} /></span>
-                        {/* what happens if it's missed sits under its date; with no date it joins the phrase on the left */}
-                        {when && <span className={"lic-when" + (when.hot && g !== "done" ? " hot" : "")}><b>{when.text}</b>{miss && <small>{b(miss)}</small>}</span>}
-                      </button>
+      {list.some(isPreview) && <p className="prev-note"><I.spark />{t("hm_preview")}</p>}
+      <div className="table apps-t" role="table">
+        <div className="tr th" role="row"><span>{t("th_app")}</span><span>{t("th_status")}</span><span>{t("th_fee")}</span><span>{t("th_takes")}</span><span>{t("th_next")}</span></div>
+        {LEVELS.map(l => {
+          const rows = list.filter(a => a.level === l);
+          if (!rows.length) return null;
+          return (
+            <div key={l} role="rowgroup" className="tgroup">
+              <p className="tg-h">{t(("lv_" + l) as Key)}<span>{rows.length}</span></p>
+              <div className="tray">
+                {rows.map(a => {
+                  return (
+                    <Working key={a.id} on={a.status === "draft"} size="line">
+                    {/* a row, not a button, so the agency's own page can be a link inside it (Harvey and Legora link every
+                        cited row to its source): the row opens the application, the link opens the page it rests on */}
+                    <div className={"tr row" + (a.critical ? " crit" : "")} role="row" tabIndex={0} aria-label={b(a.name)} onClick={() => openApp(a.id)}
+                      onKeyDown={e => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openApp(a.id); } }}>
+                      <span className="c-name"><b>{b(a.name)}</b><small>{b(a.agency)}</small><small className="c-est2">{b(a.est)}</small>{isPreview(a) && <small className="c-prev">{t("prevTag")}</small>}
+                        {a.source.url && <a className="c-src" href={a.source.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                          title={a.source.quote ? `“${a.source.quote}”${a.source.checked ? ` (${t("src_checked")} ${a.source.checked})` : ""}` : t("source")}>{a.source.label}<I.ext /></a>}
+                        <TeamLine id={a.id} /></span>
+                      <span className="c-st"><StatusChip s={a.status} /></span>
+                      <span className="c-fee">{feeText(a, t)}</span>
+                      {/* one line a cell: the first sentence, a whole phrase ("Fax: about 4 business days"); all of it on hover and in the sheet */}
+                      <span className="c-est" title={b(a.est)}>{firstSentence(b(a.est))}</span>
+                      <span className="c-next" title={a.next ? b(a.next) : undefined}>{a.critical && <em>{t("critical")}</em>}{a.next ? firstSentence(b(a.next)) : ""}</span>
+                    </div>
                     </Working>
-                    {/* one action, where the row has one: the first thing waiting on you is the page's one primary button */}
-                    {x && <span className="lic-act"><TodoButton x={x} quiet={!(g === "you" && i === 0)} /></span>}
-                  </li>
-                );
-              })}
-            </ul>
-            {g === "done" && rows.length > DONE_SHOWN && (
-              <button type="button" className="lnk lic-more" onClick={() => setShowDone(v => !v)}>
-                {showDone ? (lang === "zh" ? "收起" : "Show fewer") : lang === "zh" ? `查看全部 ${rows.length} 项` : `Show all ${rows.length}`}
-              </button>
-            )}
-          </section>
-        );
-      })}
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
       <p className="note">{t("estimates")}</p>
     </>
   );

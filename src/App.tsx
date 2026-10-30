@@ -12,11 +12,10 @@ import { emptyBook } from "./memory";
 import { chipsOf, keepRecall, recallFrom, SAMPLE_ME } from "./recall";
 import { AgentPanel } from "./AgentPanel";
 import { Composer } from "./Composer";
+import { AgentBot } from "./Bot";
 import { HOLD_MINUTES, startHold } from "./hold";
 import { finishWork, stampFilings } from "./finish";
 import { TABS, hrefOf, plainClick, readRoute, setRoute } from "./route";
-import { Guard } from "./SafeBoundary";
-import { PageSkeleton } from "./Skeleton";
 import { AppCtx, type CloudCtx, type Ctx, type OdeliaTab, type PermitsTab, type Signed, type Tab, type View } from "./ctx";
 import { formById } from "./forms/registry";
 import { canFill } from "./forms/canFill";
@@ -85,17 +84,30 @@ const readLang = (): Lang => {
   return navigator.language?.toLowerCase().startsWith("zh") ? "zh" : "en";
 };
 
-/* Four places, like Gusto's and Mercury's sidebars: Home (what needs me), Licenses (everything you file, with its
-   documents, dates and Find licenses), Odelia (the chat, what she's doing and the updates inbox) and Settings (at the
-   bottom, with Activity and Business facts). Stores joins them only once a business has two or more stores; one store
-   is Home's to show. Search is the magnifier by the logo and Ctrl K. Every page that used to be its own entry opens
-   from one of these, and its old address still works (src/route.ts LEGACY). */
+/* Four places, like the agents people already know how to use: Home (what needs me, what Odelia is doing, what's next),
+   Permits (everything you file, with its documents and dates), Stores, and Odelia (the chat, her work, her playbooks and
+   the updates inbox). Settings keeps the rest. Everything that used to be its own page still opens from one of these. */
 const NAV: { v: View; k: Key; Icon: () => React.ReactElement }[] = [
   { v: "overview", k: "nav_overview", Icon: I.overview },
   { v: "permits", k: "nav_apps", Icon: I.apps },
   { v: "stores", k: "nav_stores", Icon: I.store },
   { v: "odelia", k: "nav_odelia", Icon: I.spark },
 ];
+/* The pages that moved under tabs, for anyone who knew them as entries of their own: a folded "More" group below the
+   four places (it opens when you're on one of them, and remembers open or closed per browser), and the same list in
+   the phone menu. Each links to the page's new address and lights up there. Updates isn't listed: the bell by the logo
+   (and in the phone's top bar) opens it with its unread count, and so do Odelia's Updates tab and Home's "Odelia is
+   working on". */
+const MORE: { id: string; v: View; sub?: string; k: Key; Icon: () => React.ReactElement }[] = [
+  { id: "work", v: "odelia", sub: "work", k: "nav_work", Icon: I.queue },
+  { id: "playbooks", v: "odelia", sub: "playbooks", k: "nav_playbooks", Icon: I.book },
+  { id: "documents", v: "permits", sub: "documents", k: "nav_docs", Icon: I.docs },
+  { id: "deadlines", v: "permits", sub: "deadlines", k: "nav_deadlines", Icon: I.deadlines },
+  { id: "find", v: "find", k: "nav_find", Icon: I.find },
+  { id: "activity", v: "settings", sub: "activity", k: "nav_audit", Icon: I.audit },
+  { id: "facts", v: "settings", sub: "facts", k: "nav_context", Icon: I.context },
+];
+const atMore = (m: (typeof MORE)[number], view: View, sub?: string) => view === m.v && (!m.sub || sub === m.sub);
 const PERMITS_TABS = TABS.permits as readonly PermitsTab[], ODELIA_TABS = TABS.odelia as readonly OdeliaTab[];
 
 /** Updates worked out from the workspace itself: due dates in the next two weeks, overdue ones and renewals in the next
@@ -141,10 +153,10 @@ const askFor = (u: { kind: UpdateItem["kind"]; title: Bi }): Bi => ({
   mention: B(`What does this comment need from me: ${u.title.en}`, `这条评论需要我做什么：${u.title.zh}`),
 })[u.kind];
 
-
-/** ?sim=error in the sample: a screen that throws while drawing, to see and check the error state. */
-const SIM = typeof location !== "undefined" ? new URLSearchParams(location.search).get("sim") : null;   // read once: the address loses its query when a page sets its route
-function SimFail(): React.ReactElement { throw new Error("sim=error: a screen failing on purpose"); }
+const PLAN_LABEL: Record<string, Bi> = {
+  starter: B("Starter plan", "入门版"), growth: B("Growth plan", "成长版"), scale: B("Scale plan", "规模版"), locations: B("Essentials, per location", "基础版（按门店）"), pro: B("Pro, per location", "专业版（按门店）"),
+  store: B("Store plan, billed yearly", "门店方案（按年计费）"), store_monthly: B("Store plan, monthly", "门店方案（按月）"),
+};
 
 export default function App({ cloud }: { cloud?: CloudSession }) {
   /* language */
@@ -168,21 +180,19 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   // the side menu folds down to icons on wider screens; remembered per browser
   const [slimPref, setSlimPref] = useState(() => readFlag("placetta-side-slim"));
   useEffect(() => writeFlag("placetta-side-slim", slimPref), [slimPref]);
-  // the sidebar folds to icons with ⌘\ or Ctrl \ (Claude.ai's), and from the account menu
-  useEffect(() => {
-    const on = (e: KeyboardEvent) => { if (e.key === "\\" && (e.metaKey || e.ctrlKey) && !e.altKey) { e.preventDefault(); setSlimPref(v => !v); } };
-    addEventListener("keydown", on);
-    return () => removeEventListener("keydown", on);
-  }, []);
   const [view, setView] = useState<View>(() => readRoute().view);
   // the tab open on Permits or Odelia (and the category asked of Settings), from the address
   const [sub, setSub] = useState<string | undefined>(() => readRoute().sub);
-  // Settings keeps its own category and tells us which one is showing
+  // Settings keeps its own category and tells us which one is showing, so the More group lights the right row
   useLayoutEffect(() => {
     const on = (e: Event) => setSub((e as CustomEvent<string>).detail);
     addEventListener("placetta:settings-at", on);
     return () => removeEventListener("placetta:settings-at", on);
   }, []);
+  // the More group below the four places: remembered per browser, and open whenever you're on one of its pages
+  const [moreOpen, setMoreOpen] = useState(() => readFlag("placetta-side-more"));
+  useEffect(() => writeFlag("placetta-side-more", moreOpen), [moreOpen]);
+  useEffect(() => { if (MORE.some(m => atMore(m, view, sub))) setMoreOpen(true); }, [view, sub]);
   // Odelia's chat as a page of its own: the panel isn't shown beside or over it, the page is the panel
   const chatPage = view === "odelia" && (sub ?? "chat") === "chat";
   const dock = wide && panelOpen && !chatPage;
@@ -1424,12 +1434,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const odelia = (
     <div className={"page odelia" + (odeliaTab === "chat" ? " chat" : "")}>
       {odeliaTab !== "chat" && <PageHead title={t("nav_odelia")} />}
-      {/* Chat, what she's doing and the inbox. Playbooks are the team's: shown to Placetta staff, and still open at
-          /odelia/playbooks for anyone with the link */}
       <Tabs view="odelia" current={odeliaTab} tabs={[
-        { id: "chat", label: t("nav_chat") }, { id: "work", label: t("nav_doing"), count: waitingJobs },
-        { id: "updates", label: t("nav_updates"), count: unread },
-        ...(cloud?.me.staff || cloud?.me.staff_email || odeliaTab === "playbooks" ? [{ id: "playbooks", label: t("nav_playbooks") }] : []),
+        { id: "chat", label: t("nav_chat") }, { id: "work", label: t("nav_work"), count: waitingJobs },
+        { id: "playbooks", label: t("nav_playbooks") }, { id: "updates", label: t("nav_updates"), count: unread },
       ]} />
       {odeliaTab === "chat" && <AgentPanel feed={feed} tts={tts} mode="page" asked={asked} />}
       {odeliaTab === "work" && <WorkPage />}
@@ -1444,66 +1451,88 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     hq: cloud?.hq.length ? <Headquarters lang={lang} initial={cloud.hq} /> : !cloud ? <Headquarters lang={lang} initial={[]} sample={{ ws: view_, team: collab }} /> : <Overview />,
     partner: <PartnerPage lang={lang} sample={!cloud} />,
   }[view];
-  // the sample can show a screen loading (?sim=loading) or failing (?sim=error), so both states can be seen and checked
-  const sim = !cloud ? SIM : null;
-  const shown = sim === "error" ? <SimFail /> : sim === "loading" ? <PageSkeleton label={lang === "zh" ? "正在载入" : "Loading"} /> : page;
   // Home's count is everything waiting on the owner: the same list as Home's "Do this next" and "Waiting on you" and the
   // chat's greeting (src/doNext.ts todos), never the approvals alone
   const badge: Partial<Record<View, number>> = { overview: todos(view_, daysFromNow(0)).length, odelia: waitingJobs };
+  const wsSub = cloud ? (billing?.free && !billing.subscription_status ? b(B("Early access", "抢先体验")) : plan === "monthly" ? b(PLAN_LABEL[billing?.subscription_plan ?? ""] ?? B("Monthly plan", "月度方案")) : plan === "entry" ? b(B("Entry plan", "开店计划")) : b(B("No plan yet", "尚未开通"))) : t("sampleWs");
   const current = (v: View) => view === v || (v === "permits" && view === "find");
-  const mac = /Mac|iPhone|iPad/.test(navigator.platform);
+  /* The bell: unread updates, always in reach (the sidebar's top on a desktop, the top bar on a phone). */
+  const bell = (
+    <a {...navLink("odelia", "updates")} className="bellb" aria-label={unread ? (lang === "zh" ? `${unread} 条新动态` : `${unread} new update${unread === 1 ? "" : "s"}`) : t("nav_updates")} title={t("nav_updates")}>
+      {/* a mark, not a number: the one count of what needs you is Home's (src/doNext.ts todos); a second number beside
+          it, counting updates, read as a disagreement */}
+      <I.bell />{unread > 0 && <em className="mark" aria-hidden="true" />}
+    </a>
+  );
+
   const slim = slimPref && !phone;
-  // Stores is a place of its own once there are two or more; one store is Home's to show (its /stores address still opens)
-  const many = (view_.stores ?? []).length >= 2;
-  const nav = NAV.filter(n => n.v !== "stores" || many);
-  /* Search: the magnifier on the top row (and in the phone's top bar), and Ctrl K or ⌘K anywhere */
-  const searchb = (
-    <button type="button" className="icbtn srchb cmdk-open" onClick={() => setCmdk(true)} aria-label={t("nav_search")}
-      title={(lang === "zh" ? "搜索，或直接交给 Odelia" : "Search, or hand Odelia a job") + (mac ? " (⌘K)" : " (Ctrl K)")}><I.find /></button>
-  );
-  /* The top row, as Linear's and Claude.ai's: the mark and the business's name together, opening the switcher, which
-     also holds Headquarters, the partner page and the filing queue for the people who have them */
-  const switcher = [
-    ...(cloud ? cloud.workspaces.map(x => ({ key: x.id, label: x.name, picked: x.id === cloud.wsId, onPick: () => { if (x.id !== cloud.wsId) cloud.switchTo(x.id); } })) : [{ key: "sample", label: b(view_.business), picked: true, onPick: () => go("overview") }]),
-    ...(canHq ? [{ key: "hq", label: t("nav_hq"), icon: <I.hq />, onPick: () => go("hq") }] : []),
-    ...(partnerMe ? [{ key: "partner", label: b(B("Partner", "合作伙伴")), icon: <I.user />, onPick: () => go("partner") }] : []),
-    ...(cloud?.me.staff || cloud?.me.staff_email ? [{ key: "queue", label: t("nav_queue"), icon: <I.queue />, onPick: () => go("queue") }] : []),
-    ...(cloud ? [{ key: "new", label: b(B("New business", "新建企业")), icon: <I.plus />, onPick: () => cloud.newWorkspace() }] : []),
-    { key: "site", label: b(B("Placetta website", "快哉官网")), icon: <I.globe />, href: "/" },
-  ];
-  // a sample says so once, at the bottom, where the account would be
-  const who = cloudCtx ? (cloudCtx.email.split("@")[0] || cloudCtx.email) : b(B("Sample account", "示例账户"));
-  /* The bottom: the person, opening language, help, collapse and sign out (Claude.ai's account menu) */
-  const account = [
-    { key: "en", label: "English", picked: lang === "en", onPick: () => setLang("en") },
-    { key: "zh", label: "中文", picked: lang === "zh", onPick: () => setLang("zh") },
-    { key: "help", label: b(B("Help", "帮助")), icon: <I.message />, onPick: () => go("settings", "help") },
-    ...(!phone ? [{ key: "slim", label: b(slim ? B("Expand the sidebar", "展开侧栏") : B("Collapse the sidebar", "收起侧栏")) + (mac ? " (⌘\\)" : " (Ctrl \\)"), icon: <I.panel />, onPick: () => setSlimPref(v => !v) }] : []),
-    ...(cloud ? [{ key: "out", label: b(B("Sign out", "退出登录")), icon: <I.logout />, onPick: () => cloud.signOut() }] : []),
-  ];
-  const navRow = (n: (typeof NAV)[number]) => (
-    <li key={n.v}><a {...navLink(n.v)} aria-current={current(n.v) ? "page" : undefined} title={slim ? t(n.k) : undefined}>
-      <n.Icon /><span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}
+  // the pages that moved under tabs, with the counts the old Work and Updates entries carried
+  const moreBadge: Record<string, number> = { work: waitingJobs };
+  const moreRows = MORE.map(m => (
+    <li key={m.id}><a {...navLink(m.v, m.sub)} aria-current={atMore(m, view, sub) ? "page" : undefined} title={slim ? t(m.k) : undefined}>
+      <m.Icon /><span>{t(m.k)}</span>{moreBadge[m.id] ? <em>{moreBadge[m.id]}</em> : null}
     </a></li>
-  );
+  ));
   const side = (
-    <nav className={"side side2" + (navOpen ? " open" : "")} aria-label="Workspace">
-      <div className="side-top sw-row">
-        <Menu className="sw-wrap" buttonClass="wsname sw-btn" label={b(B("Workspaces", "工作区"))}
-          button={<><span className="sw-mark" aria-hidden="true"><Mark size={20} /></span><b title={b(view_.business)}>{b(view_.business)}</b></>}
-          items={switcher} />
-        {phone ? <button type="button" className="icbtn" onClick={() => setNavOpen(false)} aria-label={t("close")}><I.x /></button> : searchb}
+    <nav className={"side" + (navOpen ? " open" : "")} aria-label="Workspace">
+      <div className="side-top">
+        <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}>{slim ? <Mark size={22} /> : <Logo lang={lang} height={17} />}</button>
+        {phone
+          ? <button type="button" className="icbtn" onClick={() => setNavOpen(false)} aria-label={t("close")}><I.x /></button>
+          : <span className="side-tools">{bell}<button type="button" className="slimb" onClick={() => setSlimPref(v => !v)} aria-label={t(slim ? "expandMenu" : "collapseMenu")} title={t(slim ? "expandMenu" : "collapseMenu")} aria-expanded={!slim}><I.panel /></button></span>}
       </div>
-      {!phone ? (
+      {cloud ? (
+        <Menu className="wsname-wrap" buttonClass="wsname" label={b(B("Workspaces", "工作区"))} button={<><b>{b(view_.business)}</b><span>{wsSub}</span><I.chev /></>}
+          items={[
+            ...cloud.workspaces.map(x => ({ key: x.id, label: x.name, picked: x.id === cloud.wsId, onPick: () => { if (x.id !== cloud.wsId) cloud.switchTo(x.id); } })),
+            { key: "new", label: b(B("New business", "新建企业")), icon: <I.plus />, onPick: () => cloud.newWorkspace() },
+            { key: "site", label: b(B("Placetta website", "快哉官网")), icon: <I.globe />, href: "/" },
+            { key: "out", label: b(B("Sign out", "退出登录")), icon: <I.logout />, onPick: () => cloud.signOut() },
+          ]} />
+      ) : (
+        <div className="wsname-wrap">
+          <button type="button" className="wsname" disabled><b>{b(view_.business)}</b><span>{wsSub}</span></button>
+        </div>
+      )}
+      {!phone && (
         <ul className="nav">
-          {nav.map(navRow)}
-          {navRow({ v: "settings", k: "nav_settings", Icon: I.settings })}
+          {NAV.map(n => (
+            <li key={n.v}><a {...navLink(n.v)} aria-current={current(n.v) ? "page" : undefined} title={slim ? t(n.k) : undefined}>
+              {n.v === "odelia" ? <span className="nav-bot" aria-hidden="true"><AgentBot size={22} busy={busy} task={busy ? step?.state : undefined} interactive={false} /></span> : <n.Icon />}
+              <span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}
+            </a></li>
+          ))}
+          <li><button type="button" className="moreb" onClick={() => setMoreOpen(v => !v)} aria-expanded={moreOpen} title={slim ? t("nav_more") : undefined}>
+            <span className="more-chev" aria-hidden="true"><I.chevR /></span><span>{t("nav_more")}</span>
+          </button></li>
+          {moreOpen && moreRows}
         </ul>
-      ) : many ? <ul className="nav">{navRow(NAV.find(n => n.v === "stores")!)}</ul> : null}
-      <div className="side-bot side-acct">
-        <Menu className="acct-wrap" buttonClass="acct-btn" label={b(B("Account", "账户"))}
-          button={<><span className="acct-av" aria-hidden="true">{who.slice(0, 1).toUpperCase()}</span><span className="acct-name">{who}</span></>}
-          items={account} />
+      )}
+      <ul className="nav">
+        <li><button type="button" className="cmdk-open" onClick={() => setCmdk(true)} title={lang === "zh" ? "搜索，或直接交给 Odelia" : "Search, or hand Odelia a job"}><I.find /><span>{lang === "zh" ? "搜索" : "Search"}</span><kbd>{/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</kbd></button></li>
+        {canHq && <li><a {...navLink("hq")} aria-current={view === "hq" ? "page" : undefined} title={slim ? t("nav_hq") : undefined}><I.hq /><span>{t("nav_hq")}</span></a></li>}
+        {!!partnerMe && <li><a {...navLink("partner")} aria-current={view === "partner" ? "page" : undefined} title={slim ? b(B("Partner", "合作伙伴")) : undefined}><I.user /><span>{b(B("Partner", "合作伙伴"))}</span></a></li>}
+        {(cloud?.me.staff || cloud?.me.staff_email) && <li><a {...navLink("queue")} aria-current={view === "queue" ? "page" : undefined} title={slim ? t("nav_queue") : undefined}><I.queue /><span>{t("nav_queue")}</span></a></li>}
+      </ul>
+      {phone && <>
+        <p className="nav-h">{t("nav_more")}</p>
+        <ul className="nav">{moreRows}</ul>
+      </>}
+      {view_.locations.length > 0 && <p className="nav-h">{t("locations")}</p>}
+      <ul className="nav locs">
+        {view_.locations.map(l => (
+          <li key={l.id}><button type="button" title={slim ? b(l.name) : undefined} onClick={() => {
+            if (!cloud && l.id === "fremont") { setMatch(m => m && /fremont|弗里蒙特/i.test(m.where) ? m : null); go("find"); if (!match || !/fremont|弗里蒙特/i.test(match.where)) void run({ match: { what: lang === "zh" ? "奶茶店" : "Milk tea shop", where: lang === "zh" ? "加州弗里蒙特" : "Fremont, CA" } }, null); }
+            else go("overview");
+          }}><I.pin /><span>{b(l.name)}<small>{b(l.county)}</small></span>{l.state === "mapping" && <em className="map">{t("mapping")}</em>}</button></li>
+        ))}
+      </ul>
+      <div className="side-bot">
+        <a {...navLink("settings")} className={"setb" + (view === "settings" ? " on" : "")} aria-current={view === "settings" ? "page" : undefined} title={slim ? t("nav_settings") : undefined}><I.settings /><span>{t("nav_settings")}</span></a>
+        <div className="lang" role="group" aria-label={t("langSwitch")}>
+          <button type="button" aria-pressed={lang === "en"} onClick={() => setLang("en")}>EN</button>
+          <button type="button" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>中文</button>
+        </div>
       </div>
     </nav>
   );
@@ -1519,7 +1548,10 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
             <header className="mbar">
               <button type="button" className="icbtn" onClick={() => setNavOpen(true)} aria-label="Menu" title={t("nav_more")}><I.menu /></button>
               <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}><Logo lang={lang} height={16} /></button>
-              <span className="mbar-r">{searchb}</span>
+              <span className="mbar-r">
+                {bell}
+                <a {...navLink("settings")} className="icbtn" aria-label={t("nav_settings")} aria-current={view === "settings" ? "page" : undefined}><I.settings /></a>
+              </span>
             </header>
           )}
           {termsHold && (
@@ -1533,15 +1565,15 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
               <div className="tb-act"><button type="button" className="sbtn ink" onClick={() => void acceptTerms()}>{b(B("Accept", "接受"))}</button></div>
             </section>
           )}
-          <main className={"content" + (view === "overview" ? " wash" : "") + (chatPage ? " chatpage" : "")} ref={main}>{/* one screen that fails shows its own error with Retry; the sidebar, the chat and the rest carry on */}<Guard key={view}>{shown}</Guard></main>
+          <main className={"content" + (view === "overview" ? " wash" : "") + (chatPage ? " chatpage" : "")} ref={main}>{page}</main>
           {!panelOpen && !chatPage && <div className="dockbar"><Composer variant="dock" tts={tts} asked={asked} showLive={view !== "overview" && view !== "find"} starters={view === "overview"} /></div>}
           {toast && <div className="toast" role="status">{toast}</div>}
           {phone && (
-            /* four places, as Airbnb's and Instagram's bars: Stores (two or more) is in the menu */
             <nav className="tabbar" aria-label={t("nav_more")}>
-              {[...NAV.filter(n => n.v !== "stores"), { v: "settings" as View, k: "nav_settings" as Key, Icon: I.settings }].map(n => (
+              {NAV.map(n => (
                 <a key={n.v} {...navLink(n.v)} aria-current={current(n.v) ? "page" : undefined}>
-                  <n.Icon /><span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}
+                  {n.v === "odelia" ? <span className="nav-bot" aria-hidden="true"><AgentBot size={24} busy={busy} task={busy ? step?.state : undefined} interactive={false} /></span> : <n.Icon />}
+                  <span>{t(n.k)}</span>{badge[n.v] ? <em>{badge[n.v]}</em> : null}
                 </a>
               ))}
             </nav>

@@ -599,16 +599,12 @@ async function signIn(p) {
   }
 }
 
-/* Four places plus Settings (src/route.ts): Home, Licenses with its views, Odelia with its tabs, Settings, and Stores
-   for two or more stores. The old addresses (/permits/*, /work, /applications, /context and the rest) are checked too:
-   each opens its new home. */
+/* Four places plus Settings (src/route.ts): Home, Permits with its tabs, Stores, Odelia with its tabs. The old
+   addresses (/work, /applications, /context and the rest) are checked too: each opens its new home. */
 const SETTINGS = ["general", "facts", "team", "odelia", "connections", "billing", "security", "privacy", "activity", "help"];
-const PAGES = [["home", ""], ["licenses", "licenses"], ["licenses-review", "licenses/review"], ["licenses-documents", "licenses/documents"], ["licenses-deadlines", "licenses/deadlines"],
-  ["find", "licenses/find"], ["stores", "stores"], ["odelia-chat", "odelia"], ["odelia-work", "odelia/work"], ["odelia-playbooks", "odelia/playbooks"], ["odelia-updates", "odelia/updates"],
+const PAGES = [["home", ""], ["permits", "permits"], ["permits-filed", "permits/filed"], ["permits-review", "permits/review"], ["permits-documents", "permits/documents"], ["permits-deadlines", "permits/deadlines"],
+  ["find", "permits/find"], ["stores", "stores"], ["odelia-chat", "odelia"], ["odelia-work", "odelia/work"], ["odelia-playbooks", "odelia/playbooks"], ["odelia-updates", "odelia/updates"],
   ["headquarters", "headquarters"], ["partner", "partner"],
-  // the sample's loading and error states (src/App.tsx SIM)
-  ["sim-loading", "licenses?sim=loading"], ["sim-error", "licenses?sim=error"],
-  ["old-permits", "permits"], ["old-permits-filed", "permits/filed"], ["old-permits-deadlines", "permits/deadlines"], ["old-permits-find", "permits/find"],
   ["old-work", "work"], ["old-applications", "applications"], ["old-documents", "documents"], ["old-deadlines", "deadlines"], ["old-activity", "activity"], ["old-context", "context"], ["old-find", "find"]];
 
 /** Every state checked: a name and how to get there. A state whose opener finds nothing to click is skipped. */
@@ -631,10 +627,15 @@ const STATES = [
     return true;
   } },
   /* suggestions under a text field, mid-typing (src/Suggest.tsx): a place, a kind of business, a state picker */
-  { name: "suggest-where", go: async p => { await open(p, "licenses/find"); const i = p.locator(".matcher input").nth(1); await i.click(); await i.pressSequentially("san j", { delay: 30 }); await settle(p); return (await p.locator(".sug [role=option]").count()) > 0; } },
-  { name: "suggest-what", go: async p => { await open(p, "licenses/find"); const i = p.locator(".matcher input").first(); await i.click(); await i.pressSequentially("milk t", { delay: 30 }); await p.keyboard.press("ArrowDown"); await settle(p); return (await p.locator(".sug [role=option]").count()) > 0; } },
-  { name: "find-results", go: async p => { await open(p, "licenses/find"); if (!(await clickText(p, "Milk tea shop, San Jose, CA"))) return false; await p.locator(".hit").first().waitFor({ timeout: 20000 }).catch(() => {}); await p.waitForTimeout(800); return true; } },
+  { name: "suggest-where", go: async p => { await open(p, "permits/find"); const i = p.locator(".matcher input").nth(1); await i.click(); await i.pressSequentially("san j", { delay: 30 }); await settle(p); return (await p.locator(".sug [role=option]").count()) > 0; } },
+  { name: "suggest-what", go: async p => { await open(p, "permits/find"); const i = p.locator(".matcher input").first(); await i.click(); await i.pressSequentially("milk t", { delay: 30 }); await p.keyboard.press("ArrowDown"); await settle(p); return (await p.locator(".sug [role=option]").count()) > 0; } },
+  { name: "find-results", go: async p => { await open(p, "permits/find"); if (!(await clickText(p, "Milk tea shop, San Jose, CA"))) return false; await p.locator(".hit").first().waitFor({ timeout: 20000 }).catch(() => {}); await p.waitForTimeout(800); return true; } },
   { name: "nav-menu", go: async p => { await open(p, ""); return click(p, ".mbar button[aria-label=Menu]"); } },
+  // the sidebar's More group opened by hand on Home (it opens by itself on the pages it lists); the phone menu lists them outright
+  { name: "nav-more", go: async p => {
+    await p.evaluate(() => { try { localStorage.removeItem("placetta-side-more"); } catch { /* blocked */ } }).catch(() => {});
+    await open(p, ""); return click(p, ".moreb[aria-expanded=false]");
+  } },
   // the chat beside the work: ask from the dock on Home, the panel opens (docked on a desktop, a sheet on a phone)
   { name: "odelia-panel", go: async p => { await open(p, "stores"); const box = p.locator(".dockbar textarea").filter({ visible: true }).first(); if (!(await box.count())) return false; await box.fill("What's due this week?"); await box.press("Enter"); await p.waitForTimeout(1500); return true; } },
   { name: "odelia-chat-typed", go: async p => {
@@ -649,8 +650,7 @@ const STATES = [
   // the card's Ask me, Always allow or Never per kind of action (src/AllowRule.tsx), then with Never picked
   { name: "approval-choices", go: p => permCard(p, false) },
   { name: "approval-choices-never", go: p => permCard(p, true) },
-  { name: "tabbar-odelia", go: async p => { await open(p, ""); return click(p, ".tabbar a[href$=\"/odelia\"]"); } },
-  { name: "account-menu", go: async p => { await open(p, ""); return viaMenu(p, "button.acct-btn"); } },
+  { name: "tabbar-odelia", go: async p => { await open(p, ""); return click(p, ".tabbar a:last-child"); } },
   { name: "plans", go: async p => {
     await open(p, "");
     for (const t of [/^Get your entry plan/, /^See plans/, /^Change plan/, /^Compare plans/]) if (await clickText(p, t)) return true;
@@ -660,22 +660,22 @@ const STATES = [
   } },
   { name: "playbooks-open", go: async p => { await open(p, "odelia/playbooks"); return click(p, ".pb-tog"); } },
   { name: "work-open", go: async p => { await open(p, "odelia/work"); const a = await click(p, ".hz-tog"); const b = await click(p, ".sec-h.tog"); return a || b; } },
-  { name: "store-detail", go: async p => { await open(p, "stores"); return click(p, "button.st-row"); } },
-  { name: "store-detail-2", go: async p => { await open(p, "stores"); const l = p.locator("button.st-row").filter({ visible: true }); if (await l.count() < 2) return false; await l.nth(1).click(); await settle(p); return true; } },
+  { name: "store-detail", go: async p => { await open(p, "stores"); return click(p, "button.store"); } },
+  { name: "store-detail-2", go: async p => { await open(p, "stores"); const l = p.locator("button.store").filter({ visible: true }); if (await l.count() < 2) return false; await l.nth(1).click(); await settle(p); return true; } },
   { name: "stores-plan-many", go: async p => { await open(p, "stores"); await p.locator(".st-more .pill").first().click().catch(() => {}); return clickText(p, "Plan many stores"); } },
   /* Team review: cells picked in the review table, each bulk action open, a cell opened by headquarters, and a
      document's comments */
-  { name: "review-picked", go: async p => { await open(p, "licenses/review"); const l = p.locator(".rv-pick").filter({ visible: true }); if (!(await l.count())) return false; await l.first().check(); await settle(p); return true; } },
-  { name: "review-remind", go: async p => { await open(p, "licenses/review"); const l = p.locator(".rv-pick").filter({ visible: true }); if (!(await l.count())) return false; await l.first().check(); await settle(p); return clickText(p, "Set a reminder"); } },
-  { name: "review-filters", go: async p => { await open(p, "licenses/review"); if (await click(p, ".rv-ftog")) return true; return (await p.locator(".rv-filters").count()) > 0; } },
+  { name: "review-picked", go: async p => { await open(p, "permits/review"); const l = p.locator(".rv-pick").filter({ visible: true }); if (!(await l.count())) return false; await l.first().check(); await settle(p); return true; } },
+  { name: "review-remind", go: async p => { await open(p, "permits/review"); const l = p.locator(".rv-pick").filter({ visible: true }); if (!(await l.count())) return false; await l.first().check(); await settle(p); return clickText(p, "Set a reminder"); } },
+  { name: "review-filters", go: async p => { await open(p, "permits/review"); if (await click(p, ".rv-ftog")) return true; return (await p.locator(".rv-filters").count()) > 0; } },
   { name: "hq-picked-ask", go: async p => { await open(p, "headquarters"); const l = p.locator(".rv-pick").filter({ visible: true }); if (!(await l.count())) return false; await l.first().check(); await settle(p); return clickText(p, "Ask the franchisee"); } },
   { name: "hq-item", go: async p => { await open(p, "headquarters"); return click(p, ".rv-c.s-missing .rv-cell, .rv-cell"); } },
-  { name: "doc-comments", go: async p => { await open(p, "licenses/documents"); return click(p, ".cmt-btn.has, .cmt-btn"); } },
+  { name: "doc-comments", go: async p => { await open(p, "permits/documents"); return click(p, ".cmt-btn.has, .cmt-btn"); } },
   { name: "stores-check", go: async p => { await open(p, "stores"); await p.locator(".st-more .pill").first().click().catch(() => {}); return clickText(p, "Check stores already open"); } },
   { name: "stores-check-list", go: async p => { await open(p, "stores"); await p.locator(".st-more .pill").first().click().catch(() => {}); if (!(await clickText(p, "Check stores already open"))) return false; await p.locator(".sc-f input").first().fill("Flushing, NY"); return clickText(p, "Check my stores"); } },
   { name: "stores-check-gaps", go: async p => { await open(p, "stores"); await p.locator(".st-more .pill").first().click().catch(() => {}); if (!(await clickText(p, "Check stores already open"))) return false; await p.locator(".sc-f input").first().fill("Irvine, CA"); if (!(await clickText(p, "Check my stores"))) return false; return clickText(p, "Show my gaps"); } },
-  { name: "app-drawer", tabs: true, go: async p => { await open(p, "licenses"); return click(p, ".apps-t .tr.row, button.row.arow"); } },
-  { name: "app-drawer-crit", tabs: true, go: async p => { await open(p, "licenses"); return click(p, ".apps-t .tr.row.crit, button.row.arow.crit"); } },
+  { name: "app-drawer", tabs: true, go: async p => { await open(p, "permits"); return click(p, ".apps-t .tr.row, button.row.arow"); } },
+  { name: "app-drawer-crit", tabs: true, go: async p => { await open(p, "permits"); return click(p, ".apps-t .tr.row.crit, button.row.arow.crit"); } },
   ...[0, 1, 2].map(step => ({ name: "tour" + (step ? "-step" + (step + 1) : ""), go: async p => {
     await p.evaluate(() => { try { for (const k of Object.keys(localStorage)) if (/tour/i.test(k)) localStorage.removeItem(k); } catch { /* blocked */ } });
     await p.goto(URL_); await p.waitForTimeout(1200);

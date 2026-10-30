@@ -10,7 +10,7 @@
    390 on a touch phone) it opens /app, sends Odelia several messages, and watches for about 20 seconds while she works,
    finishes and goes idle. Every 1.5 seconds it also pokes each bot (a hop with a full turn of the head), which drives
    the animation through its extremes. It fails on any uncaught error in the page, on a console error from a canvas
-   (IndexSizeError and the like), on the app's own error screen (src/Skeleton.tsx PageError), or on a blank #root.
+   (IndexSizeError and the like), on the app's own "Something on this page broke" message, or on a blank #root.
 
    Options: --dir <folder>   serve an existing sample build (the folder that holds app/) instead of building one
             --seconds <n>    how long to watch after the messages (default 20)
@@ -74,7 +74,7 @@ async function check(browser, screen) {
   const blank = async (when) => {
     const r = await page.evaluate(() => {
       const root = document.getElementById("root");
-      return { kids: root ? root.childElementCount : -1, text: root ? root.innerText.trim().length : 0, broke: !!document.querySelector('.page-err') || (!!document.querySelector('[role="alert"]') && /Something on this page broke|页面出了点问题|This page didn't open|这个页面没能打开/.test(document.body.innerText)) };
+      return { kids: root ? root.childElementCount : -1, text: root ? root.innerText.trim().length : 0, broke: !!document.querySelector('[role="alert"]') && /Something on this page broke|页面出了点问题/.test(document.body.innerText) };
     }).catch(e => ({ kids: -1, text: 0, broke: false, err: String(e) }));
     if (r.kids < 1 || r.text < 20) problems.push(`#root is blank ${when}`);
     if (r.broke) problems.push(`the app showed "Something on this page broke" ${when}`);

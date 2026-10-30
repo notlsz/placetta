@@ -10,7 +10,7 @@ import type { AgencyLogin, Billing, Filing, Integration, IntegrationKind, Plan }
 /** The four places (Home, Permits, Stores, Odelia), Settings, and the pages reached from them: Find licenses (a button
  *  on Permits), the staff filing queue and Headquarters. Permits and Odelia carry their tabs in the address (route.ts). */
 export type View = "overview" | "permits" | "stores" | "odelia" | "find" | "settings" | "queue" | "hq" | "partner";
-export type PermitsTab = "todo" | "review" | "documents" | "deadlines";
+export type PermitsTab = "todo" | "filed" | "review" | "documents" | "deadlines";
 export type OdeliaTab = "chat" | "work" | "playbooks" | "updates";
 export type Tab = "progress" | "check" | "form" | "fees" | "receipt" | "comments";
 

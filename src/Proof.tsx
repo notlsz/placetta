@@ -1,4 +1,3 @@
-import { SkeletonRows } from "./Skeleton";
 import { useEffect, useState } from "react";
 import type { Bi } from "./bi";
 import { useApp } from "./ctx";
@@ -187,7 +186,7 @@ export function ProofPage({ token, preview }: { token: string; preview?: PublicP
           <button type="button" aria-pressed={lang === "zh"} onClick={() => setLang("zh")}>中文</button>
         </div>
       </header>
-      {page === "loading" && <SkeletonRows rows={4} label={zh ? "正在载入" : "Loading"} />}
+      {page === "loading" && <p className="tp-quiet" aria-live="polite">{zh ? "正在载入" : "Loading"}</p>}
       {page === "busy" && <p className="tp-quiet" role="alert">{zh ? "请求过于频繁，请一分钟后再试。" : "Too many requests. Try again in a minute."}</p>}
       {(page === "error" || (typeof page === "object" && page.status === "gone")) && (
         <section className="tp-gone">

@@ -5,21 +5,19 @@ import type { View } from "./ctx";
    served from a path (/app/); the single-file preview keeps one address. The host serves /app/index.html for every
    /app/ address.
 
-   Four places plus Settings: Home (/), Licenses (/licenses, with its views), Odelia (/odelia, with its tabs) and, for a
-   business with two or more stores, Stores (/stores). The pages that used to be their own addresses still open, at
-   their new homes (LEGACY), and so does every /permits address from before Permits was named Licenses. */
+   Four places plus Settings: Home (/), Permits (/permits, with its tabs), Stores (/stores) and Odelia (/odelia, with
+   its tabs). The pages that used to be their own addresses still open, at their new homes (LEGACY). */
 
 const BASE = import.meta.env.BASE_URL;
 export const routed = BASE.startsWith("/");
 
 const SLUG: Record<View, string> = {
-  overview: "", permits: "licenses", stores: "stores", odelia: "odelia", find: "licenses/find", settings: "settings", queue: "queue", hq: "headquarters", partner: "partner",
+  overview: "", permits: "permits", stores: "stores", odelia: "odelia", find: "permits/find", settings: "settings", queue: "queue", hq: "headquarters", partner: "partner",
 };
 
 /** The tabs a page has, by the word in its address. The first is the page's own address. */
 export const TABS: Partial<Record<View, readonly string[]>> = {
-  // the list (Needs you, Odelia is on it, Done) is Licenses' own address; "filed" was a tab of its own and opens the list
-  permits: ["todo", "review", "documents", "deadlines"],
+  permits: ["todo", "filed", "review", "documents", "deadlines"],
   odelia: ["chat", "work", "playbooks", "updates"],
 };
 
@@ -42,12 +40,7 @@ export function hrefOf(v: View, sub?: string): string {
 export function readRoute(): { view: View; sub?: string; legacy?: boolean } {
   if (!routed || !location.pathname.startsWith(BASE)) return { view: "overview" };
   const [first = "", second] = location.pathname.slice(BASE.length).split("/").filter(Boolean).map(decodeURIComponent);
-  // /permits was Licenses' address before the rename: every /permits address opens its /licenses twin
-  if (first === "permits") {
-    if (second === "find") return { view: "find", legacy: true };
-    return { view: "permits", ...(second && TABS.permits!.includes(second) ? { sub: second } : {}), legacy: true };
-  }
-  if (first === "licenses" && second === "find") return { view: "find" };
+  if (first === "permits" && second === "find") return { view: "find" };
   const view = (Object.keys(SLUG) as View[]).find(k => SLUG[k] === first);
   if (view) {
     const tabs = TABS[view];
