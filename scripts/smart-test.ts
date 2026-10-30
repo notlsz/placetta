@@ -73,6 +73,10 @@ const f = (label: string, value: string) => ({ id: label, label: same(label), va
   const p12 = preflight(ws({ apps: [app("a12", { fields: [f("Line K: Responsible persons (name, title, SSN or ITIN, address)", "Mei Chen, managing member, 2150 Lemoine Ave"), f("Business phone and email", "owner@probe-test.example")] })] }), fileAp("a12"), TODAY);
   ok(p12.errors.length === 2, "a longer line with no SSN by hand, and a phone line with no phone, are still errors", p12.errors.map(e => e.note.en));
 
+  // Florida's DR-1 "secure email: Yes/No" takes Yes or No, not an address
+  const p13 = preflight(ws({ apps: [app("a13", { fields: [f("Secure email: Yes/No", "Yes"), f("Receive notices by email", "No"), f("Business email", "Yes")] })] }), fileAp("a13"), TODAY);
+  ok(p13.errors.length === 1 && p13.errors[0].label.en === "Business email", "a yes/no question about email takes Yes or No; an email line still needs an address", p13.errors.map(e => e.label.en));
+
   // New York's DTF-17-ATT is for more than one store: a one-store business isn't asked for it
   {
     const att = [B("Schedule of locations (DTF-17-ATT) for more than one store", "多家门店需附门店清单（DTF-17-ATT）"), B("Copy of the lease", "租约副本")];

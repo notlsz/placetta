@@ -92,7 +92,8 @@ const RULES: Rule[] = [
       return p ? { level: p.level, label: B(c.label, c.label), note: p.note } : null;
     } },
   // a section named "Email Communication" over a name or a phone line isn't an email line (Florida's DR-1)
-  { kind: "email", test: /e-?mail/i, skip: /person who|telephone|\bphone\b|\bname\b/i, check: (v, c) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.trim()) ? null : err(B(c.label, c.label), B("That isn't an email address.", "这不是有效的电子邮箱地址。")) },
+  // ...and a yes/no question about email ("secure email: Yes/No", Florida's DR-1) takes Yes or No (probe, 2026-10-30)
+  { kind: "email", test: /e-?mail/i, skip: /person who|telephone|\bphone\b|\bname\b|yes\s*\/\s*no|\?/i, check: (v, c) => /^(yes|no|y|n|是|否)$/i.test(v.trim()) && /\b(secure|consent|agree|opt|receive|by e-?mail)\b/i.test(c.label) ? null : /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.trim()) ? null : err(B(c.label, c.label), B("That isn't an email address.", "这不是有效的电子邮箱地址。")) },
   { kind: "phone", test: /phone|telephone|mobile|\bcell\b|\bfax\b/i, check: (v, c) => {
       const d = digits(v);
       if (d.length === 10 || (d.length === 11 && d.startsWith("1"))) return null;
