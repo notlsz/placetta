@@ -442,7 +442,7 @@
 @media (max-width: 640px) { .win { border-radius: 20px; padding: 18px; gap: 14px; } }
 .win-stamp { flex: none; display: flex; flex-direction: column; align-items: center; gap: 1px; width: 56px; color: var(--blue-ink); animation: win-stamp .5s cubic-bezier(.3, 1.4, .5, 1) both; }
 .win-stamp svg { width: 44px; height: 44px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
-.win-stamp small { font-size: 10px; line-height: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.win-stamp small { font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .win-stamp small + small { font-weight: 500; color: var(--ink3); }
 @media (prefers-reduced-motion: reduce) { .win-stamp { animation: none; } }
 .win-tx { display: flex; flex-direction: column; gap: 4px; padding-top: 4px; }
@@ -511,7 +511,7 @@
 /* the opening-date words in the quiet grey: blue read as a link */
 .c-crit-t { color: var(--ink3); }
 /* phone: the arrow stays beside its words on the full-width button */
-@media (max-width: 640px) { .dtn-go { justify-content: center; gap: 10px; } }
+@media (max-width: 640px) { .dtn-act .pill.dtn-go { justify-content: center; gap: 10px; padding: 0 22px; } }
 /* "Opening another store?" on the same text column as the stores above it */
 .st-next { gap: 14px; }
 /* send with nothing to send: a plain arrow, no grey disc behind it (the house rule) */
@@ -519,3 +519,5 @@
 /* phone tabs: the count on the icon's corner, so every label stays centred under its icon */
 .tabbar a { position: relative; }
 .tabbar a em { position: absolute; top: 2px; left: calc(50% + 8px); margin: 0; }
+/* Panel 6: on a phone, the promise under Odelia's box keeps clear of the tab bar */
+@media (max-width: 640px) { .pn-never { margin: 10px 0 12px; } }
