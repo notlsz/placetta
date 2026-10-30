@@ -71,7 +71,7 @@
     "test:suggest": "esbuild scripts/suggest-test.ts --bundle --platform=node --format=esm --outfile=.suggest-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .suggest-test.mjs; s=$?; rm -f .suggest-test.mjs; exit $s"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.117.2",
+    "@supabase/supabase-js": "^2.118.0",
     "border-beam": "^1.4.1",
     "bot-avatars": "^0.2.2",
     "fflate": "^0.8.3",
