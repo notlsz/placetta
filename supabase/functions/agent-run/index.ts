@@ -45,7 +45,7 @@ import { mailBody, replySubject, sendMail as sendOdeliaMail } from "../_shared/m
 import { sendEmail, systemMailReady } from "../_shared/email.ts";
 import { suppressedIn } from "../_shared/suppression.ts";
 // @ts-types="./agent.d.ts"
-import { fixLessons, agencyKey, chipsOf, CLASSIFIER_SYSTEM, classifierPrompt, parseClassifier, type ToolLog, DISTILL_SYSTEM, distillPrompt, filingEvidence, type FilingRow, finishWork, keepRecall, type Lesson, lessonKeys, lessonsBrief, type MemoryBook, normalizeState, parseDistill, rank, type Recall, recallFrom, runEvidence, runRounds, startState, stampFilings, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
+import { fixLessons, lessonVerdicts, agencyKey, chipsOf, CLASSIFIER_SYSTEM, classifierPrompt, parseClassifier, type ToolLog, DISTILL_SYSTEM, distillPrompt, filingEvidence, type FilingRow, finishWork, keepRecall, type Lesson, lessonKeys, lessonsBrief, type MemoryBook, normalizeState, parseDistill, rank, type Recall, recallFrom, runEvidence, runRounds, startState, stampFilings, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
 import { mayEmail, reachOf, wantsTexts } from "../_shared/reach.ts";
 import { updateChannel } from "../_shared/deliver.ts";
 import { APPROVE_SAY, approvalAsk } from "../_shared/text_approval.ts";
@@ -502,6 +502,12 @@ async function synthetic(ws: string): Promise<boolean> {
 /** The fixes this run found (src/selfLearn.ts), as live lessons for their forms and tools. */
 async function learnFixes(run: Run, st: RunState) {
   try {
+    // reinforcement first: the fixes this run started from, judged by whether their slip came back
+    const inPlay = ((st as Record<string, unknown>).fixInPlay ?? []) as { id: string; key: string; text: string }[];
+    const v = lessonVerdicts(st.self, inPlay);
+    if (v.wins.length) await admin.rpc("lesson_outcome", { p_ids: v.wins, p_ok: true });
+    if (v.losses.length) await admin.rpc("lesson_outcome", { p_ids: v.losses, p_ok: false });
+    if (v.wins.length || v.losses.length) console.log("fix outcomes", run.id, JSON.stringify({ wins: v.wins.length, losses: v.losses.length }));
     const fixes = fixLessons(((st.self as { fixes?: unknown[] } | undefined)?.fixes ?? []) as Parameters<typeof fixLessons>[0]);
     for (const n of fixes) await admin.rpc("lesson_add", { p_ws: run.workspace_id, p_kind: "fix", p_key: n.key, p_en: n.text.en, p_zh: n.text.zh, p_url: null, p_official: true });
     if (fixes.length) console.log("learned fixes", run.id, fixes.length);
@@ -842,6 +848,8 @@ export async function work(runId: string, token: string | null, ticket: string |
       // the network's best 14, and up to 10 of her own fixes, which rank low on votes but are what keeps a slip from repeating
       const ls = [...all.filter((l) => l.kind !== "fix").slice(0, 14), ...all.filter((l) => l.kind === "fix").slice(0, 10)];
       state.lessons = ls.map((l) => l.id);
+      // the fixes in play, kept so the end of the run can tell whether each one worked (reinforcement)
+      (state as Record<string, unknown>).fixInPlay = ls.filter((l) => l.kind === "fix").map((l) => ({ id: l.id, key: l.key, text: l.text.en }));
       state.network = lessonsBrief(ls, run.lang);
       if (ls.length) { steps.push({ state: "searching", label: { en: `Starting from ${ls.length} lesson${ls.length === 1 ? "" : "s"} other businesses taught me`, zh: `参考其他商家积累的 ${ls.length} 条经验` } }); flush(); }
     }

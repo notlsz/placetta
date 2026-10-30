@@ -125,6 +125,8 @@ export declare function lessonKeys(w: Workspace): string[];
 export declare function lessonsBrief(ls: Lesson[], lang: "en" | "zh"): string;
 /** Her own slips a later call fixed, as live lessons for their forms and tools (src/selfLearn.ts). */
 export declare function fixLessons(fixes: unknown[]): NewLesson[];
+/** Reinforcement: the fix lessons a run started from, won (their slip didn't recur) or lost (it did). */
+export declare function lessonVerdicts(s: unknown, inPlay: { id: string; key: string; text: string }[]): { wins: string[]; losses: string[] };
 export declare function runEvidence(w: Workspace, o: { started: string; reply: string; sources: { url: string; title?: string }[]; asked?: string }): Evidence;
 export declare function worthLearning(ev: Evidence): boolean;
 export declare function filingEvidence(f: { title?: Bi | null; agency?: Bi | null; status: string; note?: string | null; days?: number | null; form?: string | null }): unknown;

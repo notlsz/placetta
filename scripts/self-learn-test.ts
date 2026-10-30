@@ -2,7 +2,7 @@
    Placetta's words, carrying no business's data, and every later run starts from it. */
 import { makeTools, type Made, type X } from "../src/live";
 import { SAMPLE, type Workspace } from "../src/model";
-import { noteCall, fixLessons, shape, type SelfState } from "../src/selfLearn";
+import { noteCall, fixLessons, lessonVerdicts, shape, type SelfState } from "../src/selfLearn";
 import { lessonsBrief, lessonKeys, lessonUsable, type Lesson } from "../src/learning";
 
 let fails = 0;
@@ -53,5 +53,21 @@ ok(asLesson.every(lessonUsable), "a fix is usable without a second business", as
 const brief = lessonsBrief(asLesson, "en");
 ok(/Fixes from your own earlier runs/.test(brief) && /Public/.test(brief), "the brief puts the fixes in front of the next run", brief.slice(0, 400));
 ok(!lessonUsable({ ...asLesson[0], contradicts: 2 }), "a fix businesses contradict stops being used");
+
+// 5. the same fix as a pattern for every form: a tool-level lesson without the form's name
+ok(ls.some(l => l.key === "tool:fill_fields" && /^Any form: a line refused as "not one of the line's printed choices"/.test(l.text.en) && !/Victualler|Patio/i.test(l.text.en)), "a form's fix also becomes a pattern for every form", ls.map(l => l.text.en));
+
+// 6. reinforcement: the next run starts from these lessons; a run that doesn't repeat the slip wins them, one that does loses them
+const inPlay = ls.map((l, k) => ({ id: "L" + k, key: l.key, text: l.text.en }));
+const clean: SelfState = { slips: [], fixes: [], seen: [], forms: ["bos-cv"], tools: ["fill_fields"] };
+const v1 = lessonVerdicts(clean, inPlay);
+ok(v1.wins.includes(inPlay.find(l => l.key === "form:bos-cv")!.id) && !v1.losses.length, "a run on the form without the slip wins the form's fix", v1);
+const again: SelfState = { slips: [], fixes: [], forms: ["bos-cv"], tools: ["fill_fields"], seen: [{ tool: "fill_fields", form: "bos-cv", line: "patio_property", label: "Patio: on private property, public property or both", reason: "not one of the line's printed choices" }] };
+const v2 = lessonVerdicts(again, inPlay);
+ok(v2.losses.includes(inPlay.find(l => l.key === "form:bos-cv")!.id), "the same slip again loses the fix that should have stopped it", v2);
+ok(v2.losses.includes(inPlay.find(l => /^Any form/.test(l.text))!.id), "and the pattern lesson too", v2);
+const elsewhere: SelfState = { slips: [], fixes: [], seen: [], forms: ["ny-dtf-17"], tools: ["add_store"] };
+const v3 = lessonVerdicts(elsewhere, inPlay);
+ok(!v3.wins.length && !v3.losses.length, "a run that never touched the form or tool leaves its lessons alone", v3);
 
 if (fails) { console.error(`\n${fails} failed`); process.exit(1); } else console.log("\nall passed");

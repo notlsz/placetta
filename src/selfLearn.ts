@@ -25,7 +25,7 @@ import type { NewLesson } from "./learning";
 
 export type Slip = { tool: string; app?: string; form?: string; line?: string; label?: string; reason: string; bad?: string; keys?: string[] };
 export type Fix = Slip & { good?: string; changed?: string[] };
-export type SelfState = { slips: Slip[]; fixes: Fix[] };
+export type SelfState = { slips: Slip[]; fixes: Fix[]; seen?: Slip[]; forms?: string[]; tools?: string[] };
 
 /** A value's shape: digits as 9, letters as x or X, the rest kept, lines joined by " / ". */
 export const shape = (v: string) => String(v ?? "").replace(/\d/g, "9").replace(/[A-Z]/g, "X").replace(/[a-z]/g, "x").replace(/[^\x20-\x7E\n]/g, "x").replace(/\s*\n\s*/g, " / ").replace(/\s+/g, " ").trim().slice(0, 60);
@@ -52,7 +52,13 @@ export function noteCall(s: SelfState, call: { name: string; input: Record<strin
   const form = app?.official;
   const out = error ? null : parse(content);
   const refusedNow = new Set<string>();
-  const slip = (x: Slip) => { if (s.slips.length < 60 && !s.slips.some(y => y.tool === x.tool && y.app === x.app && y.line === x.line && y.label === x.label && y.reason === x.reason)) s.slips.push(x); };
+  const slip = (x: Slip) => {
+    // every slip, fixed or not, is kept for the reinforcement at the end (lessonVerdicts)
+    if ((s.seen ??= []).length < 120) s.seen.push(x);
+    if (s.slips.length < 60 && !s.slips.some(y => y.tool === x.tool && y.app === x.app && y.line === x.line && y.label === x.label && y.reason === x.reason)) s.slips.push(x);
+  };
+  if (form && !(s.forms ??= []).includes(form)) s.forms.push(form);
+  if (!(s.tools ??= []).includes(name)) s.tools.push(name);
 
   if (error) {
     // the error's own words with anything quoted taken out: a quoted id or value can carry a business's name
@@ -123,12 +129,45 @@ export function fixLessons(fixes: Fix[]): NewLesson[] {
     }
     if (!text || text.en.length < 20) continue;
     const key = f.label && off ? `form:${off.id}` : `tool:${f.tool}`;
-    if (out.some(x => x.key === key && x.text.en === text!.en)) continue;
-    out.push({ kind: "fix" as NewLesson["kind"], key, text: { en: text.en.slice(0, 410), zh: text.zh.slice(0, 410) }, official: true });
-    if (out.length >= 6) break;
+    const push = (k: string, t: Bi) => { if (!out.some(x => x.key === k && x.text.en === t.en)) out.push({ kind: "fix" as NewLesson["kind"], key: k, text: { en: t.en.slice(0, 410), zh: t.zh.slice(0, 410) }, official: true }); };
+    push(key, text);
+    // the same fix as a pattern for every form (the "different scenarios"): the reason and what kind of answer it took,
+    // without the form; the same pattern seen on more forms adds confirmations to one lesson instead of new ones
+    if (f.label && off && f.reason) {
+      const choice = !!off.fields.find(x => x.id === f.line)?.options?.includes(f.good ?? "");
+      push("tool:fill_fields", B(`Any form: a line refused as "${f.reason.replace(/\.$/, "")}" was accepted ${choice ? "as one of its own printed choices, word for word (Not applicable when none fits)" : f.good ? `in the shape "${f.good}"` : "once corrected the same turn"}.`,
+        `任何表格：因“${f.reason.replace(/\.$/, "")}”被拒的栏目，${choice ? "改为该栏印刷选项之一（逐字；都不适用则填 Not applicable）" : f.good ? `改为“${f.good}”的格式` : "在同一轮更正"}后被接受。`));
+    }
+    if (out.length >= 8) break;
   }
   return out;
 }
 
 /** The tools whose fixes every run starts from (a form's own fixes come with its key). */
 export const TOOL_KEYS = ["tool:fill_fields", "tool:prepare_application", "tool:request_filing_approval", "tool:update_application", "tool:find_official_forms"];
+
+/** The fix lessons a run started from, judged by what the run did (reinforcement): a lesson whose slip happened again
+ *  in this run loses; one whose form or tool the run used without that slip wins; one the run never touched is left
+ *  alone. Lessons that keep losing retire (the database's rule), and the ones that keep winning rank first. */
+export function lessonVerdicts(s: SelfState | undefined, inPlay: { id: string; key: string; text: string }[]): { wins: string[]; losses: string[] } {
+  const wins: string[] = [], losses: string[] = [];
+  if (!s) return { wins, losses };
+  const seen = s.seen ?? [];
+  for (const l of inPlay) {
+    const label = /line "([^"]+)"/.exec(l.text)?.[1];
+    const reason = /refused as "([^"]+)"|refused [^(]*\(([^)]+)\)/.exec(l.text);
+    const why = (reason?.[1] ?? reason?.[2] ?? "").toLowerCase();
+    if (l.key.startsWith("form:")) {
+      const form = l.key.slice(5);
+      if (!(s.forms ?? []).includes(form)) continue;
+      const again = seen.some(x => x.form === form && (!label || (x.label ?? "").toLowerCase() === label.toLowerCase()) && (!why || x.reason.toLowerCase().includes(why.slice(0, 24))));
+      (again ? losses : wins).push(l.id);
+    } else if (l.key.startsWith("tool:")) {
+      const tool = l.key.slice(5);
+      if (!(s.tools ?? []).includes(tool) || !why) continue;   // a rule with no refusal to watch for is neither won nor lost
+      const again = !!why && seen.some(x => (x.tool === tool || tool === "fill_fields") && x.reason.toLowerCase().includes(why.slice(0, 24)));
+      (again ? losses : wins).push(l.id);
+    }
+  }
+  return { wins, losses };
+}

@@ -3,7 +3,7 @@ export { channelHint, runRounds, startState, type Channel, type ChildResult, typ
 export { normalizeState, stripState, type Reply, type Step } from "../core";
 export type { Role, Services } from "../live";
 export { agencyKey, DISTILL_SYSTEM, distillPrompt, filingEvidence, lessonKeys, rank, lessonsBrief, parseDistill, runEvidence, worthLearning, type Lesson } from "../learning";
-export { fixLessons } from "../selfLearn";
+export { fixLessons, lessonVerdicts } from "../selfLearn";
 // Memory that acts (src/recall.ts): the details a person mentioned once, read after each run and kept in their memory
 export { chipsOf, keepRecall, recallFrom } from "../recall";
 // Agent memory (src/odeliaMemory/): the workspace's memory for a run, and what a run learned, saved when it ends

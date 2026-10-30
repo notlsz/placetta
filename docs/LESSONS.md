@@ -303,3 +303,7 @@ Fixes retire when businesses contradict them or they keep losing. The twelve fix
 lesson (seeded, or learned on its own) so the agent itself knows the pattern.
 - A migration that redefines a function starts from the newest definition of it (grep every migration), never from the
   first: the fix-lessons migration briefly undid the security rule that one business can't make a lesson live.
+- Learning has to be reinforced, not just recorded: each fix lesson a run started from is judged at the end (its slip
+  didn't recur: a win; it did: a loss), so the ones that work rank first and the ones that don't retire. And every
+  form's fix is also kept as a pattern for any form ("a line refused as X was accepted as Y"), so a slip on a new form
+  that works like an old one is caught the first time.
