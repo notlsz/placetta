@@ -15,6 +15,7 @@ import { formById } from "./registry";
    Any of these keeps the application from being ready to file (src/forms/versions.ts). Runs the same in the app, on
    the server and in the tests. */
 
+const NONE_ANSWER = /^(none|n\/?a|not applicable|无|不适用)\.?$/i;
 export type ReadKind = "missing" | "wrong" | "overflow" | "characters" | "secret";
 export type ReadIssue = { id: string; kind: ReadKind; want: string; got?: string };
 export type ReadBack = { ok: boolean; checked: number; issues: ReadIssue[] };
@@ -133,7 +134,9 @@ export async function readBack(formId: string, f: Filled): Promise<ReadBack> {
     const value = v.trim();
     if (SSN.test(value) && (DASHED_SSN.test(value) || /ssn|itin|7b/i.test(id))) { add({ id, kind: "secret", want: "" }); continue; }
     if (UNPRINTABLE.test(value)) add({ id, kind: "characters", want: value });
-    if (!ours.some(w => w.id === id) && !(blank[id] && new RegExp(blank[id], "i").test(value))) add({ id, kind: "missing", want: value });
+    // "None" or "N/A" means the line stays empty: a blank box is the right answer on any form (production probe,
+    // Washington's BLS: "None" on governing person 2's percent owned was refused as not reaching the form)
+    if (!ours.some(w => w.id === id) && !(blank[id] && new RegExp(blank[id], "i").test(value)) && !NONE_ANSWER.test(value)) add({ id, kind: "missing", want: value });
     if (room[id] && value.length > room[id]) add({ id, kind: "overflow", want: value, got: value.slice(0, room[id]) });
   }
   for (const fl of form.getFields()) {

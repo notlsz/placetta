@@ -36,7 +36,7 @@ import { cadence, ensureProof, MAIN_BOT, MAX_CHILDREN, MAX_RUN_CHILDREN, met, ne
 import { companyFacts, factLines, placeFacts, type PlaceRecord } from "./connectorFacts";
 import { replyMoment, scrubStep, traced } from "./replay";
 import { emailsIn, injected, SECRET_WHY, secretNumber } from "./guard";
-import { basisLine, hingeSay, openingLine, openingPath, preflight } from "./smart";
+import { attachFor, basisLine, hingeSay, openingLine, openingPath, preflight } from "./smart";
 import { autoFixes, withFixes } from "./risk";
 import { cityOf as recordsCity, cityRecords } from "./opendata";
 import { replyLanguage } from "./langs";
@@ -403,11 +403,15 @@ export function coreFields(w: Workspace, store?: Store, abroad = false): Field[]
     row("core-email", "Contact email", "联系邮箱", fact(/e-?mail/i)),
     row("core-activity", "What the business does there", "经营内容", fact(/what you sell|activity|business type|products/i)),
     row("core-start", "Start date at this location", "该地点开始经营日期", store?.plannedOpen ?? (one ? fact(/target opening|opening date|start date/i) : undefined), store?.plannedOpen ? B("From Stores", "来自门店") : undefined),
+    // an LLC's state tax registrations ask single or multiple members (Georgia Tax Center's "Type of LLC"); the portal
+    // worker types only approved answers, so it's asked here, once, and kept with the business (rehearsal, 2026-10-29)
+    ...(/\bllc\b|limited liability company/i.test(fact(/^entity/i)?.value.en ?? "") ? [row("core-llc-members", "LLC members (single or multiple)", "LLC 成员（单一或多名）",
+      fact(/llc members|number of members|single.member|multi.?member/i) ?? (w.facts.some(f => /\b100\s?%|sole (owner|member)|only member|single.member/i.test(f.value.en)) ? "Single member" : undefined))] : []),
   ];
 }
 /** Core lines that are the same for the whole business: filled once, they fill every open application and Context. */
 const SHARED: Record<string, [Bi, FactGroup]> = {
-  "core-legal-name": [B("Legal name", "法定名称"), "business"], "core-entity": [B("Entity", "实体类型"), "business"], "core-ein": [B("EIN", "EIN"), "business"],
+  "core-legal-name": [B("Legal name", "法定名称"), "business"], "core-llc-members": [B("LLC members", "LLC 成员"), "business"], "core-entity": [B("Entity", "实体类型"), "business"], "core-ein": [B("EIN", "EIN"), "business"],
   "core-owner": [B("Owner or responsible person", "负责人"), "business"], "core-phone": [B("Business phone", "企业电话"), "business"], "core-email": [B("Contact email", "联系邮箱"), "business"],
 };
 /** Core fields with what the agent gave matched by label, then anything else it gave. */
@@ -723,7 +727,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         const fields = (listed ? officialFields(off!, given, get().facts, abroad) : withCore(coreFields(get(), target, abroad), given)).map(f => (isBlank(f.value) && known.has(f.id) ? { ...f, value: known.get(f.id)!.value, from: known.get(f.id)!.from } : f));
         const blocked = off ? addressProblems(off.id, Object.fromEntries(fields.filter(f => !isBlank(f.value)).map(f => [f.id, f.value]))) : [];
         for (const p of blocked) { const k = fields.findIndex(f => f.id === p.field); if (k >= 0) fields[k] = { ...fields[k], value: "", from: undefined, quote: undefined }; }
-        let checklist: CheckItem[] = [...(off?.attach ?? []).map(l => ({ item: l[lang], have: false })), ...arr(i.checklist)].map((c, k) => { const o = c as Record<string, unknown>; return { id: "c" + k, label: same(str(o.item, 120)), state: (o.have ? "done" : "missing") as "done" | "missing" }; }).filter((c, k, all) => c.label.en && all.findIndex(x => x.label.en.toLowerCase() === c.label.en.toLowerCase()) === k);
+        let checklist: CheckItem[] = [...attachFor(off?.attach, get()).map(l => ({ item: l[lang], have: false })), ...arr(i.checklist)].map((c, k) => { const o = c as Record<string, unknown>; return { id: "c" + k, label: same(str(o.item, 120)), state: (o.have ? "done" : "missing") as "done" | "missing" }; }).filter((c, k, all) => c.label.en && all.findIndex(x => x.label.en.toLowerCase() === c.label.en.toLowerCase()) === k);
         if (twin) {
           // the instant plan's row, refined in place: what it waits on and what's already in stay; answers typed into it stay
           const keep = twin.checklist.filter(c => c.dep || c.state === "done");

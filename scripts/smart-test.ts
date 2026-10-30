@@ -4,7 +4,7 @@ import { normalizeState } from "../src/core";
 import { FORMS } from "../src/forms/registry";
 import { LINES } from "../src/forms/lines";
 import { B, same, type Application, type Approval, type Store, type Workspace } from "../src/model";
-import { basisLine, cityOf, openingLine, openingPath, parseDate, preflight, suggestions } from "../src/smart";
+import { attachFor, basisLine, cityOf, openingLine, openingPath, parseDate, preflight, suggestions } from "../src/smart";
 
 let fails = 0;
 const ok = (cond: unknown, m: string, extra?: unknown) => { if (cond) console.log("ok  ", m); else { console.error("FAIL", m, extra ?? ""); fails++; } };
@@ -59,6 +59,13 @@ const f = (label: string, value: string) => ({ id: label, label: same(label), va
   ok(p9.errors.length === 0, "a name or a phone under an Email section, and No to 'ever received an EIN', pass", p9.errors.map(e => `${e.label.en}: ${e.note.en}`));
   const p10 = preflight(ws({ apps: [app("a10", { fields: [f("Email Communication: That person's email address", "Mei Chen")] })] }), fileAp("a10"), TODAY);
   ok(p10.errors.length === 1, "a name on the email line itself is still an error", p10.errors.length);
+
+  // New York's DTF-17-ATT is for more than one store: a one-store business isn't asked for it
+  {
+    const att = [B("Schedule of locations (DTF-17-ATT) for more than one store", "多家门店需附门店清单（DTF-17-ATT）"), B("Copy of the lease", "租约副本")];
+    ok(attachFor(att, { stores: [store({})], locations: [] }).length === 1 && attachFor(att, { stores: [store({}), store({ id: "s2" })], locations: [] }).length === 2,
+      "a multi-store attachment only for a business with more than one store");
+  }
 
   const soft = app("a3", { fields: [
     f("EIN", "Applied for"), f("Legal business name", "Golden Ox Restaurant Inc"), f("Premises address", "12 Other Ave, Queens, NY 11101"), f("Start date", plus(-10)), f("State", "Nwe York"),

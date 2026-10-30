@@ -57,6 +57,14 @@ export function legalName(w: Workspace): string | undefined {
   return f?.value.en || w.meta?.entity || undefined;
 }
 
+/** The attachments a form lists that apply to this business: one "for more than one store" (New York's DTF-17-ATT
+ *  schedule of locations) is dropped for a business with one store. Production probe, 2026-10-30. */
+export const MULTI_STORE_ONLY = /\b(more than one|multiple|each additional|several) (store|location|place of business|business location)s?\b|多家门店/i;
+export function attachFor(attach: Bi[] | undefined, w: Pick<Workspace, "stores" | "locations">): Bi[] {
+  const many = Math.max((w.stores ?? []).length, (w.locations ?? []).length) > 1;
+  return (attach ?? []).filter(a => many || !MULTI_STORE_ONLY.test(a.en));
+}
+
 type Rule = { kind: string; test: RegExp; skip?: RegExp; check: (v: string, ctx: { w: Workspace; app?: Application; today: string; label: string }) => Check | null | undefined };
 const err = (label: Bi, note: Bi): Check => ({ level: "error", label, note });
 const warn = (label: Bi, note: Bi): Check => ({ level: "warn", label, note });
@@ -203,7 +211,7 @@ export function preflight(w: Workspace, a: Approval, today: string): Preflight {
       checked++;
       const words = (t: string) => t.toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(x => x.length > 3);
       const listed = app.checklist.map(c => new Set(words(c.label.en)));
-      const unlisted = (off.attach ?? []).filter(at => { const k = words(at.en); return k.length && !listed.some(l => k.filter(x => l.has(x)).length / k.length >= 0.5); });
+      const unlisted = attachFor(off.attach, w).filter(at => { const k = words(at.en); return k.length && !listed.some(l => k.filter(x => l.has(x)).length / k.length >= 0.5); });
       if (unlisted.length)
         add(warn(B("Attachments", "附件"), B(`The agency also lists ${unlisted.slice(0, 2).map(x => x.en).join("; ")}${unlisted.length > 2 ? " and more" : ""} as attachments.`, `机构还要求附上：${unlisted.slice(0, 2).map(x => x.zh).join("；")}${unlisted.length > 2 ? " 等" : ""}。`)), undefined, "attachments");
     }
