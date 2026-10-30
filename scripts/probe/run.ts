@@ -87,7 +87,10 @@ async function person(tag: string): Promise<Person> {
     values ('00000000-0000-0000-0000-000000000000', ${lit(id)}, 'authenticated', 'authenticated', ${lit(email)}, extensions.crypt(${lit(password)}, extensions.gen_salt('bf')), now(), now(), now(),
       '{"provider":"email","providers":["email"]}', ${jsonb({ probe: RUN })}, '', '', '', '');
     insert into auth.identities (id, user_id, provider_id, provider, identity_data, last_sign_in_at, created_at, updated_at)
-    values (gen_random_uuid(), ${lit(id)}, ${lit(id)}, 'email', ${jsonb({ sub: id, email, email_verified: true })}, now(), now(), now());`);
+    values (gen_random_uuid(), ${lit(id)}, ${lit(id)}, 'email', ${jsonb({ sub: id, email, email_verified: true })}, now(), now(), now());
+    -- every workspace check needs a confirmed age (migration 20261105090600); a probe account attests, like a person
+    -- answering the app's question (without it the agent answers age_required and the filings policy refuses the row)
+    insert into public.age_confirmations (user_id, method) values (${lit(id)}, 'attest') on conflict (user_id) do nothing;`);
   made.users.add(id);
   const db = createClient(URL_, ANON, { auth: { persistSession: false, autoRefreshToken: false } });
   const { data: s, error: se } = await db.auth.signInWithPassword({ email, password });
