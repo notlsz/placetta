@@ -653,11 +653,13 @@ export function Overview() {
 /** The top of the simple Home, said the way Muse and Instinct talk: a greeting, how many things need you (or, in the
  *  first run, how many licenses there are and who does them), and the goal with its progress in one quiet line. */
 function HomeHello({ need, firstRun, landing, n, approved, agency }: { need: number; firstRun: boolean; landing: string | null; n: number; approved: number; agency: number }) {
-  const { b, lang } = useApp();
+  const { b, lang, ws } = useApp();
   const f = useFirstRun();
   const zh = lang === "zh";
   const hr = new Date().getHours();
-  const hi = zh ? (hr < 12 ? "早上好。" : hr < 18 ? "下午好。" : "晚上好。") : hr < 12 ? "Good morning." : hr < 18 ? "Good afternoon." : "Good evening.";
+  // the greeting names the business (Chesky): "Good morning, Moonleaf Tea."
+  const biz = b(ws.business);
+  const hi = zh ? `${hr < 12 ? "早上好" : hr < 18 ? "下午好" : "晚上好"}${biz ? `，${biz}` : ""}。` : `${hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening"}${biz ? `, ${biz}` : ""}.`;
   const head = firstRun ? b(headLine(f)) : need ? (zh ? `有 ${need} 件事需要您。` : `${need} thing${need === 1 ? " needs" : "s need"} you.`) : zh ? "今天没有需要您处理的事。" : "Nothing needs you today.";
   const split = firstRun ? splitLine(f) : null;
   const sub = [landing ? (zh ? `预计 ${fmtDay(landing, lang, true)} 前后开业` : `Opening around ${fmtDay(landing, lang, true)}`) : "",

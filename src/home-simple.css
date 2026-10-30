@@ -366,11 +366,26 @@
 /* round 12 */
 .page.permits .apps-t .c-name > small:not(.c-team) { text-wrap: pretty; }
 /* Odelia's cloud on her first line, not a line of its own: the first line of her answer starts after it */
+.page.odelia .answer { padding-left: 36px; }
 .page.odelia .answer > .ans-bot { position: absolute; left: -2px; top: -2px; margin: 0; }
-.page.odelia .answer > .ans-bot + p, .page.odelia .answer > .ans-bot + * > :first-child { text-indent: 34px; }
 .settings .set-col > .sg:first-child + .sg { margin-top: 48px; }
 
 /* round 13: the approval reads like the agency's stamp, white with the seal in Placetta blue; Licenses' table shares
    the title's left edge */
 .win { background: var(--card); box-shadow: 0 0 0 1px var(--sky), 0 8px 24px -16px rgba(45, 75, 120, .35); }
-@media (min-width: 860px) { .page.permits .apps-t { margin-left: -14px; margin-right: -14px; } }
+@media (min-width: 860px) {
+  .page.permits .apps-t .tr.row { padding-left: 0; }
+  .page.permits .apps-t .tr.row:hover, .page.permits .apps-t .tr.row:focus-visible { box-shadow: -14px 0 0 var(--hover-mist, rgba(0,0,0,.03)); }
+  .page.permits .apps-t .tg-h, .page.permits .apps-t .tr.th { padding-left: 0; }
+}
+
+/* round 14 */
+/* the conversation sits on the composer, like every chat app (Jobs): the first turn takes the empty space above it */
+.page.odelia.chat .feed > :first-child { margin-top: auto; }
+/* the approval inside a plan starts where its words start, like Home's card */
+.job-approve { justify-content: flex-start; }
+/* Licenses: status, fee and next start on the license name's line */
+@media (min-width: 860px) {
+  .page.permits .apps-t .tr.row { align-items: start; }
+  .page.permits .apps-t .tr.row > .c-st, .page.permits .apps-t .tr.row > .c-fee, .page.permits .apps-t .tr.row > .c-next { margin-top: 0; line-height: 20px; }
+}

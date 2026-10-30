@@ -136,13 +136,14 @@ function StoreRow({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
   const waiting = bot.open.filter(j => j.status === "waiting").length;
   const expiring = s.certs.filter(c => { const d = daysUntil(c.expires); return d >= 0 && d <= 30; }).length;
   const where = s.stage === "opening"
-    ? (s.projectedOpen ? (zh ? `筹备中，预计 ${fmtDay(s.projectedOpen, lang, true)} 开业` : `Opening ${fmtDay(s.projectedOpen, lang, true)}`) + (p && p.verdict === "on_track" ? (zh ? "，进度正常" : ", on track") : "") : (zh ? "筹备中" : "Getting ready to open"))
+    // the date is the row's own (sr-when): the line says how it's going, once (Rams)
+    ? (s.projectedOpen && !CLASSIC_STORES ? (p && p.verdict === "on_track" ? (zh ? "筹备中，进度正常" : "Getting ready, on track") : (zh ? "筹备中" : "Getting ready to open")) : s.projectedOpen ? (zh ? `筹备中，预计 ${fmtDay(s.projectedOpen, lang, true)} 开业` : `Opening ${fmtDay(s.projectedOpen, lang, true)}`) + (p && p.verdict === "on_track" ? (zh ? "，进度正常" : ", on track") : "") : (zh ? "筹备中" : "Getting ready to open"))
     : (zh ? `已开业，${b(r.label)}` : `Open. ${b(r.label)}`);
   const needs = [waiting ? (zh ? `${waiting} 件事需要您` : `${waiting} thing${waiting === 1 ? " needs" : "s need"} you`) : "", expiring ? (zh ? `${expiring} 张证书即将到期` : `${expiring} certificate${expiring === 1 ? "" : "s"} expiring`) : ""].filter(Boolean).join(zh ? "，" : ", ");
   // the one next step, in words: what the first job waiting on the owner needs, else the certificate that expires first
   const ask = bot.open.find(j => j.status === "waiting" && j.waiting)?.waiting;
   const cert = [...s.certs].filter(c => { const d = daysUntil(c.expires); return d >= 0 && d <= 30; }).sort((x, y) => x.expires.localeCompare(y.expires))[0];
-  const step = ask ? b(ask) : cert ? (zh ? `续期${cert.person}的${b(cert.kind)}` : `Renew ${cert.person}'s ${b(cert.kind)}`) : "";
+  const step = ask ? b(ask) : cert ? (zh ? `续期：${cert.person}的${b(cert.kind)}` : `Renew: ${cert.person}'s ${b(cert.kind)}`) : "";
   // the answer at the row's end (Chesky): the next date that matters, a renewal's days left or the opening day
   const when = cert ? (zh ? `${daysUntil(cert.expires)} 天后续期` : `Renews in ${daysUntil(cert.expires)} days`) : s.stage === "opening" && s.projectedOpen ? (zh ? `${fmtDay(s.projectedOpen, lang)} 开业` : `Opens ${fmtDay(s.projectedOpen, lang)}`) : "";
   return (

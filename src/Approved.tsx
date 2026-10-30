@@ -49,7 +49,7 @@ export function ApprovedMoment() {
       <button type="button" className="win-tx" onClick={() => { keep(win.app.id); openApp(win.app.id); }}>
         <h2 id="win-h">{zh ? `您的${name}已办好。` : `Your ${name.charAt(0).toLowerCase() + name.slice(1)} is in.`}</h2>
         <p className="win-sub">
-          {zh ? `${b(win.app.agency)}于 ${fmtDay(win.at.slice(0, 10), lang)} 批准。` : `Approved by ${short(b(win.app.agency))}, ${fmtDay(win.at.slice(0, 10), lang)}. `}{left > 0 ? (zh ? `还剩 ${left} 项。` : `${left === 1 ? "One" : left}\u00a0to go. `) : (zh ? "全部办好了。" : "That's all of them. ")}
+          {zh ? `${b(win.app.agency)}于 ${fmtDay(win.at.slice(0, 10), lang)} 批准。` : `Approved by ${short(b(win.app.agency))}, ${fmtDay(win.at.slice(0, 10), lang)}. `}{left > 0 ? (zh ? `还剩 ${left} 项，我在办下一项。` : `${left === 1 ? "One" : left}\u00a0to go. I'm on the next one. `) : (zh ? "全部办好了。" : "That's all of them. ")}
           {win.number ? (zh ? `编号 ${win.number}。` : `Number ${win.number}. `) : ""}
           {win.renews ? (zh ? `续期已记在 ${fmtDay(win.renews, lang, true)}。` : `Renewal on the calendar for ${fmtDay(win.renews, lang, true)}.`) : ""}
         </p>
