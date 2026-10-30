@@ -90,3 +90,22 @@
 .sg-fold > summary svg { width: 14px; height: 14px; color: var(--ink3); transition: transform .2s; }
 .sg-fold[open] > summary svg { transform: rotate(180deg); }
 .sg-fold:not([open]) { padding-bottom: 0; }
+
+/* Odelia's chat: an approval shows once, as its card (no "Waiting for your approval" header, no "Needs:" box above it),
+   and the card is the one raised thing in the thread, the way Grok Bot puts its approval in front of you */
+.turn:has(> .answer > .appr) > .work-hd.wait { display: none; }
+.answer:has(> .appr) .job .job-need { display: none; }
+.feed .answer > .appr.compact { background: var(--card); box-shadow: 0 0 0 1px var(--line), 0 6px 20px rgba(var(--e), .06); }
+
+/* Permits: the cost and Mine on one line under the tabs */
+.page.permits .pm-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-top: 14px; }
+.page.permits .pm-bar > :first-child { flex: 1 1 420px; min-width: 0; margin: 0; }
+.page.permits .pm-bar .mine-row { margin: 0; flex: none; }
+
+/* the sidebar's collapse control shows when you reach for it (Claude.ai, Linear): one less icon at rest */
+@media (hover: hover) {
+  .side .slimb { opacity: 0; transition: opacity .15s; }
+  .side:hover .slimb, .side .slimb:focus-visible { opacity: 1; }
+}
+.page.permits .pm-bar { margin-bottom: 18px; }
+.page.home.simple-home .hm-needs-more .lnk.more { color: var(--blue-ink); font-weight: 500; }

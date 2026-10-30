@@ -421,7 +421,7 @@ export function Overview() {
   const today = daysFromNow(0);
   const c = (s: Status[]) => ws.apps.filter(a => s.includes(a.status)).length;
   /* Team review: Mine keeps what's assigned to this person (and the jobs about it) in each section below */
-  const mine = team.mine && teamOf(team);
+  const mine = team.mine && teamOf(team) && CLASSIC_HOME;   // the simple Home shows everything; Mine lives on Permits
   const mineN = ws.apps.filter(a => mineApp(team, a.id)).length + (ws.jobs ?? []).filter(j => j.status !== "done" && j.status !== "stopped" && team.isMine({ kind: "job", id: j.id })).length;
   const approved = c(["approved"]), agency = c(["review", "filing"]);
 
@@ -495,7 +495,7 @@ export function Overview() {
   if (!say.length) say.push(zh ? `计划中有 ${n} 项许可` : `${n} permit${n === 1 ? "" : "s"} in your plan`);
   if (landing && !filed && !firstRun) say.push(zh ? `预计 ${fmtDay(landing, lang, true)} 前后开业` : `Opening around ${fmtDay(landing, lang, true)}`);
   const status = say.join(zh ? "，" : ". ");
-  const mineCtl = teamOf(team) ? <MineToggle count={mineN} /> : null;
+  const mineCtl = teamOf(team) && CLASSIC_HOME ? <MineToggle count={mineN} /> : null;
 
   return (
     <div className={"page home" + (CLASSIC_HOME ? "" : " simple-home")}>
@@ -526,7 +526,7 @@ export function Overview() {
           <div className="stack" data-indent>{shown.map(x => <TodoRow key={x.key} x={x} />)}</div>
           <div className="hm-needs-more">
           {all && docsAll.length > 1 && <button type="button" className="lnk more" disabled={busy} onClick={() => ask(b(findItAsk(B(docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.en} (${x.app.name.en})` : "").join("; "), docsAll.slice(0, 8).map(x => x.kind === "doc" ? `${x.label.zh}（${x.app.name.zh}）` : "").join("；")), B("open applications", "进行中的申请"), true)))}><I.spark />{zh ? `让 Odelia 找齐 ${docsAll.length} 份文件` : `Have Odelia find all ${docsAll.length}`}</button>}
-          {rest.length > 3 && <button type="button" className="lnk more" onClick={() => setAll(!all)}>{all ? (zh ? "收起" : "Show fewer") : (zh ? `全部 ${ordered.length} 项` : `All ${ordered.length}`)}</button>}
+          {rest.length > 3 && <button type="button" className="lnk more" onClick={() => setAll(!all)}>{all ? (zh ? "收起" : "Show fewer") : (zh ? `查看全部 ${ordered.length} 项` : `See all ${ordered.length}`)}</button>}
           </div>
         </section>
       )}
@@ -817,10 +817,14 @@ export function Permits({ tab: asked }: { tab: PermitsTab }) {
         <button type="button" className="pill quiet" onClick={() => go("find")}><I.find />{t("nav_find")}</button>
       </PageHead>
       <Tabs view="permits" tabs={tabs} current={tab} />
-      {(tab === "todo" || tab === "filed") && <CostLine page />}
-      {(tab === "todo" || tab === "filed") && teamOf(team) && (
-        <div className="mine-row">
-          <MineToggle count={ws.apps.filter(a => mineApp(team, a.id) && (tab === "todo" ? !FILED.includes(a.status) : FILED.includes(a.status))).length} />
+      {(tab === "todo" || tab === "filed") && (
+        <div className="pm-bar">
+          <CostLine page />
+          {teamOf(team) && (
+            <div className="mine-row">
+              <MineToggle count={ws.apps.filter(a => mineApp(team, a.id) && (tab === "todo" ? !FILED.includes(a.status) : FILED.includes(a.status))).length} />
+            </div>
+          )}
         </div>
       )}
       {tab === "todo" && <PermitTable rows={todo} empty={mine ? (lang === "zh" ? "没有分配给您的待办许可。" : "Nothing to do is assigned to you.") : t("allClear")} />}
