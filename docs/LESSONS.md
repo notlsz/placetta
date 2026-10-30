@@ -269,3 +269,4 @@ answer, even "None", and refused "No" on a box that only ticks for yes.
 - Boxes that take one number per line read a comma list as lines.
 - A box ticked by a companion line ("Other: ____") ticks only when that line has a real answer.
 - "No" on a yes-only box is an answer: it ticks nothing.
+- "No" on a yes-only box must pass the read-back too, not just the fill: change both sides of a check together.

@@ -136,7 +136,10 @@ export async function readBack(formId: string, f: Filled): Promise<ReadBack> {
     if (UNPRINTABLE.test(value)) add({ id, kind: "characters", want: value });
     // "None" or "N/A" means the line stays empty: a blank box is the right answer on any form (production probe,
     // Washington's BLS: "None" on governing person 2's percent owned was refused as not reaching the form)
-    if (!ours.some(w => w.id === id) && !(blank[id] && new RegExp(blank[id], "i").test(value)) && !NONE_ANSWER.test(value)) add({ id, kind: "missing", want: value });
+    // "No" on a line whose only boxes tick for yes ("Prepackaged Food Facility Only") is answered by ticking none (fill.ts)
+    const bx = (MAPS[formId]?.boxes[id] ?? []) as { if?: string }[];
+    const noBox = /^(no|n|否)\.?$/i.test(value) && bx.length > 0 && bx.every(b => !!b.if && !new RegExp(b.if, "i").test(value));
+    if (!ours.some(w => w.id === id) && !(blank[id] && new RegExp(blank[id], "i").test(value)) && !NONE_ANSWER.test(value) && !noBox) add({ id, kind: "missing", want: value });
     if (room[id] && value.length > room[id]) add({ id, kind: "overflow", want: value, got: value.slice(0, room[id]) });
   }
   for (const fl of form.getFields()) {
