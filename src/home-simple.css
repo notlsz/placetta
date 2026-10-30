@@ -158,3 +158,13 @@
    16 for cards, 12 for rows. Odelia's approval card was 18 and the store rows 14. */
 .appr { border-radius: 16px; }
 .store-row { border-radius: 12px; }
+
+/* Licenses on a phone: the title says what the page is; the sentence under it pushed the list a screen down */
+@media (max-width: 640px) {
+  .page.permits .ph-tx p { display: none; }
+  .page.permits .ph { gap: 12px; }
+}
+
+/* One warm color, for what needs the owner. "Sets your opening date" is a fact about the plan, not a task: Placetta
+   blue, so the "Needs you" chips are the only warm thing in the list. */
+.page.permits .c-next em { color: var(--blue-ink); }
