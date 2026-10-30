@@ -677,3 +677,19 @@
 @media (min-width: 641px) { .panel.full > .now-line > svg { margin-left: auto; } }
 /* phone tab bar: Odelia's tab in the same grey as the others until it's open */
 .tabbar a:not([aria-current="page"]) .nav-bot { filter: grayscale(1); opacity: .6; }
+/* Panel 12 round 2 */
+/* "Sets opening date" rides on the agency line, so each title is only the title (Rams) */
+.page.permits .c-name small .c-crit-t { display: inline; margin: 0 0 0 8px; font-size: inherit; font-weight: 500; color: var(--blue-ink); white-space: nowrap; }
+@media (max-width: 640px) { .page.permits .c-name small .c-crit-t { display: inline; margin: 0 0 0 6px; } }
+/* Stores: Odelia's own line under each store, her face and what she's doing for it */
+.store-row.plain .sr-she { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 13px; line-height: 18px; color: var(--ink2); }
+.store-row.plain .sr-she-bot { display: inline-grid; place-items: center; width: 16px; height: 16px; flex: none; }
+/* desktop: "Sets opening date" under the status it qualifies, never breaking the agency's name; a phone keeps it on the agency line */
+.page.permits .c-st .c-crit-st { display: none; }
+@media (min-width: 860px) {
+  .page.permits .c-name small .c-crit-t { display: none; }
+  .page.permits .c-st { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  .page.permits .c-st .c-crit-st { display: block; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--blue-ink); white-space: nowrap; }
+}
+/* phone Stores keeps its one-line summary, like the desktop */
+@media (max-width: 640px) { .page.stores-page > .ph .ph-tx p { display: block; } .store-row.plain .sr-she { align-items: flex-start; } .store-row.plain .sr-she-bot { margin-top: 1px; } }

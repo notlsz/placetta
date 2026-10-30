@@ -883,11 +883,11 @@ function PermitTable({ rows: list, empty }: { rows: Application[]; empty: string
                         cited row to its source): the row opens the application, the link opens the page it rests on */}
                     <div className={"tr row" + (a.critical ? " crit" : "")} role="row" tabIndex={0} aria-label={b(a.name)} onClick={() => openApp(a.id)}
                       onKeyDown={e => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openApp(a.id); } }}>
-                      <span className="c-name"><b>{b(a.name)}{a.critical && <span className="c-crit-t">{lang === "zh" ? "决定开业日" : "Sets opening date"}</span>}</b><small>{b(a.agency)}</small><small className="c-est2">{b(a.est)}</small>{isPreview(a) && <small className="c-prev">{t("prevTag")}</small>}
+                      <span className="c-name"><b>{b(a.name)}</b><small>{b(a.agency)}{a.critical && <span className="c-crit-t">{lang === "zh" ? "决定开业日" : "Sets opening date"}</span>}</small><small className="c-est2">{b(a.est)}</small>{isPreview(a) && <small className="c-prev">{t("prevTag")}</small>}
                         {a.source.url && <a className="c-src" href={a.source.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
                           title={a.source.quote ? `“${a.source.quote}”${a.source.checked ? ` (${t("src_checked")} ${a.source.checked})` : ""}` : t("source")}>{a.source.label}<I.ext /></a>}
                         <TeamLine id={a.id} /></span>
-                      <span className="c-st"><StatusChip s={a.status} /></span>
+                      <span className="c-st"><StatusChip s={a.status} />{a.critical && <small className="c-crit-st">{lang === "zh" ? "决定开业日" : "Sets opening date"}</small>}</span>
                       <span className={"c-fee" + (!feeTotal(a) ? " tbd" : "")}>{!feeTotal(a) && a.fees.some(x => x.tbd) ? (lang === "zh" ? "未公布" : "Not published") : feeText(a, t)}</span>
                       {/* one line a cell: the first sentence, a whole phrase ("Fax: about 4 business days"); all of it on hover and in the sheet */}
                       <span className="c-est" title={b(a.est)}>{firstSentence(b(a.est))}</span>

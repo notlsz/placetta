@@ -144,6 +144,8 @@ function StoreRow({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
   const ask = bot.open.find(j => j.status === "waiting" && j.waiting)?.waiting;
   const cert = [...s.certs].filter(c => { const d = daysUntil(c.expires); return d >= 0 && d <= 30; }).sort((x, y) => x.expires.localeCompare(y.expires))[0];
   const step = ask ? b(ask) : cert ? (zh ? `续期：${cert.person}的${b(cert.kind)}` : `Renew: ${cert.person}'s ${b(cert.kind)}`) : "";
+  // what Odelia is doing for this store right now, in her words (Chesky, panel 12: give the page her next step per store)
+  const doing = bot.open.find(j => j.status === "running") ?? bot.open.find(j => j.status !== "waiting");
   const mine = ws.apps.filter(a => (raw.apps ?? []).includes(a.id));
   const marks = [...mine.filter(a => a.status === "approved").map(() => "done"), ...mine.filter(a => a.status === "review" || a.status === "filing").map(() => "agency"), ...mine.filter(a => !["approved", "review", "filing"].includes(a.status)).map(() => "")];
   // the answer at the row's end (Chesky): the next date that matters, a renewal's days left or the opening day
@@ -156,7 +158,8 @@ function StoreRow({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
       <span className="sr-tx"><b>{b(s.name)}</b><small>{where.replace(/\.\s*$/, "")}{zh ? "。" : "."}</small>
         {/* the store's licenses, one mark each, the same signature as Home (Paul Smith): done, with the agency, to do */}
         {!CLASSIC_STORES && s.stage !== "open" && marks.length > 1 && marks.length <= 24 && <span className="hm-segs sr-segs" role="img" aria-label={zh ? `${marks.filter(m => m === "done").length}/${marks.length} 项执照已办好` : `${marks.filter(m => m === "done").length} of ${marks.length} licenses done`}>{marks.map((m, i) => <i key={i} className={m} />)}</span>}
-        {!CLASSIC_STORES && needs && <em className="sr-step">{step ? `${step.replace(/^(your approval|您的批准)[:：]\s*/i, zh ? "批准：" : "Approve: ").replace(/[.。]\s*$/, "")}${waiting + expiring > 1 ? (zh ? `，另有 ${waiting + expiring - 1} 项` : `, and ${waiting + expiring - 1} more`) : ""}` : needs}</em>}</span>
+        {!CLASSIC_STORES && needs && <em className="sr-step">{step ? `${step.replace(/^(your approval|您的批准)[:：]\s*/i, zh ? "批准：" : "Approve: ").replace(/[.。]\s*$/, "")}${waiting + expiring > 1 ? (zh ? `，另有 ${waiting + expiring - 1} 项` : `, and ${waiting + expiring - 1} more`) : ""}` : needs}</em>}
+        {!CLASSIC_STORES && doing && <span className="sr-she"><span className="sr-she-bot" aria-hidden="true"><AgentBot size={16} interactive={false} /></span>{(() => { const full = b(doing.title), nm = b(s.name); const t = full.startsWith(nm) ? full.slice(nm.length).replace(/^[:：,，]\s*/, "") : full; return zh ? `我在做：${t}` : `I'm on it: ${t}`; })()}</span>}</span>
       {CLASSIC_STORES ? (needs ? <em className="sr-need">{needs}</em> : <span className="sr-ok">{zh ? "没有需要您的" : "Nothing needs you"}</span>) : when ? <span className="sr-when">{when}</span> : null}
       <I.chevR />
     </button>
