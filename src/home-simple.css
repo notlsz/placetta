@@ -327,3 +327,16 @@
   .page.permits .apps-t .tg-h { padding-left: 14px; }
   .page.permits .apps-t .tr.th { padding-left: 14px; }
 }
+
+/* round 10: the seal lands once when the moment first shows (a stamp, not a spinner) */
+.win-seal { animation: win-stamp .5s cubic-bezier(.3, 1.4, .5, 1) both; }
+@keyframes win-stamp { from { transform: scale(1.35) rotate(-8deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .win-seal { animation: none; } }
+/* Stores: the date and the chevron sit on the store name's line */
+.store-row.plain .sr-when, .store-row.plain > svg:last-child { align-self: flex-start; margin-top: 1px; line-height: 20px; }
+.store-row.plain > svg:last-child { margin-top: 3px; }
+/* the phone's Stores: More at the top right, like the desktop */
+@media (max-width: 640px) {
+  .page.stores-page > .ph { flex-direction: row; align-items: flex-start; }
+  .page.stores-page > .ph .ph-tx p { display: none; }
+}

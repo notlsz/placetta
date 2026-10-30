@@ -25,7 +25,9 @@ export function secretNumber(label: string, value: string): boolean {
 /* What a replay of Odelia's work may show (src/replay.ts): never a Social Security number or ITIN, a card or bank
    account number, a password or an access key. Everything a replay writes goes through these two. */
 const CARD_ANY = /\b(?:\d[ -]?){13,19}\b/g;
-const BANK = /\b(routing|account|acct)( number| no\.?| #)?\s*[:#]?\s*\d[\d -]{4,30}\d/gi;
+// a bank's account or routing number, not a city's or a tax agency's: "SF business account number 1234567" and "sales
+// tax account 102-345" are numbers the owner gives Odelia to put on forms (production probe, 2026-10-30)
+const BANK = /(?<!\b(?:business|tax|city|license|licence|permit|seller'?s?|ban|customer|utility|employer|ui|withholding|unemployment)\s)\b(routing|account|acct)( number| no\.?| #)?\s*[:#]?\s*\d[\d -]{4,30}\d/gi;
 const IBAN = /\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){3,7}\b/g;
 const KEYS = /\b(sk-[A-Za-z0-9_-]{8,}|sk_(live|test)_[A-Za-z0-9]{8,}|rk_(live|test)_[A-Za-z0-9]{8,}|whsec_[A-Za-z0-9]{6,}|re_[A-Za-z0-9]{12,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{6,}|Bearer\s+[A-Za-z0-9._-]{12,}|gh[pousr]_[A-Za-z0-9]{20,}|AKIA[A-Z0-9]{16})\b/g;
 const SECRET_WORD = /\b(password|passcode|passwd|pin|secret|api[ _-]?key|token)\b\s*[:=]\s*\S+/gi;
@@ -38,7 +40,8 @@ export function redact(text: string): string {
     .replace(SSN_ANY, (_m, pre: string) => `${pre}•••-••-••••`)
     .replace(BANK, (_m, word: string) => `${word} [hidden]`)
     .replace(IBAN, "[hidden]")
-    .replace(CARD_ANY, (m) => (m.replace(/\D/g, "").length >= 13 ? "[hidden]" : m));
+    // a card number passes the Luhn check; a 13-digit tax certificate number ("23-8012345678-9") usually doesn't
+    .replace(CARD_ANY, (m) => { const d = m.replace(/\D/g, ""); return d.length >= 13 && luhn(d) ? "[hidden]" : m; });
 }
 /** A form line's value, as a replay may show it: masked when the line takes a secret number, or the value is one. */
 export function redactValue(label: string, value: string): string {

@@ -806,7 +806,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           offChoice.push({ line: o.line, label: o.label.en, value: f.value.trim(), choices: o.options! });
           return null;
         });
-        const notChoice = offChoice.length ? { not_a_choice: offChoice, fix_choice: "Fill each of these again with one of its choices, word for word. A line that doesn't apply to this business takes the choice that says so (usually No)." } : {};
+        const notChoice = offChoice.length ? { not_a_choice: offChoice, fix_choice: "Fill each of these again with one of its choices, word for word. A line that doesn't apply to this business takes the choice that says so (usually No); when none of its choices fits the business, fill it \"Not applicable\"." } : {};
         const incoming = chosen.filter((f): f is Field => !!f && !refused.some(x => x.f === f) && !secrets.includes(f));
         if (!incoming.length && (refused.length || secrets.length || offChoice.length)) { mark(); return { filled: 0, ...kept, ...notChoice, ...(refused.length ? { address_not_filled: refused.map(x => addrOut(off!.id, x.id!, x.f.value, x.c!)), do_next: ADDR_NEXT } : {}) }; }
         const added: string[] = [];

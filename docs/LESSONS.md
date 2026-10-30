@@ -242,3 +242,16 @@ and the Settings spacing all went with it. A screenshot caught it before it ship
 
 **The rule.** Remove a block by its own exact text, never by cutting between two markers in a file that grows by
 appending. After any CSS edit, `git diff --stat` the file: a deletion count larger than the change is a red flag.
+
+## 2026-10: probe run 7: an account number the owner typed reached Odelia as "[hidden]"
+
+**What happened.** 39 of 45 cases passed. Two stopped because the owner's "SF business account number 1234567" and a
+13-digit Florida sales tax certificate number were hidden by the bank and card filters before Odelia read them, so she
+asked for numbers she had been given. Three stopped on a pick-one line whose choices didn't fit the business (a patio
+line with no "no patio" box) and the form refused anything but its choices.
+
+**The rules.**
+
+- Hide a bank's account and routing numbers and real card numbers (Luhn), never an agency's account or certificate
+  number: the owner gives those so they go on forms.
+- A pick-one line where no choice fits takes its own negative choice, or "Not applicable", which ticks nothing.

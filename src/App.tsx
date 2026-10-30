@@ -1556,7 +1556,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
               <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}><Logo lang={lang} height={16} /></button>
               <span className="mbar-r">
                 {bell}
-                <a {...navLink("settings")} className="icbtn" aria-label={t("nav_settings")} aria-current={view === "settings" ? "page" : undefined}><I.settings /></a>
+                {/* Settings lives in the menu (Jobs): the phone's top bar keeps the menu, the name and the bell */}
               </span>
             </header>
           )}

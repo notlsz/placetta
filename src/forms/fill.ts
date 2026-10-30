@@ -104,6 +104,13 @@ export function asChoice(formId: string, lineId: string, value: string): string 
   // a listed choice is always an answer, even one that ticks nothing ("Neither")
   const exact = options.find(c => c.toLowerCase() === value.trim().toLowerCase());
   if (exact) return exact === value ? value : exact;
+  // a line whose choices don't include this business ("Non-Food Facility Type: laundry or pet shop" for a restaurant,
+  // a patio line with no "no patio" box): the line's own negative choice when it has one, else "Not applicable", which
+  // ticks nothing and reads back as answered (src/forms/readback.ts). Production probe, 2026-10-30.
+  if (/^(n\/?a|not applicable|none|does not apply|不适用|无)\.?$/i.test(value.trim())) {
+    const neg = options.find(c => /^(no|none|neither|not applicable|n\/a)\b/i.test(c));
+    return neg ?? "Not applicable";
+  }
   const takes = (v: string) => boxes.some(b => !("if" in b) || !b.if || new RegExp(b.if, "i").test(v.trim()));
   if (takes(value)) return value;
   const low = value.trim().toLowerCase();

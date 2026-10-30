@@ -136,7 +136,7 @@ function StoreRow({ s: raw, onOpen }: { s: Store; onOpen: () => void }) {
   const waiting = bot.open.filter(j => j.status === "waiting").length;
   const expiring = s.certs.filter(c => { const d = daysUntil(c.expires); return d >= 0 && d <= 30; }).length;
   const where = s.stage === "opening"
-    ? (s.projectedOpen ? (zh ? `筹备中，预计 ${b(estimateSay(s.projectedOpen, p?.range))} 开业` : `Opening ${b(estimateSay(s.projectedOpen, p?.range))}`) + (p && p.verdict === "on_track" ? (zh ? "，进度正常" : ", on track") : "") : (zh ? "筹备中" : "Getting ready to open"))
+    ? (s.projectedOpen ? (zh ? `筹备中，预计 ${fmtDay(s.projectedOpen, lang, true)} 开业` : `Opening ${fmtDay(s.projectedOpen, lang, true)}`) + (p && p.verdict === "on_track" ? (zh ? "，进度正常" : ", on track") : "") : (zh ? "筹备中" : "Getting ready to open"))
     : (zh ? `已开业，${b(r.label)}` : `Open. ${b(r.label)}`);
   const needs = [waiting ? (zh ? `${waiting} 件事需要您` : `${waiting} thing${waiting === 1 ? " needs" : "s need"} you`) : "", expiring ? (zh ? `${expiring} 张证书即将到期` : `${expiring} certificate${expiring === 1 ? "" : "s"} expiring`) : ""].filter(Boolean).join(zh ? "，" : ", ");
   // the one next step, in words: what the first job waiting on the owner needs, else the certificate that expires first

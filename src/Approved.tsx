@@ -13,6 +13,10 @@ const KEY = "placetta-approved-seen-";
 const seen = (id: string) => { try { return localStorage.getItem(KEY + id) === "1"; } catch { return false; } };
 const keep = (id: string) => { try { localStorage.setItem(KEY + id, "1"); } catch { /* storage blocked */ } };
 
+/** An agency's name as people say it: its initials when the full name is long ("California Department of Tax and Fee
+ *  Administration" is CDTFA), the name itself when it's short ("IRS", "City of San Jose"). */
+export const short = (name: string) => name.length <= 28 ? name : name.split(/\s+/).filter(w => /^[A-Z]/.test(w)).map(w => w[0]).join("");
+
 export type Win = { app: Application; at: string; number?: string; renews?: string };
 
 /** The newest license the agency approved in the last 7 days, from its decision or the document it sent. */
@@ -47,7 +51,7 @@ export function ApprovedMoment() {
       <button type="button" className="win-tx" onClick={() => { keep(win.app.id); openApp(win.app.id); }}>
         <h2 id="win-h">{zh ? `您的${name}已办好。` : `Your ${name.charAt(0).toLowerCase() + name.slice(1)} is in.`}</h2>
         <p className="win-sub">
-          {zh ? `${when}获批。` : `Approved ${when}. `}{left > 0 ? (zh ? `还剩 ${left} 项。` : `${left === 1 ? "One" : left}\u00a0to go. `) : (zh ? "全部办好了。" : "That's all of them. ")}
+          {zh ? `${b(win.app.agency)}${when}批准了。` : `${short(b(win.app.agency))} said yes ${when}. `}{left > 0 ? (zh ? `还剩 ${left} 项。` : `${left === 1 ? "One" : left}\u00a0to go. `) : (zh ? "全部办好了。" : "That's all of them. ")}
           {win.number ? (zh ? `编号 ${win.number}。` : `Number ${win.number}. `) : ""}
           {win.renews ? (zh ? `续期已记在 ${fmtDay(win.renews, lang, true)}。` : `Renewal on the calendar for ${fmtDay(win.renews, lang, true)}.`) : ""}
         </p>
