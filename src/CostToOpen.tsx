@@ -41,7 +41,7 @@ export function CostLine({ page, noDate }: { page?: boolean; noDate?: boolean })
   if (page) {
     // "known", never "so far": the amount isn't money spent, it's every fee an agency has published (Jobs, Rams)
     const short: Bi[] = [B(`${known}${c.quoted && !c.unpublished ? " known" : ""}`, `已知 ${known}`)];
-    const plus = c.unpublished ? B(` plus ${c.unpublished} fee${c.unpublished === 1 ? "" : "s"} set by the agenc${c.unpublished === 1 ? "y" : "ies"}`, `，另有 ${c.unpublished} 项由机构核定`) : null;
+    const plus = c.unpublished ? B(` plus ${c.unpublished} agency fee${c.unpublished === 1 ? "" : "s"}`, `，另有 ${c.unpublished} 项机构费用`) : null;
     if (c.landing && !noDate) short.push(B(`opens ${fmtDay(c.landing, "en", true)}`, `预计 ${fmtDay(c.landing, "zh", true)} 开业`));
     return (
       <>

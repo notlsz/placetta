@@ -59,6 +59,7 @@ export function answersOf(c: Case): string {
     "Fiscal year ends December 31, cash basis. No alcohol, tobacco, vapor products, motor fuel or amusement machines. Not run from a home. No other locations in this state. No previous permits, no merger, not buying an existing business. No representatives or agents.",
     // what a real owner has by the time they apply, asked for by the forms that stopped on them (probe, 2026-10-30)
     "Emergency contact: Wei Chen, (917) 555-0199, wei.chen@probe-test.example. Rubbish hauler: Republic Services. Grease: Darling Ingredients.",
+    "Mei Chen's food manager certificate: ServSafe, number 21894433, expires 2029-06-30. I confirm every attestation on these forms (I understand the tax filing requirements, the information is true).",
     "Dish machine: Hobart LXeR. Water heater: Rheem PROG50-38N, 50 gallons, 38,000 BTU. No building permit application or permitting project number has been issued yet: write \"Not yet issued\".",
     "For any other yes/no line that doesn't apply to us, the answer is No. Fill it all in and put it up for my approval.",
   ].join("\n");

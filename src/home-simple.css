@@ -412,3 +412,9 @@
   .page.odelia .answer { padding-left: 0; }
   .page.odelia .answer > .ans-bot + p, .page.odelia .answer > .ans-bot + * > :first-child { text-indent: 34px; }
 }
+
+/* round 16: the opening date lives on Home; Licenses' cost line says the money only. Page actions read as links at
+   every width, like the phone, so they don't compete with the title */
+.page.permits .cost-line.on-page .cl-date { display: none; }
+.page.permits > .ph .ph-act .pill { height: 32px; padding: 0; background: none; box-shadow: none; color: var(--blue-ink); font-weight: 500; font-size: 14.5px; }
+.page.permits > .ph .ph-act { gap: 4px 20px; }

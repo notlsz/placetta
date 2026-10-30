@@ -716,7 +716,11 @@ export async function runRounds(o: {
   const reported = (o.ws().jobs ?? []).filter(j => own(j) && j.status === "done" && !!j.report && j.report.at >= st.started!)
     .flatMap(j => reportLines(o.ws(), j, o.lang, new Date().toISOString().slice(0, 10))).slice(0, 4).join(" ");
   // no words and a job still open: the open line says it, never "Done." on top of it
-  const final = [honest(said, o.lang) || (open.length ? "" : o.lang === "zh" ? "我没写完回复就停下了。请再问我一次，或在“工作”里看我做了什么。" : "I stopped before writing a reply. Ask me again, or open Work to see what I did."), waits, formLine, proof, reported].filter(Boolean).join("\n\n");
+  // No words at all, even after being sent back once (probe: Texas sales tax, Las Vegas food, 2026-10-30): the reply is
+  // still an answer, written from the record of what this run touched, never a bare "Done." or an apology alone.
+  if (!honest(said, o.lang) && !open.length) console.error("run ended without words", JSON.stringify({ rounds: st.rounds, quiet: st.quiet ?? 0, apps: made.apps.size, approvals: made.approvals.length }));
+  const fromRecord = !honest(said, o.lang) && !open.length ? stateLine(o.ws(), [...made.apps], made.approvals, o.lang) : "";
+  const final = [honest(said, o.lang) || fromRecord || (open.length ? "" : o.lang === "zh" ? "我没写完回复就停下了。请再问我一次，或在“工作”里看我做了什么。" : "I stopped before writing a reply. Ask me again, or open Work to see what I did."), waits, formLine, proof, reported].filter(Boolean).join("\n\n");
   const cited = [...st.sources.filter(x => official(x.url)), ...st.sources.filter(x => !official(x.url))].slice(0, 4);
 
   /* ---- Sources: from what this run's tools read, never from the model's words (src/sources.ts) ---- */
@@ -735,4 +739,23 @@ export async function runRounds(o: {
     files: made.files.length ? made.files.slice(0, 6) : undefined, table: made.table, sources: line ? (links.length ? links : undefined) : cited.length ? cited : undefined, ...(undoId ? { undo: undoId } : {}),
     // the filled forms go back with the answer: a card in the app, an attachment by email, a short link by text or chat
     ...(st.filled?.length ? { forms: st.filled } : {}) } };
+}
+
+/** Where the applications a run touched stand, from the workspace itself: what's up for approval, and what each one
+ *  still needs (empty lines, missing documents). The reply when the model wrote none. */
+export function stateLine(w: Workspace, apps: string[], approvals: string[], lang: "en" | "zh"): string {
+  const zh = lang === "zh";
+  const out: string[] = [];
+  for (const id of apps.slice(0, 4)) {
+    const a = w.apps.find(x => x.id === id);
+    if (!a) continue;
+    const name = a.name[lang] || a.name.en;
+    const card = w.approvals.some(x => x.app === id && x.kind === "file" && approvals.includes(x.id));
+    const empty = a.fields.filter(f => !String(f.value ?? "").trim()).map(f => f.label[lang] || f.label.en);
+    const docs = a.checklist.filter(c => c.state === "missing").map(c => c.label[lang] || c.label.en);
+    if (card) { out.push(zh ? `${name}已提交给您批准。` : `The ${name} is up for your approval.`); continue; }
+    const need = [...empty.slice(0, 4), ...docs.slice(0, 3)];
+    out.push(need.length ? (zh ? `${name}还需要：${need.join("；")}。` : `The ${name} still needs: ${need.join("; ")}.`) : (zh ? `${name}已填好。` : `The ${name} is filled in.`));
+  }
+  return out.join(zh ? "" : " ");
 }
