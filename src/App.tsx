@@ -1575,7 +1575,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
             </section>
           )}
           <main className={"content" + (view === "overview" ? " wash" : "") + (chatPage ? " chatpage" : "")} ref={main}>{page}</main>
-          {!panelOpen && !chatPage && view !== "settings" && <div className="dockbar"><Composer variant="dock" tts={tts} asked={asked} showLive={view !== "overview" && view !== "find"} starters={view === "overview"} /></div>}
+          {!panelOpen && !chatPage && view !== "settings" && <div className="dockbar"><Composer variant="dock" tts={tts} asked={asked} showLive={view !== "overview" && view !== "find"} starters={view === "overview"} />{<p className="pn-never dock-never"><I.lock />{lang === "zh" ? "未经您同意，绝不签名、付款或提交。" : "Nothing is signed, paid or submitted without you."}</p>}</div>}
           {toast && <div className="toast" role="status">{toast}</div>}
           {phone && (
             <nav className="tabbar" aria-label={t("nav_more")}>

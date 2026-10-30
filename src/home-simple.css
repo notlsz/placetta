@@ -538,7 +538,6 @@
 @media (min-width: 860px) { .page.odelia.chat { padding-top: 56px; } }
 /* Panel 7 (2026-10-30). */
 /* one message box everywhere: the outlined one Odelia's page uses */
-.dockbar .composer, .dockbar .c-edge > .composer { border-radius: 24px; background: var(--card); box-shadow: 0 1px 2px rgba(var(--e), .06), 0 0 0 1px var(--line), 0 12px 32px -18px rgba(var(--e), .25); }
 /* the two Home cards in one material: a hairline, no heavy lift */
 .page.home > .dtn, .page.home .dtn { background: var(--card); box-shadow: 0 0 0 1px var(--line); }
 /* the job card's progress in segments, one per step */
@@ -554,3 +553,18 @@
 .tabbar a:not([aria-current="page"]) .nav-bot { filter: none; opacity: .55; }
 .nav a:not([aria-current="page"]) .nav-bot, .nav button:not([aria-current="page"]) .nav-bot { opacity: .6; }
 .win-stamp svg .win-tick { stroke-width: 3; stroke-dasharray: 40; stroke-dashoffset: 40; animation-delay: .1s; }
+/* Panel 8 (2026-10-30). */
+/* the promise under every message box, so the box sits at one height on every page (Odelia's page had it alone) */
+.dockbar { flex-direction: column; align-items: center; }
+.dockbar .dock-never { pointer-events: auto; margin: 8px 0 0; }
+/* phone Home: the tint runs edge to edge (the scrollbar gutter left 10px of white each side) */
+.phone .content.wash { scrollbar-gutter: auto; }
+.phone .content.wash > .page.home { padding-left: 28px; padding-right: 28px; }
+/* phone Odelia: its title at the same height as every other page's */
+.phone .page.odelia.chat { padding-top: 28px; }
+/* one message box everywhere: one shape (24px corners) and one outline, drawn once by its edge; the box inside draws
+   none, so two outlines of different shapes never cross (panel 8 saw arcs where a pill and a box overlapped) */
+.c-edge, .dockbar .c-edge, .panel.full .c-edge { border-radius: 24px; box-shadow: 0 0 0 1px var(--line), 0 12px 32px -18px rgba(var(--e), .22); }
+.c-edge > .composer, .dockbar .c-edge > .composer, .panel.full .c-edge > .composer, .panel.full .composer { border-radius: 24px; background: var(--card); box-shadow: none; }
+/* Settings: "Sample workspace" a step under its section's heading */
+.settings .sg-row b, .settings .sg-row strong { font-weight: 500; }

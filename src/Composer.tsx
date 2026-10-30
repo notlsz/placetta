@@ -21,7 +21,7 @@ const BEAM = ["#7399C6", "#9DB8DA", "#5F88BA", "#B9CFE8", "#8FAED3", "#C9D8EC", 
 const BAND = { core: "#FFFFFF", above: "#8FAED3", mid: "#C9D8EC", below: "#B9CFE8" };
 /* The pill's own corners: 999 for the floating dock, 24 in the agent panel (styles.css .composer, .panel .composer).
    Passed to both beams so neither has to guess from its first child. */
-const RADIUS = { dock: 999, panel: 24 };
+const RADIUS = { dock: 24, panel: 24 };
 /* A soft beam that always rides the pill's edge, in Placetta's blue. On a light page border-beam draws its stroke and bloom
    as a grey sweep with its palette ("ice", a cyan) tinted over it, so the stroke and bloom are redrawn here in the BEAM
    blues, and the inner glow keeps ice turned 20° and about half as saturated, which lands it at hue 208, between #A4C8E1 and #7399C6. */
