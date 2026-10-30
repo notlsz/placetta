@@ -62,7 +62,8 @@ export function PlanCard({ job, compact, actions, approve }: { job: Job; compact
         <em className={"job-s " + (awayWait(job) ? "away" : job.status)}>{b(state)}</em>
       </header>
       {parent && !compact && <p className="job-from">{zh ? `属于“${parent.title.zh || parent.title.en}”，由 Odelia 统筹` : `Part of “${parent.title.en}”, which Odelia coordinates`}</p>}
-      <span className="job-bar" aria-hidden="true"><i style={{ width: `${p.all ? (100 * p.done) / p.all : 0}%` }} /></span>
+      {/* one segment a step, the same bar as Home and Stores (panels 3 and 7) */}
+      <span className="job-bar segs" aria-hidden="true">{Array.from({ length: Math.max(p.all, 1) }, (_, i) => <i key={i} className={i < p.done ? "done" : ""} />)}</span>
       <ol className="job-steps">
         {job.steps.map((s, i) => (
           <li key={i} className={s.done ? "done" : i === next && job.status !== "stopped" ? "now" : ""}>

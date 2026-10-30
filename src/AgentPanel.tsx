@@ -142,7 +142,7 @@ function NowStrip({ agencies }: { agencies: number }) {
   // the simple page (Muse's "Muse is working", Grok Bot's chat first): one quiet line, the whole line opens her Work
   if (!CLASSIC_STRIP) return (
     <button type="button" className={"now-line" + (busy ? " on" : "")} onClick={() => go("odelia", "work")}>
-      <span className="ns-live" aria-hidden="true" /><span className="nl-k">{zh ? "正在做：" : "Working on:"}</span><span className="nl-t" aria-live="polite">{now.t}</span><I.chevR />
+      <span className="ns-live" aria-hidden="true" /><span className="nl-k">{zh ? "正在做" : "Working on"}</span><span className="nl-t" aria-live="polite">{now.t}</span><I.chevR />
     </button>
   );
   return (
@@ -385,9 +385,9 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
           {r.undo && <UndoTurn id={r.undo} open={undoing} onClose={() => setUndoing(false)} />}
           {more.length > 0 && (
             <div className="t-foot" ref={foot}>
-              <Menu className="t-more-wrap" buttonClass="t-more" label={zh ? "更多" : "More"} buttonLabel={zh ? "更多操作" : "More for this answer"}
+              <Menu className="t-more-wrap" buttonClass="t-more" label={zh ? "详情" : "Details"} buttonLabel={zh ? "这条回复的详情" : "Details for this answer"}
                 // a word, not three dots: the dots under a finished answer read as her still typing (panel 3, all three reviewers)
-                button={<><span>{zh ? "更多" : "More"}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg></>} items={more} />
+                button={<><span>{zh ? "详情" : "Details"}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg></>} items={more} />
             </div>
           )}
         </div>

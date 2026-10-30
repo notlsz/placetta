@@ -525,7 +525,6 @@
 /* Odelia: on a phone, her words hang beside her cloud like on a desktop (not wrapping under it); her card keeps the full width */
 @media (max-width: 640px) {
   .page.odelia .answer > .ans-bot + p, .page.odelia .answer > .ans-bot + * > :first-child { text-indent: 0; padding-left: 34px; }
-  .page.odelia.chat > .ph { display: none; }
 }
 /* the chat page under its title: no second band of space above the tabs */
 @media (min-width: 641px) { .page.odelia.chat > .ph { padding-bottom: 18px; } }
@@ -537,3 +536,21 @@
 /* Stores: the next-store line one step under the list, not a gap away */
 .st-next { margin-top: 4px; }
 @media (min-width: 860px) { .page.odelia.chat { padding-top: 56px; } }
+/* Panel 7 (2026-10-30). */
+/* one message box everywhere: the outlined one Odelia's page uses */
+.dockbar .composer, .dockbar .c-edge > .composer { border-radius: 24px; background: var(--card); box-shadow: 0 1px 2px rgba(var(--e), .06), 0 0 0 1px var(--line), 0 12px 32px -18px rgba(var(--e), .25); }
+/* the two Home cards in one material: a hairline, no heavy lift */
+.page.home > .dtn, .page.home .dtn { background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+/* the job card's progress in segments, one per step */
+.job-bar.segs { display: flex; gap: 4px; height: 6px; background: none; border-radius: 0; overflow: visible; }
+.panel.full .turn .job-bar.segs { height: 6px; }
+.job-bar.segs i { flex: 1; height: 100%; border-radius: 3px; background: var(--mist2); }
+.job-bar.segs i.done { background: var(--blue-ink); }
+/* Settings: the open section by weight alone, on the shared edge (the bar sat outside it) */
+.settings .set-tab[aria-current="page"]::before { display: none; }
+/* Licenses: every fee in one colour */
+.page.permits .c-fee, .page.permits .c-fee.tbd { color: var(--ink2); font-size: 14px; }
+/* Odelia's cloud when her tab isn't open: softer, never grey */
+.tabbar a:not([aria-current="page"]) .nav-bot { filter: none; opacity: .55; }
+.nav a:not([aria-current="page"]) .nav-bot, .nav button:not([aria-current="page"]) .nav-bot { opacity: .6; }
+.win-stamp svg .win-tick { stroke-width: 3; stroke-dasharray: 40; stroke-dashoffset: 40; animation-delay: .1s; }

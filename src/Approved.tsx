@@ -49,7 +49,7 @@ export function ApprovedMoment() {
   return (
     <section className="win" aria-labelledby="win-h" role="status">
       <span className="win-stamp" aria-hidden="true">
-        <svg viewBox="0 0 48 48"><circle className="win-ring" cx="24" cy="24" r="21" /><path className="win-tick" d="M15 24.5l6 6 12-13" /></svg>
+        <svg viewBox="0 0 48 48"><path className="win-tick" d="M12 25l8 8 16-18" /></svg>
         <small>{short(b(win.app.agency))}</small>
         <small>{day}</small>
       </span>
