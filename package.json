@@ -93,7 +93,7 @@
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "esbuild": "^0.28.2",
-    "oxlint": "^1.81.0",
+    "oxlint": "^1.89.0",
     "pdfjs-dist": "^6.3.289",
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
