@@ -34,3 +34,4 @@ scan-results/
 
 # a lockfile a local `deno test` run leaves at the root; the repo pins nothing through it
 /deno.lock
+align-out/
