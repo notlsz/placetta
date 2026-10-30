@@ -661,10 +661,10 @@ function HomeHello({ need, firstRun, landing, n, approved, agency }: { need: num
   const head = firstRun ? b(headLine(f)) : need ? (zh ? `有 ${need} 件事需要您。` : `${need} thing${need === 1 ? " needs" : "s need"} you.`) : zh ? "今天没有需要您处理的事。" : "Nothing needs you today.";
   const split = firstRun ? splitLine(f) : null;
   const sub = [landing ? (zh ? `预计 ${fmtDay(landing, lang, true)} 前后开业` : `Opening around ${fmtDay(landing, lang, true)}`) : "",
-    zh ? `${n} 项执照已办好 ${approved} 项` : `${approved} of ${n} license${n === 1 ? "" : "s"} done`].filter(Boolean).join(zh ? "，" : ". ") + (zh ? "。" : ".");
+    (zh ? `${n} 项执照已办好 ${approved} 项` : `${approved} of ${n} license${n === 1 ? "" : "s"} done`) + (agency ? (zh ? `，${agency} 项在机构审批中` : `, ${agency} with the agency`) : "")].filter(Boolean).join(zh ? "，" : ". ") + (zh ? "。" : ".");
   return (
     <header className="hm-hello">
-      <p className="hm-hi">{hi}</p>
+      <p className="hm-hi"><span className="hm-hi-bot" aria-hidden="true"><AgentBot size={22} gaze={[0, 2.4]} interactive={false} /></span>{hi}</p>
       <h1>{head}{split && <em>{b(split)}</em>}</h1>
       <p className="hm-goal">{sub}</p>
       <span className="hm-goal-bar" aria-hidden="true"><i style={{ width: `${n ? (approved / n) * 100 : 0}%` }} /><i className="b2" style={{ width: `${n ? (agency / n) * 100 : 0}%` }} /></span>

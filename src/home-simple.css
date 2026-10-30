@@ -220,8 +220,8 @@
 
 /* A page's actions sit on its title's line, centered on it (Ive), not between the title and the sentence under it */
 @media (min-width: 641px) {
-  .page.permits > .ph, .page.stores > .ph { align-items: flex-start; }
-  .page.permits > .ph .ph-act, .page.stores > .ph .ph-act { margin-top: 2px; }
+  .page.permits > .ph, .page.stores-page > .ph { align-items: flex-start; }
+  .page.permits > .ph .ph-act, .page.stores-page > .ph .ph-act { margin-top: 2px; }
 }
 /* Licenses on a phone: the two actions are quiet links, so the tabs and the list start higher */
 @media (max-width: 640px) {
@@ -242,5 +242,29 @@
   .page.permits .apps-t .tr.row .c-fee, .page.permits .apps-t .tr.row .c-next { display: none; }
   .page.permits .apps-t .tr.row .c-mob { display: block; grid-column: 1 / -1; font-size: 13.5px; line-height: 19px; color: var(--ink2); }
   .page.permits .apps-t .tr.row .c-st { align-self: start; margin-top: -1px; }
-  .page.permits .apps-t .st-draft { padding: 2px 10px; border-radius: 99px; background: var(--sky-wash); color: var(--blue-ink); }
+  .page.permits .apps-t .tr.row .st.st-draft { background: var(--sky-wash); color: var(--blue-ink); }
 }
+
+/* the sidebar's labels share one x (Ive): Odelia's cloud sits in the same 16px box as the other icons, drawn past it */
+.side .nav :is(button, a) > span.nav-bot { width: 16px; overflow: visible; }
+.side .nav :is(button, a) > svg:first-child { width: 16px; flex: none; }
+
+/* Home's greeting is Odelia's (Chesky): her cloud beside it. The bar is one blue in two strengths, done and with the
+   agency, and the sentence above it says which is which */
+.hm-hi { display: flex; align-items: center; gap: 8px; }
+.hm-hi-bot { display: grid; place-items: center; width: 22px; height: 22px; flex: none; }
+.hm-goal-bar i { background: var(--blue-ink); }
+.hm-goal-bar i.b2 { background: var(--blue); opacity: .45; }
+
+/* a tab row wider than a phone fades at its edge, so a cut word reads as "there's more" */
+@media (max-width: 640px) { .page .ptabs { -webkit-mask-image: linear-gradient(90deg, #000 86%, transparent); mask-image: linear-gradient(90deg, #000 86%, transparent); } }
+
+/* Stores in the same centered column as Home (Jobs), so the list sits under its title, not across an empty screen */
+@media (min-width: 860px) { .page.stores-page { max-width: 760px; } }
+
+/* a plan's approval says only what's new: the plan's title already names the task */
+.answer .job.compact + .appr .appr-tx > b { display: none; }
+.answer .job.compact + .appr .appr-tx > span:first-of-type { margin-top: 0; font-size: 14px; color: var(--ink2); }
+
+/* the assignee lines up with the agency line, not between the two lines of the row */
+@media (min-width: 860px) { .page.permits .apps-t .c-name > .c-team { align-self: start; line-height: 18px; } }

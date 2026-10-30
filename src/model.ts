@@ -478,7 +478,7 @@ export const SAMPLE: Workspace = {
     },
     {
       id: "edd", name: B("Employer payroll tax registration", "雇主工资税登记"), agency: B("California Employment Development Department", "加州就业发展局"), level: "state", status: "draft",
-      next: B("Placetta is finishing it. No fee", "快哉正在完成填写，无需费用"), fees: [{ label: B("Registration", "登记"), amount: 0 }], est: B("Employer account number in about 2 weeks", "约 2 周内获得雇主账号"),
+      next: B("Odelia is finishing it. No fee", "Odelia 正在完成填写，无需费用"), fees: [{ label: B("Registration", "登记"), amount: 0 }], est: B("Employer account number in about 2 weeks", "约 2 周内获得雇主账号"),
       source: SRC.edd, form: B("Commercial employer registration (e-Services for Business)", "商业雇主登记（企业在线服务）"),
       fields: [
         F("name", "Business legal name", "企业法定名称", NAME, fromCtx), F("fein", "Federal EIN", "联邦 EIN", "••-•••4471", fromCtx),
