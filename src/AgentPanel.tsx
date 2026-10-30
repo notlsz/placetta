@@ -295,6 +295,8 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
   const draft = useSmooth(live ? m.draft : undefined);
   // the plan this run kept: the job it last updated
   const plan = !last ? undefined : (ws.jobs ?? []).filter(j => j.updated >= m.at).sort((x, y) => y.updated.localeCompare(x.updated))[0];
+  // the one approval a waiting plan needs goes inside the plan's card, not as a second card under it
+  const planAp = plan && plan.status === "waiting" && rows.length === 1 ? ws.approvals.find(a => a.id === rows[0] && a.kind !== "upload" && a.kind !== "pay" && a.id !== planApprovalId(plan.id)) : undefined;
   const zh = lang === "zh";
   const undoPt = r?.undo ? (ws.undo ?? []).find(x => x.id === r.undo) : undefined;
   const hasSources = !!r && (!!r.sources?.length || !!splitSources(said)[1]);
@@ -352,7 +354,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
         <div className="answer"><span className="ans-bot" aria-hidden="true"><AgentBot size={24} interactive={false} /></span>
           {r.text.map((p, i) => { const body = splitSources(b(p))[0]; return body ? <Prose key={i} text={body} cites={i === r.text.length - 1 ? r.sources : undefined} /> : null; })}
           {r.chain && <ol className="chain">{r.chain.map((c, i) => <li key={i}>{b(c)}</li>)}</ol>}
-          {plan && <PlanCard job={plan} compact />}
+          {plan && <PlanCard job={plan} compact approve={planAp} />}
           {plan && <PlanGate job={plan} />}
           {filed.map(id => <FilingLive key={id} app={id} />)}
           {(r.apps?.some(id => !covered.has(id) && !filed.includes(id)) || (r.files?.length && !filed.length)) ? (
@@ -371,7 +373,7 @@ function TurnView({ m, last, latest, speaking, onSay, asked, onAskPerson, poke }
             </figure>
           )}
           {group.length > 1 && <ApproveGroup ids={group} />}
-          {rows.filter(id => !(plan && id === planApprovalId(plan.id))).map(id => { const a = ws.approvals.find(x => x.id === id)!; return <NeedRow key={id} a={a} compact />; })}
+          {rows.filter(id => !(plan && id === planApprovalId(plan.id)) && id !== planAp?.id).map(id => { const a = ws.approvals.find(x => x.id === id)!; return <NeedRow key={id} a={a} compact />; })}
           {/* the agency's forms this run filled again: each opens the filled form on its application */}
           {r.forms?.map(n => <FilledCard key={n.app + n.version} n={n} />)}
           {done.map(id => { const a = ws.closed.find(x => x.id === id)!; return a.withdrawn ? <WithdrawnRow key={id} a={a} /> : <p key={id} className="resolved"><span className="ok-dot"><I.check /></span><span>{b(a.title)}</span><em>{t("approvedIt")}</em></p>; })}

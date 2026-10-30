@@ -2,14 +2,15 @@ import { useRef, useState } from "react";
 import { useApp } from "./ctx";
 import { B, type Bi } from "./bi";
 import { fmtAgo, fmtDay } from "./time";
-import { I } from "./ui";
+import { I, Pill } from "./ui";
+import { LocalHold, useApprovalHold } from "./SendHold";
 import { awayWait, cadence, continuePrompt, family, nextAction, nextRun, progress, proven, storeOf, type Job, type Routine } from "./jobs";
 import { reportLines } from "./finish";
 import { PREVIEW } from "./cloud/api";
 import { toolbox } from "./jobs";
 import { hasReplay } from "./replay";
 import { AgentBot, StoreBot } from "./Bot";
-import type { Store, Workspace } from "./model";
+import type { Approval, Store, Workspace } from "./model";
 import { AskPerson, jobContext } from "./AskPerson";
 import { AssignPicker, CommentsButton } from "./Comments";
 
@@ -48,7 +49,7 @@ export function WatchLink({ job }: { job: Job }) {
 
 /** One job's plan: the steps in order, the next one marked, done ones ticked. */
 /** actions: show the one button that moves the job now even on a compact card (Home, Needs you). */
-export function PlanCard({ job, compact, actions }: { job: Job; compact?: boolean; actions?: boolean }) {
+export function PlanCard({ job, compact, actions, approve }: { job: Job; compact?: boolean; actions?: boolean; approve?: Approval }) {
   const { b, lang, ws, openApp } = useApp();
   const p = progress(job), next = job.steps.findIndex(s => !s.done);
   const zh = lang === "zh";
@@ -70,11 +71,12 @@ export function PlanCard({ job, compact, actions }: { job: Job; compact?: boolea
           </li>
         ))}
       </ol>
-      {job.status === "waiting" && job.waiting && <p className={"job-need" + (awayWait(job) ? " away" : "")}><b>{awayWait(job) ? (zh ? "进度：" : "Where it is: ") : zh ? "需要：" : "Needs: "}</b>{b(job.waiting)}</p>}
+      {job.status === "waiting" && job.waiting && !approve && <p className={"job-need" + (awayWait(job) ? " away" : "")}><b>{awayWait(job) ? (zh ? "进度：" : "Where it is: ") : zh ? "需要：" : "Needs: "}</b>{b(job.waiting)}</p>}
       {job.status === "done" && <DoneReport job={job} compact={compact} />}
       {(!compact || actions) && <JobActions job={job} />}
       {(needsYou(job) || (job.checked && job.checked.passed < job.checked.of && !awayWait(job))) && <AskPerson context={() => jobContext(job)} />}
       <Harness job={job} compact={compact} />
+      {approve && <PlanApprove a={approve} />}
       {!compact && job.apps?.length ? (
         <p className="job-apps">{job.apps.map(id => { const a = ws.apps.find(x => x.id === id); return a ? <button key={id} type="button" className="lnk" onClick={() => openApp(id)}>{b(a.name)}</button> : null; })}</p>
       ) : null}
@@ -346,4 +348,12 @@ export function WorkPage() {
       )}
     </div>
   );
+}
+
+/** The approval a plan waits on, inside the plan's own card (Jobs, Ive: one card, the task said once): just the button,
+ *  or the undo window once approved. */
+function PlanApprove({ a }: { a: Approval }) {
+  const { t, busy, openApproval } = useApp();
+  const hold = useApprovalHold(a.id);
+  return <div className="job-approve">{hold ? <LocalHold hold={hold} compact /> : <Pill onClick={() => openApproval(a.id)} disabled={busy} sm>{t("approve")}</Pill>}</div>;
 }

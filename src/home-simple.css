@@ -93,7 +93,7 @@
 
 /* Odelia's chat: an approval shows once, as its card (no "Waiting for your approval" header, no "Needs:" box above it),
    and the card is the one raised thing in the thread, the way Grok Bot puts its approval in front of you */
-.turn:has(> .answer > .appr) > .work-hd.wait { display: none; }
+.turn:has(> .answer > .appr) > .work-hd.wait, .turn:has(> .answer .job-approve) > .work-hd.wait { display: none; }
 .answer:has(> .appr) .job .job-need { display: none; }
 .feed .answer > .appr.compact { background: var(--card); box-shadow: 0 0 0 1px var(--line), 0 6px 20px rgba(var(--e), .06); }
 
@@ -172,11 +172,6 @@
 /* "Working on" leads with the words; the live mark shows only while Odelia is actually at it */
 .now-line:not(.on) .ns-live { display: none; }
 
-/* A plan and the approval that moves it read as one card (Jobs: say it once): the approval sits in the plan's footer */
-.answer .job.compact:has(+ .appr) { border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0; padding-bottom: 4px; }
-.answer .job.compact + .appr { margin-top: -12px; border-top-left-radius: 0; border-top-right-radius: 0; background: var(--mist); box-shadow: none; }
-.answer .job.compact + .appr .appr-ico { display: none; }
-.answer .job.compact + .appr { grid-template-columns: minmax(0, 1fr) auto; }
 
 /* Licenses (Rams): the opening-date rows carry one small flag by the name, not a sentence three times; a fee the agency
    hasn't set reads quieter than a real amount; an agency's name is read whole, on a second line if it needs one */
@@ -263,8 +258,6 @@
 @media (min-width: 860px) { .page.stores-page { max-width: 760px; } }
 
 /* a plan's approval says only what's new: the plan's title already names the task */
-.answer .job.compact + .appr { display: flex; justify-content: flex-end; padding-block: 10px 12px; }
-.answer .job.compact + .appr .appr-tx { display: none; }
 
 /* the assignee lines up with the agency line, not between the two lines of the row */
 @media (min-width: 860px) { .page.permits .apps-t .c-name > .c-team { align-self: start; line-height: 18px; } }
@@ -294,7 +287,6 @@
 .win-tick { animation-delay: .3s; animation-duration: .3s; }
 .st .st-seal { width: 13px; height: 13px; margin-left: -3px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 
-/* the plan and its Approve are one grey card: the same ground, no band between them */
 
 /* "Preparing" is the same blue pill at every width (Ive) */
 .apps-t .st.st-draft { background: var(--sky-wash); color: var(--blue-ink); }
@@ -305,4 +297,19 @@
 @media (min-width: 860px) {
   .page.permits .apps-t .c-name { grid-template-columns: minmax(0, 1fr); }
   .page.permits .apps-t .c-name > .c-team { justify-self: start; margin-top: 2px; }
+}
+
+/* the approval a plan waits on, inside the plan's card (src/Work.tsx PlanApprove) */
+.job-approve { display: flex; justify-content: flex-end; margin-top: 8px; }
+
+/* round 8 */
+.win-tx { border: 0; padding: 0; background: none; font: inherit; text-align: left; color: inherit; cursor: pointer; }
+.win { cursor: default; }
+.win:has(.win-tx:hover) h2 { color: var(--blue-ink); }
+.hm-hi-bot { width: 28px; height: 28px; }
+@media (max-width: 640px) {
+  /* a phone's store row: the date is already in the lines under the name, so the text keeps the full width */
+  .store-row.plain .sr-when { display: none; }
+  /* Licenses on a phone: the opening date is Home's; the cost line keeps the amount and Breakdown on one line */
+  .page.permits .cost-line.on-page .cl-date { display: none; }
 }

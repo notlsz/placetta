@@ -664,7 +664,7 @@ function HomeHello({ need, firstRun, landing, n, approved, agency }: { need: num
     (zh ? `${n} 项执照已办好 ${approved} 项` : `${approved} of ${n} license${n === 1 ? "" : "s"} done`) + (agency ? (zh ? `，${agency} 项在机构审批中` : `, ${agency} with the agency`) : "")].filter(Boolean).join(zh ? "，" : ". ") + (zh ? "。" : ".");
   return (
     <header className="hm-hello">
-      <p className="hm-hi"><span className="hm-hi-bot" aria-hidden="true"><AgentBot size={22} gaze={[0, 2.4]} interactive={false} /></span>{hi}</p>
+      <p className="hm-hi"><span className="hm-hi-bot" aria-hidden="true"><AgentBot size={28} gaze={[0, 2.4]} interactive={false} /></span>{hi}</p>
       <h1>{head}{split && <em>{b(split)}</em>}</h1>
       <p className="hm-goal">{sub}</p>
       <span className="hm-goal-bar" aria-hidden="true"><i style={{ width: `${n ? (approved / n) * 100 : 0}%` }} /><i className="b2" style={{ width: `${n ? (agency / n) * 100 : 0}%` }} /></span>

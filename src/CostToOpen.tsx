@@ -45,7 +45,7 @@ export function CostLine({ page, noDate }: { page?: boolean; noDate?: boolean })
       <>
         <p className="cost-line on-page">
           <I.card />
-          <span><b>{b(B("Cost to open", "开业成本"))}</b> {short.map(b).join(b(B(", ", "，")))}</span>
+          <span><b>{b(B("Cost to open", "开业成本"))}</b> {b(short[0])}{short[1] && <span className="cl-date">{b(B(", ", "，"))}{b(short[1])}</span>}</span>
           <button type="button" className="lnk" onClick={() => setOpen(true)}>{b(B("Breakdown", "明细"))}<I.chevR /></button>
         </p>
         {open && <CostSheet c={c} onClose={() => setOpen(false)} />}

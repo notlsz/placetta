@@ -233,3 +233,12 @@ id, so it had no lines.
 - A save that times out or deadlocks is tried again on the newest state; only a real error fails a run.
 - A form named by its number is the library's form when exactly one form carries that number.
 - A refusal to invent an identity number is correct. When a test stops there, the test's owner is missing a fact.
+
+## 2026-10: a stylesheet edit deleted six unrelated blocks
+
+**What happened.** To remove one CSS block I cut the file from that block's comment to the next comment I expected.
+Five other blocks had been appended in between, so Home's phone list, the phone Licenses links, the Stores row styles
+and the Settings spacing all went with it. A screenshot caught it before it shipped.
+
+**The rule.** Remove a block by its own exact text, never by cutting between two markers in a file that grows by
+appending. After any CSS edit, `git diff --stat` the file: a deletion count larger than the change is a red flag.

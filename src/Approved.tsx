@@ -44,16 +44,15 @@ export function ApprovedMoment() {
       <span className="win-seal" aria-hidden="true">
         <svg viewBox="0 0 48 48"><circle className="win-ring" cx="24" cy="24" r="21" /><path className="win-tick" d="M15 24.5l6 6 12-13" /></svg>
       </span>
-      <div className="win-tx">
+      <button type="button" className="win-tx" onClick={() => { keep(win.app.id); openApp(win.app.id); }}>
         <h2 id="win-h">{zh ? `您的${name}已办好。` : `Your ${name.charAt(0).toLowerCase() + name.slice(1)} is in.`}</h2>
         <p className="win-sub">
           {zh ? `${when}获批。` : `Approved ${when}. `}{left > 0 ? (zh ? `还剩 ${left} 项。` : `${left === 1 ? "One" : left}\u00a0to go. `) : (zh ? "全部办好了。" : "That's all of them. ")}
           {win.number ? (zh ? `编号 ${win.number}。` : `Number ${win.number}. `) : ""}
           {win.renews ? (zh ? `续期已记在 ${fmtDay(win.renews, lang, true)}。` : `Renewal on the calendar for ${fmtDay(win.renews, lang, true)}.`) : ""}
         </p>
-      </div>
+      </button>
       <div className="win-act">
-        <button type="button" className="lnk" onClick={() => { keep(win.app.id); openApp(win.app.id); }}>{zh ? "查看" : "See it"}</button>
         <button type="button" className="win-x" aria-label={zh ? "关闭" : "Close"} onClick={close}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg></button>
       </div>
     </section>
