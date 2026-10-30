@@ -1458,7 +1458,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   }[view];
   // Home's count is everything waiting on the owner: the same list as Home's "Do this next" and "Waiting on you" and the
   // chat's greeting (src/doNext.ts todos), never the approvals alone
-  const badge: Partial<Record<View, number>> = { overview: todos(view_, daysFromNow(0)).length, odelia: waitingJobs };
+  // one number for what needs the owner (the panel: Home's 5 and Odelia's 2 read as two answers to one question)
+  const badge: Partial<Record<View, number>> = { overview: todos(view_, daysFromNow(0)).length };
+  void waitingJobs;
   const wsSub = cloud ? (billing?.free && !billing.subscription_status ? b(B("Early access", "抢先体验")) : plan === "monthly" ? b(PLAN_LABEL[billing?.subscription_plan ?? ""] ?? B("Monthly plan", "月度方案")) : plan === "entry" ? b(B("Entry plan", "开店计划")) : b(B("No plan yet", "尚未开通"))) : t("sampleWs");
   const current = (v: View) => view === v || (v === "permits" && view === "find");
   /* The bell: unread updates, always in reach (the sidebar's top on a desktop, the top bar on a phone). */

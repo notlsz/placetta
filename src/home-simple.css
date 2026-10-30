@@ -435,3 +435,22 @@
 .page.odelia .answer .t-foot .t-more { margin-left: -7px; }
 .hm-segs.sr-segs { max-width: 220px; margin-top: 6px; gap: 3px; }
 .hm-segs.sr-segs i { height: 4px; }
+
+/* panel 2: the approval as a kept milestone. The same material as the card under it (radius, hairline), flat, since
+   only the card that needs the owner is raised; the agency's stamp with its name and date */
+.win { align-items: flex-start; gap: 18px; padding: 20px 22px; border-radius: 24px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+@media (max-width: 640px) { .win { border-radius: 20px; padding: 18px; gap: 14px; } }
+.win-stamp { flex: none; display: flex; flex-direction: column; align-items: center; gap: 1px; width: 56px; color: var(--blue-ink); animation: win-stamp .5s cubic-bezier(.3, 1.4, .5, 1) both; }
+.win-stamp svg { width: 44px; height: 44px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+.win-stamp small { font-size: 10px; line-height: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.win-stamp small + small { font-weight: 500; color: var(--ink3); }
+@media (prefers-reduced-motion: reduce) { .win-stamp { animation: none; } }
+.win-tx { display: flex; flex-direction: column; gap: 4px; padding-top: 4px; }
+.win h2 { font-size: 17px; line-height: 23px; }
+.win-sub { font-size: 14px; line-height: 20px; }
+.win-see { align-self: flex-start; margin-top: 4px; padding: 0; font-size: 14px; color: var(--blue-ink); font-weight: 500; }
+/* Licenses: the opening-date mark says it in words (Rams: an unexplained mark is decoration); an unpublished fee is one
+   quiet word, the header carries the count */
+.c-crit-t { margin-left: 8px; font-size: 12px; font-weight: 500; color: var(--blue-ink); white-space: nowrap; vertical-align: 1px; }
+/* the phone's Licenses: the first thing under the tabs is the money, then licenses (Jobs); Everything/Mine stays on wider screens */
+@media (max-width: 640px) { .pm-tabrow .mine-row { display: none; } }

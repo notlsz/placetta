@@ -35,27 +35,29 @@ export function ApprovedMoment() {
   const { b, lang, ws, openApp } = useApp();
   const zh = lang === "zh";
   const win = useMemo(() => latestWin(ws, nowIso()), [ws]);
-  const [gone, setGone] = useState(false);
+  const [gone] = useState(false);
   if (!win || gone || seen(win.app.id)) return null;
-  const close = () => { keep(win.app.id); setGone(true); };
   const name = b(win.app.name);
   // the warm line (Paul Smith): how many are left, from the plan
   const left = ws.apps.filter(a => a.status !== "approved").length;
+  const day = fmtDay(win.at.slice(0, 10), lang);
+  // a milestone the owner keeps, not a notice to clear (Paul Smith, the panel): the agency's stamp with its date, and
+  // Odelia saying it. It leaves on its own after a week, or once they open the license.
   return (
     <section className="win" aria-labelledby="win-h" role="status">
-      <span className="win-seal" aria-hidden="true">
+      <span className="win-stamp" aria-hidden="true">
         <svg viewBox="0 0 48 48"><circle className="win-ring" cx="24" cy="24" r="21" /><path className="win-tick" d="M15 24.5l6 6 12-13" /></svg>
+        <small>{short(b(win.app.agency))}</small>
+        <small>{day}</small>
       </span>
-      <button type="button" className="win-tx" onClick={() => { keep(win.app.id); openApp(win.app.id); }}>
+      <div className="win-tx">
         <h2 id="win-h">{zh ? `您的${name}已办好。` : `Your ${name.charAt(0).toLowerCase() + name.slice(1)} is in.`}</h2>
         <p className="win-sub">
-          {zh ? `${b(win.app.agency)}于 ${fmtDay(win.at.slice(0, 10), lang)} 批准。` : `Approved by ${short(b(win.app.agency))}, ${fmtDay(win.at.slice(0, 10), lang)}. `}{left > 0 ? (zh ? `还剩 ${left} 项，我在办下一项。` : `${left === 1 ? "One" : left}\u00a0to go. I'm on the next one. `) : (zh ? "全部办好了。" : "That's all of them. ")}
-          {win.number ? (zh ? `编号 ${win.number}。` : `Number ${win.number}. `) : ""}
-          {win.renews ? (zh ? `续期已记在 ${fmtDay(win.renews, lang, true)}。` : `Renewal on the calendar for ${fmtDay(win.renews, lang, true)}.`) : ""}
+          {left > 0 ? (zh ? `还剩 ${left} 项，我在办下一项。` : `${left === 1 ? "One" : left}\u00a0to go, and I'm on the next one.`) : (zh ? "全部办好了。" : "That's every one of them.")}
+          {win.number ? (zh ? ` 编号 ${win.number}。` : ` Number ${win.number}.`) : ""}
+          {win.renews ? (zh ? ` 续期已记在 ${fmtDay(win.renews, lang, true)}。` : ` Renewal on the calendar for ${fmtDay(win.renews, lang, true)}.`) : ""}
         </p>
-      </button>
-      <div className="win-act">
-        <button type="button" className="win-x" aria-label={zh ? "关闭" : "Close"} onClick={close}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg></button>
+        <button type="button" className="lnk win-see" onClick={() => { keep(win.app.id); openApp(win.app.id); }}>{zh ? "查看执照" : "See the license"}</button>
       </div>
     </section>
   );
