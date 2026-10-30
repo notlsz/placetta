@@ -285,3 +285,19 @@ ended on max_tokens with no text, and the send-back skipped max_tokens on purpos
 - Log the case you're guarding before you trust the guard: the first look at real data showed the guard was dead code.
 - A turn with no words gets a second chance whatever its stop reason.
 - Reads retry on a timeout the same way saves do; the probe retries its sign-in.
+
+## 2026-10: Odelia now learns from her own slips (src/selfLearn.ts)
+
+**Why.** Every probe round we found a slip by hand (a choice the line didn't have, a format the check refused, a label
+that matched nothing), fixed it in code, and the next run could still make a cousin of it. The network only learned
+what agencies require, from finished jobs; nothing recorded how a refusal got fixed.
+
+**What it does now.** Every tool call is watched. A refusal (not one of the choices, an address the agency doesn't
+take, a line the check before approval stops on, a tool error) is a slip; a later call in the same run that gets that
+line or tool through is its fix. The pair becomes a live "fix" lesson keyed by the form or the tool, in Placetta's own
+words (the form's label and choices, the checker's note, the value's shape only, quoted ids stripped), and every run
+for every business starts from the fixes for its forms and its tools, "here and on any line that works the same way".
+Fixes retire when businesses contradict them or they keep losing. The twelve fixes found by hand today are seeded.
+
+**The rule.** When a probe or a customer run shows a slip, the fix goes in twice: in code when it's a bug, and as a
+lesson (seeded, or learned on its own) so the agent itself knows the pattern.

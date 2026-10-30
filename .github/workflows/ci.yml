@@ -52,6 +52,7 @@ jobs:
       # every form Placetta fills on the agency's own PDF: filled with test answers, then read back line by line
       - run: npm run test:forms
       - run: npm run test:smart
+      - run: npm run test:learn
       - run: npm run test:risk
       - run: npm run test:flow
       - run: npm run test:channels

@@ -45,7 +45,7 @@ import { mailBody, replySubject, sendMail as sendOdeliaMail } from "../_shared/m
 import { sendEmail, systemMailReady } from "../_shared/email.ts";
 import { suppressedIn } from "../_shared/suppression.ts";
 // @ts-types="./agent.d.ts"
-import { agencyKey, chipsOf, CLASSIFIER_SYSTEM, classifierPrompt, parseClassifier, type ToolLog, DISTILL_SYSTEM, distillPrompt, filingEvidence, type FilingRow, finishWork, keepRecall, type Lesson, lessonKeys, lessonsBrief, type MemoryBook, normalizeState, parseDistill, rank, type Recall, recallFrom, runEvidence, runRounds, startState, stampFilings, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
+import { fixLessons, agencyKey, chipsOf, CLASSIFIER_SYSTEM, classifierPrompt, parseClassifier, type ToolLog, DISTILL_SYSTEM, distillPrompt, filingEvidence, type FilingRow, finishWork, keepRecall, type Lesson, lessonKeys, lessonsBrief, type MemoryBook, normalizeState, parseDistill, rank, type Recall, recallFrom, runEvidence, runRounds, startState, stampFilings, stripState, worthLearning, type Reply, type RunState, type Services, type Step } from "./agent.js";
 import { mayEmail, reachOf, wantsTexts } from "../_shared/reach.ts";
 import { updateChannel } from "../_shared/deliver.ts";
 import { APPROVE_SAY, approvalAsk } from "../_shared/text_approval.ts";
@@ -499,6 +499,15 @@ async function synthetic(ws: string): Promise<boolean> {
   return !error && !!(data as { synthetic?: boolean } | null)?.synthetic;
 }
 
+/** The fixes this run found (src/selfLearn.ts), as live lessons for their forms and tools. */
+async function learnFixes(run: Run, st: RunState) {
+  try {
+    const fixes = fixLessons(((st.self as { fixes?: unknown[] } | undefined)?.fixes ?? []) as Parameters<typeof fixLessons>[0]);
+    for (const n of fixes) await admin.rpc("lesson_add", { p_ws: run.workspace_id, p_kind: "fix", p_key: n.key, p_en: n.text.en, p_zh: n.text.zh, p_url: null, p_official: true });
+    if (fixes.length) console.log("learned fixes", run.id, fixes.length);
+  } catch (e) { console.error("learn fixes", run.id, String((e as Error)?.message ?? e).slice(0, 160)); }
+}
+
 export async function learnFromRun(run: Run, w: Workspace, st: RunState, reply: Reply) {
   try {
     const checks = (st.firstChecks ?? []) as { job: string; passed: number; of: number }[];
@@ -829,7 +838,9 @@ export async function work(runId: string, token: string | null, ticket: string |
     const mainRole = roleOfRun(run);
     // The network: the run starts from what other businesses' jobs taught Odelia about these places, agencies and forms.
     if (state.network === undefined) {
-      const ls = rank(await lessonsFor(lessonKeys(cur)).catch(() => [] as Lesson[])).slice(0, 14);
+      const all = rank(await lessonsFor(lessonKeys(cur)).catch(() => [] as Lesson[]));
+      // the network's best 14, and up to 10 of her own fixes, which rank low on votes but are what keeps a slip from repeating
+      const ls = [...all.filter((l) => l.kind !== "fix").slice(0, 14), ...all.filter((l) => l.kind === "fix").slice(0, 10)];
       state.lessons = ls.map((l) => l.id);
       state.network = lessonsBrief(ls, run.lang);
       if (ls.length) { steps.push({ state: "searching", label: { en: `Starting from ${ls.length} lesson${ls.length === 1 ? "" : "s"} other businesses taught me`, zh: `参考其他商家积累的 ${ls.length} 条经验` } }); flush(); }
@@ -927,6 +938,8 @@ export async function work(runId: string, token: string | null, ticket: string |
     bg(saveMemory(run, memory, state, cur, out.reply, who, who0.actor.role));
     // a production probe workspace (migration 20261030090000) teaches the network nothing and files no QA findings
     bg(synthetic(run.workspace_id).then((probe) => probe ? undefined : Promise.all([learnFromRun(run, cur, state, out.reply), gradeOnline(run, cur, state, out.reply)])));
+    // her own slips, fixed: lessons for every business, from every run, the probe's too (they carry no one's data)
+    bg(learnFixes(run, state));
   } catch (e) {
     clearTimeout(flushT);
     // An instance that lost the run says and saves nothing: the one holding it does.

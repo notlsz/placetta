@@ -115,7 +115,7 @@ export type Channel = "app" | "sms" | "voice" | "email" | "slack" | "lark" | "we
 export declare function channelHint(channel: Channel | undefined, plainSms?: boolean): string;
 
 // The network (src/learning.ts)
-export type Lesson = { id: string; kind: "place" | "agency" | "form" | "pitfall"; key: string; text: Bi; source_url?: string | null; businesses: number; confirms: number; contradicts: number; wins: number; losses: number };
+export type Lesson = { id: string; kind: "place" | "agency" | "form" | "pitfall" | "fix"; key: string; text: Bi; source_url?: string | null; businesses: number; confirms: number; contradicts: number; wins: number; losses: number };
 export type NewLesson = { kind: Lesson["kind"]; key: string; text: Bi; source_url?: string; official: boolean };
 export type Evidence = { jobs: unknown[]; learned_here: unknown[]; applications: unknown[]; official_sources: unknown[]; answer: string };
 export declare const DISTILL_SYSTEM: string;
@@ -123,6 +123,8 @@ export declare function distillPrompt(evidence: unknown, existing: Lesson[], key
 export declare function parseDistill(text: string, o: { keys: string[]; existing: string[]; w?: Workspace; max?: number }): { confirm: string[]; contradict: string[]; fresh: NewLesson[] };
 export declare function lessonKeys(w: Workspace): string[];
 export declare function lessonsBrief(ls: Lesson[], lang: "en" | "zh"): string;
+/** Her own slips a later call fixed, as live lessons for their forms and tools (src/selfLearn.ts). */
+export declare function fixLessons(fixes: unknown[]): NewLesson[];
 export declare function runEvidence(w: Workspace, o: { started: string; reply: string; sources: { url: string; title?: string }[]; asked?: string }): Evidence;
 export declare function worthLearning(ev: Evidence): boolean;
 export declare function filingEvidence(f: { title?: Bi | null; agency?: Bi | null; status: string; note?: string | null; days?: number | null; form?: string | null }): unknown;

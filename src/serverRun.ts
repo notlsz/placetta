@@ -1,3 +1,4 @@
+import { noteCall, type SelfState } from "./selfLearn";
 import { same, type Bi } from "./bi";
 import { withNextPath } from "./nextPath";
 import type { FilledNote, Reply, Step } from "./core";
@@ -76,6 +77,8 @@ export type RunState = {
   /** The network (src/learning.ts): the lessons this run started from (fixed for the whole run, so a resumed chunk
    *  reads the same), and each job's first independent check, which is the number the network moves. */
   lessons?: string[]; network?: string; firstChecks?: { job: string; passed: number; of: number }[];
+  /** Her own slips this run, and the ones a later call fixed (src/selfLearn.ts): the fixes become lessons. */
+  self?: SelfState;
   /** The request came by plain SMS (Telnyx, or a Linq line falling back to SMS), whose sender is easy to forge: the run
    *  may only read and draft. Set by the server when the run starts; nothing the model says changes it. */
   plainSms?: boolean;
@@ -583,6 +586,7 @@ export async function runRounds(o: {
           content = said; error = !!r.is_error;
         }
         if (error) st.toolErrors = (st.toolErrors ?? 0) + 1;
+        try { noteCall(st.self ??= { slips: [], fixes: [] }, { name, input, content, error }, o.ws()); } catch { /* learning never breaks a run */ }
         addSpan(st.trace ??= [], { k: "tool", n: name.slice(0, 80), at, ms: Date.now() - t0, ...(error ? { ok: false } : {}), r: st.rounds });
         // the replay: what she used, what she gave it, what came back and what it changed, and any approval it put up
         if ((st.moments ?? 0) < MAX_MOMENTS) {
