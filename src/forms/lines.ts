@@ -9289,6 +9289,293 @@ export const LINES: Record<string, Lines> = {
   },
   "notes": "Apply at lasvegasnevada.gov/Dashboard ('Apply for a permit requiring plans', Google Chrome required); $55 admin fee to enter the review queue. 'Effective January 1, 2020, all NEW commercial, residential, and civil building plans MUST be submitted electronically.' 'Only a Nevada licensed contractor may obtain a building permit for commercial construction.' Incomplete applications are not accepted; permits expire 180 days after issuance with no passed inspection. Express plan review: $550 admin + $660/hr. The city also publishes a Food-Service-Establishment-Guideline.pdf and Tenant-Improvement-Guideline.pdf (not read). Fax (702) 382-1240 appears on the instructions header but is not stated as accepting applications."
  },
+ "scc-health-permit": {
+  "status": "page_only",
+  "seen": "Health permit to operate (issued after plan check and final inspection)",
+  "read": "2026-10-13",
+  "sources": [
+   "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/food-safety-program/application-new-food-facility"
+  ],
+  "fields": [],
+  "attach": [],
+  "submit": {
+   "mail": {
+    "name": "County of Santa Clara, Department of Environmental Health",
+    "line1": "1555 Berger Drive, Bldg #2, Suite #300",
+    "city": "San Jose",
+    "state": "CA",
+    "zip": "95112"
+   },
+   "signature": "unknown",
+   "evidence": "New food facilities start with the Plan Check Application packet; the permit follows the approved plans and final inspection.",
+   "source": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/food-safety-program/application-new-food-facility"
+  },
+  "notes": "The library pointed to the plan review page; the new-facility page is the right entry point."
+ },
+ "scc-plan-check": {
+  "status": "page_only",
+  "seen": "Plan Check Application (PC_Application) with the Food Plan Check Checklist",
+  "read": "2026-10-13",
+  "sources": [
+   "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/food-safety-program/application-new-food-facility",
+   "https://deh.santaclaracounty.gov/submit-plan-review-restaurants-grocery-stores-and-other-retail-food-storefronts"
+  ],
+  "fields": [
+   {
+    "id": "scope",
+    "line": "",
+    "label": {
+     "en": "Scope of work",
+     "zh": "施工范围"
+    }
+   },
+   {
+    "id": "hoods",
+    "line": "",
+    "label": {
+     "en": "Total number of Type I and Type II hoods",
+     "zh": "I 类及 II 类排烟罩总数"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Completed Food Plan Check Checklist",
+    "zh": "填好的食品图纸审查核查表"
+   },
+   {
+    "en": "One bound, legible set of 1/4-inch scale plans: equipment, mechanical, finish schedule, plumbing, electrical",
+    "zh": "一套装订清晰、1/4 英寸比例的图纸：设备、暖通、饰面表、给排水、电气"
+   },
+   {
+    "en": "Proposed menu",
+    "zh": "拟定菜单"
+   },
+   {
+    "en": "Manufacturer specification sheets for proposed equipment",
+    "zh": "拟用设备的厂家规格表"
+   }
+  ],
+  "submit": {
+   "mail": {
+    "name": "County of Santa Clara, Department of Environmental Health",
+    "line1": "1555 Berger Drive, Bldg #2, Suite #300",
+    "city": "San Jose",
+    "state": "CA",
+    "zip": "95112"
+   },
+   "signature": "unknown",
+   "evidence": "Items must be submitted as one packet; complete packets are accepted by email, by mail, or in person at 1555 Berger Drive, Bldg #2, Suite #300.",
+   "source": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/food-safety-program/application-new-food-facility"
+  },
+  "notes": "Incomplete packets are not accepted; plans with no payment are discarded after 10 business days. DEH reviews within 20 business days. After approval submit two more sets for stamping, then two stamped sets to the city. The email address is hidden on the page."
+ },
+ "scc-fbn": {
+  "status": "mapped",
+  "seen": "Fictitious Business Name (FBN) Statement, Santa Clara County Clerk-Recorder (Rev 12, 8/12/2025)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://files.santaclaracounty.gov/exjcpb1411/2024-10/fbn-statement.pdf",
+   "https://clerkrecorder.santaclaracounty.gov/business-services/apply-renew-or-refile-fictitious-business-name-fbn-statement"
+  ],
+  "fields": [
+   {
+    "id": "fbn",
+    "line": "1",
+    "label": {
+     "en": "Fictitious business name",
+     "zh": "虚拟商号"
+    }
+   },
+   {
+    "id": "business_address",
+    "line": "2",
+    "label": {
+     "en": "Street address of principal place of business, city, state, ZIP, county",
+     "zh": "主要营业地点街道地址、城市、州、邮编、县"
+    }
+   },
+   {
+    "id": "other_county",
+    "line": "3",
+    "label": {
+     "en": "If the principal place of business is not in Santa Clara County: the county where a current statement is on file",
+     "zh": "如主要营业地点不在圣克拉拉县：已登记现行声明的县"
+    }
+   },
+   {
+    "id": "ownership",
+    "line": "4",
+    "label": {
+     "en": "This business is owned by",
+     "zh": "本企业所有者类型"
+    },
+    "options": [
+     "An individual",
+     "A general partnership",
+     "A limited partnership",
+     "A limited liability company",
+     "An unincorporated association other than a partnership",
+     "A corporation",
+     "A trust",
+     "Copartners",
+     "Married couple",
+     "Joint venture",
+     "State or local registered domestic partners",
+     "Limited liability partnership"
+    ]
+   },
+   {
+    "id": "registrant_1",
+    "line": "5",
+    "label": {
+     "en": "Registrant full name and resident address (no P.O. box), city, state, ZIP",
+     "zh": "登记人全名及居住地址（不接受邮政信箱）、城市、州、邮编"
+    }
+   },
+   {
+    "id": "registrant_2",
+    "line": "5",
+    "label": {
+     "en": "Second registrant full name and resident address (if any)",
+     "zh": "第二登记人全名及居住地址（如有）"
+    }
+   },
+   {
+    "id": "start_date",
+    "line": "6",
+    "label": {
+     "en": "Registrant began transacting business under the name on (date, or not applicable if future)",
+     "zh": "以该商号开始经营的日期（如为将来，填不适用）"
+    }
+   },
+   {
+    "id": "filing_type",
+    "line": "7",
+    "label": {
+     "en": "Type of filing",
+     "zh": "申报类型"
+    },
+    "options": [
+     "First filing",
+     "Refile, changes in facts",
+     "Refile, no changes"
+    ]
+   },
+   {
+    "id": "previous_file",
+    "line": "7",
+    "label": {
+     "en": "Previous file # (a refile)",
+     "zh": "原档案编号（重新申报时）"
+    }
+   },
+   {
+    "id": "printed_name",
+    "line": "Signature",
+    "label": {
+     "en": "Printed name of signer",
+     "zh": "签署人姓名（正楷）"
+    }
+   },
+   {
+    "id": "entity_name",
+    "line": "Entity",
+    "label": {
+     "en": "Entity name (a corporation, LLC, LP or LLP)",
+     "zh": "实体名称（公司、LLC、LP 或 LLP）"
+    }
+   },
+   {
+    "id": "signer_title",
+    "line": "Entity",
+    "label": {
+     "en": "Title/capacity of signer",
+     "zh": "签署人职务"
+    }
+   },
+   {
+    "id": "article_reg",
+    "line": "Entity",
+    "label": {
+     "en": "Article/registration # from the CA Secretary of State",
+     "zh": "加州州务卿登记编号"
+    }
+   },
+   {
+    "id": "entity_state",
+    "line": "Entity",
+    "label": {
+     "en": "State where the entity was formed",
+     "zh": "实体成立所在州"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Filing fee: $40 (1 name, 1 or 2 registrants, 1 certified copy), $7 each additional name or registrant",
+    "zh": "申报费：40 美元（1 个商号、1 至 2 名登记人、1 份核证副本），每增加一个商号或登记人 7 美元"
+   },
+   {
+    "en": "Self-addressed stamped envelope (by mail)",
+    "zh": "回邮信封（邮寄时）"
+   }
+  ],
+  "submit": {
+   "email": "bus-rdc@rec.sccgov.org",
+   "portal": "scccroselfservice.org",
+   "mail": {
+    "name": "Clerk-Recorder's Office, Business Division",
+    "line1": "110 West Tasman Drive, First Floor",
+    "city": "San Jose",
+    "state": "CA",
+    "zip": "95134"
+   },
+   "signature": "wet",
+   "evidence": "'E-mail: The form can be downloaded and filled out before submitting the completed form to bus-rdc@rec.sccgov.org.' 'Completed form must be submitted along with the filing fees.' 'Up to 5 workdays to process your application.' The statement is signed by the registrant.",
+   "source": "https://clerkrecorder.santaclaracounty.gov/business-services/apply-renew-or-refile-fictitious-business-name-fbn-statement"
+  },
+  "notes": "Read in a browser on 2026-10-31. Online filing is also available in the Clerk-Recorder's Self-Service portal. Within 45 days after filing, the statement must be published (B&P 17917). Expires five years after filing, or 40 days after a change in facts. Corporations, LLCs, LPs and LLPs need proof of registration with the Secretary of State."
+ },
+ "pla-plan-review": {
+  "status": "page_only",
+  "seen": "Food Plan Review Procedures and Food Plan Submittal Requirements, City of Plano Environmental Health & Sustainability",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.plano.gov/asset/234824a7-ef4c-481f-8b7b-ab68b680a9fb",
+   "https://www.plano.gov/asset/ac97282c-0149-4243-9b8e-5be4cc5c06dd",
+   "https://www.plano.gov/food-permits"
+  ],
+  "fields": [],
+  "attach": [
+   {
+    "en": "Plans stamped by a licensed engineer, to scale: kitchen, bar, restrooms, dry storage and dumpster layouts",
+    "zh": "持照工程师盖章、按比例的图纸：厨房、吧台、卫生间、干货储存及垃圾箱布局"
+   },
+   {
+    "en": "Equipment and fixture legend, and the finish schedule for floors, walls and ceilings",
+    "zh": "设备与固定装置图例，以及地面、墙面、天花板饰面表"
+   },
+   {
+    "en": "Plumbing plans with the grease trap information",
+    "zh": "含隔油池信息的给排水图纸"
+   },
+   {
+    "en": "Proposed menu",
+    "zh": "拟定菜单"
+   },
+   {
+    "en": "Completed Food Establishment application marked NEW PERMIT, with the owner's ID, Texas sales tax permit and Certified Food Manager Certificate",
+    "zh": "标注“NEW PERMIT”的食品经营场所申请，附业主身份证件、德州销售税许可证和注册食品经理证书"
+   }
+  ],
+  "submit": {
+   "signature": "unknown",
+   "evidence": "'Plans must be submitted to the City of Plano Building Inspections department along with “Food Establishment Plan Review” form' ... 'The plan submitter will be notified within 10 business days.' 'WE DO NOT OFFER TO EXPEDITE THE PLAN REVIEW.'",
+   "source": "https://www.plano.gov/asset/234824a7-ef4c-481f-8b7b-ab68b680a9fb"
+  },
+  "notes": "Plans go to Plano Building Inspections, which routes them to Environmental Health; electronic or paper. The fee ($475 new construction) must accompany the plans and covers the pre-operational and final inspections. Read 2026-10-31 from PDFs downloaded by the fetch-forms workflow."
+ },
  "ca-cdtfa": {
   "status": "page_only",
   "seen": "CDTFA Online Services registration (permit, license or account); no paper form. Pub 107 'Applying for a Seller's Permit' (Revision July 2024)",
@@ -14977,87 +15264,6 @@ export const LINES: Record<string, Lines> = {
    "source": "https://www.sanjoseca.gov/your-government/departments-offices/finance/business-tax-registration/register-for-a-business-tax-certificate"
   },
   "notes": "Duplicate of sj-business-tax."
- },
- "scc-plan-check": {
-  "status": "page_only",
-  "seen": "Plan Check Application (PC_Application) with the Food Plan Check Checklist",
-  "read": "2026-10-13",
-  "sources": [
-   "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/food-safety-program/application-new-food-facility",
-   "https://deh.santaclaracounty.gov/submit-plan-review-restaurants-grocery-stores-and-other-retail-food-storefronts"
-  ],
-  "fields": [
-   {
-    "id": "scope",
-    "line": "",
-    "label": {
-     "en": "Scope of work",
-     "zh": "施工范围"
-    }
-   },
-   {
-    "id": "hoods",
-    "line": "",
-    "label": {
-     "en": "Total number of Type I and Type II hoods",
-     "zh": "I 类及 II 类排烟罩总数"
-    }
-   }
-  ],
-  "attach": [
-   {
-    "en": "Completed Food Plan Check Checklist",
-    "zh": "填好的食品图纸审查核查表"
-   },
-   {
-    "en": "One bound, legible set of 1/4-inch scale plans: equipment, mechanical, finish schedule, plumbing, electrical",
-    "zh": "一套装订清晰、1/4 英寸比例的图纸：设备、暖通、饰面表、给排水、电气"
-   },
-   {
-    "en": "Proposed menu",
-    "zh": "拟定菜单"
-   },
-   {
-    "en": "Manufacturer specification sheets for proposed equipment",
-    "zh": "拟用设备的厂家规格表"
-   }
-  ],
-  "submit": {
-   "mail": {
-    "name": "County of Santa Clara, Department of Environmental Health",
-    "line1": "1555 Berger Drive, Bldg #2, Suite #300",
-    "city": "San Jose",
-    "state": "CA",
-    "zip": "95112"
-   },
-   "signature": "unknown",
-   "evidence": "Items must be submitted as one packet; complete packets are accepted by email, by mail, or in person at 1555 Berger Drive, Bldg #2, Suite #300.",
-   "source": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/food-safety-program/application-new-food-facility"
-  },
-  "notes": "Incomplete packets are not accepted; plans with no payment are discarded after 10 business days. DEH reviews within 20 business days. After approval submit two more sets for stamping, then two stamped sets to the city. The email address is hidden on the page."
- },
- "scc-health-permit": {
-  "status": "page_only",
-  "seen": "Health permit to operate (issued after plan check and final inspection)",
-  "read": "2026-10-13",
-  "sources": [
-   "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/food-safety-program/application-new-food-facility"
-  ],
-  "fields": [],
-  "attach": [],
-  "submit": {
-   "mail": {
-    "name": "County of Santa Clara, Department of Environmental Health",
-    "line1": "1555 Berger Drive, Bldg #2, Suite #300",
-    "city": "San Jose",
-    "state": "CA",
-    "zip": "95112"
-   },
-   "signature": "unknown",
-   "evidence": "New food facilities start with the Plan Check Application packet; the permit follows the approved plans and final inspection.",
-   "source": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/food-safety-program/application-new-food-facility"
-  },
-  "notes": "The library pointed to the plan review page; the new-facility page is the right entry point."
  },
  "irs-5472": {
   "status": "mapped",

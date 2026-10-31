@@ -1,0 +1,516 @@
+{
+ "scc-health-permit": {
+  "status": "mapped",
+  "form_seen": "Permit Application & Certification Statement, Department of Environmental Health, Consumer Protection Division (Rev. 08/2024; file cpd_prmt_app_2026_08_20)",
+  "read_on": "2026-10-31",
+  "sources": [
+   {
+    "url": "https://files.santaclaracounty.gov/exjcpb1761/2026-08/cpd_prmt_app_2026_08_20.pdf",
+    "what": "official PDF (fillable)"
+   },
+   {
+    "url": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/restaurant-grocery-store-or-other-fixed-food",
+    "what": "application page"
+   }
+  ],
+  "fields": [
+   {
+    "id": "owner_name",
+    "line": "Owner Information",
+    "en": "Owner name (corporation, LLC name, or first and last name of primary owner)",
+    "zh": "业主名称（公司、LLC 名称或主要业主姓名）"
+   },
+   {
+    "id": "owner_address",
+    "line": "Owner Information",
+    "en": "Owner address, unit, city, state, ZIP",
+    "zh": "业主地址、单元、城市、州、邮编"
+   },
+   {
+    "id": "owner_phone",
+    "line": "Owner Information",
+    "en": "Owner phone and extension",
+    "zh": "业主电话及分机"
+   },
+   {
+    "id": "owner_email",
+    "line": "Owner Information",
+    "en": "Owner email",
+    "zh": "业主电子邮箱"
+   },
+   {
+    "id": "prior_permit",
+    "line": "Owner Information",
+    "en": "Has/does the owner had/have a permit to operate a facility in Santa Clara County?",
+    "zh": "业主是否曾在/正在圣克拉拉县持有设施经营许可？",
+    "options": [
+     "No",
+     "Yes"
+    ]
+   },
+   {
+    "id": "prior_facility",
+    "line": "Owner Information",
+    "en": "If yes: facility ID # (FA0...) and facility name",
+    "zh": "如是：设施编号（FA0...）及设施名称"
+   },
+   {
+    "id": "facility_name",
+    "line": "Facility Information",
+    "en": "Facility name (dba)",
+    "zh": "设施名称（营业名称）"
+   },
+   {
+    "id": "facility_address",
+    "line": "Facility Information",
+    "en": "Facility address, unit, city, ZIP (CA)",
+    "zh": "设施地址、单元、城市、邮编（加州）"
+   },
+   {
+    "id": "facility_phone",
+    "line": "Facility Information",
+    "en": "Facility phone and extension",
+    "zh": "设施电话及分机"
+   },
+   {
+    "id": "facility_email",
+    "line": "Facility Information",
+    "en": "Facility email",
+    "zh": "设施电子邮箱"
+   },
+   {
+    "id": "emergency_contact",
+    "line": "Facility Information",
+    "en": "Emergency/alternate contact and phone",
+    "zh": "紧急/备用联系人及电话"
+   },
+   {
+    "id": "pool_contact",
+    "line": "Facility Information",
+    "en": "Pool/spa access contact and phone (if any)",
+    "zh": "泳池/水疗出入联系人及电话（如有）"
+   },
+   {
+    "id": "billing_to",
+    "line": "Correspondence",
+    "en": "Send official/billing correspondence to",
+    "zh": "官方/账单通知寄往",
+    "options": [
+     "Owner",
+     "Other"
+    ]
+   },
+   {
+    "id": "billing_other",
+    "line": "Correspondence",
+    "en": "If other: name, care of, facility address, unit, city, state, ZIP",
+    "zh": "如为其他：姓名、转交、地址、单元、城市、州、邮编"
+   },
+   {
+    "id": "print_name",
+    "line": "Certification",
+    "en": "Print name of the person signing",
+    "zh": "签署人姓名（正楷）"
+   },
+   {
+    "id": "signer_phone",
+    "line": "Certification",
+    "en": "Signer's phone",
+    "zh": "签署人电话"
+   }
+  ],
+  "attach": [],
+  "destination": {
+   "email": "dehweb@deh.sccgov.org",
+   "mail": {
+    "name": "County of Santa Clara, Department of Environmental Health, Consumer Protection Division",
+    "line1": "1555 Berger Drive, Suite 300",
+    "city": "San Jose",
+    "state": "CA",
+    "zip": "95112-2716"
+   },
+   "signature": "wet",
+   "evidence": "The form is signed under penalty of perjury ('Signature:'), with the division's address, phone (408) 918-3400 and email dehweb@deh.sccgov.org printed at the top. 'A permit will not be issued or renewed until the application is complete, all fees have been paid in full, and/or all applicable inspections have been passed.'",
+   "source": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/restaurant-grocery-store-or-other-fixed-food"
+  },
+  "notes": "Read in a browser on 2026-10-31 (the county's site blocks fetch tools). The operating permit comes after plan review (new facility) or a facility evaluation (change of ownership). Renewed annually; not transferable. Office-use fields left out. The printed email is the division's general inbox; the form doesn't say it accepts applications by email, so the team confirms before sending."
+ },
+ "scc-plan-check": {
+  "status": "mapped",
+  "form_seen": "Food Facility Plan Check Application Form (Rev 10/2020; file pc_app_food_2026_07_20)",
+  "read_on": "2026-10-31",
+  "sources": [
+   {
+    "url": "https://files.santaclaracounty.gov/exjcpb1761/2026-07/pc_app_food_2026_07_20.pdf",
+    "what": "official PDF (fillable)"
+   },
+   {
+    "url": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/food-safety-program/application-new-food-facility",
+    "what": "application page"
+   }
+  ],
+  "fields": [
+   {
+    "id": "facility_type",
+    "line": "Facility Type",
+    "en": "Facility type",
+    "zh": "设施类型",
+    "options": [
+     "Permanent Food Facility",
+     "Mobile Food Facility"
+    ]
+   },
+   {
+    "id": "scope",
+    "line": "Scope of Work",
+    "en": "Scope of work",
+    "zh": "工程范围",
+    "options": [
+     "Site Assessment",
+     "New Facility",
+     "Existing Permitted Facility"
+    ]
+   },
+   {
+    "id": "operation",
+    "line": "Scope of Work",
+    "en": "Operation",
+    "zh": "经营方式",
+    "options": [
+     "Food Prep",
+     "Pre-Packaged",
+     "Satellite Food Facility",
+     "Vending Machine"
+    ]
+   },
+   {
+    "id": "remodel_type",
+    "line": "Scope of Work",
+    "en": "Remodel type (an existing facility)",
+    "zh": "改建类型（现有设施）",
+    "options": [
+     "Major (50% or more)",
+     "Minor (under 50%)",
+     "Adding piece of equipment (up to three)"
+    ]
+   },
+   {
+    "id": "type1_hoods",
+    "line": "Scope of Work",
+    "en": "Number of new or modified Type-I hoods",
+    "zh": "新增或改造的 I 类排烟罩数量"
+   },
+   {
+    "id": "square_feet",
+    "line": "Scope of Work",
+    "en": "Square footage",
+    "zh": "面积（平方英尺）"
+   },
+   {
+    "id": "risk_category",
+    "line": "Risk Category",
+    "en": "Risk category",
+    "zh": "风险类别",
+    "options": [
+     "Reheating Commercially Packaged Food, No Cooking (RC1)",
+     "Cooking, Cooling or Reheating Open Foods (RC2-3)"
+    ]
+   },
+   {
+    "id": "project_name",
+    "line": "Project",
+    "en": "Project name",
+    "zh": "项目名称"
+   },
+   {
+    "id": "former_name",
+    "line": "Project",
+    "en": "Current/former facility name (if any)",
+    "zh": "现/原设施名称（如有）"
+   },
+   {
+    "id": "project_address",
+    "line": "Project",
+    "en": "Project address, city, ZIP",
+    "zh": "项目地址、城市、邮编"
+   },
+   {
+    "id": "project_phone",
+    "line": "Project",
+    "en": "Phone",
+    "zh": "电话"
+   },
+   {
+    "id": "contact",
+    "line": "Contact",
+    "en": "Contact person (designer/architect/contractor) and business name",
+    "zh": "联系人（设计师/建筑师/承包商）及公司名称"
+   },
+   {
+    "id": "contact_email",
+    "line": "Contact",
+    "en": "Contact email",
+    "zh": "联系人电子邮箱"
+   },
+   {
+    "id": "contact_address",
+    "line": "Contact",
+    "en": "Contact address, city, state, ZIP, phone",
+    "zh": "联系人地址、城市、州、邮编、电话"
+   },
+   {
+    "id": "owner",
+    "line": "Owner",
+    "en": "Owner/permittee of food operation",
+    "zh": "食品经营业主/持证人"
+   },
+   {
+    "id": "owner_address",
+    "line": "Owner",
+    "en": "Owner address, city, state, ZIP, phone",
+    "zh": "业主地址、城市、州、邮编、电话"
+   },
+   {
+    "id": "owner_email",
+    "line": "Owner",
+    "en": "Owner email",
+    "zh": "业主电子邮箱"
+   },
+   {
+    "id": "applicant_name",
+    "line": "Signature",
+    "en": "Applicant name (print) and title",
+    "zh": "申请人姓名（正楷）及职务"
+   }
+  ],
+  "attach": [
+   {
+    "en": "Food Plan Check Checklist, completed",
+    "zh": "填好的食品图纸审查核对表"
+   },
+   {
+    "en": "Plan check fee (DEH fee schedule, plan check portion)",
+    "zh": "图纸审查费（按环境卫生局收费表的审查部分）"
+   },
+   {
+    "en": "One bound set of plans to 1/4 inch scale: equipment, mechanical, finish schedule, plumbing, electrical, number of Type I hoods",
+    "zh": "一套装订的 1/4 英寸比例图纸：设备、机械、饰面表、给排水、电气、I 类排烟罩数量"
+   },
+   {
+    "en": "Proposed menu",
+    "zh": "拟定菜单"
+   },
+   {
+    "en": "Manufacturers' spec sheets for proposed equipment",
+    "zh": "拟用设备的厂家规格表"
+   }
+  ],
+  "destination": {
+   "email": "dehplancheck@deh.sccgov.org",
+   "mail": {
+    "name": "County of Santa Clara, Department of Environmental Health",
+    "line1": "1555 Berger Drive, Bldg #2, Suite #300",
+    "city": "San Jose",
+    "state": "CA",
+    "zip": "95112"
+   },
+   "signature": "wet",
+   "evidence": "'Complete packets are also accepted by email at dehplancheck@deh.sccgov.org.' 'All plans are reviewed in the order received. DEH has 20-business days to review all submittals.' The form has an 'Applicant Signature' line under Health & Safety Code section 114380.",
+   "source": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/food-safety-program/application-new-food-facility"
+  },
+  "notes": "Read in a browser on 2026-10-31. One packet: incomplete packets aren't queued; plans received without payment are discarded after 10 business days. After approval, two more sets are stamped and go to the city's planning/building department. Separate applications and fees for added operations (a deli or sushi kiosk in a grocery, remote storage)."
+ },
+ "scc-fbn": {
+  "status": "mapped",
+  "form_seen": "Fictitious Business Name (FBN) Statement, Santa Clara County Clerk-Recorder (Rev 12, 8/12/2025)",
+  "read_on": "2026-10-31",
+  "sources": [
+   {
+    "url": "https://files.santaclaracounty.gov/exjcpb1411/2024-10/fbn-statement.pdf",
+    "what": "official PDF (fillable)"
+   },
+   {
+    "url": "https://clerkrecorder.santaclaracounty.gov/business-services/apply-renew-or-refile-fictitious-business-name-fbn-statement",
+    "what": "application page"
+   }
+  ],
+  "fields": [
+   {
+    "id": "fbn",
+    "line": "1",
+    "en": "Fictitious business name",
+    "zh": "虚拟商号"
+   },
+   {
+    "id": "business_address",
+    "line": "2",
+    "en": "Street address of principal place of business, city, state, ZIP, county",
+    "zh": "主要营业地点街道地址、城市、州、邮编、县"
+   },
+   {
+    "id": "other_county",
+    "line": "3",
+    "en": "If the principal place of business is not in Santa Clara County: the county where a current statement is on file",
+    "zh": "如主要营业地点不在圣克拉拉县：已登记现行声明的县"
+   },
+   {
+    "id": "ownership",
+    "line": "4",
+    "en": "This business is owned by",
+    "zh": "本企业所有者类型",
+    "options": [
+     "An individual",
+     "A general partnership",
+     "A limited partnership",
+     "A limited liability company",
+     "An unincorporated association other than a partnership",
+     "A corporation",
+     "A trust",
+     "Copartners",
+     "Married couple",
+     "Joint venture",
+     "State or local registered domestic partners",
+     "Limited liability partnership"
+    ]
+   },
+   {
+    "id": "registrant_1",
+    "line": "5",
+    "en": "Registrant full name and resident address (no P.O. box), city, state, ZIP",
+    "zh": "登记人全名及居住地址（不接受邮政信箱）、城市、州、邮编"
+   },
+   {
+    "id": "registrant_2",
+    "line": "5",
+    "en": "Second registrant full name and resident address (if any)",
+    "zh": "第二登记人全名及居住地址（如有）"
+   },
+   {
+    "id": "start_date",
+    "line": "6",
+    "en": "Registrant began transacting business under the name on (date, or not applicable if future)",
+    "zh": "以该商号开始经营的日期（如为将来，填不适用）"
+   },
+   {
+    "id": "filing_type",
+    "line": "7",
+    "en": "Type of filing",
+    "zh": "申报类型",
+    "options": [
+     "First filing",
+     "Refile, changes in facts",
+     "Refile, no changes"
+    ]
+   },
+   {
+    "id": "previous_file",
+    "line": "7",
+    "en": "Previous file # (a refile)",
+    "zh": "原档案编号（重新申报时）"
+   },
+   {
+    "id": "printed_name",
+    "line": "Signature",
+    "en": "Printed name of signer",
+    "zh": "签署人姓名（正楷）"
+   },
+   {
+    "id": "entity_name",
+    "line": "Entity",
+    "en": "Entity name (a corporation, LLC, LP or LLP)",
+    "zh": "实体名称（公司、LLC、LP 或 LLP）"
+   },
+   {
+    "id": "signer_title",
+    "line": "Entity",
+    "en": "Title/capacity of signer",
+    "zh": "签署人职务"
+   },
+   {
+    "id": "article_reg",
+    "line": "Entity",
+    "en": "Article/registration # from the CA Secretary of State",
+    "zh": "加州州务卿登记编号"
+   },
+   {
+    "id": "entity_state",
+    "line": "Entity",
+    "en": "State where the entity was formed",
+    "zh": "实体成立所在州"
+   }
+  ],
+  "attach": [
+   {
+    "en": "Filing fee: $40 (1 name, 1 or 2 registrants, 1 certified copy), $7 each additional name or registrant",
+    "zh": "申报费：40 美元（1 个商号、1 至 2 名登记人、1 份核证副本），每增加一个商号或登记人 7 美元"
+   },
+   {
+    "en": "Self-addressed stamped envelope (by mail)",
+    "zh": "回邮信封（邮寄时）"
+   }
+  ],
+  "destination": {
+   "email": "bus-rdc@rec.sccgov.org",
+   "portal": "scccroselfservice.org",
+   "mail": {
+    "name": "Clerk-Recorder's Office, Business Division",
+    "line1": "110 West Tasman Drive, First Floor",
+    "city": "San Jose",
+    "state": "CA",
+    "zip": "95134"
+   },
+   "signature": "wet",
+   "evidence": "'E-mail: The form can be downloaded and filled out before submitting the completed form to bus-rdc@rec.sccgov.org.' 'Completed form must be submitted along with the filing fees.' 'Up to 5 workdays to process your application.' The statement is signed by the registrant.",
+   "source": "https://clerkrecorder.santaclaracounty.gov/business-services/apply-renew-or-refile-fictitious-business-name-fbn-statement"
+  },
+  "notes": "Read in a browser on 2026-10-31. Online filing is also available in the Clerk-Recorder's Self-Service portal. Within 45 days after filing, the statement must be published (B&P 17917). Expires five years after filing, or 40 days after a change in facts. Corporations, LLCs, LPs and LLPs need proof of registration with the Secretary of State."
+ },
+ "pla-plan-review": {
+  "status": "page_only",
+  "form_seen": "Food Plan Review Procedures and Food Plan Submittal Requirements, City of Plano Environmental Health & Sustainability",
+  "read_on": "2026-10-31",
+  "sources": [
+   {
+    "url": "https://www.plano.gov/asset/234824a7-ef4c-481f-8b7b-ab68b680a9fb",
+    "what": "instructions"
+   },
+   {
+    "url": "https://www.plano.gov/asset/ac97282c-0149-4243-9b8e-5be4cc5c06dd",
+    "what": "instructions"
+   },
+   {
+    "url": "https://www.plano.gov/food-permits",
+    "what": "application page"
+   }
+  ],
+  "fields": [],
+  "attach": [
+   {
+    "en": "Plans stamped by a licensed engineer, to scale: kitchen, bar, restrooms, dry storage and dumpster layouts",
+    "zh": "持照工程师盖章、按比例的图纸：厨房、吧台、卫生间、干货储存及垃圾箱布局"
+   },
+   {
+    "en": "Equipment and fixture legend, and the finish schedule for floors, walls and ceilings",
+    "zh": "设备与固定装置图例，以及地面、墙面、天花板饰面表"
+   },
+   {
+    "en": "Plumbing plans with the grease trap information",
+    "zh": "含隔油池信息的给排水图纸"
+   },
+   {
+    "en": "Proposed menu",
+    "zh": "拟定菜单"
+   },
+   {
+    "en": "Completed Food Establishment application marked NEW PERMIT, with the owner's ID, Texas sales tax permit and Certified Food Manager Certificate",
+    "zh": "标注“NEW PERMIT”的食品经营场所申请，附业主身份证件、德州销售税许可证和注册食品经理证书"
+   }
+  ],
+  "destination": {
+   "signature": "unknown",
+   "evidence": "'Plans must be submitted to the City of Plano Building Inspections department along with “Food Establishment Plan Review” form' ... 'The plan submitter will be notified within 10 business days.' 'WE DO NOT OFFER TO EXPEDITE THE PLAN REVIEW.'",
+   "source": "https://www.plano.gov/asset/234824a7-ef4c-481f-8b7b-ab68b680a9fb"
+  },
+  "notes": "Plans go to Plano Building Inspections, which routes them to Environmental Health; electronic or paper. The fee ($475 new construction) must accompany the plans and covers the pre-operational and final inspections. Read 2026-10-31 from PDFs downloaded by the fetch-forms workflow."
+ }
+}

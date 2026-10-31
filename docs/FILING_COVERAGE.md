@@ -10,13 +10,13 @@ A form can have more than one channel. Team only means Placetta has no route it 
 
 | Channel | Before (2026-10-17) | Now |
 |---|---:|---:|
-| Team only | 231 | 420 |
-| Email | 5 | 39 |
+| Team only | 231 | 419 |
+| Email | 5 | 40 |
 | Fax | 4 | 26 |
-| Certified mail | 13 | 79 |
+| Certified mail | 13 | 80 |
 | Agency portal | 16 | 255 |
 | Owner packet | 0 | 26 |
-| Any route Placetta sends on | 542 | 327 |
+| Any route Placetta sends on | 542 | 328 |
 
 ## How each form would go on its first try
 
@@ -31,11 +31,11 @@ With every channel switched on, a saved login for each portal and a connected ma
 | Owner packet: the owner sends it | 0 | 31 | 26 |
 | Signed by hand, then Placetta faxes it | 3 | 6 | 10 |
 | Signed by hand, then Placetta emails it | 0 | 0 | 24 |
-| Signed by hand, mailed back in Placetta's return envelope | 0 | 0 | 29 |
+| Signed by hand, mailed back in Placetta's return envelope | 0 | 0 | 30 |
 | Signed by hand and sent by the owner | 6 | 25 | 1 |
-| The Placetta team | 233 | 336 | 423 |
+| The Placetta team | 233 | 336 | 422 |
 
-Of the 423 forms with the team, 18 are insurance the owner buys from an insurer (workers' compensation), which the plan keeps as the owner's step: nothing is filed, so 405 are forms the team files.
+Of the 422 forms with the team, 18 are insurance the owner buys from an insurer (workers' compensation), which the plan keeps as the owner's step: nothing is filed, so 404 are forms the team files.
 
 ## Portal logins
 
@@ -255,6 +255,7 @@ Of the 255 forms filed on an agency portal, who makes the account when the busin
 | Federal | Federal basic importer's permit for wine, beer or spirits (`ttb-importer`) | portal: www.ttbonline.gov | On the agency's portal | typed | no fee | [page](https://www.ttb.gov/import-export/itd/importing-bottled-alcohol-beverages-into-the-united-states) (2026-10-24) |
 | Minnesota | Articles of Organization (Minnesota LLC) (`mn-sos-llc`) | portal: mblsportal.sos.state.mn.us | On the agency's portal | typed | on the portal | [page](https://www.sos.mn.gov/business-liens/start-a-business/) (2026-10-24) |
 | Washington | Registration of an out-of-state company (`wa-sos-foreign`) | portal: ccfs.sos.wa.gov | On the agency's portal | typed | on the portal | [page](https://www.sos.wa.gov/corporations-charities/business-entities/online-filing-instructions/register-foreign-non-wa-limited-liability-company-llc-online) (2026-10-24) |
+| Santa Clara County | Fictitious business name (DBA) (`scc-fbn`) | email, mail: bus-rdc@rec.sccgov.org, Clerk-Recorder's Office, Business Division, San Jose | Signed by hand, mailed back in Placetta's return envelope | by hand | sent with it | [page](https://clerkrecorder.santaclaracounty.gov/business-services/apply-renew-or-refile-fictitious-business-name-fbn-statement) (2026-10-31) |
 | Pennsylvania | Registration of an out-of-state company to do business in the state (`pa-foreign-registration`) | portal: file.dos.pa.gov | On the agency's portal | typed | on the portal | [page](https://www.pa.gov/services/dos/register-a-business) (2026-10-24) |
 | Virginia | Registration of an out-of-state company to do business in the state (`va-foreign-registration`) | portal: cis.scc.virginia.gov | On the agency's portal | typed | on the portal | [page](https://www.scc.virginia.gov/businesses/forms-and-fees/foreign-limited-liability-companies/) (2026-10-24) |
 | New Jersey | Registration of an out-of-state company to do business in the state (`nj-foreign-registration`) | portal: www.njportal.com | On the agency's portal | typed | on the portal | [page](https://www.njportal.com/DOR/BusinessFormation/) (2026-10-27) |
@@ -566,7 +567,6 @@ Of the 255 forms filed on an agency portal, who makes the account when the busin
 | DEKALB | Food service plan review (`dekalb-plan-review`) | Not researched yet. |  |
 | DEKALB | Food service permit (`dekalb-food-permit`) | Not researched yet. |  |
 | Los Angeles County | Fictitious business name (DBA) (`lac-fbn`) | Waiting for verification: lavote.gov refused an automated read (403), so the Registrar-Recorder's online filing route wasn't confirmed. | [page](https://lavote.gov/home/county-clerk/fictitious-business-names/frequently-asked-questions) |
-| Santa Clara County | Fictitious business name (DBA) (`scc-fbn`) | Waiting for verification: santaclaracounty.gov answers automated reads with a bot check, so the Clerk-Recorder's filing route wasn't confirmed. | [page](https://www.santaclaracounty.gov/node/286) |
 | Nevada | Registration of an out-of-state company to do business in the state (`nv-foreign-registration`) | Not researched yet. |  |
 | Oregon | Registration of an out-of-state company to do business in the state (`or-foreign-registration`) | Not researched yet. |  |
 | Minnesota | Registration of an out-of-state company to do business in the state (`mn-foreign-registration`) | Not researched yet. |  |

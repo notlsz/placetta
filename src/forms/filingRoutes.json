@@ -630,7 +630,7 @@
 "sc-scda-rvc": "team",
 "scaqmd-permit-lac": "team",
 "scaqmd-permit-orc": "team",
-"scc-fbn": "team",
+"scc-fbn": "kitReturn",
 "scc-health-permit": "emailSigned",
 "scc-plan-check": "emailSigned",
 "sd-corp-form": "team",

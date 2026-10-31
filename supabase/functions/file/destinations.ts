@@ -491,6 +491,18 @@ export const DEST: Record<string, Dest> = {
     signature: "wet", payment: "invoice", onBehalf: "unstated",
     checked: "2026-10-18", source: "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and",
   },
+  "scc-fbn": {
+    // Read in a browser on 2026-10-31 (the county's site blocks automated reads): "E-mail: The form can be downloaded
+    // and filled out before submitting the completed form to bus-rdc@rec.sccgov.org." "Completed form must be submitted
+    // along with the filing fees." By mail, with a self-addressed stamped envelope. "Up to 5 workdays to process."
+    email: "bus-rdc@rec.sccgov.org",
+    mail: { name: "Clerk-Recorder's Office, Business Division", line1: "110 West Tasman Drive, First Floor", city: "San Jose", state: "CA", zip: "95134" },
+    signature: "wet",                                 // "SIGNED X" by the registrant; electronic signatures not addressed
+    payment: "with_filing",                           // $40, $7 per added name or registrant, with the statement
+    onBehalf: "unstated",
+    checked: "2026-10-31",
+    source: "https://clerkrecorder.santaclaracounty.gov/business-services/apply-renew-or-refile-fictitious-business-name-fbn-statement",
+  },
   "sac-bot": {
     // "Submit your application(s) by email to finance@cityofsacramento.org, by mail to Revenue Division 915 I Street,
     // Room 1214, Sacramento, CA 95814 or in person. Fees are due at the time of application." Online: sacramento.hdlgov.com.
@@ -2004,7 +2016,6 @@ export const TO_VERIFY: Record<string, { source: string; note: string; partial?:
   "ga-sos-foreign": { source: "https://sos.ga.gov/how-to-guide/how-to-guide-register-foreign-entity", note: "sos.ga.gov refused an automated read (403); eCorp (ecorp.sos.ga.gov) files Georgia's domestic LLCs, but the foreign registration guide wasn't read." },
   "ma-sos-foreign-llc": { source: "https://www.sec.state.ma.us/divisions/corporations/download/c156cs48fllcregistration.pdf", note: "sec.state.ma.us answers automated reads with a bot check, so the online route for the foreign LLC registration wasn't confirmed." },
   "lac-fbn": { source: "https://lavote.gov/home/county-clerk/fictitious-business-names/frequently-asked-questions", note: "lavote.gov refused an automated read (403), so the Registrar-Recorder's online filing route wasn't confirmed." },
-  "scc-fbn": { source: "https://www.santaclaracounty.gov/node/286", note: "santaclaracounty.gov answers automated reads with a bot check, so the Clerk-Recorder's filing route wasn't confirmed." },
   "hen-license": { source: "https://www.cityofhenderson.com/government/departments/finance/business-licensing/apply-for-a-business-license", note: "cityofhenderson.com refused an automated read (403), so the online application's address wasn't confirmed." },
   "fre-business-tax": { source: "https://fremont.gov/government/departments/finance/revenue/business-tax/apply-for-a-business-tax-account", note: "fremont.gov refused an automated read (403), so the online application's address wasn't confirmed." },
 };

@@ -291,6 +291,7 @@
 "sc-dew-ui": {"s":"typed","f":"esign","p":"none","site":"uitax.dew.sc.gov","src":"https://uitax.dew.sc.gov/scuiprod/onlinehelp/NetHelp/Documents/faq2.htm","chk":"2026-10-28"},
 "sc-dor-retail": {"s":"typed","f":"esign","p":"portal","site":"mydorway.dor.sc.gov","src":"https://dor.sc.gov/businesses/apply-business-tax-account/licensing-retail-license","chk":"2026-10-28"},
 "sc-scda-retail": {"s":"typed","f":"esign","p":"portal","site":"retailfoodregistration.agriculture.sc.gov","src":"https://agriculture.sc.gov/permits-and-inspections/retail-food-safety/","chk":"2026-10-28"},
+"scc-fbn": {"s":"wet","f":"wet","p":"with_filing","src":"https://clerkrecorder.santaclaracounty.gov/business-services/apply-renew-or-refile-fictitious-business-name-fbn-statement","chk":"2026-10-31"},
 "scc-health-permit": {"s":"wet","f":"wet","p":"invoice","src":"https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and","chk":"2026-10-18"},
 "scc-plan-check": {"s":"wet","f":"wet","p":"invoice","src":"https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/submit-plan-review-restaurants-grocery-stores-and","chk":"2026-10-18"},
 "sd-dlr-ui": {"s":"typed","f":"esign","site":"apps.sd.gov","src":"https://dlr.sd.gov/ra/businesses/registration.aspx","chk":"2026-10-28"},
