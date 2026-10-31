@@ -186,6 +186,15 @@ export const DEST: Record<string, Dest> = {
     checked: "2026-10-13",
     source: "https://www.houstonpermittingcenter.org/media/941/download",
   },
+  // Plano's own page (read in a browser, 2026-10-31): "Please email permit applications to Environmental Health once
+  // completed." Payment: "Credit Cards - Call 972-941-7143 ... Checks - Mail to or drop off at 1520 K Avenue, Suite 210".
+  "pla-food-permit": {
+    email: "EnvHealth@Plano.gov",                     // printed on the application (Jan. 2026) and linked on the page
+    signature: "wet",                                 // an "Applicant Signature" line; electronic signatures not addressed
+    payment: "invoice",                               // paid after submitting, by card over the phone or a check; nothing goes with it
+    checked: "2026-10-31",
+    source: "https://www.plano.gov/food-permits",
+  },
   "ny-dol-100": {
     fax: { us: "+15184858010" },
     mail: { name: "NYS Department of Labor, Unemployment Insurance Division, Registration Section", line1: "Harriman State Office Campus, Building 12", city: "Albany", state: "NY", zip: "12240-0339" },
@@ -2040,7 +2049,6 @@ export const TEAM_ONLY: Record<string, { why: string; source: string; checked: s
   "aus-co": { why: "Not an application: the Certificate of Occupancy follows the building permit's final inspection (the email address on the page is for one that wasn't issued).", source: "https://www.austintexas.gov/development-services/certificate-occupancy", checked: "2026-10-13" },
   "pla-co": { why: "The packet goes to Building Inspections with the fee; the guide names no email, mailing address or online route for it.", source: "https://content.civicplus.com/api/assets/tx-plano/d2490980-662a-4f38-8def-66070c8691e5", checked: "2026-10-18" },
   "pla-plan-review": { why: "Submitted to Building Inspections with the Environmental Health review form and fee; no remote route is published.", source: "https://www.plano.gov/food-permits", checked: "2026-10-18" },
-  "pla-food-permit": { why: "Issued by Environmental Health once the fee is paid, after the Certificate of Occupancy; there's no application route of its own.", source: "https://www.plano.gov/food-permits", checked: "2026-10-18" },
   "bos-plan-review": { why: "\"The Plan Review appointment is in-person only.\"", source: "https://www.boston.gov/permitting/permits/food-service-permit", checked: "2026-10-18" },
   "fulton-plan-review": { why: "Mailed or brought to the district office nearest the restaurant; the county's page didn't load for us and the application prints no address, so there's no confirmed destination.", source: "https://FultonCountyGa.gov/-/media/Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection/Link-List-Items/Food-Service-Application.pdf", checked: "2026-10-18" },
   "fulton-food-permit": { why: "Same district office as the plan review; no confirmed address or online route.", source: "https://fultoncountyga.gov/Inside-Fulton-County/Fulton-County-Departments/Board-of-Health/Environmental-Health/Restaurant-Inspection", checked: "2026-10-18" },

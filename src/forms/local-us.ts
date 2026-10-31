@@ -1495,10 +1495,14 @@ export const LOCAL_US: OfficialForm[] = [
     takesSource: SRC17("https://content.civicplus.com/api/assets/234824a7-ef4c-481f-8b7b-ab68b680a9fb"), checked: "page", fields: [],
   },
   {
-    id: "pla-food-permit", form: "Food establishment permit", title: B("Food establishment permit", "食品经营场所许可证"),
-    agency: B("City of Plano Environmental Health and Sustainability", "普莱诺市环境卫生与可持续发展局"), level: "city", where: "PLA", segments: [R, T], needs: { food: true }, method: "in_person", order: 76,
-    how: B("Issued by the city's Environmental Health division once the fee is paid; the business may not open before its Certificate of Occupancy is issued.", "缴费后由市环境卫生部门签发；取得占用证前不得开业。"),
+    id: "pla-food-permit", form: "Food Service / Liquid Waste Generator Application (Jan. 2026)", title: B("Food establishment permit", "食品经营场所许可证"),
+    agency: B("City of Plano Environmental Health and Sustainability", "普莱诺市环境卫生与可持续发展局"), level: "city", where: "PLA", segments: [R, T], needs: { food: true }, method: "pdf_mail", order: 76,
+    how: B("Email the completed application to EnvHealth@Plano.gov with the owner's government ID, the Texas Sales and Use Tax Permit, the menu and the Certified Food Manager Certificate (an LLC adds its articles). The fee is paid by card over the phone or by check; the business may not open before its Certificate of Occupancy is issued.", "将填好的申请连同业主政府身份证件、德州销售与使用税许可证、菜单和注册食品经理证书（LLC 另附公司章程）发送至 EnvHealth@Plano.gov。费用通过电话刷卡或支票缴纳；取得占用证前不得开业。"),
     url: "https://www.plano.gov/food-permits", info: "https://content.civicplus.com/api/assets/tx-plano/c39480c6-84db-4e2c-b253-d47e9ef3f83a",
     fee: null, feeNote: B("$240 to $640 for a food establishment by type, $295 to $750 for a retail food store (Resolution 2025-8-1(R)).", "食品经营场所按类型 240 至 640 美元，零售食品店 295 至 750 美元（第 2025-8-1(R) 号决议）。"), checked: "page", fields: [],
+    // the application's own list (Jan. 2026): "copies of the Owner's government issued ID ..., Texas Sales and Use Tax
+    // Permit, menu, and Certified Food Manager Certificate ... All Limited Liability Companies must provide a copy of
+    // their Articles of Incorporation."
+    attach: [B("Owner's government-issued ID (driver's license or passport)", "业主政府签发的身份证件（驾照或护照）"), B("Texas Sales and Use Tax Permit", "德州销售与使用税许可证"), B("Menu", "菜单"), B("Certified Food Manager Certificate", "注册食品经理证书"), B("Articles of incorporation or organization (an LLC)", "公司章程或组织章程（LLC 适用）")],
   },
 ];

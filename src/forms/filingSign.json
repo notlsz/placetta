@@ -279,6 +279,7 @@
 "phl-food-safety": {"s":"wet","f":"wet","p":"with_filing","owner":true,"src":"https://www.phila.gov/services/permits-violations-licenses/get-a-license/business-licenses/food-businesses/take-a-food-safety-certification-course/","chk":"2026-10-18"},
 "phl-tax-account": {"s":"typed","f":"esign","p":"none","site":"tax-services.phila.gov","src":"https://www.phila.gov/services/payments-assistance-taxes/taxes/get-a-tax-account/","chk":"2026-10-18"},
 "phmsa-5800": {"s":"typed","f":"esign","p":"portal","site":"portal.phmsa.dot.gov","src":"https://www.phmsa.dot.gov/registration/registration-overview","chk":"2026-10-18"},
+"pla-food-permit": {"s":"wet","f":"wet","p":"invoice","src":"https://www.plano.gov/food-permits","chk":"2026-10-31"},
 "qcy-license": {"s":"typed","f":"esign","site":"quincyma.viewpointcloud.com","src":"https://www.quincyma.gov/departments/city_clerk/index.php","chk":"2026-10-24"},
 "ri-doh-food-market": {"s":"wet","f":"wet","p":"with_filing","src":"https://health.ri.gov/applications/FoodMarketCashRegisters.pdf","chk":"2026-10-28"},
 "ri-doh-food-service": {"s":"wet","f":"wet","p":"with_filing","src":"https://health.ri.gov/applications/FoodServiceBusinessRetail.pdf","chk":"2026-10-28"},

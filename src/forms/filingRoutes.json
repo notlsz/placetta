@@ -598,7 +598,7 @@
 "phmsa-5800": "portal",
 "phx-co": "team",
 "pla-co": "team",
-"pla-food-permit": "team",
+"pla-food-permit": "emailSigned",
 "pla-plan-review": "team",
 "qcy-food-permit": "team",
 "qcy-license": "portal",

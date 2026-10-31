@@ -1,0 +1,564 @@
+{
+ "form": "pla-food-permit",
+ "rev": "Food Service / Liquid Waste Generator Application (Jan. 2026)",
+ "pdf": "pla-food-permit.pdf",
+ "url": "https://www.plano.gov/food-permits",
+ "checked": "2026-10-31",
+ "notes": "City of Plano Environmental Health & Sustainability's fillable application (54 fields). Email it with the owner's government ID, the Texas Sales and Use Tax Permit, the menu and the Certified Food Manager Certificate (and an LLC's articles) to EnvHealth@Plano.gov. Signature and date are left for the applicant. The facility may not open until Building Inspections issues the certificate of occupancy.",
+ "lines": [
+  {
+   "id": "application_type",
+   "line": "Top",
+   "en": "Application type",
+   "zh": "申请类型",
+   "options": [
+    "New Establishment",
+    "Change of Ownership",
+    "Name Change"
+   ]
+  },
+  {
+   "id": "opening_date",
+   "line": "Business Information",
+   "en": "Anticipated opening date",
+   "zh": "预计开业日期"
+  },
+  {
+   "id": "business_name",
+   "line": "Business Information",
+   "en": "Business name",
+   "zh": "商户名称"
+  },
+  {
+   "id": "store_number",
+   "line": "Business Information",
+   "en": "Store number",
+   "zh": "门店编号"
+  },
+  {
+   "id": "business_address",
+   "line": "Business Information",
+   "en": "Business physical address",
+   "zh": "营业场所实际地址"
+  },
+  {
+   "id": "business_phone",
+   "line": "Business Information",
+   "en": "Business phone",
+   "zh": "商户电话"
+  },
+  {
+   "id": "business_email",
+   "line": "Business Information",
+   "en": "Business email",
+   "zh": "商户电子邮箱"
+  },
+  {
+   "id": "owner_name",
+   "line": "Business Information",
+   "en": "Owner/Corporation/LLC name",
+   "zh": "业主/公司/LLC 名称"
+  },
+  {
+   "id": "owner_address",
+   "line": "Business Information",
+   "en": "Owner/Corporation/LLC address",
+   "zh": "业主/公司/LLC 地址"
+  },
+  {
+   "id": "owner_phone",
+   "line": "Business Information",
+   "en": "Owner phone",
+   "zh": "业主电话"
+  },
+  {
+   "id": "owner_email",
+   "line": "Business Information",
+   "en": "Owner's email",
+   "zh": "业主电子邮箱"
+  },
+  {
+   "id": "email_correspondence",
+   "line": "Business Information",
+   "en": "Would you like to receive all correspondence via email?",
+   "zh": "是否通过电子邮件接收所有通知？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "opt_out_email",
+   "line": "Business Information",
+   "en": "Would you like to opt out of email correspondence?",
+   "zh": "是否选择不接收电子邮件通知？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "mail_to",
+   "line": "Business Information",
+   "en": "If opting out of email, where to send correspondence",
+   "zh": "如不接收邮件，通知寄往何处",
+   "options": [
+    "Business Address",
+    "Owner Address"
+   ]
+  },
+  {
+   "id": "trap_size",
+   "line": "Grease Trap / Interceptor",
+   "en": "Size of grease trap (gallons or gpm)",
+   "zh": "隔油池容量（加仑或加仑/分钟）"
+  },
+  {
+   "id": "sample_port",
+   "line": "Grease Trap / Interceptor",
+   "en": "Sample port installed?",
+   "zh": "是否安装取样口？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "trap_shared",
+   "line": "Grease Trap / Interceptor",
+   "en": "Is the grease trap / interceptor shared or individual?",
+   "zh": "隔油池为共用还是独立？",
+   "options": [
+    "Shared",
+    "Individual"
+   ]
+  },
+  {
+   "id": "trap_location",
+   "line": "Grease Trap / Interceptor",
+   "en": "Location of trap",
+   "zh": "隔油池位置"
+  },
+  {
+   "id": "pm_name",
+   "line": "Property Management",
+   "en": "Property manager name",
+   "zh": "物业经理姓名"
+  },
+  {
+   "id": "pm_email",
+   "line": "Property Management",
+   "en": "Property manager email",
+   "zh": "物业经理电子邮箱"
+  },
+  {
+   "id": "pm_phone",
+   "line": "Property Management",
+   "en": "Property manager phone",
+   "zh": "物业经理电话"
+  },
+  {
+   "id": "hours_monday",
+   "line": "Days / Times of Operation",
+   "en": "Hours on Monday",
+   "zh": "周一营业时间"
+  },
+  {
+   "id": "hours_tuesday",
+   "line": "Days / Times of Operation",
+   "en": "Hours on Tuesday",
+   "zh": "周二营业时间"
+  },
+  {
+   "id": "hours_wednesday",
+   "line": "Days / Times of Operation",
+   "en": "Hours on Wednesday",
+   "zh": "周三营业时间"
+  },
+  {
+   "id": "hours_thursday",
+   "line": "Days / Times of Operation",
+   "en": "Hours on Thursday",
+   "zh": "周四营业时间"
+  },
+  {
+   "id": "hours_friday",
+   "line": "Days / Times of Operation",
+   "en": "Hours on Friday",
+   "zh": "周五营业时间"
+  },
+  {
+   "id": "hours_saturday",
+   "line": "Days / Times of Operation",
+   "en": "Hours on Saturday",
+   "zh": "周六营业时间"
+  },
+  {
+   "id": "hours_sunday",
+   "line": "Days / Times of Operation",
+   "en": "Hours on Sunday",
+   "zh": "周日营业时间"
+  },
+  {
+   "id": "alterations",
+   "line": "Operations",
+   "en": "Will any alterations, construction, remodeling or equipment replacement occur? (If yes, plans go to Plano Building Inspections with this application)",
+   "zh": "是否有改建、施工、装修或更换设备？（如有，图纸须提交建筑检查部门并随本申请附上）",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "grocery",
+   "line": "Operations",
+   "en": "Will this location be a grocery store?",
+   "zh": "该地点是否为杂货店？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "grocery_areas",
+   "line": "Operations",
+   "en": "If a grocery store: will it have a meat/seafood market, deli, produce, hot food service or bakery?",
+   "zh": "如为杂货店：是否设有肉类/海鲜、熟食、果蔬、热食或烘焙区？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "menu_change",
+   "line": "Operations",
+   "en": "Will there be a change in the menu?",
+   "zh": "菜单是否有变更？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "menu_items",
+   "line": "Operations",
+   "en": "Will the menu include sushi, cooked-to-order (undercooked) burgers, eggs or steak, raw animal proteins, crustaceans or shellfish, or kimchi?",
+   "zh": "菜单是否包含寿司、按需烹制（未全熟）的汉堡/鸡蛋/牛排、生的动物蛋白、甲壳类或贝类、或泡菜？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "special_processes",
+   "line": "Operations",
+   "en": "Will you perform any special process (time as a public health control, cooking/cooling/reheating, reduced oxygen packaging, acidification, additives, fermentation, sous vide, unpasteurized juice, curing, smoking, shellfish tanks)? If yes, a HACCP plan or SOPs are required",
+   "zh": "是否进行特殊工艺（以时间作为公共卫生控制、烹饪/冷却/复热、减氧包装、酸化、添加剂、发酵、低温慢煮、未经巴氏杀菌果汁、腌制、烟熏、贝类养殖缸）？如是，须提交 HACCP 计划或标准操作程序",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "children_elderly",
+   "line": "Operations",
+   "en": "Will food be mainly served to children or an elderly population?",
+   "zh": "食物是否主要供应儿童或老年人？",
+   "options": [
+    "Yes",
+    "No"
+   ]
+  },
+  {
+   "id": "applicant_name",
+   "line": "Acknowledgement",
+   "en": "Applicant printed name",
+   "zh": "申请人姓名（正楷）"
+  },
+  {
+   "id": "applicant_phone",
+   "line": "Acknowledgement",
+   "en": "Applicant contact number",
+   "zh": "申请人联系电话"
+  },
+  {
+   "id": "applicant_email",
+   "line": "Acknowledgement",
+   "en": "Applicant email",
+   "zh": "申请人电子邮箱"
+  }
+ ],
+ "boxes": {
+  "application_type": [
+   {
+    "check": "New Establishment",
+    "if": "^new"
+   },
+   {
+    "check": "Change of Ownership",
+    "if": "^change of owner"
+   },
+   {
+    "check": "Name Change",
+    "if": "^name"
+   }
+  ],
+  "opening_date": [
+   {
+    "text": "Anticipated Opening Date",
+    "pick": "date"
+   }
+  ],
+  "business_name": [
+   {
+    "text": "Business Name"
+   }
+  ],
+  "store_number": [
+   {
+    "text": "Store Number"
+   }
+  ],
+  "business_address": [
+   {
+    "text": "Business Physical Address"
+   }
+  ],
+  "business_phone": [
+   {
+    "text": "Business Phone",
+    "pick": "phone"
+   }
+  ],
+  "business_email": [
+   {
+    "text": "Business Email"
+   }
+  ],
+  "owner_name": [
+   {
+    "text": "OwnerCorporationLLC Name"
+   }
+  ],
+  "owner_address": [
+   {
+    "text": "OwnerCorporationLLC Address"
+   }
+  ],
+  "owner_phone": [
+   {
+    "text": "Phone",
+    "pick": "phone"
+   }
+  ],
+  "owner_email": [
+   {
+    "text": "Owners Email"
+   }
+  ],
+  "email_correspondence": [
+   {
+    "check": "email yes",
+    "if": "^(yes|y|是)$"
+   },
+   {
+    "check": "email no",
+    "if": "^(no|n|否)$"
+   }
+  ],
+  "opt_out_email": [
+   {
+    "check": "opt out email yes",
+    "if": "^(yes|y|是)$"
+   },
+   {
+    "check": "opt out email no",
+    "if": "^(no|n|否)$"
+   }
+  ],
+  "mail_to": [
+   {
+    "check": "Business Address",
+    "if": "^business"
+   },
+   {
+    "check": "Owner Address",
+    "if": "^owner"
+   }
+  ],
+  "trap_size": [
+   {
+    "text": "Size of trap gallons or gpm"
+   }
+  ],
+  "sample_port": [
+   {
+    "check": "sample port yes",
+    "if": "^(yes|y|是)$"
+   },
+   {
+    "check": "sample port no",
+    "if": "^(no|n|否)$"
+   }
+  ],
+  "trap_shared": [
+   {
+    "check": "Shared",
+    "if": "^shared"
+   },
+   {
+    "check": "Individual",
+    "if": "^individual"
+   }
+  ],
+  "trap_location": [
+   {
+    "text": "Location of Trap"
+   }
+  ],
+  "pm_name": [
+   {
+    "text": "Manager Name"
+   }
+  ],
+  "pm_email": [
+   {
+    "text": "Email"
+   }
+  ],
+  "pm_phone": [
+   {
+    "text": "Phone_2",
+    "pick": "phone"
+   }
+  ],
+  "hours_monday": [
+   {
+    "text": "HoursMonday"
+   }
+  ],
+  "hours_tuesday": [
+   {
+    "text": "HoursTuesday"
+   }
+  ],
+  "hours_wednesday": [
+   {
+    "text": "HoursWednesday"
+   }
+  ],
+  "hours_thursday": [
+   {
+    "text": "HoursThursday"
+   }
+  ],
+  "hours_friday": [
+   {
+    "text": "HoursFriday"
+   }
+  ],
+  "hours_saturday": [
+   {
+    "text": "HoursSaturday"
+   }
+  ],
+  "hours_sunday": [
+   {
+    "text": "HoursSunday"
+   }
+  ],
+  "alterations": [
+   {
+    "check": "alterations Yes",
+    "if": "^(yes|y|是)$"
+   },
+   {
+    "check": "alterations No",
+    "if": "^(no|n|否)$"
+   }
+  ],
+  "grocery": [
+   {
+    "check": "grocery store yes",
+    "if": "^(yes|y|是)$"
+   },
+   {
+    "check": "grocery store no",
+    "if": "^(no|n|否)$"
+   }
+  ],
+  "grocery_areas": [
+   {
+    "check": "areas yes",
+    "if": "^(yes|y|是)$"
+   },
+   {
+    "check": "areas no",
+    "if": "^(no|n|否)$"
+   }
+  ],
+  "menu_change": [
+   {
+    "check": "menu change yes",
+    "if": "^(yes|y|是)$"
+   },
+   {
+    "check": "menu change no",
+    "if": "^(no|n|否)$"
+   }
+  ],
+  "menu_items": [
+   {
+    "check": "menu items yes",
+    "if": "^(yes|y|是)$"
+   },
+   {
+    "check": "menu items no",
+    "if": "^(no|n|否)$"
+   }
+  ],
+  "special_processes": [
+   {
+    "check": "processes yes",
+    "if": "^(yes|y|是)$"
+   },
+   {
+    "check": "processes no",
+    "if": "^(no|n|否)$"
+   }
+  ],
+  "children_elderly": [
+   {
+    "check": "children or elderly yes",
+    "if": "^(yes|y|是)$"
+   },
+   {
+    "check": "children or elderly no",
+    "if": "^(no|n|否)$"
+   }
+  ],
+  "applicant_name": [
+   {
+    "text": "Applicant Print Name"
+   }
+  ],
+  "applicant_phone": [
+   {
+    "text": "Applicant Contact Number",
+    "pick": "phone"
+   }
+  ],
+  "applicant_email": [
+   {
+    "text": "Applicant Email"
+   }
+  ]
+ },
+ "unmapped": {},
+ "blank": {
+  "store_number": "^(none|n/?a)$",
+  "pm_name": "^(none|n/?a)$",
+  "pm_email": "^(none|n/?a)$",
+  "pm_phone": "^(none|n/?a)$"
+ }
+}

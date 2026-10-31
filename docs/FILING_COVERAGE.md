@@ -10,13 +10,13 @@ A form can have more than one channel. Team only means Placetta has no route it 
 
 | Channel | Before (2026-10-17) | Now |
 |---|---:|---:|
-| Team only | 231 | 421 |
-| Email | 5 | 38 |
+| Team only | 231 | 420 |
+| Email | 5 | 39 |
 | Fax | 4 | 26 |
 | Certified mail | 13 | 79 |
 | Agency portal | 16 | 255 |
 | Owner packet | 0 | 26 |
-| Any route Placetta sends on | 542 | 326 |
+| Any route Placetta sends on | 542 | 327 |
 
 ## How each form would go on its first try
 
@@ -30,12 +30,12 @@ With every channel switched on, a saved login for each portal and a connected ma
 | By certified mail | 0 | 0 | 1 |
 | Owner packet: the owner sends it | 0 | 31 | 26 |
 | Signed by hand, then Placetta faxes it | 3 | 6 | 10 |
-| Signed by hand, then Placetta emails it | 0 | 0 | 23 |
+| Signed by hand, then Placetta emails it | 0 | 0 | 24 |
 | Signed by hand, mailed back in Placetta's return envelope | 0 | 0 | 29 |
 | Signed by hand and sent by the owner | 6 | 25 | 1 |
-| The Placetta team | 233 | 336 | 424 |
+| The Placetta team | 233 | 336 | 423 |
 
-Of the 424 forms with the team, 18 are insurance the owner buys from an insurer (workers' compensation), which the plan keeps as the owner's step: nothing is filed, so 406 are forms the team files.
+Of the 423 forms with the team, 18 are insurance the owner buys from an insurer (workers' compensation), which the plan keeps as the owner's step: nothing is filed, so 405 are forms the team files.
 
 ## Portal logins
 
@@ -199,6 +199,7 @@ Of the 255 forms filed on an agency portal, who makes the account when the busin
 | Columbus | Food service plan review (`cmh-plan-review`) | email: EH@columbus.gov | Signed by hand, then Placetta emails it | by hand | billed after | [page](https://www.columbus.gov/files/sharedassets/city/v/10/public-health/planreview-application.pdf) (2026-10-18) |
 | Oregon | Oregon employer registration (payroll taxes) (`or-payroll`) | fax, mail, portal: revenueonline.dor.oregon.gov, +15039471528, Oregon Employment Department, Salem | On the agency's portal | by hand | no fee | [page](https://www.oregon.gov/dor/programs/businesses/Pages/Withholding-and-Payroll-tax.aspx) (2026-10-18) |
 | Portland | Portland business tax registration (`pdx-tax`) | fax, mail, portal: pro.portland.gov, +15038235192, Revenue Division, Portland | On the agency's portal | by hand | no fee | [page](https://www.portland.gov/revenue/register-tax-account) (2026-10-18) |
+| Plano | Food establishment permit (`pla-food-permit`) | email: EnvHealth@Plano.gov | Signed by hand, then Placetta emails it | by hand | billed after | [page](https://www.plano.gov/food-permits) (2026-10-31) |
 | Federal | Tax Information Authorization (`irs-8821`) | portal: connect.irs.gov | On the agency's portal | typed | no fee | [page](https://www.irs.gov/tax-professionals/submit-forms-2848-and-8821-online) (2026-10-18) |
 | Federal | Power of Attorney and Declaration of Representative (`irs-2848`) | portal: connect.irs.gov | On the agency's portal | typed | no fee | [page](https://www.irs.gov/tax-professionals/submit-forms-2848-and-8821-online) (2026-10-18) |
 | Federal | Entity Classification Election (`irs-8832`) | mail: by the business's state: Kansas City, MO; Ogden, UT; abroad: Ogden, UT 84201-0023 | By certified mail | drawn | no fee | [page](https://www.irs.gov/filing/where-to-file-your-taxes-for-form-8832) (2026-10-28) |
@@ -483,7 +484,6 @@ Of the 255 forms filed on an agency portal, who makes the account when the busin
 | Multnomah County | Multnomah County restaurant license (`mult-food-license`) | Same as the plan review: the page names no address or inbox. | [page](https://multco.us/services/restaurant-license) (2026-10-18) |
 | Plano | Certificate of Occupancy (`pla-co`) | The packet goes to Building Inspections with the fee; the guide names no email, mailing address or online route for it. | [page](https://content.civicplus.com/api/assets/tx-plano/d2490980-662a-4f38-8def-66070c8691e5) (2026-10-18) |
 | Plano | Food establishment plan review (`pla-plan-review`) | Submitted to Building Inspections with the Environmental Health review form and fee; no remote route is published. | [page](https://www.plano.gov/food-permits) (2026-10-18) |
-| Plano | Food establishment permit (`pla-food-permit`) | Issued by Environmental Health once the fee is paid, after the Certificate of Occupancy; there's no application route of its own. | [page](https://www.plano.gov/food-permits) (2026-10-18) |
 | Montgomery County, MD | Food service plan review (`moco-plan-review`) | Health and Human Services reviews the plans before any building permit issues; they go in with the building permit to the permitting office for the address (the county's Department of Permitting Services, or the City of Rockville's or Gaithersburg's), filed by the design professional. | [page](https://montgomerycountymd.gov/HHS/Resources/Files/L%26R/Guidance%20-%20DHHS%20Plan%20Review%20via%20DPS%2010_2024.pdf) (2026-10-18) |
 | San Mateo County | Food facility plan check (`smc-plan-check`) | San Mateo County's plan check page didn't load past its navigation for us, so the plan submission route (MyEHS or paper) wasn't confirmed. | [page](https://www.smchealth.org/food-facility-plan-check-process) (2026-10-18) |
 | Glendale | Glendale business registration certificate (`gln-brc`) | Applied for in the city's GlendalePermits portal, whose address the city's page doesn't print. | [page](https://www.glendaleca.gov/government/departments/community-development/licenses-permits-and-applications/license-and-permit-applications/business-registration-certificate) (2026-10-18) |
