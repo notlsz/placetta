@@ -735,3 +735,14 @@
 /* final call on where a short chat sits (rounds 14 and 20 went both ways): on it, like Poke and iMessage, the texting
    apps Odelia is modeled on, so the suggestions follow the last message with no gap. A phone already fills the screen. */
 @media (min-width: 860px) { .page.odelia.chat .feed > :first-child { margin-top: auto; } }
+/* phone Licenses, lighter: the agency is one line (its full name is in the license), "Sets opening date" on its own */
+@media (max-width: 640px) {
+  .page.permits .c-name > small:first-of-type { display: block; white-space: nowrap !important; overflow: hidden; text-overflow: ellipsis; }
+  .page.permits .c-name small .c-crit-t { display: block; margin: 2px 0 0; }
+}
+/* one approve button everywhere: the plan card's is the same height as Home's (Ive) */
+.job-approve .pill.ink.sm { height: 48px; padding: 0 18px 0 22px; font-size: 15px; }
+/* open, the swatches name the tea; the summary's name and dot show only when folded, so nothing is said twice */
+.settings details.accent[open] > summary .sw-name, .settings details.accent[open] > summary .sw-now { display: none; }
+/* Work: the cross-store job is a plan like the store jobs under it, one treatment (Ive): the same fill, no raised shadow */
+.page.odelia .cos { background: var(--mist); box-shadow: none; border-radius: 20px; }
