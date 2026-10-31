@@ -7,3 +7,9 @@ aus-fp-b https://austin.widen.net/content/2smzwfvayk/original/10125FP-v2-Gross-A
 ca-ftb-3522 https://www.ftb.ca.gov/forms/2026/2026-3522.pdf
 ny-dos-1336 https://dos.ny.gov/system/files/documents/2023/03/1336-f.pdf
 co-tax https://tax.colorado.gov/sites/tax/files/documents/CR0100AP.pdf
+pla-food-permit https://content.civicplus.com/api/assets/tx-plano/71719162-74ec-449d-b745-9b6b1a479b12
+pla-plan-procedures https://www.plano.gov/asset/234824a7-ef4c-481f-8b7b-ab68b680a9fb
+pla-plan-submittal https://www.plano.gov/asset/ac97282c-0149-4243-9b8e-5be4cc5c06dd
+pla-food-requirements https://www.plano.gov/asset/1f521bb0-7184-4285-bd1a-11a91f39ab8c
+pla-prepermit-checklist https://content.civicplus.com/api/assets/tx-plano/90e009a8-9bdb-42a0-8964-77138129948c
+pla-fees https://content.civicplus.com/api/assets/tx-plano/c39480c6-84db-4e2c-b253-d47e9ef3f83a
