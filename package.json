@@ -73,7 +73,7 @@
     "test:edges": "esbuild scripts/edge-finder.ts --bundle --platform=node --format=esm --outfile=.edge-finder.mjs '--external:*.pdf?inline' --packages=external --jsx=automatic --log-level=error && node .edge-finder.mjs; s=$?; rm -f .edge-finder.mjs; exit $s"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.117.2",
+    "@supabase/supabase-js": "^2.118.0",
     "border-beam": "^1.4.1",
     "bot-avatars": "^0.2.2",
     "fflate": "^0.8.3",
