@@ -1,0 +1,471 @@
+{
+  "jc-co": {
+    "status": "mapped",
+    "form_seen": "U.C.C. F270 (rev. 8/2011) Application for Certificate",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.jerseycitynj.gov/cityhall/HousingAndDevelopment/businesses", "what": "application page (New Businesses, Certificate of Occupancy tabs: Change of Use / Continued CO / New CO)" },
+      { "url": "https://www.jerseycitynj.gov/common/pages/GetFile.ashx?key=c6wnAatS", "what": "official PDF (UCC F270 linked as 'UCC 270 Form')" }
+    ],
+    "fields": [
+      { "id": "work_site_location", "line": "Identification", "en": "Work Site Location", "zh": "施工/营业场所地址" },
+      { "id": "block", "line": "Identification", "en": "Block", "zh": "地块编号（Block）", "hint_en": "Tax map block number", "hint_zh": "税务地图上的 Block 编号" },
+      { "id": "lot", "line": "Identification", "en": "Lot", "zh": "宗地编号（Lot）" },
+      { "id": "qualification_code", "line": "Identification", "en": "Qualification Code", "zh": "资格代码（Qualification Code，如有）" },
+      { "id": "owner_in_fee", "line": "Identification", "en": "Owner in Fee", "zh": "产权所有人（Owner in Fee）" },
+      { "id": "owner_address", "line": "Identification", "en": "Address (owner)", "zh": "产权人地址" },
+      { "id": "owner_tel", "line": "Identification", "en": "Tel. (owner)", "zh": "产权人电话" },
+      { "id": "contractor", "line": "Identification", "en": "Contractor", "zh": "承包商名称" },
+      { "id": "contractor_address", "line": "Identification", "en": "Address (contractor)", "zh": "承包商地址" },
+      { "id": "contractor_tel", "line": "Identification", "en": "Tel. (contractor)", "zh": "承包商电话" },
+      { "id": "contractor_license_no", "line": "Identification", "en": "License No.", "zh": "承包商执照号" },
+      { "id": "federal_employer_no", "line": "Identification", "en": "Federal Employee No.", "zh": "联邦雇主识别号（FEIN）" },
+      { "id": "action", "line": "Action", "en": "Certificate requested", "zh": "申请的证书类型",
+        "options": ["Certificate of Occupancy", "Certificate of Continued Occupancy", "Lead Hazard Abatement Certificate of Clearance", "Temporary Certificate of Occupancy"] },
+      { "id": "use_group_previous", "line": "Action", "en": "Use Group: Previous", "zh": "原用途类别（Use Group）" },
+      { "id": "use_group_current", "line": "Action", "en": "Use Group: Current", "zh": "现用途类别（Use Group）" },
+      { "id": "final_cost_of_construction", "line": "Action", "en": "Final Cost of Construction: $", "zh": "最终施工造价（美元）",
+        "hint_en": "Include value of any new structure, all on-site improvements, built-in furnishings and fixtures and all integral equipment exclusive of process or manufacturing equipment.",
+        "hint_zh": "包括新建结构、场内改良、固定家具与装置及所有配套设备的价值，不含生产/加工设备。" },
+      { "id": "deviations_from_plans", "line": "Action", "en": "Describe any substantive deviation from the released plans and specifications", "zh": "说明与已批准图纸和规格的重大偏差", "hint_en": "A set of amended drawings may be required.", "hint_zh": "可能需要提交一套修订图纸。" },
+      { "id": "tco_reason", "line": "Action", "en": "If requesting a Temporary Certificate of Occupancy, explain why", "zh": "如申请临时占用证书，请说明原因" },
+      { "id": "description_of_work_use", "line": "Action", "en": "Description of Work/Use", "zh": "工程/用途说明" },
+      { "id": "signer_role", "line": "Signature", "en": "Signed: Owner / Agent", "zh": "签署人身份：业主 / 代理人", "options": ["Owner", "Agent"] }
+    ],
+    "attach": [
+      { "en": "Photo of front of (entire) property", "zh": "物业正面（整体）照片" },
+      { "en": "UCC 270 Form (F270)", "zh": "UCC F270 证书申请表" },
+      { "en": "Zoning approved plans", "zh": "经分区（Zoning）批准的图纸" }
+    ],
+    "destination": {
+      "portal": "jcnj.org",
+      "signature": "unknown",
+      "evidence": "All new CO applications are processed through the Jersey City Permit Portal.",
+      "source": "https://www.jerseycitynj.gov/cityhall/HousingAndDevelopment/businesses"
+    },
+    "notes": "The city page links the portal as http://jcnj.org/permitportal (a redirect; the host did not resolve from our sandbox, so the final portal host is unconfirmed). The CO track depends on the case: Change of Use (Zoning Review with F100/F110 and NJDCA form, then a Change of Use construction application, then the CO), Continued CO (Certificate-CCO, needs applicant contact info + UCC 270; if a CO already exists, email constructioncode@jcnj.org for a $50 'Non-CO letter' to add your name), or New CO after new construction/tenant fit-out. F270 is a 2011 state form; the portal may ask its own questions in addition. No CO fee amount was shown on the page."
+  },
+  "jc-food-license": {
+    "status": "page_only",
+    "form_seen": "Procedures for Opening a Food Establishment (Jersey City HHS, Environmental Health, 2026 PDF); the application form itself was not published",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.jerseycitynj.gov/cityhall/health/divisionofhealth", "what": "application page (Division of Environmental Health, Bureau of Licensing)" },
+      { "url": "https://www.jerseycitynj.gov/UserFiles/Servers/Server_6189660/File/City%20Hall/Human%20Health%20and%20Services/ENVIRONMENTAL/2026/FOOD%20ESTABLISHMENT%20OPENING.pdf", "what": "instructions (documents needed at the appointment)" }
+    ],
+    "fields": [
+      { "id": "owner_photo_id", "line": "1", "en": "Owner must apply in person with proof of ID", "zh": "业主须本人到场并出示身份证明" },
+      { "id": "ein_or_ssn", "line": "2", "en": "Tax ID (EIN) or Social Security Number", "zh": "联邦税号（EIN）或社会安全号（SSN）" },
+      { "id": "license_class", "line": "6", "en": "License class (determined by the inspector)", "zh": "执照类别（由检查员确定）" }
+    ],
+    "attach": [
+      { "en": "Proof of ID (owner, in person)", "zh": "业主身份证明（本人到场）" },
+      { "en": "Tax ID (EIN) or Social Security Number", "zh": "EIN 或 SSN 证明" },
+      { "en": "Business Liability Insurance (minimum $500,000)", "zh": "商业责任保险（最低 50 万美元）" },
+      { "en": "Certificate of Occupancy showing the proper use of the property (same usage as your business)", "zh": "用途与经营业务一致的占用证书（CO）" },
+      { "en": "$75.00 pre-operational inspection fee (cash, debit or credit card)", "zh": "75 美元开业前检查费（现金、借记卡或信用卡）" },
+      { "en": "Food Safety Manager or Food Handler's course certificate (depending on risk level)", "zh": "食品安全经理或食品处理员课程证书（视风险等级）" },
+      { "en": "Bill of sale if the business was bought / lease agreement", "zh": "如为收购须提供买卖契据 / 租赁合同" }
+    ],
+    "destination": {
+      "signature": "unknown",
+      "evidence": "All new licenses and temporary vendor licenses are in person, by appointment only. ... To make an appointment, call 201-547-5285 or 201-547-5173. No walk-ins will be accepted.",
+      "source": "https://www.jerseycitynj.gov/cityhall/health/divisionofhealth"
+    },
+    "notes": "New retail food licenses are in person by appointment only (no walk-ins); renewals are online (Health Licensing Applications link goes to eforms-main.govpilot.com/NJ/jerseycity). Office: City Hall Annex, One Jackson Square (364 MLK Drive), Jersey City NJ 07305, (201) 547-6800. Flow: documents approved, then pre-operational inspection ($75), then a return visit to obtain the annual license; you may not open before the license. License fees changed Aug 1, 2025 (fee list PDF linked on the page, not read here). Library method 'in_person' is correct."
+  },
+  "pla-co": {
+    "status": "not_found",
+    "form_seen": "Only 'Guide to Obtaining a Certificate of Occupancy' (City of Plano, footer dated 3/2/2026) was seen; the CO application packet itself was not reachable",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://content.civicplus.com/api/assets/tx-plano/d2490980-662a-4f38-8def-66070c8691e5", "what": "instructions (guide, not the application)" },
+      { "url": "https://content.civicplus.com/api/assets/tx-plano/ed8a9281-4c9b-49d7-8415-944fc1768562", "what": "instructions (Customer's Guide to the Building Permit Process, revised 10/8/2024)" }
+    ],
+    "fields": [],
+    "attach": [
+      { "en": "Floor plans, if required (e.g., change in occupancy group); ask Building Inspections", "zh": "如需要（例如占用类别变更），提交平面图；请向建筑检查部门确认" }
+    ],
+    "destination": {
+      "signature": "unknown",
+      "evidence": "Complete a Certificate of Occupancy application packet with the Building Inspections Department and pay an application fee.",
+      "source": "https://content.civicplus.com/api/assets/tx-plano/d2490980-662a-4f38-8def-66070c8691e5"
+    },
+    "notes": "MISMATCH: the library URL for this form is the CO guide, not the application packet. The guide says the packet is 'available at the Building Inspections Department or online at Plano.gov/BuildingInspections', but that page loads its documents by script and we could not reach the PDF. Submit at Building Inspections, Plano Municipal Center, 1520 K Ave, Suite 140, Plano TX 75074, 972-941-7140 (fax 972-941-7187 and BuildingPermits@plano.gov appear in the permit guide footer but neither is stated as accepting CO applications). The application must state the zoning use; the site needs an approved site plan and final plat. If construction is needed, an interior finish-out building permit is required rather than a simple CO permit. Fee amount not stated. Inspection scheduling: trakit.plano.gov."
+  },
+  "pla-plan-review": {
+    "status": "not_found",
+    "form_seen": "Food Plan Review Procedures (Plano Environmental Health & Sustainability, undated); the 'Food Establishment Plan Review' form it references was not reachable",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://content.civicplus.com/api/assets/234824a7-ef4c-481f-8b7b-ab68b680a9fb", "what": "instructions" },
+      { "url": "https://content.civicplus.com/api/assets/tx-plano/c39480c6-84db-4e2c-b253-d47e9ef3f83a", "what": "fee schedule (Exhibit A to Resolution No. 2025-8-1(R))" }
+    ],
+    "fields": [],
+    "attach": [
+      { "en": "Plans showing the name, location, general contractor and engineer", "zh": "图纸：注明名称、地址、总承包商和工程师" },
+      { "en": "Kitchen layout, bar layout (if any), restrooms, dry storage and dumpster area", "zh": "厨房布局、吧台布局（如有）、卫生间、干货仓储和垃圾箱区域" },
+      { "en": "Plumbing plans with grease trap information (Environmental Quality review)", "zh": "含隔油池信息的管道图（环境质量审查）" },
+      { "en": "Equipment schedule/list and finish schedule for kitchen and restroom", "zh": "厨房和卫生间的设备清单及饰面材料表" },
+      { "en": "Copy of proposed menu", "zh": "拟定菜单副本" },
+      { "en": "Plan review fee ($475 new food establishment; $275 remodel/expansion/equipment review)", "zh": "图纸审查费（新餐饮场所 475 美元；改建/扩建/设备审查 275 美元）" }
+    ],
+    "destination": {
+      "signature": "unknown",
+      "evidence": "plans must be submitted to the city of Plano Building Inspections department along with \"Food Establishment Plan Review\" form, so the plans can be reviewed by the Environmental Health division.",
+      "source": "https://content.civicplus.com/api/assets/234824a7-ef4c-481f-8b7b-ab68b680a9fb"
+    },
+    "notes": "The plan review form itself is not published at a reachable URL (the plano.gov EH Permits page loads its documents by script). Plans 'can be submitted electronically or paper plans, stamped by a licensed engineer and legible'; plans without the fee are not accepted. Review takes 10 business days; no expediting. Fees (Resolution 2025-8-1(R)): plan review $475, remodel $275, re-inspection $80; the two required inspections (pre-operational and final) are included. Questions: 972-941-7143, envhealth@plano.gov. The Building Inspections guide says food businesses submit 3 copies of plans."
+  },
+  "pla-food-permit": {
+    "status": "not_found",
+    "form_seen": "Only the Environmental Health & Sustainability Department Fee Schedule (Exhibit A to Resolution No. 2025-8-1(R)) was seen; the food permit application was not reachable",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.plano.gov/food-permits", "what": "application page" },
+      { "url": "https://content.civicplus.com/api/assets/tx-plano/c39480c6-84db-4e2c-b253-d47e9ef3f83a", "what": "fee schedule" }
+    ],
+    "fields": [],
+    "attach": [],
+    "destination": {
+      "signature": "unknown",
+      "evidence": "Submit required documents for review to Environmental Health for a seamless process.",
+      "source": "https://www.plano.gov/food-permits"
+    },
+    "notes": "MISMATCH: the library 'info' URL (c39480c6...) is the EH fee schedule, not an application. Annual permit fees: Retail Food Store Type I $295 / II $590 / III $750; Food Establishment Type I $240 / II $430 / III $590 / IV $640 (risk-based categories defined in the schedule); late renewal 10% (1-30 days) or 20% max $100 (31-60 days). 'No permit shall be issued or renewed until the applicable permit fee is paid.' Business may not open until the CO is issued. Contact: Environmental Health & Sustainability, Plano Municipal Center Suite 210 (per CO guide), 972-941-7143, envhealth@plano.gov."
+  },
+  "sl-plan-review": {
+    "status": "page_only",
+    "form_seen": "Food Inspection Program: Pre-opening: New Construction/Remodel & Change of Ownership Requirements (City of Sugar Land, 7 pages, undated)",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "css_account", "line": "", "en": "Create a profile or log in to the City's Citizen Self-Service (CSS) portal", "zh": "在市政府 Citizen Self-Service（CSS）门户注册或登录" },
+      { "id": "application_type", "line": "", "en": "Application searched under Apply (e.g. 'Occupancy' for 'Tenant Change of Occupancy Application')", "zh": "在 Apply 中搜索申请类型（如输入 Occupancy，选择 Tenant Change of Occupancy Application）" }
+    ],
+    "attach": [
+      { "en": "Menu", "zh": "菜单" },
+      { "en": "Floor plans, including equipment and finish schedules", "zh": "平面图，含设备清单和饰面材料表" }
+    ],
+    "destination": {
+      "portal": "energovweb.sugarlandtx.gov",
+      "signature": "typed",
+      "evidence": "Plan reviews are only accepted online through Citizen Self-Service (CSS) Portal.",
+      "source": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements"
+    },
+    "notes": "Plans go to the COSL Permits Office via CSS before work begins, or within 30 days of a change of ownership; one application notifies Building, Fire, Planning and Food. Changing ownership without plan review and permit approval can bring a citation and closure notice. Permits questions: permits@sugarlandtx.gov, 281-275-2270. Food Inspection Program: 111 Gillingham Lane, Bldg. B, Sugar Land TX 77478, 281-275-2170. No fee amount is printed in the guide."
+  },
+  "sl-food-permit": {
+    "status": "page_only",
+    "form_seen": "Food Inspection Program: Pre-opening: New Construction/Remodel & Change of Ownership Requirements (City of Sugar Land), section FOOD PERMIT",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "css_login", "line": "Step 1", "en": "Login or register at Citizen Self-Service (CSS) to apply for Food Establishment & Frozen Food Permit", "zh": "登录或注册 CSS，申请食品经营及冷冻食品许可" },
+      { "id": "permit_type", "line": "Step 3", "en": "Search 'FOOD' and select PERMANENT FOOD ESTABLISHMENT PERMIT", "zh": "搜索 FOOD 并选择 PERMANENT FOOD ESTABLISHMENT PERMIT（固定食品经营许可）" },
+      { "id": "business_name_matches_sales_tax", "line": "Documents 3", "en": "Business name (must match the Texas Sales Tax Permit)", "zh": "商号名称（须与德州销售税许可上的名称一致）" }
+    ],
+    "attach": [
+      { "en": "Certified Food Protection Manager certificate (at least one employee on duty at all hours)", "zh": "食品安全经理认证（营业时间内至少一名持证员工在岗）" },
+      { "en": "Waste manifest or grease trap service receipt (not required for new establishments or those closed more than 90 days)", "zh": "废物清运单或隔油池清理收据（新开业或停业超过 90 天者免交）" },
+      { "en": "Copy of State of Texas Sales Tax Permit (business name must match the food establishment)", "zh": "德州销售税许可副本（名称须与食品场所一致）" },
+      { "en": "Pest control contract or most current invoice", "zh": "虫害防治合同或最新发票" },
+      { "en": "Menu (official or unofficial list of all food items offered)", "zh": "菜单（全部出售食品的正式或非正式清单）" }
+    ],
+    "destination": {
+      "portal": "energovweb.sugarlandtx.gov",
+      "signature": "typed",
+      "evidence": "Step 4: Begin your application process and upload all required supporting documents.",
+      "source": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements"
+    },
+    "notes": "After a change-of-occupancy/new construction/remodel application is filed, CSS emails a link to complete the food permit application; it must be done before requesting the final food inspection. The guide says 'Documents to be submitted may include' the five items above. Library method 'online' is correct. Fee amounts not printed. Questions: FoodInspection@SugarLandTX.gov, 281-275-2170."
+  },
+  "sl-co": {
+    "status": "page_only",
+    "form_seen": "Tenant Change of Occupancy Application (CSS portal), as described in the Food Inspection Program pre-opening guide",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "css_account", "line": "", "en": "Create a profile or log in to the City's CSS portal", "zh": "在市政府 CSS 门户注册或登录" },
+      { "id": "application_type", "line": "", "en": "Search 'Occupancy' and select 'Tenant Change of Occupancy Application'", "zh": "搜索 Occupancy，选择 Tenant Change of Occupancy Application（租户占用变更申请）" }
+    ],
+    "attach": [],
+    "destination": {
+      "portal": "energovweb.sugarlandtx.gov",
+      "signature": "typed",
+      "evidence": "This will initiate the application process, and notify all departments (Building, Fire, Planning, & Food) of application once completed.",
+      "source": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements"
+    },
+    "notes": "Only the food program's guide was found; no Building/Permits CO guide listing the portal's questions was located. The CO is issued by email: 'Once you receive inspections from Fire, Building and are approved, the permits office will issue you a new Certificate of Occupancy via email.' Permits Office: permits@sugarlandtx.gov, 281-275-2270."
+  },
+  "chi-building": {
+    "status": "page_only",
+    "form_seen": "Express Permit Program: Interior Alteration (Nonstructural Interior Work), Chicago Guide to Building Permits, 'Before You Apply' list",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/INTWK-alteration.html", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "property_address", "line": "", "en": "Property address", "zh": "物业地址" },
+      { "id": "property_pin", "line": "", "en": "Property PIN (lookup on Cook County Assessor website)", "zh": "物业 PIN 编号（可在库克县评估办公室网站查询）" },
+      { "id": "property_owner", "line": "", "en": "Property owner: name and contact information", "zh": "业主姓名及联系方式" },
+      { "id": "emergency_contact", "line": "", "en": "Designated emergency contact", "zh": "指定紧急联系人" },
+      { "id": "building_info", "line": "", "en": "Basic info about the main building (number of stories, number/type of units)", "zh": "主建筑基本信息（层数、单元数量/类型）" },
+      { "id": "alteration_details", "line": "", "en": "Details of the proposed interior alterations", "zh": "拟进行的室内改造详情" },
+      { "id": "contractors", "line": "", "en": "Required contractors: exact names or Chicago license numbers", "zh": "所需承包商：准确名称或芝加哥执照号" },
+      { "id": "design_professional", "line": "", "en": "Required design professional (if any): exact name or Illinois license number", "zh": "所需设计专业人员（如有）：准确姓名或伊利诺伊州执照号" }
+    ],
+    "attach": [
+      { "en": "Existing condition photograph (at least 1)", "zh": "现状照片（至少 1 张）" },
+      { "en": "Energy and water efficiency compliance form", "zh": "能源与节水合规表" },
+      { "en": "Non-residential work: drawings by an Illinois-licensed architect or structural engineer (existing and proposed floor plans per story)", "zh": "非住宅工程：由伊利诺伊州持证建筑师或结构工程师绘制的图纸（每层现状及拟建平面图）" },
+      { "en": "HVAC load calculation (if new air conditioning)", "zh": "暖通负荷计算（如新增空调）" },
+      { "en": "Condominium association approval letter (if condo property)", "zh": "公寓业主协会批准函（如为公寓物业）" },
+      { "en": "Government ownership or funding letter (if applicable, e.g. SBIF grant)", "zh": "政府产权或资助证明函（如适用，例如 SBIF 补助）" },
+      { "en": "Tax and demolition form (if fire damage)", "zh": "税务与拆除表（如有火灾损坏）" },
+      { "en": "Owner as contractor form (Form 401) and government ID (if owner acts as GC or plumber)", "zh": "业主自任承包商表（Form 401）及政府身份证件（如业主自任总包或水管工）" }
+    ],
+    "destination": {
+      "portal": "webapps1.chicago.gov",
+      "signature": "typed",
+      "evidence": "Before you start the online application, you should have: Property address ...",
+      "source": "https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/INTWK-alteration.html"
+    },
+    "notes": "ALARM: for non-residential units the Express Permit Program lists as NOT eligible 'Constructing or remodeling space for a new food establishment or food establishment operator', work on a never-occupied shell/vanilla box, and changes of occupancy. Assembly (Group A, e.g. restaurants) is capped at 500 sq ft; other non-residential at 2,000 sq ft. So most new restaurant build-outs need standard plan review, not EPP; the library entry should not route food businesses to EPP. Portal host taken from the page's link to webapps1.chicago.gov/buildingpermit/ (not opened). Licensed general contractor required (Class A-E by cost). Fees: stand-alone permit fees per Chicago Construction Codes 14A-12-1204.2 (amounts not shown)."
+  },
+  "jc-construction": {
+    "status": "mapped",
+    "form_seen": "U.C.C. F100 Construction Permit Application (F100-1 rev. 8/08, F100-2 rev. 11/2014, F100-3 rev. 12/07)",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.jerseycitynj.gov/cityhall/HousingAndDevelopment/businesses", "what": "application page (Change of Use tab)" },
+      { "url": "https://www.jerseycitynj.gov/common/pages/GetFile.ashx?key=NIkjAeh3", "what": "official PDF (F100 Construction Jacket)" }
+    ],
+    "fields": [
+      { "id": "block", "line": "Header", "en": "Block", "zh": "地块编号（Block）" },
+      { "id": "lot", "line": "Header", "en": "Lot", "zh": "宗地编号（Lot）" },
+      { "id": "qualification_code", "line": "Header", "en": "Qualification Code", "zh": "资格代码（如有）" },
+      { "id": "site_address", "line": "I.1", "en": "Proposed Work Site at", "zh": "拟施工地址" },
+      { "id": "owner_in_fee", "line": "I.2", "en": "Name of Owner in Fee (tel., e-mail, address)", "zh": "产权所有人姓名（电话、电邮、地址）" },
+      { "id": "ownership_in_fee", "line": "I.3", "en": "Ownership in Fee", "zh": "产权性质", "options": ["Public", "Private"] },
+      { "id": "principal_contractor", "line": "I.4", "en": "Principal Contractor (address, tel., e-mail, fax, license/registration no., exp. date, Federal Emp. ID No.)", "zh": "主承包商（地址、电话、电邮、传真、执照/注册号、到期日、联邦雇主识别号）", "hint_en": "Home Improvement Contractor Registration No. or Exemption Reason; or, if new home, Builder Reg. No.", "hint_zh": "家装承包商注册号或豁免理由；新建住宅则填建筑商注册号" },
+      { "id": "architect_engineer", "line": "I.5", "en": "Architect or Engineer (contact, address, tel., fax, e-mail, license no.)", "zh": "建筑师或工程师（联系人、地址、电话、传真、电邮、执照号）" },
+      { "id": "responsible_person", "line": "I.6", "en": "Responsible Person in Charge once Work has Begun (tel., fax)", "zh": "开工后现场负责人（电话、传真）" },
+      { "id": "proposed_work", "line": "IIa", "en": "Proposed Work", "zh": "拟进行的工程类型",
+        "options": ["New Building", "Addition", "Alteration", "Repair", "Renovation", "Reconstruction", "Demolition", "Minor Work", "Asbestos Abat.-Subch. 8", "Lead Hazard Abatement", "Radon Remediation", "Annual Permit"] },
+      { "id": "subcodes", "line": "IIb", "en": "Subcodes (check all that apply) with Est. Cost", "zh": "子规范（勾选所有适用项）及预估费用", "options": ["Building", "Electrical", "Plumbing", "Fire Protection", "Elevator"] },
+      { "id": "plan_review_options", "line": "III", "en": "Plan Review (optional): Do you want", "zh": "图纸审查（可选）：是否需要", "options": ["Partial Releases", "Prototype Processing"] },
+      { "id": "building_contains", "line": "IV", "en": "Does or will your building contain any of the following?", "zh": "建筑是否包含或将包含以下设施？",
+        "options": ["Elevators/Escalators/Lifts/Dumbwaiters/Moving Walks", "High Pressure Boilers", "Pressure Vessels", "Refrigeration Systems", "Cross-Connections/Backflow Preventers", "Hazardous Uses/Places of Assembly", "Sprinklers/Standpipes", "Smoke Control Systems in Open Wells", "Underground Storage Tanks", "Swimming Pools, Spas and Hot Tubs", "LPGas Tanks", "Fire Alarm"] },
+      { "id": "num_stories", "line": "VI.1", "en": "Number of Stories", "zh": "层数" },
+      { "id": "height", "line": "VI.2", "en": "Height of Structure (ft.)", "zh": "建筑高度（英尺）" },
+      { "id": "area_largest_floor", "line": "VI.3", "en": "Area — Largest Floor (sq. ft.)", "zh": "最大楼层面积（平方英尺）" },
+      { "id": "new_building_area", "line": "VI.4", "en": "New Building Area (sq. ft.)", "zh": "新建建筑面积（平方英尺）" },
+      { "id": "volume_new_structure", "line": "VI.5", "en": "Volume of New Structure (cu. ft.)", "zh": "新建结构体积（立方英尺）" },
+      { "id": "max_live_load", "line": "VI.6", "en": "Max. Live Load", "zh": "最大活荷载" },
+      { "id": "max_occupancy_load", "line": "VI.7", "en": "Max. Occupancy Load", "zh": "最大容纳人数" },
+      { "id": "industrialized_building", "line": "VI.8", "en": "If Industrialized Building: State Approved / HUD", "zh": "如为工业化（预制）建筑：州批准 / HUD" },
+      { "id": "land_area_disturbed", "line": "VI.9", "en": "Total Land Area Disturbed (sq. ft.)", "zh": "扰动土地总面积（平方英尺）" },
+      { "id": "flood_hazard_zone", "line": "VI.10", "en": "Flood Hazard Zone", "zh": "洪水风险区" },
+      { "id": "base_flood_elevation", "line": "VI.11", "en": "Base Flood Elevation", "zh": "基准洪水高程" },
+      { "id": "wetlands", "line": "VI.12", "en": "Wetlands", "zh": "湿地", "options": ["yes", "no"] },
+      { "id": "residential_use", "line": "VII.A", "en": "Residential (primary use): specific use, proposed use group, present use group, dwelling units", "zh": "住宅（主要用途）：具体用途、拟定用途类别、现用途类别、住宅单元数" },
+      { "id": "nonresidential_use", "line": "VII.B", "en": "Non-Residential (primary use): 1. State Specific Use; 2. Use Group, Proposed; 3. Change in Use Group, Indicate Present", "zh": "非住宅（主要用途）：1. 具体用途；2. 拟定用途类别；3. 如用途类别变更，注明现用途" },
+      { "id": "mixed_use", "line": "VII.C", "en": "Mixed Use: list secondary use(s)", "zh": "混合用途：列出次要用途" },
+      { "id": "construction_classification", "line": "VII.D", "en": "Construct. Classification: Present / Proposed", "zh": "建筑构造类别：现状 / 拟定" },
+      { "id": "owner_certification", "line": "F100-2 I", "en": "Owner Section (if applicant is owner in fee): boxes A, B, C (C.1 Building, C.2 Fire Protection, C.3 Electrical, C.4 Plumbing), D", "zh": "业主声明（申请人为产权人时）：勾选 A、B、C（C.1 建筑、C.2 消防、C.3 电气、C.4 管道）、D" },
+      { "id": "agent_section", "line": "F100-2 II", "en": "Agent Section (if applicant is not owner in fee): Agent Name, Address, Telephone; Check if contractor", "zh": "代理人声明（申请人非产权人时）：代理人姓名、地址、电话；如为承包商请勾选" },
+      { "id": "lead_affidavit", "line": "F100-2 III", "en": "Lead Hazard Abatement: include Homeowner or Building Owner Affidavit", "zh": "铅危害消减：附业主宣誓书" },
+      { "id": "home_elevation", "line": "F100-2 IV", "en": "Home Elevation: include Home Elevation Contractor Certification", "zh": "房屋抬升：附抬升承包商证明" }
+    ],
+    "attach": [
+      { "en": "Contacts of contractors", "zh": "承包商联系方式" },
+      { "en": "Technical sections as applicable: F110 Building, F120 Electrical, F130 Plumbing, F140 Fire (work description must state the change of use)", "zh": "适用的技术分表：F110 建筑、F120 电气、F130 管道、F140 消防（工程说明须注明用途变更）" },
+      { "en": "One set of zoning-approved plans, signed and sealed by architect or engineer (printed)", "zh": "一套经分区批准、由建筑师或工程师签字盖章的图纸（纸质）" }
+    ],
+    "destination": {
+      "portal": "jcnj.org",
+      "signature": "unknown",
+      "evidence": "Once submitted on the permitting portal, all physical applications and zoning approved plans (one set) need to be submitted in person to the Construction Office located at 1 Jackson Square.",
+      "source": "https://www.jerseycitynj.gov/cityhall/HousingAndDevelopment/businesses"
+    },
+    "notes": "Two-step submission: portal first, then the paper F100 jacket, technical sections and one plan set in person at the Construction Office, City Hall Annex, One Jackson Square (364 MLK Drive), Jersey City NJ 07305 (permit counter Mon-Fri 9:00-3:00; (201) 547-5055). The paper forms carry signature lines (Owner or Agent 'Certification in lieu of oath'); the page does not say whether ink is required. The division has up to 20 business days to review and issue. Applicant completes Sections I, II, III (optional), IV, VI and VII; Section V fee summary is office use. The F100 revisions are 2007-2014 state forms. Portal link http://jcnj.org/permitportal is a redirect we could not resolve."
+  },
+  "nyc-tobacco-dealer": {
+    "status": "page_only",
+    "form_seen": "Tobacco Retail Dealer License (NYC Business, DCWP), requirements and How to Apply tabs; Basic License Application PDF not read (blocked)",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://nyc-business.nyc.gov/nycbusiness/description/cigarette-retail-dealer-license", "what": "application page" }
+    ],
+    "fields": [
+      { "id": "community_district_eligibility", "line": "", "en": "Licenses available in your community district (or a cap exception applies)", "zh": "所在社区区仍有执照名额（或符合上限例外情形）" },
+      { "id": "business_structure", "line": "", "en": "Business certificate based on legal structure (assumed name, partnership, or NYS DOS registration)", "zh": "按法律结构提供营业证明（化名证书、合伙证书或纽约州务厅注册）" },
+      { "id": "basic_license_application", "line": "", "en": "Basic License Application Form", "zh": "基本执照申请表" },
+      { "id": "sales_tax_id", "line": "", "en": "Sales Tax Identification Number or Application Confirmation Number", "zh": "销售税识别号或申请确认号" },
+      { "id": "nys_retail_dealer_registration", "line": "", "en": "NYS DTF Registration of Retail Dealers and Vending Machines for cigarettes and tobacco products", "zh": "纽约州税务局卷烟及烟草产品零售商/售货机登记" },
+      { "id": "proof_business_address", "line": "", "en": "Proof of business address", "zh": "营业地址证明" },
+      { "id": "proof_home_address", "line": "", "en": "Proof of home address for each individual on the application", "zh": "申请表上每位个人的住址证明" },
+      { "id": "payment_method", "line": "", "en": "License fee payment", "zh": "执照费支付方式", "options": ["Check or money order payable to DCWP", "Credit card (Visa, Mastercard, American Express, Discover)"] }
+    ],
+    "attach": [
+      { "en": "Business/Assumed Name Certificate, Partnership Certificate, or NYS Division of Corporations registration (DCWP may ask later)", "zh": "化名证书、合伙证书或纽约州公司注册证明（DCWP 可能后续索取）" },
+      { "en": "Copy of NYS DTF Registration of Retail Dealers and Vending Machines (cigarettes and tobacco)", "zh": "纽约州税务局卷烟/烟草零售商及售货机登记副本" },
+      { "en": "Proof of business address: utility bill within 90 days, lease or deed, rent/mortgage bill, or a current NYS/NYC license showing the address", "zh": "营业地址证明：90 天内水电账单、租约或房契、租金/房贷账单，或显示地址的有效州/市执照" },
+      { "en": "Proof of home address for each individual (utility bill within 90 days, government correspondence, lease/deed, rent/mortgage bill, driver's license, municipal ID)", "zh": "每位个人的住址证明（90 天内账单、政府信函、租约/房契、租金/房贷账单、驾照、市民卡）" },
+      { "en": "If living at another person's address: their proof of address plus a signed letter from the homeowner/leaseholder", "zh": "如住在他人地址：提供其地址证明及房主/承租人签名信" },
+      { "en": "Granting Authority to Act Affirmation (if someone else prepares and submits)", "zh": "授权代办声明（如由他人代为准备和提交）" },
+      { "en": "Tobacco Retail Dealer Cap Exception Certification and supporting documents (if using a cap exception)", "zh": "烟草零售商名额上限例外证明及支持文件（如适用）" }
+    ],
+    "destination": {
+      "email": "onlineappsdocs@dcwp.nyc.gov",
+      "portal": "a866-dcwpbp.nyc.gov",
+      "signature": "typed",
+      "evidence": "You will be redirected to a new web page where you will need a registered account with the City of New York to submit an online application.",
+      "source": "https://nyc-business.nyc.gov/nycbusiness/description/cigarette-retail-dealer-license"
+    },
+    "notes": "Fee: $200 if applying Jan 1-Jun 30, $150 if Jul 1-Dec 31; 2-year license expiring Dec 31; 2% nonrefundable card convenience fee. Pharmacies are barred. Community district caps since Feb 24, 2018 (check NYC Open Data). After online submit, print the confirmation page; remaining materials are due within 5 business days if not uploaded. In-person Licensing Center (42 Broadway, New York NY 10004) only by appointment for applicants with a disability. 'The applicant must sign the license application and all related forms.' onlineappsdocs@dcwp.nyc.gov is listed with the Licensing Center (renewal sections), not explicitly as the intake for new applications. Library name says 'Tobacco' but URL slug says 'cigarette'; the page title is 'Tobacco Retail Dealer License'."
+  },
+  "nyc-outdoor-dining": {
+    "status": "page_only",
+    "form_seen": "Dining Out NYC (NYC DOT) Before You Apply pages: Eligibility & Feasibility, Fees, Forms, Account Setup",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://nyc-business.nyc.gov/nycbusiness/business-services/initiatives/outdoor-dining", "what": "application page" },
+      { "url": "https://www.diningoutnyc.info/apply/account", "what": "instructions (what you'll need in the portal)" },
+      { "url": "https://www.diningoutnyc.info/apply/forms", "what": "instructions (required documents)" },
+      { "url": "https://www.diningoutnyc.info/apply/fees", "what": "instructions (fees)" }
+    ],
+    "fields": [
+      { "id": "cafe_type", "line": "", "en": "Cafe type", "zh": "户外餐区类型", "options": ["Sidewalk cafe (year-round)", "Roadway cafe (seasonal)", "Roadway cafe (year-round)"] },
+      { "id": "fsep_number", "line": "", "en": "Food Service Establishment Permit (FSEP) number from NYC DOHMH", "zh": "纽约市卫生局餐饮服务场所许可（FSEP）编号" },
+      { "id": "ein", "line": "", "en": "Employer Identification Number (EIN)", "zh": "联邦雇主识别号（EIN）" },
+      { "id": "primary_contact", "line": "", "en": "Phone number and email for the primary restaurant contact", "zh": "餐厅主要联系人的电话和电邮" },
+      { "id": "emergency_contact", "line": "", "en": "An emergency contact", "zh": "紧急联系人" },
+      { "id": "dos_id", "line": "", "en": "NYS Department of State (DOS) ID Number, if applicable", "zh": "纽约州务厅（DOS）ID 号（如适用）" },
+      { "id": "sidewalk_width", "line": "Sidewalk", "en": "Total width of the sidewalk, outer edge of curb to property line", "zh": "人行道总宽度（路缘外沿至物业红线）" },
+      { "id": "frontage_length", "line": "", "en": "Total length of your food establishment's frontage", "zh": "餐厅临街面总长度" },
+      { "id": "cafe_dimensions", "line": "", "en": "Length and width of proposed cafe", "zh": "拟设户外餐区的长和宽" },
+      { "id": "curb_lane_width", "line": "Roadway", "en": "Estimated width of the curb lane", "zh": "路边车道的估计宽度" },
+      { "id": "photos", "line": "", "en": "Five photos of the area in front of your establishment", "zh": "餐厅门前区域照片 5 张" }
+    ],
+    "attach": [
+      { "en": "Site Plan Form (Sidewalk Cafe or Roadway Cafe); one per frontage", "zh": "场地平面表（人行道或车行道餐区），每个临街面一份" },
+      { "en": "IRS Tax ID letter (e.g. IRS 147-C, SS-4, Certificate of Authority)", "zh": "IRS 税号证明信（如 147-C、SS-4、销售税授权证书）" },
+      { "en": "NYC Substitute W-9 Form", "zh": "纽约市替代 W-9 表" },
+      { "en": "Dining Out NYC Applicant Affirmation Form", "zh": "Dining Out NYC 申请人声明表" },
+      { "en": "Tax Affirmation Form", "zh": "税务声明表" },
+      { "en": "Property Owner Consent Form", "zh": "业主同意书" },
+      { "en": "Pest Control Certification", "zh": "虫害防治证明" },
+      { "en": "Insurance Acknowledgement Form", "zh": "保险确认表" },
+      { "en": "Authorized Representative Form (if a representative applies)", "zh": "授权代表表（如由代表申请）" },
+      { "en": "Cellar or Basement Door Certification Form (if tables or chairs over a cellar door)", "zh": "地窖/地下室门证明表（如桌椅放在地窖门上）" }
+    ],
+    "destination": {
+      "portal": "diningout.nyc.gov",
+      "signature": "typed",
+      "evidence": "Click \"submit\" Pay the non-refundable license fee to complete your submission",
+      "source": "https://www.diningoutnyc.info/apply/account"
+    },
+    "notes": "Requires an NYC.ID account. Fees: license $1,050 (once per 4-year term), public hearing $500-$900 for roadway, refundable security deposit $2,500 roadway / $1,500 sidewalk, plus an annual revocable consent fee by sector and size (sector 1-4: sidewalk $6/$10/$18/$31 per sq ft; seasonal roadway $5/$8/$14/$25). Review can take 6 months. Eligibility: ground floor, street-visible, directly accessible, with a DOHMH food service establishment permit. Seasonal roadway cafes operate Apr 1-Nov 29; year-round roadway applications open early September 2026. The temporary Open Restaurants program no longer accepts applications. Questions: diningoutnyc@dot.nyc.gov."
+  },
+  "chi-sidewalk-cafe": {
+    "status": "page_only",
+    "form_seen": "Sidewalk Cafe (BACP) program page; questions are in the online application on the City of Chicago Permit Portal",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.chicago.gov/city/en/depts/bacp/supp_info/sidewalkcafe.html", "what": "application page" }
+    ],
+    "fields": [
+      { "id": "license_type", "line": "", "en": "Proof of licensure", "zh": "执照证明", "options": ["Retail Food Establishment license", "Tavern license"] },
+      { "id": "serves_liquor", "line": "", "en": "Will liquor be served at the sidewalk cafe (requires valid Liquor license, MCC 4-60)?", "zh": "户外餐区是否供应酒类（须持有效酒类执照，市政法典 4-60）？" },
+      { "id": "cafe_placement", "line": "", "en": "Cafe placement", "zh": "餐区位置", "options": ["Business-side", "Curbside"] },
+      { "id": "extends_neighbor", "line": "", "en": "Does the cafe extend in front of a neighboring property?", "zh": "餐区是否延伸至相邻物业门前？" }
+    ],
+    "attach": [
+      { "en": "Proof of licensure (Retail Food Establishment license or Tavern license)", "zh": "执照证明（零售食品经营执照或酒馆执照）" },
+      { "en": "Associated insurance documents", "zh": "相关保险文件" },
+      { "en": "Site plan of the proposed sidewalk cafe with measurements, showing a 6-foot minimum pedestrian path", "zh": "标注尺寸的户外餐区平面图，须显示至少 6 英尺的行人通道" },
+      { "en": "Photo of the sidewalk to be occupied", "zh": "拟占用人行道的照片" },
+      { "en": "Proof of written notice to the owner and occupant of the neighboring property (if extending along the building side in front of it)", "zh": "已书面通知相邻物业业主及使用者的证明（如沿建筑侧延伸至其门前）" }
+    ],
+    "destination": {
+      "email": "",
+      "portal": "ipi.cityofchicago.org",
+      "signature": "typed",
+      "evidence": "Applications for sidewalk cafes must be made through the permitting web portal.",
+      "source": "https://www.chicago.gov/city/en/depts/bacp/supp_info/sidewalkcafe.html"
+    },
+    "notes": "Permit term March 1 through end of February, renewable annually (renewals open now). Payment via the portal after approval; BACP notifies electronically. The permit and approved plan must be printed and displayed at the main entrance. 'A full list of required materials can be found on the portal.' Questions: publicwayuse@cityofchicago.org. Cafe must be on the sidewalk only, fully bounded, with 6 ft pedestrian clearance. Fee not stated on the page. Rules: chicago.gov Sidewalk Cafe Rules and Regulations (not read)."
+  },
+  "lv-building": {
+    "status": "mapped",
+    "form_seen": "City of Las Vegas Building & Safety Commercial Application (1 page, fillable; PDF modified 7/26/2023)",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.lasvegasnevada.gov/Business/Permits-Licenses/Building-Permits", "what": "application page" },
+      { "url": "https://files.lasvegasnevada.gov/building-safety/Forms/Commercial/Commercial-Building-Application.pdf", "what": "official PDF" },
+      { "url": "https://files.lasvegasnevada.gov/building-safety/BuildingSafety-Electronic-Submittal-Instructions.pdf", "what": "instructions (How to Apply for Permits with Plans)" }
+    ],
+    "fields": [
+      { "id": "permit_no", "line": "Header", "en": "Permit #", "zh": "许可证编号（如已有）" },
+      { "id": "parent_permit_no", "line": "Header", "en": "Parent Permit #", "zh": "主许可证编号（如有）" },
+      { "id": "overall_valuation", "line": "Header", "en": "Overall Project Valuation: $", "zh": "项目总估值（美元）" },
+      { "id": "project_scope", "line": "Header", "en": "Project Scope of Work", "zh": "项目工程范围" },
+      { "id": "project_tenant_name", "line": "Header", "en": "Project/Tenant Name", "zh": "项目/租户名称" },
+      { "id": "project_address", "line": "Header", "en": "Project Address", "zh": "项目地址" },
+      { "id": "code_enforcement_case", "line": "Header", "en": "Is this permit part of a code enforcement case? Case number #", "zh": "此许可是否涉及执法案件？案件编号", "options": ["Yes", "No"] },
+      { "id": "b1_scope", "line": "Building/Suite #1", "en": "Scope of Work", "zh": "1 号建筑/单元：工程范围" },
+      { "id": "b1_valuation", "line": "Building/Suite #1", "en": "Valuation: $", "zh": "估值（美元）" },
+      { "id": "b1_occupancy_groups", "line": "Building/Suite #1", "en": "Occupancy Group(s)", "zh": "占用类别" },
+      { "id": "b1_use", "line": "Building/Suite #1", "en": "Use", "zh": "用途" },
+      { "id": "b1_construction_type", "line": "Building/Suite #1", "en": "Construction Type", "zh": "建筑构造类型" },
+      { "id": "b1_total_sf", "line": "Building/Suite #1", "en": "Total Square Footage", "zh": "总面积（平方英尺）" },
+      { "id": "b1_affected_sf", "line": "Building/Suite #1", "en": "Affected Sq' (TI's)", "zh": "受影响面积（租户改造）" },
+      { "id": "b1_highrise", "line": "Building/Suite #1", "en": "Is this a Highrise (more than 75')?", "zh": "是否为高层建筑（超过 75 英尺）？" },
+      { "id": "b1_floor_areas", "line": "Building/Suite #1", "en": "Square foot of floor areas: 1st, 2nd, 3rd, 4th", "zh": "各层面积：1 至 4 层" },
+      { "id": "b1_garage_patio_balcony", "line": "Building/Suite #1", "en": "Garage / Patio / Balcony", "zh": "车库 / 露台 / 阳台面积" },
+      { "id": "b1_units_stories", "line": "Building/Suite #1", "en": "Number of Units / Number of Stories", "zh": "单元数 / 层数" },
+      { "id": "b2_details", "line": "Building/Suite #2", "en": "Building/Suite #2: same items as #1", "zh": "2 号建筑/单元：同 1 号各项", "hint_en": "Mixed use: provide code analysis per floor as a separate attachment; one application per building if more than 2 buildings.", "hint_zh": "混合用途须另附逐层规范分析；超过 2 栋建筑须每栋一份申请。" },
+      { "id": "onsite_valuation", "line": "Onsite Improvements", "en": "Valuation: $", "zh": "场地改良估值（美元）" },
+      { "id": "light_poles", "line": "Onsite Improvements", "en": "Light poles, how many?", "zh": "灯杆数量" },
+      { "id": "trash_enclosures", "line": "Onsite Improvements", "en": "Trash enclosures, how many?", "zh": "垃圾围栏数量" },
+      { "id": "carport_sf", "line": "Onsite Improvements", "en": "Carport square footage", "zh": "车棚面积（平方英尺）" },
+      { "id": "demo_valuation", "line": "Demolition", "en": "Valuation: $", "zh": "拆除估值（美元）" },
+      { "id": "demo_row_staging", "line": "Demolition", "en": "Will demolition require parking, staging or storing in public rights of way?", "zh": "拆除是否需在公共道路停放、堆放车辆/设备/材料？", "options": ["Yes", "No"], "hint_en": "If yes, a separate traffic barricade permit is required from the Traffic Department.", "hint_zh": "如是，须另向交通部门申请路障许可。" },
+      { "id": "demo_eru", "line": "Demolition", "en": "ERU investigation for sewer credits needed?", "zh": "是否需要污水抵扣 ERU 调查？", "options": ["Yes", "No"] },
+      { "id": "demo_occupied", "line": "Demolition", "en": "Is the building going to remain occupied during demolition?", "zh": "拆除期间建筑是否仍有人使用？", "options": ["Yes", "No"] },
+      { "id": "demo_structural", "line": "Demolition", "en": "Are structural walls being demolished?", "zh": "是否拆除承重墙？", "options": ["Yes", "No"] },
+      { "id": "demo_complete", "line": "Demolition", "en": "Is this a complete building demolition?", "zh": "是否整栋拆除？", "options": ["Yes", "No"] },
+      { "id": "demo_ti", "line": "Demolition", "en": "Is the demolition associated with a Tenant Improvement?", "zh": "拆除是否与租户改造相关？", "options": ["Yes", "No"] },
+      { "id": "demo_utilities", "line": "Demolition", "en": "Are the utilities going to be disconnected?", "zh": "是否断开公用设施？", "options": ["Yes", "No"] },
+      { "id": "sign_valuation", "line": "Signs", "en": "Construction Valuation: $", "zh": "招牌工程估值（美元）" },
+      { "id": "sign_materials", "line": "Signs", "en": "Materials of construction", "zh": "招牌材料", "options": ["Metal", "Wood", "Plastic", "Other"] },
+      { "id": "sign_project_type", "line": "Signs", "en": "Type of project", "zh": "招牌项目类型", "options": ["New", "Replacement", "Relocation"] },
+      { "id": "sign_types", "line": "Signs", "en": "Sign type with size (sqft), height, illuminated (Y/N)", "zh": "招牌类型及面积、高度、是否发光", "options": ["Pole", "Monument (Structural Engineering Required)", "Wall/Roof", "Free Standing Outdoor Advertising (Billboard)", "Political"] },
+      { "id": "contractor_company", "line": "Contractor's Information", "en": "Company Name (type TBD if not known)", "zh": "承包商公司名称（未定可填 TBD）" },
+      { "id": "contractor_rep", "line": "Contractor's Information", "en": "Company Representative", "zh": "公司代表" },
+      { "id": "contractor_phone_email", "line": "Contractor's Information", "en": "Phone / Email", "zh": "电话 / 电邮" },
+      { "id": "contractor_state_license", "line": "Contractor's Information", "en": "State Contractor License #", "zh": "内华达州承包商执照号" },
+      { "id": "contractor_clv_bl", "line": "Contractor's Information", "en": "CLV Business License #", "zh": "拉斯维加斯市营业执照号" }
+    ],
+    "attach": [
+      { "en": "Completed Commercial Application (uploaded)", "zh": "已填写的商业申请表（上传）" },
+      { "en": "All applicable plans, in electronic format (ePlan requirements)", "zh": "所有适用图纸的电子版（符合 ePlan 要求）" },
+      { "en": "Code analysis (required for tenant improvements or new building construction; per floor for mixed use)", "zh": "规范分析（租户改造或新建必需；混合用途须逐层）" }
+    ],
+    "destination": {
+      "portal": "lasvegasnevada.gov",
+      "signature": "typed",
+      "evidence": "Upload the completed Application Form and all applicable plans for your permit and N/A all areas that are not applicable to your permit.",
+      "source": "https://files.lasvegasnevada.gov/building-safety/BuildingSafety-Electronic-Submittal-Instructions.pdf"
+    },
+    "notes": "Apply at lasvegasnevada.gov/Dashboard ('Apply for a permit requiring plans', Google Chrome required); $55 admin fee to enter the review queue. 'Effective January 1, 2020, all NEW commercial, residential, and civil building plans MUST be submitted electronically.' 'Only a Nevada licensed contractor may obtain a building permit for commercial construction.' Incomplete applications are not accepted; permits expire 180 days after issuance with no passed inspection. Express plan review: $550 admin + $660/hr. The city also publishes a Food-Service-Establishment-Guideline.pdf and Tenant-Improvement-Guideline.pdf (not read). Fax (702) 382-1240 appears on the instructions header but is not stated as accepting applications."
+  }
+}
