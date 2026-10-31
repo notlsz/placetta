@@ -39,7 +39,7 @@ export function IdeasPage() {
   const { lang } = useApp();
   return (
     <section className="ideas-page" aria-label={lang === "zh" ? "建议" : "Ideas"}>
-      <p className="ideas-sub">{lang === "zh" ? "我从您的记录里找到的、值得做的事。选一项，剩下的交给我。" : "Work your records say is worth doing. Choose one and I'll take it from there."}</p>
+      <p className="ideas-sub">{lang === "zh" ? "我从您的记录里找到、可以替您接手的事。选一项。" : "Things I can take off your plate, from your own records. Pick one."}</p>
       <IdeasList />
     </section>
   );

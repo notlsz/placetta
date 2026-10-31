@@ -704,4 +704,12 @@
 /* Settings: one gap between sections, and the accent's note the full width of its row */
 .settings .sg-sub.accent .sg-note { max-width: none; }
 @media (min-width: 641px) { .page.stores-page > .ph { align-items: flex-start; } .page.stores-page > .ph .ph-acts { align-self: flex-start; height: 48px; margin-top: 0; display: flex; align-items: center; } }
-.settings .sw-quip { margin-top: 14px; font-style: italic; color: var(--ink3); }
+.settings .sw-quip { margin-top: 14px; font-style: normal; color: var(--ink3); }
+
+/* panel 14: on a phone "Breakdown" starts its own line under the words on purpose, never a stray word after a wrap
+   (the fees the agencies don't publish stay in the sentence: never a cleaner number than the truth) */
+@media (max-width: 640px) { .page.permits .cost-line.on-page > .lnk { flex-basis: 100%; justify-content: flex-start; padding-left: 20px; height: auto; } }
+/* panel 14: "Not published" is an absence, not an amount, so it steps back and the dollar fees lead (Jobs) */
+.c-fee.tbd { color: var(--ink3); }
+/* the tab count clears its icon instead of sitting on its corner */
+.tabbar a em { left: calc(50% + 12px); }

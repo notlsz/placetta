@@ -31,7 +31,7 @@ export function ideas(w: Workspace, today: string, o: { unpublished?: number } =
       out.push({
         id: "renew:" + r.id, icon: "renew", rank: r.days,
         title: B(`I can renew the ${lower(r.name.en)}${at.en}`, `我可以续期${at.zh}${r.name.zh}`),
-        why: B(`Its renewal is due on ${day(r.date)}, ${r.days} days from now. I'll prepare it and you approve it.`,
+        why: B(`Renewal due ${day(r.date)}, ${r.days} days from now. I'll prepare it and you approve it.`,
           `${day(r.date, true)}前要续期，还有 ${r.days} 天。我来准备，您批准即可。`),
         ask: B(`Start the renewal of the ${r.name.en}${at.en}, which expires on ${r.date}.`, `开始续期${at.zh}${r.name.zh}，${r.date} 到期。`),
       });

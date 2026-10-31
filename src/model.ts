@@ -425,10 +425,10 @@ export const SAMPLE_RUNS: RunLog[] = [
     mo(95, "odelia", READY, { state: "searching", label: B("Reading your workspace", "读取您的工作区") }),
     mo(95, "odelia", READY, { state: "searching", kind: "tool", fn: "check_progress", label: B("Checked progress", "查看进度"), out: B("2 stores, 10 applications", "2 家门店，10 项申请"), ok: true }),
     mo(94, "odelia", READY, { state: "weaving", kind: "tool", fn: "split_job", label: B("Split the job across stores", "把工作分给各门店"), in: B("Get both stores ready for their next inspection, 2 stores", "让两家门店为下一次检查做好准备，2 家门店"), out: B("2 started, 0 waiting their turn", "2 个已开始，0 个排队"), ok: true,
-      diff: { jobs: [B("Get both stores ready for their next inspection", "让两家门店为下一次检查做好准备"), B("Flushing, Main St: get ready for the next inspection", "法拉盛 Main St 店：为下一次检查做好准备"), B("San Jose, North First St: get ready for the pre-opening inspection", "圣何塞 North First St 店：为开业前检查做好准备")] } }),
+      diff: { jobs: [B("Get both stores ready for their next inspection", "让两家门店为下一次检查做好准备"), B("Flushing, Main St: get ready for the next inspection", "法拉盛 Main St 店：为下一次检查做好准备"), B("San Jose, North First St: get ready for the pre‑opening inspection", "圣何塞 North First St 店：为开业前检查做好准备")] } }),
     mo(94, "odelia", READY, { state: "weaving", kind: "split", label: B("Split it across 2 stores: 2 started, 0 waiting their turn", "分给 2 家门店：2 家已开始，0 家排队") }),
     mo(93, "odelia", READY, { state: "breathing", label: B("Waiting for 2 store bots to finish", "等待 2 家门店的助手完成") }),
-    mo(93, "odelia", READY, { state: "composing", kind: "reply", label: B("The answer that went to you", "发给您的回复"), out: B("Each store's bot is on it: Flushing for its next health inspection, San Jose for the pre-opening inspection. One summary when both are back.", "每家门店的助手都在处理：法拉盛准备下一次卫生检查，圣何塞准备开业前检查。两家都完成后我会汇总。") }),
+    mo(93, "odelia", READY, { state: "composing", kind: "reply", label: B("The answer that went to you", "发给您的回复"), out: B("Each store's bot is on it: Flushing for its next health inspection, San Jose for the pre‑opening inspection. One summary when both are back.", "每家门店的助手都在处理：法拉盛准备下一次卫生检查，圣何塞准备开业前检查。两家都完成后我会汇总。") }),
   ] },
   { id: "local-ready-fl", at: ago(94), bot: "flushing", job: FL, steps: [
     mo(94, "flushing", FL, { state: "searching", label: B("Reading your workspace", "读取您的工作区") }),
@@ -695,7 +695,7 @@ export const SAMPLE: Workspace = {
         { text: B("Marco's certificate renewal has a deadline before it expires", "Marco 的证书续期在到期前设有截止日期"), ok: true, why: B("Deadline set 5 days before it expires", "截止日期设在到期前 5 天") },
       ],
       checked: { at: ago(31), passed: 2, of: 2 } },
-    { id: "job-ready-sj", parent: "job-ready", store: "sanjose", title: B("San Jose, North First St: get ready for the pre-opening inspection", "圣何塞 North First St 店：为开业前检查做好准备"), status: "running", started: ago(94), updated: ago(12), seat: 1, runs: ["local-ready-sj"],
+    { id: "job-ready-sj", parent: "job-ready", store: "sanjose", title: B("San Jose, North First St: get ready for the pre‑opening inspection", "圣何塞 North First St 店：为开业前检查做好准备"), status: "running", started: ago(94), updated: ago(12), seat: 1, runs: ["local-ready-sj"],
       steps: [
         { title: B("Read the county's pre-opening inspection guide", "阅读县政府开业前检查指南"), done: true },
         { title: B("Match it against the plan check and the build-out", "与图纸审查和装修进度逐项对照"), done: true },
