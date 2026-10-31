@@ -49,6 +49,23 @@
 .vis-src{margin:48px 0 0;font-size:12.5px}.vis-src a{color:rgba(255,255,255,.5);text-decoration:none}.vis-src a:hover{color:#fff}
 @media (max-width:760px){.vis{padding-top:80px;padding-bottom:80px}.vis-row{grid-template-columns:1fr;gap:28px;margin-top:44px}.vis-p{font-size:16.5px}}
 #backed,#payBand{display:none!important}
+/* shorter (Jobs, Rams): the plan card on the home page, the attorney and expediter comparison on /more.html */
+#cmp{display:none!important}
+#pricing .prcard{display:block}
+#pricing .prrow{grid-template-columns:minmax(0,600px);margin-top:32px}
+.cmp-link{display:inline-flex;align-items:center;gap:6px;margin-top:20px;font-size:15px;color:var(--gs-ink);text-decoration:none}
+.cmp-link:hover{text-decoration:underline;text-underline-offset:3px}
+/* how it works: one view, the approval and what happens after, without the five tabs */
+#h95{display:none!important}
+/* the heading first, then the card */
+#pricing .ctr{display:flex;flex-direction:column}
+#pricing .c96h{order:-1}
+#pricing .prrow{order:0}
+#pricing .cmp-link{order:1;align-self:flex-start}
+/* side-by-side panels are the same size */
+#how95a .feat2{align-items:stretch}
+#how95a .fct{display:flex;flex-direction:column}
+#how95a .fcv{flex:1}
 </style>
 <script src="/ref.js" defer></script>
 
@@ -438,7 +455,8 @@
       </div>
     </div>
     <div class="sh c96h"><h2 class="h2" id="priceH" data-i18n="c96.h">Start making money sooner. <em>For less than an expediter.</em></h2><p class="sub" data-i18n="c96.sub">Every opening needs the same licenses. What changes is the cost, who files them and who keeps them current.</p></div>
-    <div class="cmp96" id="cmp">
+    <a class="cmp-link" href="/more.html#cmp" data-i18n="cmp.link">Compare with an attorney and a permit expediter</a>
+      <div class="cmp96" id="cmp">
       <div class="c98w">
       <table class="c96t c98">
         <caption class="sr" data-i18n="c96.cap">An attorney, a permit expediter and Placetta, compared</caption>
