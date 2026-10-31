@@ -398,3 +398,17 @@ Why: fill_fields added any unmatched label as a new field, even on an agency's o
 Rule: on an official form, an unmatched label is placed on the one line whose words it has (a phone and an email are
 joined on a "phone / email" line), or comes back with the form's own labels to choose from. Nothing is added that the
 agency's form doesn't print. Business-wide lines still fill every application and Context. Test: test:flow "place:".
+
+## 2026-10-31: an agency's forms load by script, so research came back "not found"
+
+What broke: three Plano forms (and two Santa Clara County ones) came back not_found from the research agents: plano.gov
+loads its form links by script, and WebFetch reads only the served HTML. The library even said Plano's food permit
+had "no application route", which was wrong: it is emailed to EnvHealth@Plano.gov.
+Rules:
+- First pass on a local question: America.gov. Its answers come from federal, state and local sites with the links
+  shown, and it costs one short read. It gave Plano's fees and pointed at the page. Its answers are leads, never the
+  source: every value is copied from the agency's own page or form.
+- A page that loads by script is read in a real browser (the built-in browser renders it), never marked not_found.
+- An agency PDF is downloaded by the fetch-forms workflow (scripts/official-pdfs.txt; keep the existing lines, it
+  force-pushes the branch), then read here with pypdf. A fillable PDF gets a box map (src/forms/maps), checked by
+  test:forms, so Odelia fills the agency's own file.
