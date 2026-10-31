@@ -1796,6 +1796,8 @@ export function Settings() {
                 <input className="sw-hex" value={hex} onChange={e => { const v = e.target.value.trim(); setHex(v); if (/^#?[0-9a-f]{6}$/i.test(v)) setAccent(applyAccent(v.startsWith("#") ? v : "#" + v)); }} placeholder="#4D73A3" aria-label="Hex" maxLength={7} spellCheck={false} />
                 {accent && <Btn onClick={() => { setAccent(applyAccent("")); setHex(""); }}>{lang === "zh" ? "恢复默认" : "Reset"}</Btn>}
               </div>
+              {/* the one line of wit on the page, and a true one (Paul Smith): butterfly pea tea turns violet with lemon */}
+              <p className="sg-note sw-quip">{lang === "zh" ? "每种颜色都是一种茶。蝶豆花茶加一点柠檬，会从蓝变紫。" : "Each one is a tea. Butterfly pea turns from blue to violet with a squeeze of lemon."}</p>
             </details>
           </Group>
 
