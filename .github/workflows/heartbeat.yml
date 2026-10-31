@@ -38,7 +38,7 @@ jobs:
             [ "$age" -le 1200 ]
           }
           s=$(status); echo "project: $s"
-          if [ "$s" != "ACTIVE_HEALTHY" ]; then echo "project is $s; not touching it"; exit 0; fi
+          if [ "$s" = "RESTARTING" ] || [ "$s" = "COMING_UP" ]; then echo "project is $s; checking next time"; exit 0; fi
           check && exit 0
           echo "stuck; checking again in 5 minutes"; sleep 300
           check && exit 0
@@ -47,7 +47,9 @@ jobs:
             "https://api.github.com/repos/${{ github.repository }}/actions/workflows/heartbeat.yml/runs?status=failure&per_page=5" \
             | jq --arg since "$(date -u -d '-60 min' +%FT%TZ)" '[.workflow_runs[] | select(.created_at > $since)] | length')
           if [ "${recent:-0}" -gt 0 ]; then echo "::error::Still stuck, and a restart already ran within the hour. Needs a person: Supabase, Settings, General."; exit 1; fi
-          [ "$(status)" = "ACTIVE_HEALTHY" ] || { echo "a restart is already under way"; exit 1; }
+          s=$(status)
+          # restart only a project the API says is up; anything else (a restart under way, a status it won't show) is a person's call
+          [ "$s" = "ACTIVE_HEALTHY" ] || { echo "::error::Scheduled jobs are stuck and the project is $s, so it wasn't restarted. Supabase, Settings, General."; exit 1; }
           code=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "Authorization: Bearer $TOKEN" "$api/restart")
           echo "::error::Database was stuck for 5+ minutes; restarted it (HTTP $code). Check that jobs recover."
           exit 1
