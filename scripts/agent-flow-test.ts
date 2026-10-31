@@ -333,5 +333,30 @@ ok(!html("<script>alert(1)</script>").includes("<script>"), "edge: a reply can't
   ok(!w.deadlines.some(d => d.app === dropApp) && !w.locations.some(l => l.name.en === "Plano") && w.locations.some(l => l.name.en === "Austin"), "edge: its deadlines and its city go too, other cities stay");
 }
 
+// labels that name no line on an agency's form never become stray lines (production probe 2026-10-31: Houston's
+// "Contact Phone / Contact email" and Denver's Section II lines stayed empty behind strays, and nothing went up)
+{
+  let w: Workspace = { ...base(), stores: [] };
+  const made: Made = { apps: new Set(), approvals: [], memory: [], skills: [], files: [], lastToolAt: 0 };
+  const x = { model: {} as X["model"], files: new Map(), signal: new AbortController().signal } as X;
+  const tools = makeTools(() => w, p => { w = p(w); }, () => undefined, made, "en", () => 0, false, x);
+  const T = (n: string) => tools.find(t => t.name === n)!.execute.bind(null) as (i: Record<string, unknown>) => unknown;
+  const hou = String((await run(T("prepare_application"), { official_form_id: "hou-food-dealer" })).r!.application_id);
+  const n0 = w.apps.find(a => a.id === hou)!.fields.length;
+  await run(T("fill_fields"), { application_id: hou, fields: [{ label: "Contact Phone", value: "(917) 555-0142" }, { label: "Contact email", value: "mei@moonleaf.com" }] });
+  const h = w.apps.find(a => a.id === hou)!;
+  ok(h.fields.length === n0, "place: no stray lines on Houston's form", h.fields.slice(n0).map(f => f.label.en));
+  ok(h.fields.find(f => f.id === "owner_contact_phone_email")?.value === "(917) 555-0142 / mei@moonleaf.com", "place: a phone and an email join on the form's one phone / email line", h.fields.find(f => f.id === "owner_contact_phone_email"));
+  await run(T("fill_fields"), { application_id: hou, fields: [{ label: "Contact Phone", value: "(917) 555-0199" }, { label: "Contact email", value: "jun@moonleaf.com" }] });
+  ok(w.apps.find(a => a.id === hou)!.fields.find(f => f.id === "responsible_party_phone_email")?.value === "(917) 555-0199 / jun@moonleaf.com", "place: the second pair goes to the twin line");
+  const den = String((await run(T("prepare_application"), { official_form_id: "den-plan-review" })).r!.application_id);
+  const d0 = w.apps.find(a => a.id === den)!.fields.length;
+  const r = (await run(T("fill_fields"), { application_id: den, fields: [{ label: "Equipment counts", value: "3" }, { label: "Bar drain fixtures", value: "1\n0\n0\n0\n0\n1" }] })).r!;
+  const d = w.apps.find(a => a.id === den)!;
+  ok(d.fields.length === d0, "place: no stray lines on Denver's form");
+  ok(d.fields.find(f => f.id === "bar_fixtures")?.value === "1\n0\n0\n0\n0\n1", "place: a shortened label fills the one line whose words it has");
+  ok(Array.isArray(r.not_on_this_form) && (r.not_on_this_form as { try: string[] }[])[0].try.length > 1, "place: an ambiguous label comes back with the form's own labels to choose from", r);
+}
+
 memoryUiTests(ok);
 if (fails) { console.error(`\n${fails} failed`); process.exit(1); } else console.log("\nall passed");

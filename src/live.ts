@@ -30,6 +30,56 @@ const labelStart = (off: { fields: { id: string; label: { en: string } }[] } | u
   const hits = off.fields.filter(o => { const l = words(o.label.en); return k.length <= l.length ? k.every((x, i) => l[i] === x) : l.length >= 3 && l.every((x, i) => k[i] === x); });
   return hits.length === 1 ? hits[0] : undefined;
 };
+
+type OffLine = { id: string; line: string; label: { en: string; zh: string } };
+/** Labels Odelia gave, placed on an official form's own lines (fill_fields). A label that names a line, or a line the
+ *  application already has, passes as it is. Otherwise: when every word of it is in one line's label (lines with the same
+ *  label count as one, the twin logic picks which), it fills that line; two labels for the halves of a "phone / email"
+ *  line are joined in the form's order. What still fits nothing is returned, with the closest labels, never added. */
+export function placeOnForm(given: Field[], off: { fields: OffLine[] } | undefined, have: Field[], shared: (label: string) => boolean = () => false): { fields: Field[]; unplaced: { label: string; try: string[] }[]; wide: Field[] } {
+  if (!off?.fields.length) return { fields: given, unplaced: [], wide: [] };
+  const STOP = new Set(["section", "line", "page", "part", "the", "and", "for", "per", "one", "your", "number", "name"]);
+  const words = (t: string) => (t.toLowerCase().replace(/^(section|line|page|part)\s+[\w.-]+\s*[:.\-]?\s*/, "").match(/[a-z]{3,}/g) ?? []).filter(w => !STOP.has(w));
+  const named = (f: Field) => {
+    const raw = f.label.en.trim(), key = raw.toLowerCase().replace(/^line\s+/, "");
+    return !!(off.fields.find(o => o.id === key || o.label.en.toLowerCase() === key || o.label.zh === raw || o.line.toLowerCase() === key || `${o.line}: ${o.label.en}`.toLowerCase() === key || `${o.line}：${o.label.zh}` === raw) ?? labelStart(off, key))
+      || have.some(y => y.label.en.toLowerCase() === raw.toLowerCase() || y.id === raw || y.label.zh === raw);
+  };
+  // a line that is the same for the whole business (owner, phone, EIN) still fills every open application and Context
+  // (wide); on this form it goes on a line of its own words or stays off, never as a stray
+  const out: Field[] = [], unplaced: { label: string; try: string[] }[] = [], wide: Field[] = [];
+  const joined = new Map<string, { o: OffLine; parts: { at: number; v: string; f: Field }[] }>();
+  for (const f of given) {
+    if (named(f)) { out.push(f); continue; }
+    const isShared = shared(f.label.en.trim());
+    if (isShared) wide.push(f);
+    const k = words(f.label.en);
+    // a word counts when the line has it, or the same stem ("drain" for "drainage", "fixtures" for "fixture")
+    const has = (l: string[], w: string) => l.some(x => x === w || (Math.min(x.length, w.length) >= 4 && (x.startsWith(w) || w.startsWith(x))));
+    const hits = k.length ? off.fields.filter(o => { const l = words(o.label.en); return k.every(w => has(l, w)); }) : [];
+    const labels = [...new Set(hits.map(o => o.label.en))];
+    if (labels.length === 1) {
+      const o = hits[0];
+      if (/\s\/\s/.test(o.label.en) && f.value.trim()) {
+        // half of a "Contact Phone / Contact email" line: where its words sit in the label says which half
+        const low = o.label.en.toLowerCase(), at = Math.min(...k.map(w => { const i = low.lastIndexOf(w); return i < 0 ? 1e9 : i; }));
+        const j = joined.get(o.label.en) ?? { o, parts: [] };
+        j.parts.push({ at, v: f.value.trim(), f }); joined.set(o.label.en, j);
+      } else out.push({ ...f, label: { en: `${o.line}: ${o.label.en}`, zh: f.label.zh } });
+      continue;
+    }
+    // the closest lines by shared words, so the next fill names one of them exactly
+    const score = (o: OffLine) => { const l = words(o.label.en); return k.filter(w => has(l, w)).length; };
+    if (isShared) continue;
+    const near = [...off.fields].map(o => ({ o, s: score(o) })).filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 3).map(x => `${x.o.line}: ${x.o.label.en}`);
+    unplaced.push({ label: f.label.en, try: near });
+  }
+  for (const { o, parts } of joined.values()) {
+    const first = parts[0].f;
+    out.push({ ...first, label: { en: `${o.line}: ${o.label.en}`, zh: first.label.zh }, value: parts.sort((a, b) => a.at - b.at).map(p => p.v).join(" / "), confirm: parts.some(p => p.f.confirm) || undefined });
+  }
+  return { fields: out, unplaced, wide };
+}
 const addrOut = (form: string, field: string, value: string, c: AddressCheck) => ({ field, value, problem: c.problem?.en, rule: RULE_LABEL[c.rule.rule].en, agency_accepts: c.rule.what.en,
   if_the_business_has_none: c.rule.ifNone.en, sources: c.rule.confirmations.map(x => x.url), form });
 const ADDR_NEXT = "Leave that line empty. Tell the person in plain words what the agency accepts there and what to do if the business has none (if_the_business_has_none), citing the sources, then fill the address they give.";
@@ -829,7 +879,16 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
           return null;
         });
         const notChoice = offChoice.length ? { not_a_choice: offChoice, fix_choice: "Fill each of these again with one of its choices, word for word. A line that doesn't apply to this business takes the choice that says so (usually No); when none of its choices fits the business, fill it \"Not applicable\"." } : {};
-        const incoming = chosen.filter((f): f is Field => !!f && !refused.some(x => x.f === f) && !secrets.includes(f));
+        const kept0 = chosen.filter((f): f is Field => !!f && !refused.some(x => x.f === f) && !secrets.includes(f));
+        // On an agency's own form, a label that names no line never becomes a new line: that stray stayed on the card,
+        // the real line stayed empty, and the filing never went up (Houston's "Contact Phone" for its "Contact Phone /
+        // Contact email" line, Denver's shortened equipment lines; production probe 2026-10-31). A label whose words
+        // fit one line fills it; a phone and an email meant for one "phone / email" line are joined into it; anything
+        // else comes back with the form's own labels to choose from.
+        const sharedLabel = new Set(coreFields(get()).filter(f => SHARED[f.id]).map(f => f.label.en.toLowerCase()));
+        const { fields: incoming, unplaced, wide: wideOnly } = placeOnForm(kept0, off, a.fields, l => sharedLabel.has(l.toLowerCase()) || !!SHARED[l]);
+        const notPlaced = unplaced.length ? { not_on_this_form: unplaced, fix_label: "These labels match no line on the agency's form, so nothing was added. Fill each again with one of the suggested labels, word for word (or its line id)." } : {};
+        if (!incoming.length && !wideOnly.length && unplaced.length) { mark(); return { filled: 0, ...notPlaced, ...kept, ...notChoice }; }
         if (!incoming.length && (refused.length || secrets.length || offChoice.length)) { mark(); return { filled: 0, ...kept, ...notChoice, ...(refused.length ? { address_not_filled: refused.map(x => addrOut(off!.id, x.id!, x.f.value, x.c!)), do_next: ADDR_NEXT } : {}) }; }
         const added: string[] = [];
         S("shaping", L(`Filling ${incoming.length} field${incoming.length === 1 ? "" : "s"} on the ${nm(a)}`, `填写${nm(a)}的 ${incoming.length} 项`), a.source.label || undefined);
@@ -861,7 +920,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         // the lines that are the same for the whole business (owner, phone, email, EIN...) fill every open application and Context
         // matched by the core line's own label or id, whichever form the answer was typed into
         const coreLabel = new Map(coreFields(get()).filter(f => SHARED[f.id]).map(f => [f.label.en.toLowerCase(), f.id]));
-        const wide = incoming.map(g => ({ id: coreLabel.get(g.label.en.toLowerCase()) ?? (SHARED[g.label.en] ? g.label.en : ""), value: g.value, from: g.from })).filter(f => f.id && !isBlank(f.value));
+        const wide = [...incoming, ...wideOnly].map(g => ({ id: coreLabel.get(g.label.en.toLowerCase()) ?? (SHARED[g.label.en] ? g.label.en : ""), value: g.value, from: g.from })).filter(f => f.id && !isBlank(f.value));
         let also = 0;
         if (wide.length) apply(w => {
           const apps = w.apps.map(x => {
@@ -883,7 +942,7 @@ export function makeTools(get: () => Workspace, apply: (p: (w: Workspace) => Wor
         // a US agency's form prints English letters only: say so now, not first at approval
         const cjk = off && (!off.currency || off.currency === "USD") ? given.filter(f => /[㐀-鿿豈-﫿]/.test(f.value)).map(f => f.label) : [];
         return { status: now.status, still_empty: now.fields.filter(f => isBlank(f.value)).map(f => f.label.en), ...kept, ...notChoice,
-          ...(cjk.length ? { not_in_english: cjk, fix_now: "A US agency's form takes English letters only: fill these lines again in English, with no Chinese characters (not even in parentheses), or approval refuses them." } : {}), ...(refused.length ? { address_not_filled: refused.map(x => addrOut(off!.id, x.id!, x.f.value, x.c!)), do_next: ADDR_NEXT } : {}), ...(added.length ? { added_as_new_fields: added, ...(off ? { note: "These matched no line on the official form. If you meant an existing line, fill it by its label or line number." } : {}) } : {}),
+          ...(cjk.length ? { not_in_english: cjk, fix_now: "A US agency's form takes English letters only: fill these lines again in English, with no Chinese characters (not even in parentheses), or approval refuses them." } : {}), ...(refused.length ? { address_not_filled: refused.map(x => addrOut(off!.id, x.id!, x.f.value, x.c!)), do_next: ADDR_NEXT } : {}), ...notPlaced, ...(added.length ? { added_as_new_fields: added, ...(off ? { note: "These matched no line on the official form. If you meant an existing line, fill it by its label or line number." } : {}) } : {}),
           ...(also ? { also_filled_on: `${also} other open application${also === 1 ? "" : "s"}${x.asked ? "" : ", and saved to Context"}` } : {}),
           ...(x.asked && wide.length ? { not_saved_to_context: `This came from outside the app, so Context (the business facts) didn't change. To keep ${wide.map(f => SHARED[f.id][0].en).join(", ")} there, use remember: it asks an owner to confirm in the app.` } : {}) };
       },

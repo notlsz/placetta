@@ -387,3 +387,14 @@ Rules:
 - The nightly probe is sized for the free plan: 2 licenses, one at a time; edge cases on Sundays.
 - An outside heartbeat (.github/workflows/heartbeat.yml) checks every 15 minutes, restarts a stuck database once an
   hour at most, and fails loudly so the owner is emailed. A silent outage is the failure, not the slowdown.
+
+## 2026-10-31: a label that matched no line became a stray line, and the real line stayed empty
+
+What broke: the nightly probe's Houston food dealer permit and Denver plan review never went up for approval. Odelia
+filled "Contact Phone" and "Contact email" for Houston's one "Contact Phone / Contact email" line, and shortened
+Denver's Section II labels. Each became a new line that isn't on the form; the real lines stayed empty; she couldn't
+clear what she'd added. The twin-label fix of the day before didn't help, because the labels weren't twins.
+Why: fill_fields added any unmatched label as a new field, even on an agency's own form whose lines are all known.
+Rule: on an official form, an unmatched label is placed on the one line whose words it has (a phone and an email are
+joined on a "phone / email" line), or comes back with the form's own labels to choose from. Nothing is added that the
+agency's form doesn't print. Business-wide lines still fill every application and Context. Test: test:flow "place:".
