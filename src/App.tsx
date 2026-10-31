@@ -51,7 +51,7 @@ import { Walkthrough } from "./Walkthrough";
 import { Headquarters } from "./Headquarters";
 import { LegalReader } from "./Legal";
 import { UPDATED } from "./legal";
-import { daysFromNow, daysUntil, inDays, nowIso } from "./time";
+import { daysFromNow, daysUntil, fmtDay, inDays, nowIso } from "./time";
 import { todos } from "./doNext";
 import { preflight } from "./smart";
 import type { RiskFlags } from "./risk";
@@ -123,9 +123,11 @@ function localUpdates(w: Workspace): UpdateItem[] {
     const n = daysUntil(d.date);
     const when = (en: string, zh: string) => { const e = n <= 0 ? "today" : n === 1 ? "tomorrow" : `in ${n} days`; return B(en ? `${en} ${e}` : e, (n <= 0 ? "今天" : n === 1 ? "明天" : `${n} 天后`) + zh); };
     const at = new Date(Date.now() - Math.max(0, 14 - Math.abs(n)) * 36e5).toISOString();
-    if (d.kind === "renewal" && n >= 0 && n <= 60) out.push({ id: "lu-" + d.id, kind: "renewal", title: B(`${d.title.en}: ${when("expires", "到期").en}`, `${d.title.zh}：${when("expires", "到期").zh}`), body: B(`Expires ${d.date}.`, `${d.date} 到期。`), app: d.app, at, read: false, prompt: B(`Start the renewal: ${d.title.en}, expiring ${d.date}.`, `开始续办：${d.title.zh}，${d.date} 到期。`) });
-    else if (d.kind !== "renewal" && n >= 0 && n <= 14) out.push({ id: "lu-" + d.id, kind: "deadline", title: B(`${d.title.en}: ${when(d.kind === "due" ? "due" : "", d.kind === "due" ? "截止" : "").en}`, `${d.title.zh}：${when(d.kind === "due" ? "due" : "", d.kind === "due" ? "截止" : "").zh}`), body: B(`Date: ${d.date}.`, `日期：${d.date}。`), app: d.app, at, read: false, prompt: d.prompt ?? B(`Get this done before ${d.date}: ${d.title.en}.`, `在 ${d.date} 前完成：${d.title.zh}。`) });
-    else if (d.kind === "due" && n < 0 && n >= -30) out.push({ id: "lu-" + d.id, kind: "deadline", title: B(`Overdue: ${d.title.en}`, `已逾期：${d.title.zh}`), body: B(`It was due ${d.date}.`, `截止日期为 ${d.date}。`), app: d.app, at, read: false, prompt: B(`This is overdue: ${d.title.en}. What do we do now?`, `已逾期：${d.title.zh}。现在该怎么办？`) });
+    // a date as people write it ("Nov 14, 2026", "2026年11月14日"), never the ISO form
+    const de = fmtDay(d.date, "en", true), dz = fmtDay(d.date, "zh", true);
+    if (d.kind === "renewal" && n >= 0 && n <= 60) out.push({ id: "lu-" + d.id, kind: "renewal", title: B(`${d.title.en}: due ${when("", "").en}`, `${d.title.zh}：${when("", "截止").zh}`), body: B(`Renew by ${de}.`, `${dz}前续办。`), app: d.app, at, read: false, prompt: B(`Start the renewal: ${d.title.en}, expiring ${d.date}.`, `开始续办：${d.title.zh}，${d.date} 到期。`) });
+    else if (d.kind !== "renewal" && n >= 0 && n <= 14) out.push({ id: "lu-" + d.id, kind: "deadline", title: B(`${d.title.en}: ${when(d.kind === "due" && !/\bdue\b/i.test(d.title.en) ? "due" : "", d.kind === "due" ? "截止" : "").en}`, `${d.title.zh}：${when(d.kind === "due" ? "due" : "", d.kind === "due" ? "截止" : "").zh}`), body: B(`${de}.`, `${dz}。`), app: d.app, at, read: false, prompt: d.prompt ?? B(`Get this done before ${d.date}: ${d.title.en}.`, `在 ${d.date} 前完成：${d.title.zh}。`) });
+    else if (d.kind === "due" && n < 0 && n >= -30) out.push({ id: "lu-" + d.id, kind: "deadline", title: B(`Overdue: ${d.title.en}`, `已逾期：${d.title.zh}`), body: B(`It was due ${de}.`, `截止日期为 ${dz}。`), app: d.app, at, read: false, prompt: B(`This is overdue: ${d.title.en}. What do we do now?`, `已逾期：${d.title.zh}。现在该怎么办？`) });
   }
   return out.sort((x, y) => y.at.localeCompare(x.at));
 }

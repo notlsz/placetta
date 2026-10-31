@@ -722,3 +722,16 @@
 /* the chosen tea runs through the app, not only Settings (Paul Smith): the selected tab's line, the Ideas icons */
 .ptabs a[aria-selected="true"]::after, .hm-tabs button[aria-selected="true"]::after { background: var(--blue-ink); }
 .ideas .idea-ico { color: var(--blue-ink); }
+/* Updates reads like Ideas and like an inbox (Linear, Poke): plain rows, no box per item, an icon with nothing behind
+   it, centered on the title; "Open" is a link and "Handle it" the one button */
+.updates { gap: 0; }
+.upd, .upd.unread { padding: 16px 0; border-radius: 0; background: none; box-shadow: none; align-items: center; gap: 14px; }
+.upd + .upd { border-top: 0; }
+.upd-ic, .upd.k-renewal .upd-ic, .upd.k-deadline .upd-ic, .upd.k-filing .upd-ic, .upd.k-payment .upd-ic { width: 20px; height: 22px; border-radius: 0; background: none; align-self: start; }
+.upd.k-renewal .upd-ic, .upd.k-deadline .upd-ic { color: var(--warm); }
+.upd-ic svg { width: 19px; height: 19px; }
+.upd-act { display: flex; align-items: center; gap: 6px; }
+.upd-act .sbtn.quiet { background: none; box-shadow: none; color: var(--blue-ink); padding: 0 8px; }
+/* final call on where a short chat sits (rounds 14 and 20 went both ways): on it, like Poke and iMessage, the texting
+   apps Odelia is modeled on, so the suggestions follow the last message with no gap. A phone already fills the screen. */
+@media (min-width: 860px) { .page.odelia.chat .feed > :first-child { margin-top: auto; } }

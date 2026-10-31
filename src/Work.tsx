@@ -301,7 +301,7 @@ export function WorkPage() {
   const empty = !jobs.length && !routines.length && !queued.length && !busy;
   return (
     <div className="work tabbed">
-      <p className="tab-lede">{zh ? "Odelia 手上的每项工作，按门店分组：每家门店有自己的助手做本店的部分，跨门店的工作由 Odelia 统筹。她最多同时处理三项，其余排队接着做。每项工作都可以回看她是怎么做的。" : "Every job Odelia is on, grouped by store: each store has its own bot doing that store's part, and Odelia coordinates the work that spans stores. She works up to three at once; more wait their turn. You can watch back how she did any job."}</p>
+      <p className="tab-lede">{zh ? "Odelia 手上的每项工作，按门店分组。每项都可以回看。" : "Every job Odelia is on, by store. Watch back any of them."}</p>
       {/* Muse's avatar opens its activity log and the permissions you've approved: the same two, one tap from her work */}
       <nav className="wk-trust" aria-label={zh ? "她做过什么，她可以做什么" : "What she did, what she may do"}>
         <button type="button" className="lnk" onClick={() => openSettings(go, "activity")}>{zh ? "她做过的每件事" : "Everything she's done"}<I.chevR /></button>

@@ -365,3 +365,11 @@ lesson (seeded, or learned on its own) so the agent itself knows the pattern.
 - Rules: never run full probes back to back on production (see above); keep cron on a small instance at a few minutes,
   not every minute (migration 20261108100000); when the database is slow, measure a catalog query with every buffer a
   hit before blaming load, disk or size.
+
+## 2026-10-31: a layout choice flip-flopped between review rounds
+
+What broke: where a short Odelia chat sits (top of the panel, or on the message box) changed in round 14, back in
+round 20, and reviewers flagged the gap again in panel 14. Each round followed whichever reviewer spoke loudest.
+Why: the choice was made by vote, not by copying a product that already works.
+Rule: a contested layout choice is settled once by the closest working product (here Poke and iMessage: the
+conversation sits on the box), written in the CSS comment, and not reopened unless that product changes.
