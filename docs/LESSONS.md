@@ -424,3 +424,14 @@ Why: scripts/build-lines.py read the batch files sorted as text, b1, b10..b14, b
 the same forms were applied last and replaced the new research.
 Rule: batches apply in numeric order and the newest research wins. After any build-lines run, recount the forms with
 lines for the places just researched; a researched form still missing lines is a bug, not a gap.
+
+## 2026-10-31: the edge case finder, and a lesson nothing checks
+
+Every lesson above was written once and then trusted to memory. A mistake fixed on one form waited on the next form
+like it (the stray-line fix came a day after the twin-label fix and missed the same cause), and an edit script that
+misread entry boundaries moved Arcadia's links onto Alhambra's license and Alhambra's onto Torrance's, unseen.
+Rule: every lesson gets a detector in scripts/edge-finder.ts that looks for the same mistake everywhere it could
+happen (all forms, all migrations, all scripts, all user-facing strings), in the same commit as the lesson. It runs in
+CI (npm run test:edges) and nightly with Odelia's production lessons (.github/workflows/edges.yml), where Claude fixes
+the cause, the siblings and the adjacent cases in a reviewed pull request and adds the detector. The finder caught the
+link swap on its first run. Known exceptions are written in the detector with the reason, never silenced.

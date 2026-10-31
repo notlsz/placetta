@@ -1,3 +1,4 @@
+import { fmtDay } from "./time";
 import { B, type Bi } from "./bi.ts";
 import type { Workspace } from "./model.ts";
 import { openingOf } from "./smart.ts";
@@ -90,7 +91,7 @@ const RULES: Rule[] = [
   { test: /inspection (grade|score|result)|last inspection|letter grade|检查(结果|评级|等级)|卫生评级/i, answer: (c) => {
     const s = (c.ws.stores ?? []).find(x => x.id === c.store);
     if (!s?.grade) return null;
-    return { n: 0, q: "", state: "answered", answer: B(`Grade ${s.grade.letter} on ${s.grade.date}.`, `${s.grade.date} 评级 ${s.grade.letter}。`), from: B("The store's last graded inspection", "该门店最近一次评级检查") };
+    return { n: 0, q: "", state: "answered", answer: B(`Grade ${s.grade.letter} on ${fmtDay(s.grade.date, "en", true)}.`, `${fmtDay(s.grade.date, "zh", true)} 评级 ${s.grade.letter}。`), from: B("The store's last graded inspection", "该门店最近一次评级检查") };
   } },
   { test: /food (handler|safety|protection)|certified (food )?manager|servsafe|食品(安全|处理|保护)|食品经理/i, answer: (c) => {
     const s = (c.ws.stores ?? []).find(x => x.id === c.store);

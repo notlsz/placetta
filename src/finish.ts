@@ -1,3 +1,4 @@
+import { fmtDay } from "./time";
 import { B, type Bi } from "./bi";
 import { audit } from "./core";
 import { continuePrompt, jobApps, nextAction, proofMet, reconcile, STOPPED_HERE, type DoneFiling, type DoneReport, type Filed, type Job } from "./jobs";
@@ -144,7 +145,7 @@ export function scheduleAppeals<W extends Workspace>(w: W, today: string): W {
     };
     const withDl: W = { ...n, deadlines: [...n.deadlines, d] };
     n = { ...withDl, audit: audit("agent", B("Put the appeal deadline on Deadlines", "已把上诉截止日期加入截止日期"), a.name,
-      B(`${dl.date}: ${dl.counted} (${ap.name.en})`, `${dl.date}：${dl.counted}（${ap.name.zh}）`))(withDl).audit };
+      B(`${fmtDay(dl.date, "en", true)}: ${dl.counted} (${ap.name.en})`, `${fmtDay(dl.date, "zh", true)}：${dl.counted}（${ap.name.zh}）`))(withDl).audit };
   }
   return n;
 }

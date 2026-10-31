@@ -54,6 +54,8 @@ jobs:
       - run: npm run test:smart
       - run: npm run test:learn
       - run: npm run test:ideas
+      # every lesson in docs/LESSONS.md, checked everywhere it could happen again (scripts/edge-finder.ts)
+      - run: npm run test:edges
       - run: npm run test:risk
       - run: npm run test:flow
       - run: npm run test:channels

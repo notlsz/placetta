@@ -148,7 +148,7 @@ function due(ctx: Context): Plan {
   const today = inDays(0), week = inDays(7);
   const open = [...ctx.current.deadlines].filter(d => d.date >= today).sort((a, b) => a.date.localeCompare(b.date));
   const soon = open.filter(d => d.date <= week), list = (soon.length ? soon : open).slice(0, soon.length ? 6 : 3);
-  const line = (d: (typeof list)[number]) => B(`${d.date}: ${d.title.en}${d.agency ? ` (${d.agency.en})` : ""}`, `${d.date}：${d.title.zh}${d.agency ? `（${d.agency.zh}）` : ""}`);
+  const line = (d: (typeof list)[number]) => B(`${fmtDay(d.date, "en", true)}: ${d.title.en}${d.agency ? ` (${d.agency.en})` : ""}`, `${fmtDay(d.date, "zh", true)}：${d.title.zh}${d.agency ? `（${d.agency.zh}）` : ""}`);
   const lead = !open.length ? B("Nothing is due. Every deadline on your calendar has passed or been done.", "没有到期事项。日历上的截止日期都已过去或已完成。")
     : soon.length ? B(`${soon.length} thing${soon.length === 1 ? "" : "s"} due in the next 7 days:`, `未来 7 天有 ${soon.length} 项到期：`)
     : B("Nothing is due in the next 7 days. The next ones:", "未来 7 天没有到期事项。接下来的是：");

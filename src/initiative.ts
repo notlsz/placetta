@@ -1,3 +1,4 @@
+import { fmtDay } from "./time";
 import { B, type Bi } from "./bi";
 import type { Application, MemoryBook, Workspace } from "./model";
 import { agencyEmail } from "./security/registry";
@@ -171,7 +172,7 @@ export function morning(w: Workspace, today: string, o: { contacts: Contact[]; c
     if (days > PREP_FROM || days < PREP_TO) continue;
     const app = d.app ? w.apps.find(x => x.id === d.app) : undefined;
     const name = app?.name ?? d.title;
-    moves.push({ kind: "renewal", key: `prep:${d.id}:${d.date}`, deadline: d.id, ...(app ? { app: app.id } : {}), name, date: d.date, days, title: B(`Getting ahead of the ${lowerFirst(name.en)} renewal (${d.date}, ${days} days)`, `提前准备${name.zh}续期（${d.date}，还有 ${days} 天）`) });
+    moves.push({ kind: "renewal", key: `prep:${d.id}:${d.date}`, deadline: d.id, ...(app ? { app: app.id } : {}), name, date: d.date, days, title: B(`Getting ahead of the ${lowerFirst(name.en)} renewal (${fmtDay(d.date, "en", true)}, ${days} days)`, `提前准备${name.zh}续期（${fmtDay(d.date, "zh", true)}，还有 ${days} 天）`) });
   }
   // what only a person can do: approvals, by what they are
   for (const a of w.approvals) {

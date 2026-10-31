@@ -1,3 +1,4 @@
+import { fmtDay } from "./time";
 import { B, type Bi } from "./bi.ts";
 import type { Store, Workspace } from "./model.ts";
 import { buildReport, type ReportRow } from "./report.ts";
@@ -91,7 +92,7 @@ function storeChecks(s: Store, today: string): Check[] {
     if (s.mock) {
       const okN = s.mock.checks.filter(c => c.ok).length, n = s.mock.checks.length;
       out.push({ id: `${s.id}:mock`, store: s.id, area: "mock", state: okN === n ? "pass" : okN / n >= 0.8 ? "warn" : "fail", title: B("Mock inspection", "模拟检查"),
-        why: B(`${okN} of ${n} passed on ${s.mock.date}`, `${s.mock.date} 通过 ${okN}/${n}`), fix: okN === n ? undefined : B(`List what failed in the last mock inspection at ${s.name.en} and how to fix each before the inspector comes.`, `列出${s.name.zh}上次模拟检查未通过的项目，以及在检查员来之前如何逐项整改。`) });
+        why: B(`${okN} of ${n} passed on ${fmtDay(s.mock.date, "en", true)}`, `${fmtDay(s.mock.date, "zh", true)} 通过 ${okN}/${n}`), fix: okN === n ? undefined : B(`List what failed in the last mock inspection at ${s.name.en} and how to fix each before the inspector comes.`, `列出${s.name.zh}上次模拟检查未通过的项目，以及在检查员来之前如何逐项整改。`) });
     }
   }
   return out;

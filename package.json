@@ -69,7 +69,8 @@
     "econ": "esbuild scripts/econ/measure.ts --bundle --platform=node --format=esm --outfile=.econ.mjs '--external:*.pdf?inline' --external:thinking-orbs --external:playwright-core --log-level=error && node .econ.mjs; s=$?; rm -f .econ.mjs; exit $s",
     "test:reply-leak": "esbuild scripts/leak-test.ts --bundle --platform=node --format=esm --outfile=.leak-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .leak-test.mjs; s=$?; rm -f .leak-test.mjs; exit $s",
     "probe": "node scripts/probe.mjs",
-    "test:suggest": "esbuild scripts/suggest-test.ts --bundle --platform=node --format=esm --outfile=.suggest-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .suggest-test.mjs; s=$?; rm -f .suggest-test.mjs; exit $s"
+    "test:suggest": "esbuild scripts/suggest-test.ts --bundle --platform=node --format=esm --outfile=.suggest-test.mjs '--external:*.pdf?inline' --external:thinking-orbs --log-level=error && node .suggest-test.mjs; s=$?; rm -f .suggest-test.mjs; exit $s",
+    "test:edges": "esbuild scripts/edge-finder.ts --bundle --platform=node --format=esm --outfile=.edge-finder.mjs '--external:*.pdf?inline' --packages=external --jsx=automatic --log-level=error && node .edge-finder.mjs; s=$?; rm -f .edge-finder.mjs; exit $s"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

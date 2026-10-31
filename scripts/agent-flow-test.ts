@@ -2,6 +2,7 @@
    prepare each one, check nothing is filed with an empty field or a missing document, fill once and see it reused,
    and read progress for that store only. Run: npm run test:flow */
 import { formById } from "../src/forms/registry";
+import { fmtDay } from "../src/time";
 import { makeTools, coreFields, type Made, type X } from "../src/live";
 import { FORMS } from "../src/forms/registry";
 import { applyChange, blockersSay, isBlank, normalizeState } from "../src/core";
@@ -309,8 +310,9 @@ ok(!html("<script>alert(1)</script>").includes("<script>"), "edge: a reply can't
   const en = await ask("What's due this week", "en"), zh = await ask("本周有什么到期", "zh");
   const lines = en?.reply.text.map(t => t.en) ?? [];
   ok(!/Which city/.test(lines.join(" ")) && /(due in the next 7 days|Nothing is due|The next ones)/.test(lines[0] ?? ""), "edge: \"What's due this week\" answers with the deadlines, not the intake question", lines);
-  const dated = lines.slice(1).map(l => l.slice(0, 10));
-  ok(dated.length > 0 && dated.every(d => SAMPLE.deadlines.some(x => x.date === d)) && dated.join() === [...dated].sort().join(), "edge: each line is one of the workspace's own deadlines, soonest first", dated);
+  // each line starts with its date as people write it ("Nov 5, 2026"), never the ISO form (edge finder, iso-date-shown)
+  const dated = lines.slice(1).map(l => SAMPLE.deadlines.find(x => l.startsWith(fmtDay(x.date, "en", true) + ":"))?.date ?? "");
+  ok(dated.length > 0 && dated.every(Boolean) && dated.join() === [...dated].sort().join() && !lines.some(l => /^\d{4}-\d{2}-\d{2}/.test(l)), "edge: each line is one of the workspace's own deadlines, soonest first, dated as people write it", lines);
   ok(!!zh && /到期|没有/.test(zh.reply.text[0].zh) && !/哪个城市/.test(zh.reply.text.map(t => t.zh).join("")), "edge: and in Chinese", zh?.reply.text.map(t => t.zh));
 }
 

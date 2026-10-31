@@ -21,7 +21,7 @@ import { answersHash, fillAndRead, formName, formOf, latestVersion, problemsOf, 
 /** A form line named by the start of its long label ("Cooking equipment counts" for "Cooking equipment counts, one per
  *  line in the printed order: ..."): the one line whose label starts that way. Odelia shortened Denver's labels and
  *  every fill went to a new, unprinted field (production probe, 2026-10-30). */
-const labelStart = (off: { fields: { id: string; label: { en: string } }[] } | undefined, key: string) => {
+export const labelStart = (off: { fields: { id: string; label: { en: string } }[] } | undefined, key: string) => {
   // "Section II: Cooking equipment counts", "Section II cooking equipment (counts)": the section's name and the
   // punctuation aside, the line whose label begins with the same words
   const words = (t: string) => t.toLowerCase().replace(/^(section|line|page|part)\s+[\w.-]+\s*[:.\-]?\s*/, "").replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter(Boolean);

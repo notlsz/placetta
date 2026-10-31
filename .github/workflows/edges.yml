@@ -1,0 +1,93 @@
+# The edge case finder, nightly: what went wrong, and everything like it, found and fixed before a customer meets it.
+#   1. scripts/edge-finder.ts: every lesson in docs/LESSONS.md as a detector, run against every form, migration and
+#      script (the same check runs in CI, so a known mistake can't ship).
+#   2. Odelia's own lessons from production (public.odelia_lessons): the fixes she learned in the last day, and any lesson
+#      that has lost (the slip came back). A slip on one form is a question about every form like it.
+# When either finds something, Claude reads it with docs/LESSONS.md, fixes the cause, finds the siblings and adjacent
+# cases, adds a detector to scripts/edge-finder.ts and a test, writes the lesson, and opens a pull request. Nothing is
+# merged or deployed by it: CI and a person review every pull request.
+# Needs SUPABASE_ACCESS_TOKEN (read-only use: one SELECT) and ANTHROPIC_API_KEY, both already used by the probe.
+# Every action is pinned to a full commit SHA (the tag it was taken from is in the comment).
+name: Edge finder
+on:
+  schedule:
+    - cron: "53 11 * * *"   # 11:53 UTC daily, after the nightly probe
+  workflow_dispatch:
+    inputs:
+      fix: { description: "Open a fix pull request when something is found", type: boolean, default: true }
+concurrency:
+  group: edges
+  cancel-in-progress: false
+permissions: { contents: read }
+jobs:
+  find:
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 30
+    outputs:
+      found: ${{ steps.sum.outputs.found }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Edge finder
+        run: npm run -s test:edges -- --json edges.json --md edges.md || true
+      - name: Odelia's lessons from production
+        env: { TOKEN: "${{ secrets.SUPABASE_ACCESS_TOKEN }}" }
+        run: |
+          q="select kind, key, text_en, wins, losses, created_at from public.odelia_lessons where status <> 'retired' and ((kind = 'fix' and created_at > now() - interval '1 day') or losses > 0) order by losses desc, created_at desc limit 50"
+          curl -s -m 60 -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d "$(jq -n --arg q "$q" '{query: $q}')" \
+            "https://api.supabase.com/v1/projects/esquxzcfsylffuijvzec/database/query" > lessons.json || echo "[]" > lessons.json
+          jq -e 'type == "array"' lessons.json >/dev/null || echo "[]" > lessons.json
+          echo "production lessons: $(jq length lessons.json)"
+      - name: Summary
+        id: sum
+        run: |
+          e=$(jq '[.[] ] | length' edges.json 2>/dev/null || echo 0); l=$(jq length lessons.json)
+          { echo "## Edge finder"; cat edges.md 2>/dev/null; echo; echo "## Odelia's new and losing lessons: $l"; jq -r '.[] | "- \(.kind) \(.key): \(.text_en) (wins \(.wins), losses \(.losses))"' lessons.json; } >> "$GITHUB_STEP_SUMMARY"
+          echo "found=$(( e + l ))" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with: { name: edges, path: "edges.json\nedges.md\nlessons.json", retention-days: 30, if-no-files-found: ignore }
+
+  # Claude fixes the cause, the siblings and the adjacent cases, and teaches the finder. Never merges.
+  fix:
+    needs: find
+    if: needs.find.outputs.found != '0' && (github.event_name == 'schedule' || inputs.fix)
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 60
+    permissions: { contents: write, pull-requests: write, id-token: write }
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with: { name: edges, path: .edges }
+      - uses: anthropics/claude-code-action@ae68417a745a5df4b2124873632bd73a2255e6f6 # v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ github.token }}
+          claude_args: --max-turns 80 --allowedTools "Bash,Read,Edit,Write,Glob,Grep"
+          prompt: |
+            Read CLAUDE.md and docs/LESSONS.md first. .edges/edges.json is what scripts/edge-finder.ts found (each with its
+            detector, lesson, where, what and fix). .edges/lessons.json is what Odelia learned in production in the last
+            day: fix lessons (a slip on a form or tool and what fixed it) and any lesson with losses (the slip came back).
+
+            For each finding and each lesson:
+            1. Find the cause, not the symptom. Fix it at the cause in src/, supabase/ or scripts/.
+            2. Find its siblings: the same mistake on other forms, tools, migrations or screens. A slip on one form's line
+               is a question about every line like it on all 1,104 forms. Fix those too.
+            3. Find the adjacent cases: what the same cause would break next (a different label shape, another agency's
+               format, the Chinese text, a phone instead of a desktop).
+            4. Teach the finder: add or extend a detector in scripts/edge-finder.ts that would have caught it everywhere,
+               citing the lesson. Add or extend the nearest test. Write the lesson in docs/LESSONS.md (what broke, why,
+               the rule).
+            5. A losing production lesson that is simply wrong: say so in the pull request and don't paper over it.
+            6. Run npm run build:agent if src/ changed, then npx tsc -b, npm run test:edges and the tests you touched.
+               Everything must pass.
+            7. Commit as Claude <noreply@anthropic.com> on a new branch named edges-fix/<date>, push it, and open a pull
+               request titled "Edge fix: <what>" that lists, per item, the cause, the siblings found, what changed and
+               the detector added.
+            Never merge, never push to main, never deploy, never touch production data or secrets.
