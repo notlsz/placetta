@@ -51,7 +51,7 @@ jobs:
           e=$(jq '[.[] ] | length' edges.json 2>/dev/null || echo 0); l=$(jq length lessons.json)
           { echo "## Edge finder"; cat edges.md 2>/dev/null || true; echo; echo "## Odelia's new and losing lessons: $l"; jq -r '.[] | "- \(.kind) \(.key): \(.text_en) (wins \(.wins), losses \(.losses))"' lessons.json; } >> "$GITHUB_STEP_SUMMARY"
           echo "found=$(( e + l ))" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with: { name: edges, path: "edges.json\nedges.md\nlessons.json", retention-days: 30, if-no-files-found: ignore }
 
   # Claude fixes the cause, the siblings and the adjacent cases, and teaches the finder. Never merges.
