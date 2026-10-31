@@ -9,6 +9,7 @@ import { canFileLine, firstRunFacts, needLine, nowLine, restLine, whoFiles, type
 import { CheckList, ChecksSheet } from "./Checks";
 import { TrustShare } from "./TrustShare";
 import { openSettings } from "./Settings";
+import * as api from "./cloud/api";
 import { useTeam } from "./Comments";
 import { CostSheet, useCost } from "./CostToOpen";
 import { estimateSay } from "./smart";
@@ -128,9 +129,14 @@ export function FirstRunMore() {
   const [skipped, setSkipped] = useState(() => read(SKIP + id));
   const [shared, setShared] = useState(() => read(SHARED + id));
   useEffect(() => { const on = () => { keep(SHARED + id); setShared(true); }; window.addEventListener("placetta:trust", on); return () => window.removeEventListener("placetta:trust", on); }, [id]);
+  // whether Odelia can reach the owner by text, the way Claude Duet asks to notify you right after connecting apps
+  const [texts, setTexts] = useState(false);
+  useEffect(() => { if (!cloud) return; let live = true; void api.phoneStatus().then(s => { if (live) setTexts(!!s.link?.verified); }).catch(() => undefined); return () => { live = false; }; }, [cloud]);
   const steps = [
     { k: "email", show: true, done: !!cloud?.integrations.some(i => ["gmail", "outlook_mail", "mailbox"].includes(i.kind) && i.status === "connected"),
       t: zh ? "连接邮箱" : "Connect your email", s: zh ? "机构回信当天就能看到并处理。" : "Agency replies get read and handled the day they arrive.", on: () => openSettings(go, "integrations") },
+    { k: "texts", show: !!cloud, done: texts,
+      t: zh ? "用短信接收 Odelia 的进度" : "Get Odelia's updates by text", s: zh ? "申请完成或需要您批准时，她会发短信告诉您。" : "She texts you when a filing is done or needs your approval.", on: () => openSettings(go, "phone") },
     { k: "team", show: !!cloud, done: team.people.length > 1,
       t: zh ? "添加同事" : "Add a teammate", s: zh ? "店长或合伙人一起看进度、批准申请。" : "A manager or partner sees progress and can approve.", on: () => openSettings(go, "team") },
     { k: "share", show: (ws.stores ?? []).length > 0, done: shared,
