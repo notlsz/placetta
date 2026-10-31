@@ -13,3 +13,6 @@ pla-plan-submittal https://www.plano.gov/asset/ac97282c-0149-4243-9b8e-5be4cc5c0
 pla-food-requirements https://www.plano.gov/asset/1f521bb0-7184-4285-bd1a-11a91f39ab8c
 pla-prepermit-checklist https://content.civicplus.com/api/assets/tx-plano/90e009a8-9bdb-42a0-8964-77138129948c
 pla-fees https://content.civicplus.com/api/assets/tx-plano/c39480c6-84db-4e2c-b253-d47e9ef3f83a
+scc-health-permit https://files.santaclaracounty.gov/exjcpb1761/2026-08/cpd_prmt_app_2026_08_20.pdf?VersionId=XZJDmRcdCy.QwdkuwMcMLMHTxiQJyaq_
+scc-plan-check https://files.santaclaracounty.gov/exjcpb1761/2026-07/pc_app_food_2026_07_20.pdf?VersionId=JBEmLk3MO1erzQxpB7f5jrEC1RaN50Gc
+scc-plan-checklist https://files.santaclaracounty.gov/exjcpb1761/2026-07/pc_checklist_2026_07_20.pdf?VersionId=p46hzXiDlf1v7SBQH24AmemKdVGRCSTW
