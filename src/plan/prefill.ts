@@ -171,7 +171,9 @@ function line(f: FormField, c: Ctx): Answer {
   if (/business name|name of (the )?business|facility name|establishment name|name of establishment|business owner \(dba\)/.test(l)) {
     const name = c.brand || legal;
     if (!name) return null;
-    if (/address/.test(l)) return a?.street ? { v: `${name}, ${fullAddress(a)}` } : null;
+    // a line that also asks where ("Business name and business location (number, street, city, state, zip)", Fremont)
+    // takes both or waits for the street
+    if (/address|location|street/.test(l)) return a?.street ? { v: `${name}, ${fullAddress(a)}` } : null;
     return { v: name };
   }
   if (/\b(dba|trade name|assumed name|doing business as)\b/.test(l)) return c.brand ? { v: c.brand } : null;

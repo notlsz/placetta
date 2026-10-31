@@ -653,6 +653,8642 @@ export const LINES: Record<string, Lines> = {
   },
   "notes": "Fee $50. Due within 120 days after the articles take effect; missing it suspends the LLC's authority to do business."
  },
+ "sj-building-ti": {
+  "status": "page_only",
+  "seen": "Building Permit Application (tenant improvement)",
+  "read": "2026-10-13",
+  "sources": [
+   "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement"
+  ],
+  "fields": [],
+  "attach": [
+   {
+    "en": "Commercial & Industrial Projects Submittal Checklist",
+    "zh": "商业与工业项目提交核查表"
+   },
+   {
+    "en": "Plans per the Tenant Improvements Plan Checklist",
+    "zh": "按租户改造图纸核查表准备的图纸"
+   },
+   {
+    "en": "Owner-Builder Acknowledgement, if the owner applies",
+    "zh": "如业主自行申请，需业主自建确认书"
+   }
+  ],
+  "submit": {
+   "portal": "sjpermits.org",
+   "signature": "drawn",
+   "evidence": "Forms may require digital signatures. Whoever signs the building permit application is responsible and potentially liable for all activity under the permit.",
+   "source": "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement"
+  },
+  "notes": "The city advises a licensed contractor as applicant. STAR service is faster (premium fee); a refundable construction and demolition diversion deposit applies."
+ },
+ "sj-fire-systems": {
+  "status": "page_only",
+  "seen": "SJPermits.org online application, Application group 'Fire Prevention', type 'Fire Protection' (no PDF form)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.sanjoseca.gov/your-government/departments-offices/fire-department/fire-prevention-permits/development-services"
+  ],
+  "fields": [
+   {
+    "id": "account",
+    "line": "",
+    "label": {
+     "en": "Register or sign in at sjpermits.org",
+     "zh": "在 sjpermits.org 注册或登录"
+    }
+   },
+   {
+    "id": "contractor_license_type",
+    "line": "",
+    "label": {
+     "en": "Contractor's license type",
+     "zh": "承包商执照类型"
+    },
+    "hint": {
+     "en": "Determines which permits you can apply for",
+     "zh": "决定可申请的许可类别"
+    }
+   },
+   {
+    "id": "application_group_type",
+    "line": "",
+    "label": {
+     "en": "Application group 'Fire Prevention', application type 'Fire Protection'",
+     "zh": "申请组别选“Fire Prevention”，申请类型选“Fire Protection”"
+    }
+   },
+   {
+    "id": "fire_permit_subtype",
+    "line": "",
+    "label": {
+     "en": "Fire Permit Sub Type matching your license",
+     "zh": "与执照相符的消防许可子类型"
+    },
+    "hint": {
+     "en": "Page warns against applying for the wrong type",
+     "zh": "官方提醒勿选错类型"
+    }
+   },
+   {
+    "id": "property_address",
+    "line": "",
+    "label": {
+     "en": "Project property address (required)",
+     "zh": "项目物业地址（必填）"
+    }
+   },
+   {
+    "id": "applicant_confirm",
+    "line": "",
+    "label": {
+     "en": "Confirm applicant (licensed contractor with active City and State license added automatically)",
+     "zh": "确认申请人（持有有效市级及州执照的承包商会自动带入）"
+    }
+   },
+   {
+    "id": "review_pay",
+    "line": "",
+    "label": {
+     "en": "Review application and pay fees",
+     "zh": "核对申请并缴费"
+    },
+    "hint": {
+     "en": "Payment is required to start SJePlans",
+     "zh": "缴费后才能启动 SJePlans"
+    }
+   },
+   {
+    "id": "sjeplans_upload",
+    "line": "",
+    "label": {
+     "en": "Register for SJePlans and upload plans and documents",
+     "zh": "注册 SJePlans 并上传图纸及文件"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Plans, applications and documents named and formatted to SJePlans standards",
+    "zh": "按 SJePlans 命名及格式标准准备的图纸、申请及文件"
+   }
+  ],
+  "submit": {
+   "email": "SJFDPermitSpecialist@sanjoseca.gov",
+   "portal": "www.sjpermits.org",
+   "signature": "typed",
+   "evidence": "Fire protection systems permits are self-started online at www.sjpermits.org; after submitting online you receive a link to upload documents through SJePlans.",
+   "source": "https://www.sanjoseca.gov/your-government/departments-offices/fire-department/fire-prevention-permits/development-services"
+  },
+  "notes": "Email is for questions about online fire permit applications, not a submission inbox. Only the applicant's licensed-contractor login can apply; sub-type depends on license. Specific plan checklists and fees not shown on the page."
+ },
+ "sj-building-final": {
+  "status": "page_only",
+  "seen": "Inspection scheduling on SJPermits.org 'Schedule an Inspection' (no form)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/building-division/inspections/inspection-success"
+  ],
+  "fields": [
+   {
+    "id": "permit_processes",
+    "line": "",
+    "label": {
+     "en": "Processes complete and ready for inspection (from the Permit Card)",
+     "zh": "已完工可验收的工序（参照许可证卡）"
+    },
+    "hint": {
+     "en": "Building Final is approved only after all other inspection processes on the permit are approved",
+     "zh": "须先通过许可证上所有其他验收，才能批准建筑终验"
+    }
+   },
+   {
+    "id": "permit_card_onsite",
+    "line": "",
+    "label": {
+     "en": "Permit Card kept at the job site",
+     "zh": "许可证卡须保留在工地"
+    }
+   },
+   {
+    "id": "prior_notices",
+    "line": "",
+    "label": {
+     "en": "Printed copies of prior inspection notices (larger projects)",
+     "zh": "以往验收通知的打印件（较大项目）"
+    }
+   },
+   {
+    "id": "approved_plans",
+    "line": "",
+    "label": {
+     "en": "City-approved and professionally stamped plans",
+     "zh": "经市政府批准并盖有专业印章的图纸"
+    }
+   },
+   {
+    "id": "systems_working",
+    "line": "",
+    "label": {
+     "en": "Utilities on, fixtures and fans working, smoke and CO alarms installed and working",
+     "zh": "水电接通，灯具风扇运作，烟雾及一氧化碳报警器已安装且正常"
+    }
+   },
+   {
+    "id": "ladder",
+    "line": "",
+    "label": {
+     "en": "OSHA-compliant ladder if needed",
+     "zh": "如需梯子，须符合 OSHA 标准"
+    }
+   }
+  ],
+  "attach": [],
+  "submit": {
+   "portal": "www.sjpermits.org",
+   "signature": "unknown",
+   "evidence": "Go to SJPermits.org and select 'Schedule an Inspection', or call 408-535-3555 and select the option for scheduling an inspection.",
+   "source": "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/building-division/inspections/inspection-success"
+  },
+  "notes": "Not a form; a scheduling request. After approval SJPermits status changes from 'Under Inspection' to 'Finaled'. Page does not mention fire/health sign-offs; check the Permit Card."
+ },
+ "sj-sign": {
+  "status": "page_only",
+  "seen": "Sign Permit Application (Planning, online)",
+  "read": "2026-10-13",
+  "sources": [
+   "https://www.sanjoseca.gov/business/development-services-permit-center/online-permits-at-sjpermits-org/planning-online-permits"
+  ],
+  "fields": [],
+  "attach": [
+   {
+    "en": "The documents, photographs or plans in the application's 'What to Submit' section",
+    "zh": "申请表“提交内容”部分列出的文件、照片或图纸"
+   }
+  ],
+  "submit": {
+   "portal": "sjpermits.org",
+   "signature": "drawn",
+   "evidence": "Be sure to include any required documentation for staff to deem your application complete and a Digital Signature.",
+   "source": "https://www.sanjoseca.gov/business/development-services-permit-center/online-permits-at-sjpermits-org/planning-online-permits"
+  },
+  "notes": "Staff invoice after the completeness check; the receipt appears in the SJPermits account."
+ },
+ "ac-plan-check": {
+  "status": "mapped",
+  "seen": "Plan Review Questionnaire for Food Establishments + Plan Check Worksheet, Alameda County Environmental Health (no revision printed); Plan Check Guide rev Januar",
+  "read": "2026-10-31",
+  "sources": [
+   "https://deh.acgov.org/operations-assets/docs/plancheck/Plan_Check_Questionnaire.pdf",
+   "https://deh.acgov.org/operations-assets/docs/plancheck/Plan-Check-Worksheet.pdf",
+   "https://health.alamedacountyca.gov/alameda-county-plan-check-guide-for-retail-food-facilities/"
+  ],
+  "fields": [
+   {
+    "id": "q1_establishment_type",
+    "line": "Q1",
+    "label": {
+     "en": "What type of food establishment will this be? Describe",
+     "zh": "将开设何种类型的食品场所？请描述"
+    }
+   },
+   {
+    "id": "q2_business_name",
+    "line": "Q2",
+    "label": {
+     "en": "Name of Business",
+     "zh": "商户名称"
+    }
+   },
+   {
+    "id": "q3_business_address",
+    "line": "Q3",
+    "label": {
+     "en": "Address of Business",
+     "zh": "商户地址"
+    }
+   },
+   {
+    "id": "q4_cannabis",
+    "line": "Q4",
+    "label": {
+     "en": "Will there be a Cannabis Manufacturing facility?",
+     "zh": "是否设有大麻制造设施？"
+    }
+   },
+   {
+    "id": "q5_hood",
+    "line": "Q5",
+    "label": {
+     "en": "Will there be a Hood System? How many?",
+     "zh": "是否设排烟罩系统？数量多少？"
+    },
+    "hint": {
+     "en": "Additional fees per system",
+     "zh": "每套系统另收费"
+    }
+   },
+   {
+    "id": "q6_unpackaged",
+    "line": "Q6",
+    "label": {
+     "en": "Handling of unpackaged foods/drinks: portioning, cooking, deep frying, charbroiling/BBQ?",
+     "zh": "是否处理无包装食品饮料：分装、烹饪、油炸、炭烤/烧烤？"
+    }
+   },
+   {
+    "id": "q7_self_service",
+    "line": "Q7",
+    "label": {
+     "en": "Salad bar or other self-service foods?",
+     "zh": "是否有沙拉吧或其他自助食品？"
+    }
+   },
+   {
+    "id": "q8_catering",
+    "line": "Q8",
+    "label": {
+     "en": "Any catering? If so, submit a Catering SOP",
+     "zh": "是否提供外烩？如有须提交外烩标准作业程序"
+    }
+   },
+   {
+    "id": "q9_haccp_rop",
+    "line": "Q9",
+    "label": {
+     "en": "Do any food items require a HACCP or ROP?",
+     "zh": "是否有食品需要 HACCP 计划或减氧包装（ROP）？"
+    }
+   },
+   {
+    "id": "q10_shellfish_tank",
+    "line": "Q10",
+    "label": {
+     "en": "Shellfish tank (oysters, clams, etc.)?",
+     "zh": "是否设贝类水箱（生蚝、蛤蜊等）？"
+    }
+   },
+   {
+    "id": "q11_fish_tank",
+    "line": "Q11",
+    "label": {
+     "en": "Tank for finfish or crustaceans?",
+     "zh": "是否设鱼类或甲壳类水箱？"
+    }
+   },
+   {
+    "id": "q12_onsite_takeout",
+    "line": "Q12",
+    "label": {
+     "en": "On-site eating or drinking? Exclusively take-out?",
+     "zh": "是否堂食？是否仅外带？"
+    }
+   },
+   {
+    "id": "q13_utensils",
+    "line": "Q13",
+    "label": {
+     "en": "Multi-use or single-service utensils?",
+     "zh": "使用可重复餐具还是一次性餐具？"
+    }
+   },
+   {
+    "id": "q14_dishwasher",
+    "line": "Q14",
+    "label": {
+     "en": "Dishwashing machine? High temperature or chemical (low temperature)?",
+     "zh": "是否有洗碗机？高温型还是化学（低温）型？"
+    }
+   },
+   {
+    "id": "q15_prep_sinks",
+    "line": "Q15",
+    "label": {
+     "en": "Sinks used for washing produce, thawing or other food prep?",
+     "zh": "水槽是否用于洗菜、解冻或其他备餐？"
+    }
+   },
+   {
+    "id": "q16_pickup_area",
+    "line": "Q16",
+    "label": {
+     "en": "Pick-up area for third-party delivery or to-go customers?",
+     "zh": "是否设第三方外卖或外带取餐区？"
+    }
+   },
+   {
+    "id": "q17_employees",
+    "line": "Q17",
+    "label": {
+     "en": "Number of employees on site",
+     "zh": "现场员工人数"
+    }
+   },
+   {
+    "id": "q18_square_footage",
+    "line": "Q18",
+    "label": {
+     "en": "Total square footage of floor space",
+     "zh": "总楼面面积（平方英尺）"
+    }
+   },
+   {
+    "id": "q19_seating",
+    "line": "Q19",
+    "label": {
+     "en": "Seating capacity",
+     "zh": "座位数"
+    }
+   },
+   {
+    "id": "q20_alcohol",
+    "line": "Q20",
+    "label": {
+     "en": "Alcoholic beverages served on premises?",
+     "zh": "店内是否供应酒精饮料？"
+    }
+   },
+   {
+    "id": "q21_zoning",
+    "line": "Q21",
+    "label": {
+     "en": "Is the location zoned for the proposed use?",
+     "zh": "该地点的分区是否允许拟定用途？"
+    }
+   },
+   {
+    "id": "q22_septic_well",
+    "line": "Q22",
+    "label": {
+     "en": "On a septic system? Using well water?",
+     "zh": "是否使用化粪池系统？是否使用井水？"
+    }
+   },
+   {
+    "id": "q23_new_or_remodel",
+    "line": "Q23",
+    "label": {
+     "en": "New construction or remodel?",
+     "zh": "新建还是改建？"
+    }
+   },
+   {
+    "id": "q24_remodel",
+    "line": "Q24",
+    "label": {
+     "en": "If remodel: change in type of operation; previous business name/type; changes made",
+     "zh": "如为改建：经营类型是否变更；原商户名称及类型；改动内容"
+    }
+   },
+   {
+    "id": "q25_new_construction",
+    "line": "Q25",
+    "label": {
+     "en": "If new construction: new building; current business; stories; basement use",
+     "zh": "如为新建：是否新楼；现有商户；楼层数；地下室用途"
+    }
+   },
+   {
+    "id": "q26_mall",
+    "line": "Q26",
+    "label": {
+     "en": "Part of a shopping mall or center?",
+     "zh": "是否位于购物中心内？"
+    }
+   },
+   {
+    "id": "q27_shared_facilities",
+    "line": "Q27",
+    "label": {
+     "en": "Common or shared facilities (restrooms, storerooms, garbage area)?",
+     "zh": "是否有共用设施（洗手间、仓库、垃圾区）？"
+    }
+   },
+   {
+    "id": "q28_business_owner",
+    "line": "Q28",
+    "label": {
+     "en": "Business owner's name, phone, email, address",
+     "zh": "经营者姓名、电话、邮箱、地址"
+    }
+   },
+   {
+    "id": "q29_property_owner",
+    "line": "Q29",
+    "label": {
+     "en": "Property owner's name, phone, email, address",
+     "zh": "物业业主姓名、电话、邮箱、地址"
+    }
+   },
+   {
+    "id": "q30_architect",
+    "line": "Q30",
+    "label": {
+     "en": "Architect's name, phone, email",
+     "zh": "建筑师姓名、电话、邮箱"
+    }
+   },
+   {
+    "id": "q31_contractor",
+    "line": "Q31",
+    "label": {
+     "en": "Contractor's name, phone, email",
+     "zh": "承包商姓名、电话、邮箱"
+    }
+   },
+   {
+    "id": "ws_expedited",
+    "line": "Worksheet",
+    "label": {
+     "en": "Expedited Plan Check: Yes",
+     "zh": "加急图纸审查：是"
+    },
+    "hint": {
+     "en": "Additional fee required",
+     "zh": "需另付费用"
+    }
+   },
+   {
+    "id": "ws_establishment_name",
+    "line": "Worksheet",
+    "label": {
+     "en": "Establishment name, street address, city + zip, phone",
+     "zh": "场所名称、街道地址、城市及邮编、电话"
+    },
+    "hint": {
+     "en": "For permitted facilities, must match the current health permit",
+     "zh": "已有许可的场所须与现行卫生许可证一致"
+    }
+   },
+   {
+    "id": "ws_program",
+    "line": "Worksheet",
+    "label": {
+     "en": "Program checkboxes",
+     "zh": "项目类型勾选"
+    },
+    "options": [
+     "Food",
+     "Pool",
+     "Spa",
+     "Change of Ownership",
+     "Cannabis"
+    ]
+   },
+   {
+    "id": "ws_facility_status",
+    "line": "Worksheet",
+    "label": {
+     "en": "New Facility or Existing (circle one); Facility ID",
+     "zh": "新场所或现有场所（圈选）；场所编号"
+    }
+   },
+   {
+    "id": "ws_hood_fans",
+    "line": "Worksheet",
+    "label": {
+     "en": "Number of new hood exhaust fans; new dishwasher w/hood",
+     "zh": "新增排烟罩风机数量；带罩新洗碗机"
+    }
+   },
+   {
+    "id": "ws_requestor",
+    "line": "Worksheet",
+    "label": {
+     "en": "Requestor/contact person and email",
+     "zh": "申请联系人及邮箱"
+    }
+   },
+   {
+    "id": "ws_owner",
+    "line": "Worksheet",
+    "label": {
+     "en": "Business owner's name, email, address, phone",
+     "zh": "经营者姓名、邮箱、地址、电话"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Proposed menu (and menu of existing establishment if any)",
+    "zh": "拟定菜单（如有现有商户，附其菜单）"
+   },
+   {
+    "en": "Catering SOP if catering",
+    "zh": "如有外烩，附外烩标准作业程序"
+   },
+   {
+    "en": "One physical plan set at 1/4 inch = 1 foot (vicinity, site, building, equipment with numbered list, finish schedule, plumbing, elevations, ventilation hood)",
+    "zh": "一套 1/4 英寸比 1 英尺的纸质图纸（位置图、总平面、建筑、带编号设备清单的设备图、饰面表、给排水、立面、排烟罩）"
+   },
+   {
+    "en": "Manufacturer's specification sheets for all equipment",
+    "zh": "所有设备的制造商规格书"
+   },
+   {
+    "en": "Water Heater Worksheet and Ventilation Hood Worksheet if applicable",
+    "zh": "如适用，附热水器工作表及排烟罩工作表"
+   },
+   {
+    "en": "Plan review fee payment",
+    "zh": "图纸审查费"
+   }
+  ],
+  "submit": {
+   "mail": {
+    "name": "Alameda County Environmental Health Department",
+    "line1": "1131 Harbor Bay Parkway",
+    "city": "Alameda",
+    "state": "CA",
+    "zip": "94502"
+   },
+   "signature": "unknown",
+   "evidence": "The guide lists the physical address and asks for an initial physical set of plans submitted with the forms and payment; no email or portal submission is described.",
+   "source": "https://health.alamedacountyca.gov/alameda-county-plan-check-guide-for-retail-food-facilities/"
+  },
+  "notes": "Questionnaire title as printed is 'Plan Review Questionnaire for Food Establishments' (library says 'Plan Check Questionnaire'). Worksheet requires all yellow-box fields. Normal review: first response 20 working days; expedited 7. Approved plans valid 6 months. Three full sets for stamping after approval. Excludes City of Berkeley. Fees at health.alamedacountyca.gov/general-fees-eh/."
+ },
+ "ac-health-permit": {
+  "status": "page_only",
+  "seen": "Signed permit application (green copy), named in Alameda County 'Change of Ownership Guide'; form itself not published online",
+  "read": "2026-10-31",
+  "sources": [
+   "https://deh.acgov.org/operations-assets/docs/foodsafety/ChangeofOwnershipGuide.pdf"
+  ],
+  "fields": [
+   {
+    "id": "owner_verification",
+    "line": "",
+    "label": {
+     "en": "Business owner verification: corporation = Articles of Incorporation and EIN; sole prop/partnership = driver's license n",
+     "zh": "经营者身份核实：公司须提供公司章程及 EIN；独资/合伙须提供驾照号码或 EIN"
+    }
+   },
+   {
+    "id": "property_owner_contact",
+    "line": "",
+    "label": {
+     "en": "Property owner's and management company's address and contact information",
+     "zh": "物业业主及物业管理公司的地址和联系方式"
+    }
+   },
+   {
+    "id": "proposed_menu",
+    "line": "",
+    "label": {
+     "en": "Copy of the proposed menu",
+     "zh": "拟定菜单副本"
+    }
+   },
+   {
+    "id": "inspection_request",
+    "line": "",
+    "label": {
+     "en": "Request inspection: (510) 567-6700 or dehwebmain@acgov.org",
+     "zh": "预约检查：(510) 567-6700 或 dehwebmain@acgov.org"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Articles of Incorporation and Federal Tax ID (corporations)",
+    "zh": "公司章程及联邦税号（公司适用）"
+   },
+   {
+    "en": "Proposed menu",
+    "zh": "拟定菜单"
+   },
+   {
+    "en": "Payment of permit fees",
+    "zh": "许可证费用"
+   }
+  ],
+  "submit": {
+   "mail": {
+    "name": "Alameda County Environmental Health Department",
+    "line1": "1131 Harbor Bay Parkway",
+    "city": "Alameda",
+    "state": "CA",
+    "zip": "94502"
+   },
+   "signature": "unknown",
+   "evidence": "Submit the signed application with payment 'in-person or by mail' to 1131 Harbor Bay Parkway, Alameda, CA, 94502.",
+   "source": "https://deh.acgov.org/operations-assets/docs/foodsafety/ChangeofOwnershipGuide.pdf"
+  },
+  "notes": "The permit application is a paper 'green copy' issued through the inspection process; its fields are not published, so the agent cannot pre-fill it. Guide is written for change of ownership; new builds go through plan check first (ac-plan-check). Online payment available for an extra service fee. Permit mailed within two weeks of payment; may operate after paying fees. Library 'info' URL points to oaklandca.gov (city page), not the county agency."
+ },
+ "smc-plan-check": {
+  "status": "mapped",
+  "seen": "FOOD PROGRAM APPLICATION, San Mateo County Environmental Health Services (rev. 12/17/2024); Food Facility Plan Check Process (Rev. 12/30/2025)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://smchealth.org/sites/main/files/file-attachments/20241217_food_application.pdf",
+   "https://www.smchealth.org/sites/main/files/file-attachments/20251230_plan_check_process.pdf"
+  ],
+  "fields": [
+   {
+    "id": "requestor_info",
+    "line": "For Plan Review Only",
+    "label": {
+     "en": "Plan review requestor information",
+     "zh": "图纸审查申请人信息"
+    }
+   },
+   {
+    "id": "service_requested",
+    "line": "Service Requested",
+    "label": {
+     "en": "Service requested",
+     "zh": "申请服务类别"
+    },
+    "options": [
+     "Plan Review (fill out entire application)",
+     "Remodel (FO920/FO910)",
+     "New Business/Major Remodel (FO930/FO935)",
+     "Expedite (additional fees may apply)"
+    ]
+   },
+   {
+    "id": "establishment_type",
+    "line": "Type of Establishment",
+    "label": {
+     "en": "Type of establishment",
+     "zh": "场所类型"
+    },
+    "options": [
+     "Restaurant",
+     "Retail Food/Market",
+     "Mobile Food",
+     "Kitchen Rental",
+     "Bed/Breakfast",
+     "School",
+     "Other"
+    ]
+   },
+   {
+    "id": "request_type",
+    "line": "",
+    "label": {
+     "en": "Request type",
+     "zh": "申请事由"
+    },
+    "options": [
+     "New Business",
+     "Change of Ownership",
+     "Change of Business Name (previous name)"
+    ]
+   },
+   {
+    "id": "owner1",
+    "line": "Owner #1 Information",
+    "label": {
+     "en": "Owner #1: name, home address, city/st/zip, phone, alt. phone, email",
+     "zh": "业主一：姓名、住址、城市/州/邮编、电话、备用电话、邮箱"
+    }
+   },
+   {
+    "id": "owner2",
+    "line": "Owner #2 Information",
+    "label": {
+     "en": "Owner #2 (if applicable): name, home address, city/st/zip, phone, alt. phone, email",
+     "zh": "业主二（如适用）：姓名、住址、城市/州/邮编、电话、备用电话、邮箱"
+    }
+   },
+   {
+    "id": "facility_name_address",
+    "line": "Facility Information",
+    "label": {
+     "en": "Facility name, facility address, city/st/zip",
+     "zh": "场所名称、场所地址、城市/州/邮编"
+    }
+   },
+   {
+    "id": "facility_contact",
+    "line": "Facility Information",
+    "label": {
+     "en": "Facility phone, alt. phone, business email",
+     "zh": "场所电话、备用电话、商户邮箱"
+    }
+   },
+   {
+    "id": "opening_date",
+    "line": "Facility Information",
+    "label": {
+     "en": "Opening date",
+     "zh": "开业日期"
+    },
+    "hint": {
+     "en": "Final approval to open must be granted in writing before opening",
+     "zh": "开业前须获得书面最终批准"
+    }
+   },
+   {
+    "id": "retail_sqft",
+    "line": "Facility Information",
+    "label": {
+     "en": "Square footage of retail area",
+     "zh": "零售区面积（平方英尺）"
+    }
+   },
+   {
+    "id": "seating_capacity",
+    "line": "Facility Information",
+    "label": {
+     "en": "Seating capacity",
+     "zh": "座位数"
+    }
+   },
+   {
+    "id": "bill_to",
+    "line": "Send Annual Health Permi",
+    "label": {
+     "en": "Send annual health permit bill to: company, contact, address, phone, email",
+     "zh": "年度卫生许可账单寄送：公司、联系人、地址、电话、邮箱"
+    },
+    "options": [
+     "Owner 1 address",
+     "Owner 2 address",
+     "Facility address",
+     "Other"
+    ]
+   },
+   {
+    "id": "owner_rep_print_date",
+    "line": "Signature",
+    "label": {
+     "en": "Print Owner/Representative 1 and 2, date",
+     "zh": "业主/代表一及二正楷姓名、日期"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Plans (3 sets if paper)",
+    "zh": "图纸（纸质需 3 套）"
+   },
+   {
+    "en": "Equipment specification sheets",
+    "zh": "设备规格书"
+   },
+   {
+    "en": "Scope of work",
+    "zh": "工程范围说明"
+   },
+   {
+    "en": "Construction plan review checklist",
+    "zh": "施工图纸审查清单"
+   },
+   {
+    "en": "Plan review fee payment",
+    "zh": "图纸审查费"
+   }
+  ],
+  "submit": {
+   "mail": {
+    "name": "Environmental Health Services, Food Program",
+    "line1": "2000 Alameda de las Pulgas",
+    "line2": "Suite #100",
+    "city": "San Mateo",
+    "state": "CA",
+    "zip": "94403"
+   },
+   "signature": "unknown",
+   "evidence": "By signing below, the owner or authorized representative agrees to operate in accordance with all applicable state and local [laws].",
+   "source": "https://smchealth.org/sites/main/files/file-attachments/20241217_food_application.pdf"
+  },
+  "notes": "Address is the office printed on the application and process sheet; neither explicitly says 'mail to'. Library says portal (MyEHS), but official MyEHS FAQ and portal page do not mention plan review submission; approved electronic plans are emailed back, so e-submission exists but the channel was not confirmed. EnvHealth@smcgov.org and fax (650) 627-8244 are printed contacts, not confirmed submission channels. Review within 20 business days; resubmittals 10; approval valid 2 years."
+ },
+ "smc-health-permit": {
+  "status": "mapped",
+  "seen": "FOOD PROGRAM APPLICATION, San Mateo County Environmental Health Services (rev. 12/17/2024), New Business section; MyEHS online application behind login",
+  "read": "2026-10-31",
+  "sources": [
+   "https://smchealth.org/sites/main/files/file-attachments/20241217_food_application.pdf",
+   "https://www.smchealth.org/communityportal",
+   "https://www.smchealth.org/sites/main/files/file-attachments/20250428_myehs_faqs_final.pdf"
+  ],
+  "fields": [
+   {
+    "id": "establishment_type",
+    "line": "Type of Establishment",
+    "label": {
+     "en": "Type of establishment",
+     "zh": "场所类型"
+    },
+    "options": [
+     "Restaurant",
+     "Retail Food/Market",
+     "Mobile Food",
+     "Kitchen Rental",
+     "Bed/Breakfast",
+     "School",
+     "Other"
+    ]
+   },
+   {
+    "id": "request_type",
+    "line": "",
+    "label": {
+     "en": "Request type",
+     "zh": "申请事由"
+    },
+    "options": [
+     "New Business",
+     "Change of Ownership",
+     "Change of Business Name (previous name)"
+    ]
+   },
+   {
+    "id": "owner1",
+    "line": "Owner #1 Information",
+    "label": {
+     "en": "Owner #1: name, home address, city/st/zip, phone, alt. phone, email",
+     "zh": "业主一：姓名、住址、城市/州/邮编、电话、备用电话、邮箱"
+    }
+   },
+   {
+    "id": "owner2",
+    "line": "Owner #2 Information",
+    "label": {
+     "en": "Owner #2 (if applicable): name, home address, city/st/zip, phone, alt. phone, email",
+     "zh": "业主二（如适用）：姓名、住址、城市/州/邮编、电话、备用电话、邮箱"
+    }
+   },
+   {
+    "id": "facility_name_address",
+    "line": "Facility Information",
+    "label": {
+     "en": "Facility name, facility address, city/st/zip",
+     "zh": "场所名称、场所地址、城市/州/邮编"
+    }
+   },
+   {
+    "id": "facility_contact",
+    "line": "Facility Information",
+    "label": {
+     "en": "Facility phone, alt. phone, business email",
+     "zh": "场所电话、备用电话、商户邮箱"
+    }
+   },
+   {
+    "id": "opening_date",
+    "line": "Facility Information",
+    "label": {
+     "en": "Opening date",
+     "zh": "开业日期"
+    }
+   },
+   {
+    "id": "retail_sqft",
+    "line": "Facility Information",
+    "label": {
+     "en": "Square footage of retail area",
+     "zh": "零售区面积（平方英尺）"
+    }
+   },
+   {
+    "id": "seating_capacity",
+    "line": "Facility Information",
+    "label": {
+     "en": "Seating capacity",
+     "zh": "座位数"
+    }
+   },
+   {
+    "id": "bill_to",
+    "line": "Send Annual Health Permi",
+    "label": {
+     "en": "Send annual health permit bill to: company, contact, address, phone, email",
+     "zh": "年度卫生许可账单寄送：公司、联系人、地址、电话、邮箱"
+    },
+    "options": [
+     "Owner 1 address",
+     "Owner 2 address",
+     "Facility address",
+     "Other"
+    ]
+   },
+   {
+    "id": "owner_rep_print_date",
+    "line": "Signature",
+    "label": {
+     "en": "Print Owner/Representative 1 and 2, date",
+     "zh": "业主/代表一及二正楷姓名、日期"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Supporting documents in PDF as prompted by MyEHS (listed per program at smchealth.org/myehsdocs)",
+    "zh": "MyEHS 提示的 PDF 证明文件（按项目列于 smchealth.org/myehsdocs）"
+   }
+  ],
+  "submit": {
+   "portal": "smcehs.my.site.com",
+   "mail": {
+    "name": "Environmental Health Services, Food Program",
+    "line1": "2000 Alameda de las Pulgas",
+    "line2": "Suite #100",
+    "city": "San Mateo",
+    "state": "CA",
+    "zip": "94403"
+   },
+   "signature": "typed",
+   "evidence": "You will need to log in or create an account to complete a permit application and manage your permits.",
+   "source": "https://www.smchealth.org/sites/main/files/file-attachments/20250428_myehs_faqs_final.pdf"
+  },
+  "notes": "MyEHS account sign-up is reviewed by EHS staff before the account is created, so allow lead time. Exact online questions are behind login; fields above are from the paper Food Program Application. 'HEALTH PERMITS ARE NON-TRANSFERABLE'; 'SUBMITTAL OF THIS APPLICATION DOES NOT CONSTITUTE PERMIT APPROVAL'. Permit is issued after final inspection and permit fee payment."
+ },
+ "fre-business-tax": {
+  "status": "mapped",
+  "seen": "BUSINESS TAX APPLICATION, City of Fremont Revenue Division (RD_BTA, Revised 09/2018)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://fremont.gov/home/showpublisheddocument/2411/637756117853430000",
+   "https://blweb.fremont.gov/PrimeWeb/Apply/GettingStarted/BusinessLicense",
+   "https://fremont.gov/government/departments/finance/revenue/business-tax/apply-for-a-business-tax-account"
+  ],
+  "fields": [
+   {
+    "id": "application_type",
+    "line": "Page 1",
+    "label": {
+     "en": "Application type (check all that apply)",
+     "zh": "申请类型（可多选）"
+    },
+    "options": [
+     "New Business",
+     "Home Occupation Form Required",
+     "Out-Of-Town Business",
+     "Change of Owner",
+     "Change of Business Name",
+     "Location Change",
+     "2nd Location"
+    ]
+   },
+   {
+    "id": "business_tax_no",
+    "line": "Page 1",
+    "label": {
+     "en": "Business Tax No.",
+     "zh": "商业税号"
+    }
+   },
+   {
+    "id": "business_name",
+    "line": "Page 1",
+    "label": {
+     "en": "Business Name",
+     "zh": "商户名称"
+    }
+   },
+   {
+    "id": "corporation_name",
+    "line": "Page 1",
+    "label": {
+     "en": "Corporation Name (if different)",
+     "zh": "公司名称（如不同）"
+    }
+   },
+   {
+    "id": "mailing_address",
+    "line": "Page 1",
+    "label": {
+     "en": "Mailing Address",
+     "zh": "邮寄地址"
+    }
+   },
+   {
+    "id": "business_location",
+    "line": "Page 1",
+    "label": {
+     "en": "Business Location",
+     "zh": "营业地点"
+    },
+    "hint": {
+     "en": "Cannot be a P.O. Box",
+     "zh": "不可填邮政信箱"
+    }
+   },
+   {
+    "id": "ownership",
+    "line": "Page 1",
+    "label": {
+     "en": "Ownership",
+     "zh": "所有权形式"
+    },
+    "options": [
+     "Corporation",
+     "LLC",
+     "Partnership",
+     "Sole Proprietor",
+     "Trust"
+    ]
+   },
+   {
+    "id": "state_license",
+    "line": "Page 1",
+    "label": {
+     "en": "State License No., License Type, Expiration Date",
+     "zh": "州执照号码、执照类型、到期日"
+    }
+   },
+   {
+    "id": "sellers_permit",
+    "line": "Page 1",
+    "label": {
+     "en": "Sellers Permit No.",
+     "zh": "销售许可证号码"
+    }
+   },
+   {
+    "id": "federal_tax_id",
+    "line": "Page 1",
+    "label": {
+     "en": "Federal Tax ID No.",
+     "zh": "联邦税号（EIN）"
+    }
+   },
+   {
+    "id": "state_tax_id",
+    "line": "Page 1",
+    "label": {
+     "en": "State Tax ID No.",
+     "zh": "州税号"
+    }
+   },
+   {
+    "id": "start_date",
+    "line": "Page 1",
+    "label": {
+     "en": "Bus. Start Date in Fremont",
+     "zh": "在弗里蒙特开业日期"
+    }
+   },
+   {
+    "id": "contact_channels",
+    "line": "Page 1",
+    "label": {
+     "en": "Email, phone, alternate/cell, fax, website",
+     "zh": "邮箱、电话、备用/手机、传真、网站"
+    }
+   },
+   {
+    "id": "owner1",
+    "line": "Page 1",
+    "label": {
+     "en": "1st Owner: name, title, driver lic. no., soc. sec. no., home address, phone",
+     "zh": "第一业主：姓名、职务、驾照号、社安号、住址、电话"
+    }
+   },
+   {
+    "id": "owner2",
+    "line": "Page 1",
+    "label": {
+     "en": "2nd Owner: name, title, driver lic. no., soc. sec. no., home address, phone",
+     "zh": "第二业主：姓名、职务、驾照号、社安号、住址、电话"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "Page 1",
+    "label": {
+     "en": "Contact name, address, phone",
+     "zh": "联系人姓名、地址、电话"
+    }
+   },
+   {
+    "id": "emergency_contact",
+    "line": "Page 1",
+    "label": {
+     "en": "In case of emergency, please contact",
+     "zh": "紧急联系人"
+    }
+   },
+   {
+    "id": "activity_description",
+    "line": "Page 1",
+    "label": {
+     "en": "Detailed description of business activity conducted in Fremont",
+     "zh": "在弗里蒙特经营活动的详细描述"
+    }
+   },
+   {
+    "id": "internet_catalog",
+    "line": "Page 1",
+    "label": {
+     "en": "Sells products over the internet? Sells by catalog?",
+     "zh": "是否网上销售？是否目录销售？"
+    },
+    "options": [
+     "YES",
+     "NO"
+    ]
+   },
+   {
+    "id": "activity_percent",
+    "line": "Page 1",
+    "label": {
+     "en": "Business activity (check all, write % if more than one)",
+     "zh": "经营类别（可多选，多项时填百分比）"
+    },
+    "options": [
+     "Retail Sales",
+     "Wholesale",
+     "Warehousing",
+     "Manufacturing",
+     "Real Estate",
+     "Service",
+     "Professional Services",
+     "Administrative Office (No Sales)",
+     "Rental Property",
+     "Property Management",
+     "LLP"
+    ]
+   },
+   {
+    "id": "employees",
+    "line": "Page 1",
+    "label": {
+     "en": "Number of employees at Fremont location, including owner",
+     "zh": "弗里蒙特地点员工人数（含业主）"
+    }
+   },
+   {
+    "id": "square_footage",
+    "line": "Page 1",
+    "label": {
+     "en": "Square footage at location",
+     "zh": "营业面积（平方英尺）"
+    }
+   },
+   {
+    "id": "shared_occupancy",
+    "line": "Page 1",
+    "label": {
+     "en": "Shares occupancy with another business? If yes, list name",
+     "zh": "是否与其他商户共用场地？如是请列名称"
+    }
+   },
+   {
+    "id": "other_locations",
+    "line": "Page 1",
+    "label": {
+     "en": "Other Fremont location(s)",
+     "zh": "其他弗里蒙特营业地点"
+    }
+   },
+   {
+    "id": "opt_out_lists",
+    "line": "Page 1",
+    "label": {
+     "en": "Do not wish business information listed on 3rd party business lists",
+     "zh": "不希望商户信息出现在第三方名录"
+    }
+   },
+   {
+    "id": "officers",
+    "line": "Page 1",
+    "label": {
+     "en": "Names of owners, partners or corporate officers (DO NOT LEAVE BLANK)",
+     "zh": "业主、合伙人或公司高管姓名（不得留空）"
+    }
+   },
+   {
+    "id": "printed_name_date_phone",
+    "line": "Signature",
+    "label": {
+     "en": "Applicant's printed name, date, phone number",
+     "zh": "申请人正楷姓名、日期、电话"
+    }
+   },
+   {
+    "id": "p2_business_location",
+    "line": "Page 2",
+    "label": {
+     "en": "Business name and business location (number, street, city, state, zip)",
+     "zh": "商户名称及营业地点（门牌、街道、城市、州、邮编）"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Payment: check or Credit Card Authorization Form",
+    "zh": "付款：支票或信用卡授权表"
+   },
+   {
+    "en": "Additional sheets for emergency contacts and owners/officers if needed",
+    "zh": "如需要，附紧急联系人及业主/高管补充页"
+   }
+  ],
+  "submit": {
+   "email": "businesstax@fremont.gov",
+   "fax": "+15104944754",
+   "portal": "blweb.fremont.gov",
+   "mail": {
+    "name": "City of Fremont Revenue Division",
+    "line1": "39550 Liberty Street",
+    "line2": "P.O. Box 5006",
+    "city": "Fremont",
+    "state": "CA",
+    "zip": "94537-5006"
+   },
+   "signature": "unknown",
+   "evidence": "Email: Print, scan, and email the application and Credit Card Authorization Form to businesstax@fremont.gov.",
+   "source": "https://blweb.fremont.gov/PrimeWeb/Apply/GettingStarted/BusinessLicense"
+  },
+  "notes": "Fees (apply page): $30 commercial and home-based; $125 licensed contractors; plus $4 state-mandated fee. Online (HdL PrimeWeb) is available for most businesses but NOT for food trucks, peddlers, massage, barbers/beauty salons, child care, non-profits and others; those use the fillable paper form. Paper form is rev 09/2018 and the 'Health Dept. (567-6700)' review row means Alameda County EH reviews food businesses. Check exemption eligibility first. In-person counter: 39550 Liberty Street, Fremont, CA 94538."
+ },
+ "cup-building": {
+  "status": "mapped",
+  "seen": "Construction Permit Application, City of Cupertino Building Division (BldgApp_2017, revised 01/01/21)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://cupertino.org/home/showpublisheddocument/4343/638665658560970000",
+   "https://www.cupertino.gov/Your-City/Departments/Community-Development/Building/Permits",
+   "https://cupertino.prod.govaccess.org/our-city/departments/community-development/building/permits/electronic-plan-submittal"
+  ],
+  "fields": [
+   {
+    "id": "apn",
+    "line": "Page 1",
+    "label": {
+     "en": "APN #",
+     "zh": "地块编号（APN）"
+    }
+   },
+   {
+    "id": "owner",
+    "line": "Page 1",
+    "label": {
+     "en": "Owner: name, phone, e-mail, street address, city, state, zip",
+     "zh": "业主：姓名、电话、邮箱、街道地址、城市、州、邮编"
+    }
+   },
+   {
+    "id": "contact_name",
+    "line": "Page 1",
+    "label": {
+     "en": "Contact name and city, state, zip",
+     "zh": "联系人姓名及城市、州、邮编"
+    }
+   },
+   {
+    "id": "contact_role",
+    "line": "Page 1",
+    "label": {
+     "en": "Contact role",
+     "zh": "联系人身份"
+    },
+    "options": [
+     "Owner",
+     "Owner-Builder",
+     "Owner Agent",
+     "Contractor Agent",
+     "Engineer",
+     "Developer",
+     "Tenant"
+    ]
+   },
+   {
+    "id": "contractor",
+    "line": "Page 1",
+    "label": {
+     "en": "Contractor: name, license no., license type, company, e-mail, address, phone",
+     "zh": "承包商：姓名、执照号、执照类型、公司、邮箱、地址、电话"
+    }
+   },
+   {
+    "id": "project_data",
+    "line": "Page 1",
+    "label": {
+     "en": "Stories #, use type, occupancy, square feet, valuation ($)",
+     "zh": "层数、用途、占用类别、面积、工程造价（美元）"
+    }
+   },
+   {
+    "id": "areas",
+    "line": "Page 1",
+    "label": {
+     "en": "New floor SF, demo SF, total net SF, remodel kitchen SF, remodel other, porch SF, deck SF",
+     "zh": "新增面积、拆除面积、净面积合计、厨房改建面积、其他改建、门廊面积、露台面积"
+    }
+   },
+   {
+    "id": "project_scope",
+    "line": "Page 2, A",
+    "label": {
+     "en": "Scope",
+     "zh": "工程类别"
+    },
+    "options": [
+     "New construction",
+     "Addition",
+     "Alteration",
+     "T.I.",
+     "MEP",
+     "Re-roof"
+    ]
+   },
+   {
+    "id": "building_type",
+    "line": "Page 2, A",
+    "label": {
+     "en": "Building type",
+     "zh": "建筑类型"
+    },
+    "options": [
+     "Single-family/duplex",
+     "Multi-family",
+     "Industrial",
+     "Commercial"
+    ]
+   },
+   {
+    "id": "description_of_work",
+    "line": "Page 2, A",
+    "label": {
+     "en": "Description of work",
+     "zh": "工程内容描述"
+    }
+   },
+   {
+    "id": "existing_sprinklers",
+    "line": "Page 2, A",
+    "label": {
+     "en": "Existing fire sprinklers: Yes / No",
+     "zh": "现有消防喷淋：有/无"
+    }
+   },
+   {
+    "id": "existing_use_sf",
+    "line": "Page 2, A",
+    "label": {
+     "en": "Existing use and existing SF",
+     "zh": "现有用途及现有面积"
+    }
+   },
+   {
+    "id": "project_address",
+    "line": "Page 2",
+    "label": {
+     "en": "Project address",
+     "zh": "项目地址"
+    }
+   },
+   {
+    "id": "architect",
+    "line": "Page 2",
+    "label": {
+     "en": "Architect: e-mail, phone, business license number",
+     "zh": "建筑师：邮箱、电话、营业执照号"
+    }
+   },
+   {
+    "id": "applicant_date",
+    "line": "Certification",
+    "label": {
+     "en": "Owner or agent certification, date",
+     "zh": "业主或代理人声明及日期"
+    },
+    "hint": {
+     "en": "Certifies applicant is the owner or authorized agent and authorizes City inspection entry",
+     "zh": "声明本人为业主或授权代理人，并同意市府人员入内检查"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Hazardous Materials Disclosure form (commercial buildings using hazardous materials)",
+    "zh": "危险物料披露表（使用危险物料的商业建筑）"
+   },
+   {
+    "en": "Planning approval letter, or a planning meeting before submittal",
+    "zh": "规划批准函，或提交前与规划部门会面"
+   },
+   {
+    "en": "Drawings as separate landscape PDFs per sheet; supporting docs (structural, energy calcs, CalGreen checklist, special inspection form) as multipage PDFs",
+    "zh": "每张图纸单独横向 PDF；支持文件（结构、节能计算、CalGreen 清单、特殊检验表）为多页 PDF"
+   },
+   {
+    "en": "Plan Review Submittal Checklist",
+    "zh": "图纸审查提交清单"
+   }
+  ],
+  "submit": {
+   "email": "permitcenter@cupertino.gov",
+   "signature": "unknown",
+   "evidence": "Applying for a permit can be done in person or virtually via email. Email the application, drawings, and documents to permitcenter@cupertino.gov (Dropbox direct-download link).",
+   "source": "https://www.cupertino.gov/Your-City/Departments/Community-Development/Building/Permits"
+  },
+  "notes": "Library says 'portal', but the Accela portal (aca.accela.com/CUPERTINO) is only for instant permits, payment and inspections; standard permits (incl. commercial TI) go by email with a Dropbox link or at the Building Counter, 10300 Torre Avenue. Form PDF seen is rev 01/01/21 and prints permitcenter@cupertino.org; the current page says @cupertino.gov. The current forms page links a newer file (v/6 building-construction-permit-application.pdf) that could not be opened (403); re-check for a newer revision. Plan review fees due before review starts. Typical commercial TI timeline 15 days initial, 10 resubmittal; currently 20-30 business days."
+ },
+ "dly-license": {
+  "status": "mapped",
+  "seen": "Application for Business License, City of Daly City Department of Finance (no revision printed), with Business License Tax Worksheet",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.dalycity.org/DocumentCenter/View/1175/Business-License-Application-Located-in-Daly-City-PDF"
+  ],
+  "fields": [
+   {
+    "id": "business_name",
+    "line": "",
+    "label": {
+     "en": "Business Name",
+     "zh": "商户名称"
+    }
+   },
+   {
+    "id": "business_address",
+    "line": "",
+    "label": {
+     "en": "Business Address",
+     "zh": "营业地址"
+    }
+   },
+   {
+    "id": "mailing_address",
+    "line": "",
+    "label": {
+     "en": "Mailing Address, City / State / Zip",
+     "zh": "邮寄地址、城市/州/邮编"
+    }
+   },
+   {
+    "id": "phone_fax",
+    "line": "",
+    "label": {
+     "en": "Business Phone / Fax No.",
+     "zh": "商户电话/传真"
+    }
+   },
+   {
+    "id": "business_description",
+    "line": "",
+    "label": {
+     "en": "Business Description",
+     "zh": "经营内容描述"
+    }
+   },
+   {
+    "id": "date_opened",
+    "line": "",
+    "label": {
+     "en": "Date Business Opened",
+     "zh": "开业日期"
+    }
+   },
+   {
+    "id": "home_based",
+    "line": "",
+    "label": {
+     "en": "Is this a home-based business?",
+     "zh": "是否为居家经营？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "resale_abc_no",
+    "line": "",
+    "label": {
+     "en": "Resale No. / ABC No. (if applicable)",
+     "zh": "转售许可证号 / ABC 酒牌号（如适用）"
+    }
+   },
+   {
+    "id": "state_license_no",
+    "line": "",
+    "label": {
+     "en": "State License No. (if applicable)",
+     "zh": "州执照号码（如适用）"
+    }
+   },
+   {
+    "id": "health_permit_no",
+    "line": "",
+    "label": {
+     "en": "Health Permit No. (if applicable)",
+     "zh": "卫生许可证号码（如适用）"
+    }
+   },
+   {
+    "id": "business_type",
+    "line": "",
+    "label": {
+     "en": "Business Type",
+     "zh": "企业类型"
+    },
+    "options": [
+     "Sole Proprietorship",
+     "Partnership",
+     "LLC",
+     "Corporation"
+    ]
+   },
+   {
+    "id": "tax_id",
+    "line": "",
+    "label": {
+     "en": "Federal Tax I.D. # / Social Security # / CAID/CADL #",
+     "zh": "联邦税号 / 社安号 / 加州身份证或驾照号"
+    }
+   },
+   {
+    "id": "corporation_name",
+    "line": "",
+    "label": {
+     "en": "Corporation Name",
+     "zh": "公司名称"
+    }
+   },
+   {
+    "id": "owner_info",
+    "line": "",
+    "label": {
+     "en": "Owner's Name, Title, Address, Telephone No.",
+     "zh": "业主姓名、职务、地址、电话"
+    }
+   },
+   {
+    "id": "gross_receipts",
+    "line": "",
+    "label": {
+     "en": "Estimated Annual Gross Receipts",
+     "zh": "预计年总收入"
+    }
+   },
+   {
+    "id": "license_tax_amount",
+    "line": "",
+    "label": {
+     "en": "Amount of Business License Tax",
+     "zh": "营业执照税金额"
+    }
+   },
+   {
+    "id": "ws_line1",
+    "line": "Worksheet Line 1",
+    "label": {
+     "en": "If gross receipts are $100,000 or less, tax is $114.00",
+     "zh": "年收入 10 万美元或以下，税额 114 美元"
+    }
+   },
+   {
+    "id": "ws_2a",
+    "line": "Worksheet 2A",
+    "label": {
+     "en": "Enter total gross receipts",
+     "zh": "填写总收入"
+    }
+   },
+   {
+    "id": "ws_2b",
+    "line": "Worksheet 2B",
+    "label": {
+     "en": "Tax due (multiply 2A by .0011)",
+     "zh": "应缴税额（2A × 0.0011）"
+    }
+   },
+   {
+    "id": "ws_2c",
+    "line": "Worksheet 2C",
+    "label": {
+     "en": "State fee (required)",
+     "zh": "州规费（必缴）"
+    }
+   },
+   {
+    "id": "ws_2d",
+    "line": "Worksheet 2D",
+    "label": {
+     "en": "Total tax due (2B + 2C)",
+     "zh": "应缴总额（2B + 2C）"
+    }
+   },
+   {
+    "id": "ws_name_title_date",
+    "line": "Worksheet",
+    "label": {
+     "en": "Name and Title (PLEASE PRINT), Date",
+     "zh": "姓名及职务（正楷）、日期"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Payment of business license tax and fees",
+    "zh": "营业执照税及规费"
+   },
+   {
+    "en": "All Federal, State, County and City license and permit numbers for the business type (before certificate is released)",
+    "zh": "该行业所需的联邦、州、县、市执照及许可证号码（发证前须提交）"
+   }
+  ],
+  "submit": {
+   "fax": "+16509918267",
+   "mail": {
+    "name": "Department of Finance, Business License Division",
+    "line1": "333 - 90th Street",
+    "city": "Daly City",
+    "state": "CA",
+    "zip": "94015-1895"
+   },
+   "signature": "unknown",
+   "evidence": "Complete, sign and return with your payment.",
+   "source": "https://www.dalycity.org/DocumentCenter/View/1175/Business-License-Application-Located-in-Daly-City-PDF"
+  },
+  "notes": "Fax is printed in the application header; form doesn't say faxed applications are accepted (payment must accompany). Tax: $114 if gross receipts <= $100,000, else 0.0011 x gross. Form prints $4 state fee but footnote says it dropped to $1 from Jan 1, 2024, so worksheet line 2C is outdated. Fees nonrefundable. Signed under penalty of perjury. PDF also contains a Solicitors Permit form (not needed for storefronts)."
+ },
+ "dly-building": {
+  "status": "page_only",
+  "seen": "A Guide to Commercial Tenant Improvement, City of Daly City Building Division (undated); no application form named",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.dalycity.org/DocumentCenter/View/111/Tenant-Improvement-Guide-to-Commercial-PDF"
+  ],
+  "fields": [
+   {
+    "id": "plan_sets",
+    "line": "",
+    "label": {
+     "en": "Three plan sets (five for large multi-department projects), 11x17 or larger",
+     "zh": "三套图纸（需多部门审查的大型项目五套），11×17 英寸或更大"
+    }
+   },
+   {
+    "id": "plot_floor_plans",
+    "line": "",
+    "label": {
+     "en": "Plot plan (1/8 in = 1 ft) and floor plans (1/4 in = 1 ft)",
+     "zh": "地块图（1/8 英寸比 1 英尺）及平面图（1/4 英寸比 1 英尺）"
+    }
+   },
+   {
+    "id": "occupant_load",
+    "line": "",
+    "label": {
+     "en": "Occupant load; letter stating greatest number of employees at one time",
+     "zh": "使用人数；说明同时在场最多员工人数的信函"
+    }
+   },
+   {
+    "id": "energy_forms",
+    "line": "",
+    "label": {
+     "en": "LTG-1 and MECH-1 on plans; Title 24 nonresidential energy calcs with each set",
+     "zh": "图纸上附 LTG-1 及 MECH-1；每套附 Title 24 非住宅节能计算"
+    }
+   },
+   {
+    "id": "structural",
+    "line": "",
+    "label": {
+     "en": "Structural calculations; anchorage/bracing; reflected ceiling and seismic bracing",
+     "zh": "结构计算；锚固及支撑；反射天花图及抗震支撑"
+    }
+   },
+   {
+    "id": "mep_plans",
+    "line": "",
+    "label": {
+     "en": "Plumbing, electrical and mechanical plans",
+     "zh": "给排水、电气及机械图纸"
+    }
+   },
+   {
+    "id": "restaurant_hood",
+    "line": "",
+    "label": {
+     "en": "Restaurants: cooking hood, grease duct, roof outlet details and exhaust sizing calcs",
+     "zh": "餐厅：排烟罩、油烟管道、屋顶出口详图及排风量计算"
+    }
+   },
+   {
+    "id": "county_health_approval",
+    "line": "",
+    "label": {
+     "en": "Restaurants: plans reviewed and approved by San Mateo County Health",
+     "zh": "餐厅：经圣马特奥县卫生部门审批的图纸"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "San Mateo County Health Department approved plans (restaurants)",
+    "zh": "圣马特奥县卫生部门批准的图纸（餐厅）"
+   },
+   {
+    "en": "Fire sprinkler plans to the Fire Department (normally after building permit issues)",
+    "zh": "消防喷淋图纸交消防部门（一般在建筑许可签发后）"
+   }
+  ],
+  "submit": {
+   "signature": "unknown",
+   "evidence": "For additional building plan review or permit information call the Daly City Building Division at (650) 991-8061.",
+   "source": "https://www.dalycity.org/DocumentCenter/View/111/Tenant-Improvement-Guide-to-Commercial-PDF"
+  },
+  "notes": "Guide does not name a building permit application form or a submission address/portal; fees given after approval. Building Division (650) 991-8061; Fire (650) 991-8138. Library method 'in_person' not confirmed by the guide."
+ },
+ "la-ladbs": {
+  "status": "page_only",
+  "seen": "Building permit (ePlanLA / PermitLA)",
+  "read": "2026-10-13",
+  "sources": [
+   "https://dbs.lacity.gov/"
+  ],
+  "fields": [],
+  "attach": [
+   {
+    "en": "Plans for plan check (ePlanLA), unless the work qualifies for an express permit (PermitLA)",
+    "zh": "供审查的图纸（ePlanLA），符合快速许可条件者除外（PermitLA）"
+   }
+  ],
+  "submit": {
+   "portal": "eplanla.lacity.org",
+   "signature": "typed",
+   "evidence": "Projects that need plan check are filed online in ePlanLA; simple express projects in PermitLA; both need an Angeleno account.",
+   "source": "https://dbs.lacity.gov/"
+  },
+  "notes": "ladbs.org now redirects to dbs.lacity.gov, so the library's PDF link is dead. A temporary Certificate of Occupancy is paid online."
+ },
+ "la-alcohol-cup": {
+  "status": "mapped",
+  "seen": "City Planning Application CP13-7771.1 (June 2023) + Alcohol & Entertainment Establishments special instructions CP13-7773 [1.20.2026]",
+  "read": "2026-10-31",
+  "sources": [
+   "https://planning.lacity.gov/odocument/5e0156ec-098d-4b3e-a520-4464db76cfa7/CP13-7771.1_City_Planning_Application_June_2023.pdf",
+   "https://planning.lacity.gov/odocument/f50c2624-ef14-4bfb-9f93-61aacaecf43f/CP13-7773_Alcohol_&_Adult_Entertainment_Establishments_05.2023.pdf",
+   "https://planning.lacity.gov/odocument/4f85d81c-58f1-42ee-8428-610ee28c4f87/Online_Application_Submission_Process.pdf",
+   "https://planning.lacity.gov/project-review/alcohol-sales"
+  ],
+  "fields": [
+   {
+    "id": "street_address",
+    "line": "1. Project Location",
+    "label": {
+     "en": "Street Address, Unit/Space Number",
+     "zh": "街道地址、单元/铺位号"
+    },
+    "hint": {
+     "en": "Include all addresses on the site as identified in ZIMAS.",
+     "zh": "须包括 ZIMAS 系统中该地块上的全部地址。"
+    }
+   },
+   {
+    "id": "legal_description",
+    "line": "1. Project Location",
+    "label": {
+     "en": "Legal Description (Lot, Block, Tract)",
+     "zh": "法定地块描述（地块、街区、分区编号）"
+    }
+   },
+   {
+    "id": "apn_lot_area",
+    "line": "1. Project Location",
+    "label": {
+     "en": "Assessor Parcel Number, Total Lot Area",
+     "zh": "估税地块编号（APN）、地块总面积"
+    }
+   },
+   {
+    "id": "present_proposed_use",
+    "line": "2. Project Description",
+    "label": {
+     "en": "Present Use, Proposed Use, Project Name (if applicable)",
+     "zh": "现用途、拟议用途、项目名称（如有）"
+    }
+   },
+   {
+    "id": "project_description",
+    "line": "2. Project Description",
+    "label": {
+     "en": "Describe in detail the characteristics, scope and/or operation of the proposed project",
+     "zh": "详细描述拟议项目的特点、范围和/或经营方式"
+    }
+   },
+   {
+    "id": "existing_site_conditions",
+    "line": "2. Project Description",
+    "label": {
+     "en": "Existing Site Conditions (check all that apply)",
+     "zh": "现有场地状况（勾选所有适用项）"
+    },
+    "options": [
+     "Site is undeveloped or unimproved",
+     "Site has existing buildings",
+     "Site is/was developed with uses that could release hazardous materials",
+     "Site is located within 500 feet of a freeway or railroad",
+     "Site is located within 500 feet of a sensitive use",
+     "Site has special designation"
+    ]
+   },
+   {
+    "id": "proposed_project_info",
+    "line": "2. Project Description",
+    "label": {
+     "en": "Proposed Project Information (check all that apply)",
+     "zh": "拟议项目信息（勾选所有适用项）"
+    },
+    "options": [
+     "Demolition",
+     "Relocation",
+     "Removal of any on-site tree",
+     "Removal of any street tree",
+     "Removal of protected trees",
+     "Grading",
+     "Haul Route",
+     "New construction",
+     "Additions to existing buildings",
+     "Interior tenant improvement",
+     "Exterior renovation or alteration",
+     "Change of use and/or hours of operation"
+    ]
+   },
+   {
+    "id": "parking_spaces",
+    "line": "2. Parking Information",
+    "label": {
+     "en": "Is the project utilizing AB 2097? Provided # of Parking Spaces, Required # of Parking Spaces",
+     "zh": "是否适用 AB 2097？已提供车位数、要求车位数"
+    }
+   },
+   {
+    "id": "actions_requested",
+    "line": "3. Action(s) Requested",
+    "label": {
+     "en": "Authorizing Code Section, Code Section from which relief is requested, Action Requested",
+     "zh": "授权条款（LAMC）、申请豁免的条款、申请事项"
+    },
+    "hint": {
+     "en": "For an alcohol CUB under Chapter 1 zoning, the authorizing section is LAMC 12.24 W.1.",
+     "zh": "适用第 1 章分区的酒类有条件使用许可（CUB），授权条款为 LAMC 12.24 W.1。"
+    }
+   },
+   {
+    "id": "related_cases",
+    "line": "4. Related City Planning",
+    "label": {
+     "en": "Are there previous or pending cases/decisions/environmental clearances on the project site? If YES, list all case number",
+     "zh": "该地块是否有既往或待决的案件/决定/环评许可？如有，列出全部案号"
+    },
+    "options": [
+     "YES",
+     "NO"
+    ]
+   },
+   {
+    "id": "covenants",
+    "line": "5. Related Documents / R",
+    "label": {
+     "en": "Are there any recorded Covenants, affidavits or easements on this property?",
+     "zh": "该物业是否有已登记的契约条款、宣誓书或地役权？"
+    },
+    "options": [
+     "YES (provide copy)",
+     "NO"
+    ]
+   },
+   {
+    "id": "applicant",
+    "line": "6. Project Team Informat",
+    "label": {
+     "en": "Applicant Name, Company/Firm, Address, City, State, Zip, Telephone, E-mail",
+     "zh": "申请人姓名、公司、地址、城市、州、邮编、电话、邮箱"
+    }
+   },
+   {
+    "id": "in_escrow",
+    "line": "6. Project Team Informat",
+    "label": {
+     "en": "Are you in escrow to purchase the subject property?",
+     "zh": "您是否正在托管程序中购买该物业？"
+    },
+    "options": [
+     "YES",
+     "NO"
+    ]
+   },
+   {
+    "id": "property_owner",
+    "line": "6. Project Team Informat",
+    "label": {
+     "en": "Property Owner of Record: Same as / Different from applicant; Name, Address, Telephone, E-mail",
+     "zh": "登记业主：是否与申请人相同；姓名、地址、电话、邮箱"
+    }
+   },
+   {
+    "id": "agent",
+    "line": "6. Project Team Informat",
+    "label": {
+     "en": "Agent / Representative Name, Company/Firm, Address, Telephone, E-mail",
+     "zh": "代理人姓名、公司、地址、电话、邮箱"
+    }
+   },
+   {
+    "id": "primary_contact",
+    "line": "6. Project Team Informat",
+    "label": {
+     "en": "Primary Contact for Project Information (select only one)",
+     "zh": "项目主要联系人（只选一项）"
+    },
+    "options": [
+     "Owner",
+     "Applicant",
+     "Agent/Representative",
+     "Other"
+    ],
+    "hint": {
+     "en": "Email and phone required. The email must match the contact's Angeleno Account.",
+     "zh": "必须填写邮箱和电话，邮箱须与该联系人的 Angeleno 账户一致。"
+    }
+   },
+   {
+    "id": "owner_affidavit",
+    "line": "Property Owner Affidavit",
+    "label": {
+     "en": "Property owner signature, date, print name (notarized)",
+     "zh": "业主签名、日期、正楷姓名（须公证）"
+    }
+   },
+   {
+    "id": "applicant_declaration",
+    "line": "Applicant Declaration",
+    "label": {
+     "en": "Applicant signature, date, print name",
+     "zh": "申请人签名、日期、正楷姓名"
+    }
+   },
+   {
+    "id": "cub_building_sqft",
+    "line": "CP13-7773 Q1-Q2",
+    "label": {
+     "en": "Total square footage of the building or center; of the space the establishment will occupy",
+     "zh": "所在建筑或商业中心的总面积；本店所占面积（平方英尺）"
+    }
+   },
+   {
+    "id": "cub_occupancy_seats",
+    "line": "CP13-7773 Q3-Q4",
+    "label": {
+     "en": "Total occupancy load (per Fire Department); number of seats indoors and outdoors",
+     "zh": "消防部门核定的总容纳人数；室内及室外座位数"
+    }
+   },
+   {
+    "id": "cub_outdoor_alcohol",
+    "line": "CP13-7773 Q5-Q7",
+    "label": {
+     "en": "Outdoor alcohol consumption; private property or public right-of-way; revocable permit obtained",
+     "zh": "是否在户外饮酒；户外区域位于私人用地还是公共通行区；是否已取得可撤销许可"
+    }
+   },
+   {
+    "id": "cub_sensitive_uses",
+    "line": "CP13-7773 Q9",
+    "label": {
+     "en": "Is the site located within 1,000 feet of any schools, churches or parks?",
+     "zh": "场地 1000 英尺范围内是否有学校、教堂或公园？"
+    },
+    "options": [
+     "YES",
+     "NO"
+    ]
+   },
+   {
+    "id": "cub_parking",
+    "line": "CP13-7773 Q11-Q17",
+    "label": {
+     "en": "Parking spaces on site; shared or designated; off-site parking arrangements; valet and charge",
+     "zh": "现场车位数；共用或专用；场外停车安排；代客泊车及是否收费"
+    }
+   },
+   {
+    "id": "cub_hours",
+    "line": "CP13-7773 Q19",
+    "label": {
+     "en": "Proposed hours of operation, M through Su",
+     "zh": "拟议营业时间（周一至周日）"
+    }
+   },
+   {
+    "id": "cub_entertainment_age",
+    "line": "CP13-7773 Q20-Q22",
+    "label": {
+     "en": "Entertainment; minimum age for entry; accessory retail uses",
+     "zh": "是否有娱乐活动；入场最低年龄；附属零售"
+    }
+   },
+   {
+    "id": "cub_security",
+    "line": "CP13-7773 Q23-Q25",
+    "label": {
+     "en": "Employees on site at any given time; security guards; LAPD citations or violations",
+     "zh": "同时在场员工人数；是否设保安；是否有 LAPD 罚单或违规记录"
+    }
+   },
+   {
+    "id": "cub_alcohol_type",
+    "line": "CP13-7773 Q26-Q29",
+    "label": {
+     "en": "Beer & wine only or full line; fortified wine; consumption on adjacent property; exterior alcohol signs",
+     "zh": "仅啤酒和葡萄酒还是全类酒；是否售卖加强型葡萄酒；是否在相邻物业饮用；外部是否有酒类广告"
+    }
+   },
+   {
+    "id": "cub_food",
+    "line": "CP13-7773 Q30-Q33",
+    "label": {
+     "en": "Kitchen on site; alcohol without food order; alcohol sales exceed food quarterly; menu",
+     "zh": "是否设厨房；不点餐能否单独售酒；季度酒类销售额是否超过食品；附菜单"
+    }
+   },
+   {
+    "id": "cub_onsite",
+    "line": "CP13-7773 Q34-Q36",
+    "label": {
+     "en": "Bar/cocktail lounge incidental to restaurant; take-out alcohol; happy hour",
+     "zh": "餐厅是否附设酒吧；是否外带售酒；是否设欢乐时光折扣"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Notarized property owner affidavit with original wet signature; ownership disclosure, letter of authorization or grant deed as applicable",
+    "zh": "经公证、亲笔签名原件的业主宣誓书；视情况附所有权披露、授权书或产权转让契约"
+   },
+   {
+    "en": "600-foot radius land-use map (CP-7826), list of alcohol establishments 600 to 1,000 feet away, and list of sensitive uses within 600 feet",
+    "zh": "600 英尺半径土地用途图（CP-7826）、600 至 1000 英尺范围内的酒类商户清单、600 英尺内敏感用途清单"
+   },
+   {
+    "en": "Plot plan (CP-7752) and floor plan (CP-7751)",
+    "zh": "地块平面图（CP-7752）和楼层平面图（CP-7751）"
+   },
+   {
+    "en": "Menu, if food is served",
+    "zh": "菜单（如提供餐食）"
+   },
+   {
+    "en": "Hard copies for LAPD, the Certified Neighborhood Council and the Council District Office, plus postage",
+    "zh": "交洛杉矶警察局、认证社区委员会和市议员选区办公室的纸质副本，以及邮资"
+   }
+  ],
+  "submit": {
+   "email": "Planning.BESt@lacity.org",
+   "portal": "appointments.lacity.org",
+   "mail": {
+    "name": "Los Angeles City Planning, Beverage and Entertainment Streamlining (BESt) Unit",
+    "line1": "201 North Figueroa Street, Suite 525",
+    "city": "Los Angeles",
+    "state": "CA",
+    "zip": "90012"
+   },
+   "signature": "wet",
+   "evidence": "The City requires an original signature from the property owner with the \"wet\" notary stamp. ... Following the virtual application submission, certain physical materials must also be mailed in or dropped off altogether to City Planning's BESt unit, including: 1. A wet-signed, notarized application form",
+   "source": "https://planning.lacity.gov/odocument/4f85d81c-58f1-42ee-8428-610ee28c4f87/Online_Application_Submission_Process.pdf"
+  },
+  "notes": "The process has 3 steps. Prepare the application in Simpligov. Book an 'Application Filing for Alcoholic Beverages and Dancing' appointment with DCP BESt in BuildLA (appointments.lacity.org). File at a virtual appointment, then mail or drop off the wet-signed notarized form and hard copies. The email address is for inquiries; the page does not say it accepts filings. The old address Planning.CCU@lacity.org has been discontinued. New fee rates under Ordinance 188796 took effect Feb 23, 2026, and fees are non-refundable. For Chapter 1A zoning use CP13-7773.A instead. The library calls this a 'Conditional Use Permit'. City Planning calls it a Class 2 CUP for alcohol (CUB), under LAMC 12.24 W.1. Restaurants may qualify for the Restaurant Beverage Program (CP-7850) instead."
+ },
+ "la-cupa-hmbp": {
+  "status": "page_only",
+  "seen": "Hazardous Materials Business Plan submitted in CERS (LAFD CUPA web guidance; no paper form)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://lafd.org/fire-prevention/cupa/hazardous-materials",
+   "https://lafd.org/hmbp-threshold-reporting-guidance"
+  ],
+  "fields": [
+   {
+    "id": "business_activities",
+    "line": "Business Activities",
+    "label": {
+     "en": "12 YES or NO questions related to your facility's operations",
+     "zh": "关于设施运营的 12 个是/否问题"
+    },
+    "hint": {
+     "en": "Answers decide which CUPA programs apply to the facility.",
+     "zh": "答案决定设施适用哪些 CUPA 监管项目。"
+    }
+   },
+   {
+    "id": "owner_operator",
+    "line": "Business Owner/Operator ",
+    "label": {
+     "en": "Business and owner information; billing contact",
+     "zh": "企业及业主信息；账单联系人"
+    },
+    "hint": {
+     "en": "Enter the LLC or corporation as Business Owner if applicable, not an individual. The permit and invoice go to the billing contact.",
+     "zh": "如属 LLC 或公司，业主栏须填写公司名称，不要填个人姓名。许可证和账单将寄给账单联系人。"
+    }
+   },
+   {
+    "id": "hazmat_inventory",
+    "line": "Hazardous Materials Inve",
+    "label": {
+     "en": "Inventory of chemicals handled above the reportable threshold",
+     "zh": "超过申报阈值的化学品库存清单"
+    },
+    "hint": {
+     "en": "Thresholds: solids 500 pounds, liquids 55 gallons, gases 200 cubic feet (HSC 25507). Use each material's Safety Data Sheet.",
+     "zh": "阈值：固体 500 磅、液体 55 加仑、气体 200 立方英尺（HSC 25507）。参照各物质的安全数据表（SDS）。"
+    }
+   },
+   {
+    "id": "site_map",
+    "line": "Site Map",
+    "label": {
+     "en": "Site map for facilities storing reportable hazardous materials",
+     "zh": "存放须申报危险物品设施的场地平面图"
+    }
+   },
+   {
+    "id": "emergency_response_plan",
+    "line": "Emergency Response Plan",
+    "label": {
+     "en": "Emergency Response Plan and Procedures",
+     "zh": "应急响应计划及程序"
+    }
+   },
+   {
+    "id": "employee_training_plan",
+    "line": "Employee Training Plan",
+    "label": {
+     "en": "Employee training in safe handling and emergency response",
+     "zh": "员工安全操作及应急响应培训计划"
+    },
+    "hint": {
+     "en": "Section I of the state Emergency Response/Contingency Plan form satisfies this. Keep on-site training logs for 3 years.",
+     "zh": "填写州应急响应/应变计划表第 I 部分即可满足。培训记录须在现场保存 3 年。"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Site map (per LAFD site map instructions)",
+    "zh": "场地平面图（按 LAFD 场地图说明绘制）"
+   },
+   {
+    "en": "Emergency Response/Contingency Plan (state form optional)",
+    "zh": "应急响应/应变计划（可用州政府表格，非强制）"
+   },
+   {
+    "en": "Employee training plan (Section I of the state form, or an uploaded document)",
+    "zh": "员工培训计划（州表格第 I 部分或另行上传文件）"
+   }
+  ],
+  "submit": {
+   "portal": "cersbusiness3.calepa.ca.gov",
+   "signature": "typed",
+   "evidence": "If your facility meets the reporting thresholds and is not yet enrolled, you will be required to submit a Hazardous Materials Business Plan (HMBP) through CERS. Submission of your HMBP in CERS constitutes your official application to the Los Angeles City Fire Department Certified Unified Program Agency (CUPA) for the storage of hazardous materials.",
+   "source": "https://lafd.org/hmbp-threshold-reporting-guidance"
+  },
+  "notes": "Electronic filing only. Paper filing ended in 2013 when CERS replaced it. Plans must be updated and resubmitted every year between Jan 1 and Mar 1. Civil penalties run up to $2,000 per day, or $5,000 per day for knowing violations (HSC 25515). LAFD publishes restaurant- and grocery-specific threshold guides on the threshold page. Most restaurants only cross the threshold through CO2 for beverages or bulk cleaning chemicals. The CERS field-level questions are behind a login."
+ },
+ "irv-license": {
+  "status": "page_only",
+  "seen": "Business License Application Checklist, 'Your Roadmap to Launching a Business in Irvine' (REV 04/2026); application in PRISM",
+  "read": "2026-10-31",
+  "sources": [
+   "https://cityofirvine.gov/sites/default/files/irvine/repository/business-license-application-checklist.pdf",
+   "https://cityofirvine.gov/node/2161"
+  ],
+  "fields": [
+   {
+    "id": "zoning_confirmation",
+    "line": "1. Confirm Your Perfect ",
+    "label": {
+     "en": "Zoning check: business activity allowed at the address",
+     "zh": "分区核查：经营活动是否允许在该地址进行"
+    },
+    "hint": {
+     "en": "Confirm with Planning at 949-724-6308 or planning@cityofirvine.org before applying.",
+     "zh": "申请前请致电 949-724-6308 或发邮件至 planning@cityofirvine.org 向规划部门确认。"
+    }
+   },
+   {
+    "id": "home_occupation",
+    "line": "1. Confirm Your Perfect ",
+    "label": {
+     "en": "Home-based business: meets Home Occupation Standards",
+     "zh": "居家经营：是否符合居家经营标准"
+    }
+   },
+   {
+    "id": "state_professional_license",
+    "line": "2. Create Your Digital T",
+    "label": {
+     "en": "Professional credentials: State of California license (digital copy)",
+     "zh": "专业资质：加州执照（电子版）"
+    }
+   },
+   {
+    "id": "fein",
+    "line": "2. Create Your Digital T",
+    "label": {
+     "en": "Federal Employer Identification Number (EIN)",
+     "zh": "联邦雇主识别号（EIN）"
+    }
+   },
+   {
+    "id": "nonprofit_letter",
+    "line": "2. Create Your Digital T",
+    "label": {
+     "en": "Non-profit: IRS 501(c)(3) Determination Letter (if applicable)",
+     "zh": "非营利组织：IRS 501(c)(3) 认定函（如适用）"
+    }
+   },
+   {
+    "id": "sellers_permit",
+    "line": "3. Connect with Industry",
+    "label": {
+     "en": "Seller's Permit: CDTFA permit number",
+     "zh": "销售许可证：CDTFA 许可证号"
+    }
+   },
+   {
+    "id": "health_abc_permits",
+    "line": "3. Connect with Industry",
+    "label": {
+     "en": "Health and alcohol: OC Health or ABC permits",
+     "zh": "卫生与酒类：橙县卫生许可或 ABC 酒牌"
+    }
+   },
+   {
+    "id": "dba",
+    "line": "3. Connect with Industry",
+    "label": {
+     "en": "DBA: registered with the OC Clerk-Recorder if the name differs from your own",
+     "zh": "商号（DBA）：若商号与本人姓名不同，须在橙县书记官处登记"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "State professional license, digital copy (PDF or photo), if required for the trade",
+    "zh": "州专业执照电子版（PDF 或照片，如行业要求）"
+   },
+   {
+    "en": "IRS 501(c)(3) Determination Letter, for a fee waiver",
+    "zh": "IRS 501(c)(3) 认定函（申请费用减免）"
+   },
+   {
+    "en": "Product labels, for hemp products",
+    "zh": "大麻（工业大麻）产品标签（如经营此类产品）"
+   }
+  ],
+  "submit": {
+   "email": "businesslicense@cityofirvine.org",
+   "portal": "prism.cityofirvine.gov",
+   "signature": "unknown",
+   "evidence": "Businesses can use PRISM 24/7 from any device to apply for a new license or renew an existing one.",
+   "source": "https://cityofirvine.gov/node/2161"
+  },
+  "notes": "The email is the Licensing Team contact. No official page says it accepts applications. Fees include the $4 state ADA fee. Small businesses (under 10 employees) pay $78.37 new and $78.37 renewal. Large businesses (10+) pay $156.88 new and $105.23 renewal. Apply within 60 days of the start date to avoid late fees, which start at $111. The renewal penalty is $70.45. The application questions themselves are behind the PRISM login."
+ },
+ "sgb-license": {
+  "status": "page_only",
+  "seen": "Business License Requirements / BL Submittal Checklist (City of San Gabriel); the in-city 'Business License & Occupancy Permit Application' is not posted online",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.sangabrielcity.com/1735/Business-License-Requirements",
+   "https://www.sangabrielcity.com/DocumentCenter/View/22324",
+   "https://sangabrielcity.com/DocumentCenter/View/19742/City-Business-License-Guidelines-and-Fees-2023",
+   "https://www.sangabrielcity.com/DocumentCenter/View/6352"
+  ],
+  "fields": [
+   {
+    "id": "bl_occupancy_application",
+    "line": "1",
+    "label": {
+     "en": "Business License & Occupancy Permit Application (must be approved by Community Development)",
+     "zh": "营业执照及占用许可申请表（须经社区发展部批准）"
+    }
+   },
+   {
+    "id": "fbn",
+    "line": "2",
+    "label": {
+     "en": "Fictitious Business Name Statement (DBA), with proof of publication",
+     "zh": "虚构商号声明（DBA）及登报证明"
+    }
+   },
+   {
+    "id": "articles_soi",
+    "line": "3",
+    "label": {
+     "en": "Articles of Incorporation & Statement of Information (corporations/LLCs)",
+     "zh": "公司章程及信息声明（公司/LLC）"
+    }
+   },
+   {
+    "id": "sellers_permit",
+    "line": "4",
+    "label": {
+     "en": "Resale / Seller's Permit (retail/wholesale; must show San Gabriel address)",
+     "zh": "转售/销售许可证（零售/批发，须显示 San Gabriel 地址）"
+    }
+   },
+   {
+    "id": "fein",
+    "line": "5",
+    "label": {
+     "en": "Federal Tax I.D. No. (businesses with employees)",
+     "zh": "联邦税号（有雇员的企业）"
+    }
+   },
+   {
+    "id": "health_license",
+    "line": "6",
+    "label": {
+     "en": "Health License (food service or packed food sales)",
+     "zh": "卫生许可证（餐饮服务或包装食品销售）"
+    }
+   },
+   {
+    "id": "state_license",
+    "line": "7",
+    "label": {
+     "en": "State License (professionals and certain occupations)",
+     "zh": "州执照（专业人士及特定职业）"
+    }
+   },
+   {
+    "id": "lease",
+    "line": "8",
+    "label": {
+     "en": "Commercial Lease or Rental Agreement (must show the date you took occupancy)",
+     "zh": "商业租约或租赁协议（须显示入驻日期）"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Fictitious Business Name Statement stamped by LA County, with proof of publication",
+    "zh": "经洛杉矶县盖章的虚构商号声明及登报证明"
+   },
+   {
+    "en": "Articles of Incorporation or LLC Articles and Statement of Information listing all officers",
+    "zh": "公司或 LLC 章程，以及列出全部高管的信息声明"
+   },
+   {
+    "en": "Seller's permit with San Gabriel address (restaurants and retail)",
+    "zh": "显示 San Gabriel 地址的销售许可证（餐厅及零售）"
+   },
+   {
+    "en": "Health Department certificate or blue application form (restaurants; may be provided after opening)",
+    "zh": "卫生部门证书或蓝色申请表（餐厅，可于开业后补交）"
+   },
+   {
+    "en": "ABC alcohol license, if selling alcohol",
+    "zh": "ABC 酒牌（如售酒）"
+   },
+   {
+    "en": "Workers' compensation insurance and Federal Tax ID, if there are employees",
+    "zh": "工伤保险及联邦税号（如有雇员）"
+   },
+   {
+    "en": "Commercial lease showing occupancy date",
+    "zh": "显示入驻日期的商业租约"
+   }
+  ],
+  "submit": {
+   "email": "Financeinfo@sgch.org",
+   "signature": "unknown",
+   "evidence": "Once zoning is verified and tenant improvements receive final inspection approval, the business can apply for the City business license by calling (626) 308-2812 or emailing Financeinfo@sgch.org. Please include your business name and address in the subject line.",
+   "source": "https://sangabrielcity.com/DocumentCenter/View/19742/City-Business-License-Guidelines-and-Fees-2023"
+  },
+  "notes": "The library URL is wrong. DocumentCenter/View/6352 is a 2016 draw.io process flowchart, not the application. San Gabriel does not post the in-city BL & Occupancy application. The city hands it out after zoning is verified (contact Community Development at (626) 308-2806 or Commdevinfo@sgch.org first). The only posted application is the Out of Town BL Application FY 25-26 (View/23679), which is for contractors and does not fit restaurants. The 2023 guide puts the general license fee at $87.75 per year, prorated quarterly. The official pages give no mailing address for new applications. Renewals go to City of San Gabriel Finance Department, 425 S. Mission Dr., San Gabriel, CA 91776. The process requires an occupancy inspection by Fire, Building and Planning before the license issues."
+ },
+ "arc-license": {
+  "status": "mapped",
+  "seen": "CITY - NEW Business License Application (HdL online application, Registration step), arcadia.hdlgov.com",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.arcadiaca.gov/government/development_services/business_license/index.php",
+   "https://arcadia.hdlgov.com/Apply/GettingStarted/BusinessLicense",
+   "https://arcadia.hdlgov.com/Apply/Apply1/BusinessLicense"
+  ],
+  "fields": [
+   {
+    "id": "location",
+    "line": "",
+    "label": {
+     "en": "Location",
+     "zh": "经营地点在市内还是市外"
+    },
+    "options": [
+     "Inside",
+     "Outside"
+    ]
+   },
+   {
+    "id": "business_type",
+    "line": "",
+    "label": {
+     "en": "Business Type",
+     "zh": "业务类型"
+    },
+    "hint": {
+     "en": "Pick the best match from the city list.",
+     "zh": "从市政列表中选择最匹配的类别。"
+    }
+   },
+   {
+    "id": "zoning_review_type",
+    "line": "",
+    "label": {
+     "en": "Commercial / Residential (Zoning Review Form)",
+     "zh": "商业 / 住宅（分区审查表）"
+    },
+    "options": [
+     "Commercial",
+     "Residential"
+    ]
+   },
+   {
+    "id": "bus_name",
+    "line": "",
+    "label": {
+     "en": "Bus Name",
+     "zh": "商户名称"
+    }
+   },
+   {
+    "id": "bus_address",
+    "line": "",
+    "label": {
+     "en": "Bus Address (Must be physical location, not a Post Office Box)",
+     "zh": "经营地址（须为实际地址，不可用邮政信箱）"
+    }
+   },
+   {
+    "id": "mail_address",
+    "line": "",
+    "label": {
+     "en": "Mail Address (Same as address above)",
+     "zh": "邮寄地址（可勾选与上方相同）"
+    }
+   },
+   {
+    "id": "description",
+    "line": "",
+    "label": {
+     "en": "Description of Business",
+     "zh": "业务描述"
+    }
+   },
+   {
+    "id": "ownership_type",
+    "line": "",
+    "label": {
+     "en": "Ownership Type",
+     "zh": "所有权类型"
+    },
+    "options": [
+     "Corporation",
+     "Ltd Liability Co",
+     "Ltd Partnership",
+     "Partnership",
+     "Sole Proprietorship",
+     "Trust"
+    ]
+   },
+   {
+    "id": "employee_count",
+    "line": "",
+    "label": {
+     "en": "Employee Count",
+     "zh": "员工人数"
+    }
+   },
+   {
+    "id": "start_date",
+    "line": "",
+    "label": {
+     "en": "Start Date in City of Arcadia (estimate if in the future)",
+     "zh": "在 Arcadia 市的开业日期（如未开业请估计）"
+    }
+   },
+   {
+    "id": "contact_phones",
+    "line": "Contact Information",
+    "label": {
+     "en": "Phone, Phone 2, Fax, Website, Email Address",
+     "zh": "电话、备用电话、传真、网站、电子邮箱"
+    }
+   },
+   {
+    "id": "tax_ids",
+    "line": "Contact Information",
+    "label": {
+     "en": "BEAN, FEIN, SEIN",
+     "zh": "BEAN（州雇主账号）、FEIN（联邦雇主识别号）、SEIN（州雇主识别号）"
+    },
+    "hint": {
+     "en": "Sole owners and partnerships must give Social Security numbers for all owners. LLCs, LPs, trusts and corporations must give an FEIN or SEIN.",
+     "zh": "个人独资及合伙企业须提供全部业主的社会安全号；LLC、有限合伙、信托及公司须提供 FEIN 或 SEIN。"
+    }
+   },
+   {
+    "id": "contact_preference",
+    "line": "Contact Information",
+    "label": {
+     "en": "Contact me by email whenever possible",
+     "zh": "尽可能通过电子邮件联系我"
+    }
+   },
+   {
+    "id": "state_license",
+    "line": "State License Informatio",
+    "label": {
+     "en": "State License #, State License Type, State License Expire Date",
+     "zh": "州执照号、执照类型、到期日"
+    }
+   },
+   {
+    "id": "dba",
+    "line": "Additional Information",
+    "label": {
+     "en": "Doing Business As (DBA)",
+     "zh": "经营商号（DBA）"
+    }
+   },
+   {
+    "id": "prior_license",
+    "line": "Additional Information",
+    "label": {
+     "en": "Have you ever had a business license in the City?",
+     "zh": "您以前是否在本市持有过营业执照？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "npdes",
+    "line": "Additional Information",
+    "label": {
+     "en": "Regulated industry with stormwater discharge requirements (SB 205 NPDES)? SIC #, NPDES Permit #",
+     "zh": "是否属于有雨水排放要求的受监管行业（SB 205 NPDES）？SIC 编号、NPDES 许可证号"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "owner_drivers_license",
+    "line": "",
+    "label": {
+     "en": "Driver's license information of the business owner",
+     "zh": "企业主驾照信息"
+    },
+    "hint": {
+     "en": "The portal says missing owner driver's license information will delay processing.",
+     "zh": "系统提示：未提供企业主驾照信息将延误审批。"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "City Review and Approval form (zoning review), for applicants inside the City",
+    "zh": "市内申请人须提交市政审核批准表（分区审查）"
+   },
+   {
+    "en": "Seller's Permit, if applicable",
+    "zh": "销售许可证（如适用）"
+   },
+   {
+    "en": "State License, if applicable",
+    "zh": "州执照（如适用）"
+   }
+  ],
+  "submit": {
+   "email": "BL@ArcadiaCA.gov",
+   "portal": "arcadia.hdlgov.com",
+   "signature": "unknown",
+   "evidence": "Payment will not be required until your application has been accepted. You will receive an email verifying the receipt of application. Within 10 days an email containing the amount due and instructions how to make payment on-line.",
+   "source": "https://arcadia.hdlgov.com/Apply/GettingStarted/BusinessLicense"
+  },
+  "notes": "The library says pdf_mail, but Arcadia now takes new applications online through HdL (arcadia.hdlgov.com) and posts no PDF application. BL@ArcadiaCA.gov is the inquiry address. Alarming: the portal's 'Commercial Zoning Review Form' and 'Residential Zoning Review Form' links point to Santa Monica PDFs (finance.smgov.net), which looks like a vendor template error. Do not use those forms. Get Arcadia's zoning form from Arcadia Planning ((626) 574-5423). In-city applicants must also file a zoning application with Planning. Licenses run 12 months, with late penalties of 20%, 60% or 100%. I did not see the Review/Submit attestation text, so the signature type is unknown."
+ },
+ "arc-building": {
+  "status": "mapped",
+  "seen": "City of Arcadia Plan Review/Building Permit Application Form (REV.5/03)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.arcadiaca.gov/Document%20Center/Government/Development%20Services/Building%20Services/Applications%20and%20Forms/Building%20and%20Construction/Building-Plan%20Check%20Application.pdf",
+   "https://www.arcadiaca.gov/government/development_services/building_services/applications_and_forms.php",
+   "https://www.arcadiaca.gov/government/development_services/building_services/plan_check_information.php"
+  ],
+  "fields": [
+   {
+    "id": "building_address",
+    "line": "",
+    "label": {
+     "en": "Building Address",
+     "zh": "建筑地址"
+    }
+   },
+   {
+    "id": "owner",
+    "line": "",
+    "label": {
+     "en": "Owner; Mailing Address; City, State, Zip; Telephone",
+     "zh": "业主；邮寄地址；城市、州、邮编；电话"
+    }
+   },
+   {
+    "id": "contractor",
+    "line": "",
+    "label": {
+     "en": "Contractor; Address; City, State, Zip; Telephone",
+     "zh": "承包商；地址；城市、州、邮编；电话"
+    }
+   },
+   {
+    "id": "contractor_licenses",
+    "line": "",
+    "label": {
+     "en": "State Lic. & Classif.; City Lic. No.",
+     "zh": "州执照号及类别；市营业执照号"
+    }
+   },
+   {
+    "id": "applicant",
+    "line": "",
+    "label": {
+     "en": "Applicant; Address; City, State, Zip; Telephone",
+     "zh": "申请人；地址；城市、州、邮编；电话"
+    }
+   },
+   {
+    "id": "proposed_construction",
+    "line": "",
+    "label": {
+     "en": "Proposed Construction",
+     "zh": "拟议施工内容"
+    }
+   },
+   {
+    "id": "remodeled_sqft",
+    "line": "",
+    "label": {
+     "en": "Remodeled Square Ft",
+     "zh": "改建面积（平方英尺）"
+    }
+   },
+   {
+    "id": "new_main_sqft",
+    "line": "",
+    "label": {
+     "en": "New Square Ft. of Main Structure",
+     "zh": "主体结构新增面积"
+    }
+   },
+   {
+    "id": "new_accessory_sqft",
+    "line": "",
+    "label": {
+     "en": "New Square Ft. of Accessory Structure (specify)",
+     "zh": "附属结构新增面积（请注明）"
+    }
+   },
+   {
+    "id": "new_patio_sqft",
+    "line": "",
+    "label": {
+     "en": "New Square Ft of Patio(s)/Porches",
+     "zh": "新增露台/门廊面积"
+    }
+   },
+   {
+    "id": "new_misc_sqft",
+    "line": "",
+    "label": {
+     "en": "New Square Ft. of Miscellaneous Structure(s) (specify)",
+     "zh": "其他结构新增面积（请注明）"
+    }
+   },
+   {
+    "id": "occupancy_classification",
+    "line": "",
+    "label": {
+     "en": "Occupancy Classification(s)",
+     "zh": "占用分类"
+    }
+   },
+   {
+    "id": "construction_type",
+    "line": "",
+    "label": {
+     "en": "Type of Construction",
+     "zh": "建筑构造类型"
+    }
+   },
+   {
+    "id": "valuation",
+    "line": "",
+    "label": {
+     "en": "Valuation",
+     "zh": "工程估值"
+    }
+   },
+   {
+    "id": "email",
+    "line": "",
+    "label": {
+     "en": "Email Address for Contractor or Owner/Builder",
+     "zh": "承包商或业主自建人的电子邮箱"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Plans in digital format with structural calculations, energy calculations, geotechnical reports and other supporting documents as required",
+    "zh": "电子版图纸，并按要求附结构计算书、能源计算书、岩土报告等支持文件"
+   },
+   {
+    "en": "Plan Review Submittal Checklist, Owner Builder Declaration or Authorization of Agent form, as applicable",
+    "zh": "视情况附图纸审查提交清单、业主自建声明或代理授权表"
+   }
+  ],
+  "submit": {
+   "portal": "arcadiaca-energovpub.tylerhost.net",
+   "signature": "unknown",
+   "evidence": "All plan submittals are accepted in digital format only. Plans may be submitted electronically through the EDGE Portal, or provided on a flash drive when submitting for an in-person plan check.",
+   "source": "https://www.arcadiaca.gov/government/development_services/building_services/plan_check_information.php"
+  },
+  "notes": "The library URL is wrong. It points to LA County Public Health's food facility page, not Arcadia Building Services. The form is old (REV.5/03) and has no signature line. In-person plan check runs at Arcadia City Hall, 240 W. Huntington Drive, up to one hour before closing, with plans on a flash drive. The online portal is EDGE (Tyler EnerGov). Restaurants also need LA County Environmental Health plan check."
+ },
+ "alh-license": {
+  "status": "mapped",
+  "seen": "Business License Application Affidavit - Confidential (online, 'In City License'), secure.alhambraca.gov",
+  "read": "2026-10-31",
+  "sources": [
+   "https://secure.alhambraca.gov/BusinessLicenseApplication/",
+   "https://www.alhambraca.gov/DocumentCenter/View/1438"
+  ],
+  "fields": [
+   {
+    "id": "application_type",
+    "line": "",
+    "label": {
+     "en": "Please select the type of application that you would like to fill out",
+     "zh": "请选择申请类型"
+    },
+    "options": [
+     "Out of City Contractors/Rental Properties & Short Term Rentals",
+     "Home Based License",
+     "In City License"
+    ]
+   },
+   {
+    "id": "business_name",
+    "line": "General Business Informa",
+    "label": {
+     "en": "Business Name",
+     "zh": "商户名称"
+    }
+   },
+   {
+    "id": "attention",
+    "line": "General Business Informa",
+    "label": {
+     "en": "Attention",
+     "zh": "收件人"
+    }
+   },
+   {
+    "id": "business_address",
+    "line": "General Business Informa",
+    "label": {
+     "en": "Business Address, City, State, Zip (PO Boxes are not allowed)",
+     "zh": "经营地址、城市、州、邮编（不可用邮政信箱）"
+    }
+   },
+   {
+    "id": "mailing_address",
+    "line": "General Business Informa",
+    "label": {
+     "en": "Mailing Address, City, State, Zip",
+     "zh": "邮寄地址、城市、州、邮编"
+    }
+   },
+   {
+    "id": "business_phone_email",
+    "line": "General Business Informa",
+    "label": {
+     "en": "Business Phone, E-Mail Address",
+     "zh": "商户电话、电子邮箱"
+    }
+   },
+   {
+    "id": "start_date",
+    "line": "General Business Informa",
+    "label": {
+     "en": "Business Start Date in Alhambra",
+     "zh": "在 Alhambra 的开业日期"
+    }
+   },
+   {
+    "id": "description",
+    "line": "General Business Informa",
+    "label": {
+     "en": "Please Provide an Accurate Description of Proposed Business Operation - Be Specific",
+     "zh": "请准确、具体地描述拟经营业务"
+    }
+   },
+   {
+    "id": "organization",
+    "line": "Ownership",
+    "label": {
+     "en": "Select Organization",
+     "zh": "选择组织类型"
+    },
+    "options": [
+     "C-Corporation",
+     "F-Foundation",
+     "L-LLC",
+     "LLP-LLP",
+     "LP-LP",
+     "O-Other",
+     "P-Partnership",
+     "S-Sole Proprietor",
+     "SC-S Corporation",
+     "STU-STUDENT",
+     "T-Trust"
+    ]
+   },
+   {
+    "id": "owners",
+    "line": "Ownership",
+    "label": {
+     "en": "Owner Name/Home Address: list all owners or LLC/Corp officers (Title, Name, Mailing Address, Phone, SSN, Driver's Licens",
+     "zh": "业主姓名/住址：列出全部业主或 LLC/公司高管（职务、姓名、邮寄地址、电话、社会安全号、驾照）"
+    }
+   },
+   {
+    "id": "business_types",
+    "line": "Description",
+    "label": {
+     "en": "Business Types",
+     "zh": "业务类别（从列表选择）"
+    }
+   },
+   {
+    "id": "naics",
+    "line": "Description",
+    "label": {
+     "en": "NAICS",
+     "zh": "NAICS 行业代码"
+    }
+   },
+   {
+    "id": "gross_receipts",
+    "line": "Description",
+    "label": {
+     "en": "Estimated Gross Receipts for the Next 12 months",
+     "zh": "未来 12 个月预计总收入"
+    }
+   },
+   {
+    "id": "sales_tax_number",
+    "line": "Description",
+    "label": {
+     "en": "Retail Sales Tax Number",
+     "zh": "零售销售税号（销售许可证号）"
+    }
+   },
+   {
+    "id": "fein",
+    "line": "Description",
+    "label": {
+     "en": "Fein",
+     "zh": "联邦雇主识别号（FEIN）"
+    }
+   },
+   {
+    "id": "contractor_license",
+    "line": "Description",
+    "label": {
+     "en": "State Contractor License Number, State Contractor Class",
+     "zh": "州承包商执照号及类别"
+    }
+   },
+   {
+    "id": "type_of_business",
+    "line": "Description",
+    "label": {
+     "en": "Type of Business [Check Whichever is Appropriate]",
+     "zh": "业务性质（勾选适用项）"
+    },
+    "options": [
+     "Retail",
+     "Wholesale",
+     "Import/Export",
+     "Manufacturing",
+     "Professional",
+     "Entertainment",
+     "Administrative Office",
+     "Delivery Vehicles",
+     "Residential Property Rentals",
+     "Commerial Property Rentals",
+     "Contractor"
+    ]
+   },
+   {
+    "id": "declaration",
+    "line": "",
+    "label": {
+     "en": "I declare under penalty of making a false certification that the foregoing information is true and correct",
+     "zh": "本人声明，如有虚假陈述愿承担责任，以上信息真实无误"
+    }
+   },
+   {
+    "id": "executed_by",
+    "line": "",
+    "label": {
+     "en": "Executed this ... I, (name)",
+     "zh": "签署日期及签署人姓名"
+    }
+   },
+   {
+    "id": "signature",
+    "line": "",
+    "label": {
+     "en": "Please sign your name below, using the mouse or your touch screen enabled device",
+     "zh": "请用鼠标或触屏在下方签名"
+    }
+   },
+   {
+    "id": "signer_phone",
+    "line": "",
+    "label": {
+     "en": "Phone",
+     "zh": "签署人电话"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Application for Certificate of Occupancy (separate form, mailed or brought to City Hall)",
+    "zh": "占用证申请表（单独表格，邮寄或送至市政厅）"
+   }
+  ],
+  "submit": {
+   "portal": "secure.alhambraca.gov",
+   "signature": "drawn",
+   "evidence": "By submitting this application I accept the conditions and declare under penalty of perjury the foregoing is true and correct. Please sign your name below, using the mouse or your touch screen enabled device.",
+   "source": "https://secure.alhambraca.gov/BusinessLicenseApplication/"
+  },
+  "notes": "The online form asks for each owner's full SSN and driver's license. Handle these as sensitive. A one-page paper version also exists ('BUSINESS LICENSE APPLICATION AFFIDAVIT – CONFIDENTIAL', DocumentCenter/View/1438). The paper version is filed with the Business License Section, 111 South First Street, Alhambra, CA 91801, (626) 570-5021. The online form says in-city businesses must also apply for an Occupancy Permit (see alh-co)."
+ },
+ "alh-building": {
+  "status": "page_only",
+  "seen": "City of Alhambra Permit Portal Help Guide (October 2026) + Building & Safety 'Steps to plan check, permits, and inspections'",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.alhambraca.gov/DocumentCenter/View/8396/Permit-Portal-How-to-Guide-Updated-2026",
+   "https://www.alhambraca.gov/DocumentCenter/View/5053/STEPS-TO-PLAN-CHECK-PERMITS-AND-INSPECTIONS",
+   "https://www.alhambraca.gov/192/Building-Division"
+  ],
+  "fields": [
+   {
+    "id": "location",
+    "line": "Locations Step",
+    "label": {
+     "en": "Project address or Assessor Parcel Number (APN) within the City of Alhambra",
+     "zh": "项目地址或估税地块编号（APN，须位于 Alhambra 市内）"
+    },
+    "hint": {
+     "en": "Search an APN without dashes or spaces. Clarify unit numbers in the project description.",
+     "zh": "按 APN 搜索时不要加横线或空格；单元号可在项目描述中说明。"
+    }
+   },
+   {
+    "id": "applicant_contact",
+    "line": "Contacts Step",
+    "label": {
+     "en": "Applicant Contact (with active Permit Portal account)",
+     "zh": "申请人联系人（须有有效的许可门户账户）"
+    }
+   },
+   {
+    "id": "owner_contact",
+    "line": "Contacts Step",
+    "label": {
+     "en": "Property Owner Contact",
+     "zh": "物业业主联系人"
+    }
+   },
+   {
+    "id": "billing_contact",
+    "line": "Contacts Step",
+    "label": {
+     "en": "Billing Contact (applicant by default)",
+     "zh": "账单联系人（默认为申请人）"
+    }
+   },
+   {
+    "id": "summary_description",
+    "line": "Project Details Step",
+    "label": {
+     "en": "Summary/Description of the proposed scope of work (approx. 2-3 sentences)",
+     "zh": "拟议施工范围摘要（约 2 到 3 句）"
+    },
+    "hint": {
+     "en": "Enter N/A for required fields that do not apply.",
+     "zh": "不适用的必填项请填写 N/A。"
+    }
+   },
+   {
+    "id": "attachments",
+    "line": "Attachments Step",
+    "label": {
+     "en": "Documents necessary and/or required for the application",
+     "zh": "申请所需的文件"
+    }
+   },
+   {
+    "id": "review_submit",
+    "line": "Review Step",
+    "label": {
+     "en": "Review and submit",
+     "zh": "核对并提交"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Plans and supporting documents (uploaded to the Plan Check Portal after the permit application)",
+    "zh": "图纸及支持文件（提交许可申请后上传至图纸审查门户）"
+   },
+   {
+    "en": "Licensed Contractor Declarations or Owner Builder Declaration (fillable forms)",
+    "zh": "持照承包商声明或业主自建声明（可填写表格）"
+   },
+   {
+    "en": "Planning clearance, submitted first through the Permit Portal",
+    "zh": "规划许可（须先通过许可门户提交）"
+   }
+  ],
+  "submit": {
+   "email": "building@cityofalhambra.org",
+   "signature": "unknown",
+   "evidence": "Please note that Building & Safety is completely paperless. Applications and plans are submitted online, invoices are paid online as well. Paper plans, paper applications, and in person payments will not be accepted",
+   "source": "https://www.alhambraca.gov/DocumentCenter/View/5053/STEPS-TO-PLAN-CHECK-PERMITS-AND-INSPECTIONS"
+  },
+  "notes": "The library entry is wrong on 2 counts. The method says in_person, but Alhambra Building & Safety takes no paper applications. The URL points to LA County Public Health. The email accepts plan revisions only ('Email building@cityofalhambra.org the permit number and a description of the revision'), not new applications. The order is Planning clearance, then the permit application in the Permit Portal, then plans in the Plan Check Portal, then permit issuance to a licensed contractor or owner-builder. The guide does not print the portal host, which is reached through the alhambraca.gov/178 'Permit Portal' button. Plan review takes 2 to 4 weeks."
+ },
+ "lacpw-building": {
+  "status": "page_only",
+  "seen": "EPIC-LA 'How to Apply for Permits on EPIC LA' guide (BSDPermitGeneralGuide.pdf, undated)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://epicla.lacounty.gov/help/doc/BSDPermitGeneralGuide.pdf"
+  ],
+  "fields": [
+   {
+    "id": "permit_type",
+    "line": "Find the permit",
+    "label": {
+     "en": "County of Los Angeles Building Permits (select permit type)",
+     "zh": "洛杉矶县建筑许可（选择许可类型）"
+    },
+    "hint": {
+     "en": "Permits labeled 'Simple' or 'Repair/Replacement' do not need plan review.",
+     "zh": "标为 Simple 或 Repair/Replacement 的许可无需图纸审查。"
+    }
+   },
+   {
+    "id": "location",
+    "line": "Step 1 - Location",
+    "label": {
+     "en": "Project location: Address or Parcel Number",
+     "zh": "项目位置：地址或地块编号"
+    }
+   },
+   {
+    "id": "description",
+    "line": "Step 2 - Description",
+    "label": {
+     "en": "Description of work, including project valuation if applicable",
+     "zh": "工程描述（如适用，包括项目估值）"
+    }
+   },
+   {
+    "id": "contacts",
+    "line": "Step 3 - Contacts",
+    "label": {
+     "en": "Contacts (applicant by default; add others with EPIC-LA accounts and contact type)",
+     "zh": "联系人（默认为申请人；可添加其他有 EPIC-LA 账户的联系人并选择类型）"
+    }
+   },
+   {
+    "id": "more_info",
+    "line": "Step 4 - More Info",
+    "label": {
+     "en": "Construction details, one row per story or divided use",
+     "zh": "施工细节（每层或每种用途各填一行）"
+    }
+   },
+   {
+    "id": "attachments",
+    "line": "Step 5 - Attachments",
+    "label": {
+     "en": "Attachments with file type and description",
+     "zh": "附件（选择文件类型并填写说明）"
+    }
+   },
+   {
+    "id": "review_submit",
+    "line": "Step 6 - Review and Subm",
+    "label": {
+     "en": "Review and Submit",
+     "zh": "核对并提交"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Plans, calculations or other construction documents, depending on permit type; every item marked required must be uploaded",
+    "zh": "按许可类型上传图纸、计算书或其他施工文件；所有标为必需的项目都必须上传"
+   }
+  ],
+  "submit": {
+   "portal": "epicla.lacounty.gov",
+   "signature": "unknown",
+   "evidence": "Scroll through the full application, then click Submit at the bottom. After submitting, click \"Continue to permit\" to see your permit case number.",
+   "source": "https://epicla.lacounty.gov/help/doc/BSDPermitGeneralGuide.pdf"
+  },
+  "notes": "This covers unincorporated LA County only. The portal warns when a location is not in the unincorporated county. Read through WebFetch: permits.lacounty.gov and epicla.lacounty.gov block direct downloads (Incapsula 403). The guide does not name the More Info table's fields, so occupancy and square footage questions sit behind the login. The guide shows no attestation text."
+ },
+ "irv-building": {
+  "status": "mapped",
+  "seen": "Building Permit Application FORM 65-59 REV 08/19, in the Commercial Tenant Improvement package (updated June 2025) with E-Submittal Checklist FORM 66-02 REV 10/",
+  "read": "2026-10-31",
+  "sources": [
+   "https://cityofirvine.gov/sites/default/files/legacy-documents/civica-32352-commercial-tenant-improvement-package_updated-june-2025_.pdf",
+   "https://cityofirvine.gov/node/69516"
+  ],
+  "fields": [
+   {
+    "id": "project_address",
+    "line": "",
+    "label": {
+     "en": "Project Address, Suite, Grid Number",
+     "zh": "项目地址、套间号、网格编号"
+    }
+   },
+   {
+    "id": "tract_lot_units",
+    "line": "",
+    "label": {
+     "en": "Tract, Lot, Units",
+     "zh": "分区、地块、单元数"
+    }
+   },
+   {
+    "id": "permit_types",
+    "line": "Permit Types Applied For",
+    "label": {
+     "en": "Permit Types Applied For",
+     "zh": "申请的许可类型"
+    },
+    "options": [
+     "Residental Building",
+     "Commercial Building",
+     "Structural",
+     "Non-Structural",
+     "Plumbing",
+     "Electrical",
+     "Mechanical"
+    ]
+   },
+   {
+    "id": "applicant",
+    "line": "Applicant Information",
+    "label": {
+     "en": "Applicant/Company Name, Address, City, Zip, Contact, Phone, Email",
+     "zh": "申请人/公司名称、地址、城市、邮编、联系人、电话、邮箱"
+    }
+   },
+   {
+    "id": "owner",
+    "line": "Applicant Information",
+    "label": {
+     "en": "Owner of the Property, Address, City, Zip, Contact, Phone, Ext, Fax",
+     "zh": "物业业主、地址、城市、邮编、联系人、电话、分机、传真"
+    }
+   },
+   {
+    "id": "tenant_name",
+    "line": "Applicant Information",
+    "label": {
+     "en": "Tenant Name",
+     "zh": "租户名称"
+    }
+   },
+   {
+    "id": "description_of_work",
+    "line": "Project Information",
+    "label": {
+     "en": "Description of Work",
+     "zh": "工程描述"
+    }
+   },
+   {
+    "id": "related_cases",
+    "line": "Project Information",
+    "label": {
+     "en": "Related Grading Case/Other Related Cases",
+     "zh": "相关平整案件/其他相关案件"
+    }
+   },
+   {
+    "id": "adu",
+    "line": "Project Information",
+    "label": {
+     "en": "Does the scope include an Accessory Dwelling Unit?",
+     "zh": "工程范围是否包括附属住宅单元（ADU）？"
+    },
+    "options": [
+     "YES",
+     "NO"
+    ]
+   },
+   {
+    "id": "medical_retail_warehouse",
+    "line": "Project Information",
+    "label": {
+     "en": "Does the proposed use include medical or chiropractic offices; or retail or warehouse?",
+     "zh": "拟议用途是否包括医疗或脊椎按摩诊所，或零售、仓储？"
+    },
+    "options": [
+     "YES",
+     "NO"
+    ]
+   },
+   {
+    "id": "occupancy_construction",
+    "line": "Project Information",
+    "label": {
+     "en": "Occupancy Group(s), Construction Type",
+     "zh": "占用分组、建筑构造类型"
+    }
+   },
+   {
+    "id": "occupancy_current_proposed",
+    "line": "Project Information",
+    "label": {
+     "en": "Occupancy Current / Proposed",
+     "zh": "现占用分类 / 拟议占用分类"
+    }
+   },
+   {
+    "id": "use_current_proposed",
+    "line": "Project Information",
+    "label": {
+     "en": "Current Use / Proposed Use",
+     "zh": "现用途 / 拟议用途"
+    }
+   },
+   {
+    "id": "valuation_stories",
+    "line": "Project Information",
+    "label": {
+     "en": "Valuation, No. of Stories, Sprinklers (Yes/No), A/C (Yes/No)",
+     "zh": "工程估值、层数、是否有喷淋、是否有空调"
+    }
+   },
+   {
+    "id": "existing_scope",
+    "line": "Existing Buildings",
+    "label": {
+     "en": "Check all that apply to your scope of work (sq.ft.)",
+     "zh": "勾选适用的工程范围（平方英尺）"
+    },
+    "options": [
+     "Int. Alt.",
+     "Ext. Alt.",
+     "Addition",
+     "Demolition",
+     "Repair",
+     "Parking Lot (No. of Spaces)"
+    ]
+   },
+   {
+    "id": "new_buildings",
+    "line": "New Buildings Only",
+    "label": {
+     "en": "Total Number of Buildings; Total Sq. Ft. of All Buildings",
+     "zh": "新建筑总栋数；全部建筑总面积"
+    }
+   },
+   {
+    "id": "applicant_certification",
+    "line": "",
+    "label": {
+     "en": "By signing below, I certify the above information to be true and correct. Applicant Signature, Print Name, Date",
+     "zh": "签名即证明以上信息真实无误：申请人签名、正楷姓名、日期"
+    }
+   },
+   {
+    "id": "q_asphalt",
+    "line": "Questionnaire 1",
+    "label": {
+     "en": "Does the scope of work include any asphalt removal? If YES, how many sq. ft.?",
+     "zh": "工程是否涉及沥青移除？如是，面积多少平方英尺？"
+    },
+    "options": [
+     "Trenching",
+     "Parking Lot Modification"
+    ]
+   },
+   {
+    "id": "q_rooftop",
+    "line": "Questionnaire 2",
+    "label": {
+     "en": "Does this scope of work include any roof-top mechanical? 2a new pads/curbs? 2b existing pads/curbs modified?",
+     "zh": "是否有屋顶机械设备？2a 是否新增设备底座/围边？2b 是否改动现有底座/围边？"
+    },
+    "options": [
+     "YES",
+     "NO"
+    ]
+   }
+  ],
+  "attach": [
+   {
+    "en": "Electronic/Digital Signature Disclosure",
+    "zh": "电子/数字签名声明"
+   },
+   {
+    "en": "Building Data Sheet (Form 66-58), if applicable",
+    "zh": "建筑数据表（66-58 表，如适用）"
+   },
+   {
+    "en": "Commercial Take-Off Sheet (Form 66-61), if applicable",
+    "zh": "商业工程量清单（66-61 表，如适用）"
+   },
+   {
+    "en": "Recycling and Diversion of Construction and Demolition Waste Assessment 2.0",
+    "zh": "建筑与拆除垃圾回收及分流评估 2.0"
+   },
+   {
+    "en": "OCFA Plan Submittal Criteria form",
+    "zh": "橙县消防局（OCFA）图纸提交标准表"
+   },
+   {
+    "en": "Developer Deposit Case Set Up, if applicable",
+    "zh": "开发商押金案件设立表（如适用）"
+   },
+   {
+    "en": "Plans on the City Tenant Improvement Title Sheet",
+    "zh": "采用市政标准租户改造标题页的图纸"
+   },
+   {
+    "en": "For food establishments: OC Health Care Agency Environmental Health submittal; IRWD grease interceptor review",
+    "zh": "餐饮场所：向橙县卫生局环境卫生部门提交审查；向 IRWD 申请隔油池审查"
+   }
+  ],
+  "submit": {
+   "portal": "gopost-irvine.eplansoftreview.com",
+   "signature": "drawn",
+   "evidence": "I understand and agree that (i) electronically signing and submitting any document(s) to the City of Irvine legally binds me in the same manner as if I had signed in a non-electronic or non-digital form ... By using the system to electronically sign and submit any document, I agree to the terms and conditions of this Electronic/ Digital Signature Disclosure.",
+   "source": "https://cityofirvine.gov/sites/default/files/legacy-documents/civica-32352-commercial-tenant-improvement-package_updated-june-2025_.pdf"
+  },
+  "notes": "Submittal is a PDF upload to IrvineReady! (e-plan portal at gopost-irvine.eplansoftreview.com), following the E-Plan Submittal Requirements (form 66-120). The pre-application is processed first, and review starts only after plan review fees are paid. An online Construction and Demolition Waste Management Plan must be approved before the permit issues. For restaurants, see Informational Bulletin No. 313 on commercial appliance clearances."
+ },
+ "lac-fbn": {
+  "status": "mapped",
+  "seen": "Fictitious Business Name Statement (Rev. 01/2014) + Affidavit of Identity (01-2014), Los Angeles Registrar-Recorder/County Clerk",
+  "read": "2026-10-31",
+  "sources": [
+   "https://rrcc.lacounty.gov/general/pdfs/fictitious_business_name.pdf",
+   "https://lavote.gov/home/county-clerk/fictitious-business-names/frequently-asked-questions"
+  ],
+  "fields": [
+   {
+    "id": "return_address",
+    "line": "Return Mailing Address",
+    "label": {
+     "en": "Name, Address, City, State, Zip Code",
+     "zh": "回寄地址：姓名、地址、城市、州、邮编"
+    }
+   },
+   {
+    "id": "filing_type",
+    "line": "Type of Filing and Filin",
+    "label": {
+     "en": "Type of Filing (check one)",
+     "zh": "申报类型（单选）"
+    },
+    "options": [
+     "Original",
+     "New (Amended) Filing",
+     "Refile"
+    ]
+   },
+   {
+    "id": "fbn_names",
+    "line": "1.",
+    "label": {
+     "en": "Fictitious Business Name(s)",
+     "zh": "虚构商号名称"
+    },
+    "hint": {
+     "en": "$5.00 for each additional business name on the same statement.",
+     "zh": "同一声明中每增加一个商号加收 5 美元。"
+    }
+   },
+   {
+    "id": "principal_place",
+    "line": "",
+    "label": {
+     "en": "Principal Place of Business: street address, City, State, Zip, County",
+     "zh": "主要营业地点：街道地址、城市、州、邮编、县"
+    }
+   },
+   {
+    "id": "mailing_address",
+    "line": "",
+    "label": {
+     "en": "Mailing Address (if different), City, State, Zip",
+     "zh": "邮寄地址（如不同）、城市、州、邮编"
+    }
+   },
+   {
+    "id": "ai_number",
+    "line": "",
+    "label": {
+     "en": "Articles of Incorporation or Organization Number (if applicable): AI #",
+     "zh": "公司章程或组织章程编号（如适用）"
+    }
+   },
+   {
+    "id": "registrants",
+    "line": "Registered Owners 1-4",
+    "label": {
+     "en": "Full Name/Corp/LLC, Residence Address, City, State, Zip; State of Incorporation/Organization",
+     "zh": "登记业主：全名/公司/LLC、住址、城市、州、邮编；公司或 LLC 的注册州"
+    },
+    "hint": {
+     "en": "P.O. Box not accepted. $5.00 for each owner beyond one.",
+     "zh": "不接受邮政信箱。超过一位业主时每人加收 5 美元。"
+    }
+   },
+   {
+    "id": "conducted_by",
+    "line": "",
+    "label": {
+     "en": "Business Conducted By (check one)",
+     "zh": "经营主体类型（单选）"
+    },
+    "options": [
+     "an Individual",
+     "a General Partnership",
+     "a Limited Partnership",
+     "a Limited Liability Company",
+     "an Unincorporated Association other than a Partnership",
+     "a Corporation",
+     "a Trust",
+     "Copartners",
+     "a Married Couple",
+     "Joint Venture",
+     "State or Local Registered Domestic Partners",
+     "a Limited Liability Partnership"
+    ]
+   },
+   {
+    "id": "commencement_date",
+    "line": "",
+    "label": {
+     "en": "Date registrant began transacting business under the name (or N/A)",
+     "zh": "开始使用该商号经营的日期（未开始填 N/A）"
+    }
+   },
+   {
+    "id": "declaration_signer",
+    "line": "Declaration",
+    "label": {
+     "en": "Registrant/Corp/LLC Name (print), Title, Registrant Signature",
+     "zh": "登记人/公司/LLC 名称（正楷）、职务、登记人签名"
+    }
+   },
+   {
+    "id": "affidavit_identity",
+    "line": "Affidavit of Identity",
+    "label": {
+     "en": "Registrant Name, Name of Business, Registrant Address; signed date and signature",
+     "zh": "身份宣誓书：登记人姓名、商号、登记人地址、签署日期及签名"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Affidavit of Identity, notarized for mail or third-party filings, or signed before a Deputy County Clerk with valid ID in person",
+    "zh": "身份宣誓书：邮寄或第三方递交须公证；亲自递交须持有效证件在县书记官副手面前签署"
+   },
+   {
+    "en": "Corporations, LLCs or LLPs: Certificate of Status from the Secretary of State",
+    "zh": "公司、LLC 或 LLP：州务卿出具的存续状态证明"
+   },
+   {
+    "en": "Authorized Agent form, where applicable",
+    "zh": "授权代理人表（如适用）"
+   }
+  ],
+  "submit": {
+   "portal": "apps.lavote.net",
+   "mail": {
+    "name": "Los Angeles County Registrar-Recorder/County Clerk, Business Filing & Registration",
+    "line1": "P.O. Box 1208",
+    "city": "Norwalk",
+    "state": "CA",
+    "zip": "90651-1208"
+   },
+   "signature": "wet",
+   "evidence": "the LA County Registrar Recorder/County Clerk's Office requires a Notarized Affidavit of Identity form to accompany all Fictitious Business Name Statements.",
+   "source": "https://lavote.gov/home/county-clerk/fictitious-business-names/frequently-asked-questions"
+  },
+  "notes": "The fee is $26.00 for one name and one registrant, plus $5.00 for each additional name and each additional owner. The statement must be published once a week for 4 weeks within 30 days of filing, and the affidavit of publication filed within 30 days after publication ends. The county says statements are created online (apps.lavote.net/obfr/bfrmain.aspx) or at a kiosk, and 'the form is developed once the information is entered into the system upon payment'. The paper Rev. 01/2014 PDF shows the questions, but new filings go through the online/kiosk system. The ZIP differs between sources: the PDF says P.O. Box 1208, Norwalk 90651-1208, and the FAQ says Norwalk CA 90650-1208. The PDF ZIP is used here. Check before mailing. lavote.gov blocks direct downloads (403)."
+ },
+ "la-alarm-permit": {
+  "status": "mapped",
+  "seen": "City of Los Angeles Office of Finance Police Alarm Permit Application (Revised July 2026)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://finance.lacity.gov/sites/g/files/wph1721/files/2026-07/a_Police-Alarm-Permit-Application-Revised-July-2026.pdf",
+   "https://finance.lacity.gov/alarm-permits-general-information",
+   "https://finance.lacity.gov/alarm-permits-and-alarm-ordinance-faqs"
+  ],
+  "fields": [
+   {
+    "id": "legal_name",
+    "line": "",
+    "label": {
+     "en": "Legal Name",
+     "zh": "法定名称"
+    }
+   },
+   {
+    "id": "dba",
+    "line": "",
+    "label": {
+     "en": "Fictitious Name/ DBA (if applicable)",
+     "zh": "虚构商号/DBA（如适用）"
+    }
+   },
+   {
+    "id": "how_notified",
+    "line": "",
+    "label": {
+     "en": "How were you notified that a permit is required?",
+     "zh": "您是如何得知需要申请许可证的？"
+    },
+    "options": [
+     "DWP Insert",
+     "Media/Radio/Television",
+     "Your Alarm Company",
+     "City Notification",
+     "Other"
+    ]
+   },
+   {
+    "id": "alarm_location",
+    "line": "Alarm Location",
+    "label": {
+     "en": "Street Address, City, State, Zip",
+     "zh": "报警系统所在地址：街道、城市、州、邮编"
+    }
+   },
+   {
+    "id": "mailing_address",
+    "line": "Mailing Address",
+    "label": {
+     "en": "Mailing Address (if different than alarm location): Street, City, State, Zip",
+     "zh": "邮寄地址（如与报警地址不同）：街道、城市、州、邮编"
+    }
+   },
+   {
+    "id": "alarm_company",
+    "line": "Alarm Company",
+    "label": {
+     "en": "Company Name, Operator Number, Phone Number, Extension Number",
+     "zh": "报警公司名称、运营商编号、电话、分机"
+    }
+   },
+   {
+    "id": "premises_type",
+    "line": "",
+    "label": {
+     "en": "Please Select One of The Following",
+     "zh": "请选择一项"
+    },
+    "options": [
+     "Alarm is on commercial premises ($60.00 fee)",
+     "Alarm is on residential premises and monitored by an alarm company ($60.00 fee)",
+     "Alarm is on a residential premises and not monitored (No fee, but annual permit ",
+     "Alarm is on premises owned and operated by Municipal, County, State, or Federal "
+    ]
+   },
+   {
+    "id": "applicant",
+    "line": "Applicant or Agent Infor",
+    "label": {
+     "en": "Full Name, Phone Number, E-mail",
+     "zh": "申请人或代理人全名、电话、电子邮箱"
+    }
+   },
+   {
+    "id": "id_type",
+    "line": "Applicant or Agent Infor",
+    "label": {
+     "en": "ID Type, ID Number",
+     "zh": "证件类型及号码"
+    },
+    "options": [
+     "CA Driver's License",
+     "CA Identification Number"
+    ]
+   },
+   {
+    "id": "signature_date",
+    "line": "Applicant or Agent Infor",
+    "label": {
+     "en": "Signature, Date",
+     "zh": "签名、日期"
+    }
+   },
+   {
+    "id": "btrc_registered",
+    "line": "",
+    "label": {
+     "en": "Do you already have your business registered with the City of Los Angeles, Office of Finance?",
+     "zh": "您的企业是否已在洛杉矶市财政局登记？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "btrc_account",
+    "line": "",
+    "label": {
+     "en": "If your business is already registered, please provide your 15-digit account number",
+     "zh": "如已登记，请提供 15 位账户号码"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Payment, if applicable ($60.00 initial permit for commercial premises)",
+    "zh": "付款（如适用；商业场所首次许可费 60 美元）"
+   }
+  ],
+  "submit": {
+   "portal": "latax.lacity.org",
+   "mail": {
+    "name": "Finance Applications",
+    "line1": "P.O. Box 102656",
+    "city": "Pasadena",
+    "state": "CA",
+    "zip": "91189-2656"
+   },
+   "signature": "unknown",
+   "evidence": "To obtain an alarm permit, you can apply for the alarm permit online, contact us, or visit an Office of Finance branch office before 3:00 p.m.",
+   "source": "https://finance.lacity.gov/alarm-permits-general-information"
+  },
+  "notes": "The form was revised July 2026. Fees: $60.00 initial and $31.00 annual renewal. False alarm fees changed effective May 4, 2026: $260 for the first with a permit, $360 without, then escalating. The online application is at latax.lacity.org/policepermitapp. The PDF says 'Return (with payment if applicable) to: Finance Applications, P.O. Box 102656, Pasadena, CA 91189-2656'. The LAPD Alarm Section is at (213) 996-1200, lapdalarmsection@lapd.lacity.org."
+ },
+ "scaqmd-permit-lac": {
+  "status": "mapped",
+  "seen": "South Coast AQMD Form 400-A, Application Form for Permit or Plan Approval (2014.07)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.aqmd.gov/docs/default-source/aqmd-forms/Permit/400-a-form.pdf?sfvrsn=2",
+   "https://www.aqmd.gov/docs/default-source/aqmd-forms/permit/400-a-instruction.pdf?sfvrsn=452e1e61_4",
+   "https://www.aqmd.gov/home/permits/permit-application-forms"
+  ],
+  "fields": [
+   {
+    "id": "facility_name",
+    "line": "1",
+    "label": {
+     "en": "Facility Name (Business Name of Operator to Appear on the Permit)",
+     "zh": "设施名称（许可证上显示的运营方商号）"
+    }
+   },
+   {
+    "id": "facility_id",
+    "line": "2",
+    "label": {
+     "en": "Valid AQMD Facility ID (Available On Permit Or Invoice Issued By AQMD)",
+     "zh": "有效的 AQMD 设施编号（见 AQMD 签发的许可证或账单；新企业留空）"
+    }
+   },
+   {
+    "id": "owner_business_name",
+    "line": "3",
+    "label": {
+     "en": "Owner's Business Name (If different from Business Name of Operator)",
+     "zh": "业主商号（如与运营方不同）"
+    }
+   },
+   {
+    "id": "equipment_location",
+    "line": "4",
+    "label": {
+     "en": "Equipment Location Is: Fixed / Various; Street Address, City, Zip, Contact Name, Title, Phone, Fax, E-Mail",
+     "zh": "设备位置：固定/多处；街道地址、城市、邮编、联系人、职务、电话、传真、邮箱"
+    },
+    "options": [
+     "Fixed Location",
+     "Various Location"
+    ]
+   },
+   {
+    "id": "permit_mailing",
+    "line": "5",
+    "label": {
+     "en": "Permit and Correspondence Information: Address, City, State, Zip, Contact Name, Title, Phone, Fax, E-Mail",
+     "zh": "许可证及通信地址：地址、城市、州、邮编、联系人、职务、电话、传真、邮箱"
+    }
+   },
+   {
+    "id": "facility_program",
+    "line": "6",
+    "label": {
+     "en": "The Facility Is",
+     "zh": "设施所属项目"
+    },
+    "options": [
+     "Not In RECLAIM or Title V",
+     "In RECLAIM",
+     "In Title V",
+     "In RECLAIM & Title V Programs"
+    ]
+   },
+   {
+    "id": "reason",
+    "line": "7",
+    "label": {
+     "en": "Reason for Submitting Application (Select only ONE)",
+     "zh": "申请原因（只选一项）"
+    },
+    "options": [
+     "New Construction (Permit to Construct)",
+     "Equipment On-Site But Not Constructed or Operational",
+     "Equipment Operating Without A Permit",
+     "Compliance Plan",
+     "Registration/Certification",
+     "Streamlined Standard Permit",
+     "Title V Application or Amendment",
+     "RECLAIM Facility Permit Amendment",
+     "Administrative Change",
+     "Alteration/Modification",
+     "Alteration/Modification without Prior Approval",
+     "Change of Condition"
+    ]
+   },
+   {
+    "id": "existing_permit_no",
+    "line": "7c",
+    "label": {
+     "en": "Existing or Previous Permit/Application Number",
+     "zh": "现有或以前的许可证/申请编号（勾选 7c 时必填）"
+    }
+   },
+   {
+    "id": "dates",
+    "line": "8a-8c",
+    "label": {
+     "en": "Estimated Start/End Date of Construction; Estimated Start Date of Operation",
+     "zh": "预计施工开始/结束日期；预计投入运营日期"
+    }
+   },
+   {
+    "id": "equipment_description",
+    "line": "9",
+    "label": {
+     "en": "Description of Equipment or Reason for Compliance Plan (list applicable rule)",
+     "zh": "设备描述或合规计划原因（列出适用规则）"
+    }
+   },
+   {
+    "id": "identical_equipment",
+    "line": "10",
+    "label": {
+     "en": "For identical equipment, how many additional applications are being submitted with this application?",
+     "zh": "相同设备另随附提交的申请数量"
+    }
+   },
+   {
+    "id": "small_business",
+    "line": "11",
+    "label": {
+     "en": "Are you a Small Business as per AQMD's Rule 102 definition?",
+     "zh": "是否属于 AQMD 第 102 条定义的小企业（10 名员工以下且年总收入 50 万美元以下）？"
+    },
+    "options": [
+     "No",
+     "Yes"
+    ]
+   },
+   {
+    "id": "nov",
+    "line": "12",
+    "label": {
+     "en": "Has a Notice of Violation (NOV) or a Notice to Comply (NC) been issued for this equipment? If Yes, NOV/NC#",
+     "zh": "该设备是否收到过违规通知或整改通知？如有，填写编号"
+    },
+    "options": [
+     "No",
+     "Yes"
+    ]
+   },
+   {
+    "id": "business_type",
+    "line": "13",
+    "label": {
+     "en": "What type of business is being conducted at this equipment location?",
+     "zh": "该设备所在地经营何种业务？"
+    }
+   },
+   {
+    "id": "naics",
+    "line": "14",
+    "label": {
+     "en": "What is your business primary NAICS Code?",
+     "zh": "企业主要 NAICS 行业代码"
+    }
+   },
+   {
+    "id": "other_facilities",
+    "line": "15",
+    "label": {
+     "en": "Are there other facilities in the SCAQMD jurisdiction operated by the same operator?",
+     "zh": "同一运营方在 SCAQMD 辖区内是否还有其他设施？"
+    },
+    "options": [
+     "No",
+     "Yes"
+    ]
+   },
+   {
+    "id": "schools_1000ft",
+    "line": "16",
+    "label": {
+     "en": "Are there any schools (K-12) within 1000 feet of the facility property line?",
+     "zh": "设施边界 1000 英尺内是否有 K-12 学校？"
+    },
+    "options": [
+     "No",
+     "Yes"
+    ]
+   },
+   {
+    "id": "signature",
+    "line": "17",
+    "label": {
+     "en": "Signature of Responsible Official",
+     "zh": "负责人签名"
+    }
+   },
+   {
+    "id": "title",
+    "line": "18",
+    "label": {
+     "en": "Title of Responsible Official",
+     "zh": "负责人职务"
+    }
+   },
+   {
+    "id": "review_before_issuance",
+    "line": "19",
+    "label": {
+     "en": "I wish to review the permit prior to issuance",
+     "zh": "我希望在签发前审阅许可证（可能延误审批）"
+    },
+    "options": [
+     "No",
+     "Yes"
+    ]
+   },
+   {
+    "id": "print_name",
+    "line": "20",
+    "label": {
+     "en": "Print Name",
+     "zh": "正楷姓名"
+    }
+   },
+   {
+    "id": "date",
+    "line": "21",
+    "label": {
+     "en": "Date",
+     "zh": "日期"
+    }
+   },
+   {
+    "id": "confidentiality",
+    "line": "22",
+    "label": {
+     "en": "Do you claim confidentiality of data?",
+     "zh": "是否要求数据保密？"
+    },
+    "options": [
+     "No",
+     "Yes"
+    ]
+   }
+  ],
+  "attach": [
+   {
+    "en": "Form 400-CEQA",
+    "zh": "400-CEQA 表"
+   },
+   {
+    "en": "Form 400-PS",
+    "zh": "400-PS 表"
+   },
+   {
+    "en": "Supplemental Form 400-E-xx for the equipment type",
+    "zh": "对应设备类型的 400-E-xx 补充表"
+   },
+   {
+    "en": "Applicable fees (see Fee Calculator)",
+    "zh": "适用费用（见费用计算器）"
+   }
+  ],
+  "submit": {
+   "portal": "xappprod.aqmd.gov",
+   "mail": {
+    "name": "SCAQMD",
+    "line1": "P.O. Box 4944",
+    "city": "Diamond Bar",
+    "state": "CA",
+    "zip": "91765-0944"
+   },
+   "signature": "unknown",
+   "evidence": "To apply for a permit: Submit Form 400A, 400-CEQA, Form 400-PS and a supplemental Form 400-E-xx (for certain equipment type) for each equipment along with applicable fees (Fee Calculator).",
+   "source": "https://www.aqmd.gov/home/permits/permit-application-forms"
+  },
+  "notes": "File one Form 400-A per piece of equipment. The mailing address is printed on the form ('Mail To: SCAQMD, P.O. Box 4944, Diamond Bar, CA 91765-0944'). The library says the method is online, but the online filing system (xappprod.aqmd.gov/onlineapplicationfiling) only covers certain equipment. It includes Rule 222 registrations for charbroilers and food ovens, which matter for restaurants, plus dry cleaners and spray booths. Most other permits still go on paper Form 400-A. Under-fired charbroilers and some food ovens are registrations under Rule 222, not full permits, so check Rules 219 and 222 first. Form 400-A has not been revised since 2014.07, and its instructions date from 2010.09."
+ },
+ "scaqmd-permit-orc": {
+  "status": "mapped",
+  "seen": "South Coast AQMD Form 400-A, Application Form for Permit or Plan Approval (2014.07)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.aqmd.gov/docs/default-source/aqmd-forms/Permit/400-a-form.pdf?sfvrsn=2",
+   "https://www.aqmd.gov/docs/default-source/aqmd-forms/permit/400-a-instruction.pdf?sfvrsn=452e1e61_4",
+   "https://www.aqmd.gov/home/permits/permit-application-forms"
+  ],
+  "fields": [
+   {
+    "id": "facility_name",
+    "line": "1",
+    "label": {
+     "en": "Facility Name (Business Name of Operator to Appear on the Permit)",
+     "zh": "设施名称（许可证上显示的运营方商号）"
+    }
+   },
+   {
+    "id": "facility_id",
+    "line": "2",
+    "label": {
+     "en": "Valid AQMD Facility ID (Available On Permit Or Invoice Issued By AQMD)",
+     "zh": "有效的 AQMD 设施编号（见 AQMD 签发的许可证或账单；新企业留空）"
+    }
+   },
+   {
+    "id": "owner_business_name",
+    "line": "3",
+    "label": {
+     "en": "Owner's Business Name (If different from Business Name of Operator)",
+     "zh": "业主商号（如与运营方不同）"
+    }
+   },
+   {
+    "id": "equipment_location",
+    "line": "4",
+    "label": {
+     "en": "Equipment Location Is: Fixed / Various; Street Address, City, Zip, Contact Name, Title, Phone, Fax, E-Mail",
+     "zh": "设备位置：固定/多处；街道地址、城市、邮编、联系人、职务、电话、传真、邮箱"
+    },
+    "options": [
+     "Fixed Location",
+     "Various Location"
+    ]
+   },
+   {
+    "id": "permit_mailing",
+    "line": "5",
+    "label": {
+     "en": "Permit and Correspondence Information: Address, City, State, Zip, Contact Name, Title, Phone, Fax, E-Mail",
+     "zh": "许可证及通信地址：地址、城市、州、邮编、联系人、职务、电话、传真、邮箱"
+    }
+   },
+   {
+    "id": "facility_program",
+    "line": "6",
+    "label": {
+     "en": "The Facility Is",
+     "zh": "设施所属项目"
+    },
+    "options": [
+     "Not In RECLAIM or Title V",
+     "In RECLAIM",
+     "In Title V",
+     "In RECLAIM & Title V Programs"
+    ]
+   },
+   {
+    "id": "reason",
+    "line": "7",
+    "label": {
+     "en": "Reason for Submitting Application (Select only ONE)",
+     "zh": "申请原因（只选一项）"
+    },
+    "options": [
+     "New Construction (Permit to Construct)",
+     "Equipment On-Site But Not Constructed or Operational",
+     "Equipment Operating Without A Permit",
+     "Compliance Plan",
+     "Registration/Certification",
+     "Streamlined Standard Permit",
+     "Title V Application or Amendment",
+     "RECLAIM Facility Permit Amendment",
+     "Administrative Change",
+     "Alteration/Modification",
+     "Alteration/Modification without Prior Approval",
+     "Change of Condition"
+    ]
+   },
+   {
+    "id": "existing_permit_no",
+    "line": "7c",
+    "label": {
+     "en": "Existing or Previous Permit/Application Number",
+     "zh": "现有或以前的许可证/申请编号（勾选 7c 时必填）"
+    }
+   },
+   {
+    "id": "dates",
+    "line": "8a-8c",
+    "label": {
+     "en": "Estimated Start/End Date of Construction; Estimated Start Date of Operation",
+     "zh": "预计施工开始/结束日期；预计投入运营日期"
+    }
+   },
+   {
+    "id": "equipment_description",
+    "line": "9",
+    "label": {
+     "en": "Description of Equipment or Reason for Compliance Plan (list applicable rule)",
+     "zh": "设备描述或合规计划原因（列出适用规则）"
+    }
+   },
+   {
+    "id": "identical_equipment",
+    "line": "10",
+    "label": {
+     "en": "For identical equipment, how many additional applications are being submitted with this application?",
+     "zh": "相同设备另随附提交的申请数量"
+    }
+   },
+   {
+    "id": "small_business",
+    "line": "11",
+    "label": {
+     "en": "Are you a Small Business as per AQMD's Rule 102 definition?",
+     "zh": "是否属于 AQMD 第 102 条定义的小企业（10 名员工以下且年总收入 50 万美元以下）？"
+    },
+    "options": [
+     "No",
+     "Yes"
+    ]
+   },
+   {
+    "id": "nov",
+    "line": "12",
+    "label": {
+     "en": "Has a Notice of Violation (NOV) or a Notice to Comply (NC) been issued for this equipment? If Yes, NOV/NC#",
+     "zh": "该设备是否收到过违规通知或整改通知？如有，填写编号"
+    },
+    "options": [
+     "No",
+     "Yes"
+    ]
+   },
+   {
+    "id": "business_type",
+    "line": "13",
+    "label": {
+     "en": "What type of business is being conducted at this equipment location?",
+     "zh": "该设备所在地经营何种业务？"
+    }
+   },
+   {
+    "id": "naics",
+    "line": "14",
+    "label": {
+     "en": "What is your business primary NAICS Code?",
+     "zh": "企业主要 NAICS 行业代码"
+    }
+   },
+   {
+    "id": "other_facilities",
+    "line": "15",
+    "label": {
+     "en": "Are there other facilities in the SCAQMD jurisdiction operated by the same operator?",
+     "zh": "同一运营方在 SCAQMD 辖区内是否还有其他设施？"
+    },
+    "options": [
+     "No",
+     "Yes"
+    ]
+   },
+   {
+    "id": "schools_1000ft",
+    "line": "16",
+    "label": {
+     "en": "Are there any schools (K-12) within 1000 feet of the facility property line?",
+     "zh": "设施边界 1000 英尺内是否有 K-12 学校？"
+    },
+    "options": [
+     "No",
+     "Yes"
+    ]
+   },
+   {
+    "id": "signature",
+    "line": "17",
+    "label": {
+     "en": "Signature of Responsible Official",
+     "zh": "负责人签名"
+    }
+   },
+   {
+    "id": "title",
+    "line": "18",
+    "label": {
+     "en": "Title of Responsible Official",
+     "zh": "负责人职务"
+    }
+   },
+   {
+    "id": "review_before_issuance",
+    "line": "19",
+    "label": {
+     "en": "I wish to review the permit prior to issuance",
+     "zh": "我希望在签发前审阅许可证（可能延误审批）"
+    },
+    "options": [
+     "No",
+     "Yes"
+    ]
+   },
+   {
+    "id": "print_name",
+    "line": "20",
+    "label": {
+     "en": "Print Name",
+     "zh": "正楷姓名"
+    }
+   },
+   {
+    "id": "date",
+    "line": "21",
+    "label": {
+     "en": "Date",
+     "zh": "日期"
+    }
+   },
+   {
+    "id": "confidentiality",
+    "line": "22",
+    "label": {
+     "en": "Do you claim confidentiality of data?",
+     "zh": "是否要求数据保密？"
+    },
+    "options": [
+     "No",
+     "Yes"
+    ]
+   }
+  ],
+  "attach": [
+   {
+    "en": "Form 400-CEQA",
+    "zh": "400-CEQA 表"
+   },
+   {
+    "en": "Form 400-PS",
+    "zh": "400-PS 表"
+   },
+   {
+    "en": "Supplemental Form 400-E-xx for the equipment type",
+    "zh": "对应设备类型的 400-E-xx 补充表"
+   },
+   {
+    "en": "Applicable fees (see Fee Calculator)",
+    "zh": "适用费用（见费用计算器）"
+   }
+  ],
+  "submit": {
+   "portal": "xappprod.aqmd.gov",
+   "mail": {
+    "name": "SCAQMD",
+    "line1": "P.O. Box 4944",
+    "city": "Diamond Bar",
+    "state": "CA",
+    "zip": "91765-0944"
+   },
+   "signature": "unknown",
+   "evidence": "To apply for a permit: Submit Form 400A, 400-CEQA, Form 400-PS and a supplemental Form 400-E-xx (for certain equipment type) for each equipment along with applicable fees (Fee Calculator).",
+   "source": "https://www.aqmd.gov/home/permits/permit-application-forms"
+  },
+  "notes": "This is the same form and process as scaqmd-permit-lac. South Coast AQMD covers Orange County and the urban parts of LA, Riverside and San Bernardino counties with one application. The library keeps 2 entries, one per county. Online filing covers only certain equipment, including Rule 222 charbroiler and food oven registrations. Everything else goes on paper Form 400-A (2014.07)."
+ },
+ "nyc-fpc": {
+  "status": "page_only",
+  "seen": "Food Protection Online Course registration and in-person final exam (NYC Health Academy); FAQ 'Food Protection Course - Online' (no revision printed)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.nyc.gov/site/doh/business/health-academy/food-protection-online-free.page",
+   "https://www.nyc.gov/assets/doh/downloads/pdf/hany/food-protection-course-faq.pdf"
+  ],
+  "fields": [
+   {
+    "id": "online_course",
+    "line": "",
+    "label": {
+     "en": "Complete the free Online Food Protection Course (15 lessons, a quiz after each)",
+     "zh": "完成免费的在线食品保护课程（共15课，每课后须通过测验）"
+    },
+    "hint": {
+     "en": "Offered in English, Spanish and Chinese; your user ID and password are sent to your e-mail address.",
+     "zh": "提供英文、西班牙文和中文版本；用户名和密码会发送到您的电子邮箱。"
+    }
+   },
+   {
+    "id": "exam_appointment",
+    "line": "",
+    "label": {
+     "en": "Schedule the in-person final exam appointment (prompted after the course)",
+     "zh": "预约线下期末考试（完成课程后系统会提示）"
+    },
+    "options": [
+     "NYC Health Academy, 160 West 100th Street, Third Floor, Manhattan",
+     "College of Staten Island, 2800 Victory Boulevard, Staten Island"
+    ]
+   },
+   {
+    "id": "exam_payment",
+    "line": "",
+    "label": {
+     "en": "Pay the exam fee by credit card",
+     "zh": "用信用卡支付考试费"
+    },
+    "hint": {
+     "en": "$24 plus $0.60 convenience fee; AMEX, Discover, Mastercard, Visa; bank debit cards not accepted.",
+     "zh": "24美元另加0.60美元手续费；接受AMEX、Discover、Mastercard、Visa；不接受借记卡。"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Photo identification (bring to the exam)",
+    "zh": "带照片的身份证件（考试时携带）"
+   },
+   {
+    "en": "Printout of the exam confirmation page (cannot be re-printed later)",
+    "zh": "考试确认页的打印件（之后无法重新打印）"
+   }
+  ],
+  "submit": {
+   "portal": "a816-healthpsi.nyc.gov",
+   "signature": "unknown",
+   "evidence": "You will be prompted to schedule an exam appointment once you successfully complete the course.",
+   "source": "https://www.nyc.gov/site/doh/business/health-academy/food-protection-online-free.page"
+  },
+  "notes": "Registration fields are not published. The certificate is mailed 2 to 6 weeks after the exam and never expires. Exam fee $24 + $0.60. The College of Staten Island charges its own fees. This is a personal credential: the filer is the individual, not the business."
+ },
+ "nyc-dob-alt": {
+  "status": "mapped",
+  "seen": "DOB NOW: Build – Plans/Work (PW1) Step-By-Step Guides (April 04, 2019)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.nyc.gov/assets/buildings/pdf/dob_now_build_pw1_step_by_step_guide.pdf"
+  ],
+  "fields": [
+   {
+    "id": "house_number",
+    "line": "PW1 Location Information",
+    "label": {
+     "en": "House Number",
+     "zh": "门牌号"
+    }
+   },
+   {
+    "id": "street_name",
+    "line": "PW1 Location Information",
+    "label": {
+     "en": "Street Name",
+     "zh": "街道名"
+    }
+   },
+   {
+    "id": "borough",
+    "line": "PW1 Location Information",
+    "label": {
+     "en": "Borough",
+     "zh": "行政区"
+    }
+   },
+   {
+    "id": "block",
+    "line": "PW1 Location Information",
+    "label": {
+     "en": "Block",
+     "zh": "街区号（Block）"
+    }
+   },
+   {
+    "id": "lot",
+    "line": "PW1 Location Information",
+    "label": {
+     "en": "Lot",
+     "zh": "地段号（Lot）"
+    }
+   },
+   {
+    "id": "suite",
+    "line": "PW1 Location Information",
+    "label": {
+     "en": "Apartment/Suite Number (optional)",
+     "zh": "单元/套房号（选填）"
+    },
+    "hint": {
+     "en": "BIN, Community Board and Zip Code auto-populate.",
+     "zh": "BIN、社区委员会和邮编会自动填入。"
+    }
+   },
+   {
+    "id": "work_on_floors",
+    "line": "PW1 Work on Floors",
+    "label": {
+     "en": "Location, Description of Location, From and To floor numbers",
+     "zh": "施工位置、位置说明及起止楼层"
+    }
+   },
+   {
+    "id": "applicant",
+    "line": "PW1 Stakeholders",
+    "label": {
+     "en": "Applicant Information: Email, License Type, Business Name",
+     "zh": "申请人信息：邮箱、执照类型、公司名称"
+    },
+    "hint": {
+     "en": "Applicant of Record is a licensed professional (e.g. RA/PE).",
+     "zh": "备案申请人须为持证专业人士（如注册建筑师/工程师）。"
+    }
+   },
+   {
+    "id": "filing_rep",
+    "line": "PW1 Stakeholders",
+    "label": {
+     "en": "Filing Representative Class I / Preparer eFiling Email address (optional)",
+     "zh": "一类申报代表/填表人的电子申报邮箱（选填）"
+    }
+   },
+   {
+    "id": "filing_includes",
+    "line": "PW1 Filing Review Type",
+    "label": {
+     "en": "Filing Includes",
+     "zh": "申报包含"
+    },
+    "options": [
+     "New Work",
+     "Legalization"
+    ]
+   },
+   {
+    "id": "violations",
+    "line": "PW1 Filing Review Type",
+    "label": {
+     "en": "Are there any existing DOB Violation Numbers related to this work? (up to five)",
+     "zh": "是否有与本工程相关的现有DOB违规编号？（最多五个）"
+    }
+   },
+   {
+    "id": "job_cost",
+    "line": "PW1 Additional Informati",
+    "label": {
+     "en": "Estimated Job Cost $",
+     "zh": "预估工程造价（美元）"
+    }
+   },
+   {
+    "id": "floor_area",
+    "line": "PW1 Additional Informati",
+    "label": {
+     "en": "Total Construction Floor Area (Square Feet)",
+     "zh": "施工总面积（平方英尺）"
+    }
+   },
+   {
+    "id": "assoc_nb",
+    "line": "PW1 Additional Informati",
+    "label": {
+     "en": "Is this job associated with a New Building job filed in BIS?",
+     "zh": "本工程是否关联在BIS中申报的新建工程？"
+    }
+   },
+   {
+    "id": "assoc_other",
+    "line": "PW1 Additional Informati",
+    "label": {
+     "en": "Is this job associated with any other jobs filed in BIS/DOB NOW?",
+     "zh": "本工程是否关联在BIS/DOB NOW中申报的其他工程？"
+    }
+   },
+   {
+    "id": "building_code",
+    "line": "PW1 Additional Considera",
+    "label": {
+     "en": "Review is requested under which Building code?",
+     "zh": "申请按哪一版建筑规范审查？"
+    }
+   },
+   {
+    "id": "job_description",
+    "line": "PW1 Job Description",
+    "label": {
+     "en": "Job Description",
+     "zh": "工程描述"
+    }
+   },
+   {
+    "id": "site_characteristics",
+    "line": "PW1 Site Characteristics",
+    "label": {
+     "en": "Site Characteristics",
+     "zh": "场地特征"
+    },
+    "options": [
+     "Tidal Wetlands",
+     "Fire District",
+     "Urban Renewal",
+     "Coastal Erosion Hazard Area",
+     "Freshwater Wetlands",
+     "Flood Hazard Area"
+    ]
+   },
+   {
+    "id": "asbestos",
+    "line": "PW1 Asbestos Abatement C",
+    "label": {
+     "en": "Asbestos compliance; DEP ACP-5 Control Number or ACP20/21, and Investigator Certificate Number",
+     "zh": "石棉合规；DEP ACP-5控制编号或ACP20/21，以及调查员证书编号"
+    }
+   },
+   {
+    "id": "comments",
+    "line": "PW1 Comments",
+    "label": {
+     "en": "Comments (additional information)",
+     "zh": "备注（补充信息）"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Seal and Signature: DPL1 Form, signed and sealed, uploaded by the Applicant of Record",
+    "zh": "由备案申请人上传的已签字盖章的DPL1表（盖章与签名）"
+   },
+   {
+    "en": "Construction drawings sealed by the Applicant of Record",
+    "zh": "由备案申请人盖章的施工图纸"
+   }
+  ],
+  "submit": {
+   "portal": "a810-dobnow.nyc.gov",
+   "signature": "typed",
+   "evidence": "A Filing Representative Class I or Preparer cannot upload the signed and sealed DPL1 Form, complete the Statements & Signature section or submit the filing on behalf of the Applicant of Record.",
+   "source": "https://www.nyc.gov/assets/buildings/pdf/dob_now_build_pw1_step_by_step_guide.pdf"
+  },
+  "notes": "Guide dated 2019; DOB NOW screens may have changed. The guide does not list every Yes/No question under Additional Considerations, and NYCECC compliance applies only to some work types. Filing must be done by a licensed professional (RA/PE); the business owner cannot file it alone. The library entry's url points at the LAA (Limited Alteration Application) resources page; a full restaurant buildout is usually an Alteration filing, not an LAA, so check which job type the client needs."
+ },
+ "nyc-cb-notice": {
+  "status": "mapped",
+  "seen": "Standardized NOTICE FORM for Providing 30-Day Advance Notice to a Local Municipality or Community Board (rev-04/2/26 on the SLA page; the Dec 2025 on-premises a",
+  "read": "2026-10-31",
+  "sources": [
+   "https://sla.ny.gov/standardized-notice-form",
+   "https://sla.ny.gov/faq-municipalcommunity-board-notices-premises-applicants",
+   "https://www.nyc.gov/site/manhattancb1/applicants/liquor-licenses.page"
+  ],
+  "fields": [
+   {
+    "id": "date_sent",
+    "line": "1",
+    "label": {
+     "en": "Date Notice Sent",
+     "zh": "通知寄出日期"
+    }
+   },
+   {
+    "id": "delivered_by",
+    "line": "1a",
+    "label": {
+     "en": "Delivered by",
+     "zh": "送达方式"
+    },
+    "hint": {
+     "en": "Certified mail return receipt requested, overnight delivery with proof of mailing, personal service, or e-mail if the board accepts it.",
+     "zh": "挂号信（要求回执）、附邮寄凭证的隔夜快递、当面递交，或在社区委员会接受时使用电子邮件。"
+    }
+   },
+   {
+    "id": "application_type",
+    "line": "2",
+    "label": {
+     "en": "Type of Application that will be filed with the Authority for an On-Premises license",
+     "zh": "将向酒类管理局提交的堂饮执照申请类型"
+    },
+    "options": [
+     "New Application",
+     "Class Change",
+     "Removal",
+     "other types per instructions"
+    ]
+   },
+   {
+    "id": "board_name",
+    "line": "3",
+    "label": {
+     "en": "Name of Municipality or Community Board",
+     "zh": "市政机构或社区委员会名称"
+    }
+   },
+   {
+    "id": "license_id",
+    "line": "4",
+    "label": {
+     "en": "Licensee License ID (if applicable)",
+     "zh": "持照人执照编号（如适用）"
+    }
+   },
+   {
+    "id": "applicant_name",
+    "line": "5",
+    "label": {
+     "en": "Applicant or Licensee Name",
+     "zh": "申请人或持照人名称"
+    }
+   },
+   {
+    "id": "trade_name",
+    "line": "6",
+    "label": {
+     "en": "Trade Name (if any)",
+     "zh": "商号（如有）"
+    }
+   },
+   {
+    "id": "street_address",
+    "line": "7",
+    "label": {
+     "en": "Street Address of Establishment",
+     "zh": "经营场所街道地址"
+    }
+   },
+   {
+    "id": "city",
+    "line": "8",
+    "label": {
+     "en": "City, Town or Village",
+     "zh": "市、镇或村"
+    }
+   },
+   {
+    "id": "business_phone",
+    "line": "9",
+    "label": {
+     "en": "Business Telephone Number of Applicant/Licensee",
+     "zh": "申请人/持照人营业电话"
+    }
+   },
+   {
+    "id": "business_email",
+    "line": "10",
+    "label": {
+     "en": "Business E-mail of Applicant/Licensee",
+     "zh": "申请人/持照人营业邮箱"
+    }
+   },
+   {
+    "id": "alcohol_types",
+    "line": "11",
+    "label": {
+     "en": "Type(s) of alcohol sold or to be sold",
+     "zh": "销售或拟销售的酒类"
+    },
+    "options": [
+     "Beer & Cider",
+     "Wine, Beer & Cider",
+     "Liquor, Wine, Beer & Cider"
+    ]
+   },
+   {
+    "id": "food_service",
+    "line": "12",
+    "label": {
+     "en": "Extent of Food Service",
+     "zh": "餐食供应程度"
+    },
+    "options": [
+     "Full Food menu",
+     "Menu meets legal minimum food requirements"
+    ]
+   },
+   {
+    "id": "establishment_type",
+    "line": "13",
+    "label": {
+     "en": "Type of Establishment",
+     "zh": "场所类型"
+    }
+   },
+   {
+    "id": "method_of_operation",
+    "line": "14",
+    "label": {
+     "en": "Method of Operation (check all that apply)",
+     "zh": "经营方式（可多选）"
+    },
+    "options": [
+     "Seasonal Establishment",
+     "Juke Box",
+     "Disc Jockey",
+     "Recorded Music",
+     "Karaoke",
+     "Live Music",
+     "Employee Dancing",
+     "Exotic Dancing",
+     "Topless Entertainment",
+     "Video/Arcade Games",
+     "Third Party Promoters",
+     "Security Personnel"
+    ]
+   },
+   {
+    "id": "outdoor_area",
+    "line": "15",
+    "label": {
+     "en": "Licensed Outdoor Area (check all that apply)",
+     "zh": "持照户外区域（可多选）"
+    },
+    "options": [
+     "None",
+     "Patio or Deck",
+     "Sidewalk Cafe",
+     "Rooftop Garden/Grounds",
+     "Freestanding Covered Structure",
+     "Other"
+    ]
+   },
+   {
+    "id": "floors",
+    "line": "16",
+    "label": {
+     "en": "List the floor(s) of the building that the establishment is located on",
+     "zh": "场所所在楼层"
+    }
+   },
+   {
+    "id": "rooms",
+    "line": "17",
+    "label": {
+     "en": "List the room number(s) the establishment is located in, if appropriate",
+     "zh": "场所所在房间号（如适用）"
+    }
+   },
+   {
+    "id": "500_ft",
+    "line": "18",
+    "label": {
+     "en": "Is the premises within 500 feet of three or more on-premises liquor establishments?",
+     "zh": "场所500英尺内是否有三家或以上堂饮酒类场所？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "manager_present",
+    "line": "19",
+    "label": {
+     "en": "Will the license holder or a manager be physically present during all hours of operation?",
+     "zh": "营业期间持照人或经理是否始终在场？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "transfer_licensee",
+    "line": "20",
+    "label": {
+     "en": "If a transfer application, name and License ID Number of the licensee",
+     "zh": "如为转让申请，原持照人姓名及执照编号"
+    }
+   },
+   {
+    "id": "owns_building",
+    "line": "21",
+    "label": {
+     "en": "Does the applicant or licensee own the building?",
+     "zh": "申请人或持照人是否拥有该建筑？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "owner_name",
+    "line": "22",
+    "label": {
+     "en": "Building Owner's Full Name",
+     "zh": "业主全名"
+    }
+   },
+   {
+    "id": "owner_address",
+    "line": "23-24",
+    "label": {
+     "en": "Building Owner's Street Address; City, Town or Village, State, Zip",
+     "zh": "业主街道地址；市/镇/村、州、邮编"
+    }
+   },
+   {
+    "id": "owner_phone",
+    "line": "25",
+    "label": {
+     "en": "Business Telephone Number of Building Owner",
+     "zh": "业主营业电话"
+    }
+   },
+   {
+    "id": "rep_name",
+    "line": "26",
+    "label": {
+     "en": "Representative/Attorney's Full Name",
+     "zh": "代理人/律师全名"
+    }
+   },
+   {
+    "id": "rep_address",
+    "line": "27-28",
+    "label": {
+     "en": "Representative/Attorney's Street Address; City, Town or Village, State, Zip",
+     "zh": "代理人/律师街道地址；市/镇/村、州、邮编"
+    }
+   },
+   {
+    "id": "rep_phone",
+    "line": "29",
+    "label": {
+     "en": "Business Telephone Number of Representative/Attorney",
+     "zh": "代理人/律师营业电话"
+    }
+   },
+   {
+    "id": "rep_email",
+    "line": "30",
+    "label": {
+     "en": "Business E-mail Address of Representative/Attorney",
+     "zh": "代理人/律师营业邮箱"
+    }
+   },
+   {
+    "id": "principal",
+    "line": "31",
+    "label": {
+     "en": "Printed Principal Name; Title; Principal Signature; Date",
+     "zh": "负责人姓名（正楷）；职务；负责人签名；日期"
+    },
+    "hint": {
+     "en": "Signed under penalty of perjury.",
+     "zh": "在伪证罪处罚下签署。"
+    }
+   }
+  ],
+  "attach": [],
+  "submit": {
+   "signature": "typed",
+   "evidence": "Form includes an electronic signature agreement checkbox; notices may be e-mailed 'provided the municipality or community board elects to accept notices via email.'",
+   "source": "https://sla.ny.gov/standardized-notice-form"
+  },
+  "notes": "Send at least 30 days before the SLA will process the application. The recipient is the community board for the premises, so the destination varies by board. Example: Manhattan CB1 takes the notice by e-mail as a PDF at onjames@cb.nyc.gov. For an e-mailed notice, the board must e-mail the SLA itself with the subject 'E-mail proof of acceptance from community board/municipality'; a sent-folder copy or read receipt is not accepted. Keep the certified-mail or delivery proof: the SLA application requires 'A COPY OF THE COMPLETED STANDARDIZED FORM AND PROOF OF DELIVERY'. Two revisions are in circulation (rev-10/23/25 in the packet, rev-04/2/26 on the standalone page): use the standalone page's. The page text was garbled, so the field order above is a reconstruction; check it against the PDF. Many boards also require their own questionnaire."
+ },
+ "ny-sla-rw": {
+  "status": "mapped",
+  "seen": "APPLICATION FOR ALCOHOLIC BEVERAGE CONTROL RETAIL LICENSE (ON PREMISES) rev-01/22/25, in packet on-premises-application-12192025; Instructions for On-Premises R",
+  "read": "2026-10-31",
+  "sources": [
+   "https://sla.ny.gov/system/files/documents/2026/01/on-premises-application-12192025.pdf",
+   "https://sla.ny.gov/system/files/documents/2026/01/on-premises-instructions-nybe_12192025.pdf",
+   "https://sla.ny.gov/restaurant-license-quick-reference-0"
+  ],
+  "fields": [
+   {
+    "id": "applicant",
+    "line": "1",
+    "label": {
+     "en": "APPLICANT: Premises Street Address, Name of Applicant, Trade Name (DBA), E-mail address",
+     "zh": "申请人：场所街道地址、申请人名称、商号（DBA）、电子邮箱"
+    }
+   },
+   {
+    "id": "contact",
+    "line": "2",
+    "label": {
+     "en": "CONTACT (if different than applicant)",
+     "zh": "联系人（如与申请人不同）"
+    }
+   },
+   {
+    "id": "seasonal",
+    "line": "3",
+    "label": {
+     "en": "For SEASONAL licenses only (select license date range)",
+     "zh": "仅季节性执照：选择执照日期范围"
+    }
+   },
+   {
+    "id": "additional_bars",
+    "line": "4",
+    "label": {
+     "en": "Number of ADDITIONAL BARS (if any)",
+     "zh": "额外吧台数量（如有）"
+    }
+   },
+   {
+    "id": "seasonal_bar_months",
+    "line": "5",
+    "label": {
+     "en": "Months that SEASONAL add bars will operate",
+     "zh": "季节性额外吧台营业月份"
+    }
+   },
+   {
+    "id": "fein",
+    "line": "6",
+    "label": {
+     "en": "Federal Tax ID Number (required)",
+     "zh": "联邦税号（必填）"
+    }
+   },
+   {
+    "id": "sole_prop_partners",
+    "line": "7",
+    "label": {
+     "en": "TO BE FILLED IN ONLY BY SOLE PROPRIETOR OR PARTNERS",
+     "zh": "仅限个人独资或合伙填写"
+    }
+   },
+   {
+    "id": "corp_llc",
+    "line": "8",
+    "label": {
+     "en": "TO BE FILLED IN ONLY BY CORPORATION OR LLC/LLP APPLICANTS",
+     "zh": "仅限公司或LLC/LLP申请人填写"
+    }
+   },
+   {
+    "id": "right_to_premises",
+    "line": "Right to Premises 1a",
+    "label": {
+     "en": "By what right does the applicant have possession of the premises?",
+     "zh": "申请人凭何种权利占用该场所？"
+    },
+    "options": [
+     "binding contract",
+     "written intent to lease",
+     "ownership"
+    ]
+   },
+   {
+    "id": "percentage_rent",
+    "line": "Right to Premises 1b",
+    "label": {
+     "en": "Do the lease terms require consideration based on a percentage of the business's receipts?",
+     "zh": "租约是否要求按营业收入百分比支付对价？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "other_interested",
+    "line": "Right to Premises 2",
+    "label": {
+     "en": "OTHER INTERESTED PARTIES",
+     "zh": "其他利害关系人"
+    }
+   },
+   {
+    "id": "landlord_name",
+    "line": "Landlord 1",
+    "label": {
+     "en": "Name of Landlord (as it appears on lease and deed)",
+     "zh": "房东名称（与租约和地契一致）"
+    }
+   },
+   {
+    "id": "landlord_principals",
+    "line": "Landlord 4",
+    "label": {
+     "en": "Landlord Principals (ALL landlord principals must be disclosed)",
+     "zh": "房东负责人（须披露全部）"
+    }
+   },
+   {
+    "id": "landlord_police",
+    "line": "Landlord 5",
+    "label": {
+     "en": "Are any persons listed on this form police officers?",
+     "zh": "本表所列人员中是否有警察？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "landlord_years",
+    "line": "Landlord 6",
+    "label": {
+     "en": "Number of years real property has been owned or legally controlled by the landlord",
+     "zh": "房东拥有或合法控制该物业的年数"
+    }
+   },
+   {
+    "id": "expense_real_property",
+    "line": "Financial 1a",
+    "label": {
+     "en": "Real Property (if purchased within the past year by the applicant or principals)",
+     "zh": "不动产（如申请人或负责人在过去一年内购买）"
+    }
+   },
+   {
+    "id": "expense_business",
+    "line": "Financial 1b",
+    "label": {
+     "en": "Purchase/Contract Price of Business (submit copy of contract)",
+     "zh": "生意收购/合同价格（附合同副本）"
+    }
+   },
+   {
+    "id": "expense_renovation",
+    "line": "Financial 1c",
+    "label": {
+     "en": "Renovations/Improvement Costs (e.g., furnishings, fixtures)",
+     "zh": "装修/改造费用（如家具、固定装置）"
+    }
+   },
+   {
+    "id": "cash",
+    "line": "Financial 2",
+    "label": {
+     "en": "CASH",
+     "zh": "现金资金"
+    }
+   },
+   {
+    "id": "borrowed",
+    "line": "Financial 3",
+    "label": {
+     "en": "BORROWED",
+     "zh": "借贷资金"
+    }
+   },
+   {
+    "id": "investors_disclosed",
+    "line": "Financial 4",
+    "label": {
+     "en": "Have all investors been disclosed in this application?",
+     "zh": "本申请是否已披露所有投资人？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "zoning",
+    "line": "Establishment 1a",
+    "label": {
+     "en": "State what the area is zoned for",
+     "zh": "说明该区域的分区用途"
+    }
+   },
+   {
+    "id": "certificate_of_occupancy",
+    "line": "Establishment 1b",
+    "label": {
+     "en": "Does the premises have a VALID CERTIFICATE OF OCCUPANCY and ALL appropriate permits?",
+     "zh": "场所是否持有有效的占用证书及所有相关许可？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "other_address",
+    "line": "Establishment 2b",
+    "label": {
+     "en": "Is or has the building/premises been known by any other address?",
+     "zh": "该建筑/场所是否曾使用其他地址？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "prior_license",
+    "line": "Establishment 2c",
+    "label": {
+     "en": "Is there or has there ever been a license to traffic in alcoholic beverages at this location?",
+     "zh": "该地点目前或过去是否有过酒类经营执照？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "full_kitchen",
+    "line": "Establishment 5a",
+    "label": {
+     "en": "Does the premises have a full kitchen?",
+     "zh": "场所是否有完整厨房？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "chef_employed",
+    "line": "Establishment 5b",
+    "label": {
+     "en": "Is a chef/cook employed at the premises?",
+     "zh": "场所是否雇用厨师？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "outside_areas",
+    "line": "Establishment 7a",
+    "label": {
+     "en": "Are there any outside areas used for the sale or consumption of alcohol?",
+     "zh": "是否有用于销售或饮用酒类的户外区域？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "other_business",
+    "line": "Method of Operation 1",
+    "label": {
+     "en": "Will any other business of any kind be conducted in said premises?",
+     "zh": "场所内是否经营其他任何业务？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "music",
+    "line": "Method of Operation 2",
+    "label": {
+     "en": "Will the premises have music?",
+     "zh": "场所是否有音乐？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "dancing",
+    "line": "Method of Operation 3",
+    "label": {
+     "en": "Will the premises permit dancing?",
+     "zh": "场所是否允许跳舞？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "topless",
+    "line": "Method of Operation 4",
+    "label": {
+     "en": "Will there be topless entertainment?",
+     "zh": "是否有上空表演？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "manager",
+    "line": "Method of Operation 5",
+    "label": {
+     "en": "Will the business employ a manager?",
+     "zh": "是否雇用经理？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "employees",
+    "line": "Method of Operation 6",
+    "label": {
+     "en": "How many employees? (excluding principals and security personnel)",
+     "zh": "员工人数（不含负责人和保安）"
+    }
+   },
+   {
+    "id": "security",
+    "line": "Method of Operation 7",
+    "label": {
+     "en": "Will security personnel be used at the premises?",
+     "zh": "场所是否使用保安人员？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "supervision_plan",
+    "line": "Method of Operation 8",
+    "label": {
+     "en": "Provide a detailed plan of supervision for the premises to be licensed",
+     "zh": "提供拟持照场所的详细监管计划"
+    }
+   },
+   {
+    "id": "consistent_with_notice",
+    "line": "Method of Operation 9",
+    "label": {
+     "en": "Are all responses consistent with the 30-Day Standardized Notice Form given to the Community Board?",
+     "zh": "所有回答是否与提交给社区委员会的30天标准通知表一致？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   }
+  ],
+  "attach": [
+   {
+    "en": "NYBE Application Wizard Cover Page",
+    "zh": "NYBE申请向导封面页"
+   },
+   {
+    "en": "Penal bond (Form L-9), if required",
+    "zh": "履约保证金（L-9表），如需要"
+   },
+   {
+    "en": "Contract of sale, if buying an existing business",
+    "zh": "如收购现有生意，附买卖合同"
+   },
+   {
+    "en": "Photographs at least 5\" x 7\", applicant's name, address and date on the back",
+    "zh": "至少5x7英寸照片，背面注明申请人姓名、地址和日期"
+   },
+   {
+    "en": "Diagrams on 8.5\" x 11\" paper: interior diagram for each floor and a block plot diagram",
+    "zh": "8.5x11英寸图纸：每层室内平面图及街区位置图"
+   },
+   {
+    "en": "Corporate Filing Receipt, Assumed Name Filing Receipt, or Business Certificate",
+    "zh": "公司注册回执、假定名称注册回执或营业证书"
+   },
+   {
+    "en": "Current photo identification for all principals",
+    "zh": "所有负责人的有效带照片身份证件"
+   },
+   {
+    "en": "Standardized Notice Form with proof of mailing or hand delivery to the community board",
+    "zh": "标准通知表及寄送或递交社区委员会的凭证"
+   },
+   {
+    "en": "Deed, or signed lease or letter of intent for the premises",
+    "zh": "场所地契，或已签署的租约或意向书"
+   },
+   {
+    "en": "Financial documentation (bank statements, loan agreements where applicable)",
+    "zh": "财务证明（银行对账单，如适用的贷款协议）"
+   },
+   {
+    "en": "Menu, if the premises has a kitchen or food preparation area",
+    "zh": "菜单（如场所有厨房或备餐区）"
+   },
+   {
+    "en": "Personal questionnaires, where required",
+    "zh": "个人问卷（如需要）"
+   },
+   {
+    "en": "Notice of Appearance, for represented applicants",
+    "zh": "代理出庭通知（如有代理人）"
+   }
+  ],
+  "submit": {
+   "portal": "businessexpress.ny.gov",
+   "mail": {
+    "name": "New York State Liquor Authority",
+    "line1": "P.O. Box 782772",
+    "city": "Philadelphia",
+    "state": "PA",
+    "zip": "19178-2772"
+   },
+   "signature": "unknown",
+   "evidence": "Complete the application as a fillable form through New York Business Express; 'Applications may not be handwritten.' Print a completed copy and mail it.",
+   "source": "https://sla.ny.gov/system/files/documents/2026/01/on-premises-instructions-nybe_12192025.pdf"
+  },
+  "notes": "The library calls this 'RW 341'; no form with that number was found. The current form is the generic On-Premises Retail License application, with Restaurant Wine chosen through the NYBE Application Wizard. Fill it in through NYBE, then print it and mail it to the Philadelphia lockbox. The instructions don't say whether e-signatures are accepted; principals sign under penalty of perjury. Fees depend on county and beverage type (SLA retail fee schedule); the wizard cover sheet states the amount due. The license runs 2 years. The 'Notice to be Posted' must go up at the premises within 10 days of filing. The packet carries several revision stamps (rev-01/22/25 application, rev-12/19/25 checklist and method of operation). Only the first 40 lines are mapped; the packet also includes personal questionnaires and more."
+ },
+ "hou-buildout": {
+  "status": "page_only",
+  "seen": "Buildout Permit page (HPWCODE1148) and Commercial Prerequisite Checklist CE-1105 (revised August 2026)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.houstonpermittingcenter.org/node/871/printable/print",
+   "https://www.houstonpermittingcenter.org/media/1811/download"
+  ],
+  "fields": [
+   {
+    "id": "ipermits_application",
+    "line": "CE-1105",
+    "label": {
+     "en": "Electronic building permit application (each new structure, lease remodel or build-out)",
+     "zh": "电子建筑许可申请（每个新建、租户改造或装修项目各一份）"
+    }
+   },
+   {
+    "id": "valuation",
+    "line": "CE-1105",
+    "label": {
+     "en": "Plan review fee valuation, based on total project cost per building, permit and address or lease space",
+     "zh": "图纸审查费估值（按每栋建筑、每个许可及地址或租赁空间的项目总成本）"
+    }
+   },
+   {
+    "id": "owner_declaration",
+    "line": "CE-1105",
+    "label": {
+     "en": "Declaration in Support of Application, signed by the owner (checked against HCAD records)",
+     "zh": "由业主签署的申请支持声明（将与HCAD记录核对）"
+    },
+    "hint": {
+     "en": "Proof of ownership needed if the owner doesn't match HCAD.",
+     "zh": "如与HCAD记录不符，需提供产权证明。"
+    }
+   },
+   {
+    "id": "required_reviews",
+    "line": "CE-1105 Required Reviews",
+    "label": {
+     "en": "Required reviews (check those that apply)",
+     "zh": "所需审查（勾选适用项）"
+    },
+    "options": [
+     "Planning & Development",
+     "Utility Analysis",
+     "Utility Infrastructure",
+     "Storm Drainage",
+     "Floodplain Management",
+     "Traffic",
+     "Health",
+     "Fire Marshal (Standpipe)",
+     "Fire Access Road",
+     "High Pile/Hazmat",
+     "Structural",
+     "Mechanical"
+    ]
+   }
+  ],
+  "attach": [
+   {
+    "en": "Complete set of construction plans (not marked Preliminary or Not for Construction), uploaded to ProjectDox",
+    "zh": "完整施工图（不得标注“初步”或“非施工用”），上传至ProjectDox"
+   },
+   {
+    "en": "Commercial Prerequisite Checklist CE-1105 and the documents it lists",
+    "zh": "商业前置清单CE-1105及其所列文件"
+   },
+   {
+    "en": "Asbestos survey (existing building modifications)",
+    "zh": "石棉调查报告（现有建筑改造）"
+   },
+   {
+    "en": "Sewer and water letters of availability",
+    "zh": "下水道与供水可用性证明信"
+   },
+   {
+    "en": "TAS / Elimination of Architectural Barriers registration (EAB number for projects over $50,000)",
+    "zh": "TAS无障碍登记（项目超过5万美元需EAB编号）"
+   },
+   {
+    "en": "Energy code report (ComCheck) with inspection checklist",
+    "zh": "节能规范报告（ComCheck）及检查清单"
+   },
+   {
+    "en": "Code analysis sheet; room use and occupancy labeled on floor plan; door, hardware, glazing and wall schedules",
+    "zh": "规范分析表；平面图标注各房间用途；门、五金、玻璃及墙体表"
+   },
+   {
+    "en": "Mechanical, electrical (one-line, load analysis, panel schedule) and plumbing (riser, floor plan) plans",
+    "zh": "暖通、电气（单线图、负荷分析、配电盘表）及给排水（立管图、平面图）图纸"
+   },
+   {
+    "en": "Health plans: complete equipment plan with manufacturer specs for food and drink preparation or service",
+    "zh": "卫生图纸：含制造商规格的完整食品饮料设备布置图"
+   },
+   {
+    "en": "Owner's Statement of Intended Use (CE_1120), or HazMat / High Piled Storage details",
+    "zh": "业主拟定用途声明（CE_1120），或危险品/高堆储存说明"
+   },
+   {
+    "en": "A.R.A. permit or time-stamped application for alcohol-related businesses",
+    "zh": "涉酒类业务需A.R.A.许可或带时间戳的申请"
+   }
+  ],
+  "submit": {
+   "portal": "pdinet.pd.houstontx.gov",
+   "signature": "unknown",
+   "evidence": "Log in to or create an iPermits account; complete the building permit application; pay the plan review fee(s); wait for an email invitation to upload plans.",
+   "source": "https://www.houstonpermittingcenter.org/node/871/printable/print"
+  },
+  "notes": "iPermits application fields are not published. Plans go to ProjectDox (projectdox.houstonelectronicplanreview.org) after an e-mail invitation. Fee: per the City fee schedule plus a $33.56 admin fee. Valid 6 months; about 15 business days to process. Fire alarm, fire sprinkler, signs and similar work need separate permits. The CE-1105 items above are the WebFetch summary's paraphrase, not quotes, so check wording against the PDF."
+ },
+ "hou-fire": {
+  "status": "mapped",
+  "seen": "CITY OF HOUSTON Fire Prevention Permit Application (Word file dated 2012, last saved 2016)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.houstontx.gov/fire/business/Fire%20Prevention%20Permit%20Application%202012.doc",
+   "https://houstontx.gov/fire/formsandpermits/"
+  ],
+  "fields": [
+   {
+    "id": "application_type",
+    "line": "",
+    "label": {
+     "en": "Application Type (Please circle one)",
+     "zh": "申请类型（圈选一项）"
+    },
+    "options": [
+     "New",
+     "Renewal",
+     "FMA"
+    ]
+   },
+   {
+    "id": "business_name",
+    "line": "Mailing Address of Appli",
+    "label": {
+     "en": "Name of Business",
+     "zh": "企业名称"
+    }
+   },
+   {
+    "id": "street",
+    "line": "Mailing Address of Appli",
+    "label": {
+     "en": "Street/P.O. Box",
+     "zh": "街道/邮政信箱"
+    }
+   },
+   {
+    "id": "city_state",
+    "line": "Mailing Address of Appli",
+    "label": {
+     "en": "City/State",
+     "zh": "城市/州"
+    }
+   },
+   {
+    "id": "zip",
+    "line": "Mailing Address of Appli",
+    "label": {
+     "en": "Zip",
+     "zh": "邮编"
+    }
+   },
+   {
+    "id": "responsible_person",
+    "line": "",
+    "label": {
+     "en": "Print Name of Person Responsible as it should appear on the Permit and notarized affidavit",
+     "zh": "负责人姓名（正楷，与许可证及公证宣誓书一致）"
+    }
+   },
+   {
+    "id": "business_phone",
+    "line": "",
+    "label": {
+     "en": "Business Phone ( ) Ex",
+     "zh": "营业电话及分机"
+    }
+   },
+   {
+    "id": "emergency_phone",
+    "line": "",
+    "label": {
+     "en": "Emergency Phone ( ) Ex",
+     "zh": "紧急联系电话及分机"
+    }
+   },
+   {
+    "id": "permit_address",
+    "line": "",
+    "label": {
+     "en": "Permit Address",
+     "zh": "许可地址"
+    }
+   },
+   {
+    "id": "permit_needed_for",
+    "line": "",
+    "label": {
+     "en": "Permit Needed for?",
+     "zh": "许可用途"
+    }
+   },
+   {
+    "id": "start_date",
+    "line": "",
+    "label": {
+     "en": "Permit Start Date",
+     "zh": "许可起始日期"
+    }
+   },
+   {
+    "id": "completion_date",
+    "line": "",
+    "label": {
+     "en": "Estimated Job Completion Date",
+     "zh": "预计完工日期"
+    }
+   },
+   {
+    "id": "tank_ids",
+    "line": "",
+    "label": {
+     "en": "Identification number(s) and capacity if for a tank installation or tank vehicle; also project number",
+     "zh": "如为储罐安装或罐车，填写编号及容量；并填项目编号"
+    }
+   },
+   {
+    "id": "permit_type",
+    "line": "",
+    "label": {
+     "en": "Type of Permit (Refer to Instructions) and Permit Fee $",
+     "zh": "许可类型（参见说明）及许可费"
+    }
+   },
+   {
+    "id": "priority_fee",
+    "line": "",
+    "label": {
+     "en": "Priority Fee (Special Handling), for inspection at a specific time (certified funds only)",
+     "zh": "优先费（特殊处理），用于指定时间检查（仅限保付款项）"
+    }
+   },
+   {
+    "id": "after_hours_fee",
+    "line": "",
+    "label": {
+     "en": "Fees for inspection outside regular working hours (minimum 4 hours, certified funds only)",
+     "zh": "非工作时间检查费（至少4小时，仅限保付款项）"
+    }
+   },
+   {
+    "id": "admin_fee",
+    "line": "",
+    "label": {
+     "en": "Administrative Fee per permit",
+     "zh": "每个许可的行政费"
+    }
+   },
+   {
+    "id": "total",
+    "line": "",
+    "label": {
+     "en": "TOTAL $",
+     "zh": "合计金额"
+    }
+   },
+   {
+    "id": "signature",
+    "line": "",
+    "label": {
+     "en": "Person Responsible Signature; Date",
+     "zh": "负责人签名；日期"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Notarized affidavit (Deed Restrictions and Law Compliance, State of Texas, County of Harris) on the form; the current forms page says the Unsworn Declaration Form replaces the affidavit",
+    "zh": "表上的公证宣誓书（契约限制与守法声明）；现行表格页称已改用非宣誓声明表（Unsworn Declaration）"
+   },
+   {
+    "en": "Payment: check or money order payable to City of Houston Fire Department, or cash; certified funds only for Temporary/FMA permits",
+    "zh": "付款：支票或汇票（抬头City of Houston Fire Department）或现金；临时/FMA许可仅收保付款项"
+   }
+  ],
+  "submit": {
+   "mail": {
+    "name": "Fire Department; Permit Office",
+    "line1": "P. O. Box 3625",
+    "city": "Houston",
+    "state": "TX",
+    "zip": "77253"
+   },
+   "signature": "wet",
+   "evidence": "Mail to Fire Department; Permit Office, P. O. Box 3625, Houston, Texas 77253 or bring to 1002 Washington. Houston, Texas 77002. Notarized Affidavit required.",
+   "source": "https://www.houstontx.gov/fire/business/Fire%20Prevention%20Permit%20Application%202012.doc"
+  },
+  "notes": "Old form (2012): its fee link points to a 2016 fee schedule; current fees are at cohweb.houstontx.gov/FIN_FeeSchedule. In-person: HFD Permit Office, 1002 Washington, Houston TX 77002; phone 832-394-8811. Conflict: the form demands a notarized affidavit, but the forms page now says the Unsworn Declaration Form 'replaces the affidavit' for fire and fire alarm permits. Call 832-394-8811 to confirm before filing. Hazardous-material permits still need a notarized affidavit. Fees are non-refundable. Text was pulled from the .doc binary, so the field order is approximate."
+ },
+ "dal-plan-review": {
+  "status": "page_only",
+  "seen": "Food establishment permit and plan review (Consumer Health; Planning & Development for new construction)",
+  "read": "2026-10-13",
+  "sources": [
+   "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx"
+  ],
+  "fields": [],
+  "attach": [
+   {
+    "en": "Facility blueprints and equipment specification sheets",
+    "zh": "设施图纸及设备规格表"
+   }
+  ],
+  "submit": {
+   "signature": "unknown",
+   "evidence": "For new construction, change in ownership, remodels or a change of use, contact Planning & Development at 320 E. Jefferson Blvd. or 214-670-4127. A separate plan review application (CCS-FRM-352, $205) applies only to kiosks and self-service establishments, at 7901 Goforth.",
+   "source": "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx"
+  },
+  "notes": "Dallas plan review for a fixed restaurant runs through the building permit in DallasNow (Planning & Development), not a health form. Annual food permit fees: risk 1 $141-$155, risk 2 $283-$308, risk 3 $468-$513; due Dec 31."
+ },
+ "lv-license": {
+  "status": "mapped",
+  "seen": "City of Las Vegas Business License Application, Form BL001 (Revised 04/05/16), as reference for the online General Business application",
+  "read": "2026-10-31",
+  "sources": [
+   "https://files.lasvegasnevada.gov/business-licensing/Business-License-Application.pdf",
+   "https://lasvegasnevada.gov/Business/Business-License/Apply-For-A-Business-License"
+  ],
+  "fields": [
+   {
+    "id": "business_type",
+    "line": "",
+    "label": {
+     "en": "Business Type",
+     "zh": "申请类别"
+    },
+    "options": [
+     "New Business",
+     "Change of Ownership",
+     "Change of Name",
+     "Change of Corp. Officer",
+     "Other",
+     "Change of Location",
+     "Non-Profit"
+    ]
+   },
+   {
+    "id": "dba",
+    "line": "",
+    "label": {
+     "en": "Business Trade Name (dba)",
+     "zh": "营业商号（DBA）"
+    }
+   },
+   {
+    "id": "business_phone",
+    "line": "",
+    "label": {
+     "en": "Business Phone",
+     "zh": "营业电话"
+    }
+   },
+   {
+    "id": "opening_date",
+    "line": "",
+    "label": {
+     "en": "Opening Date",
+     "zh": "开业日期"
+    }
+   },
+   {
+    "id": "hours",
+    "line": "",
+    "label": {
+     "en": "Hours of Operation",
+     "zh": "营业时间"
+    }
+   },
+   {
+    "id": "fax",
+    "line": "",
+    "label": {
+     "en": "Business Fax",
+     "zh": "营业传真"
+    }
+   },
+   {
+    "id": "home_based",
+    "line": "",
+    "label": {
+     "en": "Home Based Business",
+     "zh": "是否家庭经营"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "mobile",
+    "line": "",
+    "label": {
+     "en": "Mobile Phone",
+     "zh": "手机"
+    }
+   },
+   {
+    "id": "physical_address",
+    "line": "",
+    "label": {
+     "en": "Business Physical Address",
+     "zh": "营业实际地址"
+    }
+   },
+   {
+    "id": "mailing_address",
+    "line": "",
+    "label": {
+     "en": "Business Mailing Address",
+     "zh": "营业邮寄地址"
+    }
+   },
+   {
+    "id": "email",
+    "line": "",
+    "label": {
+     "en": "Business E-mail",
+     "zh": "营业电子邮箱"
+    }
+   },
+   {
+    "id": "legal_name",
+    "line": "",
+    "label": {
+     "en": "Business Legal Name",
+     "zh": "企业法定名称"
+    }
+   },
+   {
+    "id": "corporate_phone",
+    "line": "",
+    "label": {
+     "en": "Corporate Phone",
+     "zh": "公司总部电话"
+    }
+   },
+   {
+    "id": "website",
+    "line": "",
+    "label": {
+     "en": "Business Web Site",
+     "zh": "企业网站"
+    }
+   },
+   {
+    "id": "type_of_business",
+    "line": "",
+    "label": {
+     "en": "Type of Business",
+     "zh": "业务类型"
+    }
+   },
+   {
+    "id": "activity_description",
+    "line": "",
+    "label": {
+     "en": "Business activity and product(s) or service(s) description",
+     "zh": "经营活动及产品或服务说明"
+    }
+   },
+   {
+    "id": "nv_business_reg",
+    "line": "",
+    "label": {
+     "en": "NV State Business Registration #",
+     "zh": "内华达州商业登记号"
+    }
+   },
+   {
+    "id": "nv_occupational",
+    "line": "",
+    "label": {
+     "en": "NV Occupational License #",
+     "zh": "内华达州职业执照号"
+    }
+   },
+   {
+    "id": "nv_tax_id",
+    "line": "",
+    "label": {
+     "en": "NV Tax ID #",
+     "zh": "内华达州税号"
+    }
+   },
+   {
+    "id": "activities",
+    "line": "",
+    "label": {
+     "en": "Check All That Apply",
+     "zh": "勾选所有适用项"
+    },
+    "options": [
+     "Alcohol sale or service",
+     "Alcohol / drug counseling",
+     "Coin Operated Machine (Number)",
+     "Check Cashing",
+     "Dance / Entertainment",
+     "Gaming",
+     "Pawn",
+     "Sales",
+     "Sexually-oriented materials or activities",
+     "Tobacco sales",
+     "Used merchandise sales / trade-in",
+     "Lodging (addendum required)"
+    ]
+   },
+   {
+    "id": "naics",
+    "line": "",
+    "label": {
+     "en": "NAICS Code(s)",
+     "zh": "NAICS行业代码"
+    }
+   },
+   {
+    "id": "units",
+    "line": "",
+    "label": {
+     "en": "No. of Units required (State Licensed Professionals, Seats, Stations, etc.)",
+     "zh": "所需单位数（州持证专业人员、座位、工位等）"
+    }
+   },
+   {
+    "id": "entity_type",
+    "line": "",
+    "label": {
+     "en": "Entity type",
+     "zh": "实体类型"
+    },
+    "options": [
+     "Sole Proprietor",
+     "Corp/LLC"
+    ]
+   },
+   {
+    "id": "owner_name",
+    "line": "Business Ownership",
+    "label": {
+     "en": "Name (Last, First)",
+     "zh": "所有人姓名（姓，名）"
+    }
+   },
+   {
+    "id": "owner_home_address",
+    "line": "Business Ownership",
+    "label": {
+     "en": "Home Address (P.O. Box Not Acceptable)",
+     "zh": "住宅地址（不接受邮政信箱）"
+    }
+   },
+   {
+    "id": "owner_title",
+    "line": "Business Ownership",
+    "label": {
+     "en": "Title",
+     "zh": "职务"
+    }
+   },
+   {
+    "id": "owner_percent",
+    "line": "Business Ownership",
+    "label": {
+     "en": "Percent Owned",
+     "zh": "持股比例"
+    }
+   },
+   {
+    "id": "owner_dob",
+    "line": "Business Ownership",
+    "label": {
+     "en": "Date of Birth",
+     "zh": "出生日期"
+    }
+   },
+   {
+    "id": "owner_phones",
+    "line": "Business Ownership",
+    "label": {
+     "en": "Home Phone; Cell Phone",
+     "zh": "住宅电话；手机"
+    }
+   },
+   {
+    "id": "owner_email",
+    "line": "Business Ownership",
+    "label": {
+     "en": "Email",
+     "zh": "电子邮箱"
+    }
+   },
+   {
+    "id": "previous_business",
+    "line": "",
+    "label": {
+     "en": "Previous Business Information (Name, Address & Ownership)",
+     "zh": "原企业信息（名称、地址及所有权）"
+    }
+   },
+   {
+    "id": "acknowledgements",
+    "line": "Acknowledgement 1-9",
+    "label": {
+     "en": "Acknowledgement items 1-9 (incl. background check authorization, health permit if applicable)",
+     "zh": "确认事项1至9（含背景调查授权、如适用的卫生许可）"
+    }
+   },
+   {
+    "id": "signature",
+    "line": "",
+    "label": {
+     "en": "Authorized Signature; Print Name; Date",
+     "zh": "授权签名；正楷姓名；日期"
+    }
+   },
+   {
+    "id": "agent",
+    "line": "",
+    "label": {
+     "en": "Authorized Agent: Phone; Fax; E-mail",
+     "zh": "授权代理人：电话；传真；电子邮箱"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Nevada State Business License and Nevada Department of Taxation ID",
+    "zh": "内华达州营业执照及内华达州税务局税号"
+   },
+   {
+    "en": "Certificate of Business Fictitious Firm Name from the Clark County Clerk (if operating under another name)",
+    "zh": "克拉克县书记官处的虚构商号证书（如使用其他名称经营）"
+   },
+   {
+    "en": "IRS Employer Identification Number (EIN)",
+    "zh": "美国国税局雇主识别号（EIN）"
+   },
+   {
+    "en": "Health permit, if applicable (food businesses)",
+    "zh": "卫生许可（如适用，食品类企业）"
+   },
+   {
+    "en": "Lodging addendum, if applicable",
+    "zh": "住宿附表（如适用）"
+   }
+  ],
+  "submit": {
+   "portal": "lasvegasnevada.gov",
+   "signature": "typed",
+   "evidence": "Use our online portal to apply for a business license ... Currently our online feature is only available for General Business license applications.",
+   "source": "https://lasvegasnevada.gov/Business/Business-License/Apply-For-A-Business-License"
+  },
+  "notes": "Online (lasvegasnevada.gov/dashboard) for General Business licenses only. Privilege licenses, including alcohol, need an appointment (702-229-1840). Fields come from the paper BL001 form (2016); the portal may ask them differently. Before applying, confirm with the Clark County jurisdiction map that the address is in the City of Las Vegas, and confirm zoning and the Certificate of Occupancy. No fee amounts are on the form or page. City Hall: 495 S. Main St., Las Vegas NV 89101; licensing phone (702) 229-6281."
+ },
+ "cc-business-license": {
+  "status": "mapped",
+  "seen": "CLARK COUNTY BUSINESS LICENSE APPLICATION, CCBL App rev. 03.2021; Application Checklist 08-13-2026",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:5689aef9-f31d-47fe-b296-cfa63ad638b5/original/as/ccbl-app-031721.pdf",
+   "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:0746bb4a-633d-43f6-85c8-875896f099a7/original/as/application-checklist-08-13-2026.pdf",
+   "https://www.clarkcountynv.gov/business/doing_business_with_clark_county/divisions/general_business/general-license-guide"
+  ],
+  "fields": [
+   {
+    "id": "fictitious_firm_name",
+    "line": "Section A",
+    "label": {
+     "en": "Fictitious Firm Name",
+     "zh": "虚构商号"
+    }
+   },
+   {
+    "id": "classification",
+    "line": "Section A",
+    "label": {
+     "en": "Classification or Category",
+     "zh": "执照分类或类别"
+    }
+   },
+   {
+    "id": "business_name",
+    "line": "Section A",
+    "label": {
+     "en": "Business Name",
+     "zh": "企业名称"
+    }
+   },
+   {
+    "id": "dba",
+    "line": "Section A",
+    "label": {
+     "en": "Doing Business As",
+     "zh": "经营名称（DBA）"
+    }
+   },
+   {
+    "id": "naics",
+    "line": "Section A",
+    "label": {
+     "en": "NAICS Code",
+     "zh": "NAICS行业代码"
+    }
+   },
+   {
+    "id": "ownership_type",
+    "line": "Section B",
+    "label": {
+     "en": "Type of Business Ownership (select one)",
+     "zh": "企业所有权类型（单选）"
+    },
+    "options": [
+     "Sole Proprietorship",
+     "Corporation",
+     "Limited Liability Co.",
+     "Partnership",
+     "Limited Partnership"
+    ]
+   },
+   {
+    "id": "owner1_name",
+    "line": "Section B",
+    "label": {
+     "en": "Owner/Officer 1 Name (Last, First, MI, or Corporation/LLC)",
+     "zh": "所有人/高管1姓名（姓、名、中间名首字母，或公司/LLC名称）"
+    }
+   },
+   {
+    "id": "owner1_title",
+    "line": "Section B",
+    "label": {
+     "en": "Owner/Officer 1 Title",
+     "zh": "所有人/高管1职务"
+    }
+   },
+   {
+    "id": "owner1_address",
+    "line": "Section B",
+    "label": {
+     "en": "Owner/Officer 1 Address Line 1, Line 2, City, State, Zip",
+     "zh": "所有人/高管1地址（第1、2行、城市、州、邮编）"
+    }
+   },
+   {
+    "id": "owner1_percent",
+    "line": "Section B",
+    "label": {
+     "en": "Owner/Officer 1 % Owned",
+     "zh": "所有人/高管1持股比例"
+    }
+   },
+   {
+    "id": "owner2_name",
+    "line": "Section B",
+    "label": {
+     "en": "Owner/Officer 2 Name (Last, First, MI, or Corporation/LLC)",
+     "zh": "所有人/高管2姓名（姓、名、中间名首字母，或公司/LLC名称）"
+    }
+   },
+   {
+    "id": "owner2_title",
+    "line": "Section B",
+    "label": {
+     "en": "Owner/Officer 2 Title",
+     "zh": "所有人/高管2职务"
+    }
+   },
+   {
+    "id": "owner2_address",
+    "line": "Section B",
+    "label": {
+     "en": "Owner/Officer 2 Address Line 1, Line 2, City, State, Zip",
+     "zh": "所有人/高管2地址（第1、2行、城市、州、邮编）"
+    }
+   },
+   {
+    "id": "owner2_percent",
+    "line": "Section B",
+    "label": {
+     "en": "Owner/Officer 2 % Owned",
+     "zh": "所有人/高管2持股比例"
+    }
+   },
+   {
+    "id": "location_address",
+    "line": "Section C",
+    "label": {
+     "en": "Business Location Address Line 1, Line 2, City, State, Zip Code, Country",
+     "zh": "营业地点地址（第1、2行、城市、州、邮编、国家）"
+    },
+    "hint": {
+     "en": "Mailboxes and P.O. Boxes are not accepted.",
+     "zh": "不接受信箱或邮政信箱。"
+    }
+   },
+   {
+    "id": "email",
+    "line": "Section C",
+    "label": {
+     "en": "Email Address",
+     "zh": "电子邮箱"
+    }
+   },
+   {
+    "id": "business_phone",
+    "line": "Section C",
+    "label": {
+     "en": "Business Phone No.",
+     "zh": "营业电话"
+    }
+   },
+   {
+    "id": "business_fax",
+    "line": "Section C",
+    "label": {
+     "en": "Business Fax No.",
+     "zh": "营业传真"
+    }
+   },
+   {
+    "id": "mailing_address",
+    "line": "Section C",
+    "label": {
+     "en": "Mailing Address (If same as location, indicate \"location\")",
+     "zh": "邮寄地址（如与营业地点相同，填“location”）"
+    }
+   },
+   {
+    "id": "authorized_contact",
+    "line": "Section C",
+    "label": {
+     "en": "Authorized Contact Last Name, First Name, MI, email, phone",
+     "zh": "授权联系人姓、名、中间名首字母、邮箱、电话"
+    }
+   },
+   {
+    "id": "owned_leased",
+    "line": "Section C",
+    "label": {
+     "en": "Owned/Leased, with lessor details",
+     "zh": "自有/租赁，及出租人信息"
+    },
+    "hint": {
+     "en": "Checklist: provide proof of rights to the location and complete the Landlord/Lessor section.",
+     "zh": "清单要求：提供场地使用权证明并填写房东/出租人部分。"
+    }
+   },
+   {
+    "id": "business_activity",
+    "line": "Section C",
+    "label": {
+     "en": "Business activity",
+     "zh": "经营活动"
+    }
+   },
+   {
+    "id": "start_date",
+    "line": "Section C",
+    "label": {
+     "en": "Start date",
+     "zh": "开业日期"
+    }
+   },
+   {
+    "id": "signature",
+    "line": "Signature",
+    "label": {
+     "en": "Signature; Print Name; Date",
+     "zh": "签名；正楷姓名；日期"
+    },
+    "hint": {
+     "en": "\"I certify the information provided herein and attached is true and accurate to the best of my knowledge.\"",
+     "zh": "“本人证明此处及所附信息据本人所知真实准确。”"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Nevada State Business License / Secretary of State registration (nvsilverflume.gov)",
+    "zh": "内华达州营业执照/州务卿登记（nvsilverflume.gov）"
+   },
+   {
+    "en": "Nevada Department of Taxation registration",
+    "zh": "内华达州税务局登记"
+   },
+   {
+    "en": "Fictitious Firm Name certificate from the Clark County Clerk, if using a DBA",
+    "zh": "如使用DBA，需克拉克县书记官处的虚构商号证书"
+   },
+   {
+    "en": "Proof of rights to the location (lease or ownership)",
+    "zh": "场地使用权证明（租约或产权）"
+   },
+   {
+    "en": "Proof of application with the Southern Nevada Health District (food establishments)",
+    "zh": "已向南内华达卫生区提交申请的证明（食品场所）"
+   },
+   {
+    "en": "Nevada state board license or certificate, if applicable",
+    "zh": "州监管委员会执照或证书（如适用）"
+   }
+  ],
+  "submit": {
+   "portal": "blepay.clarkcountynv.gov",
+   "mail": {
+    "name": "Clark County Department of Business License",
+    "line1": "500 S. Grand Central Parkway, 3rd Fl.",
+    "line2": "BOX 551810",
+    "city": "Las Vegas",
+    "state": "NV",
+    "zip": "89155"
+   },
+   "signature": "typed",
+   "evidence": "Complete the Clark County business license application: submit through the online portal at https://blepay.clarkcountynv.gov/NAICSDefault.aspx. Online applications don't require additional documents.",
+   "source": "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:0746bb4a-633d-43f6-85c8-875896f099a7/original/as/application-checklist-08-13-2026.pdf"
+  },
+  "notes": "For unincorporated Clark County only. Fee: $45 non-refundable application fee plus the category's license fee. Submit within 30 days of opening, after all construction is complete. The paper form must be filled in BLACK INK and mailed (tracked mail recommended). In person by appointment only (702-455-0174). The checklist gives the mail address as 'P.O. Box 551810, Las Vegas, NV 89155-1810', the guide page uses the street form above; both are BOX 551810. Fields after #40 on the form (owned/leased, activity, start date, signature) come from the summary's description, not printed labels, so check them against the PDF. Most licenses are issued within 45 days."
+ },
+ "chi-sanitation": {
+  "status": "mapped",
+  "seen": "Food Service Manager Certificate Application (CDPH Food Service Sanitation Manager Program, administered by Kennedy-King College; no revision printed)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://chicago.gov/city/en/depts/cdph/provdrs/food_safety/svcs/enroll_in_a_foodsanitationcertificationcourse.html",
+   "https://www.ccc.edu/wp-content/uploads/kennedy_departments_Documents_FoodService-SanitationApplication.pdf",
+   "https://www.ccc.edu/wp-content/uploads/kennedy_menu_Documents_KKC-FSS-ElectronicApplicationInstructions.pdf"
+  ],
+  "fields": [
+   {
+    "id": "name",
+    "line": "",
+    "label": {
+     "en": "First Name / Last Name",
+     "zh": "名 / 姓"
+    },
+    "hint": {
+     "en": "Spell your name identically on the application, training documents and ID.",
+     "zh": "申请表、培训文件和身份证件上的姓名拼写须完全一致。"
+    }
+   },
+   {
+    "id": "ssn_last4",
+    "line": "",
+    "label": {
+     "en": "Last 4 digits Social Security # / Date",
+     "zh": "社会安全号后四位 / 日期"
+    }
+   },
+   {
+    "id": "home_address",
+    "line": "",
+    "label": {
+     "en": "Home Address / Apt#",
+     "zh": "住宅地址 / 公寓号"
+    }
+   },
+   {
+    "id": "city_state_zip",
+    "line": "",
+    "label": {
+     "en": "City / State / Zip Code",
+     "zh": "城市 / 州 / 邮编"
+    }
+   },
+   {
+    "id": "phone_email",
+    "line": "",
+    "label": {
+     "en": "Daytime Phone # / Email",
+     "zh": "日间电话 / 电子邮箱"
+    }
+   },
+   {
+    "id": "request_type",
+    "line": "",
+    "label": {
+     "en": "Request type",
+     "zh": "申请类型"
+    },
+    "options": [
+     "NEW/RECIPROCITY REQUEST",
+     "DUPLICATE REQUEST ONLY"
+    ]
+   },
+   {
+    "id": "duplicate_details",
+    "line": "Duplicate Request",
+    "label": {
+     "en": "City of Chicago CDPH Certificate #; Exam Date; Expiration Date",
+     "zh": "芝加哥CDPH证书编号；考试日期；到期日期"
+    }
+   },
+   {
+    "id": "training_provider",
+    "line": "",
+    "label": {
+     "en": "Name of Training Provider / Name of Instructor/Proctor",
+     "zh": "培训机构名称 / 讲师或监考人姓名"
+    }
+   },
+   {
+    "id": "exam_state",
+    "line": "",
+    "label": {
+     "en": "Location of Exam (State)",
+     "zh": "考试地点（州）"
+    }
+   },
+   {
+    "id": "training_type",
+    "line": "",
+    "label": {
+     "en": "Type of Training (Check One)",
+     "zh": "培训方式（单选）"
+    },
+    "options": [
+     "Instructor Led Class",
+     "On-Line"
+    ]
+   },
+   {
+    "id": "signature",
+    "line": "",
+    "label": {
+     "en": "Applicant Signature",
+     "zh": "申请人签名"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Training Hours' Verification form (instructor-led) or proof of completion from an approved online provider",
+    "zh": "培训课时证明表（面授），或认可在线机构的结业证明"
+   },
+   {
+    "en": "Copy of valid National Food Protection Manager Certificate from an ANSI-accredited testing agency",
+    "zh": "ANSI认可考试机构颁发的有效国家食品保护经理证书副本"
+   },
+   {
+    "en": "Copy of valid picture ID (driver's license, state ID, passport or other government ID)",
+    "zh": "有效带照片身份证件副本（驾照、州身份证、护照或其他政府证件）"
+   },
+   {
+    "en": "$52.00 fee",
+    "zh": "52美元费用"
+   }
+  ],
+  "submit": {
+   "email": "kkc-fssp@ccc.edu",
+   "mail": {
+    "name": "Kennedy-King, Food Service Sanitation Program",
+    "line1": "6301 South Halsted, W Building",
+    "city": "Chicago",
+    "state": "IL",
+    "zip": "60621-3979"
+   },
+   "signature": "wet",
+   "evidence": "The application 'needs to be signed'; scan the four required documents into one PDF and e-mail it to kkc-fssp@ccc.edu.",
+   "source": "https://www.ccc.edu/wp-content/uploads/kennedy_menu_Documents_KKC-FSS-ElectronicApplicationInstructions.pdf"
+  },
+  "notes": "The CDPH page says to pass an approved course; ANSI CFPM holders may apply for reciprocity. Processing goes through Kennedy-King College (City Colleges of Chicago), not a chicago.gov portal, so the library's 'online' method is really e-mail, mail or in person. E-mail: one combined PDF, subject line '<First Last> FSSM Application'; payment by card through a link sent after approval. Mail: money order payable to Kennedy-King College. In person: 6343 S Halsted, W142. Signature is set to 'wet' because the scanned application must be signed and no e-signature is mentioned. Fee $52; 4 to 6 weeks. This is a personal credential: the filer is the individual. ccc.edu is a public city college acting for CDPH, not a city .gov domain."
+ },
+ "chi-plan-review": {
+  "status": "mapped",
+  "seen": "Chicago Department of Public Health Food Establishment Plan Review Application (file PlanReviewApplicationForm2016.pdf; no revision printed)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.chicago.gov/content/dam/city/depts/cdph/food_env/general/Food_Protection/PlanReviewApplicationForm2016.pdf",
+   "https://www.chicago.gov/content/dam/city/depts/cdph/FoodProtection/FP_Plan.Review.Requirements.2020_Feb2021.pdf",
+   "https://www.chicago.gov/content/dam/city/depts/bacp/general/Retail%20Food%20Guide.pdf"
+  ],
+  "fields": [
+   {
+    "id": "owner_name",
+    "line": "",
+    "label": {
+     "en": "Business Owner Name",
+     "zh": "企业所有人姓名"
+    }
+   },
+   {
+    "id": "establishment_name",
+    "line": "",
+    "label": {
+     "en": "Name of Establishment",
+     "zh": "场所名称"
+    }
+   },
+   {
+    "id": "establishment_address",
+    "line": "",
+    "label": {
+     "en": "Address of Establishment",
+     "zh": "场所地址"
+    }
+   },
+   {
+    "id": "contact_name",
+    "line": "",
+    "label": {
+     "en": "Name of Contact Person",
+     "zh": "联系人姓名"
+    }
+   },
+   {
+    "id": "contact_number",
+    "line": "",
+    "label": {
+     "en": "Contact Number",
+     "zh": "联系电话"
+    }
+   },
+   {
+    "id": "email",
+    "line": "",
+    "label": {
+     "en": "Email address",
+     "zh": "电子邮箱"
+    }
+   },
+   {
+    "id": "new_remodel",
+    "line": "",
+    "label": {
+     "en": "Establishment type",
+     "zh": "项目类型"
+    },
+    "options": [
+     "New",
+     "Remodel/Conversion"
+    ]
+   },
+   {
+    "id": "category",
+    "line": "",
+    "label": {
+     "en": "Category",
+     "zh": "类别"
+    },
+    "options": [
+     "Restaurant",
+     "Institution",
+     "Daycare",
+     "Grocery Store",
+     "Retail Food Market",
+     "Other"
+    ]
+   },
+   {
+    "id": "construction_start",
+    "line": "",
+    "label": {
+     "en": "Projected Construction Start Date",
+     "zh": "预计开工日期"
+    }
+   },
+   {
+    "id": "completion_date",
+    "line": "",
+    "label": {
+     "en": "Projected Date for Completion",
+     "zh": "预计完工日期"
+    }
+   },
+   {
+    "id": "floors",
+    "line": "",
+    "label": {
+     "en": "Number of Floors",
+     "zh": "楼层数"
+    }
+   },
+   {
+    "id": "meals",
+    "line": "",
+    "label": {
+     "en": "Number of Meals (if applicable)",
+     "zh": "供餐数量（如适用）"
+    }
+   },
+   {
+    "id": "employees",
+    "line": "",
+    "label": {
+     "en": "Number of employees; Maximum # employees per shift",
+     "zh": "员工人数；每班最多员工数"
+    }
+   },
+   {
+    "id": "seats",
+    "line": "",
+    "label": {
+     "en": "Number of Seats (if applicable)",
+     "zh": "座位数（如适用）"
+    }
+   },
+   {
+    "id": "bathrooms",
+    "line": "",
+    "label": {
+     "en": "Number of Bathrooms",
+     "zh": "卫生间数量"
+    }
+   },
+   {
+    "id": "phf_categories",
+    "line": "Food Preparation",
+    "label": {
+     "en": "PHF categories to be handled, prepared, and served",
+     "zh": "将处理、制备和供应的潜在危险食品类别"
+    },
+    "options": [
+     "Thin meats, poultry, fish, eggs",
+     "Thick meats, whole poultry",
+     "Cold processed foods",
+     "Hot processed foods",
+     "Bakery goods",
+     "Ice Cream",
+     "Other",
+     "N/A – No Food preparation on-site"
+    ]
+   },
+   {
+    "id": "cold_storage",
+    "line": "Food Supplies & Storage",
+    "label": {
+     "en": "Cold storage: Refrigeration units, Walk-in units, Freezer units (number)",
+     "zh": "冷藏：冷藏柜、步入式冷库、冷冻柜（数量）"
+    }
+   },
+   {
+    "id": "hot_holding",
+    "line": "Food Supplies & Storage",
+    "label": {
+     "en": "Hot holding units (types and numbers)",
+     "zh": "热保温设备（类型及数量）"
+    }
+   },
+   {
+    "id": "thaw_cool_reheat",
+    "line": "Food Supplies & Storage",
+    "label": {
+     "en": "Thawing/cooling/reheating equipment",
+     "zh": "解冻/冷却/复热设备"
+    }
+   },
+   {
+    "id": "thermometer",
+    "line": "Food Supplies & Storage",
+    "label": {
+     "en": "Type of temperature measuring device",
+     "zh": "温度测量设备类型"
+    }
+   },
+   {
+    "id": "cooking_equipment",
+    "line": "Cooking",
+    "label": {
+     "en": "Cooking equipment (number of each)",
+     "zh": "烹饪设备（各类数量）"
+    },
+    "options": [
+     "Stove",
+     "Fryer",
+     "Oven",
+     "Other"
+    ]
+   },
+   {
+    "id": "hood",
+    "line": "Cooking",
+    "label": {
+     "en": "Hood (ventilation) above cooking equipment",
+     "zh": "烹饪设备上方是否有排烟罩"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "sanitize_method",
+    "line": "Cooking",
+    "label": {
+     "en": "How cooking equipment and non-submersible food contact surfaces will be sanitized",
+     "zh": "烹饪设备及不可浸泡的食品接触面如何消毒"
+    }
+   },
+   {
+    "id": "produce_washed",
+    "line": "Special Processes",
+    "label": {
+     "en": "Will all produce be washed on-site prior to use?",
+     "zh": "所有农产品使用前是否在店内清洗？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "produce_location",
+    "line": "Special Processes",
+    "label": {
+     "en": "Is there a planned location for washing produce? If no, sink cleaning procedure between uses",
+     "zh": "是否有专门的农产品清洗位置？如无，说明多用途水槽每次使用间的清洁消毒程序"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "vacuum_package",
+    "line": "Special Processes",
+    "label": {
+     "en": "Do you plan to vacuum package items on-site?",
+     "zh": "是否计划在店内真空包装？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "sushi",
+    "line": "Special Processes",
+    "label": {
+     "en": "Do you plan to prepare sushi on-site?",
+     "zh": "是否计划在店内制作寿司？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "small_equipment",
+    "line": "Small Equipment",
+    "label": {
+     "en": "Slicers, cutting boards, can openers, mixers, bulk ice machines, other (number, location, type)",
+     "zh": "切片机、砧板、开罐器、搅拌机、制冰机及其他（数量、位置、类型）"
+    }
+   },
+   {
+    "id": "soft_serve",
+    "line": "Small Equipment",
+    "label": {
+     "en": "Soft serve (frozen dessert) machine (number, location, type)",
+     "zh": "软冰淇淋（冷冻甜品）机（数量、位置、类型）"
+    }
+   },
+   {
+    "id": "dish_machine",
+    "line": "Sinks/Dishwashing",
+    "label": {
+     "en": "Will you have a commercial dish machine?",
+     "zh": "是否配备商用洗碗机？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "three_comp_sink",
+    "line": "Sinks/Dishwashing",
+    "label": {
+     "en": "Three Compartment Sink with attached drain board and grease trap?",
+     "zh": "是否有带沥水板和隔油池的三格水槽？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "mop_sink",
+    "line": "Sinks/Dishwashing",
+    "label": {
+     "en": "Will you have a mop/slop sink?",
+     "zh": "是否有拖把池？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "hand_sinks",
+    "line": "Sinks/Dishwashing",
+    "label": {
+     "en": "Number of hand washing sinks and location(s)",
+     "zh": "洗手池数量及位置"
+    }
+   },
+   {
+    "id": "finish_schedule",
+    "line": "Finish Schedule",
+    "label": {
+     "en": "Finish Schedule (floor, coving, walls, ceiling) for kitchen, storage, toilets, dressing, garbage, warewashing, walk-in",
+     "zh": "装修材料表（地面、踢脚圆角、墙面、天花板），涵盖厨房、储藏、卫生间、更衣室、垃圾区、洗碗区、步入式冷库"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Equipment cut sheets (food storage equipment and sinks)",
+    "zh": "设备规格页（食品储存设备及水槽）"
+   },
+   {
+    "en": "HACCP plan for specialized processes (e.g. vacuum packaging on-site)",
+    "zh": "特殊工艺的HACCP计划（如店内真空包装）"
+   },
+   {
+    "en": "Menu (determines space and equipment needed)",
+    "zh": "菜单（决定所需空间和设备）"
+   }
+  ],
+  "submit": {
+   "fax": "+13127464240",
+   "mail": {
+    "name": "Chicago Department of Public Health, Food Protection Program",
+    "line1": "2133 West Lexington Street",
+    "city": "Chicago",
+    "state": "IL",
+    "zip": "60612"
+   },
+   "signature": "unknown",
+   "evidence": "Submit to the Food Protection Program, 2133 West Lexington Street, Chicago, IL 60612. Phone: 312-746-8046. Fax: 312-746-4240.",
+   "source": "https://www.chicago.gov/content/dam/city/depts/cdph/food_env/general/Food_Protection/PlanReviewApplicationForm2016.pdf"
+  },
+  "notes": "The form is from 2016. The 2021 requirements say 'CDPH is not on E-Plan' and 'Self-Certified Plans will not be reviewed by CDPH.' The Retail Food Guide says plan review is coordinated between CDPH and the Department of Buildings during the building permit process. It's unclear whether the 2133 W Lexington address and fax are still current, so check with the plan review contact (Gregory Nelson, Supervising Sanitarian, 312-746-9509, gregory.nelson@cityofchicago.org) before sending. No fee or signature line is stated on the form."
+ },
+ "chi-license": {
+  "status": "page_only",
+  "seen": "Retail Food Establishment license page (BACP); License Application Requirements Information page; Chicago's Guide to Restaurants and Retail Food Establishments ",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.chicago.gov/city/en/depts/bacp/supp_info/retailfoodestablishment0.html",
+   "https://www.chicago.gov/city/en/depts/bacp/supp_info/license_applicationrequirementsinformation.html",
+   "https://www.chicago.gov/content/dam/city/depts/bacp/general/Retail%20Food%20Guide.pdf"
+  ],
+  "fields": [
+   {
+    "id": "business_ownership",
+    "line": "",
+    "label": {
+     "en": "Business name and ownership information",
+     "zh": "企业名称及所有权信息"
+    },
+    "hint": {
+     "en": "The complete DBA must appear on the license.",
+     "zh": "执照上须显示完整的DBA名称。"
+    }
+   },
+   {
+    "id": "business_address",
+    "line": "",
+    "label": {
+     "en": "Business address",
+     "zh": "营业地址"
+    },
+    "hint": {
+     "en": "Must be properly zoned and non-residential.",
+     "zh": "须符合分区规定且为非住宅。"
+    }
+   },
+   {
+    "id": "square_footage",
+    "line": "",
+    "label": {
+     "en": "Square footage of the business location",
+     "zh": "营业场所面积（平方英尺）"
+    }
+   },
+   {
+    "id": "activity_description",
+    "line": "",
+    "label": {
+     "en": "Detailed description of all business activities conducted on and off the location",
+     "zh": "场所内外所有经营活动的详细说明"
+    }
+   },
+   {
+    "id": "applicant_id",
+    "line": "",
+    "label": {
+     "en": "Identification from all applicants (driver's license, state ID or other government photo ID)",
+     "zh": "所有申请人的身份证件（驾照、州身份证或其他政府带照片证件）"
+    }
+   },
+   {
+    "id": "il_file_number",
+    "line": "",
+    "label": {
+     "en": "State of Illinois File Number, if applicable",
+     "zh": "伊利诺伊州注册档案号（如适用）"
+    }
+   },
+   {
+    "id": "idor_account",
+    "line": "",
+    "label": {
+     "en": "Illinois Department of Revenue (IDOR) Account ID Number, if applicable",
+     "zh": "伊利诺伊州税务局（IDOR）账户号（如适用）"
+    }
+   },
+   {
+    "id": "fein",
+    "line": "",
+    "label": {
+     "en": "Federal EIN (FEIN), if applicable",
+     "zh": "联邦雇主识别号（FEIN，如适用）"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Lease or proof of property ownership",
+    "zh": "租约或产权证明"
+   },
+   {
+    "en": "Photo ID",
+    "zh": "带照片身份证件"
+   },
+   {
+    "en": "City of Chicago Food Service Sanitation Certificate holder on premises at all times",
+    "zh": "场所内须始终有持芝加哥食品服务卫生证书的员工"
+   }
+  ],
+  "submit": {
+   "signature": "typed",
+   "evidence": "All business license applications started online must be completed online.",
+   "source": "https://www.chicago.gov/city/en/depts/bacp/supp_info/license_applicationrequirementsinformation.html"
+  },
+  "notes": "Apply online through 'Chicago Business Direct' (host not shown on the pages read) or in person at the Small Business Center, City Hall, 121 N. LaSalle St., Room 800 (312-744-6249; businesslicense@cityofchicago.org is for help, not filing). In-person applicants complete a Business Information Sheet pre-application. The premises must pass a CDPH health inspection before the license is issued. Two fee tables conflict. Current BACP page: $660 (0-1,000 sq ft), $940 (1,001-2,500), $1,110 (2,501-4,500), $1,320 (4,501-10,000), $1,650 (over 10,000). The older guide: $660 / $880 / $1,100. Use the BACP page. 2-year term. Unpaid City debt must be cleared before the license is issued."
+ },
+ "chi-limited": {
+  "status": "page_only",
+  "seen": "Business Licensing page (Limited Business License) and License Application Requirements Information page",
+  "read": "2026-10-31",
+  "sources": [
+   "https://chicago.gov/city/en/sites/chicago-business-licensing/home/business-licensing.html",
+   "https://www.chicago.gov/city/en/depts/bacp/supp_info/license_applicationrequirementsinformation.html"
+  ],
+  "fields": [
+   {
+    "id": "business_ownership",
+    "line": "",
+    "label": {
+     "en": "Business name and ownership information",
+     "zh": "企业名称及所有权信息"
+    }
+   },
+   {
+    "id": "business_address",
+    "line": "",
+    "label": {
+     "en": "Business address",
+     "zh": "营业地址"
+    }
+   },
+   {
+    "id": "square_footage",
+    "line": "",
+    "label": {
+     "en": "Square footage of the business location",
+     "zh": "营业场所面积（平方英尺）"
+    }
+   },
+   {
+    "id": "activity_description",
+    "line": "",
+    "label": {
+     "en": "Detailed description of all business activities conducted on and off the location",
+     "zh": "场所内外所有经营活动的详细说明"
+    },
+    "options": [
+     "General Retail Sales and Services",
+     "Nail Salon",
+     "Salon/Spa Services",
+     "Tax Preparation"
+    ]
+   },
+   {
+    "id": "applicant_id",
+    "line": "",
+    "label": {
+     "en": "Identification from all applicants (driver's license, state ID or other government photo ID)",
+     "zh": "所有申请人的身份证件（驾照、州身份证或其他政府带照片证件）"
+    }
+   },
+   {
+    "id": "il_file_number",
+    "line": "",
+    "label": {
+     "en": "State of Illinois File Number, if applicable",
+     "zh": "伊利诺伊州注册档案号（如适用）"
+    }
+   },
+   {
+    "id": "idor_account",
+    "line": "",
+    "label": {
+     "en": "Illinois Department of Revenue (IDOR) Account ID Number, if applicable",
+     "zh": "伊利诺伊州税务局（IDOR）账户号（如适用）"
+    }
+   },
+   {
+    "id": "fein",
+    "line": "",
+    "label": {
+     "en": "Federal EIN (FEIN), if applicable",
+     "zh": "联邦雇主识别号（FEIN，如适用）"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Government-issued photo ID for all applicants",
+    "zh": "所有申请人的政府签发带照片身份证件"
+   }
+  ],
+  "submit": {
+   "signature": "typed",
+   "evidence": "All business license applications started online must be completed online.",
+   "source": "https://www.chicago.gov/city/en/depts/bacp/supp_info/license_applicationrequirementsinformation.html"
+  },
+  "notes": "Fee $250 per 2 years. Zoning review is required; no criminal background check. Online through Chicago Business Direct (host not shown) or in person at the Small Business Center, 121 N. LaSalle, Room 800. The library's info url (ofinterest/bus/retail.html) was not opened. The four activities in the options list are the ones the page lists under the Limited Business License, not form choices."
+ },
+ "jc-co": {
+  "status": "mapped",
+  "seen": "U.C.C. F270 (rev. 8/2011) Application for Certificate",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.jerseycitynj.gov/cityhall/HousingAndDevelopment/businesses",
+   "https://www.jerseycitynj.gov/common/pages/GetFile.ashx?key=c6wnAatS"
+  ],
+  "fields": [
+   {
+    "id": "work_site_location",
+    "line": "Identification",
+    "label": {
+     "en": "Work Site Location",
+     "zh": "施工/营业场所地址"
+    }
+   },
+   {
+    "id": "block",
+    "line": "Identification",
+    "label": {
+     "en": "Block",
+     "zh": "地块编号（Block）"
+    },
+    "hint": {
+     "en": "Tax map block number",
+     "zh": "税务地图上的 Block 编号"
+    }
+   },
+   {
+    "id": "lot",
+    "line": "Identification",
+    "label": {
+     "en": "Lot",
+     "zh": "宗地编号（Lot）"
+    }
+   },
+   {
+    "id": "qualification_code",
+    "line": "Identification",
+    "label": {
+     "en": "Qualification Code",
+     "zh": "资格代码（Qualification Code，如有）"
+    }
+   },
+   {
+    "id": "owner_in_fee",
+    "line": "Identification",
+    "label": {
+     "en": "Owner in Fee",
+     "zh": "产权所有人（Owner in Fee）"
+    }
+   },
+   {
+    "id": "owner_address",
+    "line": "Identification",
+    "label": {
+     "en": "Address (owner)",
+     "zh": "产权人地址"
+    }
+   },
+   {
+    "id": "owner_tel",
+    "line": "Identification",
+    "label": {
+     "en": "Tel. (owner)",
+     "zh": "产权人电话"
+    }
+   },
+   {
+    "id": "contractor",
+    "line": "Identification",
+    "label": {
+     "en": "Contractor",
+     "zh": "承包商名称"
+    }
+   },
+   {
+    "id": "contractor_address",
+    "line": "Identification",
+    "label": {
+     "en": "Address (contractor)",
+     "zh": "承包商地址"
+    }
+   },
+   {
+    "id": "contractor_tel",
+    "line": "Identification",
+    "label": {
+     "en": "Tel. (contractor)",
+     "zh": "承包商电话"
+    }
+   },
+   {
+    "id": "contractor_license_no",
+    "line": "Identification",
+    "label": {
+     "en": "License No.",
+     "zh": "承包商执照号"
+    }
+   },
+   {
+    "id": "federal_employer_no",
+    "line": "Identification",
+    "label": {
+     "en": "Federal Employee No.",
+     "zh": "联邦雇主识别号（FEIN）"
+    }
+   },
+   {
+    "id": "action",
+    "line": "Action",
+    "label": {
+     "en": "Certificate requested",
+     "zh": "申请的证书类型"
+    },
+    "options": [
+     "Certificate of Occupancy",
+     "Certificate of Continued Occupancy",
+     "Lead Hazard Abatement Certificate of Clearance",
+     "Temporary Certificate of Occupancy"
+    ]
+   },
+   {
+    "id": "use_group_previous",
+    "line": "Action",
+    "label": {
+     "en": "Use Group: Previous",
+     "zh": "原用途类别（Use Group）"
+    }
+   },
+   {
+    "id": "use_group_current",
+    "line": "Action",
+    "label": {
+     "en": "Use Group: Current",
+     "zh": "现用途类别（Use Group）"
+    }
+   },
+   {
+    "id": "final_cost_of_construction",
+    "line": "Action",
+    "label": {
+     "en": "Final Cost of Construction: $",
+     "zh": "最终施工造价（美元）"
+    },
+    "hint": {
+     "en": "Include value of any new structure, all on-site improvements, built-in furnishings and fixtures and all integral equipment exclusive of process or manufacturing equipment.",
+     "zh": "包括新建结构、场内改良、固定家具与装置及所有配套设备的价值，不含生产/加工设备。"
+    }
+   },
+   {
+    "id": "deviations_from_plans",
+    "line": "Action",
+    "label": {
+     "en": "Describe any substantive deviation from the released plans and specifications",
+     "zh": "说明与已批准图纸和规格的重大偏差"
+    },
+    "hint": {
+     "en": "A set of amended drawings may be required.",
+     "zh": "可能需要提交一套修订图纸。"
+    }
+   },
+   {
+    "id": "tco_reason",
+    "line": "Action",
+    "label": {
+     "en": "If requesting a Temporary Certificate of Occupancy, explain why",
+     "zh": "如申请临时占用证书，请说明原因"
+    }
+   },
+   {
+    "id": "description_of_work_use",
+    "line": "Action",
+    "label": {
+     "en": "Description of Work/Use",
+     "zh": "工程/用途说明"
+    }
+   },
+   {
+    "id": "signer_role",
+    "line": "Signature",
+    "label": {
+     "en": "Signed: Owner / Agent",
+     "zh": "签署人身份：业主 / 代理人"
+    },
+    "options": [
+     "Owner",
+     "Agent"
+    ]
+   }
+  ],
+  "attach": [
+   {
+    "en": "Photo of front of (entire) property",
+    "zh": "物业正面（整体）照片"
+   },
+   {
+    "en": "UCC 270 Form (F270)",
+    "zh": "UCC F270 证书申请表"
+   },
+   {
+    "en": "Zoning approved plans",
+    "zh": "经分区（Zoning）批准的图纸"
+   }
+  ],
+  "submit": {
+   "portal": "jcnj.org",
+   "signature": "unknown",
+   "evidence": "All new CO applications are processed through the Jersey City Permit Portal.",
+   "source": "https://www.jerseycitynj.gov/cityhall/HousingAndDevelopment/businesses"
+  },
+  "notes": "The city page links the portal as http://jcnj.org/permitportal (a redirect; the host did not resolve from our sandbox, so the final portal host is unconfirmed). The CO track depends on the case: Change of Use (Zoning Review with F100/F110 and NJDCA form, then a Change of Use construction application, then the CO), Continued CO (Certificate-CCO, needs applicant contact info + UCC 270; if a CO already exists, email constructioncode@jcnj.org for a $50 'Non-CO letter' to add your name), or New CO after new construction/tenant fit-out. F270 is a 2011 state form; the portal may ask its own questions in addition. No CO fee amount was shown on the page."
+ },
+ "jc-food-license": {
+  "status": "page_only",
+  "seen": "Procedures for Opening a Food Establishment (Jersey City HHS, Environmental Health, 2026 PDF); the application form itself was not published",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.jerseycitynj.gov/cityhall/health/divisionofhealth",
+   "https://www.jerseycitynj.gov/UserFiles/Servers/Server_6189660/File/City%20Hall/Human%20Health%20and%20Services/ENVIRONMENTAL/2026/FOOD%20ESTABLISHMENT%20OPENING.pdf"
+  ],
+  "fields": [
+   {
+    "id": "owner_photo_id",
+    "line": "1",
+    "label": {
+     "en": "Owner must apply in person with proof of ID",
+     "zh": "业主须本人到场并出示身份证明"
+    }
+   },
+   {
+    "id": "ein_or_ssn",
+    "line": "2",
+    "label": {
+     "en": "Tax ID (EIN) or Social Security Number",
+     "zh": "联邦税号（EIN）或社会安全号（SSN）"
+    }
+   },
+   {
+    "id": "license_class",
+    "line": "6",
+    "label": {
+     "en": "License class (determined by the inspector)",
+     "zh": "执照类别（由检查员确定）"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Proof of ID (owner, in person)",
+    "zh": "业主身份证明（本人到场）"
+   },
+   {
+    "en": "Tax ID (EIN) or Social Security Number",
+    "zh": "EIN 或 SSN 证明"
+   },
+   {
+    "en": "Business Liability Insurance (minimum $500,000)",
+    "zh": "商业责任保险（最低 50 万美元）"
+   },
+   {
+    "en": "Certificate of Occupancy showing the proper use of the property (same usage as your business)",
+    "zh": "用途与经营业务一致的占用证书（CO）"
+   },
+   {
+    "en": "$75.00 pre-operational inspection fee (cash, debit or credit card)",
+    "zh": "75 美元开业前检查费（现金、借记卡或信用卡）"
+   },
+   {
+    "en": "Food Safety Manager or Food Handler's course certificate (depending on risk level)",
+    "zh": "食品安全经理或食品处理员课程证书（视风险等级）"
+   },
+   {
+    "en": "Bill of sale if the business was bought / lease agreement",
+    "zh": "如为收购须提供买卖契据 / 租赁合同"
+   }
+  ],
+  "submit": {
+   "signature": "unknown",
+   "evidence": "All new licenses and temporary vendor licenses are in person, by appointment only. ... To make an appointment, call 201-547-5285 or 201-547-5173. No walk-ins will be accepted.",
+   "source": "https://www.jerseycitynj.gov/cityhall/health/divisionofhealth"
+  },
+  "notes": "New retail food licenses are in person by appointment only (no walk-ins); renewals are online (Health Licensing Applications link goes to eforms-main.govpilot.com/NJ/jerseycity). Office: City Hall Annex, One Jackson Square (364 MLK Drive), Jersey City NJ 07305, (201) 547-6800. Flow: documents approved, then pre-operational inspection ($75), then a return visit to obtain the annual license; you may not open before the license. License fees changed Aug 1, 2025 (fee list PDF linked on the page, not read here). Library method 'in_person' is correct."
+ },
+ "sl-plan-review": {
+  "status": "page_only",
+  "seen": "Food Inspection Program: Pre-opening: New Construction/Remodel & Change of Ownership Requirements (City of Sugar Land, 7 pages, undated)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements"
+  ],
+  "fields": [
+   {
+    "id": "css_account",
+    "line": "",
+    "label": {
+     "en": "Create a profile or log in to the City's Citizen Self-Service (CSS) portal",
+     "zh": "在市政府 Citizen Self-Service（CSS）门户注册或登录"
+    }
+   },
+   {
+    "id": "application_type",
+    "line": "",
+    "label": {
+     "en": "Application searched under Apply (e.g. 'Occupancy' for 'Tenant Change of Occupancy Application')",
+     "zh": "在 Apply 中搜索申请类型（如输入 Occupancy，选择 Tenant Change of Occupancy Application）"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Menu",
+    "zh": "菜单"
+   },
+   {
+    "en": "Floor plans, including equipment and finish schedules",
+    "zh": "平面图，含设备清单和饰面材料表"
+   }
+  ],
+  "submit": {
+   "portal": "energovweb.sugarlandtx.gov",
+   "signature": "typed",
+   "evidence": "Plan reviews are only accepted online through Citizen Self-Service (CSS) Portal.",
+   "source": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements"
+  },
+  "notes": "Plans go to the COSL Permits Office via CSS before work begins, or within 30 days of a change of ownership; one application notifies Building, Fire, Planning and Food. Changing ownership without plan review and permit approval can bring a citation and closure notice. Permits questions: permits@sugarlandtx.gov, 281-275-2270. Food Inspection Program: 111 Gillingham Lane, Bldg. B, Sugar Land TX 77478, 281-275-2170. No fee amount is printed in the guide."
+ },
+ "sl-food-permit": {
+  "status": "page_only",
+  "seen": "Food Inspection Program: Pre-opening: New Construction/Remodel & Change of Ownership Requirements (City of Sugar Land), section FOOD PERMIT",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements"
+  ],
+  "fields": [
+   {
+    "id": "css_login",
+    "line": "Step 1",
+    "label": {
+     "en": "Login or register at Citizen Self-Service (CSS) to apply for Food Establishment & Frozen Food Permit",
+     "zh": "登录或注册 CSS，申请食品经营及冷冻食品许可"
+    }
+   },
+   {
+    "id": "permit_type",
+    "line": "Step 3",
+    "label": {
+     "en": "Search 'FOOD' and select PERMANENT FOOD ESTABLISHMENT PERMIT",
+     "zh": "搜索 FOOD 并选择 PERMANENT FOOD ESTABLISHMENT PERMIT（固定食品经营许可）"
+    }
+   },
+   {
+    "id": "business_name_matches_sales_tax",
+    "line": "Documents 3",
+    "label": {
+     "en": "Business name (must match the Texas Sales Tax Permit)",
+     "zh": "商号名称（须与德州销售税许可上的名称一致）"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Certified Food Protection Manager certificate (at least one employee on duty at all hours)",
+    "zh": "食品安全经理认证（营业时间内至少一名持证员工在岗）"
+   },
+   {
+    "en": "Waste manifest or grease trap service receipt (not required for new establishments or those closed more than 90 days)",
+    "zh": "废物清运单或隔油池清理收据（新开业或停业超过 90 天者免交）"
+   },
+   {
+    "en": "Copy of State of Texas Sales Tax Permit (business name must match the food establishment)",
+    "zh": "德州销售税许可副本（名称须与食品场所一致）"
+   },
+   {
+    "en": "Pest control contract or most current invoice",
+    "zh": "虫害防治合同或最新发票"
+   },
+   {
+    "en": "Menu (official or unofficial list of all food items offered)",
+    "zh": "菜单（全部出售食品的正式或非正式清单）"
+   }
+  ],
+  "submit": {
+   "portal": "energovweb.sugarlandtx.gov",
+   "signature": "typed",
+   "evidence": "Step 4: Begin your application process and upload all required supporting documents.",
+   "source": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements"
+  },
+  "notes": "After a change-of-occupancy/new construction/remodel application is filed, CSS emails a link to complete the food permit application; it must be done before requesting the final food inspection. The guide says 'Documents to be submitted may include' the five items above. Library method 'online' is correct. Fee amounts not printed. Questions: FoodInspection@SugarLandTX.gov, 281-275-2170."
+ },
+ "sl-co": {
+  "status": "page_only",
+  "seen": "Tenant Change of Occupancy Application (CSS portal), as described in the Food Inspection Program pre-opening guide",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements"
+  ],
+  "fields": [
+   {
+    "id": "css_account",
+    "line": "",
+    "label": {
+     "en": "Create a profile or log in to the City's CSS portal",
+     "zh": "在市政府 CSS 门户注册或登录"
+    }
+   },
+   {
+    "id": "application_type",
+    "line": "",
+    "label": {
+     "en": "Search 'Occupancy' and select 'Tenant Change of Occupancy Application'",
+     "zh": "搜索 Occupancy，选择 Tenant Change of Occupancy Application（租户占用变更申请）"
+    }
+   }
+  ],
+  "attach": [],
+  "submit": {
+   "portal": "energovweb.sugarlandtx.gov",
+   "signature": "typed",
+   "evidence": "This will initiate the application process, and notify all departments (Building, Fire, Planning, & Food) of application once completed.",
+   "source": "https://www.sugarlandtx.gov/DocumentCenter/View/26923/Pre-Opening-New-Construction-Remodel-and-Change-of-Ownership-Requirements"
+  },
+  "notes": "Only the food program's guide was found; no Building/Permits CO guide listing the portal's questions was located. The CO is issued by email: 'Once you receive inspections from Fire, Building and are approved, the permits office will issue you a new Certificate of Occupancy via email.' Permits Office: permits@sugarlandtx.gov, 281-275-2270."
+ },
+ "chi-building": {
+  "status": "page_only",
+  "seen": "Express Permit Program: Interior Alteration (Nonstructural Interior Work), Chicago Guide to Building Permits, 'Before You Apply' list",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/INTWK-alteration.html"
+  ],
+  "fields": [
+   {
+    "id": "property_address",
+    "line": "",
+    "label": {
+     "en": "Property address",
+     "zh": "物业地址"
+    }
+   },
+   {
+    "id": "property_pin",
+    "line": "",
+    "label": {
+     "en": "Property PIN (lookup on Cook County Assessor website)",
+     "zh": "物业 PIN 编号（可在库克县评估办公室网站查询）"
+    }
+   },
+   {
+    "id": "property_owner",
+    "line": "",
+    "label": {
+     "en": "Property owner: name and contact information",
+     "zh": "业主姓名及联系方式"
+    }
+   },
+   {
+    "id": "emergency_contact",
+    "line": "",
+    "label": {
+     "en": "Designated emergency contact",
+     "zh": "指定紧急联系人"
+    }
+   },
+   {
+    "id": "building_info",
+    "line": "",
+    "label": {
+     "en": "Basic info about the main building (number of stories, number/type of units)",
+     "zh": "主建筑基本信息（层数、单元数量/类型）"
+    }
+   },
+   {
+    "id": "alteration_details",
+    "line": "",
+    "label": {
+     "en": "Details of the proposed interior alterations",
+     "zh": "拟进行的室内改造详情"
+    }
+   },
+   {
+    "id": "contractors",
+    "line": "",
+    "label": {
+     "en": "Required contractors: exact names or Chicago license numbers",
+     "zh": "所需承包商：准确名称或芝加哥执照号"
+    }
+   },
+   {
+    "id": "design_professional",
+    "line": "",
+    "label": {
+     "en": "Required design professional (if any): exact name or Illinois license number",
+     "zh": "所需设计专业人员（如有）：准确姓名或伊利诺伊州执照号"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Existing condition photograph (at least 1)",
+    "zh": "现状照片（至少 1 张）"
+   },
+   {
+    "en": "Energy and water efficiency compliance form",
+    "zh": "能源与节水合规表"
+   },
+   {
+    "en": "Non-residential work: drawings by an Illinois-licensed architect or structural engineer (existing and proposed floor plans per story)",
+    "zh": "非住宅工程：由伊利诺伊州持证建筑师或结构工程师绘制的图纸（每层现状及拟建平面图）"
+   },
+   {
+    "en": "HVAC load calculation (if new air conditioning)",
+    "zh": "暖通负荷计算（如新增空调）"
+   },
+   {
+    "en": "Condominium association approval letter (if condo property)",
+    "zh": "公寓业主协会批准函（如为公寓物业）"
+   },
+   {
+    "en": "Government ownership or funding letter (if applicable, e.g. SBIF grant)",
+    "zh": "政府产权或资助证明函（如适用，例如 SBIF 补助）"
+   },
+   {
+    "en": "Tax and demolition form (if fire damage)",
+    "zh": "税务与拆除表（如有火灾损坏）"
+   },
+   {
+    "en": "Owner as contractor form (Form 401) and government ID (if owner acts as GC or plumber)",
+    "zh": "业主自任承包商表（Form 401）及政府身份证件（如业主自任总包或水管工）"
+   }
+  ],
+  "submit": {
+   "portal": "webapps1.chicago.gov",
+   "signature": "typed",
+   "evidence": "Before you start the online application, you should have: Property address ...",
+   "source": "https://www.chicago.gov/city/en/sites/guide-to-building-permits/home/instructions/EPP/INTWK-alteration.html"
+  },
+  "notes": "ALARM: for non-residential units the Express Permit Program lists as NOT eligible 'Constructing or remodeling space for a new food establishment or food establishment operator', work on a never-occupied shell/vanilla box, and changes of occupancy. Assembly (Group A, e.g. restaurants) is capped at 500 sq ft; other non-residential at 2,000 sq ft. So most new restaurant build-outs need standard plan review, not EPP; the library entry should not route food businesses to EPP. Portal host taken from the page's link to webapps1.chicago.gov/buildingpermit/ (not opened). Licensed general contractor required (Class A-E by cost). Fees: stand-alone permit fees per Chicago Construction Codes 14A-12-1204.2 (amounts not shown)."
+ },
+ "jc-construction": {
+  "status": "mapped",
+  "seen": "U.C.C. F100 Construction Permit Application (F100-1 rev. 8/08, F100-2 rev. 11/2014, F100-3 rev. 12/07)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.jerseycitynj.gov/cityhall/HousingAndDevelopment/businesses",
+   "https://www.jerseycitynj.gov/common/pages/GetFile.ashx?key=NIkjAeh3"
+  ],
+  "fields": [
+   {
+    "id": "block",
+    "line": "Header",
+    "label": {
+     "en": "Block",
+     "zh": "地块编号（Block）"
+    }
+   },
+   {
+    "id": "lot",
+    "line": "Header",
+    "label": {
+     "en": "Lot",
+     "zh": "宗地编号（Lot）"
+    }
+   },
+   {
+    "id": "qualification_code",
+    "line": "Header",
+    "label": {
+     "en": "Qualification Code",
+     "zh": "资格代码（如有）"
+    }
+   },
+   {
+    "id": "site_address",
+    "line": "I.1",
+    "label": {
+     "en": "Proposed Work Site at",
+     "zh": "拟施工地址"
+    }
+   },
+   {
+    "id": "owner_in_fee",
+    "line": "I.2",
+    "label": {
+     "en": "Name of Owner in Fee (tel., e-mail, address)",
+     "zh": "产权所有人姓名（电话、电邮、地址）"
+    }
+   },
+   {
+    "id": "ownership_in_fee",
+    "line": "I.3",
+    "label": {
+     "en": "Ownership in Fee",
+     "zh": "产权性质"
+    },
+    "options": [
+     "Public",
+     "Private"
+    ]
+   },
+   {
+    "id": "principal_contractor",
+    "line": "I.4",
+    "label": {
+     "en": "Principal Contractor (address, tel., e-mail, fax, license/registration no., exp. date, Federal Emp. ID No.)",
+     "zh": "主承包商（地址、电话、电邮、传真、执照/注册号、到期日、联邦雇主识别号）"
+    },
+    "hint": {
+     "en": "Home Improvement Contractor Registration No. or Exemption Reason; or, if new home, Builder Reg. No.",
+     "zh": "家装承包商注册号或豁免理由；新建住宅则填建筑商注册号"
+    }
+   },
+   {
+    "id": "architect_engineer",
+    "line": "I.5",
+    "label": {
+     "en": "Architect or Engineer (contact, address, tel., fax, e-mail, license no.)",
+     "zh": "建筑师或工程师（联系人、地址、电话、传真、电邮、执照号）"
+    }
+   },
+   {
+    "id": "responsible_person",
+    "line": "I.6",
+    "label": {
+     "en": "Responsible Person in Charge once Work has Begun (tel., fax)",
+     "zh": "开工后现场负责人（电话、传真）"
+    }
+   },
+   {
+    "id": "proposed_work",
+    "line": "IIa",
+    "label": {
+     "en": "Proposed Work",
+     "zh": "拟进行的工程类型"
+    },
+    "options": [
+     "New Building",
+     "Addition",
+     "Alteration",
+     "Repair",
+     "Renovation",
+     "Reconstruction",
+     "Demolition",
+     "Minor Work",
+     "Asbestos Abat.-Subch. 8",
+     "Lead Hazard Abatement",
+     "Radon Remediation",
+     "Annual Permit"
+    ]
+   },
+   {
+    "id": "subcodes",
+    "line": "IIb",
+    "label": {
+     "en": "Subcodes (check all that apply) with Est. Cost",
+     "zh": "子规范（勾选所有适用项）及预估费用"
+    },
+    "options": [
+     "Building",
+     "Electrical",
+     "Plumbing",
+     "Fire Protection",
+     "Elevator"
+    ]
+   },
+   {
+    "id": "plan_review_options",
+    "line": "III",
+    "label": {
+     "en": "Plan Review (optional): Do you want",
+     "zh": "图纸审查（可选）：是否需要"
+    },
+    "options": [
+     "Partial Releases",
+     "Prototype Processing"
+    ]
+   },
+   {
+    "id": "building_contains",
+    "line": "IV",
+    "label": {
+     "en": "Does or will your building contain any of the following?",
+     "zh": "建筑是否包含或将包含以下设施？"
+    },
+    "options": [
+     "Elevators/Escalators/Lifts/Dumbwaiters/Moving Walks",
+     "High Pressure Boilers",
+     "Pressure Vessels",
+     "Refrigeration Systems",
+     "Cross-Connections/Backflow Preventers",
+     "Hazardous Uses/Places of Assembly",
+     "Sprinklers/Standpipes",
+     "Smoke Control Systems in Open Wells",
+     "Underground Storage Tanks",
+     "Swimming Pools, Spas and Hot Tubs",
+     "LPGas Tanks",
+     "Fire Alarm"
+    ]
+   },
+   {
+    "id": "num_stories",
+    "line": "VI.1",
+    "label": {
+     "en": "Number of Stories",
+     "zh": "层数"
+    }
+   },
+   {
+    "id": "height",
+    "line": "VI.2",
+    "label": {
+     "en": "Height of Structure (ft.)",
+     "zh": "建筑高度（英尺）"
+    }
+   },
+   {
+    "id": "area_largest_floor",
+    "line": "VI.3",
+    "label": {
+     "en": "Area — Largest Floor (sq. ft.)",
+     "zh": "最大楼层面积（平方英尺）"
+    }
+   },
+   {
+    "id": "new_building_area",
+    "line": "VI.4",
+    "label": {
+     "en": "New Building Area (sq. ft.)",
+     "zh": "新建建筑面积（平方英尺）"
+    }
+   },
+   {
+    "id": "volume_new_structure",
+    "line": "VI.5",
+    "label": {
+     "en": "Volume of New Structure (cu. ft.)",
+     "zh": "新建结构体积（立方英尺）"
+    }
+   },
+   {
+    "id": "max_live_load",
+    "line": "VI.6",
+    "label": {
+     "en": "Max. Live Load",
+     "zh": "最大活荷载"
+    }
+   },
+   {
+    "id": "max_occupancy_load",
+    "line": "VI.7",
+    "label": {
+     "en": "Max. Occupancy Load",
+     "zh": "最大容纳人数"
+    }
+   },
+   {
+    "id": "industrialized_building",
+    "line": "VI.8",
+    "label": {
+     "en": "If Industrialized Building: State Approved / HUD",
+     "zh": "如为工业化（预制）建筑：州批准 / HUD"
+    }
+   },
+   {
+    "id": "land_area_disturbed",
+    "line": "VI.9",
+    "label": {
+     "en": "Total Land Area Disturbed (sq. ft.)",
+     "zh": "扰动土地总面积（平方英尺）"
+    }
+   },
+   {
+    "id": "flood_hazard_zone",
+    "line": "VI.10",
+    "label": {
+     "en": "Flood Hazard Zone",
+     "zh": "洪水风险区"
+    }
+   },
+   {
+    "id": "base_flood_elevation",
+    "line": "VI.11",
+    "label": {
+     "en": "Base Flood Elevation",
+     "zh": "基准洪水高程"
+    }
+   },
+   {
+    "id": "wetlands",
+    "line": "VI.12",
+    "label": {
+     "en": "Wetlands",
+     "zh": "湿地"
+    },
+    "options": [
+     "yes",
+     "no"
+    ]
+   },
+   {
+    "id": "residential_use",
+    "line": "VII.A",
+    "label": {
+     "en": "Residential (primary use): specific use, proposed use group, present use group, dwelling units",
+     "zh": "住宅（主要用途）：具体用途、拟定用途类别、现用途类别、住宅单元数"
+    }
+   },
+   {
+    "id": "nonresidential_use",
+    "line": "VII.B",
+    "label": {
+     "en": "Non-Residential (primary use): 1. State Specific Use; 2. Use Group, Proposed; 3. Change in Use Group, Indicate Present",
+     "zh": "非住宅（主要用途）：1. 具体用途；2. 拟定用途类别；3. 如用途类别变更，注明现用途"
+    }
+   },
+   {
+    "id": "mixed_use",
+    "line": "VII.C",
+    "label": {
+     "en": "Mixed Use: list secondary use(s)",
+     "zh": "混合用途：列出次要用途"
+    }
+   },
+   {
+    "id": "construction_classification",
+    "line": "VII.D",
+    "label": {
+     "en": "Construct. Classification: Present / Proposed",
+     "zh": "建筑构造类别：现状 / 拟定"
+    }
+   },
+   {
+    "id": "owner_certification",
+    "line": "F100-2 I",
+    "label": {
+     "en": "Owner Section (if applicant is owner in fee): boxes A, B, C (C.1 Building, C.2 Fire Protection, C.3 Electrical, C.4 Plum",
+     "zh": "业主声明（申请人为产权人时）：勾选 A、B、C（C.1 建筑、C.2 消防、C.3 电气、C.4 管道）、D"
+    }
+   },
+   {
+    "id": "agent_section",
+    "line": "F100-2 II",
+    "label": {
+     "en": "Agent Section (if applicant is not owner in fee): Agent Name, Address, Telephone; Check if contractor",
+     "zh": "代理人声明（申请人非产权人时）：代理人姓名、地址、电话；如为承包商请勾选"
+    }
+   },
+   {
+    "id": "lead_affidavit",
+    "line": "F100-2 III",
+    "label": {
+     "en": "Lead Hazard Abatement: include Homeowner or Building Owner Affidavit",
+     "zh": "铅危害消减：附业主宣誓书"
+    }
+   },
+   {
+    "id": "home_elevation",
+    "line": "F100-2 IV",
+    "label": {
+     "en": "Home Elevation: include Home Elevation Contractor Certification",
+     "zh": "房屋抬升：附抬升承包商证明"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Contacts of contractors",
+    "zh": "承包商联系方式"
+   },
+   {
+    "en": "Technical sections as applicable: F110 Building, F120 Electrical, F130 Plumbing, F140 Fire (work description must state the change of use)",
+    "zh": "适用的技术分表：F110 建筑、F120 电气、F130 管道、F140 消防（工程说明须注明用途变更）"
+   },
+   {
+    "en": "One set of zoning-approved plans, signed and sealed by architect or engineer (printed)",
+    "zh": "一套经分区批准、由建筑师或工程师签字盖章的图纸（纸质）"
+   }
+  ],
+  "submit": {
+   "portal": "jcnj.org",
+   "signature": "unknown",
+   "evidence": "Once submitted on the permitting portal, all physical applications and zoning approved plans (one set) need to be submitted in person to the Construction Office located at 1 Jackson Square.",
+   "source": "https://www.jerseycitynj.gov/cityhall/HousingAndDevelopment/businesses"
+  },
+  "notes": "Two-step submission: portal first, then the paper F100 jacket, technical sections and one plan set in person at the Construction Office, City Hall Annex, One Jackson Square (364 MLK Drive), Jersey City NJ 07305 (permit counter Mon-Fri 9:00-3:00; (201) 547-5055). The paper forms carry signature lines (Owner or Agent 'Certification in lieu of oath'); the page does not say whether ink is required. The division has up to 20 business days to review and issue. Applicant completes Sections I, II, III (optional), IV, VI and VII; Section V fee summary is office use. The F100 revisions are 2007-2014 state forms. Portal link http://jcnj.org/permitportal is a redirect we could not resolve."
+ },
+ "nyc-tobacco-dealer": {
+  "status": "page_only",
+  "seen": "Tobacco Retail Dealer License (NYC Business, DCWP), requirements and How to Apply tabs; Basic License Application PDF not read (blocked)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://nyc-business.nyc.gov/nycbusiness/description/cigarette-retail-dealer-license"
+  ],
+  "fields": [
+   {
+    "id": "community_district_eligibility",
+    "line": "",
+    "label": {
+     "en": "Licenses available in your community district (or a cap exception applies)",
+     "zh": "所在社区区仍有执照名额（或符合上限例外情形）"
+    }
+   },
+   {
+    "id": "business_structure",
+    "line": "",
+    "label": {
+     "en": "Business certificate based on legal structure (assumed name, partnership, or NYS DOS registration)",
+     "zh": "按法律结构提供营业证明（化名证书、合伙证书或纽约州务厅注册）"
+    }
+   },
+   {
+    "id": "basic_license_application",
+    "line": "",
+    "label": {
+     "en": "Basic License Application Form",
+     "zh": "基本执照申请表"
+    }
+   },
+   {
+    "id": "sales_tax_id",
+    "line": "",
+    "label": {
+     "en": "Sales Tax Identification Number or Application Confirmation Number",
+     "zh": "销售税识别号或申请确认号"
+    }
+   },
+   {
+    "id": "nys_retail_dealer_registration",
+    "line": "",
+    "label": {
+     "en": "NYS DTF Registration of Retail Dealers and Vending Machines for cigarettes and tobacco products",
+     "zh": "纽约州税务局卷烟及烟草产品零售商/售货机登记"
+    }
+   },
+   {
+    "id": "proof_business_address",
+    "line": "",
+    "label": {
+     "en": "Proof of business address",
+     "zh": "营业地址证明"
+    }
+   },
+   {
+    "id": "proof_home_address",
+    "line": "",
+    "label": {
+     "en": "Proof of home address for each individual on the application",
+     "zh": "申请表上每位个人的住址证明"
+    }
+   },
+   {
+    "id": "payment_method",
+    "line": "",
+    "label": {
+     "en": "License fee payment",
+     "zh": "执照费支付方式"
+    },
+    "options": [
+     "Check or money order payable to DCWP",
+     "Credit card (Visa, Mastercard, American Express, Discover)"
+    ]
+   }
+  ],
+  "attach": [
+   {
+    "en": "Business/Assumed Name Certificate, Partnership Certificate, or NYS Division of Corporations registration (DCWP may ask later)",
+    "zh": "化名证书、合伙证书或纽约州公司注册证明（DCWP 可能后续索取）"
+   },
+   {
+    "en": "Copy of NYS DTF Registration of Retail Dealers and Vending Machines (cigarettes and tobacco)",
+    "zh": "纽约州税务局卷烟/烟草零售商及售货机登记副本"
+   },
+   {
+    "en": "Proof of business address: utility bill within 90 days, lease or deed, rent/mortgage bill, or a current NYS/NYC license showing the address",
+    "zh": "营业地址证明：90 天内水电账单、租约或房契、租金/房贷账单，或显示地址的有效州/市执照"
+   },
+   {
+    "en": "Proof of home address for each individual (utility bill within 90 days, government correspondence, lease/deed, rent/mortgage bill, driver's license, municipal ID)",
+    "zh": "每位个人的住址证明（90 天内账单、政府信函、租约/房契、租金/房贷账单、驾照、市民卡）"
+   },
+   {
+    "en": "If living at another person's address: their proof of address plus a signed letter from the homeowner/leaseholder",
+    "zh": "如住在他人地址：提供其地址证明及房主/承租人签名信"
+   },
+   {
+    "en": "Granting Authority to Act Affirmation (if someone else prepares and submits)",
+    "zh": "授权代办声明（如由他人代为准备和提交）"
+   },
+   {
+    "en": "Tobacco Retail Dealer Cap Exception Certification and supporting documents (if using a cap exception)",
+    "zh": "烟草零售商名额上限例外证明及支持文件（如适用）"
+   }
+  ],
+  "submit": {
+   "email": "onlineappsdocs@dcwp.nyc.gov",
+   "portal": "a866-dcwpbp.nyc.gov",
+   "signature": "typed",
+   "evidence": "You will be redirected to a new web page where you will need a registered account with the City of New York to submit an online application.",
+   "source": "https://nyc-business.nyc.gov/nycbusiness/description/cigarette-retail-dealer-license"
+  },
+  "notes": "Fee: $200 if applying Jan 1-Jun 30, $150 if Jul 1-Dec 31; 2-year license expiring Dec 31; 2% nonrefundable card convenience fee. Pharmacies are barred. Community district caps since Feb 24, 2018 (check NYC Open Data). After online submit, print the confirmation page; remaining materials are due within 5 business days if not uploaded. In-person Licensing Center (42 Broadway, New York NY 10004) only by appointment for applicants with a disability. 'The applicant must sign the license application and all related forms.' onlineappsdocs@dcwp.nyc.gov is listed with the Licensing Center (renewal sections), not explicitly as the intake for new applications. Library name says 'Tobacco' but URL slug says 'cigarette'; the page title is 'Tobacco Retail Dealer License'."
+ },
+ "nyc-outdoor-dining": {
+  "status": "page_only",
+  "seen": "Dining Out NYC (NYC DOT) Before You Apply pages: Eligibility & Feasibility, Fees, Forms, Account Setup",
+  "read": "2026-10-31",
+  "sources": [
+   "https://nyc-business.nyc.gov/nycbusiness/business-services/initiatives/outdoor-dining",
+   "https://www.diningoutnyc.info/apply/account",
+   "https://www.diningoutnyc.info/apply/forms",
+   "https://www.diningoutnyc.info/apply/fees"
+  ],
+  "fields": [
+   {
+    "id": "cafe_type",
+    "line": "",
+    "label": {
+     "en": "Cafe type",
+     "zh": "户外餐区类型"
+    },
+    "options": [
+     "Sidewalk cafe (year-round)",
+     "Roadway cafe (seasonal)",
+     "Roadway cafe (year-round)"
+    ]
+   },
+   {
+    "id": "fsep_number",
+    "line": "",
+    "label": {
+     "en": "Food Service Establishment Permit (FSEP) number from NYC DOHMH",
+     "zh": "纽约市卫生局餐饮服务场所许可（FSEP）编号"
+    }
+   },
+   {
+    "id": "ein",
+    "line": "",
+    "label": {
+     "en": "Employer Identification Number (EIN)",
+     "zh": "联邦雇主识别号（EIN）"
+    }
+   },
+   {
+    "id": "primary_contact",
+    "line": "",
+    "label": {
+     "en": "Phone number and email for the primary restaurant contact",
+     "zh": "餐厅主要联系人的电话和电邮"
+    }
+   },
+   {
+    "id": "emergency_contact",
+    "line": "",
+    "label": {
+     "en": "An emergency contact",
+     "zh": "紧急联系人"
+    }
+   },
+   {
+    "id": "dos_id",
+    "line": "",
+    "label": {
+     "en": "NYS Department of State (DOS) ID Number, if applicable",
+     "zh": "纽约州务厅（DOS）ID 号（如适用）"
+    }
+   },
+   {
+    "id": "sidewalk_width",
+    "line": "Sidewalk",
+    "label": {
+     "en": "Total width of the sidewalk, outer edge of curb to property line",
+     "zh": "人行道总宽度（路缘外沿至物业红线）"
+    }
+   },
+   {
+    "id": "frontage_length",
+    "line": "",
+    "label": {
+     "en": "Total length of your food establishment's frontage",
+     "zh": "餐厅临街面总长度"
+    }
+   },
+   {
+    "id": "cafe_dimensions",
+    "line": "",
+    "label": {
+     "en": "Length and width of proposed cafe",
+     "zh": "拟设户外餐区的长和宽"
+    }
+   },
+   {
+    "id": "curb_lane_width",
+    "line": "Roadway",
+    "label": {
+     "en": "Estimated width of the curb lane",
+     "zh": "路边车道的估计宽度"
+    }
+   },
+   {
+    "id": "photos",
+    "line": "",
+    "label": {
+     "en": "Five photos of the area in front of your establishment",
+     "zh": "餐厅门前区域照片 5 张"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Site Plan Form (Sidewalk Cafe or Roadway Cafe); one per frontage",
+    "zh": "场地平面表（人行道或车行道餐区），每个临街面一份"
+   },
+   {
+    "en": "IRS Tax ID letter (e.g. IRS 147-C, SS-4, Certificate of Authority)",
+    "zh": "IRS 税号证明信（如 147-C、SS-4、销售税授权证书）"
+   },
+   {
+    "en": "NYC Substitute W-9 Form",
+    "zh": "纽约市替代 W-9 表"
+   },
+   {
+    "en": "Dining Out NYC Applicant Affirmation Form",
+    "zh": "Dining Out NYC 申请人声明表"
+   },
+   {
+    "en": "Tax Affirmation Form",
+    "zh": "税务声明表"
+   },
+   {
+    "en": "Property Owner Consent Form",
+    "zh": "业主同意书"
+   },
+   {
+    "en": "Pest Control Certification",
+    "zh": "虫害防治证明"
+   },
+   {
+    "en": "Insurance Acknowledgement Form",
+    "zh": "保险确认表"
+   },
+   {
+    "en": "Authorized Representative Form (if a representative applies)",
+    "zh": "授权代表表（如由代表申请）"
+   },
+   {
+    "en": "Cellar or Basement Door Certification Form (if tables or chairs over a cellar door)",
+    "zh": "地窖/地下室门证明表（如桌椅放在地窖门上）"
+   }
+  ],
+  "submit": {
+   "portal": "diningout.nyc.gov",
+   "signature": "typed",
+   "evidence": "Click \"submit\" Pay the non-refundable license fee to complete your submission",
+   "source": "https://www.diningoutnyc.info/apply/account"
+  },
+  "notes": "Requires an NYC.ID account. Fees: license $1,050 (once per 4-year term), public hearing $500-$900 for roadway, refundable security deposit $2,500 roadway / $1,500 sidewalk, plus an annual revocable consent fee by sector and size (sector 1-4: sidewalk $6/$10/$18/$31 per sq ft; seasonal roadway $5/$8/$14/$25). Review can take 6 months. Eligibility: ground floor, street-visible, directly accessible, with a DOHMH food service establishment permit. Seasonal roadway cafes operate Apr 1-Nov 29; year-round roadway applications open early September 2026. The temporary Open Restaurants program no longer accepts applications. Questions: diningoutnyc@dot.nyc.gov."
+ },
+ "chi-sidewalk-cafe": {
+  "status": "page_only",
+  "seen": "Sidewalk Cafe (BACP) program page; questions are in the online application on the City of Chicago Permit Portal",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.chicago.gov/city/en/depts/bacp/supp_info/sidewalkcafe.html"
+  ],
+  "fields": [
+   {
+    "id": "license_type",
+    "line": "",
+    "label": {
+     "en": "Proof of licensure",
+     "zh": "执照证明"
+    },
+    "options": [
+     "Retail Food Establishment license",
+     "Tavern license"
+    ]
+   },
+   {
+    "id": "serves_liquor",
+    "line": "",
+    "label": {
+     "en": "Will liquor be served at the sidewalk cafe (requires valid Liquor license, MCC 4-60)?",
+     "zh": "户外餐区是否供应酒类（须持有效酒类执照，市政法典 4-60）？"
+    }
+   },
+   {
+    "id": "cafe_placement",
+    "line": "",
+    "label": {
+     "en": "Cafe placement",
+     "zh": "餐区位置"
+    },
+    "options": [
+     "Business-side",
+     "Curbside"
+    ]
+   },
+   {
+    "id": "extends_neighbor",
+    "line": "",
+    "label": {
+     "en": "Does the cafe extend in front of a neighboring property?",
+     "zh": "餐区是否延伸至相邻物业门前？"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Proof of licensure (Retail Food Establishment license or Tavern license)",
+    "zh": "执照证明（零售食品经营执照或酒馆执照）"
+   },
+   {
+    "en": "Associated insurance documents",
+    "zh": "相关保险文件"
+   },
+   {
+    "en": "Site plan of the proposed sidewalk cafe with measurements, showing a 6-foot minimum pedestrian path",
+    "zh": "标注尺寸的户外餐区平面图，须显示至少 6 英尺的行人通道"
+   },
+   {
+    "en": "Photo of the sidewalk to be occupied",
+    "zh": "拟占用人行道的照片"
+   },
+   {
+    "en": "Proof of written notice to the owner and occupant of the neighboring property (if extending along the building side in front of it)",
+    "zh": "已书面通知相邻物业业主及使用者的证明（如沿建筑侧延伸至其门前）"
+   }
+  ],
+  "submit": {
+   "portal": "ipi.cityofchicago.org",
+   "signature": "typed",
+   "evidence": "Applications for sidewalk cafes must be made through the permitting web portal.",
+   "source": "https://www.chicago.gov/city/en/depts/bacp/supp_info/sidewalkcafe.html"
+  },
+  "notes": "Permit term March 1 through end of February, renewable annually (renewals open now). Payment via the portal after approval; BACP notifies electronically. The permit and approved plan must be printed and displayed at the main entrance. 'A full list of required materials can be found on the portal.' Questions: publicwayuse@cityofchicago.org. Cafe must be on the sidewalk only, fully bounded, with 6 ft pedestrian clearance. Fee not stated on the page. Rules: chicago.gov Sidewalk Cafe Rules and Regulations (not read)."
+ },
+ "lv-building": {
+  "status": "mapped",
+  "seen": "City of Las Vegas Building & Safety Commercial Application (1 page, fillable; PDF modified 7/26/2023)",
+  "read": "2026-10-31",
+  "sources": [
+   "https://www.lasvegasnevada.gov/Business/Permits-Licenses/Building-Permits",
+   "https://files.lasvegasnevada.gov/building-safety/Forms/Commercial/Commercial-Building-Application.pdf",
+   "https://files.lasvegasnevada.gov/building-safety/BuildingSafety-Electronic-Submittal-Instructions.pdf"
+  ],
+  "fields": [
+   {
+    "id": "permit_no",
+    "line": "Header",
+    "label": {
+     "en": "Permit #",
+     "zh": "许可证编号（如已有）"
+    }
+   },
+   {
+    "id": "parent_permit_no",
+    "line": "Header",
+    "label": {
+     "en": "Parent Permit #",
+     "zh": "主许可证编号（如有）"
+    }
+   },
+   {
+    "id": "overall_valuation",
+    "line": "Header",
+    "label": {
+     "en": "Overall Project Valuation: $",
+     "zh": "项目总估值（美元）"
+    }
+   },
+   {
+    "id": "project_scope",
+    "line": "Header",
+    "label": {
+     "en": "Project Scope of Work",
+     "zh": "项目工程范围"
+    }
+   },
+   {
+    "id": "project_tenant_name",
+    "line": "Header",
+    "label": {
+     "en": "Project/Tenant Name",
+     "zh": "项目/租户名称"
+    }
+   },
+   {
+    "id": "project_address",
+    "line": "Header",
+    "label": {
+     "en": "Project Address",
+     "zh": "项目地址"
+    }
+   },
+   {
+    "id": "code_enforcement_case",
+    "line": "Header",
+    "label": {
+     "en": "Is this permit part of a code enforcement case? Case number #",
+     "zh": "此许可是否涉及执法案件？案件编号"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "b1_scope",
+    "line": "Building/Suite #1",
+    "label": {
+     "en": "Scope of Work",
+     "zh": "1 号建筑/单元：工程范围"
+    }
+   },
+   {
+    "id": "b1_valuation",
+    "line": "Building/Suite #1",
+    "label": {
+     "en": "Valuation: $",
+     "zh": "估值（美元）"
+    }
+   },
+   {
+    "id": "b1_occupancy_groups",
+    "line": "Building/Suite #1",
+    "label": {
+     "en": "Occupancy Group(s)",
+     "zh": "占用类别"
+    }
+   },
+   {
+    "id": "b1_use",
+    "line": "Building/Suite #1",
+    "label": {
+     "en": "Use",
+     "zh": "用途"
+    }
+   },
+   {
+    "id": "b1_construction_type",
+    "line": "Building/Suite #1",
+    "label": {
+     "en": "Construction Type",
+     "zh": "建筑构造类型"
+    }
+   },
+   {
+    "id": "b1_total_sf",
+    "line": "Building/Suite #1",
+    "label": {
+     "en": "Total Square Footage",
+     "zh": "总面积（平方英尺）"
+    }
+   },
+   {
+    "id": "b1_affected_sf",
+    "line": "Building/Suite #1",
+    "label": {
+     "en": "Affected Sq' (TI's)",
+     "zh": "受影响面积（租户改造）"
+    }
+   },
+   {
+    "id": "b1_highrise",
+    "line": "Building/Suite #1",
+    "label": {
+     "en": "Is this a Highrise (more than 75')?",
+     "zh": "是否为高层建筑（超过 75 英尺）？"
+    }
+   },
+   {
+    "id": "b1_floor_areas",
+    "line": "Building/Suite #1",
+    "label": {
+     "en": "Square foot of floor areas: 1st, 2nd, 3rd, 4th",
+     "zh": "各层面积：1 至 4 层"
+    }
+   },
+   {
+    "id": "b1_garage_patio_balcony",
+    "line": "Building/Suite #1",
+    "label": {
+     "en": "Garage / Patio / Balcony",
+     "zh": "车库 / 露台 / 阳台面积"
+    }
+   },
+   {
+    "id": "b1_units_stories",
+    "line": "Building/Suite #1",
+    "label": {
+     "en": "Number of Units / Number of Stories",
+     "zh": "单元数 / 层数"
+    }
+   },
+   {
+    "id": "b2_details",
+    "line": "Building/Suite #2",
+    "label": {
+     "en": "Building/Suite #2: same items as #1",
+     "zh": "2 号建筑/单元：同 1 号各项"
+    },
+    "hint": {
+     "en": "Mixed use: provide code analysis per floor as a separate attachment; one application per building if more than 2 buildings.",
+     "zh": "混合用途须另附逐层规范分析；超过 2 栋建筑须每栋一份申请。"
+    }
+   },
+   {
+    "id": "onsite_valuation",
+    "line": "Onsite Improvements",
+    "label": {
+     "en": "Valuation: $",
+     "zh": "场地改良估值（美元）"
+    }
+   },
+   {
+    "id": "light_poles",
+    "line": "Onsite Improvements",
+    "label": {
+     "en": "Light poles, how many?",
+     "zh": "灯杆数量"
+    }
+   },
+   {
+    "id": "trash_enclosures",
+    "line": "Onsite Improvements",
+    "label": {
+     "en": "Trash enclosures, how many?",
+     "zh": "垃圾围栏数量"
+    }
+   },
+   {
+    "id": "carport_sf",
+    "line": "Onsite Improvements",
+    "label": {
+     "en": "Carport square footage",
+     "zh": "车棚面积（平方英尺）"
+    }
+   },
+   {
+    "id": "demo_valuation",
+    "line": "Demolition",
+    "label": {
+     "en": "Valuation: $",
+     "zh": "拆除估值（美元）"
+    }
+   },
+   {
+    "id": "demo_row_staging",
+    "line": "Demolition",
+    "label": {
+     "en": "Will demolition require parking, staging or storing in public rights of way?",
+     "zh": "拆除是否需在公共道路停放、堆放车辆/设备/材料？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ],
+    "hint": {
+     "en": "If yes, a separate traffic barricade permit is required from the Traffic Department.",
+     "zh": "如是，须另向交通部门申请路障许可。"
+    }
+   },
+   {
+    "id": "demo_eru",
+    "line": "Demolition",
+    "label": {
+     "en": "ERU investigation for sewer credits needed?",
+     "zh": "是否需要污水抵扣 ERU 调查？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "demo_occupied",
+    "line": "Demolition",
+    "label": {
+     "en": "Is the building going to remain occupied during demolition?",
+     "zh": "拆除期间建筑是否仍有人使用？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "demo_structural",
+    "line": "Demolition",
+    "label": {
+     "en": "Are structural walls being demolished?",
+     "zh": "是否拆除承重墙？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "demo_complete",
+    "line": "Demolition",
+    "label": {
+     "en": "Is this a complete building demolition?",
+     "zh": "是否整栋拆除？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "demo_ti",
+    "line": "Demolition",
+    "label": {
+     "en": "Is the demolition associated with a Tenant Improvement?",
+     "zh": "拆除是否与租户改造相关？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "demo_utilities",
+    "line": "Demolition",
+    "label": {
+     "en": "Are the utilities going to be disconnected?",
+     "zh": "是否断开公用设施？"
+    },
+    "options": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "id": "sign_valuation",
+    "line": "Signs",
+    "label": {
+     "en": "Construction Valuation: $",
+     "zh": "招牌工程估值（美元）"
+    }
+   },
+   {
+    "id": "sign_materials",
+    "line": "Signs",
+    "label": {
+     "en": "Materials of construction",
+     "zh": "招牌材料"
+    },
+    "options": [
+     "Metal",
+     "Wood",
+     "Plastic",
+     "Other"
+    ]
+   },
+   {
+    "id": "sign_project_type",
+    "line": "Signs",
+    "label": {
+     "en": "Type of project",
+     "zh": "招牌项目类型"
+    },
+    "options": [
+     "New",
+     "Replacement",
+     "Relocation"
+    ]
+   },
+   {
+    "id": "sign_types",
+    "line": "Signs",
+    "label": {
+     "en": "Sign type with size (sqft), height, illuminated (Y/N)",
+     "zh": "招牌类型及面积、高度、是否发光"
+    },
+    "options": [
+     "Pole",
+     "Monument (Structural Engineering Required)",
+     "Wall/Roof",
+     "Free Standing Outdoor Advertising (Billboard)",
+     "Political"
+    ]
+   },
+   {
+    "id": "contractor_company",
+    "line": "Contractor's Information",
+    "label": {
+     "en": "Company Name (type TBD if not known)",
+     "zh": "承包商公司名称（未定可填 TBD）"
+    }
+   },
+   {
+    "id": "contractor_rep",
+    "line": "Contractor's Information",
+    "label": {
+     "en": "Company Representative",
+     "zh": "公司代表"
+    }
+   },
+   {
+    "id": "contractor_phone_email",
+    "line": "Contractor's Information",
+    "label": {
+     "en": "Phone / Email",
+     "zh": "电话 / 电邮"
+    }
+   },
+   {
+    "id": "contractor_state_license",
+    "line": "Contractor's Information",
+    "label": {
+     "en": "State Contractor License #",
+     "zh": "内华达州承包商执照号"
+    }
+   },
+   {
+    "id": "contractor_clv_bl",
+    "line": "Contractor's Information",
+    "label": {
+     "en": "CLV Business License #",
+     "zh": "拉斯维加斯市营业执照号"
+    }
+   }
+  ],
+  "attach": [
+   {
+    "en": "Completed Commercial Application (uploaded)",
+    "zh": "已填写的商业申请表（上传）"
+   },
+   {
+    "en": "All applicable plans, in electronic format (ePlan requirements)",
+    "zh": "所有适用图纸的电子版（符合 ePlan 要求）"
+   },
+   {
+    "en": "Code analysis (required for tenant improvements or new building construction; per floor for mixed use)",
+    "zh": "规范分析（租户改造或新建必需；混合用途须逐层）"
+   }
+  ],
+  "submit": {
+   "portal": "lasvegasnevada.gov",
+   "signature": "typed",
+   "evidence": "Upload the completed Application Form and all applicable plans for your permit and N/A all areas that are not applicable to your permit.",
+   "source": "https://files.lasvegasnevada.gov/building-safety/BuildingSafety-Electronic-Submittal-Instructions.pdf"
+  },
+  "notes": "Apply at lasvegasnevada.gov/Dashboard ('Apply for a permit requiring plans', Google Chrome required); $55 admin fee to enter the review queue. 'Effective January 1, 2020, all NEW commercial, residential, and civil building plans MUST be submitted electronically.' 'Only a Nevada licensed contractor may obtain a building permit for commercial construction.' Incomplete applications are not accepted; permits expire 180 days after issuance with no passed inspection. Express plan review: $550 admin + $660/hr. The city also publishes a Food-Service-Establishment-Guideline.pdf and Tenant-Improvement-Guideline.pdf (not read). Fax (702) 382-1240 appears on the instructions header but is not stated as accepting applications."
+ },
  "ca-cdtfa": {
   "status": "page_only",
   "seen": "CDTFA Online Services registration (permit, license or account); no paper form. Pub 107 'Applying for a Seller's Permit' (Revision July 2024)",
@@ -1616,28 +10252,6 @@ export const LINES: Record<string, Lines> = {
    "source": "https://publichealth.lacounty.gov/eh/about/permit.htm"
   },
   "notes": "Not mailed in for new facilities: it comes from and goes back to the plan checker at the final inspection. Change of ownership: the inspector takes it at the inspection. Questions: EHPermits@ph.lacounty.gov, (888) 700-9995."
- },
- "la-ladbs": {
-  "status": "page_only",
-  "seen": "Building permit (ePlanLA / PermitLA)",
-  "read": "2026-10-13",
-  "sources": [
-   "https://dbs.lacity.gov/"
-  ],
-  "fields": [],
-  "attach": [
-   {
-    "en": "Plans for plan check (ePlanLA), unless the work qualifies for an express permit (PermitLA)",
-    "zh": "供审查的图纸（ePlanLA），符合快速许可条件者除外（PermitLA）"
-   }
-  ],
-  "submit": {
-   "portal": "eplanla.lacity.org",
-   "signature": "typed",
-   "evidence": "Projects that need plan check are filed online in ePlanLA; simple express projects in PermitLA; both need an Angeleno account.",
-   "source": "https://dbs.lacity.gov/"
-  },
-  "notes": "ladbs.org now redirects to dbs.lacity.gov, so the library's PDF link is dead. A temporary Certificate of Occupancy is paid online."
  },
  "la-lafd-ops": {
   "status": "page_only",
@@ -3798,27 +12412,6 @@ export const LINES: Record<string, Lines> = {
    "source": "https://dallascityhall.com/departments/codecompliance/Admin1/ApplyforaPermit/Documents/CCS-FRM-424%20Food%20Establishment%20Applcation.pdf"
   },
   "notes": "Form is old (Rev 5, 04/10/2018) and printed as a carbon set (White - File; Canary - Inspector). Routing: new construction / finish-out / remodel / pre-inspection go through Planning & Development at 320 E Jefferson Blvd (214-670-4127); change of ownership and kiosk/self-service at 7901 Goforth. Consumer Health phone (214) 670-8083. Fees (page): application $121; annual permit by risk and size: Risk 1 $141/$155, Risk 2 $283/$308, Risk 3 $468/$513 (under/over 2,000 sq ft); re-inspection $191; renewal due Dec 31, $199 reinstatement after, $158 pre-closure fee after Jan 30; name/owner change $220. The page now links the PDF under a /legacy-website/ApplyforaPermit/ path; the /Admin1/ URL still serves the same form. No email or portal destination confirmed; library 'in_person' matches."
- },
- "dal-plan-review": {
-  "status": "page_only",
-  "seen": "Food establishment permit and plan review (Consumer Health; Planning & Development for new construction)",
-  "read": "2026-10-13",
-  "sources": [
-   "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx"
-  ],
-  "fields": [],
-  "attach": [
-   {
-    "en": "Facility blueprints and equipment specification sheets",
-    "zh": "设施图纸及设备规格表"
-   }
-  ],
-  "submit": {
-   "signature": "unknown",
-   "evidence": "For new construction, change in ownership, remodels or a change of use, contact Planning & Development at 320 E. Jefferson Blvd. or 214-670-4127. A separate plan review application (CCS-FRM-352, $205) applies only to kiosks and self-service establishments, at 7901 Goforth.",
-   "source": "https://dallascityhall.com/departments/codecompliance/consumer-health/Pages/food-establishment.aspx"
-  },
-  "notes": "Dallas plan review for a fixed restaurant runs through the building permit in DallasNow (Planning & Development), not a health form. Annual food permit fees: risk 1 $141-$155, risk 2 $283-$308, risk 3 $468-$513; due Dec 31."
  },
  "dal-building": {
   "status": "page_only",
@@ -6465,58 +15058,6 @@ export const LINES: Record<string, Lines> = {
    "source": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/food-safety-program/application-new-food-facility"
   },
   "notes": "The library pointed to the plan review page; the new-facility page is the right entry point."
- },
- "sj-building-ti": {
-  "status": "page_only",
-  "seen": "Building Permit Application (tenant improvement)",
-  "read": "2026-10-13",
-  "sources": [
-   "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement"
-  ],
-  "fields": [],
-  "attach": [
-   {
-    "en": "Commercial & Industrial Projects Submittal Checklist",
-    "zh": "商业与工业项目提交核查表"
-   },
-   {
-    "en": "Plans per the Tenant Improvements Plan Checklist",
-    "zh": "按租户改造图纸核查表准备的图纸"
-   },
-   {
-    "en": "Owner-Builder Acknowledgement, if the owner applies",
-    "zh": "如业主自行申请，需业主自建确认书"
-   }
-  ],
-  "submit": {
-   "portal": "sjpermits.org",
-   "signature": "drawn",
-   "evidence": "Forms may require digital signatures. Whoever signs the building permit application is responsible and potentially liable for all activity under the permit.",
-   "source": "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/commercial-industrial-properties/tenant-improvement"
-  },
-  "notes": "The city advises a licensed contractor as applicant. STAR service is faster (premium fee); a refundable construction and demolition diversion deposit applies."
- },
- "sj-sign": {
-  "status": "page_only",
-  "seen": "Sign Permit Application (Planning, online)",
-  "read": "2026-10-13",
-  "sources": [
-   "https://www.sanjoseca.gov/business/development-services-permit-center/online-permits-at-sjpermits-org/planning-online-permits"
-  ],
-  "fields": [],
-  "attach": [
-   {
-    "en": "The documents, photographs or plans in the application's 'What to Submit' section",
-    "zh": "申请表“提交内容”部分列出的文件、照片或图纸"
-   }
-  ],
-  "submit": {
-   "portal": "sjpermits.org",
-   "signature": "drawn",
-   "evidence": "Be sure to include any required documentation for staff to deem your application complete and a Digital Signature.",
-   "source": "https://www.sanjoseca.gov/business/development-services-permit-center/online-permits-at-sjpermits-org/planning-online-permits"
-  },
-  "notes": "Staff invoice after the completeness check; the receipt appears in the SJPermits account."
  },
  "irs-5472": {
   "status": "mapped",

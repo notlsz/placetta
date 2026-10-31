@@ -190,7 +190,10 @@ const f = (label: string, value: string) => ({ id: label, label: same(label), va
 
 /* ---------------- the forms library, line by line ---------------- */
 {
-  const OFFICIAL = /\.gov$|\.gov\.|nyc\.gov|lacity\.gov|lacity\.org|lacounty\.gov|sfgov\.org|sf\.gov|sftreasurer\.org|sanjoseca\.gov|santaclaracounty\.gov|austintexas\.gov|dallascityhall\.com|dallas\.gov|houstontx\.gov|houstonpermittingcenter\.org|houstonhealth\.org|state\.tx\.us|texas\.gov|ny\.gov|ca\.gov|irs\.gov|fincen\.gov|lafd\.org|sfplanning\.org|sfdph\.org/;
+  const OFFICIAL = /\.gov$|\.gov\.|nyc\.gov|lacity\.gov|lacity\.org|lacounty\.gov|sfgov\.org|sf\.gov|sftreasurer\.org|sanjoseca\.gov|santaclaracounty\.gov|austintexas\.gov|dallascityhall\.com|dallas\.gov|houstontx\.gov|houstonpermittingcenter\.org|houstonhealth\.org|state\.tx\.us|texas\.gov|ny\.gov|ca\.gov|irs\.gov|fincen\.gov|lafd\.org|sfplanning\.org|sfdph\.org|acgov\.org|smchealth\.org|cupertino\.org|dalycity\.org|sangabrielcity\.com|arcadia\.hdlgov\.com|ccc\.edu|diningoutnyc\.info|\.govaccess\.org/;
+  // the last eight, added with batches b10 to b13 (2026-10-31): Alameda County, San Mateo County Health, Cupertino, Daly City,
+  // San Gabriel, Arcadia's own licensing portal, City Colleges of Chicago (issues Chicago's sanitation certificate), NYC DOT's
+  // Dining Out NYC program; govaccess.org is the city-site host Cupertino's pages are served from
   const entries = Object.entries(LINES);
   ok(entries.length >= 45, "45+ core forms researched line by line from the agencies", entries.length);
   const bad = entries.filter(([, l]) => !l.sources.length || l.sources.some(u => !OFFICIAL.test(new URL(u).hostname)));
