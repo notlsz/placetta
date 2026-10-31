@@ -13,8 +13,11 @@
 
 -- the integrations function checks a JWT at the gateway; its public anon key moves from the job's text into the vault
 do $$
-declare jwt text := (select substring(command from 'Bearer ([A-Za-z0-9._-]+)') from cron.job where jobname = 'placetta-mail-watch' limit 1);
+declare jwt text;
 begin
+  -- a database without pg_cron or the vault (CI's) has no job to read it from
+  if to_regclass('cron.job') is null or to_regclass('vault.secrets') is null then return; end if;
+  execute $q$select substring(command from 'Bearer ([A-Za-z0-9._-]+)') from cron.job where jobname = 'placetta-mail-watch' limit 1$q$ into jwt;
   if jwt is not null and not exists (select 1 from vault.secrets where name = 'gateway_anon_jwt') then
     perform vault.create_secret(jwt, 'gateway_anon_jwt', 'Public anon key the gateway checks on the integrations function (mail watch).');
   end if;
@@ -64,19 +67,22 @@ end $$;
 revoke execute on function public.tick() from public, anon, authenticated;
 
 -- when each job last ran well, for the outside health check (.github/workflows/heartbeat.yml): staff and the service only
+-- plpgsql, so a database without pg_cron (CI's) can still create it; it is only called where cron exists
 create or replace function public.cron_health()
 returns table (jobname text, last_ok timestamptz, failed_30m bigint)
-language sql security definer set search_path = '' stable as $$
-  select j.jobname,
+language plpgsql security definer set search_path = '' stable as $$
+begin
+  return query
+  select j.jobname::text,
          (select max(d.end_time) from cron.job_run_details d where d.jobid = j.jobid and d.status = 'succeeded'),
          (select count(*) from cron.job_run_details d where d.jobid = j.jobid and d.status = 'failed' and d.start_time > now() - interval '30 minutes')
   from cron.job j;
-$$;
+end $$;
 revoke execute on function public.cron_health() from public, anon, authenticated;
 
 do $$
 begin
-  if not exists (select 1 from pg_available_extensions where name = 'pg_cron') then return; end if;
+  if to_regclass('cron.job') is null then raise notice 'pg_cron is not available'; return; end if;
   perform cron.unschedule(j.jobid) from cron.job j
    where j.jobname in ('placetta-minute', 'placetta-agent-watchdog', 'placetta-requeue-filings', 'placetta-odelia-outbox',
                        'placetta-mail-watch', 'placetta-learn', 'placetta-ai-throttle', 'placetta-tick');
