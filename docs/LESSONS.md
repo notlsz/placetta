@@ -415,3 +415,12 @@ Rules:
 - An agency PDF is downloaded by the fetch-forms workflow (scripts/official-pdfs.txt; keep the existing lines, it
   force-pushes the branch), then read here with pypdf. A fillable PDF gets a box map (src/forms/maps), checked by
   test:forms, so Odelia fills the agency's own file.
+
+## 2026-10-31: new research was silently overwritten by older batches
+
+What broke: four forms researched as fully mapped in batches b10 to b14 (LA's building permit, San Jose's tenant
+improvement and sign permits, Dallas plan review) still showed no lines, and Santa Clara's new permit lines vanished.
+Why: scripts/build-lines.py read the batch files sorted as text, b1, b10..b14, b2..b9, so the older b2..b9 entries for
+the same forms were applied last and replaced the new research.
+Rule: batches apply in numeric order and the newest research wins. After any build-lines run, recount the forms with
+lines for the places just researched; a researched form still missing lines is a bug, not a gap.

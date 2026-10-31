@@ -7,7 +7,11 @@ import json, re, sys, glob, os
 
 src = sys.argv[1] if len(sys.argv) > 1 else "research/lines"
 out = {}
-for path in sorted(glob.glob(os.path.join(src, "b*.json"))):
+# in batch order, b2 before b10, so newer research replaces older (sorted as text, b10..b14 used to be overwritten by b2..b9)
+def batch_no(path):
+    m = re.search(r"b(\d+)\.json$", path)
+    return int(m.group(1)) if m else 0
+for path in sorted(glob.glob(os.path.join(src, "b*.json")), key=batch_no):
     if path.endswith("-urls.json"):
         continue
     for fid, v in json.load(open(path)).items():
