@@ -180,6 +180,24 @@ const lineOf = (off: { fields: { id: string; line: string; label: { en: string }
   }
 }
 
+/* 9. Flags that never reach the program (2026-10-31: the nightly finder's --json/--md went after the script's own
+      "exit $s", so no report was written): a workflow or script passing "npm run X -- flags" to a script that runs
+      several commands. */
+{
+  const L = "2026-10-31: the edge case finder, and a lesson nothing checks";
+  const scripts = JSON.parse(readFileSync("package.json", "utf8")).scripts as Record<string, string>;
+  const files = [...readdirSync(".github/workflows").map(f => `.github/workflows/${f}`), ...readdirSync("scripts").filter(f => /\.(sh|mjs|ts|mts)$/.test(f) && f !== "edge-finder.ts").map(f => `scripts/${f}`)];
+  for (const file of files) {
+    const src = readFileSync(file, "utf8");
+    for (const m of src.matchAll(/npm run(?: -s)? ([\w:-]+) -- /g)) {
+      const cmd = scripts[m[1]] ?? "";
+      // flags land on the last command: fine when that is the program itself (cleanup moved to a trap), lost after "exit $s"
+      const last = cmd.split(/;|&&/).pop()!.trim();
+      if (/;|&&/.test(cmd) && !/^(NODE_\w+=\S+\s+)*(node|deno|python3?|npx)\b/.test(last)) add("lost-flags", L, "error", file, `"npm run ${m[1]} -- ..." appends the flags after "${cmd.slice(-40)}", not to the program`, "run the program directly, or pass \"$@\" in the script");
+    }
+  }
+}
+
 /* report */
 const errors = found.filter(f => f.level === "error"), warns = found.filter(f => f.level === "warn");
 const byDet = (xs: Finding[]) => Object.entries(xs.reduce((m, f) => ((m[f.detector] = (m[f.detector] ?? 0) + 1), m), {} as Record<string, number>)).map(([k, v]) => `${k} ${v}`).join(", ");

@@ -435,3 +435,11 @@ happen (all forms, all migrations, all scripts, all user-facing strings), in the
 CI (npm run test:edges) and nightly with Odelia's production lessons (.github/workflows/edges.yml), where Claude fixes
 the cause, the siblings and the adjacent cases in a reviewed pull request and adds the detector. The finder caught the
 link swap on its first run. Known exceptions are written in the detector with the reason, never silenced.
+
+## 2026-10-31: flags passed through npm never reached the program
+
+What broke: the nightly edge finder wrote no report: `npm run test:edges -- --json ...` appended the flags after the
+script's own `exit $s`, not to the finder. The same was true of `npm run verify:sources -- --only=...`, documented in
+the script itself and silently ignored.
+Rule: a script that takes flags ends with the program (cleanup in a `trap ... EXIT`), or a workflow runs the program
+directly. Detector: edge-finder "lost-flags".
