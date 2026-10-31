@@ -31,7 +31,11 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - name: Edge finder
-        run: npm run -s test:edges -- --json edges.json --md edges.md || true
+        # built and run directly: npm would append the report flags after the script's own "exit", not to the finder
+        run: |
+          npx esbuild scripts/edge-finder.ts --bundle --platform=node --format=esm --outfile=.edge-finder.mjs '--external:*.pdf?inline' --packages=external --jsx=automatic --log-level=error
+          node .edge-finder.mjs --json edges.json --md edges.md || true
+          [ -f edges.json ] || echo "[]" > edges.json
       - name: Odelia's lessons from production
         env: { TOKEN: "${{ secrets.SUPABASE_ACCESS_TOKEN }}" }
         run: |
@@ -45,7 +49,7 @@ jobs:
         id: sum
         run: |
           e=$(jq '[.[] ] | length' edges.json 2>/dev/null || echo 0); l=$(jq length lessons.json)
-          { echo "## Edge finder"; cat edges.md 2>/dev/null; echo; echo "## Odelia's new and losing lessons: $l"; jq -r '.[] | "- \(.kind) \(.key): \(.text_en) (wins \(.wins), losses \(.losses))"' lessons.json; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "## Edge finder"; cat edges.md 2>/dev/null || true; echo; echo "## Odelia's new and losing lessons: $l"; jq -r '.[] | "- \(.kind) \(.key): \(.text_en) (wins \(.wins), losses \(.losses))"' lessons.json; } >> "$GITHUB_STEP_SUMMARY"
           echo "found=$(( e + l ))" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with: { name: edges, path: "edges.json\nedges.md\nlessons.json", retention-days: 30, if-no-files-found: ignore }
