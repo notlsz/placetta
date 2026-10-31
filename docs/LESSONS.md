@@ -355,3 +355,13 @@ lesson (seeded, or learned on its own) so the agent itself knows the pattern.
   off its column's center and overlaps the check. The founder's rule (everything in a row on one y axis, icons centered
   with their text) outranks a reviewer's wit. Rule: run fit-check before every push, and never take a suggestion that
   rotates or offsets content; find the personality in words and color instead.
+
+## 2026-10-30 (evening): the database stayed slow for hours, and it was CPU
+
+- After the probes stopped, the database stayed slow: the REST API answered 503 (its schema cache load timed out) and
+  cron jobs failed to start. It held only 88 MB, ran no queries, and every page was in memory, yet a 9,000-row catalog
+  join took 2.5 seconds instead of milliseconds. That is CPU throttling: the instance's burstable CPU was spent by the
+  day's full probe runs, and it refills only while idle, which a job connecting every minute prevents.
+- Rules: never run full probes back to back on production (see above); keep cron on a small instance at a few minutes,
+  not every minute (migration 20261108100000); when the database is slow, measure a catalog query with every buffer a
+  hit before blaming load, disk or size.
