@@ -719,3 +719,6 @@
 .page.home .win { box-shadow: 0 0 0 1px var(--line); border-radius: var(--r-anchor); }
 /* Odelia's tab icon is 22px tall like the others, so all four labels share one baseline */
 .tabbar a .nav-bot { height: 22px; margin-top: 1px; overflow: visible; display: inline-flex; align-items: center; justify-content: center; }
+/* the chosen tea runs through the app, not only Settings (Paul Smith): the selected tab's line, the Ideas icons */
+.ptabs a[aria-selected="true"]::after, .hm-tabs button[aria-selected="true"]::after { background: var(--blue-ink); }
+.ideas .idea-ico { color: var(--blue-ink); }
