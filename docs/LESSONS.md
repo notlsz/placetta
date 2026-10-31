@@ -409,6 +409,9 @@ Rules:
   shown, and it costs one short read. It gave Plano's fees and pointed at the page. Its answers are leads, never the
   source: every value is copied from the agency's own page or form.
 - A page that loads by script is read in a real browser (the built-in browser renders it), never marked not_found.
+- When an agency blocks both us and GitHub (Santa Clara County: 403 to fetch tools and to Actions), open its page in
+  the browser and read the PDF there with pdf.js from cdnjs (text and fillable field names come back; the file
+  never has to leave the browser).
 - An agency PDF is downloaded by the fetch-forms workflow (scripts/official-pdfs.txt; keep the existing lines, it
   force-pushes the branch), then read here with pypdf. A fillable PDF gets a box map (src/forms/maps), checked by
   test:forms, so Odelia fills the agency's own file.
