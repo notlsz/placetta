@@ -713,3 +713,9 @@
 .c-fee.tbd { color: var(--ink3); }
 /* the tab count clears its icon instead of sitting on its corner */
 .tabbar a em { left: calc(50% + 12px); }
+/* house rule: no filled shape behind a count; the tab's number is plain, like the sidebar's */
+.tabbar a em { background: none; color: var(--ink3); padding: 0; min-width: 0; }
+/* one card treatment on Home: the win keeps its tint and takes the same hairline and corner as "Do this next" (Ive) */
+.page.home .win { box-shadow: 0 0 0 1px var(--line); border-radius: var(--r-anchor); }
+/* Odelia's tab icon is 22px tall like the others, so all four labels share one baseline */
+.tabbar a .nav-bot { height: 22px; margin-top: 1px; overflow: visible; display: inline-flex; align-items: center; justify-content: center; }
