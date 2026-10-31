@@ -1,0 +1,494 @@
+{
+  "sj-building-ti": {
+    "status": "mapped",
+    "form_seen": "Building Permit Application, FORM #310 (rev 01/31/23, 'subject to change')",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://sanjoseca.gov/home/showpublisheddocument/25915/636952379507770000", "what": "official PDF" },
+      { "url": "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/bulding-permit-application-instructions", "what": "instructions" },
+      { "url": "https://www.sanjoseca.gov/businesses/development-services-permit-center/sjeplans-electronic-plan-submittal-review/sjeplans-for-building-permits-applications", "what": "application page" }
+    ],
+    "fields": [
+      { "id": "project_address", "line": "Project Identification", "en": "Project address (San Jose, CA) and ZIP code", "zh": "项目地址（加州圣何塞）及邮编", "hint_en": "City of San José properties only; confirm the address is incorporated on SJPermits.org", "hint_zh": "仅限圣何塞市辖区内物业；可在 SJPermits.org 确认地址属于市辖区" },
+      { "id": "applicant_name", "line": "Project Identification", "en": "Applicant name", "zh": "申请人姓名" },
+      { "id": "applicant_address", "line": "Project Identification", "en": "Applicant address", "zh": "申请人地址" },
+      { "id": "applicant_email", "line": "Project Identification", "en": "Applicant email", "zh": "申请人电子邮箱" },
+      { "id": "applicant_phone", "line": "Project Identification", "en": "Applicant phone", "zh": "申请人电话" },
+      { "id": "legal_owner", "line": "Project Identification", "en": "Legal owner name, email and phone (if different from applicant)", "zh": "产权所有人姓名、邮箱及电话（如与申请人不同）" },
+      { "id": "design_professional", "line": "Project Identification", "en": "Design professional in charge: firm name, state license no., address, email, phone", "zh": "主管设计专业人员：公司名称、州执照号、地址、邮箱、电话", "hint_en": "Leave blank if none", "hint_zh": "如无可留空" },
+      { "id": "permit_type", "line": "Project Identification", "en": "Permit type (check all that apply)", "zh": "许可类型（可多选）", "options": ["Building", "Electrical", "Mechanical", "Plumbing"] },
+      { "id": "scope_of_work", "line": "Project Identification", "en": "Brief scope of work description", "zh": "工程范围简述", "hint_en": "Must match the work seen at inspection", "hint_zh": "须与验收时的实际施工内容一致" },
+      { "id": "workers_comp", "line": "Declarations A", "en": "Workers' Compensation Declaration (check one)", "zh": "工伤保险声明（单选）", "options": ["Certificate of consent to self-insure (policy no.)", "Insurance carrier, phone, policy no., expiration date", "No employees"] },
+      { "id": "lending_agency", "line": "Declarations B", "en": "Construction Lending Agency: lender name and address, or N/A", "zh": "建筑贷款机构：贷款方名称及地址，如无填 N/A" },
+      { "id": "decl_signer_print_date", "line": "Declarations", "en": "Licensed contractor, property owner or authorized agent: print name, date", "zh": "持牌承包商、业主或授权代理人：正楷姓名、日期" },
+      { "id": "contractor_company", "line": "Page 2, Section A", "en": "Licensed contractor: company name", "zh": "持牌承包商：公司名称" },
+      { "id": "contractor_license_no", "line": "Page 2, Section A", "en": "Contractor's license number and license class", "zh": "承包商执照号码及执照类别" },
+      { "id": "contractor_business_tax_no", "line": "Page 2, Section A", "en": "City business tax number", "zh": "圣何塞市商业税证号码" },
+      { "id": "contractor_sign_print_date", "line": "Page 2, Section A", "en": "Contractor or agent: print name, date (agent must present photo ID)", "zh": "承包商或代理人：正楷姓名、日期（代理人须出示带照片证件）" },
+      { "id": "owner_builder_exemption", "line": "Page 2, Section B", "en": "Owner-builder exemption from Contractors' State License Law (check one)", "zh": "业主自建：豁免州承包商执照法的理由（单选）", "options": ["Owner or employees (wages only) will do the work; structure not for sale", "Owner contracts exclusively with licensed contractors", "Other exemption (state reason)"] },
+      { "id": "owner_builder_print_date", "line": "Page 2, Section B", "en": "Owner-builder or agent: print name, date", "zh": "业主自建人或代理人：正楷姓名、日期" },
+      { "id": "agent_authorizer_type", "line": "Page 2, Section C", "en": "Authorizing an agent: Licensed Contractor or Owner-Builder", "zh": "授权代理人：持牌承包商 或 业主自建人", "options": ["Licensed Contractor", "Owner-Builder"] },
+      { "id": "agent_details", "line": "Page 2, Section C", "en": "Agent name, phone, address and project address", "zh": "代理人姓名、电话、地址及项目地址" },
+      { "id": "agent_authorizer_print_date", "line": "Page 2, Section C", "en": "Contractor or owner-builder: print name, date", "zh": "承包商或业主自建人：正楷姓名、日期" }
+    ],
+    "attach": [
+      { "en": "Form 311 Owner-Builder Acknowledgement and Verification (if Section B applies)", "zh": "311 表：业主自建确认及核实表（如适用 B 部分）" },
+      { "en": "Section C completed, or a notarized letter naming the authorized agent dated within 12 months", "zh": "填妥的 C 部分，或 12 个月内经公证的授权代理人信函" },
+      { "en": "Photo ID for any agent signing the form", "zh": "代签代理人的带照片证件" },
+      { "en": "Plans and documents per the project's Submittal Checklist, uploaded to SJePlans", "zh": "按项目提交清单准备的图纸及文件，上传至 SJePlans" }
+    ],
+    "destination": {
+      "portal": "www.sjpermits.org",
+      "signature": "unknown",
+      "evidence": "Instructions say to complete the form on a computer, save it as PDF and submit per 'Start Your Project'; they link 'Digital Signatures' help but do not state that electronic signatures are accepted.",
+      "source": "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/bulding-permit-application-instructions"
+    },
+    "notes": "PDF seen is rev 01/31/23 while the instructions page is marked 'Updated: 03/03/2026'; a newer revision may exist, re-check the 'Form link' on the instructions page. Submission flow: start application on SJPermits.org, then upload to SJePlans (only the ePlan Applicant can upload); plan review fee invoice must be paid before review. Paper copy also available at the Permit Center for simple/over-the-counter projects."
+  },
+  "sj-fire-systems": {
+    "status": "page_only",
+    "form_seen": "SJPermits.org online application, Application group 'Fire Prevention', type 'Fire Protection' (no PDF form)",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.sanjoseca.gov/your-government/departments-offices/fire-department/fire-prevention-permits/development-services", "what": "application page" }
+    ],
+    "fields": [
+      { "id": "account", "line": "", "en": "Register or sign in at sjpermits.org", "zh": "在 sjpermits.org 注册或登录" },
+      { "id": "contractor_license_type", "line": "", "en": "Contractor's license type", "zh": "承包商执照类型", "hint_en": "Determines which permits you can apply for", "hint_zh": "决定可申请的许可类别" },
+      { "id": "application_group_type", "line": "", "en": "Application group 'Fire Prevention', application type 'Fire Protection'", "zh": "申请组别选“Fire Prevention”，申请类型选“Fire Protection”" },
+      { "id": "fire_permit_subtype", "line": "", "en": "Fire Permit Sub Type matching your license", "zh": "与执照相符的消防许可子类型", "hint_en": "Page warns against applying for the wrong type", "hint_zh": "官方提醒勿选错类型" },
+      { "id": "property_address", "line": "", "en": "Project property address (required)", "zh": "项目物业地址（必填）" },
+      { "id": "applicant_confirm", "line": "", "en": "Confirm applicant (licensed contractor with active City and State license added automatically)", "zh": "确认申请人（持有有效市级及州执照的承包商会自动带入）" },
+      { "id": "review_pay", "line": "", "en": "Review application and pay fees", "zh": "核对申请并缴费", "hint_en": "Payment is required to start SJePlans", "hint_zh": "缴费后才能启动 SJePlans" },
+      { "id": "sjeplans_upload", "line": "", "en": "Register for SJePlans and upload plans and documents", "zh": "注册 SJePlans 并上传图纸及文件" }
+    ],
+    "attach": [
+      { "en": "Plans, applications and documents named and formatted to SJePlans standards", "zh": "按 SJePlans 命名及格式标准准备的图纸、申请及文件" }
+    ],
+    "destination": {
+      "email": "SJFDPermitSpecialist@sanjoseca.gov",
+      "portal": "www.sjpermits.org",
+      "signature": "typed",
+      "evidence": "Fire protection systems permits are self-started online at www.sjpermits.org; after submitting online you receive a link to upload documents through SJePlans.",
+      "source": "https://www.sanjoseca.gov/your-government/departments-offices/fire-department/fire-prevention-permits/development-services"
+    },
+    "notes": "Email is for questions about online fire permit applications, not a submission inbox. Only the applicant's licensed-contractor login can apply; sub-type depends on license. Specific plan checklists and fees not shown on the page."
+  },
+  "sj-building-final": {
+    "status": "page_only",
+    "form_seen": "Inspection scheduling on SJPermits.org 'Schedule an Inspection' (no form)",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/building-division/inspections/inspection-success", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "permit_processes", "line": "", "en": "Processes complete and ready for inspection (from the Permit Card)", "zh": "已完工可验收的工序（参照许可证卡）", "hint_en": "Building Final is approved only after all other inspection processes on the permit are approved", "hint_zh": "须先通过许可证上所有其他验收，才能批准建筑终验" },
+      { "id": "permit_card_onsite", "line": "", "en": "Permit Card kept at the job site", "zh": "许可证卡须保留在工地" },
+      { "id": "prior_notices", "line": "", "en": "Printed copies of prior inspection notices (larger projects)", "zh": "以往验收通知的打印件（较大项目）" },
+      { "id": "approved_plans", "line": "", "en": "City-approved and professionally stamped plans", "zh": "经市政府批准并盖有专业印章的图纸" },
+      { "id": "systems_working", "line": "", "en": "Utilities on, fixtures and fans working, smoke and CO alarms installed and working", "zh": "水电接通，灯具风扇运作，烟雾及一氧化碳报警器已安装且正常" },
+      { "id": "ladder", "line": "", "en": "OSHA-compliant ladder if needed", "zh": "如需梯子，须符合 OSHA 标准" }
+    ],
+    "attach": [],
+    "destination": {
+      "portal": "www.sjpermits.org",
+      "signature": "unknown",
+      "evidence": "Go to SJPermits.org and select 'Schedule an Inspection', or call 408-535-3555 and select the option for scheduling an inspection.",
+      "source": "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/building-division/inspections/inspection-success"
+    },
+    "notes": "Not a form; a scheduling request. After approval SJPermits status changes from 'Under Inspection' to 'Finaled'. Page does not mention fire/health sign-offs; check the Permit Card."
+  },
+  "scc-health-permit": {
+    "status": "not_found",
+    "form_seen": "",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/food-safety-program/application-new-food-facility", "what": "application page" },
+      { "url": "https://deh.santaclaracounty.gov/food-and-retail/compliance-retail-food-operations/restaurant-grocery-store-or-other-fixed-food", "what": "application page" }
+    ],
+    "fields": [],
+    "attach": [],
+    "destination": {},
+    "notes": "Could not open the 'Permit Application & Certification Statement' PDF: deh.santaclaracounty.gov plan-review page and files.santaclaracounty.gov return Cloudflare 403 to both WebFetch and curl. The search hit 'EHD 100CP Health Permit Application' at scceh.org is SANTA CRUZ County, not Santa Clara; do not use it. What the DEH 'Application New Food Facility' page does say: plan check packet = Plan Check Application + Food Plan Check Checklist + one bound 1/4-inch-scale plan set (equipment, mechanical, finish schedule, plumbing, electrical, Type I hoods) + proposed menu + equipment cut sheets; submit in person at County of Santa Clara DEH, 1555 Berger Drive, Bldg #2, Suite #300, San Jose, CA 95112 (7:30-4:15 M-F) or by email (address obscured in fetch); 'Incomplete packets will not be accepted'; plans without payment discarded after 10 business days. Operating permit is filed after plan review or facility evaluation; permits are non-transferable. Re-try from a browser."
+  },
+  "sj-sign": {
+    "status": "mapped",
+    "form_seen": "SIGN PERMIT APPLICATION, San José Planning Division (03/10/2025, 'subject to change')",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.sanjoseca.gov/home/showpublisheddocument/15381/638900946952300000", "what": "official PDF" }
+    ],
+    "fields": [
+      { "id": "worksheet", "line": "Page 1", "en": "Worksheet by zoning district", "zh": "按分区选择工作表", "options": ["Worksheet A: commercial or industrial district", "Worksheet B: residential, agriculture or open space district", "Worksheet C: DC Downtown Primary Commercial district"] },
+      { "id": "apn", "line": "1. Property Information", "en": "APN/S", "zh": "地块编号（APN，多个用逗号分隔）" },
+      { "id": "property_address", "line": "1. Property Information", "en": "Property address/location", "zh": "物业地址/位置" },
+      { "id": "signage_description", "line": "2. Proposed Signage Description", "en": "Proposed signage: number of signs, free-standing or attached, dimensions, area per sign", "zh": "拟设招牌：数量、独立式或附墙式、尺寸、每块面积" },
+      { "id": "property_owner", "line": "3. Property Owner Information", "en": "Property owner", "zh": "物业业主" },
+      { "id": "owner_contact_name", "line": "3. Property Owner Information", "en": "Contact name if property owner is a group/trust/corp", "zh": "业主为团体/信托/公司时的联系人姓名" },
+      { "id": "owner_mailing_address", "line": "3. Property Owner Information", "en": "Mailing address", "zh": "邮寄地址" },
+      { "id": "owner_phone_email", "line": "3. Property Owner Information", "en": "Phone and email", "zh": "电话及电子邮箱" },
+      { "id": "applicant_name", "line": "4. Applicant and/or Contact Person", "en": "Applicant/contact name (write SAME if same as owner)", "zh": "申请人/联系人姓名（与业主相同则填 SAME）" },
+      { "id": "applicant_mailing_address", "line": "4. Applicant and/or Contact Person", "en": "Mailing address", "zh": "邮寄地址" },
+      { "id": "applicant_phone_email", "line": "4. Applicant and/or Contact Person", "en": "Phone and email", "zh": "电话及电子邮箱" },
+      { "id": "applicant_sign_date", "line": "5. Application Signature", "en": "Applicant signature, date (MM/DD/YYYY)", "zh": "申请人签名及日期（月/日/年）" },
+      { "id": "owner_sign_date", "line": "5. Application Signature", "en": "Signature of property owner or other allowable signatory per SJMC 20.100.100, date", "zh": "业主或依 SJMC 20.100.100 允许的其他签署人签名及日期" },
+      { "id": "wsA_attached_count", "line": "Worksheet A", "en": "Attached signs: number proposed and existing", "zh": "附墙招牌：拟设及现有数量" },
+      { "id": "wsA_frontage", "line": "Worksheet A", "en": "Per occupancy frontage (1st-4th): frontage length (ft) and proposed sign area (sq ft)", "zh": "各临街面（第1至4面）：临街长度（英尺）及拟设招牌面积（平方英尺）" },
+      { "id": "wsA_freestanding", "line": "Worksheet A", "en": "Free-standing signs: number, allowed/proposed area, height, setback", "zh": "独立式招牌：数量、允许/拟设面积、高度、退界距离" },
+      { "id": "wsC_frontage", "line": "Worksheet C", "en": "Frontages 1-4: frontage x 2.5 max area minus existing; frontage x 1.5 max single sign", "zh": "临街面1至4：长度×2.5为总面积上限减去现有；长度×1.5为单块上限" }
+    ],
+    "attach": [
+      { "en": "Site plan to scale or line drawing (north arrow, tenant space, frontage dimensions, existing and proposed signs, setbacks)", "zh": "按比例或线条绘制的总平面图（指北针、租户空间、临街尺寸、现有及拟设招牌、退界）" },
+      { "en": "Floor plan of the tenant space with dimensions", "zh": "标注尺寸的租户空间平面图" },
+      { "en": "Building elevations (building-mounted signs)", "zh": "建筑立面图（附墙招牌）" },
+      { "en": "Sign elevations: dimensions, colors, materials, attachment method, illumination", "zh": "招牌立面图：尺寸、颜色、材料、安装方式、照明" }
+    ],
+    "destination": {
+      "signature": "unknown",
+      "evidence": "Form (paraphrased by fetch): electronic or virtual submissions require a Digital ID signature; in-person submissions require an original ink signature. 'You may submit by a virtual or in-person appointment.'",
+      "source": "https://www.sanjoseca.gov/home/showpublisheddocument/15381/638900946952300000"
+    },
+    "notes": "Library says method 'portal' but the form says submission is by virtual or in-person Planning appointment (virtual = PDFs). Digital ID (certificate) signature required for virtual; wet ink in person. Fee invoice issued after submission; application 'considered rejected' until fee items provided; full fees due within 14 days. A separate building permit may also be required for signs."
+  },
+  "ac-plan-check": {
+    "status": "mapped",
+    "form_seen": "Plan Review Questionnaire for Food Establishments + Plan Check Worksheet, Alameda County Environmental Health (no revision printed); Plan Check Guide rev January 2021",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://deh.acgov.org/operations-assets/docs/plancheck/Plan_Check_Questionnaire.pdf", "what": "official PDF" },
+      { "url": "https://deh.acgov.org/operations-assets/docs/plancheck/Plan-Check-Worksheet.pdf", "what": "official PDF" },
+      { "url": "https://health.alamedacountyca.gov/alameda-county-plan-check-guide-for-retail-food-facilities/", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "q1_establishment_type", "line": "Q1", "en": "What type of food establishment will this be? Describe", "zh": "将开设何种类型的食品场所？请描述" },
+      { "id": "q2_business_name", "line": "Q2", "en": "Name of Business", "zh": "商户名称" },
+      { "id": "q3_business_address", "line": "Q3", "en": "Address of Business", "zh": "商户地址" },
+      { "id": "q4_cannabis", "line": "Q4", "en": "Will there be a Cannabis Manufacturing facility?", "zh": "是否设有大麻制造设施？" },
+      { "id": "q5_hood", "line": "Q5", "en": "Will there be a Hood System? How many?", "zh": "是否设排烟罩系统？数量多少？", "hint_en": "Additional fees per system", "hint_zh": "每套系统另收费" },
+      { "id": "q6_unpackaged", "line": "Q6", "en": "Handling of unpackaged foods/drinks: portioning, cooking, deep frying, charbroiling/BBQ?", "zh": "是否处理无包装食品饮料：分装、烹饪、油炸、炭烤/烧烤？" },
+      { "id": "q7_self_service", "line": "Q7", "en": "Salad bar or other self-service foods?", "zh": "是否有沙拉吧或其他自助食品？" },
+      { "id": "q8_catering", "line": "Q8", "en": "Any catering? If so, submit a Catering SOP", "zh": "是否提供外烩？如有须提交外烩标准作业程序" },
+      { "id": "q9_haccp_rop", "line": "Q9", "en": "Do any food items require a HACCP or ROP?", "zh": "是否有食品需要 HACCP 计划或减氧包装（ROP）？" },
+      { "id": "q10_shellfish_tank", "line": "Q10", "en": "Shellfish tank (oysters, clams, etc.)?", "zh": "是否设贝类水箱（生蚝、蛤蜊等）？" },
+      { "id": "q11_fish_tank", "line": "Q11", "en": "Tank for finfish or crustaceans?", "zh": "是否设鱼类或甲壳类水箱？" },
+      { "id": "q12_onsite_takeout", "line": "Q12", "en": "On-site eating or drinking? Exclusively take-out?", "zh": "是否堂食？是否仅外带？" },
+      { "id": "q13_utensils", "line": "Q13", "en": "Multi-use or single-service utensils?", "zh": "使用可重复餐具还是一次性餐具？" },
+      { "id": "q14_dishwasher", "line": "Q14", "en": "Dishwashing machine? High temperature or chemical (low temperature)?", "zh": "是否有洗碗机？高温型还是化学（低温）型？" },
+      { "id": "q15_prep_sinks", "line": "Q15", "en": "Sinks used for washing produce, thawing or other food prep?", "zh": "水槽是否用于洗菜、解冻或其他备餐？" },
+      { "id": "q16_pickup_area", "line": "Q16", "en": "Pick-up area for third-party delivery or to-go customers?", "zh": "是否设第三方外卖或外带取餐区？" },
+      { "id": "q17_employees", "line": "Q17", "en": "Number of employees on site", "zh": "现场员工人数" },
+      { "id": "q18_square_footage", "line": "Q18", "en": "Total square footage of floor space", "zh": "总楼面面积（平方英尺）" },
+      { "id": "q19_seating", "line": "Q19", "en": "Seating capacity", "zh": "座位数" },
+      { "id": "q20_alcohol", "line": "Q20", "en": "Alcoholic beverages served on premises?", "zh": "店内是否供应酒精饮料？" },
+      { "id": "q21_zoning", "line": "Q21", "en": "Is the location zoned for the proposed use?", "zh": "该地点的分区是否允许拟定用途？" },
+      { "id": "q22_septic_well", "line": "Q22", "en": "On a septic system? Using well water?", "zh": "是否使用化粪池系统？是否使用井水？" },
+      { "id": "q23_new_or_remodel", "line": "Q23", "en": "New construction or remodel?", "zh": "新建还是改建？" },
+      { "id": "q24_remodel", "line": "Q24", "en": "If remodel: change in type of operation; previous business name/type; changes made", "zh": "如为改建：经营类型是否变更；原商户名称及类型；改动内容" },
+      { "id": "q25_new_construction", "line": "Q25", "en": "If new construction: new building; current business; stories; basement use", "zh": "如为新建：是否新楼；现有商户；楼层数；地下室用途" },
+      { "id": "q26_mall", "line": "Q26", "en": "Part of a shopping mall or center?", "zh": "是否位于购物中心内？" },
+      { "id": "q27_shared_facilities", "line": "Q27", "en": "Common or shared facilities (restrooms, storerooms, garbage area)?", "zh": "是否有共用设施（洗手间、仓库、垃圾区）？" },
+      { "id": "q28_business_owner", "line": "Q28", "en": "Business owner's name, phone, email, address", "zh": "经营者姓名、电话、邮箱、地址" },
+      { "id": "q29_property_owner", "line": "Q29", "en": "Property owner's name, phone, email, address", "zh": "物业业主姓名、电话、邮箱、地址" },
+      { "id": "q30_architect", "line": "Q30", "en": "Architect's name, phone, email", "zh": "建筑师姓名、电话、邮箱" },
+      { "id": "q31_contractor", "line": "Q31", "en": "Contractor's name, phone, email", "zh": "承包商姓名、电话、邮箱" },
+      { "id": "ws_expedited", "line": "Worksheet", "en": "Expedited Plan Check: Yes", "zh": "加急图纸审查：是", "hint_en": "Additional fee required", "hint_zh": "需另付费用" },
+      { "id": "ws_establishment_name", "line": "Worksheet", "en": "Establishment name, street address, city + zip, phone", "zh": "场所名称、街道地址、城市及邮编、电话", "hint_en": "For permitted facilities, must match the current health permit", "hint_zh": "已有许可的场所须与现行卫生许可证一致" },
+      { "id": "ws_program", "line": "Worksheet", "en": "Program checkboxes", "zh": "项目类型勾选", "options": ["Food", "Pool", "Spa", "Change of Ownership", "Cannabis"] },
+      { "id": "ws_facility_status", "line": "Worksheet", "en": "New Facility or Existing (circle one); Facility ID", "zh": "新场所或现有场所（圈选）；场所编号" },
+      { "id": "ws_hood_fans", "line": "Worksheet", "en": "Number of new hood exhaust fans; new dishwasher w/hood", "zh": "新增排烟罩风机数量；带罩新洗碗机" },
+      { "id": "ws_requestor", "line": "Worksheet", "en": "Requestor/contact person and email", "zh": "申请联系人及邮箱" },
+      { "id": "ws_owner", "line": "Worksheet", "en": "Business owner's name, email, address, phone", "zh": "经营者姓名、邮箱、地址、电话" }
+    ],
+    "attach": [
+      { "en": "Proposed menu (and menu of existing establishment if any)", "zh": "拟定菜单（如有现有商户，附其菜单）" },
+      { "en": "Catering SOP if catering", "zh": "如有外烩，附外烩标准作业程序" },
+      { "en": "One physical plan set at 1/4 inch = 1 foot (vicinity, site, building, equipment with numbered list, finish schedule, plumbing, elevations, ventilation hood)", "zh": "一套 1/4 英寸比 1 英尺的纸质图纸（位置图、总平面、建筑、带编号设备清单的设备图、饰面表、给排水、立面、排烟罩）" },
+      { "en": "Manufacturer's specification sheets for all equipment", "zh": "所有设备的制造商规格书" },
+      { "en": "Water Heater Worksheet and Ventilation Hood Worksheet if applicable", "zh": "如适用，附热水器工作表及排烟罩工作表" },
+      { "en": "Plan review fee payment", "zh": "图纸审查费" }
+    ],
+    "destination": {
+      "mail": { "name": "Alameda County Environmental Health Department", "line1": "1131 Harbor Bay Parkway", "line2": "", "city": "Alameda", "state": "CA", "zip": "94502" },
+      "signature": "unknown",
+      "evidence": "The guide lists the physical address and asks for an initial physical set of plans submitted with the forms and payment; no email or portal submission is described.",
+      "source": "https://health.alamedacountyca.gov/alameda-county-plan-check-guide-for-retail-food-facilities/"
+    },
+    "notes": "Questionnaire title as printed is 'Plan Review Questionnaire for Food Establishments' (library says 'Plan Check Questionnaire'). Worksheet requires all yellow-box fields. Normal review: first response 20 working days; expedited 7. Approved plans valid 6 months. Three full sets for stamping after approval. Excludes City of Berkeley. Fees at health.alamedacountyca.gov/general-fees-eh/."
+  },
+  "ac-health-permit": {
+    "status": "page_only",
+    "form_seen": "Signed permit application (green copy), named in Alameda County 'Change of Ownership Guide'; form itself not published online",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://deh.acgov.org/operations-assets/docs/foodsafety/ChangeofOwnershipGuide.pdf", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "owner_verification", "line": "", "en": "Business owner verification: corporation = Articles of Incorporation and EIN; sole prop/partnership = driver's license no. or EIN", "zh": "经营者身份核实：公司须提供公司章程及 EIN；独资/合伙须提供驾照号码或 EIN" },
+      { "id": "property_owner_contact", "line": "", "en": "Property owner's and management company's address and contact information", "zh": "物业业主及物业管理公司的地址和联系方式" },
+      { "id": "proposed_menu", "line": "", "en": "Copy of the proposed menu", "zh": "拟定菜单副本" },
+      { "id": "inspection_request", "line": "", "en": "Request inspection: (510) 567-6700 or dehwebmain@acgov.org", "zh": "预约检查：(510) 567-6700 或 dehwebmain@acgov.org" }
+    ],
+    "attach": [
+      { "en": "Articles of Incorporation and Federal Tax ID (corporations)", "zh": "公司章程及联邦税号（公司适用）" },
+      { "en": "Proposed menu", "zh": "拟定菜单" },
+      { "en": "Payment of permit fees", "zh": "许可证费用" }
+    ],
+    "destination": {
+      "mail": { "name": "Alameda County Environmental Health Department", "line1": "1131 Harbor Bay Parkway", "line2": "", "city": "Alameda", "state": "CA", "zip": "94502" },
+      "signature": "unknown",
+      "evidence": "Submit the signed application with payment 'in-person or by mail' to 1131 Harbor Bay Parkway, Alameda, CA, 94502.",
+      "source": "https://deh.acgov.org/operations-assets/docs/foodsafety/ChangeofOwnershipGuide.pdf"
+    },
+    "notes": "The permit application is a paper 'green copy' issued through the inspection process; its fields are not published, so the agent cannot pre-fill it. Guide is written for change of ownership; new builds go through plan check first (ac-plan-check). Online payment available for an extra service fee. Permit mailed within two weeks of payment; may operate after paying fees. Library 'info' URL points to oaklandca.gov (city page), not the county agency."
+  },
+  "smc-plan-check": {
+    "status": "mapped",
+    "form_seen": "FOOD PROGRAM APPLICATION, San Mateo County Environmental Health Services (rev. 12/17/2024); Food Facility Plan Check Process (Rev. 12/30/2025)",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://smchealth.org/sites/main/files/file-attachments/20241217_food_application.pdf", "what": "official PDF" },
+      { "url": "https://www.smchealth.org/sites/main/files/file-attachments/20251230_plan_check_process.pdf", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "requestor_info", "line": "For Plan Review Only", "en": "Plan review requestor information", "zh": "图纸审查申请人信息" },
+      { "id": "service_requested", "line": "Service Requested", "en": "Service requested", "zh": "申请服务类别", "options": ["Plan Review (fill out entire application)", "Remodel (FO920/FO910)", "New Business/Major Remodel (FO930/FO935)", "Expedite (additional fees may apply)"] },
+      { "id": "establishment_type", "line": "Type of Establishment", "en": "Type of establishment", "zh": "场所类型", "options": ["Restaurant", "Retail Food/Market", "Mobile Food", "Kitchen Rental", "Bed/Breakfast", "School", "Other"] },
+      { "id": "request_type", "line": "", "en": "Request type", "zh": "申请事由", "options": ["New Business", "Change of Ownership", "Change of Business Name (previous name)"] },
+      { "id": "owner1", "line": "Owner #1 Information", "en": "Owner #1: name, home address, city/st/zip, phone, alt. phone, email", "zh": "业主一：姓名、住址、城市/州/邮编、电话、备用电话、邮箱" },
+      { "id": "owner2", "line": "Owner #2 Information", "en": "Owner #2 (if applicable): name, home address, city/st/zip, phone, alt. phone, email", "zh": "业主二（如适用）：姓名、住址、城市/州/邮编、电话、备用电话、邮箱" },
+      { "id": "facility_name_address", "line": "Facility Information", "en": "Facility name, facility address, city/st/zip", "zh": "场所名称、场所地址、城市/州/邮编" },
+      { "id": "facility_contact", "line": "Facility Information", "en": "Facility phone, alt. phone, business email", "zh": "场所电话、备用电话、商户邮箱" },
+      { "id": "opening_date", "line": "Facility Information", "en": "Opening date", "zh": "开业日期", "hint_en": "Final approval to open must be granted in writing before opening", "hint_zh": "开业前须获得书面最终批准" },
+      { "id": "retail_sqft", "line": "Facility Information", "en": "Square footage of retail area", "zh": "零售区面积（平方英尺）" },
+      { "id": "seating_capacity", "line": "Facility Information", "en": "Seating capacity", "zh": "座位数" },
+      { "id": "bill_to", "line": "Send Annual Health Permit Bill To", "en": "Send annual health permit bill to: company, contact, address, phone, email", "zh": "年度卫生许可账单寄送：公司、联系人、地址、电话、邮箱", "options": ["Owner 1 address", "Owner 2 address", "Facility address", "Other"] },
+      { "id": "owner_rep_print_date", "line": "Signature", "en": "Print Owner/Representative 1 and 2, date", "zh": "业主/代表一及二正楷姓名、日期" }
+    ],
+    "attach": [
+      { "en": "Plans (3 sets if paper)", "zh": "图纸（纸质需 3 套）" },
+      { "en": "Equipment specification sheets", "zh": "设备规格书" },
+      { "en": "Scope of work", "zh": "工程范围说明" },
+      { "en": "Construction plan review checklist", "zh": "施工图纸审查清单" },
+      { "en": "Plan review fee payment", "zh": "图纸审查费" }
+    ],
+    "destination": {
+      "mail": { "name": "Environmental Health Services, Food Program", "line1": "2000 Alameda de las Pulgas", "line2": "Suite #100", "city": "San Mateo", "state": "CA", "zip": "94403" },
+      "signature": "unknown",
+      "evidence": "By signing below, the owner or authorized representative agrees to operate in accordance with all applicable state and local [laws].",
+      "source": "https://smchealth.org/sites/main/files/file-attachments/20241217_food_application.pdf"
+    },
+    "notes": "Address is the office printed on the application and process sheet; neither explicitly says 'mail to'. Library says portal (MyEHS), but official MyEHS FAQ and portal page do not mention plan review submission; approved electronic plans are emailed back, so e-submission exists but the channel was not confirmed. EnvHealth@smcgov.org and fax (650) 627-8244 are printed contacts, not confirmed submission channels. Review within 20 business days; resubmittals 10; approval valid 2 years."
+  },
+  "smc-health-permit": {
+    "status": "mapped",
+    "form_seen": "FOOD PROGRAM APPLICATION, San Mateo County Environmental Health Services (rev. 12/17/2024), New Business section; MyEHS online application behind login",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://smchealth.org/sites/main/files/file-attachments/20241217_food_application.pdf", "what": "official PDF" },
+      { "url": "https://www.smchealth.org/communityportal", "what": "application page" },
+      { "url": "https://www.smchealth.org/sites/main/files/file-attachments/20250428_myehs_faqs_final.pdf", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "establishment_type", "line": "Type of Establishment", "en": "Type of establishment", "zh": "场所类型", "options": ["Restaurant", "Retail Food/Market", "Mobile Food", "Kitchen Rental", "Bed/Breakfast", "School", "Other"] },
+      { "id": "request_type", "line": "", "en": "Request type", "zh": "申请事由", "options": ["New Business", "Change of Ownership", "Change of Business Name (previous name)"] },
+      { "id": "owner1", "line": "Owner #1 Information", "en": "Owner #1: name, home address, city/st/zip, phone, alt. phone, email", "zh": "业主一：姓名、住址、城市/州/邮编、电话、备用电话、邮箱" },
+      { "id": "owner2", "line": "Owner #2 Information", "en": "Owner #2 (if applicable): name, home address, city/st/zip, phone, alt. phone, email", "zh": "业主二（如适用）：姓名、住址、城市/州/邮编、电话、备用电话、邮箱" },
+      { "id": "facility_name_address", "line": "Facility Information", "en": "Facility name, facility address, city/st/zip", "zh": "场所名称、场所地址、城市/州/邮编" },
+      { "id": "facility_contact", "line": "Facility Information", "en": "Facility phone, alt. phone, business email", "zh": "场所电话、备用电话、商户邮箱" },
+      { "id": "opening_date", "line": "Facility Information", "en": "Opening date", "zh": "开业日期" },
+      { "id": "retail_sqft", "line": "Facility Information", "en": "Square footage of retail area", "zh": "零售区面积（平方英尺）" },
+      { "id": "seating_capacity", "line": "Facility Information", "en": "Seating capacity", "zh": "座位数" },
+      { "id": "bill_to", "line": "Send Annual Health Permit Bill To", "en": "Send annual health permit bill to: company, contact, address, phone, email", "zh": "年度卫生许可账单寄送：公司、联系人、地址、电话、邮箱", "options": ["Owner 1 address", "Owner 2 address", "Facility address", "Other"] },
+      { "id": "owner_rep_print_date", "line": "Signature", "en": "Print Owner/Representative 1 and 2, date", "zh": "业主/代表一及二正楷姓名、日期" }
+    ],
+    "attach": [
+      { "en": "Supporting documents in PDF as prompted by MyEHS (listed per program at smchealth.org/myehsdocs)", "zh": "MyEHS 提示的 PDF 证明文件（按项目列于 smchealth.org/myehsdocs）" }
+    ],
+    "destination": {
+      "portal": "smcehs.my.site.com",
+      "mail": { "name": "Environmental Health Services, Food Program", "line1": "2000 Alameda de las Pulgas", "line2": "Suite #100", "city": "San Mateo", "state": "CA", "zip": "94403" },
+      "signature": "typed",
+      "evidence": "You will need to log in or create an account to complete a permit application and manage your permits.",
+      "source": "https://www.smchealth.org/sites/main/files/file-attachments/20250428_myehs_faqs_final.pdf"
+    },
+    "notes": "MyEHS account sign-up is reviewed by EHS staff before the account is created, so allow lead time. Exact online questions are behind login; fields above are from the paper Food Program Application. 'HEALTH PERMITS ARE NON-TRANSFERABLE'; 'SUBMITTAL OF THIS APPLICATION DOES NOT CONSTITUTE PERMIT APPROVAL'. Permit is issued after final inspection and permit fee payment."
+  },
+  "fre-business-tax": {
+    "status": "mapped",
+    "form_seen": "BUSINESS TAX APPLICATION, City of Fremont Revenue Division (RD_BTA, Revised 09/2018)",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://fremont.gov/home/showpublisheddocument/2411/637756117853430000", "what": "official PDF" },
+      { "url": "https://blweb.fremont.gov/PrimeWeb/Apply/GettingStarted/BusinessLicense", "what": "application page" },
+      { "url": "https://fremont.gov/government/departments/finance/revenue/business-tax/apply-for-a-business-tax-account", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "application_type", "line": "Page 1", "en": "Application type (check all that apply)", "zh": "申请类型（可多选）", "options": ["New Business", "Home Occupation Form Required", "Out-Of-Town Business", "Change of Owner", "Change of Business Name", "Location Change", "2nd Location"] },
+      { "id": "business_tax_no", "line": "Page 1", "en": "Business Tax No.", "zh": "商业税号" },
+      { "id": "business_name", "line": "Page 1", "en": "Business Name", "zh": "商户名称" },
+      { "id": "corporation_name", "line": "Page 1", "en": "Corporation Name (if different)", "zh": "公司名称（如不同）" },
+      { "id": "mailing_address", "line": "Page 1", "en": "Mailing Address", "zh": "邮寄地址" },
+      { "id": "business_location", "line": "Page 1", "en": "Business Location", "zh": "营业地点", "hint_en": "Cannot be a P.O. Box", "hint_zh": "不可填邮政信箱" },
+      { "id": "ownership", "line": "Page 1", "en": "Ownership", "zh": "所有权形式", "options": ["Corporation", "LLC", "Partnership", "Sole Proprietor", "Trust"] },
+      { "id": "state_license", "line": "Page 1", "en": "State License No., License Type, Expiration Date", "zh": "州执照号码、执照类型、到期日" },
+      { "id": "sellers_permit", "line": "Page 1", "en": "Sellers Permit No.", "zh": "销售许可证号码" },
+      { "id": "federal_tax_id", "line": "Page 1", "en": "Federal Tax ID No.", "zh": "联邦税号（EIN）" },
+      { "id": "state_tax_id", "line": "Page 1", "en": "State Tax ID No.", "zh": "州税号" },
+      { "id": "start_date", "line": "Page 1", "en": "Bus. Start Date in Fremont", "zh": "在弗里蒙特开业日期" },
+      { "id": "contact_channels", "line": "Page 1", "en": "Email, phone, alternate/cell, fax, website", "zh": "邮箱、电话、备用/手机、传真、网站" },
+      { "id": "owner1", "line": "Page 1", "en": "1st Owner: name, title, driver lic. no., soc. sec. no., home address, phone", "zh": "第一业主：姓名、职务、驾照号、社安号、住址、电话" },
+      { "id": "owner2", "line": "Page 1", "en": "2nd Owner: name, title, driver lic. no., soc. sec. no., home address, phone", "zh": "第二业主：姓名、职务、驾照号、社安号、住址、电话" },
+      { "id": "contact", "line": "Page 1", "en": "Contact name, address, phone", "zh": "联系人姓名、地址、电话" },
+      { "id": "emergency_contact", "line": "Page 1", "en": "In case of emergency, please contact", "zh": "紧急联系人" },
+      { "id": "activity_description", "line": "Page 1", "en": "Detailed description of business activity conducted in Fremont", "zh": "在弗里蒙特经营活动的详细描述" },
+      { "id": "internet_catalog", "line": "Page 1", "en": "Sells products over the internet? Sells by catalog?", "zh": "是否网上销售？是否目录销售？", "options": ["YES", "NO"] },
+      { "id": "activity_percent", "line": "Page 1", "en": "Business activity (check all, write % if more than one)", "zh": "经营类别（可多选，多项时填百分比）", "options": ["Retail Sales", "Wholesale", "Warehousing", "Manufacturing", "Real Estate", "Service", "Professional Services", "Administrative Office (No Sales)", "Rental Property", "Property Management", "LLP"] },
+      { "id": "employees", "line": "Page 1", "en": "Number of employees at Fremont location, including owner", "zh": "弗里蒙特地点员工人数（含业主）" },
+      { "id": "square_footage", "line": "Page 1", "en": "Square footage at location", "zh": "营业面积（平方英尺）" },
+      { "id": "shared_occupancy", "line": "Page 1", "en": "Shares occupancy with another business? If yes, list name", "zh": "是否与其他商户共用场地？如是请列名称" },
+      { "id": "other_locations", "line": "Page 1", "en": "Other Fremont location(s)", "zh": "其他弗里蒙特营业地点" },
+      { "id": "opt_out_lists", "line": "Page 1", "en": "Do not wish business information listed on 3rd party business lists", "zh": "不希望商户信息出现在第三方名录" },
+      { "id": "officers", "line": "Page 1", "en": "Names of owners, partners or corporate officers (DO NOT LEAVE BLANK)", "zh": "业主、合伙人或公司高管姓名（不得留空）" },
+      { "id": "printed_name_date_phone", "line": "Signature", "en": "Applicant's printed name, date, phone number", "zh": "申请人正楷姓名、日期、电话" },
+      { "id": "p2_business_location", "line": "Page 2", "en": "Business name and business location (number, street, city, state, zip)", "zh": "商户名称及营业地点（门牌、街道、城市、州、邮编）" }
+    ],
+    "attach": [
+      { "en": "Payment: check or Credit Card Authorization Form", "zh": "付款：支票或信用卡授权表" },
+      { "en": "Additional sheets for emergency contacts and owners/officers if needed", "zh": "如需要，附紧急联系人及业主/高管补充页" }
+    ],
+    "destination": {
+      "email": "businesstax@fremont.gov",
+      "fax": "+15104944754",
+      "mail": { "name": "City of Fremont Revenue Division", "line1": "39550 Liberty Street", "line2": "P.O. Box 5006", "city": "Fremont", "state": "CA", "zip": "94537-5006" },
+      "portal": "blweb.fremont.gov",
+      "signature": "unknown",
+      "evidence": "Email: Print, scan, and email the application and Credit Card Authorization Form to businesstax@fremont.gov.",
+      "source": "https://blweb.fremont.gov/PrimeWeb/Apply/GettingStarted/BusinessLicense"
+    },
+    "notes": "Fees (apply page): $30 commercial and home-based; $125 licensed contractors; plus $4 state-mandated fee. Online (HdL PrimeWeb) is available for most businesses but NOT for food trucks, peddlers, massage, barbers/beauty salons, child care, non-profits and others; those use the fillable paper form. Paper form is rev 09/2018 and the 'Health Dept. (567-6700)' review row means Alameda County EH reviews food businesses. Check exemption eligibility first. In-person counter: 39550 Liberty Street, Fremont, CA 94538."
+  },
+  "cup-building": {
+    "status": "mapped",
+    "form_seen": "Construction Permit Application, City of Cupertino Building Division (BldgApp_2017, revised 01/01/21)",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://cupertino.org/home/showpublisheddocument/4343/638665658560970000", "what": "official PDF" },
+      { "url": "https://www.cupertino.gov/Your-City/Departments/Community-Development/Building/Permits", "what": "instructions" },
+      { "url": "https://cupertino.prod.govaccess.org/our-city/departments/community-development/building/permits/electronic-plan-submittal", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "apn", "line": "Page 1", "en": "APN #", "zh": "地块编号（APN）" },
+      { "id": "owner", "line": "Page 1", "en": "Owner: name, phone, e-mail, street address, city, state, zip", "zh": "业主：姓名、电话、邮箱、街道地址、城市、州、邮编" },
+      { "id": "contact_name", "line": "Page 1", "en": "Contact name and city, state, zip", "zh": "联系人姓名及城市、州、邮编" },
+      { "id": "contact_role", "line": "Page 1", "en": "Contact role", "zh": "联系人身份", "options": ["Owner", "Owner-Builder", "Owner Agent", "Contractor Agent", "Engineer", "Developer", "Tenant"] },
+      { "id": "contractor", "line": "Page 1", "en": "Contractor: name, license no., license type, company, e-mail, address, phone", "zh": "承包商：姓名、执照号、执照类型、公司、邮箱、地址、电话" },
+      { "id": "project_data", "line": "Page 1", "en": "Stories #, use type, occupancy, square feet, valuation ($)", "zh": "层数、用途、占用类别、面积、工程造价（美元）" },
+      { "id": "areas", "line": "Page 1", "en": "New floor SF, demo SF, total net SF, remodel kitchen SF, remodel other, porch SF, deck SF", "zh": "新增面积、拆除面积、净面积合计、厨房改建面积、其他改建、门廊面积、露台面积" },
+      { "id": "project_scope", "line": "Page 2, A", "en": "Scope", "zh": "工程类别", "options": ["New construction", "Addition", "Alteration", "T.I.", "MEP", "Re-roof"] },
+      { "id": "building_type", "line": "Page 2, A", "en": "Building type", "zh": "建筑类型", "options": ["Single-family/duplex", "Multi-family", "Industrial", "Commercial"] },
+      { "id": "description_of_work", "line": "Page 2, A", "en": "Description of work", "zh": "工程内容描述" },
+      { "id": "existing_sprinklers", "line": "Page 2, A", "en": "Existing fire sprinklers: Yes / No", "zh": "现有消防喷淋：有/无" },
+      { "id": "existing_use_sf", "line": "Page 2, A", "en": "Existing use and existing SF", "zh": "现有用途及现有面积" },
+      { "id": "project_address", "line": "Page 2", "en": "Project address", "zh": "项目地址" },
+      { "id": "architect", "line": "Page 2", "en": "Architect: e-mail, phone, business license number", "zh": "建筑师：邮箱、电话、营业执照号" },
+      { "id": "applicant_date", "line": "Certification", "en": "Owner or agent certification, date", "zh": "业主或代理人声明及日期", "hint_en": "Certifies applicant is the owner or authorized agent and authorizes City inspection entry", "hint_zh": "声明本人为业主或授权代理人，并同意市府人员入内检查" }
+    ],
+    "attach": [
+      { "en": "Hazardous Materials Disclosure form (commercial buildings using hazardous materials)", "zh": "危险物料披露表（使用危险物料的商业建筑）" },
+      { "en": "Planning approval letter, or a planning meeting before submittal", "zh": "规划批准函，或提交前与规划部门会面" },
+      { "en": "Drawings as separate landscape PDFs per sheet; supporting docs (structural, energy calcs, CalGreen checklist, special inspection form) as multipage PDFs", "zh": "每张图纸单独横向 PDF；支持文件（结构、节能计算、CalGreen 清单、特殊检验表）为多页 PDF" },
+      { "en": "Plan Review Submittal Checklist", "zh": "图纸审查提交清单" }
+    ],
+    "destination": {
+      "email": "permitcenter@cupertino.gov",
+      "signature": "unknown",
+      "evidence": "Applying for a permit can be done in person or virtually via email. Email the application, drawings, and documents to permitcenter@cupertino.gov (Dropbox direct-download link).",
+      "source": "https://www.cupertino.gov/Your-City/Departments/Community-Development/Building/Permits"
+    },
+    "notes": "Library says 'portal', but the Accela portal (aca.accela.com/CUPERTINO) is only for instant permits, payment and inspections; standard permits (incl. commercial TI) go by email with a Dropbox link or at the Building Counter, 10300 Torre Avenue. Form PDF seen is rev 01/01/21 and prints permitcenter@cupertino.org; the current page says @cupertino.gov. The current forms page links a newer file (v/6 building-construction-permit-application.pdf) that could not be opened (403); re-check for a newer revision. Plan review fees due before review starts. Typical commercial TI timeline 15 days initial, 10 resubmittal; currently 20-30 business days."
+  },
+  "dly-license": {
+    "status": "mapped",
+    "form_seen": "Application for Business License, City of Daly City Department of Finance (no revision printed), with Business License Tax Worksheet",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.dalycity.org/DocumentCenter/View/1175/Business-License-Application-Located-in-Daly-City-PDF", "what": "official PDF" }
+    ],
+    "fields": [
+      { "id": "business_name", "line": "", "en": "Business Name", "zh": "商户名称" },
+      { "id": "business_address", "line": "", "en": "Business Address", "zh": "营业地址" },
+      { "id": "mailing_address", "line": "", "en": "Mailing Address, City / State / Zip", "zh": "邮寄地址、城市/州/邮编" },
+      { "id": "phone_fax", "line": "", "en": "Business Phone / Fax No.", "zh": "商户电话/传真" },
+      { "id": "business_description", "line": "", "en": "Business Description", "zh": "经营内容描述" },
+      { "id": "date_opened", "line": "", "en": "Date Business Opened", "zh": "开业日期" },
+      { "id": "home_based", "line": "", "en": "Is this a home-based business?", "zh": "是否为居家经营？", "options": ["Yes", "No"] },
+      { "id": "resale_abc_no", "line": "", "en": "Resale No. / ABC No. (if applicable)", "zh": "转售许可证号 / ABC 酒牌号（如适用）" },
+      { "id": "state_license_no", "line": "", "en": "State License No. (if applicable)", "zh": "州执照号码（如适用）" },
+      { "id": "health_permit_no", "line": "", "en": "Health Permit No. (if applicable)", "zh": "卫生许可证号码（如适用）" },
+      { "id": "business_type", "line": "", "en": "Business Type", "zh": "企业类型", "options": ["Sole Proprietorship", "Partnership", "LLC", "Corporation"] },
+      { "id": "tax_id", "line": "", "en": "Federal Tax I.D. # / Social Security # / CAID/CADL #", "zh": "联邦税号 / 社安号 / 加州身份证或驾照号" },
+      { "id": "corporation_name", "line": "", "en": "Corporation Name", "zh": "公司名称" },
+      { "id": "owner_info", "line": "", "en": "Owner's Name, Title, Address, Telephone No.", "zh": "业主姓名、职务、地址、电话" },
+      { "id": "gross_receipts", "line": "", "en": "Estimated Annual Gross Receipts", "zh": "预计年总收入" },
+      { "id": "license_tax_amount", "line": "", "en": "Amount of Business License Tax", "zh": "营业执照税金额" },
+      { "id": "ws_line1", "line": "Worksheet Line 1", "en": "If gross receipts are $100,000 or less, tax is $114.00", "zh": "年收入 10 万美元或以下，税额 114 美元" },
+      { "id": "ws_2a", "line": "Worksheet 2A", "en": "Enter total gross receipts", "zh": "填写总收入" },
+      { "id": "ws_2b", "line": "Worksheet 2B", "en": "Tax due (multiply 2A by .0011)", "zh": "应缴税额（2A × 0.0011）" },
+      { "id": "ws_2c", "line": "Worksheet 2C", "en": "State fee (required)", "zh": "州规费（必缴）" },
+      { "id": "ws_2d", "line": "Worksheet 2D", "en": "Total tax due (2B + 2C)", "zh": "应缴总额（2B + 2C）" },
+      { "id": "ws_name_title_date", "line": "Worksheet", "en": "Name and Title (PLEASE PRINT), Date", "zh": "姓名及职务（正楷）、日期" }
+    ],
+    "attach": [
+      { "en": "Payment of business license tax and fees", "zh": "营业执照税及规费" },
+      { "en": "All Federal, State, County and City license and permit numbers for the business type (before certificate is released)", "zh": "该行业所需的联邦、州、县、市执照及许可证号码（发证前须提交）" }
+    ],
+    "destination": {
+      "fax": "+16509918267",
+      "mail": { "name": "Department of Finance, Business License Division", "line1": "333 - 90th Street", "line2": "", "city": "Daly City", "state": "CA", "zip": "94015-1895" },
+      "signature": "unknown",
+      "evidence": "Complete, sign and return with your payment.",
+      "source": "https://www.dalycity.org/DocumentCenter/View/1175/Business-License-Application-Located-in-Daly-City-PDF"
+    },
+    "notes": "Fax is printed in the application header; form doesn't say faxed applications are accepted (payment must accompany). Tax: $114 if gross receipts <= $100,000, else 0.0011 x gross. Form prints $4 state fee but footnote says it dropped to $1 from Jan 1, 2024, so worksheet line 2C is outdated. Fees nonrefundable. Signed under penalty of perjury. PDF also contains a Solicitors Permit form (not needed for storefronts)."
+  },
+  "dly-building": {
+    "status": "page_only",
+    "form_seen": "A Guide to Commercial Tenant Improvement, City of Daly City Building Division (undated); no application form named",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://www.dalycity.org/DocumentCenter/View/111/Tenant-Improvement-Guide-to-Commercial-PDF", "what": "instructions" }
+    ],
+    "fields": [
+      { "id": "plan_sets", "line": "", "en": "Three plan sets (five for large multi-department projects), 11x17 or larger", "zh": "三套图纸（需多部门审查的大型项目五套），11×17 英寸或更大" },
+      { "id": "plot_floor_plans", "line": "", "en": "Plot plan (1/8 in = 1 ft) and floor plans (1/4 in = 1 ft)", "zh": "地块图（1/8 英寸比 1 英尺）及平面图（1/4 英寸比 1 英尺）" },
+      { "id": "occupant_load", "line": "", "en": "Occupant load; letter stating greatest number of employees at one time", "zh": "使用人数；说明同时在场最多员工人数的信函" },
+      { "id": "energy_forms", "line": "", "en": "LTG-1 and MECH-1 on plans; Title 24 nonresidential energy calcs with each set", "zh": "图纸上附 LTG-1 及 MECH-1；每套附 Title 24 非住宅节能计算" },
+      { "id": "structural", "line": "", "en": "Structural calculations; anchorage/bracing; reflected ceiling and seismic bracing", "zh": "结构计算；锚固及支撑；反射天花图及抗震支撑" },
+      { "id": "mep_plans", "line": "", "en": "Plumbing, electrical and mechanical plans", "zh": "给排水、电气及机械图纸" },
+      { "id": "restaurant_hood", "line": "", "en": "Restaurants: cooking hood, grease duct, roof outlet details and exhaust sizing calcs", "zh": "餐厅：排烟罩、油烟管道、屋顶出口详图及排风量计算" },
+      { "id": "county_health_approval", "line": "", "en": "Restaurants: plans reviewed and approved by San Mateo County Health", "zh": "餐厅：经圣马特奥县卫生部门审批的图纸" }
+    ],
+    "attach": [
+      { "en": "San Mateo County Health Department approved plans (restaurants)", "zh": "圣马特奥县卫生部门批准的图纸（餐厅）" },
+      { "en": "Fire sprinkler plans to the Fire Department (normally after building permit issues)", "zh": "消防喷淋图纸交消防部门（一般在建筑许可签发后）" }
+    ],
+    "destination": {
+      "signature": "unknown",
+      "evidence": "For additional building plan review or permit information call the Daly City Building Division at (650) 991-8061.",
+      "source": "https://www.dalycity.org/DocumentCenter/View/111/Tenant-Improvement-Guide-to-Commercial-PDF"
+    },
+    "notes": "Guide does not name a building permit application form or a submission address/portal; fees given after approval. Building Division (650) 991-8061; Fire (650) 991-8138. Library method 'in_person' not confirmed by the guide."
+  },
+  "scc-fbn": {
+    "status": "not_found",
+    "form_seen": "",
+    "read_on": "2026-10-31",
+    "sources": [
+      { "url": "https://clerkrecorder.santaclaracounty.gov/resources/fee-schedule", "what": "instructions" }
+    ],
+    "fields": [],
+    "attach": [],
+    "destination": {},
+    "notes": "FBN page and statement PDF (files.santaclaracounty.gov/exjcpb1411/2024-10/fbn-statement.pdf) are behind Cloudflare and returned 403 to WebFetch and curl. Official fee schedule (readable): FBN Statement $40.00 (one business name, one or two owners, one certified copy); each additional name and/or owner $7.00; abandonment $37.00; withdrawal of partnership $37.00; extra certified copy $10 first page + $1 each additional. Re-try the FBN page from a browser."
+  }
+}
