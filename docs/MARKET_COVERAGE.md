@@ -270,7 +270,7 @@ Read at 10123 N Wolfe Rd, Cupertino, CA 95014. Jurisdictions: US, CA, CUP, SCC. 
 | Registration Form for Commercial Employers | `ca-edd-de1` DE 1 · [PDF](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de1.pdf) · portal eddservices.edd.ca.gov | yes | portal (eddservices.edd.ca.gov), fax, mail |  |
 | Food facility plan check | `scc-plan-check` Food Facility Plan Check Application Form | no | email | Santa Clara County's application PDFs didn't download (blocked); filed by email to the county. |
 | Workers' compensation insurance | `ca-workers-comp` Workers' compensation policy | no | Placetta team: not researched | Nothing to fill: Bought from an insurer licensed in the state (or the state fund) before the first employee starts; the insurer reports the policy to the state. |
-| Building permit for the tenant improvement | `cup-building` Building permit (tenant improvement) | no | Placetta team: not researched | Online only (www.cupertino.gov): Placetta prepares the answers summary for the agency's site. |
+| Building permit for the tenant improvement | `cup-building` Building permit (tenant improvement) | no | Placetta team: not researched | No agency PDF found. |
 | Health permit to operate a food facility | `scc-health-permit` Permit Application & Certification Statement | no | email | Santa Clara County's application PDFs didn't download (blocked); filed by email to the county. |
 
 ## 11. Irvine
@@ -388,7 +388,7 @@ Read at 1688 Hostetter Rd, San Jose, CA 95131. Jurisdictions: US, CA, SJ, SCC.
 | Fire protection system permit | `sj-fire-systems` Fire Protection Systems permit | no | Placetta team: Only a licensed contractor can apply: "Your Contractor's License type will determine which permits you can apply for." | Online only (www.sjpermits.org): Placetta prepares the answers summary for the agency's site. |
 | Building final inspection | `sj-building-final` Building final inspection · portal sjpermits.org | no | portal (sjpermits.org) | Online only (sjpermits.org): Placetta prepares the answers summary for the agency's site. |
 | Health permit to operate a food facility | `scc-health-permit` Permit Application & Certification Statement | no | email | Santa Clara County's application PDFs didn't download (blocked); filed by email to the county. |
-| Sign permit | `sj-sign` Signs - Sign Permit Application · portal sjpermits.org | no | portal (sjpermits.org) (an agency fee keeps email, fax and mail with the team) | Online only (sjpermits.org): Placetta prepares the answers summary for the agency's site. |
+| Sign permit | `sj-sign` Signs - Sign Permit Application · portal sjpermits.org | no | portal (sjpermits.org) (an agency fee keeps email, fax and mail with the team) | Filed in person; no PDF mapped. |
 
 ## Paradise (unincorporated Clark County: the Las Vegas Strip)
 

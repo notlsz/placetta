@@ -79,9 +79,9 @@ export const LOCAL_US: OfficialForm[] = [
   },
   {
     id: "sj-sign", form: "Signs - Sign Permit Application", title: B("Sign permit", "招牌许可证"),
-    agency: B("City of San José Planning Division", "圣何塞市规划处"), level: "city", where: "SJ", segments: [R, T], needs: { signage: true }, method: "portal", order: 80,
+    agency: B("City of San José Planning Division", "圣何塞市规划处"), level: "city", where: "SJ", segments: [R, T], needs: { signage: true }, method: "in_person", order: 80,
     how: B("Upload the signed application to SJPermits.org, then pay the invoice.", "将签署的申请表上传至 SJPermits.org，然后缴纳账单。"),
-    url: "https://www.sanjoseca.gov/business/development-services-permit-center/online-permits-at-sjpermits-org/planning-online-permits",
+    url: "https://www.sanjoseca.gov/home/showpublisheddocument/15381/638900946952300000",
     info: "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/planning-division/start-a-new-project-or-use/applications-and-appointments",
     fee: 445, feeNote: B("$445, plus $110 for each additional sign.", "445 美元，每增加一块招牌另收 110 美元。"),
     takes: B("Average: 2 weeks.", "平均 2 周。"),
@@ -960,9 +960,9 @@ export const LOCAL_US: OfficialForm[] = [
   },
   {
     id: "chi-sanitation", form: "City of Chicago Food Service Sanitation Certificate", title: B("Chicago food service sanitation certificate", "芝加哥食品服务卫生证书"),
-    agency: B("Chicago Department of Public Health, Food Protection Program", "芝加哥公共卫生局食品保护项目"), level: "city", where: "CHI", segments: [R, T], needs: { food: true }, method: "online", order: 40,
+    agency: B("Chicago Department of Public Health, Food Protection Program", "芝加哥公共卫生局食品保护项目"), level: "city", where: "CHI", segments: [R, T], needs: { food: true }, method: "pdf_mail", order: 40,
     how: B("A person in charge holding this Public Health certificate must be on site whenever food that needs temperature control is prepared, held or served. Pass an approved course, or apply for reciprocity with a valid ANSI-accredited food protection manager certificate. A place selling only prepackaged food doesn't need one.", "制作、存放或供应需温度控制的食品时，现场须有一名持此公共卫生局证书的负责人。须通过认可课程，或凭有效的 ANSI 认证食品保护经理证书申请互认。仅销售预包装食品的场所无需此证。"),
-    url: "https://chicago.gov/city/en/depts/cdph/provdrs/food_safety/svcs/enroll_in_a_foodsanitationcertificationcourse.html", info: "https://chicago.gov/city/en/depts/cdph/provdrs/food_safety/svcs/enroll_in_a_foodsanitationcertificationcourse.html",
+    url: "https://www.ccc.edu/wp-content/uploads/kennedy_departments_Documents_FoodService-SanitationApplication.pdf", info: "https://chicago.gov/city/en/depts/cdph/provdrs/food_safety/svcs/enroll_in_a_foodsanitationcertificationcourse.html",
     fee: null, feeNote: B("Set by the course provider.", "由课程机构定价。"), checked: "page", fields: [],
   },
   {

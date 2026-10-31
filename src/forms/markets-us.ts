@@ -182,7 +182,7 @@ export const MARKETS_US: OfficialForm[] = [
     id: "sgb-license", form: "Business License and Occupancy Application", title: B("City of San Gabriel business license", "圣盖博市营业执照"),
     agency: B("City of San Gabriel, Finance (Business License)", "圣盖博市财政局（营业执照）"), level: "city", where: "SGB", segments: ALL, method: "pdf_mail", order: 55,
     how: B("Verify zoning and building permits with Community Development first; once the tenant improvements pass final inspection, apply for the business license by phone or by email to Financeinfo@sgch.org with the business name and address in the subject.", "先向社区发展局核实分区和建筑许可；租户改造通过最终检查后，致电或发邮件至 Financeinfo@sgch.org 申请营业执照，邮件主题写明企业名称和地址。"),
-    url: "https://www.sangabrielcity.com/DocumentCenter/View/6352", pdf: "https://www.sangabrielcity.com/DocumentCenter/View/6352",
+    url: "https://www.sangabrielcity.com/1735/Business-License-Requirements", pdf: "https://www.sangabrielcity.com/DocumentCenter/View/6352",
     info: "https://sangabrielcity.com/DocumentCenter/View/19742/City-Business-License-Guidelines-and-Fees-2023",
     fee: null, feeNote: B("A flat tax by business classification.", "按业务类别收取固定税额。"), checked: "page", fields: [],
   },

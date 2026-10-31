@@ -477,8 +477,8 @@ export const FORMS: OfficialForm[] = [
     plain: B("New York City makes you tell the local community board 30 days before you apply for a liquor license.", "纽约市要求在申请酒类执照前 30 天通知当地社区委员会。"),
   },
   {
-    id: "ny-sla-rw", form: "Restaurant Wine license (RW 341)", title: B("Restaurant wine license (beer and wine)", "餐厅葡萄酒执照（啤酒与葡萄酒）"),
-    agency: B("New York State Liquor Authority", "纽约州酒类管理局"), level: "state", where: "NYC", segments: ["restaurant"], needs: { alcohol: true }, method: "online", order: 71,
+    id: "ny-sla-rw", form: "On-Premises Retail License application (Restaurant Wine, rev-01/22/25)", title: B("Restaurant wine license (beer and wine)", "餐厅葡萄酒执照（啤酒与葡萄酒）"),
+    agency: B("New York State Liquor Authority", "纽约州酒类管理局"), level: "state", where: "NYC", segments: ["restaurant"], needs: { alcohol: true }, method: "pdf_mail", order: 71,
     how: B("The SLA's license for a restaurant with a kitchen and a full menu to serve beer and wine, not spirits, on the premises. Serving spirits takes an On-Premises Liquor license instead.", "纽约州酒类管理局为有厨房和完整菜单的餐厅发放的执照，可在店内供应啤酒和葡萄酒，但不含烈酒。供应烈酒须改申请堂饮酒类执照（On-Premises Liquor）。"),
     url: "https://sla.ny.gov/restaurant-license-quick-reference-0", info: "https://ht.nyc-business.nyc.gov/nycbusiness/description/restaurant-wine-license",
     fee: 1060, feeNote: B("$960 for the 2-year license in New York City's counties plus a $100 filing fee (SLA fee chart).", "纽约市各县 2 年期执照费 960 美元，另加 100 美元申请费（酒类管理局收费表）。"),
