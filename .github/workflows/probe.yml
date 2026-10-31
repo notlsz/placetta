@@ -2,8 +2,8 @@
 # approval, with every stage alert checked, plus the edge cases. Its workspaces are synthetic (migration
 # 20261030090000): nothing reaches an agency, nothing lands on the Placetta team, nothing is learned, and everything it
 # makes is deleted when it finishes.
-#   nightly   6 of the 30 licenses (a different 6 each night) and every edge case
-#   Sundays   all 30 licenses and every edge case
+#   nightly   2 of the 30 licenses (a different 2 each night), one at a time
+#   Sundays   6 licenses and every edge case, one at a time (sized for the free plan's CPU)
 #   by hand   any slice, or named licenses
 # When it fails: the "Production probe" issue is opened (or updated) with what failed, and Claude reads the failures,
 # finds the cause in the code and opens a pull request with the fix and a test. Nothing is merged or deployed by it:
@@ -44,8 +44,12 @@ jobs:
             [ -z "${{ inputs.only }}" ] && [ -n "${{ inputs.slice }}" ] && args="--slice ${{ inputs.slice }}"
             [ "${{ inputs.edges }}" = "false" ] && args="$args --no-edges"
           elif [ "$(date -u +%u)" != "7" ]; then
-            args="--slice $(( $(date -u +%j | sed 's/^0*//') % 5 ))/5"
+            # free plan: 2 licenses a night, one at a time, edge cases on Sundays only (a full run starved the database)
+            args="--slice $(( $(date -u +%j | sed 's/^0*//') % 15 ))/15 --no-edges"
+          else
+            args="--slice $(( $(date -u +%U | sed 's/^0*//') % 5 ))/5"
           fi
+          args="$args --parallel 1"
           echo "args=$args" >> "$GITHUB_OUTPUT"
       - name: Probe production
         id: run

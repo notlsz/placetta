@@ -1,0 +1,53 @@
+# Production heartbeat: an outside check that Odelia's scheduled work is running, on GitHub's free timer.
+# Every 15 minutes it asks the database when its one scheduled job (placetta-tick, migration 20261109090000) last ran
+# well. When the database can't answer or the job hasn't run in 20 minutes, it checks again 5 minutes later; if it is
+# still stuck, it restarts the project once (the same as Settings, General, Restart project) and fails, so GitHub
+# emails the owner. It never restarts twice within an hour, and never while a restart is already under way.
+# Why: on the free plan the database once ran out of CPU and every job failed for hours with nobody told (2026-10-30).
+# It needs only the SUPABASE_ACCESS_TOKEN the deploy already uses. Actions are pinned to full commit SHAs.
+name: Production heartbeat
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+concurrency:
+  group: heartbeat
+  cancel-in-progress: false
+permissions: { contents: read, actions: read }
+jobs:
+  beat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      REF: esquxzcfsylffuijvzec
+    steps:
+      - name: Check, and restart once if stuck
+        run: |
+          set -u
+          api=https://api.supabase.com/v1/projects/$REF
+          status() { curl -s -m 20 -H "Authorization: Bearer $TOKEN" "$api" | jq -r '.status // "unknown"'; }
+          # 0 healthy, 1 stuck: the tick hasn't succeeded in 20 minutes, or the database can't answer in 30 seconds
+          check() {
+            out=$(curl -s -m 30 -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+              -d '{"query":"select extract(epoch from now() - last_ok)::int as age from public.cron_health() where jobname = '\''placetta-tick'\''"}' \
+              "$api/database/query") || { echo "database did not answer"; return 1; }
+            age=$(echo "$out" | jq -r '.[0].age // empty' 2>/dev/null)
+            if [ -z "$age" ]; then echo "no answer: $(echo "$out" | head -c 200)"; return 1; fi
+            echo "tick last ran ${age}s ago"
+            [ "$age" -le 1200 ]
+          }
+          s=$(status); echo "project: $s"
+          if [ "$s" != "ACTIVE_HEALTHY" ]; then echo "project is $s; not touching it"; exit 0; fi
+          check && exit 0
+          echo "stuck; checking again in 5 minutes"; sleep 300
+          check && exit 0
+          # once an hour at most: the last successful restart is in this workflow's own recent failed runs
+          recent=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/heartbeat.yml/runs?status=failure&per_page=5" \
+            | jq --arg since "$(date -u -d '-60 min' +%FT%TZ)" '[.workflow_runs[] | select(.created_at > $since)] | length')
+          if [ "${recent:-0}" -gt 0 ]; then echo "::error::Still stuck, and a restart already ran within the hour. Needs a person: Supabase, Settings, General."; exit 1; fi
+          [ "$(status)" = "ACTIVE_HEALTHY" ] || { echo "a restart is already under way"; exit 1; }
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "Authorization: Bearer $TOKEN" "$api/restart")
+          echo "::error::Database was stuck for 5+ minutes; restarted it (HTTP $code). Check that jobs recover."
+          exit 1

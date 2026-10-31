@@ -373,3 +373,17 @@ round 20, and reviewers flagged the gap again in panel 14. Each round followed w
 Why: the choice was made by vote, not by copying a product that already works.
 Rule: a contested layout choice is settled once by the closest working product (here Poke and iMessage: the
 conversation sits on the box), written in the CSS comment, and not reopened unless that product changes.
+
+## 2026-10-31: the free database ran out of CPU and every job failed for hours, silently
+
+What broke: on the free plan, pg_cron logged "job startup timeout" for every job and the REST API returned 503. Odelia's
+held sends, follow-ups and agency chases stopped, and nobody was told until a person looked.
+Why: three loads stacked on a burstable CPU: about 56 cron connections an hour (one per job run), 53 MB of cron history
+nothing deleted, and a nightly probe running 6 licenses plus every edge case 3 at a time.
+Rules:
+- One scheduled job (placetta-tick, every 3 minutes) does all sub-hourly work, each piece only when something is due.
+  A new sub-hourly job goes into public.tick(), never into its own cron.schedule.
+- Cron history keeps 3 days (placetta-cron-history).
+- The nightly probe is sized for the free plan: 2 licenses, one at a time; edge cases on Sundays.
+- An outside heartbeat (.github/workflows/heartbeat.yml) checks every 15 minutes, restarts a stuck database once an
+  hour at most, and fails loudly so the owner is emailed. A silent outage is the failure, not the slowdown.
