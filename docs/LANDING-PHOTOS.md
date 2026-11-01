@@ -5,7 +5,7 @@ harsh direct on-camera flash at night, rain or dark around the edges, real unpos
 natural skin, film grain, flash falloff into black, warm tones, no readable text or logos. Generated with Higgsfield.
 Shown with "Illustrative photos, not customers." Files: site/img/stories/*.webp (900 x 1200, quality 78).
 
-## On the page (site/next.html, "Why we exist")
+## On the page (the home page, "Why we exist" (was site/next.html until 2026-11-01))
 Shown as one carousel copied from america.gov's hero (2026-11-01): one large rounded photo at a time, the customer's
 request in a white pill over its top edge, "Cleared with Placetta:" and the real permits that project needs below,
 then previous, pause and next. 15 slides, 5.2 seconds each, paused for reduced motion, keys show.Nq and show.Nd.

@@ -51,6 +51,7 @@
     }
   ],
   "redirects": [
+    { "source": "/next.html", "destination": "/", "permanent": false },
     {
       "source": "/",
       "has": [
