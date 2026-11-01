@@ -9,7 +9,7 @@ Shown with "Illustrative photos, not customers." Files: site/img/stories/*.webp 
 Shown as one carousel copied from america.gov's hero (2026-11-01): one large rounded photo at a time, the customer's
 request in a white pill over its top edge, "Cleared with Placetta:" and the real permits that project needs below,
 then previous, pause and next. 15 slides, 5.2 seconds each, paused for reduced motion, keys show.Nq and show.Nd.
-Added 2026-11-01: wind, grid, defense (uncrewed aircraft). A SpaceX-style mission control was tried for
+Removed 2026-11-01 (founder): robotics and investment. Added 2026-11-01: wind, grid, defense (uncrewed aircraft). A SpaceX-style mission control was tried for
 satellites and dropped: Z Image made it look staged, not candid. Wind replaced it, as the founder asked.
 Rows 1 and 2: open-night, harvest, first-shift, reopen, family, factory.
 Rows 3 and 4 (the big organizations, 2026-11-01): energy, manufacturing, mining, investment, robotics, datacenter.
