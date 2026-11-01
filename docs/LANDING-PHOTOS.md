@@ -28,3 +28,9 @@ All Z Image, 3:4, generated on higgsfield.ai. The mining truck's stray brand tex
    first finished part to the plant's founder, sparks and work lights in the background.
 6. computing centers: Outside a newly powered data center in the rain, a construction crew and the operator's
    executives cheer under the flash as rows of server halls light up behind the fence.
+
+Variety rule (founder, 2026-11-01): no two slides share a prompt shape. Not every scene is a gray-haired man laughing
+with his head back: vary age, gender, background, mood (quiet, tired, tearful, wild), time of day and framing.
+What reads as real (2026-11-01): prompt it as a cheap point-and-shoot flash snapshot, crooked framing, slightly out
+of focus, overexposed faces, red-eye, someone half cut off, a blurry hand in front, ordinary unflattering faces, mud.
+Polished, centered, symmetrical, eyes-closed or model-pretty scenes read as AI.
