@@ -59,11 +59,19 @@
 .show-done{display:flex;align-items:center;justify-content:center;gap:10px;margin:24px auto 0;max-width:64ch;font-size:16px;line-height:1.5;color:rgba(255,255,255,.78);text-align:left}
 .show-done b{font-weight:500;color:#fff}
 .show-ok{flex:none;display:flex;align-items:center;justify-content:center;width:18px;height:18px;color:#5fd39c}
-.show-nav{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:22px}
-.show-b{display:flex;align-items:center;justify-content:center;width:40px;height:40px;padding:0;border:0;border-radius:999px;background:rgba(255,255,255,.1);color:#fff;cursor:pointer}
-.show-b:hover{background:rgba(255,255,255,.18)}.show-b:focus-visible{outline:2px solid #9bbecb;outline-offset:2px}
+.show-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:28px}
+.show-ctl{display:flex;align-items:center;gap:2px;padding:4px;border-radius:999px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.show-b{position:relative;display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:0;border-radius:999px;background:transparent;color:rgba(255,255,255,.8);cursor:pointer;transition:background .15s,color .15s}
+.show-b:hover{background:rgba(255,255,255,.1);color:#fff}.show-b:focus-visible{outline:2px solid #9bbecb;outline-offset:1px}
 .show-b .i-pl{display:none}.show.paused .show-b .i-pl{display:block}.show.paused .show-b .i-pa{display:none}
-.show-n{min-width:56px;font-size:13px;color:rgba(255,255,255,.55);font-variant-numeric:tabular-nums}
+.show-ring{position:absolute;inset:5px;width:34px;height:34px;transform:rotate(-90deg);pointer-events:none}
+.show-ring circle{fill:none;stroke-width:2}.show-ring .tr{stroke:rgba(255,255,255,.16)}
+.show-ring .pr{stroke:#fff;stroke-linecap:round;stroke-dasharray:100.53;stroke-dashoffset:100.53;animation:showRing 5.2s linear forwards;animation-play-state:paused}
+.show.run .show-ring .pr{animation-play-state:running}
+@keyframes showRing{to{stroke-dashoffset:0}}
+/* the slideshow plays on every device, also with reduced motion on (founder, 2026-11-01): only the timer ring animates */
+@media (prefers-reduced-motion:reduce){.show-ring .pr{animation:showRing 5.2s linear forwards!important;animation-play-state:paused!important}.show.run .show-ring .pr{animation-play-state:running!important}}
+.show-n{min-width:48px;font-size:13px;letter-spacing:.02em;color:rgba(255,255,255,.5);font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:no-preference){.show-s.on .show-q>span{display:inline-block;animation:showType 1.1s steps(28,end) both}}
 @keyframes showType{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 @media (max-width:760px){.show{margin-top:64px}.show-ask{height:auto;min-height:52px;margin:0 4% -26px;padding:8px 8px 8px 18px;border-radius:26px;font-size:14.5px;line-height:1.35}.show-q{white-space:normal}.show-go{width:34px;height:34px}.show-ph{aspect-ratio:4/5;border-radius:22px}.show-done{font-size:15px;justify-content:flex-start;align-items:flex-start}.show-ok{margin-top:2px}}
@@ -359,9 +367,11 @@
       </figure>
       </div>
       <div class="show-nav">
-        <button type="button" class="show-b" data-show="prev" aria-label="Previous"><svg viewBox="0 0 20 20" width="16" height="16"><path d="m12 5-5 5 5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button type="button" class="show-b" data-show="play" aria-label="Pause"><svg class="i-pa" viewBox="0 0 20 20" width="16" height="16"><path d="M7.5 5v10M12.5 5v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg class="i-pl" viewBox="0 0 20 20" width="16" height="16"><path d="M7 5.5v9l7-4.5z" fill="currentColor"/></svg></button>
-        <button type="button" class="show-b" data-show="next" aria-label="Next"><svg viewBox="0 0 20 20" width="16" height="16"><path d="m8 5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="show-ctl">
+          <button type="button" class="show-b" data-show="prev" aria-label="Previous"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m12 4.5-5.5 5.5 5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" class="show-b" data-show="play" aria-label="Pause"><svg class="show-ring" viewBox="0 0 36 36" aria-hidden="true"><circle class="tr" cx="18" cy="18" r="16"/><circle class="pr" cx="18" cy="18" r="16"/></svg><svg class="i-pa" viewBox="0 0 20 20" width="14" height="14"><path d="M7 5v10M13 5v10" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg class="i-pl" viewBox="0 0 20 20" width="14" height="14"><path d="M7 4.8v10.4l8.2-5.2z" fill="currentColor"/></svg></button>
+          <button type="button" class="show-b" data-show="next" aria-label="Next"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m8 4.5 5.5 5.5-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
         <span class="show-n" aria-live="polite"><span id="showN">1</span> / 15</span>
       </div>
     </div>
@@ -711,21 +721,25 @@
 <script>
 (() => { const r = document.getElementById("show"); if (!r) return;
   const s = [...r.querySelectorAll(".show-s")], n = document.getElementById("showN"), pb = r.querySelector('[data-show="play"]');
-  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let i = 0, t = 0, paused = calm, seen = false;
+  let ring = r.querySelector(".show-ring .pr");
+  let i = 0, paused = false, inView = false, held = false;
   const load = k => { const im = s[k % s.length].querySelector("img[data-src]"); if (im) { im.src = im.dataset.src; im.removeAttribute("data-src"); } };
+  const restart = () => { const c = ring.cloneNode(); ring.replaceWith(c); ring = c; };
+  const sync = () => r.classList.toggle("run", !paused && inView && !document.hidden && !held);
   const go = k => { s[i].classList.remove("on"); s[i].setAttribute("aria-hidden", "true");
-    i = (k + s.length) % s.length; s[i].classList.add("on"); s[i].removeAttribute("aria-hidden"); n.textContent = i + 1; load(i); load(i + 1); };
-  const tick = () => { clearTimeout(t); if (!paused && seen) t = setTimeout(() => { go(i + 1); tick(); }, 5200); };
-  const setP = p => { paused = p; r.classList.toggle("paused", p); pb.setAttribute("aria-label", p ? "Play" : "Pause"); tick(); };
+    i = (k + s.length) % s.length; s[i].classList.add("on"); s[i].removeAttribute("aria-hidden"); n.textContent = i + 1; load(i); load(i + 1); restart(); };
+  r.querySelector(".show-ring").addEventListener("animationend", () => go(i + 1));
+  const setP = p => { paused = p; r.classList.toggle("paused", p); pb.setAttribute("aria-label", p ? "Play" : "Pause"); sync(); };
   r.addEventListener("click", e => { const b = e.target.closest("[data-show]"); if (!b) return;
-    const a = b.dataset.show; if (a === "play") return setP(!paused); go(i + (a === "next" ? 1 : -1)); tick(); });
+    const a = b.dataset.show; if (a === "play") return setP(!paused); go(i + (a === "next" ? 1 : -1)); });
   let x0 = null; r.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
   r.addEventListener("touchend", e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null;
-    if (Math.abs(dx) > 40) { go(i + (dx < 0 ? 1 : -1)); tick(); } }, { passive: true });
-  r.addEventListener("focusin", () => { clearTimeout(t); }); r.addEventListener("focusout", tick);
-  new IntersectionObserver(es => { seen = es[0].isIntersecting; tick(); }, { threshold: .35 }).observe(r);
-  setP(paused);
+    if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1)); }, { passive: true });
+  // a keyboard user reading a slide holds it; a mouse click on the arrows doesn't
+  r.addEventListener("focusin", e => { held = e.target.matches(":focus-visible"); sync(); }); r.addEventListener("focusout", () => { held = false; sync(); });
+  document.addEventListener("visibilitychange", sync);
+  new IntersectionObserver(es => { inView = es[0].isIntersecting; sync(); }, { threshold: .2 }).observe(r);
+  load(1); setP(false);
 })();
 </script>
 <script defer src="/landing.js?v=f146a1b0db"></script>
