@@ -47,7 +47,7 @@ function agRegions(){ try { return AGG.length; } catch(e){ return 0; } }
 const T = {
 en:{
  "nav.how":"How it works", "nav.faq":"FAQ","nav.login":"Log in","nav.app":"Open app",
- "q.goT":"Your plan is ready to build.","q.goP":"Confirm {c} and Placetta maps every license, permit and registration for {m}, with fees and timelines, in a few minutes.","q.go":"Build my plan","q.goN":"Free. Nothing is filed or paid without your approval.",
+ "q.goT":"Your {m} plan","q.free":"Your plan is free. Nothing is filed without your approval.","q.goP":"Open it and Odelia fills in each one for your address: the agency, the fee, the order and how long it takes.","q.go":"Open my plan","q.goN":"Saved for {c}. Free, and nothing is filed without your approval.",
  "cta.plan":"Get my plan",
  "hero.badge2":"Bringing the world's businesses to America","cmp.link":"Compare with an attorney and a permit expediter","vis.k":"Why we exist","vis.ill":"Illustrative scenes. The permits are the real ones each project needs.","show.by":"Cleared with Placetta:","show.1q":"We're switching on 300 wind turbines in Wyoming.","show.1d":"FAA tower clearances, state siting permit and grid interconnection.","show.2q":"Opening our first US tea house in Flushing.","show.2d":"Business license, seller's permit, health permit and sign permit.","show.3q":"Upgrading 120 miles of transmission lines.","show.3d":"Utility commission certificate, federal right-of-way and environmental review.","show.4q":"Putting our family name on a storefront in Houston.","show.4d":"Assumed name filing, sign permit and certificate of occupancy.","show.5q":"Flight-testing our autonomous drones in Arizona.","show.5d":"FAA waivers, test range approvals and export control classification.","show.6q":"Our farm wants to sell to stores in three states.","show.6d":"Food facility registration, organic certification and state seller's permits.","show.7q":"Powering on a 300 MW data center in Virginia.","show.7d":"Utility agreement, generator air permit and building approvals.","show.8q":"Our restaurant closed. How do we reopen?","show.8d":"Health reinspection, fire clearance and a renewed liquor license.","show.9q":"Our first trucks come off the line in Georgia this spring.","show.9d":"Air permit, stormwater permit and occupancy for 2 million square feet.","show.10q":"Hiring our first 40 people in Texas.","show.10d":"Employer registration, workers' comp and new-hire reporting, before day one.","show.11q":"Reopening a lithium mine in Nevada.","show.11d":"Federal plan of operations, water rights and a state reclamation bond.","show.12q":"Our new plant needs to run by spring.","show.12d":"Zoning, air permit and fire marshal sign-off, on schedule.","show.13q":"Switching on 400 MW of solar in Arizona.","show.13d":"Interconnection agreement, state siting permit and county use permit.","vis.h":"We bring the world's businesses to America.","vis.p":"Every license Odelia clears is a store that opens sooner, capital that lands instead of stalling, and jobs that start in an American town.","vis.n1":"$232B","vis.s1":"foreign investment into the US in 2025","vis.n2":"$13.8B","vis.s2":"of it built or grew a business","vis.n3":"20,700","vis.s3":"new jobs planned at those businesses","vis.src":"Source: U.S. Bureau of Economic Analysis, 2025.",
  "tm.cta":"Put Odelia to work on your stores","tm.m5":"The business tax certificate renews in 30 days. The renewal is drafted.","tm.m4":"The county asked for a revised floor plan. I let the construction manager know.","tm.m3":"Filed with Santa Clara County. The receipt is saved to your drive.","tm.m2":"The health permit packet for San José is ready. Approve it and I'll hand it to our team to file.","tm.m1":"Your week ahead: 3 filings due across 2 stores. Each one is ready for review.","tm.d5":"Fri","tm.d4":"Thu","tm.d3":"Wed","tm.d2":"Tue","tm.d1":"Mon","tm.wks":"Sample week","tm.wk":"A week with Odelia","tm.v8":"Files anything you have not approved","tm.k8":"Never","tm.v7":"Approvals, signatures, agency fees and ID checks","tm.k7":"Asks you for","tm.v6":"Every license each store needs, in order, filed on time and renewed before it lapses","tm.k6":"Owns","tm.v5":"Gmail, Outlook, Slack, Google Calendar, Google Drive","tm.k5":"Works in","tm.v4":"English and Chinese","tm.k4":"Languages","tm.v3":"Always on, every time zone","tm.k3":"Hours","tm.v2":"You","tm.k2":"Reports to","tm.v1":"Permits and licenses manager","tm.k1":"Role","tm.jdt":"Odelia","tm.jd":"Role card","tm.now":"Working now: San José health permit packet","tm.r4":"Odelia","tm.r4s":"Permits and licenses","tm.r3s":"Build-out and inspections","tm.r3":"Construction manager","tm.r2s":"Sites and leases","tm.r2":"Real estate lead","tm.r1s":"Head of US expansion","tm.a1":"Y","tm.a2":"R","tm.a3":"C","tm.r1":"You","tm.sample":"Sample team","tm.team":"US expansion team","tm.sub":"Add Odelia, Placetta's AI agent, to your expansion team like any other hire. She owns permits and licenses for every store, works in the tools your team already uses, and comes to you only for what needs a person.","tm.c1h":"She joins your team","tm.c1p":"Add Odelia like any other hire. She has a seat on your expansion team and a status you can see.","tm.on":"Online","tm.t1":"Odelia joined your team","tm.t1s":"US expansion, permits and licenses","tm.c2h":"She knows her job","tm.c2p":"One role, owned end to end: every license, filed on time and renewed before it lapses.","tm.v3s":"Always on","tm.gcal":"Google Calendar","tm.gdrive":"Google Drive","tm.t2":"Never files without your approval","tm.t2s":"You sign, pay agency fees and pass ID checks","tm.c3h":"She reports in","tm.c3p":"Updates arrive where your team already talks: Slack, email and your calendar.","tm.you":"Approved. Go ahead.","tm.t3":"Renewal drafted","tm.t3s":"Business tax certificate, 30 days before it lapses","tm.h":"Your newest teammate.","hero.badge":"Licenses and permits in 92 cities worldwide",
@@ -131,7 +131,7 @@ en:{
 },
 zh:{
  "nav.how":"运作方式", "nav.faq":"常见问题","nav.login":"登录","nav.app":"进入应用",
- "q.goT":"可以开始生成您的计划了。","q.goP":"确认 {c} 后，快哉会在几分钟内梳理{m}所需的全部执照、许可和登记，并附上费用和时间。","q.go":"生成我的计划","q.goN":"免费。未经您批准，不会提交或支付任何费用。",
+ "q.goT":"您的{m}开店计划","q.free":"计划免费。未经您批准，不会提交任何申请。","q.goP":"打开后，Odelia 会按您的地址逐项补全：主管机构、费用、顺序和所需时间。","q.go":"打开我的计划","q.goN":"已保存到 {c}。免费，未经您批准不会提交任何申请。",
  "cta.plan":"获取我的计划",
  "hero.badge2":"把世界的企业带到美国","cmp.link":"对比律师和许可代办","vis.k":"我们为何存在","vis.ill":"示意场景。许可都是每个项目真正需要的那些。","show.by":"Placetta 办妥：","show.1q":"我们要在怀俄明启用 300 台风力发电机。","show.1d":"FAA 高塔许可、州选址许可和电网并网。","show.2q":"在法拉盛开我们在美国的第一家茶馆。","show.2d":"营业执照、销售许可、卫生许可和招牌许可。","show.3q":"升级 120 英里输电线路。","show.3d":"公用事业委员会许可、联邦路权和环境审查。","show.4q":"把我们家的名字挂上休斯顿的店面。","show.4d":"商号登记、招牌许可和占用证书。","show.5q":"在亚利桑那试飞我们的自主无人机。","show.5d":"FAA 豁免、试飞场审批和出口管制分类。","show.6q":"我们的农场想把产品卖进三个州的商店。","show.6d":"食品设施注册、有机认证和各州销售许可。","show.7q":"在弗吉尼亚启用一座 300 兆瓦的数据中心。","show.7d":"电力协议、发电机空气许可和建筑审批。","show.8q":"我们的餐厅关门了，怎么重新开业？","show.8d":"卫生复检、消防许可和续期的酒类执照。","show.9q":"今年春天，我们在佐治亚的第一批卡车下线。","show.9d":"空气许可、雨水许可和 200 万平方英尺的占用证书。","show.10q":"在德州招聘我们的前 40 名员工。","show.10d":"雇主登记、工伤保险和新员工申报，第一天之前办好。","show.11q":"在内华达重启一座锂矿。","show.11d":"联邦作业计划、水权和州复垦保证金。","show.12q":"我们的新工厂必须在春天前投产。","show.12d":"分区、空气许可和消防验收，按期完成。","show.13q":"在亚利桑那接通 400 兆瓦太阳能。","show.13d":"并网协议、州选址许可和县用地许可。","vis.h":"我们把世界的企业带到美国。","vis.p":"Odelia 办下的每一张执照，都意味着一家门店更早开业、一笔资本真正落地而不是卡在手续里、一座美国小城多了几份工作。","vis.n1":"2,322 亿美元","vis.s1":"2025 年外国投资者投入美国","vis.n2":"138 亿美元","vis.s2":"用于新建或扩建企业","vis.n3":"20,700","vis.s3":"这些企业计划新增的岗位","vis.src":"来源：美国经济分析局，2025 年。",
  "tm.cta":"让 Odelia 为您的门店工作","tm.m5":"营业税证书 30 天后到期，续期申请已起草。","tm.m4":"县政府要求提供修改后的平面图，我已通知工程经理。","tm.m3":"已向圣克拉拉县提交，回执已保存到您的云端硬盘。","tm.m2":"圣何塞卫生许可申请材料已准备好。您确认后，我会交给团队提交。","tm.m1":"本周安排：2 家门店共有 3 项申请到期，均已准备好供您审阅。","tm.d5":"周五","tm.d4":"周四","tm.d3":"周三","tm.d2":"周二","tm.d1":"周一","tm.wks":"示例一周","tm.wk":"与 Odelia 共事的一周","tm.v8":"提交任何未经您确认的申请","tm.k8":"绝不","tm.v7":"确认、签名、政府费用和身份核验","tm.k7":"需要您提供","tm.v6":"每家门店所需的每一项证照，按顺序按时提交，到期前完成续期","tm.k6":"负责","tm.v5":"Gmail、Outlook、Slack、Google 日历、Google 云端硬盘","tm.k5":"工作工具","tm.v4":"中文和英文","tm.k4":"语言","tm.v3":"全天候，覆盖所有时区","tm.k3":"工作时间","tm.v2":"您","tm.k2":"汇报对象","tm.v1":"许可与证照经理","tm.k1":"岗位","tm.jdt":"Odelia","tm.jd":"岗位卡","tm.now":"正在处理：圣何塞卫生许可申请材料","tm.r4":"Odelia","tm.r4s":"许可与证照","tm.r3s":"装修与验收","tm.r3":"工程经理","tm.r2s":"选址与租约","tm.r2":"选址负责人","tm.r1s":"美国拓展负责人","tm.a1":"您","tm.a2":"址","tm.a3":"工","tm.r1":"您","tm.sample":"示例团队","tm.team":"美国拓展团队","tm.sub":"像招聘新同事一样，把快哉的 AI 智能代理 Odelia 加入您的拓展团队。她负责每家门店的许可与证照，在团队现有的工具里工作，只有需要真人处理的事才会找您。","tm.c1h":"她加入您的团队","tm.c1p":"像招聘新同事一样加入 Odelia。她在您的拓展团队中有自己的位置，工作状态一目了然。","tm.on":"在线","tm.t1":"Odelia 已加入您的团队","tm.t1s":"美国拓展，许可与证照","tm.c2h":"她清楚自己的职责","tm.c2p":"一个岗位，从头负责到底：每一项证照按时提交，到期前完成续期。","tm.v3s":"全天候","tm.gcal":"Google 日历","tm.gdrive":"Google 云端硬盘","tm.t2":"未经您确认，绝不提交","tm.t2s":"签名、政府费用和身份核验由您完成","tm.c3h":"她主动向您汇报","tm.c3p":"进展直接发到团队已在用的地方：Slack、邮件和日历。","tm.you":"确认，提交吧。","tm.t3":"续期申请已起草","tm.t3s":"营业税证书，到期前 30 天","tm.h":"您团队的新成员。","hero.badge":"执照与许可，覆盖全球 92 座城市",
@@ -766,30 +766,36 @@ function contactOk(){
 }
 function chips(key, arr){ return `<div class="qchips" role="group">${arr.map(a => { const v = Array.isArray(a) ? a[0] : a; const lab = Array.isArray(a) ? (a.length === 2 ? a[L()] : a[1 + L()]) : a; return `<button type="button" data-k="${key}" data-v="${esc(v)}" aria-pressed="${Q[key] === v}">${lab}</button>`; }).join("")}</div>`; }
 
+// what the plan covers, from the answers so far: shown before the email, and again as the plan itself after it
+function planItems(){
+  const items = [["State registration and tax accounts","州注册与税务账户"],["City business license","市营业执照"]];
+  if (Q.industry === "fb") items.push(["Health permit","卫生许可"],["Liquor license, if you serve alcohol","酒类执照（如供应酒精饮料）"]);
+  items.push(["Fire and building permits","消防与建筑许可"],["Sign permit","招牌许可"],["Zoning and certificate of occupancy","区划与使用许可证"]);
+  if (Q.hq && Q.hq !== "us") items.push(["Foreign-ownership checks on your lease","外资租赁限制核查"]);
+  items.push(["Timeline, order and government fees","时间表、顺序和政府规费"]);
+  return items;
+}
+
 function qHTML(){
   const i = L();
   if (qStep === 0) return `<div class="qpane">
       <h3 class="qh" id="qTitle">${t("q.0t")}</h3><p class="qs">${t("q.0s")}</p>
       <div class="qblk"><label class="sr" for="q-market">${t("q.0t")}</label><input class="qin" id="q-market" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="${t("q.0ph")}" value="${esc(MARKETS.find(x=>x[0]===Q.market) ? "" : Q.market)}"></div>
       <div class="qblk" style="margin-top:12px">${chips("market", MARKETS)}</div>
-      <div class="qfoot"><small>${t("st.note")}</small><button type="button" class="btn b-ink" data-next ${valid[0]() ? "" : "disabled"}>${t("q.next")}</button></div></div>`;
+      <div class="qfoot"><small>${t("q.free")}</small><button type="button" class="btn b-ink" data-next ${valid[0]() ? "" : "disabled"}>${t("q.next")}</button></div></div>`;
   if (qStep === 1) return `<div class="qpane">
       <h3 class="qh" id="qTitle">${t("q.1t")}</h3>
       <div class="qblk"><span class="qlab">${t("q.1a")}</span>${chips("industry", INDUSTRIES)}</div>
-      <div class="qfoot"><small>${t("st.note")}</small><button type="button" class="btn b-ink" data-next ${valid[1]() ? "" : "disabled"}>${t("q.next")}</button></div></div>`;
+      <div class="qfoot"><small>${t("q.free")}</small><button type="button" class="btn b-ink" data-next ${valid[1]() ? "" : "disabled"}>${t("q.next")}</button></div></div>`;
   if (qStep === 2) return `<div class="qpane">
       <h3 class="qh" id="qTitle">${t("q.2t")}</h3>
       <div class="qblk"><span class="qlab">${t("q.2a")}</span>${chips("opening", OPENINGS)}</div>
       <div class="qblk"><span class="qlab">${t("q.2b")}</span>${chips("locations", LOCS)}</div>
-      <div class="qfoot"><small>${t("st.note")}</small><button type="button" class="btn b-ink" data-next ${valid[2]() ? "" : "disabled"}>${t("q.next")}</button></div></div>`;
+      <div class="qfoot"><small>${t("q.free")}</small><button type="button" class="btn b-ink" data-next ${valid[2]() ? "" : "disabled"}>${t("q.next")}</button></div></div>`;
   if (qStep === 3){
     if (!Q.contact) Q.contact = (lang === "zh" || Q.hq === "cn") ? "wechat" : "email";
     if (!Q.plang) Q.plang = lang;
-    const items = [["State registration and tax accounts","州注册与税务账户"],["City business license","市营业执照"]];
-    if (Q.industry === "fb") items.push(["Health permit","卫生许可"],["Liquor license, if you serve alcohol","酒类执照（如供应酒精饮料）"]);
-    items.push(["Fire and building permits","消防与建筑许可"],["Sign permit","招牌许可"],["Zoning and certificate of occupancy","区划与使用许可证"]);
-    if (Q.hq && Q.hq !== "us") items.push(["Foreign-ownership checks on your lease","外资租赁限制核查"]);
-    items.push(["Timeline, order and government fees","时间表、顺序和政府规费"]);
+    const items = planItems();
     const isW = Q.contact === "wechat";
     return `<div class="qpane">
       <h3 class="qh" id="qTitle">${t("q.3t")}</h3>
@@ -809,14 +815,14 @@ function qHTML(){
           <div><label class="qlab" for="q-company">${t("q.company")}</label><input class="qin" id="q-company" autocomplete="organization" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="next" value="${esc(Q.company)}"></div>
           <div><label class="qlab" for="q-site">${t("q.site")}</label><input class="qin" id="q-site" inputmode="url" autocomplete="url" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="${t("q.siteph")}" value="${esc(Q.website)}"></div></div></details>
       </div>
-      <div class="qfoot"><small>${t("q.fine")}</small><button type="button" class="btn b-ink" data-send>${t("q.send")}</button></div></div>`;
+      <div class="qfoot"><small>${t("q.free")}</small><button type="button" class="btn b-ink" data-send>${t("q.send")}</button></div></div>`;
   }
   const c = Q.contact === "wechat" ? `${t("q.wechat")} ${esc(Q.wechat)}` : esc(Q.email);
   if (Q.contact !== "wechat") return `<div class="qpane qdone">
-      <div class="ok"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg></div>
-      <h3 class="qh" id="qTitle">${t("q.goT")}</h3>
-      <p class="qs">${t("q.goP").replace("{m}", "<b>" + esc(marketLabel()) + "</b>").replace("{c}", "<b>" + c + "</b>")}</p>
-      <div class="qfoot"><small>${t("q.goN")}</small><a class="btn b-ink" href="/app/" data-track="handoff_app">${t("q.go")}</a></div></div>`;
+      <h3 class="qh" id="qTitle">${t("q.goT").replace("{m}", esc(marketLabel()))}</h3>
+      <p class="qs">${t("q.goP")}</p>
+      <div class="qprev"><ul>${planItems().map(x => `<li>${CHK}<span>${x[i]}</span></li>`).join("")}</ul></div>
+      <div class="qfoot"><small>${t("q.goN").replace("{c}", c)}</small><a class="btn b-ink" href="/app/" data-track="handoff_app">${t("q.go")}</a></div></div>`;
   return `<div class="qpane qdone">
       <div class="ok"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg></div>
       <h3 class="qh" id="qTitle">${t("q.doneT")}</h3>
