@@ -443,3 +443,17 @@ script's own `exit $s`, not to the finder. The same was true of `npm run verify:
 the script itself and silently ignored.
 Rule: a script that takes flags ends with the program (cleanup in a `trap ... EXIT`), or a workflow runs the program
 directly. Detector: edge-finder "lost-flags".
+
+### 2026-11-01: a desktop rule that lost to the base rule written after it
+What broke: on the home page the slideshow sat 80px lower than the headline beside it. Its desktop override
+(`.show{margin:0}` inside a media query) came earlier in the file than the base `.show{margin:80px auto 0}`, so the
+base rule won on equal specificity.
+Rule: a media-query override goes after its base rule, or carries more specificity (`.vis-in .show`). Check by
+measuring: after a layout change, read the boxes (top of each column) instead of trusting the stylesheet.
+
+### 2026-11-01: landing photos that looked AI-made and all alike
+What broke: six of fifteen slides were the same picture (a gray-haired man laughing with his head back, a woman with a
+hand over her mouth), polished and centered. The founder called them out twice.
+Rule: no two photos share a prompt shape; vary age, gender, background, mood and framing; prompt a cheap flash
+snapshot (crooked, blurry, overexposed, someone cut off). See docs/LANDING-PHOTOS.md. Review the full set as one
+contact sheet before shipping, not each photo alone.

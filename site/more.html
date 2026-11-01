@@ -39,11 +39,15 @@
 .vis-ill{margin:56px 0 0;text-align:center;font-size:12.5px;color:rgba(255,255,255,.45)}
 .vis-src{margin:6px 0 0;text-align:center;font-size:12.5px}.vis-src a{color:rgba(255,255,255,.5);text-decoration:none}.vis-src a:hover{color:#fff}
 @media (max-width:760px){.vis{padding-top:80px;padding-bottom:80px}.vis-p{font-size:16.5px}}
+.vis-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;margin-top:48px;max-width:560px}
+.vis-stats b{display:block;font-family:var(--serif);font-weight:300;font-size:clamp(44px,5vw,64px);line-height:1;letter-spacing:-.02em;color:#fff;font-variant-numeric:lining-nums;white-space:nowrap}
+.vis-stats b:lang(zh){font-size:clamp(30px,3.4vw,44px)}
+.vis-stats span{display:block;margin-top:12px;font-size:14px;line-height:1.5;color:rgba(255,255,255,.6)}
 /* desktop: the words on the left, one photo on the right, so the photo stays small and the band reads as one piece */
-@media (min-width:1000px){.vis-in{display:grid;grid-template-columns:minmax(0,1fr) 500px;grid-template-rows:auto auto auto 1fr;column-gap:80px;align-items:start}
-.vis-k{grid-column:1;grid-row:1}.vis-h{grid-column:1;grid-row:2}.vis-p{grid-column:1;grid-row:3}
-.show{grid-column:2;grid-row:1/span 4;margin:0;max-width:none}
-.vis-ill{grid-column:2;grid-row:5;margin-top:36px}.vis-src{grid-column:2;grid-row:6}}
+@media (min-width:1000px){.vis-in{display:grid;grid-template-columns:minmax(0,1fr) 500px;grid-template-rows:auto auto auto auto 1fr;column-gap:80px;align-items:start}
+.vis-k{grid-column:1;grid-row:1}.vis-h{grid-column:1;grid-row:2}.vis-p{grid-column:1;grid-row:3}.vis-stats{grid-column:1;grid-row:4}
+.vis-in .show{grid-column:2;grid-row:1/span 5;margin:0;max-width:none}
+.vis-ill{grid-column:2;grid-row:6;margin-top:36px}.vis-src{grid-column:2;grid-row:7}}
 /* What Placetta clears: one large photo at a time with the request laid over its top edge (america.gov's hero, 2026-11-01) */
 .show{max-width:540px;margin:80px auto 0}
 .show-track{display:grid;grid-template-columns:minmax(0,1fr)}
@@ -557,4 +561,4 @@
   load(1); setP(false);
 })();
 </script>
-<script defer src="/landing.js?v=26c82af9a1"></script>
+<script defer src="/landing.js?v=3e274a9677"></script>

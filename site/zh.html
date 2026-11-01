@@ -47,11 +47,15 @@
 .vis-ill{margin:56px 0 0;text-align:center;font-size:12.5px;color:rgba(255,255,255,.45)}
 .vis-src{margin:6px 0 0;text-align:center;font-size:12.5px}.vis-src a{color:rgba(255,255,255,.5);text-decoration:none}.vis-src a:hover{color:#fff}
 @media (max-width:760px){.vis{padding-top:80px;padding-bottom:80px}.vis-p{font-size:16.5px}}
+.vis-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;margin-top:48px;max-width:560px}
+.vis-stats b{display:block;font-family:var(--serif);font-weight:300;font-size:clamp(44px,5vw,64px);line-height:1;letter-spacing:-.02em;color:#fff;font-variant-numeric:lining-nums;white-space:nowrap}
+.vis-stats b:lang(zh){font-size:clamp(30px,3.4vw,44px)}
+.vis-stats span{display:block;margin-top:12px;font-size:14px;line-height:1.5;color:rgba(255,255,255,.6)}
 /* desktop: the words on the left, one photo on the right, so the photo stays small and the band reads as one piece */
-@media (min-width:1000px){.vis-in{display:grid;grid-template-columns:minmax(0,1fr) 500px;grid-template-rows:auto auto auto 1fr;column-gap:80px;align-items:start}
-.vis-k{grid-column:1;grid-row:1}.vis-h{grid-column:1;grid-row:2}.vis-p{grid-column:1;grid-row:3}
-.show{grid-column:2;grid-row:1/span 4;margin:0;max-width:none}
-.vis-ill{grid-column:2;grid-row:5;margin-top:36px}.vis-src{grid-column:2;grid-row:6}}
+@media (min-width:1000px){.vis-in{display:grid;grid-template-columns:minmax(0,1fr) 500px;grid-template-rows:auto auto auto auto 1fr;column-gap:80px;align-items:start}
+.vis-k{grid-column:1;grid-row:1}.vis-h{grid-column:1;grid-row:2}.vis-p{grid-column:1;grid-row:3}.vis-stats{grid-column:1;grid-row:4}
+.vis-in .show{grid-column:2;grid-row:1/span 5;margin:0;max-width:none}
+.vis-ill{grid-column:2;grid-row:6;margin-top:36px}.vis-src{grid-column:2;grid-row:7}}
 /* What Placetta clears: one large photo at a time with the request laid over its top edge (america.gov's hero, 2026-11-01) */
 .show{max-width:540px;margin:80px auto 0}
 .show-track{display:grid;grid-template-columns:minmax(0,1fr)}
@@ -293,7 +297,8 @@
   <div class="vis-in">
     <p class="vis-k" data-i18n="vis.k">我们为何存在</p>
     <h2 class="vis-h" id="visH" data-i18n="vis.h">我们把世界的企业带到美国。</h2>
-    <p class="vis-p" data-i18n="vis.p">Odelia 办下的每一张执照，都意味着一家门店更早开业、一笔资本真正落地而不是卡在手续里、一座美国小城多了几份工作。2025 年外国投资者在美国投入 2,322 亿美元，其中只有 138 亿美元用于新建或扩建企业。我们要让这个数字变大。</p>
+    <p class="vis-p" data-i18n="vis.p">Odelia 办下的每一张执照，都意味着一家门店更早开业、一笔资本真正落地而不是卡在手续里、一座美国小城多了几份工作。我们要让第二个数字变大。</p>
+    <div class="vis-stats"><div><b data-i18n="vis.n1">2,322 亿美元</b><span data-i18n="vis.s1">2025 年外国投资者投入美国</span></div><div><b data-i18n="vis.n2">138 亿美元</b><span data-i18n="vis.s2">用于新建或扩建企业</span></div></div>
     <div class="show" id="show" role="region" aria-roledescription="carousel" aria-label="What Placetta clears">
       <div class="show-track">
       <figure class="show-s on" aria-roledescription="slide" aria-label="1 of 15">
@@ -318,7 +323,7 @@
       </figure>
       <figure class="show-s" aria-roledescription="slide" aria-label="5 of 15" aria-hidden="true">
         <div class="show-ask"><span class="show-q"><span data-i18n="show.5q">在亚利桑那试飞我们的自主无人机。</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
-        <div class="show-ph"><img data-src="/img/stories/defense.webp" width="900" height="1200" decoding="async" alt="A defense founder and engineer laugh beside an uncrewed aircraft at a test range"></div>
+        <div class="show-ph"><img data-src="/img/stories/defense.webp" width="900" height="1200" decoding="async" alt="Engineers crowd a laptop on a pickup tailgate at a desert test range, drone lights in the sky"></div>
         <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Placetta 办妥：</b> <span data-i18n="show.5d">FAA 豁免、试飞场审批和出口管制分类。</span></span></figcaption>
       </figure>
       <figure class="show-s" aria-roledescription="slide" aria-label="6 of 15" aria-hidden="true">
@@ -337,8 +342,8 @@
         <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Placetta 办妥：</b> <span data-i18n="show.8d">卫生复检、消防许可和续期的酒类执照。</span></span></figcaption>
       </figure>
       <figure class="show-s" aria-roledescription="slide" aria-label="9 of 15" aria-hidden="true">
-        <div class="show-ask"><span class="show-q"><span data-i18n="show.9q">今年春天，我们在佐治亚的第一辆车下线。</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
-        <div class="show-ph"><img data-src="/img/stories/manufacturing.webp" width="900" height="1200" decoding="async" alt="Executives and line workers embrace as the first car leaves a new plant"></div>
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.9q">今年春天，我们在佐治亚的第一批卡车下线。</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img data-src="/img/stories/manufacturing.webp" width="900" height="1200" decoding="async" alt="Autoworkers throw their caps in the air as the first pickup truck rolls off a new line"></div>
         <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Placetta 办妥：</b> <span data-i18n="show.9d">空气许可、雨水许可和 200 万平方英尺的占用证书。</span></span></figcaption>
       </figure>
       <figure class="show-s" aria-roledescription="slide" aria-label="10 of 15" aria-hidden="true">
@@ -348,7 +353,7 @@
       </figure>
       <figure class="show-s" aria-roledescription="slide" aria-label="11 of 15" aria-hidden="true">
         <div class="show-ask"><span class="show-q"><span data-i18n="show.11q">在内华达重启一座锂矿。</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
-        <div class="show-ph"><img data-src="/img/stories/mining.webp" width="900" height="1200" decoding="async" alt="A mining chairman sprays champagne with a crew at a reopened mine"></div>
+        <div class="show-ph"><img data-src="/img/stories/mining.webp" width="900" height="1200" decoding="async" alt="An older miner cries into his hands at the mouth of a reopened mine while his crew grins around him"></div>
         <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Placetta 办妥：</b> <span data-i18n="show.11d">联邦作业计划、水权和州复垦保证金。</span></span></figcaption>
       </figure>
       <figure class="show-s" aria-roledescription="slide" aria-label="12 of 15" aria-hidden="true">
@@ -358,17 +363,17 @@
       </figure>
       <figure class="show-s" aria-roledescription="slide" aria-label="13 of 15" aria-hidden="true">
         <div class="show-ask"><span class="show-q"><span data-i18n="show.13q">交付我们第一批美国制造的机械臂。</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
-        <div class="show-ph"><img data-src="/img/stories/robotics.webp" width="900" height="1200" decoding="async" alt="A founder laughs as a robot arm hands him its first finished part"></div>
+        <div class="show-ph"><img data-src="/img/stories/robotics.webp" width="900" height="1200" decoding="async" alt="Engineers film as a robot arm sets a birthday cupcake beside their sleeping founder at 4am"></div>
         <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Placetta 办妥：</b> <span data-i18n="show.13d">生产许可、产品安全认证和出口分类。</span></span></figcaption>
       </figure>
       <figure class="show-s" aria-roledescription="slide" aria-label="14 of 15" aria-hidden="true">
         <div class="show-ask"><span class="show-q"><span data-i18n="show.14q">我们的基金想在美国建厂。</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
-        <div class="show-ph"><img data-src="/img/stories/investment.webp" width="900" height="1200" decoding="async" alt="A foreign investor and an American governor shake hands over signed papers"></div>
+        <div class="show-ph"><img data-src="/img/stories/investment.webp" width="900" height="1200" decoding="async" alt="A mayor and a foreign investor toast with coffee over pie and signed contracts in a diner at 2am"></div>
         <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Placetta 办妥：</b> <span data-i18n="show.14d">签约之前，每个州的每一张执照都已理清。</span></span></figcaption>
       </figure>
       <figure class="show-s" aria-roledescription="slide" aria-label="15 of 15" aria-hidden="true">
         <div class="show-ask"><span class="show-q"><span data-i18n="show.15q">在亚利桑那接通 400 兆瓦太阳能。</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
-        <div class="show-ph"><img data-src="/img/stories/energy.webp" width="900" height="1200" decoding="async" alt="An energy chairman and linemen celebrate a solar farm switching on at night"></div>
+        <div class="show-ph"><img data-src="/img/stories/energy.webp" width="900" height="1200" decoding="async" alt="A utility executive dances barefoot between solar panels at night while two electricians film her"></div>
         <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Placetta 办妥：</b> <span data-i18n="show.15d">并网协议、州选址许可和县用地许可。</span></span></figcaption>
       </figure>
       </div>
@@ -382,7 +387,7 @@
       </div>
     </div>
     <p class="vis-ill" data-i18n="vis.ill">示意场景。许可都是每个项目真正需要的那些。</p>
-    <p class="vis-src"><a href="https://www.bea.gov/news/2026/new-foreign-direct-investment-united-states-2025" target="_blank" rel="noopener" data-i18n="vis.src">2025 年外国在美新增直接投资：美国经济分析局。</a></p>
+    <p class="vis-src"><a href="https://www.bea.gov/news/2026/new-foreign-direct-investment-united-states-2025" target="_blank" rel="noopener" data-i18n="vis.src">来源：美国经济分析局，2025 年。</a></p>
   </div>
 </section>
 
@@ -748,4 +753,4 @@
   load(1); setP(false);
 })();
 </script>
-<script defer src="/landing.js?v=26c82af9a1"></script>
+<script defer src="/landing.js?v=3e274a9677"></script>
