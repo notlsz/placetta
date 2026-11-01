@@ -6,9 +6,11 @@ natural skin, film grain, flash falloff into black, warm tones, no readable text
 Shown with "Illustrative photos, not customers." Files: site/img/stories/*.webp (900 x 1200, quality 78).
 
 ## On the page (site/next.html, "Why we exist")
-open-night, harvest, first-shift, reopen, family, factory (Z Image, free plan).
+Rows 1 and 2: open-night, harvest, first-shift, reopen, family, factory.
+Rows 3 and 4 (the big organizations, 2026-11-01): energy, manufacturing, mining, investment, robotics, datacenter.
+All Z Image, 3:4, generated on higgsfield.ai. The mining truck's stray brand text was blurred out.
 
-## Next set: the big organizations (needs Higgsfield credit; best on gpt_image_2_5, Basic plan or higher)
+## The big-organization prompts (now on the page)
 1. energy: At the switch-on of a new solar farm at dusk, a utility CEO in a hard hat and a crew of linemen laugh and
    hug as rows of panels and a substation glow behind them; one engineer covers her mouth in disbelief.
 2. manufacturing: The ribbon-cutting night of a vast new auto plant: executives in suits and line workers in
