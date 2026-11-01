@@ -47,9 +47,10 @@
 .vis-ill{margin:56px 0 0;text-align:center;font-size:12.5px;color:rgba(255,255,255,.45)}
 .vis-src{margin:6px 0 0;text-align:center;font-size:12.5px}.vis-src a{color:rgba(255,255,255,.5);text-decoration:none}.vis-src a:hover{color:#fff}
 @media (max-width:760px){.vis{padding-top:80px;padding-bottom:80px}.vis-p{font-size:16.5px}}
-.vis-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;margin-top:48px;max-width:560px}
-.vis-stats b{display:block;font-family:var(--serif);font-weight:300;font-size:clamp(44px,5vw,64px);line-height:1;letter-spacing:-.02em;color:#fff;font-variant-numeric:lining-nums;white-space:nowrap}
-.vis-stats b:lang(zh){font-size:clamp(30px,3.4vw,44px)}
+.vis-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;margin-top:48px;max-width:620px}
+.vis-stats b{display:block;font-family:var(--serif);font-weight:300;font-size:clamp(34px,3.6vw,52px);line-height:1;letter-spacing:-.02em;color:#fff;font-variant-numeric:lining-nums;white-space:nowrap}
+.vis-stats b:lang(zh){font-size:clamp(22px,2.4vw,32px)}
+@media (max-width:520px){.vis-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.vis-stats b{font-size:30px}.vis-stats b:lang(zh){font-size:20px}.vis-stats span{font-size:12.5px}}
 .vis-stats span{display:block;margin-top:12px;font-size:14px;line-height:1.5;color:rgba(255,255,255,.6)}
 /* desktop: the words on the left, one photo on the right, so the photo stays small and the band reads as one piece */
 @media (min-width:1000px){.vis-in{display:grid;grid-template-columns:minmax(0,1fr) 500px;grid-template-rows:auto auto auto auto 1fr;column-gap:80px;align-items:start}
@@ -298,7 +299,7 @@
     <p class="vis-k" data-i18n="vis.k">我们为何存在</p>
     <h2 class="vis-h" id="visH" data-i18n="vis.h">我们把世界的企业带到美国。</h2>
     <p class="vis-p" data-i18n="vis.p">Odelia 办下的每一张执照，都意味着一家门店更早开业、一笔资本真正落地而不是卡在手续里、一座美国小城多了几份工作。我们要让第二个数字变大。</p>
-    <div class="vis-stats"><div><b data-i18n="vis.n1">2,322 亿美元</b><span data-i18n="vis.s1">2025 年外国投资者投入美国</span></div><div><b data-i18n="vis.n2">138 亿美元</b><span data-i18n="vis.s2">用于新建或扩建企业</span></div></div>
+    <div class="vis-stats"><div><b data-i18n="vis.n1">2,322 亿美元</b><span data-i18n="vis.s1">2025 年外国投资者投入美国</span></div><div><b data-i18n="vis.n2">138 亿美元</b><span data-i18n="vis.s2">用于新建或扩建企业</span></div><div><b data-i18n="vis.n3">20,700</b><span data-i18n="vis.s3">这些企业计划新增的岗位</span></div></div>
     <div class="show" id="show" role="region" aria-roledescription="carousel" aria-label="What Placetta clears">
       <div class="show-track">
       <figure class="show-s on" aria-roledescription="slide" aria-label="1 of 15">
@@ -753,4 +754,4 @@
   load(1); setP(false);
 })();
 </script>
-<script defer src="/landing.js?v=3e274a9677"></script>
+<script defer src="/landing.js?v=821d623636"></script>

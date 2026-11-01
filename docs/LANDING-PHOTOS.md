@@ -34,3 +34,7 @@ with his head back: vary age, gender, background, mood (quiet, tired, tearful, w
 What reads as real (2026-11-01): prompt it as a cheap point-and-shoot flash snapshot, crooked framing, slightly out
 of focus, overexposed faces, red-eye, someone half cut off, a blurry hand in front, ordinary unflattering faces, mud.
 Polished, centered, symmetrical, eyes-closed or model-pretty scenes read as AI.
+
+Jobs figure (2026-11-01): 20,700 = BEA's total planned employment (232,400) minus current employment of acquired
+enterprises (211,700), New Foreign Direct Investment in the United States, 2025 (released June 10, 2026). Acquisitions
+keep existing jobs, so only the remainder counts as new.
