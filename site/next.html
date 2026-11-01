@@ -43,14 +43,30 @@
 .vis-k{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gs);margin:0 0 20px}
 .vis-h{font-family:var(--serif);font-weight:300;font-size:clamp(36px,5.2vw,64px);line-height:1.04;letter-spacing:-.02em;margin:0;max-width:16ch;text-wrap:balance;color:#fff}
 .vis-p{font-size:18px;line-height:1.6;color:rgba(255,255,255,.78);max-width:62ch;margin:28px 0 0}
-.vis-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px;margin-top:64px}
-.vis-row b{display:block;font-family:var(--serif);font-weight:300;font-size:30px;line-height:1.1;letter-spacing:-.01em;margin-bottom:10px;color:#fff}
-.vis-row span{display:block;font-size:15px;line-height:1.55;color:rgba(255,255,255,.66)}
-.vis-img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;border-radius:14px;margin-bottom:24px;background:#111}
-.vis-row2{margin-top:56px}
-.vis-ill{margin:40px 0 0;font-size:12.5px;color:rgba(255,255,255,.45)}
-.vis-src{margin:6px 0 0;font-size:12.5px}.vis-src a{color:rgba(255,255,255,.5);text-decoration:none}.vis-src a:hover{color:#fff}
-@media (max-width:760px){.vis{padding-top:80px;padding-bottom:80px}.vis-row{grid-template-columns:1fr;gap:28px;margin-top:44px}.vis-p{font-size:16.5px}}
+.vis-ill{margin:56px 0 0;text-align:center;font-size:12.5px;color:rgba(255,255,255,.45)}
+.vis-src{margin:6px 0 0;text-align:center;font-size:12.5px}.vis-src a{color:rgba(255,255,255,.5);text-decoration:none}.vis-src a:hover{color:#fff}
+@media (max-width:760px){.vis{padding-top:80px;padding-bottom:80px}.vis-p{font-size:16.5px}}
+/* What Placetta clears: one large photo at a time with the request laid over its top edge (america.gov's hero, 2026-11-01) */
+.show{max-width:880px;margin:96px auto 0}
+.show-track{display:grid;grid-template-columns:minmax(0,1fr)}
+.show-s{grid-area:1/1;min-width:0;margin:0;opacity:0;visibility:hidden;transition:opacity .7s ease,visibility 0s .7s}
+.show-s.on{opacity:1;visibility:visible;transition:opacity .7s ease}
+.show-ask{position:relative;z-index:2;display:flex;align-items:center;gap:12px;height:60px;margin:0 7% -30px;padding:0 10px 0 24px;background:#fff;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.28);color:#16181d;font-size:16px}
+.show-q{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.show-go{flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:999px;background:#0b1f4a;color:#fff}
+.show-ph{border-radius:28px;overflow:hidden;aspect-ratio:4/3;background:#111}
+.show-ph img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 34%}
+.show-done{display:flex;align-items:center;justify-content:center;gap:10px;margin:24px auto 0;max-width:64ch;font-size:16px;line-height:1.5;color:rgba(255,255,255,.78);text-align:left}
+.show-done b{font-weight:500;color:#fff}
+.show-ok{flex:none;display:flex;align-items:center;justify-content:center;width:18px;height:18px;color:#5fd39c}
+.show-nav{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:22px}
+.show-b{display:flex;align-items:center;justify-content:center;width:40px;height:40px;padding:0;border:0;border-radius:999px;background:rgba(255,255,255,.1);color:#fff;cursor:pointer}
+.show-b:hover{background:rgba(255,255,255,.18)}.show-b:focus-visible{outline:2px solid #9bbecb;outline-offset:2px}
+.show-b .i-pl{display:none}.show.paused .show-b .i-pl{display:block}.show.paused .show-b .i-pa{display:none}
+.show-n{min-width:56px;font-size:13px;color:rgba(255,255,255,.55);font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:no-preference){.show-s.on .show-q>span{display:inline-block;animation:showType 1.1s steps(28,end) both}}
+@keyframes showType{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@media (max-width:760px){.show{margin-top:64px}.show-ask{height:auto;min-height:52px;margin:0 4% -26px;padding:8px 8px 8px 18px;border-radius:26px;font-size:14.5px;line-height:1.35}.show-q{white-space:normal}.show-go{width:34px;height:34px}.show-ph{aspect-ratio:4/5;border-radius:22px}.show-done{font-size:15px;justify-content:flex-start;align-items:flex-start}.show-ok{margin-top:2px}}
 #backed,#payBand{display:none!important}
 /* shorter (Jobs, Rams): the plan card on the home page, the attorney and expediter comparison on /more.html */
 #cmp{display:none!important}
@@ -264,27 +280,92 @@
     <p class="vis-k" data-i18n="vis.k">Why we exist</p>
     <h2 class="vis-h" id="visH" data-i18n="vis.h">We bring the world's businesses to America.</h2>
     <p class="vis-p" data-i18n="vis.p">Every license Odelia clears is a store that opens sooner, capital that lands instead of stalling, and jobs that start in an American town. Foreign investors put $232 billion into the United States in 2025. Only $13.8 billion of it built or grew a business. We exist to grow that number.</p>
-    <div class="vis-row">
-      <div><img class="vis-img" src="/img/stories/open-night.webp" width="900" height="1200" loading="lazy" decoding="async" alt="A couple walks out of their new tea shop on opening night as friends throw confetti"><b data-i18n="vis.a1">Stores open</b><span data-i18n="vis.a1s">A brand from Chengdu or Lyon opens in Flushing or Plano in weeks, not seasons.</span></div>
-      <div><img class="vis-img" src="/img/stories/harvest.webp" width="900" height="1200" loading="lazy" decoding="async" alt="A farming family laughs beside a combine after a record harvest"><b data-i18n="vis.a2">Capital lands</b><span data-i18n="vis.a2s">Investment that would have stalled in paperwork becomes leases, build-outs and inventory.</span></div>
-      <div><img class="vis-img" src="/img/stories/first-shift.webp" width="900" height="1200" loading="lazy" decoding="async" alt="A new bakery owner and her first employee hug on the first shift"><b data-i18n="vis.a3">Jobs start</b><span data-i18n="vis.a3s">Every opening hires locally: baristas, managers, contractors, suppliers.</span></div>
+    <div class="show" id="show" role="region" aria-roledescription="carousel" aria-label="What Placetta clears">
+      <div class="show-track">
+      <figure class="show-s on" aria-roledescription="slide" aria-label="1 of 15">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.1q">We're launching 1,200 satellites. What do we need?</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img src="/img/stories/satellites.webp" width="900" height="1200" decoding="async" alt="Engineers cheer in mission control as a satellite constellation reaches orbit"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.1d">FCC space station license, FAA launch license and NOAA remote-sensing license.</span></span></figcaption>
+      </figure>
+      <figure class="show-s" aria-roledescription="slide" aria-label="2 of 15" aria-hidden="true">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.2q">Opening our first US tea house in Flushing.</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img src="/img/stories/open-night.webp" width="900" height="1200" decoding="async" alt="A couple walks out of their new tea shop on opening night as friends throw confetti"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.2d">Business license, seller's permit, health permit and sign permit.</span></span></figcaption>
+      </figure>
+      <figure class="show-s" aria-roledescription="slide" aria-label="3 of 15" aria-hidden="true">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.3q">Upgrading 120 miles of transmission lines.</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img data-src="/img/stories/grid.webp" width="900" height="1200" decoding="async" alt="Utility crews high-five as a modernized substation is energized at night"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.3d">Utility commission certificate, federal right-of-way and environmental review.</span></span></figcaption>
+      </figure>
+      <figure class="show-s" aria-roledescription="slide" aria-label="4 of 15" aria-hidden="true">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.4q">Putting our family name on a storefront in Houston.</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img data-src="/img/stories/family.webp" width="900" height="1200" decoding="async" alt="A grandmother blows a kiss from a car outside her family's new restaurant"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.4d">Assumed name filing, sign permit and certificate of occupancy.</span></span></figcaption>
+      </figure>
+      <figure class="show-s" aria-roledescription="slide" aria-label="5 of 15" aria-hidden="true">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.5q">Flight-testing our autonomous drones in Arizona.</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img data-src="/img/stories/defense.webp" width="900" height="1200" decoding="async" alt="A defense founder and engineer laugh beside an uncrewed aircraft at a test range"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.5d">FAA waivers, test range approvals and export control classification.</span></span></figcaption>
+      </figure>
+      <figure class="show-s" aria-roledescription="slide" aria-label="6 of 15" aria-hidden="true">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.6q">Our farm wants to sell to stores in three states.</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img data-src="/img/stories/harvest.webp" width="900" height="1200" decoding="async" alt="A farming family laughs beside a combine after a record harvest"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.6d">Food facility registration, organic certification and state seller's permits.</span></span></figcaption>
+      </figure>
+      <figure class="show-s" aria-roledescription="slide" aria-label="7 of 15" aria-hidden="true">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.7q">Powering on a 300 MW data center in Virginia.</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img data-src="/img/stories/datacenter.webp" width="900" height="1200" decoding="async" alt="Executives and crews cheer in the rain as a data center powers on"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.7d">Utility agreement, generator air permit and building approvals.</span></span></figcaption>
+      </figure>
+      <figure class="show-s" aria-roledescription="slide" aria-label="8 of 15" aria-hidden="true">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.8q">Our restaurant closed. How do we reopen?</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img data-src="/img/stories/reopen.webp" width="900" height="1200" decoding="async" alt="A couple celebrates the night their family restaurant reopens"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.8d">Health reinspection, fire clearance and a renewed liquor license.</span></span></figcaption>
+      </figure>
+      <figure class="show-s" aria-roledescription="slide" aria-label="9 of 15" aria-hidden="true">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.9q">Our first car comes off the line in Georgia this spring.</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img data-src="/img/stories/manufacturing.webp" width="900" height="1200" decoding="async" alt="Executives and line workers embrace as the first car leaves a new plant"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.9d">Air permit, stormwater permit and occupancy for 2 million square feet.</span></span></figcaption>
+      </figure>
+      <figure class="show-s" aria-roledescription="slide" aria-label="10 of 15" aria-hidden="true">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.10q">Hiring our first 40 people in Texas.</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img data-src="/img/stories/first-shift.webp" width="900" height="1200" decoding="async" alt="A new bakery owner and her first employee hug on the first shift"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.10d">Employer registration, workers' comp and new-hire reporting, before day one.</span></span></figcaption>
+      </figure>
+      <figure class="show-s" aria-roledescription="slide" aria-label="11 of 15" aria-hidden="true">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.11q">Reopening a lithium mine in Nevada.</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img data-src="/img/stories/mining.webp" width="900" height="1200" decoding="async" alt="A mining chairman sprays champagne with a crew at a reopened mine"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.11d">Federal plan of operations, water rights and a state reclamation bond.</span></span></figcaption>
+      </figure>
+      <figure class="show-s" aria-roledescription="slide" aria-label="12 of 15" aria-hidden="true">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.12q">Our new plant needs to run by spring.</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img data-src="/img/stories/factory.webp" width="900" height="1200" decoding="async" alt="Workers celebrate the first night of a new factory line"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.12d">Zoning, air permit and fire marshal sign-off, on schedule.</span></span></figcaption>
+      </figure>
+      <figure class="show-s" aria-roledescription="slide" aria-label="13 of 15" aria-hidden="true">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.13q">Shipping our first American-made robot arms.</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img data-src="/img/stories/robotics.webp" width="900" height="1200" decoding="async" alt="A founder laughs as a robot arm hands him its first finished part"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.13d">Manufacturing permits, product safety certification and export classification.</span></span></figcaption>
+      </figure>
+      <figure class="show-s" aria-roledescription="slide" aria-label="14 of 15" aria-hidden="true">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.14q">Our fund wants to build factories in America.</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img data-src="/img/stories/investment.webp" width="900" height="1200" decoding="async" alt="A foreign investor and an American governor shake hands over signed papers"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.14d">Every license in every state, mapped before the deal signs.</span></span></figcaption>
+      </figure>
+      <figure class="show-s" aria-roledescription="slide" aria-label="15 of 15" aria-hidden="true">
+        <div class="show-ask"><span class="show-q"><span data-i18n="show.15q">Switching on 400 MW of solar in Arizona.</span></span><span class="show-go" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        <div class="show-ph"><img data-src="/img/stories/energy.webp" width="900" height="1200" decoding="async" alt="An energy chairman and linemen celebrate a solar farm switching on at night"></div>
+        <figcaption class="show-done"><span class="show-ok" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="m5 10.5 3.2 3L15 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b data-i18n="show.by">Cleared with Placetta:</b> <span data-i18n="show.15d">Interconnection agreement, state siting permit and county use permit.</span></span></figcaption>
+      </figure>
+      </div>
+      <div class="show-nav">
+        <button type="button" class="show-b" data-show="prev" aria-label="Previous"><svg viewBox="0 0 20 20" width="16" height="16"><path d="m12 5-5 5 5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button type="button" class="show-b" data-show="play" aria-label="Pause"><svg class="i-pa" viewBox="0 0 20 20" width="16" height="16"><path d="M7.5 5v10M12.5 5v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg class="i-pl" viewBox="0 0 20 20" width="16" height="16"><path d="M7 5.5v9l7-4.5z" fill="currentColor"/></svg></button>
+        <button type="button" class="show-b" data-show="next" aria-label="Next"><svg viewBox="0 0 20 20" width="16" height="16"><path d="m8 5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <span class="show-n" aria-live="polite"><span id="showN">1</span> / 15</span>
+      </div>
     </div>
-    <div class="vis-row vis-row2">
-      <div><img class="vis-img" src="/img/stories/reopen.webp" width="900" height="1200" loading="lazy" decoding="async" alt="A couple celebrates the night their family restaurant reopens"><b data-i18n="vis.a4">Doors reopen</b><span data-i18n="vis.a4s">A restaurant that closed serves again, with every license back in place.</span></div>
-      <div><img class="vis-img" src="/img/stories/family.webp" width="900" height="1200" loading="lazy" decoding="async" alt="A grandmother blows a kiss from a car outside her family's new restaurant"><b data-i18n="vis.a5">Families rise</b><span data-i18n="vis.a5s">Three generations, one storefront, a name on the street.</span></div>
-      <div><img class="vis-img" src="/img/stories/factory.webp" width="900" height="1200" loading="lazy" decoding="async" alt="Workers celebrate the first night of a new factory line"><b data-i18n="vis.a6">Lines run</b><span data-i18n="vis.a6s">A new plant's permits clear, and a whole shift goes to work.</span></div>
-    </div>
-    <div class="vis-row vis-row2">
-      <div><img class="vis-img" src="/img/stories/energy.webp" width="900" height="1200" loading="lazy" decoding="async" alt="An energy chairman and linemen celebrate a solar farm switching on at night"><b data-i18n="vis.a7">Power flows</b><span data-i18n="vis.a7s">A utility's new solar farm switches on, every interconnection permit cleared.</span></div>
-      <div><img class="vis-img" src="/img/stories/manufacturing.webp" width="900" height="1200" loading="lazy" decoding="async" alt="Executives and line workers embrace as the first car leaves a new plant"><b data-i18n="vis.a8">The first car rolls</b><span data-i18n="vis.a8s">A billion-dollar plant clears zoning, air and fire permits on schedule.</span></div>
-      <div><img class="vis-img" src="/img/stories/mining.webp" width="900" height="1200" loading="lazy" decoding="async" alt="A mining chairman sprays champagne with a crew at a reopened mine"><b data-i18n="vis.a9">Mines reopen</b><span data-i18n="vis.a9s">Lithium moves again once every state and federal permit is in hand.</span></div>
-    </div>
-    <div class="vis-row vis-row2">
-      <div><img class="vis-img" src="/img/stories/investment.webp" width="900" height="1200" loading="lazy" decoding="async" alt="A foreign investor and an American governor shake hands over signed papers"><b data-i18n="vis.a10">Deals close</b><span data-i18n="vis.a10s">A sovereign fund commits, because the path to opening is mapped before the ink dries.</span></div>
-      <div><img class="vis-img" src="/img/stories/robotics.webp" width="900" height="1200" loading="lazy" decoding="async" alt="A founder laughs as a robot arm hands him its first finished part"><b data-i18n="vis.a11">Robots ship</b><span data-i18n="vis.a11s">A robotics maker's first American-made part comes off the line before dawn.</span></div>
-      <div><img class="vis-img" src="/img/stories/datacenter.webp" width="900" height="1200" loading="lazy" decoding="async" alt="Executives and crews cheer in the rain as a data center powers on"><b data-i18n="vis.a12">Compute lights up</b><span data-i18n="vis.a12s">A data center powers on with every utility, building and environmental sign-off done.</span></div>
-    </div>
-    <p class="vis-ill" data-i18n="vis.ill">Illustrative photos, not customers.</p>
+    <p class="vis-ill" data-i18n="vis.ill">Illustrative scenes. The permits are the real ones each project needs.</p>
     <p class="vis-src"><a href="https://www.bea.gov/news/2026/new-foreign-direct-investment-united-states-2025" target="_blank" rel="noopener" data-i18n="vis.src">New foreign direct investment in the United States, 2025: U.S. Bureau of Economic Analysis.</a></p>
   </div>
 </section>
@@ -627,4 +708,24 @@
 <button type="button" class="resume" id="resume" hidden><span class="orb" style="width:18px;height:18px"></span><span id="resumeT"></span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></button>
 <div class="mbar" id="mbar"><p id="mbarT"></p><button type="button" class="btn b-ink" data-open="mobile_bar" id="mbarB"></button></div>
 
+<script>
+(() => { const r = document.getElementById("show"); if (!r) return;
+  const s = [...r.querySelectorAll(".show-s")], n = document.getElementById("showN"), pb = r.querySelector('[data-show="play"]');
+  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let i = 0, t = 0, paused = calm, seen = false;
+  const load = k => { const im = s[k % s.length].querySelector("img[data-src]"); if (im) { im.src = im.dataset.src; im.removeAttribute("data-src"); } };
+  const go = k => { s[i].classList.remove("on"); s[i].setAttribute("aria-hidden", "true");
+    i = (k + s.length) % s.length; s[i].classList.add("on"); s[i].removeAttribute("aria-hidden"); n.textContent = i + 1; load(i); load(i + 1); };
+  const tick = () => { clearTimeout(t); if (!paused && seen) t = setTimeout(() => { go(i + 1); tick(); }, 5200); };
+  const setP = p => { paused = p; r.classList.toggle("paused", p); pb.setAttribute("aria-label", p ? "Play" : "Pause"); tick(); };
+  r.addEventListener("click", e => { const b = e.target.closest("[data-show]"); if (!b) return;
+    const a = b.dataset.show; if (a === "play") return setP(!paused); go(i + (a === "next" ? 1 : -1)); tick(); });
+  let x0 = null; r.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+  r.addEventListener("touchend", e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if (Math.abs(dx) > 40) { go(i + (dx < 0 ? 1 : -1)); tick(); } }, { passive: true });
+  r.addEventListener("focusin", () => { clearTimeout(t); }); r.addEventListener("focusout", tick);
+  new IntersectionObserver(es => { seen = es[0].isIntersecting; tick(); }, { threshold: .35 }).observe(r);
+  setP(paused);
+})();
+</script>
 <script defer src="/landing.js?v=f146a1b0db"></script>
