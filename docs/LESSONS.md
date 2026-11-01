@@ -457,3 +457,16 @@ hand over her mouth), polished and centered. The founder called them out twice.
 Rule: no two photos share a prompt shape; vary age, gender, background, mood and framing; prompt a cheap flash
 snapshot (crooked, blurry, overexposed, someone cut off). See docs/LANDING-PHOTOS.md. Review the full set as one
 contact sheet before shipping, not each photo alone.
+
+### 2026-11-01: two functions named sendLead, so every plan request went out twice
+What broke: site/landing.js declared `function sendLead` twice. The second (an older version) replaced the first, so
+`sendLead(leadRow())` ran with the whole row as its `source` and a second `sendLead(source)` posted again: two rows per
+request, one with a broken source, and the offline outbox never ran.
+Rule: one name, one function in a script file; a newer version replaces the old one in the same edit. Check: a form test
+counts the requests a submit sends (exactly one).
+
+### 2026-11-01: Odelia asked for the city and the business right after being told both
+What broke: in the sample, "What do I need to open a bubble tea shop in San Jose?" matched no script, so the fallback
+asked "Which city, and will it serve food...?".
+Rule: before any intake question, read the line (readLine): with both, answer; with one, ask only for the other. Never
+ask for what the person just said. Tests: test:flow "named:".

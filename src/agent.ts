@@ -942,7 +942,17 @@ function plan(req: Request, ctx: Context): Plan {
   const own = SCRIPTS.slice(0, 6).find(s => s.match.test(req.text)) ?? PROMISES.find(s => s.match.test(req.text));
   if (own) return own.plan(ctx, req.text);
   // a question about this business's own permits, stores and dates: the workspace answers it before the forms library
-  return fromWorkspace(ctx, req.text) ?? question(ctx, req.text) ?? SCRIPTS.find(s => s.match.test(req.text))?.plan(ctx, req.text) ?? FALLBACK();
+  return fromWorkspace(ctx, req.text) ?? question(ctx, req.text) ?? SCRIPTS.find(s => s.match.test(req.text))?.plan(ctx, req.text) ?? named(req.text) ?? FALLBACK();
+}
+
+/** A message that already says what and where ("What do I need to open a bubble tea shop in San Jose?") gets the list,
+ *  and one that says only one of them is asked only for the other: never ask again for what the person just said. */
+function named(text: string): Plan | null {
+  const r = readLine(text);
+  if (r.place && r.sell) return match(r.sell, r.place);
+  if (r.place) return { steps: [S("composing", "Writing a reply", "撰写回复")], reply: { text: [B(`Got it, ${r.place}. What will you open there: food, a store, a warehouse or something else?`, `好的，${r.place}。您要开什么：餐饮、门店、仓库还是其他？`)] } };
+  if (r.sell) return { steps: [S("composing", "Writing a reply", "撰写回复")], reply: { text: [B(`Got it, ${r.sell.toLowerCase()}. Which city and state?`, `好的，${r.sell}。在哪个城市和州？`)] } };
+  return null;
 }
 
 /** Scripted stand-in for the real agent, so the product can be designed and tested end to end. */

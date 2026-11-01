@@ -303,6 +303,19 @@ ok(!html("<script>alert(1)</script>").includes("<script>"), "edge: a reply can't
   ok(!!sent && !w.approvals.some(a => a.id === "a-staff"), "edge: a message approval (not a filing) still goes through");
 }
 
+// a message that already names the business and the city never gets asked for them again (founder's UX walk,
+// 2026-11-01: "What do I need to open a bubble tea shop in San Jose?" got "Which city, and will it serve food...?")
+{
+  const ask = async (text: string, lang: "en" | "zh") => { let reply: Extract<AgentEvent, { type: "reply" }> | undefined; await demoAgent.run({ text }, { lang, current: SAMPLE }, e => { if (e.type === "reply") reply = e; }, new AbortController().signal).catch(() => undefined); return reply; };
+  const said = (r: Awaited<ReturnType<typeof ask>>) => JSON.stringify(r ?? "");
+  const both = await ask("What do I need to open a bubble tea shop in San Jose?", "en");
+  ok(!/Which city/.test(said(both)) && /match|San Jose/i.test(said(both)), "named: business and city given, no intake question", said(both));
+  const city = await ask("I want to open something in Houston, TX", "en");
+  ok(/Houston/.test(said(city)) && !/Which city/.test(said(city)), "named: only the city given, asks only what", said(city));
+  const zh = await ask("我想在圣何塞开一家奶茶店，需要什么？", "zh");
+  ok(!/在哪个城市/.test(said(zh)), "named: Chinese line with city and business, no intake question", said(zh));
+}
+
 // the composer's starter chip "What's due this week" (found by the Playwright walk: it got the new-business intake
 // question "Which city, and will it serve food...?"): the sample's own deadlines, soonest first, in both languages
 {

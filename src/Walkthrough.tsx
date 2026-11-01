@@ -77,7 +77,11 @@ export function Walkthrough() {
   const firstWin = !!ws.firstPlan?.win && ws.approvals.some(a => a.app === ws.firstPlan?.win);
   // In the first run Home already leads with the plan and one button (src/FirstRun.tsx): nothing covers it, and the
   // tour waits for a later visit.
-  const [open, setOpen] = useState(() => !tourSeen() && !/[?&]notour\b/.test(location.search) && !firstWin && !isFirstRun(ws));
+  // It no longer opens on its own (founder, 2026-11-01: "remove unnecessary steps"). The page already says what to do (Ask
+  // Odelia, one Approve button), and on a phone the cards covered the very box they pointed at. Help, Take the tour,
+  // still opens it.
+  void firstWin; void isFirstRun;
+  const [open, setOpen] = useState(false);
   // On first load the tour floats near the top without a scrim, so the plan behind it stays in view and usable (the
   // 2026-10-23 review: "An onboarding modal covers the dashboard on first load"). Asked for again from Help, it opens
   // as a dialog, since the person asked to see it.

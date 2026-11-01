@@ -107,7 +107,7 @@ en:{
  "how.h":"Mapped by Odelia. Filed by Odelia.",
  "lm.plan":"Plan", "lm.wallet":"Renewal calendar",
  "st.label":"Where are you opening?", "st.ph":"Where are you opening? e.g. Los Angeles", "st.btn":"Get my plan",
- "q.step":"Step {n} of 4", "q.0t":"Where are you opening?", "q.0s":"A city and state, or a country. Four quick questions, about a minute.", "q.0ph":"e.g. Los Angeles, CA", "q.1t":"What are you opening?", "q.1a":"Industry", "q.1b":"Headquarters", "q.1ph":"Which country?", "q.2t":"When, and how many?", "q.2a":"Target opening", "q.2b":"Locations in the next 12 months", "q.3t":"Where should we send your plan?", "q.prev":"Your {m} plan will cover", "q.prevn":"The final list depends on your address and build-out.", "q.email":"Email", "q.wechat":"WeChat", "q.emailph":"name@company.com", "q.wechatph":"Your WeChat ID", "q.plang":"Plan language", "q.opt":"Add company details (optional)", "q.company":"Company", "q.site":"Website", "q.next":"Continue", "q.send":"Send me my plan", "q.errEmail":"Enter an email like name@company.com.", "q.errWechat":"Enter your WeChat ID (at least 5 characters).", "q.leaveT":"Leave before you get your plan?", "q.leaveP":"Your answers are saved on this device. You're {n} away from your plan.", "q.one":"one step", "q.many":"{n} steps", "q.keep":"Keep going", "q.leave":"Leave", "q.n3":"Walk through it with us if you'd like. No obligation.", "q.sample":"See a sample plan while you wait",
+ "q.step":"Step {n} of 3", "q.0t":"Where are you opening?", "q.0s":"A city and state, or a country. Three quick questions, under a minute.", "q.0ph":"e.g. Los Angeles, CA", "q.1t":"What are you opening?", "q.1a":"Industry", "q.1b":"Headquarters", "q.1ph":"Which country?", "q.2t":"When, and how many?", "q.2a":"Target opening", "q.2b":"Locations in the next 12 months", "q.3t":"Where should we send your plan?", "q.prev":"Your {m} plan will cover", "q.prevn":"The final list depends on your address and build-out.", "q.email":"Email", "q.wechat":"WeChat", "q.emailph":"name@company.com", "q.wechatph":"Your WeChat ID", "q.plang":"Plan language", "q.opt":"Add company details (optional)", "q.company":"Company", "q.site":"Website", "q.next":"Continue", "q.send":"Send me my plan", "q.errEmail":"Enter an email like name@company.com.", "q.errWechat":"Enter your WeChat ID (at least 5 characters).", "q.leaveT":"Leave before you get your plan?", "q.leaveP":"Your answers are saved on this device. You're {n} away from your plan.", "q.one":"one step", "q.many":"{n} steps", "q.keep":"Keep going", "q.leave":"Leave", "q.n3":"Walk through it with us if you'd like. No obligation.", "q.sample":"See a sample plan while you wait",
  "resume":"Finish your {m} plan",
  "mbar.r":"Finish your plan, step {n} of 4", "mbar.b":"Get my plan", "mbar.rb":"Continue",
  "map.h":"Where we work", "map.sub":"From São Paulo to Nairobi to Kuala Lumpur, one team files the paperwork. Pick a market to see what opening there takes.", "map.us":"United States", "map.world":"Worldwide", "map.s1":"US states covered", "map.s2":"countries covered", "map.desc":"Map of markets where Placetta handles compliance", "map.pick":"Choose a market", "map.prompt":"Pick a state or country to start a plan there.", "map.go":"Get your free plan for {m}", "map.t1":"Deepest coverage", "map.t2":"Full coverage", "map.t3":"Growing coverage", "map.t4":"Covered",
@@ -191,7 +191,7 @@ zh:{
  "how.h":"由 Odelia 梳理，由 Odelia 申报。",
  "lm.plan":"开店计划", "lm.wallet":"续期日历",
  "st.label":"您要在哪里开店？", "st.ph":"您要在哪里开店？例如：洛杉矶", "st.btn":"获取计划",
- "q.step":"第 {n} 步，共 4 步", "q.0t":"您要在哪里开店？", "q.0s":"城市和州，或国家。共 4 个简单问题，约一分钟。", "q.0ph":"例如：加州洛杉矶", "q.1t":"您要开什么店？", "q.1a":"行业", "q.1b":"总部所在地", "q.1ph":"哪个国家？", "q.2t":"什么时候开？开几家？", "q.2a":"目标开业时间", "q.2b":"未来 12 个月门店数", "q.3t":"计划发到哪里？", "q.prev":"您的{m}开店计划将包括", "q.prevn":"最终清单取决于具体地址和装修情况。", "q.email":"邮箱", "q.wechat":"微信", "q.emailph":"name@company.com", "q.wechatph":"您的微信号", "q.plang":"计划语言", "q.opt":"补充公司信息（选填）", "q.company":"公司名称", "q.site":"网站", "q.next":"继续", "q.send":"把计划发给我", "q.errEmail":"请输入有效邮箱，例如 name@company.com。", "q.errWechat":"请输入微信号（至少 5 个字符）。", "q.leaveT":"还没拿到计划，确定要离开吗？", "q.leaveP":"您的回答已保存在本设备上。距离拿到计划只差 {n}。", "q.one":"1 步", "q.many":"{n} 步", "q.keep":"继续填写", "q.leave":"离开", "q.n3":"如有需要，我们可以和您一起逐项讲解，不附带任何义务。", "q.sample":"等待期间，先看看示例计划",
+ "q.step":"第 {n} 步，共 3 步", "q.0t":"您要在哪里开店？", "q.0s":"城市和州，或国家。共 3 个简单问题，不到一分钟。", "q.0ph":"例如：加州洛杉矶", "q.1t":"您要开什么店？", "q.1a":"行业", "q.1b":"总部所在地", "q.1ph":"哪个国家？", "q.2t":"什么时候开？开几家？", "q.2a":"目标开业时间", "q.2b":"未来 12 个月门店数", "q.3t":"计划发到哪里？", "q.prev":"您的{m}开店计划将包括", "q.prevn":"最终清单取决于具体地址和装修情况。", "q.email":"邮箱", "q.wechat":"微信", "q.emailph":"name@company.com", "q.wechatph":"您的微信号", "q.plang":"计划语言", "q.opt":"补充公司信息（选填）", "q.company":"公司名称", "q.site":"网站", "q.next":"继续", "q.send":"把计划发给我", "q.errEmail":"请输入有效邮箱，例如 name@company.com。", "q.errWechat":"请输入微信号（至少 5 个字符）。", "q.leaveT":"还没拿到计划，确定要离开吗？", "q.leaveP":"您的回答已保存在本设备上。距离拿到计划只差 {n}。", "q.one":"1 步", "q.many":"{n} 步", "q.keep":"继续填写", "q.leave":"离开", "q.n3":"如有需要，我们可以和您一起逐项讲解，不附带任何义务。", "q.sample":"等待期间，先看看示例计划",
  "resume":"完成您的{m}开店计划",
  "mbar.r":"完成您的计划（第 {n}/4 步）", "mbar.b":"获取计划", "mbar.rb":"继续",
  "map.h":"业务覆盖", "map.sub":"从圣保罗到内罗毕，再到吉隆坡，同一支团队为您办妥所有手续。选择一个市场，看看在当地开业需要哪些手续。", "map.us":"美国", "map.world":"全球", "map.s1":"个美国州", "map.s2":"个国家和地区", "map.desc":"快哉提供合规服务的市场地图", "map.pick":"选择市场", "map.prompt":"点击任意州或国家，开始规划在当地开店。", "map.go":"获取{m}免费开店计划", "map.t1":"覆盖最深", "map.t2":"全面覆盖", "map.t3":"覆盖扩展中", "map.t4":"已覆盖",
@@ -222,7 +222,7 @@ Object.assign(T.en, {"dv.h1":"Enterprise security","dv.h2":"with fine-grained co
 Object.assign(T.zh, {"dv.h1":"企业级安全","dv.h2":"精细的权限控制","dv.tc":"信任中心","dv.b1":"SOC 2","dv.b1s":"Type I 审计进行中","dv.b2":"ISO 27001","dv.b2s":"进行中","dv.b3":"SCIM","dv.b3s":"即将上线","dv.b4s":"进行中","dv.b5s":"进行中","dv.b6s":"进行中","dv.l1":"您的申报和文件始终归您所有","dv.l2":"未经您批准，不申报、不付款","dv.l3":"完整的审计日志","dv.l4":"机构登录信息存放在加密保险库中","dv.l5":"全团队两步验证登录","dv.l6":"传输和存储全程加密"});
 Object.assign(T.en, {"price.det":"See details","price.detsub":"The math on waiting, how Placetta compares, and the rent calculator.","price.moresub":"Renewals outside the plan, and the free plan preview.","foot.about":"About"});
 Object.assign(T.zh, {"price.det":"查看详情","price.detsub":"等待的成本、与其他方式的对比，以及租金计算器。","price.moresub":"方案外的续期，以及免费的计划预览。","foot.about":"关于我们"});
-Object.assign(T.en, {"diff.src": "Sources: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a> (expediter, restaurant permits), BLS median pay for <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">operations managers</a> (May 2023), and <a href=\"https://www.bls.gov/ooh/legal/lawyers.htm\" target=\"_blank\" rel=\"noopener\">lawyers</a>, <a href=\"https://www.bls.gov/ooh/business-and-financial/compliance-officers.htm\" target=\"_blank\" rel=\"noopener\">compliance officers</a>, <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">bookkeepers</a>, <a href=\"https://www.bls.gov/ooh/media-and-communication/interpreters-and-translators.htm\" target=\"_blank\" rel=\"noopener\">translators</a> and <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/secretaries-and-administrative-assistants.htm\" target=\"_blank\" rel=\"noopener\">administrative assistants</a> (May 2025)", "diff.h": "Seven people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "7 → 1", "diff.2s": "Seven hires to pay and chase, down to one employee and Odelia", "diff.3b": "$500,000+", "diff.3s": "A year in salaries for six of them, before the expediter's fee", "diff.1b": "About 1 minute", "diff.1s": "From one line to a full plan", "diff.team": "One employee", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Four quick questions, about a minute. Nothing is filed or paid without your approval."});
+Object.assign(T.en, {"diff.src": "Sources: <a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a> (expediter, restaurant permits), BLS median pay for <a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">operations managers</a> (May 2023), and <a href=\"https://www.bls.gov/ooh/legal/lawyers.htm\" target=\"_blank\" rel=\"noopener\">lawyers</a>, <a href=\"https://www.bls.gov/ooh/business-and-financial/compliance-officers.htm\" target=\"_blank\" rel=\"noopener\">compliance officers</a>, <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">bookkeepers</a>, <a href=\"https://www.bls.gov/ooh/media-and-communication/interpreters-and-translators.htm\" target=\"_blank\" rel=\"noopener\">translators</a> and <a href=\"https://www.bls.gov/ooh/office-and-administrative-support/secretaries-and-administrative-assistants.htm\" target=\"_blank\" rel=\"noopener\">administrative assistants</a> (May 2025)", "diff.h": "Seven people on the clock, and still no permit", "diff.before": "Before", "diff.after": "After", "diff.2b": "7 → 1", "diff.2s": "Seven hires to pay and chase, down to one employee and Odelia", "diff.3b": "$500,000+", "diff.3s": "A year in salaries for six of them, before the expediter's fee", "diff.1b": "About 1 minute", "diff.1s": "From one line to a full plan", "diff.team": "One employee", "diff.with": "with", "hero.h1": "Your store is built.<br><em>Your permits aren't.</em>", "hero.note": "Three quick questions, under a minute. Nothing is filed or paid without your approval."});
 Object.assign(T.zh, {"diff.src": "来源：<a href=\"https://permitplace.com/permit-expediter-cost-guide/\" target=\"_blank\" rel=\"noopener\">PermitPlace</a>（代办费，餐厅许可）、美国劳工统计局<a href=\"https://www.bls.gov/oes/current/oes111021.htm\" target=\"_blank\" rel=\"noopener\">运营经理</a>（2023 年 5 月），以及<a href=\"https://www.bls.gov/ooh/legal/lawyers.htm\" target=\"_blank\" rel=\"noopener\">律师</a>、<a href=\"https://www.bls.gov/ooh/business-and-financial/compliance-officers.htm\" target=\"_blank\" rel=\"noopener\">合规专员</a>、<a href=\"https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm\" target=\"_blank\" rel=\"noopener\">会计</a>、<a href=\"https://www.bls.gov/ooh/media-and-communication/interpreters-and-translators.htm\" target=\"_blank\" rel=\"noopener\">翻译</a>与<a href=\"https://www.bls.gov/ooh/office-and-administrative-support/secretaries-and-administrative-assistants.htm\" target=\"_blank\" rel=\"noopener\">行政助理</a>（2025 年 5 月）薪酬中位数", "diff.h": "请了七个人，执照还是没下来", "diff.before": "之前", "diff.after": "之后", "diff.2b": "7 → 1", "diff.2s": "要雇、要催的 7 个人，变成一名员工加 Odelia", "diff.3b": "50 万美元以上", "diff.3s": "其中六个人一年的薪酬，还不算许可代办费", "diff.1b": "约 1 分钟", "diff.1s": "从一句话到完整的开店计划", "diff.team": "一名员工", "diff.with": "携手", "hero.h1": "店装好了，<br><em>执照还没下来。</em>", "hero.note": "4 个简单问题，约一分钟。未经您批准，不提交、不付款。"});
 /* Oct 18 section pass: new strings for the sections changed that day */
 // the store plan month to month (founder, 2026-10-23): the pricing card's Yearly and Monthly choice
@@ -756,7 +756,7 @@ function save(){ try { localStorage.setItem("placetta-draft", JSON.stringify({Q,
 
 const valid = {
   0: () => !!Q.market.trim(),
-  1: () => !!Q.industry && !!Q.hq,
+  1: () => !!Q.industry,
   2: () => !!Q.opening && !!Q.locations,
   3: () => contactOk()
 };
@@ -776,8 +776,6 @@ function qHTML(){
   if (qStep === 1) return `<div class="qpane">
       <h3 class="qh" id="qTitle">${t("q.1t")}</h3>
       <div class="qblk"><span class="qlab">${t("q.1a")}</span>${chips("industry", INDUSTRIES)}</div>
-      <div class="qblk"><span class="qlab">${t("q.1b")}</span>${chips("hq", HQS)}
-        ${Q.hq === "other" ? `<input class="qin" id="q-hqo" style="margin-top:10px" autocomplete="country-name" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="${t("q.1ph")}" value="${esc(Q.hqOther)}">` : ""}</div>
       <div class="qfoot"><small>${t("st.note")}</small><button type="button" class="btn b-ink" data-next ${valid[1]() ? "" : "disabled"}>${t("q.next")}</button></div></div>`;
   if (qStep === 2) return `<div class="qpane">
       <h3 class="qh" id="qTitle">${t("q.2t")}</h3>
@@ -802,7 +800,12 @@ function qHTML(){
         <input class="qin" id="q-contact" ${isW ? 'autocomplete="off"' : 'type="email" autocomplete="email" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false"'} enterkeyhint="send" placeholder="${isW ? t("q.wechatph") : t("q.emailph")}" value="${esc(isW ? Q.wechat : Q.email)}">
         <p class="qerr" id="qErr" ${errShown && !contactOk() ? "" : "hidden"}>${isW ? t("q.errWechat") : t("q.errEmail")}</p>
         <div class="qrow2"><span class="qlab">${t("q.plang")}</span><div class="qmini" role="group"><button type="button" data-pl="en" aria-pressed="${Q.plang === "en"}">English</button><button type="button" data-pl="zh" aria-pressed="${Q.plang === "zh"}">中文</button></div></div>
-        <details class="qopt" ${Q.company || Q.website ? "open" : ""}><summary>${t("q.opt")}</summary><div class="g2">
+        <details class="qopt" ${Q.company || Q.website || Q.hq || Q.opening || Q.locations ? "open" : ""}><summary>${t("q.opt")}</summary>
+          <div class="qblk"><span class="qlab">${t("q.1b")}</span>${chips("hq", HQS)}
+            ${Q.hq === "other" ? `<input class="qin" id="q-hqo" style="margin-top:10px" autocomplete="country-name" autocapitalize="words" autocorrect="off" spellcheck="false" placeholder="${t("q.1ph")}" value="${esc(Q.hqOther)}">` : ""}</div>
+          <div class="qblk"><span class="qlab">${t("q.2a")}</span>${chips("opening", OPENINGS)}</div>
+          <div class="qblk"><span class="qlab">${t("q.2b")}</span>${chips("locations", LOCS)}</div>
+          <div class="g2">
           <div><label class="qlab" for="q-company">${t("q.company")}</label><input class="qin" id="q-company" autocomplete="organization" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="next" value="${esc(Q.company)}"></div>
           <div><label class="qlab" for="q-site">${t("q.site")}</label><input class="qin" id="q-site" inputmode="url" autocomplete="url" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="${t("q.siteph")}" value="${esc(Q.website)}"></div></div></details>
       </div>
@@ -826,14 +829,16 @@ function qHTML(){
 function renderStep(){
   const done = qStep > 3;
   document.getElementById("qBody").innerHTML = qHTML();
-  document.getElementById("qBar").style.width = (done ? 100 : (qStep / 4) * 100 + 6) + "%";
-  document.getElementById("qStep").textContent = done ? "" : t("q.step").replace("{n}", qStep + 1);
+  const shown = qStep >= 3 ? 3 : qStep + 1;   // 3 steps: where, what, where to send
+  document.getElementById("qBar").style.width = (done ? 100 : ((shown - 1) / 3) * 100 + 6) + "%";
+  document.getElementById("qStep").textContent = done ? "" : t("q.step").replace("{n}", shown);
   document.getElementById("qBack").disabled = qStep === 0 || done;
   const f = document.querySelector('#qBody input:not([type=hidden])');
   if (qStep === 0 || (qStep === 3)) setTimeout(() => { const el = qStep === 0 ? document.getElementById("q-market") : document.getElementById("q-contact"); if (el && innerWidth >= 640) el.focus(); }, 60);
 }
 function refreshNext(){ const b = document.querySelector("#qBody [data-next]"); if (b) b.disabled = !valid[qStep](); }
 function go(n){
+  if (n === 2) n = n > qStep ? 3 : 1;   // "When, and how many?" moved into the optional details (founder, 2026-11-01)
   if (n > qStep) track("form_step_complete", {step: qStep + 1, source});
   qStep = n; errShown = false; save(); renderStep();
   track("form_step_view", {step: Math.min(qStep + 1, 5), source});
@@ -849,7 +854,8 @@ document.getElementById("qBody")?.addEventListener("click", e => {
     if (k === "hq"){ renderStep(); if (v === "other") { const o = document.getElementById("q-hqo"); if (o) o.focus(); return; } }
     refreshNext();
     clearTimeout(autoT);
-    if (valid[qStep]() && !(qStep === 1 && Q.hq === "other")) autoT = setTimeout(() => go(qStep + 1), 280);
+    // a tap moves on by itself only on the first two steps; on the last, the optional details never send the form
+    if (qStep < 3 && valid[qStep]()) autoT = setTimeout(() => go(qStep + 1), 280);
     return;
   }
   if (e.target.closest("[data-next]")){ if (valid[qStep]()) go(qStep + 1); return; }
@@ -916,7 +922,6 @@ function submit(){
   track("plan_request_submitted", {source, audience: audienceOf(source), preferred_language: Q.plang, contact_method: Q.contact, industry: Q.industry, hq: Q.hq === "other" ? (Q.hqOther || "other") : Q.hq, market: Q.market, opening: Q.opening, locations: Q.locations, has_company: !!Q.company});
   sendLead(leadRow());
   submitted = true;
-  sendLead(source);
   if (Q.contact !== "wechat") try { localStorage.setItem("placetta-handoff", JSON.stringify({v: 1, at: Date.now(), email: Q.email.trim(), company: Q.company.trim(), market: marketLabelEn(), industry: Q.industry, opening: Q.opening, plang: Q.plang || lang})); } catch(e){}
   try { localStorage.setItem("placetta-sent", "1"); localStorage.removeItem("placetta-draft"); } catch(e){}
   qStep = 4; renderStep(); updateResume();
@@ -924,23 +929,7 @@ function submit(){
 
 /* Plan requests are kept in Placetta's database (public.plan_requests: anyone can add one, nobody can read them back
    except the team in Supabase). The publishable key is meant for the browser. */
-const SUPA = "https://esquxzcfsylffuijvzec.supabase.co", SUPA_KEY = "sb_publishable_Ub54H3S-bU8WDuY7toMtzg_S1ieEO_p";
 const marketLabelEn = () => { const m = MARKETS.find(x => x[0] === Q.market); return m ? m[0] : Q.market.trim(); };
-function sendLead(src){
-  const p = new URLSearchParams(location.search), utm = {};
-  ["utm_source","utm_medium","utm_campaign","utm_term","utm_content"].forEach(k => { if (p.get(k)) utm[k] = p.get(k).slice(0, 200); });
-  const w = Q.contact === "wechat";
-  const row = {
-    client_id: crypto.randomUUID(),
-    source: src, page_lang: lang, preferred_language: Q.plang || lang, market: marketLabelEn().slice(0, 300), industry: Q.industry, hq: Q.hq === "other" ? (Q.hqOther || "other").slice(0, 100) : Q.hq,
-    opening: Q.opening, locations: Q.locations, contact_method: w ? "wechat" : "email", email: w ? null : Q.email.trim().slice(0, 320), wechat: w ? Q.wechat.trim().slice(0, 100) : null,
-    company: Q.company.trim().slice(0, 300) || null, website: Q.website.trim().slice(0, 500) || null, answers: Q, utm,
-    page_url: (location.origin + location.pathname).slice(0, 500), referrer: document.referrer.slice(0, 500) || null, user_agent: navigator.userAgent.slice(0, 300),
-  };
-  fetch(SUPA + "/rest/v1/plan_requests", { method: "POST", keepalive: true, headers: { apikey: SUPA_KEY, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(row) })
-    .then(r => track(r.ok ? "plan_request_saved" : "plan_request_save_failed", {status: r.status}))
-    .catch(() => track("plan_request_save_failed", {status: 0}));
-}
 
 /* the Beam rides the sheet's border when Get my plan is clicked in the hero; its bundle loads once, ahead of time when idle */
 let beamP = null;
@@ -962,7 +951,7 @@ function openForm(src, preset){
 function closeForm(force){
   if (!force && qStep >= 1 && qStep <= 3 && !leaveShown){
     leaveShown = true;
-    const left = 4 - qStep;
+    const left = qStep >= 3 ? 1 : 3 - qStep;
     document.getElementById("qLeaveT").textContent = t("q.leaveT");
     document.getElementById("qLeaveP").textContent = t("q.leaveP").replace("{n}", left === 1 ? t("q.one") : t("q.many").replace("{n}", left));
     document.getElementById("qKeep").textContent = t("q.keep");
