@@ -1,6 +1,15 @@
 /* land9 (Oct 29): sections that left the home page for /more.html. An old link to one of them (/#agencies) lands there */
 (() => { const h = location.hash.slice(1), MOVED = ["studies", "csFold", "numbers", "calcFold", "plans", "prMore", "tiers", "franchise", "trust", "security", "cost", "industries", "together", "agencies", "cn", "experts"];
   if (MOVED.includes(h) && !document.getElementById(h)) location.replace("/more.html#" + h); })();
+/* The page's photos and the hero video can't be saved, dragged out, copied or opened in a new tab (founder, 2026-11-01).
+   This only stops the browser's own menus and gestures; a screenshot or the developer tools can still take them. */
+(() => { const media = t => t instanceof Element && t.closest("img,video,picture,.show-ph,.hvid");
+  document.addEventListener("contextmenu", e => { if (media(e.target)) e.preventDefault(); });
+  document.addEventListener("dragstart", e => { if (media(e.target)) e.preventDefault(); });
+  document.addEventListener("copy", e => { const s = getSelection(); if (!s || s.isCollapsed || !e.clipboardData) return;
+    for (let i = 0; i < s.rangeCount; i++) if (s.getRangeAt(i).cloneContents().querySelector("img,video,picture")) {
+      e.preventDefault(); e.clipboardData.setData("text/plain", s.toString()); return; } });
+})();
 (() => {
 /* ============ PROOF: the switchboard for every claim about customers, backers, experts and results ============
    Each flag stays false until the claim behind it is substantiated in writing and that evidence is kept on file.

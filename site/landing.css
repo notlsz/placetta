@@ -3993,3 +3993,8 @@ body main .faqcta .btn,body main .ctab .btn,body main .prbtn,body .hdr .btn{min-
 .cpkn{font-size:15px;line-height:20px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cpkn b{font-weight:600}
 .cpks{font-size:13px;line-height:18px;color:var(--muted)}
+
+/* photos and the hero video: no drag out, no long-press save sheet, no selection; a clear layer over each slideshow photo
+   so a right-click or long-press lands on it, not the image, and the browser offers no "Save image" or "Open in new tab" */
+img,video{-webkit-user-drag:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.show-ph{position:relative}.show-ph::after{content:"";position:absolute;inset:0;z-index:1}
