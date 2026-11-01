@@ -1,6 +1,15 @@
 /* land9 (Oct 29): sections that left the home page for /more.html. An old link to one of them (/#agencies) lands there */
 (() => { const h = location.hash.slice(1), MOVED = ["studies", "csFold", "numbers", "calcFold", "plans", "prMore", "tiers", "franchise", "trust", "security", "cost", "industries", "together", "agencies", "cn", "experts"];
   if (MOVED.includes(h) && !document.getElementById(h)) location.replace("/more.html#" + h); })();
+/* "You approve. Odelia files." and "Kept current after you open" are the same height, side by side or stacked, in both
+   languages: each card's words take the height of the tallest, so the two pictures start and end on the same line. */
+(() => { const box = document.querySelector("#how95a .feat2"); if (!box) return;
+  const fit = () => { const t = [...box.querySelectorAll(":scope > .fcard > .fct")]; t.forEach(e => e.style.minHeight = "");
+    const h = Math.max(...t.map(e => e.getBoundingClientRect().height)); t.forEach(e => e.style.minHeight = h + "px"); };
+  fit(); new ResizeObserver(fit).observe(box);
+  new MutationObserver(fit).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+  document.fonts && document.fonts.ready.then(fit);
+})();
 /* The page's photos and the hero video can't be saved, dragged out, copied or opened in a new tab (founder, 2026-11-01).
    This only stops the browser's own menus and gestures; a screenshot or the developer tools can still take them. */
 (() => { const media = t => t instanceof Element && t.closest("img,video,picture,.show-ph,.hvid");

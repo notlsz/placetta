@@ -3597,7 +3597,7 @@ body .more97>#cost{margin-top:0!important}
 body .more97>#industries,body .more97>#together,body .more97>#agencies,body .more97>#cn,body .more97>#experts{margin-top:12px!important}
 .more97 .ctr{padding:0;max-width:none;width:auto}
 .more97 .agnote{display:none}
-body #how95a .feat2 .fcv{flex:none}
+body #how95a .feat2 .fcv{flex:1 1 auto}
 body .ctas>div{gap:22px!important}
 @media (max-width:639px){.tr97g{gap:14px}body .tr97g li span{display:none!important}.more97 details.fold97 summary small{display:none}.more97 details.fold97 summary{padding-block:14px}body #faq .faqcta{display:none}}
 .more97 details.fold97{margin:0}
