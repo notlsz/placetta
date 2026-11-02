@@ -100,3 +100,25 @@ Starting targets, not findings: measure, then adjust.
 - Opening too many markets before operations work (Target Canada).
 - HQ overriding the local operator on product (eBay China).
 - Claiming numbers we can't prove (the website's proof rule applies to every market page).
+
+## 7. The first 90 days (from 2026-11-01)
+
+| Days | Work | Gate before the next phase |
+| --- | --- | --- |
+| 1 to 30 | Registries for Canada, Australia, UAE (top 5 cities each); one counter runner each; NYC filing representative and SF permit consultant registered | Odelia maps a restaurant in all three with no edits |
+| 31 to 60 | Canada sold to 10 US customers; ASIC lodging live; one UAE free-zone referrer; UK ACSP application filed; 3 China referrers signed | 10 paid openings outside the US |
+| 61 to 90 | First opening times published; Singapore filing agent and Malaysia secretary signed; every market scored; wave 2 start decided | 2 markets past the graduate bars |
+
+A missed gate means fixing that phase, not spending on more markets.
+
+## 8. Who may file: the readout from the research
+
+- A licensed profession must prepare or file for others: Japan (行政書士, 司法書士), Korea (법무사), Singapore (registered
+  filing agents), UK (ACSPs since 18 Mar 2025), Israel (lawyer verifies). Partner; never file around them.
+- A notary must form the company: Germany, Netherlands, Italy, Switzerland, Spain (deed), Mexico. Odelia prepares the
+  file for the notary.
+- Software may file, or file through the accountant route: Australia (private providers), UAE, France (mandate), Spain
+  (private PAE), Brazil (Redesim accountant area), Portugal, Poland (S24), Turkey (POA), South Africa, Kenya, Nigeria,
+  Peru, Colombia, Chile.
+- Abroad, the portal is rarely the slow part: local presence (resident director, secretary, manager), apostille and
+  translation, and capital or sector gates are. Productize those.

@@ -1,0 +1,29 @@
+# Asia-Pacific and Middle East: who opens businesses for others (researched 2026-11-01)
+
+Pages opened by a research agent; many are setup firms, not governments. † = not verified.
+
+| Country | Incumbent (fee/time) | Portal; who may file | Channel / payment | Main friction | Sources |
+|---|---|---|---|---|---|
+| China | 代办 bundled with 代理记账; WFOE via lawyer/consultant ~$3k–8k; SAMR 7–12 business days, 2–4 months total | SAMR one-stop; Shanghai yct.sh.gov.cn (not fully online); China-based rep files with apostilled POA | WeChat / Alipay, WeChat Pay | Negative List; real lease; bank account 1–2 months; all filings in Chinese | sohu.com/a/1069842772_122910795; china-briefing.com/news/shanghai-business-registration-online-platform-foreign-invested-enterprises-launched/ |
+| Japan | 司法書士 registers, 行政書士 drafts; ¥50k–150k fees, ¥250k–350k total | e-OSS (app.e-oss.myna.go.jp), ~3 days; only 行政書士 may prepare gov documents for a fee, only 司法書士 file registrations for a fee | LINE (80%) / PayPay (70M+) | My Number card 1–2 months; seal certificate in person | pref.fukushima.lg.jp/sec/01135a/gyoseishoshi.html; biz.moneyforward.com/establish/basic/590/ |
+| South Korea | 법무사 or law firm; online ₩240,900 + ₩155k–425k gov fees; 3–5 days | KOTRA/bank FDI notice; 인터넷등기소; 홈택스; foreign directors can't e-sign, 법무사 files on paper; 법무사법 Art. 3 reserves registration work | KakaoTalk (95%) / Kakao Pay, Naver Pay, Toss | Apostille + Korean translation | help-me.kr/blog/article/orporation-formation-cost-10million/; korea.legal |
+| Taiwan | CPA capital audit NT$3k–5k; 代辦† | MOEA investment approval 14+ days, capital approval 14+ days, then registration | LINE† / JKOPay | Two approvals before registration | invest.ntpc.gov.tw; kaizencpa.com/Faq/info/id/1881.html |
+| Hong Kong | Licensed TCSP as company secretary | CR e-Services HK$1,545 + HK$2,350 BR, ~1 hour; resident secretary required | WhatsApp (90%) / FPS, AlipayHK, PayMe | Local secretary + address | statrys.com/hk/guides/company-registration-guide |
+| Singapore | Corporate service provider = registered filing agent | ACRA BizFile+; filing for others in business requires registered filing agent | WhatsApp (90%) / PayNow | Filing-agent regime | acra.gov.sg/corporate-service-providers/background-to-filing-agent-and-qualified-individual |
+| Malaysia | SSM-licensed secretary RM800–2,500, retainer RM1,200–3,500/yr | SSM MyCoID RM1,050, ~1 day; licensed secretary mandatory | WhatsApp (90%) / DuitNow, FPX, TnG | Resident director; bank 4 weeks | 3ecpa.com.my/blog/malaysia-company-incorporation-cost-index-2026-original-fee-data-ssm-regulatory/ |
+| Indonesia | Notaris + consultants; 4–6 weeks | AHU then OSS-RBA (NIB); notary must draft deed | WhatsApp (65%) / QRIS†, GoPay, OVO, DANA | IDR 10bn investment plan per KBLI; LKPM reports | aseanbriefing.com/doing-business-guide/indonesia/company-establishment/setting-up-pt-pma-indonesia |
+| Thailand | Lawyers/incorporation services | DBD Biz Regist online-only from 1 Jul 2026, THB 5,500; FBL months | LINE† / PromptPay | 49% foreign cap; THB 2M per work permit | thethaiger.com/legal/company-registration/ |
+| Vietnam | Law/consulting $1,500–3,000 + $300–500; 25–35 days | IRC 15–45 days then ERC 5 days | Zalo (85%) / VietQR† | 2–4 months; legalised docs; sub-licences | luatvietan.vn/thanh-lap-cong-ty-100-von-nuoc-ngoai.html |
+| Philippines | Consultants / law firms† | SEC eSPARC fully digital; mayor's permit, BIR† | Messenger (95%), Viber / GCash | $200k paid-in for foreign-owned | mb.com.ph/2025/4/7/sec-company-registration-process-now-purely-digital-no-more-paper-documents |
+| India | CA/CS firms† | MCA SPICe+, 7–10 days; practising CA/CS/CMA signs a declaration; DSC for directors | WhatsApp (70%) / UPI | Resident director; FC-GPR within 30 days | sansalegal.com/post/how-to-register-a-company-in-india-mca-spice-process-and-fees |
+| Australia | Accountants, solicitors, online agents | ASIC A$636 from 1 Jul 2026; private providers may lodge | Messenger / PayTo | Resident director (s.201A) | ablis.business.gov.au/service/ag/register-a-company/67 |
+| New Zealand | Accountants/lawyers† | Companies Office NZ$118.74 + GST | Messenger / cards | Resident director | stripe.com/nz/resources/more/business-registration-in-new-zealand |
+| UAE | PRO firms, typing centres: AED 1–5k/month; ~AED 800–1,500 per visa | Invest in Dubai; DED Instant Licence ~5 min; PRO not legally required | WhatsApp (90%) / cards, Apple Pay | 5–8 touchpoints per visa; mainland vs free zone | uaeroadmap.pages.dev (low authority); wamda.com |
+| Saudi Arabia | GRO/mu'aqqib† ~$1,150/month | MISA licence SAR 2,000/yr + SAR 10,000; Saudi Business Center CR ~SAR 1,825; resident manager | WhatsApp (80%) / mada | Attestation + Arabic; Saudisation | healyconsultants.com/saudi-arabia-company-registration/government-relations-officer; etqanlawfirm-sa.com/en/sagia-license-fees/ |
+| Qatar | PRO / mandoob† | MOCI Single Window, hours for simple setups | WhatsApp (65%) / NAPS-QPay | Manager with Qatar ID; prior approvals | sovereigngroup.com/news/qatar-launches-simplified-single-window-platform-for-company-registration/ |
+| Israel | Israeli lawyers (required to verify documents) | Registrar of Companies | WhatsApp (90%) / Bit, PayBox | Hebrew name; translation delays | embassies.gov.il; expanship.com/il/blog/incorporation-requirements-in-israel |
+| Turkey | Lawyers, mali müşavir† by POA | MERSIS, same day; notarised POA proxy can file | WhatsApp / instalment cards | Tax ID; translation; premises visit | invest.gov.tr/en/InvestmentGuide/Pages/establishing-a-business.aspx |
+
+Readout: a licensed profession must do or sign the filing in Japan, Korea, Singapore and Israel (partner required);
+third parties may file in Australia, UAE, Turkey (by POA) and the Philippines†. The slow part is rarely the portal: it is
+local presence (resident director, secretary, manager, local ID), apostille and translation, and capital or sector gates.
