@@ -33,7 +33,7 @@
 <!-- /seo:head -->
 <link rel="icon" href="/favicon.ico" sizes="any" /><link rel="icon" type="image/svg+xml" id="favicon" href="/favicon.svg" /><link rel="apple-touch-icon" href="/apple-touch-icon.png" /><link rel="manifest" href="/site.webmanifest" />
 <link rel="stylesheet" href="/fonts/fonts.css">
-<link rel="stylesheet" href="/landing.css?v=7652cfa9cc">
+<link rel="stylesheet" href="/landing.css?v=abaf4faa89">
 <style>
 /* the edge, right under the hero: one line of the problem, three numbers against the alternatives, same y in a row */
 .edge{padding-block:64px 8px}
@@ -168,7 +168,7 @@ body .edge + .vdemo{margin-top:56px!important}
             <input id="st-hero" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" data-i18n-ph="st.ph" data-i18n-ph-s="st.phs" placeholder="Where are you opening? e.g. Los Angeles">
             <button type="submit" class="btn b-white" data-i18n="cta.plan">Get my plan</button>
           </form>
-          <p class="hcity" id="hCity" aria-live="polite" data-i18n="hc.empty">You know about a few of your licenses. Type your city to see the full count.</p>
+          <p class="hcity" id="hCity" aria-live="polite"></p>
           <p class="hnote" data-i18n="hero.note">Three quick questions, under a minute. Nothing is filed or paid without your approval.</p>
           <p class="stalt"><a href="/app/sample" data-track="hero_sample"><span data-i18n="hero.see">See it working, no signup</span><i aria-hidden="true">→</i></a></p>
         </div>
@@ -267,10 +267,10 @@ body .edge + .vdemo{margin-top:56px!important}
 <!-- ======================= WATCH: the real app, start to finish (Nov 2) ======================= -->
 <section class="sec watch rv" data-rv="up" id="watch" aria-labelledby="watchH">
   <div class="ctr">
-    <div class="sh"><h2 class="h2" id="watchH" data-i18n="watch.h">Watch Odelia file a permit.</h2><p class="sub" data-i18n="watch.sub">The real app, on a sample tea shop: you ask, you approve, she files. 72 seconds.</p></div>
+    <div class="sh"><h2 class="h2" id="watchH" data-i18n="watch.h">Watch Odelia file a permit.</h2><p class="sub" data-i18n="watch.sub">The real app, on a sample tea shop: you ask, you approve, she files. 49 seconds.</p></div>
     <div class="wv" id="wv">
-      <video class="wv-v" id="wvV" poster="media/odelia-demo-poster.png" preload="none" playsinline controlslist="nodownload noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback draggable="false" aria-label="Odelia demo: a San Jose sign permit, asked for, approved and filed" data-i18n-aria="watch.aria"><source src="media/odelia-demo.mp4" type="video/mp4"><source src="media/odelia-demo.webm" type="video/webm"></video>
-      <button type="button" class="wv-play" id="wvP" aria-label="Play the demo" data-i18n-aria="watch.play"><span class="wv-pill"><svg width="15" height="16" viewBox="0 0 22 24" aria-hidden="true"><path d="M3 2.6v18.8a1.4 1.4 0 0 0 2.1 1.2l15.6-9.4a1.4 1.4 0 0 0 0-2.4L5.1 1.4A1.4 1.4 0 0 0 3 2.6Z" fill="currentColor"/></svg><span data-i18n="watch.len">Watch, 1:12</span></span></button>
+      <video class="wv-v" id="wvV" poster="media/odelia-launch-poster.png" preload="none" playsinline controlslist="nodownload noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback draggable="false" aria-label="Odelia demo: a San Jose sign permit, asked for, approved and filed" data-i18n-aria="watch.aria"><source src="media/odelia-launch.mp4" type="video/mp4"><source src="media/odelia-launch.webm" type="video/webm"></video>
+      <button type="button" class="wv-play" id="wvP" aria-label="Play the demo" data-i18n-aria="watch.play"><span class="wv-pill"><svg width="15" height="16" viewBox="0 0 22 24" aria-hidden="true"><path d="M3 2.6v18.8a1.4 1.4 0 0 0 2.1 1.2l15.6-9.4a1.4 1.4 0 0 0 0-2.4L5.1 1.4A1.4 1.4 0 0 0 3 2.6Z" fill="currentColor"/></svg><span data-i18n="watch.len">Watch, 0:49</span></span></button>
     </div>
   </div>
 </section>
@@ -792,8 +792,8 @@ body .edge + .vdemo{margin-top:56px!important}
   // the Chinese page plays the Chinese cut: the app in Chinese, Chinese captions and cards (follows the EN / 中文 switch)
   let cur = "";
   const pick = () => { const zh = (document.documentElement.lang || "").startsWith("zh"), k = zh ? "-zh" : ""; if (k === cur || !v.paused) return; cur = k;
-    v.poster = "media/odelia-demo" + k + "-poster.png";
-    v.innerHTML = '<source src="media/odelia-demo' + k + '.mp4" type="video/mp4"><source src="media/odelia-demo' + k + '.webm" type="video/webm">';
+    v.poster = "media/odelia-launch" + k + "-poster.png";
+    v.innerHTML = '<source src="media/odelia-launch' + k + '.mp4" type="video/mp4"><source src="media/odelia-launch' + k + '.webm" type="video/webm">';
     v.load(); w.classList.remove("on"); v.controls = false; };
   pick(); new MutationObserver(pick).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   // one press plays it with sound and hands over the video's own controls; at the end the play button comes back
@@ -803,4 +803,4 @@ body .edge + .vdemo{margin-top:56px!important}
   new IntersectionObserver(es => { if (!es[0].isIntersecting && !v.paused) v.pause(); }, { threshold: .15 }).observe(w);
 })();
 </script>
-<script defer src="/landing.js?v=7ab2a1c55a"></script>
+<script defer src="/landing.js?v=97e9d0ace2"></script>

@@ -3819,6 +3819,7 @@ html[lang="zh-CN"] .prmore summary h2,html[lang="zh-CN"] .prmore summary h3,html
 .hero .hcity{order:3;flex-basis:100%;margin:2px 0 0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.74);text-wrap:pretty;transition:color .25s var(--ease)}
 .hero .hcity b{font-weight:600;color:#fff}
 .hero .hcity.on{color:rgba(255,255,255,.92)}
+.hero .hcity:empty{display:none}
 @media (max-width:767px){.hero .hcity{margin:10px auto 0;max-width:32ch;font-size:13.5px;text-align:center}}
 .pb98{display:grid;gap:12px;margin:24px 0 16px}
 @media (min-width:900px){.pb98{grid-template-columns:1fr 1fr}}
