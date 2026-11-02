@@ -270,7 +270,7 @@ body .edge + .vdemo{margin-top:56px!important}
   <div class="ctr">
     <div class="sh"><h2 class="h2" id="watchH" data-i18n="watch.h">看 Odelia 办一份许可。</h2><p class="sub" data-i18n="watch.sub">真实的应用，演示用的示例茶饮店：您提问、您批准，她来提交。70 秒。</p></div>
     <div class="wv" id="wv">
-      <video class="wv-v" id="wvV" poster="media/odelia-demo-poster.jpg" preload="none" playsinline controlslist="nodownload noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback draggable="false" aria-label="Odelia 演示：一份圣何塞招牌许可，从提问、批准到提交" data-i18n-aria="watch.aria"><source src="media/odelia-demo.mp4" type="video/mp4"><source src="media/odelia-demo.webm" type="video/webm"></video>
+      <video class="wv-v" id="wvV" poster="media/odelia-demo-poster.png" preload="none" playsinline controlslist="nodownload noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback draggable="false" aria-label="Odelia 演示：一份圣何塞招牌许可，从提问、批准到提交" data-i18n-aria="watch.aria"><source src="media/odelia-demo.mp4" type="video/mp4"><source src="media/odelia-demo.webm" type="video/webm"></video>
       <button type="button" class="wv-play" id="wvP" aria-label="播放演示" data-i18n-aria="watch.play"><span class="wv-pill"><svg width="15" height="16" viewBox="0 0 22 24" aria-hidden="true"><path d="M3 2.6v18.8a1.4 1.4 0 0 0 2.1 1.2l15.6-9.4a1.4 1.4 0 0 0 0-2.4L5.1 1.4A1.4 1.4 0 0 0 3 2.6Z" fill="currentColor"/></svg><span data-i18n="watch.len">观看，1:10</span></span></button>
     </div>
   </div>
@@ -793,7 +793,7 @@ body .edge + .vdemo{margin-top:56px!important}
   // the Chinese page plays the Chinese cut: the app in Chinese, Chinese captions and cards (follows the EN / 中文 switch)
   let cur = "";
   const pick = () => { const zh = (document.documentElement.lang || "").startsWith("zh"), k = zh ? "-zh" : ""; if (k === cur || !v.paused) return; cur = k;
-    v.poster = "media/odelia-demo" + k + "-poster.jpg";
+    v.poster = "media/odelia-demo" + k + "-poster.png";
     v.innerHTML = '<source src="media/odelia-demo' + k + '.mp4" type="video/mp4"><source src="media/odelia-demo' + k + '.webm" type="video/webm">';
     v.load(); w.classList.remove("on"); v.controls = false; };
   pick(); new MutationObserver(pick).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
