@@ -87,11 +87,11 @@ async function site(m: Mock, finalIdx: number, steps: { do: string }[], receipt?
 class Mem implements Store {
   f: Filing;
   constructor(f: Filing) { this.f = f; }
-  tasks: string[] = []; docs: string[] = []; logins = 0;
+  tasks: string[] = []; docs: string[] = []; logins = 0; timeline: { ms: number; en: string; kind: string }[] = [];
   async claim() { return null; }
   async reload() { return this.f; }
   async step(_f: Filing, e: LogEntry | null, patch: Record<string, unknown> = {}) {
-    if (e) this.f.agent_log = [...this.f.agent_log, e];
+    if (e) { this.f.agent_log = [...this.f.agent_log, e]; this.timeline.push({ ms: Date.now(), en: e.en, kind: e.kind }); }
     for (const [k, v] of Object.entries(patch)) if (!(k === "submit_clicked_at" && this.f.submit_clicked_at)) (this.f as unknown as Record<string, unknown>)[k] = v;
     return { ...this.f };
   }
@@ -115,6 +115,8 @@ class Scripted implements Model {
   calls = 0;
   async next(i: StepInput): Promise<ToolCall> {
     this.calls++;
+    // DRYRUN_PACE_MS: slow each step down so a person can watch the recording (a real model takes seconds a step)
+    const pace = Number(process.env.DRYRUN_PACE_MS ?? 0); if (pace) await new Promise((r) => setTimeout(r, pace));
     const s = i.state, fields = i.filing.payload.fields ?? [];
     const conf = /Confirmation Number: (\S+)/.exec(s.text);
     if (conf) return { name: "done", input: { confirmation_number: conf[1], summary: "Dry run receipt" } };
@@ -157,7 +159,8 @@ for (const m of mocks) {
     const last = store.f.agent_log.filter((e) => e.en).slice(-14).map((e) => `${e.kind ?? ""}${e.ref ? `/${e.ref}` : ""}: ${e.en.slice(0, 140)}`);
     rows.push({ host: m.host, form: m.form, business: name, result: (r as { kind?: string } | null)?.kind ?? "none", confirmation: store.f.confirmation_number,
       status: store.f.status, sent: w.sent(), modelSteps: model.calls, pages: m.pages.length, seconds: Math.round((Date.now() - t0) / 1000),
-      handedToPerson: store.f.agent_log.filter((e) => e.kind === "handoff" || e.ref === "payment").map((e) => e.ref ?? e.kind), tasks: store.tasks, docs: store.docs, last });
+      handedToPerson: store.f.agent_log.filter((e) => e.kind === "handoff" || e.ref === "payment").map((e) => e.ref ?? e.kind), tasks: store.tasks, docs: store.docs, last,
+      t0, timeline: store.timeline });
     assert.ok(w.sent() <= 1, "never sent twice");
   });
 }

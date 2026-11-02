@@ -211,7 +211,10 @@ export async function openKernel(d: Deps): Promise<Session> {
 export async function openLocal(d: Deps): Promise<Session> {
   const browser = await d.launch();
   // no downloads, no service workers: the run's own throwaway context (sandbox.ts locks the rest down)
-  const page = await (await browser.newContext({ acceptDownloads: false, serviceWorkers: "block", viewport: { width: 1280, height: 900 } })).newPage();
+  // FILER_RECORD_DIR: a dry run on this machine records the browser as a video (the founder watching one run start to
+  // end). Never set in production, where Steel and Browserbase keep their own recordings.
+  const rec = process.env.FILER_RECORD_DIR, size = { width: 1280, height: 900 };
+  const page = await (await browser.newContext({ acceptDownloads: false, serviceWorkers: "block", viewport: size, ...(rec ? { recordVideo: { dir: rec, size } } : {}) })).newPage();
   // no hosted view: the worker serves its own live browser for a hand-back (live.ts, run.ts handBack)
   return { browser, page, liveUrl: null, recorded: false, provider: "local", close: () => browser.close() };
 }

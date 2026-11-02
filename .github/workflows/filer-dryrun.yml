@@ -1,0 +1,71 @@
+# Odelia's filing dry runs, every night: the real filing worker (worker/filer/src/run.ts) and the real playbooks,
+# against the copies of 15 agency sites in worker/filer/test/mocks, each filed start to end with a made-up business,
+# each recorded as a video. Then the live check: the real agencies' public pages each playbook was written against
+# still say what it expects (worker/filer/src/probe.ts). Nothing here signs in to, fills or submits a real agency site.
+# A failure opens (or updates) the "Filing dry run failing" issue; a pass closes it.
+# Every action is pinned to a full commit SHA (the tag it was taken from is in the comment).
+name: Filing dry run
+on:
+  schedule:
+    - cron: "17 9 * * *"   # 09:17 UTC daily (US night), before the production probe
+  workflow_dispatch:
+concurrency:
+  group: filer-dryrun
+  cancel-in-progress: false
+permissions: { contents: read }
+jobs:
+  dryrun:
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: 22, cache: npm }
+      - run: npm ci && npm ci --prefix worker/filer
+      - name: Chromium
+        working-directory: worker/filer
+        run: |
+          node node_modules/playwright-core/cli.js install --with-deps chromium
+          echo "CHROMIUM_PATH=$(node -e "console.log(require('playwright-core').chromium.executablePath())")" >> "$GITHUB_ENV"
+      - name: File all 15 forms on the agency copies, recorded
+        id: dry
+        working-directory: worker/filer
+        env: { FILER_RECORD_DIR: "${{ github.workspace }}/dryrun/videos", DRYRUN_OUT: "${{ github.workspace }}/dryrun/runs.json", DRYRUN_PACE_MS: "800" }
+        run: mkdir -p ../../dryrun/videos && npm run dryrun
+        continue-on-error: true
+      - name: The live agency pages still match the playbooks
+        id: live
+        working-directory: worker/filer
+        run: npm run probe | tee ../../dryrun/live-pages.txt
+        continue-on-error: true
+      - name: Summary
+        if: always()
+        run: |
+          node -e '
+            const r = JSON.parse(require("fs").readFileSync("dryrun/runs.json", "utf8"));
+            console.log("| Agency | Form | Result | Confirmation | Seconds |\n|---|---|---|---|---|");
+            for (const x of r) console.log(`| ${x.host} | ${x.form} | ${x.result} | ${x.confirmation ?? ""} | ${x.seconds} |`);
+          ' >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          cat dryrun/live-pages.txt >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with: { name: filing-dry-run, path: dryrun, retention-days: 14, if-no-files-found: ignore }
+      - name: Fail when either check failed
+        if: steps.dry.outcome == 'failure' || steps.live.outcome == 'failure'
+        run: exit 1
+
+  issue:
+    needs: dryrun
+    if: always() && needs.dryrun.result != 'cancelled'
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    permissions: { issues: write }
+    steps:
+      - env: { GH_TOKEN: "${{ github.token }}", RESULT: "${{ needs.dryrun.result }}", RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" }
+        run: |
+          n=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search "Filing dry run in:title" --json number -q '.[0].number')
+          if [ "$RESULT" = "success" ]; then
+            [ -n "$n" ] && gh issue close "$n" -R "$GITHUB_REPOSITORY" -c "Passing again: $RUN_URL"
+            exit 0
+          fi
+          body="The nightly filing dry run failed: $RUN_URL (the videos are in the run's filing-dry-run artifact)"
+          if [ -n "$n" ]; then gh issue comment "$n" -R "$GITHUB_REPOSITORY" -b "$body"; else gh issue create -R "$GITHUB_REPOSITORY" -t "Filing dry run failing" -b "$body"; fi
