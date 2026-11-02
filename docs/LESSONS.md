@@ -470,3 +470,9 @@ What broke: in the sample, "What do I need to open a bubble tea shop in San Jose
 asked "Which city, and will it serve food...?".
 Rule: before any intake question, read the line (readLine): with both, answer; with one, ask only for the other. Never
 ask for what the person just said. Tests: test:flow "named:".
+
+## 2026-11-02: a line under the phone top bar
+
+What happened: the home page's blue wash started below a solid white top bar, so the color jump read as a line.
+Rule: a bar that sits above a tinted page carries the top of the same tint, or is transparent. Check the seam
+zoomed in at 375, at rest and scrolled.

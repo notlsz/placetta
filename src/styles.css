@@ -2610,3 +2610,11 @@ div.wl { cursor: default; }
 .xp-tx a { color: var(--blue-ink); }
 .xp-est { margin: 8px 0 0; font-size: 13px; color: var(--ink); }
 .opening-date { display: block; margin-bottom: 2px; font-size: 14px; color: var(--ink); }
+
+/* Nov 2: no seam under the phone top bar. The home wash used to start below a white bar, which drew a visible
+   line. The bar now carries the top of the wash and the page carries the rest, held still behind scrolling text,
+   so the two always meet at the same color. */
+.phone .mbar:has(~ .content.wash) { background: radial-gradient(1100px 560px at 50% -180px, #E1E9F4 0%, rgba(225, 238, 252, .55) 42%, rgba(var(--w), 0) 74%) no-repeat, var(--bg); }
+.phone .content.wash { background: radial-gradient(1100px 560px at 50% -228px, #E1E9F4 0%, rgba(225, 238, 252, .55) 42%, rgba(var(--w), 0) 74%) no-repeat, var(--bg); background-attachment: scroll; }
+:root[data-theme="dark"] .phone .mbar:has(~ .content.wash) { background: radial-gradient(1100px 560px at 50% -180px, rgba(70, 104, 150, .26) 0%, rgba(70, 104, 150, .08) 45%, rgba(var(--w), 0) 74%) no-repeat, var(--bg); }
+:root[data-theme="dark"] .phone .content.wash { background: radial-gradient(1100px 560px at 50% -228px, rgba(70, 104, 150, .26) 0%, rgba(70, 104, 150, .08) 45%, rgba(var(--w), 0) 74%) no-repeat, var(--bg); background-attachment: scroll; }
