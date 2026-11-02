@@ -388,7 +388,7 @@ Read at 1688 Hostetter Rd, San Jose, CA 95131. Jurisdictions: US, CA, SJ, SCC.
 | Fire protection system permit | `sj-fire-systems` Fire Protection Systems permit | no | Placetta team: Only a licensed contractor can apply: "Your Contractor's License type will determine which permits you can apply for." | Online only (www.sjpermits.org): Placetta prepares the answers summary for the agency's site. |
 | Building final inspection | `sj-building-final` Building final inspection · portal sjpermits.org | no | portal (sjpermits.org) | Online only (sjpermits.org): Placetta prepares the answers summary for the agency's site. |
 | Health permit to operate a food facility | `scc-health-permit` Permit Application & Certification Statement | no | email | Santa Clara County's application PDFs didn't download (blocked); filed by email to the county. |
-| Sign permit | `sj-sign` Signs - Sign Permit Application · portal sjpermits.org | no | portal (sjpermits.org) (an agency fee keeps email, fax and mail with the team) | Filed in person; no PDF mapped. |
+| Sign permit | `sj-sign` Signs - Sign Permit Application · portal sjpermits.org | no | portal (sjpermits.org) (an agency fee keeps email, fax and mail with the team) | Online only (sjpermits.org): Placetta prepares the answers summary for the agency's site. |
 
 ## Paradise (unincorporated Clark County: the Las Vegas Strip)
 
