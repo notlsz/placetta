@@ -789,6 +789,13 @@ body .edge + .vdemo{margin-top:56px!important}
 </script>
 <script>
 (() => { const w = document.getElementById("wv"), v = document.getElementById("wvV"), b = document.getElementById("wvP"); if (!w || !v || !b) return;
+  // the Chinese page plays the Chinese cut: the app in Chinese, Chinese captions and cards (follows the EN / 中文 switch)
+  let cur = "";
+  const pick = () => { const zh = (document.documentElement.lang || "").startsWith("zh"), k = zh ? "-zh" : ""; if (k === cur || !v.paused) return; cur = k;
+    v.poster = "media/odelia-demo" + k + "-poster.jpg";
+    v.innerHTML = '<source src="media/odelia-demo' + k + '.mp4" type="video/mp4"><source src="media/odelia-demo' + k + '.webm" type="video/webm">';
+    v.load(); w.classList.remove("on"); v.controls = false; };
+  pick(); new MutationObserver(pick).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   // one press plays it with sound and hands over the video's own controls; at the end the play button comes back
   b.addEventListener("click", () => { w.classList.add("on"); v.controls = true; v.play().catch(() => { w.classList.remove("on"); v.controls = false; }); try { window.va && window.va("event", { name: "demo_play" }); } catch (e) {} });
   v.addEventListener("ended", () => { w.classList.remove("on"); v.controls = false; v.currentTime = 0; v.load(); });
@@ -796,4 +803,4 @@ body .edge + .vdemo{margin-top:56px!important}
   new IntersectionObserver(es => { if (!es[0].isIntersecting && !v.paused) v.pause(); }, { threshold: .15 }).observe(w);
 })();
 </script>
-<script defer src="/landing.js?v=0abd0ed338"></script>
+<script defer src="/landing.js?v=7ab2a1c55a"></script>
