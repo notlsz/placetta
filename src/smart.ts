@@ -449,14 +449,22 @@ export function hingeStepSay(h: Hinge): Bi {
     : t.kind === "statistic" ? B(`, per ${host} (a statistic, not the agency's)`, `，依据 ${host}（统计数据，非机构公布）`)
     : host ? B(`, per ${host}`, `，依据 ${host}`) : B("", "");
   const fast = h.expedite ? B(` with ${/^[A-Z][a-z]/.test(h.expedite.label.en) ? h.expedite.label.en.charAt(0).toLowerCase() + h.expedite.label.en.slice(1) : h.expedite.label.en}`, `（${h.expedite.label.zh}）`) : B("", "");
-  return B(`${h.name.en}${fast.en}, ${t.say.en}${per.en}`, `${h.name.zh}${fast.zh}，${t.say.zh}${per.zh}`);
+  const n = hingeName(h);
+  return B(`${n.lead}${n.name}${fast.en} (${t.say.en}${per.en})`, `${h.name.zh}${fast.zh}（${t.say.zh}${per.zh}）`);
+}
+
+/** A step's name inside a sentence: "the fire inspection", lower case unless it starts with an acronym ("the EIN").
+ *  Nov 2: "hinges on Fire inspection, …; and Food facility…" read as a log, not a sentence. */
+export function hingeName(h: Pick<Hinge, "name">): { lead: string; name: string } {
+  const en = h.name.en, low = /^[A-Z][a-z]/.test(en) ? en.charAt(0).toLowerCase() + en.slice(1) : en;
+  return { lead: "the ", name: low };
 }
 
 /** "The date hinges on: …" with the one or two steps that decide it, or null when nothing is left to wait on. */
 export function hingeSay(p: Pick<OpeningPath, "hinge">): Bi | null {
   if (!p.hinge.length) return null;
   const parts = p.hinge.map(hingeStepSay);
-  return B(`The date hinges on ${parts.map(x => x.en).join("; and ")}.`, `开业日期取决于：${parts.map(x => x.zh).join("；以及")}。`);
+  return B(`The date depends on ${parts.map(x => x.en).join(" and ")}.`, `开业日期取决于：${parts.map(x => x.zh).join("和")}。`);
 }
 
 /** Deadlines with each opening store's opening as its one milestone. A stored "Target opening" milestone (the sample's,

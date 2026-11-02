@@ -1,5 +1,5 @@
 import type { Lang } from "./i18n";
-import { estimateSay, hingeStepSay, type Hinge } from "./smart";
+import { estimateSay, hingeName, hingeStepSay, type Hinge } from "./smart";
 import { hostOf } from "./forms/expedite";
 
 /* The opening estimate as every screen shows it: the date, the range around it, and the one or two steps it hinges on,
@@ -22,16 +22,18 @@ export function HingeLine({ hinge, lang, onOpen, className, lead }: { hinge: Hin
   const zh = lang === "zh";
   return (
     <p className={"oe-hinge" + (className ? " " + className : "")} data-hinge="">
-      {lead}{zh ? "开业日期取决于：" : "The date hinges on "}
+      {lead}{zh ? "开业日期取决于：" : "The date depends on "}
       {hinge.map((h, i) => {
-        const said = hingeStepSay(h)[lang], name = h.name[lang];
+        // the same words as hingeSay (src/smart.ts): "the fire inspection (no published time, so we plan on 30 days)"
+        const said = hingeStepSay(h)[lang], n = zh ? { lead: "", name: h.name.zh } : hingeName(h), name = n.name, skip = n.lead.length + name.length;
         const host = hostOf(h.timing.source);
         const at = host ? said.lastIndexOf(host) : -1;
-        const mid = at >= 0 ? said.slice(name.length, at) : said.slice(name.length);
+        const mid = at >= 0 ? said.slice(skip, at) : said.slice(skip);
         const end = at >= 0 ? said.slice(at + host.length) : "";
         return (
           <span key={h.app} className="oe-step">
-            {i > 0 && (zh ? "；以及" : "; and ")}
+            {i > 0 && (zh ? "和" : " and ")}
+            {n.lead}
             {onOpen ? <button type="button" className="lnk" onClick={() => onOpen(h.app)}>{name}</button> : <b>{name}</b>}
             {mid}
             {at >= 0 && <a href={h.timing.source} target="_blank" rel="noopener noreferrer">{host}</a>}

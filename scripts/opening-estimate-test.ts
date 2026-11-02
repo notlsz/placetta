@@ -69,8 +69,8 @@ export function openingEstimateTests(ok: Ok, eq: Eq) {
     eq(p.hinge.map(h => h.app), ["health", "plan"], "the date hinges on the two longest steps on the chain");
     eq(p.hinge[0].timing.kind, "default", "a step with no published time is a default, not a number of ours");
     const h = hingeSay(p)!;
-    eq(h.en, "The date hinges on Health permit to operate a food facility, issued after the final inspection; no published time, so we plan on 30 days; and Food facility plan check, up to 20 business days after payment, per deh.santaclaracounty.gov.", "the hinge names each step, its time and its source");
-    eq(h.zh, "开业日期取决于：食品设施卫生营业许可证，竣工检查后签发；未公布办理时间，按默认 30 天估算；以及食品设施图纸审查，付款后最长 20 个工作日，依据 deh.santaclaracounty.gov。", "and in Chinese");
+    eq(h.en, "The date depends on the health permit to operate a food facility (issued after the final inspection; no published time, so we plan on 30 days) and the food facility plan check (up to 20 business days after payment, per deh.santaclaracounty.gov).", "the hinge names each step, its time and its source");
+    eq(h.zh, "开业日期取决于：食品设施卫生营业许可证（竣工检查后签发；未公布办理时间，按默认 30 天估算）和食品设施图纸审查（付款后最长 20 个工作日，依据 deh.santaclaracounty.gov）。", "and in Chinese");
   }
 
   /* the hinge with only published times: plan check then building permit */
@@ -78,7 +78,7 @@ export function openingEstimateTests(ok: Ok, eq: Eq) {
     const w = ws([app("plan", "scc-plan-check"), app("building", "sj-building-ti", ["plan"])]);
     const p = openingPath(w.stores![0], w, TODAY);
     eq(p.hinge.map(h => h.app), ["plan", "building"], "the hinge is the plan check, then the building permit");
-    eq(hingeSay(p)!.en, "The date hinges on Food facility plan check, up to 20 business days after payment, per deh.santaclaracounty.gov; and Building permit for a tenant improvement, 10 to 20 working days: 10 for the first review, 5 for each recheck, per sanjoseca.gov.", "each with its own words and host");
+    eq(hingeSay(p)!.en, "The date depends on the food facility plan check (up to 20 business days after payment, per deh.santaclaracounty.gov) and the building permit for a tenant improvement (10 to 20 working days: 10 for the first review, 5 for each recheck, per sanjoseca.gov).", "each with its own words and host");
     ok(p.hinge.every(h => /^https:\/\//.test(h.timing.source ?? "")), "each hinge step links to its source", p.hinge.map(h => h.timing.source));
   }
 

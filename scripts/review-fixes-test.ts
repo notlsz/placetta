@@ -54,7 +54,7 @@ export function reviewFixTests(ok: Ok, eq: Eq) {
     eq(said.slice(0, lead.length), lead, "the opening says the date and how it sits against the target, plainly");
     // then the range and the step the date hinges on, with where its time comes from (the same estimate as Home)
     ok(/^ Likely [A-Z][a-z]{2} \d{1,2}(, \d{4})? to [A-Z][a-z]{2} \d{1,2}(, \d{4})?\.$/.test(said.slice(lead.length)), "then the likely range", said);
-    ok(/^The date hinges on .+\.$/.test(r.p.reply.text[2].en), "then the hinge, as its own short paragraph", r.p.reply.text[2].en);
+    ok(/^The date depends on the .+\)\.$/.test(r.p.reply.text[2].en), "then the hinge, as its own short paragraph", r.p.reply.text[2].en);
     ok(/^约 .+ 开业，比您定的 .+ 早 \d+ 天。可能在 .+ 至 .+ 之间。$/.test(r.p.reply.text[1].zh) && /^开业日期取决于：.+。$/.test(r.p.reply.text[2].zh), "and in Chinese", r.p.reply.text[1].zh);
     ok(!/where the permits put it|planned:/.test(r.en), "no 'where the permits put it today (planned: …)'");
   }

@@ -235,10 +235,17 @@ export function TaskBot({ id, size = 26, label, busy = true }: { id: string; siz
   return touch ? <span className={"taskbot" + (busy ? " hop" : "")}>{bot}</span> : bot;
 }
 
-/** A store's own bot: Odelia for that one store, in the same family, with a shape of its own picked from the store's
- *  id (so each store keeps its bot everywhere: Work, Home, Stores and the replay). It hops while it works. */
+/** A store's own bot: Odelia for that one store, the same cloud everywhere (Work, Home, Stores and the replay). It hops
+ *  while it works. */
 export function StoreBot({ id, size = 26, label, busy }: { id: string; size?: number; label: string; busy?: boolean }) {
-  return <TaskBot id={"store:" + id} size={size} label={label} busy={busy} />;
+  // Nov 2: a store's bot is Odelia's own cloud, not a drop, a ball or a pill: three characters in one card read as
+  // three products (UI review). The store's name beside it says which store; the seed keeps each one's idle sway its own.
+  let h = 0; for (const c of "store:" + id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const bot = (
+    <Plush type="cloud" face="mouth" color={CLOUD} size={size} state={busy && !touch ? "working" : "default"} seed={(h % 100) / 100}
+      interactive={false} turn={0.4} jumpEvery={0} paused={touch} aria-label={label} />
+  );
+  return touch ? <span className={"taskbot" + (busy ? " hop" : "")}>{bot}</span> : bot;
 }
 /** The bot behind a replay's moment: the main Odelia, or a store's bot. */
 export function BotOf({ bot, size, label }: { bot?: string; size: number; label: string }) {
