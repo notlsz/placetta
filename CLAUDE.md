@@ -13,6 +13,9 @@ When something breaks in production, add an entry there.
 
 ## Also read
 
+- [docs/growth/README.md](docs/growth/README.md): the growth playbook and one file per market. Read it before any work on
+  a country, a city, market pricing, market landing copy or partners, and log what you learn in that market's file.
+
 - [docs/SECURITY.md](docs/SECURITY.md): what must never ship to the browser.
 
 ## How every task runs (the founder's standing workflow, 2026-10-30)
