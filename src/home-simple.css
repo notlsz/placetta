@@ -771,3 +771,19 @@
 .feed .answer > .appr.compact .appr-ico, .panel.full .answer > .appr.compact .appr-ico { width: 40px; height: 40px; border-radius: 10px; background: var(--card); color: var(--blue-ink); box-shadow: 0 1px 2px rgba(var(--e), .06); display: grid; place-items: center; }
 /* the stamp's agency stays inside the stamp: a long name (no acronym to show) wraps to two lines at most, centered */
 .win-stamp .ws-ag { max-width: 64px; white-space: normal; text-align: center; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* the agency receipt viewer (src/FilingLive.tsx ReceiptView): the confirmation page, then the facts in two columns */
+.rc { display: flex; flex-direction: column; gap: 14px; padding: 18px; }
+.rc .rp-h { display: flex; align-items: center; gap: 10px; }
+.rc .rp-h > span { color: var(--ink2); font-size: 13.5px; }
+.rc .rp-h > .icbtn { margin-left: auto; }
+.rc-stage { max-height: 40vh; }
+.rc-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; margin: 0; }
+.rc-facts > div { min-width: 0; }
+.rc-facts dt { font-size: 12.5px; color: var(--ink3); }
+.rc-facts dd { margin: 2px 0 0; font-size: 14.5px; color: var(--ink); overflow-wrap: anywhere; }
+.rc-act { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.rc-act small { color: var(--ink2); font-size: 13px; }
+@media (max-width: 640px) { .rc-facts { grid-template-columns: minmax(0, 1fr); } .rc-act { flex-direction: column; align-items: stretch; } }
+/* the page's note ("Sample") sits in the page's own address bar, at its right, never over a field (Nov 2: it covered
+   "Submitted" on the receipt) */
+.shot .sh-bar .sh-tag { margin-left: auto; font-size: 11px; color: var(--ink3); white-space: nowrap; }

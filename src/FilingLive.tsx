@@ -182,6 +182,7 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
   const run = useRun(appId);
   const zh = lang === "zh";
   const [open, setOpen] = useState<number | null>(null);
+  const [receipt, setReceipt] = useState(false);
   const [all, setAll] = useState(false);
   const [stopping, setStopping] = useState(false);
   // the sample plays its filing once, as it would arrive live; an account's arrives from the server as it happens
@@ -298,13 +299,14 @@ export function FilingLive({ app: appId, embedded }: { app: string; embedded?: b
       <footer className="fl-f">
         <ReviewBadges appId={run.app.id} />
         {run.events.length > 1 && <button type="button" className="pill quiet sm" onClick={() => setOpen(0)}><I.play />{zh ? "回放" : "Replay"}</button>}
-        {run.receipt && !run.sample && cloud && <button type="button" className="pill quiet sm" onClick={() => void cloud.fileUrl(run.receipt!).then(u => u && window.open(u, "_blank", "noopener"))}>{zh ? "机构回执" : "Agency receipt"}</button>}
-        {run.receipt && run.sample && <button type="button" className="pill quiet sm" onClick={() => download(run.receipt!)}>{zh ? "机构回执" : "Agency receipt"}</button>}
+        {run.receipt && (run.sample || cloud) && <button type="button" className="pill quiet sm" onClick={() => setReceipt(true)}>{zh ? "机构回执" : "Agency receipt"}</button>}
         {run.pdf && cloud && <button type="button" className="pill quiet sm" onClick={() => void cloud.fileUrl(run.pdf!).then(u => u && window.open(u, "_blank", "noopener"))}>{zh ? "发送的表格" : "The form as sent"}</button>}
         <small>{[refused ? (zh ? `拒绝了 ${refused} 个未经批准的值` : `${refused} unapproved value${refused === 1 ? "" : "s"} refused`) : "", run.confirmation && state === "done" ? (zh ? `确认号 ${run.confirmation}` : `Confirmation ${run.confirmation}`) : "", tookTx].filter(Boolean).join(zh ? "，" : ", ")}</small>
       </footer>
 
       {open !== null && <Replay run={run} start={open} onClose={() => setOpen(null)} />}
+      {receipt && <ReceiptView run={run} onClose={() => setReceipt(false)}
+        onSave={() => run.sample ? download(run.receipt!) : void cloud?.fileUrl(run.receipt!).then(u => u && window.open(u, "_blank", "noopener"))} />}
     </section>
   );
 }
@@ -319,6 +321,37 @@ function WorkerWait() {
 
 /* ------------------------------ a page, as Placetta saw it ------------------------------ */
 
+/** The agency's receipt, seen before it's saved (Nov 2): the confirmation page Odelia captured, with the facts an owner
+ *  files away (number, agency, when, what it cost, what was checked), the way Genspark and Devin show the result itself
+ *  and not a download. */
+function ReceiptView({ run, onClose, onSave }: { run: Run; onClose: () => void; onSave: () => void }) {
+  const { b, lang } = useApp();
+  const zh = lang === "zh";
+  const last = run.frames[run.frames.length - 1];
+  const done = [...run.events].reverse().find(e => e.at);
+  const when = done?.at ? new Date(done.at).toLocaleString(zh ? "zh-CN" : "en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "";
+  const fee = run.app.fees.reduce((n, f) => n + (f.tbd ? 0 : f.amount), 0);
+  const rows: [string, string][] = [
+    ...(run.confirmation ? [[zh ? "确认号" : "Confirmation", run.confirmation] as [string, string]] : []),
+    [zh ? "机构" : "Agency", b(run.app.agency)],
+    ...(when ? [[zh ? "提交时间" : "Submitted", when] as [string, string]] : []),
+    [zh ? "机构费用" : "Agency fee", fee ? money(fee, run.app.currency) : (zh ? "无" : "None")],
+    [zh ? "核对" : "Checked", zh ? "每一行都与您批准的内容一致" : "Every line matches what you approved"],
+  ];
+  return (
+    <Modal label={zh ? "机构回执" : "Agency receipt"} onClose={onClose} wide>
+      <div className="rc">
+        <header className="rp-h"><b>{b(run.app.name)}</b><span>{zh ? "机构回执" : "Agency receipt"}{run.sample ? (zh ? "，示例" : ", sample") : ""}</span>
+          <button type="button" className="icbtn" onClick={onClose} aria-label={zh ? "关闭" : "Close"}><I.x /></button></header>
+        {last && <div className="rp-stage rc-stage"><Shot frame={last} host={run.host} /></div>}
+        <dl className="rc-facts">{rows.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+        <div className="rc-act"><small>{zh ? "回执 PDF 已存入文件库。" : "The receipt PDF is saved in Documents."}</small>
+          <button type="button" className="pill ink sm" onClick={onSave}>{zh ? "下载 PDF" : "Download PDF"}</button></div>
+      </div>
+    </Modal>
+  );
+}
+
 function Shot({ frame, host, hi, small }: { frame: Frame; host: string; hi?: number; small?: boolean }) {
   const { b, cloud } = useApp();
   const [url, setUrl] = useState<string | null>(null);
@@ -330,7 +363,7 @@ function Shot({ frame, host, hi, small }: { frame: Frame; host: string; hi?: num
   if (frame.img) return <span className={"shot img" + (small ? " sm" : "")}>{url ? <img src={url} alt={b(frame.title)} /> : <i />}</span>;
   return (
     <span className={"shot draw k-" + frame.kind + (small ? " sm" : "")} aria-hidden={small}>
-      <span className="sh-bar"><i /><i /><i /><em>{host}</em></span>
+      <span className="sh-bar"><i /><i /><i /><em>{host}</em>{frame.note && !small && <small className="sh-tag">{b(frame.note)}</small>}</span>
       <span className="sh-body">
         {frame.kind === "done" && <span className="sh-ok"><I.check /></span>}
         <b>{b(frame.title)}</b>
@@ -339,7 +372,6 @@ function Shot({ frame, host, hi, small }: { frame: Frame; host: string; hi?: num
         ))}
         {frame.kind === "review" && !small && <span className="sh-btn">Submit</span>}
       </span>
-      {frame.note && !small && <em className="sh-note">{b(frame.note)}</em>}
     </span>
   );
 }

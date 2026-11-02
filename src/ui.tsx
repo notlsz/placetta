@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ReactNode, type SelectHTMLAttributes } from "react";
 import type React from "react";
+import { createPortal } from "react-dom";
 import type { Application, Doc, Level, Status } from "./model";
 import { useApp } from "./ctx";
 import { bytes, fmtAgo, fmtDay, money } from "./time";
@@ -207,11 +208,14 @@ export function Modal({ label, onClose, children, wide }: { label: string; onClo
     window.addEventListener("keydown", k);
     return () => { window.removeEventListener("keydown", k); prev?.focus?.(); };
   }, [onClose]);
-  return (
+  const el = (
     <div className="scrim" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div ref={box} className={"modal" + (wide ? " wide" : "")} role="dialog" aria-modal="true" aria-label={label} tabIndex={-1}>{children}</div>
     </div>
   );
+  // on the page itself, not inside whatever card opened it: a replay opened from a filing in the chat was clipped by the
+  // chat's scrolling column (Nov 2). Server rendering (tests) has no document, so it stays in place there.
+  return typeof document === "undefined" ? el : createPortal(el, document.body);
 }
 
 /** Right-hand sheet for an application. */

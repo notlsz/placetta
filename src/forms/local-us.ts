@@ -79,7 +79,7 @@ export const LOCAL_US: OfficialForm[] = [
   },
   {
     id: "sj-sign", form: "Signs - Sign Permit Application", title: B("Sign permit", "招牌许可证"),
-    agency: B("City of San José Planning Division", "圣何塞市规划处"), level: "city", where: "SJ", segments: [R, T], needs: { signage: true }, method: "in_person", order: 80,
+    agency: B("City of San José Planning Division", "圣何塞市规划处"), level: "city", where: "SJ", segments: [R, T], needs: { signage: true }, method: "portal", order: 80,
     how: B("Upload the signed application to SJPermits.org, then pay the invoice.", "将签署的申请表上传至 SJPermits.org，然后缴纳账单。"),
     url: "https://www.sanjoseca.gov/home/showpublisheddocument/15381/638900946952300000",
     info: "https://www.sanjoseca.gov/your-government/departments-offices/planning-building-code-enforcement/planning-division/start-a-new-project-or-use/applications-and-appointments",
