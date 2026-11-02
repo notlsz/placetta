@@ -306,6 +306,8 @@ export function WorkPage() {
       <nav className="wk-trust" aria-label={zh ? "她做过什么，她可以做什么" : "What she did, what she may do"}>
         <button type="button" className="lnk" onClick={() => openSettings(go, "activity")}>{zh ? "她做过的每件事" : "Everything she's done"}<I.chevR /></button>
         <button type="button" className="lnk" onClick={() => openSettings(go, "approvals")}>{zh ? "她不用问就能做的事" : "What she may do without asking"}<I.chevR /></button>
+        {/* Nov 2: Ideas left the tabs; it opens from here */}
+        <button type="button" className="lnk" onClick={() => go("odelia", "ideas")}>{zh ? "她给门店的建议" : "Her ideas for your stores"}<I.chevR /></button>
       </nav>
 
       {busy && live && <p className="work-now"><I.spark /><span>{zh ? "正在做：" : "Working now: "}{b(live.label)}…</span></p>}

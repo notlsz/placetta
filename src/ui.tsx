@@ -109,9 +109,33 @@ export function Prose({ text, cites }: { text: string; cites?: Cite[] }) {
     if (!m) return s;
     return m.map((x, i) => { const body = x.text.trimEnd(); return <Fragment key={i}>{body}{x.marks.map(n => <CiteMark key={n} n={n} c={cites![n - 1]} />)}{x.text.slice(body.length)}</Fragment>; });
   };
+  // a run of 3+ "Thing: where it stands" lines is a status list, not a paragraph: the name on the left, the state on
+  // the right in its color (done, needs you, in progress, waiting), the way Linear and Devin show a checklist's state.
+  // A line that ends a sentence (a summary like "2 of 10 done, 7 to go.") stays prose above it.
+  const ST = /^([^:：]{2,70})[:：]\s*(.+?)$/;
+  const isStat = (l: string) => { const m = ST.exec(l); return !!m && !/[.。!?]$/.test(m[2].trim()) && !/^https?$/i.test(m[1]); };
+  const tone = (v: string) => /\b(approved|done|issued|in hand|complete)\b|已批准|已完成|已办好/i.test(v) || /^(\d+) of \1\b/.test(v) ? "ok"
+    : /\b(needs? your|waiting for your|your approval|from you|you need|needs you)\b|等您|需要您/i.test(v) ? "you"
+    : /\b(with the agency|preparing|is preparing|filed|in review|under review|working)\b|机构审核|正在准备|已提交/i.test(v) ? "work"
+    : /\b(waits? on|after|blocked|not started)\b|等待|之后/i.test(v) ? "wait" : "work";
+  const statRun = (lines: string[]) => { let a = 0; while (a < lines.length && !isStat(lines[a])) a++; let z = a; while (z < lines.length && isStat(lines[z])) z++; return z - a >= 3 ? [a, z] as const : null; };
+  const para = (lines: string[], key: string | number) => <p key={key}>{lines.flatMap((l, j) => (j ? [<br key={"b" + j} />, <Fragment key={j}>{show(l)}</Fragment>] : [<Fragment key={j}>{show(l)}</Fragment>]))}</p>;
+  const prose = (x: Block, i: number): ReactNode => {
+    if (x.list) return null;
+    const run = statRun(x.lines);
+    if (!run) return para(x.lines, i);
+    const [a, z] = run;
+    return (
+      <Fragment key={i}>
+        {a > 0 && para(x.lines.slice(0, a), "h")}
+        <ul className="stat-l">{x.lines.slice(a, z).map((l, j) => { const m = ST.exec(l)!; const v = m[2].trim(); show(l); return <li key={j}><span className="sl-k">{m[1].trim()}</span><span className={"sl-v sl-" + tone(v)}>{v.charAt(0).toUpperCase() + v.slice(1)}</span></li>; })}</ul>
+        {z < x.lines.length && para(x.lines.slice(z), "t")}
+      </Fragment>
+    );
+  };
   return <>{blocks.map((x, i) => x.list
     ? (x.ordered ? <ol key={i} className="prose-l">{x.lines.map((l, j) => <li key={j}>{show(l)}</li>)}</ol> : <ul key={i} className="prose-l">{x.lines.map((l, j) => <li key={j}>{show(l)}</li>)}</ul>)
-    : <p key={i}>{x.lines.flatMap((l, j) => (j ? [<br key={"b" + j} />, <Fragment key={j}>{show(l)}</Fragment>] : [<Fragment key={j}>{show(l)}</Fragment>]))}</p>)}</>;
+    : prose(x, i))}</>;
 }
 
 /** A source's number in the text: opens the page; on hover or focus, the page, the sentence Placetta read on it and
@@ -164,7 +188,9 @@ export function AppArtifact({ a }: { a: Application }) {
       <span className="atile" aria-hidden="true"><I.form /></span>
       <span className="ameta">
         <b>{b(a.form ?? a.name)}</b>
-        <span>{lang === "zh" ? `${b(a.agency)}，已填 ${filled}/${a.fields.length} 项` : `${b(a.agency)}. ${filled} of ${a.fields.length} fields filled`}</span>
+        <span>{!a.fields.length ? (lang === "zh" ? `${b(a.agency)}，查看清单` : `${b(a.agency)}. Checklist`)
+          : filled === a.fields.length ? (lang === "zh" ? `${b(a.agency)}，已全部填好` : `${b(a.agency)}. All filled`)
+          : lang === "zh" ? `${b(a.agency)}，已填 ${filled}/${a.fields.length} 项` : `${b(a.agency)}. ${filled} of ${a.fields.length} fields filled`}</span>
       </span>
       <span className="achev" aria-hidden="true"><I.chevR /></span>
     </button>

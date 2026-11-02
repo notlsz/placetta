@@ -69,7 +69,7 @@ export function openingEstimateTests(ok: Ok, eq: Eq) {
     eq(p.hinge.map(h => h.app), ["health", "plan"], "the date hinges on the two longest steps on the chain");
     eq(p.hinge[0].timing.kind, "default", "a step with no published time is a default, not a number of ours");
     const h = hingeSay(p)!;
-    eq(h.en, "The date hinges on Health permit to operate a food facility, issued after the final inspection; no published time, a 30-day default; and Food facility plan check, up to 20 business days after payment, per deh.santaclaracounty.gov.", "the hinge names each step, its time and its source");
+    eq(h.en, "The date hinges on Health permit to operate a food facility, issued after the final inspection; no published time, so we plan on 30 days; and Food facility plan check, up to 20 business days after payment, per deh.santaclaracounty.gov.", "the hinge names each step, its time and its source");
     eq(h.zh, "开业日期取决于：食品设施卫生营业许可证，竣工检查后签发；未公布办理时间，按默认 30 天估算；以及食品设施图纸审查，付款后最长 20 个工作日，依据 deh.santaclaracounty.gov。", "and in Chinese");
   }
 
@@ -109,7 +109,7 @@ export function openingEstimateTests(ok: Ok, eq: Eq) {
   /* 5. no invented numbers */
   {
     eq(timingOf(app("x", undefined)).kind, "default", "a step with no form and no source uses the default");
-    eq(DEFAULT_TIMING.say.en, "no published time; a 30-day default", "and says it's a default");
+    eq(DEFAULT_TIMING.say.en, "no published time, so we plan on 30 days", "and says it's a default");
     eq(spanFromWords("No standard time published; expedited review in 1 to 2 business days."), null, "a sentence that says no time is published gives no number");
     eq(spanFromWords("If you pay during registration, the account activates in 2 to 3 business days; otherwise the invoice is mailed within 5 to 10 business days."), { fast: 2, typical: 3, slow: 3, unit: "business" }, "the agency's first stated time, its range kept");
     eq(spanFromWords("Average: 2 weeks."), { fast: 14, typical: 14, slow: 14, unit: "calendar" }, "weeks in days");

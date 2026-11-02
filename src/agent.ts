@@ -426,7 +426,9 @@ function fromWorkspace(ctx: Context, text: string): Plan | null {
         // the range and the step the date hinges on, with where its time comes from (the same estimate as Home and Stores)
         const op = openingPath(s, w, today), r = op.range, h = hingeSay(op);
         const likely = r && (r.fast !== d || r.slow !== d) ? B(` Likely ${fmtDay(r.fast, "en", r.fast.slice(0, 4) !== d.slice(0, 4))} to ${fmtDay(r.slow, "en", r.slow.slice(0, 4) !== d.slice(0, 4))}.`, `可能在 ${fmtDay(r.fast, "zh", r.fast.slice(0, 4) !== d.slice(0, 4))} 至 ${fmtDay(r.slow, "zh", r.slow.slice(0, 4) !== d.slice(0, 4))} 之间。`) : B("", "");
-        text_.push(B(opens.en + vs.en + likely.en + (h ? " " + h.en : ""), opens.zh + vs.zh + likely.zh + (h ? h.zh : "")));
+        // the date, then what it hinges on as its own short paragraph: one long block read as a wall (Nov 2 review)
+        text_.push(B(opens.en + vs.en + likely.en, opens.zh + vs.zh + likely.zh));
+        if (h) text_.push(h);
       } else text_.push(B("Opening: no date yet. The permits aren't mapped for it.", "开业：尚无日期，还没有梳理它的许可。"));
     } else if (s && s.stage === "open" && open) text_.push(B(`${s.name.en} is already open${s.opened ? `, since ${fmtDay(s.opened, "en", true)}` : ""}.`, `${s.name.zh}已开业${s.opened ? `，自 ${fmtDay(s.opened, "zh", true)} 起` : ""}。`));
   };

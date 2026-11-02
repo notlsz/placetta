@@ -180,7 +180,6 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const phone = useNarrow(860);
   const [panelOpen, setPanelOpen] = useState(false);
   const panelRef = useRef(false);
-  useEffect(() => { panelRef.current = panelOpen; }, [panelOpen]);
   const [navOpen, setNavOpen] = useState(false);
   const [cmdk, setCmdk] = useState(false);
   useCommandKey(setCmdk);
@@ -190,6 +189,8 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
   const [view, setView] = useState<View>(() => readRoute().view);
   // the tab open on Permits or Odelia (and the category asked of Settings), from the address
   const [sub, setSub] = useState<string | undefined>(() => readRoute().sub);
+  // the reply's first sentence shows as a toast only when no chat is on screen (the panel or the Odelia chat page)
+  useEffect(() => { panelRef.current = panelOpen || (view === "odelia" && (sub ?? "chat") === "chat"); }, [panelOpen, view, sub]);
   // Settings keeps its own category and tells us which one is showing, so the More group lights the right row
   useLayoutEffect(() => {
     const on = (e: Event) => setSub((e as CustomEvent<string>).detail);
@@ -218,6 +219,9 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
     // Settings keeps its own category state; tell it which one was asked for (by the ⌘K bar, a link, a page that moved there)
     if (v === "settings" && s) window.dispatchEvent(new CustomEvent("placetta:settings", { detail: s }));
   }, []);
+  // Nov 2: a phone has one chat, the Odelia page. Asking from anywhere else goes there, so she never answers in a
+  // second sheet with its own header (the way Poke and iMessage keep one thread)
+  useEffect(() => { if (phone && panelOpen && !chatPage) { setPanelOpen(false); go("odelia"); } }, [phone, panelOpen, chatPage, go]);
   // Back and Forward move between pages and tabs; a Settings address also picks its category.
   useEffect(() => {
     const on = () => {
@@ -1446,9 +1450,12 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
       {/* the title on every tab, chat too, so the page's top edge doesn't jump between pages (panels 4 to 6); a phone hides it on chat */}
       <PageHead title={t("nav_odelia")} />
       <Tabs view="odelia" current={odeliaTab} tabs={[
-        { id: "chat", label: t("nav_chat") }, { id: "work", label: t("nav_work"), count: waitingJobs }, { id: "ideas", label: t("nav_ideas") },
-        // Playbooks stays one click away under More; the tab shows only while you're on it
-        ...(odeliaTab === "playbooks" ? [{ id: "playbooks", label: t("nav_playbooks") }] : []), { id: "updates", label: t("nav_updates"), count: unread },
+        // Nov 2: two tabs, as Poke and Lindy keep a conversation and the work. Updates open from the bell (the sidebar's
+        // top on a desktop, the top bar on a phone), Ideas and Playbooks from Work; each tab shows only while you're on it
+        { id: "chat", label: t("nav_chat") }, { id: "work", label: t("nav_work"), count: waitingJobs },
+        ...(odeliaTab === "ideas" ? [{ id: "ideas", label: t("nav_ideas") }] : []),
+        ...(odeliaTab === "playbooks" ? [{ id: "playbooks", label: t("nav_playbooks") }] : []),
+        ...(odeliaTab === "updates" ? [{ id: "updates", label: t("nav_updates"), count: unread }] : []),
       ]} />
       {odeliaTab === "chat" && <AgentPanel feed={feed} tts={tts} mode="page" asked={asked} />}
       {odeliaTab === "work" && <WorkPage />}
@@ -1494,7 +1501,7 @@ export default function App({ cloud }: { cloud?: CloudSession }) {
         <button type="button" className="brand" onClick={() => go("overview")} aria-label={t("nav_overview")}>{slim ? <Mark size={22} /> : <Logo lang={lang} height={17} />}</button>
         {phone
           ? <button type="button" className="icbtn" onClick={() => setNavOpen(false)} aria-label={t("close")}><I.x /></button>
-          : <span className="side-tools">{/* the bell's updates are Odelia's Updates tab, with its count */}<button type="button" className="slimb" onClick={() => setSlimPref(v => !v)} aria-label={t(slim ? "expandMenu" : "collapseMenu")} title={t(slim ? "expandMenu" : "collapseMenu")} aria-expanded={!slim}><I.panel /></button></span>}
+          : <span className="side-tools">{/* the bell opens Odelia's updates, with its count (Nov 2: no longer a tab) */}{!slim && bell}<button type="button" className="slimb" onClick={() => setSlimPref(v => !v)} aria-label={t(slim ? "expandMenu" : "collapseMenu")} title={t(slim ? "expandMenu" : "collapseMenu")} aria-expanded={!slim}><I.panel /></button></span>}
       </div>
       {cloud ? (
         <Menu className="wsname-wrap" buttonClass="wsname" label={b(B("Workspaces", "工作区"))} button={<><b>{b(view_.business)}</b><span>{wsSub}</span><I.chev /></>}

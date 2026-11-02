@@ -68,7 +68,7 @@ export const TIMES: Record<string, Timing> = {
   // the county issues the operating permit after the final inspection, and publishes no time for that inspection (its
   // "up to 20 business days" is the plan review's, counted on the plan check above, not again here)
   "scc-health-permit": { ...cd(30, 30, 30), kind: "default",
-    say: B("issued after the final inspection; no published time, a 30-day default", "竣工检查后签发；未公布办理时间，按默认 30 天估算") },
+    say: B("issued after the final inspection; no published time, so we plan on 30 days", "竣工检查后签发；未公布办理时间，按默认 30 天估算") },
   "lac-plan-check": { ...bd(20, 20, 20), kind: "agency", source: LAC_FORM, checked: CHECKED,
     say: B("within 20 working days after payment", "付款后 20 个工作日内") },
   // the Mayor's Management Report, FY2026: average days to the first plan review, 4.4 for a minor alteration and 8.4
@@ -219,7 +219,7 @@ export function spanSay(s: Span): Bi {
 }
 
 /** The conservative default for a step with no published time: 30 days, said as a default. */
-export const DEFAULT_TIMING: Timing = { ...cd(30, 30, 30), kind: "default", say: B("no published time; a 30-day default", "未公布办理时间，按默认 30 天估算") };
+export const DEFAULT_TIMING: Timing = { ...cd(30, 30, 30), kind: "default", say: B("no published time, so we plan on 30 days", "未公布办理时间，按默认 30 天估算") };
 
 /** The source part of a "takesSource" ("https://… (2026-10-10)"): the URL and the day it was read. */
 export function splitSource(s?: string): { url?: string; checked?: string } {

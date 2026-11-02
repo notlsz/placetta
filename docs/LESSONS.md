@@ -476,3 +476,15 @@ ask for what the person just said. Tests: test:flow "named:".
 What happened: the home page's blue wash started below a solid white top bar, so the color jump read as a line.
 Rule: a bar that sits above a tinted page carries the top of the same tint, or is transparent. Check the seam
 zoomed in at 375, at rest and scrolled.
+
+## 2026-11-02: Odelia's replies read like a log (UI review, 7.4 to 9.5)
+
+What happened: a status answer came out as eight "Thing: status" lines of plain text, its cards came in two styles
+(grey forms, a white outlined approval), a short chat sat 125px below the tabs, the page repeated "Odelia" as a big
+title, a phone answered in a second sheet with its own header, and a form with no fields said "0 of 0 fields filled".
+Why: each piece was right on its own screen; nobody read one whole reply as a page.
+Rules: a run of 3+ "Thing: status" lines renders as a status list (src/ui.tsx Prose). A reply uses one card style.
+A phone has one chat (src/App.tsx sends an ask from anywhere to the Odelia page). Read a full reply, top to bottom,
+at 375 and 1280 before shipping any change to the chat.
+Also: a test that pins a calendar date fails when the clock reaches it (review-fixes-test's "Mar 1, 2027"). Compare
+against the computed date, not a constant.
