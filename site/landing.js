@@ -674,7 +674,7 @@ function pfDay(d){ if (!d) return ""; const x = new Date(d + "T12:00:00Z"); retu
 function renderProof(){
   const el = document.getElementById("pfRow"); if (!el) return;
   const n = agCount(), items = [
-    PROOF.stats31000 && ["31,000+", t("pf.s1")],
+    // Nov 1: "31,000+ businesses served worldwide since 2016" dropped at the founder's request
     // land98: Ferrari's 5 months and Stefan's 4 months stand on their own quote cards just below, with the person and
     // the organization, so the row does not say them twice
     PROOF.stats31000 && ["3+", t("pf.s2b")],
