@@ -769,3 +769,5 @@
 @media (max-width: 640px) { .answer .artifact .ameta b { white-space: normal; overflow: visible; text-overflow: clip; } }
 /* 6. the approval's icon sits on the same white tile as each form's, so every card in a reply reads as one family */
 .feed .answer > .appr.compact .appr-ico, .panel.full .answer > .appr.compact .appr-ico { width: 40px; height: 40px; border-radius: 10px; background: var(--card); color: var(--blue-ink); box-shadow: 0 1px 2px rgba(var(--e), .06); display: grid; place-items: center; }
+/* the stamp's agency stays inside the stamp: a long name (no acronym to show) wraps to two lines at most, centered */
+.win-stamp .ws-ag { max-width: 64px; white-space: normal; text-align: center; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

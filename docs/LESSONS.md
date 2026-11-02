@@ -488,3 +488,11 @@ A phone has one chat (src/App.tsx sends an ask from anywhere to the Odelia page)
 at 375 and 1280 before shipping any change to the chat.
 Also: a test that pins a calendar date fails when the clock reaches it (review-fixes-test's "Mar 1, 2027"). Compare
 against the computed date, not a constant.
+
+## 2026-11-02: the Chinese agency name ran out of the win's stamp
+
+What happened: Home's "seller's permit is in" card stamps the agency under a check mark in a 56px column. In Chinese
+the name is "加州税费管理局（CDTFA）", which ran under the card's text.
+Why: short() only shortened names over 28 characters and never looked for the acronym; English happened to be short.
+Rule: a fixed-width label shows the acronym an agency name carries (stampName in src/Approved.tsx) and wraps inside
+its column otherwise. Check every fixed-width label in Chinese, not only English.

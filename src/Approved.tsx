@@ -16,6 +16,9 @@ const keep = (id: string) => { try { localStorage.setItem(KEY + id, "1"); } catc
 /** An agency's name as people say it: its initials when the full name is long ("California Department of Tax and Fee
  *  Administration" is CDTFA), the name itself when it's short ("IRS", "City of San Jose"). */
 export const short = (name: string) => name.length <= 28 ? name : name.split(/\s+/).filter(w => /^[A-Z]/.test(w)).map(w => w[0]).join("");
+/** The agency on the win's stamp, which is 56px wide: the acronym it's known by when the name carries one
+ *  ("加州税费管理局（CDTFA）" is CDTFA, not a line that runs into the card's text, Nov 2), else the short name. */
+export const stampName = (name: string) => /[（(]\s*([A-Z][A-Z0-9&.\- ]{1,9}?)\s*[)）]/.exec(name)?.[1] ?? (/^[A-Z0-9&.\- ]{1,9}$/.test(name) ? name : short(name.replace(/\s*[（(].*$/, "")));
 
 export type Win = { app: Application; at: string; number?: string; renews?: string };
 
@@ -50,7 +53,7 @@ export function ApprovedMoment() {
     <section className="win" aria-labelledby="win-h" role="status">
       <span className="win-stamp" aria-hidden="true">
         <svg viewBox="0 0 48 48"><path className="win-tick" d="M12 25l8 8 16-18" /></svg>
-        <small>{short(b(win.app.agency))}</small>
+        <small className="ws-ag">{stampName(b(win.app.agency))}</small>
         <small>{day}</small>
       </span>
       <div className="win-tx">
