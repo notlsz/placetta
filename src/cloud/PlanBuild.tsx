@@ -24,8 +24,10 @@ import "../firstrun.css";
 
 const STEP_MS = 100, MAX_MS = 1600;
 
-export function PlanBuild({ lang, ws, place, instant, busy, err, onBack, onNext, onSkip }: {
+export function PlanBuild({ lang, ws, place, instant, busy, err, onBack, onNext, onSkip, visitor }: {
   lang: Lang; ws: Workspace; place: string; instant?: boolean; busy: boolean; err: string; onBack: () => void; onNext: () => void; onSkip: () => void;
+  /** Before sign-up (src/cloud/Root.tsx PlanFirst): the plan is the same; the buttons save it, and the hint says what an account adds. */
+  visitor?: boolean;
 }) {
   const zh = lang === "zh";
   const b = (x: { en: string; zh: string }) => x[lang];
@@ -99,15 +101,16 @@ export function PlanBuild({ lang, ws, place, instant, busy, err, onBack, onNext,
           {(can || rest) && <p className="pv-note">{can ? b(can) : ""}{can && rest && !zh ? " " : ""}{rest ? b(rest) : ""}</p>}
           {f.opening && (f.hinge.length ? <HingeLine hinge={f.hinge} lang={lang} className="pv-note" lead={when} />
             : <p className="pv-note">{when}</p>)}
-          <div className="pv-act">
+          <div className={"pv-act" + (visitor ? " stick" : "")}>
             <button type="button" className="pv-link" disabled={busy} onClick={onBack}>{zh ? "返回" : "Back"}</button>
             <span className="pv-go">
-              <button type="button" className="pv-link" disabled={busy} onClick={onSkip} data-plan-skip="">{zh ? "先看计划" : "Go to my plan"}</button>
-              <button type="button" className="sbtn ink big" disabled={busy} onClick={onNext} data-plan-next="" autoFocus>{busy ? "…" : zh ? "填写第一份申请" : "Fill my first application"}</button>
+              <button type="button" className="pv-link" disabled={busy} onClick={onSkip} data-plan-skip="">{visitor ? (zh ? "已有账户，登录" : "I have an account") : zh ? "先看计划" : "Go to my plan"}</button>
+              <button type="button" className="sbtn ink big" disabled={busy} onClick={onNext} data-plan-next="" autoFocus={!visitor}>{busy ? "…" : visitor ? (zh ? "保存计划，免费" : "Save my plan, free") : zh ? "填写第一份申请" : "Fill my first application"}</button>
             </span>
           </div>
-          <p className="pv-hint">{zh ? "回答 3 个问题，Odelia 就能填好第一份申请，等您批准。" : "3 answers and Odelia fills your first application, ready for you to approve."}
-            {forming > 0 && (zh ? `公司已经注册？告诉她法定名称，注册公司的 ${forming} 项就会从计划中去掉。` : ` Company already formed? Give its legal name and the ${forming} formation step${forming === 1 ? "" : "s"} drop${forming === 1 ? "s" : ""} off.`)}</p>
+          <p className="pv-hint">{visitor ? (zh ? "保存后，Odelia 会填好第一份申请，等您批准。不经您同意，不提交、不付款。" : "Save it and Odelia fills your first application for you to approve. Nothing is filed or paid without you.")
+            : zh ? "回答 3 个问题，Odelia 就能填好第一份申请，等您批准。" : "3 answers and Odelia fills your first application, ready for you to approve."}
+            {!visitor && forming > 0 && (zh ? `公司已经注册？告诉她法定名称，注册公司的 ${forming} 项就会从计划中去掉。` : ` Company already formed? Give its legal name and the ${forming} formation step${forming === 1 ? "" : "s"} drop${forming === 1 ? "s" : ""} off.`)}</p>
         </>
       )}
       {err && <p className="gate-err" role="alert">{err}</p>}

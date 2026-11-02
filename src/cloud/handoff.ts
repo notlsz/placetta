@@ -10,7 +10,7 @@ const DAYS = 3;
 /** What the website saves (see site/index.html, submit()). */
 type Saved = { v: 1; at: number; email?: string; company?: string; market?: string; industry?: string; opening?: string; plang?: string; sell?: string };
 
-export type Handoff = { email: string; brand: string; place: string; sell: string; other: string; when: number; lang?: Lang };
+export type Handoff = { email: string; brand: string; place: string; sell: string; other: string; when: number; lang?: Lang; industry?: string };
 
 const PLACES: Record<string, string> = { "San Francisco Bay Area": "San Francisco, CA", "Several markets": "" };
 const SELL: Record<string, [string, string]> = { retail: ["Retail", ""], health: ["other", "Health and wellness"], fitness: ["other", "Fitness"] };
@@ -35,6 +35,7 @@ export function readHandoff(): Handoff | null {
       sell, other,
       when: WHEN[clip(s.opening, 10)] ?? -1,
       lang: s.plang === "zh" || s.plang === "en" ? s.plang : undefined,
+      industry: clip(s.industry, 20) || undefined,
     };
   } catch { return null; }
 }

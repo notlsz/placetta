@@ -18,8 +18,12 @@ const ANSWERS: Record<string, Record<string, string>> = {
     l8a: "Yes", l8b: "1", l8c: "Yes", l9a: "Other: Foreign-owned U.S. disregarded entity", l10: "Started a new milk tea shop", l11: "09/01/2026", l12: "December", l13: "6",
     l15: "11/15/2026", l16: "Accommodation & food service", l17: "Milk tea, fruit tea and snacks, made to order", l18: "No", sign: "Mei Lin, Managing Member", phone: "(408) 555-0142" },
   edd: { request_type: "Register for a New Employer Account Number", employer_type: "COMMERCIAL", taxpayer_type: "Limited Liability Company (LLC)", first_payroll_date: "2026-11-15",
-    employees_in_ca: "Yes", employees_residing_ca_outside: "No", officer_member_info: "Mei Lin, Managing Member", legal_name: "Moonleaf Tea LLC", dba: "Moonleaf Tea", fein: "88-1234471",
-    ownership_began: "2026-09-01", state_of_incorporation: "California", physical_location: ADDR, mailing_address: "Same as above",
+    // Nov 2: an LLC answers the sole-owner, co-owner and sibling-partnership lines "Not applicable", the officer line says
+    // "SSN by hand" (Placetta never holds the number) and each address line carries the business phone, so the sample's
+    // "ready to file" passes every line check instead of opening as High risk (docs/LESSONS.md)
+    e1_individual_family: "Not applicable", e2_coowner_children: "Not applicable", e3_partnership_parents: "Not applicable", owner_info: "Not applicable",
+    employees_in_ca: "Yes", employees_residing_ca_outside: "No", officer_member_info: "Mei Lin, Managing Member, SSN by hand", legal_name: "Moonleaf Tea LLC", dba: "Moonleaf Tea", fein: "88-1234471",
+    ownership_began: "2026-09-01", state_of_incorporation: "California", sos_entity_number: "202614310922", physical_location: `${ADDR}, USA, (408) 555-0142`, mailing_address: "Same as above, (408) 555-0142",
     products_services: "Milk tea, fruit tea and snacks, made to order and sold over the counter", industry: "Retail" },
 };
 const host = (u: string) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return u; } };

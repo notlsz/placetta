@@ -13,6 +13,10 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { readiness } from "../src/stores.ts";
 import { B, SAMPLE, same, type Workspace } from "../src/model";
 import { memoryUiTests } from "./memory-ui-test";
+import { SAMPLE_WS } from "../src/sample";
+import { rejectionRisk } from "../src/risk";
+import { filingBlockers } from "../src/core";
+import { daysFromNow } from "../src/time";
 
 /** A believable answer for a form line, so the check before approval sees real-looking values (it refuses "test value" as a phone).
  *  An SSN line gets "By hand": Placetta never keeps the number, the signer writes it (src/guard.ts). */
@@ -287,6 +291,18 @@ ok(!html("<script>alert(1)</script>").includes("<script>"), "edge: a reply can't
   w = { ...w, apps: w.apps.map(a => (a.id === "sign" ? { ...a, fields: a.fields.map((f, i) => (i === 0 ? { ...f, value: "TBD" } : f)) } : a)) };
   const held = await go({ approve: "a-sign" });
   ok(w.apps.find(a => a.id === "sign")!.status === "ready" && /Not ready/.test(held?.reply.text[0].en ?? ""), "edge: the demo won't file it with a TBD line");
+}
+
+// "ready" means ready (Nov 2): every filing Odelia calls ready to file opens with no line a reviewer must fix and
+// nothing left empty, on the same sample the app shows (src/sample.ts SAMPLE_WS, the official forms' own lines)
+{
+  let w = SAMPLE_WS;
+  await demoAgent.run({ text: "File everything that's ready" }, { lang: "en", current: w }, e => { if (e.type === "update") w = e.patch(w); }, new AbortController().signal).catch(() => undefined);
+  for (const a of w.approvals.filter(x => x.kind === "file")) {
+    const app = w.apps.find(x => x.id === a.app)!, r = rejectionRisk(w, a, daysFromNow(0)), left = filingBlockers(app);
+    ok(!r.issues.some(x => x.hard) && r.level !== "high", `ready means ready: ${a.id} opens with no High risk`, r.issues.filter(x => x.severity === "high").map(x => x.label.en));
+    ok(!left.empty.length && !left.missing.length, `ready means ready: ${a.id} has nothing left to fill`, left);
+  }
 }
 
 // the demo's other scripted filings: prepared by the script, then approved, each still files

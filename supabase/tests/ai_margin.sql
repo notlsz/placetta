@@ -19,7 +19,8 @@ begin
   -- Essentials and Pro are legacy plans (the store plan has its own numbers: margin_guard.sql)
   insert into public.billing (workspace_id, subscription_status, subscription_plan, paid_locations, price_model) values
     (w1, 'active', 'locations', 1, 'legacy'), (w2, 'active', 'pro', 2, 'legacy'), (w4, 'active', 'locations', 1, 'legacy'), (w5, 'active', 'locations', 1, 'legacy'), (w6, 'active', 'locations', 1, 'legacy');
-  insert into public.billing (workspace_id, price_model, entry_markets, entry_paid_at) values (w3, 'legacy', 1, now() - interval '2 days');
+  -- paid this month whatever today's date: "two days ago" fell in last month on the 1st and 2nd (Nov 2, 2026)
+  insert into public.billing (workspace_id, price_model, entry_markets, entry_paid_at) values (w3, 'legacy', 1, greatest(date_trunc('month', now()), now() - interval '2 days'));
 
   -- 1. role and vendor land on the event; the old five-argument call still works
   g := public.ai_gate(w1, a, 'call', null);

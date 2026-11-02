@@ -120,6 +120,32 @@ function RegionPick({ lang }: { lang: Lang }) {
   );
 }
 
+/** Nov 2: the plan before the account. Someone who answered the website's questions (src/cloud/handoff.ts) sees their
+ *  whole plan first, built locally from the registry (src/plan/start.ts, no model call, nothing saved), the way Genspark
+ *  and Lindy show the result before asking for an account. Saving it is the sign-up. */
+// food and beverage on the website is a restaurant here until onboarding asks which kind (milk tea, coffee, bakery)
+const VISITOR_SELL: Record<string, string> = { fb: "Restaurant" };
+function PlanFirst({ lang, children }: { lang: Lang; children: React.ReactNode }) {
+  const [hand] = useState(readHandoff);
+  const plan = useMemo(() => {
+    if (!hand) return null;
+    const at = parsePlace(hand.place);
+    if (!at) return null;
+    const sell = hand.sell === "other" ? hand.other : hand.sell || VISITOR_SELL[hand.industry ?? ""] || "";
+    const chip = SELLS.find(x => x.en === sell);
+    const what = chip ? chip[lang === "zh" ? "zh" : "en"] : sell;
+    if (!what) return null;
+    try {
+      const months = hand.when >= 0 ? WHEN[hand.when]?.months ?? null : null;
+      return { ws: firstWorkspace({ what, city: at.city, state: at.state, lang, brand: hand.brand, months, notFormed: false, legal: "", owner: "", address: "", intake: {} }).state, place: `${at.city}, ${at.state}` };
+    } catch { return null; }
+  }, [hand, lang]);
+  const [open, setOpen] = useState(!!plan);
+  if (!plan || !open) return <>{children}</>;
+  return <PlanBuild lang={lang} ws={plan.ws} place={plan.place} busy={false} err="" visitor
+    onBack={() => { location.href = "/"; }} onNext={() => setOpen(false)} onSkip={() => setOpen(false)} />;
+}
+
 function SignIn({ lang, start }: { lang: Lang; start?: StartPeek | null }) {
   const L = (x: Bi) => x[lang];
   const [hand] = useState(readHandoff);
@@ -235,7 +261,7 @@ function SignIn({ lang, start }: { lang: Lang; start?: StartPeek | null }) {
     : step === "reset" ? L(B("Check your email.", "请查收邮件。"))
     : step === "password" ? (mode === "create" ? L(B("Create your password.", "设置密码。")) : L(B("Enter your password.", "输入密码。")))
     : start ? L(B("Your plan from Odelia is one step away.", "Odelia 发给您的计划只差一步。"))
-    : hand ? L(B("Your license plan is one step away.", "您的执照计划只差一步。")) : L(B("Sign in to Placetta.", "登录快哉。"));
+    : hand ? L(B("Save your license plan.", "保存您的执照计划。")) : L(B("Sign in to Placetta.", "登录快哉。"));
   const startPlace = start ? (lang === "zh" ? start.place_zh || start.place : start.place) : "";
   const sub = step === "phone" ? L(B("Log in or sign up with your phone number. No password needed.", "用手机号登录或注册，无需密码。"))
     : step === "phonecode" ? L(B(`We texted a 6-digit code to ${cc} ${phone}.`, `6 位验证码已发送至 ${cc} ${phone}。`))
@@ -244,7 +270,7 @@ function SignIn({ lang, start }: { lang: Lang; start?: StartPeek | null }) {
     : step === "reset" ? L(B(`If there's an account for ${email}, we sent it a link to set a new password. Open it on this device.`, `如果 ${email} 已注册，我们已向其发送设置新密码的链接。请在此设备上打开。`))
     : step === "password" ? null
     : start ? L(B(`Sign in or create an account to open it: ${start.permits ?? 0} permits for ${start.what} in ${startPlace}, in order.`, `登录或创建账户即可打开：${startPlace}${start.what}需要的 ${start.permits ?? 0} 项许可，已按顺序排好。`))
-    : hand ? L(B("Confirm your email and Placetta starts mapping every license your store needs.", "确认邮箱后，快哉就开始梳理门店所需的全部执照。"))
+    : hand ? L(B("Confirm your email to keep it. Odelia starts on your first application right after.", "确认邮箱即可保存。随后 Odelia 就开始填写第一份申请。"))
     : L(B("New or invited? Sign in with your work email.", "新用户或受邀成员，请用工作邮箱登录。"));
   return (
     <div className="gate-card">
@@ -922,7 +948,7 @@ export function CloudRoot() {
   return (
     <Frame lang={lang} setLang={setLang}>
       {phase.k === "loading" && <div className="gate-card"><div className="gate-bot"><GateBot busy /></div><p className="gate-sub">{L(B("Opening your workspace…", "正在打开工作区…"))}</p></div>}
-      {phase.k === "signin" && <SignIn lang={lang} start={start?.peek?.status === "ok" ? start.peek : null} />}
+      {phase.k === "signin" && <PlanFirst lang={lang}><SignIn lang={lang} start={start?.peek?.status === "ok" ? start.peek : null} /></PlanFirst>}
       {phase.k === "claim" && <ClaimStart lang={lang} email={phase.email} token={phase.token} peek={phase.peek} onDone={(id, n) => { setStart(null); void open(id, n); }} onSkip={() => { clearStart(); setStart(null); void open(lastWs.get()); }} />}
       {phase.k === "recover" && <SetPassword lang={lang} onDone={recovered} onCancel={() => { recovering.current = false; void api.signOut().then(() => setPhase({ k: "signin" })); }} />}
       {phase.k === "sso" && (

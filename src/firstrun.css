@@ -112,3 +112,6 @@
   .pv-link { align-self: center; }
   .pv-hint { text-align: center; }
 }
+/* before sign-up (PlanFirst): saving the plan stays in reach under a long list, on the page's own ground */
+.pv-act.stick { position: sticky; bottom: 0; z-index: 2; background: var(--bg, #fff); padding-block: 14px calc(14px + env(safe-area-inset-bottom, 0px)); margin-inline: -4px; padding-inline: 4px; }
+@media (max-width: 640px) { .pv-act.stick > .pv-link:first-child { display: none; } .pv-act.stick { padding-block: 10px calc(10px + env(safe-area-inset-bottom, 0px)); } }

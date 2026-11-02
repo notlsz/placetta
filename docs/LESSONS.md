@@ -496,3 +496,14 @@ the name is "加州税费管理局（CDTFA）", which ran under the card's text.
 Why: short() only shortened names over 28 characters and never looked for the acronym; English happened to be short.
 Rule: a fixed-width label shows the acronym an agency name carries (stampName in src/Approved.tsx) and wraps inside
 its column otherwise. Check every fixed-width label in Chinese, not only English.
+
+## 2026-11-02: "ready to file" opened as High risk, and a test broke on the 1st of the month
+
+What happened: in the sample, Odelia said "Two are ready to file", then the employer registration opened as High risk
+and blocked (no "SSN by hand" on the officer line, no phone on the address lines, the sole-owner questions an LLC
+doesn't answer left empty). Separately, the database check failed every commit from Nov 1: a test paid an entry plan
+"two days ago", which on the 1st and 2nd is last month.
+Why: the scripted sample set "ready" by hand instead of running the same checks the approval card runs (the live agent
+already does: request_filing_approval refuses on preflight errors). The test used a relative date for a calendar rule.
+Rules: "ready" is only ever said after the approval card's own checks pass (scripts/agent-flow-test.ts "ready means
+ready" runs them on every filing the sample calls ready). A test about a calendar month dates its rows inside the month.
