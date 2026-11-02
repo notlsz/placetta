@@ -114,6 +114,15 @@ body .edge + .vdemo{margin-top:56px!important}
 #how95a .feat2{align-items:stretch}
 #how95a .fct{display:flex;flex-direction:column}
 #how95a .fcv{flex:1}
+/* Nov 2: the demo film. The real app, framed on the page's own ground; one play button, sound on when you press it */
+.watch{margin-top:72px}
+.wv{position:relative;max-width:1100px;margin:28px auto 0;border-radius:22px;overflow:hidden;background:#F3F1EC;box-shadow:0 30px 80px -34px rgba(9,19,36,.38),0 0 0 1px rgba(14,17,22,.05);aspect-ratio:16/9}
+.wv-v{display:block;width:100%;height:100%;object-fit:cover;background:#F3F1EC}
+.wv-play{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:9%;gap:14px;border:0;background:rgba(243,241,236,.0);cursor:pointer;color:#0E1116}
+.wv-pill{display:inline-flex;align-items:center;gap:12px;height:60px;padding:0 30px 0 26px;border-radius:999px;background:#0E1116;color:#fff;font-size:17px;font-weight:500;letter-spacing:-.01em;box-shadow:0 18px 40px -14px rgba(9,19,36,.55);transition:transform .25s cubic-bezier(.16,1,.3,1)}
+.wv-play:hover .wv-pill,.wv-play:focus-visible .wv-pill{transform:scale(1.04)}
+.wv.on .wv-play{display:none}
+@media (max-width:767px){.watch{margin-top:48px}.wv{border-radius:16px;margin-top:20px}.wv-play{padding-bottom:5%}.wv-pill{height:38px;font-size:14px;padding:0 16px 0 14px;gap:8px}.wv-pill svg{width:12px;height:13px}}
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="/ref.js" defer></script>
@@ -251,6 +260,17 @@ body .edge + .vdemo{margin-top:56px!important}
       </div>
       <div class="vprog"><i id="vBar"></i></div>
     </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= WATCH: the real app, start to finish (Nov 2) ======================= -->
+<section class="sec watch rv" data-rv="up" id="watch" aria-labelledby="watchH">
+  <div class="ctr">
+    <div class="sh"><h2 class="h2" id="watchH" data-i18n="watch.h">Watch Odelia file a permit.</h2><p class="sub" data-i18n="watch.sub">The real app, on a sample tea shop: you ask, you approve, she files. 72 seconds.</p></div>
+    <div class="wv" id="wv">
+      <video class="wv-v" id="wvV" poster="media/odelia-demo-poster.jpg" preload="none" playsinline controlslist="nodownload noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback draggable="false" aria-label="Odelia demo: a San Jose sign permit, asked for, approved and filed" data-i18n-aria="watch.aria"><source src="media/odelia-demo.mp4" type="video/mp4"><source src="media/odelia-demo.webm" type="video/webm"></video>
+      <button type="button" class="wv-play" id="wvP" aria-label="Play the demo" data-i18n-aria="watch.play"><span class="wv-pill"><svg width="15" height="16" viewBox="0 0 22 24" aria-hidden="true"><path d="M3 2.6v18.8a1.4 1.4 0 0 0 2.1 1.2l15.6-9.4a1.4 1.4 0 0 0 0-2.4L5.1 1.4A1.4 1.4 0 0 0 3 2.6Z" fill="currentColor"/></svg><span data-i18n="watch.len">Watch, 1:12</span></span></button>
     </div>
   </div>
 </section>
@@ -767,4 +787,13 @@ body .edge + .vdemo{margin-top:56px!important}
   load(1); setP(false);
 })();
 </script>
-<script defer src="/landing.js?v=96c3bee14a"></script>
+<script>
+(() => { const w = document.getElementById("wv"), v = document.getElementById("wvV"), b = document.getElementById("wvP"); if (!w || !v || !b) return;
+  // one press plays it with sound and hands over the video's own controls; at the end the play button comes back
+  b.addEventListener("click", () => { w.classList.add("on"); v.controls = true; v.play().catch(() => { w.classList.remove("on"); v.controls = false; }); try { window.va && window.va("event", { name: "demo_play" }); } catch (e) {} });
+  v.addEventListener("ended", () => { w.classList.remove("on"); v.controls = false; v.currentTime = 0; v.load(); });
+  // scrolled away: pause, so it never plays out of sight
+  new IntersectionObserver(es => { if (!es[0].isIntersecting && !v.paused) v.pause(); }, { threshold: .15 }).observe(w);
+})();
+</script>
+<script defer src="/landing.js?v=0abd0ed338"></script>
