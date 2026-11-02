@@ -2601,6 +2601,11 @@ https://www.placetta.com/guides/answers/de-minimis-800-exemption-status.html
 https://www.placetta.com/guides/answers/does-a-single-member-llc-need-an-ein.html
 https://www.placetta.com/guides/answers/california-food-handler-card.html
 https://www.placetta.com/guides/answers/can-a-foreigner-form-a-texas-llc.html
+https://www.placetta.com/guides/answers/texas-food-handler-card.html
+https://www.placetta.com/guides/answers/texas-certified-food-manager.html
+https://www.placetta.com/guides/answers/nyc-beer-and-wine-license-cost.html
+https://www.placetta.com/guides/answers/los-angeles-business-tax-registration-certificate.html
+https://www.placetta.com/guides/answers/california-edd-employer-registration.html
 https://www.placetta.com/guides/business/restaurant.html
 https://www.placetta.com/guides/business/retail-store.html
 https://www.placetta.com/guides/business/grocery-store.html
@@ -5254,6 +5259,11 @@ https://www.placetta.com/guides/zh/answers/de-minimis-800-exemption-status.html
 https://www.placetta.com/guides/zh/answers/does-a-single-member-llc-need-an-ein.html
 https://www.placetta.com/guides/zh/answers/california-food-handler-card.html
 https://www.placetta.com/guides/zh/answers/can-a-foreigner-form-a-texas-llc.html
+https://www.placetta.com/guides/zh/answers/texas-food-handler-card.html
+https://www.placetta.com/guides/zh/answers/texas-certified-food-manager.html
+https://www.placetta.com/guides/zh/answers/nyc-beer-and-wine-license-cost.html
+https://www.placetta.com/guides/zh/answers/los-angeles-business-tax-registration-certificate.html
+https://www.placetta.com/guides/zh/answers/california-edd-employer-registration.html
 https://www.placetta.com/guides/zh/business/restaurant.html
 https://www.placetta.com/guides/zh/business/retail-store.html
 https://www.placetta.com/guides/zh/business/grocery-store.html

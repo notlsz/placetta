@@ -4,7 +4,7 @@
 
 Odelia, Placetta's AI agent, prepares each application from your documents. You review and approve it, then Odelia files it and follows up until the agency decides. When an agency needs a person, in person or on the phone, our team steps in.
 
-Free license guides: 103 cities in 29 countries (41 in the US), 24 kinds of business, 683 official forms, in English and Chinese. Every guide lists the filings in the order they are made, with the agency, how each is filed, the government fee and a link to the agency's own page. Agencies change requirements; check the agency's page before filing. Placetta is not a law firm and does not give legal advice.
+Free license guides: 109 cities in 29 countries (41 in the US), 24 kinds of business, 1104 official forms, in English and Chinese. Every guide lists the filings in the order they are made, with the agency, how each is filed, the government fee and a link to the agency's own page. Agencies change requirements; check the agency's page before filing. Placetta is not a law firm and does not give legal advice.
 
 ## 中文简介
 快哉为进入新市场的企业办理执照、许可和登记，并保持有效。快哉为每个门店地址梳理所需的全部执照、许可和登记，填写政府官方表格，经客户批准后提交，并跟踪续期、检查和规则变化。中英文服务。
@@ -66,6 +66,7 @@ Every page has a Markdown copy at the same address ending in .md: [https://www.p
 - [Opening in each city as a foreign company](https://www.placetta.com/guides/permits/foreign-company.html)
 - [Hiring your first employees in each city](https://www.placetta.com/guides/permits/hiring-employees.html)
 - [Build-out and occupancy permits in each city](https://www.placetta.com/guides/permits/build-out-and-occupancy.html)
+- [Sign permits in each city](https://www.placetta.com/guides/permits/sign-permits.html)
 - [Importing goods into each city](https://www.placetta.com/guides/permits/importing-goods.html)
 - [Renewals and annual filings in each city](https://www.placetta.com/guides/permits/renewals.html)
 
@@ -124,6 +125,11 @@ Every page has a Markdown copy at the same address ending in .md: [https://www.p
 - [Does a single-member LLC with no employees need an EIN?](https://www.placetta.com/guides/answers/does-a-single-member-llc-need-an-ein.html)
 - [Do restaurant workers in California need a food handler card?](https://www.placetta.com/guides/answers/california-food-handler-card.html)
 - [Can a foreigner form an LLC in Texas?](https://www.placetta.com/guides/answers/can-a-foreigner-form-a-texas-llc.html)
+- [Do restaurant workers in Texas need a food handler card?](https://www.placetta.com/guides/answers/texas-food-handler-card.html)
+- [Does a restaurant in Texas need a certified food manager?](https://www.placetta.com/guides/answers/texas-certified-food-manager.html)
+- [How much does a beer and wine license cost for a restaurant in New York City?](https://www.placetta.com/guides/answers/nyc-beer-and-wine-license-cost.html)
+- [Do I need a business tax registration certificate in Los Angeles?](https://www.placetta.com/guides/answers/los-angeles-business-tax-registration-certificate.html)
+- [When does a new business have to register with the California EDD?](https://www.placetta.com/guides/answers/california-edd-employer-registration.html)
 
 ## Cities
 - [New York City, United States](https://www.placetta.com/guides/new-york-city/)
@@ -133,6 +139,11 @@ Every page has a Markdown copy at the same address ending in .md: [https://www.p
 - [Monterrey, Mexico](https://www.placetta.com/guides/monterrey/)
 - [Guadalajara, Mexico](https://www.placetta.com/guides/guadalajara/)
 - [Cancún, Mexico](https://www.placetta.com/guides/cancun/)
+- [San Pedro Garza García, Mexico](https://www.placetta.com/guides/san-pedro-garza-garcia/)
+- [Zapopan, Mexico](https://www.placetta.com/guides/zapopan/)
+- [Tijuana, Mexico](https://www.placetta.com/guides/tijuana/)
+- [Querétaro, Mexico](https://www.placetta.com/guides/queretaro/)
+- [Puebla, Mexico](https://www.placetta.com/guides/puebla/)
 - [Toronto, Canada](https://www.placetta.com/guides/toronto/)
 - [Vancouver, Canada](https://www.placetta.com/guides/vancouver/)
 - [Montréal, Canada](https://www.placetta.com/guides/montreal/)
@@ -182,6 +193,7 @@ Every page has a Markdown copy at the same address ending in .md: [https://www.p
 - [Graz, Austria](https://www.placetta.com/guides/graz/)
 - [Gothenburg, Sweden](https://www.placetta.com/guides/gothenburg/)
 - [Aarhus, Denmark](https://www.placetta.com/guides/aarhus/)
+- [Lyon, France](https://www.placetta.com/guides/lyon/)
 - [Dubai, United Arab Emirates](https://www.placetta.com/guides/dubai/)
 - [Abu Dhabi, United Arab Emirates](https://www.placetta.com/guides/abu-dhabi/)
 - [Sharjah, United Arab Emirates](https://www.placetta.com/guides/sharjah/)
