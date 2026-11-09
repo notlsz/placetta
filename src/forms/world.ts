@@ -256,6 +256,11 @@ export const CITIES: City[] = [
   c("DUL", "US", "Duluth", "德卢斯", ["duluth, ga", "duluth, georgia", "德卢斯"], false, "GA"),
   c("HEN", "US", "Henderson", "亨德森", ["henderson, nv", "henderson, nevada", "亨德森"], false, "NV"),
   c("BEL", "US", "Bellevue", "贝尔维尤", ["bellevue, wa", "bellevue, washington", "贝尔维尤"], true, "WA"),
+  // added in the growth run of 2026-11-09 with the national and state steps until local ones are sourced: Kansas City
+  // (Two Hands Hospitality into the West Bottoms, Flower Child into the metro; Kansas City, Kansas is its own city, so
+  // only the Missouri names match) and Indianapolis (Birdcall's five-unit deal, Hawaiian Bros)
+  c("US-KCMO", "US", "Kansas City", "堪萨斯城", ["kansas city, mo", "kansas city, missouri", "kansas city mo", "kcmo", "密苏里州堪萨斯城"], false, "MO"),
+  c("US-INDY", "US", "Indianapolis", "印第安纳波利斯", ["indianapolis", "印第安纳波利斯", "印第安纳波利斯市"], false, "IN"),
   c("QCY", "US", "Quincy", "昆西", ["quincy, ma", "quincy, massachusetts", "昆西"], false, "MA"),
   c("ROC", "US", "Rockville", "罗克维尔", ["rockville, md", "rockville, maryland", "rockville md", "罗克维尔", "洛克维尔"], true, "MD"),
   ...([["Detroit", "底特律", "MI"], ["Charlotte", "夏洛特", "NC"], ["Nashville", "纳什维尔", "TN"], ["Salt Lake City", "盐湖城", "UT"]] as const)

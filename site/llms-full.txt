@@ -87,6 +87,21 @@ File Form W-7 with the IRS, generally attached to a US federal tax return unless
 ### Does a Chinese company need a US attorney to file a trademark?
 Yes. The USPTO requires every applicant domiciled outside the US to be represented by a US-licensed attorney, and every applicant must give and keep current its domicile address. The base application fee is $350 for each class of goods or services. https://www.placetta.com/guides/answers/us-trademark-for-chinese-companies.html
 
+### Does a restaurant that sells alcohol have to register with the TTB?
+Yes. Every business that sells beer, wine or spirits, restaurants, bars and convenience stores included, registers with TTB before it starts selling, once for each location. File Form 5630.5d or register in Permits Online; TTB's page lists no fee. After that, re-register by July 1 only if your information has changed, and within 30 days of going out of business. https://www.placetta.com/guides/answers/does-a-restaurant-register-with-ttb.html
+
+### Does California's Proposition 65 apply to a small business?
+Only with 10 or more employees, counting full-time and part-time staff on the date of the exposure; smaller businesses and government agencies are exempt from the warnings. Nothing is filed with the state. Out-of-state online sellers aren't exempt: the warning must show on the product page, or behind a clearly marked "WARNING" link, before the purchase is completed. Manufacturers, importers and distributors carry the main responsibility, and retailers place and keep up the warnings they receive. https://www.placetta.com/guides/answers/does-prop-65-apply-to-small-businesses.html
+
+### Does a small business in New York need workers' compensation insurance?
+Yes, from its first employee, and the coverage should be in place before anyone is on the payroll. Anyone providing services to a for-profit business counts, including family members, paid or unpaid; only a sole proprietor with no employees, family members or subcontractors is exempt. You also need disability benefits insurance that includes Paid Family Leave. Both are bought from an insurer, which reports the coverage to the Workers' Compensation Board. https://www.placetta.com/guides/answers/new-york-workers-compensation-small-business.html
+
+### Do I need a new Certificate of Occupancy to open a restaurant or store in New York City?
+Only if the space's current one doesn't allow your use. A Certificate of Occupancy sets a building's legal use, occupancy limits and layout; a change of use needs an alteration filing and an amended CO, and so does work that changes the exits or the occupancy limit. Look it up by address on the Department of Buildings site. Buildings from before 1938 don't need one unless later work changed them, and a Letter of No Objection shows their legal use. A restaurant's Health Department permit application asks for the CO or that letter. https://www.placetta.com/guides/answers/nyc-certificate-of-occupancy-to-open.html
+
+### Does a new company in the UAE have to register for corporate tax?
+Yes. Every company registers for corporate tax with the Federal Tax Authority on EmaraTax, free of charge. Late registration carries an AED 10,000 penalty, which is waived for the first tax period if the company registers and then files its first return or annual declaration within seven months of the end of that period. VAT registration is separate and required once taxable supplies pass AED 375,000 a year. https://www.placetta.com/guides/answers/uae-corporate-tax-registration.html
+
 ### Do food shipments from China need FDA Prior Notice?
 Yes. Every imported food shipment needs Prior Notice before it arrives: at least 2 hours ahead by road, 4 by rail or air and 8 by water, and before it is sent by international mail. Anyone with the information can submit it, through FDA's system or the customs broker's ABI. Food without proper notice can be refused and held at the port, and food from an unregistered foreign facility can be held until it registers. https://www.placetta.com/guides/answers/fda-prior-notice-for-food-imports.html
 

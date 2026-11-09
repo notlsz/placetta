@@ -2596,6 +2596,11 @@ https://www.placetta.com/guides/answers/how-much-does-a-customs-bond-cost.html
 https://www.placetta.com/guides/answers/is-china-an-e2-treaty-country.html
 https://www.placetta.com/guides/answers/how-to-get-an-itin.html
 https://www.placetta.com/guides/answers/us-trademark-for-chinese-companies.html
+https://www.placetta.com/guides/answers/does-a-restaurant-register-with-ttb.html
+https://www.placetta.com/guides/answers/does-prop-65-apply-to-small-businesses.html
+https://www.placetta.com/guides/answers/new-york-workers-compensation-small-business.html
+https://www.placetta.com/guides/answers/nyc-certificate-of-occupancy-to-open.html
+https://www.placetta.com/guides/answers/uae-corporate-tax-registration.html
 https://www.placetta.com/guides/answers/fda-prior-notice-for-food-imports.html
 https://www.placetta.com/guides/answers/de-minimis-800-exemption-status.html
 https://www.placetta.com/guides/answers/does-a-single-member-llc-need-an-ein.html
@@ -5249,6 +5254,11 @@ https://www.placetta.com/guides/zh/answers/how-much-does-a-customs-bond-cost.htm
 https://www.placetta.com/guides/zh/answers/is-china-an-e2-treaty-country.html
 https://www.placetta.com/guides/zh/answers/how-to-get-an-itin.html
 https://www.placetta.com/guides/zh/answers/us-trademark-for-chinese-companies.html
+https://www.placetta.com/guides/zh/answers/does-a-restaurant-register-with-ttb.html
+https://www.placetta.com/guides/zh/answers/does-prop-65-apply-to-small-businesses.html
+https://www.placetta.com/guides/zh/answers/new-york-workers-compensation-small-business.html
+https://www.placetta.com/guides/zh/answers/nyc-certificate-of-occupancy-to-open.html
+https://www.placetta.com/guides/zh/answers/uae-corporate-tax-registration.html
 https://www.placetta.com/guides/zh/answers/fda-prior-notice-for-food-imports.html
 https://www.placetta.com/guides/zh/answers/de-minimis-800-exemption-status.html
 https://www.placetta.com/guides/zh/answers/does-a-single-member-llc-need-an-ein.html
