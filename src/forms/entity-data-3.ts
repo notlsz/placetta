@@ -180,7 +180,7 @@ export const LATER_STATES: StateData[] = [
           q: ["https://www.sos.mn.gov/media/1824/llcarticlesoforganization.pdf", "Filing Fee: $155 for expedited service in-person and online filings, $135 if by mail"] }] },
       "corp-form": { form: "Articles of Incorporation (business corporation, Chapter 302A)", fee: 155, feeNote: MN_ONLINE,
         proof: [MN_FEES, "Articles of Incorporation – Original Filing $135.00 $155.00"] },
-      "llc-qualify": { id: "mn-foreign-registration", doc: ["Certificate of Authority", "营业授权证书"], form: "Certificate of Authority (foreign limited liability company, Chapter 322C)", fee: 205, feeNote: MN_ONLINE,
+      "llc-qualify": { id: "mn-foreign-registration", doc: ["Certificate of Authority", "营业授权证书"], form: "Certificate of Authority (foreign limited liability company, Chapter 322C)", fee: 185, feeNote: MN_ONLINE,
         proof: [MN_FEES, "Certificate of Authority – Original Filing for 322C $185.00 $205.00"] },
       "corp-qualify": { doc: ["Certificate of Authority", "营业授权证书"], form: "Certificate of Authority to Transact Business (foreign business corporation, Chapter 303)", fee: 220, feeNote: MN_ONLINE,
         url: "https://www.sos.mn.gov/media/1559/foreigncorpregistration.pdf",
