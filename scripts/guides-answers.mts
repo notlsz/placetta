@@ -179,6 +179,43 @@ export const ANSWERS: Answer[] = [
          zh: "CBP 对保证金本身（CBP 301 表）不收费；您向 CBP 认可的担保公司支付保费，通常由报关行代办。连续保证金覆盖一年内的全部报关，额度至少 50,000 美元，每年续保。CBP 审核至少需要 5 个工作日。" },
     forms: ["cbp-301", "cbp-5106", "cbp-ace"], plan: [{ place: "new-york-city", seg: "seller" }, { place: "los-angeles", seg: "warehouse" }],
   },
+  // added in the growth run of 2026-11-16; facts from the forms library and the official pages opened that day
+  // (dos.ny.gov, ftb.ca.gov, houstonpermittingcenter.org and houstonhealth.org, twc.texas.gov, nyc.gov/buildings)
+  {
+    slug: "new-york-llc-publication-requirement",
+    q: { en: "Does a new LLC in New York have to publish a notice in the newspaper?", zh: "纽约州新设 LLC 需要在报纸上刊登公告吗？" },
+    a: { en: "Yes. Within 120 days after its articles of organization take effect, a new New York LLC publishes a notice for six weeks in two newspapers chosen by the county clerk, then files the Certificate of Publication with the newspapers' affidavits and a $50 fee. If it misses the deadline, its authority to do business is suspended until it files. The newspapers charge separately, and their rates vary by county.",
+         zh: "需要。纽约州新设 LLC 须在组织章程生效后 120 天内，在县书记官指定的两份报纸上连续刊登公告六周，然后提交成立公告证明（Certificate of Publication）及报社出具的刊登宣誓书，并缴纳 50 美元费用。逾期未完成的，其经营资格将被暂停，直至提交为止。报社另收刊登费，各县价格不同。" },
+    forms: ["ny-dos-pub", "ny-dos-1336"], plan: [{ place: "new-york-city", seg: "retail" }, { place: "new-york-city", seg: "restaurant" }],
+  },
+  {
+    slug: "out-of-state-llc-doing-business-in-california",
+    q: { en: "When is an out-of-state LLC doing business in California?", zh: "外州 LLC 什么情况下算在加州经营？" },
+    a: { en: "When it engages in any transaction for financial gain in California, or when its California sales, property or payroll pass that year's thresholds: for 2025, $757,070 in sales or $75,707 in property or payroll, or 25% of its total. An LLC doing business in California owes the $800 annual tax (Form FTB 3522). An LLC formed in another state registers with the Secretary of State on Form LLC-5, filed in bizfile Online with a certificate of good standing from its home state.",
+         zh: "在加州从事任何以营利为目的的交易，或在加州的销售额、财产或工资超过当年门槛时，即属在加州经营：2025 年的门槛为销售额 757,070 美元，财产或工资 75,707 美元，或占其总额的 25%。在加州经营的 LLC 须缴纳 800 美元年度税（FTB 3522 表）。在外州成立的 LLC 通过 bizfile Online 提交 LLC-5 表向州务卿登记，并附注册地出具的存续证明。" },
+    forms: ["ca-ftb-3522", "ca-llc-5"], plan: [{ place: "los-angeles", seg: "seller" }, { place: "los-angeles", seg: "retail" }],
+  },
+  {
+    slug: "houston-food-dealer-permit",
+    q: { en: "How do I get a food permit for a restaurant in Houston?", zh: "在休斯顿开餐厅如何办理食品经营许可证？" },
+    a: { en: "Every food establishment in Houston needs the Health Department's Food Dealer permit. New construction and major remodels go through plan review first; then book the preoperational inspection at least 14 business days ahead, with your certified food manager on site, and pay the permit invoice issued at that inspection. The permit costs $224.44 to $739.44 depending on risk level, plus inspection fees, and renews every year.",
+         zh: "在休斯顿，所有食品经营场所都须取得卫生局的食品经营许可证（Food Dealer permit）。新建或大规模改建须先经图纸审查；然后至少提前 14 个工作日预约开业前检查，注册食品经理须在场，并缴纳检查时开具的许可证账单。许可证费按风险等级为 224.44 至 739.44 美元，另加检查费，每年续期。" },
+    forms: ["hou-plan-review", "hou-food-dealer", "tx-food-manager"], plan: [{ place: "houston", seg: "restaurant" }],
+  },
+  {
+    slug: "texas-unemployment-tax-registration",
+    q: { en: "When does a new business in Texas have to register with the Texas Workforce Commission?", zh: "德州新企业什么时候须向德州劳动力委员会（TWC）登记？" },
+    a: { en: "Within 10 days of becoming liable: when you pay $1,500 or more in gross wages in a calendar quarter, or have at least one employee in 20 different weeks of a calendar year, consecutive or not. Registration is free online, and a liable employer gets its TWC tax account number right away. The tax applies to the first $9,000 of each employee's wages in a year, with wage reports and payments due every quarter.",
+         zh: "在产生纳税义务后 10 天内登记：即在一个日历季度内支付工资总额达 1,500 美元或以上，或在一个日历年内有 20 个不同的周雇有至少一名员工（不必连续）。在线登记免费，须纳税的雇主可即时获得 TWC 税务账号。税基为每名员工每年工资的前 9,000 美元，工资申报和缴税按季度进行。" },
+    forms: ["tx-twc"], plan: [{ place: "houston", seg: "restaurant" }, { place: "dallas", seg: "retail" }],
+  },
+  {
+    slug: "nyc-business-sign-permit",
+    q: { en: "Do I need a permit for my store sign in New York City?", zh: "在纽约市，门店招牌需要许可证吗？" },
+    a: { en: "Yes, unless the sign is painted directly on the building, or is smaller than six square feet and not illuminated. The sign permit is filed with the Department of Buildings in DOB NOW: Build, a licensed sign hanger does most installations, and larger signs may need plans from a registered architect or engineer. Local Law 15 of 2026 extended DOB's relief for existing accessory signs: for signs in place by February 9, 2025, no summonses for work without a permit through February 8, 2028, and permit fees waived through August 7, 2028.",
+         zh: "需要，除非招牌直接绘制在建筑上，或面积小于六平方英尺且不发光。招牌许可证通过 DOB NOW: Build 向建筑局申请，多数安装须由持证招牌安装商完成，较大的招牌可能需要注册建筑师或工程师出图。2026 年第 15 号地方法延长了建筑局对现有附属招牌的宽免：2025 年 2 月 9 日前已安装的招牌，至 2028 年 2 月 8 日不因无证施工开具传票，至 2028 年 8 月 7 日免收许可证费用。" },
+    forms: ["nyc-sign"], plan: [{ place: "new-york-city", seg: "retail" }, { place: "new-york-city", seg: "restaurant" }],
+  },
   {
     slug: "is-china-an-e2-treaty-country",
     q: { en: "Can a Chinese investor get an E-2 visa?", zh: "中国投资人可以申请 E-2 签证吗？" },

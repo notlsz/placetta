@@ -78,6 +78,21 @@ Apply for the Health Department's Food Service Establishment Permit online, or i
 ### How much does a US customs bond cost?
 CBP charges nothing for the bond itself (CBP Form 301); you pay a premium to a CBP-approved surety, usually arranged by your customs broker. A continuous bond covers a year of entries with at least $50,000 of coverage and renews yearly. CBP takes at least 5 business days to review it. https://www.placetta.com/guides/answers/how-much-does-a-customs-bond-cost.html
 
+### Does a new LLC in New York have to publish a notice in the newspaper?
+Yes. Within 120 days after its articles of organization take effect, a new New York LLC publishes a notice for six weeks in two newspapers chosen by the county clerk, then files the Certificate of Publication with the newspapers' affidavits and a $50 fee. If it misses the deadline, its authority to do business is suspended until it files. The newspapers charge separately, and their rates vary by county. https://www.placetta.com/guides/answers/new-york-llc-publication-requirement.html
+
+### When is an out-of-state LLC doing business in California?
+When it engages in any transaction for financial gain in California, or when its California sales, property or payroll pass that year's thresholds: for 2025, $757,070 in sales or $75,707 in property or payroll, or 25% of its total. An LLC doing business in California owes the $800 annual tax (Form FTB 3522). An LLC formed in another state registers with the Secretary of State on Form LLC-5, filed in bizfile Online with a certificate of good standing from its home state. https://www.placetta.com/guides/answers/out-of-state-llc-doing-business-in-california.html
+
+### How do I get a food permit for a restaurant in Houston?
+Every food establishment in Houston needs the Health Department's Food Dealer permit. New construction and major remodels go through plan review first; then book the preoperational inspection at least 14 business days ahead, with your certified food manager on site, and pay the permit invoice issued at that inspection. The permit costs $224.44 to $739.44 depending on risk level, plus inspection fees, and renews every year. https://www.placetta.com/guides/answers/houston-food-dealer-permit.html
+
+### When does a new business in Texas have to register with the Texas Workforce Commission?
+Within 10 days of becoming liable: when you pay $1,500 or more in gross wages in a calendar quarter, or have at least one employee in 20 different weeks of a calendar year, consecutive or not. Registration is free online, and a liable employer gets its TWC tax account number right away. The tax applies to the first $9,000 of each employee's wages in a year, with wage reports and payments due every quarter. https://www.placetta.com/guides/answers/texas-unemployment-tax-registration.html
+
+### Do I need a permit for my store sign in New York City?
+Yes, unless the sign is painted directly on the building, or is smaller than six square feet and not illuminated. The sign permit is filed with the Department of Buildings in DOB NOW: Build, a licensed sign hanger does most installations, and larger signs may need plans from a registered architect or engineer. Local Law 15 of 2026 extended DOB's relief for existing accessory signs: for signs in place by February 9, 2025, no summonses for work without a permit through February 8, 2028, and permit fees waived through August 7, 2028. https://www.placetta.com/guides/answers/nyc-business-sign-permit.html
+
 ### Can a Chinese investor get an E-2 visa?
 Not as a citizen of the People's Republic of China: the State Department's list of E-1 and E-2 treaty countries doesn't include mainland China or Hong Kong. Taiwan is on the list, as China (Taiwan), for both E-1 and E-2. https://www.placetta.com/guides/answers/is-china-an-e2-treaty-country.html
 

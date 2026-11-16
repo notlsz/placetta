@@ -2593,6 +2593,11 @@ https://www.placetta.com/guides/answers/texas-franchise-tax-no-tax-due.html
 https://www.placetta.com/guides/answers/texas-sales-tax-permit.html
 https://www.placetta.com/guides/answers/nyc-food-service-establishment-permit.html
 https://www.placetta.com/guides/answers/how-much-does-a-customs-bond-cost.html
+https://www.placetta.com/guides/answers/new-york-llc-publication-requirement.html
+https://www.placetta.com/guides/answers/out-of-state-llc-doing-business-in-california.html
+https://www.placetta.com/guides/answers/houston-food-dealer-permit.html
+https://www.placetta.com/guides/answers/texas-unemployment-tax-registration.html
+https://www.placetta.com/guides/answers/nyc-business-sign-permit.html
 https://www.placetta.com/guides/answers/is-china-an-e2-treaty-country.html
 https://www.placetta.com/guides/answers/how-to-get-an-itin.html
 https://www.placetta.com/guides/answers/us-trademark-for-chinese-companies.html
@@ -5246,6 +5251,11 @@ https://www.placetta.com/guides/zh/answers/texas-franchise-tax-no-tax-due.html
 https://www.placetta.com/guides/zh/answers/texas-sales-tax-permit.html
 https://www.placetta.com/guides/zh/answers/nyc-food-service-establishment-permit.html
 https://www.placetta.com/guides/zh/answers/how-much-does-a-customs-bond-cost.html
+https://www.placetta.com/guides/zh/answers/new-york-llc-publication-requirement.html
+https://www.placetta.com/guides/zh/answers/out-of-state-llc-doing-business-in-california.html
+https://www.placetta.com/guides/zh/answers/houston-food-dealer-permit.html
+https://www.placetta.com/guides/zh/answers/texas-unemployment-tax-registration.html
+https://www.placetta.com/guides/zh/answers/nyc-business-sign-permit.html
 https://www.placetta.com/guides/zh/answers/is-china-an-e2-treaty-country.html
 https://www.placetta.com/guides/zh/answers/how-to-get-an-itin.html
 https://www.placetta.com/guides/zh/answers/us-trademark-for-chinese-companies.html

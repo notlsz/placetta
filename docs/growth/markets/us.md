@@ -49,4 +49,9 @@ In: China, Taiwan, Korea, Japan, Southeast Asia F&B and retail brands. Out: the 
 
 ## Log
 
+- 2026-11-16: weekly growth run (growth/2026-11-16). Five answers: NY LLC publication, out-of-state LLC doing business in
+  California (FTB 2025 thresholds $757,070 sales, $75,707 property or payroll: https://www.ftb.ca.gov/file/business/doing-business-in-california.html),
+  Houston Food Dealer permit, Texas TWC registration, NYC business sign permit (Local Law 15 of 2026 relief). Cities: Pittsburgh
+  (YangGuoFu Malatang's first store, a Chinese brand) and Sioux Falls (South Dakota's first Raising Cane's), both `guide: false`.
+  Learned: the FTB thresholds change every year, so the California answer needs a yearly check.
 - 2026-11-01: file created from the 2026-11 research. Facts marked † are unverified; check before quoting.
