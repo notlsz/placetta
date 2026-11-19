@@ -258,7 +258,10 @@ export const CITIES: City[] = [
   c("BEL", "US", "Bellevue", "贝尔维尤", ["bellevue, wa", "bellevue, washington", "贝尔维尤"], true, "WA"),
   c("QCY", "US", "Quincy", "昆西", ["quincy, ma", "quincy, massachusetts", "昆西"], false, "MA"),
   c("ROC", "US", "Rockville", "罗克维尔", ["rockville, md", "rockville, maryland", "rockville md", "罗克维尔", "洛克维尔"], true, "MD"),
-  ...([["Detroit", "底特律", "MI"], ["Charlotte", "夏洛特", "NC"], ["Nashville", "纳什维尔", "TN"], ["Salt Lake City", "盐湖城", "UT"]] as const)
+  // Raleigh and Honolulu added in the growth run of 2026-11-02 (Shipley Do-Nuts and Fogo de Chão into Raleigh; Molly Tea,
+  // Chick-fil-A and Pepper Lunch into Honolulu), with the national and state steps until local ones are sourced
+  ...([["Detroit", "底特律", "MI"], ["Charlotte", "夏洛特", "NC"], ["Nashville", "纳什维尔", "TN"], ["Salt Lake City", "盐湖城", "UT"],
+    ["Raleigh", "罗利", "NC"], ["Honolulu", "檀香山", "HI"]] as const)
     .map(([en, zh, st]) => c("US-" + en.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6), "US", en, zh, [en.toLowerCase(), zh], false, st)),
 ];
 
