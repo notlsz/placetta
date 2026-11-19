@@ -2366,6 +2366,7 @@ body #agencies .agi .agk-f .agt,body #agencies .agk-f .agt{color:#1F3F6B!importa
 html[lang="zh-CN"] .prv b{font-family:var(--serif);letter-spacing:-.02em}
 .prv span{font-size:17px;line-height:1.3;color:var(--ink2)}
 .prps{margin-top:12px;font-size:14px;font-weight:500;color:var(--gs-ink)}
+.prlic{margin-top:6px;font-size:14px;line-height:1.45;color:var(--muted)}
 /* the store plan's Yearly and Monthly choice, in the comparison's Placetta column (Oct 23) */
 .print{display:inline-flex;margin:14px 0 0;background:rgba(255,255,255,.1)}
 .print[hidden]{display:none}
@@ -3819,6 +3820,7 @@ html[lang="zh-CN"] .prmore summary h2,html[lang="zh-CN"] .prmore summary h3,html
 .hero .hcity{order:3;flex-basis:100%;margin:2px 0 0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.74);text-wrap:pretty;transition:color .25s var(--ease)}
 .hero .hcity b{font-weight:600;color:#fff}
 .hero .hcity.on{color:rgba(255,255,255,.92)}
+.hero .hcity:empty{display:none}
 @media (max-width:767px){.hero .hcity{margin:10px auto 0;max-width:32ch;font-size:13.5px;text-align:center}}
 .pb98{display:grid;gap:12px;margin:24px 0 16px}
 @media (min-width:900px){.pb98{grid-template-columns:1fr 1fr}}
