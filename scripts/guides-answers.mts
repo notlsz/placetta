@@ -235,4 +235,43 @@ export const ANSWERS: Answer[] = [
          zh: "可以。德州法律不限制谁可以设立或持有企业实体，不需要是美国公民或居民；组织人只须具备订立合同的能力。LLC 向州务卿提交 205 表即可设立。" },
     forms: ["tx-205", "irs-ss4"], plan: [{ place: "houston", seg: "restaurant" }, { place: "dallas", seg: "retail" }, { place: "fort-worth", seg: "restaurant" }],
   },
+  // added in the growth run of 2026-11-23; facts from the forms library and the official pages opened that day
+  // (nyc.gov/site/finance commercial rent tax, publichealth.lacounty.gov plan check and restaurant permit pages,
+  // houstonpermittingcenter.org hpwcode1106 and hpwcode1112). The California ABC answer restates ca-abc and
+  // la-alcohol-cup as the library holds them (abc.ca.gov refused automated reads this run).
+  {
+    slug: "nyc-commercial-rent-tax",
+    q: { en: "Do I have to pay commercial rent tax on a store or restaurant in Manhattan?", zh: "在曼哈顿开店或开餐厅需要缴纳商业租金税吗？" },
+    a: { en: "Only if the space is in Manhattan south of 96th Street and its annual base rent is $250,000 or more. The rate is 6% of base rent after a 35% reduction, an effective 3.9%, with a sliding credit for base rent between $250,000 and $300,000. The small business tax credit removes the tax for tenants with total income of $5 million or less and base rent under $500,000. A tenant paying more than $200,000 a year in gross rent still files the returns, quarterly and annual, online in e-Services.",
+         zh: "仅当场所位于曼哈顿 96 街以南、且年基本租金达到 250,000 美元或以上时才需缴纳。税率为基本租金扣减 35% 后的 6%，实际税率为 3.9%；基本租金在 250,000 至 300,000 美元之间的可获递减抵免。小企业税收抵免使总收入不超过 500 万美元且基本租金低于 500,000 美元的租户免缴此税。年总租金超过 200,000 美元的租户仍须通过 e-Services 在线提交季度和年度申报表。" },
+    forms: ["nyc-crt"], plan: [{ place: "new-york-city", seg: "retail" }, { place: "new-york-city", seg: "restaurant" }],
+  },
+  {
+    slug: "los-angeles-county-restaurant-health-permit",
+    q: { en: "How do I get a health permit for a restaurant in Los Angeles County?", zh: "在洛杉矶县开餐厅如何办理卫生许可证？" },
+    a: { en: "A new restaurant, or a major remodel of the food prep area, starts with Environmental Health's plan check: submit the plans and pay the plan check fee, $1,044 to $2,723 for a new restaurant depending on its size, and the first review takes up to 20 business days, or 10 expedited. After building approval and construction, submit the Public Health Permit application and pass the final inspection with proof of a Certificate of Occupancy or a signed building inspection card; the permit is issued once its invoice is paid, and renews every year. Buying an existing restaurant with no major work goes straight to the nearest district office for the permit.",
+         zh: "新开餐厅或对食品加工区进行大规模改建，须先经环境卫生处图纸审查：提交图纸并缴纳审查费，新餐厅按面积为 1,044 至 2,723 美元，首次审查最长 20 个工作日，加急 10 个工作日。取得建筑批准并完成施工后，提交公共卫生许可证申请，并在最终检查时出示占用证或已签字的建筑检查卡；缴清账单后即发许可证，每年续期。收购现有餐厅且无大规模施工的，直接向就近的区办公室申请许可证。" },
+    forms: ["lac-plan-check", "lac-health-permit"], plan: [{ place: "los-angeles", seg: "restaurant" }],
+  },
+  {
+    slug: "california-restaurant-liquor-license-time",
+    q: { en: "How long does it take to get a liquor license for a restaurant in California?", zh: "在加州为餐厅申请酒牌需要多长时间？" },
+    a: { en: "ABC's investigation takes about 55 to 65 days, and the license can't be issued in under 30; the notice of application is posted at the premises for 30 days. A restaurant serving beer and wine applies for a Type 41; serving spirits takes a Type 47, whose number is capped by county population, so many are bought from an existing holder by transfer. In the City of Los Angeles, serving alcohol also needs a Conditional Use Permit from City Planning, which usually takes at least 4 to 5 months.",
+         zh: "加州酒类管理局（ABC）的调查约需 55 至 65 天，且不少于 30 天不得发证；申请公告须在场所张贴 30 天。供应啤酒和葡萄酒的餐厅申请 41 类执照；供应烈酒须申请 47 类，其数量按县人口设上限，因此多数须向现有持照人受让。在洛杉矶市，供应酒类还须向市规划局申请有条件使用许可，通常至少需要 4 至 5 个月。" },
+    forms: ["ca-abc", "la-alcohol-cup"], plan: [{ place: "los-angeles", seg: "restaurant" }],
+  },
+  {
+    slug: "houston-certificate-of-occupancy",
+    q: { en: "Do I need a Certificate of Occupancy to open a store or restaurant in Houston?", zh: "在休斯顿开店或开餐厅需要占用证吗？" },
+    a: { en: "Yes. Inside Houston city limits, a commercial building or lease space needs a Certificate of Occupancy before it is occupied, and a new one when its use, square footage or occupant load changes. Email Form CE-1045-A to Occupancy Inspections, pay the day the application is processed, and an inspector visits; the fee is $94.00 to $537.12. A space being built out gets a buildout permit first. The certificate doesn't expire, and is posted where it can be seen at the premises.",
+         zh: "需要。在休斯顿市区范围内，商业建筑或租赁场所在入驻前须取得占用证，用途、面积或容纳人数变更时须重新办理。将 CE-1045-A 表电邮至占用检查科，在申请受理当天付款，随后检查员到场检查；费用为 94.00 至 537.12 美元。需要装修的场所须先取得装修许可证。占用证没有有效期，须张贴在场所内显眼处。" },
+    forms: ["hou-buildout", "hou-co"], plan: [{ place: "houston", seg: "restaurant" }, { place: "houston", seg: "retail" }],
+  },
+  {
+    slug: "houston-business-sign-permit",
+    q: { en: "Do I need a permit for my business sign in Houston?", zh: "在休斯顿，营业招牌需要许可证吗？" },
+    a: { en: "Yes, for an on-premises sign that can be seen from a street, alley or sidewalk. A business may have up to five signs, and most are permitted and installed by a licensed sign contractor, who applies in iPermits; plan review and a site inspection follow, in about 4 to 11 business days. The minimum fees are $97.25 each for construction, plan review and inspection, $69.46 for the operating permit and a $33.56 admin fee, plus $0.56 a square foot above 32. The operating permit renews every year.",
+         zh: "需要，凡是从街道、小巷或人行道可见的场所招牌都需要。每个商家最多可设五块招牌，多数由持证招牌承包商申请许可并安装，承包商通过 iPermits 提交；之后进行图纸审查和现场检查，约需 4 至 11 个工作日。最低费用为施工、图纸审查和检查各 97.25 美元，运营许可 69.46 美元，另加 33.56 美元行政费，超过 32 平方英尺的部分每平方英尺 0.56 美元。运营许可每年续期。" },
+    forms: ["hou-sign"], plan: [{ place: "houston", seg: "retail" }, { place: "houston", seg: "restaurant" }],
+  },
 ];

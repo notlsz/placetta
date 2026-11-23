@@ -238,6 +238,12 @@ export const CITIES: City[] = [
   c("DEN", "US", "Denver", "丹佛", ["denver", "丹佛"], true, "CO"),
   c("MSP", "US", "Minneapolis", "明尼阿波利斯", ["minneapolis", "明尼阿波利斯"], true, "MN"),
   c("CMH", "US", "Columbus", "哥伦布", ["columbus, oh", "columbus, ohio", "columbus oh", "俄亥俄州哥伦布", "哥伦布"], true, "OH"),
+  // added in the growth run of 2026-11-23 with the national and state steps until local ones are sourced: Davis, CA
+  // (BINGXUE, a Shandong tea brand, opened its first US store there, Oct 2026) and Cincinnati (Zaxby's first Ohio
+  // restaurant opens Nov 30, 2026 in Liberty Township, Butler County, in the Cincinnati area). Davis is matched only
+  // with its state, since other states have a Davis too.
+  c("US-DAV", "US", "Davis", "戴维斯", ["davis, ca", "davis, california", "davis ca", "加州戴维斯"], false, "CA"),
+  c("US-CVG", "US", "Cincinnati", "辛辛那提", ["cincinnati", "辛辛那提"], false, "OH"),
   // added 2026-10-18 (the target markets of src/forms/markets.ts among them) with their own sourced steps in beachhead.ts; false where the library has only some of the city's
   // steps, so the plan names whom Odelia confirms the rest with. Names shared with another US city match only with
   // their state; a full address is also read by its city (src/forms/usplace.ts).
