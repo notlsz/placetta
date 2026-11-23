@@ -102,6 +102,21 @@ Yes. Food workers who prepare, store or handle food must get a California Food H
 ### Can a foreigner form an LLC in Texas?
 Yes. Texas law doesn't restrict who can form or own a business entity, so you don't need to be a US citizen or resident; the organizer only has to be a person capable of entering into a contract. The LLC files Form 205 with the Secretary of State. https://www.placetta.com/guides/answers/can-a-foreigner-form-a-texas-llc.html
 
+### Do I have to pay commercial rent tax on a store or restaurant in Manhattan?
+Only if the space is in Manhattan south of 96th Street and its annual base rent is $250,000 or more. The rate is 6% of base rent after a 35% reduction, an effective 3.9%, with a sliding credit for base rent between $250,000 and $300,000. The small business tax credit removes the tax for tenants with total income of $5 million or less and base rent under $500,000. A tenant paying more than $200,000 a year in gross rent still files the returns, quarterly and annual, online in e-Services. https://www.placetta.com/guides/answers/nyc-commercial-rent-tax.html
+
+### How do I get a health permit for a restaurant in Los Angeles County?
+A new restaurant, or a major remodel of the food prep area, starts with Environmental Health's plan check: submit the plans and pay the plan check fee, $1,044 to $2,723 for a new restaurant depending on its size, and the first review takes up to 20 business days, or 10 expedited. After building approval and construction, submit the Public Health Permit application and pass the final inspection with proof of a Certificate of Occupancy or a signed building inspection card; the permit is issued once its invoice is paid, and renews every year. Buying an existing restaurant with no major work goes straight to the nearest district office for the permit. https://www.placetta.com/guides/answers/los-angeles-county-restaurant-health-permit.html
+
+### How long does it take to get a liquor license for a restaurant in California?
+ABC's investigation takes about 55 to 65 days, and the license can't be issued in under 30; the notice of application is posted at the premises for 30 days. A restaurant serving beer and wine applies for a Type 41; serving spirits takes a Type 47, whose number is capped by county population, so many are bought from an existing holder by transfer. In the City of Los Angeles, serving alcohol also needs a Conditional Use Permit from City Planning, which usually takes at least 4 to 5 months. https://www.placetta.com/guides/answers/california-restaurant-liquor-license-time.html
+
+### Do I need a Certificate of Occupancy to open a store or restaurant in Houston?
+Yes. Inside Houston city limits, a commercial building or lease space needs a Certificate of Occupancy before it is occupied, and a new one when its use, square footage or occupant load changes. Email Form CE-1045-A to Occupancy Inspections, pay the day the application is processed, and an inspector visits; the fee is $94.00 to $537.12. A space being built out gets a buildout permit first. The certificate doesn't expire, and is posted where it can be seen at the premises. https://www.placetta.com/guides/answers/houston-certificate-of-occupancy.html
+
+### Do I need a permit for my business sign in Houston?
+Yes, for an on-premises sign that can be seen from a street, alley or sidewalk. A business may have up to five signs, and most are permitted and installed by a licensed sign contractor, who applies in iPermits; plan review and a site inspection follow, in about 4 to 11 business days. The minimum fees are $97.25 each for construction, plan review and inspection, $69.46 for the operating permit and a $33.56 admin fee, plus $0.56 a square foot above 32. The operating permit renews every year. https://www.placetta.com/guides/answers/houston-business-sign-permit.html
+
 ## City guides
 ### Milk tea and bubble tea shops in New York City
 https://www.placetta.com/guides/new-york-city/milk-tea-shop.html

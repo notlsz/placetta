@@ -49,4 +49,13 @@ In: China, Taiwan, Korea, Japan, Southeast Asia F&B and retail brands. Out: the 
 
 ## Log
 
+- 2026-11-23: weekly growth run (growth/2026-11-23). Five answers: Manhattan commercial rent tax
+  (https://nyc.gov/site/finance/business/business-commercial-rent-tax-crt.page), Los Angeles County restaurant health
+  permit (http://publichealth.lacounty.gov/eh/inspection/retail-plan-check.htm), California restaurant liquor license
+  timing (from ca-abc and la-alcohol-cup as the library holds them), Houston Certificate of Occupancy
+  (https://www.houstonpermittingcenter.org/hpwcode1106), Houston business sign permit
+  (https://www.houstonpermittingcenter.org/hpwcode1112). Cities: Davis, CA (BINGXUE's first US store, a Shandong tea
+  brand) and Cincinnati (Zaxby's first Ohio restaurant, Liberty Township), both `guide: false`.
+  Learned: abc.ca.gov and calrecycle.ca.gov refuse automated reads (Cloudflare and WP Engine), so facts there can only
+  come from the library's last check; an SB 54 small producer answer waits for a person to open CalRecycle's page.
 - 2026-11-01: file created from the 2026-11 research. Facts marked † are unverified; check before quoting.
